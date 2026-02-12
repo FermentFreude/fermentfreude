@@ -1,0 +1,430 @@
+# Developer Instructions for Claude
+
+**Project:** Fermentfreude — Next.js 15 (App Router) + Payload CMS 3.x + Stripe  
+**Goal:** Implement features with senior full-stack discipline: minimal code, clear separation of concerns, secure by default, accessible UI.
+
+---
+
+## 1) Operating Principles
+
+### Build like a senior
+
+- **Minimize new files.** Reuse existing modules/components whenever possible.
+- Add a new file **only if**:
+  - the file truly doesn't exist already **and**
+  - the responsibility is new and clearly separated.
+
+### Separation of concerns
+
+- **UI**: presentation + basic interaction only (in `src/components/` or `src/app/(app)/`)
+- **Domain logic**: pure functions (validation, mapping, calculations) in `src/utilities/`
+- **Data access**: Payload queries, Stripe calls in service modules
+- **Side effects**: webhooks, email sending, isolated and auditable
+
+### Fewer moving parts
+
+- Avoid new dependencies unless absolutely necessary.
+- If a feature can be done with existing tooling (Payload, Next.js, Stripe), do that.
+
+---
+
+## 2) Before Writing Code (mandatory)
+
+### Step A — Analyze first
+
+1. **Identify where the feature belongs:**
+   - Payload schema change? → `src/collections/` or `src/globals/`
+   - Next page/UI change? → `src/app/(app)/` or `src/components/`
+   - API route/webhook change? → `src/app/(payload)/` or `src/endpoints/`
+
+2. **Search the codebase for:**
+   - existing patterns in similar collections (Products, Pages)
+   - existing components in `src/components/`
+   - existing utilities in `src/utilities/`
+   - existing blocks in `src/blocks/`
+
+3. **Propose the smallest change set.**
+
+### Step B — Confirm integration points
+
+- Payload collections/globals involved
+- Any external systems involved (Stripe, Brevo, booking tool)
+- Data flow: **CMS → API → UI** (or webhook → handler → persistence)
+
+---
+
+## 3) File & Code Organization Rules
+
+### Fermentfreude Project Structure (Payload 3.0)
+
+```
+src/
+├── app/
+│   ├── (app)/              # Frontend routes (products, cart, checkout, account)
+│   └── (payload)/          # Payload admin routes (auto-generated, don't edit)
+│
+├── access/                 # Permission rules (admins, adminsOrPublished, etc.)
+├── blocks/                 # Content blocks (ArchiveBlock, CallToAction, Content, MediaBlock)
+├── collections/            # Content types (Categories, Media, Pages, Products/, Users/)
+├── components/             # React components (UI, admin, checkout, forms, etc.)
+├── endpoints/              # Custom API endpoints (seed)
+├── fields/                 # Reusable field definitions (link, slug, hero)
+├── fonts/                  # Font files
+├── globals/                # Global settings (Footer, Header)
+├── heros/                  # Hero components (HighImpact, LowImpact, MediumImpact, PostHero)
+├── hooks/                  # Lifecycle hooks (populatePublishedAt, revalidate, etc.)
+├── lib/                    # Utility libs (generate-meta, merge-open-graph, utils)
+├── plugins/                # Plugin configuration (ecommerce, seo, form-builder)
+├── providers/              # Context providers (Auth, HeaderTheme, Theme)
+├── utilities/              # Helper functions (format-date-time, etc.)
+├── cssVariables.js         # CSS variables
+├── payload-types.ts        # Auto-generated types (don't edit manually)
+└── payload.config.ts       # Main Payload config
+```
+
+### Do not create new files if a good home exists
+
+- **Need a workshop collection?** → Add `src/collections/Workshops.ts` (follow Products pattern)
+- **Need a recipe component?** → Add to `src/components/RecipeCard/`
+- **Need a booking widget?** → Add to `src/components/BookingWidget/`
+- **Need a utility function?** → Add to `src/utilities/`
+- **Need a Brevo integration?** → Add to `src/endpoints/brevo.ts`
+
+### When you _do_ create a file
+
+- Match existing naming patterns:
+  - Collections: `PascalCase.ts` (e.g., `Workshops.ts`)
+  - Components: `PascalCase/index.tsx` or `PascalCase.tsx`
+  - Utilities: `kebab-case.ts` (e.g., `format-workshop-date.ts`)
+  - API routes: `route.ts` in folder
+- Include TypeScript types
+- Keep it focused on single responsibility
+
+### Prefer these patterns (established in codebase)
+
+- **Components**: Follow existing component structure in `src/components/`
+- **Blocks**: Follow ArchiveBlock, CallToAction, Content patterns in `src/blocks/`
+- **Collections**: Follow Products, Pages patterns in `src/collections/`
+- **Plugins**: Configured in `src/plugins/index.ts`
+- **Hooks**: Follow revalidate, populatePublishedAt patterns in `src/hooks/`
+
+---
+
+## 4) Next.js Best Practices (App Router — Next.js 15)
+
+### Server vs client components
+
+- Default to **server components** (no 'use client' directive).
+- Use client components (`'use client'`) only when:
+  - you need stateful UI interactions (forms, cart, toggles)
+  - browser-only APIs are required (localStorage, window)
+  - using hooks (useState, useEffect, useContext)
+
+### Data fetching
+
+- Fetch data in server components when possible.
+- Never expose secrets in client code.
+- Use Payload's Local API in server components:
+  ```typescript
+  import { getPayload } from 'payload'
+  import config from '@payload-config'
+  const payload = await getPayload({ config })
+  const data = await payload.find({ collection: 'products' })
+  ```
+
+### Route Groups
+
+- `(app)` — Frontend pages visible to users
+- `(payload)` — Admin panel (auto-generated, don't modify)
+
+### Existing patterns to follow
+
+- **Dynamic routes**: See `(app)/[slug]/page.tsx`, `(app)/products/[slug]/page.tsx`
+- **Loading states**: Use existing loading patterns
+- **Error handling**: Use `Message` component
+- **Form handling**: Use form components from `src/components/forms/`
+
+---
+
+## 5) Payload CMS Best Practices (3.x)
+
+### Content modeling (follow existing patterns)
+
+- **Collections** for repeatable content:
+  - Existing: `Categories`, `Media`, `Pages`, `Products` (with Variants), `Users`
+  - Auto-created by ecommerce plugin: `Carts`, `Addresses`, `Orders`, `Transactions`, `Variants`, `VariantTypes`, `VariantOptions`
+  - To add: `Workshops`, `Recipes`, `Press`, `B2BInquiries`
+- **Globals** for page-managed content:
+  - Existing: `Footer`, `Header`
+
+### Follow existing collection structure
+
+```typescript
+import type { CollectionConfig } from 'payload'
+
+export const YourCollection: CollectionConfig = {
+  slug: 'collection-name',
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: ['title', '_status', 'updatedAt'],
+  },
+  access: {
+    read: adminsOrPublished,
+    create: admins,
+    update: admins,
+    delete: admins,
+  },
+  versions: { drafts: true },
+  fields: [
+    { name: 'title', type: 'text', required: true },
+    slugField(),
+    // ... more fields
+  ],
+}
+```
+
+### Plugins (configured in `src/plugins/index.ts`)
+
+- **@payloadcms/plugin-ecommerce** — Products, variants, carts, orders, transactions, Stripe
+- **@payloadcms/plugin-seo** — SEO metadata for pages and products
+- **@payloadcms/plugin-form-builder** — Contact forms, newsletter signups
+- **@payloadcms/richtext-lexical** — Rich text editor (replaces Slate)
+
+### Permissions (match existing patterns)
+
+- **Public read**: Products, Pages, Media, Categories (published only)
+- **Authenticated write**: Products, Pages (editors)
+- **Admin only**: Orders, Transactions, Users
+- Access functions in `src/access/`
+
+---
+
+## 6) Ecommerce Plugin (Payload 3.0)
+
+### Built-in collections (don't recreate)
+
+- **Products** — with pricing per currency
+- **Variants** — product variations (size, color)
+- **Carts** — server-side, supports guest + authenticated users
+- **Addresses** — saved user addresses
+- **Orders** — created after successful transaction
+- **Transactions** — payment tracking from initiation to completion
+
+### Stripe integration
+
+- Configured via `stripeAdapter()` in `src/plugins/index.ts`
+- Payment flow: `initiatePayment()` → Stripe PaymentIntent → `confirmOrder()`
+- Webhooks auto-configured
+- Client hooks: `useCart()`, `usePayments()`, `useAddresses()` from `@payloadcms/plugin-ecommerce/client/react`
+
+### Sensitive data
+
+- Stripe keys only in environment variables:
+  - `STRIPE_SECRET_KEY`
+  - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+  - `STRIPE_WEBHOOKS_SIGNING_SECRET`
+- Never store raw payment details
+
+---
+
+## 7) Styling (TailwindCSS 4 + shadcn/ui)
+
+### Structure
+
+- TailwindCSS configured in `tailwind.config.mjs`
+- shadcn/ui components in `src/components/ui/`
+- Component config in `components.json`
+
+### Patterns
+
+- Use Tailwind utility classes directly in JSX
+- Use `cn()` from `src/lib/utils.ts` for conditional classes
+- Use shadcn/ui components (Button, Input, Label, Select, etc.)
+- For Fermentfreude: nature-aligned colors (greens, browns, earth tones)
+- Ensure WCAG AA contrast (4.5:1 minimum)
+
+---
+
+## 8) Security Requirements
+
+### Must do
+
+- Validate all incoming data (API routes, webhooks, forms)
+- Protect admin/editor routes with proper auth (Payload handles this)
+- Use environment variables for secrets
+- Apply least privilege (Payload roles: admin, customer)
+
+### Avoid
+
+- Writing secrets into logs
+- Exposing internal IDs unnecessarily to client
+- Allowing unvalidated query params to hit DB calls
+
+---
+
+## 9) Accessibility Requirements (WCAG 2.1 AA)
+
+- Semantic HTML first (`<header>`, `<nav>`, `<main>`, `<footer>`)
+- Labels for every input
+- Keyboard navigation works (Tab, Enter, Escape)
+- Focus states are visible
+- Proper heading hierarchy (H1 → H2 → H3)
+- Alt text for meaningful images; empty alt for decorative
+- Buttons are buttons (not divs)
+
+---
+
+## 10) Performance & SEO
+
+### Performance
+
+- Use Next.js `<Image>` component (not `<img>`)
+- Set `priority` on hero/above-fold images
+- Lazy load below-fold components with `dynamic()`
+- Keep component trees shallow
+
+### SEO
+
+- Use `metadata` export in App Router pages
+- SEO plugin configured for pages and products
+- Use `generateMeta` utility from `src/lib/generate-meta.ts`
+
+---
+
+## 11) Testing
+
+### Available test infrastructure
+
+- **Vitest** — Integration tests (`pnpm test:int`)
+- **Playwright** — E2E tests (`pnpm test:e2e`)
+- **Both** — `pnpm test`
+
+### Required checks before finishing a change
+
+- TypeScript passes (`pnpm generate:types` if schema changed)
+- Lint passes (`pnpm lint`)
+- No unused exports or dead code
+- Manual smoke test:
+  - create/edit content in Payload `/admin`
+  - page renders correctly
+  - forms submit correctly
+
+### Commands
+
+```bash
+pnpm dev                  # Development server
+pnpm build                # Production build
+pnpm start                # Production server
+pnpm lint                 # ESLint check
+pnpm lint:fix             # Auto-fix issues
+pnpm generate:types       # Regenerate Payload types
+pnpm generate:importmap   # Regenerate import map
+pnpm test:int             # Integration tests
+pnpm test:e2e             # E2E tests
+```
+
+---
+
+## 12) Environment Variables
+
+### Required (see `.env.example`)
+
+```bash
+# Database
+DATABASE_URL=mongodb+srv://...
+
+# Payload
+PAYLOAD_SECRET=min-32-character-random-string
+PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3000
+NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOKS_SIGNING_SECRET=whsec_...
+
+# Draft preview
+PREVIEW_SECRET=demo-draft-secret
+
+# Brevo (optional)
+BREVO_API_KEY=your_api_key
+```
+
+### Never commit
+
+- `.env` file (`.gitignore` already configured)
+- Any file with actual keys/secrets
+
+---
+
+## 13) Common Tasks & Patterns
+
+### Adding a new collection (e.g., Workshops)
+
+1. Create `src/collections/Workshops.ts`
+2. Follow `Products` structure
+3. Add to `collections` array in `payload.config.ts`
+4. Run `pnpm generate:types`
+5. Create display component in `src/components/WorkshopCard/`
+6. Create page in `src/app/(app)/workshops/`
+7. Add to navigation in Header global
+
+### Adding a new page
+
+1. Check if CMS-managed (Pages collection with blocks) or hardcoded
+2. If CMS: use Pages collection, add layout blocks
+3. If hardcoded: create in `src/app/(app)/[name]/page.tsx`
+4. Add `metadata` export for SEO
+5. Add to Header global navigation
+
+### Adding a new component
+
+1. Check `src/components/` for similar components
+2. Create file: `ComponentName.tsx` or `ComponentName/index.tsx`
+3. Use TypeScript types
+4. Use Tailwind + shadcn/ui for styling
+5. Make accessible (WCAG AA)
+
+### Adding API integration (e.g., Brevo)
+
+1. Add endpoint in `src/endpoints/brevo.ts`
+2. Register in `payload.config.ts`
+3. Store API key in `.env`
+4. Add error handling
+
+---
+
+## 14) Documentation References
+
+- **Development setup**: `docs/DEVELOPMENT.md`
+- **Security best practices**: `docs/SECURITY.md`
+- **Accessibility standards**: `docs/ACCESSIBILITY.md`
+- **Performance optimization**: `docs/PERFORMANCE.md`
+
+---
+
+## 15) Quick Reference
+
+### Start development
+
+```bash
+pnpm install
+cp .env.example .env
+# Edit .env with your credentials
+pnpm dev
+```
+
+### Access points
+
+- Frontend: http://localhost:3000
+- Admin: http://localhost:3000/admin
+
+---
+
+**Remember:** This is a production e-commerce system for a real client. Code quality, security, accessibility, and performance are not optional. Always follow existing patterns and keep changes minimal.
+
+---
+
+_Last Updated: February 12, 2026_  
+_Project: Fermentfreude Digital Ecosystem_  
+_Stack: Next.js 15 + Payload CMS 3.x + TailwindCSS 4 + shadcn/ui + Stripe_
