@@ -11,11 +11,15 @@ export function middleware(request: NextRequest) {
   // Allow these paths through without password
   if (
     pathname.startsWith('/coming-soon') ||
-    pathname.startsWith('/api/preview-access') ||
+    pathname.startsWith('/api') ||
     pathname.startsWith('/admin') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
     pathname.startsWith('/media') ||
+    pathname.endsWith('.svg') ||
+    pathname.endsWith('.png') ||
+    pathname.endsWith('.jpg') ||
+    pathname.endsWith('.ico') ||
     pathname === '/robots.txt'
   ) {
     return NextResponse.next()

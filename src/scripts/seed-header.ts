@@ -1,6 +1,7 @@
 /**
  * One-time script to seed the Header global with all nav items and dropdown sub-items.
  * Seeds both DE (default) and EN locales.
+ * Nav order matches Figma: Home, Workshops, Shop, For Chefs, About Us, Contact
  * Run: set -a && source .env && set +a && npx tsx src/scripts/seed-header.ts
  */
 import config from '@payload-config'
@@ -23,13 +24,6 @@ async function seedHeader() {
             type: 'custom',
             label: 'Home',
             url: '/',
-          },
-        },
-        {
-          link: {
-            type: 'custom',
-            label: 'Shop',
-            url: '/shop',
           },
         },
         {
@@ -64,6 +58,20 @@ async function seedHeader() {
         {
           link: {
             type: 'custom',
+            label: 'Shop',
+            url: '/shop',
+          },
+        },
+        {
+          link: {
+            type: 'custom',
+            label: 'Für Köche',
+            url: '/gastronomy',
+          },
+        },
+        {
+          link: {
+            type: 'custom',
             label: 'Über uns',
             url: '/about',
           },
@@ -83,8 +91,8 @@ async function seedHeader() {
         {
           link: {
             type: 'custom',
-            label: 'Gastronomie',
-            url: '/gastronomy',
+            label: 'Kontakt',
+            url: '/contact',
           },
         },
       ],
@@ -94,8 +102,6 @@ async function seedHeader() {
   // ----- 2) Seed English locale -----
   payload.logger.info('Seeding Header → EN locale...')
 
-  // For localized fields we need to update each locale separately.
-  // The nav item structure (array positions) stays the same — only localized text fields change.
   await payload.updateGlobal({
     slug: 'header',
     locale: 'en',
@@ -107,13 +113,6 @@ async function seedHeader() {
             type: 'custom',
             label: 'Home',
             url: '/',
-          },
-        },
-        {
-          link: {
-            type: 'custom',
-            label: 'Shop',
-            url: '/shop',
           },
         },
         {
@@ -148,7 +147,21 @@ async function seedHeader() {
         {
           link: {
             type: 'custom',
-            label: 'About',
+            label: 'Shop',
+            url: '/shop',
+          },
+        },
+        {
+          link: {
+            type: 'custom',
+            label: 'For Chefs',
+            url: '/gastronomy',
+          },
+        },
+        {
+          link: {
+            type: 'custom',
+            label: 'About Us',
             url: '/about',
           },
           dropdownItems: [
@@ -167,8 +180,8 @@ async function seedHeader() {
         {
           link: {
             type: 'custom',
-            label: 'Gastronomy',
-            url: '/gastronomy',
+            label: 'Contact',
+            url: '/contact',
           },
         },
       ],
@@ -179,10 +192,11 @@ async function seedHeader() {
   payload.logger.info('')
   payload.logger.info('Nav items (both locales):')
   payload.logger.info('  • Home → /')
-  payload.logger.info('  • Shop → /shop')
   payload.logger.info('  • Workshops → /workshops (4 dropdown sub-items)')
-  payload.logger.info('  • Über uns / About → /about (2 dropdown sub-items)')
-  payload.logger.info('  • Gastronomie / Gastronomy → /gastronomy')
+  payload.logger.info('  • Shop → /shop')
+  payload.logger.info('  • For Chefs / Für Köche → /gastronomy')
+  payload.logger.info('  • About Us / Über uns → /about (2 dropdown sub-items)')
+  payload.logger.info('  • Contact / Kontakt → /contact')
   payload.logger.info('')
   payload.logger.info(
     'Editors can manage both languages from /admin → Header (switch locale in top bar)',

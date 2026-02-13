@@ -1,6 +1,8 @@
-const plugin = require('tailwindcss/plugin')
+import typography from '@tailwindcss/typography'
+import plugin from 'tailwindcss/plugin'
+
 /** @type {import('tailwindcss').Config} */
-export default {
+const config = {
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -85,7 +87,7 @@ export default {
         error: 'hsl(var(--error))',
         warning: 'hsl(var(--warning))',
       },
-      typography: ({ theme }) => ({
+      typography: (_theme) => ({
         DEFAULT: {
           css: {
             '--tw-prose-body': 'var(--text)',
@@ -102,8 +104,9 @@ export default {
         },
       }),
       fontFamily: {
-        mono: ['var(--font-geist-mono)'],
-        sans: ['var(--font-geist-sans)'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', 'monospace'],
+        sans: ['neue-haas-grotesk-text', 'sans-serif'],
+        display: ['neue-haas-grotesk-display', 'sans-serif'],
       },
       keyframes: {
         fadeIn: {
@@ -176,7 +179,7 @@ export default {
     hoverOnlyWhenSupported: true,
   },
   plugins: [
-    require('@tailwindcss/typography'),
+    typography,
     plugin(({ matchUtilities, theme }) => {
       matchUtilities(
         {
@@ -193,3 +196,5 @@ export default {
     }),
   ],
 }
+
+export default config

@@ -11,14 +11,67 @@
 @custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));
 
 @layer base {
-  h1,
-  h2,
-  h3,
-  h4,
+  body {
+    font-family: 'neue-haas-grotesk-text', sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.6;
+    letter-spacing: 0.005em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.375rem, 3vw, 2rem);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  h4 {
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
   h5,
   h6 {
-    font-weight: unset;
-    font-size: unset;
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 700;
+    font-size: 1.125rem;
+    line-height: 1.4;
+  }
+
+  p {
+    margin-bottom: 1.25em;
+  }
+
+  /* Editorial uppercase labels */
+  .label-uppercase {
+    font-family: 'neue-haas-grotesk-text', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 }
 
@@ -43,8 +96,10 @@
   --breakpoint-lg: 64rem;
   --breakpoint-xl: 80rem;
   --breakpoint-2xl: 86rem;
-  --font-mono: var(--font-geist-mono);
-  --font-sans: var(--font-geist-sans);
+  --font-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-sans: 'neue-haas-grotesk-text', sans-serif;
+  --font-display: 'neue-haas-grotesk-display', sans-serif;
 }
 
 @layer utilities {

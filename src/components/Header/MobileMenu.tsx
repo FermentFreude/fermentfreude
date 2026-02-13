@@ -21,59 +21,23 @@ import { useEffect, useState } from 'react'
 import { LanguageToggle } from './LanguageToggle'
 import { NavDropdownMobile } from './NavDropdown'
 import { ThemeToggle } from './ThemeToggle'
-
-// Default dropdown items — used when no CMS sub-items are configured
-const defaultDropdowns: Record<string, { label: string; href: string; description?: string }[]> = {
-  about: [
-    { label: 'Über uns', href: '/about', description: 'Unser Team & Mission' },
-    { label: 'Fermentation', href: '/fermentation', description: 'Was ist Fermentation?' },
-  ],
-  workshops: [
-    {
-      label: 'Lakto Gemüse',
-      href: '/workshops/lakto-gemuese',
-      description: 'Fermentierte Gemüse-Workshops',
-    },
-    { label: 'Tempeh', href: '/workshops/tempeh', description: 'Tempeh selber machen' },
-    { label: 'Kombucha', href: '/workshops/kombucha', description: 'Kombucha brauen lernen' },
-    {
-      label: 'Gutschein',
-      href: '/workshops/voucher',
-      description: 'Workshop-Gutschein verschenken',
-    },
-  ],
-}
-
-function getDefaultDropdownKey(label?: string | null, url?: string | null): string | null {
-  const l = label?.toLowerCase()
-  if (l === 'workshops' || url === '/workshops') return 'workshops'
-  if (
-    l === 'about us' ||
-    l === 'about' ||
-    l === 'fermentation' ||
-    url === '/about' ||
-    url === '/fermentation'
-  )
-    return 'about'
-  return null
-}
+import { defaultDropdowns, defaultNavItems, getDefaultDropdownKey } from './nav-defaults'
 
 interface Props {
-  menu: Header['navItems']
+  menu: Header['navItems'] | null
 }
 
 export function MobileMenu({ menu }: Props) {
   const { user } = useAuth()
-
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
 
+  const hasRealCMSItems = menu && menu.length > 0 && menu.some((i) => i.link?.label)
+
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth > 1024) {
-        setIsOpen(false)
-      }
+      if (window.innerWidth > 1024) setIsOpen(false)
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -83,35 +47,36 @@ export function MobileMenu({ menu }: Props) {
     setIsOpen(false)
   }, [pathname, searchParams])
 
+  const renderedDropdowns = new Set<string>()
+
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
       <SheetTrigger className="flex h-10 w-10 items-center justify-center rounded-md text-ff-gray-15 dark:text-neutral-300 transition-colors hover:text-ff-charcoal dark:hover:text-white">
         <MenuIcon className="h-5 w-5" />
       </SheetTrigger>
 
-      <SheetContent side="left" className="w-75 px-6 bg-white dark:bg-ff-near-black">
+      <SheetContent side="left" className="w-75 px-6 bg-ff-ivory dark:bg-ff-near-black">
         <SheetHeader className="px-0 pt-4 pb-0">
           <SheetTitle className="flex items-center">
             <Image
               src="/logo.svg"
               alt="Fermentfreude"
-              width={160}
-              height={19}
-              className="h-5 w-auto dark:invert"
+              width={200}
+              height={24}
+              className="h-6 w-auto dark:invert"
             />
           </SheetTitle>
           <SheetDescription className="sr-only">Navigation menu</SheetDescription>
         </SheetHeader>
 
         <div className="py-6">
-          {menu?.length ? (
-            <ul className="flex w-full flex-col gap-1">
-              {(() => {
-                const renderedDropdowns = new Set<string>()
-                return menu.map((item) => {
+          <ul className="flex w-full flex-col gap-1">
+            {hasRealCMSItems
+              ? menu!.map((item) => {
                   const url = item.link.url
+                  const label = item.link.label
                   const cmsDropdownItems = item.dropdownItems
-                  const defaultKey = getDefaultDropdownKey(item.link.label, url)
+                  const defaultKey = getDefaultDropdownKey(label, url)
 
                   const dropdownItems =
                     cmsDropdownItems && cmsDropdownItems.length > 0
@@ -121,15 +86,15 @@ export function MobileMenu({ menu }: Props) {
                         : null
 
                   if (dropdownItems && dropdownItems.length > 0) {
-                    const key = defaultKey || item.link.label
+                    const key = defaultKey || label
                     if (renderedDropdowns.has(key)) return null
                     renderedDropdowns.add(key)
 
                     return (
                       <li key={item.id}>
                         <NavDropdownMobile
-                          label={defaultKey === 'about' ? 'About' : item.link.label}
-                          href={defaultKey === 'about' ? undefined : url || undefined}
+                          label={label}
+                          href={url || undefined}
                           items={dropdownItems}
                         />
                       </li>
@@ -141,21 +106,39 @@ export function MobileMenu({ menu }: Props) {
                       <CMSLink
                         {...item.link}
                         appearance="inline"
-                        className="block py-2.5 text-base font-bold text-ff-gray-15 dark:text-neutral-300 hover:text-ff-charcoal dark:hover:text-white transition-colors"
+                        className="block py-2.5 text-base font-display font-bold text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
                       />
                     </li>
                   )
                 })
-              })()}
-            </ul>
-          ) : null}
+              : defaultNavItems.map((item) => (
+                  <li key={item.url}>
+                    {item.dropdownItems ? (
+                      <NavDropdownMobile
+                        label={item.label}
+                        href={item.url}
+                        items={item.dropdownItems}
+                      />
+                    ) : (
+                      <Link
+                        href={item.url}
+                        className="block py-2.5 text-base font-display font-bold text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+          </ul>
         </div>
 
         <hr className="border-ff-white-95 dark:border-neutral-800" />
 
-        {/* Toggles */}
+        {/* Settings: Language & Theme toggles */}
         <div className="flex items-center justify-between py-4">
-          <span className="text-sm font-semibold text-ff-gray-text dark:text-neutral-400">Settings</span>
+          <span className="text-sm font-semibold text-ff-gray-text dark:text-neutral-400">
+            Settings
+          </span>
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <ThemeToggle />
@@ -173,7 +156,7 @@ export function MobileMenu({ menu }: Props) {
               <li>
                 <Link
                   href="/orders"
-                  className="text-base text-ff-gray-15 dark:text-neutral-300 hover:text-ff-charcoal dark:hover:text-white transition-colors"
+                  className="text-base text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
                 >
                   Orders
                 </Link>
@@ -181,7 +164,7 @@ export function MobileMenu({ menu }: Props) {
               <li>
                 <Link
                   href="/account/addresses"
-                  className="text-base text-ff-gray-15 dark:text-neutral-300 hover:text-ff-charcoal dark:hover:text-white transition-colors"
+                  className="text-base text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
                 >
                   Addresses
                 </Link>
@@ -189,7 +172,7 @@ export function MobileMenu({ menu }: Props) {
               <li>
                 <Link
                   href="/account"
-                  className="text-base text-ff-gray-15 dark:text-neutral-300 hover:text-ff-charcoal dark:hover:text-white transition-colors"
+                  className="text-base text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
                 >
                   Manage account
                 </Link>
@@ -205,13 +188,13 @@ export function MobileMenu({ menu }: Props) {
           <div className="py-6 flex flex-col gap-3">
             <Link
               href="/create-account"
-              className="w-full text-center rounded-full border border-ff-charcoal dark:border-neutral-600 bg-ff-ivory dark:bg-neutral-800 px-6 py-2.5 text-sm font-bold text-ff-charcoal dark:text-neutral-200 transition-colors hover:bg-ff-charcoal hover:text-ff-ivory dark:hover:bg-neutral-700 dark:hover:text-white"
+              className="w-full text-center rounded-full border border-ff-near-black dark:border-neutral-600 bg-ff-ivory dark:bg-transparent px-6 py-2.5 font-display text-base font-bold text-ff-near-black dark:text-neutral-200 transition-colors hover:bg-ff-near-black hover:text-ff-ivory dark:hover:bg-neutral-700 dark:hover:text-white"
             >
               Sign Up
             </Link>
             <Link
               href="/login"
-              className="w-full text-center rounded-full bg-ff-charcoal dark:bg-white px-6 py-2.5 text-sm font-bold text-ff-ivory dark:text-ff-near-black transition-colors hover:bg-ff-charcoal-dark dark:hover:bg-neutral-200"
+              className="w-full text-center rounded-full bg-ff-near-black dark:bg-white px-6 py-2.5 font-display text-base font-bold text-ff-ivory dark:text-ff-near-black transition-colors hover:bg-ff-charcoal dark:hover:bg-neutral-200"
             >
               Log in
             </Link>

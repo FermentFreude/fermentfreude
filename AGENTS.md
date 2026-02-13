@@ -2,6 +2,31 @@
 
 You are an expert Payload CMS developer. When working with Payload projects, follow these rules:
 
+## Typography & Fonts
+
+This project uses **Neue Haas Grotesk** via Adobe Fonts (Typekit), loaded in `src/app/(app)/layout.tsx`:
+
+```html
+<link rel="stylesheet" href="https://use.typekit.net/dtk7kir.css" />
+```
+
+### Font Families
+
+| Tailwind class   | Font name                        | Usage                          |
+|------------------|----------------------------------|--------------------------------|
+| `font-sans`      | `neue-haas-grotesk-text`         | Body text, paragraphs, labels  |
+| `font-display`   | `neue-haas-grotesk-display`      | Headings, nav links, buttons   |
+
+### Rules
+
+1. **Never use Geist, Inter, or system fonts** — always use Neue Haas Grotesk
+2. **Nav links & headings**: use `font-display font-bold`
+3. **Body text**: use `font-sans` (default on `<body>`)
+4. **Tailwind config** (`tailwind.config.mjs`): `fontFamily.sans` = `neue-haas-grotesk-text`, `fontFamily.display` = `neue-haas-grotesk-display`
+5. **CSS theme** (`globals.css`): `--font-sans` and `--font-display` variables match the above
+6. **All headings** (h1–h6) use `neue-haas-grotesk-display` weight 700 via `@layer base` in globals.css
+7. When adding new components, use `font-display` for display/heading text and `font-sans` for body text
+
 ## Core Principles
 
 1. **TypeScript-First**: Always use TypeScript with proper types from Payload

@@ -20,9 +20,19 @@ async function getGlobal<T extends Global>(slug: T, depth = 0, locale?: Supporte
 }
 
 /**
- * Returns a unstable_cache function mapped with the cache tag for the slug
+ * Returns a unstable_cache function mapped with the cache tag for the slug.
+ * In development, cache is disabled so changes appear immediately.
  */
-export const getCachedGlobal = <T extends Global>(slug: T, depth = 0, locale?: SupportedLocale) =>
-  unstable_cache(async () => getGlobal<T>(slug, depth, locale), [slug, locale || 'default'], {
-    tags: [`global_${slug}`],
-  })
+export const getCachedGlobal = <T extends Global>(slug: T, depth = 0, locale?: SupportedLocale) => {
+  if (process.env.NODE_ENV === 'development') {
+    return () => getGlobal<T>(slug, depth, locale)
+  }
+
+  return unstable_cache(
+    async () => getGlobal<T>(slug, depth, locale),
+    [slug, locale || 'default'],
+    {
+      tags: [`global_${slug}`],
+    },
+  )
+}

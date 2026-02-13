@@ -43,10 +43,12 @@ export default buildConfig({
       {
         label: 'Deutsch',
         code: 'de',
+        fallbackLocale: 'en',
       },
       {
         label: 'English',
         code: 'en',
+        fallbackLocale: 'de',
       },
     ],
     defaultLocale: 'de',
