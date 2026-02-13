@@ -5,5 +5,10 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+  },
+  "builder.serverUrl": "",
+  "builder.command": "npm run dev\n",
+  "builder.runDevServer": true,
+  "builder.autoDetectDevServer": true,
+  "builder.launchType": "editor"
 }

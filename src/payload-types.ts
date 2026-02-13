@@ -127,7 +127,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('de' | 'en') | ('de' | 'en')[];
   globals: {
     header: Header;
     footer: Footer;
@@ -136,7 +136,7 @@ export interface Config {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
   };
-  locale: null;
+  locale: 'de' | 'en';
   user: User;
   jobs: {
     tasks: unknown;
@@ -1799,6 +1799,20 @@ export interface Header {
           url?: string | null;
           label: string;
         };
+        /**
+         * Optional sub-items shown in a dropdown menu. If empty, the nav item renders as a simple link.
+         */
+        dropdownItems?:
+          | {
+              label: string;
+              href: string;
+              /**
+               * Short description shown below the label in the dropdown.
+               */
+              description?: string | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -1845,6 +1859,14 @@ export interface HeaderSelect<T extends boolean = true> {
               reference?: T;
               url?: T;
               label?: T;
+            };
+        dropdownItems?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              description?: T;
+              id?: T;
             };
         id?: T;
       };

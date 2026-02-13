@@ -21,6 +21,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { revalidatePage, revalidateDelete } from './hooks/revalidatePage'
+import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -54,6 +55,7 @@ export const Pages: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+      localized: true,
     },
     {
       name: 'publishedOn',
@@ -134,7 +136,7 @@ export const Pages: CollectionConfig = {
     slugField(),
   ],
   hooks: {
-    afterChange: [revalidatePage],
+    afterChange: [revalidatePage, autoTranslateCollection],
     afterDelete: [revalidateDelete],
   },
   versions: {

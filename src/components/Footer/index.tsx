@@ -6,11 +6,16 @@ import { getCachedGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
 import React, { Suspense } from 'react'
 import { LogoIcon } from '@/components/icons/logo'
+import { cookies } from 'next/headers'
 
 const { COMPANY_NAME, SITE_NAME } = process.env
 
 export async function Footer() {
-  const footer: Footer = await getCachedGlobal('footer', 1)()
+  const cookieStore = await cookies()
+  const localeValue = cookieStore.get('fermentfreude-locale')?.value
+  const locale = (localeValue === 'en' ? 'en' : 'de') as 'de' | 'en'
+
+  const footer: Footer = await getCachedGlobal('footer', 1, locale)()
   const menu = footer.navItems || []
   const currentYear = new Date().getFullYear()
   const copyrightDate = 2023 + (currentYear > 2023 ? `-${currentYear}` : '')

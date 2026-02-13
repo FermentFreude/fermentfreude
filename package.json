@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.76.1",
+    "@payloadcms/db-mongodb": "3.76.1",
     "@payloadcms/email-nodemailer": "3.76.1",
     "@payloadcms/live-preview-react": "3.76.1",
     "@payloadcms/next": "3.76.1",
@@ -44,6 +45,7 @@
     "clsx": "^2.1.0",
     "cross-env": "^7.0.3",
     "date-fns": "^4.1.0",
+    "deepl-node": "^1.24.0",
     "dotenv": "^8.2.0",
     "embla-carousel-auto-scroll": "^8.1.5",
     "embla-carousel-react": "^8.5.2",
@@ -62,8 +64,7 @@
     "sharp": "0.34.2",
     "sonner": "^1.7.2",
     "stripe": "18.5.0",
-    "tailwind-merge": "^3.4.0",
-    "@payloadcms/db-mongodb": "3.76.1"
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

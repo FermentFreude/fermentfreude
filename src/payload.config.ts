@@ -38,6 +38,20 @@ export default buildConfig({
     },
     user: Users.slug,
   },
+  localization: {
+    locales: [
+      {
+        label: 'Deutsch',
+        code: 'de',
+      },
+      {
+        label: 'English',
+        code: 'en',
+      },
+    ],
+    defaultLocale: 'de',
+    fallback: true,
+  },
   collections: [Users, Pages, Categories, Media],
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',

@@ -421,10 +421,75 @@ pnpm dev
 
 ---
 
+## 16) CMS-Editable with Hardcoded Defaults Pattern
+
+When adding content that editors should be able to manage from the Admin panel, **always** follow this three-layer approach:
+
+### The Pattern
+
+1. **Schema** — Add the editable fields to the relevant Payload collection or global (e.g., `src/globals/Header.ts`, `src/collections/Pages/`).
+2. **Hardcoded Defaults** — In the component, define a `defaults` map with sensible initial values. The component renders these defaults immediately — no CMS setup required for the site to work.
+3. **CMS Override** — If CMS data exists for that item, use it instead of the default. CMS always wins.
+4. **Seed Script** — Write a script in `src/scripts/` that populates the CMS with the default values so editors can see and modify them from day one.
+
+### Component Logic
+
+```typescript
+// 1. Define defaults
+const defaults: Record<string, MyItem[]> = {
+  'key-that-matches-cms': [
+    { label: 'Default Label', href: '/default-url', description: 'Default subtitle' },
+  ],
+}
+
+// 2. Render: CMS data overrides defaults
+const items = cmsData.length > 0 ? cmsData : (defaults[matchKey] ?? [])
+```
+
+### Seed Script Pattern
+
+```typescript
+// src/scripts/seed-[feature].ts
+import { getPayload } from 'payload'
+import config from '@payload-config'
+
+async function seed() {
+  const payload = await getPayload({ config })
+
+  await payload.updateGlobal({
+    slug: 'global-slug',
+    data: {
+      /* default values */
+    },
+    context: { skipRevalidate: true }, // Required: avoids revalidateTag error outside Next.js
+  })
+
+  payload.logger.info('✓ Seeded successfully!')
+  process.exit(0)
+}
+
+seed()
+```
+
+Run with: `set -a && source .env && set +a && npx tsx src/scripts/seed-[feature].ts`
+
+### Why This Pattern
+
+- **No blank pages** — Site works immediately with defaults, even before editors touch the CMS.
+- **Full editor control** — Editors can override everything from `/admin` without developer help.
+- **Safe to redeploy** — Defaults only apply when CMS data is empty; editor changes are never overwritten.
+- **Seed on first deploy** — Run the seed script once so editors see all items pre-populated and ready to edit.
+
+### Existing Examples
+
+- **Header nav items + dropdowns** — `src/globals/Header.ts` schema, `src/components/Header/index.client.tsx` defaults, `src/scripts/seed-header.ts` seed script.
+
+---
+
 **Remember:** This is a production e-commerce system for a real client. Code quality, security, accessibility, and performance are not optional. Always follow existing patterns and keep changes minimal.
 
 ---
 
-_Last Updated: February 12, 2026_  
+_Last Updated: February 13, 2026_  
 _Project: Fermentfreude Digital Ecosystem_  
 _Stack: Next.js 15 + Payload CMS 3.x + TailwindCSS 4 + shadcn/ui + Stripe_

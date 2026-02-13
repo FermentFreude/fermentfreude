@@ -8,6 +8,8 @@ import {
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -19,15 +21,20 @@ export const Media: CollectionConfig = {
   access: {
     read: () => true,
   },
+  hooks: {
+    afterChange: [autoTranslateCollection],
+  },
   fields: [
     {
       name: 'alt',
       type: 'text',
       required: true,
+      localized: true,
     },
     {
       name: 'caption',
       type: 'richText',
+      localized: true,
       editor: lexicalEditor({
         features: ({ rootFeatures }) => {
           return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]

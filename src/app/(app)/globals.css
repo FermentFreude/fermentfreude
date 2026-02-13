@@ -112,6 +112,25 @@
   --chart-4: oklch(82.8% 0.189 84.429deg);
   --chart-5: oklch(76.9% 0.188 70.08deg);
   --radius: 0.625rem;
+
+  /* Fermentfreude Brand Colors */
+  --ff-ivory: #f9f0dc;
+  --ff-ivory-mist: #faf2e0;
+  --ff-cream: #fffef9;
+  --ff-warm-gray: #ece5de;
+  --ff-charcoal: #4b4b4b;
+  --ff-charcoal-dark: #403c39;
+  --ff-near-black: #1a1a1a;
+  --ff-black: #1d1d1d;
+  --ff-gray-15: #262626;
+  --ff-white-95: #f1f1f3;
+  --ff-gold: #e6be68;
+  --ff-gold-light: #edd195;
+  --ff-gray-text: #595959;
+  --ff-gray-text-light: #6b6b6b;
+  --ff-border-light: #e8e4d9;
+  --ff-card-gray: rgba(193, 193, 193, 0.65);
+
   --sidebar: oklch(98.5% 0 0deg);
   --sidebar-foreground: oklch(14.5% 0 0deg);
   --sidebar-primary: oklch(20.5% 0 0deg);
@@ -203,6 +222,24 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
+
+  /* Fermentfreude Brand */
+  --color-ff-ivory: var(--ff-ivory);
+  --color-ff-ivory-mist: var(--ff-ivory-mist);
+  --color-ff-cream: var(--ff-cream);
+  --color-ff-warm-gray: var(--ff-warm-gray);
+  --color-ff-charcoal: var(--ff-charcoal);
+  --color-ff-charcoal-dark: var(--ff-charcoal-dark);
+  --color-ff-near-black: var(--ff-near-black);
+  --color-ff-black: var(--ff-black);
+  --color-ff-gold: var(--ff-gold);
+  --color-ff-gold-light: var(--ff-gold-light);
+  --color-ff-gray-text: var(--ff-gray-text);
+  --color-ff-gray-text-light: var(--ff-gray-text-light);
+  --color-ff-border-light: var(--ff-border-light);
+  --color-ff-card-gray: var(--ff-card-gray);
+  --color-ff-gray-15: var(--ff-gray-15);
+  --color-ff-white-95: var(--ff-white-95);
 }
 
 @layer base {
@@ -210,7 +247,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground min-h-[100vh] flex flex-col;
+    @apply bg-background text-foreground min-h-screen flex flex-col;
   }
 }
 

@@ -1,29 +1,40 @@
 .navLink {
   overflow: hidden;
   border-radius: unset;
+  padding: 0;
+  letter-spacing: 0.01em;
+  text-decoration: none;
 
   &::after {
     content: '';
     position: absolute;
     bottom: -2px;
-    left: 0;
-    width: 100%;
+    left: 50%;
+    width: 0;
     height: 2px;
-    background-color: var(--primary);
-    transition: transform 0.3s;
+    background-color: var(--ff-charcoal);
   }
 
-  &:not(.active) {
-    &:hover {
-      &::after {
-        transform: translateY(-2px);
-      }
+  [data-theme='dark'] &::after {
+    background-color: #e5e5e5;
+    transition:
+      width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  &:hover {
+    text-decoration: none;
+
+    &::after {
+      left: 0;
+      width: 100%;
     }
   }
 
   &.active {
     &::after {
-      transform: translateY(-2px);
+      left: 0;
+      width: 100%;
     }
   }
 }
