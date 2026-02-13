@@ -456,15 +456,27 @@ import config from '@payload-config'
 async function seed() {
   const payload = await getPayload({ config })
 
+  // Always seed DE (default locale)
   await payload.updateGlobal({
     slug: 'global-slug',
+    locale: 'de',
     data: {
-      /* default values */
+      /* German values */
     },
-    context: { skipRevalidate: true }, // Required: avoids revalidateTag error outside Next.js
+    context: { skipRevalidate: true, skipAutoTranslate: true },
   })
 
-  payload.logger.info('✓ Seeded successfully!')
+  // Always seed EN
+  await payload.updateGlobal({
+    slug: 'global-slug',
+    locale: 'en',
+    data: {
+      /* English values */
+    },
+    context: { skipRevalidate: true, skipAutoTranslate: true },
+  })
+
+  payload.logger.info('✓ Seeded successfully (DE + EN)!')
   process.exit(0)
 }
 
@@ -483,6 +495,61 @@ Run with: `set -a && source .env && set +a && npx tsx src/scripts/seed-[feature]
 ### Existing Examples
 
 - **Header nav items + dropdowns** — `src/globals/Header.ts` schema, `src/components/Header/index.client.tsx` defaults, `src/scripts/seed-header.ts` seed script.
+- **Hero section** — `src/fields/hero.ts` schema, `src/heros/HeroSlider/index.tsx` defaults, `src/scripts/seed-home-hero.ts` seed script.
+
+---
+
+## 17) Bilingual & Admin-Ready Rules (NEVER SKIP)
+
+These rules apply to **every** new feature, section, field, or content block — no exceptions.
+
+### A — Every visible text is a CMS field
+
+- Every piece of visible content (text, images, links, labels, button text) MUST be a field in the Payload schema.
+- Never rely on hardcoded-only text — hardcoded defaults are fallbacks, not the source of truth.
+
+### B — All text fields are localized
+
+- Every text, textarea, and richText field MUST have `localized: true`.
+- Locales: `de` (default / German) and `en` (English).
+
+### C — Seed BOTH languages — always
+
+- Every seed script MUST populate both `locale: 'de'` and `locale: 'en'`.
+- Always pass `context: { skipRevalidate: true, skipAutoTranslate: true }` in seed scripts.
+- After seeding, all fields must appear pre-filled and editable in `/admin` for both languages.
+- **Never forget either language.**
+
+### D — Hardcoded defaults in English
+
+- Component defaults are written in English.
+- CMS data always wins: `const resolved = cmsValue ?? DEFAULT_VALUE`
+
+### E — Admin dashboard = non-coder friendly
+
+- An editor who doesn't code must be able to change every visible text, link, and image from `/admin`.
+- Use `admin.condition` to show fields only when relevant.
+- Use `admin.description` to explain every non-obvious field.
+- Use clear `label` values on every field.
+- Required fields must always have seeded data so saving never fails.
+
+### F — After every schema change
+
+1. `pnpm generate:types` — update TypeScript types.
+2. `pnpm generate:importmap` — if components changed.
+3. `npx tsc --noEmit` — verify zero TypeScript errors.
+4. Re-run the relevant seed script to populate new fields.
+
+### G — Checklist before finishing any feature
+
+- [ ] Schema field added with `localized: true`, `label`, and `admin.description`?
+- [ ] Component has English hardcoded default as fallback?
+- [ ] Component reads CMS data and overrides default?
+- [ ] Seed script populates DE and EN?
+- [ ] Seed script uses `skipAutoTranslate: true`?
+- [ ] Types regenerated?
+- [ ] Zero TypeScript errors?
+- [ ] Admin panel shows the field, pre-filled, editable?
 
 ---
 

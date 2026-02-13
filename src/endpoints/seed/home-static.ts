@@ -5,7 +5,7 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
     slug: 'home',
     _status: 'published',
     hero: {
-      type: 'lowImpact',
+      type: 'heroSlider',
       richText: {
         root: {
           type: 'root',
@@ -19,7 +19,45 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
                   format: 0,
                   mode: 'normal',
                   style: '',
-                  text: 'Payload Ecommerce Template',
+                  text: 'Gutes Essen',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              tag: 'h1',
+              version: 1,
+            },
+            {
+              type: 'heading',
+              children: [
+                {
+                  type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'Bessere Gesundheit',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              tag: 'h1',
+              version: 1,
+            },
+            {
+              type: 'heading',
+              children: [
+                {
+                  type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'Echte Freude',
                   version: 1,
                 },
               ],
@@ -33,35 +71,12 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
               type: 'paragraph',
               children: [
                 {
-                  type: 'link',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Visit the admin dashboard',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  fields: {
-                    linkType: 'custom',
-                    newTab: false,
-                    url: '/admin',
-                  },
-                  format: '',
-                  indent: 0,
-                  version: 2,
-                },
-                {
                   type: 'text',
                   detail: 0,
                   format: 0,
                   mode: 'normal',
                   style: '',
-                  text: ' to make your account and seed content for your website.',
+                  text: 'Wir machen Fermentation zugänglich & freudvoll — für bessere Darmgesundheit durch Geschmack, Bildung und handgemachte Lebensmittel.',
                   version: 1,
                 },
               ],
@@ -78,11 +93,29 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
           version: 1,
         },
       },
+      links: [
+        {
+          link: {
+            type: 'custom',
+            label: 'Shop',
+            url: '/shop',
+            appearance: 'default',
+          },
+        },
+        {
+          link: {
+            type: 'custom',
+            label: 'Workshops',
+            url: '/workshops',
+            appearance: 'outline',
+          },
+        },
+      ],
     },
     layout: [],
     meta: {
-      description: 'An open-source ecommerce site built with Payload and Next.js.',
-      title: 'Payload Ecommerce Template',
+      description: 'FermentFreude — Fermentation zugänglich & freudvoll machen.',
+      title: 'FermentFreude — Gutes Essen, Bessere Gesundheit, Echte Freude',
     },
     title: 'Home',
   }

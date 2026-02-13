@@ -63,8 +63,10 @@ export default async function Page({ params }: Args) {
 
   const { hero, layout } = page
 
+  const isFullBleedHero = hero.type === 'heroSlider' || hero.type === 'highImpact'
+
   return (
-    <article className="pt-16 pb-24">
+    <article className={isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'}>
       <RenderHero {...hero} />
       <RenderBlocks blocks={layout} />
     </article>

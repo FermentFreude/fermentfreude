@@ -20,6 +20,21 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  // Heavy packages resolved once on the server, not re-bundled
+  serverExternalPackages: ['sharp', 'graphql'],
+  experimental: {
+    // Tree-shake large libraries — only import what's used
+    // NOTE: Do NOT add @payloadcms/* here — Payload uses its own import map system
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-checkbox',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-select',
+      'date-fns',
+      'embla-carousel-react',
+    ],
+  },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],

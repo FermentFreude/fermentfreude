@@ -435,7 +435,11 @@ export interface Page {
   title: string;
   publishedOn?: string | null;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
+    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'heroSlider';
+    /**
+     * Small uppercase text above the heading (e.g. "Fermentation for everyone").
+     */
+    eyebrow?: string | null;
     richText?: {
       root: {
         type: string;
@@ -1193,6 +1197,7 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
+        eyebrow?: T;
         richText?: T;
         links?:
           | T

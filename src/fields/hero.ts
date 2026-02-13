@@ -35,8 +35,22 @@ export const hero: Field = {
           label: 'Low Impact',
           value: 'lowImpact',
         },
+        {
+          label: 'Hero Slider',
+          value: 'heroSlider',
+        },
       ],
       required: true,
+    },
+    {
+      name: 'eyebrow',
+      type: 'text',
+      localized: true,
+      label: 'Eyebrow Text',
+      admin: {
+        description: 'Small uppercase text above the heading (e.g. "Fermentation for everyone").',
+        condition: (_, { type } = {}) => type === 'heroSlider',
+      },
     },
     {
       name: 'richText',
