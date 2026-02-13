@@ -76,9 +76,7 @@ export const autoTranslateCollection: CollectionAfterChangeHook = async ({
       `[AutoTranslate] ✓ ${textsToTranslate.length} field(s) auto-translated to EN for ${collection.slug}/${doc.id}`,
     )
   } catch (error) {
-    payload.logger.error(
-      `[AutoTranslate] Failed for ${collection.slug}/${doc.id}: ${error}`,
-    )
+    payload.logger.error(`[AutoTranslate] Failed for ${collection.slug}/${doc.id}: ${error}`)
   }
 
   return doc
@@ -96,10 +94,7 @@ function collectLocalizedTextPaths(fields: Field[], prefix = ''): string[] {
     if ('name' in field && field.name) {
       const path = prefix ? `${prefix}.${field.name}` : field.name
 
-      if (
-        (field.type === 'text' || field.type === 'textarea') &&
-        field.localized
-      ) {
+      if ((field.type === 'text' || field.type === 'textarea') && field.localized) {
         paths.push(path)
       }
 
@@ -120,7 +115,9 @@ function collectLocalizedTextPaths(fields: Field[], prefix = ''): string[] {
     if (field.type === 'tabs' && 'tabs' in field) {
       for (const tab of field.tabs) {
         if ('name' in tab && tab.name) {
-          paths.push(...collectLocalizedTextPaths(tab.fields, prefix ? `${prefix}.${tab.name}` : tab.name))
+          paths.push(
+            ...collectLocalizedTextPaths(tab.fields, prefix ? `${prefix}.${tab.name}` : tab.name),
+          )
         } else {
           paths.push(...collectLocalizedTextPaths(tab.fields, prefix))
         }

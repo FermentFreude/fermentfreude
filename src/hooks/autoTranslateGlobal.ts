@@ -1,4 +1,4 @@
-import type { GlobalAfterChangeHook, Field } from 'payload'
+import type { Field, GlobalAfterChangeHook } from 'payload'
 
 import { translateBatchToEnglish } from '@/utilities/translate'
 
@@ -30,7 +30,14 @@ export const autoTranslateGlobal: GlobalAfterChangeHook = async ({ doc, global, 
     const textsToTranslate: string[] = []
     const operations: Array<{ path: string; value: string }> = []
 
-    collectTranslations(global.fields, doc as unknown as Record<string, unknown>, enDoc as unknown as Record<string, unknown>, '', textsToTranslate, operations)
+    collectTranslations(
+      global.fields,
+      doc as unknown as Record<string, unknown>,
+      enDoc as unknown as Record<string, unknown>,
+      '',
+      textsToTranslate,
+      operations,
+    )
 
     if (textsToTranslate.length === 0) return doc
 

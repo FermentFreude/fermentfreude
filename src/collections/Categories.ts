@@ -1,5 +1,5 @@
-import { slugField } from 'payload'
 import type { CollectionConfig } from 'payload'
+import { slugField } from 'payload'
 
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 
