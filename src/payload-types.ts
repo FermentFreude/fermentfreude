@@ -474,6 +474,23 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Display the gold FERMENTFREUDE wordmark above the heading in the hero section.
+     */
+    showWordmark?: boolean | null;
+    /**
+     * Social media icons displayed alongside the hero content. Leave empty to hide.
+     */
+    socialLinks?:
+      | {
+          platform: 'facebook' | 'twitter' | 'instagram' | 'pinterest' | 'youtube' | 'tiktok';
+          /**
+           * Full URL to your social media profile (e.g. https://facebook.com/yourpage).
+           */
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
     media?: (string | null) | Media;
   };
   layout: (
@@ -1212,6 +1229,14 @@ export interface PagesSelect<T extends boolean = true> {
                     label?: T;
                     appearance?: T;
                   };
+              id?: T;
+            };
+        showWordmark?: T;
+        socialLinks?:
+          | T
+          | {
+              platform?: T;
+              url?: T;
               id?: T;
             };
         media?: T;

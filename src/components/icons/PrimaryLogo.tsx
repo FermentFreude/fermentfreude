@@ -1,7 +1,12 @@
 import clsx from 'clsx'
 import React from 'react'
 
-export function FermentFreudeLogo(props: React.ComponentProps<'svg'>) {
+/**
+ * Primary Logo — Horizontal wordmark "FERMENTFREUDE"
+ * Inline SVG using currentColor for flexible coloring.
+ * Used in: Footer, Mobile Menu
+ */
+export function PrimaryLogo(props: React.ComponentProps<'svg'>) {
   return (
     <svg
       aria-label="FermentFreude logo"

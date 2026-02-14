@@ -1,5 +1,6 @@
 'use client'
 
+import { SecondaryLogo } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
 
@@ -30,15 +31,8 @@ export default function ComingSoonPage() {
 
   return (
     <div style={{ textAlign: 'center', maxWidth: 420, padding: '2rem' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logo-v2.svg"
-          alt="FermentFreude"
-          width={280}
-          height={120}
-          style={{ maxWidth: '100%', height: 'auto' }}
-        />
+      <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+        <SecondaryLogo className="max-w-70" />
       </div>
       <p
         style={{

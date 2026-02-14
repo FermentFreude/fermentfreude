@@ -50,15 +50,11 @@ export function SectionHeading({
           {tag}
         </span>
       )}
-      <h2
-        className={cn('text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl', titleClassName)}
-      >
-        {title}
-      </h2>
+      <h2 className={cn('text-section-heading', titleClassName)}>{title}</h2>
       {description && (
         <p
           className={cn(
-            'max-w-2xl text-base leading-relaxed text-ff-gray-text md:text-lg',
+            'content-narrow text-body-lg leading-relaxed text-ff-gray-text',
             descriptionClassName,
           )}
         >

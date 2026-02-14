@@ -21,7 +21,7 @@ async function seedHomeHero() {
 
   const heroDE = {
     type: 'heroSlider' as const,
-    eyebrow: 'Fermentation für alle',
+    showWordmark: true,
     richText: {
       root: {
         type: 'root',
@@ -35,7 +35,7 @@ async function seedHomeHero() {
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Gutes Essen',
+                text: 'Lerne mit uns',
                 version: 1,
               },
             ],
@@ -54,26 +54,7 @@ async function seedHomeHero() {
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Bessere Gesundheit',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'heading',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Echte Freude',
+                text: 'Kreiere deinen eigenen Geschmack zu Hause',
                 version: 1,
               },
             ],
@@ -92,7 +73,7 @@ async function seedHomeHero() {
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Wir machen Fermentation zugänglich & freudvoll — für bessere Darmgesundheit durch Geschmack, Bildung und handgemachte Lebensmittel.',
+                text: 'Wir stellen fermentierte Lebensmittel her und teilen das Wissen dahinter. Durch Workshops, Produkte und Bildung machen wir Fermentation zugänglich und genussvoll.',
                 version: 1,
               },
             ],
@@ -113,25 +94,23 @@ async function seedHomeHero() {
       {
         link: {
           type: 'custom' as const,
-          label: 'Shop',
-          url: '/shop',
+          label: 'Mehr entdecken',
+          url: '/about',
           appearance: 'default' as const,
         },
       },
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Workshops',
-          url: '/workshops',
-          appearance: 'outline' as const,
-        },
-      },
+    ],
+    socialLinks: [
+      { platform: 'facebook' as const, url: 'https://facebook.com/fermentfreude' },
+      { platform: 'twitter' as const, url: 'https://twitter.com/fermentfreude' },
+      { platform: 'pinterest' as const, url: 'https://pinterest.com/fermentfreude' },
+      { platform: 'youtube' as const, url: 'https://youtube.com/@fermentfreude' },
     ],
   }
 
   const heroEN = {
     type: 'heroSlider' as const,
-    eyebrow: 'Fermentation for everyone',
+    showWordmark: true,
     richText: {
       root: {
         type: 'root',
@@ -145,7 +124,7 @@ async function seedHomeHero() {
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Good Food',
+                text: 'Learn with us',
                 version: 1,
               },
             ],
@@ -164,26 +143,7 @@ async function seedHomeHero() {
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Better Health',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'heading',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Real Joy',
+                text: 'Create your own flavour at home',
                 version: 1,
               },
             ],
@@ -202,7 +162,7 @@ async function seedHomeHero() {
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'We make fermentation accessible & joyful — for better gut health through taste, education, and handmade food.',
+                text: 'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.',
                 version: 1,
               },
             ],
@@ -223,19 +183,17 @@ async function seedHomeHero() {
       {
         link: {
           type: 'custom' as const,
-          label: 'Shop',
-          url: '/shop',
+          label: 'Discover More',
+          url: '/about',
           appearance: 'default' as const,
         },
       },
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Workshops',
-          url: '/workshops',
-          appearance: 'outline' as const,
-        },
-      },
+    ],
+    socialLinks: [
+      { platform: 'facebook' as const, url: 'https://facebook.com/fermentfreude' },
+      { platform: 'twitter' as const, url: 'https://twitter.com/fermentfreude' },
+      { platform: 'pinterest' as const, url: 'https://pinterest.com/fermentfreude' },
+      { platform: 'youtube' as const, url: 'https://youtube.com/@fermentfreude' },
     ],
   }
 
@@ -249,12 +207,12 @@ async function seedHomeHero() {
       id: homeId,
       locale: 'de',
       draft: true,
-      context: { skipRevalidate: true, skipAutoTranslate: true },
+      context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
         hero: heroDE,
         meta: {
-          title: 'FermentFreude — Gutes Essen, Bessere Gesundheit, Echte Freude',
-          description: 'FermentFreude — Fermentation zugänglich & freudvoll machen.',
+          title: 'FermentFreude — Lerne mit uns, kreiere deinen eigenen Geschmack',
+          description: 'Wir stellen fermentierte Lebensmittel her und teilen das Wissen dahinter.',
         },
       },
     })
@@ -265,12 +223,12 @@ async function seedHomeHero() {
       id: homeId,
       locale: 'en',
       draft: true,
-      context: { skipRevalidate: true, skipAutoTranslate: true },
+      context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
         hero: heroEN,
         meta: {
-          title: 'FermentFreude — Good Food, Better Health, Real Joy',
-          description: 'FermentFreude — Making fermentation accessible & joyful.',
+          title: 'FermentFreude — Learn with us, create your own flavour at home',
+          description: 'We create fermented foods and share the knowledge behind them.',
         },
       },
     })
@@ -284,7 +242,7 @@ async function seedHomeHero() {
       collection: 'pages',
       locale: 'de',
       draft: true,
-      context: { skipRevalidate: true, skipAutoTranslate: true },
+      context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
         title: 'Home',
         slug: 'home',
@@ -292,8 +250,8 @@ async function seedHomeHero() {
         hero: heroDE,
         layout: [],
         meta: {
-          title: 'FermentFreude — Gutes Essen, Bessere Gesundheit, Echte Freude',
-          description: 'FermentFreude — Fermentation zugänglich & freudvoll machen.',
+          title: 'FermentFreude — Lerne mit uns, kreiere deinen eigenen Geschmack',
+          description: 'Wir stellen fermentierte Lebensmittel her und teilen das Wissen dahinter.',
         },
       },
     })
@@ -304,13 +262,13 @@ async function seedHomeHero() {
       id: created.id,
       locale: 'en',
       draft: true,
-      context: { skipRevalidate: true, skipAutoTranslate: true },
+      context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
         title: 'Home',
         hero: heroEN,
         meta: {
-          title: 'FermentFreude — Good Food, Better Health, Real Joy',
-          description: 'FermentFreude — Making fermentation accessible & joyful.',
+          title: 'FermentFreude — Learn with us, create your own flavour at home',
+          description: 'We create fermented foods and share the knowledge behind them.',
         },
       },
     })

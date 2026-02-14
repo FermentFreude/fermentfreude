@@ -27,7 +27,7 @@ export async function Footer() {
           <div>
             <Link className="flex items-center gap-2" href="/">
               <Image
-                src="/logo.svg"
+                src="/primary-logo.svg"
                 alt="Fermentfreude"
                 width={200}
                 height={24}

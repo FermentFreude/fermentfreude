@@ -74,6 +74,55 @@ export const hero: Field = {
       },
     }),
     {
+      name: 'showWordmark',
+      type: 'checkbox',
+      defaultValue: true,
+      label: 'Show Brand Wordmark',
+      localized: false,
+      admin: {
+        condition: (_, { type } = {}) => type === 'heroSlider',
+        description:
+          'Display the gold FERMENTFREUDE wordmark above the heading in the hero section.',
+      },
+    },
+    {
+      name: 'socialLinks',
+      type: 'array',
+      label: 'Social Media Links',
+      maxRows: 6,
+      admin: {
+        condition: (_, { type } = {}) => type === 'heroSlider',
+        description:
+          'Social media icons displayed alongside the hero content. Leave empty to hide.',
+      },
+      fields: [
+        {
+          name: 'platform',
+          type: 'select',
+          required: true,
+          label: 'Platform',
+          options: [
+            { label: 'Facebook', value: 'facebook' },
+            { label: 'Twitter / X', value: 'twitter' },
+            { label: 'Instagram', value: 'instagram' },
+            { label: 'Pinterest', value: 'pinterest' },
+            { label: 'YouTube', value: 'youtube' },
+            { label: 'TikTok', value: 'tiktok' },
+          ],
+        },
+        {
+          name: 'url',
+          type: 'text',
+          required: true,
+          label: 'Profile URL',
+          admin: {
+            description:
+              'Full URL to your social media profile (e.g. https://facebook.com/yourpage).',
+          },
+        },
+      ],
+    },
+    {
       name: 'media',
       type: 'upload',
       admin: {

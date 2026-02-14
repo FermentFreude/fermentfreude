@@ -18,15 +18,15 @@ const bgStyles = {
 }
 
 const paddingStyles = {
-  sm: 'py-12 md:py-16',
-  md: 'py-16 md:py-24',
-  lg: 'py-20 md:py-32',
-  xl: 'py-24 md:py-40',
+  sm: 'section-padding-sm',
+  md: 'section-padding-md',
+  lg: 'section-padding-lg',
+  xl: 'section-padding-xl',
 }
 
 /**
  * Reusable content section wrapper with consistent padding and background colors.
- * Provides the container layout for page sections.
+ * Uses design-system tokens for vertical rhythm and container padding.
  */
 export function ContentSection({
   children,
@@ -36,7 +36,7 @@ export function ContentSection({
 }: ContentSectionProps) {
   return (
     <section className={cn(bgStyles[bg], paddingStyles[padding], className)}>
-      <div className="container mx-auto px-6 md:px-12 lg:px-20">{children}</div>
+      <div className="container mx-auto container-padding">{children}</div>
     </section>
   )
 }

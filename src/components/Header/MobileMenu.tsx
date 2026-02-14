@@ -51,7 +51,7 @@ export function MobileMenu({ menu }: Props) {
 
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
-      <SheetTrigger className="flex h-10 w-10 items-center justify-center rounded-md text-ff-gray-15 dark:text-neutral-300 transition-colors hover:text-ff-charcoal dark:hover:text-white">
+      <SheetTrigger className="flex h-10 w-10 items-center justify-center rounded-md text-white/90 transition-colors hover:text-white">
         <MenuIcon className="h-5 w-5" />
       </SheetTrigger>
 
@@ -59,7 +59,7 @@ export function MobileMenu({ menu }: Props) {
         <SheetHeader className="px-0 pt-4 pb-0">
           <SheetTitle className="flex items-center">
             <Image
-              src="/logo.svg"
+              src="/primary-logo.svg"
               alt="Fermentfreude"
               width={200}
               height={24}

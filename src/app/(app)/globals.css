@@ -10,11 +10,84 @@
 @custom-variant xl (@media (width >= theme(--breakpoint-xl)));
 @custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));
 
+/* ════════════════════════════════════════════════════════════════
+ *  DESIGN SYSTEM TOKENS
+ *  Single source of truth for typography, spacing, sizing, and
+ *  border-radius across the entire website.
+ * ════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Typography Scale ──────────────────────────────────────── */
+  /* Hero: see .text-hero / .text-hero-body classes for breakpoint-precise sizes */
+  --leading-hero: 1.08;
+  --tracking-hero: -0.025em;
+
+  /* Display: page titles, large feature headings */
+  --text-display: clamp(2.25rem, 5vw, 4rem);
+  --leading-display: 1.1;
+  --tracking-display: -0.025em;
+
+  /* Heading: section headings (h2 level) */
+  --text-heading: clamp(1.75rem, 4vw, 3rem);
+  --leading-heading: 1.15;
+  --tracking-heading: -0.02em;
+
+  /* Subheading: subsection headings (h3 level) */
+  --text-subheading: clamp(1.375rem, 3vw, 2rem);
+  --leading-subheading: 1.25;
+  --tracking-subheading: -0.015em;
+
+  /* Title: card titles, h4 level */
+  --text-title: clamp(1.125rem, 2vw, 1.5rem);
+  --leading-title: 1.3;
+  --tracking-title: -0.01em;
+
+  /* Body sizes */
+  --text-body-lg: clamp(1rem, 1vw + 0.25rem, 1.25rem);
+  --text-body: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-caption: 0.75rem;
+
+  /* ── Spacing Scale ─────────────────────────────────────────── */
+  /* Section vertical padding */
+  --space-section-sm: clamp(3rem, 5vw, 4rem);
+  --space-section-md: clamp(4rem, 7vw, 6rem);
+  --space-section-lg: clamp(5rem, 9vw, 8rem);
+  --space-section-xl: clamp(6rem, 11vw, 10rem);
+
+  /* Container horizontal padding — consistent across the site */
+  --space-container-x: clamp(1.5rem, 4vw, 6rem);
+
+  /* Content gaps */
+  --space-content-xs: clamp(0.5rem, 1vw, 0.75rem);
+  --space-content-sm: clamp(0.75rem, 1.5vw, 1rem);
+  --space-content-md: clamp(1rem, 2vw, 1.5rem);
+  --space-content-lg: clamp(1.5rem, 3vw, 2rem);
+  --space-content-xl: clamp(2rem, 4vw, 3rem);
+
+  /* ── Max-Width Scale ───────────────────────────────────────── */
+  --content-narrow: 42rem; /* ~672px — text-heavy, focused reading */
+  --content-medium: 56rem; /* ~896px — most section content */
+  --content-wide: 72rem; /* ~1152px — cards/grids */
+  --content-full: 86rem; /* ~1376px — full-width sections */
+
+  /* ── Border Radius Scale ───────────────────────────────────── */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-card: 1.75rem;
+  --radius-pill: 9999px;
+}
+
+/* ── Base Typography ─────────────────────────────────────────── */
+
 @layer base {
   body {
     font-family: 'neue-haas-grotesk-text', sans-serif;
     font-weight: 400;
-    font-size: 1rem;
+    font-size: var(--text-body);
     line-height: 1.6;
     letter-spacing: 0.005em;
     -webkit-font-smoothing: antialiased;
@@ -24,33 +97,33 @@
   h1 {
     font-family: 'neue-haas-grotesk-display', sans-serif;
     font-weight: 700;
-    font-size: clamp(2.25rem, 5vw, 4rem);
-    line-height: 1.1;
-    letter-spacing: -0.025em;
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
   }
 
   h2 {
     font-family: 'neue-haas-grotesk-display', sans-serif;
     font-weight: 700;
-    font-size: clamp(1.75rem, 4vw, 3rem);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    font-size: var(--text-heading);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
   }
 
   h3 {
     font-family: 'neue-haas-grotesk-display', sans-serif;
     font-weight: 700;
-    font-size: clamp(1.375rem, 3vw, 2rem);
-    line-height: 1.25;
-    letter-spacing: -0.015em;
+    font-size: var(--text-subheading);
+    line-height: var(--leading-subheading);
+    letter-spacing: var(--tracking-subheading);
   }
 
   h4 {
     font-family: 'neue-haas-grotesk-display', sans-serif;
     font-weight: 700;
-    font-size: clamp(1.125rem, 2vw, 1.5rem);
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+    font-size: var(--text-title);
+    line-height: var(--leading-title);
+    letter-spacing: var(--tracking-title);
   }
 
   h5,
@@ -64,14 +137,198 @@
   p {
     margin-bottom: 1.25em;
   }
+}
+
+/* ── Design System Utility Classes ───────────────────────────── */
+
+@layer components {
+  /* === Typography Presets === */
+
+  /* Hero headline — Figma design: 80px / 900 / line-height 0.98
+   * Mobile: 32px → SM: 40px → MD: 52px → LG: 64px → XL+: 80px */
+  /* ── Hero title — based on Figma, scaled down ~20% ──────────
+   * 26px → 32px → 38px → 48px → 60px */
+  .text-hero {
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 900;
+    font-size: 1.625rem;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+  }
+  @media (width >= 40rem) {
+    .text-hero {
+      font-size: 2rem;
+    }
+  }
+  @media (width >= 48rem) {
+    .text-hero {
+      font-size: 2.375rem;
+    }
+  }
+  @media (width >= 64rem) {
+    .text-hero {
+      font-size: 3rem;
+    }
+  }
+  @media (width >= 80rem) {
+    .text-hero {
+      font-size: 3.75rem;
+    }
+  }
+
+  /* ── Hero body — based on Figma, scaled down ~20% ──────────
+   * 12px → 14px → 15px → 16px → 18px */
+  .text-hero-body {
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    line-height: 1.28;
+  }
+  @media (width >= 40rem) {
+    .text-hero-body {
+      font-size: 0.875rem;
+    }
+  }
+  @media (width >= 48rem) {
+    .text-hero-body {
+      font-size: 0.9375rem;
+    }
+  }
+  @media (width >= 64rem) {
+    .text-hero-body {
+      font-size: 1rem;
+    }
+  }
+  @media (width >= 80rem) {
+    .text-hero-body {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* Hero eyebrow — exact breakpoint progression
+   * Mobile: 10px → SM–LG: 0.75rem (12px) → XL+: 0.875rem (14px) */
+  .text-hero-eyebrow {
+    font-family: 'neue-haas-grotesk-text', sans-serif;
+    font-size: 0.625rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  @media (width >= 40rem) {
+    .text-hero-eyebrow {
+      font-size: 0.75rem;
+    }
+  }
+  @media (width >= 80rem) {
+    .text-hero-eyebrow {
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Display headline — page-level headings */
+  .text-display {
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 700;
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+  }
+
+  /* Section heading */
+  .text-section-heading {
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 700;
+    font-size: var(--text-heading);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+  }
+
+  /* Subheading */
+  .text-subheading {
+    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-weight: 700;
+    font-size: var(--text-subheading);
+    line-height: var(--leading-subheading);
+    letter-spacing: var(--tracking-subheading);
+  }
+
+  /* Body large — descriptions, intros */
+  .text-body-lg {
+    font-family: 'neue-haas-grotesk-text', sans-serif;
+    font-size: var(--text-body-lg);
+    line-height: 1.6;
+  }
+
+  /* Body default */
+  .text-body {
+    font-family: 'neue-haas-grotesk-text', sans-serif;
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+
+  /* Body small */
+  .text-body-sm {
+    font-family: 'neue-haas-grotesk-text', sans-serif;
+    font-size: var(--text-body-sm);
+    line-height: 1.5;
+  }
+
+  /* Caption — metadata, labels */
+  .text-caption {
+    font-family: 'neue-haas-grotesk-text', sans-serif;
+    font-size: var(--text-caption);
+    line-height: 1.4;
+  }
 
   /* Editorial uppercase labels */
   .label-uppercase {
     font-family: 'neue-haas-grotesk-text', sans-serif;
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: var(--text-caption);
     letter-spacing: 0.1em;
     text-transform: uppercase;
+  }
+
+  /* Eyebrow — used above headings (hero, sections) */
+  .text-eyebrow {
+    font-family: 'neue-haas-grotesk-text', sans-serif;
+    font-size: var(--text-caption);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* === Spacing Presets === */
+
+  /* Section wrappers — consistent vertical rhythm */
+  .section-padding-sm {
+    padding-block: var(--space-section-sm);
+  }
+  .section-padding-md {
+    padding-block: var(--space-section-md);
+  }
+  .section-padding-lg {
+    padding-block: var(--space-section-lg);
+  }
+  .section-padding-xl {
+    padding-block: var(--space-section-xl);
+  }
+
+  /* Container horizontal padding — use on any full-width wrapper */
+  .container-padding {
+    padding-inline: var(--space-container-x);
+  }
+
+  /* === Content Width Constraints === */
+  .content-narrow {
+    max-width: var(--content-narrow);
+  }
+  .content-medium {
+    max-width: var(--content-medium);
+  }
+  .content-wide {
+    max-width: var(--content-wide);
+  }
+  .content-full {
+    max-width: var(--content-full);
   }
 }
 
@@ -295,6 +552,18 @@
   --color-ff-card-gray: var(--ff-card-gray);
   --color-ff-gray-15: var(--ff-gray-15);
   --color-ff-white-95: var(--ff-white-95);
+
+  /* ── Design System Spacing Tokens ──────────────────────────── */
+  --spacing-section-sm: var(--space-section-sm);
+  --spacing-section-md: var(--space-section-md);
+  --spacing-section-lg: var(--space-section-lg);
+  --spacing-section-xl: var(--space-section-xl);
+  --spacing-container-x: var(--space-container-x);
+  --spacing-content-xs: var(--space-content-xs);
+  --spacing-content-sm: var(--space-content-sm);
+  --spacing-content-md: var(--space-content-md);
+  --spacing-content-lg: var(--space-content-lg);
+  --spacing-content-xl: var(--space-content-xl);
 }
 
 @layer base {

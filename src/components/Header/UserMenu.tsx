@@ -47,7 +47,7 @@ export function UserMenu() {
     >
       <button
         onClick={() => setIsOpen((o) => !o)}
-        className="relative p-1.5 text-ff-gray-15 dark:text-neutral-300 hover:text-ff-charcoal dark:hover:text-white transition-colors hover:cursor-pointer"
+        className="relative p-1.5 text-white/90 hover:text-white transition-colors hover:cursor-pointer"
         aria-label="Account menu"
         aria-expanded={isOpen}
         aria-haspopup="true"

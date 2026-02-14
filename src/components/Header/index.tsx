@@ -12,7 +12,7 @@ export async function Header() {
   const header = await getCachedGlobal('header', 1, locale)()
 
   return (
-    <header className="sticky top-0 z-50 w-full">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full">
       <AnnouncementBar />
       <HeaderClient header={header} />
     </header>
