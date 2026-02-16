@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (_e) {
         setUser(null)
-        throw new Error('An error occurred while fetching your account.')
+        setStatus(undefined)
       }
     }
 

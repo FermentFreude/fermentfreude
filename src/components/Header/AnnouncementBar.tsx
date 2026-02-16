@@ -21,7 +21,7 @@ export function AnnouncementBar() {
         </Link>
         <button
           onClick={() => setVisible(false)}
-          className="absolute right-3 text-ff-ivory/60 dark:text-ff-near-black/60 hover:text-ff-ivory dark:hover:text-ff-near-black transition-colors"
+          className="absolute right-3 text-white dark:text-ff-near-black/60 hover:text-ff-ivory dark:hover:text-ff-near-black transition-colors"
           aria-label="Dismiss announcement"
         >
           <X className="w-4 h-4" />

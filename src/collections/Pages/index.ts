@@ -10,6 +10,7 @@ import { Content } from '@/blocks/Content/config'
 import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
+import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
@@ -98,6 +99,7 @@ export const Pages: CollectionConfig = {
                 ThreeItemGrid,
                 Banner,
                 FormBlock,
+                WorkshopSlider,
               ],
               required: true,
             },

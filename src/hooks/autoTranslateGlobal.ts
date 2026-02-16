@@ -76,55 +76,78 @@ export const autoTranslateGlobal: GlobalAfterChangeHook = async ({ doc, global, 
 
 /**
  * Recursively walk fields schema and collect localized text values needing translation.
- * Handles: text, textarea, group, row, collapsible, tabs, array (iterates items).
+ *
+ * IMPORTANT: `deDoc` / `enDoc` are always scoped to the CURRENT level
+ * (root document, group sub-object, or array/block item). `absolutePrefix`
+ * tracks the full path for building the update payload.
+ *
+ * Handles: text, textarea, group, row, collapsible, tabs, array, blocks.
  */
 function collectTranslations(
   fields: Field[],
   deDoc: Record<string, unknown>,
   enDoc: Record<string, unknown>,
-  prefix: string,
+  absolutePrefix: string,
   texts: string[],
   operations: Array<{ path: string; value: string }>,
 ): void {
   for (const field of fields) {
     if ('name' in field && field.name) {
-      const path = prefix ? `${prefix}.${field.name}` : field.name
+      const absolutePath = absolutePrefix ? `${absolutePrefix}.${field.name}` : field.name
 
       // Localized text/textarea field
       if ((field.type === 'text' || field.type === 'textarea') && field.localized) {
-        const deValue = getNestedValue(deDoc, path) as string | undefined
-        const enValue = getNestedValue(enDoc, path) as string | undefined
+        const deValue = deDoc[field.name] as string | undefined
+        const enValue = enDoc[field.name] as string | undefined
 
         if (deValue && deValue.trim() && (!enValue || enValue === deValue)) {
           texts.push(deValue)
-          operations.push({ path, value: deValue })
+          operations.push({ path: absolutePath, value: deValue })
         }
       }
 
-      // Group — recurse into sub-fields
+      // Group — recurse into sub-fields with narrowed doc scope
       if (field.type === 'group' && 'fields' in field) {
-        const deGroup = (getNestedValue(deDoc, path) as Record<string, unknown>) || {}
-        const enGroup = (getNestedValue(enDoc, path) as Record<string, unknown>) || {}
-        collectTranslations(field.fields, deGroup, enGroup, path, texts, operations)
+        const deGroup = (deDoc[field.name] as Record<string, unknown>) || {}
+        const enGroup = (enDoc[field.name] as Record<string, unknown>) || {}
+        collectTranslations(field.fields, deGroup, enGroup, absolutePath, texts, operations)
       }
 
-      // Array — iterate items and recurse
+      // Array — iterate items and recurse with narrowed doc scope
       if (field.type === 'array' && 'fields' in field) {
-        const deArray = (getNestedValue(deDoc, path) as Array<Record<string, unknown>>) || []
-        const enArray = (getNestedValue(enDoc, path) as Array<Record<string, unknown>>) || []
+        const deArray = deDoc[field.name]
+        if (Array.isArray(deArray)) {
+          const enArray = (enDoc[field.name] as Array<Record<string, unknown>>) || []
+          deArray.forEach((deItem, idx) => {
+            const enItem = enArray[idx] || {}
+            const itemPrefix = `${absolutePath}.${idx}`
+            collectTranslations(field.fields, deItem, enItem, itemPrefix, texts, operations)
+          })
+        }
+      }
 
-        deArray.forEach((deItem, idx) => {
-          const enItem = enArray[idx] || {}
-          const itemPrefix = `${path}.${idx}`
-          collectTranslations(field.fields, deItem, enItem, itemPrefix, texts, operations)
-        })
+      // Blocks — iterate items, lookup block config, and recurse
+      if (field.type === 'blocks' && 'blocks' in field) {
+        const deBlocks = deDoc[field.name]
+        if (Array.isArray(deBlocks)) {
+          const enBlocks = (enDoc[field.name] as Array<Record<string, unknown>>) || []
+          deBlocks.forEach((deItem: Record<string, unknown>, idx: number) => {
+            const blockType = deItem.blockType as string | undefined
+            if (!blockType) return
+            const blockConfig = field.blocks.find((b) => b.slug === blockType)
+            if (!blockConfig) return
+            const enItem = enBlocks[idx] || {}
+            const itemPrefix = `${absolutePath}.${idx}`
+            collectTranslations(blockConfig.fields, deItem, enItem, itemPrefix, texts, operations)
+          })
+        }
       }
     }
 
     // Row / collapsible — no name, just recurse
     if (field.type === 'row' || field.type === 'collapsible') {
       if ('fields' in field) {
-        collectTranslations(field.fields, deDoc, enDoc, prefix, texts, operations)
+        collectTranslations(field.fields, deDoc, enDoc, absolutePrefix, texts, operations)
       }
     }
 
@@ -132,30 +155,17 @@ function collectTranslations(
     if (field.type === 'tabs' && 'tabs' in field) {
       for (const tab of field.tabs) {
         if ('name' in tab && tab.name) {
-          const tabPath = prefix ? `${prefix}.${tab.name}` : tab.name
-          const deTab = (getNestedValue(deDoc, tabPath) as Record<string, unknown>) || {}
-          const enTab = (getNestedValue(enDoc, tabPath) as Record<string, unknown>) || {}
+          const tabPath = absolutePrefix ? `${absolutePrefix}.${tab.name}` : tab.name
+          const deTab = (deDoc[tab.name] as Record<string, unknown>) || {}
+          const enTab = (enDoc[tab.name] as Record<string, unknown>) || {}
           collectTranslations(tab.fields, deTab, enTab, tabPath, texts, operations)
         } else {
-          collectTranslations(tab.fields, deDoc, enDoc, prefix, texts, operations)
+          // Unnamed tabs — fields live directly on parent doc
+          collectTranslations(tab.fields, deDoc, enDoc, absolutePrefix, texts, operations)
         }
       }
     }
   }
-}
-
-/** Get a nested value from an object using dot notation (supports numeric indices) */
-function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  return path.split('.').reduce((current, key) => {
-    if (current && typeof current === 'object') {
-      if (Array.isArray(current)) {
-        const idx = parseInt(key, 10)
-        return current[idx]
-      }
-      return (current as Record<string, unknown>)[key]
-    }
-    return undefined
-  }, obj as unknown)
 }
 
 /** Set a nested value on an object using dot notation (supports numeric indices for arrays) */

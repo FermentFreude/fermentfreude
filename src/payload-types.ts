@@ -502,6 +502,7 @@ export interface Page {
     | ThreeItemGridBlock
     | BannerBlock
     | FormBlock
+    | WorkshopSliderBlock
   )[];
   meta?: {
     title?: string | null;
@@ -893,6 +894,62 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkshopSliderBlock".
+ */
+export interface WorkshopSliderBlock {
+  /**
+   * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
+   */
+  eyebrow?: string | null;
+  /**
+   * Add up to 6 workshop slides. Each slide has a title, description, features, image, and CTA.
+   */
+  workshops: {
+    /**
+     * Workshop name displayed as the main heading (e.g. "Lakto-Gemüse").
+     */
+    title: string;
+    /**
+     * Short description of the workshop (1–2 sentences).
+     */
+    description: string;
+    /**
+     * Numbered feature list (e.g. "Duration: approx. 3 hours"). Shown with 01, 02, 03, … numbering.
+     */
+    features?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Product/workshop photo displayed on the right side of the slide.
+     */
+    image?: (string | null) | Media;
+    /**
+     * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
+     */
+    ctaLink?: string | null;
+    /**
+     * Label for the button linking to this workshop's detail page (e.g. "Workshop Details").
+     */
+    detailsButtonLabel?: string | null;
+    id?: string | null;
+  }[];
+  /**
+   * Label for the button linking to the main workshops page (e.g. "All Workshops").
+   */
+  allWorkshopsButtonLabel?: string | null;
+  /**
+   * URL the "All Workshops" button links to (default: "/workshops").
+   */
+  allWorkshopsLink?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'workshopSlider';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants".
  */
 export interface Variant {
@@ -1252,6 +1309,7 @@ export interface PagesSelect<T extends boolean = true> {
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        workshopSlider?: T | WorkshopSliderBlockSelect<T>;
       };
   meta?:
     | T
@@ -1381,6 +1439,33 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkshopSliderBlock_select".
+ */
+export interface WorkshopSliderBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  workshops?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        image?: T;
+        ctaLink?: T;
+        detailsButtonLabel?: T;
+        id?: T;
+      };
+  allWorkshopsButtonLabel?: T;
+  allWorkshopsLink?: T;
   id?: T;
   blockName?: T;
 }

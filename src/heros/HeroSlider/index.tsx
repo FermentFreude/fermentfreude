@@ -175,7 +175,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
               {/* Gold wordmark logo + Heading + Description */}
               <div className="flex flex-col">
                 {resolvedShowWordmark && (
-                  <PrimaryLogo className="h-[7px] sm:h-2.5 md:h-4 lg:h-5 xl:h-6 w-auto self-start text-[#E8C079] mb-2 sm:mb-3" />
+                  <PrimaryLogo className="h-1.75 sm:h-2.5 md:h-4 lg:h-5 xl:h-6 w-auto self-start text-[#E8C079] mb-2 sm:mb-3" />
                 )}
 
                 {resolvedRichText && (

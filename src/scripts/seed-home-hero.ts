@@ -206,9 +206,9 @@ async function seedHomeHero() {
       collection: 'pages',
       id: homeId,
       locale: 'de',
-      draft: true,
       context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
+        _status: 'published',
         hero: heroDE,
         meta: {
           title: 'FermentFreude — Lerne mit uns, kreiere deinen eigenen Geschmack',
@@ -222,9 +222,9 @@ async function seedHomeHero() {
       collection: 'pages',
       id: homeId,
       locale: 'en',
-      draft: true,
       context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
+        _status: 'published',
         hero: heroEN,
         meta: {
           title: 'FermentFreude — Learn with us, create your own flavour at home',
@@ -241,7 +241,6 @@ async function seedHomeHero() {
     const created = await payload.create({
       collection: 'pages',
       locale: 'de',
-      draft: true,
       context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
         title: 'Home',
@@ -261,7 +260,6 @@ async function seedHomeHero() {
       collection: 'pages',
       id: created.id,
       locale: 'en',
-      draft: true,
       context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
         title: 'Home',
