@@ -14,14 +14,14 @@ export default function AboutPage() {
       <div className="relative h-[600px] w-full overflow-hidden bg-cover bg-center bg-[url('/assets/images/banner.png')]"></div>
 
       {/* Our Story Section */}
-      <section className="w-full py-24">
+      <section className="w-full pt-4 pb-8 md:py-24">
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="flex flex-col items-center gap-12">
             {/* Section Label */}
             <h2 className="font-display text-3xl font-bold text-[#E5B765]">Our Story</h2>
 
             {/* Main Heading */}
-            <h1 className="font-display text-center text-6xl font-bold leading-tight text-[#1D1D1D]">
+            <h1 className="font-display text-center text-5xl font-bold leading-tight text-[#1D1D1D]">
               Bringing Joy to Fermentation
             </h1>
 
@@ -32,7 +32,7 @@ export default function AboutPage() {
             </p>
 
             {/* Description Paragraphs */}
-            <div className="flex w-full text-center flex-col gap-8 bg-white py-12">
+            <div className="flex w-full text-center flex-col gap-1 bg-white py-4 -mt-12">
               <p className="font-display text-2xl font-normal leading-relaxed text-[#1D1D1D]">
                 FermentFreude is a modern Austrian food-tech startup helping people discover
                 fermentation through fun workshops and premium fermented products. We combine
@@ -49,21 +49,21 @@ export default function AboutPage() {
       </section>
 
       {/* Our Team Section */}
-      <section className="w-full py-24">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="flex flex-col items-center gap-16">
+      <section className="w-full pt-4 pb-24 md:py-24">
+        <div className="mx-auto max-w-[1400px] px-3 md:px-6">
+          <div className="flex flex-col items-center gap-12 md:gap-16">
             {/* Section Label */}
-            <h2 className="font-display text-3xl font-bold text-[#E5B765]">Our Team</h2>
+            <h2 className="font-display text-3xl font-bold text-[#E5B765] animate-fade-in">Our Team</h2>
 
             {/* Team Heading */}
-            <h3 className="font-display text-center text-5xl font-bold text-[#1D1D1D]">
+            <h3 className="font-display text-center text-5xl font-bold text-[#1D1D1D] animate-fade-in-up animate-delay-200">
               Meet the Experts Behind FermentFreude
             </h3>
 
             {/* Team Members Grid */}
             <div className="grid w-full gap-12 md:grid-cols-2">
               {/* Marcel Rauminger */}
-              <div className="flex aspect-[1/2] flex-col overflow-hidden rounded-3xl bg-white shadow-lg">
+              <div className="flex aspect-[1/2] flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up animate-delay-400 hover:scale-[1.02] transition-transform duration-300">
                 <div className="flex-1 w-full overflow-hidden">
                   <img
                     src="/assets/images/marcel-rauminger.jpg"
@@ -89,7 +89,7 @@ export default function AboutPage() {
               </div>
 
               {/* David Heider */}
-              <div className="flex aspect-[1/2] flex-col overflow-hidden rounded-3xl bg-white shadow-lg">
+              <div className="flex aspect-[1/2] flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up animate-delay-600 hover:scale-[1.02] transition-transform duration-300">
                 <div className="flex-1 w-full overflow-hidden">
                   <img
                     src="/assets/images/david-heider.jpg"
@@ -117,7 +117,7 @@ export default function AboutPage() {
       </section>
 
       {/* Sponsors Section */}
-      <section className="w-full bg-[#ECE5DE] py-24">
+      <section className="w-full bg-[#ECE5DE] py-12 pb-16 md:py-24">
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="flex flex-col items-center gap-12">
             <h2 className="font-display text-center text-3xl font-bold text-[#1D1D1D]">
@@ -162,7 +162,7 @@ export default function AboutPage() {
       </section>
 
       {/* Contact Section */}
-      <section className="w-full py-24">
+      <section className="w-full py-12 pb-16 md:py-24">
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="relative overflow-hidden rounded-3xl md:rounded-[5rem] bg-white shadow-lg">
             <div className="grid gap-8 md:grid-cols-2">
@@ -184,7 +184,7 @@ export default function AboutPage() {
                     <div className="flex gap-4 md:gap-6">
                       <div className="flex-shrink-0">
                         <svg
-                          className="w-10 h-11 md:w-[54px] md:h-[59px]"
+                          className="w-8 h-8 md:w-10 md:h-10"
                           viewBox="0 0 54 59"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +215,7 @@ export default function AboutPage() {
                     <div className="flex gap-4 md:gap-6">
                       <div className="flex-shrink-0">
                         <svg
-                          className="w-10 h-11 md:w-[54px] md:h-[59px]"
+                          className="w-8 h-8 md:w-10 md:h-10"
                           viewBox="0 0 54 59"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"
@@ -240,7 +240,7 @@ export default function AboutPage() {
                     <div className="flex gap-4 md:gap-6">
                       <div className="flex-shrink-0">
                         <svg
-                          className="w-10 h-11 md:w-[54px] md:h-[59px]"
+                          className="w-8 h-8 md:w-10 md:h-10"
                           viewBox="0 0 54 59"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"
@@ -248,14 +248,14 @@ export default function AboutPage() {
                           <path
                             d="M47.25 9.83333H6.75C3.0225 9.83333 0 12.8558 0 16.5833V42.4167C0 46.1442 3.0225 49.1667 6.75 49.1667H47.25C50.9775 49.1667 54 46.1442 54 42.4167V16.5833C54 12.8558 50.9775 9.83333 47.25 9.83333Z"
                             stroke="#6B6B6B"
-                            strokeWidth="1.95603"
+                            strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                           <path
                             d="M0 16.5833L27 30.25L54 16.5833"
                             stroke="#6B6B6B"
-                            strokeWidth="1.95603"
+                            strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
@@ -265,44 +265,12 @@ export default function AboutPage() {
                         <div className="font-display mb-2 text-lg font-bold text-[#1E1E1E]">
                           Mail
                         </div>
-                        <div className="font-display text-base font-bold text-[#555] break-words">
-                          fermentfreude@gmail.com
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Website */}
-                    <div className="flex gap-4 md:gap-6">
-                      <div className="flex-shrink-0">
-                        <svg
-                          className="w-10 h-11 md:w-[54px] md:h-[59px]"
-                          viewBox="0 0 54 59"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <a
+                          href="mailto:fermentfreude@gmail.com"
+                          className="font-display text-base font-bold text-[#555] break-words hover:underline inline"
                         >
-                          <path
-                            d="M46.4638 29.4707C46.4638 35.2635 44.3802 40.819 40.6713 44.9151C36.9624 49.0113 31.9321 51.3124 26.687 51.3124C21.4418 51.3124 16.4115 49.0113 12.7027 44.9151C8.99378 40.819 6.91016 35.2635 6.91016 29.4707M46.4638 29.4707C46.4638 23.6779 44.3802 18.1223 40.6713 14.0262C36.9624 9.93009 31.9321 7.62891 26.687 7.62891C21.4418 7.62891 16.4115 9.93009 12.7027 14.0262C8.99378 18.1223 6.91016 23.6779 6.91016 29.4707M46.4638 29.4707H6.91016"
-                            stroke="#6B6B6B"
-                            strokeWidth="1.95603"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M34.2911 29.4707C33.9174 37.458 31.2536 45.1072 26.6846 51.3124C22.1156 45.1072 19.4518 37.458 19.0781 29.4707C19.4518 21.4833 22.1156 13.8342 26.6846 7.62891C31.2536 13.8342 33.9174 21.4833 34.2911 29.4707Z"
-                            stroke="#6B6B6B"
-                            strokeWidth="1.95603"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-display mb-2 text-lg font-bold text-[#1E1E1E]">
-                          Website
-                        </div>
-                        <div className="font-display text-base font-bold text-[#555] break-words">
-                          www.fermentfreude.com
-                        </div>
+                          fermentfreude@gmail.com
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -452,7 +420,7 @@ export default function AboutPage() {
                 </Link>
                 <Link
                   href="/courses"
-                  className="rounded-full border-4 border-[#4B4B4B] bg-white px-6 py-4 md:px-16 md:py-5 font-display text-lg md:text-2xl font-semibold text-[#4B4B4B] transition-colors hover:bg-[#F9F0DC]"
+                  className="rounded-full bg-white px-6 py-4 md:px-16 md:py-6 font-display text-lg md:text-2xl font-semibold text-[#4B4B4B] transition-all hover:bg-[#F9F0DC] hover:border-4 hover:border-[#4B4B4B]"
                 >
                   Browse online courses
                 </Link>
