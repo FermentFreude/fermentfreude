@@ -1,5 +1,4 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import sharp from 'sharp'
 
 import {
@@ -30,18 +29,12 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
-  cors: [
-    process.env.NEXT_PUBLIC_SERVER_URL || '',
-  ].filter(Boolean) as string[],
+  cors: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean) as string[],
   admin: {
-    components: {
-      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
-      beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
-      beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
-    },
+    // components: {
+    //   beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
+    //   beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
+    // },
     user: Users.slug,
   },
   localization: {
