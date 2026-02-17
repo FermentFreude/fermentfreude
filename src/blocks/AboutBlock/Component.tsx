@@ -207,7 +207,7 @@ export const AboutBlockComponent: React.FC<
     },
   }
 
-  const heroImageUrl = getImageUrl(aboutData?.heroImage) || '/assets/images/banner.png'
+  const heroImageUrl = getImageUrl(aboutData?.heroImage) || '/assets/images/Banner.png'
   const id = toKebabCase((block as { blockName?: string }).blockName ?? 'about')
 
   return (
