@@ -28,7 +28,15 @@ async function seedHomeHero() {
                 type: 'heading',
                 tag: n.tag,
                 children: [
-                  { type: 'text', text: n.text, version: 1, detail: 0, format: 0, mode: 'normal', style: '' },
+                  {
+                    type: 'text',
+                    text: n.text,
+                    version: 1,
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                  },
                 ],
                 direction: 'ltr' as const,
                 format: '' as const,
@@ -38,7 +46,15 @@ async function seedHomeHero() {
             : {
                 type: 'paragraph',
                 children: [
-                  { type: 'text', text: n.text, version: 1, detail: 0, format: 0, mode: 'normal', style: '' },
+                  {
+                    type: 'text',
+                    text: n.text,
+                    version: 1,
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                  },
                 ],
                 direction: 'ltr' as const,
                 format: '' as const,
@@ -72,8 +88,16 @@ async function seedHomeHero() {
       {
         link: {
           type: 'custom' as const,
-          label: 'Mehr entdecken',
-          url: '/about',
+          label: 'Shop',
+          url: '/shop',
+          appearance: 'default' as const,
+        },
+      },
+      {
+        link: {
+          type: 'custom' as const,
+          label: 'Workshops',
+          url: '/workshops',
           appearance: 'default' as const,
         },
       },
@@ -103,8 +127,16 @@ async function seedHomeHero() {
       {
         link: {
           type: 'custom' as const,
-          label: 'Discover More',
-          url: '/about',
+          label: 'Shop',
+          url: '/shop',
+          appearance: 'default' as const,
+        },
+      },
+      {
+        link: {
+          type: 'custom' as const,
+          label: 'Workshops',
+          url: '/workshops',
           appearance: 'default' as const,
         },
       },
@@ -150,8 +182,7 @@ async function seedHomeHero() {
       layout: [],
       meta: {
         title: 'FermentFreude — Lerne mit uns, kreiere deinen eigenen Geschmack',
-        description:
-          'Wir stellen fermentierte Lebensmittel her und teilen das Wissen dahinter.',
+        description: 'Wir stellen fermentierte Lebensmittel her und teilen das Wissen dahinter.',
       },
     },
   })
@@ -203,8 +234,7 @@ async function seedHomeHero() {
       layout: [],
       meta: {
         title: 'FermentFreude — Learn with us, create your own flavour at home',
-        description:
-          'We create fermented foods and share the knowledge behind them.',
+        description: 'We create fermented foods and share the knowledge behind them.',
       },
     },
   })
