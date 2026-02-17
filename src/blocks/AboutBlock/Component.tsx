@@ -194,7 +194,7 @@ export const AboutBlockComponent: React.FC<
   return (
     <div id={id} className="min-h-screen bg-white">
       {/* Hero Banner */}
-      <div className="relative h-[600px] w-full overflow-hidden">
+      <div className="relative h-150 w-full overflow-hidden">
         {hasMediaResource(aboutData?.heroImage) ? (
           <Media
             resource={aboutData.heroImage}
@@ -208,7 +208,7 @@ export const AboutBlockComponent: React.FC<
 
       {/* Our Story Section */}
       <section className="w-full pt-4 pb-8 md:py-24">
-        <div className="mx-auto max-w-[1400px] px-6">
+        <div className="mx-auto max-w-350 px-6">
           <div className="flex flex-col items-center gap-12">
             <h2 className="font-display text-3xl font-bold text-[#E5B765]">{ourStory.label}</h2>
             <h1 className="font-display text-center text-5xl font-bold leading-tight text-[#1D1D1D]">
@@ -233,7 +233,7 @@ export const AboutBlockComponent: React.FC<
 
       {/* Our Team Section */}
       <section className="w-full pt-4 pb-24 md:py-24">
-        <div className="mx-auto max-w-[1400px] px-3 md:px-6">
+        <div className="mx-auto max-w-350 px-3 md:px-6">
           <div className="flex flex-col items-center gap-12 md:gap-16">
             <h2 className="font-display text-3xl font-bold text-[#E5B765] animate-fade-in">
               {team.label}
@@ -246,7 +246,7 @@ export const AboutBlockComponent: React.FC<
                 return (
                   <div
                     key={idx}
-                    className="flex aspect-[1/2] flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up hover:scale-[1.02] transition-transform duration-300"
+                    className="flex aspect-1/2 flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up hover:scale-[1.02] transition-transform duration-300"
                     style={{
                       animationDelay: `${(idx + 1) * 200}ms`,
                     }}
@@ -283,7 +283,7 @@ export const AboutBlockComponent: React.FC<
       {/* Sponsors Section */}
       {sponsors.logos.length > 0 && (
         <section className="w-full bg-[#ECE5DE] py-12 pb-16 md:py-24">
-          <div className="mx-auto max-w-[1400px] px-6">
+          <div className="mx-auto max-w-350 px-6">
             <div className="flex flex-col items-center gap-12">
               <h2 className="font-display text-center text-3xl font-bold text-[#1D1D1D]">
                 {sponsors.heading}
@@ -314,7 +314,7 @@ export const AboutBlockComponent: React.FC<
 
       {/* Contact Section */}
       <section className="w-full py-12 pb-16 md:py-24">
-        <div className="mx-auto max-w-[1400px] px-6">
+        <div className="mx-auto max-w-350 px-6">
           <div className="relative overflow-hidden rounded-3xl md:rounded-[5rem] bg-white shadow-lg">
             <div className="grid gap-8 md:grid-cols-2">
               <div className="rounded-t-[5rem] md:rounded-l-[5rem] md:rounded-t-none bg-[#FAF2E0] p-6 md:p-16">
@@ -327,7 +327,7 @@ export const AboutBlockComponent: React.FC<
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex gap-4 md:gap-6">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <svg
                           className="w-8 h-8 md:w-10 md:h-10"
                           viewBox="0 0 54 59"
@@ -348,13 +348,13 @@ export const AboutBlockComponent: React.FC<
                         <div className="font-display mb-2 text-lg font-bold text-[#1E1E1E]">
                           {contact.labels.location}
                         </div>
-                        <div className="font-display text-base font-bold text-[#555] break-words whitespace-pre-line">
+                        <div className="font-display text-base font-bold text-[#555] wrap-break-word whitespace-pre-line">
                           {contact.location}
                         </div>
                       </div>
                     </div>
                     <div className="flex gap-4 md:gap-6">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <svg
                           className="w-8 h-8 md:w-10 md:h-10"
                           viewBox="0 0 54 59"
@@ -371,13 +371,13 @@ export const AboutBlockComponent: React.FC<
                         <div className="font-display mb-2 text-lg font-bold text-[#1E1E1E]">
                           {contact.labels.phone}
                         </div>
-                        <div className="font-display text-base font-bold text-[#555] break-words">
+                        <div className="font-display text-base font-bold text-[#555] wrap-break-word">
                           {contact.phone}
                         </div>
                       </div>
                     </div>
                     <div className="flex gap-4 md:gap-6">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <svg
                           className="w-8 h-8 md:w-10 md:h-10"
                           viewBox="0 0 54 59"
@@ -406,7 +406,7 @@ export const AboutBlockComponent: React.FC<
                         </div>
                         <a
                           href={`mailto:${contact.email}`}
-                          className="font-display text-base font-bold text-[#555] break-words hover:underline inline"
+                          className="font-display text-base font-bold text-[#555] wrap-break-word hover:underline inline"
                         >
                           {contact.email}
                         </a>
@@ -511,7 +511,7 @@ export const AboutBlockComponent: React.FC<
                   <textarea
                     placeholder={contactForm.placeholders.message}
                     rows={6}
-                    className="resize-none rounded-[2rem] border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
+                    className="resize-none rounded-4xl border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
                   />
                   <button
                     type="submit"
@@ -528,7 +528,7 @@ export const AboutBlockComponent: React.FC<
 
       {/* Ready to Learn CTA */}
       <section className="w-full py-12 md:py-24 bg-[#F9F0DC]">
-        <div className="mx-auto max-w-[1400px] px-6">
+        <div className="mx-auto max-w-350 px-6">
           <div className="rounded-[2.75rem] bg-[#F9F0DC] px-6 py-12 md:px-24 md:py-20">
             <div className="flex flex-col items-center gap-8 md:gap-12">
               <h2 className="font-display text-center text-2xl md:text-3xl font-bold text-[#1D1D1D]">
