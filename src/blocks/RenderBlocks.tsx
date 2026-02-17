@@ -7,6 +7,7 @@ import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
 import { WorkshopSliderBlock } from '@/blocks/WorkshopSlider/Component'
+import { AboutBlockComponent } from '@/blocks/AboutBlock/Component'
 import { toKebabCase } from '@/utilities/toKebabCase'
 import React, { Fragment } from 'react'
 
@@ -22,6 +23,7 @@ const blockComponents = {
   mediaBlock: MediaBlock,
   threeItemGrid: ThreeItemGridBlock,
   workshopSlider: WorkshopSliderBlock,
+  aboutBlock: AboutBlockComponent,
 }
 
 export const RenderBlocks: React.FC<{
