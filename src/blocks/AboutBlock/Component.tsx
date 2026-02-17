@@ -88,7 +88,7 @@ const DEFAULTS = {
 function getImageUrl(image: unknown): string {
   if (!image) return ''
   if (typeof image === 'string') return image
-  if (typeof image === 'object' && image !== null && 'url' in image) {
+  if (typeof image === 'object' && 'url' in image) {
     const url = (image as { url?: string }).url
     if (!url) return ''
     return url.startsWith('http') ? url : `${process.env.NEXT_PUBLIC_SERVER_URL || ''}${url}`
