@@ -12,8 +12,12 @@ export async function Header() {
   const header = await getCachedGlobal('header', 1, locale)()
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full">
-      <AnnouncementBar />
+    <header className="sticky top-0 z-50 w-full">
+      <AnnouncementBar
+        enabled={header.announcementBar?.enabled}
+        text={header.announcementBar?.text}
+        link={header.announcementBar?.link}
+      />
       <HeaderClient header={header} />
     </header>
   )

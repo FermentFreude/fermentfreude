@@ -18,6 +18,11 @@ async function seedHeader() {
     locale: 'de',
     context: { skipRevalidate: true, skipAutoTranslate: true },
     data: {
+      announcementBar: {
+        enabled: true,
+        text: 'Wir haben auch digitale Workshops, schau mal rein',
+        link: '/workshops',
+      },
       navItems: [
         {
           link: {
@@ -152,6 +157,11 @@ async function seedHeader() {
     locale: 'en',
     context: { skipRevalidate: true, skipAutoTranslate: true },
     data: {
+      announcementBar: {
+        enabled: true,
+        text: 'We Have Digital Workshops too, take a look',
+        link: '/workshops',
+      },
       navItems: enNavItems,
     },
   })

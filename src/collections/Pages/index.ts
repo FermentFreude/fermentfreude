@@ -101,7 +101,6 @@ export const Pages: CollectionConfig = {
                 FormBlock,
                 WorkshopSlider,
               ],
-              required: true,
             },
           ],
           label: 'Content',

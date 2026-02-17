@@ -50,13 +50,13 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
   }, [])
 
   const sharedClassName = cn(
-    'relative navLink flex items-center gap-1 text-white/90 font-display font-bold text-[11px] lg:text-xs hover:text-white transition-colors',
+    'relative navLink flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm hover:text-ff-near-black dark:hover:text-white transition-colors',
     { active: isActive },
   )
 
   const chevron = (
     <ChevronDown
-      className={cn('w-2.5 h-2.5 transition-transform duration-200', {
+      className={cn('w-3 h-3 transition-transform duration-200', {
         'rotate-180': isOpen,
       })}
       aria-hidden="true"
