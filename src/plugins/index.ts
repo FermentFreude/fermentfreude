@@ -1,5 +1,6 @@
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { seoPlugin } from '@payloadcms/plugin-seo'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { Plugin } from 'payload'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -27,6 +28,16 @@ const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
 }
 
 export const plugins: Plugin[] = [
+  vercelBlobStorage({
+    enabled: process.env.BLOB_READ_WRITE_TOKEN ? true : false,
+    collections: {
+      media: {
+        disablePayloadAccessControl: true,
+        prefix: 'media',
+      },
+    },
+    token: process.env.BLOB_READ_WRITE_TOKEN!,
+  }),
   seoPlugin({
     generateTitle,
     generateURL,
