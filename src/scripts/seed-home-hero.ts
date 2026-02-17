@@ -323,7 +323,9 @@ async function seedHomeHero() {
       },
     })
 
-    payload.logger.info(`✅ Home page created (id: ${created.id}) with hero (DE + EN, reusing array IDs).`)
+    payload.logger.info(
+      `✅ Home page created (id: ${created.id}) with hero (DE + EN, reusing array IDs).`,
+    )
   }
 
   payload.logger.info('Done. Exiting.')

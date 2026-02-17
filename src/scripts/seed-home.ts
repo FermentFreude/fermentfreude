@@ -10,11 +10,11 @@
  *
  * Run: set -a && source .env && set +a && npx tsx src/scripts/seed-home.ts
  */
+import type { Page } from '@/payload-types'
 import config from '@payload-config'
 import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
-import type { Page } from '@/payload-types'
 
 interface WithId {
   id?: string
@@ -59,7 +59,11 @@ async function seedHome() {
 
   // Delete any existing workshop media to avoid duplicates
   await payload
-    .delete({ collection: 'media', where: { alt: { contains: 'workshop' } }, context: { skipAutoTranslate: true } })
+    .delete({
+      collection: 'media',
+      where: { alt: { contains: 'workshop' } },
+      context: { skipAutoTranslate: true },
+    })
     .catch(() => {})
 
   const laktoImage = await payload.create({
@@ -101,25 +105,77 @@ async function seedHome() {
         children: [
           {
             type: 'heading',
-            children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: 'Lerne mit uns', version: 1 }],
-            direction: 'ltr' as const, format: '', indent: 0, tag: 'h1', version: 1,
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'Lerne mit uns',
+                version: 1,
+              },
+            ],
+            direction: 'ltr' as const,
+            format: '',
+            indent: 0,
+            tag: 'h1',
+            version: 1,
           },
           {
             type: 'heading',
-            children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: 'Kreiere deinen eigenen Geschmack zu Hause', version: 1 }],
-            direction: 'ltr' as const, format: '', indent: 0, tag: 'h1', version: 1,
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'Kreiere deinen eigenen Geschmack zu Hause',
+                version: 1,
+              },
+            ],
+            direction: 'ltr' as const,
+            format: '',
+            indent: 0,
+            tag: 'h1',
+            version: 1,
           },
           {
             type: 'paragraph',
-            children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: 'Wir stellen fermentierte Lebensmittel her und teilen das Wissen dahinter. Durch Workshops, Produkte und Bildung machen wir Fermentation zugänglich und genussvoll.', version: 1 }],
-            direction: 'ltr' as const, format: '', indent: 0, textFormat: 0, version: 1,
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'Wir stellen fermentierte Lebensmittel her und teilen das Wissen dahinter. Durch Workshops, Produkte und Bildung machen wir Fermentation zugänglich und genussvoll.',
+                version: 1,
+              },
+            ],
+            direction: 'ltr' as const,
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            version: 1,
           },
         ],
-        direction: 'ltr' as const, format: '' as const, indent: 0, version: 1,
+        direction: 'ltr' as const,
+        format: '' as const,
+        indent: 0,
+        version: 1,
       },
     },
     links: [
-      { link: { type: 'custom' as const, label: 'Mehr entdecken', url: '/about', appearance: 'default' as const } },
+      {
+        link: {
+          type: 'custom' as const,
+          label: 'Mehr entdecken',
+          url: '/about',
+          appearance: 'default' as const,
+        },
+      },
     ],
     socialLinks: [
       { platform: 'facebook' as const, url: 'https://facebook.com/fermentfreude' },
@@ -139,25 +195,77 @@ async function seedHome() {
         children: [
           {
             type: 'heading',
-            children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: 'Learn with us', version: 1 }],
-            direction: 'ltr' as const, format: '', indent: 0, tag: 'h1', version: 1,
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'Learn with us',
+                version: 1,
+              },
+            ],
+            direction: 'ltr' as const,
+            format: '',
+            indent: 0,
+            tag: 'h1',
+            version: 1,
           },
           {
             type: 'heading',
-            children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: 'Create your own flavour at home', version: 1 }],
-            direction: 'ltr' as const, format: '', indent: 0, tag: 'h1', version: 1,
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'Create your own flavour at home',
+                version: 1,
+              },
+            ],
+            direction: 'ltr' as const,
+            format: '',
+            indent: 0,
+            tag: 'h1',
+            version: 1,
           },
           {
             type: 'paragraph',
-            children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: 'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.', version: 1 }],
-            direction: 'ltr' as const, format: '', indent: 0, textFormat: 0, version: 1,
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.',
+                version: 1,
+              },
+            ],
+            direction: 'ltr' as const,
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            version: 1,
           },
         ],
-        direction: 'ltr' as const, format: '' as const, indent: 0, version: 1,
+        direction: 'ltr' as const,
+        format: '' as const,
+        indent: 0,
+        version: 1,
       },
     },
     links: [
-      { link: { type: 'custom' as const, label: 'Discover More', url: '/about', appearance: 'default' as const } },
+      {
+        link: {
+          type: 'custom' as const,
+          label: 'Discover More',
+          url: '/about',
+          appearance: 'default' as const,
+        },
+      },
     ],
     socialLinks: [
       { platform: 'facebook' as const, url: 'https://facebook.com/fermentfreude' },
@@ -176,7 +284,8 @@ async function seedHome() {
     workshops: [
       {
         title: 'Lakto-Gemüse',
-        description: 'Gemüse fermentieren und jeden Monat neue Geschmacksrichtungen erleben. Hast du saisonales Gemüse übrig und möchtest es in echte Geschmackserlebnisse verwandeln?',
+        description:
+          'Gemüse fermentieren und jeden Monat neue Geschmacksrichtungen erleben. Hast du saisonales Gemüse übrig und möchtest es in echte Geschmackserlebnisse verwandeln?',
         features: [
           { text: 'Dauer: ca. 3 Stunden' },
           { text: 'Für alle – vom Anfänger bis zum Profi.' },
@@ -189,7 +298,8 @@ async function seedHome() {
       },
       {
         title: 'Kombucha',
-        description: 'Tee fermentieren und mit jedem Brauvorgang ausgewogene Aromen kreieren. Neugierig, wie Kombucha natürlich spritzig, frisch und komplex wird?',
+        description:
+          'Tee fermentieren und mit jedem Brauvorgang ausgewogene Aromen kreieren. Neugierig, wie Kombucha natürlich spritzig, frisch und komplex wird?',
         features: [
           { text: 'Dauer: ca. 3 Stunden' },
           { text: 'Für alle – vom Anfänger bis zum Profi.' },
@@ -202,7 +312,8 @@ async function seedHome() {
       },
       {
         title: 'Tempeh',
-        description: 'Von Bohnen zu Tempeh – Textur, Geschmack und Technik verstehen. Lerne, wie diese traditionelle Fermentation zu einem vielseitigen, gesunden Protein wird.',
+        description:
+          'Von Bohnen zu Tempeh – Textur, Geschmack und Technik verstehen. Lerne, wie diese traditionelle Fermentation zu einem vielseitigen, gesunden Protein wird.',
         features: [
           { text: 'Dauer: ca. 3 Stunden' },
           { text: 'Für Hobbyköche und Profis geeignet.' },
@@ -225,7 +336,8 @@ async function seedHome() {
     workshops: [
       {
         title: 'Lacto-Vegetables',
-        description: 'Fermenting vegetables, experiencing different flavours every month. Do you have leftover seasonal vegetables and want to transform them into real taste sensations?',
+        description:
+          'Fermenting vegetables, experiencing different flavours every month. Do you have leftover seasonal vegetables and want to transform them into real taste sensations?',
         features: [
           { text: 'Duration: approx. 3 hours' },
           { text: 'For everyone from beginner to pro.' },
@@ -238,7 +350,8 @@ async function seedHome() {
       },
       {
         title: 'Kombucha',
-        description: 'Fermenting tea, creating balanced flavours with every brew. Curious how kombucha becomes naturally fizzy, fresh, and complex?',
+        description:
+          'Fermenting tea, creating balanced flavours with every brew. Curious how kombucha becomes naturally fizzy, fresh, and complex?',
         features: [
           { text: 'Duration: approx. 3 hours' },
           { text: 'For everyone from beginner to pro.' },
@@ -251,7 +364,8 @@ async function seedHome() {
       },
       {
         title: 'Tempeh',
-        description: 'From beans to tempeh, understanding texture, taste, and technique. Learn how this traditional fermentation becomes a versatile, healthy protein.',
+        description:
+          'From beans to tempeh, understanding texture, taste, and technique. Learn how this traditional fermentation becomes a versatile, healthy protein.',
         features: [
           { text: 'Duration: approx. 3 hours' },
           { text: 'Suitable for home cooks and professionals.' },
@@ -326,18 +440,20 @@ async function seedHome() {
   // ============================================================
   payload.logger.info('Reading back to capture generated IDs...')
 
-  const freshDoc = await payload.findByID({
+  const freshDoc = (await payload.findByID({
     collection: 'pages',
     id: homeId,
     locale: 'de',
     depth: 0,
-  }) as Page
+  })) as Page
 
   const freshHero = (freshDoc.hero || {}) as Record<string, unknown>
   const freshLinks = (freshHero.links || []) as WithId[]
   const freshSocialLinks = (freshHero.socialLinks || []) as WithId[]
   const freshLayout = Array.isArray(freshDoc.layout) ? freshDoc.layout : []
-  const wsBlock = freshLayout.find((b) => 'blockType' in b && b.blockType === 'workshopSlider') as BlockItem | undefined
+  const wsBlock = freshLayout.find((b) => 'blockType' in b && b.blockType === 'workshopSlider') as
+    | BlockItem
+    | undefined
 
   if (!wsBlock) {
     payload.logger.error('❌ workshopSlider block not found after DE save.')

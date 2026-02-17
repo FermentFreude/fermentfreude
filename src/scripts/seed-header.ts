@@ -100,11 +100,11 @@ async function seedHeader() {
   // ----- 2) Read back to capture auto-generated IDs -----
   payload.logger.info('Reading back Header to capture generated IDs...')
 
-  const freshHeader = await payload.findGlobal({
+  const freshHeader = (await payload.findGlobal({
     slug: 'header',
     locale: 'de',
     depth: 0,
-  }) as any
+  })) as any
 
   const freshNavItems = freshHeader.navItems || []
 

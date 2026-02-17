@@ -5,11 +5,11 @@
  *
  * Run: set -a && source .env && set +a && npx tsx src/scripts/seed-workshop-slider.ts
  */
+import type { Page } from '@/payload-types'
 import config from '@payload-config'
 import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
-import type { Page } from '@/payload-types'
 
 /** Read a local file and return a Payload-compatible File object */
 function readLocalFile(filePath: string) {
@@ -189,12 +189,12 @@ async function seedWorkshopSlider() {
   }
 
   // ---------- Update DE layout (creates blocks with auto-generated IDs) ----------
-  const homeDe = await payload.findByID({
+  const homeDe = (await payload.findByID({
     collection: 'pages',
     id: homeId,
     locale: 'de',
     depth: 2,
-  }) as Page
+  })) as Page
 
   const existingLayoutDE = Array.isArray(homeDe.layout) ? homeDe.layout : []
   // Remove any existing workshopSlider blocks to avoid duplicates
@@ -219,12 +219,12 @@ async function seedWorkshopSlider() {
   // ---------- Read back to capture auto-generated IDs ----------
   // The layout field is NOT localized, so blocks share IDs across locales.
   // We MUST reuse the same IDs for EN, otherwise the DE text gets orphaned.
-  const freshDoc = await payload.findByID({
+  const freshDoc = (await payload.findByID({
     collection: 'pages',
     id: homeId,
     locale: 'de',
     depth: 0,
-  }) as Page
+  })) as Page
 
   const freshLayout = Array.isArray(freshDoc.layout) ? freshDoc.layout : []
   const wsBlock = freshLayout.find(
