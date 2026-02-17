@@ -14,6 +14,22 @@ import config from '@payload-config'
 import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
+import type { Page } from '@/payload-types'
+
+interface WithId {
+  id?: string
+  [key: string]: unknown
+}
+
+interface WorkshopItem extends WithId {
+  features: WithId[]
+  workshops?: WorkshopItem[]
+}
+
+interface BlockItem extends WithId {
+  blockType?: string
+  workshops?: WorkshopItem[]
+}
 
 /** Read a local file and return a Payload-compatible File object */
 function readLocalFile(filePath: string) {
@@ -315,13 +331,13 @@ async function seedHome() {
     id: homeId,
     locale: 'de',
     depth: 0,
-  }) as any
+  }) as Page
 
-  const freshHero = freshDoc.hero || {}
-  const freshLinks = freshHero.links || []
-  const freshSocialLinks = freshHero.socialLinks || []
+  const freshHero = (freshDoc.hero || {}) as Record<string, unknown>
+  const freshLinks = (freshHero.links || []) as WithId[]
+  const freshSocialLinks = (freshHero.socialLinks || []) as WithId[]
   const freshLayout = Array.isArray(freshDoc.layout) ? freshDoc.layout : []
-  const wsBlock = freshLayout.find((b: any) => b.blockType === 'workshopSlider')
+  const wsBlock = freshLayout.find((b) => 'blockType' in b && b.blockType === 'workshopSlider') as BlockItem | undefined
 
   if (!wsBlock) {
     payload.logger.error('❌ workshopSlider block not found after DE save.')
@@ -333,11 +349,11 @@ async function seedHome() {
   // ============================================================
   const heroEN_withIds = {
     ...heroEN,
-    links: heroEN.links.map((l: any, i: number) => ({
+    links: heroEN.links.map((l, i) => ({
       ...l,
       id: freshLinks[i]?.id,
     })),
-    socialLinks: heroEN.socialLinks.map((s: any, i: number) => ({
+    socialLinks: heroEN.socialLinks.map((s, i) => ({
       ...s,
       id: freshSocialLinks[i]?.id,
     })),
@@ -346,12 +362,12 @@ async function seedHome() {
   const workshopSliderEN_withIds = {
     ...workshopSliderEN,
     id: wsBlock.id,
-    workshops: workshopSliderEN.workshops.map((w: any, i: number) => ({
+    workshops: workshopSliderEN.workshops.map((w, i) => ({
       ...w,
-      id: wsBlock.workshops[i]?.id,
-      features: w.features.map((f: any, j: number) => ({
+      id: wsBlock.workshops?.[i]?.id,
+      features: w.features.map((f, j) => ({
         ...f,
-        id: wsBlock.workshops[i]?.features?.[j]?.id,
+        id: wsBlock.workshops?.[i]?.features?.[j]?.id,
       })),
     })),
   }
