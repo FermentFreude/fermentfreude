@@ -1,4 +1,4 @@
-import type { AboutBlock as AboutBlockProps } from '@/payload-types'
+import type { AboutBlock as AboutBlockProps, Media as MediaType } from '@/payload-types'
 import Link from 'next/link'
 
 import { Media } from '@/components/Media'
@@ -85,27 +85,9 @@ const DEFAULTS = {
   },
 }
 
-function getImageUrl(image: unknown): string {
-  if (!image) return ''
-  if (typeof image === 'string') return image
-  if (typeof image === 'object' && 'url' in image) {
-    const url = (image as { url?: string }).url
-    if (!url) return ''
-    return url.startsWith('http') ? url : `${process.env.NEXT_PUBLIC_SERVER_URL || ''}${url}`
-  }
-  return ''
-}
-
-function getImageAlt(image: unknown): string {
-  if (!image) return ''
-  if (typeof image === 'object' && 'alt' in image) {
-    const alt = (image as { alt?: string | { de?: string; en?: string } }).alt
-    if (typeof alt === 'string') return alt
-    if (typeof alt === 'object' && alt !== null) {
-      return alt.de || alt.en || ''
-    }
-  }
-  return ''
+/** Check if a media field has a resolved Media object (not just an ID string) */
+function hasMediaResource(image: unknown): image is MediaType {
+  return typeof image === 'object' && image !== null && 'url' in image
 }
 
 export const AboutBlockComponent: React.FC<
@@ -207,18 +189,22 @@ export const AboutBlockComponent: React.FC<
     },
   }
 
-  const heroImageUrl = getImageUrl(aboutData?.heroImage) || '/assets/images/Banner.png'
   const id = toKebabCase((block as { blockName?: string }).blockName ?? 'about')
 
   return (
     <div id={id} className="min-h-screen bg-white">
       {/* Hero Banner */}
-      <div
-        className="relative h-[600px] w-full overflow-hidden bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${heroImageUrl})`,
-        }}
-      />
+      <div className="relative h-[600px] w-full overflow-hidden">
+        {hasMediaResource(aboutData?.heroImage) ? (
+          <Media
+            resource={aboutData.heroImage}
+            imgClassName="h-full w-full object-cover"
+            priority
+          />
+        ) : (
+          <div className="h-full w-full bg-[#ECE5DE]" />
+        )}
+      </div>
 
       {/* Our Story Section */}
       <section className="w-full pt-4 pb-8 md:py-24">
@@ -257,9 +243,6 @@ export const AboutBlockComponent: React.FC<
             </h3>
             <div className="grid w-full gap-12 md:grid-cols-2">
               {team.members.map((member: (typeof team.members)[0] & { image?: unknown }, idx: number) => {
-                const memberImageUrl = getImageUrl(member.image)
-                const memberImageAlt = getImageAlt(member.image) || member.name
-
                 return (
                   <div
                     key={idx}
@@ -269,21 +252,13 @@ export const AboutBlockComponent: React.FC<
                     }}
                   >
                     <div className="flex-1 w-full overflow-hidden">
-                      {memberImageUrl ? (
+                      {hasMediaResource(member.image) ? (
                         <Media
-                          resource={member.image ?? undefined}
+                          resource={member.image}
                           imgClassName="h-full w-full object-cover"
                         />
                       ) : (
-                        <img
-                          src={
-                            idx === 0
-                              ? '/assets/images/marcel-rauminger.jpg'
-                              : '/assets/images/david-heider.jpg'
-                          }
-                          alt={memberImageAlt}
-                          className="h-full w-full object-cover"
-                        />
+                        <div className="h-full w-full bg-[#ECE5DE]" />
                       )}
                     </div>
                     <div className="flex flex-col gap-4 px-8 pb-8 pt-6 text-center">
@@ -315,25 +290,18 @@ export const AboutBlockComponent: React.FC<
               </h2>
               <div className="flex w-full flex-wrap items-center justify-center md:justify-between gap-16">
                 {sponsors.logos.map((logo: { image?: unknown; alt?: string }, idx: number) => {
-                  const logoUrl = getImageUrl(logo.image)
-                  const logoAlt = getImageAlt(logo.image) || logo.alt || `Sponsor Logo ${idx + 1}`
-
                   return (
                     <div
                       key={idx}
                       className="flex h-24 w-48 items-center justify-center rounded-lg"
                     >
-                      {logoUrl ? (
+                      {hasMediaResource(logo.image) ? (
                         <Media
-                          resource={logo.image as string | number | import('@/payload-types').Media | undefined}
+                          resource={logo.image}
                           imgClassName="h-full w-full object-contain"
                         />
                       ) : (
-                        <img
-                          src={`/assets/images/sponsor-logo-${idx + 1}.svg`}
-                          alt={logoAlt}
-                          className="h-full w-full object-contain"
-                        />
+                        <div className="h-full w-full bg-[#ECE5DE] rounded-lg" />
                       )}
                     </div>
                   )
