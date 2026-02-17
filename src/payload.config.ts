@@ -31,10 +31,6 @@ export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean) as string[],
   admin: {
-    // components: {
-    //   beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
-    //   beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
-    // },
     user: Users.slug,
   },
   localization: {
