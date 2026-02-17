@@ -188,8 +188,7 @@ async function seedWorkshopSlider() {
     ],
   }
 
-  // ---------- Update DE layout ----------
-  // Get existing layout to append (not overwrite)
+  // ---------- Update DE layout (creates blocks with auto-generated IDs) ----------
   const homeDe = await payload.findByID({
     collection: 'pages',
     id: homeId,
@@ -217,16 +216,42 @@ async function seedWorkshopSlider() {
 
   payload.logger.info('✅ DE layout updated with WorkshopSlider block (with images).')
 
-  // ---------- Update EN layout ----------
-  const homeEn = await payload.findByID({
+  // ---------- Read back to capture auto-generated IDs ----------
+  // The layout field is NOT localized, so blocks share IDs across locales.
+  // We MUST reuse the same IDs for EN, otherwise the DE text gets orphaned.
+  const freshDoc = await payload.findByID({
     collection: 'pages',
     id: homeId,
-    locale: 'en',
-    depth: 2,
+    locale: 'de',
+    depth: 0,
   }) as Page
 
-  const existingLayoutEN = Array.isArray(homeEn.layout) ? homeEn.layout : []
-  const cleanLayoutEN = existingLayoutEN.filter(
+  const freshLayout = Array.isArray(freshDoc.layout) ? freshDoc.layout : []
+  const wsBlock = freshLayout.find(
+    (b: { blockType?: string }) => b.blockType === 'workshopSlider',
+  ) as any
+
+  if (!wsBlock) {
+    payload.logger.error('❌ Could not find workshopSlider block after DE seed.')
+    process.exit(1)
+  }
+
+  // ---------- Update EN layout (reuse same block + array item IDs) ----------
+  const workshopSliderEN_withIds = {
+    ...workshopSliderEN,
+    id: wsBlock.id,
+    workshops: workshopSliderEN.workshops.map((w: any, i: number) => ({
+      ...w,
+      id: wsBlock.workshops[i]?.id,
+      features: w.features.map((f: any, j: number) => ({
+        ...f,
+        id: wsBlock.workshops[i]?.features?.[j]?.id,
+      })),
+    })),
+  }
+
+  // Keep all non-workshopSlider blocks as-is (with their existing IDs)
+  const otherBlocks = freshLayout.filter(
     (b: { blockType?: string }) => b.blockType !== 'workshopSlider',
   )
 
@@ -237,12 +262,12 @@ async function seedWorkshopSlider() {
     context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
     data: {
       _status: 'published',
-      hero: homeEn.hero,
-      layout: [...cleanLayoutEN, workshopSliderEN],
+      hero: freshDoc.hero,
+      layout: [...otherBlocks, workshopSliderEN_withIds],
     },
   })
 
-  payload.logger.info('✅ EN layout updated with WorkshopSlider block (with images).')
+  payload.logger.info('✅ EN layout updated with WorkshopSlider block (reusing block IDs).')
   payload.logger.info('Done. Exiting.')
   process.exit(0)
 }

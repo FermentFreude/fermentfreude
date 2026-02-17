@@ -16,7 +16,7 @@ async function seedHeader() {
   await payload.updateGlobal({
     slug: 'header',
     locale: 'de',
-    context: { skipRevalidate: true },
+    context: { skipRevalidate: true, skipAutoTranslate: true },
     data: {
       navItems: [
         {
@@ -97,90 +97,62 @@ async function seedHeader() {
     },
   })
 
-  // ----- 2) Seed English locale -----
-  payload.logger.info('Seeding Header → EN locale...')
+  // ----- 2) Read back to capture auto-generated IDs -----
+  payload.logger.info('Reading back Header to capture generated IDs...')
+
+  const freshHeader = await payload.findGlobal({
+    slug: 'header',
+    locale: 'de',
+    depth: 0,
+  }) as any
+
+  const freshNavItems = freshHeader.navItems || []
+
+  // EN nav data with labels only (reuse IDs from DE)
+  const enLabels = ['Home', 'About', 'Chefs', 'Shop', 'Workshops']
+  const enDropdowns: Record<number, Array<{ label: string; description: string }>> = {
+    1: [
+      { label: 'About Us', description: 'Our Team & Mission' },
+      { label: 'Fermentation', description: 'What is Fermentation?' },
+      { label: 'Contact', description: 'Get in touch' },
+    ],
+    4: [
+      { label: 'Lacto Vegetables', description: 'Fermented vegetable workshops' },
+      { label: 'Tempeh', description: 'Learn to make tempeh' },
+      { label: 'Kombucha', description: 'Learn to brew kombucha' },
+      { label: 'Gift Voucher', description: 'Give a workshop voucher' },
+    ],
+  }
+
+  // Build EN navItems reusing IDs from DE
+  const enNavItems = freshNavItems.map((navItem: any, idx: number) => {
+    const result: any = {
+      id: navItem.id,
+      link: {
+        ...navItem.link,
+        label: enLabels[idx] || navItem.link?.label,
+      },
+    }
+    if (enDropdowns[idx] && navItem.dropdownItems) {
+      result.dropdownItems = navItem.dropdownItems.map((dd: any, ddIdx: number) => ({
+        id: dd.id,
+        href: dd.href,
+        label: enDropdowns[idx][ddIdx]?.label || dd.label,
+        description: enDropdowns[idx][ddIdx]?.description || dd.description,
+      }))
+    }
+    return result
+  })
+
+  // ----- 3) Seed English locale (reusing IDs) -----
+  payload.logger.info('Seeding Header → EN locale (with matching IDs)...')
 
   await payload.updateGlobal({
     slug: 'header',
     locale: 'en',
-    context: { skipRevalidate: true },
+    context: { skipRevalidate: true, skipAutoTranslate: true },
     data: {
-      navItems: [
-        {
-          link: {
-            type: 'custom',
-            label: 'Home',
-            url: '/',
-          },
-        },
-        {
-          link: {
-            type: 'custom',
-            label: 'About',
-            url: '/about',
-          },
-          dropdownItems: [
-            {
-              label: 'About Us',
-              href: '/about',
-              description: 'Our Team & Mission',
-            },
-            {
-              label: 'Fermentation',
-              href: '/fermentation',
-              description: 'What is Fermentation?',
-            },
-            {
-              label: 'Contact',
-              href: '/contact',
-              description: 'Get in touch',
-            },
-          ],
-        },
-        {
-          link: {
-            type: 'custom',
-            label: 'Chefs',
-            url: '/gastronomy',
-          },
-        },
-        {
-          link: {
-            type: 'custom',
-            label: 'Shop',
-            url: '/shop',
-          },
-        },
-        {
-          link: {
-            type: 'custom',
-            label: 'Workshops',
-            url: '/workshops',
-          },
-          dropdownItems: [
-            {
-              label: 'Lacto Vegetables',
-              href: '/workshops/lakto-gemuese',
-              description: 'Fermented vegetable workshops',
-            },
-            {
-              label: 'Tempeh',
-              href: '/workshops/tempeh',
-              description: 'Learn to make tempeh',
-            },
-            {
-              label: 'Kombucha',
-              href: '/workshops/kombucha',
-              description: 'Learn to brew kombucha',
-            },
-            {
-              label: 'Gift Voucher',
-              href: '/workshops/voucher',
-              description: 'Give a workshop voucher',
-            },
-          ],
-        },
-      ],
+      navItems: enNavItems,
     },
   })
 

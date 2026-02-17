@@ -201,7 +201,7 @@ async function seedHomeHero() {
     const homeId = existing.docs[0].id
     payload.logger.info(`Home page found (id: ${homeId}). Updating hero...`)
 
-    // Update DE (default locale)
+    // 1. Update DE (default locale) — creates array items with auto-generated IDs
     await payload.update({
       collection: 'pages',
       id: homeId,
@@ -217,7 +217,34 @@ async function seedHomeHero() {
       },
     })
 
-    // Update EN locale
+    // 2. Read back to capture auto-generated IDs for links & socialLinks arrays
+    // These arrays are NOT localized, so they share IDs across locales.
+    // We MUST reuse the same IDs for EN, otherwise the DE label text gets orphaned.
+    const freshDoc = await payload.findByID({
+      collection: 'pages',
+      id: homeId,
+      locale: 'de',
+      depth: 0,
+    })
+
+    const freshHero = (freshDoc as any).hero || {}
+    const freshLinks = freshHero.links || []
+    const freshSocialLinks = freshHero.socialLinks || []
+
+    // 3. Inject IDs from DE into EN hero data
+    const heroEN_withIds = {
+      ...heroEN,
+      links: heroEN.links.map((l: any, i: number) => ({
+        ...l,
+        id: freshLinks[i]?.id,
+      })),
+      socialLinks: heroEN.socialLinks.map((s: any, i: number) => ({
+        ...s,
+        id: freshSocialLinks[i]?.id,
+      })),
+    }
+
+    // 4. Update EN locale with same IDs
     await payload.update({
       collection: 'pages',
       id: homeId,
@@ -225,7 +252,7 @@ async function seedHomeHero() {
       context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
         _status: 'published',
-        hero: heroEN,
+        hero: heroEN_withIds,
         meta: {
           title: 'FermentFreude — Learn with us, create your own flavour at home',
           description: 'We create fermented foods and share the knowledge behind them.',
@@ -233,11 +260,11 @@ async function seedHomeHero() {
       },
     })
 
-    payload.logger.info('✅ Home page hero updated (DE + EN).')
+    payload.logger.info('✅ Home page hero updated (DE + EN, reusing array IDs).')
   } else {
     payload.logger.info('No home page found. Creating one...')
 
-    // Create with DE (default locale)
+    // 1. Create with DE (default locale) — creates array items with auto-generated IDs
     const created = await payload.create({
       collection: 'pages',
       locale: 'de',
@@ -255,7 +282,32 @@ async function seedHomeHero() {
       },
     })
 
-    // Seed EN locale
+    // 2. Read back to capture auto-generated IDs for links & socialLinks arrays
+    const freshDoc = await payload.findByID({
+      collection: 'pages',
+      id: created.id,
+      locale: 'de',
+      depth: 0,
+    })
+
+    const freshHero = (freshDoc as any).hero || {}
+    const freshLinks = freshHero.links || []
+    const freshSocialLinks = freshHero.socialLinks || []
+
+    // 3. Inject IDs from DE into EN hero data
+    const heroEN_withIds = {
+      ...heroEN,
+      links: heroEN.links.map((l: any, i: number) => ({
+        ...l,
+        id: freshLinks[i]?.id,
+      })),
+      socialLinks: heroEN.socialLinks.map((s: any, i: number) => ({
+        ...s,
+        id: freshSocialLinks[i]?.id,
+      })),
+    }
+
+    // 4. Seed EN locale with same IDs
     await payload.update({
       collection: 'pages',
       id: created.id,
@@ -263,7 +315,7 @@ async function seedHomeHero() {
       context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
       data: {
         title: 'Home',
-        hero: heroEN,
+        hero: heroEN_withIds,
         meta: {
           title: 'FermentFreude — Learn with us, create your own flavour at home',
           description: 'We create fermented foods and share the knowledge behind them.',
@@ -271,7 +323,7 @@ async function seedHomeHero() {
       },
     })
 
-    payload.logger.info(`✅ Home page created (id: ${created.id}) with hero (DE + EN).`)
+    payload.logger.info(`✅ Home page created (id: ${created.id}) with hero (DE + EN, reusing array IDs).`)
   }
 
   payload.logger.info('Done. Exiting.')
