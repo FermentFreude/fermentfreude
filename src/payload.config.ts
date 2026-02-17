@@ -29,6 +29,10 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
+  cors: [
+    process.env.NEXT_PUBLIC_SERVER_URL || '',
+  ].filter(Boolean) as string[],
   admin: {
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.

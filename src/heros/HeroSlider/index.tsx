@@ -157,7 +157,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
       {/* ──── Fullscreen GIF background ───────────────────────── */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/media/tempeh-hero.gif"
+        src="/assets/tempeh-hero.gif"
         alt=""
         aria-hidden="true"
         className="absolute inset-0 w-full h-full object-cover"
