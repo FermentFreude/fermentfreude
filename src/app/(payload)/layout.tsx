@@ -7,6 +7,7 @@ import type { ServerFunctionClient } from 'payload'
 import React from 'react'
 
 import { importMap } from './admin/importMap.js'
+import { SuppressBodyHydrationWarning } from './SuppressBodyHydrationWarning'
 import './custom.scss'
 
 type Args = {
@@ -28,7 +29,9 @@ const Layout = ({ children }: Args) => (
     importMap={importMap}
     serverFunction={serverFunction}
     htmlProps={{ suppressHydrationWarning: true }}
+    bodyProps={{ suppressHydrationWarning: true }}
   >
+    <SuppressBodyHydrationWarning />
     {children}
   </RootLayout>
 )

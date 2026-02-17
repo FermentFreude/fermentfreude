@@ -1,48 +1,245 @@
-import type { Metadata } from 'next'
+import type { AboutBlock as AboutBlockProps } from '@/payload-types'
 import Link from 'next/link'
 
-export const metadata: Metadata = {
-  title: 'About Us | FermentFreude',
-  description:
-    'Making fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods',
+import { Media } from '@/components/Media'
+import { toKebabCase } from '@/utilities/toKebabCase'
+
+const DEFAULTS = {
+  ourStory: {
+    label: 'Our Story',
+    heading: 'Bringing Joy to Fermentation',
+    subheading:
+      'Making fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods',
+    description: [
+      'FermentFreude is a modern Austrian food-tech startup helping people discover fermentation through fun workshops and premium fermented products. We combine health, enjoyment, and knowledge to make fermentation part of everyday life.',
+      'By merging traditional fermentation methods with modern science and regional sourcing, we empower home cooks and professionals to approach food with confidence, curiosity, and pleasure.',
+    ],
+  },
+  team: {
+    label: 'Our Team',
+    heading: 'Meet the Experts Behind FermentFreude',
+    members: [
+      {
+        name: 'Marcel Rauminger',
+        role: 'Fermentation Specialist & Chef',
+        description:
+          'With over 17 years as a passionate chef and certificate in vegan cooking enriched by months in a Thai monastery, Marcel discovered the keys to fermentation and has become a specialist in creative fermented cuisine. His desire to expertise through workshops, sharing new discoveries and passion for fine flavor.',
+      },
+      {
+        name: 'David Heider',
+        role: 'Nutrition Specialist & Food Developer',
+        description:
+          'With a background in food science and economics, David is passionate about making complex scientific concepts digestible for everyone. He develops open-sourced fermentation techniques based fermented foods that taste amazing and support wellbeing, creating the perfect bridge between science and art of FermentFreude.',
+      },
+    ],
+  },
+  sponsors: {
+    heading: 'This project is supported by:',
+  },
+  contact: {
+    heading: 'Contact Detail',
+    description:
+      'If you need any help and prefer to reach out directly, feel free to do it via phone or email.',
+    labels: {
+      location: 'Location',
+      phone: 'Phone',
+      email: 'Mail',
+    },
+    location: 'Grabenstraße 15\n8010 Graz',
+    phone: '+436604943577',
+    email: 'fermentfreude@gmail.com',
+    socialMedia: {
+      facebook: 'https://facebook.com',
+      twitter: 'https://twitter.com',
+      pinterest: 'https://pinterest.com',
+      youtube: 'https://youtube.com',
+    },
+    socialMediaLabel: 'Follow Our Social Media',
+  },
+  contactForm: {
+    heading: 'Ask About Anything',
+    placeholders: {
+      name: 'Your Name',
+      email: 'Your Email',
+      phone: 'Your Phone',
+      message: 'Your Message',
+    },
+    subjectOptions: {
+      default: 'Subject',
+      options: ['General Inquiry', 'Workshop Information', 'Product Question', 'Partnership'],
+    },
+    submitButton: 'Submit Now',
+  },
+  cta: {
+    heading: 'Ready to learn?',
+    description:
+      'Join our workshops and online courses to learn hands-on fermentation techniques, ask questions, and connect with a community of learners.',
+    workshopsButton: {
+      label: 'View workshops',
+      href: '/workshops',
+    },
+    coursesButton: {
+      label: 'Browse online courses',
+      href: '/courses',
+    },
+  },
 }
 
-export default function AboutPage() {
+function getImageUrl(image: unknown): string {
+  if (!image) return ''
+  if (typeof image === 'string') return image
+  if (typeof image === 'object' && image !== null && 'url' in image) {
+    const url = (image as { url?: string }).url
+    if (!url) return ''
+    return url.startsWith('http') ? url : `${process.env.NEXT_PUBLIC_SERVER_URL || ''}${url}`
+  }
+  return ''
+}
+
+function getImageAlt(image: unknown): string {
+  if (!image) return ''
+  if (typeof image === 'object' && image !== null && 'alt' in image) {
+    const alt = (image as { alt?: string | { de?: string; en?: string } }).alt
+    if (typeof alt === 'string') return alt
+    if (typeof alt === 'object' && alt !== null) {
+      return alt.de || alt.en || ''
+    }
+  }
+  return ''
+}
+
+export const AboutBlockComponent: React.FC<
+  AboutBlockProps & {
+    id?: string | number
+    className?: string
+  }
+> = (props) => {
+  const block = props as AboutBlockProps
+  const aboutData = block
+
+  const ourStory = {
+    label: aboutData?.ourStory?.label ?? DEFAULTS.ourStory.label,
+    heading: aboutData?.ourStory?.heading ?? DEFAULTS.ourStory.heading,
+    subheading: aboutData?.ourStory?.subheading ?? DEFAULTS.ourStory.subheading,
+    description:
+      aboutData?.ourStory?.description && aboutData.ourStory.description.length > 0
+        ? aboutData.ourStory.description.map((p) => (p as { paragraph?: string }).paragraph || '')
+        : DEFAULTS.ourStory.description,
+  }
+
+  const team = {
+    label: aboutData?.team?.label ?? DEFAULTS.team.label,
+    heading: aboutData?.team?.heading ?? DEFAULTS.team.heading,
+    members:
+      aboutData?.team?.members && aboutData.team.members.length > 0
+        ? aboutData.team.members
+        : DEFAULTS.team.members.map((m) => ({
+            name: m.name,
+            role: m.role,
+            description: m.description,
+            image: null,
+          })),
+  }
+
+  const sponsors = {
+    heading: aboutData?.sponsors?.heading ?? DEFAULTS.sponsors.heading,
+    logos:
+      aboutData?.sponsors?.logos && aboutData.sponsors.logos.length > 0
+        ? aboutData.sponsors.logos
+        : [],
+  }
+
+  const contact = {
+    heading: aboutData?.contact?.heading ?? DEFAULTS.contact.heading,
+    description: aboutData?.contact?.description ?? DEFAULTS.contact.description,
+    labels: {
+      location: aboutData?.contact?.labels?.location ?? DEFAULTS.contact.labels.location,
+      phone: aboutData?.contact?.labels?.phone ?? DEFAULTS.contact.labels.phone,
+      email: aboutData?.contact?.labels?.email ?? DEFAULTS.contact.labels.email,
+    },
+    location: aboutData?.contact?.location ?? DEFAULTS.contact.location,
+    phone: aboutData?.contact?.phone ?? DEFAULTS.contact.phone,
+    email: aboutData?.contact?.email ?? DEFAULTS.contact.email,
+    socialMedia: {
+      facebook: aboutData?.contact?.socialMedia?.facebook ?? DEFAULTS.contact.socialMedia.facebook,
+      twitter: aboutData?.contact?.socialMedia?.twitter ?? DEFAULTS.contact.socialMedia.twitter,
+      pinterest:
+        aboutData?.contact?.socialMedia?.pinterest ?? DEFAULTS.contact.socialMedia.pinterest,
+      youtube: aboutData?.contact?.socialMedia?.youtube ?? DEFAULTS.contact.socialMedia.youtube,
+    },
+    socialMediaLabel: DEFAULTS.contact.socialMediaLabel,
+  }
+
+  const contactForm = {
+    heading: aboutData?.contactForm?.heading ?? DEFAULTS.contactForm.heading,
+    placeholders: {
+      name: aboutData?.contactForm?.placeholders?.name ?? DEFAULTS.contactForm.placeholders.name,
+      email: aboutData?.contactForm?.placeholders?.email ?? DEFAULTS.contactForm.placeholders.email,
+      phone: aboutData?.contactForm?.placeholders?.phone ?? DEFAULTS.contactForm.placeholders.phone,
+      message:
+        aboutData?.contactForm?.placeholders?.message ?? DEFAULTS.contactForm.placeholders.message,
+    },
+    subjectOptions: {
+      default:
+        aboutData?.contactForm?.subjectOptions?.default ??
+        DEFAULTS.contactForm.subjectOptions.default,
+      options:
+        aboutData?.contactForm?.subjectOptions?.options &&
+        aboutData.contactForm.subjectOptions.options.length > 0
+          ? aboutData.contactForm.subjectOptions.options.map(
+              (opt: { label?: string }) => opt.label || '',
+            )
+          : DEFAULTS.contactForm.subjectOptions.options,
+    },
+    submitButton: aboutData?.contactForm?.submitButton ?? DEFAULTS.contactForm.submitButton,
+  }
+
+  const cta = {
+    heading: aboutData?.cta?.heading ?? DEFAULTS.cta.heading,
+    description: aboutData?.cta?.description ?? DEFAULTS.cta.description,
+    workshopsButton: {
+      label: aboutData?.cta?.workshopsButton?.label ?? DEFAULTS.cta.workshopsButton.label,
+      href: aboutData?.cta?.workshopsButton?.href ?? DEFAULTS.cta.workshopsButton.href,
+    },
+    coursesButton: {
+      label: aboutData?.cta?.coursesButton?.label ?? DEFAULTS.cta.coursesButton.label,
+      href: aboutData?.cta?.coursesButton?.href ?? DEFAULTS.cta.coursesButton.href,
+    },
+  }
+
+  const heroImageUrl = getImageUrl(aboutData?.heroImage) || '/assets/images/banner.png'
+  const id = toKebabCase((block as { blockName?: string }).blockName ?? 'about')
+
   return (
-    <div className="min-h-screen bg-white">
+    <div id={id} className="min-h-screen bg-white">
       {/* Hero Banner */}
-      <div className="relative h-[600px] w-full overflow-hidden bg-cover bg-center bg-[url('/assets/images/banner.png')]"></div>
+      <div
+        className="relative h-[600px] w-full overflow-hidden bg-cover bg-center"
+        style={{
+          backgroundImage: `url(${heroImageUrl})`,
+        }}
+      />
 
       {/* Our Story Section */}
       <section className="w-full pt-4 pb-8 md:py-24">
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="flex flex-col items-center gap-12">
-            {/* Section Label */}
-            <h2 className="font-display text-3xl font-bold text-[#E5B765]">Our Story</h2>
-
-            {/* Main Heading */}
+            <h2 className="font-display text-3xl font-bold text-[#E5B765]">{ourStory.label}</h2>
             <h1 className="font-display text-center text-5xl font-bold leading-tight text-[#1D1D1D]">
-              Bringing Joy to Fermentation
+              {ourStory.heading}
             </h1>
-
-            {/* Subheading */}
             <p className="max-w-4xl text-center font-display text-3xl font-bold leading-relaxed text-[#4B4F4A]">
-              Making fermentation joyful & accessible while empowering gut health through taste,
-              education, and quality handmade foods
+              {ourStory.subheading}
             </p>
-
-            {/* Description Paragraphs */}
             <div className="flex w-full text-center flex-col gap-1 bg-white py-4 -mt-12">
-              <p className="font-display text-2xl font-normal leading-relaxed text-[#1D1D1D]">
-                FermentFreude is a modern Austrian food-tech startup helping people discover
-                fermentation through fun workshops and premium fermented products. We combine
-                health, enjoyment, and knowledge to make fermentation part of everyday life.
-              </p>
-              <p className="font-display text-2xl font-normal leading-relaxed text-[#1D1D1D]">
-                By merging traditional fermentation methods with modern science and regional
-                sourcing, we empower home cooks and professionals to approach food with confidence,
-                curiosity, and pleasure.
-              </p>
+              {ourStory.description.map((paragraph: string, idx: number) => (
+                <p
+                  key={idx}
+                  className="font-display text-2xl font-normal leading-relaxed text-[#1D1D1D]"
+                >
+                  {paragraph}
+                </p>
+              ))}
             </div>
           </div>
         </div>
@@ -52,135 +249,115 @@ export default function AboutPage() {
       <section className="w-full pt-4 pb-24 md:py-24">
         <div className="mx-auto max-w-[1400px] px-3 md:px-6">
           <div className="flex flex-col items-center gap-12 md:gap-16">
-            {/* Section Label */}
-            <h2 className="font-display text-3xl font-bold text-[#E5B765] animate-fade-in">Our Team</h2>
-
-            {/* Team Heading */}
+            <h2 className="font-display text-3xl font-bold text-[#E5B765] animate-fade-in">
+              {team.label}
+            </h2>
             <h3 className="font-display text-center text-5xl font-bold text-[#1D1D1D] animate-fade-in-up animate-delay-200">
-              Meet the Experts Behind FermentFreude
+              {team.heading}
             </h3>
-
-            {/* Team Members Grid */}
             <div className="grid w-full gap-12 md:grid-cols-2">
-              {/* Marcel Rauminger */}
-              <div className="flex aspect-[1/2] flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up animate-delay-400 hover:scale-[1.02] transition-transform duration-300">
-                <div className="flex-1 w-full overflow-hidden">
-                  <img
-                    src="/assets/images/marcel-rauminger.jpg"
-                    alt="Marcel Rauminger"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="flex flex-col gap-4 px-8 pb-8 pt-6 text-center">
-                  <h3 className="font-display text-3xl font-bold text-[#1D1D1D]">
-                    Marcel Rauminger
-                  </h3>
-                  <p className="font-sans text-base font-normal text-[#E5B765]">
-                    Fermentation Specialist & Chef
-                  </p>
-                  <p className="font-sans text-base leading-relaxed text-[#1D1D1D]">
-                    With over 17 years as a passionate chef and certificate in vegan cooking
-                    enriched by months in a Thai monastery, Marcel discovered the keys to
-                    fermentation and has become a specialist in creative fermented cuisine. His
-                    desire to expertise through workshops, sharing new discoveries and passion for
-                    fine flavor.
-                  </p>
-                </div>
-              </div>
+              {team.members.map((member: (typeof team.members)[0] & { image?: unknown }, idx: number) => {
+                const memberImageUrl = getImageUrl(member.image)
+                const memberImageAlt = getImageAlt(member.image) || member.name
 
-              {/* David Heider */}
-              <div className="flex aspect-[1/2] flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up animate-delay-600 hover:scale-[1.02] transition-transform duration-300">
-                <div className="flex-1 w-full overflow-hidden">
-                  <img
-                    src="/assets/images/david-heider.jpg"
-                    alt="David Heider"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="flex flex-col gap-4 px-8 pb-8 pt-6 text-center">
-                  <h3 className="font-display text-3xl font-bold text-[#1D1D1D]">David Heider</h3>
-                  <p className="font-sans text-base font-normal text-[#E5B765]">
-                    Nutrition Specialist & Food Developer
-                  </p>
-                  <p className="font-sans text-base leading-relaxed text-[#1D1D1D]">
-                    With a background in food science and economics, David is passionate about
-                    making complex scientific concepts digestible for everyone. He develops
-                    open-sourced fermentation techniques based fermented foods that taste amazing
-                    and support wellbeing, creating the perfect bridge between science and art of
-                    FermentFreude.
-                  </p>
-                </div>
-              </div>
+                return (
+                  <div
+                    key={idx}
+                    className="flex aspect-[1/2] flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up hover:scale-[1.02] transition-transform duration-300"
+                    style={{
+                      animationDelay: `${(idx + 1) * 200}ms`,
+                    }}
+                  >
+                    <div className="flex-1 w-full overflow-hidden">
+                      {memberImageUrl ? (
+                        <Media
+                          resource={member.image ?? undefined}
+                          imgClassName="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={
+                            idx === 0
+                              ? '/assets/images/marcel-rauminger.jpg'
+                              : '/assets/images/david-heider.jpg'
+                          }
+                          alt={memberImageAlt}
+                          className="h-full w-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-4 px-8 pb-8 pt-6 text-center">
+                      <h3 className="font-display text-3xl font-bold text-[#1D1D1D]">
+                        {member.name}
+                      </h3>
+                      <p className="font-sans text-base font-normal text-[#E5B765]">
+                        {member.role}
+                      </p>
+                      <p className="font-sans text-base leading-relaxed text-[#1D1D1D]">
+                        {member.description}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>
       </section>
 
       {/* Sponsors Section */}
-      <section className="w-full bg-[#ECE5DE] py-12 pb-16 md:py-24">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="flex flex-col items-center gap-12">
-            <h2 className="font-display text-center text-3xl font-bold text-[#1D1D1D]">
-              This project is supported by:
-            </h2>
-            <div className="flex w-full flex-wrap items-center justify-center md:justify-between gap-16">
-              {/* Sponsor Logo 1 */}
-              <div className="flex h-24 w-48 items-center justify-center rounded-lg">
-                <img
-                  src="/assets/images/sponsor-logo-1.svg"
-                  alt="Sponsor Logo 1"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-              {/* Sponsor Logo 2 */}
-              <div className="flex h-24 w-48 items-center justify-center rounded-lg">
-                <img
-                  src="/assets/images/sponsor-logo-2.svg"
-                  alt="Sponsor Logo 2"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-              {/* Science Park Graz */}
-              <div className="flex h-24 w-48 items-center justify-center rounded-l">
-                <img
-                  src="/assets/images/sponsor-logo-3.svg"
-                  alt="Science Park Graz"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-              {/* Sponsor Logo 4 */}
-              <div className="flex h-24 w-48 items-center justify-center rounded-lg">
-                <img
-                  src="/assets/images/sponsor-logo-4.svg"
-                  alt="Sponsor Logo 4"
-                  className="h-full w-full object-contain"
-                />
+      {sponsors.logos.length > 0 && (
+        <section className="w-full bg-[#ECE5DE] py-12 pb-16 md:py-24">
+          <div className="mx-auto max-w-[1400px] px-6">
+            <div className="flex flex-col items-center gap-12">
+              <h2 className="font-display text-center text-3xl font-bold text-[#1D1D1D]">
+                {sponsors.heading}
+              </h2>
+              <div className="flex w-full flex-wrap items-center justify-center md:justify-between gap-16">
+                {sponsors.logos.map((logo: { image?: unknown; alt?: string }, idx: number) => {
+                  const logoUrl = getImageUrl(logo.image)
+                  const logoAlt = getImageAlt(logo.image) || logo.alt || `Sponsor Logo ${idx + 1}`
+
+                  return (
+                    <div
+                      key={idx}
+                      className="flex h-24 w-48 items-center justify-center rounded-lg"
+                    >
+                      {logoUrl ? (
+                        <Media
+                          resource={logo.image as string | number | import('@/payload-types').Media | undefined}
+                          imgClassName="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <img
+                          src={`/assets/images/sponsor-logo-${idx + 1}.svg`}
+                          alt={logoAlt}
+                          className="h-full w-full object-contain"
+                        />
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Contact Section */}
       <section className="w-full py-12 pb-16 md:py-24">
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="relative overflow-hidden rounded-3xl md:rounded-[5rem] bg-white shadow-lg">
             <div className="grid gap-8 md:grid-cols-2">
-              {/* Contact Details */}
               <div className="rounded-t-[5rem] md:rounded-l-[5rem] md:rounded-t-none bg-[#FAF2E0] p-6 md:p-16">
                 <div className="flex flex-col gap-8 md:gap-12">
                   <h2 className="font-display text-2xl md:text-3xl font-bold text-[#1E1E1E]">
-                    Contact Detail
+                    {contact.heading}
                   </h2>
-
                   <p className="font-display text-lg md:text-2xl font-bold leading-relaxed text-[#555]">
-                    If you need any help and prefer to reach out directly, feel free to do it via
-                    phone or email.
+                    {contact.description}
                   </p>
-
-                  {/* Contact Information Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Location */}
                     <div className="flex gap-4 md:gap-6">
                       <div className="flex-shrink-0">
                         <svg
@@ -201,17 +378,13 @@ export default function AboutPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-display mb-2 text-lg font-bold text-[#1E1E1E]">
-                          Location
+                          {contact.labels.location}
                         </div>
-                        <div className="font-display text-base font-bold text-[#555] break-words">
-                          Grabenstraße 15
-                          <br />
-                          8010 Graz
+                        <div className="font-display text-base font-bold text-[#555] break-words whitespace-pre-line">
+                          {contact.location}
                         </div>
                       </div>
                     </div>
-
-                    {/* Phone */}
                     <div className="flex gap-4 md:gap-6">
                       <div className="flex-shrink-0">
                         <svg
@@ -228,15 +401,13 @@ export default function AboutPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-display mb-2 text-lg font-bold text-[#1E1E1E]">
-                          Phone
+                          {contact.labels.phone}
                         </div>
                         <div className="font-display text-base font-bold text-[#555] break-words">
-                          +436604943577
+                          {contact.phone}
                         </div>
                       </div>
                     </div>
-
-                    {/* Mail */}
                     <div className="flex gap-4 md:gap-6">
                       <div className="flex-shrink-0">
                         <svg
@@ -263,26 +434,24 @@ export default function AboutPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-display mb-2 text-lg font-bold text-[#1E1E1E]">
-                          Mail
+                          {contact.labels.email}
                         </div>
                         <a
-                          href="mailto:fermentfreude@gmail.com"
+                          href={`mailto:${contact.email}`}
                           className="font-display text-base font-bold text-[#555] break-words hover:underline inline"
                         >
-                          fermentfreude@gmail.com
+                          {contact.email}
                         </a>
                       </div>
                     </div>
                   </div>
-
-                  {/* Social Media */}
                   <div className="mt-8">
                     <div className="font-display mb-4 text-xl font-bold text-[#555]">
-                      Follow Our Social Media
+                      {contact.socialMediaLabel}
                     </div>
                     <div className="flex gap-4">
                       <Link
-                        href="https://facebook.com"
+                        href={contact.socialMedia.facebook}
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6B6B6B] transition-colors hover:bg-[#555]"
                       >
                         <span className="sr-only">Facebook</span>
@@ -294,7 +463,7 @@ export default function AboutPage() {
                         </svg>
                       </Link>
                       <Link
-                        href="https://twitter.com"
+                        href={contact.socialMedia.twitter}
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6B6B6B] transition-colors hover:bg-[#555]"
                       >
                         <span className="sr-only">Twitter</span>
@@ -306,7 +475,7 @@ export default function AboutPage() {
                         </svg>
                       </Link>
                       <Link
-                        href="https://pinterest.com"
+                        href={contact.socialMedia.pinterest}
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6B6B6B] transition-colors hover:bg-[#555]"
                       >
                         <span className="sr-only">Pinterest</span>
@@ -318,7 +487,7 @@ export default function AboutPage() {
                         </svg>
                       </Link>
                       <Link
-                        href="https://youtube.com"
+                        href={contact.socialMedia.youtube}
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6B6B6B] transition-colors hover:bg-[#555]"
                       >
                         <span className="sr-only">YouTube</span>
@@ -333,40 +502,34 @@ export default function AboutPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Contact Form */}
               <div className="flex flex-col gap-6 p-6 md:p-16">
                 <h2 className="font-display mb-4 text-2xl md:text-3xl font-semibold text-black">
-                  Ask About Anything
+                  {contactForm.heading}
                 </h2>
-
                 <form className="flex flex-col gap-6">
                   <input
                     type="text"
-                    placeholder="Your Name"
+                    placeholder={contactForm.placeholders.name}
                     className="rounded-full border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
                   />
-
                   <div className="grid gap-4 md:grid-cols-2">
                     <input
                       type="email"
-                      placeholder="Your Email"
+                      placeholder={contactForm.placeholders.email}
                       className="rounded-full border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
                     />
                     <input
                       type="tel"
-                      placeholder="Your Phone"
+                      placeholder={contactForm.placeholders.phone}
                       className="rounded-full border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
                     />
                   </div>
-
                   <div className="relative">
                     <select className="w-full appearance-none rounded-full border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none">
-                      <option>Subject</option>
-                      <option>General Inquiry</option>
-                      <option>Workshop Information</option>
-                      <option>Product Question</option>
-                      <option>Partnership</option>
+                      <option>{contactForm.subjectOptions.default}</option>
+                      {contactForm.subjectOptions.options.map((option: string, idx: number) => (
+                        <option key={idx}>{option}</option>
+                      ))}
                     </select>
                     <div className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2">
                       <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
@@ -377,18 +540,16 @@ export default function AboutPage() {
                       </svg>
                     </div>
                   </div>
-
                   <textarea
-                    placeholder="Your Message"
+                    placeholder={contactForm.placeholders.message}
                     rows={6}
                     className="resize-none rounded-[2rem] border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
-                  ></textarea>
-
+                  />
                   <button
                     type="submit"
                     className="rounded-full border border-[#4B4B4B] bg-[#595959] px-8 py-6 font-display text-2xl font-bold text-[#F5F1EE] transition-colors hover:bg-[#4B4B4B]"
                   >
-                    Submit Now
+                    {contactForm.submitButton}
                   </button>
                 </form>
               </div>
@@ -403,26 +564,23 @@ export default function AboutPage() {
           <div className="rounded-[2.75rem] bg-[#F9F0DC] px-6 py-12 md:px-24 md:py-20">
             <div className="flex flex-col items-center gap-8 md:gap-12">
               <h2 className="font-display text-center text-2xl md:text-3xl font-bold text-[#1D1D1D]">
-                Ready to learn?
+                {cta.heading}
               </h2>
-
               <p className="max-w-4xl text-center font-display text-xl md:text-3xl font-semibold text-[#4B4B4B]">
-                Join our workshops and online courses to learn hands-on fermentation techniques, ask
-                questions, and connect with a community of learners.
+                {cta.description}
               </p>
-
               <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
                 <Link
-                  href="/workshops"
+                  href={cta.workshopsButton.href}
                   className="rounded-full bg-[#6B6B6B] px-8 py-4 md:px-20 md:py-6 font-display text-lg md:text-2xl font-semibold text-[#F9F0DC] transition-colors hover:bg-[#595959]"
                 >
-                  View workshops
+                  {cta.workshopsButton.label}
                 </Link>
                 <Link
-                  href="/courses"
+                  href={cta.coursesButton.href}
                   className="rounded-full bg-white px-6 py-4 md:px-16 md:py-6 font-display text-lg md:text-2xl font-semibold text-[#4B4B4B] transition-all hover:bg-[#F9F0DC] hover:border-4 hover:border-[#4B4B4B]"
                 >
-                  Browse online courses
+                  {cta.coursesButton.label}
                 </Link>
               </div>
             </div>

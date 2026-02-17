@@ -1,3 +1,4 @@
+import { AboutBlockComponent } from '@/blocks/AboutBlock/Component'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
@@ -13,6 +14,7 @@ import React, { Fragment } from 'react'
 import type { Page } from '../payload-types'
 
 const blockComponents = {
+  aboutBlock: AboutBlockComponent,
   archive: ArchiveBlock,
   banner: BannerBlock,
   carousel: CarouselBlock,
