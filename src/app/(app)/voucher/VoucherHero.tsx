@@ -8,11 +8,32 @@ interface VoucherHeroProps {
   description: string
   amounts: string[]
   deliveryOptions: Array<{ type: string; title: string; icon: string }>
+  cardLabel: string
+  valueLabel: string
+  cardDisclaimer: string
+  amountSectionLabel: string
+  deliverySectionLabel: string
+  greetingLabel: string
+  greetingPlaceholder: string
+  addToCartButton: string
 }
 
-export function VoucherHero({ heading, description, amounts, deliveryOptions }: VoucherHeroProps) {
-  const [selectedAmount, setSelectedAmount] = useState('50€')
-  const [selectedDelivery, setSelectedDelivery] = useState('email')
+export function VoucherHero({
+  heading,
+  description,
+  amounts,
+  deliveryOptions,
+  cardLabel,
+  valueLabel,
+  cardDisclaimer,
+  amountSectionLabel,
+  deliverySectionLabel,
+  greetingLabel,
+  greetingPlaceholder,
+  addToCartButton,
+}: VoucherHeroProps) {
+  const [selectedAmount, setSelectedAmount] = useState(amounts[0] ?? '50€')
+  const [selectedDelivery, setSelectedDelivery] = useState(deliveryOptions[0]?.type ?? 'email')
 
   // Format amount for display (e.g., "50€" -> "€50,00")
   const formatAmount = (amount: string) => {
@@ -46,7 +67,7 @@ export function VoucherHero({ heading, description, amounts, deliveryOptions }: 
               {/* Label */}
               <div className="mb-6">
                 <p className="font-display text-sm font-bold uppercase tracking-wider text-[#1D1D1D]">
-                  GESCHENK GUTSCHEIN
+                  {cardLabel}
                 </p>
               </div>
 
@@ -66,7 +87,7 @@ export function VoucherHero({ heading, description, amounts, deliveryOptions }: 
               {/* Value Text */}
               <div className="text-center mb-4">
                 <h3 className="font-display text-2xl md:text-3xl font-bold text-[#1D1D1D] mb-2">
-                  Wertgutschein
+                  {valueLabel}
                 </h3>
                 <p className="font-display text-4xl md:text-5xl font-bold text-[#1D1D1D]">
                   {formatAmount(selectedAmount)}
@@ -75,7 +96,7 @@ export function VoucherHero({ heading, description, amounts, deliveryOptions }: 
 
               {/* Disclaimer */}
               <div className="text-center mt-6">
-                <p className="font-sans text-sm text-[#4B4F4A]">Einlösbar in unserem Shop</p>
+                <p className="font-sans text-sm text-[#4B4F4A]">{cardDisclaimer}</p>
               </div>
             </div>
           </div>
@@ -96,7 +117,7 @@ export function VoucherHero({ heading, description, amounts, deliveryOptions }: 
               {/* Amount Selection */}
               <div className="flex flex-col gap-4">
                 <label className="font-display text-base md:text-lg font-bold text-[#1D1D1D] uppercase tracking-wide">
-                  WERTGUTSCHEIN
+                  {amountSectionLabel}
                 </label>
                 <div className="flex flex-wrap gap-3">
                   {amounts.map((amount) => (
@@ -118,7 +139,7 @@ export function VoucherHero({ heading, description, amounts, deliveryOptions }: 
               {/* Delivery Options */}
               <div className="flex flex-col gap-4">
                 <label className="font-display text-base md:text-lg font-bold text-[#1D1D1D] uppercase tracking-wide">
-                  VERSANDART
+                  {deliverySectionLabel}
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {deliveryOptions.map((option) => (
@@ -181,10 +202,10 @@ export function VoucherHero({ heading, description, amounts, deliveryOptions }: 
               {/* Greeting Message */}
               <div className="flex flex-col gap-4">
                 <label className="font-display text-base md:text-lg font-bold text-[#1D1D1D]">
-                  Deine Grußnachricht
+                  {greetingLabel}
                 </label>
                 <textarea
-                  placeholder="Max. 250 Zeichen"
+                  placeholder={greetingPlaceholder}
                   rows={4}
                   maxLength={250}
                   className="w-full rounded-2xl border-2 border-[#E8E4D9] px-5 md:px-6 py-4 font-sans text-sm md:text-base text-[#1D1D1D] placeholder:text-[#B8B8B8] focus:border-[#6B6B6B] focus:outline-none resize-none transition-colors"
@@ -196,7 +217,7 @@ export function VoucherHero({ heading, description, amounts, deliveryOptions }: 
                 type="button"
                 className="w-full rounded-full bg-[#6B6B6B] px-6 md:px-8 py-5 md:py-6 font-display text-lg md:text-xl font-bold text-white transition-colors hover:bg-[#595959] shadow-md hover:shadow-lg"
               >
-                In den Warenkorb
+                {addToCartButton}
               </button>
             </div>
           </div>

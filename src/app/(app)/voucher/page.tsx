@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { getLocale } from '@/utilities/getLocale'
+import type { Media, Page } from '@/payload-types'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
@@ -17,29 +18,23 @@ async function getVoucherDocument(locale?: 'de' | 'en') {
     collection: 'pages',
     depth: 2,
     limit: 1,
-    locale,
+    locale: locale ?? 'de',
     where: {
       and: [
-        {
-          slug: {
-            equals: 'voucher',
-          },
-        },
-        {
-          _status: {
-            equals: 'published',
-          },
-        },
+        { slug: { equals: 'voucher' } },
+        { _status: { equals: 'published' } },
       ],
     },
   })
-  return result.docs?.[0] || null
+  return result.docs?.[0] ?? null
 }
 
 const getCachedVoucher = (locale?: 'de' | 'en') =>
-  unstable_cache(async () => getVoucherDocument(locale), ['voucher', locale || 'de'], {
-    tags: ['voucher'],
-  })
+  unstable_cache(
+    async () => getVoucherDocument(locale),
+    ['voucher', locale ?? 'de'],
+    { tags: ['voucher'] },
+  )
 
 export const metadata: Metadata = {
   title: 'Geschenkgutschein | FermentFreude',
@@ -47,125 +42,181 @@ export const metadata: Metadata = {
     'Verschenke Fermentation! Das perfekte Geschenk für Foodies und Gesundheitsbewusste.',
 }
 
-// Hardcoded defaults (German)
+// Hardcoded defaults in English so the site works with an empty database
 const DEFAULTS = {
-  heroHeading: 'Verschenke Fermentation',
+  heroHeading: 'Give the gift of fermentation',
   heroDescription:
-    'Das perfekte Geschenk für Foodies und Gesundheitsbewusste. Wähle einen Betrag und optional eine Grußnachricht für deinen Gutschein.',
-  voucherAmounts: ['99€'],
+    'The perfect gift for foodies and the health-conscious. Choose an amount and optionally a greeting message for your voucher.',
+  voucherAmounts: [{ amount: '99€' }],
   deliveryOptions: [
-    {
-      type: 'email',
-      title: 'Per E-Mail zum selber drucken',
-      icon: 'email',
-    },
-    {
-      type: 'post',
-      title: 'Per Post inkl. hochwertiger Karte',
-      icon: 'card',
-    },
+    { type: 'email', title: 'By email to print at home', icon: 'email' as const },
+    { type: 'post', title: 'By post with premium card', icon: 'card' as const },
   ],
-  starterSetHeading: 'Kombiniere den Gutschein mit einem Starter-Set',
+  cardLabel: 'GIFT VOUCHER',
+  valueLabel: 'Voucher value',
+  cardDisclaimer: 'Redeemable in our shop',
+  amountSectionLabel: 'VOUCHER VALUE',
+  deliverySectionLabel: 'DELIVERY METHOD',
+  greetingLabel: 'Your greeting message',
+  greetingPlaceholder: 'Max. 250 characters',
+  addToCartButton: 'Add to cart',
+  starterSetHeading: 'Combine the voucher with a starter set',
   starterSetDescription:
-    'Miete Mi, wie vorher! E-Mail mit dem Gutschein, fertig im Druck. 1 wochig, 2 wochig, pro tag.',
-  starterSetButton: 'Zu den Starter-Sets',
+    'Rent a jar, same as before! Email with the voucher, ready to print. 1 week, 2 weeks, per day.',
+  starterSetButton: 'View starter sets',
   starterSetImage: '/assets/images/products.png',
-  giftOccasionsHeading: 'Ein Geschenk für jeden Anlass',
+  giftOccasionsHeading: 'A gift for every occasion',
   giftOccasions: [
-    {
-      image: '/assets/images/Workshops.png',
-      caption: 'Geburtstage',
-    },
-    {
-      image: '/assets/images/hochzeit.png',
-      caption: 'Hochzeiten',
-    },
-    {
-      image: '/assets/images/Im Laden.png',
-      caption: 'Team Events',
-    },
-    {
-      image: '/assets/images/Weihnachten.png',
-      caption: 'Weihnachten',
-    },
+    { image: '/assets/images/Workshops.png', caption: 'Birthdays' },
+    { image: '/assets/images/hochzeit.png', caption: 'Weddings' },
+    { image: '/assets/images/Im Laden.png', caption: 'Team events' },
+    { image: '/assets/images/Weihnachten.png', caption: 'Christmas' },
   ],
-  faqHeading: 'Häufige Fragen zu Gutscheinen',
+  faqHeading: 'Frequently asked questions about vouchers',
   faqs: [
     {
-      question: 'Wie lange ist ein Gutschein gültig?',
+      question: 'How long is a voucher valid?',
       answer:
-        'Unsere Gutscheine sind 12 Monate ab Kaufdatum gültig und können für Workshops, Online-Kurse und Produkte eingelöst werden.',
+        'Our vouchers are valid for 12 months from the date of purchase and can be redeemed for workshops, online courses and products.',
     },
     {
-      question: 'Kann der Gutschein in Teilschritten eingelöst werden?',
+      question: 'Can the voucher be redeemed in instalments?',
       answer:
-        'Ja, Sie können den Gutschein in mehreren Schritten verwenden. Der Restbetrag bleibt auf dem Gutschein gespeichert.',
+        'Yes, you can use the voucher in several steps. The remaining balance stays on the voucher.',
     },
     {
-      question: 'Wo kann ich den Code eingeben?',
+      question: 'Where can I enter the code?',
       answer:
-        'Bei der Bestellung können Sie den Gutscheincode im Warenkorb eingeben. Der Betrag wird automatisch vom Gesamtpreis abgezogen.',
+        'During checkout you can enter the voucher code in the cart. The amount is automatically deducted from the total.',
     },
     {
-      question: 'Kann ein Gutschein wieder aufgeladen werden?',
+      question: 'Can a voucher be topped up?',
       answer:
-        'Ja, Sie können einen bestehenden Gutschein jederzeit mit einem zusätzlichen Betrag aufladen.',
+        'Yes, you can top up an existing voucher with an additional amount at any time.',
     },
   ],
 }
 
+function resolveMediaUrl(
+  media: string | Media | null | undefined,
+  fallback: string,
+): string {
+  if (!media) return fallback
+  if (typeof media === 'object' && media?.url) return media.url
+  if (typeof media === 'string') return fallback
+  return fallback
+}
+
 export default async function VoucherPage() {
   const locale = await getLocale()
-  const voucherData = await getCachedVoucher(locale)()
+  const voucherData = (await getCachedVoucher(locale)()) as Page | null
 
-  // Helper function to resolve CMS value or use default
-  const resolve = <T,>(cmsValue: T | null | undefined, defaultValue: T): T => {
-    return cmsValue ?? defaultValue
-  }
+  const resolve = <T,>(cmsValue: T | null | undefined, defaultValue: T): T =>
+    cmsValue ?? defaultValue
 
-  // Resolve all values with defaults
-  const heroHeading = resolve(voucherData?.storyHeading || voucherData?.title, DEFAULTS.heroHeading)
-  const heroDescription = resolve(
-    voucherData?.storyDescription?.[0]?.paragraph || voucherData?.meta?.description,
-    DEFAULTS.heroDescription,
+  const v = voucherData?.voucher
+
+  const heroHeading = resolve(v?.heroHeading, DEFAULTS.heroHeading)
+  const heroDescription = resolve(v?.heroDescription, DEFAULTS.heroDescription)
+  const amounts =
+    (v?.voucherAmounts?.length ?? 0) > 0
+      ? v!.voucherAmounts.map((a) => a.amount)
+      : DEFAULTS.voucherAmounts.map((a) => a.amount)
+  const deliveryOptions =
+    (v?.deliveryOptions?.length ?? 0) > 0
+      ? v!.deliveryOptions.map((d) => ({
+          type: d.type,
+          title: d.title,
+          icon: d.icon,
+        }))
+      : DEFAULTS.deliveryOptions
+
+  const cardLabel = resolve(v?.cardLabel, DEFAULTS.cardLabel)
+  const valueLabel = resolve(v?.valueLabel, DEFAULTS.valueLabel)
+  const cardDisclaimer = resolve(v?.cardDisclaimer, DEFAULTS.cardDisclaimer)
+  const amountSectionLabel = resolve(
+    v?.amountSectionLabel,
+    DEFAULTS.amountSectionLabel,
+  )
+  const deliverySectionLabel = resolve(
+    v?.deliverySectionLabel,
+    DEFAULTS.deliverySectionLabel,
+  )
+  const greetingLabel = resolve(v?.greetingLabel, DEFAULTS.greetingLabel)
+  const greetingPlaceholder = resolve(
+    v?.greetingPlaceholder,
+    DEFAULTS.greetingPlaceholder,
+  )
+  const addToCartButton = resolve(
+    v?.addToCartButton,
+    DEFAULTS.addToCartButton,
   )
 
-  const starterSetHeading = resolve(DEFAULTS.starterSetHeading, DEFAULTS.starterSetHeading)
+  const starterSetHeading = resolve(
+    v?.starterSetHeading,
+    DEFAULTS.starterSetHeading,
+  )
   const starterSetDescription = resolve(
-    DEFAULTS.starterSetDescription,
+    v?.starterSetDescription,
     DEFAULTS.starterSetDescription,
   )
-  const starterSetButton = resolve(DEFAULTS.starterSetButton, DEFAULTS.starterSetButton)
-  const starterSetImage = resolve(DEFAULTS.starterSetImage, DEFAULTS.starterSetImage)
+  const starterSetButton = resolve(
+    v?.starterSetButton,
+    DEFAULTS.starterSetButton,
+  )
+  const starterSetImage = resolveMediaUrl(
+    v?.starterSetImage,
+    DEFAULTS.starterSetImage,
+  )
 
-  const giftOccasionsHeading = resolve(DEFAULTS.giftOccasionsHeading, DEFAULTS.giftOccasionsHeading)
-  const giftOccasions = DEFAULTS.giftOccasions
+  const giftOccasionsHeading = resolve(
+    v?.giftOccasionsHeading,
+    DEFAULTS.giftOccasionsHeading,
+  )
+  const defaultOccasionImages = DEFAULTS.giftOccasions.map((o) => o.image)
+  const giftOccasions =
+    (v?.giftOccasions?.length ?? 0) > 0
+      ? v!.giftOccasions.map((g, i) => ({
+          image: resolveMediaUrl(
+            g.image,
+            defaultOccasionImages[i] ?? defaultOccasionImages[0] ?? '',
+          ),
+          caption: g.caption,
+        }))
+      : DEFAULTS.giftOccasions
 
-  const faqHeading = resolve(DEFAULTS.faqHeading, DEFAULTS.faqHeading)
-  const faqs = DEFAULTS.faqs
+  const faqHeading = resolve(v?.faqHeading, DEFAULTS.faqHeading)
+  const faqs =
+    (v?.faqs?.length ?? 0) > 0
+      ? v!.faqs.map((f) => ({ question: f.question, answer: f.answer }))
+      : DEFAULTS.faqs
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section with Voucher Preview and Configuration */}
       <VoucherHero
         heading={heroHeading}
         description={heroDescription}
-        amounts={DEFAULTS.voucherAmounts}
-        deliveryOptions={DEFAULTS.deliveryOptions}
+        amounts={amounts}
+        deliveryOptions={deliveryOptions}
+        cardLabel={cardLabel}
+        valueLabel={valueLabel}
+        cardDisclaimer={cardDisclaimer}
+        amountSectionLabel={amountSectionLabel}
+        deliverySectionLabel={deliverySectionLabel}
+        greetingLabel={greetingLabel}
+        greetingPlaceholder={greetingPlaceholder}
+        addToCartButton={addToCartButton}
       />
-
-      {/* Starter-Set Section */}
       <StarterSetSection
         heading={starterSetHeading}
         description={starterSetDescription}
         buttonText={starterSetButton}
         image={starterSetImage}
       />
-
-      {/* Gift Occasions Section */}
-      <GiftOccasionsSection heading={giftOccasionsHeading} occasions={giftOccasions} />
-
-      {/* FAQ Section */}
+      <GiftOccasionsSection
+        heading={giftOccasionsHeading}
+        occasions={giftOccasions}
+      />
       <FAQSection heading={faqHeading} faqs={faqs} />
     </div>
   )
