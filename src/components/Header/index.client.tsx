@@ -4,9 +4,10 @@ import { Cart } from '@/components/Cart'
 import { CMSLink } from '@/components/Link'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Suspense } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { Header } from 'src/payload-types'
+import { AnnouncementBar } from './AnnouncementBar'
 import { MobileMenu } from './MobileMenu'
 
 import { cn } from '@/utilities/cn'
@@ -24,12 +25,43 @@ export function HeaderClient({ header }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
 
+  // Hide-on-scroll-down, show-on-scroll-up
+  const [hidden, setHidden] = useState(false)
+  const lastScrollY = useRef(0)
+
+  const handleScroll = useCallback(() => {
+    const y = window.scrollY
+    // Only hide after scrolling past 80px so the header doesn't flicker at the very top
+    if (y > 80 && y > lastScrollY.current) {
+      setHidden(true)
+    } else {
+      setHidden(false)
+    }
+    lastScrollY.current = y
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [handleScroll])
+
   // Use CMS items if they exist with labels, otherwise fall back to hardcoded defaults
   const hasRealCMSItems = cmsItems.length > 0 && cmsItems.some((i) => i.link?.label)
   const renderedDropdowns = new Set<string>()
 
   return (
-    <nav className="bg-ff-ivory dark:bg-ff-near-black border-b border-ff-white-95 dark:border-neutral-800 transition-colors">
+    <header
+      className={cn(
+        'sticky top-0 z-50 w-full transition-transform duration-300',
+        hidden && '-translate-y-full',
+      )}
+    >
+      <AnnouncementBar
+        enabled={header.announcementBar?.enabled}
+        text={header.announcementBar?.text}
+        link={header.announcementBar?.link}
+      />
+      <nav className="bg-ff-ivory dark:bg-ff-near-black border-b border-ff-white-95 dark:border-neutral-800">
       <div className="container flex items-center justify-between py-3 lg:py-4">
         {/* Logo */}
         <Link href="/" className="shrink-0">
@@ -76,7 +108,7 @@ export function HeaderClient({ header }: Props) {
                     <CMSLink
                       {...item.link}
                       className={cn(
-                        'relative navLink text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm hover:text-ff-near-black dark:hover:text-white transition-colors',
+                        'relative navLink text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors',
                         {
                           active:
                             url && url !== '/'
@@ -97,7 +129,7 @@ export function HeaderClient({ header }: Props) {
                     <Link
                       href={item.url}
                       className={cn(
-                        'relative navLink text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm hover:text-ff-near-black dark:hover:text-white transition-colors',
+                        'relative navLink text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors',
                         {
                           active: item.url !== '/' ? pathname.includes(item.url) : pathname === '/',
                         },
@@ -129,5 +161,6 @@ export function HeaderClient({ header }: Props) {
         </div>
       </div>
     </nav>
+    </header>
   )
 }

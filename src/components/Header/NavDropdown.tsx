@@ -50,7 +50,7 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
   }, [])
 
   const sharedClassName = cn(
-    'relative navLink flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm hover:text-ff-near-black dark:hover:text-white transition-colors',
+    'relative navLink inline-flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors',
     { active: isActive },
   )
 
