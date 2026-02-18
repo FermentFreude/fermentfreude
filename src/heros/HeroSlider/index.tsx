@@ -1,16 +1,17 @@
 'use client'
 
-import { PrimaryLogo } from '@/components/icons'
 import { RichText } from '@/components/RichText'
 import type { Page } from '@/payload-types'
+import Image from 'next/image'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
+import useEmblaCarousel from 'embla-carousel-react'
 import Link from 'next/link'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
  *  HARDCODED DEFAULTS (English)
- *  Shows immediately without any CMS setup.
+ *  Shown immediately without any CMS setup.
  *  CMS data always wins when available.
  * ═══════════════════════════════════════════════════════════════ */
 
@@ -24,7 +25,7 @@ const DEFAULT_RICHTEXT = {
         children: [
           {
             type: 'text',
-            text: 'Learn with us',
+            text: 'Good food',
             version: 1,
             detail: 0,
             format: 0,
@@ -43,7 +44,26 @@ const DEFAULT_RICHTEXT = {
         children: [
           {
             type: 'text',
-            text: 'Create your own flavour at home',
+            text: 'Better Health',
+            version: 1,
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+          },
+        ],
+        direction: 'ltr' as const,
+        format: '' as const,
+        indent: 0,
+        version: 1,
+      },
+      {
+        type: 'heading',
+        tag: 'h1',
+        children: [
+          {
+            type: 'text',
+            text: 'Real Joy',
             version: 1,
             detail: 0,
             format: 0,
@@ -61,7 +81,7 @@ const DEFAULT_RICHTEXT = {
         children: [
           {
             type: 'text',
-            text: 'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.',
+            text: 'We make fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods.',
             version: 1,
             detail: 0,
             format: 0,
@@ -87,42 +107,20 @@ const DEFAULT_LINKS = [
   {
     link: {
       type: 'custom' as const,
-      label: 'Shop',
-      url: '/shop',
+      label: 'Workshop',
+      url: '/workshops',
       appearance: 'default' as const,
     },
   },
   {
     link: {
       type: 'custom' as const,
-      label: 'Workshops',
-      url: '/workshops',
-      appearance: 'default' as const,
+      label: 'Products',
+      url: '/shop',
+      appearance: 'outline' as const,
     },
   },
 ]
-
-const DEFAULT_SOCIAL_LINKS = [
-  { platform: 'facebook', url: 'https://facebook.com/fermentfreude' },
-  { platform: 'twitter', url: 'https://twitter.com/fermentfreude' },
-  { platform: 'pinterest', url: 'https://pinterest.com/fermentfreude' },
-  { platform: 'youtube', url: 'https://youtube.com/@fermentfreude' },
-]
-
-/** SVG path data for each social platform icon (24×24 viewBox) */
-const SOCIAL_ICON_PATHS: Record<string, string> = {
-  facebook: 'M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z',
-  twitter:
-    'M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z',
-  pinterest:
-    'M12 2C6.5 2 2 6.5 2 12c0 4.2 2.6 7.9 6.4 9.3-.1-.8-.2-2 0-2.9.2-.8 1.2-5 1.2-5s-.3-.6-.3-1.5c0-1.4.8-2.4 1.8-2.4.9 0 1.3.6 1.3 1.4 0 .9-.5 2.1-.8 3.3-.2 1 .5 1.8 1.5 1.8 1.8 0 3.1-1.9 3.1-4.6 0-2.4-1.7-4.1-4.2-4.1-2.8 0-4.5 2.1-4.5 4.3 0 .9.3 1.8.7 2.3a.3.3 0 0 1 .1.3l-.3 1.1c0 .2-.1.2-.3.1-1.2-.6-2-2.4-2-3.9 0-3.2 2.3-6.1 6.6-6.1 3.5 0 6.2 2.5 6.2 5.8 0 3.4-2.2 6.2-5.2 6.2-1 0-2-.5-2.3-1.1l-.6 2.4c-.2.9-.8 2-1.2 2.6.9.3 1.9.4 3 .4 5.5 0 10-4.5 10-10S17.5 2 12 2z',
-  youtube:
-    'M19.6 3.2c-3.6-.2-11.6-.2-15.2 0C.5 3.5 0 5.8 0 12s.5 8.5 4.4 8.8c3.6.2 11.6.2 15.2 0C23.5 20.5 24 18.2 24 12s-.5-8.5-4.4-8.8zM9 16V8l8 4-8 4z',
-  instagram:
-    'M12 2.2c3.2 0 3.6 0 4.9.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8 0 3.2 0 3.6-.1 4.8-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.9.1-3.2 0-3.6 0-4.8-.1-3.3-.1-4.8-1.7-4.9-4.9-.1-1.3-.1-1.6-.1-4.8 0-3.2 0-3.6.1-4.9.1-3.2 1.7-4.8 4.9-4.9 1.3 0 1.6 0 4.8 0zM12 0C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1 0 8.3 0 8.7 0 12s0 3.7.1 4.9c.2 4.4 2.6 6.8 7 7 1.3.1 1.6.1 4.9.1s3.7 0 4.9-.1c4.4-.2 6.8-2.6 7-7 .1-1.3.1-1.7.1-4.9s0-3.7-.1-4.9c-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8z',
-  tiktok:
-    'M12.5 0c1.3 0 2.6 0 3.9 0 .1 1.5.6 3.1 1.8 4.2 1.1 1.1 2.7 1.6 4.2 1.8v4c-1.4 0-2.9-.3-4.2-1-.6-.3-1.1-.6-1.6-.9 0 2.9 0 5.8 0 8.8-.1 1.4-.5 2.8-1.4 3.9-1.3 1.9-3.6 3.2-5.9 3.2-1.4.1-2.9-.3-4.1-1-2-1.2-3.4-3.4-3.6-5.7 0-.5 0-1 0-1.5.2-1.9 1.1-3.7 2.6-5 1.7-1.4 4-2.1 6.2-1.7 0 1.5 0 3 0 4.4-1-.3-2.2-.2-3 .4-.6.4-1.1 1-1.4 1.8-.2.5-.2 1.1-.1 1.6.2 1.6 1.8 3 3.5 2.9 1.1 0 2.2-.7 2.8-1.6.2-.3.4-.7.4-1.1.1-1.8.1-3.6.1-5.4 0-4 0-8 0-12z',
-}
 
 /* ═══════════════════════════════════════════════════════════════ */
 
@@ -140,121 +138,273 @@ function resolveHref(link: Record<string, unknown>): string {
   return (link?.url as string) || '#'
 }
 
+/* ── Test slides using local image ─────────────────────────── */
+const TEST_SLIDES = Array.from({ length: 5 }, (_, i) => ({
+  id: `slide-${i}`,
+  src: '/assets/images/hero-test.jpg',
+  alt: `FermentFreude hero slide ${i + 1}`,
+}))
+
+/* ── Arrow Icons ──────────────────────────────────────────────── */
+
+function ChevronLeft({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+  )
+}
+
+function ChevronRight({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  )
+}
+
+/* ── Scroll Down Indicator ────────────────────────────────────── */
+
+function ScrollIndicator() {
+  return (
+    <div className="hidden lg:flex flex-col items-center gap-2 text-[#4b4b4b]/60">
+      <div className="w-px h-10 bg-[#4b4b4b]/40" />
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ *  HERO SLIDER COMPONENT
+ * ═══════════════════════════════════════════════════════════════ */
+
 export const HeroSlider: React.FC<HeroSliderProps> = ({
   links,
   richText,
-  showWordmark,
-  socialLinks,
+  heroImages,
 }) => {
   const { setHeaderTheme } = useHeaderTheme()
 
   /* ── Merge CMS data with defaults ──────────────────────────── */
   const resolvedRichText = richText ?? DEFAULT_RICHTEXT
   const resolvedLinks = links && links.length > 0 ? links : DEFAULT_LINKS
-  const resolvedShowWordmark = showWordmark ?? true
-  const resolvedSocialLinks =
-    socialLinks && socialLinks.length > 0 ? socialLinks : DEFAULT_SOCIAL_LINKS
+
+  // Use local test images for now
+  const slides = TEST_SLIDES
 
   useEffect(() => {
-    setHeaderTheme('dark')
+    setHeaderTheme('light')
   }, [setHeaderTheme])
+
+  /* ── Embla Carousel ─────────────────────────────────────────── */
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    align: 'center',
+    skipSnaps: false,
+    containScroll: false,
+  })
+
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
+  const scrollTo = useCallback((index: number) => emblaApi?.scrollTo(index), [emblaApi])
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return
+    setSelectedIndex(emblaApi.selectedScrollSnap())
+  }, [emblaApi])
+
+  useEffect(() => {
+    if (!emblaApi) return
+    onSelect()
+    emblaApi.on('select', onSelect)
+    emblaApi.on('reInit', onSelect)
+    return () => {
+      emblaApi.off('select', onSelect)
+      emblaApi.off('reInit', onSelect)
+    }
+  }, [emblaApi, onSelect])
+
+  const hasImages = slides.length > 0
 
   /* ── Render ────────────────────────────────────────────────── */
   return (
-    <section className="relative w-full h-svh overflow-hidden">
-      {/* ──── Fullscreen GIF background ───────────────────────── */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/assets/tempeh-hero.gif"
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-
-      {/* ──── Gradient overlay ────────────────────────────────── */}
-      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-black/20" />
-
-      {/* ──── Content — vertically centered, clear of navbar ──── */}
-      <div className="relative z-10 flex items-center h-full pt-16 sm:pt-20 lg:pt-24">
-        <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
-          <div className="flex items-center justify-between max-w-7xl mx-auto">
-            {/* Left: Main content */}
-            <div className="flex flex-col gap-5 sm:gap-6 md:gap-8 lg:gap-10 max-w-3xl">
-              {/* Gold wordmark logo + Heading + Description */}
-              <div className="flex flex-col">
-                {resolvedShowWordmark && (
-                  <PrimaryLogo className="h-1.75 sm:h-2.5 md:h-4 lg:h-5 xl:h-6 w-auto self-start text-[#E8C079] mb-2 sm:mb-3" />
+    <section className="relative w-full bg-[#F9F0DC] overflow-hidden">
+      <div className="mx-auto w-full max-w-416 px-(--space-container-x) pt-28 sm:pt-32 lg:pt-36 pb-12 sm:pb-16 lg:pb-20">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-0">
+          {/* ══════════════════════════════════════════════════════
+           *  LEFT SIDE — Text Content
+           * ══════════════════════════════════════════════════════ */}
+          <div className="w-full lg:w-[42%] xl:w-[40%] flex flex-col gap-6 sm:gap-8 lg:gap-12 shrink-0 lg:pr-8 xl:pr-12">
+            {/* Title + Description */}
+            {resolvedRichText && (
+              <RichText
+                className={cn(
+                  'flex flex-col',
+                  '[&_h1]:font-display [&_h1]:font-black [&_h1]:text-[#1d1d1d]',
+                  '[&_h1]:text-[2rem] sm:[&_h1]:text-[2.5rem] md:[&_h1]:text-[3rem] lg:[&_h1]:text-[3.5rem] xl:[&_h1]:text-[4.25rem]',
+                  '[&_h1]:leading-[1.08] [&_h1]:tracking-[-0.02em]',
+                  '[&_h1]:mb-0',
+                  '[&_p]:font-display [&_p]:font-bold [&_p]:text-[#6b6b6b]',
+                  '[&_p]:text-[0.875rem] sm:[&_p]:text-[1rem] lg:[&_p]:text-[1.125rem] xl:[&_p]:text-[1.25rem]',
+                  '[&_p]:leading-normal [&_p]:mt-6 sm:[&_p]:mt-8 lg:[&_p]:mt-10',
+                  '[&_p]:max-w-xl',
+                  '[&_p]:mb-0',
                 )}
+                data={resolvedRichText}
+                enableGutter={false}
+                enableProse={false}
+              />
+            )}
 
-                {resolvedRichText && (
-                  <RichText
-                    className={cn(
-                      'flex flex-col gap-2 sm:gap-3 lg:gap-4',
-                      '[&_h1]:text-hero [&_h1]:text-[#F6EFDD]',
-                      '[&_p]:text-hero-body [&_p]:text-[#D8D8D8]',
-                      '[&_p]:max-w-[52ch] [&_p]:mt-2 sm:[&_p]:mt-3',
-                    )}
-                    data={resolvedRichText}
-                    enableGutter={false}
-                    enableProse={false}
-                  />
-                )}
-              </div>
-
-              {/* CTA Button(s) */}
-              {resolvedLinks.length > 0 && (
-                <div className="flex flex-wrap items-center gap-4">
-                  {resolvedLinks.map(({ link }, i) => {
-                    const href = resolveHref(link as unknown as Record<string, unknown>)
-                    return (
-                      <Link
-                        key={i}
-                        href={href}
-                        className={cn(
-                          'inline-flex items-center justify-center font-display font-bold',
-                          'transition-all duration-300 ease-out',
-                          i === 0
-                            ? 'rounded-full bg-[#E5B765] text-black px-5 py-2 text-xs sm:text-sm sm:px-6 sm:py-2.5 lg:text-base lg:px-7 lg:py-3 hover:bg-[#d4a654] hover:scale-105'
-                            : 'group text-white/80 hover:text-white text-xs sm:text-sm',
-                        )}
-                      >
-                        {(link as { label?: string })?.label}
-                        {i !== 0 && (
-                          <span className="ml-2 inline-block transition-transform duration-300 group-hover:translate-x-1">
-                            →
-                          </span>
-                        )}
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Right: Social media icons (desktop only — Figma) */}
-            {resolvedSocialLinks.length > 0 && (
-              <div className="hidden lg:flex flex-col items-center gap-4 xl:gap-5">
-                {resolvedSocialLinks.map((social, i) => {
-                  const iconPath = SOCIAL_ICON_PATHS[(social.platform as string) ?? '']
-                  if (!iconPath) return null
+            {/* CTA Buttons */}
+            {resolvedLinks.length > 0 && (
+              <div className="flex flex-wrap items-center gap-3">
+                {resolvedLinks.map(({ link }, i) => {
+                  const href = resolveHref(link as unknown as Record<string, unknown>)
+                  const label = (link as { label?: string })?.label
+                  const isPrimary = i === 0
                   return (
-                    <a
+                    <Link
                       key={i}
-                      href={social.url as string}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={social.platform as string}
-                      className="flex items-center justify-center w-10 h-10 xl:w-12 xl:h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 transition-all duration-300 hover:bg-black/80 hover:scale-110"
+                      href={href}
+                      className={cn(
+                        'inline-flex items-center justify-center font-display font-bold',
+                        'rounded-full transition-all duration-300 ease-out',
+                        'text-sm sm:text-base lg:text-lg',
+                        'px-8 py-3 sm:px-10 sm:py-3.5 lg:px-12 lg:py-4',
+                        isPrimary
+                          ? 'bg-[#4b4b4b] text-[#F9F0DC] hover:bg-[#3a3a3a] hover:scale-[1.02]'
+                          : 'bg-[#F9F0DC] text-[#4b4b4b] border border-[#4b4b4b] hover:bg-[#4b4b4b] hover:text-[#F9F0DC] hover:scale-[1.02]',
+                      )}
                     >
-                      <svg viewBox="0 0 24 24" className="w-4 h-4 xl:w-5 xl:h-5" fill="#FAF2E0">
-                        <path d={iconPath} />
-                      </svg>
-                    </a>
+                      {label}
+                    </Link>
                   )
                 })}
               </div>
             )}
           </div>
+
+          {/* ══════════════════════════════════════════════════════
+           *  RIGHT SIDE — Image Carousel
+           * ══════════════════════════════════════════════════════ */}
+          <div className="w-full lg:w-[58%] xl:w-[60%] relative">
+            {hasImages ? (
+              <>
+                {/* Carousel viewport */}
+                <div className="overflow-hidden" ref={emblaRef}>
+                  <div className="flex items-center touch-pan-y">
+                    {slides.map((slide, index) => {
+                      const isActive = index === selectedIndex
+                      return (
+                        <div
+                          key={slide.id}
+                          className={cn(
+                            'flex-[0_0_55%] sm:flex-[0_0_50%] lg:flex-[0_0_58%] xl:flex-[0_0_55%]',
+                            'min-w-0 relative px-2 sm:px-3',
+                            'transition-all duration-500 ease-out',
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              'relative overflow-hidden rounded-3xl sm:rounded-4xl lg:rounded-[2.5rem]',
+                              'transition-all duration-500 ease-out',
+                              isActive
+                                ? 'aspect-3/4 sm:aspect-4/5 scale-100 opacity-100 z-10'
+                                : 'aspect-3/4 sm:aspect-4/5 scale-[0.85] opacity-60 z-0',
+                            )}
+                          >
+                            <Image
+                              src={slide.src}
+                              alt={slide.alt}
+                              fill
+                              className="object-cover"
+                              priority={isActive}
+                            />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Navigation */}
+                <div className="flex items-center justify-center lg:justify-end gap-3 mt-6 lg:mt-8 lg:pr-4">
+                  {/* Previous */}
+                  <button
+                    onClick={scrollPrev}
+                    aria-label="Previous slide"
+                    className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#4b4b4b]/30 text-[#4b4b4b] hover:bg-[#4b4b4b] hover:text-[#F9F0DC] transition-colors duration-200"
+                  >
+                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+
+                  {/* Dot indicators */}
+                  <div className="flex items-center gap-2 sm:gap-2.5 px-2">
+                    {slides.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => scrollTo(index)}
+                        aria-label={`Go to slide ${index + 1}`}
+                        className={cn(
+                          'rounded-full transition-all duration-300',
+                          index === selectedIndex
+                            ? 'w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#4b4b4b]'
+                            : 'w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#4b4b4b]/40 hover:bg-[#4b4b4b]/60',
+                        )}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Next */}
+                  <button
+                    onClick={scrollNext}
+                    aria-label="Next slide"
+                    className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#4b4b4b]/30 text-[#4b4b4b] hover:bg-[#4b4b4b] hover:text-[#F9F0DC] transition-colors duration-200"
+                  >
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* Placeholder when no images */
+              <div className="flex items-center justify-center gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      'bg-[#ECE5DE] rounded-4xl',
+                      i === 2
+                        ? 'w-[55%] aspect-3/4'
+                        : 'w-[35%] aspect-3/4 scale-[0.85] opacity-60',
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Scroll indicator — bottom right */}
+        <div className="flex justify-end mt-6 lg:mt-8">
+          <ScrollIndicator />
         </div>
       </div>
     </section>

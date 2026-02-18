@@ -337,6 +337,7 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -495,6 +496,15 @@ export interface Page {
            * Full URL to your social media profile (e.g. https://facebook.com/yourpage).
            */
           url: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Images for the hero carousel. Add 3–5 for the best visual effect. They appear in a stacked slider layout.
+     */
+    heroImages?:
+      | {
+          image: string | Media;
           id?: string | null;
         }[]
       | null;
@@ -1766,6 +1776,12 @@ export interface PagesSelect<T extends boolean = true> {
               url?: T;
               id?: T;
             };
+        heroImages?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
         media?: T;
         slides?:
           | T
@@ -2195,6 +2211,7 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

@@ -132,6 +132,27 @@ export const hero: Field = {
       ],
     },
     {
+      name: 'heroImages',
+      type: 'array',
+      label: 'Hero Carousel Images',
+      minRows: 1,
+      maxRows: 8,
+      admin: {
+        condition: (_, { type } = {}) => type === 'heroSlider',
+        description:
+          'Images for the hero carousel. Add 3–5 for the best visual effect. They appear in a stacked slider layout.',
+      },
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+          label: 'Image',
+        },
+      ],
+    },
+    {
       name: 'media',
       type: 'upload',
       admin: {
