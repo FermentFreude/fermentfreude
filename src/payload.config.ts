@@ -32,6 +32,12 @@ export default buildConfig({
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean) as string[],
   admin: {
     user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    components: {
+      beforeDashboard: ['/components/BeforeDashboard'],
+    },
   },
   localization: {
     locales: [

@@ -334,30 +334,44 @@ export const seed = async ({
   ])
 
   // Voucher page: seed DE first (Payload generates IDs), then EN reusing same IDs (bilingual seeding)
-  payload.logger.info(`— Seeding voucher page (DE then EN)...`)
-  const voucherPageDE = await payload.create({
-    collection: 'pages',
-    depth: 0,
-    locale: 'de',
-    data: voucherPageDataDE({ image: imageHero }),
-    context: voucherSeedContext,
-  })
-  const savedVoucherDoc = await payload.findByID({
-    collection: 'pages',
-    id: voucherPageDE.id,
-    depth: 0,
-    locale: 'de',
-  })
-  await payload.update({
-    collection: 'pages',
-    id: voucherPageDE.id,
-    depth: 0,
-    locale: 'en',
-    data: voucherPageDataEN(savedVoucherDoc as Page, {
-      image: imageHero,
-    }),
-    context: voucherSeedContext,
-  })
+  // Note: For proper voucher page seeding with images, use: pnpm seed voucher
+  // This is a minimal seed that uses placeholder images
+  try {
+    payload.logger.info(`— Seeding voucher page (DE then EN)...`)
+    const voucherPageDE = await payload.create({
+      collection: 'pages',
+      depth: 0,
+      locale: 'de',
+      data: voucherPageDataDE({
+        cardLogo: null,
+        starterSetImage: imageHero,
+        giftOccasionImages: [imageHero, imageHero, imageHero, imageHero],
+      }),
+      context: voucherSeedContext,
+    })
+    const savedVoucherDoc = await payload.findByID({
+      collection: 'pages',
+      id: voucherPageDE.id,
+      depth: 0,
+      locale: 'de',
+    })
+    await payload.update({
+      collection: 'pages',
+      id: voucherPageDE.id,
+      depth: 0,
+      locale: 'en',
+      data: voucherPageDataEN(savedVoucherDoc as Page, {
+        cardLogo: null,
+        starterSetImage: imageHero,
+        giftOccasionImages: [imageHero, imageHero, imageHero, imageHero],
+      }),
+      context: voucherSeedContext,
+    })
+    payload.logger.info(`✅ Voucher page seeded successfully`)
+  } catch (error) {
+    payload.logger.error(`⚠️  Failed to seed voucher page: ${error}`)
+    payload.logger.info(`   Run 'pnpm seed voucher' separately for full voucher page with images`)
+  }
 
   payload.logger.info(`— Seeding addresses...`)
 

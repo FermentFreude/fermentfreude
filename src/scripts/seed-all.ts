@@ -13,11 +13,15 @@
  *   2. Home page (hero + workshop slider with images)
  *   3. About page (with images uploaded to Vercel Blob)
  *
- * Run manually: set -a && source .env && set +a && npx tsx src/scripts/seed-all.ts [target]
+ * Run manually: npx tsx src/scripts/seed-all.ts [target]
  */
+import { config } from 'dotenv'
 import { spawnSync } from 'child_process'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+// Load .env file
+config()
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -26,9 +30,10 @@ const scripts: Record<string, { name: string; file: string }> = {
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
+  voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
 }
 
-const allOrder = ['header', 'home', 'about']
+const allOrder = ['header', 'home', 'about', 'voucher']
 
 function runSeed(key: string): boolean {
   const script = scripts[key]
