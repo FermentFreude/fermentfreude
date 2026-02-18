@@ -2,13 +2,15 @@ import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from '
 
 import { contactFormData } from './contact-form'
 import { contactPageData } from './contact-page'
-import { productHatData } from './product-hat'
-import { productTshirtData, productTshirtVariant } from './product-tshirt'
 import { homePageData } from './home'
+import { voucherPageDataDE, voucherPageDataEN, seedContext as voucherSeedContext } from './voucher-page'
 import { imageHatData } from './image-hat'
 import { imageTshirtBlackData } from './image-tshirt-black'
 import { imageTshirtWhiteData } from './image-tshirt-white'
 import { imageHero1Data } from './image-hero-1'
+import { productHatData } from './product-hat'
+import { productTshirtData, productTshirtVariant } from './product-tshirt'
+import type { Page } from '@/payload-types'
 import { Address, Transaction, VariantOption } from '@/payload-types'
 
 const collections: CollectionSlug[] = [
@@ -330,6 +332,32 @@ export const seed = async ({
       }),
     }),
   ])
+
+  // Voucher page: seed DE first (Payload generates IDs), then EN reusing same IDs (bilingual seeding)
+  payload.logger.info(`— Seeding voucher page (DE then EN)...`)
+  const voucherPageDE = await payload.create({
+    collection: 'pages',
+    depth: 0,
+    locale: 'de',
+    data: voucherPageDataDE({ image: imageHero }),
+    context: voucherSeedContext,
+  })
+  const savedVoucherDoc = await payload.findByID({
+    collection: 'pages',
+    id: voucherPageDE.id,
+    depth: 0,
+    locale: 'de',
+  })
+  await payload.update({
+    collection: 'pages',
+    id: voucherPageDE.id,
+    depth: 0,
+    locale: 'en',
+    data: voucherPageDataEN(savedVoucherDoc as Page, {
+      image: imageHero,
+    }),
+    context: voucherSeedContext,
+  })
 
   payload.logger.info(`— Seeding addresses...`)
 

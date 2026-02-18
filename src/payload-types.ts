@@ -507,6 +507,116 @@ export interface Page {
         | AboutBlock
       )[]
     | null;
+  /**
+   * Content for the Gift Voucher page. These fields only apply when this page’s slug is "voucher".
+   */
+  voucher?: {
+    /**
+     * Main headline above the voucher form (e.g. "Give the gift of fermentation").
+     */
+    heroHeading: string;
+    /**
+     * Short intro text below the heading explaining the voucher.
+     */
+    heroDescription: string;
+    /**
+     * List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.
+     */
+    voucherAmounts: {
+      amount: string;
+      id?: string | null;
+    }[];
+    /**
+     * Ways to receive the voucher (e.g. by email or post).
+     */
+    deliveryOptions: {
+      /**
+       * Internal key, e.g. "email" or "post". Used for logic, not shown.
+       */
+      type: string;
+      /**
+       * Label shown to the user (e.g. "By email to print at home").
+       */
+      title: string;
+      /**
+       * Icon displayed next to this option.
+       */
+      icon: 'email' | 'card';
+      id?: string | null;
+    }[];
+    /**
+     * Label on the voucher preview card (e.g. "GIFT VOUCHER").
+     */
+    cardLabel: string;
+    /**
+     * Label above the amount on the card (e.g. "Voucher value").
+     */
+    valueLabel: string;
+    /**
+     * Small text under the amount (e.g. "Redeemable in our shop").
+     */
+    cardDisclaimer: string;
+    /**
+     * Label above the amount buttons (e.g. "VOUCHER VALUE").
+     */
+    amountSectionLabel: string;
+    /**
+     * Label above delivery options (e.g. "DELIVERY METHOD").
+     */
+    deliverySectionLabel: string;
+    /**
+     * Label for the optional greeting message field.
+     */
+    greetingLabel: string;
+    /**
+     * Placeholder text in the greeting textarea (e.g. "Max. 250 characters").
+     */
+    greetingPlaceholder: string;
+    /**
+     * Text for the main CTA button (e.g. "Add to cart").
+     */
+    addToCartButton: string;
+    /**
+     * Heading for the "Combine with Starter Set" section.
+     */
+    starterSetHeading: string;
+    /**
+     * Body text for the starter set section.
+     */
+    starterSetDescription: string;
+    /**
+     * Button text (e.g. "View Starter Sets").
+     */
+    starterSetButton: string;
+    /**
+     * Image shown in the starter set section. Leave empty to use fallback.
+     */
+    starterSetImage?: (string | null) | Media;
+    /**
+     * Heading for the "Gift for every occasion" section.
+     */
+    giftOccasionsHeading: string;
+    /**
+     * Occasion cards with image and caption (e.g. Birthdays, Weddings).
+     */
+    giftOccasions: {
+      image: string | Media;
+      caption: string;
+      id?: string | null;
+    }[];
+    /**
+     * Heading above the voucher FAQ accordion.
+     */
+    faqHeading: string;
+    /**
+     * Frequently asked questions about vouchers.
+     */
+    faqs: {
+      question: string;
+      answer: string;
+      id?: string | null;
+    }[];
+  };
   meta?: {
     title?: string | null;
     /**
@@ -1504,6 +1614,54 @@ export interface PagesSelect<T extends boolean = true> {
         formBlock?: T | FormBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
         aboutBlock?: T | AboutBlockSelect<T>;
+      };
+  voucher?:
+    | T
+    | {
+        heroHeading?: T;
+        heroDescription?: T;
+        voucherAmounts?:
+          | T
+          | {
+              amount?: T;
+              id?: T;
+            };
+        deliveryOptions?:
+          | T
+          | {
+              type?: T;
+              title?: T;
+              icon?: T;
+              id?: T;
+            };
+        cardLabel?: T;
+        valueLabel?: T;
+        cardDisclaimer?: T;
+        amountSectionLabel?: T;
+        deliverySectionLabel?: T;
+        greetingLabel?: T;
+        greetingPlaceholder?: T;
+        addToCartButton?: T;
+        starterSetHeading?: T;
+        starterSetDescription?: T;
+        starterSetButton?: T;
+        starterSetImage?: T;
+        giftOccasionsHeading?: T;
+        giftOccasions?:
+          | T
+          | {
+              image?: T;
+              caption?: T;
+              id?: T;
+            };
+        faqHeading?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
       };
   meta?:
     | T
