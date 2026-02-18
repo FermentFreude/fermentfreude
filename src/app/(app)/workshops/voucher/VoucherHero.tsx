@@ -147,12 +147,12 @@ export function VoucherHero({
                 <label className="font-display text-base md:text-lg font-bold text-[#1D1D1D] uppercase tracking-wide">
                   {deliverySectionLabel}
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex gap-4">
                   {deliveryOptions.map((option) => (
                     <button
                       key={option.type}
                       onClick={() => setSelectedDelivery(option.type)}
-                      className={`py-2 px-4 md:py-2 md:px-4 rounded-2xl border-2 transition-all text-left ${
+                      className={`py-2 px-4 md:py-2 md:px-4 rounded-2xl border-2 transition-all text-left w-auto ${
                         selectedDelivery === option.type
                           ? 'border-[#6B6B6B] bg-[#FAF2E0] shadow-sm'
                           : 'border-[#E8E4D9] bg-white hover:bg-[#FAF2E0] hover:border-[#6B6B6B]'
@@ -193,7 +193,7 @@ export function VoucherHero({
                           )}
                         </div>
                         <span
-                          className={`font-sans text-sm md:text-base font-semibold leading-relaxed ${
+                          className={`font-sans text-xs md:text-sm font-semibold leading-relaxed ${
                             selectedDelivery === option.type ? 'text-[#1D1D1D]' : 'text-[#4B4F4A]'
                           }`}
                         >
