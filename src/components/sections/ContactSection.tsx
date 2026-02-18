@@ -131,13 +131,13 @@ export function ContactSection({ contact, contactForm, className }: ContactSecti
                         />
                       </svg>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-display mb-2 text-lg font-bold text-[#1E1E1E]">
+                    <div className="min-w-0 flex-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <span className="font-display text-lg font-bold text-[#1E1E1E]">
                         {contact.labels.email}
-                      </div>
+                      </span>
                       <a
                         href={`mailto:${contact.email}`}
-                        className="font-display text-base font-bold text-[#555] wrap-break-word hover:underline inline"
+                        className="font-display text-base font-bold text-[#555] hover:underline"
                       >
                         {contact.email}
                       </a>
