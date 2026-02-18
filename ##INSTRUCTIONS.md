@@ -533,18 +533,32 @@ These rules apply to **every** new feature, section, field, or content block —
 - Use clear `label` values on every field.
 - Required fields must always have seeded data so saving never fails.
 
-### F — After every schema change
+### F — Images go through Payload Media (Vercel Blob) — NEVER static paths
+
+- This project uses `@payloadcms/storage-vercel-blob` — all uploaded images are stored in Vercel Blob, **not** in the filesystem.
+- **Static file paths (`/assets/images/...`)** do NOT work on Vercel. Never use them as `src` in `<img>` tags or CSS `backgroundImage`.
+- Every image field in the schema MUST be `type: 'upload', relationTo: 'media'`.
+- In components, render images using the Payload `<Media resource={...} />` component (from `@/components/Media`). Never use raw `<img src="/assets/...">`.
+- If no image is set in the CMS, render a neutral placeholder (`<div className="h-full w-full bg-[#ECE5DE]" />`), not a hardcoded file path.
+- **Seed scripts** MUST upload images to the Media collection using `payload.create({ collection: 'media', data: { alt }, file: readLocalFile(...) })` and then reference the returned Media document in content fields.
+- Source images for seeding live in `public/assets/images/` locally — they exist only for the seed script to read and upload, never for direct serving.
+- To check if a media field has a resolved Media object (not just a string ID), use a type guard: `typeof image === 'object' && image !== null && 'url' in image`.
+- Always set `priority` on hero/above-fold `<Media>` components.
+
+### G — After every schema change
 
 1. `pnpm generate:types` — update TypeScript types.
 2. `pnpm generate:importmap` — if components changed.
 3. `npx tsc --noEmit` — verify zero TypeScript errors.
 4. Re-run the relevant seed script to populate new fields.
 
-### G — Checklist before finishing any feature
+### H — Checklist before finishing any feature
 
 - [ ] Schema field added with `localized: true`, `label`, and `admin.description`?
 - [ ] Component has English hardcoded default as fallback?
 - [ ] Component reads CMS data and overrides default?
+- [ ] All images use `<Media resource={...}>` — no static `/assets/` paths in rendered output?
+- [ ] Seed script uploads images to Media collection (Vercel Blob), not referencing static paths?
 - [ ] Seed script populates DE and EN?
 - [ ] Seed script uses `skipAutoTranslate: true`?
 - [ ] Types regenerated?
