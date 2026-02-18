@@ -11,14 +11,5 @@ export async function Header() {
   const locale = (localeValue === 'en' ? 'en' : 'de') as 'de' | 'en'
   const header = await getCachedGlobal('header', 1, locale)()
 
-  return (
-    <header className="sticky top-0 z-50 w-full">
-      <AnnouncementBar
-        enabled={header.announcementBar?.enabled}
-        text={header.announcementBar?.text}
-        link={header.announcementBar?.link}
-      />
-      <HeaderClient header={header} />
-    </header>
-  )
+  return <HeaderClient header={header} />
 }

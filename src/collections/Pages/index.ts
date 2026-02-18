@@ -11,6 +11,7 @@ import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
+import { AboutBlock } from '@/blocks/AboutBlock/config'
 import { hero } from '@/fields/hero'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
@@ -100,6 +101,7 @@ export const Pages: CollectionConfig = {
                 Banner,
                 FormBlock,
                 WorkshopSlider,
+                AboutBlock,
               ],
             },
           ],

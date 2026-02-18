@@ -59,7 +59,7 @@ export function MobileMenu({ menu }: Props) {
         <SheetHeader className="px-0 pt-4 pb-0">
           <SheetTitle className="flex items-center">
             <Image
-              src="/logo.svg"
+              src="/primary-logo.svg"
               alt="Fermentfreude"
               width={200}
               height={24}

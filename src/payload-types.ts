@@ -504,6 +504,7 @@ export interface Page {
         | BannerBlock
         | FormBlock
         | WorkshopSliderBlock
+        | AboutBlock
       )[]
     | null;
   /**
@@ -1062,6 +1063,196 @@ export interface WorkshopSliderBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AboutBlock".
+ */
+export interface AboutBlock {
+  /**
+   * Background image displayed at the top of the about page.
+   */
+  heroImage?: (string | null) | Media;
+  ourStory: {
+    /**
+     * Small label text shown above the heading (e.g., "Our Story").
+     */
+    label: string;
+    /**
+     * Large heading for the Our Story section.
+     */
+    heading: string;
+    /**
+     * Subheading text shown below the main heading.
+     */
+    subheading: string;
+    description?:
+      | {
+          /**
+           * A paragraph of text describing the story.
+           */
+          paragraph: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  team: {
+    /**
+     * Small label text shown above the heading (e.g., "Our Team").
+     */
+    label: string;
+    /**
+     * Main heading for the team section.
+     */
+    heading: string;
+    members?:
+      | {
+          /**
+           * Optional. If empty, the about page uses a fallback image for this slot.
+           */
+          image?: (string | null) | Media;
+          name: string;
+          /**
+           * Job title or role (e.g., "Fermentation Specialist & Chef").
+           */
+          role: string;
+          /**
+           * Biography or description of the team member.
+           */
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  sponsors: {
+    /**
+     * Heading text for the sponsors section.
+     */
+    heading: string;
+    logos?:
+      | {
+          image: string | Media;
+          /**
+           * Alternative text for the logo image.
+           */
+          alt: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  contact: {
+    /**
+     * Heading for the contact section.
+     */
+    heading: string;
+    /**
+     * Description text explaining how to contact.
+     */
+    description: string;
+    labels: {
+      /**
+       * Label for the location field (e.g., "Location").
+       */
+      location: string;
+      /**
+       * Label for the phone field (e.g., "Phone").
+       */
+      phone: string;
+      /**
+       * Label for the email field (e.g., "Mail").
+       */
+      email: string;
+    };
+    /**
+     * Physical address (can include line breaks).
+     */
+    location: string;
+    /**
+     * Contact phone number (not localized as it is a number).
+     */
+    phone: string;
+    /**
+     * Contact email address (not localized).
+     */
+    email: string;
+    socialMedia: {
+      facebook: string;
+      twitter: string;
+      pinterest: string;
+      youtube: string;
+    };
+  };
+  contactForm: {
+    /**
+     * Heading text above the contact form.
+     */
+    heading: string;
+    /**
+     * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
+     */
+    form?: (string | null) | Form;
+    placeholders: {
+      /**
+       * Placeholder text for the name input field.
+       */
+      name: string;
+      /**
+       * Placeholder text for the email input field.
+       */
+      email: string;
+      /**
+       * Placeholder text for the phone input field.
+       */
+      phone: string;
+      /**
+       * Placeholder text for the message textarea field.
+       */
+      message: string;
+    };
+    subjectOptions: {
+      /**
+       * Default option shown in the subject dropdown (e.g., "Subject").
+       */
+      default: string;
+      options?:
+        | {
+            label: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    /**
+     * Text displayed on the submit button.
+     */
+    submitButton: string;
+  };
+  cta: {
+    /**
+     * Heading for the call-to-action section.
+     */
+    heading: string;
+    /**
+     * Description text for the CTA section.
+     */
+    description: string;
+    workshopsButton: {
+      label: string;
+      /**
+       * URL the button links to (e.g., "/workshops").
+       */
+      href: string;
+    };
+    coursesButton: {
+      label: string;
+      /**
+       * URL the button links to (e.g., "/courses").
+       */
+      href: string;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'aboutBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants".
  */
 export interface Variant {
@@ -1422,6 +1613,7 @@ export interface PagesSelect<T extends boolean = true> {
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
+        aboutBlock?: T | AboutBlockSelect<T>;
       };
   voucher?:
     | T
@@ -1626,6 +1818,123 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
       };
   allWorkshopsButtonLabel?: T;
   allWorkshopsLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AboutBlock_select".
+ */
+export interface AboutBlockSelect<T extends boolean = true> {
+  heroImage?: T;
+  ourStory?:
+    | T
+    | {
+        label?: T;
+        heading?: T;
+        subheading?: T;
+        description?:
+          | T
+          | {
+              paragraph?: T;
+              id?: T;
+            };
+      };
+  team?:
+    | T
+    | {
+        label?: T;
+        heading?: T;
+        members?:
+          | T
+          | {
+              image?: T;
+              name?: T;
+              role?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  sponsors?:
+    | T
+    | {
+        heading?: T;
+        logos?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+      };
+  contact?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        labels?:
+          | T
+          | {
+              location?: T;
+              phone?: T;
+              email?: T;
+            };
+        location?: T;
+        phone?: T;
+        email?: T;
+        socialMedia?:
+          | T
+          | {
+              facebook?: T;
+              twitter?: T;
+              pinterest?: T;
+              youtube?: T;
+            };
+      };
+  contactForm?:
+    | T
+    | {
+        heading?: T;
+        form?: T;
+        placeholders?:
+          | T
+          | {
+              name?: T;
+              email?: T;
+              phone?: T;
+              message?: T;
+            };
+        subjectOptions?:
+          | T
+          | {
+              default?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+            };
+        submitButton?: T;
+      };
+  cta?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        workshopsButton?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
+        coursesButton?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
+      };
   id?: T;
   blockName?: T;
 }

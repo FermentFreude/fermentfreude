@@ -87,8 +87,16 @@ const DEFAULT_LINKS = [
   {
     link: {
       type: 'custom' as const,
-      label: 'Discover More',
-      url: '/about',
+      label: 'Shop',
+      url: '/shop',
+      appearance: 'default' as const,
+    },
+  },
+  {
+    link: {
+      type: 'custom' as const,
+      label: 'Workshops',
+      url: '/workshops',
       appearance: 'default' as const,
     },
   },
