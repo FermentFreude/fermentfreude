@@ -184,6 +184,13 @@ export const Pages: CollectionConfig = {
               ],
             },
             {
+              name: 'cardLogo',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Card Logo',
+              admin: { description: 'Logo displayed on the voucher preview card. Leave empty to use fallback.' },
+            },
+            {
               name: 'cardLabel',
               type: 'text',
               required: true,

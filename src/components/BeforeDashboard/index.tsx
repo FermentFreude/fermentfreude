@@ -82,3 +82,5 @@ export const BeforeDashboard: React.FC = () => {
     </div>
   )
 }
+
+export default BeforeDashboard

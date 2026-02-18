@@ -1,8 +1,12 @@
 import type { Media, Page } from '@/payload-types'
 
 type VoucherPageArgs = {
-  /** Used for starter set image and gift occasion images when seeding. */
-  image: Media
+  /** Logo displayed on the voucher card */
+  cardLogo?: Media | null
+  /** Starter set image */
+  starterSetImage?: Media | null
+  /** Gift occasion images - array matching the order: Birthdays, Weddings, Team events, Christmas */
+  giftOccasionImages: (Media | null)[]
 }
 
 const seedContext = {
@@ -14,7 +18,7 @@ const seedContext = {
 /**
  * German (DE) voucher page data. Save this first so Payload generates IDs for arrays/blocks.
  */
-export function voucherPageDataDE({ image }: VoucherPageArgs): Required<
+export function voucherPageDataDE({ cardLogo, starterSetImage, giftOccasionImages }: VoucherPageArgs): Required<
   Pick<Page, 'slug' | 'title' | '_status' | 'voucher'>
 > & { hero: Page['hero'] } {
   return {
@@ -29,9 +33,7 @@ export function voucherPageDataDE({ image }: VoucherPageArgs): Required<
       heroDescription:
         'Das perfekte Geschenk für Foodies und Gesundheitsbewusste. Wähle einen Betrag und optional eine Grußnachricht für deinen Gutschein.',
       voucherAmounts: [
-        { amount: '50€' },
         { amount: '99€' },
-        { amount: '150€' },
       ],
       deliveryOptions: [
         {
@@ -57,14 +59,16 @@ export function voucherPageDataDE({ image }: VoucherPageArgs): Required<
       starterSetDescription:
         'Miete Mi, wie vorher! E-Mail mit dem Gutschein, fertig im Druck. 1 wochig, 2 wochig, pro Tag.',
       starterSetButton: 'Zu den Starter-Sets',
-      starterSetImage: image.id,
+      cardLogo: cardLogo?.id ?? null,
+      starterSetImage: starterSetImage?.id ?? null,
       giftOccasionsHeading: 'Ein Geschenk für jeden Anlass',
-      giftOccasions: [
-        { image: image.id, caption: 'Geburtstage' },
-        { image: image.id, caption: 'Hochzeiten' },
-        { image: image.id, caption: 'Team Events' },
-        { image: image.id, caption: 'Weihnachten' },
-      ],
+      giftOccasions: giftOccasionImages
+        .filter((img): img is Media => img !== null)
+        .slice(0, 4)
+        .map((img, i) => ({
+          image: img.id,
+          caption: ['Geburtstage', 'Hochzeiten', 'Team Events', 'Weihnachten'][i] ?? 'Occasion',
+        })),
       faqHeading: 'Häufige Fragen zu Gutscheinen',
       faqs: [
         {
@@ -97,7 +101,7 @@ export function voucherPageDataDE({ image }: VoucherPageArgs): Required<
  */
 export function voucherPageDataEN(
   savedDoc: Page,
-  { image }: VoucherPageArgs,
+  { cardLogo, starterSetImage, giftOccasionImages }: VoucherPageArgs,
 ): Required<
   Pick<Page, 'slug' | 'title' | '_status' | 'voucher'>
 > & { hero: Page['hero'] } {
@@ -117,7 +121,7 @@ export function voucherPageDataEN(
         'The perfect gift for foodies and the health-conscious. Choose an amount and optionally a greeting message for your voucher.',
       voucherAmounts: (v.voucherAmounts ?? []).map((item, i) => ({
         id: item.id ?? undefined,
-        amount: ['50€', '99€', '150€'][i] ?? item.amount,
+        amount: ['99€'][i] ?? item.amount,
       })),
       deliveryOptions: (v.deliveryOptions ?? []).map((item, i) => ({
         id: item.id ?? undefined,
@@ -140,13 +144,19 @@ export function voucherPageDataEN(
       starterSetDescription:
         'Rent a jar, same as before! Email with the voucher, ready to print. 1 week, 2 weeks, per day.',
       starterSetButton: 'View starter sets',
-      starterSetImage: image.id,
+      cardLogo: cardLogo?.id ?? null,
+      starterSetImage: starterSetImage?.id ?? null,
       giftOccasionsHeading: 'A gift for every occasion',
-      giftOccasions: (v.giftOccasions ?? []).map((item, i) => ({
-        id: item.id ?? undefined,
-        image: image.id,
-        caption: ['Birthdays', 'Weddings', 'Team events', 'Christmas'][i] ?? item.caption,
-      })),
+      giftOccasions: (v.giftOccasions ?? []).map((item, i) => {
+        const occasionImage = giftOccasionImages[i]
+        const imageId = occasionImage?.id ?? (typeof item.image === 'string' ? item.image : item.image?.id)
+        if (!imageId) return null
+        return {
+          id: item.id ?? undefined,
+          image: imageId,
+          caption: ['Birthdays', 'Weddings', 'Team events', 'Christmas'][i] ?? item.caption,
+        }
+      }).filter((item): item is NonNullable<typeof item> => item !== null),
       faqHeading: 'Frequently asked questions about vouchers',
       faqs: (v.faqs ?? []).map((item, i) => ({
         id: item.id ?? undefined,

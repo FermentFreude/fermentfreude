@@ -545,6 +545,10 @@ export interface Page {
       id?: string | null;
     }[];
     /**
+     * Logo displayed on the voucher preview card. Leave empty to use fallback.
+     */
+    cardLogo?: (string | null) | Media;
+    /**
      * Label on the voucher preview card (e.g. "GIFT VOUCHER").
      */
     cardLabel: string;
@@ -1634,6 +1638,7 @@ export interface PagesSelect<T extends boolean = true> {
               icon?: T;
               id?: T;
             };
+        cardLogo?: T;
         cardLabel?: T;
         valueLabel?: T;
         cardDisclaimer?: T;
