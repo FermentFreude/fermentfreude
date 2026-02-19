@@ -39,6 +39,10 @@ export const hero: Field = {
           label: 'Hero Slider',
           value: 'heroSlider',
         },
+        {
+          label: 'Hero Carousel',
+          value: 'heroCarousel',
+        },
       ],
       required: true,
     },
@@ -130,6 +134,65 @@ export const hero: Field = {
       },
       relationTo: 'media',
       required: true,
+    },
+    {
+      name: 'slides',
+      type: 'array',
+      label: 'Carousel Slides',
+      minRows: 1,
+      maxRows: 8,
+      admin: {
+        condition: (_, { type } = {}) => type === 'heroCarousel',
+        description: 'Each slide has a fullscreen image with overlay text and CTA.',
+      },
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+          label: 'Background Image',
+          admin: {
+            description: 'Fullscreen background for this slide.',
+          },
+        },
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+          localized: true,
+          label: 'Title',
+          admin: {
+            description: 'Main heading on the slide.',
+          },
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          localized: true,
+          label: 'Description',
+          admin: {
+            description: 'Optional supporting text.',
+          },
+        },
+        {
+          name: 'buttonLabel',
+          type: 'text',
+          localized: true,
+          label: 'Button Label',
+          admin: {
+            description: 'CTA button text (e.g., "Order Now", "Learn More").',
+          },
+        },
+        {
+          name: 'buttonUrl',
+          type: 'text',
+          label: 'Button URL',
+          admin: {
+            description: 'Where the button links to.',
+          },
+        },
+      ],
     },
   ],
   label: false,

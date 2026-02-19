@@ -7,8 +7,8 @@ import type { ServerFunctionClient } from 'payload'
 import React from 'react'
 
 import { importMap } from './admin/importMap.js'
-import { SuppressBodyHydrationWarning } from './SuppressBodyHydrationWarning'
 import './custom.scss'
+import { SuppressBodyHydrationWarning } from './SuppressBodyHydrationWarning'
 
 type Args = {
   children: React.ReactNode

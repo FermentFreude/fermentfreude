@@ -210,22 +210,22 @@ export function ContactSection({ contact, contactForm, className }: ContactSecti
                 <input
                   type="text"
                   placeholder={contactForm.placeholders.name}
-                  className="rounded-full border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
+                  className="rounded-full border border-[rgba(128,128,128,0.55)] px-6 py-2.5 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
                 />
                 <div className="grid gap-4 md:grid-cols-2">
                   <input
                     type="email"
                     placeholder={contactForm.placeholders.email}
-                    className="rounded-full border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
+                    className="rounded-full border border-[rgba(128,128,128,0.55)] px-6 py-2.5 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
                   />
                   <input
                     type="tel"
                     placeholder={contactForm.placeholders.phone}
-                    className="rounded-full border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
+                    className="rounded-full border border-[rgba(128,128,128,0.55)] px-6 py-2.5 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
                   />
                 </div>
                 <div className="relative">
-                  <select className="w-full appearance-none rounded-full border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none">
+                  <select className="w-full appearance-none rounded-full border border-[rgba(128,128,128,0.55)] px-6 py-2.5 font-display text-base font-bold text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none">
                     <option>{contactForm.subjectOptions.default}</option>
                     {contactForm.subjectOptions.options.map((option: string, idx: number) => (
                       <option key={idx}>{option}</option>
@@ -243,11 +243,11 @@ export function ContactSection({ contact, contactForm, className }: ContactSecti
                 <textarea
                   placeholder={contactForm.placeholders.message}
                   rows={6}
-                  className="resize-none rounded-4xl border border-[rgba(128,128,128,0.55)] px-8 py-6 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
+                  className="resize-none rounded-4xl border border-[rgba(128,128,128,0.55)] px-6 py-3 font-display text-base font-bold text-[#B8B8B8] placeholder:text-[#B8B8B8] focus:border-[#4B4B4B] focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="rounded-full border border-[#4B4B4B] bg-[#595959] px-8 py-6 font-display text-2xl font-bold text-[#F5F1EE] transition-colors hover:bg-[#4B4B4B]"
+                  className="rounded-full border border-[#4B4B4B] bg-[#595959] px-6 py-2.5 font-display text-base font-bold text-[#F5F1EE] transition-colors hover:bg-[#4B4B4B]"
                 >
                   {contactForm.submitButton}
                 </button>

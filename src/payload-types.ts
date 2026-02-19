@@ -435,7 +435,7 @@ export interface Page {
   title: string;
   publishedOn?: string | null;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'heroSlider';
+    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'heroSlider' | 'heroCarousel';
     /**
      * Small uppercase text above the heading (e.g. "Fermentation for everyone").
      */
@@ -492,19 +492,170 @@ export interface Page {
         }[]
       | null;
     media?: (string | null) | Media;
+    /**
+     * Each slide has a fullscreen image with overlay text and CTA.
+     */
+    slides?:
+      | {
+          /**
+           * Fullscreen background for this slide.
+           */
+          image: string | Media;
+          /**
+           * Main heading on the slide.
+           */
+          title: string;
+          /**
+           * Optional supporting text.
+           */
+          description?: string | null;
+          /**
+           * CTA button text (e.g., "Order Now", "Learn More").
+           */
+          buttonLabel?: string | null;
+          /**
+           * Where the button links to.
+           */
+          buttonUrl?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
-  layout: (
-    | AboutBlock
-    | CallToActionBlock
-    | ContentBlock
-    | MediaBlock
-    | ArchiveBlock
-    | CarouselBlock
-    | ThreeItemGridBlock
-    | BannerBlock
-    | FormBlock
-    | WorkshopSliderBlock
-  )[];
+  /**
+   * Content blocks. Leave empty for Voucher page (slug: voucher).
+   */
+  layout?:
+    | (
+        | AboutBlock
+        | ContactBlock
+        | CallToActionBlock
+        | ContentBlock
+        | MediaBlock
+        | ArchiveBlock
+        | CarouselBlock
+        | ThreeItemGridBlock
+        | BannerBlock
+        | FormBlock
+        | WorkshopSliderBlock
+      )[]
+    | null;
+  /**
+   * Content for the Gift Voucher page. These fields only apply when this page's slug is "voucher".
+   */
+  voucher?: {
+    /**
+     * Main headline above the voucher form (e.g. "Give the gift of fermentation").
+     */
+    heroHeading: string;
+    /**
+     * Short intro text below the heading explaining the voucher.
+     */
+    heroDescription: string;
+    /**
+     * List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.
+     */
+    voucherAmounts: {
+      amount: string;
+      id?: string | null;
+    }[];
+    /**
+     * Ways to receive the voucher (e.g. by email or post).
+     */
+    deliveryOptions: {
+      /**
+       * Internal key, e.g. "email" or "post". Used for logic, not shown.
+       */
+      type: string;
+      /**
+       * Label shown to the user (e.g. "By email to print at home").
+       */
+      title: string;
+      /**
+       * Icon displayed next to this option.
+       */
+      icon: 'email' | 'card';
+      id?: string | null;
+    }[];
+    /**
+     * Logo displayed on the voucher preview card. Leave empty to use fallback.
+     */
+    cardLogo?: (string | null) | Media;
+    /**
+     * Label on the voucher preview card (e.g. "GIFT VOUCHER").
+     */
+    cardLabel: string;
+    /**
+     * Label above the amount on the card (e.g. "Voucher value").
+     */
+    valueLabel: string;
+    /**
+     * Small text under the amount (e.g. "Redeemable in our shop").
+     */
+    cardDisclaimer: string;
+    /**
+     * Label above the amount buttons (e.g. "VOUCHER VALUE").
+     */
+    amountSectionLabel: string;
+    /**
+     * Label above delivery options (e.g. "DELIVERY METHOD").
+     */
+    deliverySectionLabel: string;
+    /**
+     * Label for the optional greeting message field.
+     */
+    greetingLabel: string;
+    /**
+     * Placeholder text in the greeting textarea (e.g. "Max. 250 characters").
+     */
+    greetingPlaceholder: string;
+    /**
+     * Text for the main CTA button (e.g. "Add to cart").
+     */
+    addToCartButton: string;
+    /**
+     * Heading for the "Combine with Starter Set" section.
+     */
+    starterSetHeading: string;
+    /**
+     * Body text for the starter set section.
+     */
+    starterSetDescription: string;
+    /**
+     * Button text (e.g. "View Starter Sets").
+     */
+    starterSetButton: string;
+    /**
+     * Image shown in the starter set section. Leave empty to use fallback.
+     */
+    starterSetImage?: (string | null) | Media;
+    /**
+     * Heading for the "Gift for every occasion" section.
+     */
+    giftOccasionsHeading: string;
+    /**
+     * Occasion cards with image and caption (e.g. Birthdays, Weddings).
+     */
+    giftOccasions: {
+      /**
+       * Optional. Uses fallback if empty.
+       */
+      image?: (string | null) | Media;
+      caption: string;
+      id?: string | null;
+    }[];
+    /**
+     * Heading above the voucher FAQ accordion.
+     */
+    faqHeading: string;
+    /**
+     * Frequently asked questions about vouchers.
+     */
+    faqs: {
+      question: string;
+      answer: string;
+      id?: string | null;
+    }[];
+  };
   meta?: {
     title?: string | null;
     /**
@@ -885,6 +1036,119 @@ export interface Form {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactBlock".
+ */
+export interface ContactBlock {
+  /**
+   * Heading and subtext shown above the contact form.
+   */
+  hero: {
+    /**
+     * Full-width background for the hero. Leave empty for cream background.
+     */
+    image?: (string | null) | Media;
+    /**
+     * Main heading (e.g., "Kontakt" or "Get in Touch").
+     */
+    heading: string;
+    /**
+     * Optional supporting text below the heading.
+     */
+    subtext?: string | null;
+    /**
+     * Optional CTA button (e.g., "Explore Workshops").
+     */
+    buttonLabel?: string | null;
+    /**
+     * URL for the CTA button.
+     */
+    buttonHref?: string | null;
+  };
+  /**
+   * Image displayed on the left side of the contact form card (e.g., team at workshop).
+   */
+  contactImage?: (string | null) | Media;
+  contact: {
+    /**
+     * Heading above the form (e.g., "Kontakt").
+     */
+    heading: string;
+    /**
+     * Short intro text above the form fields.
+     */
+    description: string;
+  };
+  contactForm: {
+    /**
+     * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
+     */
+    form?: (string | null) | Form;
+    placeholders: {
+      /**
+       * Placeholder for first name (e.g., "Vorname").
+       */
+      firstName: string;
+      /**
+       * Placeholder for last name (e.g., "Nachname").
+       */
+      lastName: string;
+      /**
+       * Placeholder for email field.
+       */
+      email: string;
+      /**
+       * Placeholder for message textarea.
+       */
+      message: string;
+    };
+    subjectOptions: {
+      /**
+       * Default option shown in subject dropdown (e.g., "Betreff").
+       */
+      default: string;
+      options?:
+        | {
+            label: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    /**
+     * Text on the submit button (e.g., "Submit Now").
+     */
+    submitButton: string;
+  };
+  /**
+   * Dark banner below the contact form (e.g., "For Chefs and Food Professionals").
+   */
+  ctaBanner: {
+    /**
+     * Main heading in golden accent (e.g., "For Chefs and Food Professionals").
+     */
+    heading: string;
+    /**
+     * Supporting text in white.
+     */
+    description: string;
+    /**
+     * CTA button text (e.g., "Get to know more here").
+     */
+    buttonLabel: string;
+    /**
+     * URL the button links to (e.g., "/gastronomy").
+     */
+    buttonHref: string;
+  };
+  /**
+   * Google Maps embed URL (iframe src). Get from Google Maps → Share → Embed a map. Leave empty to hide map.
+   */
+  mapEmbedUrl?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contactBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1488,11 +1752,22 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         media?: T;
+        slides?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              description?: T;
+              buttonLabel?: T;
+              buttonUrl?: T;
+              id?: T;
+            };
       };
   layout?:
     | T
     | {
         aboutBlock?: T | AboutBlockSelect<T>;
+        contactBlock?: T | ContactBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
@@ -1502,6 +1777,55 @@ export interface PagesSelect<T extends boolean = true> {
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
+      };
+  voucher?:
+    | T
+    | {
+        heroHeading?: T;
+        heroDescription?: T;
+        voucherAmounts?:
+          | T
+          | {
+              amount?: T;
+              id?: T;
+            };
+        deliveryOptions?:
+          | T
+          | {
+              type?: T;
+              title?: T;
+              icon?: T;
+              id?: T;
+            };
+        cardLogo?: T;
+        cardLabel?: T;
+        valueLabel?: T;
+        cardDisclaimer?: T;
+        amountSectionLabel?: T;
+        deliverySectionLabel?: T;
+        greetingLabel?: T;
+        greetingPlaceholder?: T;
+        addToCartButton?: T;
+        starterSetHeading?: T;
+        starterSetDescription?: T;
+        starterSetButton?: T;
+        starterSetImage?: T;
+        giftOccasionsHeading?: T;
+        giftOccasions?:
+          | T
+          | {
+              image?: T;
+              caption?: T;
+              id?: T;
+            };
+        faqHeading?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
       };
   meta?:
     | T
@@ -1630,6 +1954,64 @@ export interface AboutBlockSelect<T extends boolean = true> {
               href?: T;
             };
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactBlock_select".
+ */
+export interface ContactBlockSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        image?: T;
+        heading?: T;
+        subtext?: T;
+        buttonLabel?: T;
+        buttonHref?: T;
+      };
+  contactImage?: T;
+  contact?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+      };
+  contactForm?:
+    | T
+    | {
+        form?: T;
+        placeholders?:
+          | T
+          | {
+              firstName?: T;
+              lastName?: T;
+              email?: T;
+              message?: T;
+            };
+        subjectOptions?:
+          | T
+          | {
+              default?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+            };
+        submitButton?: T;
+      };
+  ctaBanner?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        buttonLabel?: T;
+        buttonHref?: T;
+      };
+  mapEmbedUrl?: T;
   id?: T;
   blockName?: T;
 }

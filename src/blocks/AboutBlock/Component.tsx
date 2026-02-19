@@ -216,7 +216,7 @@ export const AboutBlockComponent: React.FC<
     <div id={id} className="min-h-screen bg-white">
       {/* Hero Banner */}
       <div
-        className="relative h-[600px] w-full overflow-hidden bg-cover bg-center"
+        className="relative h-[600px] w-full overflow-hidden bg-cover bg-bottom"
         style={{
           backgroundImage: `url(${heroImageUrl})`,
         }}
@@ -328,13 +328,13 @@ export const AboutBlockComponent: React.FC<
               <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
                 <Link
                   href={cta.workshopsButton.href}
-                  className="rounded-full bg-[#6B6B6B] px-8 py-4 md:px-20 md:py-6 font-display text-lg md:text-2xl font-semibold text-[#F9F0DC] transition-colors hover:bg-[#595959]"
+                  className="rounded-full bg-[#6B6B6B] px-6 py-2.5 md:px-16 md:py-3 font-display text-lg md:text-xl font-semibold text-[#F9F0DC] transition-colors hover:bg-[#595959]"
                 >
                   {cta.workshopsButton.label}
                 </Link>
                 <Link
                   href={cta.coursesButton.href}
-                  className="rounded-full bg-white px-6 py-4 md:px-16 md:py-6 font-display text-lg md:text-2xl font-semibold text-[#4B4B4B] transition-all hover:bg-[#F9F0DC] hover:border-4 hover:border-[#4B4B4B]"
+                  className="rounded-full bg-white px-6 py-2.5 md:px-14 md:py-3 font-display text-lg md:text-xl font-semibold text-[#4B4B4B] transition-all hover:bg-[#F9F0DC] hover:border-4 hover:border-[#4B4B4B]"
                 >
                   {cta.coursesButton.label}
                 </Link>

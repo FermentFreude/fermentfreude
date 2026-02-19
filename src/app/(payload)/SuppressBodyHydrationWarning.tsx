@@ -1,28 +1,36 @@
 'use client'
 
-import { useEffect } from 'react'
+import Script from 'next/script'
 
 /**
- * Removes browser extension attributes from the body tag to prevent hydration warnings.
- * These attributes (like `cz-shortcut-listen`) are added by browser extensions
- * (e.g., password managers) and cause server/client HTML mismatches.
+ * Prevents browser extension hydration errors by removing extension-added attributes
+ * from the body BEFORE React hydrates. Uses an inline script with beforeInteractive
+ * so it runs before React, avoiding server/client HTML mismatches.
+ *
+ * Attributes like `cz-shortcut-listen` are added by browser extensions (e.g.,
+ * password managers) and cause "attributes didn't match" hydration errors.
  */
 export function SuppressBodyHydrationWarning() {
-  useEffect(() => {
-    // Remove common browser extension attributes that cause hydration warnings
-    const extensionAttributes = [
-      'cz-shortcut-listen',
-      'data-new-gr-c-s-check-loaded',
-      'data-gr-ext-installed',
-      'data-new-gr-c-s-loaded',
-    ]
-
-    extensionAttributes.forEach((attr) => {
-      if (document.body.hasAttribute(attr)) {
-        document.body.removeAttribute(attr)
-      }
-    })
-  }, [])
-
-  return null
+  return (
+    <Script
+      id="remove-extension-attributes"
+      strategy="beforeInteractive"
+      dangerouslySetInnerHTML={{
+        __html: `
+          (function() {
+            var attrs = ['cz-shortcut-listen', 'data-new-gr-c-s-check-loaded', 'data-gr-ext-installed', 'data-new-gr-c-s-loaded'];
+            function removeAttrs() {
+              if (document.body) {
+                attrs.forEach(function(a) { document.body.removeAttribute(a); });
+              } else {
+                requestAnimationFrame(removeAttrs);
+              }
+            }
+            removeAttrs();
+            document.addEventListener('DOMContentLoaded', removeAttrs);
+          })();
+        `,
+      }}
+    />
+  )
 }

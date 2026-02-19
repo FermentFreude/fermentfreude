@@ -1,4 +1,5 @@
 import { AboutBlockComponent } from '@/blocks/AboutBlock/Component'
+import { ContactBlockComponent } from '@/blocks/ContactBlock/Component'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
@@ -15,6 +16,7 @@ import type { Page } from '../payload-types'
 
 const blockComponents = {
   aboutBlock: AboutBlockComponent,
+  contactBlock: ContactBlockComponent,
   archive: ArchiveBlock,
   banner: BannerBlock,
   carousel: CarouselBlock,
@@ -27,20 +29,21 @@ const blockComponents = {
 }
 
 export const RenderBlocks: React.FC<{
-  blocks: Page['layout'][0][]
+  blocks: NonNullable<Page['layout']>
 }> = (props) => {
   const { blocks } = props
+  const blockList = blocks ?? []
 
-  const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
+  const hasBlocks = blockList.length > 0
 
   if (hasBlocks) {
     return (
       <Fragment>
-        {blocks.map((block, index) => {
+        {blockList.map((block, index) => {
           const { blockName, blockType } = block
 
           if (blockType && blockType in blockComponents) {
-            const Block = blockComponents[blockType]
+            const Block = blockComponents[blockType as keyof typeof blockComponents]
 
             if (Block) {
               return (
