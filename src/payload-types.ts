@@ -435,7 +435,14 @@ export interface Page {
   title: string;
   publishedOn?: string | null;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'heroSlider' | 'heroCarousel';
+    type:
+      | 'none'
+      | 'highImpact'
+      | 'mediumImpact'
+      | 'lowImpact'
+      | 'heroSlider'
+      | 'heroCarousel'
+      | 'foodPresentationSlider';
     /**
      * Small uppercase text above the heading (e.g. "Fermentation for everyone").
      */
@@ -505,6 +512,10 @@ export interface Page {
            * Main heading on the slide.
            */
           title: string;
+          /**
+           * Elegant tagline below the title (e.g. "Elegance in Every Spoonful").
+           */
+          tagline?: string | null;
           /**
            * Optional supporting text.
            */
@@ -1042,6 +1053,10 @@ export interface Form {
  * via the `definition` "ContactBlock".
  */
 export interface ContactBlock {
+  /**
+   * When checked, the hero section is hidden. Use this when the page has a page-level hero (e.g. Food Presentation Slider).
+   */
+  hideHeroSection?: boolean | null;
   /**
    * Heading and subtext shown above the contact form.
    */
@@ -1757,6 +1772,7 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               image?: T;
               title?: T;
+              tagline?: T;
               description?: T;
               buttonLabel?: T;
               buttonUrl?: T;
@@ -1962,6 +1978,7 @@ export interface AboutBlockSelect<T extends boolean = true> {
  * via the `definition` "ContactBlock_select".
  */
 export interface ContactBlockSelect<T extends boolean = true> {
+  hideHeroSection?: T;
   hero?:
     | T
     | {

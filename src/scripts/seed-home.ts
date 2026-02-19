@@ -53,34 +53,68 @@ async function seedHome() {
   const payload = await getPayload({ config })
 
   // ============================================================
-  // 1. Upload workshop images (or reuse existing)
+  // 1. Upload workshop images (fallback to Banner.png if workshops dir missing)
   // ============================================================
   const workshopsDir = path.resolve(process.cwd(), 'public/media/workshops')
+  const assetsDir = path.resolve(process.cwd(), 'public/assets/images')
+  const workshopScenePath = path.join(assetsDir, 'workshop-slider.png')
+  const kombuchaScenePath = path.join(assetsDir, 'workshop-kombucha.png')
+  const fallbackPath = path.join(assetsDir, 'Banner.png')
+  const readImage = (p: string) => (fs.existsSync(p) ? readLocalFile(p) : null)
+  const workshopFallback = readImage(workshopScenePath) ?? readImage(fallbackPath)
+  const kombuchaFallback = readImage(kombuchaScenePath) ?? workshopFallback
+  const laktoFile = readImage(path.join(workshopsDir, 'lakto.png')) ?? workshopFallback
+  const kombuchaFile = readImage(path.join(workshopsDir, 'kombucha.png')) ?? kombuchaFallback
+  const tempehFile = readImage(path.join(workshopsDir, 'tempeh.png')) ?? workshopFallback
 
-  // Delete any existing workshop media to avoid duplicates
-  await payload
-    .delete({ collection: 'media', where: { alt: { contains: 'workshop' } }, context: { skipAutoTranslate: true } })
-    .catch(() => {})
+  if (!laktoFile || !kombuchaFile || !tempehFile) {
+    payload.logger.error(
+      '❌ No images. Add public/media/workshops/{lakto,kombucha,tempeh}.png or public/assets/images/workshop-slider.png or Banner.png',
+    )
+    process.exit(1)
+  }
+
+  // Delete only the 3 workshop slider images we're about to recreate (not Contact page's workshop images)
+  const homeWorkshopAlts = [
+    'Lakto-Gemüse workshop – fermented vegetables in glass jars',
+    'Kombucha workshop – kombucha SCOBY and fermented tea in jar',
+    'Tempeh workshop – homemade tempeh on ceramic plate',
+  ]
+  for (const alt of homeWorkshopAlts) {
+    const existing = await payload.find({
+      collection: 'media',
+      where: { alt: { equals: alt } },
+      limit: 10,
+      depth: 0,
+    })
+    for (const doc of existing.docs) {
+      await payload.delete({
+        collection: 'media',
+        id: doc.id,
+        context: { skipAutoTranslate: true },
+      })
+    }
+  }
 
   const laktoImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Lakto-Gemüse workshop – fermented vegetables in glass jars' },
-    file: readLocalFile(path.join(workshopsDir, 'lakto.png')),
+    file: laktoFile,
   })
 
   const kombuchaImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Kombucha workshop – kombucha SCOBY and fermented tea in jar' },
-    file: readLocalFile(path.join(workshopsDir, 'kombucha.png')),
+    file: kombuchaFile,
   })
 
   const tempehImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Tempeh workshop – homemade tempeh on ceramic plate' },
-    file: readLocalFile(path.join(workshopsDir, 'tempeh.png')),
+    file: tempehFile,
   })
 
   payload.logger.info(

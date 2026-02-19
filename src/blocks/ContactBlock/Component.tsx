@@ -104,10 +104,12 @@ export const ContactBlockComponent: React.FC<
     contactImage && typeof contactImage === 'object' && contactImage !== null && 'url' in contactImage
 
   const id = toKebabCase((block as { blockName?: string }).blockName ?? 'contact')
+  const hideHeroSection = (block as { hideHeroSection?: boolean }).hideHeroSection === true
 
   return (
     <div id={id} className="min-h-screen bg-[#F9F0DC]">
-      {/* Hero — heading + subtext, with optional background image */}
+      {/* Hero — heading + subtext, with optional background image (hidden when page uses page-level hero) */}
+      {!hideHeroSection && (
       <section
         className={`relative w-full px-6 pt-16 pb-12 md:pt-24 md:pb-16 ${
           hasHeroImage ? 'min-h-[55vh] md:min-h-[65vh]' : ''
@@ -157,6 +159,7 @@ export const ContactBlockComponent: React.FC<
           ) : null}
         </div>
       </section>
+      )}
 
       {/* Main contact card — image left, form right */}
       <section className="w-full px-6 py-12 md:py-24">

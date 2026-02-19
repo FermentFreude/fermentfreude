@@ -43,6 +43,10 @@ export const hero: Field = {
           label: 'Hero Carousel',
           value: 'heroCarousel',
         },
+        {
+          label: 'Food Presentation Slider',
+          value: 'foodPresentationSlider',
+        },
       ],
       required: true,
     },
@@ -95,7 +99,8 @@ export const hero: Field = {
       label: 'Social Media Links',
       maxRows: 6,
       admin: {
-        condition: (_, { type } = {}) => type === 'heroSlider',
+        condition: (_, { type } = {}) =>
+          type === 'heroSlider' || type === 'foodPresentationSlider',
         description:
           'Social media icons displayed alongside the hero content. Leave empty to hide.',
       },
@@ -142,7 +147,8 @@ export const hero: Field = {
       minRows: 1,
       maxRows: 8,
       admin: {
-        condition: (_, { type } = {}) => type === 'heroCarousel',
+        condition: (_, { type } = {}) =>
+          type === 'heroCarousel' || type === 'foodPresentationSlider',
         description: 'Each slide has a fullscreen image with overlay text and CTA.',
       },
       fields: [
@@ -164,6 +170,16 @@ export const hero: Field = {
           label: 'Title',
           admin: {
             description: 'Main heading on the slide.',
+          },
+        },
+        {
+          name: 'tagline',
+          type: 'text',
+          required: false,
+          localized: true,
+          label: 'Tagline',
+          admin: {
+            description: 'Elegant tagline below the title (e.g. "Elegance in Every Spoonful").',
           },
         },
         {

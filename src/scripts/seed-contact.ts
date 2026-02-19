@@ -65,28 +65,108 @@ async function seedContact() {
     console.log(`  🗑️  Deleted existing contact page ${doc.id}`)
   }
 
-  // ── 2. Upload contact card image to Payload Media (Vercel Blob) ─
-  let contactImage: Media | undefined
-  const teamImagePath = path.join(imagesDir, 'Banner.png') // Use banner as placeholder; replace with team image when available
+  // ── 2. Upload images to Payload Media (Vercel Blob) ─
+  let contactFormImage: Media | undefined  // for contact form card (left side)
+  let sliderBannerImage: Media | undefined // for hero slider (Banner.png – previous)
+  let workshopImage: Media | undefined
+  const contactFormImagePath = path.join(imagesDir, 'contact-form.png')
+  const bannerPath = path.join(imagesDir, 'Banner.png')
+  const workshopImagePath = path.join(imagesDir, 'workshop-slider.png')
 
-  if (fs.existsSync(teamImagePath)) {
+  if (fs.existsSync(contactFormImagePath)) {
     const created = await payload.create({
       collection: 'media',
       data: { alt: 'contact-card – FermentFreude team at workshop' },
-      file: readLocalFile(teamImagePath),
+      file: readLocalFile(contactFormImagePath),
       context: { skipAutoTranslate: true },
     })
-    contactImage = created as Media
-    console.log(`  📸 Contact card image: ${contactImage.id}`)
-  } else {
-    console.log('  ⚠️  Banner.png not found, contact card will show placeholder')
+    contactFormImage = created as Media
+    console.log(`  📸 Contact form image: ${contactFormImage.id}`)
+  }
+
+  if (fs.existsSync(bannerPath)) {
+    const created = await payload.create({
+      collection: 'media',
+      data: { alt: 'Hero slider – FermentFreude workshop banner' },
+      file: readLocalFile(bannerPath),
+      context: { skipAutoTranslate: true },
+    })
+    sliderBannerImage = created as Media
+    console.log(`  📸 Slider banner image: ${sliderBannerImage.id}`)
+  }
+
+  const kombuchaWorkshopPath = path.join(imagesDir, 'workshop-kombucha.png')
+  const companyImagePath = path.join(imagesDir, 'company-b2b.png')
+  let kombuchaWorkshopImage: Media | undefined
+  let companyImage: Media | undefined
+
+  if (fs.existsSync(workshopImagePath)) {
+    const created = await payload.create({
+      collection: 'media',
+      data: { alt: 'Fermentation workshop – table with ingredients, jars, and fermentation station' },
+      file: readLocalFile(workshopImagePath),
+      context: { skipAutoTranslate: true },
+    })
+    workshopImage = created as Media
+    console.log(`  📸 Workshop slider image: ${workshopImage.id}`)
+  }
+
+  if (fs.existsSync(kombuchaWorkshopPath)) {
+    const created = await payload.create({
+      collection: 'media',
+      data: { alt: 'Kombucha workshop – workstations with SCOBYs, teas, and flavoring ingredients' },
+      file: readLocalFile(kombuchaWorkshopPath),
+      context: { skipAutoTranslate: true },
+    })
+    kombuchaWorkshopImage = created as Media
+    console.log(`  📸 Kombucha workshop image: ${kombuchaWorkshopImage.id}`)
+  }
+
+  if (fs.existsSync(companyImagePath)) {
+    const created = await payload.create({
+      collection: 'media',
+      data: { alt: 'B2B product display – fermented products in professional packaging on shelf in commercial kitchen' },
+      file: readLocalFile(companyImagePath),
+      context: { skipAutoTranslate: true },
+    })
+    companyImage = created as Media
+    console.log(`  📸 Company/B2B slide image: ${companyImage.id}`)
   }
 
   // ── 3. Create the Contact page in DE (default locale) ─────────
   const deData = contactDataDE({
-    contactImage,
-    heroImage: contactImage,
+    contactImage: contactFormImage,
+    heroImage: sliderBannerImage,
   })
+
+  const heroSlidesDE = sliderBannerImage
+    ? [
+        {
+          image: sliderBannerImage.id,
+          title: 'Kontakt',
+          description:
+            'Du möchtest einen Workshop buchen oder hast Fragen? Wir freuen uns auf deine Nachricht.',
+          buttonLabel: 'Workshops entdecken',
+          buttonUrl: '/workshops',
+        },
+        {
+          image: (kombuchaWorkshopImage ?? workshopImage ?? sliderBannerImage).id,
+          title: 'Workshops',
+          description:
+            'Entdecke die Kunst der Fermentation. Von Lakto-Gemüse über Kombucha bis Tempeh – lerne mit uns.',
+          buttonLabel: 'Workshop buchen',
+          buttonUrl: '/workshops',
+        },
+        {
+          image: (companyImage ?? workshopImage ?? sliderBannerImage).id,
+          title: 'Für Firmen',
+          description:
+            'Fermentierte, pflanzliche Optionen für professionelle Küchen. Wir liefern Produkte und Wissen.',
+          buttonLabel: 'Mehr erfahren',
+          buttonUrl: '/gastronomy',
+        },
+      ]
+    : []
 
   const contactPage = await payload.create({
     collection: 'pages',
@@ -100,10 +180,14 @@ async function seedContact() {
       title: 'Kontakt',
       slug: 'contact',
       _status: 'published',
-      hero: { type: 'none' },
+      hero:
+        heroSlidesDE.length > 0
+          ? { type: 'heroCarousel' as const, slides: heroSlidesDE }
+          : { type: 'none' },
       layout: [
         {
           blockType: 'contactBlock',
+          hideHeroSection: heroSlidesDE.length > 0,
           ...deData,
         },
       ],
@@ -112,7 +196,7 @@ async function seedContact() {
 
   console.log(`  ✅ Created Contact page ${contactPage.id} (DE)`)
 
-  // ── 4. Read back the layout to get array IDs ──────────────────
+  // ── 4. Read back the layout and hero to get array IDs ──────────
   const created = await payload.findByID({
     collection: 'pages',
     id: contactPage.id,
@@ -121,6 +205,8 @@ async function seedContact() {
   })
 
   const layoutBlock = (created.layout ?? [])[0]
+  const freshHero = (created.hero ?? {}) as { slides?: Array<{ id?: string }> }
+  const freshSlideIds = (freshHero.slides ?? []).map((s) => s.id)
   if (!layoutBlock) {
     console.error('  ❌ No layout block found after creation')
     process.exit(1)
@@ -135,7 +221,36 @@ async function seedContact() {
   const optionIds = ((subjectOptions?.options ?? []) as Array<{ id?: string }>).map((o) => o.id)
 
   // ── 5. Build EN data ──────────────────────────────────────────
-  const enData = contactDataEN({ contactImage, heroImage: contactImage })
+  const enData = contactDataEN({ contactImage: contactFormImage, heroImage: sliderBannerImage })
+
+  const heroSlidesEN = sliderBannerImage
+    ? [
+        {
+          image: sliderBannerImage.id,
+          title: 'Contact',
+          description:
+            'Would you like to book a workshop or have questions? We look forward to hearing from you.',
+          buttonLabel: 'Explore Workshops',
+          buttonUrl: '/workshops',
+        },
+        {
+          image: (kombuchaWorkshopImage ?? workshopImage ?? sliderBannerImage).id,
+          title: 'Workshops',
+          description:
+            'Discover the art of fermentation. From lacto vegetables to kombucha and tempeh – learn with us.',
+          buttonLabel: 'Book Workshop',
+          buttonUrl: '/workshops',
+        },
+        {
+          image: (companyImage ?? workshopImage ?? sliderBannerImage).id,
+          title: 'For Businesses',
+          description:
+            'Fermented, plant-based options for professional kitchens. We supply products and knowledge.',
+          buttonLabel: 'Learn More',
+          buttonUrl: '/gastronomy',
+        },
+      ]
+    : []
 
   if (enData.contactForm?.subjectOptions?.options && optionIds.length > 0) {
     enData.contactForm.subjectOptions.options = enData.contactForm.subjectOptions.options.map(
@@ -147,6 +262,14 @@ async function seedContact() {
   }
 
   // ── 6. Update EN locale ─────────────────────────────────────
+  const heroEN =
+    heroSlidesEN.length > 0
+      ? {
+          type: 'heroCarousel' as const,
+          slides: heroSlidesEN.map((s, i) => ({ ...s, id: freshSlideIds[i] })),
+        }
+      : { type: 'none' as const }
+
   await payload.update({
     collection: 'pages',
     id: contactPage.id,
@@ -159,10 +282,12 @@ async function seedContact() {
     data: {
       title: 'Contact',
       _status: 'published',
+      hero: heroEN,
       layout: [
         {
           id: blockId,
           blockType: 'contactBlock',
+          hideHeroSection: heroSlidesEN.length > 0,
           ...enData,
         },
       ],

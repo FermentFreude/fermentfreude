@@ -9,6 +9,16 @@ export const ContactBlock: Block = {
   },
   fields: [
     {
+      name: 'hideHeroSection',
+      type: 'checkbox',
+      label: 'Hide Hero Section',
+      defaultValue: false,
+      admin: {
+        description:
+          'When checked, the hero section is hidden. Use this when the page has a page-level hero (e.g. Food Presentation Slider).',
+      },
+    },
+    {
       name: 'hero',
       type: 'group',
       label: 'Hero Section',

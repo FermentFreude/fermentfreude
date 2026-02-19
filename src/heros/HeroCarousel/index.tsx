@@ -1,7 +1,6 @@
 'use client'
 
 import { Media } from '@/components/Media'
-import { PrimaryLogo } from '@/components/icons'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
 import Link from 'next/link'
@@ -121,7 +120,6 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
                 <div className="relative z-10 flex h-full items-center pt-16 sm:pt-20 lg:pt-24">
                   <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
                     <div className="max-w-3xl">
-                      <PrimaryLogo className="mb-4 h-8 sm:h-10 md:h-12 lg:h-14 w-auto text-[#E8C079]" />
                       <h1 className="font-display text-4xl font-bold leading-tight text-[#F6EFDD] sm:text-5xl md:text-6xl lg:text-7xl">
                         {slide.title}
                       </h1>
