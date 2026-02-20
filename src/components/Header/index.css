@@ -38,3 +38,30 @@
     }
   }
 }
+
+/* ── Transparent header on home page (desktop only) ────────── */
+@media (min-width: 1024px) {
+  /* Dark mode: white text on transparent */
+  [data-theme='dark'] header[data-transparent] .navLink,
+  [data-theme='dark'] header[data-transparent] .navLink:hover {
+    color: white;
+  }
+
+  [data-theme='dark'] header[data-transparent] .navLink::after {
+    background-color: white;
+  }
+
+  [data-theme='dark'] header[data-transparent] nav button,
+  [data-theme='dark'] header[data-transparent] nav a {
+    color: white;
+  }
+
+  /* Logo — invert to white in dark mode only */
+  [data-theme='dark'] header[data-transparent] nav img {
+    filter: brightness(0) invert(1);
+  }
+
+  [data-theme='dark'] header[data-transparent] nav svg {
+    color: white;
+  }
+}
