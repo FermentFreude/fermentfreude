@@ -508,6 +508,63 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Each slide has its own text, product images, colors, and CTA. The slider cycles through these automatically.
+     */
+    heroSlides?:
+      | {
+          /**
+           * Internal ID for this slide (e.g. "lakto", "kombucha", "tempeh", "basics"). Not shown to visitors.
+           */
+          slideId: string;
+          /**
+           * Small uppercase text above the title (e.g. "Workshop Experience").
+           */
+          eyebrow?: string | null;
+          /**
+           * Main heading for this slide. Use \n for line breaks.
+           */
+          title: string;
+          /**
+           * Short description text below the title.
+           */
+          description?: string | null;
+          /**
+           * Short tags displayed below the divider (e.g. "All-natural", "Probiotic-rich").
+           */
+          attributes?:
+            | {
+                text: string;
+                id?: string | null;
+              }[]
+            | null;
+          /**
+           * Text for the primary call-to-action button (e.g. "Learn More").
+           */
+          ctaLabel?: string | null;
+          /**
+           * URL the CTA button links to (e.g. "/workshops/lakto").
+           */
+          ctaHref?: string | null;
+          /**
+           * Hex color for the central card background (e.g. "#555954").
+           */
+          panelColor?: string | null;
+          /**
+           * Hex color for the outer/page background (e.g. "#D2DFD7").
+           */
+          bgColor?: string | null;
+          /**
+           * Product or person image shown to the left of the central card.
+           */
+          leftImage?: (string | null) | Media;
+          /**
+           * Product or person image shown to the right of the central card.
+           */
+          rightImage?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
     media?: (string | null) | Media;
     /**
      * Each slide has a fullscreen image with overlay text and CTA.
@@ -1780,6 +1837,27 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               image?: T;
+              id?: T;
+            };
+        heroSlides?:
+          | T
+          | {
+              slideId?: T;
+              eyebrow?: T;
+              title?: T;
+              description?: T;
+              attributes?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              ctaLabel?: T;
+              ctaHref?: T;
+              panelColor?: T;
+              bgColor?: T;
+              leftImage?: T;
+              rightImage?: T;
               id?: T;
             };
         media?: T;

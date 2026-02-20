@@ -73,6 +73,13 @@ async function seedHome() {
       context: { skipAutoTranslate: true },
     })
     .catch(() => {})
+  await payload
+    .delete({
+      collection: 'media',
+      where: { alt: { contains: 'slide-' } },
+      context: { skipAutoTranslate: true },
+    })
+    .catch(() => {})
 
   // Workshop images
   const laktoImage = await payload.create({
@@ -125,9 +132,65 @@ async function seedHome() {
     file: readLocalFile(path.join(heroDir, 'hero-slide-4.png')),
   })
 
-  payload.logger.info(
-    `✅ Images uploaded: lakto=${laktoImage.id}, kombucha=${kombuchaImage.id}, tempeh=${tempehImage.id}, hero1=${heroImage1.id}, hero2=${heroImage2.id}, hero3=${heroImage3.id}, hero4=${heroImage4.id}`,
-  )
+  // ── Per-slide product images (uploaded to Media / Vercel Blob) ──
+
+  // Lakto slide images
+  const laktoSlideLeft = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'slide-lakto-left – FermentFreude Sauerkraut Jar' },
+    file: readLocalFile(path.join(heroDir, 'lakto1.png')),
+  })
+  const laktoSlideRight = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'slide-lakto-right – FermentFreude Sauerkraut Jar' },
+    file: readLocalFile(path.join(heroDir, 'lakto2.png')),
+  })
+
+  // Kombucha slide images
+  const kombuchaSlideLeft = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'slide-kombucha-left – FermentFreude Kombucha Apple & Carrot' },
+    file: readLocalFile(path.join(heroDir, 'kombucha1.png')),
+  })
+  const kombuchaSlideRight = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'slide-kombucha-right – FermentFreude Kombucha Coffee Flavour' },
+    file: readLocalFile(path.join(heroDir, 'kombucha2.png')),
+  })
+
+  // Tempeh slide images
+  const tempehSlideLeft = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'slide-tempeh-left – FermentFreude Tempeh Slices' },
+    file: readLocalFile(path.join(heroDir, 'tempeh1.png')),
+  })
+  const tempehSlideRight = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'slide-tempeh-right – FermentFreude Black Bean Tempeh' },
+    file: readLocalFile(path.join(heroDir, 'tempeh2.png')),
+  })
+
+  // Basics slide images (David + Marcel)
+  const basicsSlideLeft = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'slide-basics-left – David Heider, FermentFreude founder' },
+    file: readLocalFile(path.join(heroDir, 'DavidHeroCopy.png')),
+  })
+  const basicsSlideRight = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'slide-basics-right – Marcel Rauminger, FermentFreude founder' },
+    file: readLocalFile(path.join(heroDir, 'MarcelHero.png')),
+  })
+
+  payload.logger.info('✅ All images uploaded to Media collection.')
 
   // ============================================================
   // 2. Prepare content data
@@ -248,6 +311,60 @@ async function seedHome() {
       { image: heroImage4.id },
       { image: heroImage1.id },
     ],
+    heroSlides: [
+      {
+        slideId: 'lakto',
+        eyebrow: 'Workshop-Erlebnis',
+        title: 'Entdecke die Kunst der\nLakto-Fermentation!',
+        description: 'Unser Hands-on-Workshop nimmt dich mit auf eine Reise durch die traditionelle Milchsäure-Fermentation und verwandelt einfaches Gemüse in probiotische Köstlichkeiten.',
+        attributes: [{ text: 'Natürlich' }, { text: 'Probiotisch' }, { text: 'Mit Liebe gemacht' }],
+        ctaLabel: 'Mehr erfahren',
+        ctaHref: '/workshops/lakto',
+        panelColor: '#555954',
+        bgColor: '#D2DFD7',
+        leftImage: laktoSlideLeft.id,
+        rightImage: laktoSlideRight.id,
+      },
+      {
+        slideId: 'kombucha',
+        eyebrow: 'Workshop-Erlebnis',
+        title: 'Tauche ein in die Welt des\nKombucha-Brauens!',
+        description: 'Lerne, deinen eigenen Kombucha von Grund auf zu brauen — vom Züchten des SCOBY bis zum Abfüllen deines perfekten, sprudelnden Probiotik-Tees.',
+        attributes: [{ text: 'Lebende Kulturen' }, { text: 'Natürlich spritzig' }, { text: 'Handgemacht' }],
+        ctaLabel: 'Mehr erfahren',
+        ctaHref: '/workshops/kombucha',
+        panelColor: '#555954',
+        bgColor: '#F6F0E8',
+        leftImage: kombuchaSlideLeft.id,
+        rightImage: kombuchaSlideRight.id,
+      },
+      {
+        slideId: 'tempeh',
+        eyebrow: 'Workshop-Erlebnis',
+        title: 'Meistere die Kunst der\nTempeh-Herstellung!',
+        description: 'Entdecke die indonesische Tradition des Tempeh — züchte deine eigenen Lebendkulturen und stelle proteinreiche, fermentierte Köstlichkeiten her.',
+        attributes: [{ text: 'Proteinreich' }, { text: 'Traditionell' }, { text: 'Pflanzenbasiert' }],
+        ctaLabel: 'Mehr erfahren',
+        ctaHref: '/workshops/tempeh',
+        panelColor: '#737672',
+        bgColor: '#F6F3F0',
+        leftImage: tempehSlideLeft.id,
+        rightImage: tempehSlideRight.id,
+      },
+      {
+        slideId: 'basics',
+        eyebrow: 'Workshop-Erlebnis',
+        title: 'Starte deine Reise mit den\nFermentations-Grundlagen!',
+        description: 'Der perfekte Einstieg — lerne die grundlegende Fermentationswissenschaft, Sicherheit und Techniken, um zu Hause alles sicher zu fermentieren.',
+        attributes: [{ text: 'Anfängerfreundlich' }, { text: 'Wissenschaftlich fundiert' }, { text: 'Praktisch' }],
+        ctaLabel: 'Mehr erfahren',
+        ctaHref: '/workshops/basics',
+        panelColor: '#000000',
+        bgColor: '#AEB1AE',
+        leftImage: basicsSlideLeft.id,
+        rightImage: basicsSlideRight.id,
+      },
+    ],
   }
 
   // ── Hero (EN) ──
@@ -364,6 +481,60 @@ async function seedHome() {
       { image: heroImage3.id },
       { image: heroImage4.id },
       { image: heroImage1.id },
+    ],
+    heroSlides: [
+      {
+        slideId: 'lakto',
+        eyebrow: 'Workshop Experience',
+        title: 'Discover the Art of\nLakto-Fermentation!',
+        description: 'Our hands-on workshop takes you on a journey through traditional lacto-fermentation, turning simple vegetables into probiotic-rich delicacies.',
+        attributes: [{ text: 'All-natural' }, { text: 'Probiotic-rich' }, { text: 'Made with Love' }],
+        ctaLabel: 'Learn More',
+        ctaHref: '/workshops/lakto',
+        panelColor: '#555954',
+        bgColor: '#D2DFD7',
+        leftImage: laktoSlideLeft.id,
+        rightImage: laktoSlideRight.id,
+      },
+      {
+        slideId: 'kombucha',
+        eyebrow: 'Workshop Experience',
+        title: 'Immerse Yourself in\nKombucha Brewing!',
+        description: 'Learn to brew your own kombucha from scratch — from growing the SCOBY to bottling your perfect fizzy, probiotic tea.',
+        attributes: [{ text: 'Live cultures' }, { text: 'Naturally fizzy' }, { text: 'Handcrafted' }],
+        ctaLabel: 'Learn More',
+        ctaHref: '/workshops/kombucha',
+        panelColor: '#555954',
+        bgColor: '#F6F0E8',
+        leftImage: kombuchaSlideLeft.id,
+        rightImage: kombuchaSlideRight.id,
+      },
+      {
+        slideId: 'tempeh',
+        eyebrow: 'Workshop Experience',
+        title: 'Master the Craft of\nTempeh Making!',
+        description: 'Explore the Indonesian tradition of tempeh — cultivate your own live cultures and create protein-rich, fermented goodness at home.',
+        attributes: [{ text: 'High protein' }, { text: 'Traditional' }, { text: 'Plant-based' }],
+        ctaLabel: 'Learn More',
+        ctaHref: '/workshops/tempeh',
+        panelColor: '#737672',
+        bgColor: '#F6F3F0',
+        leftImage: tempehSlideLeft.id,
+        rightImage: tempehSlideRight.id,
+      },
+      {
+        slideId: 'basics',
+        eyebrow: 'Workshop Experience',
+        title: 'Begin Your Journey with\nFermentation Basics!',
+        description: 'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
+        attributes: [{ text: 'Beginner-friendly' }, { text: 'Science-based' }, { text: 'Practical' }],
+        ctaLabel: 'Learn More',
+        ctaHref: '/workshops/basics',
+        panelColor: '#000000',
+        bgColor: '#AEB1AE',
+        leftImage: basicsSlideLeft.id,
+        rightImage: basicsSlideRight.id,
+      },
     ],
   }
 
@@ -542,6 +713,7 @@ async function seedHome() {
   const freshHero = (freshDoc.hero || {}) as Record<string, unknown>
   const freshLinks = (freshHero.links || []) as WithId[]
   const freshHeroImages = (freshHero.heroImages || []) as WithId[]
+  const freshHeroSlides = (freshHero.heroSlides || []) as (WithId & { attributes?: WithId[] })[]
   const freshLayout = Array.isArray(freshDoc.layout) ? freshDoc.layout : []
   const wsBlock = freshLayout.find((b) => 'blockType' in b && b.blockType === 'workshopSlider') as
     | BlockItem
@@ -564,6 +736,14 @@ async function seedHome() {
     heroImages: heroEN.heroImages.map((img, i) => ({
       ...img,
       id: freshHeroImages[i]?.id,
+    })),
+    heroSlides: heroEN.heroSlides.map((s, i) => ({
+      ...s,
+      id: freshHeroSlides[i]?.id,
+      attributes: s.attributes.map((a: { text: string }, j: number) => ({
+        ...a,
+        id: freshHeroSlides[i]?.attributes?.[j]?.id,
+      })),
     })),
   }
 
@@ -604,7 +784,8 @@ async function seedHome() {
 
   payload.logger.info('✅ EN saved.')
   payload.logger.info('')
-  payload.logger.info('🎉 Home page fully seeded (DE + EN) with hero + workshop slider.')
+  payload.logger.info('🎉 Home page fully seeded (DE + EN) with hero slides + workshop slider.')
+  payload.logger.info('   All slide images uploaded to Media (Vercel Blob ready).')
   payload.logger.info('   Switch locale in admin to verify both languages.')
   process.exit(0)
 }

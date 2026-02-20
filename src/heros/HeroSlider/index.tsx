@@ -1,49 +1,40 @@
 'use client'
 
-import type { Page } from '@/payload-types'
+import { Media as MediaComponent } from '@/components/Media'
+import type { Media as MediaType, Page } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
- *  SLIDE DATA — one slide per workshop
- *  Each slide has its own background color, text, image, attributes, and CTA.
- *  Later: driven by CMS heroSlides array field.
+ *  SLIDE DATA — CMS-driven via heroSlides array field.
+ *  DEFAULT_SLIDES are English fallbacks when CMS data is absent.
  * ═══════════════════════════════════════════════════════════════ */
 
-interface HeroSlide {
-  id: string
+interface ResolvedSlide {
+  slideId: string
   eyebrow: string
   title: string
   description: string
   attributes: string[]
   ctaLabel: string
   ctaHref: string
-  /** Central panel background */
   panelColor: string
-  /** Outer / page background */
   bgColor: string
+  leftImage: MediaType | null
+  rightImage: MediaType | null
 }
 
-/** Person images — same across all slides */
-const LEFT_IMAGE = {
-  src: '/media/hero/DavidHeroCopy.png',
-  alt: 'David Heider – FermentFreude founder',
-  width: 1000,
-  height: 1250,
-}
-const RIGHT_IMAGE = {
-  src: '/media/hero/MarcelHero.png',
-  alt: 'Marcel Rauminger – FermentFreude founder',
-  width: 1000,
-  height: 1250,
+/** Type guard: check if a value is a resolved Media object (not just a string ID) */
+function isResolvedMedia(val: unknown): val is MediaType {
+  return typeof val === 'object' && val !== null && 'url' in val
 }
 
-const SLIDES: HeroSlide[] = [
+const DEFAULT_SLIDES: ResolvedSlide[] = [
   {
-    id: 'lakto',
+    slideId: 'lakto',
     eyebrow: 'Workshop Experience',
     title: 'Discover the Art of\nLakto-Fermentation!',
     description:
@@ -53,9 +44,11 @@ const SLIDES: HeroSlide[] = [
     ctaHref: '/workshops/lakto',
     panelColor: '#555954',
     bgColor: '#D2DFD7',
+    leftImage: null,
+    rightImage: null,
   },
   {
-    id: 'kombucha',
+    slideId: 'kombucha',
     eyebrow: 'Workshop Experience',
     title: 'Immerse Yourself in\nKombucha Brewing!',
     description:
@@ -65,9 +58,11 @@ const SLIDES: HeroSlide[] = [
     ctaHref: '/workshops/kombucha',
     panelColor: '#555954',
     bgColor: '#F6F0E8',
+    leftImage: null,
+    rightImage: null,
   },
   {
-    id: 'tempeh',
+    slideId: 'tempeh',
     eyebrow: 'Workshop Experience',
     title: 'Master the Craft of\nTempeh Making!',
     description:
@@ -77,9 +72,11 @@ const SLIDES: HeroSlide[] = [
     ctaHref: '/workshops/tempeh',
     panelColor: '#737672',
     bgColor: '#F6F3F0',
+    leftImage: null,
+    rightImage: null,
   },
   {
-    id: 'basics',
+    slideId: 'basics',
     eyebrow: 'Workshop Experience',
     title: 'Begin Your Journey with\nFermentation Basics!',
     description:
@@ -89,8 +86,36 @@ const SLIDES: HeroSlide[] = [
     ctaHref: '/workshops/basics',
     panelColor: '#000000',
     bgColor: '#AEB1AE',
+    leftImage: null,
+    rightImage: null,
   },
 ]
+
+/** Render a slide image from CMS Media, or a neutral placeholder */
+function SlideImage({
+  media,
+  className,
+  priority,
+  size,
+}: {
+  media: MediaType | null
+  className?: string
+  priority?: boolean
+  size?: string
+}) {
+  if (media) {
+    return (
+      <MediaComponent
+        resource={media}
+        imgClassName={className}
+        priority={priority}
+        size={size}
+      />
+    )
+  }
+  // Placeholder
+  return <div className={cn('bg-[#ECE5DE] rounded-lg', className)} style={{ width: 200, height: 300 }} />
+}
 
 const AUTO_PLAY_INTERVAL = 6000
 
@@ -161,8 +186,35 @@ function NavArrow({
 
 type HeroSliderProps = Page['hero']
 
-export const HeroSlider: React.FC<HeroSliderProps> = () => {
+export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
   const { setHeaderTheme } = useHeaderTheme()
+
+  /* ── Merge CMS heroSlides with defaults ───────────────────── */
+  const slides: ResolvedSlide[] = useMemo(() => {
+    const cmsSlides = (props as Record<string, unknown>).heroSlides as
+      | NonNullable<Page['hero']['heroSlides']>
+      | undefined
+    if (!cmsSlides?.length) return DEFAULT_SLIDES
+
+    return cmsSlides.map((cs) => {
+      const fallback = DEFAULT_SLIDES.find((d) => d.slideId === cs.slideId)
+      return {
+        slideId: cs.slideId ?? fallback?.slideId ?? 'unknown',
+        eyebrow: cs.eyebrow ?? fallback?.eyebrow ?? '',
+        title: cs.title ?? fallback?.title ?? '',
+        description: cs.description ?? fallback?.description ?? '',
+        attributes: cs.attributes?.length
+          ? cs.attributes.map((a) => a.text)
+          : fallback?.attributes ?? [],
+        ctaLabel: cs.ctaLabel ?? fallback?.ctaLabel ?? 'Learn More',
+        ctaHref: cs.ctaHref ?? fallback?.ctaHref ?? '#',
+        panelColor: cs.panelColor ?? fallback?.panelColor ?? '#555954',
+        bgColor: cs.bgColor ?? fallback?.bgColor ?? '#D2DFD7',
+        leftImage: isResolvedMedia(cs.leftImage) ? cs.leftImage : (fallback?.leftImage ?? null),
+        rightImage: isResolvedMedia(cs.rightImage) ? cs.rightImage : (fallback?.rightImage ?? null),
+      }
+    })
+  }, [props])
 
   const [activeIndex, setActiveIndex] = useState(0)
   const [animState, setAnimState] = useState<'entering' | 'visible' | 'exiting'>('entering')
@@ -170,55 +222,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const progressRef = useRef<HTMLDivElement>(null)
 
-  const slide = SLIDES[activeIndex]
-  // Custom images for kombucha slide
-  const isKombucha = slide.id === 'kombucha'
-  const isLakto = slide.id === 'lakto'
-  const isTempeh = slide.id === 'tempeh'
-  const leftImage = isLakto
-    ? {
-        src: '/media/hero/lakto1.png',
-        alt: 'FermentFreude Sauerkraut Jar',
-        width: 810,
-        height: 768,
-      }
-    : isKombucha
-      ? {
-          src: '/media/hero/kombucha1.png',
-          alt: 'FermentFreude Kombucha Apple & Carrot',
-          width: 1000,
-          height: 1250,
-        }
-      : isTempeh
-        ? {
-            src: '/media/hero/tempeh1.png',
-            alt: 'FermentFreude Tempeh Slices',
-            width: 768,
-            height: 768,
-          }
-        : LEFT_IMAGE
-  const rightImage = isLakto
-    ? {
-        src: '/media/hero/lakto2.png',
-        alt: 'FermentFreude Sauerkraut Jar',
-        width: 810,
-        height: 768,
-      }
-    : isKombucha
-      ? {
-          src: '/media/hero/kombucha2.png',
-          alt: 'FermentFreude Kombucha Coffee Flavour',
-          width: 1000,
-          height: 1250,
-        }
-      : isTempeh
-        ? {
-            src: '/media/hero/tempeh2.png',
-            alt: 'FermentFreude Black Bean Tempeh',
-            width: 768,
-            height: 768,
-          }
-        : RIGHT_IMAGE
+  const slide = slides[activeIndex]
 
   useEffect(() => {
     setHeaderTheme('light')
@@ -241,12 +245,12 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
   )
 
   const goNext = useCallback(() => {
-    goToSlide((activeIndex + 1) % SLIDES.length)
-  }, [activeIndex, goToSlide])
+    goToSlide((activeIndex + 1) % slides.length)
+  }, [activeIndex, goToSlide, slides.length])
 
   const goPrev = useCallback(() => {
-    goToSlide((activeIndex - 1 + SLIDES.length) % SLIDES.length)
-  }, [activeIndex, goToSlide])
+    goToSlide((activeIndex - 1 + slides.length) % slides.length)
+  }, [activeIndex, goToSlide, slides.length])
 
   /* ── Auto-play ─────────────────────────────────────────────── */
   useEffect(() => {
@@ -263,8 +267,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
     const el = progressRef.current
     // Force restart animation
     el.style.animation = 'none'
-    // eslint-disable-next-line no-unused-expressions
-    el.offsetHeight // trigger reflow
+    void el.offsetHeight // trigger reflow
     el.style.animation = ''
   }, [activeIndex])
 
@@ -378,14 +381,11 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
               isExiting && 'hero-exit-image',
             )}
           >
-            <Image
-              src={leftImage.src}
-              alt={leftImage.alt}
-              width={leftImage.width}
-              height={leftImage.height}
+            <SlideImage
+              media={slide.leftImage}
               className="object-contain drop-shadow-xl h-[28vh] w-auto"
               priority={activeIndex === 0}
-              sizes="40vw"
+              size="40vw"
             />
           </div>
           <div
@@ -395,13 +395,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
               isExiting && 'hero-exit-image',
             )}
           >
-            <Image
-              src={rightImage.src}
-              alt={rightImage.alt}
-              width={rightImage.width}
-              height={rightImage.height}
+            <SlideImage
+              media={slide.rightImage}
               className="object-contain drop-shadow-xl h-[28vh] w-auto"
-              sizes="40vw"
+              size="40vw"
             />
           </div>
         </div>
@@ -497,7 +494,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
 
         {/* Image — Card — Image */}
         <div className="flex items-center justify-center w-full max-w-5xl mx-auto px-14 lg:px-20 xl:px-24 gap-4 lg:gap-6">
-          {/* LEFT IMAGE (David) */}
+          {/* LEFT IMAGE */}
           <div className="flex items-center justify-center">
             <div
               className={cn(
@@ -506,14 +503,11 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
                 isExiting && 'hero-exit-image',
               )}
             >
-              <Image
-                src={leftImage.src}
-                alt={leftImage.alt}
-                width={leftImage.width}
-                height={leftImage.height}
+              <SlideImage
+                media={slide.leftImage}
                 className="object-contain drop-shadow-2xl h-[45vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3"
                 priority={activeIndex === 0}
-                sizes="(min-width: 768px) 20vw, 0px"
+                size="(min-width: 768px) 20vw, 0px"
               />
             </div>
           </div>
@@ -627,7 +621,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
             </div>
           </div>
 
-          {/* RIGHT IMAGE (Marcel) */}
+          {/* RIGHT IMAGE */}
           <div className="flex items-center justify-center">
             <div
               className={cn(
@@ -636,13 +630,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
                 isExiting && 'hero-exit-image',
               )}
             >
-              <Image
-                src={rightImage.src}
-                alt={rightImage.alt}
-                width={rightImage.width}
-                height={rightImage.height}
+              <SlideImage
+                media={slide.rightImage}
                 className="object-contain drop-shadow-2xl h-[45vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3"
-                sizes="(min-width: 768px) 20vw, 0px"
+                size="(min-width: 768px) 20vw, 0px"
               />
             </div>
           </div>
@@ -652,7 +643,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = () => {
       {/* ── Bottom navigation (shared) ─────────────────────────── */}
       <div className="absolute bottom-4 left-0 right-0 z-30 flex flex-col items-center gap-2">
         <div className="flex items-center gap-2">
-          {SLIDES.map((_, i) => (
+          {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => goToSlide(i)}

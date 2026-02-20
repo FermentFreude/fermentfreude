@@ -153,6 +153,126 @@ export const hero: Field = {
       ],
     },
     {
+      name: 'heroSlides',
+      type: 'array',
+      label: 'Hero Slides',
+      minRows: 1,
+      maxRows: 8,
+      admin: {
+        condition: (_, { type } = {}) => type === 'heroSlider',
+        description:
+          'Each slide has its own text, product images, colors, and CTA. The slider cycles through these automatically.',
+      },
+      fields: [
+        {
+          name: 'slideId',
+          type: 'text',
+          required: true,
+          label: 'Slide Identifier',
+          admin: {
+            description: 'Internal ID for this slide (e.g. "lakto", "kombucha", "tempeh", "basics"). Not shown to visitors.',
+          },
+        },
+        {
+          name: 'eyebrow',
+          type: 'text',
+          localized: true,
+          label: 'Eyebrow Text',
+          admin: {
+            description: 'Small uppercase text above the title (e.g. "Workshop Experience").',
+          },
+        },
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+          required: true,
+          label: 'Slide Title',
+          admin: {
+            description: 'Main heading for this slide. Use \\n for line breaks.',
+          },
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          localized: true,
+          label: 'Slide Description',
+          admin: {
+            description: 'Short description text below the title.',
+          },
+        },
+        {
+          name: 'attributes',
+          type: 'array',
+          label: 'Attributes',
+          maxRows: 5,
+          admin: {
+            description: 'Short tags displayed below the divider (e.g. "All-natural", "Probiotic-rich").',
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              localized: true,
+              required: true,
+              label: 'Attribute Text',
+            },
+          ],
+        },
+        {
+          name: 'ctaLabel',
+          type: 'text',
+          localized: true,
+          label: 'CTA Button Label',
+          admin: {
+            description: 'Text for the primary call-to-action button (e.g. "Learn More").',
+          },
+        },
+        {
+          name: 'ctaHref',
+          type: 'text',
+          label: 'CTA Button Link',
+          admin: {
+            description: 'URL the CTA button links to (e.g. "/workshops/lakto").',
+          },
+        },
+        {
+          name: 'panelColor',
+          type: 'text',
+          label: 'Panel Color',
+          admin: {
+            description: 'Hex color for the central card background (e.g. "#555954").',
+          },
+        },
+        {
+          name: 'bgColor',
+          type: 'text',
+          label: 'Background Color',
+          admin: {
+            description: 'Hex color for the outer/page background (e.g. "#D2DFD7").',
+          },
+        },
+        {
+          name: 'leftImage',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Left Product Image',
+          admin: {
+            description: 'Product or person image shown to the left of the central card.',
+          },
+        },
+        {
+          name: 'rightImage',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Right Product Image',
+          admin: {
+            description: 'Product or person image shown to the right of the central card.',
+          },
+        },
+      ],
+    },
+    {
       name: 'media',
       type: 'upload',
       admin: {
