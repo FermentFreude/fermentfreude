@@ -48,7 +48,7 @@ export function HeaderClient({ header }: Props) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [handleScroll])
 
-  // Desktop-only transparent header on home page when at top
+  // Transparent header on home page when at top
   const isTransparent = isHomePage && isAtTop
 
   // Use CMS items if they exist with labels, otherwise fall back to hardcoded defaults
@@ -73,7 +73,7 @@ export function HeaderClient({ header }: Props) {
         className={cn(
           'border-b transition-all duration-300',
           isTransparent
-            ? 'bg-ff-ivory lg:bg-transparent border-ff-white-95 lg:border-transparent dark:bg-ff-near-black lg:dark:bg-transparent dark:border-neutral-800 lg:dark:border-transparent'
+            ? 'bg-white/60 backdrop-blur-xl border-white/30 lg:bg-transparent lg:backdrop-blur-none lg:border-transparent dark:bg-neutral-900/60 dark:backdrop-blur-xl dark:border-white/10 lg:dark:bg-transparent lg:dark:backdrop-blur-none lg:dark:border-transparent'
             : 'bg-ff-ivory dark:bg-ff-near-black border-ff-white-95 dark:border-neutral-800',
         )}
       >
