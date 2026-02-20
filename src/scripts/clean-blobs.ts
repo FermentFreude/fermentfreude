@@ -12,11 +12,7 @@
  *
  * After running this, run `pnpm seed` to re-upload optimized images.
  */
-import {
-  S3Client,
-  ListObjectsV2Command,
-  DeleteObjectsCommand,
-} from '@aws-sdk/client-s3'
+import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 
 async function cleanR2() {
   const bucket = process.env.R2_BUCKET
@@ -49,7 +45,10 @@ async function cleanR2() {
     )
     if (result.Contents) {
       allObjects.push(
-        ...result.Contents.map((o: { Key?: string; Size?: number }) => ({ key: o.Key!, size: o.Size ?? 0 })),
+        ...result.Contents.map((o: { Key?: string; Size?: number }) => ({
+          key: o.Key!,
+          size: o.Size ?? 0,
+        })),
       )
     }
     continuationToken = result.IsTruncated ? result.NextContinuationToken : undefined

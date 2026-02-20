@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
-import { homeStaticData } from '@/endpoints/seed/home-static'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
@@ -9,7 +8,6 @@ import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 
-import type { Page } from '@/payload-types'
 import { notFound } from 'next/navigation'
 
 export async function generateStaticParams() {
@@ -47,15 +45,10 @@ export default async function Page({ params }: Args) {
   const url = '/' + slug
   const locale = await getLocale()
 
-  let page = await queryPageBySlug({
+  const page = await queryPageBySlug({
     slug,
     locale,
   })
-
-  // Remove this code once your website is seeded
-  if (!page && slug === 'home') {
-    page = homeStaticData() as Page
-  }
 
   if (!page) {
     return notFound()

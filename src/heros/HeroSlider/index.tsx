@@ -1,187 +1,23 @@
 'use client'
 
-import { Media as MediaComponent } from '@/components/Media'
-import type { Media as MediaType, Page } from '@/payload-types'
+import type { Page } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
-/* ═══════════════════════════════════════════════════════════════
- *  SLIDE DATA — CMS-driven via heroSlides array field.
- *  DEFAULT_SLIDES are English fallbacks when CMS data is absent.
- * ═══════════════════════════════════════════════════════════════ */
-
-interface ResolvedSlide {
-  slideId: string
-  eyebrow: string
-  title: string
-  description: string
-  attributes: string[]
-  ctaLabel: string
-  ctaHref: string
-  panelColor: string
-  bgColor: string
-  leftImage: MediaType | null
-  rightImage: MediaType | null
-}
-
-/** Type guard: check if a value is a resolved Media object (not just a string ID) */
-function isResolvedMedia(val: unknown): val is MediaType {
-  return typeof val === 'object' && val !== null && 'url' in val
-}
-
-const DEFAULT_SLIDES: ResolvedSlide[] = [
-  {
-    slideId: 'lakto',
-    eyebrow: 'Workshop Experience',
-    title: 'Discover the Art of\nLakto-Fermentation!',
-    description:
-      'Our hands-on workshop takes you on a journey through traditional lacto-fermentation, turning simple vegetables into probiotic-rich delicacies.',
-    attributes: ['All-natural', 'Probiotic-rich', 'Made with Love'],
-    ctaLabel: 'Learn More',
-    ctaHref: '/workshops/lakto',
-    panelColor: '#555954',
-    bgColor: '#D2DFD7',
-    leftImage: null,
-    rightImage: null,
-  },
-  {
-    slideId: 'kombucha',
-    eyebrow: 'Workshop Experience',
-    title: 'Immerse Yourself in\nKombucha Brewing!',
-    description:
-      'Learn to brew your own kombucha from scratch — from growing the SCOBY to bottling your perfect fizzy, probiotic tea.',
-    attributes: ['Live cultures', 'Naturally fizzy', 'Handcrafted'],
-    ctaLabel: 'Learn More',
-    ctaHref: '/workshops/kombucha',
-    panelColor: '#555954',
-    bgColor: '#F6F0E8',
-    leftImage: null,
-    rightImage: null,
-  },
-  {
-    slideId: 'tempeh',
-    eyebrow: 'Workshop Experience',
-    title: 'Master the Craft of\nTempeh Making!',
-    description:
-      'Explore the Indonesian tradition of tempeh — cultivate your own live cultures and create protein-rich, fermented goodness at home.',
-    attributes: ['High protein', 'Traditional', 'Plant-based'],
-    ctaLabel: 'Learn More',
-    ctaHref: '/workshops/tempeh',
-    panelColor: '#737672',
-    bgColor: '#F6F3F0',
-    leftImage: null,
-    rightImage: null,
-  },
-  {
-    slideId: 'basics',
-    eyebrow: 'Workshop Experience',
-    title: 'Begin Your Journey with\nFermentation Basics!',
-    description:
-      'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
-    attributes: ['Beginner-friendly', 'Science-based', 'Practical'],
-    ctaLabel: 'Learn More',
-    ctaHref: '/workshops/basics',
-    panelColor: '#000000',
-    bgColor: '#AEB1AE',
-    leftImage: null,
-    rightImage: null,
-  },
-]
-
-/** Render a slide image from CMS Media, or a neutral placeholder */
-function SlideImage({
-  media,
-  className,
-  priority,
-  size,
-}: {
-  media: MediaType | null
-  className?: string
-  priority?: boolean
-  size?: string
-}) {
-  if (media) {
-    return (
-      <MediaComponent
-        resource={media}
-        imgClassName={className}
-        priority={priority}
-        size={size}
-      />
-    )
-  }
-  // Placeholder
-  return <div className={cn('bg-[#ECE5DE] rounded-lg', className)} style={{ width: 200, height: 300 }} />
-}
-
-const AUTO_PLAY_INTERVAL = 6000
-
-/* ── Arrow Icons ──────────────────────────────────────────────── */
-
-function NavArrow({
-  direction,
-  onClick,
-  panelColor,
-}: {
-  direction: 'left' | 'right'
-  onClick: () => void
-  panelColor: string
-}) {
-  const isLeft = direction === 'left'
-  return (
-    <button
-      onClick={onClick}
-      aria-label={isLeft ? 'Previous slide' : 'Next slide'}
-      className={cn(
-        'hidden md:flex fixed top-1/2 -translate-y-1/2 z-40',
-        'items-center justify-center',
-        'w-10 h-24',
-        'group/arrow cursor-pointer',
-        isLeft ? 'left-0' : 'right-0',
-      )}
-    >
-      {/* Filled circle — positioned to hang off the edge, always half-cut */}
-      <span
-        className={cn(
-          'absolute rounded-full transition-all duration-300 ease-out',
-          'w-24 h-24 group-hover/arrow:w-44 group-hover/arrow:h-44',
-          isLeft ? '-left-12 group-hover/arrow:-left-22' : '-right-12 group-hover/arrow:-right-22',
-        )}
-        style={{ backgroundColor: panelColor }}
-        aria-hidden="true"
-      />
-      {/* Chevron — always on screen, nudges inward on hover */}
-      <svg
-        className={cn(
-          'relative w-5 h-5 transition-transform duration-300',
-          'text-white',
-          isLeft ? 'ml-1 group-hover/arrow:translate-x-1' : 'mr-1 group-hover/arrow:-translate-x-1',
-        )}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d={isLeft ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'} />
-      </svg>
-    </button>
-  )
-}
+import { NavArrow } from './NavArrow'
+import { SlideImage } from './SlideImage'
+import type { ResolvedSlide } from './slide-data'
+import { DEFAULT_SLIDES, isResolvedMedia } from './slide-data'
+import { AUTO_PLAY_INTERVAL, useAutoPlay } from './useAutoPlay'
+import { useSwipe } from './useSwipe'
 
 /* ═══════════════════════════════════════════════════════════════
  *  HERO SLIDER — Product Presentation Style
- *  Matches the Slider Revolution "Chocolate Bar" template:
- *  - Full-viewport slide
- *  - Central dark panel with text
- *  - Large product images flanking left & right
- *  - Background color transitions per slide
- *  - Staggered CSS entrance/exit animations
- *  - Auto-play with progress bar
+ *  Full-viewport slide with central dark panel, flanking product
+ *  images, background color transitions, CSS animations, auto-play.
  * ═══════════════════════════════════════════════════════════════ */
 
 type HeroSliderProps = Page['hero']
@@ -205,7 +41,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         description: cs.description ?? fallback?.description ?? '',
         attributes: cs.attributes?.length
           ? cs.attributes.map((a) => a.text)
-          : fallback?.attributes ?? [],
+          : (fallback?.attributes ?? []),
         ctaLabel: cs.ctaLabel ?? fallback?.ctaLabel ?? 'Learn More',
         ctaHref: cs.ctaHref ?? fallback?.ctaHref ?? '#',
         panelColor: cs.panelColor ?? fallback?.panelColor ?? '#555954',
@@ -216,11 +52,19 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
     })
   }, [props])
 
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [animState, setAnimState] = useState<'entering' | 'visible' | 'exiting'>('entering')
-  const [isPaused, setIsPaused] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const progressRef = useRef<HTMLDivElement>(null)
+  const {
+    activeIndex,
+    isEntering,
+    isExiting,
+    isPaused,
+    setIsPaused,
+    progressRef,
+    goToSlide,
+    goNext,
+    goPrev,
+  } = useAutoPlay(slides.length)
+
+  const { handleTouchStart, handleTouchEnd } = useSwipe({ goNext, goPrev })
 
   const slide = slides[activeIndex]
 
@@ -228,64 +72,14 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
     setHeaderTheme('light')
   }, [setHeaderTheme])
 
-  /* ── Transition logic ──────────────────────────────────────── */
-  const goToSlide = useCallback(
-    (nextIndex: number) => {
-      if (animState === 'exiting') return
-      // Exit current
-      setAnimState('exiting')
-      setTimeout(() => {
-        setActiveIndex(nextIndex)
-        setAnimState('entering')
-        // After entrance animations complete, mark visible
-        setTimeout(() => setAnimState('visible'), 800)
-      }, 450) // exit duration
-    },
-    [animState],
-  )
-
-  const goNext = useCallback(() => {
-    goToSlide((activeIndex + 1) % slides.length)
-  }, [activeIndex, goToSlide, slides.length])
-
-  const goPrev = useCallback(() => {
-    goToSlide((activeIndex - 1 + slides.length) % slides.length)
-  }, [activeIndex, goToSlide, slides.length])
-
-  /* ── Auto-play ─────────────────────────────────────────────── */
-  useEffect(() => {
-    if (isPaused || animState === 'exiting') return
-    timerRef.current = setTimeout(goNext, AUTO_PLAY_INTERVAL)
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
-  }, [activeIndex, isPaused, animState, goNext])
-
-  /* ── Restart progress bar animation on slide change ───────── */
-  useEffect(() => {
-    if (!progressRef.current) return
-    const el = progressRef.current
-    // Force restart animation
-    el.style.animation = 'none'
-    void el.offsetHeight // trigger reflow
-    el.style.animation = ''
-  }, [activeIndex])
-
-  /* ── Initial enter ─────────────────────────────────────────── */
-  useEffect(() => {
-    const t = setTimeout(() => setAnimState('visible'), 900)
-    return () => clearTimeout(t)
-  }, [])
-
-  const isEntering = animState === 'entering'
-  const isExiting = animState === 'exiting'
-
   /* ── Render ────────────────────────────────────────────────── */
   return (
     <section
-      className="relative w-full h-svh overflow-hidden max-w-[100vw]"
+      className="relative w-full h-svh overflow-hidden max-w-[100vw] touch-pan-y"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* ── Mobile split background (below md) ─────────────── */}
       <div className="md:hidden absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -324,11 +118,9 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
       {/* ═══════════════════════════════════════════════════════
        *  MOBILE LAYOUT (below md)
-       *  Top 42%: bgColor + watermark + images + side chevrons
-       *  Bottom 58%: panelColor + text + dots
        * ═══════════════════════════════════════════════════════ */}
       <div className="md:hidden relative z-10 flex flex-col h-full">
-        {/* Mobile chevrons — half-circles at edges, grow on hover */}
+        {/* Mobile chevrons */}
         <button
           onClick={goPrev}
           aria-label="Previous slide"
@@ -484,8 +276,6 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
       {/* ═══════════════════════════════════════════════════════
        *  DESKTOP / TABLET LAYOUT (md+)
-       *  Solid bgColor background, three-column:
-       *  chevron | image | card | image | chevron
        * ═══════════════════════════════════════════════════════ */}
       <div className="hidden md:flex relative z-10 h-full items-center justify-center w-full">
         {/* Nav arrows at screen edges */}

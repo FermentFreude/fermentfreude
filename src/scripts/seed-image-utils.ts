@@ -103,8 +103,13 @@ export async function optimizedFile(
 
   const originalKB = (inputBuffer.byteLength / 1024).toFixed(0)
   const outputKB = (outputBuffer.byteLength / 1024).toFixed(0)
-  const savings = (((inputBuffer.byteLength - outputBuffer.byteLength) / inputBuffer.byteLength) * 100).toFixed(0)
-  console.log(`   📦 ${path.basename(filePath)}: ${originalKB}KB → ${outputKB}KB (${savings}% smaller)`)
+  const savings = (
+    ((inputBuffer.byteLength - outputBuffer.byteLength) / inputBuffer.byteLength) *
+    100
+  ).toFixed(0)
+  console.log(
+    `   📦 ${path.basename(filePath)}: ${originalKB}KB → ${outputKB}KB (${savings}% smaller)`,
+  )
 
   return {
     name: outputName,

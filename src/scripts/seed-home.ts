@@ -45,8 +45,8 @@ async function seedHome() {
   // ============================================================
   // 1. Upload images (or reuse existing)
   // ============================================================
-  const workshopsDir = path.resolve(process.cwd(), 'public/media/workshops')
-  const heroDir = path.resolve(process.cwd(), 'public/media/hero')
+  const workshopsDir = path.resolve(process.cwd(), 'seed-assets/media/workshops')
+  const heroDir = path.resolve(process.cwd(), 'seed-assets/media/hero')
 
   // Delete any existing workshop / hero media to avoid duplicates
   await payload
@@ -181,7 +181,7 @@ async function seedHome() {
   })
 
   // ── New block images ──
-  const imagesDir = path.resolve(process.cwd(), 'public/assets/images')
+  const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
 
   // VoucherCta image (Gift Set)
   const voucherImage = await payload.create({

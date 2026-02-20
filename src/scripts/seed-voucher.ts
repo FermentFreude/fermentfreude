@@ -29,7 +29,7 @@ import {
   voucherPageDataDE,
   voucherPageDataEN,
   seedContext as voucherSeedContext,
-} from '@/endpoints/seed/voucher-page'
+} from './data/voucher-page'
 import { IMAGE_PRESETS, optimizedFile, readLocalFile } from './seed-image-utils'
 
 async function seedVoucher() {
@@ -37,7 +37,7 @@ async function seedVoucher() {
 
   console.log('🧪 Seeding Voucher page…')
 
-  const imagesDir = path.resolve(process.cwd(), 'public/assets/images')
+  const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
 
   // ── 1. Delete any existing voucher page ──────────────────────
   const existing = await payload.find({

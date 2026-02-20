@@ -1,7 +1,6 @@
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import { cookies } from 'next/headers'
 
-import { AnnouncementBar } from './AnnouncementBar'
 import { HeaderClient } from './index.client'
 import './index.css'
 

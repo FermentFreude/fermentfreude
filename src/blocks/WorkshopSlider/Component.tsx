@@ -5,6 +5,7 @@ import type {
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
 import { cn } from '@/utilities/cn'
+import Image from 'next/image'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -219,6 +220,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                   {/* Product image — behind the card on sm+ */}
                   <div
                     className={cn(
+                      'relative',
                       'sm:absolute sm:right-0 sm:top-0',
                       'sm:z-0',
                       'sm:w-[50%] lg:w-[52%]',
@@ -229,11 +231,12 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                     )}
                   >
                     {imgUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={imgUrl}
                         alt={workshop.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="(min-width: 640px) 50vw, 100vw"
                       />
                     ) : (
                       <div className="w-full h-full bg-neutral-200 flex items-center justify-center">

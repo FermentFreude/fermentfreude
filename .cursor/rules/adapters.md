@@ -133,12 +133,43 @@ try {
 
 Available storage adapters:
 
-- **@payloadcms/storage-s3** - AWS S3
+- **@payloadcms/storage-s3** - AWS S3 / Cloudflare R2 (S3-compatible)
 - **@payloadcms/storage-azure** - Azure Blob Storage
 - **@payloadcms/storage-gcs** - Google Cloud Storage
-- **@payloadcms/storage-r2** - Cloudflare R2
-- **@payloadcms/storage-vercel-blob** - Vercel Blob
 - **@payloadcms/storage-uploadthing** - Uploadthing
+
+> **FermentFreude uses `@payloadcms/storage-s3` with Cloudflare R2.** See `src/plugins/index.ts` for the actual config.
+
+### Cloudflare R2 via S3 Adapter (FermentFreude)
+
+```typescript
+import { s3Storage } from '@payloadcms/storage-s3'
+
+export default buildConfig({
+  plugins: [
+    s3Storage({
+      collections: {
+        media: {
+          disablePayloadAccessControl: true,
+          prefix: 'media',
+          generateFileURL: ({ filename, prefix }) => {
+            return `${process.env.R2_PUBLIC_URL}/${prefix}/${filename}`
+          },
+        },
+      },
+      bucket: process.env.R2_BUCKET!,
+      config: {
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+        },
+        endpoint: process.env.R2_ENDPOINT!,
+        region: 'auto',
+      },
+    }),
+  ],
+})
+```
 
 ### AWS S3
 

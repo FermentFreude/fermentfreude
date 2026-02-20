@@ -95,7 +95,6 @@ export default buildConfig({
     },
   }),
   //email: nodemailerAdapter(),
-  endpoints: [],
   globals: [Header, Footer],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',

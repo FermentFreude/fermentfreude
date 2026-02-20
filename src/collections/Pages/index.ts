@@ -2,7 +2,6 @@ import type { CollectionConfig } from 'payload'
 
 import { adminOnly } from '@/access/adminOnly'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
-import { AboutBlock } from '@/blocks/AboutBlock/config'
 import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
@@ -13,7 +12,10 @@ import { FeatureCards } from '@/blocks/FeatureCards/config'
 import { FormBlock } from '@/blocks/Form/config'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
+import { OurStory } from '@/blocks/OurStory/config'
+import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
 import { SponsorsBar } from '@/blocks/SponsorsBar/config'
+import { TeamCards } from '@/blocks/TeamCards/config'
 import { TeamPreview } from '@/blocks/TeamPreview/config'
 import { Testimonials } from '@/blocks/Testimonials/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
@@ -99,7 +101,6 @@ export const Pages: CollectionConfig = {
               name: 'layout',
               type: 'blocks',
               blocks: [
-                AboutBlock,
                 ContactBlock,
                 CallToAction,
                 Content,
@@ -108,7 +109,10 @@ export const Pages: CollectionConfig = {
                 MediaBlock,
                 Archive,
                 Carousel,
+                OurStory,
+                ReadyToLearnCTA,
                 SponsorsBar,
+                TeamCards,
                 TeamPreview,
                 Testimonials,
                 ThreeItemGrid,

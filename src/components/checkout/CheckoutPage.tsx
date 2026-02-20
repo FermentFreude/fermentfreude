@@ -299,8 +299,7 @@ export const CheckoutPage: React.FC = () => {
         )}
 
         <Suspense fallback={<React.Fragment />}>
-          {/* @ts-ignore */}
-          {paymentData && paymentData?.['clientSecret'] && (
+          {paymentData && typeof paymentData['clientSecret'] === 'string' && (
             <div className="pb-16">
               <h2 className="font-medium text-3xl">Payment</h2>
               {error && <p>{`Error: ${error}`}</p>}

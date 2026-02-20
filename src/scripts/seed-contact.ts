@@ -20,7 +20,7 @@ import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
 
-import { contactDataDE, contactDataEN } from '@/endpoints/seed/contact'
+import { contactDataDE, contactDataEN } from './data/contact'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
 async function seedContact() {
@@ -28,7 +28,7 @@ async function seedContact() {
 
   console.log('🧪 Seeding Contact page…')
 
-  const imagesDir = path.resolve(process.cwd(), 'public/assets/images')
+  const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
 
   // ── 1. Delete any existing contact page ──────────────────────
   const existing = await payload.find({
@@ -48,7 +48,7 @@ async function seedContact() {
   }
 
   // ── 2. Upload images to Payload Media (Cloudflare R2) ─
-  let contactFormImage: Media | undefined  // for contact form card (left side)
+  let contactFormImage: Media | undefined // for contact form card (left side)
   let sliderBannerImage: Media | undefined // for hero slider (Banner.png – previous)
   let workshopImage: Media | undefined
   const contactFormImagePath = path.join(imagesDir, 'contact-form.png')
@@ -85,7 +85,9 @@ async function seedContact() {
   if (fs.existsSync(workshopImagePath)) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'Fermentation workshop – table with ingredients, jars, and fermentation station' },
+      data: {
+        alt: 'Fermentation workshop – table with ingredients, jars, and fermentation station',
+      },
       file: await optimizedFile(workshopImagePath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })
@@ -96,7 +98,9 @@ async function seedContact() {
   if (fs.existsSync(kombuchaWorkshopPath)) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'Kombucha workshop – workstations with SCOBYs, teas, and flavoring ingredients' },
+      data: {
+        alt: 'Kombucha workshop – workstations with SCOBYs, teas, and flavoring ingredients',
+      },
       file: await optimizedFile(kombuchaWorkshopPath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })
@@ -107,7 +111,9 @@ async function seedContact() {
   if (fs.existsSync(companyImagePath)) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'B2B product display – fermented products in professional packaging on shelf in commercial kitchen' },
+      data: {
+        alt: 'B2B product display – fermented products in professional packaging on shelf in commercial kitchen',
+      },
       file: await optimizedFile(companyImagePath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })

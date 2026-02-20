@@ -1,10 +1,11 @@
-# Copilot Instructions — FermentFreude
+# Cursor Rules — FermentFreude
 
-> **Canonical rules live in `docs/##INSTRUCTIONS.md`.** This file is a summary for GitHub Copilot. Read the full docs for detailed patterns.
+> **Canonical rules live in `docs/##INSTRUCTIONS.md`.** This file is a summary. Read the full docs for detailed patterns.
+> **Payload CMS patterns:** `docs/AGENTS.md`
+> **Design tokens:** `docs/DESIGN_SYSTEM.md`
 
 **Stack:** Next.js 15 (App Router) · Payload CMS 3.x · MongoDB Atlas M0 · Cloudflare R2 · Stripe · TailwindCSS 4 · shadcn/ui
 **Locales:** `de` (default, German) and `en` (English). DeepL auto-translation hooks exist but are skipped in seeds.
-**Full docs:** `docs/##INSTRUCTIONS.md` (project rules), `docs/AGENTS.md` (Payload patterns), `docs/DESIGN_SYSTEM.md` (design tokens)
 
 ---
 

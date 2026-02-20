@@ -6,10 +6,10 @@ import { useCallback, useEffect, useRef } from 'react'
 
 type UseClickableCardType<T extends HTMLElement> = {
   card: {
-    ref: RefObject<T>
+    ref: RefObject<T | null>
   }
   link: {
-    ref: RefObject<HTMLAnchorElement>
+    ref: RefObject<HTMLAnchorElement | null>
   }
 }
 
@@ -31,27 +31,23 @@ export function useClickableCard<T extends HTMLElement>({
   const hasActiveParent = useRef<boolean>(false)
   const pressedButton = useRef<number>(0)
 
-  const handleMouseDown = useCallback(
-    (e: MouseEvent) => {
-      if (e.target) {
-        const target = e.target as Element
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    if (e.target) {
+      const target = e.target as Element
 
-        const timeNow = +new Date()
-        const parent = target?.closest('a')
+      const timeNow = +new Date()
+      const parent = target?.closest('a')
 
-        pressedButton.current = e.button
+      pressedButton.current = e.button
 
-        if (!parent) {
-          hasActiveParent.current = false
-          timeDown.current = timeNow
-        } else {
-          hasActiveParent.current = true
-        }
+      if (!parent) {
+        hasActiveParent.current = false
+        timeDown.current = timeNow
+      } else {
+        hasActiveParent.current = true
       }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router, card, link, timeDown],
-  )
+    }
+  }, [])
 
   const handleMouseUp = useCallback(
     (e: MouseEvent) => {
@@ -71,8 +67,7 @@ export function useClickableCard<T extends HTMLElement>({
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router, card, link, timeDown],
+    [external, newTab, router, scroll],
   )
 
   useEffect(() => {
@@ -85,22 +80,17 @@ export function useClickableCard<T extends HTMLElement>({
 
     return () => {
       if (cardNode) {
-        if (cardNode) {
-          cardNode?.removeEventListener('mousedown', handleMouseDown)
-          cardNode?.removeEventListener('mouseup', handleMouseUp)
-        }
+        cardNode.removeEventListener('mousedown', handleMouseDown)
+        cardNode.removeEventListener('mouseup', handleMouseUp)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card, link, router])
+  }, [handleMouseDown, handleMouseUp])
 
   return {
     card: {
-      // @ts-expect-error
       ref: card,
     },
     link: {
-      // @ts-expect-error
       ref: link,
     },
   }

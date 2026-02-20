@@ -350,6 +350,8 @@ export default buildConfig({
   // ...
 ```
 
+> **Note:** FermentFreude uses **Cloudflare R2** (via `@payloadcms/storage-s3`) instead of Vercel Blob. See `src/plugins/index.ts` for the R2 configuration and `docs/##INSTRUCTIONS.md` for project-specific rules.
+
 ### Self-hosting
 
 Before deploying your app, you need to:
