@@ -21,6 +21,11 @@ const nextConfig = {
         hostname: '*.public.blob.vercel-storage.com',
         protocol: 'https',
       },
+      // Unsplash (fallback images for gastronomy slider)
+      {
+        hostname: 'images.unsplash.com',
+        protocol: 'https',
+      },
     ],
   },
   reactStrictMode: true,

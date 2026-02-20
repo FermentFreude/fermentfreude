@@ -633,3 +633,12 @@ button {
   animation-delay: 0.6s;
   opacity: 0;
 }
+
+/* Gastronomy Offer Cards — scroll-triggered fade-in-up with stagger */
+.offer-card {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.offer-cards-in-view .offer-card {
+  animation: fadeInUp 0.6s ease-out forwards;
+}

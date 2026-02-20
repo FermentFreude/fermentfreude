@@ -337,6 +337,7 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -533,7 +534,7 @@ export interface Page {
       | null;
   };
   /**
-   * Content blocks. Leave empty for Voucher page (slug: voucher).
+   * Content blocks. Leave empty for Voucher (slug: voucher) and Gastronomy (slug: gastronomy) pages.
    */
   layout?:
     | (
@@ -550,6 +551,103 @@ export interface Page {
         | WorkshopSliderBlock
       )[]
     | null;
+  /**
+   * Content for the Gastronomy page (/gastronomy). Only applies when slug is "gastronomy".
+   */
+  gastronomy?: {
+    /**
+     * Main heading (e.g., "Elevate Your Gastronomy Business").
+     */
+    gastronomyHeroTitle?: string | null;
+    /**
+     * Button text (e.g., "Take a look").
+     */
+    gastronomyHeroCtaLabel: string;
+    /**
+     * Where the button links (e.g., "#offer").
+     */
+    gastronomyHeroCtaUrl?: string | null;
+    /**
+     * Heading above the offer cards (e.g., "What we offer").
+     */
+    gastronomyOfferSectionTitle?: string | null;
+    /**
+     * Three service cards.
+     */
+    gastronomyOfferCards?:
+      | {
+          image?: (string | null) | Media;
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    gastronomyQuoteText?: string | null;
+    gastronomyQuoteSubtext?: string | null;
+    gastronomyWorkshopSectionTitle: string;
+    gastronomyWorkshopSectionSubtitle?: string | null;
+    /**
+     * e.g. "Nächster Termin:" / "Next Appointment:"
+     */
+    gastronomyWorkshopNextDateLabel?: string | null;
+    gastronomyWorkshopCards?:
+      | {
+          image?: (string | null) | Media;
+          title: string;
+          description: string;
+          price: string;
+          /**
+           * e.g. "pro Person" / "per Person"
+           */
+          priceSuffix?: string | null;
+          buttonLabel: string;
+          buttonUrl: string;
+          duration?: string | null;
+          /**
+           * e.g. "February 15, 2026"
+           */
+          nextDate?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    gastronomyOfferDetailsTitle?: string | null;
+    gastronomyOfferDetails?:
+      | {
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    gastronomyCollaborateImage?: (string | null) | Media;
+    gastronomyCollaborateTitle: string;
+    gastronomyCollaborateSubtitle?: string | null;
+    gastronomyContactImage?: (string | null) | Media;
+    gastronomyContactTitle: string;
+    gastronomyContactDescription?: string | null;
+    gastronomyFormPlaceholders?: {
+      firstName?: string | null;
+      lastName?: string | null;
+      email?: string | null;
+      message?: string | null;
+    };
+    gastronomySubjectOptions?: {
+      default?: string | null;
+      options?:
+        | {
+            label?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    gastronomySubmitButtonLabel?: string | null;
+    gastronomyCtaBanner?: {
+      heading?: string | null;
+      description?: string | null;
+      buttonLabel?: string | null;
+      buttonHref?: string | null;
+    };
+    gastronomyMapEmbedUrl?: string | null;
+  };
   /**
    * Content for the Gift Voucher page. These fields only apply when this page's slug is "voucher".
    */
@@ -1053,6 +1151,14 @@ export interface Form {
  * via the `definition` "ContactBlock".
  */
 export interface ContactBlock {
+  /**
+   * When checked, the "For Chefs and Food Professionals" banner below the contact form is hidden.
+   */
+  hideCtaBanner?: boolean | null;
+  /**
+   * When checked, the map section below the contact form is hidden.
+   */
+  hideMap?: boolean | null;
   /**
    * When checked, the hero section is hidden. Use this when the page has a page-level hero (e.g. Food Presentation Slider).
    */
@@ -1794,6 +1900,84 @@ export interface PagesSelect<T extends boolean = true> {
         formBlock?: T | FormBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
       };
+  gastronomy?:
+    | T
+    | {
+        gastronomyHeroTitle?: T;
+        gastronomyHeroCtaLabel?: T;
+        gastronomyHeroCtaUrl?: T;
+        gastronomyOfferSectionTitle?: T;
+        gastronomyOfferCards?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        gastronomyQuoteText?: T;
+        gastronomyQuoteSubtext?: T;
+        gastronomyWorkshopSectionTitle?: T;
+        gastronomyWorkshopSectionSubtitle?: T;
+        gastronomyWorkshopNextDateLabel?: T;
+        gastronomyWorkshopCards?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              description?: T;
+              price?: T;
+              priceSuffix?: T;
+              buttonLabel?: T;
+              buttonUrl?: T;
+              duration?: T;
+              nextDate?: T;
+              id?: T;
+            };
+        gastronomyOfferDetailsTitle?: T;
+        gastronomyOfferDetails?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        gastronomyCollaborateImage?: T;
+        gastronomyCollaborateTitle?: T;
+        gastronomyCollaborateSubtitle?: T;
+        gastronomyContactImage?: T;
+        gastronomyContactTitle?: T;
+        gastronomyContactDescription?: T;
+        gastronomyFormPlaceholders?:
+          | T
+          | {
+              firstName?: T;
+              lastName?: T;
+              email?: T;
+              message?: T;
+            };
+        gastronomySubjectOptions?:
+          | T
+          | {
+              default?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+            };
+        gastronomySubmitButtonLabel?: T;
+        gastronomyCtaBanner?:
+          | T
+          | {
+              heading?: T;
+              description?: T;
+              buttonLabel?: T;
+              buttonHref?: T;
+            };
+        gastronomyMapEmbedUrl?: T;
+      };
   voucher?:
     | T
     | {
@@ -1978,6 +2162,8 @@ export interface AboutBlockSelect<T extends boolean = true> {
  * via the `definition` "ContactBlock_select".
  */
 export interface ContactBlockSelect<T extends boolean = true> {
+  hideCtaBanner?: T;
+  hideMap?: T;
   hideHeroSection?: T;
   hero?:
     | T
@@ -2195,6 +2381,7 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
