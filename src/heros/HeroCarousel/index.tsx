@@ -21,7 +21,7 @@ const DEFAULT_SLIDES = [
       'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.',
     buttonLabel: 'Discover More',
     buttonUrl: '/about',
-    image: null as unknown,
+    image: null as string | null,
   },
 ]
 
@@ -36,7 +36,7 @@ function getImageUrl(image: unknown): string {
   return ''
 }
 
-type HeroCarouselProps = Extract<Page['hero'], { type: 'heroCarousel' }>
+type HeroCarouselProps = Page['hero'] & { type: 'heroCarousel' }
 
 export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
   const { setHeaderTheme } = useHeaderTheme()
@@ -71,7 +71,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
     if (!emblaApi) return
     onSelect()
     emblaApi.on('select', onSelect)
-    return () => emblaApi.off('select', onSelect)
+    return () => { emblaApi.off('select', onSelect) }
   }, [emblaApi, onSelect])
 
   // Autoplay: advance every 5 seconds

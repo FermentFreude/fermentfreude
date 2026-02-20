@@ -25,7 +25,7 @@ const DEFAULT_SLIDES = [
       'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.',
     buttonLabel: 'LEARN MORE',
     buttonUrl: '/about',
-    image: null as unknown,
+    image: null as string | null,
   },
 ]
 

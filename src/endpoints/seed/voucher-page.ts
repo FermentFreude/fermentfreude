@@ -20,7 +20,7 @@ const seedContext = {
  */
 export function voucherPageDataDE({ cardLogo, starterSetImage, giftOccasionImages }: VoucherPageArgs): Required<
   Pick<Page, 'slug' | 'title' | '_status' | 'voucher'>
-> & { hero: Page['hero'] } {
+> & { hero: Page['hero']; layout: Page['layout'] } {
   return {
     slug: 'voucher',
     title: 'Geschenkgutschein',
@@ -102,7 +102,7 @@ export function voucherPageDataEN(
   { cardLogo, starterSetImage, giftOccasionImages }: VoucherPageArgs,
 ): Required<
   Pick<Page, 'slug' | 'title' | '_status' | 'voucher'>
-> & { hero: Page['hero'] } {
+> & { hero: Page['hero']; layout: Page['layout'] } {
   const v = savedDoc.voucher
   if (!v) throw new Error('Voucher page DE doc has no voucher group')
 

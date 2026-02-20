@@ -8,6 +8,7 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
       type: 'heroCarousel',
       slides: [
         {
+          image: '' as unknown as string,
           title: 'Learn with us',
           description:
             'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.',
@@ -15,6 +16,7 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
           buttonUrl: '/about',
         },
         {
+          image: '' as unknown as string,
           title: 'Lacto Vegetables',
           description:
             'Discover the art of lacto-fermented vegetables. Crisp, tangy, and full of probiotics.',
@@ -22,6 +24,7 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
           buttonUrl: '/workshops/lakto-gemuese',
         },
         {
+          image: '' as unknown as string,
           title: 'Tempeh at Home',
           description:
             'Learn to craft traditional tempeh with modern techniques. Rich, nutty, versatile.',

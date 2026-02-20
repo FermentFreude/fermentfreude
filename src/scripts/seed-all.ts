@@ -16,6 +16,7 @@
  *
  * Run manually: npx tsx src/scripts/seed-all.ts [target]
  */
+// @ts-ignore
 import { config } from 'dotenv'
 import { spawnSync } from 'child_process'
 import path from 'path'

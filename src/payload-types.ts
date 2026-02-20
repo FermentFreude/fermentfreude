@@ -2705,6 +2705,26 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: string;
+  /**
+   * The banner shown at the very top of the site. Use it to highlight promotions, events, or important messages.
+   */
+  announcementBar: {
+    /**
+     * Toggle the announcement bar on or off site-wide.
+     */
+    enabled?: boolean | null;
+    /**
+     * The message displayed in the announcement bar (e.g. "New workshops available!").
+     */
+    text: string;
+    /**
+     * URL the announcement links to (e.g. "/workshops"). Leave empty for no link.
+     */
+    link?: string | null;
+  };
+  /**
+   * The main navigation links shown in the header. Drag to reorder. Each item can optionally have a dropdown with sub-items.
+   */
   navItems?:
     | {
         link: {
@@ -2766,6 +2786,13 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
+  announcementBar?:
+    | T
+    | {
+        enabled?: T;
+        text?: T;
+        link?: T;
+      };
   navItems?:
     | T
     | {
