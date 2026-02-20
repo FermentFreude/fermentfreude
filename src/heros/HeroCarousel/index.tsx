@@ -3,9 +3,9 @@
 import { Media } from '@/components/Media'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
+import useEmblaCarousel from 'embla-carousel-react'
 import Link from 'next/link'
 import React, { useCallback, useEffect } from 'react'
-import useEmblaCarousel from 'embla-carousel-react'
 
 import type { Page } from '@/payload-types'
 
@@ -71,7 +71,9 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
     if (!emblaApi) return
     onSelect()
     emblaApi.on('select', onSelect)
-    return () => { emblaApi.off('select', onSelect) }
+    return () => {
+      emblaApi.off('select', onSelect)
+    }
   }, [emblaApi, onSelect])
 
   // Autoplay: advance every 5 seconds
@@ -90,10 +92,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
           {resolvedSlides.map((slide, i) => {
             const imageUrl = getImageUrl(slide.image)
             return (
-              <div
-                key={i}
-                className="relative min-w-0 flex-[0_0_100%] h-full"
-              >
+              <div key={i} className="relative min-w-0 flex-[0_0_100%] h-full">
                 {/* Background image */}
                 {imageUrl ? (
                   <div
@@ -156,9 +155,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
               onClick={() => emblaApi?.scrollTo(i)}
               className={cn(
                 'h-2 w-2 rounded-full transition-all duration-300',
-                i === selectedIndex
-                  ? 'w-8 bg-[#E5B765]'
-                  : 'bg-white/50 hover:bg-white/70',
+                i === selectedIndex ? 'w-8 bg-[#E5B765]' : 'bg-white/50 hover:bg-white/70',
               )}
             />
           ))}

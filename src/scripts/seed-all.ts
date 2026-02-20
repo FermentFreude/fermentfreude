@@ -17,8 +17,8 @@
  * Run manually: npx tsx src/scripts/seed-all.ts [target]
  */
 // @ts-ignore
-import { config } from 'dotenv'
 import { spawnSync } from 'child_process'
+import { config } from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -80,6 +80,10 @@ if (target) {
       break
     }
   }
-  console.log(allOk ? '\n🎉 All seeds complete! Check /admin to verify.' : '\n💥 Seeding stopped due to error.')
+  console.log(
+    allOk
+      ? '\n🎉 All seeds complete! Check /admin to verify.'
+      : '\n💥 Seeding stopped due to error.',
+  )
   process.exit(allOk ? 0 : 1)
 }

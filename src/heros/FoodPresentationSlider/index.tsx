@@ -2,11 +2,10 @@
 
 import { Media } from '@/components/Media'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
-import { cn } from '@/utilities/cn'
-import Link from 'next/link'
-import React, { useCallback, useEffect } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import React, { useCallback, useEffect } from 'react'
 
 import type { Page } from '@/payload-types'
 

@@ -18,9 +18,14 @@ const seedContext = {
 /**
  * German (DE) voucher page data. Save this first so Payload generates IDs for arrays/blocks.
  */
-export function voucherPageDataDE({ cardLogo, starterSetImage, giftOccasionImages }: VoucherPageArgs): Required<
-  Pick<Page, 'slug' | 'title' | '_status' | 'voucher'>
-> & { hero: Page['hero']; layout: Page['layout'] } {
+export function voucherPageDataDE({
+  cardLogo,
+  starterSetImage,
+  giftOccasionImages,
+}: VoucherPageArgs): Required<Pick<Page, 'slug' | 'title' | '_status' | 'voucher'>> & {
+  hero: Page['hero']
+  layout: Page['layout']
+} {
   return {
     slug: 'voucher',
     title: 'Geschenkgutschein',
@@ -33,9 +38,7 @@ export function voucherPageDataDE({ cardLogo, starterSetImage, giftOccasionImage
       heroHeading: 'Verschenke Fermentation',
       heroDescription:
         'Das perfekte Geschenk für Foodies und Gesundheitsbewusste. Wähle einen Betrag und optional eine Grußnachricht für deinen Gutschein.',
-      voucherAmounts: [
-        { amount: '99€' },
-      ],
+      voucherAmounts: [{ amount: '99€' }],
       deliveryOptions: [
         {
           type: 'email',
@@ -63,10 +66,12 @@ export function voucherPageDataDE({ cardLogo, starterSetImage, giftOccasionImage
       cardLogo: cardLogo?.id ?? null,
       starterSetImage: starterSetImage?.id ?? null,
       giftOccasionsHeading: 'Ein Geschenk für jeden Anlass',
-      giftOccasions: ['Geburtstage', 'Hochzeiten', 'Team Events', 'Weihnachten'].map((caption, i) => ({
-        image: giftOccasionImages[i]?.id ?? null,
-        caption,
-      })),
+      giftOccasions: ['Geburtstage', 'Hochzeiten', 'Team Events', 'Weihnachten'].map(
+        (caption, i) => ({
+          image: giftOccasionImages[i]?.id ?? null,
+          caption,
+        }),
+      ),
       faqHeading: 'Häufige Fragen zu Gutscheinen',
       faqs: [
         {
@@ -100,9 +105,10 @@ export function voucherPageDataDE({ cardLogo, starterSetImage, giftOccasionImage
 export function voucherPageDataEN(
   savedDoc: Page,
   { cardLogo, starterSetImage, giftOccasionImages }: VoucherPageArgs,
-): Required<
-  Pick<Page, 'slug' | 'title' | '_status' | 'voucher'>
-> & { hero: Page['hero']; layout: Page['layout'] } {
+): Required<Pick<Page, 'slug' | 'title' | '_status' | 'voucher'>> & {
+  hero: Page['hero']
+  layout: Page['layout']
+} {
   const v = savedDoc.voucher
   if (!v) throw new Error('Voucher page DE doc has no voucher group')
 
@@ -125,10 +131,7 @@ export function voucherPageDataEN(
       deliveryOptions: (v.deliveryOptions ?? []).map((item, i) => ({
         id: item.id ?? undefined,
         type: item.type,
-        title:
-          i === 0
-            ? 'By email to print at home'
-            : 'By post with premium card',
+        title: i === 0 ? 'By email to print at home' : 'By post with premium card',
         icon: item.icon,
       })),
       cardLabel: 'GIFT VOUCHER',
@@ -148,7 +151,8 @@ export function voucherPageDataEN(
       giftOccasionsHeading: 'A gift for every occasion',
       giftOccasions: (v.giftOccasions ?? []).map((item, i) => {
         const occasionImage = giftOccasionImages[i]
-        const imageId = occasionImage?.id ?? (typeof item.image === 'string' ? item.image : item.image?.id)
+        const imageId =
+          occasionImage?.id ?? (typeof item.image === 'string' ? item.image : item.image?.id)
         return {
           id: item.id ?? undefined,
           image: imageId ?? null,
@@ -158,18 +162,20 @@ export function voucherPageDataEN(
       faqHeading: 'Frequently asked questions about vouchers',
       faqs: (v.faqs ?? []).map((item, i) => ({
         id: item.id ?? undefined,
-        question: [
-          'How long is a voucher valid?',
-          'Can the voucher be redeemed in instalments?',
-          'Where can I enter the code?',
-          'Can a voucher be topped up?',
-        ][i] ?? item.question,
-        answer: [
-          'Our vouchers are valid for 12 months from the date of purchase and can be redeemed for workshops, online courses and products.',
-          'Yes, you can use the voucher in several steps. The remaining balance stays on the voucher.',
-          'During checkout you can enter the voucher code in the cart. The amount is automatically deducted from the total.',
-          'Yes, you can top up an existing voucher with an additional amount at any time.',
-        ][i] ?? item.answer,
+        question:
+          [
+            'How long is a voucher valid?',
+            'Can the voucher be redeemed in instalments?',
+            'Where can I enter the code?',
+            'Can a voucher be topped up?',
+          ][i] ?? item.question,
+        answer:
+          [
+            'Our vouchers are valid for 12 months from the date of purchase and can be redeemed for workshops, online courses and products.',
+            'Yes, you can use the voucher in several steps. The remaining balance stays on the voucher.',
+            'During checkout you can enter the voucher code in the cart. The amount is automatically deducted from the total.',
+            'Yes, you can top up an existing voucher with an additional amount at any time.',
+          ][i] ?? item.answer,
       })),
     },
   }

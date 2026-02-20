@@ -258,51 +258,53 @@ export const AboutBlockComponent: React.FC<
               {team.heading}
             </h3>
             <div className="grid w-full gap-12 md:grid-cols-2">
-              {team.members.map((member: (typeof team.members)[0] & { image?: unknown }, idx: number) => {
-                const memberImageUrl = getImageUrl(member.image)
-                const memberImageAlt = getImageAlt(member.image) || member.name
+              {team.members.map(
+                (member: (typeof team.members)[0] & { image?: unknown }, idx: number) => {
+                  const memberImageUrl = getImageUrl(member.image)
+                  const memberImageAlt = getImageAlt(member.image) || member.name
 
-                return (
-                  <div
-                    key={idx}
-                    className="flex aspect-1/2 flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up hover:scale-[1.02] transition-transform duration-300"
-                    style={{
-                      animationDelay: `${(idx + 1) * 200}ms`,
-                    }}
-                  >
-                    <div className="relative aspect-3/4 w-full overflow-hidden">
-                      {memberImageUrl ? (
-                        <Media
-                          resource={member.image ?? undefined}
-                          fill
-                          imgClassName="object-cover"
-                        />
-                      ) : (
-                        <img
-                          src={
-                            idx === 0
-                              ? '/assets/images/marcel-rauminger.jpg'
-                              : '/assets/images/david-heider.jpg'
-                          }
-                          alt={memberImageAlt}
-                          className="absolute inset-0 size-full object-cover"
-                        />
-                      )}
+                  return (
+                    <div
+                      key={idx}
+                      className="flex aspect-1/2 flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up hover:scale-[1.02] transition-transform duration-300"
+                      style={{
+                        animationDelay: `${(idx + 1) * 200}ms`,
+                      }}
+                    >
+                      <div className="relative aspect-3/4 w-full overflow-hidden">
+                        {memberImageUrl ? (
+                          <Media
+                            resource={member.image ?? undefined}
+                            fill
+                            imgClassName="object-cover"
+                          />
+                        ) : (
+                          <img
+                            src={
+                              idx === 0
+                                ? '/assets/images/marcel-rauminger.jpg'
+                                : '/assets/images/david-heider.jpg'
+                            }
+                            alt={memberImageAlt}
+                            className="absolute inset-0 size-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-4 px-8 pb-8 pt-6 text-center">
+                        <h3 className="font-display text-3xl font-bold text-[#1D1D1D]">
+                          {member.name}
+                        </h3>
+                        <p className="font-sans text-base font-normal text-[#E5B765]">
+                          {member.role}
+                        </p>
+                        <p className="font-sans text-base leading-relaxed text-[#1D1D1D]">
+                          {member.description}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-4 px-8 pb-8 pt-6 text-center">
-                      <h3 className="font-display text-3xl font-bold text-[#1D1D1D]">
-                        {member.name}
-                      </h3>
-                      <p className="font-sans text-base font-normal text-[#E5B765]">
-                        {member.role}
-                      </p>
-                      <p className="font-sans text-base leading-relaxed text-[#1D1D1D]">
-                        {member.description}
-                      </p>
-                    </div>
-                  </div>
-                )
-              })}
+                  )
+                },
+              )}
             </div>
           </div>
         </div>

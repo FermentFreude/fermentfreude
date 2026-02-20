@@ -16,8 +16,8 @@
  * Run: npx tsx src/scripts/seed-voucher.ts
  */
 // @ts-ignore
-import { config as loadEnv } from 'dotenv'
 import config from '@payload-config'
+import { config as loadEnv } from 'dotenv'
 import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'

@@ -29,7 +29,6 @@ const Layout = ({ children }: Args) => (
     importMap={importMap}
     serverFunction={serverFunction}
     htmlProps={{ suppressHydrationWarning: true }}
-    bodyProps={{ suppressHydrationWarning: true }}
   >
     <SuppressBodyHydrationWarning />
     {children}
