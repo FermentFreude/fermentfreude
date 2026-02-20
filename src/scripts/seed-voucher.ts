@@ -15,8 +15,8 @@
  *
  * Run: npx tsx src/scripts/seed-voucher.ts
  */
-// @ts-ignore
 import config from '@payload-config'
+// @ts-expect-error — dotenv types not resolved via package.json exports
 import { config as loadEnv } from 'dotenv'
 import fs from 'fs'
 import path from 'path'

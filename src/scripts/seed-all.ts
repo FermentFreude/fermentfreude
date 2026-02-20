@@ -16,8 +16,8 @@
  *
  * Run manually: npx tsx src/scripts/seed-all.ts [target]
  */
-// @ts-ignore
 import { spawnSync } from 'child_process'
+// @ts-expect-error — dotenv types not resolved via package.json exports
 import { config } from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
