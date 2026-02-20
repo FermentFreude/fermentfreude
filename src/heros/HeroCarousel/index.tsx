@@ -109,11 +109,11 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
                     />
                   </div>
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#2a2a2a] to-[#1a1a1a]" />
+                  <div className="absolute inset-0 bg-linear-to-br from-[#2a2a2a] to-[#1a1a1a]" />
                 )}
 
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/50 to-black/30" />
 
                 {/* Content */}
                 <div className="relative z-10 flex h-full items-center pt-16 sm:pt-20 lg:pt-24">
