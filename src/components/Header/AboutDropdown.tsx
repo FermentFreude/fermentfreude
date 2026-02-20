@@ -17,6 +17,11 @@ const aboutItems = [
     href: '/fermentation',
     description: 'Was ist Fermentation?',
   },
+  {
+    label: 'Kontakt',
+    href: '/contact',
+    description: 'Kontaktieren Sie uns',
+  },
 ]
 
 export function AboutDropdown() {
@@ -25,7 +30,8 @@ export function AboutDropdown() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
 
-  const isActive = pathname === '/about' || pathname.includes('/fermentation')
+  const isActive =
+    pathname === '/about' || pathname === '/contact' || pathname.includes('/fermentation')
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -100,7 +106,8 @@ export function AboutDropdown() {
 export function AboutDropdownMobile() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
-  const isActive = pathname === '/about' || pathname.includes('/fermentation')
+  const isActive =
+    pathname === '/about' || pathname === '/contact' || pathname.includes('/fermentation')
 
   return (
     <div>

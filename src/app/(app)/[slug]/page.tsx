@@ -63,7 +63,11 @@ export default async function Page({ params }: Args) {
 
   const { hero, layout } = page
 
-  const isFullBleedHero = hero.type === 'heroSlider' || hero.type === 'highImpact'
+  const isFullBleedHero =
+    hero.type === 'heroSlider' ||
+    hero.type === 'heroCarousel' ||
+    hero.type === 'foodPresentationSlider' ||
+    hero.type === 'highImpact'
 
   return (
     <article className={isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'}>
@@ -92,6 +96,7 @@ const queryPageBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' |
 
   const result = await payload.find({
     collection: 'pages',
+    depth: 3,
     draft,
     limit: 1,
     locale,

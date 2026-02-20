@@ -39,6 +39,14 @@ export const hero: Field = {
           label: 'Hero Slider',
           value: 'heroSlider',
         },
+        {
+          label: 'Hero Carousel',
+          value: 'heroCarousel',
+        },
+        {
+          label: 'Food Presentation Slider',
+          value: 'foodPresentationSlider',
+        },
       ],
       required: true,
     },
@@ -91,7 +99,8 @@ export const hero: Field = {
       label: 'Social Media Links',
       maxRows: 6,
       admin: {
-        condition: (_, { type } = {}) => type === 'heroSlider',
+        condition: (_, { type } = {}) =>
+          type === 'heroSlider' || type === 'foodPresentationSlider',
         description:
           'Social media icons displayed alongside the hero content. Leave empty to hide.',
       },
@@ -130,6 +139,76 @@ export const hero: Field = {
       },
       relationTo: 'media',
       required: true,
+    },
+    {
+      name: 'slides',
+      type: 'array',
+      label: 'Carousel Slides',
+      minRows: 1,
+      maxRows: 8,
+      admin: {
+        condition: (_, { type } = {}) =>
+          type === 'heroCarousel' || type === 'foodPresentationSlider',
+        description: 'Each slide has a fullscreen image with overlay text and CTA.',
+      },
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+          label: 'Background Image',
+          admin: {
+            description: 'Fullscreen background for this slide.',
+          },
+        },
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+          localized: true,
+          label: 'Title',
+          admin: {
+            description: 'Main heading on the slide.',
+          },
+        },
+        {
+          name: 'tagline',
+          type: 'text',
+          required: false,
+          localized: true,
+          label: 'Tagline',
+          admin: {
+            description: 'Elegant tagline below the title (e.g. "Elegance in Every Spoonful").',
+          },
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          localized: true,
+          label: 'Description',
+          admin: {
+            description: 'Optional supporting text.',
+          },
+        },
+        {
+          name: 'buttonLabel',
+          type: 'text',
+          localized: true,
+          label: 'Button Label',
+          admin: {
+            description: 'CTA button text (e.g., "Order Now", "Learn More").',
+          },
+        },
+        {
+          name: 'buttonUrl',
+          type: 'text',
+          label: 'Button URL',
+          admin: {
+            description: 'Where the button links to.',
+          },
+        },
+      ],
     },
   ],
   label: false,

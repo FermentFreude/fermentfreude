@@ -28,6 +28,7 @@ export function voucherPageDataDE({ cardLogo, starterSetImage, giftOccasionImage
     hero: {
       type: 'none',
     },
+    layout: [],
     voucher: {
       heroHeading: 'Verschenke Fermentation',
       heroDescription:
@@ -62,13 +63,10 @@ export function voucherPageDataDE({ cardLogo, starterSetImage, giftOccasionImage
       cardLogo: cardLogo?.id ?? null,
       starterSetImage: starterSetImage?.id ?? null,
       giftOccasionsHeading: 'Ein Geschenk für jeden Anlass',
-      giftOccasions: giftOccasionImages
-        .filter((img): img is Media => img !== null)
-        .slice(0, 4)
-        .map((img, i) => ({
-          image: img.id,
-          caption: ['Geburtstage', 'Hochzeiten', 'Team Events', 'Weihnachten'][i] ?? 'Occasion',
-        })),
+      giftOccasions: ['Geburtstage', 'Hochzeiten', 'Team Events', 'Weihnachten'].map((caption, i) => ({
+        image: giftOccasionImages[i]?.id ?? null,
+        caption,
+      })),
       faqHeading: 'Häufige Fragen zu Gutscheinen',
       faqs: [
         {
@@ -115,6 +113,7 @@ export function voucherPageDataEN(
     hero: {
       type: 'none',
     },
+    layout: [],
     voucher: {
       heroHeading: 'Give the gift of fermentation',
       heroDescription:
@@ -150,13 +149,12 @@ export function voucherPageDataEN(
       giftOccasions: (v.giftOccasions ?? []).map((item, i) => {
         const occasionImage = giftOccasionImages[i]
         const imageId = occasionImage?.id ?? (typeof item.image === 'string' ? item.image : item.image?.id)
-        if (!imageId) return null
         return {
           id: item.id ?? undefined,
-          image: imageId,
+          image: imageId ?? null,
           caption: ['Birthdays', 'Weddings', 'Team events', 'Christmas'][i] ?? item.caption,
         }
-      }).filter((item): item is NonNullable<typeof item> => item !== null),
+      }),
       faqHeading: 'Frequently asked questions about vouchers',
       faqs: (v.faqs ?? []).map((item, i) => ({
         id: item.id ?? undefined,

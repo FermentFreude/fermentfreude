@@ -2,6 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { adminOnly } from '@/access/adminOnly'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
+import { AboutBlock } from '@/blocks/AboutBlock/config'
+import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
@@ -11,7 +13,6 @@ import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
-import { AboutBlock } from '@/blocks/AboutBlock/config'
 import { hero } from '@/fields/hero'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
@@ -92,6 +93,8 @@ export const Pages: CollectionConfig = {
               name: 'layout',
               type: 'blocks',
               blocks: [
+                AboutBlock,
+                ContactBlock,
                 CallToAction,
                 Content,
                 MediaBlock,
@@ -101,8 +104,11 @@ export const Pages: CollectionConfig = {
                 Banner,
                 FormBlock,
                 WorkshopSlider,
-                AboutBlock,
               ],
+              required: false,
+              admin: {
+                description: 'Content blocks. Leave empty for Voucher page (slug: voucher).',
+              },
             },
           ],
           label: 'Content',
@@ -111,7 +117,8 @@ export const Pages: CollectionConfig = {
           name: 'voucher',
           label: 'Voucher Page',
           admin: {
-            description: 'Content for the Gift Voucher page. These fields only apply when this page’s slug is "voucher".',
+            description:
+              'Content for the Gift Voucher page. These fields only apply when this page\'s slug is "voucher".',
             condition: (data) => data?.slug === 'voucher',
           },
           fields: [
@@ -121,7 +128,10 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Hero Heading',
-              admin: { description: 'Main headline above the voucher form (e.g. "Give the gift of fermentation").' },
+              admin: {
+                description:
+                  'Main headline above the voucher form (e.g. "Give the gift of fermentation").',
+              },
             },
             {
               name: 'heroDescription',
@@ -129,7 +139,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Hero Description',
-              admin: { description: 'Short intro text below the heading explaining the voucher.' },
+              admin: {
+                description: 'Short intro text below the heading explaining the voucher.',
+              },
             },
             {
               name: 'voucherAmounts',
@@ -137,7 +149,10 @@ export const Pages: CollectionConfig = {
               label: 'Voucher Amounts',
               required: true,
               minRows: 1,
-              admin: { description: 'List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.' },
+              admin: {
+                description:
+                  'List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.',
+              },
               fields: [
                 {
                   name: 'amount',
@@ -160,7 +175,9 @@ export const Pages: CollectionConfig = {
                   type: 'text',
                   required: true,
                   label: 'Type (internal)',
-                  admin: { description: 'Internal key, e.g. "email" or "post". Used for logic, not shown.' },
+                  admin: {
+                    description: 'Internal key, e.g. "email" or "post". Used for logic, not shown.',
+                  },
                 },
                 {
                   name: 'title',
@@ -168,7 +185,9 @@ export const Pages: CollectionConfig = {
                   required: true,
                   localized: true,
                   label: 'Title',
-                  admin: { description: 'Label shown to the user (e.g. "By email to print at home").' },
+                  admin: {
+                    description: 'Label shown to the user (e.g. "By email to print at home").',
+                  },
                 },
                 {
                   name: 'icon',
@@ -188,7 +207,10 @@ export const Pages: CollectionConfig = {
               type: 'upload',
               relationTo: 'media',
               label: 'Card Logo',
-              admin: { description: 'Logo displayed on the voucher preview card. Leave empty to use fallback.' },
+              admin: {
+                description:
+                  'Logo displayed on the voucher preview card. Leave empty to use fallback.',
+              },
             },
             {
               name: 'cardLabel',
@@ -196,7 +218,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Card Label',
-              admin: { description: 'Label on the voucher preview card (e.g. "GIFT VOUCHER").' },
+              admin: {
+                description: 'Label on the voucher preview card (e.g. "GIFT VOUCHER").',
+              },
             },
             {
               name: 'valueLabel',
@@ -204,7 +228,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Value Label',
-              admin: { description: 'Label above the amount on the card (e.g. "Voucher value").' },
+              admin: {
+                description: 'Label above the amount on the card (e.g. "Voucher value").',
+              },
             },
             {
               name: 'cardDisclaimer',
@@ -212,7 +238,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Card Disclaimer',
-              admin: { description: 'Small text under the amount (e.g. "Redeemable in our shop").' },
+              admin: {
+                description: 'Small text under the amount (e.g. "Redeemable in our shop").',
+              },
             },
             {
               name: 'amountSectionLabel',
@@ -220,7 +248,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Amount Section Label',
-              admin: { description: 'Label above the amount buttons (e.g. "VOUCHER VALUE").' },
+              admin: {
+                description: 'Label above the amount buttons (e.g. "VOUCHER VALUE").',
+              },
             },
             {
               name: 'deliverySectionLabel',
@@ -228,7 +258,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Delivery Section Label',
-              admin: { description: 'Label above delivery options (e.g. "DELIVERY METHOD").' },
+              admin: {
+                description: 'Label above delivery options (e.g. "DELIVERY METHOD").',
+              },
             },
             {
               name: 'greetingLabel',
@@ -236,7 +268,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Greeting Message Label',
-              admin: { description: 'Label for the optional greeting message field.' },
+              admin: {
+                description: 'Label for the optional greeting message field.',
+              },
             },
             {
               name: 'greetingPlaceholder',
@@ -244,7 +278,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Greeting Placeholder',
-              admin: { description: 'Placeholder text in the greeting textarea (e.g. "Max. 250 characters").' },
+              admin: {
+                description: 'Placeholder text in the greeting textarea (e.g. "Max. 250 characters").',
+              },
             },
             {
               name: 'addToCartButton',
@@ -252,7 +288,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Add to Cart Button',
-              admin: { description: 'Text for the main CTA button (e.g. "Add to cart").' },
+              admin: {
+                description: 'Text for the main CTA button (e.g. "Add to cart").',
+              },
             },
             {
               name: 'starterSetHeading',
@@ -260,7 +298,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Starter Set Section Heading',
-              admin: { description: 'Heading for the "Combine with Starter Set" section.' },
+              admin: {
+                description: 'Heading for the "Combine with Starter Set" section.',
+              },
             },
             {
               name: 'starterSetDescription',
@@ -268,7 +308,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Starter Set Description',
-              admin: { description: 'Body text for the starter set section.' },
+              admin: {
+                description: 'Body text for the starter set section.',
+              },
             },
             {
               name: 'starterSetButton',
@@ -276,14 +318,19 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Starter Set Button',
-              admin: { description: 'Button text (e.g. "View Starter Sets").' },
+              admin: {
+                description: 'Button text (e.g. "View Starter Sets").',
+              },
             },
             {
               name: 'starterSetImage',
               type: 'upload',
               relationTo: 'media',
               label: 'Starter Set Image',
-              admin: { description: 'Image shown in the starter set section. Leave empty to use fallback.' },
+              admin: {
+                description:
+                  'Image shown in the starter set section. Leave empty to use fallback.',
+              },
             },
             {
               name: 'giftOccasionsHeading',
@@ -291,7 +338,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'Gift Occasions Heading',
-              admin: { description: 'Heading for the "Gift for every occasion" section.' },
+              admin: {
+                description: 'Heading for the "Gift for every occasion" section.',
+              },
             },
             {
               name: 'giftOccasions',
@@ -299,14 +348,18 @@ export const Pages: CollectionConfig = {
               label: 'Gift Occasions',
               required: true,
               minRows: 1,
-              admin: { description: 'Occasion cards with image and caption (e.g. Birthdays, Weddings).' },
+              maxRows: 4,
+              admin: {
+                description: 'Occasion cards with image and caption (e.g. Birthdays, Weddings).',
+              },
               fields: [
                 {
                   name: 'image',
                   type: 'upload',
                   relationTo: 'media',
-                  required: true,
+                  required: false,
                   label: 'Image',
+                  admin: { description: 'Optional. Uses fallback if empty.' },
                 },
                 {
                   name: 'caption',
@@ -323,7 +376,9 @@ export const Pages: CollectionConfig = {
               required: true,
               localized: true,
               label: 'FAQ Heading',
-              admin: { description: 'Heading above the voucher FAQ accordion.' },
+              admin: {
+                description: 'Heading above the voucher FAQ accordion.',
+              },
             },
             {
               name: 'faqs',
@@ -331,7 +386,9 @@ export const Pages: CollectionConfig = {
               label: 'FAQs',
               required: true,
               minRows: 1,
-              admin: { description: 'Frequently asked questions about vouchers.' },
+              admin: {
+                description: 'Frequently asked questions about vouchers.',
+              },
               fields: [
                 {
                   name: 'question',

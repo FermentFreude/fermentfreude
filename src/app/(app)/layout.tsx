@@ -37,14 +37,14 @@ const twitterSite = TWITTER_SITE ? ensureStartsWith(TWITTER_SITE, 'https://') : 
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning={true}>
       <head>
         <InitTheme />
         <link rel="stylesheet" href="https://use.typekit.net/dtk7kir.css" />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning={true}>
         <Providers>
           <AdminBar />
           <LivePreviewListener />

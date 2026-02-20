@@ -5,7 +5,30 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
     slug: 'home',
     _status: 'published',
     hero: {
-      type: 'heroSlider',
+      type: 'heroCarousel',
+      slides: [
+        {
+          title: 'Learn with us',
+          description:
+            'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.',
+          buttonLabel: 'Discover More',
+          buttonUrl: '/about',
+        },
+        {
+          title: 'Lacto Vegetables',
+          description:
+            'Discover the art of lacto-fermented vegetables. Crisp, tangy, and full of probiotics.',
+          buttonLabel: 'Book Workshop',
+          buttonUrl: '/workshops/lakto-gemuese',
+        },
+        {
+          title: 'Tempeh at Home',
+          description:
+            'Learn to craft traditional tempeh with modern techniques. Rich, nutty, versatile.',
+          buttonLabel: 'Learn More',
+          buttonUrl: '/workshops/tempeh',
+        },
+      ],
       richText: {
         root: {
           type: 'root',

@@ -1,5 +1,6 @@
 import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
 
+import { aboutDataDE, aboutDataEN } from './about'
 import { contactFormData } from './contact-form'
 import { contactPageData } from './contact-page'
 import { homePageData } from './home'
@@ -225,17 +226,22 @@ export const seed = async ({
     },
   })
 
-  const [black, white] = await Promise.all(
-    colorVariantOptions.map((option) => {
-      return payload.create({
-        collection: 'variantOptions',
-        data: {
-          ...option,
-          variantType: colorVariantType.id,
-        },
-      })
-    }),
-  )
+  // Create color variant options sequentially to avoid MongoDB transaction conflicts
+  // when product creation validates gallery.variantOption references
+  const black = await payload.create({
+    collection: 'variantOptions',
+    data: {
+      ...colorVariantOptions[0],
+      variantType: colorVariantType.id,
+    },
+  })
+  const white = await payload.create({
+    collection: 'variantOptions',
+    data: {
+      ...colorVariantOptions[1],
+      variantType: colorVariantType.id,
+    },
+  })
 
   payload.logger.info(`— Seeding products...`)
 
@@ -614,6 +620,95 @@ export const seed = async ({
       },
     }),
   ])
+
+  payload.logger.info(`— Seeding About page...`)
+
+  const aboutBlockDataDE = aboutDataDE({
+    heroImage: imageHero,
+    marcelImage: undefined,
+    davidImage: undefined,
+    sponsorLogos: undefined,
+  })
+  const aboutBlockDataEN = aboutDataEN({
+    heroImage: imageHero,
+    marcelImage: undefined,
+    davidImage: undefined,
+    sponsorLogos: undefined,
+  })
+
+  // Create page with German locale first - ensure all DE localized fields are set
+  const aboutPage = await payload.create({
+    collection: 'pages',
+    locale: 'de',
+    req,
+    data: {
+      title: 'Über uns',
+      slug: 'about',
+      _status: 'published',
+      hero: {
+        type: 'none',
+      },
+      layout: [
+        {
+          blockType: 'aboutBlock',
+          blockName: 'About',
+          ...aboutBlockDataDE,
+        },
+      ],
+    },
+    context: {
+      skipRevalidate: true,
+      disableRevalidate: true,
+      skipAutoTranslate: true,
+    },
+  })
+
+  // Update with English locale - Payload should preserve DE nested localized fields
+  await payload.update({
+    collection: 'pages',
+    id: aboutPage.id,
+    locale: 'en',
+    req,
+    data: {
+      title: 'About',
+      layout: [
+        {
+          blockType: 'aboutBlock',
+          blockName: 'About',
+          ...aboutBlockDataEN,
+        },
+      ],
+    },
+    context: {
+      skipRevalidate: true,
+      disableRevalidate: true,
+      skipAutoTranslate: true,
+    },
+  })
+
+  // Re-apply German locale data to ensure nested localized fields are properly stored
+  // This addresses a potential issue where nested localized fields in blocks
+  // may not be properly persisted when updating a different locale
+  await payload.update({
+    collection: 'pages',
+    id: aboutPage.id,
+    locale: 'de',
+    req,
+    data: {
+      layout: [
+        {
+          blockType: 'aboutBlock',
+          blockName: 'About',
+          ...aboutBlockDataDE,
+        },
+      ],
+    },
+    context: {
+      skipRevalidate: true,
+      disableRevalidate: true,
+      skipAutoTranslate: true,
+    },
+  })
 
   payload.logger.info('Seeded database successfully!')
 }

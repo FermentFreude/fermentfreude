@@ -8,6 +8,7 @@ import React from 'react'
 
 import { importMap } from './admin/importMap.js'
 import './custom.scss'
+import { SuppressBodyHydrationWarning } from './SuppressBodyHydrationWarning'
 
 type Args = {
   children: React.ReactNode
@@ -28,7 +29,9 @@ const Layout = ({ children }: Args) => (
     importMap={importMap}
     serverFunction={serverFunction}
     htmlProps={{ suppressHydrationWarning: true }}
+    bodyProps={{ suppressHydrationWarning: true }}
   >
+    <SuppressBodyHydrationWarning />
     {children}
   </RootLayout>
 )

@@ -7,6 +7,7 @@
  *   pnpm seed header       # Seeds only the header
  *   pnpm seed home         # Seeds only the home page
  *   pnpm seed about        # Seeds only the about page
+ *   pnpm seed contact      # Seeds only the contact page
  *
  * Order (when seeding all):
  *   1. Header (global — nav items)
@@ -30,10 +31,11 @@ const scripts: Record<string, { name: string; file: string }> = {
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
+  contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
 }
 
-const allOrder = ['header', 'home', 'about', 'voucher']
+const allOrder = ['header', 'home', 'about', 'contact', 'voucher']
 
 function runSeed(key: string): boolean {
   const script = scripts[key]

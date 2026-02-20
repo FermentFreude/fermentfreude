@@ -16,7 +16,7 @@ async function getVoucherDocument(locale?: 'de' | 'en') {
   const payload = await getPayload({ config: configPromise })
   const result = await payload.find({
     collection: 'pages',
-    depth: 2,
+    depth: 3,
     limit: 1,
     locale: locale ?? 'de',
     where: {
@@ -33,7 +33,7 @@ const getCachedVoucher = (locale?: 'de' | 'en') =>
   unstable_cache(
     async () => getVoucherDocument(locale),
     ['voucher', locale ?? 'de'],
-    { tags: ['voucher'] },
+    { tags: ['voucher'], revalidate: 60 },
   )
 
 export const metadata: Metadata = {

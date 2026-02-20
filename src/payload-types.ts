@@ -337,7 +337,6 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -436,7 +435,14 @@ export interface Page {
   title: string;
   publishedOn?: string | null;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'heroSlider';
+    type:
+      | 'none'
+      | 'highImpact'
+      | 'mediumImpact'
+      | 'lowImpact'
+      | 'heroSlider'
+      | 'heroCarousel'
+      | 'foodPresentationSlider';
     /**
      * Small uppercase text above the heading (e.g. "Fermentation for everyone").
      */
@@ -493,9 +499,46 @@ export interface Page {
         }[]
       | null;
     media?: (string | null) | Media;
+    /**
+     * Each slide has a fullscreen image with overlay text and CTA.
+     */
+    slides?:
+      | {
+          /**
+           * Fullscreen background for this slide.
+           */
+          image: string | Media;
+          /**
+           * Main heading on the slide.
+           */
+          title: string;
+          /**
+           * Elegant tagline below the title (e.g. "Elegance in Every Spoonful").
+           */
+          tagline?: string | null;
+          /**
+           * Optional supporting text.
+           */
+          description?: string | null;
+          /**
+           * CTA button text (e.g., "Order Now", "Learn More").
+           */
+          buttonLabel?: string | null;
+          /**
+           * Where the button links to.
+           */
+          buttonUrl?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
+  /**
+   * Content blocks. Leave empty for Voucher page (slug: voucher).
+   */
   layout?:
     | (
+        | AboutBlock
+        | ContactBlock
         | CallToActionBlock
         | ContentBlock
         | MediaBlock
@@ -505,11 +548,10 @@ export interface Page {
         | BannerBlock
         | FormBlock
         | WorkshopSliderBlock
-        | AboutBlock
       )[]
     | null;
   /**
-   * Content for the Gift Voucher page. These fields only apply when this page’s slug is "voucher".
+   * Content for the Gift Voucher page. These fields only apply when this page's slug is "voucher".
    */
   voucher?: {
     /**
@@ -605,7 +647,10 @@ export interface Page {
      * Occasion cards with image and caption (e.g. Birthdays, Weddings).
      */
     giftOccasions: {
-      image: string | Media;
+      /**
+       * Optional. Uses fallback if empty.
+       */
+      image?: (string | null) | Media;
       caption: string;
       id?: string | null;
     }[];
@@ -638,6 +683,487 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AboutBlock".
+ */
+export interface AboutBlock {
+  /**
+   * Background image displayed at the top of the about page.
+   */
+  heroImage?: (string | null) | Media;
+  ourStory: {
+    /**
+     * Small label text shown above the heading (e.g., "Our Story").
+     */
+    label: string;
+    /**
+     * Large heading for the Our Story section.
+     */
+    heading: string;
+    /**
+     * Subheading text shown below the main heading.
+     */
+    subheading: string;
+    description?:
+      | {
+          /**
+           * A paragraph of text describing the story.
+           */
+          paragraph: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  team: {
+    /**
+     * Small label text shown above the heading (e.g., "Our Team").
+     */
+    label: string;
+    /**
+     * Main heading for the team section.
+     */
+    heading: string;
+    members?:
+      | {
+          /**
+           * Optional. If empty, the about page uses a fallback image for this slot.
+           */
+          image?: (string | null) | Media;
+          name: string;
+          /**
+           * Job title or role (e.g., "Fermentation Specialist & Chef").
+           */
+          role: string;
+          /**
+           * Biography or description of the team member.
+           */
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  sponsors: {
+    /**
+     * Heading text for the sponsors section.
+     */
+    heading: string;
+    logos?:
+      | {
+          image: string | Media;
+          /**
+           * Alternative text for the logo image.
+           */
+          alt: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  contact: {
+    /**
+     * Heading for the contact section.
+     */
+    heading: string;
+    /**
+     * Description text explaining how to contact.
+     */
+    description: string;
+    labels: {
+      /**
+       * Label for the location field (e.g., "Location").
+       */
+      location: string;
+      /**
+       * Label for the phone field (e.g., "Phone").
+       */
+      phone: string;
+      /**
+       * Label for the email field (e.g., "Mail").
+       */
+      email: string;
+    };
+    /**
+     * Physical address (can include line breaks).
+     */
+    location: string;
+    /**
+     * Contact phone number (not localized as it is a number).
+     */
+    phone: string;
+    /**
+     * Contact email address (not localized).
+     */
+    email: string;
+    socialMedia: {
+      facebook: string;
+      twitter: string;
+      pinterest: string;
+      youtube: string;
+    };
+  };
+  contactForm: {
+    /**
+     * Heading text above the contact form.
+     */
+    heading: string;
+    /**
+     * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
+     */
+    form?: (string | null) | Form;
+    placeholders: {
+      /**
+       * Placeholder text for the name input field.
+       */
+      name: string;
+      /**
+       * Placeholder text for the email input field.
+       */
+      email: string;
+      /**
+       * Placeholder text for the phone input field.
+       */
+      phone: string;
+      /**
+       * Placeholder text for the message textarea field.
+       */
+      message: string;
+    };
+    subjectOptions: {
+      /**
+       * Default option shown in the subject dropdown (e.g., "Subject").
+       */
+      default: string;
+      options?:
+        | {
+            label: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    /**
+     * Text displayed on the submit button.
+     */
+    submitButton: string;
+  };
+  cta: {
+    /**
+     * Heading for the call-to-action section.
+     */
+    heading: string;
+    /**
+     * Description text for the CTA section.
+     */
+    description: string;
+    workshopsButton: {
+      label: string;
+      /**
+       * URL the button links to (e.g., "/workshops").
+       */
+      href: string;
+    };
+    coursesButton: {
+      label: string;
+      /**
+       * URL the button links to (e.g., "/courses").
+       */
+      href: string;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'aboutBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms".
+ */
+export interface Form {
+  id: string;
+  title: string;
+  fields?:
+    | (
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'checkbox';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'country';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'email';
+          }
+        | {
+            message?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'message';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            placeholder?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'select';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'state';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textarea';
+          }
+      )[]
+    | null;
+  submitButtonLabel?: string | null;
+  /**
+   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
+   */
+  confirmationType?: ('message' | 'redirect') | null;
+  confirmationMessage?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  redirect?: {
+    url: string;
+  };
+  /**
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
+   */
+  emails?:
+    | {
+        emailTo?: string | null;
+        cc?: string | null;
+        bcc?: string | null;
+        replyTo?: string | null;
+        emailFrom?: string | null;
+        subject: string;
+        /**
+         * Enter the message that should be sent in this email.
+         */
+        message?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactBlock".
+ */
+export interface ContactBlock {
+  /**
+   * When checked, the hero section is hidden. Use this when the page has a page-level hero (e.g. Food Presentation Slider).
+   */
+  hideHeroSection?: boolean | null;
+  /**
+   * Heading and subtext shown above the contact form.
+   */
+  hero: {
+    /**
+     * Full-width background for the hero. Leave empty for cream background.
+     */
+    image?: (string | null) | Media;
+    /**
+     * Main heading (e.g., "Kontakt" or "Get in Touch").
+     */
+    heading: string;
+    /**
+     * Optional supporting text below the heading.
+     */
+    subtext?: string | null;
+    /**
+     * Optional CTA button (e.g., "Explore Workshops").
+     */
+    buttonLabel?: string | null;
+    /**
+     * URL for the CTA button.
+     */
+    buttonHref?: string | null;
+  };
+  /**
+   * Image displayed on the left side of the contact form card (e.g., team at workshop).
+   */
+  contactImage?: (string | null) | Media;
+  contact: {
+    /**
+     * Heading above the form (e.g., "Kontakt").
+     */
+    heading: string;
+    /**
+     * Short intro text above the form fields.
+     */
+    description: string;
+  };
+  contactForm: {
+    /**
+     * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
+     */
+    form?: (string | null) | Form;
+    placeholders: {
+      /**
+       * Placeholder for first name (e.g., "Vorname").
+       */
+      firstName: string;
+      /**
+       * Placeholder for last name (e.g., "Nachname").
+       */
+      lastName: string;
+      /**
+       * Placeholder for email field.
+       */
+      email: string;
+      /**
+       * Placeholder for message textarea.
+       */
+      message: string;
+    };
+    subjectOptions: {
+      /**
+       * Default option shown in subject dropdown (e.g., "Betreff").
+       */
+      default: string;
+      options?:
+        | {
+            label: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    /**
+     * Text on the submit button (e.g., "Submit Now").
+     */
+    submitButton: string;
+  };
+  /**
+   * Dark banner below the contact form (e.g., "For Chefs and Food Professionals").
+   */
+  ctaBanner: {
+    /**
+     * Main heading in golden accent (e.g., "For Chefs and Food Professionals").
+     */
+    heading: string;
+    /**
+     * Supporting text in white.
+     */
+    description: string;
+    /**
+     * CTA button text (e.g., "Get to know more here").
+     */
+    buttonLabel: string;
+    /**
+     * URL the button links to (e.g., "/gastronomy").
+     */
+    buttonHref: string;
+  };
+  /**
+   * Google Maps embed URL (iframe src). Get from Google Maps → Share → Embed a map. Leave empty to hide map.
+   */
+  mapEmbedUrl?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contactBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -838,180 +1364,6 @@ export interface FormBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms".
- */
-export interface Form {
-  id: string;
-  title: string;
-  fields?:
-    | (
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            defaultValue?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'checkbox';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'country';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'email';
-          }
-        | {
-            message?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'message';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            placeholder?: string | null;
-            options?:
-              | {
-                  label: string;
-                  value: string;
-                  id?: string | null;
-                }[]
-              | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'select';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'state';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'text';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textarea';
-          }
-      )[]
-    | null;
-  submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
-  confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  redirect?: {
-    url: string;
-  };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
-  emails?:
-    | {
-        emailTo?: string | null;
-        cc?: string | null;
-        bcc?: string | null;
-        replyTo?: string | null;
-        emailFrom?: string | null;
-        subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
-        message?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "WorkshopSliderBlock".
  */
 export interface WorkshopSliderBlock {
@@ -1065,196 +1417,6 @@ export interface WorkshopSliderBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'workshopSlider';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "AboutBlock".
- */
-export interface AboutBlock {
-  /**
-   * Background image displayed at the top of the about page.
-   */
-  heroImage?: (string | null) | Media;
-  ourStory: {
-    /**
-     * Small label text shown above the heading (e.g., "Our Story").
-     */
-    label: string;
-    /**
-     * Large heading for the Our Story section.
-     */
-    heading: string;
-    /**
-     * Subheading text shown below the main heading.
-     */
-    subheading: string;
-    description?:
-      | {
-          /**
-           * A paragraph of text describing the story.
-           */
-          paragraph: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  team: {
-    /**
-     * Small label text shown above the heading (e.g., "Our Team").
-     */
-    label: string;
-    /**
-     * Main heading for the team section.
-     */
-    heading: string;
-    members?:
-      | {
-          /**
-           * Optional. If empty, the about page uses a fallback image for this slot.
-           */
-          image?: (string | null) | Media;
-          name: string;
-          /**
-           * Job title or role (e.g., "Fermentation Specialist & Chef").
-           */
-          role: string;
-          /**
-           * Biography or description of the team member.
-           */
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  sponsors: {
-    /**
-     * Heading text for the sponsors section.
-     */
-    heading: string;
-    logos?:
-      | {
-          image: string | Media;
-          /**
-           * Alternative text for the logo image.
-           */
-          alt: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  contact: {
-    /**
-     * Heading for the contact section.
-     */
-    heading: string;
-    /**
-     * Description text explaining how to contact.
-     */
-    description: string;
-    labels: {
-      /**
-       * Label for the location field (e.g., "Location").
-       */
-      location: string;
-      /**
-       * Label for the phone field (e.g., "Phone").
-       */
-      phone: string;
-      /**
-       * Label for the email field (e.g., "Mail").
-       */
-      email: string;
-    };
-    /**
-     * Physical address (can include line breaks).
-     */
-    location: string;
-    /**
-     * Contact phone number (not localized as it is a number).
-     */
-    phone: string;
-    /**
-     * Contact email address (not localized).
-     */
-    email: string;
-    socialMedia: {
-      facebook: string;
-      twitter: string;
-      pinterest: string;
-      youtube: string;
-    };
-  };
-  contactForm: {
-    /**
-     * Heading text above the contact form.
-     */
-    heading: string;
-    /**
-     * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
-     */
-    form?: (string | null) | Form;
-    placeholders: {
-      /**
-       * Placeholder text for the name input field.
-       */
-      name: string;
-      /**
-       * Placeholder text for the email input field.
-       */
-      email: string;
-      /**
-       * Placeholder text for the phone input field.
-       */
-      phone: string;
-      /**
-       * Placeholder text for the message textarea field.
-       */
-      message: string;
-    };
-    subjectOptions: {
-      /**
-       * Default option shown in the subject dropdown (e.g., "Subject").
-       */
-      default: string;
-      options?:
-        | {
-            label: string;
-            id?: string | null;
-          }[]
-        | null;
-    };
-    /**
-     * Text displayed on the submit button.
-     */
-    submitButton: string;
-  };
-  cta: {
-    /**
-     * Heading for the call-to-action section.
-     */
-    heading: string;
-    /**
-     * Description text for the CTA section.
-     */
-    description: string;
-    workshopsButton: {
-      label: string;
-      /**
-       * URL the button links to (e.g., "/workshops").
-       */
-      href: string;
-    };
-    coursesButton: {
-      label: string;
-      /**
-       * URL the button links to (e.g., "/courses").
-       */
-      href: string;
-    };
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'aboutBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1605,10 +1767,23 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         media?: T;
+        slides?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              tagline?: T;
+              description?: T;
+              buttonLabel?: T;
+              buttonUrl?: T;
+              id?: T;
+            };
       };
   layout?:
     | T
     | {
+        aboutBlock?: T | AboutBlockSelect<T>;
+        contactBlock?: T | ContactBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
@@ -1618,7 +1793,6 @@ export interface PagesSelect<T extends boolean = true> {
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
-        aboutBlock?: T | AboutBlockSelect<T>;
       };
   voucher?:
     | T
@@ -1681,6 +1855,182 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AboutBlock_select".
+ */
+export interface AboutBlockSelect<T extends boolean = true> {
+  heroImage?: T;
+  ourStory?:
+    | T
+    | {
+        label?: T;
+        heading?: T;
+        subheading?: T;
+        description?:
+          | T
+          | {
+              paragraph?: T;
+              id?: T;
+            };
+      };
+  team?:
+    | T
+    | {
+        label?: T;
+        heading?: T;
+        members?:
+          | T
+          | {
+              image?: T;
+              name?: T;
+              role?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  sponsors?:
+    | T
+    | {
+        heading?: T;
+        logos?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+      };
+  contact?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        labels?:
+          | T
+          | {
+              location?: T;
+              phone?: T;
+              email?: T;
+            };
+        location?: T;
+        phone?: T;
+        email?: T;
+        socialMedia?:
+          | T
+          | {
+              facebook?: T;
+              twitter?: T;
+              pinterest?: T;
+              youtube?: T;
+            };
+      };
+  contactForm?:
+    | T
+    | {
+        heading?: T;
+        form?: T;
+        placeholders?:
+          | T
+          | {
+              name?: T;
+              email?: T;
+              phone?: T;
+              message?: T;
+            };
+        subjectOptions?:
+          | T
+          | {
+              default?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+            };
+        submitButton?: T;
+      };
+  cta?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        workshopsButton?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
+        coursesButton?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactBlock_select".
+ */
+export interface ContactBlockSelect<T extends boolean = true> {
+  hideHeroSection?: T;
+  hero?:
+    | T
+    | {
+        image?: T;
+        heading?: T;
+        subtext?: T;
+        buttonLabel?: T;
+        buttonHref?: T;
+      };
+  contactImage?: T;
+  contact?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+      };
+  contactForm?:
+    | T
+    | {
+        form?: T;
+        placeholders?:
+          | T
+          | {
+              firstName?: T;
+              lastName?: T;
+              email?: T;
+              message?: T;
+            };
+        subjectOptions?:
+          | T
+          | {
+              default?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+            };
+        submitButton?: T;
+      };
+  ctaBanner?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        buttonLabel?: T;
+        buttonHref?: T;
+      };
+  mapEmbedUrl?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1829,123 +2179,6 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "AboutBlock_select".
- */
-export interface AboutBlockSelect<T extends boolean = true> {
-  heroImage?: T;
-  ourStory?:
-    | T
-    | {
-        label?: T;
-        heading?: T;
-        subheading?: T;
-        description?:
-          | T
-          | {
-              paragraph?: T;
-              id?: T;
-            };
-      };
-  team?:
-    | T
-    | {
-        label?: T;
-        heading?: T;
-        members?:
-          | T
-          | {
-              image?: T;
-              name?: T;
-              role?: T;
-              description?: T;
-              id?: T;
-            };
-      };
-  sponsors?:
-    | T
-    | {
-        heading?: T;
-        logos?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-      };
-  contact?:
-    | T
-    | {
-        heading?: T;
-        description?: T;
-        labels?:
-          | T
-          | {
-              location?: T;
-              phone?: T;
-              email?: T;
-            };
-        location?: T;
-        phone?: T;
-        email?: T;
-        socialMedia?:
-          | T
-          | {
-              facebook?: T;
-              twitter?: T;
-              pinterest?: T;
-              youtube?: T;
-            };
-      };
-  contactForm?:
-    | T
-    | {
-        heading?: T;
-        form?: T;
-        placeholders?:
-          | T
-          | {
-              name?: T;
-              email?: T;
-              phone?: T;
-              message?: T;
-            };
-        subjectOptions?:
-          | T
-          | {
-              default?: T;
-              options?:
-                | T
-                | {
-                    label?: T;
-                    id?: T;
-                  };
-            };
-        submitButton?: T;
-      };
-  cta?:
-    | T
-    | {
-        heading?: T;
-        description?: T;
-        workshopsButton?:
-          | T
-          | {
-              label?: T;
-              href?: T;
-            };
-        coursesButton?:
-          | T
-          | {
-              label?: T;
-              href?: T;
-            };
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
@@ -1962,7 +2195,6 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2378,26 +2610,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: string;
-  /**
-   * The banner shown at the very top of the site. Use it to highlight promotions, events, or important messages.
-   */
-  announcementBar: {
-    /**
-     * Toggle the announcement bar on or off site-wide.
-     */
-    enabled?: boolean | null;
-    /**
-     * The message displayed in the announcement bar (e.g. "New workshops available!").
-     */
-    text: string;
-    /**
-     * URL the announcement links to (e.g. "/workshops"). Leave empty for no link.
-     */
-    link?: string | null;
-  };
-  /**
-   * The main navigation links shown in the header. Drag to reorder. Each item can optionally have a dropdown with sub-items.
-   */
   navItems?:
     | {
         link: {
@@ -2459,13 +2671,6 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
-  announcementBar?:
-    | T
-    | {
-        enabled?: T;
-        text?: T;
-        link?: T;
-      };
   navItems?:
     | T
     | {
