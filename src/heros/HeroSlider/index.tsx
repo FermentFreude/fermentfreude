@@ -1,410 +1,680 @@
 'use client'
 
-import { RichText } from '@/components/RichText'
 import type { Page } from '@/payload-types'
-import Image from 'next/image'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
-import useEmblaCarousel from 'embla-carousel-react'
+import Image from 'next/image'
 import Link from 'next/link'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
- *  HARDCODED DEFAULTS (English)
- *  Shown immediately without any CMS setup.
- *  CMS data always wins when available.
+ *  SLIDE DATA — one slide per workshop
+ *  Each slide has its own background color, text, image, attributes, and CTA.
+ *  Later: driven by CMS heroSlides array field.
  * ═══════════════════════════════════════════════════════════════ */
 
-const DEFAULT_RICHTEXT = {
-  root: {
-    type: 'root',
-    children: [
-      {
-        type: 'heading',
-        tag: 'h1',
-        children: [
-          {
-            type: 'text',
-            text: 'Good food',
-            version: 1,
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-        direction: 'ltr' as const,
-        format: '' as const,
-        indent: 0,
-        version: 1,
-      },
-      {
-        type: 'heading',
-        tag: 'h1',
-        children: [
-          {
-            type: 'text',
-            text: 'Better Health',
-            version: 1,
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-        direction: 'ltr' as const,
-        format: '' as const,
-        indent: 0,
-        version: 1,
-      },
-      {
-        type: 'heading',
-        tag: 'h1',
-        children: [
-          {
-            type: 'text',
-            text: 'Real Joy',
-            version: 1,
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-        direction: 'ltr' as const,
-        format: '' as const,
-        indent: 0,
-        version: 1,
-      },
-      {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: 'We make fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods.',
-            version: 1,
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-        direction: 'ltr' as const,
-        format: '' as const,
-        indent: 0,
-        textFormat: 0,
-        version: 1,
-      },
-    ],
-    direction: 'ltr' as const,
-    format: '' as const,
-    indent: 0,
-    version: 1,
-  },
+interface HeroSlide {
+  id: string
+  eyebrow: string
+  title: string
+  description: string
+  attributes: string[]
+  ctaLabel: string
+  ctaHref: string
+  /** Central panel background */
+  panelColor: string
+  /** Outer / page background */
+  bgColor: string
 }
 
-const DEFAULT_LINKS = [
+/** Person images — same across all slides */
+const LEFT_IMAGE = {
+  src: '/media/hero/DavidHeroCopy.png',
+  alt: 'David Heider – FermentFreude founder',
+  width: 1000,
+  height: 1250,
+}
+const RIGHT_IMAGE = {
+  src: '/media/hero/MarcelHero.png',
+  alt: 'Marcel Rauminger – FermentFreude founder',
+  width: 1000,
+  height: 1250,
+}
+
+const SLIDES: HeroSlide[] = [
   {
-    link: {
-      type: 'custom' as const,
-      label: 'Workshop',
-      url: '/workshops',
-      appearance: 'default' as const,
-    },
+    id: 'lakto',
+    eyebrow: 'Workshop Experience',
+    title: 'Discover the Art of\nLakto-Fermentation!',
+    description:
+      'Our hands-on workshop takes you on a journey through traditional lacto-fermentation, turning simple vegetables into probiotic-rich delicacies.',
+    attributes: ['All-natural', 'Probiotic-rich', 'Made with Love'],
+    ctaLabel: 'Learn More',
+    ctaHref: '/workshops/lakto',
+    panelColor: '#555954',
+    bgColor: '#D2DFD7',
   },
   {
-    link: {
-      type: 'custom' as const,
-      label: 'Products',
-      url: '/shop',
-      appearance: 'outline' as const,
-    },
+    id: 'kombucha',
+    eyebrow: 'Workshop Experience',
+    title: 'Immerse Yourself in\nKombucha Brewing!',
+    description:
+      'Learn to brew your own kombucha from scratch — from growing the SCOBY to bottling your perfect fizzy, probiotic tea.',
+    attributes: ['Live cultures', 'Naturally fizzy', 'Handcrafted'],
+    ctaLabel: 'Learn More',
+    ctaHref: '/workshops/kombucha',
+    panelColor: '#555954',
+    bgColor: '#F6F0E8',
+  },
+  {
+    id: 'tempeh',
+    eyebrow: 'Workshop Experience',
+    title: 'Master the Craft of\nTempeh Making!',
+    description:
+      'Explore the Indonesian tradition of tempeh — cultivate your own live cultures and create protein-rich, fermented goodness at home.',
+    attributes: ['High protein', 'Traditional', 'Plant-based'],
+    ctaLabel: 'Learn More',
+    ctaHref: '/workshops/tempeh',
+    panelColor: '#737672',
+    bgColor: '#F6F3F0',
+  },
+  {
+    id: 'basics',
+    eyebrow: 'Workshop Experience',
+    title: 'Begin Your Journey with\nFermentation Basics!',
+    description:
+      'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
+    attributes: ['Beginner-friendly', 'Science-based', 'Practical'],
+    ctaLabel: 'Learn More',
+    ctaHref: '/workshops/basics',
+    panelColor: '#000000',
+    bgColor: '#AEB1AE',
   },
 ]
 
-/* ═══════════════════════════════════════════════════════════════ */
-
-type HeroSliderProps = Page['hero']
-
-/** Resolve a Payload CMS link object to an href string. */
-function resolveHref(link: Record<string, unknown>): string {
-  if (link?.type === 'reference' && typeof link?.reference === 'object' && link.reference) {
-    const ref = link.reference as { relationTo?: string; value?: { slug?: string } | string }
-    const slug = typeof ref.value === 'object' ? ref.value?.slug : ref.value
-    if (slug) {
-      return `${ref.relationTo !== 'pages' ? `/${ref.relationTo}` : ''}/${slug}`
-    }
-  }
-  return (link?.url as string) || '#'
-}
-
-/* ── Test slides using local image ─────────────────────────── */
-const TEST_SLIDES = Array.from({ length: 5 }, (_, i) => ({
-  id: `slide-${i}`,
-  src: '/assets/images/hero-test.jpg',
-  alt: `FermentFreude hero slide ${i + 1}`,
-}))
+const AUTO_PLAY_INTERVAL = 6000
 
 /* ── Arrow Icons ──────────────────────────────────────────────── */
 
-function ChevronLeft({ className }: { className?: string }) {
+function NavArrow({
+  direction,
+  onClick,
+  panelColor,
+}: {
+  direction: 'left' | 'right'
+  onClick: () => void
+  panelColor: string
+}) {
+  const isLeft = direction === 'left'
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <button
+      onClick={onClick}
+      aria-label={isLeft ? 'Previous slide' : 'Next slide'}
+      className={cn(
+        'hidden md:flex fixed top-1/2 -translate-y-1/2 z-40',
+        'items-center justify-center',
+        'w-10 h-24',
+        'group/arrow cursor-pointer',
+        isLeft ? 'left-0' : 'right-0',
+      )}
     >
-      <path d="M15 18l-6-6 6-6" />
-    </svg>
-  )
-}
-
-function ChevronRight({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M9 18l6-6-6-6" />
-    </svg>
-  )
-}
-
-/* ── Scroll Down Indicator ────────────────────────────────────── */
-
-function ScrollIndicator() {
-  return (
-    <div className="hidden lg:flex flex-col items-center gap-2 text-[#4b4b4b]/60">
-      <div className="w-px h-10 bg-[#4b4b4b]/40" />
-    </div>
+      {/* Filled circle — positioned to hang off the edge, always half-cut */}
+      <span
+        className={cn(
+          'absolute rounded-full transition-all duration-300 ease-out',
+          'w-24 h-24 group-hover/arrow:w-44 group-hover/arrow:h-44',
+          isLeft ? '-left-12 group-hover/arrow:-left-22' : '-right-12 group-hover/arrow:-right-22',
+        )}
+        style={{ backgroundColor: panelColor }}
+        aria-hidden="true"
+      />
+      {/* Chevron — always on screen, nudges inward on hover */}
+      <svg
+        className={cn(
+          'relative w-5 h-5 transition-transform duration-300',
+          'text-white',
+          isLeft ? 'ml-1 group-hover/arrow:translate-x-1' : 'mr-1 group-hover/arrow:-translate-x-1',
+        )}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d={isLeft ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'} />
+      </svg>
+    </button>
   )
 }
 
 /* ═══════════════════════════════════════════════════════════════
- *  HERO SLIDER COMPONENT
+ *  HERO SLIDER — Product Presentation Style
+ *  Matches the Slider Revolution "Chocolate Bar" template:
+ *  - Full-viewport slide
+ *  - Central dark panel with text
+ *  - Large product images flanking left & right
+ *  - Background color transitions per slide
+ *  - Staggered CSS entrance/exit animations
+ *  - Auto-play with progress bar
  * ═══════════════════════════════════════════════════════════════ */
 
-export const HeroSlider: React.FC<HeroSliderProps> = ({
-  links,
-  richText,
-  heroImages,
-}) => {
+type HeroSliderProps = Page['hero']
+
+export const HeroSlider: React.FC<HeroSliderProps> = () => {
   const { setHeaderTheme } = useHeaderTheme()
 
-  /* ── Merge CMS data with defaults ──────────────────────────── */
-  const resolvedRichText = richText ?? DEFAULT_RICHTEXT
-  const resolvedLinks = links && links.length > 0 ? links : DEFAULT_LINKS
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [animState, setAnimState] = useState<'entering' | 'visible' | 'exiting'>('entering')
+  const [isPaused, setIsPaused] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const progressRef = useRef<HTMLDivElement>(null)
 
-  // Use local test images for now
-  const slides = TEST_SLIDES
+  const slide = SLIDES[activeIndex]
+  // Custom images for kombucha slide
+  const isKombucha = slide.id === 'kombucha'
+  const isLakto = slide.id === 'lakto'
+  const isTempeh = slide.id === 'tempeh'
+  const leftImage = isLakto
+    ? {
+        src: '/media/hero/lakto1.png',
+        alt: 'FermentFreude Sauerkraut Jar',
+        width: 810,
+        height: 768,
+      }
+    : isKombucha
+      ? {
+          src: '/media/hero/kombucha1.png',
+          alt: 'FermentFreude Kombucha Apple & Carrot',
+          width: 1000,
+          height: 1250,
+        }
+      : isTempeh
+        ? {
+            src: '/media/hero/tempeh1.png',
+            alt: 'FermentFreude Tempeh Slices',
+            width: 768,
+            height: 768,
+          }
+        : LEFT_IMAGE
+  const rightImage = isLakto
+    ? {
+        src: '/media/hero/lakto2.png',
+        alt: 'FermentFreude Sauerkraut Jar',
+        width: 810,
+        height: 768,
+      }
+    : isKombucha
+      ? {
+          src: '/media/hero/kombucha2.png',
+          alt: 'FermentFreude Kombucha Coffee Flavour',
+          width: 1000,
+          height: 1250,
+        }
+      : isTempeh
+        ? {
+            src: '/media/hero/tempeh2.png',
+            alt: 'FermentFreude Black Bean Tempeh',
+            width: 768,
+            height: 768,
+          }
+        : RIGHT_IMAGE
 
   useEffect(() => {
     setHeaderTheme('light')
   }, [setHeaderTheme])
 
-  /* ── Embla Carousel ─────────────────────────────────────────── */
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    align: 'center',
-    skipSnaps: false,
-    containScroll: false,
-  })
+  /* ── Transition logic ──────────────────────────────────────── */
+  const goToSlide = useCallback(
+    (nextIndex: number) => {
+      if (animState === 'exiting') return
+      // Exit current
+      setAnimState('exiting')
+      setTimeout(() => {
+        setActiveIndex(nextIndex)
+        setAnimState('entering')
+        // After entrance animations complete, mark visible
+        setTimeout(() => setAnimState('visible'), 800)
+      }, 450) // exit duration
+    },
+    [animState],
+  )
 
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  const goNext = useCallback(() => {
+    goToSlide((activeIndex + 1) % SLIDES.length)
+  }, [activeIndex, goToSlide])
 
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
-  const scrollTo = useCallback((index: number) => emblaApi?.scrollTo(index), [emblaApi])
+  const goPrev = useCallback(() => {
+    goToSlide((activeIndex - 1 + SLIDES.length) % SLIDES.length)
+  }, [activeIndex, goToSlide])
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return
-    setSelectedIndex(emblaApi.selectedScrollSnap())
-  }, [emblaApi])
-
+  /* ── Auto-play ─────────────────────────────────────────────── */
   useEffect(() => {
-    if (!emblaApi) return
-    onSelect()
-    emblaApi.on('select', onSelect)
-    emblaApi.on('reInit', onSelect)
+    if (isPaused || animState === 'exiting') return
+    timerRef.current = setTimeout(goNext, AUTO_PLAY_INTERVAL)
     return () => {
-      emblaApi.off('select', onSelect)
-      emblaApi.off('reInit', onSelect)
+      if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [emblaApi, onSelect])
+  }, [activeIndex, isPaused, animState, goNext])
 
-  const hasImages = slides.length > 0
+  /* ── Restart progress bar animation on slide change ───────── */
+  useEffect(() => {
+    if (!progressRef.current) return
+    const el = progressRef.current
+    // Force restart animation
+    el.style.animation = 'none'
+    // eslint-disable-next-line no-unused-expressions
+    el.offsetHeight // trigger reflow
+    el.style.animation = ''
+  }, [activeIndex])
+
+  /* ── Initial enter ─────────────────────────────────────────── */
+  useEffect(() => {
+    const t = setTimeout(() => setAnimState('visible'), 900)
+    return () => clearTimeout(t)
+  }, [])
+
+  const isEntering = animState === 'entering'
+  const isExiting = animState === 'exiting'
 
   /* ── Render ────────────────────────────────────────────────── */
   return (
-    <section className="relative w-full bg-[#F9F0DC] overflow-hidden">
-      <div className="mx-auto w-full max-w-416 px-(--space-container-x) pt-28 sm:pt-32 lg:pt-36 pb-12 sm:pb-16 lg:pb-20">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-0">
-          {/* ══════════════════════════════════════════════════════
-           *  LEFT SIDE — Text Content
-           * ══════════════════════════════════════════════════════ */}
-          <div className="w-full lg:w-[42%] xl:w-[40%] flex flex-col gap-6 sm:gap-8 lg:gap-12 shrink-0 lg:pr-8 xl:pr-12">
-            {/* Title + Description */}
-            {resolvedRichText && (
-              <RichText
-                className={cn(
-                  'flex flex-col',
-                  '[&_h1]:font-display [&_h1]:font-black [&_h1]:text-[#1d1d1d]',
-                  '[&_h1]:text-[2rem] sm:[&_h1]:text-[2.5rem] md:[&_h1]:text-[3rem] lg:[&_h1]:text-[3.5rem] xl:[&_h1]:text-[4.25rem]',
-                  '[&_h1]:leading-[1.08] [&_h1]:tracking-[-0.02em]',
-                  '[&_h1]:mb-0',
-                  '[&_p]:font-display [&_p]:font-bold [&_p]:text-[#6b6b6b]',
-                  '[&_p]:text-[0.875rem] sm:[&_p]:text-[1rem] lg:[&_p]:text-[1.125rem] xl:[&_p]:text-[1.25rem]',
-                  '[&_p]:leading-normal [&_p]:mt-6 sm:[&_p]:mt-8 lg:[&_p]:mt-10',
-                  '[&_p]:max-w-xl',
-                  '[&_p]:mb-0',
-                )}
-                data={resolvedRichText}
-                enableGutter={false}
-                enableProse={false}
-              />
-            )}
+    <section
+      className="relative w-full h-svh overflow-hidden max-w-[100vw]"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* ── Mobile split background (below md) ─────────────── */}
+      <div className="md:hidden absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div
+          className="h-[42%] transition-colors duration-700"
+          style={{ backgroundColor: slide.bgColor }}
+        />
+        <div
+          className="h-[58%] transition-colors duration-700"
+          style={{ backgroundColor: slide.panelColor }}
+        />
+      </div>
 
-            {/* CTA Buttons */}
-            {resolvedLinks.length > 0 && (
-              <div className="flex flex-wrap items-center gap-3">
-                {resolvedLinks.map(({ link }, i) => {
-                  const href = resolveHref(link as unknown as Record<string, unknown>)
-                  const label = (link as { label?: string })?.label
-                  const isPrimary = i === 0
-                  return (
-                    <Link
-                      key={i}
-                      href={href}
-                      className={cn(
-                        'inline-flex items-center justify-center font-display font-bold',
-                        'rounded-full transition-all duration-300 ease-out',
-                        'text-sm sm:text-base lg:text-lg',
-                        'px-8 py-3 sm:px-10 sm:py-3.5 lg:px-12 lg:py-4',
-                        isPrimary
-                          ? 'bg-[#4b4b4b] text-[#F9F0DC] hover:bg-[#3a3a3a] hover:scale-[1.02]'
-                          : 'bg-[#F9F0DC] text-[#4b4b4b] border border-[#4b4b4b] hover:bg-[#4b4b4b] hover:text-[#F9F0DC] hover:scale-[1.02]',
-                      )}
-                    >
-                      {label}
-                    </Link>
-                  )
-                })}
-              </div>
+      {/* ── Desktop/tablet solid background (md+) ──────────── */}
+      <div
+        className="hidden md:block absolute inset-0 transition-colors duration-700 pointer-events-none"
+        style={{ backgroundColor: slide.bgColor }}
+        aria-hidden="true"
+      />
+
+      {/* ── Watermark ──────────────────────────────────────── */}
+      <div
+        className={cn(
+          'pointer-events-none absolute left-0 right-0 flex items-center justify-center select-none',
+          'font-display font-black uppercase tracking-[-0.04em]',
+          'text-[18vw] md:text-[10vw]',
+          'top-0 h-[42%] md:top-0 md:h-full',
+          'transition-opacity duration-700',
+          isExiting ? 'opacity-0' : 'opacity-[0.07]',
+        )}
+        style={{ color: slide.panelColor }}
+        aria-hidden="true"
+      >
+        FermentFreude
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════
+       *  MOBILE LAYOUT (below md)
+       *  Top 42%: bgColor + watermark + images + side chevrons
+       *  Bottom 58%: panelColor + text + dots
+       * ═══════════════════════════════════════════════════════ */}
+      <div className="md:hidden relative z-10 flex flex-col h-full">
+        {/* Mobile chevrons — half-circles at edges, grow on hover */}
+        <button
+          onClick={goPrev}
+          aria-label="Previous slide"
+          className="absolute left-0 top-[21%] -translate-y-1/2 z-30 flex items-center justify-center w-10 h-24 group/arrow cursor-pointer"
+        >
+          <span
+            className="absolute rounded-full w-24 h-24 -left-12 group-hover/arrow:w-44 group-hover/arrow:h-44 group-hover/arrow:-left-22 transition-all duration-300 ease-out"
+            style={{ backgroundColor: slide.panelColor }}
+          />
+          <svg
+            className="relative w-5 h-5 text-white ml-1 group-hover/arrow:translate-x-1 transition-transform duration-300"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <button
+          onClick={goNext}
+          aria-label="Next slide"
+          className="absolute right-0 top-[21%] -translate-y-1/2 z-30 flex items-center justify-center w-10 h-24 group/arrow cursor-pointer"
+        >
+          <span
+            className="absolute rounded-full w-24 h-24 -right-12 group-hover/arrow:w-44 group-hover/arrow:h-44 group-hover/arrow:-right-22 transition-all duration-300 ease-out"
+            style={{ backgroundColor: slide.panelColor }}
+          />
+          <svg
+            className="relative w-5 h-5 text-white mr-1 group-hover/arrow:-translate-x-1 transition-transform duration-300"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+
+        {/* Images — centered in the background area */}
+        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 z-20 flex items-end">
+          <div
+            className={cn(
+              'relative',
+              isEntering && 'hero-anim-image',
+              isExiting && 'hero-exit-image',
             )}
+          >
+            <Image
+              src={leftImage.src}
+              alt={leftImage.alt}
+              width={leftImage.width}
+              height={leftImage.height}
+              className="object-contain drop-shadow-xl h-[28vh] w-auto"
+              priority={activeIndex === 0}
+              sizes="40vw"
+            />
           </div>
-
-          {/* ══════════════════════════════════════════════════════
-           *  RIGHT SIDE — Image Carousel
-           * ══════════════════════════════════════════════════════ */}
-          <div className="w-full lg:w-[58%] xl:w-[60%] relative">
-            {hasImages ? (
-              <>
-                {/* Carousel viewport */}
-                <div className="overflow-hidden" ref={emblaRef}>
-                  <div className="flex items-center touch-pan-y">
-                    {slides.map((slide, index) => {
-                      const isActive = index === selectedIndex
-                      return (
-                        <div
-                          key={slide.id}
-                          className={cn(
-                            'flex-[0_0_55%] sm:flex-[0_0_50%] lg:flex-[0_0_58%] xl:flex-[0_0_55%]',
-                            'min-w-0 relative px-2 sm:px-3',
-                            'transition-all duration-500 ease-out',
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              'relative overflow-hidden rounded-3xl sm:rounded-4xl lg:rounded-[2.5rem]',
-                              'transition-all duration-500 ease-out',
-                              isActive
-                                ? 'aspect-3/4 sm:aspect-4/5 scale-100 opacity-100 z-10'
-                                : 'aspect-3/4 sm:aspect-4/5 scale-[0.85] opacity-60 z-0',
-                            )}
-                          >
-                            <Image
-                              src={slide.src}
-                              alt={slide.alt}
-                              fill
-                              className="object-cover"
-                              priority={isActive}
-                            />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Navigation */}
-                <div className="flex items-center justify-center lg:justify-end gap-3 mt-6 lg:mt-8 lg:pr-4">
-                  {/* Previous */}
-                  <button
-                    onClick={scrollPrev}
-                    aria-label="Previous slide"
-                    className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#4b4b4b]/30 text-[#4b4b4b] hover:bg-[#4b4b4b] hover:text-[#F9F0DC] transition-colors duration-200"
-                  >
-                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-
-                  {/* Dot indicators */}
-                  <div className="flex items-center gap-2 sm:gap-2.5 px-2">
-                    {slides.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => scrollTo(index)}
-                        aria-label={`Go to slide ${index + 1}`}
-                        className={cn(
-                          'rounded-full transition-all duration-300',
-                          index === selectedIndex
-                            ? 'w-3.5 h-3.5 sm:w-4 sm:h-4 bg-[#4b4b4b]'
-                            : 'w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#4b4b4b]/40 hover:bg-[#4b4b4b]/60',
-                        )}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Next */}
-                  <button
-                    onClick={scrollNext}
-                    aria-label="Next slide"
-                    className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#4b4b4b]/30 text-[#4b4b4b] hover:bg-[#4b4b4b] hover:text-[#F9F0DC] transition-colors duration-200"
-                  >
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-              </>
-            ) : (
-              /* Placeholder when no images */
-              <div className="flex items-center justify-center gap-4">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      'bg-[#ECE5DE] rounded-4xl',
-                      i === 2
-                        ? 'w-[55%] aspect-3/4'
-                        : 'w-[35%] aspect-3/4 scale-[0.85] opacity-60',
-                    )}
-                  />
-                ))}
-              </div>
+          <div
+            className={cn(
+              'relative -ml-2',
+              isEntering && 'hero-anim-image',
+              isExiting && 'hero-exit-image',
             )}
+          >
+            <Image
+              src={rightImage.src}
+              alt={rightImage.alt}
+              width={rightImage.width}
+              height={rightImage.height}
+              className="object-contain drop-shadow-xl h-[28vh] w-auto"
+              sizes="40vw"
+            />
           </div>
         </div>
 
-        {/* Scroll indicator — bottom right */}
-        <div className="flex justify-end mt-6 lg:mt-8">
-          <ScrollIndicator />
+        {/* Text content — bottom panel area */}
+        <div className="mt-auto h-[58%] flex flex-col items-center text-center justify-center px-6 pb-14 pt-4">
+          <p
+            className={cn(
+              'uppercase tracking-[0.2em] text-white text-[9px] font-display font-medium mb-1.5',
+              isEntering && 'hero-anim-eyebrow',
+              isExiting && 'hero-exit-content',
+            )}
+          >
+            {slide.eyebrow}
+          </p>
+          <h1
+            className={cn(
+              'font-display font-black text-white text-lg sm:text-xl leading-[1.15] tracking-[-0.02em] whitespace-pre-line mb-2',
+              isEntering && 'hero-anim-title',
+              isExiting && 'hero-exit-content',
+            )}
+          >
+            {slide.title}
+          </h1>
+          <p
+            className={cn(
+              'text-white text-[11px] sm:text-xs leading-relaxed max-w-[18rem] mb-3 font-sans',
+              isEntering && 'hero-anim-desc',
+              isExiting && 'hero-exit-content',
+            )}
+          >
+            {slide.description}
+          </p>
+          <div
+            className={cn(
+              'w-full max-w-[18rem]',
+              isEntering && 'hero-anim-divider',
+              isExiting && 'hero-exit-content',
+            )}
+          >
+            <div className="w-full h-px bg-white/20 mb-1.5" />
+            <div
+              className={cn(
+                'flex items-center justify-center flex-wrap gap-x-3 gap-y-1',
+                isEntering && 'hero-anim-attrs',
+                isExiting && 'hero-exit-content',
+              )}
+            >
+              {slide.attributes.map((attr, i) => (
+                <React.Fragment key={attr}>
+                  <span className="text-white text-[9px] font-display font-medium tracking-wide">
+                    {attr}
+                  </span>
+                  {i < slide.attributes.length - 1 && (
+                    <span className="w-px h-3 bg-white/30" aria-hidden="true" />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+          <div
+            className={cn(
+              'mt-4 flex items-center gap-2',
+              isEntering && 'hero-anim-cta',
+              isExiting && 'hero-exit-content',
+            )}
+          >
+            <Link
+              href={slide.ctaHref}
+              className="inline-flex items-center justify-center font-display font-bold text-[10px] px-5 py-1.5 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 transition-all duration-300"
+            >
+              {slide.ctaLabel}
+            </Link>
+            <Link
+              href="/shop"
+              className="inline-flex items-center justify-center font-display font-bold text-[10px] px-5 py-1.5 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] transition-all duration-300"
+            >
+              Shop
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════
+       *  DESKTOP / TABLET LAYOUT (md+)
+       *  Solid bgColor background, three-column:
+       *  chevron | image | card | image | chevron
+       * ═══════════════════════════════════════════════════════ */}
+      <div className="hidden md:flex relative z-10 h-full items-center justify-center w-full">
+        {/* Nav arrows at screen edges */}
+        <NavArrow direction="left" onClick={goPrev} panelColor={slide.panelColor} />
+        <NavArrow direction="right" onClick={goNext} panelColor={slide.panelColor} />
+
+        {/* Image — Card — Image */}
+        <div className="flex items-center justify-center w-full max-w-5xl mx-auto px-14 lg:px-20 xl:px-24 gap-4 lg:gap-6">
+          {/* LEFT IMAGE (David) */}
+          <div className="flex items-center justify-center">
+            <div
+              className={cn(
+                'relative group/img',
+                isEntering && 'hero-anim-image',
+                isExiting && 'hero-exit-image',
+              )}
+            >
+              <Image
+                src={leftImage.src}
+                alt={leftImage.alt}
+                width={leftImage.width}
+                height={leftImage.height}
+                className="object-contain drop-shadow-2xl h-[45vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3"
+                priority={activeIndex === 0}
+                sizes="(min-width: 768px) 20vw, 0px"
+              />
+            </div>
+          </div>
+
+          {/* CENTER CARD */}
+          <div className="shrink min-w-0 flex justify-center relative z-20">
+            <div
+              className="w-full rounded-xl lg:rounded-2xl px-4 lg:px-6 py-5 lg:py-7 flex flex-col items-center text-center transition-colors duration-700"
+              style={{ backgroundColor: slide.panelColor }}
+            >
+              {/* Logo */}
+              <div
+                className={cn(
+                  'mb-1.5',
+                  isEntering && 'hero-anim-eyebrow',
+                  isExiting && 'hero-exit-content',
+                )}
+              >
+                <Image
+                  src="/secondary-logo.svg"
+                  alt="FermentFreude"
+                  width={240}
+                  height={104}
+                  className="h-5 lg:h-7 w-auto brightness-0 invert"
+                />
+              </div>
+
+              {/* Eyebrow */}
+              <p
+                className={cn(
+                  'uppercase tracking-[0.2em] text-white text-[8px] lg:text-[10px] font-display font-medium mb-1',
+                  isEntering && 'hero-anim-eyebrow',
+                  isExiting && 'hero-exit-content',
+                )}
+              >
+                {slide.eyebrow}
+              </p>
+
+              {/* Title */}
+              <h1
+                className={cn(
+                  'font-display font-black text-white text-base lg:text-[1.35rem] xl:text-[1.45rem] leading-[1.15] tracking-[-0.02em] whitespace-pre-line mb-1.5',
+                  isEntering && 'hero-anim-title',
+                  isExiting && 'hero-exit-content',
+                )}
+              >
+                {slide.title}
+              </h1>
+
+              {/* Description */}
+              <p
+                className={cn(
+                  'text-white text-[10px] lg:text-xs leading-relaxed max-w-[16rem] mb-2 font-sans',
+                  isEntering && 'hero-anim-desc',
+                  isExiting && 'hero-exit-content',
+                )}
+              >
+                {slide.description}
+              </p>
+
+              {/* Divider + attributes */}
+              <div
+                className={cn(
+                  'w-full max-w-[16rem]',
+                  isEntering && 'hero-anim-divider',
+                  isExiting && 'hero-exit-content',
+                )}
+              >
+                <div className="w-full h-px bg-white/20 mb-1.5" />
+                <div
+                  className={cn(
+                    'flex items-center justify-center flex-wrap gap-x-3 gap-y-1',
+                    isEntering && 'hero-anim-attrs',
+                    isExiting && 'hero-exit-content',
+                  )}
+                >
+                  {slide.attributes.map((attr, i) => (
+                    <React.Fragment key={attr}>
+                      <span className="text-white text-[8px] lg:text-[10px] font-display font-medium tracking-wide">
+                        {attr}
+                      </span>
+                      {i < slide.attributes.length - 1 && (
+                        <span className="w-px h-3 bg-white/30" aria-hidden="true" />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTAs */}
+              <div
+                className={cn(
+                  'mt-3 lg:mt-4 flex items-center gap-1.5 lg:gap-2',
+                  isEntering && 'hero-anim-cta',
+                  isExiting && 'hero-exit-content',
+                )}
+              >
+                <Link
+                  href={slide.ctaHref}
+                  className="inline-flex items-center justify-center font-display font-bold text-[10px] lg:text-xs px-5 lg:px-6 py-1.5 lg:py-2 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 hover:scale-[1.03] transition-all duration-300"
+                >
+                  {slide.ctaLabel}
+                </Link>
+                <Link
+                  href="/shop"
+                  className="inline-flex items-center justify-center font-display font-bold text-[10px] lg:text-xs px-5 lg:px-6 py-1.5 lg:py-2 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] hover:scale-[1.03] transition-all duration-300"
+                >
+                  Shop
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT IMAGE (Marcel) */}
+          <div className="flex items-center justify-center">
+            <div
+              className={cn(
+                'relative group/img',
+                isEntering && 'hero-anim-image',
+                isExiting && 'hero-exit-image',
+              )}
+            >
+              <Image
+                src={rightImage.src}
+                alt={rightImage.alt}
+                width={rightImage.width}
+                height={rightImage.height}
+                className="object-contain drop-shadow-2xl h-[45vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3"
+                sizes="(min-width: 768px) 20vw, 0px"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Bottom navigation (shared) ─────────────────────────── */}
+      <div className="absolute bottom-4 left-0 right-0 z-30 flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2">
+          {SLIDES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goToSlide(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className={cn(
+                'rounded-full transition-all duration-300',
+                i === activeIndex
+                  ? 'w-2.5 h-2.5 bg-white'
+                  : 'w-2 h-2 bg-white/40 hover:bg-white/60',
+              )}
+            />
+          ))}
+        </div>
+        <div className="w-16 sm:w-20 h-0.5 bg-white/20 rounded-full overflow-hidden">
+          <div
+            ref={progressRef}
+            className="h-full bg-white/70 rounded-full"
+            style={{
+              animation: `heroProgress ${AUTO_PLAY_INTERVAL}ms linear`,
+              animationPlayState: isPaused ? 'paused' : 'running',
+            }}
+          />
         </div>
       </div>
     </section>
