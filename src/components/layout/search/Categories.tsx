@@ -1,9 +1,8 @@
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import clsx from 'clsx'
-import React, { Suspense } from 'react'
+import { getPayload } from 'payload'
+import { Suspense } from 'react'
 
-import { FilterList } from './filter'
 import { CategoryItem } from './Categories.client'
 
 async function CategoryList() {

@@ -109,6 +109,7 @@ async function seedHeader() {
     slug: 'header',
     locale: 'de',
     depth: 0,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   })) as any
 
   const freshNavItems = freshHeader.navItems || []
@@ -130,7 +131,9 @@ async function seedHeader() {
   }
 
   // Build EN navItems reusing IDs from DE
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const enNavItems = freshNavItems.map((navItem: any, idx: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result: any = {
       id: navItem.id,
       link: {
@@ -139,6 +142,7 @@ async function seedHeader() {
       },
     }
     if (enDropdowns[idx] && navItem.dropdownItems) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       result.dropdownItems = navItem.dropdownItems.map((dd: any, ddIdx: number) => ({
         id: dd.id,
         href: dd.href,

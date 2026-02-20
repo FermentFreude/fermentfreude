@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
+import type { Page } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
-import type { Media, Page } from '@/payload-types'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
@@ -20,21 +20,17 @@ async function getVoucherDocument(locale?: 'de' | 'en') {
     limit: 1,
     locale: locale ?? 'de',
     where: {
-      and: [
-        { slug: { equals: 'voucher' } },
-        { _status: { equals: 'published' } },
-      ],
+      and: [{ slug: { equals: 'voucher' } }, { _status: { equals: 'published' } }],
     },
   })
   return result.docs?.[0] ?? null
 }
 
 const getCachedVoucher = (locale?: 'de' | 'en') =>
-  unstable_cache(
-    async () => getVoucherDocument(locale),
-    ['voucher', locale ?? 'de'],
-    { tags: ['voucher'], revalidate: 60 },
-  )
+  unstable_cache(async () => getVoucherDocument(locale), ['voucher', locale ?? 'de'], {
+    tags: ['voucher'],
+    revalidate: 60,
+  })
 
 export const metadata: Metadata = {
   title: 'Geschenkgutschein | FermentFreude',
@@ -91,12 +87,10 @@ const DEFAULTS = {
     },
     {
       question: 'Can a voucher be topped up?',
-      answer:
-        'Yes, you can top up an existing voucher with an additional amount at any time.',
+      answer: 'Yes, you can top up an existing voucher with an additional amount at any time.',
     },
   ],
 }
-
 
 export default async function VoucherPage() {
   const locale = await getLocale()
@@ -126,42 +120,18 @@ export default async function VoucherPage() {
   const cardLabel = resolve(v?.cardLabel, DEFAULTS.cardLabel)
   const valueLabel = resolve(v?.valueLabel, DEFAULTS.valueLabel)
   const cardDisclaimer = resolve(v?.cardDisclaimer, DEFAULTS.cardDisclaimer)
-  const amountSectionLabel = resolve(
-    v?.amountSectionLabel,
-    DEFAULTS.amountSectionLabel,
-  )
-  const deliverySectionLabel = resolve(
-    v?.deliverySectionLabel,
-    DEFAULTS.deliverySectionLabel,
-  )
+  const amountSectionLabel = resolve(v?.amountSectionLabel, DEFAULTS.amountSectionLabel)
+  const deliverySectionLabel = resolve(v?.deliverySectionLabel, DEFAULTS.deliverySectionLabel)
   const greetingLabel = resolve(v?.greetingLabel, DEFAULTS.greetingLabel)
-  const greetingPlaceholder = resolve(
-    v?.greetingPlaceholder,
-    DEFAULTS.greetingPlaceholder,
-  )
-  const addToCartButton = resolve(
-    v?.addToCartButton,
-    DEFAULTS.addToCartButton,
-  )
+  const greetingPlaceholder = resolve(v?.greetingPlaceholder, DEFAULTS.greetingPlaceholder)
+  const addToCartButton = resolve(v?.addToCartButton, DEFAULTS.addToCartButton)
 
-  const starterSetHeading = resolve(
-    v?.starterSetHeading,
-    DEFAULTS.starterSetHeading,
-  )
-  const starterSetDescription = resolve(
-    v?.starterSetDescription,
-    DEFAULTS.starterSetDescription,
-  )
-  const starterSetButton = resolve(
-    v?.starterSetButton,
-    DEFAULTS.starterSetButton,
-  )
+  const starterSetHeading = resolve(v?.starterSetHeading, DEFAULTS.starterSetHeading)
+  const starterSetDescription = resolve(v?.starterSetDescription, DEFAULTS.starterSetDescription)
+  const starterSetButton = resolve(v?.starterSetButton, DEFAULTS.starterSetButton)
   const starterSetImage = v?.starterSetImage ?? null
 
-  const giftOccasionsHeading = resolve(
-    v?.giftOccasionsHeading,
-    DEFAULTS.giftOccasionsHeading,
-  )
+  const giftOccasionsHeading = resolve(v?.giftOccasionsHeading, DEFAULTS.giftOccasionsHeading)
   const giftOccasions =
     (v?.giftOccasions?.length ?? 0) > 0
       ? v!.giftOccasions.map((g) => ({
@@ -202,10 +172,7 @@ export default async function VoucherPage() {
         buttonText={starterSetButton}
         image={starterSetImage}
       />
-      <GiftOccasionsSection
-        heading={giftOccasionsHeading}
-        occasions={giftOccasions}
-      />
+      <GiftOccasionsSection heading={giftOccasionsHeading} occasions={giftOccasions} />
       <FAQSection heading={faqHeading} faqs={faqs} />
     </div>
   )

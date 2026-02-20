@@ -42,7 +42,6 @@ type Args = {
 
 export default async function Page({ params }: Args) {
   const { slug = 'home' } = await params
-  const url = '/' + slug
   const locale = await getLocale()
 
   const page = await queryPageBySlug({

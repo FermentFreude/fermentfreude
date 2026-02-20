@@ -64,7 +64,7 @@ export const CheckoutPage: React.FC = () => {
         }
       }
     }
-  }, [addresses])
+  }, [addresses, shippingAddress])
 
   useEffect(() => {
     return () => {
@@ -102,7 +102,7 @@ export const CheckoutPage: React.FC = () => {
         toast.error(errorMessage)
       }
     },
-    [billingAddress, billingAddressSameAsShipping, shippingAddress],
+    [billingAddress, billingAddressSameAsShipping, shippingAddress, email, initiatePayment],
   )
 
   if (!stripe) return null
@@ -357,7 +357,7 @@ export const CheckoutPage: React.FC = () => {
             if (typeof item.product === 'object' && item.product) {
               const {
                 product,
-                product: { id, meta, title, gallery },
+                product: { meta, title, gallery },
                 quantity,
                 variant,
               } = item

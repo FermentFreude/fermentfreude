@@ -5,18 +5,14 @@ import { Label } from '@/components/ui/label'
 import { Textarea as TextAreaComponent } from '@/components/ui/textarea'
 import React from 'react'
 
-import { Width } from '../Width'
-import { capitaliseFirstLetter } from '@/utilities/capitaliseFirstLetter'
-import { FormItem } from '@/components/forms/FormItem'
 import { FormError } from '@/components/forms/FormError'
+import { FormItem } from '@/components/forms/FormItem'
+import { capitaliseFirstLetter } from '@/utilities/capitaliseFirstLetter'
+import { Width } from '../Width'
 
 export const Textarea: React.FC<
   TextField & {
-    errors: Partial<
-      FieldErrorsImpl<{
-        [x: string]: any
-      }>
-    >
+    errors: Partial<FieldErrorsImpl<FieldValues>>
     register: UseFormRegister<FieldValues>
     rows?: number
   }
