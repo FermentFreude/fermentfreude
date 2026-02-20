@@ -1,3 +1,4 @@
+import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
 import type { Media as MediaType, VoucherCtaBlock as VoucherCtaBlockType } from '@/payload-types'
 import Link from 'next/link'
@@ -28,33 +29,35 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   return (
     <section
       id={id ?? undefined}
-      className="rounded-[40px] md:rounded-[60px] lg:rounded-[87px] bg-[#f9f0dc] px-6 py-12 md:px-12 md:py-16 lg:px-30 lg:py-22.75"
+      className="rounded-2xl bg-ff-ivory section-padding-md container-padding"
     >
-      <div className="container mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+      <div className="container mx-auto flex flex-col lg:flex-row items-center gap-(--space-content-xl)">
         {/* Text side */}
-        <div className="flex-1 flex flex-col gap-6 lg:gap-8 items-start">
-          <h2 className="font-display text-4xl md:text-5xl lg:text-[80px] leading-none text-[#1d1d1d] tracking-tight">
-            {resolvedHeading}
-          </h2>
-          <p className="font-display font-bold text-base md:text-lg lg:text-[22px] leading-relaxed text-[#091638] max-w-150 whitespace-pre-line">
+        <FadeIn from="left" className="flex-1 flex flex-col gap-(--space-content-md) items-start">
+          <h2 className="text-ff-black">{resolvedHeading}</h2>
+          <p className="text-body-lg text-ff-navy content-narrow whitespace-pre-line">
             {resolvedDescription}
           </p>
           <Link
             href={resolvedButtonLink}
-            className="inline-flex items-center justify-center rounded-full bg-[#4b4b4b] hover:bg-[#3a3a3a] transition-colors text-[#faf2e0] font-display font-bold text-lg md:text-xl lg:text-2xl px-8 py-4 lg:px-10 lg:py-5"
+            className="inline-flex items-center justify-center rounded-full bg-ff-charcoal hover:bg-ff-charcoal-hover hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-ivory-mist font-display font-bold text-base px-6 py-2.5"
           >
             {resolvedButtonLabel}
           </Link>
-        </div>
+        </FadeIn>
 
         {/* Image side */}
-        <div className="shrink-0 w-full lg:w-120 xl:w-135 aspect-580/540 rounded-[40px] md:rounded-[60px] lg:rounded-[71px] overflow-hidden">
+        <FadeIn
+          from="right"
+          delay={150}
+          className="shrink-0 w-full max-w-xs lg:max-w-sm aspect-580/540 rounded-2xl overflow-hidden"
+        >
           {image && typeof image === 'object' ? (
             <Media resource={image as MediaType} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-[#ECE5DE]" />
+            <div className="w-full h-full bg-ff-warm-gray" />
           )}
-        </div>
+        </FadeIn>
       </div>
     </section>
   )

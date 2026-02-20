@@ -1,3 +1,4 @@
+import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
 import type { Media as MediaType, SponsorsBarBlock as SponsorsBarBlockType } from '@/payload-types'
 
@@ -12,29 +13,30 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
   const resolvedSponsors = sponsors ?? []
 
   return (
-    <section id={id ?? undefined} className="bg-[#ece5de] px-6 py-12 md:py-16 lg:py-19.25">
-      <div className="container mx-auto flex flex-col items-center gap-8 md:gap-10 lg:gap-12">
-        <h2 className="font-display font-bold text-2xl md:text-3xl lg:text-[45px] leading-[1.3] text-[#1d1d1d] text-center">
-          {resolvedHeading}
-        </h2>
+    <section id={id ?? undefined} className="bg-ff-warm-gray section-padding-sm container-padding">
+      <div className="container mx-auto flex flex-col items-center gap-(--space-content-lg)">
+        <FadeIn>
+          <h3 className="text-ff-black text-center">{resolvedHeading}</h3>
+        </FadeIn>
 
-        <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 lg:gap-16 w-full max-w-300">
+        <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 w-full content-wide mx-auto">
           {resolvedSponsors.map((sponsor, index) => {
             const logo = sponsor.logo
             const content = (
-              <div
+              <FadeIn
                 key={index}
-                className="flex items-center justify-center h-16 md:h-20 lg:h-25 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                delay={index * 100}
+                className="flex items-center justify-center h-8 md:h-10 w-auto opacity-70 hover:opacity-100 transition-opacity duration-300"
               >
                 {logo && typeof logo === 'object' ? (
                   <Media
                     resource={logo as MediaType}
-                    className="h-full w-auto object-contain max-w-50"
+                    className="h-full w-auto object-contain max-w-32"
                   />
                 ) : (
-                  <div className="h-full w-40 bg-[#d9d2cb] rounded-lg" />
+                  <div className="h-full w-28 bg-ff-sponsor-placeholder rounded-(--radius-md)" />
                 )}
-              </div>
+              </FadeIn>
             )
 
             if (sponsor.url) {

@@ -3,7 +3,7 @@ import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { Plugin } from 'payload'
 
 import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
@@ -28,15 +28,26 @@ const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
 }
 
 export const plugins: Plugin[] = [
-  vercelBlobStorage({
-    enabled: process.env.BLOB_READ_WRITE_TOKEN ? true : false,
+  s3Storage({
+    enabled: !!process.env.R2_BUCKET,
     collections: {
       media: {
         disablePayloadAccessControl: true,
         prefix: 'media',
+        generateFileURL: ({ filename, prefix }) => {
+          return `${process.env.R2_PUBLIC_URL}/${prefix}/${filename}`
+        },
       },
     },
-    token: process.env.BLOB_READ_WRITE_TOKEN!,
+    bucket: process.env.R2_BUCKET!,
+    config: {
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+      },
+      endpoint: process.env.R2_ENDPOINT!,
+      region: 'auto',
+    },
   }),
   seoPlugin({
     generateTitle,

@@ -2,7 +2,7 @@
 
 import type { TestimonialsBlock as TestimonialsBlockType } from '@/payload-types'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 const DEFAULTS = {
   eyebrow: 'Testimonials',
@@ -36,11 +36,11 @@ const DEFAULTS = {
 
 function StarRating({ rating }: { rating: number }) {
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-0.5">
       {Array.from({ length: 5 }, (_, i) => (
         <svg
           key={i}
-          className={`w-5 h-5 ${i < rating ? 'text-[#e5b765]' : 'text-gray-300'}`}
+          className={`w-4 h-4 ${i < rating ? 'text-ff-gold-accent' : 'text-gray-300'}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -70,31 +70,61 @@ export const TestimonialsBlock: React.FC<Props> = ({
 
   const [activeIndex, setActiveIndex] = useState(0)
   const total = resolvedTestimonials.length
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
 
-  const goPrev = () => setActiveIndex((prev) => (prev - 1 + total) % total)
-  const goNext = () => setActiveIndex((prev) => (prev + 1) % total)
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) setIsVisible(true)
+      },
+      { threshold: 0.12 },
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
+  // Auto-advance every 6s
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const startTimer = useCallback(() => {
+    timerRef.current = setInterval(() => setActiveIndex((p) => (p + 1) % total), 6000)
+  }, [total])
+  useEffect(() => {
+    startTimer()
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [startTimer])
+
+  const go = (dir: -1 | 1) => {
+    setActiveIndex((p) => (p + dir + total) % total)
+    if (timerRef.current) clearInterval(timerRef.current)
+    startTimer()
+  }
 
   const current = resolvedTestimonials[activeIndex]
 
   return (
-    <section id={id ?? undefined} className="py-16 md:py-24 lg:py-25">
+    <section
+      ref={sectionRef}
+      id={id ?? undefined}
+      className={`section-padding-md transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
+    >
       <div className="container mx-auto px-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-12 md:mb-16">
-          <div className="flex flex-col gap-2 max-w-175">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-(--space-content-md) mb-(--space-content-xl)">
+          <div className="flex flex-col gap-(--space-content-xs) content-medium">
             {resolvedEyebrow && (
-              <span className="font-display font-bold text-2xl md:text-[35px] text-[#e5b765]">
-                {resolvedEyebrow}
-              </span>
+              <span className="text-eyebrow text-ff-gold-accent">{resolvedEyebrow}</span>
             )}
-            <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-[52px] leading-[1.2] text-[#4b4f4a]">
-              {resolvedHeading}
-            </h2>
+            <h2 className="text-ff-olive">{resolvedHeading}</h2>
           </div>
           {resolvedButtonLabel && (
             <Link
               href={resolvedButtonLink}
-              className="inline-flex items-center justify-center rounded-full bg-[#e5b765] hover:bg-[#d4a654] transition-colors text-[#1b1b1b] font-display font-bold text-base md:text-lg px-8 py-3 md:px-12 md:py-4 shrink-0"
+              className="inline-flex items-center justify-center rounded-full bg-ff-gold-accent hover:bg-ff-gold-accent-dark hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-dark-deep font-display font-bold text-sm px-6 py-2 shrink-0"
             >
               {resolvedButtonLabel}
             </Link>
@@ -102,19 +132,20 @@ export const TestimonialsBlock: React.FC<Props> = ({
         </div>
 
         {/* Testimonial card */}
-        <div className="relative bg-[#faf2e0] rounded-[40px] md:rounded-[60px] lg:rounded-[80px] px-8 py-12 md:px-16 md:py-16 lg:px-20 lg:py-20 flex flex-col items-center text-center gap-6 md:gap-8">
+        <div className="relative bg-ff-ivory-mist rounded-2xl p-8 md:p-10 lg:p-12 flex flex-col items-center text-center gap-(--space-content-md)">
           <StarRating rating={current?.rating ?? 5} />
 
-          <blockquote className="font-sans font-medium text-base md:text-lg lg:text-[26px] leading-relaxed text-[#1e1e1e] max-w-220">
+          <blockquote
+            key={activeIndex}
+            className="text-body-lg text-ff-dark content-medium animate-fade-in"
+          >
             &ldquo;{current?.quote ?? ''}&rdquo;
           </blockquote>
 
           <div className="flex flex-col items-center gap-1">
-            <p className="font-display text-lg md:text-xl text-[#1e1e1e]">
-              {current?.authorName ?? ''}
-            </p>
+            <p className="font-display text-base text-ff-dark">{current?.authorName ?? ''}</p>
             {current?.authorRole && (
-              <p className="font-sans text-sm md:text-base text-[#faf2e0] bg-[#4b4f4a] px-3 py-0.5 rounded-full">
+              <p className="text-caption text-ff-ivory-mist bg-ff-olive px-3 py-0.5 rounded-full">
                 {current.authorRole}
               </p>
             )}
@@ -124,13 +155,13 @@ export const TestimonialsBlock: React.FC<Props> = ({
           {total > 1 && (
             <>
               <button
-                onClick={goPrev}
+                onClick={() => go(-1)}
                 aria-label="Previous testimonial"
-                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-[#4b4f4a] hover:bg-black/5 transition-colors"
+                className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-ff-olive hover:bg-black/5 transition-colors"
               >
                 <svg
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -142,13 +173,13 @@ export const TestimonialsBlock: React.FC<Props> = ({
                 </svg>
               </button>
               <button
-                onClick={goNext}
+                onClick={() => go(1)}
                 aria-label="Next testimonial"
-                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-[#4b4f4a] hover:bg-black/5 transition-colors"
+                className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-ff-olive hover:bg-black/5 transition-colors"
               >
                 <svg
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -165,14 +196,18 @@ export const TestimonialsBlock: React.FC<Props> = ({
 
         {/* Dots */}
         {total > 1 && (
-          <div className="flex justify-center gap-2 mt-6">
+          <div className="flex justify-center gap-1.5 mt-4">
             {resolvedTestimonials.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setActiveIndex(index)}
+                onClick={() => {
+                  setActiveIndex(index)
+                  if (timerRef.current) clearInterval(timerRef.current)
+                  startTimer()
+                }}
                 aria-label={`Go to testimonial ${index + 1}`}
-                className={`w-3 h-3 rounded-full transition-colors ${
-                  index === activeIndex ? 'bg-[#e5b765]' : 'bg-[#e5b765]/30'
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === activeIndex ? 'bg-ff-gold-accent scale-125' : 'bg-ff-gold-accent/30'
                 }`}
               />
             ))}

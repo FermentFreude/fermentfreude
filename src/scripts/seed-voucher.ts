@@ -3,7 +3,7 @@
  * Creates a "Geschenkgutschein" / "Gift Voucher" page with all sections:
  * hero with voucher form, starter set, gift occasions, and FAQ.
  *
- * Uploads images to Payload Media (Vercel Blob) so they're editable from /admin.
+ * Uploads images to Payload Media (Cloudflare R2) so they're editable from /admin.
  * Seeds both DE (default) and EN locales, reusing array IDs.
  *
  * Following the rules:
@@ -11,7 +11,7 @@
  * - Seed both languages: DE first, read back IDs, then EN with same IDs
  * - Context flags: skipRevalidate, disableRevalidate, skipAutoTranslate
  * - Sequential DB writes (no Promise.all) for MongoDB Atlas M0
- * - Images uploaded via Payload Media collection (stored in Vercel Blob)
+ * - Images uploaded via Payload Media collection (stored in Cloudflare R2)
  *
  * Run: npx tsx src/scripts/seed-voucher.ts
  */
@@ -30,25 +30,7 @@ import {
   voucherPageDataEN,
   seedContext as voucherSeedContext,
 } from '@/endpoints/seed/voucher-page'
-
-/** Read a local file and return a Payload-compatible File object */
-function readLocalFile(filePath: string) {
-  const data = fs.readFileSync(filePath)
-  const ext = path.extname(filePath).slice(1).toLowerCase()
-  const mimeMap: Record<string, string> = {
-    png: 'image/png',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    webp: 'image/webp',
-    svg: 'image/svg+xml',
-  }
-  return {
-    name: path.basename(filePath),
-    data,
-    mimetype: mimeMap[ext] || 'application/octet-stream',
-    size: data.byteLength,
-  }
-}
+import { IMAGE_PRESETS, optimizedFile, readLocalFile } from './seed-image-utils'
 
 async function seedVoucher() {
   const payload = await getPayload({ config })
@@ -84,7 +66,7 @@ async function seedVoucher() {
       /* none found */
     })
 
-  // ── 3. Upload images to Payload Media (Vercel Blob) ────────
+  // ── 3. Upload images to Payload Media (Cloudflare R2) ────────
   console.log('  📸 Uploading images to Media collection…')
 
   // Upload card logo
@@ -109,7 +91,7 @@ async function seedVoucher() {
     starterSetImage = await payload.create({
       collection: 'media',
       data: { alt: 'voucher-starter-set – Starter set image for voucher page' },
-      file: readLocalFile(starterSetImagePath),
+      file: await optimizedFile(starterSetImagePath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })
     console.log(`    ✅ Starter set image: ${starterSetImage.id}`)
@@ -132,7 +114,7 @@ async function seedVoucher() {
       const img = await payload.create({
         collection: 'media',
         data: { alt: occasion.alt },
-        file: readLocalFile(filePath),
+        file: await optimizedFile(filePath, IMAGE_PRESETS.card),
         context: { skipAutoTranslate: true },
       })
       giftOccasionImages.push(img)

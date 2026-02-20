@@ -12,9 +12,10 @@
  */
 import type { Page } from '@/payload-types'
 import config from '@payload-config'
-import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
+
+import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
 interface WithId {
   id?: string
@@ -36,25 +37,7 @@ interface BlockItem extends WithId {
   links?: WithId[]
 }
 
-/** Read a local file and return a Payload-compatible File object */
-function readLocalFile(filePath: string) {
-  const data = fs.readFileSync(filePath)
-  const ext = path.extname(filePath).slice(1).toLowerCase()
-  const mimeMap: Record<string, string> = {
-    png: 'image/png',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    webp: 'image/webp',
-    svg: 'image/svg+xml',
-    gif: 'image/gif',
-  }
-  return {
-    name: path.basename(filePath),
-    data,
-    mimetype: mimeMap[ext] || 'image/png',
-    size: data.byteLength,
-  }
-}
+// readLocalFile + optimizedFile imported from ./seed-image-utils
 
 async function seedHome() {
   const payload = await getPayload({ config })
@@ -93,21 +76,21 @@ async function seedHome() {
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Lakto-Gemüse workshop – fermented vegetables in glass jars' },
-    file: readLocalFile(path.join(workshopsDir, 'lakto.png')),
+    file: await optimizedFile(path.join(workshopsDir, 'lakto.png'), IMAGE_PRESETS.card),
   })
 
   const kombuchaImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Kombucha workshop – kombucha SCOBY and fermented tea in jar' },
-    file: readLocalFile(path.join(workshopsDir, 'kombucha.png')),
+    file: await optimizedFile(path.join(workshopsDir, 'kombucha.png'), IMAGE_PRESETS.card),
   })
 
   const tempehImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Tempeh workshop – homemade tempeh on ceramic plate' },
-    file: readLocalFile(path.join(workshopsDir, 'tempeh.png')),
+    file: await optimizedFile(path.join(workshopsDir, 'tempeh.png'), IMAGE_PRESETS.card),
   })
 
   // Hero carousel images (from Figma design)
@@ -115,44 +98,44 @@ async function seedHome() {
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'FermentFreude hero – fermented foods arrangement slide 1' },
-    file: readLocalFile(path.join(heroDir, 'hero-slide-1.png')),
+    file: await optimizedFile(path.join(heroDir, 'hero-slide-1.png'), IMAGE_PRESETS.card),
   })
 
   const heroImage2 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'FermentFreude hero – fermented foods arrangement slide 2' },
-    file: readLocalFile(path.join(heroDir, 'hero-slide-2.png')),
+    file: await optimizedFile(path.join(heroDir, 'hero-slide-2.png'), IMAGE_PRESETS.card),
   })
 
   const heroImage3 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'FermentFreude hero – fermented foods arrangement slide 3' },
-    file: readLocalFile(path.join(heroDir, 'hero-slide-3.png')),
+    file: await optimizedFile(path.join(heroDir, 'hero-slide-3.png'), IMAGE_PRESETS.card),
   })
 
   const heroImage4 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'FermentFreude hero – fermented foods arrangement slide 4' },
-    file: readLocalFile(path.join(heroDir, 'hero-slide-4.png')),
+    file: await optimizedFile(path.join(heroDir, 'hero-slide-4.png'), IMAGE_PRESETS.card),
   })
 
-  // ── Per-slide product images (uploaded to Media / Vercel Blob) ──
+  // ── Per-slide product images (uploaded to Media / Cloudflare R2) ──
 
   // Lakto slide images
   const laktoSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'slide-lakto-left – FermentFreude Sauerkraut Jar' },
-    file: readLocalFile(path.join(heroDir, 'lakto1.png')),
+    file: await optimizedFile(path.join(heroDir, 'lakto1.png'), IMAGE_PRESETS.card),
   })
   const laktoSlideRight = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'slide-lakto-right – FermentFreude Sauerkraut Jar' },
-    file: readLocalFile(path.join(heroDir, 'lakto2.png')),
+    file: await optimizedFile(path.join(heroDir, 'lakto2.png'), IMAGE_PRESETS.card),
   })
 
   // Kombucha slide images
@@ -160,13 +143,13 @@ async function seedHome() {
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'slide-kombucha-left – FermentFreude Kombucha Apple & Carrot' },
-    file: readLocalFile(path.join(heroDir, 'kombucha1.png')),
+    file: await optimizedFile(path.join(heroDir, 'kombucha1.png'), IMAGE_PRESETS.card),
   })
   const kombuchaSlideRight = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'slide-kombucha-right – FermentFreude Kombucha Coffee Flavour' },
-    file: readLocalFile(path.join(heroDir, 'kombucha2.png')),
+    file: await optimizedFile(path.join(heroDir, 'kombucha2.png'), IMAGE_PRESETS.card),
   })
 
   // Tempeh slide images
@@ -174,13 +157,13 @@ async function seedHome() {
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'slide-tempeh-left – FermentFreude Tempeh Slices' },
-    file: readLocalFile(path.join(heroDir, 'tempeh1.png')),
+    file: await optimizedFile(path.join(heroDir, 'tempeh1.png'), IMAGE_PRESETS.card),
   })
   const tempehSlideRight = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'slide-tempeh-right – FermentFreude Black Bean Tempeh' },
-    file: readLocalFile(path.join(heroDir, 'tempeh2.png')),
+    file: await optimizedFile(path.join(heroDir, 'tempeh2.png'), IMAGE_PRESETS.card),
   })
 
   // Basics slide images (David + Marcel)
@@ -188,13 +171,13 @@ async function seedHome() {
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'slide-basics-left – David Heider, FermentFreude founder' },
-    file: readLocalFile(path.join(heroDir, 'DavidHeroCopy.png')),
+    file: await optimizedFile(path.join(heroDir, 'DavidHeroCopy.png'), IMAGE_PRESETS.card),
   })
   const basicsSlideRight = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'slide-basics-right – Marcel Rauminger, FermentFreude founder' },
-    file: readLocalFile(path.join(heroDir, 'MarcelHero.png')),
+    file: await optimizedFile(path.join(heroDir, 'MarcelHero.png'), IMAGE_PRESETS.card),
   })
 
   // ── New block images ──
@@ -205,7 +188,7 @@ async function seedHome() {
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'FermentFreude Gift Set – fermentation starter kit in box' },
-    file: readLocalFile(path.join(imagesDir, 'Image (Gift Set).png')),
+    file: await optimizedFile(path.join(imagesDir, 'Image (Gift Set).png'), IMAGE_PRESETS.card),
   })
 
   // HeroBanner background (Banner)
@@ -213,7 +196,7 @@ async function seedHome() {
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'FermentFreude chefs banner – professional kitchen scene' },
-    file: readLocalFile(path.join(imagesDir, 'Banner.png')),
+    file: await optimizedFile(path.join(imagesDir, 'Banner.png'), IMAGE_PRESETS.hero),
   })
 
   // TeamPreview – David & Marcel photos
@@ -221,13 +204,13 @@ async function seedHome() {
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'David Heider – FermentFreude co-founder and instructor' },
-    file: readLocalFile(path.join(imagesDir, 'david-heider.jpg')),
+    file: await optimizedFile(path.join(imagesDir, 'david-heider.jpg'), IMAGE_PRESETS.card),
   })
   const marcelPhoto = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Marcel Rauminger – FermentFreude co-founder and instructor' },
-    file: readLocalFile(path.join(imagesDir, 'marcel-rauminger.jpg')),
+    file: await optimizedFile(path.join(imagesDir, 'marcel-rauminger.jpg'), IMAGE_PRESETS.card),
   })
 
   // SponsorsBar logos
@@ -235,25 +218,25 @@ async function seedHome() {
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Sponsor logo 1' },
-    file: readLocalFile(path.join(imagesDir, 'sponsor-logo.png')),
+    file: await optimizedFile(path.join(imagesDir, 'sponsor-logo.png'), IMAGE_PRESETS.logo),
   })
   const sponsorLogo2 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Sponsor logo 2' },
-    file: readLocalFile(path.join(imagesDir, 'sponsor-logo-2.png')),
+    file: await optimizedFile(path.join(imagesDir, 'sponsor-logo-2.png'), IMAGE_PRESETS.logo),
   })
   const sponsorLogo3 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Sponsor logo 3' },
-    file: readLocalFile(path.join(imagesDir, 'sponsor-logo-3.png')),
+    file: await optimizedFile(path.join(imagesDir, 'sponsor-logo-3.png'), IMAGE_PRESETS.logo),
   })
   const sponsorLogo4 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Sponsor logo 4' },
-    file: readLocalFile(path.join(imagesDir, 'sponsor-logo-4.png')),
+    file: await optimizedFile(path.join(imagesDir, 'sponsor-logo-4.png'), IMAGE_PRESETS.logo),
   })
 
   payload.logger.info('✅ All images uploaded to Media collection.')
@@ -1216,7 +1199,7 @@ async function seedHome() {
   payload.logger.info('   • Team Preview (David & Marcel)')
   payload.logger.info('   • Testimonials (4 reviews)')
   payload.logger.info('   • Sponsors Bar (4 logos)')
-  payload.logger.info('   All images uploaded to Media (Vercel Blob ready).')
+  payload.logger.info('   All images uploaded to Media (Cloudflare R2).')
   payload.logger.info('   Switch locale in admin to verify both languages.')
   process.exit(0)
 }

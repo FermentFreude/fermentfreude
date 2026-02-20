@@ -1,3 +1,4 @@
+import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
 import type { Media as MediaType, TeamPreviewBlock as TeamPreviewBlockType } from '@/payload-types'
 import Link from 'next/link'
@@ -34,58 +35,58 @@ export const TeamPreviewBlock: React.FC<Props> = ({
   const resolvedMembers = members && members.length > 0 ? members : DEFAULTS.members
 
   return (
-    <section id={id ?? undefined} className="py-16 md:py-24 lg:py-25">
-      <div className="container mx-auto px-6 flex flex-col lg:flex-row items-start gap-10 lg:gap-16">
+    <section id={id ?? undefined} className="section-padding-md">
+      <div className="container mx-auto px-6 flex flex-col lg:flex-row items-start gap-(--space-content-xl)">
         {/* Photos */}
-        <div className="flex gap-6 md:gap-8 lg:gap-10 flex-1">
+        <div className="flex gap-(--space-content-lg) flex-1">
           {resolvedMembers.map((member, index) => (
-            <div key={index} className="flex flex-col items-center gap-3">
-              <div className="w-50 md:w-70 lg:w-95 xl:w-110 aspect-474/726 rounded-[40px] md:rounded-[60px] lg:rounded-[85px] overflow-hidden">
+            <FadeIn
+              key={index}
+              delay={index * 150}
+              className="flex flex-col items-center gap-(--space-content-sm)"
+            >
+              <div className="w-36 md:w-44 lg:w-52 aspect-3/4 rounded-2xl overflow-hidden">
                 {'image' in member && member.image && typeof member.image === 'object' ? (
                   <Media
                     resource={member.image as MediaType}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full bg-[#ECE5DE]" />
+                  <div className="w-full h-full bg-ff-warm-gray" />
                 )}
               </div>
               <div className="text-center">
-                <p className="font-display font-medium text-lg md:text-xl lg:text-2xl text-[#1e1e1e]">
+                <p className="font-display font-medium text-base text-ff-dark">
                   {'name' in member ? member.name : DEFAULTS.members[index]?.name}
                 </p>
                 {'role' in member && member.role && (
-                  <p className="font-display font-light text-sm md:text-base text-[#4b4f4a]">
-                    {member.role}
-                  </p>
+                  <p className="text-caption text-ff-olive">{member.role}</p>
                 )}
               </div>
-            </div>
+            </FadeIn>
           ))}
         </div>
 
         {/* Text side */}
-        <div className="flex flex-col gap-3 lg:gap-4 max-w-105 lg:pt-6">
+        <FadeIn
+          from="right"
+          delay={200}
+          className="flex flex-col gap-(--space-content-sm) max-w-xs lg:max-w-sm lg:pt-4"
+        >
           {resolvedEyebrow && (
-            <span className="font-display font-medium text-lg md:text-xl lg:text-2xl text-[#626160] tracking-[2px] capitalize">
-              {resolvedEyebrow}
-            </span>
+            <span className="text-eyebrow text-ff-gray-muted">{resolvedEyebrow}</span>
           )}
-          <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-[50px] leading-[0.95] text-[#e5b765]">
-            {resolvedHeading}
-          </h2>
-          <p className="font-display font-bold text-sm md:text-base leading-relaxed text-[#4b4f4a] tracking-tight mt-2">
-            {resolvedDescription}
-          </p>
+          <h2 className="text-ff-gold-accent">{resolvedHeading}</h2>
+          <p className="text-body-sm text-ff-olive mt-1">{resolvedDescription}</p>
           {resolvedButtonLabel && (
             <Link
               href={resolvedButtonLink}
-              className="inline-flex items-center justify-center rounded-4xl bg-[#4b4f4a] hover:bg-[#3a3e3a] transition-colors text-[#faf2e0] font-display font-bold text-lg md:text-xl lg:text-2xl px-10 py-4 lg:px-14 lg:py-5 mt-6 w-fit"
+              className="inline-flex items-center justify-center rounded-full bg-ff-olive hover:bg-ff-olive-dark hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-ivory-mist font-display font-bold text-base px-6 py-2.5 mt-4 w-fit"
             >
               {resolvedButtonLabel}
             </Link>
           )}
-        </div>
+        </FadeIn>
       </div>
     </section>
   )

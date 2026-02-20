@@ -155,6 +155,19 @@ Each block is independently editable, reorderable, and reusable on other pages.
 - Run all: `pnpm seed` | Run one: `pnpm seed about`
 - Each seed populates the page's `layout` array with the correct block types and data
 
+### Image optimization for seeds
+
+- **Always use `optimizedFile()`** from `src/scripts/seed-image-utils.ts` when uploading images in seed scripts
+- **Never upload raw PNGs** from design tools (Figma exports are often 5-25 MB each)
+- `optimizedFile()` converts to WebP + resizes, typically saving **80-90%** storage
+- Use the correct preset for the image role:
+  - `IMAGE_PRESETS.hero` — full-width banners (max 1920px, quality 80)
+  - `IMAGE_PRESETS.card` — product photos, cards, portraits (max 1200px, quality 80)
+  - `IMAGE_PRESETS.logo` — sponsor logos, icons (max 600px, quality 80)
+- Use `readLocalFile()` only for SVGs (cannot be rasterized)
+- To clean up old blobs: `set -a && source .env && set +a && npx tsx src/scripts/clean-blobs.ts`
+- **Vercel Blob Hobby plan:** 500 MB storage limit. Optimized seeds use ~15-20 MB total vs ~117 MB raw
+
 ---
 
 ## 4) Next.js Best Practices (App Router — Next.js 15)

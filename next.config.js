@@ -16,9 +16,9 @@ const nextConfig = {
           protocol: url.protocol.replace(':', ''),
         }
       }),
-      // Vercel Blob storage
+      // Cloudflare R2 public URL
       {
-        hostname: '*.public.blob.vercel-storage.com',
+        hostname: 'pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev',
         protocol: 'https',
       },
     ],

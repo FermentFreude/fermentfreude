@@ -12,7 +12,7 @@
  * Order (when seeding all):
  *   1. Header (global — nav items)
  *   2. Home page (hero + workshop slider with images)
- *   3. About page (with images uploaded to Vercel Blob)
+ *   3. About page (with images uploaded to Cloudflare R2)
  *
  * Run manually: npx tsx src/scripts/seed-all.ts [target]
  */
