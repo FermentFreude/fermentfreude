@@ -39,5 +39,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# seed source images (uploaded to R2 via seed scripts)
+seed-assets/
+
 public/media
 

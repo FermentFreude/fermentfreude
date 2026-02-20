@@ -9,7 +9,7 @@ export const Media: React.FC<Props> = (props) => {
   const { className, htmlElement = 'div', resource } = props
 
   const isVideo = typeof resource === 'object' && resource?.mimeType?.includes('video')
-  const Tag = (htmlElement as any) || Fragment
+  const Tag = (htmlElement as React.ElementType) || Fragment
 
   return (
     <Tag
@@ -19,6 +19,7 @@ export const Media: React.FC<Props> = (props) => {
           }
         : {})}
     >
+      {/* eslint-disable-next-line jsx-a11y/alt-text -- alt is forwarded via props to next/image */}
       {isVideo ? <Video {...props} /> : <Image {...props} />}
     </Tag>
   )

@@ -2,11 +2,10 @@
 
 import { Media } from '@/components/Media'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
-import { cn } from '@/utilities/cn'
-import Link from 'next/link'
-import React, { useCallback, useEffect } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import React, { useCallback, useEffect } from 'react'
 
 import type { Page } from '@/payload-types'
 
@@ -25,7 +24,7 @@ const DEFAULT_SLIDES = [
       'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.',
     buttonLabel: 'LEARN MORE',
     buttonUrl: '/about',
-    image: null as unknown,
+    image: null as string | null,
   },
 ]
 

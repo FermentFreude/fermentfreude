@@ -3,9 +3,9 @@
 import { Media } from '@/components/Media'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
+import useEmblaCarousel from 'embla-carousel-react'
 import Link from 'next/link'
 import React, { useCallback, useEffect } from 'react'
-import useEmblaCarousel from 'embla-carousel-react'
 
 import type { Page } from '@/payload-types'
 
@@ -21,7 +21,7 @@ const DEFAULT_SLIDES = [
       'We create fermented foods and share the knowledge behind them. Through workshops, products, and education, we make fermentation accessible and enjoyable.',
     buttonLabel: 'Discover More',
     buttonUrl: '/about',
-    image: null as unknown,
+    image: null as string | null,
   },
 ]
 
@@ -36,7 +36,7 @@ function getImageUrl(image: unknown): string {
   return ''
 }
 
-type HeroCarouselProps = Extract<Page['hero'], { type: 'heroCarousel' }>
+type HeroCarouselProps = Page['hero'] & { type: 'heroCarousel' }
 
 export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
   const { setHeaderTheme } = useHeaderTheme()
@@ -71,7 +71,9 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
     if (!emblaApi) return
     onSelect()
     emblaApi.on('select', onSelect)
-    return () => emblaApi.off('select', onSelect)
+    return () => {
+      emblaApi.off('select', onSelect)
+    }
   }, [emblaApi, onSelect])
 
   // Autoplay: advance every 5 seconds
@@ -90,10 +92,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
           {resolvedSlides.map((slide, i) => {
             const imageUrl = getImageUrl(slide.image)
             return (
-              <div
-                key={i}
-                className="relative min-w-0 flex-[0_0_100%] h-full"
-              >
+              <div key={i} className="relative min-w-0 flex-[0_0_100%] h-full">
                 {/* Background image */}
                 {imageUrl ? (
                   <div
@@ -110,11 +109,11 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
                     />
                   </div>
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#2a2a2a] to-[#1a1a1a]" />
+                  <div className="absolute inset-0 bg-linear-to-br from-[#2a2a2a] to-[#1a1a1a]" />
                 )}
 
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/50 to-black/30" />
 
                 {/* Content */}
                 <div className="relative z-10 flex h-full items-center pt-16 sm:pt-20 lg:pt-24">
@@ -156,9 +155,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
               onClick={() => emblaApi?.scrollTo(i)}
               className={cn(
                 'h-2 w-2 rounded-full transition-all duration-300',
-                i === selectedIndex
-                  ? 'w-8 bg-[#E5B765]'
-                  : 'bg-white/50 hover:bg-white/70',
+                i === selectedIndex ? 'w-8 bg-[#E5B765]' : 'bg-white/50 hover:bg-white/70',
               )}
             />
           ))}

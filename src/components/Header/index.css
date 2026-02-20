@@ -12,7 +12,11 @@
     left: 50%;
     width: 0;
     height: 2px;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--ff-charcoal);
+  }
+
+  [data-theme='dark'] &::after {
+    background-color: #e5e5e5;
     transition:
       width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
       left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -33,4 +37,29 @@
       width: 100%;
     }
   }
+}
+
+/* ── Transparent header on home page ────────────────────────── */
+/* Dark mode: white text on transparent */
+[data-theme='dark'] header[data-transparent] .navLink,
+[data-theme='dark'] header[data-transparent] .navLink:hover {
+  color: white;
+}
+
+[data-theme='dark'] header[data-transparent] .navLink::after {
+  background-color: white;
+}
+
+[data-theme='dark'] header[data-transparent] nav button,
+[data-theme='dark'] header[data-transparent] nav a {
+  color: white;
+}
+
+/* Logo — invert to white in dark mode only */
+[data-theme='dark'] header[data-transparent] nav img {
+  filter: brightness(0) invert(1);
+}
+
+[data-theme='dark'] header[data-transparent] nav svg {
+  color: white;
 }

@@ -50,13 +50,13 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
   }, [])
 
   const sharedClassName = cn(
-    'relative navLink flex items-center gap-1 text-white/90 font-display font-bold text-[11px] lg:text-xs hover:text-white transition-colors',
+    'relative navLink inline-flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors',
     { active: isActive },
   )
 
   const chevron = (
     <ChevronDown
-      className={cn('w-2.5 h-2.5 transition-transform duration-200', {
+      className={cn('w-3 h-3 transition-transform duration-200', {
         'rotate-180': isOpen,
       })}
       aria-hidden="true"
@@ -87,16 +87,16 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
           isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-1',
         )}
       >
-        <div className="w-56 rounded-xl border border-ff-white-95 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg overflow-hidden">
+        <div className="w-56 rounded-xl border border-white/40 dark:border-white/10 bg-white/70 dark:bg-neutral-900/70 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-black/20 overflow-hidden">
           <div className="py-1.5">
             {items.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'block px-4 py-2.5 text-sm font-medium text-ff-gray-15 dark:text-neutral-300 hover:bg-ff-ivory dark:hover:bg-neutral-800 transition-colors',
+                  'block px-4 py-2.5 text-sm font-medium text-ff-gray-15 dark:text-neutral-300 hover:bg-white/50 dark:hover:bg-white/5 transition-colors',
                   {
-                    'bg-ff-ivory/50 dark:bg-neutral-800/50 text-ff-charcoal dark:text-white':
+                    'bg-white/60 dark:bg-white/10 text-ff-charcoal dark:text-white':
                       pathname === item.href,
                   },
                 )}

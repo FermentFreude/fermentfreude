@@ -16,21 +16,9 @@ export interface DefaultNavItem {
   dropdownItems?: DropdownItem[]
 }
 
-/** Default nav items — order: Home, About, Chefs, Shop, Workshops */
+/** Default nav items matching the Figma nav order */
 export const defaultNavItems: DefaultNavItem[] = [
   { label: 'Home', url: '/' },
-  {
-    label: 'About',
-    url: '/about',
-    dropdownKey: 'about',
-    dropdownItems: [
-      { label: 'About Us', href: '/about', description: 'Our Team & Mission' },
-      { label: 'Fermentation', href: '/fermentation', description: 'What is Fermentation?' },
-      { label: 'Contact', href: '/contact', description: 'Get in touch' },
-    ],
-  },
-  { label: 'Chefs', url: '/gastronomy' },
-  { label: 'Shop', url: '/shop' },
   {
     label: 'Workshops',
     url: '/workshops',
@@ -50,6 +38,18 @@ export const defaultNavItems: DefaultNavItem[] = [
       },
     ],
   },
+  { label: 'Shop', url: '/shop' },
+  { label: 'For Chefs', url: '/gastronomy' },
+  {
+    label: 'About Us',
+    url: '/about',
+    dropdownKey: 'about',
+    dropdownItems: [
+      { label: 'About Us', href: '/about', description: 'Our Team & Mission' },
+      { label: 'Fermentation', href: '/fermentation', description: 'What is Fermentation?' },
+    ],
+  },
+  { label: 'Contact', url: '/contact' },
 ]
 
 /** Default dropdown lookup keyed by identifier */
@@ -67,13 +67,9 @@ export function getDefaultDropdownKey(label?: string | null, url?: string | null
   if (
     l === 'about us' ||
     l === 'about' ||
-    l === 'über uns' ||
     l === 'fermentation' ||
-    l === 'contact' ||
-    l === 'kontakt' ||
     url === '/about' ||
-    url === '/fermentation' ||
-    url === '/contact'
+    url === '/fermentation'
   )
     return 'about'
   return null

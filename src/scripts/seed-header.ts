@@ -18,6 +18,11 @@ async function seedHeader() {
     locale: 'de',
     context: { skipRevalidate: true, skipAutoTranslate: true },
     data: {
+      announcementBar: {
+        enabled: true,
+        text: 'Wir haben auch digitale Workshops, schau mal rein',
+        link: '/workshops',
+      },
       navItems: [
         {
           link: {
@@ -100,11 +105,12 @@ async function seedHeader() {
   // ----- 2) Read back to capture auto-generated IDs -----
   payload.logger.info('Reading back Header to capture generated IDs...')
 
-  const freshHeader = await payload.findGlobal({
+  const freshHeader = (await payload.findGlobal({
     slug: 'header',
     locale: 'de',
     depth: 0,
-  }) as any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  })) as any
 
   const freshNavItems = freshHeader.navItems || []
 
@@ -125,7 +131,9 @@ async function seedHeader() {
   }
 
   // Build EN navItems reusing IDs from DE
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const enNavItems = freshNavItems.map((navItem: any, idx: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result: any = {
       id: navItem.id,
       link: {
@@ -134,6 +142,7 @@ async function seedHeader() {
       },
     }
     if (enDropdowns[idx] && navItem.dropdownItems) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       result.dropdownItems = navItem.dropdownItems.map((dd: any, ddIdx: number) => ({
         id: dd.id,
         href: dd.href,
@@ -152,6 +161,11 @@ async function seedHeader() {
     locale: 'en',
     context: { skipRevalidate: true, skipAutoTranslate: true },
     data: {
+      announcementBar: {
+        enabled: true,
+        text: 'We Have Digital Workshops too, take a look',
+        link: '/workshops',
+      },
       navItems: enNavItems,
     },
   })

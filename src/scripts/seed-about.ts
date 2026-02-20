@@ -1,52 +1,44 @@
 /**
- * Seed the About page with the AboutBlock.
- * Creates an "Über uns" / "About Us" page with all sections:
- * hero image, our story, team, sponsors, contact, and CTA.
+ * Seed the About page with decomposed blocks.
+ * Creates an "Über uns" / "About Us" page composed from:
+ *   Hero (highImpact) + OurStory + TeamCards + SponsorsBar + ReadyToLearnCTA
  *
- * Uploads images to Payload Media (Vercel Blob) so they're editable from /admin.
+ * Uploads images to Payload Media (Cloudflare R2) so they're editable from /admin.
  * Seeds both DE (default) and EN locales, reusing array IDs.
  *
  * Following the rules:
- * - Schema first: all about fields are in the CMS schema (AboutBlock)
- * - Seed both languages: DE first, read back IDs, then EN with same IDs
+ * - Schema first: all fields are CMS block fields
+ * - Seed both languages: DE first → read back IDs → EN with same IDs
  * - Context flags: skipRevalidate, disableRevalidate, skipAutoTranslate
  * - Sequential DB writes (no Promise.all) for MongoDB Atlas M0
- * - Images uploaded via Payload Media collection (stored in Vercel Blob)
+ * - Images uploaded via Payload Media collection (stored in Cloudflare R2)
  *
  * Run: set -a && source .env && set +a && npx tsx src/scripts/seed-about.ts
  */
 import config from '@payload-config'
-import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
 
-import { aboutDataDE, aboutDataEN } from '@/endpoints/seed/about'
-
-/** Read a local file and return a Payload-compatible File object */
-function readLocalFile(filePath: string) {
-  const data = fs.readFileSync(filePath)
-  const ext = path.extname(filePath).slice(1).toLowerCase()
-  const mimeMap: Record<string, string> = {
-    png: 'image/png',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    webp: 'image/webp',
-    svg: 'image/svg+xml',
-  }
-  return {
-    name: path.basename(filePath),
-    data,
-    mimetype: mimeMap[ext] || 'application/octet-stream',
-    size: data.byteLength,
-  }
-}
+import {
+  aboutHeroDE,
+  aboutHeroEN,
+  ourStoryDE,
+  ourStoryEN,
+  readyToLearnDE,
+  readyToLearnEN,
+  sponsorsBarDE,
+  sponsorsBarEN,
+  teamCardsDE,
+  teamCardsEN,
+} from './data/about'
+import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
 async function seedAbout() {
   const payload = await getPayload({ config })
 
   console.log('🧪 Seeding About page…')
 
-  const imagesDir = path.resolve(process.cwd(), 'public/assets/images')
+  const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
 
   // ── 1. Delete any existing about page ──────────────────────
   const existing = await payload.find({
@@ -75,13 +67,13 @@ async function seedAbout() {
       /* none found */
     })
 
-  // ── 3. Upload images to Payload Media (Vercel Blob) ────────
+  // ── 3. Upload images to Payload Media (Cloudflare R2) ────────
   console.log('  📸 Uploading images to Media collection…')
 
   const heroImage = await payload.create({
     collection: 'media',
     data: { alt: 'about-hero – FermentFreude about page banner' },
-    file: readLocalFile(path.join(imagesDir, 'Banner.png')),
+    file: await optimizedFile(path.join(imagesDir, 'Banner.png'), IMAGE_PRESETS.hero),
     context: { skipAutoTranslate: true },
   })
   console.log(`    ✅ Hero banner: ${heroImage.id}`)
@@ -89,7 +81,7 @@ async function seedAbout() {
   const marcelImage = await payload.create({
     collection: 'media',
     data: { alt: 'about-team – Marcel Rauminger, Fermentation Specialist & Chef' },
-    file: readLocalFile(path.join(imagesDir, 'marcel-rauminger.jpg')),
+    file: await optimizedFile(path.join(imagesDir, 'marcel-rauminger.jpg'), IMAGE_PRESETS.card),
     context: { skipAutoTranslate: true },
   })
   console.log(`    ✅ Marcel photo: ${marcelImage.id}`)
@@ -97,12 +89,12 @@ async function seedAbout() {
   const davidImage = await payload.create({
     collection: 'media',
     data: { alt: 'about-team – David Heider, Nutrition Specialist & Food Developer' },
-    file: readLocalFile(path.join(imagesDir, 'david-heider.jpg')),
+    file: await optimizedFile(path.join(imagesDir, 'david-heider.jpg'), IMAGE_PRESETS.card),
     context: { skipAutoTranslate: true },
   })
   console.log(`    ✅ David photo: ${davidImage.id}`)
 
-  // Upload sponsor logos (use PNG versions — smaller & more compatible)
+  // Upload sponsor logos
   const sponsorImages = []
   const sponsorFiles = [
     { file: 'sponsor-logo.png', alt: 'about-sponsor – Sponsor Logo 1' },
@@ -115,21 +107,22 @@ async function seedAbout() {
     const img = await payload.create({
       collection: 'media',
       data: { alt: s.alt },
-      file: readLocalFile(path.join(imagesDir, s.file)),
+      file: await optimizedFile(path.join(imagesDir, s.file), IMAGE_PRESETS.logo),
       context: { skipAutoTranslate: true },
     })
     sponsorImages.push(img)
     console.log(`    ✅ ${s.file}: ${img.id}`)
   }
 
-  // ── 4. Create the About page in DE (default locale) ────────
-  const deData = aboutDataDE({
-    heroImage: heroImage,
-    marcelImage: marcelImage,
-    davidImage: davidImage,
+  // ── 4. Build block data ────────────────────────────────────
+  const imgArgs = {
+    heroImage,
+    marcelImage,
+    davidImage,
     sponsorLogos: sponsorImages,
-  })
+  }
 
+  // ── 5. Create the About page in DE (default locale) ────────
   const aboutPage = await payload.create({
     collection: 'pages',
     locale: 'de',
@@ -142,19 +135,19 @@ async function seedAbout() {
       title: 'Über uns',
       slug: 'about',
       _status: 'published',
-      hero: { type: 'none' },
+      hero: aboutHeroDE(imgArgs),
       layout: [
-        {
-          blockType: 'aboutBlock',
-          ...deData,
-        },
-      ],
+        ourStoryDE(),
+        teamCardsDE(imgArgs),
+        sponsorsBarDE(imgArgs),
+        readyToLearnDE(),
+      ] as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   })
 
   console.log(`  ✅ Created About page ${aboutPage.id} (DE)`)
 
-  // ── 5. Read back the layout to get array IDs ──────────────
+  // ── 6. Read back the layout to get array IDs ──────────────
   const created = await payload.findByID({
     collection: 'pages',
     id: aboutPage.id,
@@ -162,84 +155,54 @@ async function seedAbout() {
     locale: 'de',
   })
 
-  const layoutBlock = (created.layout ?? [])[0]
-  if (!layoutBlock) {
-    console.error('  ❌ No layout block found after creation')
+  const blocks = created.layout ?? []
+  if (blocks.length < 4) {
+    console.error(`  ❌ Expected 4 layout blocks, got ${blocks.length}`)
     process.exit(1)
   }
 
-  // Extract array IDs to reuse for EN locale
-  const blockId = layoutBlock.id
-  const deBlock = layoutBlock as unknown as Record<string, unknown>
+  // Block IDs
+  const ourStoryBlockId = blocks[0]!.id
+  const teamCardsBlockId = blocks[1]!.id
+  const sponsorsBarBlockId = blocks[2]!.id
+  const readyToLearnBlockId = blocks[3]!.id
 
-  // Extract description array IDs
-  const ourStory = deBlock.ourStory as Record<string, unknown> | undefined
-  const descriptionIds = ((ourStory?.description ?? []) as Array<{ id?: string }>).map(
-    (d) => d.id,
+  // Extract array IDs from OurStory paragraphs
+  const ourStoryBlock = blocks[0] as unknown as Record<string, unknown>
+  const paragraphIds = ((ourStoryBlock?.paragraphs ?? []) as Array<{ id?: string }>).map(
+    (p) => p.id,
   )
 
-  // Extract team member IDs
-  const team = deBlock.team as Record<string, unknown> | undefined
-  const memberIds = ((team?.members ?? []) as Array<{ id?: string }>).map((m) => m.id)
+  // Extract array IDs from TeamCards members
+  const teamCardsBlock = blocks[1] as unknown as Record<string, unknown>
+  const memberIds = ((teamCardsBlock?.members ?? []) as Array<{ id?: string }>).map((m) => m.id)
 
-  // Extract sponsor logo IDs
-  const sponsors = deBlock.sponsors as Record<string, unknown> | undefined
-  const logoIds = ((sponsors?.logos ?? []) as Array<{ id?: string }>).map((l) => l.id)
+  // Extract array IDs from SponsorsBar sponsors
+  const sponsorsBarBlock = blocks[2] as unknown as Record<string, unknown>
+  const sponsorIds = ((sponsorsBarBlock?.sponsors ?? []) as Array<{ id?: string }>).map((s) => s.id)
 
-  // Extract subject option IDs
-  const contactForm = deBlock.contactForm as Record<string, unknown> | undefined
-  const subjectOptions = contactForm?.subjectOptions as Record<string, unknown> | undefined
-  const optionIds = ((subjectOptions?.options ?? []) as Array<{ id?: string }>).map((o) => o.id)
+  // ── 7. Build EN data with same array IDs ──────────────────
+  const enOurStory = ourStoryEN()
+  enOurStory.paragraphs = enOurStory.paragraphs.map((p, idx) => ({
+    ...p,
+    id: paragraphIds[idx],
+  }))
 
-  // ── 6. Build EN data with same array IDs ──────────────────
-  const enData = aboutDataEN({
-    heroImage: heroImage,
-    marcelImage: marcelImage,
-    davidImage: davidImage,
-    sponsorLogos: sponsorImages,
-  })
+  const enTeamCards = teamCardsEN(imgArgs)
+  enTeamCards.members = enTeamCards.members.map((m, idx) => ({
+    ...m,
+    id: memberIds[idx],
+  }))
 
-  // Patch description IDs
-  if (enData.ourStory?.description) {
-    enData.ourStory.description = enData.ourStory.description.map(
-      (d: { paragraph: string }, idx: number) => ({
-        ...d,
-        id: descriptionIds[idx],
-      }),
-    )
+  const enSponsorsBar = sponsorsBarEN(imgArgs)
+  if (enSponsorsBar.sponsors && sponsorIds.length > 0) {
+    enSponsorsBar.sponsors = enSponsorsBar.sponsors.map((s, idx) => ({
+      ...s,
+      id: sponsorIds[idx],
+    }))
   }
 
-  // Patch team member IDs
-  if (enData.team?.members) {
-    ;(enData.team as Record<string, unknown>).members = enData.team.members.map(
-      (m: { name: string; role: string; description: string; image?: unknown }, idx: number) => ({
-        ...m,
-        id: memberIds[idx],
-      }),
-    )
-  }
-
-  // Patch sponsor logo IDs
-  if (enData.sponsors?.logos && logoIds.length > 0) {
-    ;(enData.sponsors as Record<string, unknown>).logos = enData.sponsors.logos.map(
-      (l: { image?: unknown; alt: string }, idx: number) => ({
-        ...l,
-        id: logoIds[idx],
-      }),
-    )
-  }
-
-  // Patch subject option IDs
-  if (enData.contactForm?.subjectOptions?.options && optionIds.length > 0) {
-    enData.contactForm.subjectOptions.options = enData.contactForm.subjectOptions.options.map(
-      (o: { label: string }, idx: number) => ({
-        ...o,
-        id: optionIds[idx],
-      }),
-    )
-  }
-
-  // ── 7. Update EN locale ───────────────────────────────────
+  // ── 8. Update EN locale ───────────────────────────────────
   await payload.update({
     collection: 'pages',
     id: aboutPage.id,
@@ -252,19 +215,20 @@ async function seedAbout() {
     data: {
       title: 'About Us',
       _status: 'published',
+      hero: aboutHeroEN(imgArgs),
       layout: [
-        {
-          id: blockId,
-          blockType: 'aboutBlock',
-          ...enData,
-        },
-      ],
+        { id: ourStoryBlockId, ...enOurStory },
+        { id: teamCardsBlockId, ...enTeamCards },
+        { id: sponsorsBarBlockId, ...enSponsorsBar },
+        { id: readyToLearnBlockId, ...readyToLearnEN() },
+      ] as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   })
 
   console.log(`  ✅ Updated About page ${aboutPage.id} (EN)`)
   console.log('🎉 About page seeded successfully!')
-  console.log('   All images stored in Payload Media (Vercel Blob) — editable from /admin')
+  console.log('   Blocks: hero → OurStory → TeamCards → SponsorsBar → ReadyToLearnCTA')
+  console.log('   All images stored in Payload Media (Cloudflare R2) — editable from /admin')
 
   process.exit(0)
 }

@@ -2,7 +2,7 @@
  * Seed the Contact page with the ContactBlock.
  * Creates a "Kontakt" / "Contact" page with hero, contact form card, CTA banner, and map.
  *
- * Uploads contact image to Payload Media (Vercel Blob) so it's editable from /admin.
+ * Uploads contact image to Payload Media (Cloudflare R2) so it's editable from /admin.
  * Seeds both DE (default) and EN locales, reusing array IDs.
  *
  * Following the rules:
@@ -10,7 +10,7 @@
  * - Seed both languages: DE first, read back IDs, then EN with same IDs
  * - Context flags: skipRevalidate, disableRevalidate, skipAutoTranslate
  * - Sequential DB writes (no Promise.all) for MongoDB Atlas M0
- * - Images uploaded via Payload Media collection (stored in Vercel Blob)
+ * - Images uploaded via Payload Media collection (stored in Cloudflare R2)
  *
  * Run: set -a && source .env && set +a && npx tsx src/scripts/seed-contact.ts
  */
@@ -20,33 +20,15 @@ import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
 
-import { contactDataDE, contactDataEN } from '@/endpoints/seed/contact'
-
-/** Read a local file and return a Payload-compatible File object */
-function readLocalFile(filePath: string) {
-  const data = fs.readFileSync(filePath)
-  const ext = path.extname(filePath).slice(1).toLowerCase()
-  const mimeMap: Record<string, string> = {
-    png: 'image/png',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    webp: 'image/webp',
-    svg: 'image/svg+xml',
-  }
-  return {
-    name: path.basename(filePath),
-    data,
-    mimetype: mimeMap[ext] || 'application/octet-stream',
-    size: data.byteLength,
-  }
-}
+import { contactDataDE, contactDataEN } from './data/contact'
+import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
 async function seedContact() {
   const payload = await getPayload({ config })
 
   console.log('🧪 Seeding Contact page…')
 
-  const imagesDir = path.resolve(process.cwd(), 'public/assets/images')
+  const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
 
   // ── 1. Delete any existing contact page ──────────────────────
   const existing = await payload.find({
@@ -65,8 +47,8 @@ async function seedContact() {
     console.log(`  🗑️  Deleted existing contact page ${doc.id}`)
   }
 
-  // ── 2. Upload images to Payload Media (Vercel Blob) ─
-  let contactFormImage: Media | undefined  // for contact form card (left side)
+  // ── 2. Upload images to Payload Media (Cloudflare R2) ─
+  let contactFormImage: Media | undefined // for contact form card (left side)
   let sliderBannerImage: Media | undefined // for hero slider (Banner.png – previous)
   let workshopImage: Media | undefined
   const contactFormImagePath = path.join(imagesDir, 'contact-form.png')
@@ -77,7 +59,7 @@ async function seedContact() {
     const created = await payload.create({
       collection: 'media',
       data: { alt: 'contact-card – FermentFreude team at workshop' },
-      file: readLocalFile(contactFormImagePath),
+      file: await optimizedFile(contactFormImagePath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })
     contactFormImage = created as Media
@@ -88,7 +70,7 @@ async function seedContact() {
     const created = await payload.create({
       collection: 'media',
       data: { alt: 'Hero slider – FermentFreude workshop banner' },
-      file: readLocalFile(bannerPath),
+      file: await optimizedFile(bannerPath, IMAGE_PRESETS.hero),
       context: { skipAutoTranslate: true },
     })
     sliderBannerImage = created as Media
@@ -103,8 +85,10 @@ async function seedContact() {
   if (fs.existsSync(workshopImagePath)) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'Fermentation workshop – table with ingredients, jars, and fermentation station' },
-      file: readLocalFile(workshopImagePath),
+      data: {
+        alt: 'Fermentation workshop – table with ingredients, jars, and fermentation station',
+      },
+      file: await optimizedFile(workshopImagePath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })
     workshopImage = created as Media
@@ -114,8 +98,10 @@ async function seedContact() {
   if (fs.existsSync(kombuchaWorkshopPath)) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'Kombucha workshop – workstations with SCOBYs, teas, and flavoring ingredients' },
-      file: readLocalFile(kombuchaWorkshopPath),
+      data: {
+        alt: 'Kombucha workshop – workstations with SCOBYs, teas, and flavoring ingredients',
+      },
+      file: await optimizedFile(kombuchaWorkshopPath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })
     kombuchaWorkshopImage = created as Media
@@ -125,8 +111,10 @@ async function seedContact() {
   if (fs.existsSync(companyImagePath)) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'B2B product display – fermented products in professional packaging on shelf in commercial kitchen' },
-      file: readLocalFile(companyImagePath),
+      data: {
+        alt: 'B2B product display – fermented products in professional packaging on shelf in commercial kitchen',
+      },
+      file: await optimizedFile(companyImagePath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })
     companyImage = created as Media
@@ -296,7 +284,7 @@ async function seedContact() {
 
   console.log(`  ✅ Updated Contact page ${contactPage.id} (EN)`)
   console.log('🎉 Contact page seeded successfully!')
-  console.log('   Images stored in Payload Media (Vercel Blob) — editable from /admin')
+  console.log('   Images stored in Payload Media (Cloudflare R2) — editable from /admin')
 
   process.exit(0)
 }

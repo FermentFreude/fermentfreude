@@ -67,7 +67,7 @@ export const ContactBlockComponent: React.FC<
   const rawOptions = data?.contactForm?.subjectOptions?.options
   const subjectOptionsList =
     rawOptions && Array.isArray(rawOptions) && rawOptions.length > 0
-      ? rawOptions.map((o: { label?: string }) => (typeof o === 'string' ? o : o?.label ?? ''))
+      ? rawOptions.map((o: { label?: string }) => (typeof o === 'string' ? o : (o?.label ?? '')))
       : DEFAULTS.contactForm.subjectOptions.options
 
   const contactForm = {
@@ -101,7 +101,10 @@ export const ContactBlockComponent: React.FC<
     'https://maps.google.com/maps?q=Grabenstra%C3%9Fe+15,+8010+Graz,+Austria&t=&z=17&ie=UTF8&iwloc=&output=embed'
   const contactImage = data?.contactImage
   const hasContactImage =
-    contactImage && typeof contactImage === 'object' && contactImage !== null && 'url' in contactImage
+    contactImage &&
+    typeof contactImage === 'object' &&
+    contactImage !== null &&
+    'url' in contactImage
 
   const id = toKebabCase((block as { blockName?: string }).blockName ?? 'contact')
   const hideHeroSection = (block as { hideHeroSection?: boolean }).hideHeroSection === true
@@ -112,76 +115,64 @@ export const ContactBlockComponent: React.FC<
     <div id={id} className="min-h-screen bg-[#F9F0DC]">
       {/* Hero — heading + subtext, with optional background image (hidden when page uses page-level hero) */}
       {!hideHeroSection && (
-      <section
-        className={`relative w-full px-6 pt-16 pb-12 md:pt-24 md:pb-16 ${
-          hasHeroImage ? 'min-h-[55vh] md:min-h-[65vh]' : ''
-        }`}
-      >
-        {hasHeroImage && (
-          <>
-            <div className="absolute inset-0">
-              <Media
-                resource={heroImage}
-                fill
-                imgClassName="object-cover"
-                priority
-              />
-            </div>
-            <div className="absolute inset-0 bg-black/50" />
-          </>
-        )}
-        <div
-          className={`relative z-10 mx-auto max-w-[1200px] ${
-            hasHeroImage ? 'text-left' : 'text-center'
+        <section
+          className={`relative w-full px-6 pt-16 pb-12 md:pt-24 md:pb-16 ${
+            hasHeroImage ? 'min-h-[55vh] md:min-h-[65vh]' : ''
           }`}
         >
-          <h1
-            className={`font-display text-4xl font-bold md:text-5xl lg:text-6xl ${
-              hasHeroImage ? 'text-[#F6EFDD]' : 'text-[#1D1D1D]'
+          {hasHeroImage && (
+            <>
+              <div className="absolute inset-0">
+                <Media resource={heroImage} fill imgClassName="object-cover" priority />
+              </div>
+              <div className="absolute inset-0 bg-black/50" />
+            </>
+          )}
+          <div
+            className={`relative z-10 mx-auto max-w-300 ${
+              hasHeroImage ? 'text-left' : 'text-center'
             }`}
           >
-            {hero.heading}
-          </h1>
-          {hero.subtext ? (
-            <p
-              className={`mt-4 max-w-2xl font-sans text-lg leading-relaxed md:text-xl ${
-                hasHeroImage ? 'text-[#D8D8D8]' : 'text-[#6B6B6B]'
+            <h1
+              className={`font-display text-4xl font-bold md:text-5xl lg:text-6xl ${
+                hasHeroImage ? 'text-[#F6EFDD]' : 'text-[#1D1D1D]'
               }`}
             >
-              {hero.subtext}
-            </p>
-          ) : null}
-          {hero.buttonLabel && hero.buttonHref ? (
-            <a
-              href={hero.buttonHref}
-              className="mt-6 inline-flex rounded-xl bg-[#E5B765] px-6 py-2.5 font-display text-base font-bold text-white transition-colors hover:bg-[#d4a654] md:mt-8"
-            >
-              {hero.buttonLabel}
-            </a>
-          ) : null}
-        </div>
-      </section>
+              {hero.heading}
+            </h1>
+            {hero.subtext ? (
+              <p
+                className={`mt-4 max-w-2xl font-sans text-lg leading-relaxed md:text-xl ${
+                  hasHeroImage ? 'text-[#D8D8D8]' : 'text-[#6B6B6B]'
+                }`}
+              >
+                {hero.subtext}
+              </p>
+            ) : null}
+            {hero.buttonLabel && hero.buttonHref ? (
+              <a
+                href={hero.buttonHref}
+                className="mt-6 inline-flex rounded-xl bg-[#E5B765] px-6 py-2.5 font-display text-base font-bold text-white transition-colors hover:bg-[#d4a654] md:mt-8"
+              >
+                {hero.buttonLabel}
+              </a>
+            ) : null}
+          </div>
+        </section>
       )}
 
       {/* Main contact card — image left, form right */}
       <section className="w-full px-6 py-12 md:py-24">
-        <div className="mx-auto max-w-[1200px]">
+        <div className="mx-auto max-w-300">
           <div className="overflow-hidden rounded-3xl bg-white shadow-lg md:rounded-[3rem]">
             <div className="grid md:grid-cols-2">
               {/* Left: Image */}
-              <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[400px]">
+              <div className="relative aspect-4/3 md:aspect-auto md:min-h-100">
                 {hasContactImage ? (
-                  <Media
-                    resource={contactImage}
-                    fill
-                    imgClassName="object-cover"
-                    priority
-                  />
+                  <Media resource={contactImage} fill imgClassName="object-cover" priority />
                 ) : (
                   <div className="flex size-full items-center justify-center bg-[#ECE5DE]">
-                    <span className="font-sans text-sm text-[#6B6B6B]">
-                      Add image in CMS
-                    </span>
+                    <span className="font-sans text-sm text-[#6B6B6B]">Add image in CMS</span>
                   </div>
                 )}
               </div>
@@ -214,7 +205,7 @@ export const ContactBlockComponent: React.FC<
                   />
                   <div className="relative">
                     <select
-                      className="w-full appearance-none rounded-xl border border-[rgba(128,128,128,0.4)] px-4 py-2.5 font-sans text-base text-[#1D1D1D] focus:border-[#4B4B4B] focus:outline-none [color-scheme:light]"
+                      className="w-full appearance-none rounded-xl border border-[rgba(128,128,128,0.4)] px-4 py-2.5 font-sans text-base text-[#1D1D1D] focus:border-[#4B4B4B] focus:outline-none scheme-light"
                       defaultValue=""
                     >
                       <option value="" disabled>
@@ -256,7 +247,7 @@ export const ContactBlockComponent: React.FC<
       {/* CTA Banner — dark gray, gold heading */}
       {!hideCtaBanner && (
       <section className="w-full px-6 pb-12 md:pb-24">
-        <div className="mx-auto max-w-[1200px]">
+        <div className="mx-auto max-w-300">
           <div className="overflow-hidden rounded-3xl bg-[#333] px-8 py-16 text-center md:px-16 md:py-20">
             <h2 className="font-display text-2xl font-bold text-[#E5B765] md:text-3xl lg:text-4xl">
               {ctaBanner.heading}
@@ -278,7 +269,7 @@ export const ContactBlockComponent: React.FC<
       {/* Map */}
       {!hideMap && mapEmbedUrl ? (
         <section className="w-full px-6 pb-12 md:pb-24">
-          <div className="mx-auto max-w-[1200px] overflow-hidden rounded-2xl bg-white shadow">
+          <div className="mx-auto max-w-300 overflow-hidden rounded-2xl bg-white shadow">
             <div className="relative aspect-video w-full">
               <iframe
                 src={mapEmbedUrl}

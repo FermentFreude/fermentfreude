@@ -334,6 +334,22 @@
 
 @plugin "@tailwindcss/typography";
 
+/* ── Block Animations ────────────────────────────────────────── */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+
 @source inline("lg:col-span-4");
 @source inline("lg:col-span-6");
 @source inline("lg:col-span-8");
@@ -442,6 +458,16 @@
   --ff-gray-text-light: #6b6b6b;
   --ff-border-light: #e8e4d9;
   --ff-card-gray: rgba(193, 193, 193, 0.65);
+  --ff-olive: #4b4f4a;
+  --ff-olive-dark: #3a3e3a;
+  --ff-gold-accent: #e5b765;
+  --ff-gold-accent-dark: #d4a654;
+  --ff-dark: #1e1e1e;
+  --ff-dark-deep: #1b1b1b;
+  --ff-navy: #091638;
+  --ff-gray-muted: #626160;
+  --ff-charcoal-hover: #333333;
+  --ff-sponsor-placeholder: #d9d2cb;
 
   --sidebar: oklch(98.5% 0 0deg);
   --sidebar-foreground: oklch(14.5% 0 0deg);
@@ -552,6 +578,16 @@
   --color-ff-card-gray: var(--ff-card-gray);
   --color-ff-gray-15: var(--ff-gray-15);
   --color-ff-white-95: var(--ff-white-95);
+  --color-ff-olive: var(--ff-olive);
+  --color-ff-olive-dark: var(--ff-olive-dark);
+  --color-ff-gold-accent: var(--ff-gold-accent);
+  --color-ff-gold-accent-dark: var(--ff-gold-accent-dark);
+  --color-ff-dark: var(--ff-dark);
+  --color-ff-dark-deep: var(--ff-dark-deep);
+  --color-ff-navy: var(--ff-navy);
+  --color-ff-gray-muted: var(--ff-gray-muted);
+  --color-ff-charcoal-hover: var(--ff-charcoal-hover);
+  --color-ff-sponsor-placeholder: var(--ff-sponsor-placeholder);
 
   /* ── Design System Spacing Tokens ──────────────────────────── */
   --spacing-section-sm: var(--space-section-sm);

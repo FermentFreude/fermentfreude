@@ -27,5 +27,6 @@ export const RenderHero: React.FC<Page['hero']> = (props) => {
 
   if (!HeroToRender) return null
 
-  return <HeroToRender {...props} />
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return <HeroToRender {...(props as any)} />
 }

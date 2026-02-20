@@ -32,6 +32,12 @@ export default buildConfig({
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean) as string[],
   admin: {
     user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    components: {
+      beforeDashboard: ['/components/BeforeDashboard'],
+    },
   },
   localization: {
     locales: [
@@ -89,7 +95,6 @@ export default buildConfig({
     },
   }),
   //email: nodemailerAdapter(),
-  endpoints: [],
   globals: [Header, Footer],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',

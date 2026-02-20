@@ -13,12 +13,13 @@
  * Order (when seeding all):
  *   1. Header (global — nav items)
  *   2. Home page (hero + workshop slider with images)
- *   3. About page (with images uploaded to Vercel Blob)
+ *   3. About page (with images uploaded to Cloudflare R2)
  *
  * Run manually: npx tsx src/scripts/seed-all.ts [target]
  */
-import { config } from 'dotenv'
 import { spawnSync } from 'child_process'
+// @ts-expect-error — dotenv types not resolved via package.json exports
+import { config } from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -86,6 +87,10 @@ if (target) {
       break
     }
   }
-  console.log(allOk ? '\n🎉 All seeds complete! Check /admin to verify.' : '\n💥 Seeding stopped due to error.')
+  console.log(
+    allOk
+      ? '\n🎉 All seeds complete! Check /admin to verify.'
+      : '\n💥 Seeding stopped due to error.',
+  )
   process.exit(allOk ? 0 : 1)
 }
