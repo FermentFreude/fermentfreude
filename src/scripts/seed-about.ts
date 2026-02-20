@@ -179,9 +179,7 @@ async function seedAbout() {
 
   // Extract array IDs from SponsorsBar sponsors
   const sponsorsBarBlock = blocks[2] as unknown as Record<string, unknown>
-  const sponsorIds = ((sponsorsBarBlock?.sponsors ?? []) as Array<{ id?: string }>).map(
-    (s) => s.id,
-  )
+  const sponsorIds = ((sponsorsBarBlock?.sponsors ?? []) as Array<{ id?: string }>).map((s) => s.id)
 
   // ── 7. Build EN data with same array IDs ──────────────────
   const enOurStory = ourStoryEN()

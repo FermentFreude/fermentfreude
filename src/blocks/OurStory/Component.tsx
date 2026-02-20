@@ -18,9 +18,7 @@ export const OurStoryBlock: React.FC<Props> = ({ label, heading, subheading, par
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedSubheading = subheading ?? DEFAULTS.subheading
   const resolvedParagraphs =
-    paragraphs && paragraphs.length > 0
-      ? paragraphs.map((p) => p.text ?? '')
-      : DEFAULTS.paragraphs
+    paragraphs && paragraphs.length > 0 ? paragraphs.map((p) => p.text ?? '') : DEFAULTS.paragraphs
 
   return (
     <section id={id ?? undefined} className="w-full pt-4 pb-8 md:py-24">
