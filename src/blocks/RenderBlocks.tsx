@@ -5,9 +5,15 @@ import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { CarouselBlock } from '@/blocks/Carousel/Component'
 import { ContactBlockComponent } from '@/blocks/ContactBlock/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
+import { FeatureCardsBlock } from '@/blocks/FeatureCards/Component'
 import { FormBlock } from '@/blocks/Form/Component'
+import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
+import { SponsorsBarBlock } from '@/blocks/SponsorsBar/Component'
+import { TeamPreviewBlock } from '@/blocks/TeamPreview/Component'
+import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
+import { VoucherCtaBlock } from '@/blocks/VoucherCta/Component'
 import { WorkshopSliderBlock } from '@/blocks/WorkshopSlider/Component'
 import { toKebabCase } from '@/utilities/toKebabCase'
 import React, { Fragment } from 'react'
@@ -22,9 +28,15 @@ const blockComponents = {
   carousel: CarouselBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
+  featureCards: FeatureCardsBlock,
   formBlock: FormBlock,
+  heroBanner: HeroBannerBlock,
   mediaBlock: MediaBlock,
+  sponsorsBar: SponsorsBarBlock,
+  teamPreview: TeamPreviewBlock,
+  testimonials: TestimonialsBlock,
   threeItemGrid: ThreeItemGridBlock,
+  voucherCta: VoucherCtaBlock,
   workshopSlider: WorkshopSliderBlock,
 }
 

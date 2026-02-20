@@ -1,6 +1,6 @@
 /**
  * Combined seed script for the Home page.
- * Seeds hero (heroSlider) + layout (workshopSlider block) in both DE and EN.
+ * Seeds hero (heroSlider) + layout blocks in both DE and EN.
  *
  * Strategy:
  *   1. Seed DE first (Payload auto-generates IDs for arrays, blocks, etc.)
@@ -29,6 +29,11 @@ interface WorkshopItem extends WithId {
 interface BlockItem extends WithId {
   blockType?: string
   workshops?: WorkshopItem[]
+  cards?: WithId[]
+  members?: WithId[]
+  testimonials?: WithId[]
+  sponsors?: WithId[]
+  links?: WithId[]
 }
 
 /** Read a local file and return a Payload-compatible File object */
@@ -40,6 +45,8 @@ function readLocalFile(filePath: string) {
     jpg: 'image/jpeg',
     jpeg: 'image/jpeg',
     webp: 'image/webp',
+    svg: 'image/svg+xml',
+    gif: 'image/gif',
   }
   return {
     name: path.basename(filePath),
@@ -190,6 +197,65 @@ async function seedHome() {
     file: readLocalFile(path.join(heroDir, 'MarcelHero.png')),
   })
 
+  // ── New block images ──
+  const imagesDir = path.resolve(process.cwd(), 'public/assets/images')
+
+  // VoucherCta image (Gift Set)
+  const voucherImage = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'FermentFreude Gift Set – fermentation starter kit in box' },
+    file: readLocalFile(path.join(imagesDir, 'Image (Gift Set).png')),
+  })
+
+  // HeroBanner background (Banner)
+  const bannerImage = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'FermentFreude chefs banner – professional kitchen scene' },
+    file: readLocalFile(path.join(imagesDir, 'Banner.png')),
+  })
+
+  // TeamPreview – David & Marcel photos
+  const davidPhoto = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'David Heider – FermentFreude co-founder and instructor' },
+    file: readLocalFile(path.join(imagesDir, 'david-heider.jpg')),
+  })
+  const marcelPhoto = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Marcel Rauminger – FermentFreude co-founder and instructor' },
+    file: readLocalFile(path.join(imagesDir, 'marcel-rauminger.jpg')),
+  })
+
+  // SponsorsBar logos
+  const sponsorLogo1 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Sponsor logo 1' },
+    file: readLocalFile(path.join(imagesDir, 'sponsor-logo.png')),
+  })
+  const sponsorLogo2 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Sponsor logo 2' },
+    file: readLocalFile(path.join(imagesDir, 'sponsor-logo-2.png')),
+  })
+  const sponsorLogo3 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Sponsor logo 3' },
+    file: readLocalFile(path.join(imagesDir, 'sponsor-logo-3.png')),
+  })
+  const sponsorLogo4 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Sponsor logo 4' },
+    file: readLocalFile(path.join(imagesDir, 'sponsor-logo-4.png')),
+  })
+
   payload.logger.info('✅ All images uploaded to Media collection.')
 
   // ============================================================
@@ -316,7 +382,8 @@ async function seedHome() {
         slideId: 'lakto',
         eyebrow: 'Workshop-Erlebnis',
         title: 'Entdecke die Kunst der\nLakto-Fermentation!',
-        description: 'Unser Hands-on-Workshop nimmt dich mit auf eine Reise durch die traditionelle Milchsäure-Fermentation und verwandelt einfaches Gemüse in probiotische Köstlichkeiten.',
+        description:
+          'Unser Hands-on-Workshop nimmt dich mit auf eine Reise durch die traditionelle Milchsäure-Fermentation und verwandelt einfaches Gemüse in probiotische Köstlichkeiten.',
         attributes: [{ text: 'Natürlich' }, { text: 'Probiotisch' }, { text: 'Mit Liebe gemacht' }],
         ctaLabel: 'Mehr erfahren',
         ctaHref: '/workshops/lakto',
@@ -329,8 +396,13 @@ async function seedHome() {
         slideId: 'kombucha',
         eyebrow: 'Workshop-Erlebnis',
         title: 'Tauche ein in die Welt des\nKombucha-Brauens!',
-        description: 'Lerne, deinen eigenen Kombucha von Grund auf zu brauen — vom Züchten des SCOBY bis zum Abfüllen deines perfekten, sprudelnden Probiotik-Tees.',
-        attributes: [{ text: 'Lebende Kulturen' }, { text: 'Natürlich spritzig' }, { text: 'Handgemacht' }],
+        description:
+          'Lerne, deinen eigenen Kombucha von Grund auf zu brauen — vom Züchten des SCOBY bis zum Abfüllen deines perfekten, sprudelnden Probiotik-Tees.',
+        attributes: [
+          { text: 'Lebende Kulturen' },
+          { text: 'Natürlich spritzig' },
+          { text: 'Handgemacht' },
+        ],
         ctaLabel: 'Mehr erfahren',
         ctaHref: '/workshops/kombucha',
         panelColor: '#555954',
@@ -342,8 +414,13 @@ async function seedHome() {
         slideId: 'tempeh',
         eyebrow: 'Workshop-Erlebnis',
         title: 'Meistere die Kunst der\nTempeh-Herstellung!',
-        description: 'Entdecke die indonesische Tradition des Tempeh — züchte deine eigenen Lebendkulturen und stelle proteinreiche, fermentierte Köstlichkeiten her.',
-        attributes: [{ text: 'Proteinreich' }, { text: 'Traditionell' }, { text: 'Pflanzenbasiert' }],
+        description:
+          'Entdecke die indonesische Tradition des Tempeh — züchte deine eigenen Lebendkulturen und stelle proteinreiche, fermentierte Köstlichkeiten her.',
+        attributes: [
+          { text: 'Proteinreich' },
+          { text: 'Traditionell' },
+          { text: 'Pflanzenbasiert' },
+        ],
         ctaLabel: 'Mehr erfahren',
         ctaHref: '/workshops/tempeh',
         panelColor: '#737672',
@@ -355,8 +432,13 @@ async function seedHome() {
         slideId: 'basics',
         eyebrow: 'Workshop-Erlebnis',
         title: 'Starte deine Reise mit den\nFermentations-Grundlagen!',
-        description: 'Der perfekte Einstieg — lerne die grundlegende Fermentationswissenschaft, Sicherheit und Techniken, um zu Hause alles sicher zu fermentieren.',
-        attributes: [{ text: 'Anfängerfreundlich' }, { text: 'Wissenschaftlich fundiert' }, { text: 'Praktisch' }],
+        description:
+          'Der perfekte Einstieg — lerne die grundlegende Fermentationswissenschaft, Sicherheit und Techniken, um zu Hause alles sicher zu fermentieren.',
+        attributes: [
+          { text: 'Anfängerfreundlich' },
+          { text: 'Wissenschaftlich fundiert' },
+          { text: 'Praktisch' },
+        ],
         ctaLabel: 'Mehr erfahren',
         ctaHref: '/workshops/basics',
         panelColor: '#000000',
@@ -487,8 +569,13 @@ async function seedHome() {
         slideId: 'lakto',
         eyebrow: 'Workshop Experience',
         title: 'Discover the Art of\nLakto-Fermentation!',
-        description: 'Our hands-on workshop takes you on a journey through traditional lacto-fermentation, turning simple vegetables into probiotic-rich delicacies.',
-        attributes: [{ text: 'All-natural' }, { text: 'Probiotic-rich' }, { text: 'Made with Love' }],
+        description:
+          'Our hands-on workshop takes you on a journey through traditional lacto-fermentation, turning simple vegetables into probiotic-rich delicacies.',
+        attributes: [
+          { text: 'All-natural' },
+          { text: 'Probiotic-rich' },
+          { text: 'Made with Love' },
+        ],
         ctaLabel: 'Learn More',
         ctaHref: '/workshops/lakto',
         panelColor: '#555954',
@@ -500,8 +587,13 @@ async function seedHome() {
         slideId: 'kombucha',
         eyebrow: 'Workshop Experience',
         title: 'Immerse Yourself in\nKombucha Brewing!',
-        description: 'Learn to brew your own kombucha from scratch — from growing the SCOBY to bottling your perfect fizzy, probiotic tea.',
-        attributes: [{ text: 'Live cultures' }, { text: 'Naturally fizzy' }, { text: 'Handcrafted' }],
+        description:
+          'Learn to brew your own kombucha from scratch — from growing the SCOBY to bottling your perfect fizzy, probiotic tea.',
+        attributes: [
+          { text: 'Live cultures' },
+          { text: 'Naturally fizzy' },
+          { text: 'Handcrafted' },
+        ],
         ctaLabel: 'Learn More',
         ctaHref: '/workshops/kombucha',
         panelColor: '#555954',
@@ -513,7 +605,8 @@ async function seedHome() {
         slideId: 'tempeh',
         eyebrow: 'Workshop Experience',
         title: 'Master the Craft of\nTempeh Making!',
-        description: 'Explore the Indonesian tradition of tempeh — cultivate your own live cultures and create protein-rich, fermented goodness at home.',
+        description:
+          'Explore the Indonesian tradition of tempeh — cultivate your own live cultures and create protein-rich, fermented goodness at home.',
         attributes: [{ text: 'High protein' }, { text: 'Traditional' }, { text: 'Plant-based' }],
         ctaLabel: 'Learn More',
         ctaHref: '/workshops/tempeh',
@@ -526,8 +619,13 @@ async function seedHome() {
         slideId: 'basics',
         eyebrow: 'Workshop Experience',
         title: 'Begin Your Journey with\nFermentation Basics!',
-        description: 'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
-        attributes: [{ text: 'Beginner-friendly' }, { text: 'Science-based' }, { text: 'Practical' }],
+        description:
+          'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
+        attributes: [
+          { text: 'Beginner-friendly' },
+          { text: 'Science-based' },
+          { text: 'Practical' },
+        ],
         ctaLabel: 'Learn More',
         ctaHref: '/workshops/basics',
         panelColor: '#000000',
@@ -642,6 +740,254 @@ async function seedHome() {
     ],
   }
 
+  // ── VoucherCta (DE) ──
+  const voucherCtaDE = {
+    blockType: 'voucherCta' as const,
+    heading: 'Verschenke ein besonderes Geschmacks-Erlebnis',
+    description:
+      'Unsere Gutscheine sind das perfekte Geschenk für alle, die gutes Essen, Gesundheit und einzigartige Erlebnisse lieben. Wähle zwischen Workshop-Gutscheinen und Produktsets.',
+    buttonLabel: 'Gutschein',
+    buttonLink: '/voucher',
+    image: voucherImage.id,
+  }
+
+  // ── VoucherCta (EN) ──
+  const voucherCtaEN = {
+    blockType: 'voucherCta' as const,
+    heading: 'Gift a special tasty experience',
+    description:
+      'Our vouchers are the perfect gift for anyone who loves good food, health, and unique experiences. Choose between workshop vouchers and product sets.',
+    buttonLabel: 'Voucher',
+    buttonLink: '/voucher',
+    image: voucherImage.id,
+  }
+
+  // ── HeroBanner (DE) ──
+  const heroBannerDE = {
+    blockType: 'heroBanner' as const,
+    heading: 'Für Köche und Lebensmittel-Profis',
+    description:
+      'Wir arbeiten mit Restaurants, Hotels und Catering-Unternehmen zusammen, um fermentierte Produkte in professionelle Küchen zu bringen.',
+    buttonLabel: 'Erfahre hier mehr',
+    buttonLink: '/gastronomy',
+    backgroundImage: bannerImage.id,
+  }
+
+  // ── HeroBanner (EN) ──
+  const heroBannerEN = {
+    blockType: 'heroBanner' as const,
+    heading: 'For Chefs and Food Professionals',
+    description:
+      'We work with restaurants, hotels, and catering companies to bring fermented products into professional kitchens.',
+    buttonLabel: 'Get to know more here',
+    buttonLink: '/gastronomy',
+    backgroundImage: bannerImage.id,
+  }
+
+  // ── FeatureCards (DE) ──
+  const featureCardsDE = {
+    blockType: 'featureCards' as const,
+    eyebrow: 'FERMENTATION',
+    heading: 'Warum Fermentation?',
+    description:
+      'Fermentation ist eine der ältesten und natürlichsten Methoden der Lebensmittelkonservierung. Sie verbessert Geschmack, Nährwert und Verdaulichkeit.',
+    cards: [
+      {
+        title: 'Probiotika',
+        description:
+          'Fermentierte Lebensmittel sind reich an lebenden Kulturen, die deine Darmgesundheit und dein Immunsystem stärken.',
+      },
+      {
+        title: 'Nährstoffe',
+        description:
+          'Der Fermentationsprozess erhöht die Bioverfügbarkeit von Vitaminen und Mineralstoffen in deiner Nahrung.',
+      },
+      {
+        title: 'Geschmack',
+        description:
+          'Fermentation erzeugt komplexe Umami-Aromen und einzigartige Geschmacksprofile, die kein anderes Verfahren erreicht.',
+      },
+    ],
+    buttonLabel: 'Mehr erfahren',
+    buttonLink: '/about',
+  }
+
+  // ── FeatureCards (EN) ──
+  const featureCardsEN = {
+    blockType: 'featureCards' as const,
+    eyebrow: 'FERMENTATION',
+    heading: 'Why Fermentation?',
+    description:
+      'Fermentation is one of the oldest and most natural methods of food preservation. It enhances flavour, nutritional value, and digestibility.',
+    cards: [
+      {
+        title: 'Probiotics',
+        description:
+          'Fermented foods are rich in live cultures that strengthen your gut health and immune system.',
+      },
+      {
+        title: 'Nutrients',
+        description:
+          'The fermentation process increases the bioavailability of vitamins and minerals in your food.',
+      },
+      {
+        title: 'Flavour',
+        description:
+          'Fermentation creates complex umami flavours and unique taste profiles that no other process can achieve.',
+      },
+    ],
+    buttonLabel: 'Read more about it',
+    buttonLink: '/about',
+  }
+
+  // ── TeamPreview (DE) ──
+  const teamPreviewDE = {
+    blockType: 'teamPreview' as const,
+    eyebrow: 'Unser Team',
+    heading: 'Nur die besten Instruktoren',
+    description:
+      'Unsere Gründer David und Marcel bringen jahrelange Erfahrung in Fermentation, Lebensmittelwissenschaft und kulinarischer Ausbildung mit. Jeder Workshop wird persönlich von ihnen geleitet.',
+    buttonLabel: 'Über uns',
+    buttonLink: '/about',
+    members: [
+      {
+        name: 'David Heider',
+        role: 'Gründer & Instruktor',
+        image: davidPhoto.id,
+      },
+      {
+        name: 'Marcel Rauminger',
+        role: 'Gründer & Instruktor',
+        image: marcelPhoto.id,
+      },
+    ],
+  }
+
+  // ── TeamPreview (EN) ──
+  const teamPreviewEN = {
+    blockType: 'teamPreview' as const,
+    eyebrow: 'Our Team',
+    heading: 'Only The Best Instructors',
+    description:
+      'Our founders David and Marcel bring years of experience in fermentation, food science, and culinary education. Every workshop is personally led by them.',
+    buttonLabel: 'About us',
+    buttonLink: '/about',
+    members: [
+      {
+        name: 'David Heider',
+        role: 'Founder & Instructor',
+        image: davidPhoto.id,
+      },
+      {
+        name: 'Marcel Rauminger',
+        role: 'Founder & Instructor',
+        image: marcelPhoto.id,
+      },
+    ],
+  }
+
+  // ── Testimonials (DE) ──
+  const testimonialsDE = {
+    blockType: 'testimonials' as const,
+    eyebrow: 'Testimonials',
+    heading: 'Was ihnen an unserem Fermentationskurs gefällt',
+    buttonLabel: 'Alle Bewertungen',
+    buttonLink: '/reviews',
+    testimonials: [
+      {
+        quote:
+          'Der Kombucha-Workshop war ein absolutes Highlight! David und Marcel erklären alles so verständlich und mit so viel Leidenschaft. Mein selbstgebrauter Kombucha schmeckt fantastisch.',
+        authorName: 'Sophie M.',
+        authorRole: 'Künstlerin',
+        rating: 5,
+      },
+      {
+        quote:
+          'Als Koch war ich beeindruckt von der Tiefe des Wissens. Die Lakto-Fermentation hat meine Speisekarte komplett verändert. Absolute Empfehlung für Profis und Hobbyköche.',
+        authorName: 'Thomas K.',
+        authorRole: 'Koch',
+        rating: 5,
+      },
+      {
+        quote:
+          'Ich habe den Tempeh-Workshop als Geschenk bekommen und es war das beste Geschenk überhaupt. Die Atmosphäre war warm und einladend, und ich habe so viel gelernt.',
+        authorName: 'Anna L.',
+        authorRole: 'Bloggerin',
+        rating: 5,
+      },
+      {
+        quote:
+          'Super organisiert, tolle Materialien und ein wunderbares Team. Mein Mann und ich machen jetzt jede Woche eigenes Sauerkraut. Danke FermentFreude!',
+        authorName: 'Maria B.',
+        authorRole: 'Lehrerin',
+        rating: 4,
+      },
+    ],
+  }
+
+  // ── Testimonials (EN) ──
+  const testimonialsEN = {
+    blockType: 'testimonials' as const,
+    eyebrow: 'Testimonials',
+    heading: 'What They Like About Our Fermentation Class',
+    buttonLabel: 'View All Reviews',
+    buttonLink: '/reviews',
+    testimonials: [
+      {
+        quote:
+          'The kombucha workshop was an absolute highlight! David and Marcel explain everything so clearly and with so much passion. My home-brewed kombucha tastes fantastic.',
+        authorName: 'Sophie M.',
+        authorRole: 'Artist',
+        rating: 5,
+      },
+      {
+        quote:
+          'As a chef, I was impressed by the depth of knowledge. The lacto-fermentation completely changed my menu. Absolutely recommended for professionals and home cooks alike.',
+        authorName: 'Thomas K.',
+        authorRole: 'Chef',
+        rating: 5,
+      },
+      {
+        quote:
+          'I received the tempeh workshop as a gift and it was the best gift ever. The atmosphere was warm and welcoming, and I learned so much.',
+        authorName: 'Anna L.',
+        authorRole: 'Blogger',
+        rating: 5,
+      },
+      {
+        quote:
+          'Super organised, great materials, and a wonderful team. My husband and I now make our own sauerkraut every week. Thank you FermentFreude!',
+        authorName: 'Maria B.',
+        authorRole: 'Teacher',
+        rating: 4,
+      },
+    ],
+  }
+
+  // ── SponsorsBar (DE) ──
+  const sponsorsBarDE = {
+    blockType: 'sponsorsBar' as const,
+    heading: 'Dieses Projekt wird unterstützt von:',
+    sponsors: [
+      { name: 'Partner 1', logo: sponsorLogo1.id, url: '' },
+      { name: 'Partner 2', logo: sponsorLogo2.id, url: '' },
+      { name: 'Partner 3', logo: sponsorLogo3.id, url: '' },
+      { name: 'Partner 4', logo: sponsorLogo4.id, url: '' },
+    ],
+  }
+
+  // ── SponsorsBar (EN) ──
+  const sponsorsBarEN = {
+    blockType: 'sponsorsBar' as const,
+    heading: 'This project is supported by:',
+    sponsors: [
+      { name: 'Partner 1', logo: sponsorLogo1.id, url: '' },
+      { name: 'Partner 2', logo: sponsorLogo2.id, url: '' },
+      { name: 'Partner 3', logo: sponsorLogo3.id, url: '' },
+      { name: 'Partner 4', logo: sponsorLogo4.id, url: '' },
+    ],
+  }
+
   // ============================================================
   // 3. Find or create home page
   // ============================================================
@@ -677,7 +1023,17 @@ async function seedHome() {
   // ============================================================
   // 4. Update DE: hero + layout together (single save)
   // ============================================================
-  payload.logger.info('Saving DE locale (hero + workshopSlider)...')
+  payload.logger.info('Saving DE locale (hero + all layout blocks)...')
+
+  const layoutDE = [
+    workshopSliderDE,
+    voucherCtaDE,
+    heroBannerDE,
+    featureCardsDE,
+    teamPreviewDE,
+    testimonialsDE,
+    sponsorsBarDE,
+  ]
 
   await payload.update({
     collection: 'pages',
@@ -688,10 +1044,11 @@ async function seedHome() {
       _status: 'published',
       title: 'Home',
       hero: heroDE,
-      layout: [workshopSliderDE],
+      layout: layoutDE,
       meta: {
         title: 'FermentFreude — Gutes Essen, bessere Gesundheit, echte Freude',
-        description: 'Wir machen Fermentation genussvoll & zugänglich und stärken die Darmgesundheit durch Geschmack, Bildung und handgemachte Lebensmittel.',
+        description:
+          'Wir machen Fermentation genussvoll & zugänglich und stärken die Darmgesundheit durch Geschmack, Bildung und handgemachte Lebensmittel.',
       },
     },
   })
@@ -715,9 +1072,18 @@ async function seedHome() {
   const freshHeroImages = (freshHero.heroImages || []) as WithId[]
   const freshHeroSlides = (freshHero.heroSlides || []) as (WithId & { attributes?: WithId[] })[]
   const freshLayout = Array.isArray(freshDoc.layout) ? freshDoc.layout : []
-  const wsBlock = freshLayout.find((b) => 'blockType' in b && b.blockType === 'workshopSlider') as
-    | BlockItem
-    | undefined
+
+  // Helper to find blocks by type
+  const findBlock = (type: string) =>
+    freshLayout.find((b) => 'blockType' in b && b.blockType === type) as BlockItem | undefined
+
+  const wsBlock = findBlock('workshopSlider')
+  const vcBlock = findBlock('voucherCta')
+  const hbBlock = findBlock('heroBanner')
+  const fcBlock = findBlock('featureCards')
+  const tpBlock = findBlock('teamPreview')
+  const tmBlock = findBlock('testimonials')
+  const sbBlock = findBlock('sponsorsBar')
 
   if (!wsBlock) {
     payload.logger.error('❌ workshopSlider block not found after DE save.')
@@ -760,10 +1126,66 @@ async function seedHome() {
     })),
   }
 
+  const voucherCtaEN_withIds = {
+    ...voucherCtaEN,
+    id: vcBlock?.id,
+  }
+
+  const heroBannerEN_withIds = {
+    ...heroBannerEN,
+    id: hbBlock?.id,
+  }
+
+  const featureCardsEN_withIds = {
+    ...featureCardsEN,
+    id: fcBlock?.id,
+    cards: featureCardsEN.cards.map((c, i) => ({
+      ...c,
+      id: fcBlock?.cards?.[i]?.id,
+    })),
+  }
+
+  const teamPreviewEN_withIds = {
+    ...teamPreviewEN,
+    id: tpBlock?.id,
+    members: teamPreviewEN.members.map((m, i) => ({
+      ...m,
+      id: tpBlock?.members?.[i]?.id,
+    })),
+  }
+
+  const testimonialsEN_withIds = {
+    ...testimonialsEN,
+    id: tmBlock?.id,
+    testimonials: testimonialsEN.testimonials.map((t, i) => ({
+      ...t,
+      id: tmBlock?.testimonials?.[i]?.id,
+    })),
+  }
+
+  const sponsorsBarEN_withIds = {
+    ...sponsorsBarEN,
+    id: sbBlock?.id,
+    sponsors: sponsorsBarEN.sponsors.map((s, i) => ({
+      ...s,
+      id: sbBlock?.sponsors?.[i]?.id,
+    })),
+  }
+
+  const layoutEN = [
+    workshopSliderEN_withIds,
+    voucherCtaEN_withIds,
+    heroBannerEN_withIds,
+    featureCardsEN_withIds,
+    teamPreviewEN_withIds,
+    testimonialsEN_withIds,
+    sponsorsBarEN_withIds,
+  ]
+
   // ============================================================
   // 7. Update EN: hero + layout together (single save, same IDs)
   // ============================================================
-  payload.logger.info('Saving EN locale (hero + workshopSlider with matching IDs)...')
+  payload.logger.info('Saving EN locale (hero + all blocks with matching IDs)...')
 
   await payload.update({
     collection: 'pages',
@@ -774,18 +1196,27 @@ async function seedHome() {
       _status: 'published',
       title: 'Home',
       hero: heroEN_withIds,
-      layout: [workshopSliderEN_withIds],
+      layout: layoutEN,
       meta: {
         title: 'FermentFreude — Good food, better health, real joy',
-        description: 'We make fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods.',
+        description:
+          'We make fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods.',
       },
     },
   })
 
   payload.logger.info('✅ EN saved.')
   payload.logger.info('')
-  payload.logger.info('🎉 Home page fully seeded (DE + EN) with hero slides + workshop slider.')
-  payload.logger.info('   All slide images uploaded to Media (Vercel Blob ready).')
+  payload.logger.info('🎉 Home page fully seeded (DE + EN) with all blocks:')
+  payload.logger.info('   • Hero Slider (4 slides with product images)')
+  payload.logger.info('   • Workshop Slider (Lakto, Kombucha, Tempeh)')
+  payload.logger.info('   • Voucher CTA (gift experience)')
+  payload.logger.info('   • Hero Banner (for chefs)')
+  payload.logger.info('   • Feature Cards (why fermentation)')
+  payload.logger.info('   • Team Preview (David & Marcel)')
+  payload.logger.info('   • Testimonials (4 reviews)')
+  payload.logger.info('   • Sponsors Bar (4 logos)')
+  payload.logger.info('   All images uploaded to Media (Vercel Blob ready).')
   payload.logger.info('   Switch locale in admin to verify both languages.')
   process.exit(0)
 }

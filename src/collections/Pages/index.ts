@@ -3,15 +3,21 @@ import type { CollectionConfig } from 'payload'
 import { adminOnly } from '@/access/adminOnly'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 import { AboutBlock } from '@/blocks/AboutBlock/config'
-import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
+import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Content } from '@/blocks/Content/config'
+import { FeatureCards } from '@/blocks/FeatureCards/config'
 import { FormBlock } from '@/blocks/Form/config'
+import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
+import { SponsorsBar } from '@/blocks/SponsorsBar/config'
+import { TeamPreview } from '@/blocks/TeamPreview/config'
+import { Testimonials } from '@/blocks/Testimonials/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
+import { VoucherCta } from '@/blocks/VoucherCta/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
@@ -97,12 +103,18 @@ export const Pages: CollectionConfig = {
                 ContactBlock,
                 CallToAction,
                 Content,
+                FeatureCards,
+                HeroBanner,
                 MediaBlock,
                 Archive,
                 Carousel,
+                SponsorsBar,
+                TeamPreview,
+                Testimonials,
                 ThreeItemGrid,
                 Banner,
                 FormBlock,
+                VoucherCta,
                 WorkshopSlider,
               ],
               required: false,
@@ -279,7 +291,8 @@ export const Pages: CollectionConfig = {
               localized: true,
               label: 'Greeting Placeholder',
               admin: {
-                description: 'Placeholder text in the greeting textarea (e.g. "Max. 250 characters").',
+                description:
+                  'Placeholder text in the greeting textarea (e.g. "Max. 250 characters").',
               },
             },
             {
@@ -328,8 +341,7 @@ export const Pages: CollectionConfig = {
               relationTo: 'media',
               label: 'Starter Set Image',
               admin: {
-                description:
-                  'Image shown in the starter set section. Leave empty to use fallback.',
+                description: 'Image shown in the starter set section. Leave empty to use fallback.',
               },
             },
             {

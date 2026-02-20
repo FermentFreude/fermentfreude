@@ -608,12 +608,18 @@ export interface Page {
         | ContactBlock
         | CallToActionBlock
         | ContentBlock
+        | FeatureCardsBlock
+        | HeroBannerBlock
         | MediaBlock
         | ArchiveBlock
         | CarouselBlock
+        | SponsorsBarBlock
+        | TeamPreviewBlock
+        | TestimonialsBlock
         | ThreeItemGridBlock
         | BannerBlock
         | FormBlock
+        | VoucherCtaBlock
         | WorkshopSliderBlock
       )[]
     | null;
@@ -1279,6 +1285,82 @@ export interface ContentBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureCardsBlock".
+ */
+export interface FeatureCardsBlock {
+  /**
+   * Small uppercase text above the heading (e.g. "FERMENTATION").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main section heading (e.g. "Why Fermentation?").
+   */
+  heading: string;
+  /**
+   * Short paragraph below the heading.
+   */
+  description?: string | null;
+  /**
+   * Cards with icon, title, and description. Shown in a horizontal row.
+   */
+  cards: {
+    /**
+     * Small icon displayed at the top of the card.
+     */
+    icon?: (string | null) | Media;
+    /**
+     * Title displayed below the icon (e.g. "Probiotics").
+     */
+    title: string;
+    /**
+     * Short description text for this feature.
+     */
+    description: string;
+    id?: string | null;
+  }[];
+  /**
+   * CTA button text (e.g. "Read more about it"). Leave empty to hide.
+   */
+  buttonLabel?: string | null;
+  /**
+   * URL the button links to.
+   */
+  buttonLink?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBannerBlock".
+ */
+export interface HeroBannerBlock {
+  /**
+   * Large white heading over the background image (e.g. "For Chefs and Food Professionals").
+   */
+  heading: string;
+  /**
+   * Subtext below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * CTA button text (e.g. "Get to know more here").
+   */
+  buttonLabel: string;
+  /**
+   * URL the CTA button links to.
+   */
+  buttonLink: string;
+  /**
+   * Full-width background image for the banner section.
+   */
+  backgroundImage?: (string | null) | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'heroBanner';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
@@ -1370,6 +1452,122 @@ export interface CarouselBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SponsorsBarBlock".
+ */
+export interface SponsorsBarBlock {
+  /**
+   * Text above the logos (e.g. "This project is supported by:").
+   */
+  heading: string;
+  /**
+   * Sponsor/partner logos displayed in a horizontal row.
+   */
+  sponsors: {
+    /**
+     * Name used as alt text for the logo image.
+     */
+    name: string;
+    /**
+     * Sponsor logo. SVG or PNG recommended.
+     */
+    logo: string | Media;
+    /**
+     * Optional link to the sponsor website.
+     */
+    url?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'sponsorsBar';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamPreviewBlock".
+ */
+export interface TeamPreviewBlock {
+  /**
+   * Small uppercase text above the heading (e.g. "Our Team").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main heading (e.g. "Only The Best Instructors").
+   */
+  heading: string;
+  /**
+   * Body text describing the team.
+   */
+  description: string;
+  /**
+   * CTA button text (e.g. "About us").
+   */
+  buttonLabel?: string | null;
+  /**
+   * URL the button links to (e.g. "/about").
+   */
+  buttonLink?: string | null;
+  /**
+   * Team members to display. Typically 2 members with large portrait photos.
+   */
+  members: {
+    name: string;
+    /**
+     * Role title (e.g. "Instructor").
+     */
+    role?: string | null;
+    /**
+     * Portrait photo. Tall aspect ratio recommended.
+     */
+    image?: (string | null) | Media;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'teamPreview';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock".
+ */
+export interface TestimonialsBlock {
+  /**
+   * Small text above the heading (e.g. "Testimonials").
+   */
+  eyebrow?: string | null;
+  /**
+   * Section heading (e.g. "What They Like About Our Fermentation Class").
+   */
+  heading: string;
+  /**
+   * Optional "View All" button text. Leave empty to hide.
+   */
+  buttonLabel?: string | null;
+  buttonLink?: string | null;
+  /**
+   * Individual testimonial entries displayed as a slider.
+   */
+  testimonials: {
+    /**
+     * The testimonial text.
+     */
+    quote: string;
+    authorName: string;
+    /**
+     * Optional role/title of the author (e.g. "Artist").
+     */
+    authorRole?: string | null;
+    /**
+     * Star rating from 1 to 5.
+     */
+    rating?: number | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonials';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ThreeItemGridBlock".
  */
 export interface ThreeItemGridBlock {
@@ -1428,6 +1626,35 @@ export interface FormBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VoucherCtaBlock".
+ */
+export interface VoucherCtaBlock {
+  /**
+   * Large heading text (e.g. "Gift a special tasty experience").
+   */
+  heading: string;
+  /**
+   * Short paragraph below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * Text on the CTA button (e.g. "Voucher").
+   */
+  buttonLabel: string;
+  /**
+   * URL the button links to (e.g. "/voucher").
+   */
+  buttonLink: string;
+  /**
+   * Image displayed on the right side of the CTA block.
+   */
+  image?: (string | null) | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'voucherCta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1880,12 +2107,18 @@ export interface PagesSelect<T extends boolean = true> {
         contactBlock?: T | ContactBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
+        featureCards?: T | FeatureCardsBlockSelect<T>;
+        heroBanner?: T | HeroBannerBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
+        sponsorsBar?: T | SponsorsBarBlockSelect<T>;
+        teamPreview?: T | TeamPreviewBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        voucherCta?: T | VoucherCtaBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
       };
   voucher?:
@@ -2178,6 +2411,40 @@ export interface ContentBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureCardsBlock_select".
+ */
+export interface FeatureCardsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  description?: T;
+  cards?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  buttonLabel?: T;
+  buttonLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBannerBlock_select".
+ */
+export interface HeroBannerBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  backgroundImage?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MediaBlock_select".
  */
 export interface MediaBlockSelect<T extends boolean = true> {
@@ -2216,6 +2483,65 @@ export interface CarouselBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SponsorsBarBlock_select".
+ */
+export interface SponsorsBarBlockSelect<T extends boolean = true> {
+  heading?: T;
+  sponsors?:
+    | T
+    | {
+        name?: T;
+        logo?: T;
+        url?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamPreviewBlock_select".
+ */
+export interface TeamPreviewBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  members?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        image?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock_select".
+ */
+export interface TestimonialsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  testimonials?:
+    | T
+    | {
+        quote?: T;
+        authorName?: T;
+        authorRole?: T;
+        rating?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ThreeItemGridBlock_select".
  */
 export interface ThreeItemGridBlockSelect<T extends boolean = true> {
@@ -2241,6 +2567,19 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VoucherCtaBlock_select".
+ */
+export interface VoucherCtaBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  image?: T;
   id?: T;
   blockName?: T;
 }
@@ -2763,6 +3102,9 @@ export interface Header {
  */
 export interface Footer {
   id: string;
+  /**
+   * Links shown in the "Quick Links" column.
+   */
   navItems?:
     | {
         link: {
@@ -2778,6 +3120,46 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Links shown in the "Our Workshops" column.
+   */
+  workshopLinks?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?: {
+            relationTo: 'pages';
+            value: string | Page;
+          } | null;
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Address displayed in the footer (e.g. "Grabenstraße 15, 8010 Graz, Austria").
+   */
+  location?: string | null;
+  /**
+   * Contact phone number.
+   */
+  phone?: string | null;
+  /**
+   * Heading for the newsletter section (e.g. "Subscribe Newsletter").
+   */
+  newsletterHeading?: string | null;
+  /**
+   * Short text above the newsletter subscribe form.
+   */
+  newsletterDescription?: string | null;
+  socialMedia?: {
+    facebook?: string | null;
+    twitter?: string | null;
+    pinterest?: string | null;
+    youtube?: string | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2837,6 +3219,32 @@ export interface FooterSelect<T extends boolean = true> {
               label?: T;
             };
         id?: T;
+      };
+  workshopLinks?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  location?: T;
+  phone?: T;
+  newsletterHeading?: T;
+  newsletterDescription?: T;
+  socialMedia?:
+    | T
+    | {
+        facebook?: T;
+        twitter?: T;
+        pinterest?: T;
+        youtube?: T;
       };
   updatedAt?: T;
   createdAt?: T;
