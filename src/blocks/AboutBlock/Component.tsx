@@ -216,7 +216,7 @@ export const AboutBlockComponent: React.FC<
     <div id={id} className="min-h-screen bg-white">
       {/* Hero Banner */}
       <div
-        className="relative h-[600px] w-full overflow-hidden bg-cover bg-bottom"
+        className="relative h-150 w-full overflow-hidden bg-cover bg-bottom"
         style={{
           backgroundImage: `url(${heroImageUrl})`,
         }}
@@ -224,7 +224,7 @@ export const AboutBlockComponent: React.FC<
 
       {/* Our Story Section */}
       <section className="w-full pt-4 pb-8 md:py-24">
-        <div className="mx-auto max-w-[1400px] px-6">
+        <div className="mx-auto max-w-350 px-6">
           <div className="flex flex-col items-center gap-12">
             <h2 className="font-display text-3xl font-bold text-[#E5B765]">{ourStory.label}</h2>
             <h1 className="font-display text-center text-5xl font-bold leading-tight text-[#1D1D1D]">
@@ -249,7 +249,7 @@ export const AboutBlockComponent: React.FC<
 
       {/* Our Team Section */}
       <section className="w-full pt-4 pb-24 md:py-24">
-        <div className="mx-auto max-w-[1400px] px-3 md:px-6">
+        <div className="mx-auto max-w-350 px-3 md:px-6">
           <div className="flex flex-col items-center gap-12 md:gap-16">
             <h2 className="font-display text-3xl font-bold text-[#E5B765] animate-fade-in">
               {team.label}
@@ -265,12 +265,12 @@ export const AboutBlockComponent: React.FC<
                 return (
                   <div
                     key={idx}
-                    className="flex aspect-[1/2] flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up hover:scale-[1.02] transition-transform duration-300"
+                    className="flex aspect-1/2 flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up hover:scale-[1.02] transition-transform duration-300"
                     style={{
                       animationDelay: `${(idx + 1) * 200}ms`,
                     }}
                   >
-                    <div className="relative aspect-[3/4] w-full overflow-hidden">
+                    <div className="relative aspect-3/4 w-full overflow-hidden">
                       {memberImageUrl ? (
                         <Media
                           resource={member.image ?? undefined}
@@ -316,7 +316,7 @@ export const AboutBlockComponent: React.FC<
 
       {/* Ready to Learn CTA */}
       <section className="w-full py-12 md:py-24 bg-[#F9F0DC]">
-        <div className="mx-auto max-w-[1400px] px-6">
+        <div className="mx-auto max-w-350 px-6">
           <div className="rounded-[2.75rem] bg-[#F9F0DC] px-6 py-12 md:px-24 md:py-20">
             <div className="flex flex-col items-center gap-8 md:gap-12">
               <h2 className="font-display text-center text-2xl md:text-3xl font-bold text-[#1D1D1D]">
