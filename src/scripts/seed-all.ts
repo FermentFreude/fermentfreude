@@ -30,6 +30,7 @@ const __dirname = path.dirname(__filename)
 
 const scripts: Record<string, { name: string; file: string }> = {
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
+  bootstrap: { name: 'Bootstrap (minimal home, no images)', file: 'seed-bootstrap.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
