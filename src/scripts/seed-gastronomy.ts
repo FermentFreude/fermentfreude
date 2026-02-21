@@ -356,7 +356,7 @@ async function seedGastronomy() {
   payload.logger.info('Seeding Gastronomy page…')
 
   // ── Upload images to Payload Media (Vercel Blob) — skip if Blob suspended ─
-  const imagesDir = path.resolve(process.cwd(), 'public/assets/images')
+  const imagesDir = path.resolve(process.cwd(), 'public/assets/images/gastronomy')
   const media: {
     offer1?: Media
     offer2?: Media
@@ -368,8 +368,16 @@ async function seedGastronomy() {
     contact?: Media
   } = {}
 
-  const offerPaths = ['workshop-slider.png', 'workshop-kombucha.png', 'company-b2b.png']
-  const workshopPaths = ['workshop-slider.png', 'workshop-kombucha.png', 'company-b2b.png']
+  const offerPaths = [
+    'gastronomy-slide-professional-training.png',
+    'gastronomy-slide-corporate-events.png',
+    'gastronomy-slide-menu-development.png',
+  ]
+  const workshopPaths = [
+    'gastronomy-slide-fermentation-jars.png',
+    'gastronomy-slide-flatlay-fermentation.png',
+    'gastronomy-slide-01-cutting-board.png',
+  ]
   const altTexts = {
     offer: ['Professional training – fermentation workshop', 'Corporate events – team fermentation', 'Menu development – fermented products'],
     workshop: ['Lakto fermentation workshop', 'Kombucha workshop', 'Tempeh workshop'],
@@ -386,6 +394,8 @@ async function seedGastronomy() {
           context: { skipAutoTranslate: true },
         })
         ;(media as Record<string, Media>)[`offer${i + 1}`] = created as Media
+      } else {
+        payload.logger.warn(`Offer image not found: ${p}`)
       }
     }
     for (let i = 0; i < 3; i++) {
@@ -398,9 +408,11 @@ async function seedGastronomy() {
           context: { skipAutoTranslate: true },
         })
         ;(media as Record<string, Media>)[`workshop${i + 1}`] = created as Media
+      } else {
+        payload.logger.warn(`Workshop image not found: ${p}`)
       }
     }
-    const collaboratePath = path.join(imagesDir, 'Banner.png')
+    const collaboratePath = path.join(imagesDir, 'gastronomy-cutting-board-fermentation.png')
     if (fs.existsSync(collaboratePath)) {
       const created = await payload.create({
         collection: 'media',
@@ -409,8 +421,10 @@ async function seedGastronomy() {
         context: { skipAutoTranslate: true },
       })
       media.collaborate = created as Media
+    } else {
+      payload.logger.warn(`Collaborate image not found: ${collaboratePath}`)
     }
-    const contactPath = path.join(imagesDir, 'contact-form.png')
+    const contactPath = path.join(imagesDir, 'gastronomy-slide-01-cutting-board.png')
     if (fs.existsSync(contactPath)) {
       const created = await payload.create({
         collection: 'media',
@@ -419,6 +433,8 @@ async function seedGastronomy() {
         context: { skipAutoTranslate: true },
       })
       media.contact = created as Media
+    } else {
+      payload.logger.warn(`Contact image not found: ${contactPath}`)
     }
   } catch (err) {
     payload.logger.warn('Image upload skipped (e.g. Vercel Blob suspended). Seeding text only.')
