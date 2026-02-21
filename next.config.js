@@ -21,6 +21,11 @@ const nextConfig = {
         hostname: 'pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev',
         protocol: 'https',
       },
+      // Unsplash (fallback images for gastronomy slider)
+      {
+        hostname: 'images.unsplash.com',
+        protocol: 'https',
+      },
     ],
   },
   reactStrictMode: true,

@@ -108,6 +108,8 @@ export const ContactBlockComponent: React.FC<
 
   const id = toKebabCase((block as { blockName?: string }).blockName ?? 'contact')
   const hideHeroSection = (block as { hideHeroSection?: boolean }).hideHeroSection === true
+  const hideCtaBanner = (block as { hideCtaBanner?: boolean }).hideCtaBanner === true
+  const hideMap = (block as { hideMap?: boolean }).hideMap === true
 
   return (
     <div id={id} className="min-h-screen bg-[#F9F0DC]">
@@ -243,6 +245,7 @@ export const ContactBlockComponent: React.FC<
       </section>
 
       {/* CTA Banner — dark gray, gold heading */}
+      {!hideCtaBanner && (
       <section className="w-full px-6 pb-12 md:pb-24">
         <div className="mx-auto max-w-300">
           <div className="overflow-hidden rounded-3xl bg-[#333] px-8 py-16 text-center md:px-16 md:py-20">
@@ -261,9 +264,10 @@ export const ContactBlockComponent: React.FC<
           </div>
         </div>
       </section>
+      )}
 
       {/* Map */}
-      {mapEmbedUrl ? (
+      {!hideMap && mapEmbedUrl ? (
         <section className="w-full px-6 pb-12 md:pb-24">
           <div className="mx-auto max-w-300 overflow-hidden rounded-2xl bg-white shadow">
             <div className="relative aspect-video w-full">

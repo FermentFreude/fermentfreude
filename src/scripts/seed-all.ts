@@ -8,6 +8,7 @@
  *   pnpm seed home         # Seeds only the home page
  *   pnpm seed about        # Seeds only the about page
  *   pnpm seed contact      # Seeds only the contact page
+ *   pnpm seed gastronomy         # Seeds only the gastronomy page (Pages collection)
  *
  * Order (when seeding all):
  *   1. Header (global — nav items)
@@ -34,10 +35,11 @@ const scripts: Record<string, { name: string; file: string }> = {
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
+  gastronomy: { name: 'Gastronomy page', file: 'seed-gastronomy.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
 }
 
-const allOrder = ['header', 'home', 'about', 'contact', 'voucher']
+const allOrder = ['header', 'home', 'about', 'contact', 'gastronomy', 'voucher']
 
 function runSeed(key: string): boolean {
   const script = scripts[key]
@@ -50,9 +52,14 @@ function runSeed(key: string): boolean {
   const scriptPath = path.resolve(__dirname, script.file)
   console.log(`\n── ${script.name} ──`)
 
-  const result = spawnSync('npx', ['tsx', scriptPath], {
+  const args = process.argv.slice(2).filter((a) => a !== target)
+  const seedEnv = { ...process.env }
+  if (key === 'gastronomy') {
+    seedEnv.PAYLOAD_SKIP_GASTRONOMY_CONDITION = '1'
+  }
+  const result = spawnSync('npx', ['tsx', scriptPath, ...args], {
     stdio: 'inherit',
-    env: process.env,
+    env: seedEnv,
     cwd: process.cwd(),
     shell: true,
   })

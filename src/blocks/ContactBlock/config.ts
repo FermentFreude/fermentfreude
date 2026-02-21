@@ -9,6 +9,25 @@ export const ContactBlock: Block = {
   },
   fields: [
     {
+      name: 'hideCtaBanner',
+      type: 'checkbox',
+      label: 'Hide CTA Banner',
+      defaultValue: false,
+      admin: {
+        description:
+          'When checked, the "For Chefs and Food Professionals" banner below the contact form is hidden.',
+      },
+    },
+    {
+      name: 'hideMap',
+      type: 'checkbox',
+      label: 'Hide Map',
+      defaultValue: false,
+      admin: {
+        description: 'When checked, the map section below the contact form is hidden.',
+      },
+    },
+    {
       name: 'hideHeroSection',
       type: 'checkbox',
       label: 'Hide Hero Section',
