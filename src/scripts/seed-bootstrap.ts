@@ -233,7 +233,7 @@ async function seedBootstrap() {
       slug: 'about',
       _status: 'published',
       hero: aboutHeroDE,
-      layout: aboutLayoutDE,
+      layout: aboutLayoutDE as any,
     },
   })
 
@@ -299,7 +299,7 @@ async function seedBootstrap() {
         { ...enTeamCards, id: blockIds[1] },
         { ...enSponsorsBar, id: blockIds[2] },
         { ...readyToLearnEN(), id: blockIds[3] },
-      ],
+      ] as any,
     },
   })
 
