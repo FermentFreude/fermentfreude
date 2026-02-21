@@ -436,7 +436,7 @@ async function seedGastronomy() {
     } else {
       payload.logger.warn(`Contact image not found: ${contactPath}`)
     }
-  } catch (err) {
+  } catch (_err) {
     payload.logger.warn('Image upload skipped (e.g. Vercel Blob suspended). Seeding text only.')
   }
 
@@ -533,7 +533,7 @@ async function seedGastronomy() {
         },
       })
       payload.logger.info('Gastronomy page updated (DE + EN). Edit at /admin/collections/pages')
-    } catch (err) {
+    } catch (_err) {
       payload.logger.warn('EN locale update failed. DE content saved. Add EN manually in admin.')
       payload.logger.info('Gastronomy page updated (DE only). Edit at /admin/collections/pages')
     }
@@ -612,7 +612,7 @@ async function seedGastronomy() {
       },
     })
     payload.logger.info('Gastronomy page seeded (DE + EN). Edit at /admin/collections/pages')
-  } catch (err) {
+  } catch (_err) {
     payload.logger.warn('EN locale update failed. DE content saved. Add EN manually in admin.')
     payload.logger.info('Gastronomy page seeded (DE only). Edit at /admin/collections/pages')
   }

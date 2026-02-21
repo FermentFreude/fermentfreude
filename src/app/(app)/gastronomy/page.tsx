@@ -13,7 +13,6 @@ import { getPayload } from 'payload'
 
 import type { Media as MediaType, Page as PageType } from '@/payload-types'
 
-const DEFAULT_HERO_TITLE = 'Elevate Your Gastronomy Business'
 const DEFAULT_HERO_CTA = 'Take A Look'
 const DEFAULT_OFFER_TITLE = 'What we offer'
 const DEFAULT_QUOTE =
@@ -51,7 +50,6 @@ export default async function GastronomyPage() {
   const page = result.docs[0] as PageType | undefined
   const g = page?.gastronomy
 
-  const heroTitle = g?.gastronomyHeroTitle ?? DEFAULT_HERO_TITLE
   const heroCtaLabel = g?.gastronomyHeroCtaLabel ?? DEFAULT_HERO_CTA
   const heroCtaUrl = g?.gastronomyHeroCtaUrl ?? '#offer'
   const offerSectionTitle = g?.gastronomyOfferSectionTitle ?? DEFAULT_OFFER_TITLE

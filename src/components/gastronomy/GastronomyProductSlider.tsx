@@ -14,12 +14,8 @@ import Link from 'next/link'
 import React, { useCallback, useEffect } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 
-/** Fallback images when CMS has none — Unsplash (allowed in next.config.js) */
-const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200&q=80', // fermentation jars
-  'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1200&q=80', // professional kitchen
-  'https://images.unsplash.com/photo-1556911220-e15b29be5c8f?w=1200&q=80', // cooking prep
-]
+/** Fallback: no external URLs — show neutral bg when CMS image is missing */
+const FALLBACK_IMAGES: string[] = []
 
 function isResolvedMedia(img: unknown): img is { url?: string } {
   return typeof img === 'object' && img !== null && 'url' in img

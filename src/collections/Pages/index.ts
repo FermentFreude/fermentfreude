@@ -222,6 +222,14 @@ export const Pages: CollectionConfig = {
               label: 'Workshop Section Subtitle',
             },
             {
+              name: 'gastronomyWorkshopClarification',
+              type: 'textarea',
+              required: false,
+              localized: true,
+              label: 'Workshop Clarification',
+              admin: { description: 'Optional text below workshop subtitle explaining who can attend (e.g. chefs welcome, custom workshops available).' },
+            },
+            {
               name: 'gastronomyWorkshopNextDateLabel',
               type: 'text',
               required: false,

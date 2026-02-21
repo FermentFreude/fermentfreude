@@ -661,6 +661,10 @@ export interface Page {
     gastronomyWorkshopSectionTitle: string;
     gastronomyWorkshopSectionSubtitle?: string | null;
     /**
+     * Optional text below workshop subtitle explaining who can attend (e.g. chefs welcome, custom workshops available).
+     */
+    gastronomyWorkshopClarification?: string | null;
+    /**
      * e.g. "Nächster Termin:" / "Next Appointment:"
      */
     gastronomyWorkshopNextDateLabel?: string | null;
@@ -2159,6 +2163,7 @@ export interface PagesSelect<T extends boolean = true> {
         gastronomyQuoteSubtext?: T;
         gastronomyWorkshopSectionTitle?: T;
         gastronomyWorkshopSectionSubtitle?: T;
+        gastronomyWorkshopClarification?: T;
         gastronomyWorkshopNextDateLabel?: T;
         gastronomyWorkshopCards?:
           | T
