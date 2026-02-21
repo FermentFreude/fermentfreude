@@ -21,22 +21,17 @@ export const OurStoryBlock: React.FC<Props> = ({ label, heading, subheading, par
     paragraphs && paragraphs.length > 0 ? paragraphs.map((p) => p.text ?? '') : DEFAULTS.paragraphs
 
   return (
-    <section id={id ?? undefined} className="w-full pt-4 pb-8 md:py-24">
-      <div className="mx-auto max-w-350 px-6">
-        <div className="flex flex-col items-center gap-12">
-          <h2 className="font-display text-3xl font-bold text-[#E5B765]">{resolvedLabel}</h2>
-          <h1 className="font-display text-center text-5xl font-bold leading-tight text-[#1D1D1D]">
-            {resolvedHeading}
-          </h1>
-          <p className="max-w-4xl text-center font-display text-3xl font-bold leading-relaxed text-[#4B4F4A]">
+    <section id={id ?? undefined} className="section-padding-md">
+      <div className="container mx-auto container-padding">
+        <div className="flex flex-col items-center gap-(--space-content-xl) content-medium mx-auto">
+          <span className="text-eyebrow text-ff-gold-accent">{resolvedLabel}</span>
+          <h2 className="text-center text-ff-black">{resolvedHeading}</h2>
+          <p className="text-body-lg text-center text-ff-olive font-display font-bold content-medium">
             {resolvedSubheading}
           </p>
-          <div className="flex w-full flex-col gap-1 bg-white py-4 -mt-12 text-center">
+          <div className="flex w-full flex-col gap-(--space-content-sm) text-center content-medium">
             {resolvedParagraphs.map((paragraph: string, idx: number) => (
-              <p
-                key={idx}
-                className="font-display text-2xl font-normal leading-relaxed text-[#1D1D1D]"
-              >
+              <p key={idx} className="text-body text-ff-black/80">
                 {paragraph}
               </p>
             ))}

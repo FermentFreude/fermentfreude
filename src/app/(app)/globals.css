@@ -710,3 +710,91 @@ button {
 .animate-delay-600 {
   animation-delay: 600ms;
 }
+
+/* ════════════════════════════════════════════════════════════════
+ *  BENTO GALLERY — GSAP Flip scrubbed grid
+ *  Adapted from CodePen: https://codepen.io/GreenSock/pen/vYMzKZx
+ * ════════════════════════════════════════════════════════════════ */
+
+/* Outer wrapper — gets pinned by ScrollTrigger */
+.bento-gallery-wrap {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* The grid container itself */
+.bento-gallery {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: none;
+}
+
+/* Individual gallery cells */
+.bento-gallery__item {
+  background-position: 50% 50%;
+  background-size: cover;
+  flex: none;
+  position: relative;
+  overflow: hidden;
+}
+.bento-gallery__item img,
+.bento-gallery__item video {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+/* Placeholder when no image is available */
+.bento-gallery__placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: #555954;
+}
+
+/* ── Compact bento state ── */
+.bento-gallery--bento {
+  display: grid;
+  gap: 1vh;
+  grid-template-columns: repeat(3, 32.5vw);
+  grid-template-rows: repeat(4, 23vh);
+  justify-content: center;
+  align-content: center;
+}
+
+.bento-gallery--bento .bento-gallery__item:nth-child(1) {
+  grid-area: 1/1/3/2;
+}
+.bento-gallery--bento .bento-gallery__item:nth-child(2) {
+  grid-area: 1/2/2/3;
+}
+.bento-gallery--bento .bento-gallery__item:nth-child(3) {
+  grid-area: 2/2/4/3;
+}
+.bento-gallery--bento .bento-gallery__item:nth-child(4) {
+  grid-area: 1/3/3/3;
+}
+.bento-gallery--bento .bento-gallery__item:nth-child(5) {
+  grid-area: 3/1/3/2;
+}
+.bento-gallery--bento .bento-gallery__item:nth-child(6) {
+  grid-area: 3/3/5/4;
+}
+.bento-gallery--bento .bento-gallery__item:nth-child(7) {
+  grid-area: 4/1/5/2;
+}
+.bento-gallery--bento .bento-gallery__item:nth-child(8) {
+  grid-area: 4/2/5/3;
+}
+
+/* ── Expanded full-viewport state (class toggled by Flip) ── */
+.bento-gallery--final.bento-gallery--bento {
+  grid-template-columns: repeat(3, 100vw);
+  grid-template-rows: repeat(4, 49.5vh);
+  gap: 1vh;
+}

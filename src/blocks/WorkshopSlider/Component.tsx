@@ -159,10 +159,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
   /* ── Render ────────────────────────────────────────────────── */
   return (
-    <section id={id ?? undefined} className="w-full py-6 sm:py-8 lg:py-10">
+    <section id={id ?? undefined} className="w-full section-padding-sm">
       <div className="max-w-5xl mx-auto px-(--space-container-x,1.5rem)">
         {/* ── Eyebrow ──────────────────────────────────── */}
-        <span className="font-display font-bold text-[10px] sm:text-xs lg:text-sm tracking-widest uppercase text-[#E8C079] dark:text-[#E8C079] block mb-1 sm:mb-1.5">
+        <span className="text-eyebrow text-ff-gold-accent block mb-1 sm:mb-1.5">
           {resolvedEyebrow}
         </span>
       </div>
@@ -194,7 +194,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               className="snap-center shrink-0 w-screen"
             >
               <div
-                className="max-w-5xl mx-auto px-(--space-container-x,1.5rem) flex flex-col min-h-[45vh] sm:min-h-[40vh] lg:min-h-[45vh]"
+                className="max-w-5xl mx-auto px-(--space-container-x,1.5rem) flex flex-col min-h-[45vh] sm:min-h-[40vh] lg:min-h-[55vh]"
                 style={{
                   opacity,
                   transform: `scale(${scale})`,
@@ -203,12 +203,12 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                 }}
               >
                 {/* ── Title ──────────────────────────────── */}
-                <h2 className="font-display font-black text-[1.25rem] sm:text-[1.75rem] lg:text-[2rem] xl:text-[2.5rem] leading-[1.05] tracking-tight text-(--ff-near-black,#1a1a1a) dark:text-white mb-0.5">
+                <h2 className="leading-[1.05] tracking-tight text-(--ff-near-black,#1a1a1a) dark:text-white mb-0.5">
                   {workshop.title}
                 </h2>
 
                 {/* ── Description ────────────────────────── */}
-                <p className="font-display font-bold text-xs sm:text-xs lg:text-sm text-(--ff-near-black,#1a1a1a) dark:text-white/80 leading-snug max-w-[55ch]">
+                <p className="text-body-sm font-display font-bold text-(--ff-near-black,#1a1a1a) dark:text-white/80 leading-snug max-w-[55ch]">
                   {workshop.description}
                 </p>
 
@@ -223,7 +223,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                       'relative',
                       'sm:absolute sm:right-0 sm:top-0',
                       'sm:z-0',
-                      'sm:w-[50%] lg:w-[52%]',
+                      'sm:w-[50%] lg:w-[58%]',
                       'rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden',
                       'aspect-16/10 sm:aspect-auto sm:h-full',
                       'w-full',

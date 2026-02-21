@@ -73,7 +73,7 @@ export function HeaderClient({ header }: Props) {
         className={cn(
           'border-b transition-all duration-300',
           isTransparent
-            ? 'bg-white/60 backdrop-blur-xl border-white/30 lg:bg-transparent lg:backdrop-blur-none lg:border-transparent dark:bg-neutral-900/60 dark:backdrop-blur-xl dark:border-white/10 lg:dark:bg-transparent lg:dark:backdrop-blur-none lg:dark:border-transparent'
+            ? 'bg-transparent backdrop-blur-none border-transparent dark:bg-transparent dark:backdrop-blur-none dark:border-transparent'
             : 'bg-ff-ivory dark:bg-ff-near-black border-ff-white-95 dark:border-neutral-800',
         )}
       >

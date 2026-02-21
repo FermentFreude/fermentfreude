@@ -70,6 +70,13 @@ async function seedHome() {
       context: { skipAutoTranslate: true },
     })
     .catch(() => {})
+  await payload
+    .delete({
+      collection: 'media',
+      where: { alt: { contains: 'Gallery' } },
+      context: { skipAutoTranslate: true },
+    })
+    .catch(() => {})
 
   // Workshop images
   const laktoImage = await payload.create({
@@ -183,13 +190,38 @@ async function seedHome() {
   // ── New block images ──
   const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
 
-  // VoucherCta image (Gift Set)
-  const voucherImage = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude Gift Set – fermentation starter kit in box' },
-    file: await optimizedFile(path.join(imagesDir, 'Image (Gift Set).png'), IMAGE_PRESETS.card),
-  })
+  // VoucherCta gallery images (8 images for bento gallery – from Figma)
+  const galleryDir = path.resolve(process.cwd(), 'seed-assets/images/gallery')
+  const galleryImageConfigs = [
+    {
+      file: path.join(galleryDir, 'gallery-1.png'),
+      alt: 'Gallery – workshop scene, people laughing',
+    },
+    {
+      file: path.join(galleryDir, 'gallery-2.png'),
+      alt: 'Gallery – fermented food bowls on slate',
+    },
+    { file: path.join(galleryDir, 'gallery-5.png'), alt: 'Gallery – overhead dinner with FF logo' },
+    { file: path.join(galleryDir, 'gallery-4.png'), alt: 'Gallery – chopping fresh ingredients' },
+    { file: path.join(galleryDir, 'gallery-3.png'), alt: 'Gallery – workshop preparation scene' },
+    {
+      file: path.join(galleryDir, 'gallery-6.png'),
+      alt: 'Gallery – table with bottles and flowers',
+    },
+    { file: path.join(galleryDir, 'gallery-7.png'), alt: 'Gallery – kombucha SCOBY jar closeup' },
+    { file: path.join(galleryDir, 'gallery-8.png'), alt: 'Gallery – workshop table with chairs' },
+  ]
+
+  const galleryMediaIds: string[] = []
+  for (const cfg of galleryImageConfigs) {
+    const media = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: cfg.alt },
+      file: await optimizedFile(cfg.file, IMAGE_PRESETS.card),
+    })
+    galleryMediaIds.push(media.id)
+  }
 
   // HeroBanner background (Banner)
   const bannerImage = await payload.create({
@@ -727,22 +759,20 @@ async function seedHome() {
   const voucherCtaDE = {
     blockType: 'voucherCta' as const,
     heading: 'Verschenke ein besonderes Geschmacks-Erlebnis',
-    description:
-      'Unsere Gutscheine sind das perfekte Geschenk für alle, die gutes Essen, Gesundheit und einzigartige Erlebnisse lieben. Wähle zwischen Workshop-Gutscheinen und Produktsets.',
+    description: 'Teile ein leckeres Erlebnis mit jemandem Besonderem.',
     buttonLabel: 'Gutschein',
     buttonLink: '/voucher',
-    image: voucherImage.id,
+    galleryImages: galleryMediaIds.map((id) => ({ image: id })),
   }
 
   // ── VoucherCta (EN) ──
   const voucherCtaEN = {
     blockType: 'voucherCta' as const,
     heading: 'Gift a special tasty experience',
-    description:
-      'Our vouchers are the perfect gift for anyone who loves good food, health, and unique experiences. Choose between workshop vouchers and product sets.',
+    description: 'Share a tasty experience with someone special.',
     buttonLabel: 'Voucher',
     buttonLink: '/voucher',
-    image: voucherImage.id,
+    galleryImages: galleryMediaIds.map((id) => ({ image: id })),
   }
 
   // ── HeroBanner (DE) ──
@@ -1009,10 +1039,10 @@ async function seedHome() {
   payload.logger.info('Saving DE locale (hero + all layout blocks)...')
 
   const layoutDE = [
-    workshopSliderDE,
     voucherCtaDE,
-    heroBannerDE,
     featureCardsDE,
+    heroBannerDE,
+    workshopSliderDE,
     teamPreviewDE,
     testimonialsDE,
     sponsorsBarDE,
@@ -1112,6 +1142,10 @@ async function seedHome() {
   const voucherCtaEN_withIds = {
     ...voucherCtaEN,
     id: vcBlock?.id,
+    galleryImages: voucherCtaEN.galleryImages.map((g, i) => ({
+      ...g,
+      id: (vcBlock as any)?.galleryImages?.[i]?.id,
+    })),
   }
 
   const heroBannerEN_withIds = {
@@ -1156,10 +1190,10 @@ async function seedHome() {
   }
 
   const layoutEN = [
-    workshopSliderEN_withIds,
     voucherCtaEN_withIds,
-    heroBannerEN_withIds,
     featureCardsEN_withIds,
+    heroBannerEN_withIds,
+    workshopSliderEN_withIds,
     teamPreviewEN_withIds,
     testimonialsEN_withIds,
     sponsorsBarEN_withIds,

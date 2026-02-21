@@ -49,13 +49,24 @@ export const VoucherCta: Block = {
       },
     },
     {
-      name: 'image',
-      type: 'upload',
-      relationTo: 'media',
-      label: 'Image',
+      name: 'galleryImages',
+      type: 'array',
+      label: 'Bento Gallery Images',
+      minRows: 1,
+      maxRows: 8,
       admin: {
-        description: 'Image displayed on the right side of the CTA block.',
+        description:
+          'Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.',
       },
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+          label: 'Gallery Image',
+        },
+      ],
     },
   ],
 }

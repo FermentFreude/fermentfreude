@@ -81,8 +81,8 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* ── Mobile split background (below md) ─────────────── */}
-      <div className="md:hidden absolute inset-0 pointer-events-none" aria-hidden="true">
+      {/* ── Mobile split background (below sm) ─────────────── */}
+      <div className="sm:hidden absolute inset-0 pointer-events-none" aria-hidden="true">
         <div
           className="h-[42%] transition-colors duration-700"
           style={{ backgroundColor: slide.bgColor }}
@@ -93,9 +93,9 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         />
       </div>
 
-      {/* ── Desktop/tablet solid background (md+) ──────────── */}
+      {/* ── Desktop/tablet solid background (sm+) ──────────── */}
       <div
-        className="hidden md:block absolute inset-0 transition-colors duration-700 pointer-events-none"
+        className="hidden sm:block absolute inset-0 transition-colors duration-700 pointer-events-none"
         style={{ backgroundColor: slide.bgColor }}
         aria-hidden="true"
       />
@@ -105,8 +105,8 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         className={cn(
           'pointer-events-none absolute left-0 right-0 flex items-center justify-center select-none',
           'font-display font-black uppercase tracking-[-0.04em]',
-          'text-[18vw] md:text-[10vw]',
-          'top-0 h-[42%] md:top-0 md:h-full',
+          'text-[18vw] sm:text-[10vw]',
+          'top-0 h-[42%] sm:top-0 sm:h-full',
           'transition-opacity duration-700',
           isExiting ? 'opacity-0' : 'opacity-[0.07]',
         )}
@@ -119,7 +119,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
       {/* ═══════════════════════════════════════════════════════
        *  MOBILE LAYOUT (below md)
        * ═══════════════════════════════════════════════════════ */}
-      <div className="md:hidden relative z-10 flex flex-col h-full">
+      <div className="sm:hidden relative z-10 flex flex-col h-full pt-24">
         {/* Mobile chevrons */}
         <button
           onClick={goPrev}
@@ -277,13 +277,13 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
       {/* ═══════════════════════════════════════════════════════
        *  DESKTOP / TABLET LAYOUT (md+)
        * ═══════════════════════════════════════════════════════ */}
-      <div className="hidden md:flex relative z-10 h-full items-center justify-center w-full">
+      <div className="hidden sm:flex relative z-10 h-full items-center justify-center w-full pt-24 lg:pt-28">
         {/* Nav arrows at screen edges */}
         <NavArrow direction="left" onClick={goPrev} panelColor={slide.panelColor} />
         <NavArrow direction="right" onClick={goNext} panelColor={slide.panelColor} />
 
         {/* Image — Card — Image */}
-        <div className="flex items-center justify-center w-full max-w-5xl mx-auto px-14 lg:px-20 xl:px-24 gap-4 lg:gap-6">
+        <div className="flex items-center justify-center w-full max-w-5xl mx-auto px-8 sm:px-14 lg:px-20 xl:px-24 gap-3 sm:gap-4 lg:gap-6">
           {/* LEFT IMAGE */}
           <div className="flex items-center justify-center">
             <div

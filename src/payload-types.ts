@@ -1556,9 +1556,14 @@ export interface VoucherCtaBlock {
    */
   buttonLink: string;
   /**
-   * Image displayed on the right side of the CTA block.
+   * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
    */
-  image?: (string | null) | Media;
+  galleryImages?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'voucherCta';
@@ -2429,7 +2434,12 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
   description?: T;
   buttonLabel?: T;
   buttonLink?: T;
-  image?: T;
+  galleryImages?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }

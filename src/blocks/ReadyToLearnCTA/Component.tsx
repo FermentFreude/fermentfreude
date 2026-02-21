@@ -30,30 +30,26 @@ export const ReadyToLearnCTABlock: React.FC<Props> = ({
   }
 
   return (
-    <section id={id ?? undefined} className="w-full py-12 md:py-24 bg-[#F9F0DC]">
-      <div className="mx-auto max-w-350 px-6">
-        <div className="rounded-[2.75rem] bg-[#F9F0DC] px-6 py-12 md:px-24 md:py-20">
-          <div className="flex flex-col items-center gap-8 md:gap-12">
-            <h2 className="font-display text-center text-2xl font-bold text-[#1D1D1D] md:text-3xl">
-              {resolvedHeading}
-            </h2>
-            <p className="max-w-4xl text-center font-display text-xl font-semibold text-[#4B4B4B] md:text-3xl">
-              {resolvedDescription}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
-              <Link
-                href={resolvedPrimary.href}
-                className="rounded-full bg-[#6B6B6B] px-6 py-2.5 font-display text-lg font-semibold text-[#F9F0DC] transition-colors hover:bg-[#595959] md:px-16 md:py-3 md:text-xl"
-              >
-                {resolvedPrimary.label}
-              </Link>
-              <Link
-                href={resolvedSecondary.href}
-                className="rounded-full bg-white px-6 py-2.5 font-display text-lg font-semibold text-[#4B4B4B] transition-all hover:border-4 hover:border-[#4B4B4B] hover:bg-[#F9F0DC] md:px-14 md:py-3 md:text-xl"
-              >
-                {resolvedSecondary.label}
-              </Link>
-            </div>
+    <section id={id ?? undefined} className="bg-ff-ivory section-padding-md">
+      <div className="container mx-auto container-padding">
+        <div className="flex flex-col items-center gap-(--space-content-xl) content-medium mx-auto text-center">
+          <h2 className="text-ff-black">{resolvedHeading}</h2>
+          <p className="text-body-lg font-display font-semibold text-ff-olive content-medium">
+            {resolvedDescription}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-(--space-content-md)">
+            <Link
+              href={resolvedPrimary.href}
+              className="inline-flex items-center justify-center rounded-full bg-ff-charcoal hover:bg-ff-charcoal-hover hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-ivory font-display font-bold text-base px-8 py-3"
+            >
+              {resolvedPrimary.label}
+            </Link>
+            <Link
+              href={resolvedSecondary.href}
+              className="inline-flex items-center justify-center rounded-full border-2 border-ff-charcoal bg-transparent hover:bg-ff-charcoal hover:text-ff-ivory hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-charcoal font-display font-bold text-base px-8 py-3"
+            >
+              {resolvedSecondary.label}
+            </Link>
           </div>
         </div>
       </div>

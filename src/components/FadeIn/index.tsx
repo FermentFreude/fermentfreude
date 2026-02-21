@@ -1,14 +1,21 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import React, { useRef } from 'react'
+
+gsap.registerPlugin(ScrollTrigger)
 
 interface FadeInProps {
   children: React.ReactNode
   className?: string
-  /** Stagger delay in ms */
+  /** Stagger delay in seconds */
   delay?: number
   /** Direction to animate from */
   from?: 'bottom' | 'left' | 'right'
+  /** Animation duration in seconds (default 0.9) */
+  duration?: number
 }
 
 export const FadeIn: React.FC<FadeInProps> = ({
@@ -16,38 +23,44 @@ export const FadeIn: React.FC<FadeInProps> = ({
   className = '',
   delay = 0,
   from = 'bottom',
+  duration = 0.9,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
 
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-          observer.unobserve(el)
-        }
-      },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  const translate = {
-    bottom: isVisible ? 'translate-y-0' : 'translate-y-5',
-    left: isVisible ? 'translate-x-0' : '-translate-x-5',
-    right: isVisible ? 'translate-x-0' : 'translate-x-5',
+  const initial = {
+    bottom: { y: 60, x: 0, skewY: 1.5 },
+    left: { y: 0, x: -60, skewY: 0 },
+    right: { y: 0, x: 60, skewY: 0 },
   }
 
+  useGSAP(
+    () => {
+      if (!ref.current) return
+
+      const { y, x, skewY } = initial[from]
+
+      gsap.set(ref.current, { y, x, opacity: 0, skewY })
+
+      gsap.to(ref.current, {
+        y: 0,
+        x: 0,
+        opacity: 1,
+        skewY: 0,
+        duration,
+        delay: delay / 1000, // convert ms to seconds for backwards compat
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: ref.current,
+          start: 'top 88%',
+          once: true,
+        },
+      })
+    },
+    { scope: ref },
+  )
+
   return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${isVisible ? 'opacity-100' : 'opacity-0'} ${translate[from]} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
+    <div ref={ref} className={className} style={{ opacity: 0 }}>
       {children}
     </div>
   )
