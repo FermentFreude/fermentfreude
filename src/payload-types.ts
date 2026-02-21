@@ -499,6 +499,72 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Images for the hero carousel. Add 3–5 for the best visual effect. They appear in a stacked slider layout.
+     */
+    heroImages?:
+      | {
+          image: string | Media;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Each slide has its own text, product images, colors, and CTA. The slider cycles through these automatically.
+     */
+    heroSlides?:
+      | {
+          /**
+           * Internal ID for this slide (e.g. "lakto", "kombucha", "tempeh", "basics"). Not shown to visitors.
+           */
+          slideId: string;
+          /**
+           * Small uppercase text above the title (e.g. "Workshop Experience").
+           */
+          eyebrow?: string | null;
+          /**
+           * Main heading for this slide. Use \n for line breaks.
+           */
+          title: string;
+          /**
+           * Short description text below the title.
+           */
+          description?: string | null;
+          /**
+           * Short tags displayed below the divider (e.g. "All-natural", "Probiotic-rich").
+           */
+          attributes?:
+            | {
+                text: string;
+                id?: string | null;
+              }[]
+            | null;
+          /**
+           * Text for the primary call-to-action button (e.g. "Learn More").
+           */
+          ctaLabel?: string | null;
+          /**
+           * URL the CTA button links to (e.g. "/workshops/lakto").
+           */
+          ctaHref?: string | null;
+          /**
+           * Hex color for the central card background (e.g. "#555954").
+           */
+          panelColor?: string | null;
+          /**
+           * Hex color for the outer/page background (e.g. "#D2DFD7").
+           */
+          bgColor?: string | null;
+          /**
+           * Product or person image shown to the left of the central card.
+           */
+          leftImage?: (string | null) | Media;
+          /**
+           * Product or person image shown to the right of the central card.
+           */
+          rightImage?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
     media?: (string | null) | Media;
     /**
      * Each slide has a fullscreen image with overlay text and CTA.
@@ -538,16 +604,24 @@ export interface Page {
    */
   layout?:
     | (
-        | AboutBlock
         | ContactBlock
         | CallToActionBlock
         | ContentBlock
+        | FeatureCardsBlock
+        | HeroBannerBlock
         | MediaBlock
         | ArchiveBlock
         | CarouselBlock
+        | OurStoryBlock
+        | ReadyToLearnCtaBlock
+        | SponsorsBarBlock
+        | TeamCardsBlock
+        | TeamPreviewBlock
+        | TestimonialsBlock
         | ThreeItemGridBlock
         | BannerBlock
         | FormBlock
+        | VoucherCtaBlock
         | WorkshopSliderBlock
       )[]
     | null;
@@ -784,152 +858,86 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "AboutBlock".
+ * via the `definition` "ContactBlock".
  */
-export interface AboutBlock {
+export interface ContactBlock {
   /**
-   * Background image displayed at the top of the about page.
+   * When checked, the "For Chefs and Food Professionals" banner below the contact form is hidden.
    */
-  heroImage?: (string | null) | Media;
-  ourStory: {
+  hideCtaBanner?: boolean | null;
+  /**
+   * When checked, the map section below the contact form is hidden.
+   */
+  hideMap?: boolean | null;
+  /**
+   * When checked, the hero section is hidden. Use this when the page has a page-level hero (e.g. Food Presentation Slider).
+   */
+  hideHeroSection?: boolean | null;
+  /**
+   * Heading and subtext shown above the contact form.
+   */
+  hero: {
     /**
-     * Small label text shown above the heading (e.g., "Our Story").
+     * Full-width background for the hero. Leave empty for cream background.
      */
-    label: string;
+    image?: (string | null) | Media;
     /**
-     * Large heading for the Our Story section.
-     */
-    heading: string;
-    /**
-     * Subheading text shown below the main heading.
-     */
-    subheading: string;
-    description?:
-      | {
-          /**
-           * A paragraph of text describing the story.
-           */
-          paragraph: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  team: {
-    /**
-     * Small label text shown above the heading (e.g., "Our Team").
-     */
-    label: string;
-    /**
-     * Main heading for the team section.
+     * Main heading (e.g., "Kontakt" or "Get in Touch").
      */
     heading: string;
-    members?:
-      | {
-          /**
-           * Optional. If empty, the about page uses a fallback image for this slot.
-           */
-          image?: (string | null) | Media;
-          name: string;
-          /**
-           * Job title or role (e.g., "Fermentation Specialist & Chef").
-           */
-          role: string;
-          /**
-           * Biography or description of the team member.
-           */
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  sponsors: {
     /**
-     * Heading text for the sponsors section.
+     * Optional supporting text below the heading.
      */
-    heading: string;
-    logos?:
-      | {
-          image: string | Media;
-          /**
-           * Alternative text for the logo image.
-           */
-          alt: string;
-          id?: string | null;
-        }[]
-      | null;
+    subtext?: string | null;
+    /**
+     * Optional CTA button (e.g., "Explore Workshops").
+     */
+    buttonLabel?: string | null;
+    /**
+     * URL for the CTA button.
+     */
+    buttonHref?: string | null;
   };
+  /**
+   * Image displayed on the left side of the contact form card (e.g., team at workshop).
+   */
+  contactImage?: (string | null) | Media;
   contact: {
     /**
-     * Heading for the contact section.
+     * Heading above the form (e.g., "Kontakt").
      */
     heading: string;
     /**
-     * Description text explaining how to contact.
+     * Short intro text above the form fields.
      */
     description: string;
-    labels: {
-      /**
-       * Label for the location field (e.g., "Location").
-       */
-      location: string;
-      /**
-       * Label for the phone field (e.g., "Phone").
-       */
-      phone: string;
-      /**
-       * Label for the email field (e.g., "Mail").
-       */
-      email: string;
-    };
-    /**
-     * Physical address (can include line breaks).
-     */
-    location: string;
-    /**
-     * Contact phone number (not localized as it is a number).
-     */
-    phone: string;
-    /**
-     * Contact email address (not localized).
-     */
-    email: string;
-    socialMedia: {
-      facebook: string;
-      twitter: string;
-      pinterest: string;
-      youtube: string;
-    };
   };
   contactForm: {
-    /**
-     * Heading text above the contact form.
-     */
-    heading: string;
     /**
      * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
      */
     form?: (string | null) | Form;
     placeholders: {
       /**
-       * Placeholder text for the name input field.
+       * Placeholder for first name (e.g., "Vorname").
        */
-      name: string;
+      firstName: string;
       /**
-       * Placeholder text for the email input field.
+       * Placeholder for last name (e.g., "Nachname").
+       */
+      lastName: string;
+      /**
+       * Placeholder for email field.
        */
       email: string;
       /**
-       * Placeholder text for the phone input field.
-       */
-      phone: string;
-      /**
-       * Placeholder text for the message textarea field.
+       * Placeholder for message textarea.
        */
       message: string;
     };
     subjectOptions: {
       /**
-       * Default option shown in the subject dropdown (e.g., "Subject").
+       * Default option shown in subject dropdown (e.g., "Betreff").
        */
       default: string;
       options?:
@@ -940,37 +948,38 @@ export interface AboutBlock {
         | null;
     };
     /**
-     * Text displayed on the submit button.
+     * Text on the submit button (e.g., "Submit Now").
      */
     submitButton: string;
   };
-  cta: {
+  /**
+   * Dark banner below the contact form (e.g., "For Chefs and Food Professionals").
+   */
+  ctaBanner: {
     /**
-     * Heading for the call-to-action section.
+     * Main heading in golden accent (e.g., "For Chefs and Food Professionals").
      */
     heading: string;
     /**
-     * Description text for the CTA section.
+     * Supporting text in white.
      */
     description: string;
-    workshopsButton: {
-      label: string;
-      /**
-       * URL the button links to (e.g., "/workshops").
-       */
-      href: string;
-    };
-    coursesButton: {
-      label: string;
-      /**
-       * URL the button links to (e.g., "/courses").
-       */
-      href: string;
-    };
+    /**
+     * CTA button text (e.g., "Get to know more here").
+     */
+    buttonLabel: string;
+    /**
+     * URL the button links to (e.g., "/gastronomy").
+     */
+    buttonHref: string;
   };
+  /**
+   * Google Maps embed URL (iframe src). Get from Google Maps → Share → Embed a map. Leave empty to hide map.
+   */
+  mapEmbedUrl?: string | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'aboutBlock';
+  blockType: 'contactBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1148,131 +1157,6 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContactBlock".
- */
-export interface ContactBlock {
-  /**
-   * When checked, the "For Chefs and Food Professionals" banner below the contact form is hidden.
-   */
-  hideCtaBanner?: boolean | null;
-  /**
-   * When checked, the map section below the contact form is hidden.
-   */
-  hideMap?: boolean | null;
-  /**
-   * When checked, the hero section is hidden. Use this when the page has a page-level hero (e.g. Food Presentation Slider).
-   */
-  hideHeroSection?: boolean | null;
-  /**
-   * Heading and subtext shown above the contact form.
-   */
-  hero: {
-    /**
-     * Full-width background for the hero. Leave empty for cream background.
-     */
-    image?: (string | null) | Media;
-    /**
-     * Main heading (e.g., "Kontakt" or "Get in Touch").
-     */
-    heading: string;
-    /**
-     * Optional supporting text below the heading.
-     */
-    subtext?: string | null;
-    /**
-     * Optional CTA button (e.g., "Explore Workshops").
-     */
-    buttonLabel?: string | null;
-    /**
-     * URL for the CTA button.
-     */
-    buttonHref?: string | null;
-  };
-  /**
-   * Image displayed on the left side of the contact form card (e.g., team at workshop).
-   */
-  contactImage?: (string | null) | Media;
-  contact: {
-    /**
-     * Heading above the form (e.g., "Kontakt").
-     */
-    heading: string;
-    /**
-     * Short intro text above the form fields.
-     */
-    description: string;
-  };
-  contactForm: {
-    /**
-     * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
-     */
-    form?: (string | null) | Form;
-    placeholders: {
-      /**
-       * Placeholder for first name (e.g., "Vorname").
-       */
-      firstName: string;
-      /**
-       * Placeholder for last name (e.g., "Nachname").
-       */
-      lastName: string;
-      /**
-       * Placeholder for email field.
-       */
-      email: string;
-      /**
-       * Placeholder for message textarea.
-       */
-      message: string;
-    };
-    subjectOptions: {
-      /**
-       * Default option shown in subject dropdown (e.g., "Betreff").
-       */
-      default: string;
-      options?:
-        | {
-            label: string;
-            id?: string | null;
-          }[]
-        | null;
-    };
-    /**
-     * Text on the submit button (e.g., "Submit Now").
-     */
-    submitButton: string;
-  };
-  /**
-   * Dark banner below the contact form (e.g., "For Chefs and Food Professionals").
-   */
-  ctaBanner: {
-    /**
-     * Main heading in golden accent (e.g., "For Chefs and Food Professionals").
-     */
-    heading: string;
-    /**
-     * Supporting text in white.
-     */
-    description: string;
-    /**
-     * CTA button text (e.g., "Get to know more here").
-     */
-    buttonLabel: string;
-    /**
-     * URL the button links to (e.g., "/gastronomy").
-     */
-    buttonHref: string;
-  };
-  /**
-   * Google Maps embed URL (iframe src). Get from Google Maps → Share → Embed a map. Leave empty to hide map.
-   */
-  mapEmbedUrl?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'contactBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
@@ -1315,6 +1199,82 @@ export interface ContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureCardsBlock".
+ */
+export interface FeatureCardsBlock {
+  /**
+   * Small uppercase text above the heading (e.g. "FERMENTATION").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main section heading (e.g. "Why Fermentation?").
+   */
+  heading: string;
+  /**
+   * Short paragraph below the heading.
+   */
+  description?: string | null;
+  /**
+   * Cards with icon, title, and description. Shown in a horizontal row.
+   */
+  cards: {
+    /**
+     * Small icon displayed at the top of the card.
+     */
+    icon?: (string | null) | Media;
+    /**
+     * Title displayed below the icon (e.g. "Probiotics").
+     */
+    title: string;
+    /**
+     * Short description text for this feature.
+     */
+    description: string;
+    id?: string | null;
+  }[];
+  /**
+   * CTA button text (e.g. "Read more about it"). Leave empty to hide.
+   */
+  buttonLabel?: string | null;
+  /**
+   * URL the button links to.
+   */
+  buttonLink?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBannerBlock".
+ */
+export interface HeroBannerBlock {
+  /**
+   * Large white heading over the background image (e.g. "For Chefs and Food Professionals").
+   */
+  heading: string;
+  /**
+   * Subtext below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * CTA button text (e.g. "Get to know more here").
+   */
+  buttonLabel: string;
+  /**
+   * URL the CTA button links to.
+   */
+  buttonLink: string;
+  /**
+   * Full-width background image for the banner section.
+   */
+  backgroundImage?: (string | null) | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'heroBanner';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1409,6 +1369,217 @@ export interface CarouselBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OurStoryBlock".
+ */
+export interface OurStoryBlock {
+  /**
+   * Small accent text above the heading (e.g. "Our Story", "Unsere Geschichte").
+   */
+  label: string;
+  /**
+   * Large heading for the story section.
+   */
+  heading: string;
+  /**
+   * Subheading text shown below the main heading.
+   */
+  subheading: string;
+  /**
+   * Body text paragraphs describing the story.
+   */
+  paragraphs: {
+    text: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ourStory';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ReadyToLearnCtaBlock".
+ */
+export interface ReadyToLearnCtaBlock {
+  /**
+   * CTA heading text (e.g. "Ready to learn?").
+   */
+  heading: string;
+  /**
+   * Body text below the heading.
+   */
+  description: string;
+  primaryButton: {
+    label: string;
+    /**
+     * URL the button links to (e.g. "/workshops").
+     */
+    href: string;
+  };
+  secondaryButton: {
+    label: string;
+    /**
+     * URL the button links to (e.g. "/courses").
+     */
+    href: string;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'readyToLearnCta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SponsorsBarBlock".
+ */
+export interface SponsorsBarBlock {
+  /**
+   * Text above the logos (e.g. "This project is supported by:").
+   */
+  heading: string;
+  /**
+   * Sponsor/partner logos displayed in a horizontal row.
+   */
+  sponsors: {
+    /**
+     * Name used as alt text for the logo image.
+     */
+    name: string;
+    /**
+     * Sponsor logo. SVG or PNG recommended.
+     */
+    logo: string | Media;
+    /**
+     * Optional link to the sponsor website.
+     */
+    url?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'sponsorsBar';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamCardsBlock".
+ */
+export interface TeamCardsBlock {
+  /**
+   * Small accent text above the heading (e.g. "Our Team").
+   */
+  label: string;
+  /**
+   * Main heading for the team section.
+   */
+  heading: string;
+  /**
+   * Team member cards with photo, name, role, and biography.
+   */
+  members: {
+    /**
+     * Team member portrait. If empty, a neutral placeholder is shown.
+     */
+    image?: (string | null) | Media;
+    name: string;
+    /**
+     * Job title (e.g. "Fermentation Specialist & Chef").
+     */
+    role: string;
+    /**
+     * Short biography or description of the team member.
+     */
+    description: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'teamCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamPreviewBlock".
+ */
+export interface TeamPreviewBlock {
+  /**
+   * Small uppercase text above the heading (e.g. "Our Team").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main heading (e.g. "Only The Best Instructors").
+   */
+  heading: string;
+  /**
+   * Body text describing the team.
+   */
+  description: string;
+  /**
+   * CTA button text (e.g. "About us").
+   */
+  buttonLabel?: string | null;
+  /**
+   * URL the button links to (e.g. "/about").
+   */
+  buttonLink?: string | null;
+  /**
+   * Team members to display. Typically 2 members with large portrait photos.
+   */
+  members: {
+    name: string;
+    /**
+     * Role title (e.g. "Instructor").
+     */
+    role?: string | null;
+    /**
+     * Portrait photo. Tall aspect ratio recommended.
+     */
+    image?: (string | null) | Media;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'teamPreview';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock".
+ */
+export interface TestimonialsBlock {
+  /**
+   * Small text above the heading (e.g. "Testimonials").
+   */
+  eyebrow?: string | null;
+  /**
+   * Section heading (e.g. "What They Like About Our Fermentation Class").
+   */
+  heading: string;
+  /**
+   * Optional "View All" button text. Leave empty to hide.
+   */
+  buttonLabel?: string | null;
+  buttonLink?: string | null;
+  /**
+   * Individual testimonial entries displayed as a slider.
+   */
+  testimonials: {
+    /**
+     * The testimonial text.
+     */
+    quote: string;
+    authorName: string;
+    /**
+     * Optional role/title of the author (e.g. "Artist").
+     */
+    authorRole?: string | null;
+    /**
+     * Star rating from 1 to 5.
+     */
+    rating?: number | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonials';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ThreeItemGridBlock".
  */
 export interface ThreeItemGridBlock {
@@ -1467,6 +1638,40 @@ export interface FormBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VoucherCtaBlock".
+ */
+export interface VoucherCtaBlock {
+  /**
+   * Large heading text (e.g. "Gift a special tasty experience").
+   */
+  heading: string;
+  /**
+   * Short paragraph below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * Text on the CTA button (e.g. "Voucher").
+   */
+  buttonLabel: string;
+  /**
+   * URL the button links to (e.g. "/voucher").
+   */
+  buttonLink: string;
+  /**
+   * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
+   */
+  galleryImages?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'voucherCta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1872,6 +2077,33 @@ export interface PagesSelect<T extends boolean = true> {
               url?: T;
               id?: T;
             };
+        heroImages?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
+        heroSlides?:
+          | T
+          | {
+              slideId?: T;
+              eyebrow?: T;
+              title?: T;
+              description?: T;
+              attributes?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              ctaLabel?: T;
+              ctaHref?: T;
+              panelColor?: T;
+              bgColor?: T;
+              leftImage?: T;
+              rightImage?: T;
+              id?: T;
+            };
         media?: T;
         slides?:
           | T
@@ -1888,16 +2120,24 @@ export interface PagesSelect<T extends boolean = true> {
   layout?:
     | T
     | {
-        aboutBlock?: T | AboutBlockSelect<T>;
         contactBlock?: T | ContactBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
+        featureCards?: T | FeatureCardsBlockSelect<T>;
+        heroBanner?: T | HeroBannerBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
+        ourStory?: T | OurStoryBlockSelect<T>;
+        readyToLearnCta?: T | ReadyToLearnCtaBlockSelect<T>;
+        sponsorsBar?: T | SponsorsBarBlockSelect<T>;
+        teamCards?: T | TeamCardsBlockSelect<T>;
+        teamPreview?: T | TeamPreviewBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        voucherCta?: T | VoucherCtaBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
       };
   gastronomy?:
@@ -2042,123 +2282,6 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "AboutBlock_select".
- */
-export interface AboutBlockSelect<T extends boolean = true> {
-  heroImage?: T;
-  ourStory?:
-    | T
-    | {
-        label?: T;
-        heading?: T;
-        subheading?: T;
-        description?:
-          | T
-          | {
-              paragraph?: T;
-              id?: T;
-            };
-      };
-  team?:
-    | T
-    | {
-        label?: T;
-        heading?: T;
-        members?:
-          | T
-          | {
-              image?: T;
-              name?: T;
-              role?: T;
-              description?: T;
-              id?: T;
-            };
-      };
-  sponsors?:
-    | T
-    | {
-        heading?: T;
-        logos?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-      };
-  contact?:
-    | T
-    | {
-        heading?: T;
-        description?: T;
-        labels?:
-          | T
-          | {
-              location?: T;
-              phone?: T;
-              email?: T;
-            };
-        location?: T;
-        phone?: T;
-        email?: T;
-        socialMedia?:
-          | T
-          | {
-              facebook?: T;
-              twitter?: T;
-              pinterest?: T;
-              youtube?: T;
-            };
-      };
-  contactForm?:
-    | T
-    | {
-        heading?: T;
-        form?: T;
-        placeholders?:
-          | T
-          | {
-              name?: T;
-              email?: T;
-              phone?: T;
-              message?: T;
-            };
-        subjectOptions?:
-          | T
-          | {
-              default?: T;
-              options?:
-                | T
-                | {
-                    label?: T;
-                    id?: T;
-                  };
-            };
-        submitButton?: T;
-      };
-  cta?:
-    | T
-    | {
-        heading?: T;
-        description?: T;
-        workshopsButton?:
-          | T
-          | {
-              label?: T;
-              href?: T;
-            };
-        coursesButton?:
-          | T
-          | {
-              label?: T;
-              href?: T;
-            };
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ContactBlock_select".
  */
 export interface ContactBlockSelect<T extends boolean = true> {
@@ -2270,6 +2393,40 @@ export interface ContentBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureCardsBlock_select".
+ */
+export interface FeatureCardsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  description?: T;
+  cards?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  buttonLabel?: T;
+  buttonLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBannerBlock_select".
+ */
+export interface HeroBannerBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  backgroundImage?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MediaBlock_select".
  */
 export interface MediaBlockSelect<T extends boolean = true> {
@@ -2308,6 +2465,123 @@ export interface CarouselBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OurStoryBlock_select".
+ */
+export interface OurStoryBlockSelect<T extends boolean = true> {
+  label?: T;
+  heading?: T;
+  subheading?: T;
+  paragraphs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ReadyToLearnCtaBlock_select".
+ */
+export interface ReadyToLearnCtaBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  primaryButton?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  secondaryButton?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SponsorsBarBlock_select".
+ */
+export interface SponsorsBarBlockSelect<T extends boolean = true> {
+  heading?: T;
+  sponsors?:
+    | T
+    | {
+        name?: T;
+        logo?: T;
+        url?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamCardsBlock_select".
+ */
+export interface TeamCardsBlockSelect<T extends boolean = true> {
+  label?: T;
+  heading?: T;
+  members?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        role?: T;
+        description?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamPreviewBlock_select".
+ */
+export interface TeamPreviewBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  members?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        image?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock_select".
+ */
+export interface TestimonialsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  testimonials?:
+    | T
+    | {
+        quote?: T;
+        authorName?: T;
+        authorRole?: T;
+        rating?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ThreeItemGridBlock_select".
  */
 export interface ThreeItemGridBlockSelect<T extends boolean = true> {
@@ -2333,6 +2607,24 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VoucherCtaBlock_select".
+ */
+export interface VoucherCtaBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  galleryImages?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -2797,6 +3089,26 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: string;
+  /**
+   * The banner shown at the very top of the site. Use it to highlight promotions, events, or important messages.
+   */
+  announcementBar: {
+    /**
+     * Toggle the announcement bar on or off site-wide.
+     */
+    enabled?: boolean | null;
+    /**
+     * The message displayed in the announcement bar (e.g. "New workshops available!").
+     */
+    text: string;
+    /**
+     * URL the announcement links to (e.g. "/workshops"). Leave empty for no link.
+     */
+    link?: string | null;
+  };
+  /**
+   * The main navigation links shown in the header. Drag to reorder. Each item can optionally have a dropdown with sub-items.
+   */
   navItems?:
     | {
         link: {
@@ -2835,6 +3147,9 @@ export interface Header {
  */
 export interface Footer {
   id: string;
+  /**
+   * Links shown in the "Quick Links" column.
+   */
   navItems?:
     | {
         link: {
@@ -2850,6 +3165,46 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Links shown in the "Our Workshops" column.
+   */
+  workshopLinks?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?: {
+            relationTo: 'pages';
+            value: string | Page;
+          } | null;
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Address displayed in the footer (e.g. "Grabenstraße 15, 8010 Graz, Austria").
+   */
+  location?: string | null;
+  /**
+   * Contact phone number.
+   */
+  phone?: string | null;
+  /**
+   * Heading for the newsletter section (e.g. "Subscribe Newsletter").
+   */
+  newsletterHeading?: string | null;
+  /**
+   * Short text above the newsletter subscribe form.
+   */
+  newsletterDescription?: string | null;
+  socialMedia?: {
+    facebook?: string | null;
+    twitter?: string | null;
+    pinterest?: string | null;
+    youtube?: string | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2858,6 +3213,13 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
+  announcementBar?:
+    | T
+    | {
+        enabled?: T;
+        text?: T;
+        link?: T;
+      };
   navItems?:
     | T
     | {
@@ -2902,6 +3264,32 @@ export interface FooterSelect<T extends boolean = true> {
               label?: T;
             };
         id?: T;
+      };
+  workshopLinks?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  location?: T;
+  phone?: T;
+  newsletterHeading?: T;
+  newsletterDescription?: T;
+  socialMedia?:
+    | T
+    | {
+        facebook?: T;
+        twitter?: T;
+        pinterest?: T;
+        youtube?: T;
       };
   updatedAt?: T;
   createdAt?: T;
