@@ -51,6 +51,20 @@ export const WorkshopSlider: Block = {
           },
         },
         {
+          name: 'theme',
+          type: 'select',
+          label: 'Slide Theme',
+          defaultValue: 'light',
+          options: [
+            { label: 'Light (ivory card, dark text)', value: 'light' },
+            { label: 'Dark (charcoal card, light text)', value: 'dark' },
+          ],
+          admin: {
+            description:
+              'Visual theme for this slide. Light = ivory feature card with dark text. Dark = charcoal feature card with cream text.',
+          },
+        },
+        {
           name: 'features',
           type: 'array',
           label: 'Features',
@@ -76,7 +90,7 @@ export const WorkshopSlider: Block = {
           relationTo: 'media',
           label: 'Workshop Image',
           admin: {
-            description: 'Product/workshop photo displayed on the right side of the slide.',
+            description: 'Product/workshop photo displayed above the feature card.',
           },
         },
         {

@@ -77,6 +77,13 @@ async function seedHome() {
       context: { skipAutoTranslate: true },
     })
     .catch(() => {})
+  await payload
+    .delete({
+      collection: 'media',
+      where: { alt: { contains: 'icon-feature' } },
+      context: { skipAutoTranslate: true },
+    })
+    .catch(() => {})
 
   // Workshop images
   const laktoImage = await payload.create({
@@ -269,6 +276,27 @@ async function seedHome() {
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Sponsor logo 4' },
     file: await optimizedFile(path.join(imagesDir, 'sponsor-logo-4.png'), IMAGE_PRESETS.logo),
+  })
+
+  // FeatureCards icons (SVGs from seed-assets/images/icons)
+  const iconsDir = path.resolve(process.cwd(), 'seed-assets/images/icons')
+  const iconProbiotics = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'icon-feature – probiotics test tube and DNA' },
+    file: await optimizedFile(path.join(iconsDir, 'probiotics.svg'), IMAGE_PRESETS.logo),
+  })
+  const iconNutrients = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'icon-feature – nutrients bowl with vegetables' },
+    file: await optimizedFile(path.join(iconsDir, 'nutrients.svg'), IMAGE_PRESETS.logo),
+  })
+  const iconFlavour = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'icon-feature – taste wine glasses' },
+    file: await optimizedFile(path.join(iconsDir, 'taste.svg'), IMAGE_PRESETS.logo),
   })
 
   payload.logger.info('✅ All images uploaded to Media collection.')
@@ -660,6 +688,7 @@ async function seedHome() {
     workshops: [
       {
         title: 'Lakto-Gemüse',
+        theme: 'light' as const,
         description:
           'Gemüse fermentieren und jeden Monat neue Geschmacksrichtungen erleben. Hast du saisonales Gemüse übrig und möchtest es in echte Geschmackserlebnisse verwandeln?',
         features: [
@@ -674,6 +703,7 @@ async function seedHome() {
       },
       {
         title: 'Kombucha',
+        theme: 'dark' as const,
         description:
           'Tee fermentieren und mit jedem Brauvorgang ausgewogene Aromen kreieren. Neugierig, wie Kombucha natürlich spritzig, frisch und komplex wird?',
         features: [
@@ -688,6 +718,7 @@ async function seedHome() {
       },
       {
         title: 'Tempeh',
+        theme: 'dark' as const,
         description:
           'Von Bohnen zu Tempeh – Textur, Geschmack und Technik verstehen. Lerne, wie diese traditionelle Fermentation zu einem vielseitigen, gesunden Protein wird.',
         features: [
@@ -712,6 +743,7 @@ async function seedHome() {
     workshops: [
       {
         title: 'Lacto-Vegetables',
+        theme: 'light' as const,
         description:
           'Fermenting vegetables, experiencing different flavours every month. Do you have leftover seasonal vegetables and want to transform them into real taste sensations?',
         features: [
@@ -726,6 +758,7 @@ async function seedHome() {
       },
       {
         title: 'Kombucha',
+        theme: 'dark' as const,
         description:
           'Fermenting tea, creating balanced flavours with every brew. Curious how kombucha becomes naturally fizzy, fresh, and complex?',
         features: [
@@ -740,6 +773,7 @@ async function seedHome() {
       },
       {
         title: 'Tempeh',
+        theme: 'dark' as const,
         description:
           'From beans to tempeh, understanding texture, taste, and technique. Learn how this traditional fermentation becomes a versatile, healthy protein.',
         features: [
@@ -784,6 +818,7 @@ async function seedHome() {
     buttonLabel: 'Erfahre hier mehr',
     buttonLink: '/gastronomy',
     backgroundImage: bannerImage.id,
+    backgroundVideoUrl: '/assets/videos/gastro-banner.mp4',
   }
 
   // ── HeroBanner (EN) ──
@@ -795,6 +830,7 @@ async function seedHome() {
     buttonLabel: 'Get to know more here',
     buttonLink: '/gastronomy',
     backgroundImage: bannerImage.id,
+    backgroundVideoUrl: '/assets/videos/gastro-banner.mp4',
   }
 
   // ── FeatureCards (DE) ──
@@ -809,16 +845,19 @@ async function seedHome() {
         title: 'Probiotika',
         description:
           'Fermentierte Lebensmittel sind reich an lebenden Kulturen, die deine Darmgesundheit und dein Immunsystem stärken.',
+        icon: iconProbiotics.id,
       },
       {
         title: 'Nährstoffe',
         description:
           'Der Fermentationsprozess erhöht die Bioverfügbarkeit von Vitaminen und Mineralstoffen in deiner Nahrung.',
+        icon: iconNutrients.id,
       },
       {
         title: 'Geschmack',
         description:
           'Fermentation erzeugt komplexe Umami-Aromen und einzigartige Geschmacksprofile, die kein anderes Verfahren erreicht.',
+        icon: iconFlavour.id,
       },
     ],
     buttonLabel: 'Mehr erfahren',
@@ -837,16 +876,19 @@ async function seedHome() {
         title: 'Probiotics',
         description:
           'Fermented foods are rich in live cultures that strengthen your gut health and immune system.',
+        icon: iconProbiotics.id,
       },
       {
         title: 'Nutrients',
         description:
           'The fermentation process increases the bioavailability of vitamins and minerals in your food.',
+        icon: iconNutrients.id,
       },
       {
         title: 'Flavour',
         description:
           'Fermentation creates complex umami flavours and unique taste profiles that no other process can achieve.',
+        icon: iconFlavour.id,
       },
     ],
     buttonLabel: 'Read more about it',

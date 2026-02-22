@@ -152,7 +152,7 @@ export const ContactBlockComponent: React.FC<
             {hero.buttonLabel && hero.buttonHref ? (
               <a
                 href={hero.buttonHref}
-                className="mt-6 inline-flex rounded-xl bg-[#E5B765] px-6 py-2.5 font-display text-base font-bold text-white transition-colors hover:bg-[#d4a654] md:mt-8"
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-ff-gold-accent px-6 py-2.5 font-display text-base font-bold text-white transition-all hover:bg-ff-gold-accent-dark hover:scale-[1.03] active:scale-[0.97] md:mt-8"
               >
                 {hero.buttonLabel}
               </a>
@@ -179,12 +179,8 @@ export const ContactBlockComponent: React.FC<
 
               {/* Right: Form */}
               <div className="flex flex-col gap-6 p-6 md:p-12 lg:p-16">
-                <h2 className="font-display text-2xl font-bold text-[#E5B765] md:text-3xl">
-                  {contact.heading}
-                </h2>
-                <p className="font-sans text-base leading-relaxed text-[#6B6B6B]">
-                  {contact.description}
-                </p>
+                <h2 className="text-ff-gold-accent">{contact.heading}</h2>
+                <p className="text-body text-ff-charcoal leading-relaxed">{contact.description}</p>
                 <form className="flex flex-col gap-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <input
@@ -233,7 +229,7 @@ export const ContactBlockComponent: React.FC<
                   />
                   <button
                     type="submit"
-                    className="mt-2 rounded-xl bg-[#4B4B4B] px-6 py-2.5 font-display text-base font-bold text-white transition-colors hover:bg-[#333]"
+                    className="mt-2 rounded-full bg-ff-charcoal px-6 py-2.5 font-display text-base font-bold text-white transition-all hover:bg-ff-charcoal-hover hover:scale-[1.03] active:scale-[0.97]"
                   >
                     {contactForm.submitButton}
                   </button>
@@ -246,24 +242,22 @@ export const ContactBlockComponent: React.FC<
 
       {/* CTA Banner — dark gray, gold heading */}
       {!hideCtaBanner && (
-      <section className="w-full px-6 pb-12 md:pb-24">
-        <div className="mx-auto max-w-300">
-          <div className="overflow-hidden rounded-3xl bg-[#333] px-8 py-16 text-center md:px-16 md:py-20">
-            <h2 className="font-display text-2xl font-bold text-[#E5B765] md:text-3xl lg:text-4xl">
-              {ctaBanner.heading}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl font-sans text-base leading-relaxed text-white md:text-lg">
-              {ctaBanner.description}
-            </p>
-            <a
-              href={ctaBanner.buttonHref}
-              className="mt-8 inline-flex rounded-xl border-2 border-[#E5B765] bg-transparent px-8 py-2.5 font-display text-base font-bold text-[#E5B765] transition-colors hover:bg-[#E5B765] hover:text-[#333]"
-            >
-              {ctaBanner.buttonLabel}
-            </a>
+        <section className="w-full px-6 pb-12 md:pb-24">
+          <div className="mx-auto max-w-300">
+            <div className="overflow-hidden rounded-3xl bg-[#333] px-8 py-16 text-center md:px-16 md:py-20">
+              <h2 className="text-ff-gold-accent">{ctaBanner.heading}</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-body-lg leading-relaxed text-white">
+                {ctaBanner.description}
+              </p>
+              <a
+                href={ctaBanner.buttonHref}
+                className="mt-8 inline-flex items-center justify-center rounded-full border-2 border-ff-gold-accent bg-transparent px-6 py-2.5 font-display text-base font-bold text-ff-gold-accent transition-all hover:bg-ff-gold-accent hover:text-ff-charcoal hover:scale-[1.03] active:scale-[0.97]"
+              >
+                {ctaBanner.buttonLabel}
+              </a>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       )}
 
       {/* Map */}

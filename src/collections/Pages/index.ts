@@ -134,7 +134,8 @@ export const Pages: CollectionConfig = {
           name: 'gastronomy',
           label: 'Gastronomy Page',
           admin: {
-            description: 'Content for the Gastronomy page (/gastronomy). Only applies when slug is "gastronomy".',
+            description:
+              'Content for the Gastronomy page (/gastronomy). Only applies when slug is "gastronomy".',
             // When true, gastronomy fields are validated. Use false during seed to skip validation.
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_GASTRONOMY_CONDITION === '1') return false
@@ -152,7 +153,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Hero Title',
-                  admin: { description: 'Main heading (e.g., "Elevate Your Gastronomy Business").' },
+                  admin: {
+                    description: 'Main heading (e.g., "Elevate Your Gastronomy Business").',
+                  },
                 },
                 {
                   name: 'gastronomyHeroCtaLabel',
@@ -188,9 +191,21 @@ export const Pages: CollectionConfig = {
               label: 'Offer Cards',
               admin: { description: 'Three service cards.' },
               fields: [
-                { name: 'image', type: 'upload', relationTo: 'media', required: false, label: 'Image' },
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Image',
+                },
                 { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
-                { name: 'description', type: 'textarea', required: true, localized: true, label: 'Description' },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  required: true,
+                  localized: true,
+                  label: 'Description',
+                },
               ],
             },
             {
@@ -227,7 +242,10 @@ export const Pages: CollectionConfig = {
               required: false,
               localized: true,
               label: 'Workshop Clarification',
-              admin: { description: 'Optional text below workshop subtitle explaining who can attend (e.g. chefs welcome, custom workshops available).' },
+              admin: {
+                description:
+                  'Optional text below workshop subtitle explaining who can attend (e.g. chefs welcome, custom workshops available).',
+              },
             },
             {
               name: 'gastronomyWorkshopNextDateLabel',
@@ -245,9 +263,21 @@ export const Pages: CollectionConfig = {
               maxRows: 3,
               label: 'Workshop Cards',
               fields: [
-                { name: 'image', type: 'upload', relationTo: 'media', required: false, label: 'Image' },
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Image',
+                },
                 { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
-                { name: 'description', type: 'textarea', required: true, localized: true, label: 'Description' },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  required: true,
+                  localized: true,
+                  label: 'Description',
+                },
                 { name: 'price', type: 'text', required: true, label: 'Price' },
                 {
                   name: 'priceSuffix',
@@ -257,7 +287,13 @@ export const Pages: CollectionConfig = {
                   label: 'Price Suffix',
                   admin: { description: 'e.g. "pro Person" / "per Person"' },
                 },
-                { name: 'buttonLabel', type: 'text', required: true, localized: true, label: 'Button Label' },
+                {
+                  name: 'buttonLabel',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Button Label',
+                },
                 { name: 'buttonUrl', type: 'text', required: true, label: 'Button URL' },
                 { name: 'duration', type: 'text', required: false, label: 'Duration' },
                 {
@@ -286,7 +322,13 @@ export const Pages: CollectionConfig = {
               label: 'Offer Details',
               fields: [
                 { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
-                { name: 'description', type: 'textarea', required: true, localized: true, label: 'Description' },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  required: true,
+                  localized: true,
+                  label: 'Description',
+                },
               ],
             },
             {
@@ -336,10 +378,28 @@ export const Pages: CollectionConfig = {
               type: 'group',
               label: 'Form Placeholders',
               fields: [
-                { name: 'firstName', type: 'text', required: false, localized: true, label: 'First Name' },
-                { name: 'lastName', type: 'text', required: false, localized: true, label: 'Last Name' },
+                {
+                  name: 'firstName',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'First Name',
+                },
+                {
+                  name: 'lastName',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Last Name',
+                },
                 { name: 'email', type: 'text', required: false, localized: true, label: 'Email' },
-                { name: 'message', type: 'text', required: false, localized: true, label: 'Message' },
+                {
+                  name: 'message',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Message',
+                },
               ],
             },
             {
@@ -347,7 +407,13 @@ export const Pages: CollectionConfig = {
               type: 'group',
               label: 'Subject Dropdown',
               fields: [
-                { name: 'default', type: 'text', required: false, localized: true, label: 'Default Option' },
+                {
+                  name: 'default',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Default Option',
+                },
                 {
                   name: 'options',
                   type: 'array',
@@ -369,9 +435,27 @@ export const Pages: CollectionConfig = {
               type: 'group',
               label: 'CTA Banner',
               fields: [
-                { name: 'heading', type: 'text', required: false, localized: true, label: 'Heading' },
-                { name: 'description', type: 'textarea', required: false, localized: true, label: 'Description' },
-                { name: 'buttonLabel', type: 'text', required: false, localized: true, label: 'Button Label' },
+                {
+                  name: 'heading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Heading',
+                },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Description',
+                },
+                {
+                  name: 'buttonLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Button Label',
+                },
                 { name: 'buttonHref', type: 'text', required: false, label: 'Button URL' },
               ],
             },

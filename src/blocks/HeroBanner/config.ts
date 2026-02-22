@@ -55,7 +55,17 @@ export const HeroBanner: Block = {
       relationTo: 'media',
       label: 'Background Image',
       admin: {
-        description: 'Full-width background image for the banner section.',
+        description:
+          'Full-width background image for the banner section. Used as fallback/poster when a video is set.',
+      },
+    },
+    {
+      name: 'backgroundVideoUrl',
+      type: 'text',
+      label: 'Background Video URL',
+      admin: {
+        description:
+          'Optional static video URL (e.g. /assets/videos/gastro-banner.mp4). Served from public/ — no DB or R2 storage used. Overrides the background image when set.',
       },
     },
   ],

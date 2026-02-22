@@ -9,10 +9,10 @@
  */
 import { Media } from '@/components/Media'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
+import useEmblaCarousel from 'embla-carousel-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useCallback, useEffect } from 'react'
-import useEmblaCarousel from 'embla-carousel-react'
 
 /** Fallback: no external URLs — show neutral bg when CMS image is missing */
 const FALLBACK_IMAGES: string[] = []
@@ -37,18 +37,15 @@ type Props = {
 const DEFAULT_SLIDES: Slide[] = [
   {
     title: 'Professional Training',
-    description:
-      "Elevate your team's culinary skills with tailored fermentation workshops.",
+    description: "Elevate your team's culinary skills with tailored fermentation workshops.",
   },
   {
     title: 'Corporate Events',
-    description:
-      'Unique teambuilding experiences around fermentation for your company.',
+    description: 'Unique teambuilding experiences around fermentation for your company.',
   },
   {
     title: 'Menu Development',
-    description:
-      'We support you in integrating fermented products into your menu.',
+    description: 'We support you in integrating fermented products into your menu.',
   },
 ]
 
@@ -150,7 +147,8 @@ export function GastronomyProductSlider({ slides, ctaLabel, ctaUrl }: Props) {
                   {resolvedSlides.length > 1 && (
                     <div className="mt-12 flex items-center gap-0 md:mt-16">
                       <span className="font-sans text-sm font-extrabold tracking-tight text-[#1b1b1b]/70 md:hidden md:text-base">
-                        {String(selectedIndex + 1).padStart(2, '0')} / {String(resolvedSlides.length).padStart(2, '0')}{' '}
+                        {String(selectedIndex + 1).padStart(2, '0')} /{' '}
+                        {String(resolvedSlides.length).padStart(2, '0')}{' '}
                       </span>
                       <button
                         type="button"
@@ -181,7 +179,8 @@ export function GastronomyProductSlider({ slides, ctaLabel, ctaUrl }: Props) {
       {/* Slide counter — bottom left on dark image area (white text), desktop only */}
       {resolvedSlides.length > 1 && (
         <div className="absolute bottom-6 left-6 z-20 hidden font-sans text-sm font-extrabold tracking-tight text-white md:block md:bottom-8 md:left-12 md:text-base">
-          {String(selectedIndex + 1).padStart(2, '0')} / {String(resolvedSlides.length).padStart(2, '0')}
+          {String(selectedIndex + 1).padStart(2, '0')} /{' '}
+          {String(resolvedSlides.length).padStart(2, '0')}
         </div>
       )}
     </section>

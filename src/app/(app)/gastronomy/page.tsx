@@ -59,7 +59,8 @@ export default async function GastronomyPage() {
   const workshopSectionTitle = g?.gastronomyWorkshopSectionTitle ?? DEFAULT_WORKSHOP_TITLE
   const workshopSectionSubtitle = g?.gastronomyWorkshopSectionSubtitle ?? DEFAULT_WORKSHOP_SUBTITLE
   const workshopClarification = g?.gastronomyWorkshopClarification ?? null
-  const workshopNextDateLabel = g?.gastronomyWorkshopNextDateLabel ?? DEFAULT_WORKSHOP_NEXT_DATE_LABEL
+  const workshopNextDateLabel =
+    g?.gastronomyWorkshopNextDateLabel ?? DEFAULT_WORKSHOP_NEXT_DATE_LABEL
   const workshopCards = g?.gastronomyWorkshopCards ?? []
   const offerDetailsTitle = g?.gastronomyOfferDetailsTitle ?? DEFAULT_OFFER_DETAILS_TITLE
   const offerDetails = g?.gastronomyOfferDetails ?? []
@@ -67,8 +68,12 @@ export default async function GastronomyPage() {
   const collaborateTitle = g?.gastronomyCollaborateTitle ?? DEFAULT_COLLABORATE_TITLE
   const collaborateSubtitle = g?.gastronomyCollaborateSubtitle ?? DEFAULT_COLLABORATE_SUBTITLE
 
-  const formPlaceholders = g?.gastronomyFormPlaceholders as { firstName?: string; lastName?: string; email?: string; message?: string } | undefined
-  const subjectOptions = g?.gastronomySubjectOptions as { default?: string; options?: Array<{ label?: string }> } | undefined
+  const formPlaceholders = g?.gastronomyFormPlaceholders as
+    | { firstName?: string; lastName?: string; email?: string; message?: string }
+    | undefined
+  const subjectOptions = g?.gastronomySubjectOptions as
+    | { default?: string; options?: Array<{ label?: string }> }
+    | undefined
 
   // Contact section — same design as About page ContactBlock; CTA banner and map hidden — same design as About page ContactBlock (defaults in English per rules)
   const contactBlockProps = {
@@ -97,9 +102,12 @@ export default async function GastronomyPage() {
       },
       subjectOptions: {
         default: subjectOptions?.default ?? 'Subject',
-        options:
-          (subjectOptions?.options ?? []).map((o) => o?.label ?? '') ||
-          ['General Inquiry', 'Workshop', 'Product', 'Partnership'],
+        options: (subjectOptions?.options ?? []).map((o) => o?.label ?? '') || [
+          'General Inquiry',
+          'Workshop',
+          'Product',
+          'Partnership',
+        ],
       },
       submitButton: g?.gastronomySubmitButtonLabel ?? 'Send Message',
     },
@@ -117,7 +125,12 @@ export default async function GastronomyPage() {
     <article className="font-sans">
       {/* Hero — Kitchen Knives style product slider */}
       <GastronomyProductSlider
-        slides={offerCards.map((c) => ({ id: c.id ?? undefined, title: c.title, description: c.description, image: c.image }))}
+        slides={offerCards.map((c) => ({
+          id: c.id ?? undefined,
+          title: c.title,
+          description: c.description,
+          image: c.image,
+        }))}
         ctaLabel={heroCtaLabel}
         ctaUrl={heroCtaUrl}
       />
@@ -125,7 +138,12 @@ export default async function GastronomyPage() {
       {/* What we offer — white bg, 3 cards with scroll-triggered animation */}
       <GastronomyOfferCards
         title={offerSectionTitle}
-        cards={offerCards.map((c) => ({ id: c.id, title: c.title, description: c.description, image: c.image }))}
+        cards={offerCards.map((c) => ({
+          id: c.id,
+          title: c.title,
+          description: c.description,
+          image: c.image,
+        }))}
       />
 
       {/* Quote — bg #333333, main quote white, subtext #E6BE68 */}
@@ -166,10 +184,14 @@ export default async function GastronomyPage() {
                   )}
                 </div>
                 <div className="p-6">
-                  <h3 className="mb-2 font-display text-2xl font-bold text-[#1a1a1a]">{card.title}</h3>
+                  <h3 className="mb-2 font-display text-2xl font-bold text-[#1a1a1a]">
+                    {card.title}
+                  </h3>
                   <p className="mb-4 text-base leading-relaxed text-[#333]">{card.description}</p>
                   <div className="mb-5 flex items-baseline gap-2">
-                    <span className="font-display text-3xl font-bold text-[#E5B765]">{card.price}</span>
+                    <span className="font-display text-3xl font-bold text-[#E5B765]">
+                      {card.price}
+                    </span>
                     {(card as { priceSuffix?: string }).priceSuffix && (
                       <span className="font-sans text-xl text-[#555]">
                         {(card as { priceSuffix?: string }).priceSuffix}
@@ -208,7 +230,9 @@ export default async function GastronomyPage() {
               <div key={col} className="space-y-6">
                 {offerDetails.slice(col * 4, col * 4 + 4).map((item, i) => (
                   <div key={item.id ?? `${col}-${i}`} className="border-l-2 border-white/30 pl-4">
-                    <h3 className="mb-1 font-display text-base font-bold text-[#E6BE68]">{item.title}</h3>
+                    <h3 className="mb-1 font-display text-base font-bold text-[#E6BE68]">
+                      {item.title}
+                    </h3>
                     <p className="text-sm leading-relaxed text-white">{item.description}</p>
                   </div>
                 ))}
@@ -223,12 +247,7 @@ export default async function GastronomyPage() {
         <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl">
           {isResolvedMedia(collaborateImage) ? (
             <div className="relative min-h-55 aspect-4/3 md:aspect-21/9 md:min-h-70">
-              <Media
-                resource={collaborateImage}
-                fill
-                imgClassName="object-cover"
-                priority
-              />
+              <Media resource={collaborateImage} fill imgClassName="object-cover" priority />
               <div className="absolute inset-0 bg-black/40" />
               <div className="absolute inset-0 flex flex-col items-center justify-center px-6 py-10">
                 <h2 className="text-center font-display text-2xl font-bold text-white md:text-4xl lg:text-5xl">
@@ -261,7 +280,9 @@ export default async function GastronomyPage() {
 
       {/* Contact — same design as About page */}
       <div id="contact">
-        <ContactBlockComponent {...(contactBlockProps as unknown as Parameters<typeof ContactBlockComponent>[0])} />
+        <ContactBlockComponent
+          {...(contactBlockProps as unknown as Parameters<typeof ContactBlockComponent>[0])}
+        />
       </div>
 
       {/* Edit in Admin — floating link to design/edit the page */}

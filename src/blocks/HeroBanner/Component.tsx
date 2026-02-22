@@ -19,6 +19,7 @@ export const HeroBannerBlock: React.FC<Props> = ({
   buttonLabel,
   buttonLink,
   backgroundImage,
+  backgroundVideoUrl,
   id,
 }) => {
   const resolvedHeading = heading ?? DEFAULTS.heading
@@ -31,8 +32,23 @@ export const HeroBannerBlock: React.FC<Props> = ({
       id={id ?? undefined}
       className="relative w-full min-h-[50vh] lg:min-h-[60vh] flex items-center justify-center overflow-hidden rounded-2xl"
     >
-      {/* Background image */}
-      {backgroundImage && typeof backgroundImage === 'object' ? (
+      {/* Background video or image */}
+      {backgroundVideoUrl ? (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          poster={
+            backgroundImage && typeof backgroundImage === 'object'
+              ? ((backgroundImage as MediaType).url ?? undefined)
+              : undefined
+          }
+        >
+          <source src={backgroundVideoUrl} type="video/mp4" />
+        </video>
+      ) : backgroundImage && typeof backgroundImage === 'object' ? (
         <Media
           resource={backgroundImage as MediaType}
           className="absolute inset-0 w-full h-full object-cover"

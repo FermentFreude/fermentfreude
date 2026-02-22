@@ -40,9 +40,7 @@ const LOGO_CY = 50.292 / 2
 const LOGO_SCALE = 2
 
 export function SplashScreen() {
-  const [phase, setPhase] = useState<
-    'idle' | 'wave' | 'filled' | 'close' | 'done'
-  >('idle')
+  const [phase, setPhase] = useState<'idle' | 'wave' | 'filled' | 'close' | 'done'>('idle')
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
@@ -88,10 +86,7 @@ export function SplashScreen() {
   const isClosing = phase === 'close'
 
   return (
-    <div
-      className="splash-overlay fixed inset-0 z-9999"
-      aria-hidden="true"
-    >
+    <div className="splash-overlay fixed inset-0 z-9999" aria-hidden="true">
       <svg
         className="absolute inset-0 h-full w-full"
         viewBox={`0 0 ${VB_W} ${VB_H}`}
@@ -100,18 +95,12 @@ export function SplashScreen() {
         <defs>
           {/* Open: thin line at bottom → full rect */}
           <clipPath id="wave-reveal">
-            <path
-              className={waveStarted ? 'splash-wave-morph' : ''}
-              d={WAVE_OPEN_START}
-            />
+            <path className={waveStarted ? 'splash-wave-morph' : ''} d={WAVE_OPEN_START} />
           </clipPath>
 
           {/* Close: full rect → thin line at top (exits upward) */}
           <clipPath id="wave-close">
-            <path
-              className={isClosing ? 'splash-wave-close' : ''}
-              d={WAVE_CLOSE_FULL}
-            />
+            <path className={isClosing ? 'splash-wave-close' : ''} d={WAVE_CLOSE_FULL} />
           </clipPath>
         </defs>
 

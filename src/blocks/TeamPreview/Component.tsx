@@ -74,7 +74,7 @@ export const TeamPreviewBlock: React.FC<Props> = ({
           className="flex flex-col gap-(--space-content-sm) max-w-xs lg:max-w-sm lg:pt-4"
         >
           {resolvedEyebrow && (
-            <span className="text-eyebrow text-ff-gray-muted">{resolvedEyebrow}</span>
+            <span className="text-eyebrow text-ff-gold-accent">{resolvedEyebrow}</span>
           )}
           <h2 className="text-ff-gold-accent">{resolvedHeading}</h2>
           <p className="text-body-sm text-ff-olive mt-1">{resolvedDescription}</p>

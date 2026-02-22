@@ -26,7 +26,7 @@ export const OurStoryBlock: React.FC<Props> = ({ label, heading, subheading, par
         <div className="flex flex-col items-center gap-(--space-content-xl) content-medium mx-auto">
           <span className="text-eyebrow text-ff-gold-accent">{resolvedLabel}</span>
           <h2 className="text-center text-ff-black">{resolvedHeading}</h2>
-          <p className="text-body-lg text-center text-ff-olive font-display font-bold content-medium">
+          <p className="text-body-lg text-center text-ff-olive content-medium">
             {resolvedSubheading}
           </p>
           <div className="flex w-full flex-col gap-(--space-content-sm) text-center content-medium">

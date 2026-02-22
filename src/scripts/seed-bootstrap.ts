@@ -255,9 +255,7 @@ async function seedBootstrap() {
     (p) => p.id,
   )
   const memberIds = ((teamCardsBlock?.members ?? []) as Array<{ id?: string }>).map((m) => m.id)
-  const sponsorIds = ((sponsorsBarBlock?.sponsors ?? []) as Array<{ id?: string }>).map(
-    (s) => s.id,
-  )
+  const sponsorIds = ((sponsorsBarBlock?.sponsors ?? []) as Array<{ id?: string }>).map((s) => s.id)
 
   const enOurStory = ourStoryEN()
   enOurStory.paragraphs = enOurStory.paragraphs.map((p, idx) => ({

@@ -124,7 +124,7 @@ export const TestimonialsBlock: React.FC<Props> = ({
           {resolvedButtonLabel && (
             <Link
               href={resolvedButtonLink}
-              className="inline-flex items-center justify-center rounded-full bg-ff-gold-accent hover:bg-ff-gold-accent-dark hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-dark-deep font-display font-bold text-sm px-6 py-2 shrink-0"
+              className="inline-flex items-center justify-center rounded-full bg-ff-gold-accent hover:bg-ff-gold-accent-dark hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-dark-deep font-display font-bold text-base px-6 py-2.5 shrink-0"
             >
               {resolvedButtonLabel}
             </Link>

@@ -1273,9 +1273,13 @@ export interface HeroBannerBlock {
    */
   buttonLink: string;
   /**
-   * Full-width background image for the banner section.
+   * Full-width background image for the banner section. Used as fallback/poster when a video is set.
    */
   backgroundImage?: (string | null) | Media;
+  /**
+   * Optional static video URL (e.g. /assets/videos/gastro-banner.mp4). Served from public/ — no DB or R2 storage used. Overrides the background image when set.
+   */
+  backgroundVideoUrl?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'heroBanner';
@@ -1699,6 +1703,10 @@ export interface WorkshopSliderBlock {
      */
     description: string;
     /**
+     * Visual theme for this slide. Light = ivory feature card with dark text. Dark = charcoal feature card with cream text.
+     */
+    theme?: ('light' | 'dark') | null;
+    /**
      * Numbered feature list (e.g. "Duration: approx. 3 hours"). Shown with 01, 02, 03, … numbering.
      */
     features?:
@@ -1708,7 +1716,7 @@ export interface WorkshopSliderBlock {
         }[]
       | null;
     /**
-     * Product/workshop photo displayed on the right side of the slide.
+     * Product/workshop photo displayed above the feature card.
      */
     image?: (string | null) | Media;
     /**
@@ -2427,6 +2435,7 @@ export interface HeroBannerBlockSelect<T extends boolean = true> {
   buttonLabel?: T;
   buttonLink?: T;
   backgroundImage?: T;
+  backgroundVideoUrl?: T;
   id?: T;
   blockName?: T;
 }
@@ -2644,6 +2653,7 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        theme?: T;
         features?:
           | T
           | {

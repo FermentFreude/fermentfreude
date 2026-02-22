@@ -132,7 +132,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
       <section className="relative overflow-hidden bg-[#333333]">
         <div className="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-2">
           {/* Image */}
-          <div className="relative aspect-4/3 lg:aspect-auto lg:min-h-[520px]">
+          <div className="relative aspect-4/3 lg:aspect-auto lg:min-h-130">
             {isResolvedMedia(image) ? (
               <Media resource={image} fill imgClassName="object-cover" priority />
             ) : (

@@ -152,28 +152,20 @@ export const VoucherCtaBlock: React.FC<Props> = ({
       {/* ── Text + Button below gallery ── */}
       <div
         data-anim="content"
-        className="flex flex-col items-center text-center px-6 sm:px-10 py-10 sm:py-14 lg:py-20"
-        style={{ backgroundColor: '#D2DFD7' }}
+        className="flex flex-col items-center text-center section-padding-md container-padding"
+        style={{ backgroundColor: '#E8E6E3' }}
       >
         <div className="max-w-2xl flex flex-col items-center gap-3 sm:gap-5">
-          <h2
-            data-anim="heading"
-            className="font-display font-black text-2xl sm:text-4xl lg:text-5xl tracking-tight leading-[1.1]"
-            style={{ color: '#2a2a28' }}
-          >
+          <h2 data-anim="heading" className="text-ff-black">
             {resolvedHeading}
           </h2>
-          <p
-            data-anim="desc"
-            className="text-base sm:text-lg max-w-lg font-sans leading-relaxed"
-            style={{ color: '#555954' }}
-          >
+          <p data-anim="desc" className="text-body-lg max-w-lg text-ff-charcoal leading-relaxed">
             {resolvedDescription}
           </p>
           <Link
             data-anim="cta"
             href={resolvedButtonLink}
-            className="inline-flex items-center justify-center rounded-full font-display font-bold text-[10px] lg:text-xs px-5 lg:px-6 py-1.5 lg:py-2 transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] bg-ff-ivory text-[#1d1d1d] hover:bg-ff-ivory/90"
+            className="shadow-[inset_0_0_0_2px_#616467] text-ff-charcoal px-6 py-2.5 rounded-full tracking-widest uppercase font-display font-bold bg-transparent hover:bg-[#616467] hover:text-white hover:scale-[1.03] active:scale-[0.97] transition-all text-base"
           >
             {resolvedButtonLabel}
           </Link>

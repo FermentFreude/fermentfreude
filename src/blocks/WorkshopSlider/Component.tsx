@@ -1,11 +1,11 @@
 'use client'
 
+import { Media } from '@/components/Media'
 import type {
   Media as MediaType,
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
 import { cn } from '@/utilities/cn'
-import Image from 'next/image'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -19,9 +19,10 @@ const DEFAULT_EYEBROW = 'Workshop Experience'
 
 const DEFAULT_WORKSHOPS = [
   {
-    title: 'Lacto-Vegetables',
+    title: 'Lakto-Gemüse',
+    theme: 'light' as const,
     description:
-      'Fermenting vegetables, experiencing different flavours every month. Do you have leftover seasonal vegetables and want to transform them into real taste sensations?',
+      'Fermenting vegetables, experiencing different flavours every month.\nDo you have leftover seasonal vegetables and want to transform them into real taste sensations?',
     features: [
       { text: 'Duration: approx. 3 hours' },
       { text: 'For everyone from beginner to pro.' },
@@ -33,8 +34,9 @@ const DEFAULT_WORKSHOPS = [
   },
   {
     title: 'Kombucha',
+    theme: 'dark' as const,
     description:
-      'Fermenting tea, creating balanced flavours with every brew. Curious how kombucha becomes naturally fizzy, fresh, and complex?',
+      'Fermenting tea, creating balanced flavours with every brew.\nCurious how kombucha becomes naturally fizzy, fresh, and complex?',
     features: [
       { text: 'Duration: approx. 3 hours' },
       { text: 'For everyone from beginner to pro.' },
@@ -46,8 +48,9 @@ const DEFAULT_WORKSHOPS = [
   },
   {
     title: 'Tempeh',
+    theme: 'dark' as const,
     description:
-      'From beans to tempeh, understanding texture, taste, and technique. Learn how this traditional fermentation becomes a versatile, healthy protein.',
+      'From beans to tempeh, understanding texture, taste, and technique.\nLearn how this traditional fermentation becomes a versatile, healthy protein.',
     features: [
       { text: 'Duration: approx. 3 hours' },
       { text: 'Suitable for home cooks and professionals.' },
@@ -59,7 +62,6 @@ const DEFAULT_WORKSHOPS = [
   },
 ]
 
-const DEFAULT_DETAILS_BUTTON_LABEL = 'Workshop Details'
 const DEFAULT_ALL_WORKSHOPS_BUTTON_LABEL = 'All Workshops'
 const DEFAULT_ALL_WORKSHOPS_LINK = '/workshops'
 
@@ -69,16 +71,42 @@ type Props = WorkshopSliderBlockType & {
   id?: string
 }
 
-/** Format index as zero-padded number (e.g. 1 → "01") */
+/** Format index as zero-padded number (e.g. 0 → "01") */
 function padIndex(i: number): string {
   return String(i + 1).padStart(2, '0')
 }
 
-/** Get the image URL from a Payload media field */
-function getImageUrl(image: MediaType | string | null | undefined): string | null {
+/** Resolve Payload media field to an object (or null) */
+function resolveMedia(image: MediaType | string | number | null | undefined): MediaType | null {
   if (!image) return null
-  if (typeof image === 'string') return image
-  return image.url ?? null
+  if (typeof image === 'object') return image
+  return null
+}
+
+/* ── Theme colour maps ─────────────────────────────────────── */
+const themeStyles = {
+  light: {
+    titleColor: 'text-black',
+    descColor: 'text-[#1A1A1A]',
+    cardBg: 'bg-[var(--ff-ivory-mist,#FAF2E0)]',
+    cardText: 'text-black',
+    cardDivider: 'border-black',
+    stepNumColor: 'text-[#C1C1C1]',
+    stepLineColor: 'border-[#C1C1C1]',
+    arrowBg: 'bg-[var(--ff-ivory-mist,#FCF4EA)]',
+    arrowIcon: 'text-[#C1C1C1]',
+  },
+  dark: {
+    titleColor: 'text-[#555954]',
+    descColor: 'text-[#4B4B4B]',
+    cardBg: 'bg-[#4B4B4B]',
+    cardText: 'text-[#FCF4EA]',
+    cardDivider: 'border-[#FCF4EA]',
+    stepNumColor: 'text-[#351C0B]',
+    stepLineColor: 'border-[#351C0B]',
+    arrowBg: 'bg-[#4B4B4B]',
+    arrowIcon: 'text-[#E6BE68]',
+  },
 }
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
@@ -102,13 +130,15 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       ? workshops.map((w, i) => ({
           title: w.title || DEFAULT_WORKSHOPS[i]?.title || `Workshop ${i + 1}`,
           description: w.description || DEFAULT_WORKSHOPS[i]?.description || '',
+          theme: (w.theme as 'light' | 'dark') || DEFAULT_WORKSHOPS[i]?.theme || 'light',
           features:
             w.features && w.features.length > 0 ? w.features : DEFAULT_WORKSHOPS[i]?.features || [],
-          image: w.image,
+          image: resolveMedia(w.image as MediaType | string | number | null | undefined),
           ctaLink: w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || '#',
-          detailsButtonLabel: w.detailsButtonLabel || DEFAULT_DETAILS_BUTTON_LABEL,
+          detailsButtonLabel:
+            w.detailsButtonLabel || DEFAULT_WORKSHOPS[i]?.detailsButtonLabel || 'Workshop Details',
         }))
-      : DEFAULT_WORKSHOPS
+      : DEFAULT_WORKSHOPS.map((w) => ({ ...w, image: null as MediaType | null }))
 
   const total = resolvedWorkshops.length
 
@@ -160,13 +190,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   /* ── Render ────────────────────────────────────────────────── */
   return (
     <section id={id ?? undefined} className="w-full section-padding-sm">
-      <div className="max-w-5xl mx-auto px-(--space-container-x,1.5rem)">
-        {/* ── Eyebrow ──────────────────────────────────── */}
-        <span className="text-eyebrow text-ff-gold-accent block mb-1 sm:mb-1.5">
-          {resolvedEyebrow}
-        </span>
-      </div>
-
       {/* ── Horizontal scroll track ──────────────────────────── */}
       <div
         ref={scrollRef}
@@ -177,13 +200,11 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {resolvedWorkshops.map((workshop, wIdx) => {
-          const imgUrl = getImageUrl(
-            (workshop as { image?: MediaType | string | null }).image ?? null,
-          )
           const feats = workshop.features ?? []
           const ratio = visibilities[wIdx] ?? (wIdx === 0 ? 1 : 0)
           const scale = 0.92 + 0.08 * ratio
           const opacity = 0.35 + 0.65 * ratio
+          const t = themeStyles[workshop.theme] ?? themeStyles.light
 
           return (
             <div
@@ -194,7 +215,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               className="snap-center shrink-0 w-screen"
             >
               <div
-                className="max-w-5xl mx-auto px-(--space-container-x,1.5rem) flex flex-col min-h-[45vh] sm:min-h-[40vh] lg:min-h-[55vh]"
+                className="max-w-369 mx-auto px-(--space-container-x,1.5rem) flex flex-col gap-6 lg:gap-8"
                 style={{
                   opacity,
                   transform: `scale(${scale})`,
@@ -202,92 +223,150 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                   transformOrigin: 'center top',
                 }}
               >
-                {/* ── Title ──────────────────────────────── */}
-                <h2 className="leading-[1.05] tracking-tight text-(--ff-near-black,#1a1a1a) dark:text-white mb-0.5">
-                  {workshop.title}
-                </h2>
+                {/* ── Eyebrow ─────────────────────────────── */}
+                <span className="text-(--ff-gold-accent,#E5B765) font-display font-black text-lg lg:text-[1.75rem] leading-snug">
+                  {resolvedEyebrow}
+                </span>
 
-                {/* ── Description ────────────────────────── */}
-                <p className="text-body-sm font-display font-bold text-(--ff-near-black,#1a1a1a) dark:text-white/80 leading-snug max-w-[55ch]">
-                  {workshop.description}
-                </p>
+                {/* ── Counter ─────────────────────────────── */}
+                <span className="font-sans text-base lg:text-xl tabular-nums self-end -mt-12 lg:-mt-14">
+                  <span className="text-[#351C0B]">{activeIndex + 1}/ </span>
+                  <span className="text-[#351C0B]/30">{total}</span>
+                </span>
 
-                {/* ── Spacer between text & features/image ── */}
-                <div className="mt-2.5 sm:mt-3 lg:mt-4" />
-
-                {/* ── Features + Image area ──────────────── */}
-                <div className="relative flex-1">
-                  {/* Product image — behind the card on sm+ */}
-                  <div
+                {/* ── Title + Description ─────────────────── */}
+                <div className="flex flex-col">
+                  <h2
                     className={cn(
-                      'relative',
-                      'sm:absolute sm:right-0 sm:top-0',
-                      'sm:z-0',
-                      'sm:w-[50%] lg:w-[58%]',
-                      'rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden',
-                      'aspect-16/10 sm:aspect-auto sm:h-full',
-                      'w-full',
-                      'mb-4 sm:mb-0',
+                      'font-display font-black leading-[1.2] tracking-tight',
+                      'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5rem]',
+                      t.titleColor,
                     )}
                   >
-                    {imgUrl ? (
-                      <Image
-                        src={imgUrl}
-                        alt={workshop.title}
+                    {workshop.title}
+                  </h2>
+                  <p
+                    className={cn(
+                      'font-display font-bold text-base sm:text-lg lg:text-2xl',
+                      'leading-relaxed max-w-[55ch] whitespace-pre-line mt-2 lg:mt-4',
+                      workshop.theme === 'light' ? 'font-bold' : 'font-medium',
+                      t.descColor,
+                    )}
+                  >
+                    {workshop.description}
+                  </p>
+                </div>
+
+                {/* ── Image + Features layout ────────────────── */}
+                <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-10">
+                  {/* Image with nav button overlay */}
+                  <div className="relative w-full lg:w-[60%] aspect-879/495 rounded-2xl lg:rounded-3xl overflow-hidden shrink-0">
+                    {workshop.image ? (
+                      <Media
+                        resource={workshop.image}
                         fill
-                        className="object-cover"
-                        sizes="(min-width: 640px) 50vw, 100vw"
+                        imgClassName="object-cover"
+                        className="absolute inset-0"
                       />
                     ) : (
-                      <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
-                        <span className="text-neutral-400 font-display text-lg">
+                      <div className="w-full h-full bg-(--ff-warm-gray,#ECE5DE) flex items-center justify-center">
+                        <span className="text-(--ff-charcoal,#4b4b4b) font-display text-lg">
                           {workshop.title}
                         </span>
                       </div>
                     )}
+
+                    {/* Circular nav arrow overlaying the image */}
+                    <button
+                      onClick={handleNext}
+                      disabled={activeIndex === total - 1}
+                      aria-label="Next workshop"
+                      className={cn(
+                        'absolute bottom-4 left-1/2 -translate-x-1/2',
+                        'w-14 h-14 lg:w-17.5 lg:h-17.5 rounded-full',
+                        'flex items-center justify-center',
+                        'transition-all duration-300',
+                        'disabled:opacity-30 disabled:pointer-events-none',
+                        t.arrowBg,
+                      )}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        className={cn('w-4 h-4 lg:w-5 lg:h-5', t.arrowIcon)}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
                   </div>
 
-                  {/* Numbers + ivory card */}
-                  <div className="relative z-10 flex">
-                    {/* Numbered labels with lines — tablet+ */}
-                    <div className="hidden sm:flex flex-col shrink-0 w-32 lg:w-40 xl:w-44">
+                  {/* Numbers + Feature card */}
+                  <div className="flex items-start gap-3 lg:gap-5 w-full lg:w-auto">
+                    {/* Numbered step indicators — hidden on mobile */}
+                    <div className="hidden sm:flex flex-col items-end shrink-0 pt-16 lg:pt-25">
                       {feats.map((_, fIdx) => (
-                        <div key={fIdx} className="flex items-center gap-2 h-7 lg:h-9">
-                          <span className="font-display text-xs lg:text-sm text-(--ff-near-black,#1a1a1a)/50 dark:text-white/50 shrink-0 tabular-nums">
+                        <React.Fragment key={fIdx}>
+                          <span
+                            className={cn(
+                              'font-display font-bold text-base lg:text-xl tabular-nums py-2 lg:py-3',
+                              t.stepNumColor,
+                            )}
+                          >
                             {padIndex(fIdx)}
                           </span>
-                          <div className="flex-1 h-px bg-(--ff-near-black,#1a1a1a)/15 dark:bg-white/15" />
-                        </div>
+                          {fIdx < feats.length - 1 && (
+                            <div
+                              className={cn('w-48.25 border-t', t.stepLineColor)}
+                              style={{ borderWidth: '0.84px' }}
+                            />
+                          )}
+                        </React.Fragment>
                       ))}
                     </div>
 
-                    {/* Ivory feature card */}
+                    {/* Feature card */}
                     <div
                       className={cn(
-                        'bg-(--ff-ivory,#f9f0dc) relative',
-                        'rounded-xl sm:rounded-2xl lg:rounded-3xl',
-                        'p-3 sm:p-3.5',
-                        'lg:py-4 lg:px-5',
-                        'w-full sm:w-auto sm:min-w-52 lg:min-w-64 xl:min-w-72',
+                        'rounded-[42px] backdrop-blur-sm',
+                        'px-6 sm:px-8 lg:px-11 py-12 sm:py-16 lg:py-25',
+                        'w-full sm:w-auto sm:min-w-[320px] lg:min-w-100 xl:min-w-140.25',
+                        'flex flex-col items-center justify-center gap-2.5',
+                        t.cardBg,
                       )}
                     >
                       {feats.map((feature, fIdx) => (
-                        <div key={fIdx}>
-                          <div className="flex items-center gap-3 sm:gap-0 py-1 lg:py-1.5">
-                            {/* Mobile-only number */}
-                            <span className="sm:hidden font-display text-xs text-(--ff-near-black,#1a1a1a)/50 dark:text-white/50 shrink-0 w-6 tabular-nums">
+                        <React.Fragment key={fIdx}>
+                          {/* Divider line */}
+                          <div
+                            className={cn('w-full max-w-119.25 border-t', t.cardDivider)}
+                            style={{ borderWidth: '0.84px' }}
+                          />
+                          {/* Feature text */}
+                          <p
+                            className={cn(
+                              'w-full max-w-119.25 font-display font-bold text-base lg:text-xl leading-relaxed',
+                              t.cardText,
+                            )}
+                          >
+                            {/* Mobile-only number prefix */}
+                            <span className="sm:hidden text-xs opacity-50 mr-2 tabular-nums">
                               {padIndex(fIdx)}
                             </span>
-                            {/* Feature text */}
-                            <span className="font-display font-bold text-xs lg:text-sm text-(--ff-near-black,#1a1a1a) dark:text-white leading-snug">
-                              {(feature as { text?: string }).text}
-                            </span>
-                          </div>
-                          {fIdx < feats.length - 1 && (
-                            <div className="h-px bg-(--ff-near-black,#1a1a1a)/10 dark:bg-white/10" />
-                          )}
-                        </div>
+                            {(feature as { text?: string }).text}
+                          </p>
+                        </React.Fragment>
                       ))}
+                      {/* Final divider */}
+                      {feats.length > 0 && (
+                        <div
+                          className={cn('w-full max-w-119.25 border-t', t.cardDivider)}
+                          style={{ borderWidth: '0.84px' }}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -298,34 +377,23 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       </div>
 
       {/* ──── Bottom controls ─────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-(--space-container-x,1.5rem)">
-        {/* Progress bar + counter + arrows */}
-        <div className="flex items-center gap-6 mt-3 lg:mt-4">
-          {/* Progress bar */}
-          <div className="flex-1 h-0.75 bg-(--ff-near-black,#1a1a1a)/10 dark:bg-white/10 rounded-full overflow-hidden">
+      <div className="max-w-369 mx-auto px-(--space-container-x,1.5rem)">
+        {/* Progress bar */}
+        <div className="flex items-center gap-6 mt-6 lg:mt-8">
+          <div className="flex-1 h-0.75 bg-(--ff-near-black,#1a1a1a)/10 rounded-full overflow-hidden">
             <div
-              className="h-full bg-(--ff-near-black,#1a1a1a) dark:bg-white rounded-full transition-all duration-300"
+              className="h-full bg-(--ff-near-black,#1a1a1a) rounded-full transition-all duration-300"
               style={{
                 width: `${(1 / total) * 100}%`,
                 transform: `translateX(${activeIndex * 100}%)`,
               }}
             />
           </div>
-
-          {/* Counter */}
-          <span className="font-display text-sm lg:text-base shrink-0">
-            <span className="text-(--ff-near-black,#1a1a1a) dark:text-white">
-              {activeIndex + 1}/
-            </span>
-            <span className="text-(--ff-near-black,#1a1a1a)/30 dark:text-white/30 ml-0.5">
-              {total}
-            </span>
-          </span>
         </div>
 
-        {/* Buttons row: prev / + / next  |  All Workshops — same total width */}
-        <div className="flex items-center justify-between mt-4 lg:mt-3">
-          {/* Prev + "+" + Next — flex-1 each so they share equal width */}
+        {/* Navigation + CTA row */}
+        <div className="flex items-center justify-between mt-5 lg:mt-6">
+          {/* Prev / "+" / Next */}
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={handlePrev}
@@ -333,11 +401,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               disabled={activeIndex === 0}
               className={cn(
                 'w-10 h-10 sm:w-11 sm:h-11 rounded-full border',
-                'border-(--ff-near-black,#1a1a1a)/20 dark:border-white/20',
+                'border-(--ff-near-black,#1a1a1a)/20',
                 'flex items-center justify-center transition-all duration-300',
-                'text-(--ff-near-black,#1a1a1a) dark:text-white',
+                'text-(--ff-near-black,#1a1a1a)',
                 'hover:bg-(--ff-near-black,#1a1a1a)/5 hover:border-(--ff-near-black,#1a1a1a)/40',
-                'dark:hover:bg-white/10 dark:hover:border-white/40',
                 'disabled:opacity-30 disabled:pointer-events-none',
               )}
             >
@@ -385,11 +452,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               disabled={activeIndex === total - 1}
               className={cn(
                 'w-10 h-10 sm:w-11 sm:h-11 rounded-full border',
-                'border-(--ff-near-black,#1a1a1a)/20 dark:border-white/20',
+                'border-(--ff-near-black,#1a1a1a)/20',
                 'flex items-center justify-center transition-all duration-300',
-                'text-(--ff-near-black,#1a1a1a) dark:text-white',
+                'text-(--ff-near-black,#1a1a1a)',
                 'hover:bg-(--ff-near-black,#1a1a1a)/5 hover:border-(--ff-near-black,#1a1a1a)/40',
-                'dark:hover:bg-white/10 dark:hover:border-white/40',
                 'disabled:opacity-30 disabled:pointer-events-none',
               )}
             >
@@ -413,11 +479,11 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
             className={cn(
               'inline-flex items-center justify-center',
               'rounded-full',
-              'px-6 py-2.5 text-sm sm:px-7 sm:py-3 lg:text-base lg:px-8 lg:py-3',
+              'px-6 py-2.5 text-base',
               'bg-(--ff-charcoal-dark,#403c39) text-(--ff-ivory-mist,#faf2e0)',
               'font-display font-bold',
               'transition-all duration-300 ease-out',
-              'hover:bg-(--ff-ivory-mist,#faf2e0) hover:text-(--ff-charcoal-dark,#403c39) hover:scale-105',
+              'hover:bg-(--ff-ivory-mist,#faf2e0) hover:text-(--ff-charcoal-dark,#403c39) hover:scale-[1.03] active:scale-[0.97]',
             )}
           >
             {resolvedAllWorkshopsLabel}
