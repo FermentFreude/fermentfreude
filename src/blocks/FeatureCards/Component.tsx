@@ -32,16 +32,19 @@ const DEFAULTS = {
       title: 'Probiotics',
       description:
         'Fermented foods are rich in live cultures that strengthen your gut health and immune system.',
+      icon: undefined as unknown,
     },
     {
       title: 'Nutrients',
       description:
         'The fermentation process increases the bioavailability of vitamins and minerals in your food.',
+      icon: undefined as unknown,
     },
     {
       title: 'Flavour',
       description:
         'Fermentation creates complex umami flavours and unique taste profiles that no other process can achieve.',
+      icon: undefined as unknown,
     },
   ],
   buttonLabel: 'Read more about it',
