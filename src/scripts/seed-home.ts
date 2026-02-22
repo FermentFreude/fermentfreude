@@ -1,106 +1,86 @@
 /**
- * Combined seed script for the Home page.
- * Seeds hero (heroSlider) + layout blocks in both DE and EN.
+ * Home page seed — images + page composition only.
+ *
+ * Block content lives colocated with each block component:
+ *   src/blocks/<BlockName>/seed.ts
+ *   src/heros/HeroSlider/seed.ts
  *
  * Strategy:
- *   1. Seed DE first (Payload auto-generates IDs for arrays, blocks, etc.)
- *   2. Read back the saved doc to capture all generated IDs
- *   3. Seed EN reusing those exact IDs — so localized text fields
- *      are correctly stored against the same array/block items
+ *   1. Upload images sequentially (MongoDB M0 = no transactions)
+ *   2. Build block data by calling imported builder functions
+ *   3. Save DE locale
+ *   4. Read back to capture auto-generated array/block IDs
+ *   5. Save EN locale reusing those exact IDs
  *
  * Run: set -a && source .env && set +a && npx tsx src/scripts/seed-home.ts
  */
-import type { Page } from '@/payload-types'
+
 import config from '@payload-config'
 import path from 'path'
 import { getPayload } from 'payload'
 
+import type { Page } from '@/payload-types'
+
+import { buildHeroBanner, mergeHeroBannerEN } from '../blocks/HeroBanner/seed'
+import { buildFeatureCards, mergeFeatureCardsEN } from '../blocks/FeatureCards/seed'
+import { buildSponsorsBar, mergeSponsorsBarEN } from '../blocks/SponsorsBar/seed'
+import { buildTeamPreview, mergeTeamPreviewEN } from '../blocks/TeamPreview/seed'
+import { buildTestimonials, mergeTestimonialsEN } from '../blocks/Testimonials/seed'
+import { buildVoucherCta, mergeVoucherCtaEN } from '../blocks/VoucherCta/seed'
+import { buildWorkshopSlider, mergeWorkshopSliderEN } from '../blocks/WorkshopSlider/seed'
+import { buildHeroSlider, mergeHeroSliderEN } from '../heros/HeroSlider/seed'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
+// ── Shared type for reading back fresh IDs ─────────────────────────────────
 interface WithId {
   id?: string
   [key: string]: unknown
 }
-
-interface WorkshopItem extends WithId {
-  features: WithId[]
-  workshops?: WorkshopItem[]
-}
-
 interface BlockItem extends WithId {
   blockType?: string
-  workshops?: WorkshopItem[]
+  workshops?: { id?: string; features?: { id?: string }[] }[]
   cards?: WithId[]
   members?: WithId[]
   testimonials?: WithId[]
   sponsors?: WithId[]
-  links?: WithId[]
   galleryImages?: WithId[]
 }
-
-// readLocalFile + optimizedFile imported from ./seed-image-utils
 
 async function seedHome() {
   const payload = await getPayload({ config })
 
-  // ============================================================
-  // 1. Upload images (or reuse existing)
-  // ============================================================
+  // ══════════════════════════════════════════════════════════════════════════
+  // 1. Upload images
+  //    Sequential writes — MongoDB Atlas M0 has no transactions.
+  //    Delete stale copies first to avoid duplicates.
+  // ══════════════════════════════════════════════════════════════════════════
+
   const workshopsDir = path.resolve(process.cwd(), 'seed-assets/media/workshops')
   const heroDir = path.resolve(process.cwd(), 'seed-assets/media/hero')
+  const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
+  const galleryDir = path.resolve(process.cwd(), 'seed-assets/images/gallery')
+  const iconsDir = path.resolve(process.cwd(), 'seed-assets/images/icons')
 
-  // Delete any existing workshop / hero media to avoid duplicates
-  await payload
-    .delete({
-      collection: 'media',
-      where: { alt: { contains: 'workshop' } },
-      context: { skipAutoTranslate: true },
-    })
-    .catch(() => {})
-  await payload
-    .delete({
-      collection: 'media',
-      where: { alt: { contains: 'hero' } },
-      context: { skipAutoTranslate: true },
-    })
-    .catch(() => {})
-  await payload
-    .delete({
-      collection: 'media',
-      where: { alt: { contains: 'slide-' } },
-      context: { skipAutoTranslate: true },
-    })
-    .catch(() => {})
-  await payload
-    .delete({
-      collection: 'media',
-      where: { alt: { contains: 'Gallery' } },
-      context: { skipAutoTranslate: true },
-    })
-    .catch(() => {})
-  await payload
-    .delete({
-      collection: 'media',
-      where: { alt: { contains: 'icon-feature' } },
-      context: { skipAutoTranslate: true },
-    })
-    .catch(() => {})
+  // Clean up stale media
+  for (const contains of ['workshop', 'hero', 'slide-', 'Gallery', 'icon-feature']) {
+    await payload
+      .delete({ collection: 'media', where: { alt: { contains } }, context: { skipAutoTranslate: true } })
+      .catch(() => {})
+  }
 
-  // Workshop images
+  // ── Workshop cover images ─────────────────────────────────────────────────
   const laktoImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Lakto-Gemüse workshop – fermented vegetables in glass jars' },
     file: await optimizedFile(path.join(workshopsDir, 'lakto.png'), IMAGE_PRESETS.card),
   })
-
   const kombuchaImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Kombucha workshop – kombucha SCOBY and fermented tea in jar' },
     file: await optimizedFile(path.join(workshopsDir, 'kombucha.png'), IMAGE_PRESETS.card),
   })
-
   const tempehImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -108,28 +88,25 @@ async function seedHome() {
     file: await optimizedFile(path.join(workshopsDir, 'tempeh.png'), IMAGE_PRESETS.card),
   })
 
-  // Hero carousel images (from Figma design)
+  // ── Hero carousel background images ──────────────────────────────────────
   const heroImage1 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'FermentFreude hero – fermented foods arrangement slide 1' },
     file: await optimizedFile(path.join(heroDir, 'hero-slide-1.png'), IMAGE_PRESETS.card),
   })
-
   const heroImage2 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'FermentFreude hero – fermented foods arrangement slide 2' },
     file: await optimizedFile(path.join(heroDir, 'hero-slide-2.png'), IMAGE_PRESETS.card),
   })
-
   const heroImage3 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'FermentFreude hero – fermented foods arrangement slide 3' },
     file: await optimizedFile(path.join(heroDir, 'hero-slide-3.png'), IMAGE_PRESETS.card),
   })
-
   const heroImage4 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -137,9 +114,7 @@ async function seedHome() {
     file: await optimizedFile(path.join(heroDir, 'hero-slide-4.png'), IMAGE_PRESETS.card),
   })
 
-  // ── Per-slide product images (uploaded to Media / Cloudflare R2) ──
-
-  // Lakto slide images
+  // ── Per-slide product images ──────────────────────────────────────────────
   const laktoSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -152,8 +127,6 @@ async function seedHome() {
     data: { alt: 'slide-lakto-right – FermentFreude Sauerkraut Jar' },
     file: await optimizedFile(path.join(heroDir, 'lakto2.png'), IMAGE_PRESETS.card),
   })
-
-  // Kombucha slide images
   const kombuchaSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -166,8 +139,6 @@ async function seedHome() {
     data: { alt: 'slide-kombucha-right – FermentFreude Kombucha Coffee Flavour' },
     file: await optimizedFile(path.join(heroDir, 'kombucha2.png'), IMAGE_PRESETS.card),
   })
-
-  // Tempeh slide images
   const tempehSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -180,8 +151,6 @@ async function seedHome() {
     data: { alt: 'slide-tempeh-right – FermentFreude Black Bean Tempeh' },
     file: await optimizedFile(path.join(heroDir, 'tempeh2.png'), IMAGE_PRESETS.card),
   })
-
-  // Basics slide images (David + Marcel)
   const basicsSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -195,43 +164,29 @@ async function seedHome() {
     file: await optimizedFile(path.join(heroDir, 'MarcelHero.png'), IMAGE_PRESETS.card),
   })
 
-  // ── New block images ──
-  const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
-
-  // VoucherCta gallery images (8 images for bento gallery – from Figma)
-  const galleryDir = path.resolve(process.cwd(), 'seed-assets/images/gallery')
+  // ── VoucherCta gallery (8 images) ─────────────────────────────────────────
   const galleryImageConfigs = [
-    {
-      file: path.join(galleryDir, 'gallery-1.png'),
-      alt: 'Gallery – workshop scene, people laughing',
-    },
-    {
-      file: path.join(galleryDir, 'gallery-2.png'),
-      alt: 'Gallery – fermented food bowls on slate',
-    },
+    { file: path.join(galleryDir, 'gallery-1.png'), alt: 'Gallery – workshop scene, people laughing' },
+    { file: path.join(galleryDir, 'gallery-2.png'), alt: 'Gallery – fermented food bowls on slate' },
     { file: path.join(galleryDir, 'gallery-5.png'), alt: 'Gallery – overhead dinner with FF logo' },
     { file: path.join(galleryDir, 'gallery-4.png'), alt: 'Gallery – chopping fresh ingredients' },
     { file: path.join(galleryDir, 'gallery-3.png'), alt: 'Gallery – workshop preparation scene' },
-    {
-      file: path.join(galleryDir, 'gallery-6.png'),
-      alt: 'Gallery – table with bottles and flowers',
-    },
+    { file: path.join(galleryDir, 'gallery-6.png'), alt: 'Gallery – table with bottles and flowers' },
     { file: path.join(galleryDir, 'gallery-7.png'), alt: 'Gallery – kombucha SCOBY jar closeup' },
     { file: path.join(galleryDir, 'gallery-8.png'), alt: 'Gallery – workshop table with chairs' },
   ]
-
   const galleryMediaIds: string[] = []
   for (const cfg of galleryImageConfigs) {
-    const media = await payload.create({
+    const m = await payload.create({
       collection: 'media',
       context: { skipAutoTranslate: true, skipRevalidate: true },
       data: { alt: cfg.alt },
       file: await optimizedFile(cfg.file, IMAGE_PRESETS.card),
     })
-    galleryMediaIds.push(media.id)
+    galleryMediaIds.push(String(m.id))
   }
 
-  // HeroBanner background (Banner)
+  // ── HeroBanner background ─────────────────────────────────────────────────
   const bannerImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -239,7 +194,7 @@ async function seedHome() {
     file: await optimizedFile(path.join(imagesDir, 'Banner.png'), IMAGE_PRESETS.hero),
   })
 
-  // TeamPreview – David & Marcel photos
+  // ── Team photos ───────────────────────────────────────────────────────────
   const davidPhoto = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -253,7 +208,7 @@ async function seedHome() {
     file: await optimizedFile(path.join(imagesDir, 'marcel-rauminger.jpg'), IMAGE_PRESETS.card),
   })
 
-  // SponsorsBar logos
+  // ── Sponsor logos ─────────────────────────────────────────────────────────
   const sponsorLogo1 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -279,8 +234,7 @@ async function seedHome() {
     file: await optimizedFile(path.join(imagesDir, 'sponsor-logo-4.png'), IMAGE_PRESETS.logo),
   })
 
-  // FeatureCards icons (SVGs from seed-assets/images/icons)
-  const iconsDir = path.resolve(process.cwd(), 'seed-assets/images/icons')
+  // ── FeatureCards icons (SVGs) ─────────────────────────────────────────────
   const iconProbiotics = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -300,753 +254,66 @@ async function seedHome() {
     file: await optimizedFile(path.join(iconsDir, 'taste.svg'), IMAGE_PRESETS.logo),
   })
 
-  payload.logger.info('✅ All images uploaded to Media collection.')
+  payload.logger.info('✅ All images uploaded.')
 
-  // ============================================================
-  // 2. Prepare content data
-  // ============================================================
+  // ══════════════════════════════════════════════════════════════════════════
+  // 2. Build block data (content lives in each block's seed.ts)
+  // ══════════════════════════════════════════════════════════════════════════
 
-  // ── Hero (DE) ──
-  const heroDE = {
-    type: 'heroSlider' as const,
-    richText: {
-      root: {
-        type: 'root',
-        children: [
-          {
-            type: 'heading',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Gutes Essen',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'heading',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Bessere Gesundheit',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'heading',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Echte Freude',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'paragraph',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Wir machen Fermentation genussvoll & zugänglich und stärken die Darmgesundheit durch Geschmack, Bildung und hochwertige handgemachte Lebensmittel.',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            textFormat: 0,
-            version: 1,
-          },
-        ],
-        direction: 'ltr' as const,
-        format: '' as const,
-        indent: 0,
-        version: 1,
-      },
-    },
-    links: [
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Workshop',
-          url: '/workshops',
-          appearance: 'default' as const,
-        },
-      },
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Produkte',
-          url: '/shop',
-          appearance: 'outline' as const,
-        },
-      },
-    ],
-    heroImages: [
-      { image: heroImage1.id },
-      { image: heroImage2.id },
-      { image: heroImage3.id },
-      { image: heroImage4.id },
-      { image: heroImage1.id },
-    ],
-    heroSlides: [
-      {
-        slideId: 'lakto',
-        eyebrow: 'Workshop-Erlebnis',
-        title: 'Entdecke die Kunst der\nLakto-Fermentation!',
-        description:
-          'Unser Hands-on-Workshop nimmt dich mit auf eine Reise durch die traditionelle Milchsäure-Fermentation und verwandelt einfaches Gemüse in probiotische Köstlichkeiten.',
-        attributes: [{ text: 'Natürlich' }, { text: 'Probiotisch' }, { text: 'Mit Liebe gemacht' }],
-        ctaLabel: 'Mehr erfahren',
-        ctaHref: '/workshops/lakto',
-        panelColor: '#555954',
-        bgColor: '#D2DFD7',
-        leftImage: laktoSlideLeft.id,
-        rightImage: laktoSlideRight.id,
-      },
-      {
-        slideId: 'kombucha',
-        eyebrow: 'Workshop-Erlebnis',
-        title: 'Tauche ein in die Welt des\nKombucha-Brauens!',
-        description:
-          'Lerne, deinen eigenen Kombucha von Grund auf zu brauen — vom Züchten des SCOBY bis zum Abfüllen deines perfekten, sprudelnden Probiotik-Tees.',
-        attributes: [
-          { text: 'Lebende Kulturen' },
-          { text: 'Natürlich spritzig' },
-          { text: 'Handgemacht' },
-        ],
-        ctaLabel: 'Mehr erfahren',
-        ctaHref: '/workshops/kombucha',
-        panelColor: '#555954',
-        bgColor: '#F6F0E8',
-        leftImage: kombuchaSlideLeft.id,
-        rightImage: kombuchaSlideRight.id,
-      },
-      {
-        slideId: 'tempeh',
-        eyebrow: 'Workshop-Erlebnis',
-        title: 'Meistere die Kunst der\nTempeh-Herstellung!',
-        description:
-          'Entdecke die indonesische Tradition des Tempeh — züchte deine eigenen Lebendkulturen und stelle proteinreiche, fermentierte Köstlichkeiten her.',
-        attributes: [
-          { text: 'Proteinreich' },
-          { text: 'Traditionell' },
-          { text: 'Pflanzenbasiert' },
-        ],
-        ctaLabel: 'Mehr erfahren',
-        ctaHref: '/workshops/tempeh',
-        panelColor: '#737672',
-        bgColor: '#F6F3F0',
-        leftImage: tempehSlideLeft.id,
-        rightImage: tempehSlideRight.id,
-      },
-      {
-        slideId: 'basics',
-        eyebrow: 'Workshop-Erlebnis',
-        title: 'Starte deine Reise mit den\nFermentations-Grundlagen!',
-        description:
-          'Der perfekte Einstieg — lerne die grundlegende Fermentationswissenschaft, Sicherheit und Techniken, um zu Hause alles sicher zu fermentieren.',
-        attributes: [
-          { text: 'Anfängerfreundlich' },
-          { text: 'Wissenschaftlich fundiert' },
-          { text: 'Praktisch' },
-        ],
-        ctaLabel: 'Mehr erfahren',
-        ctaHref: '/workshops/basics',
-        panelColor: '#000000',
-        bgColor: '#AEB1AE',
-        leftImage: basicsSlideLeft.id,
-        rightImage: basicsSlideRight.id,
-      },
-    ],
-  }
+  const { de: heroDE, en: heroEN } = buildHeroSlider({
+    heroImage1Id: String(heroImage1.id),
+    heroImage2Id: String(heroImage2.id),
+    heroImage3Id: String(heroImage3.id),
+    heroImage4Id: String(heroImage4.id),
+    laktoSlideLeftId: String(laktoSlideLeft.id),
+    laktoSlideRightId: String(laktoSlideRight.id),
+    kombuchaSlideLeftId: String(kombuchaSlideLeft.id),
+    kombuchaSlideRightId: String(kombuchaSlideRight.id),
+    tempehSlideLeftId: String(tempehSlideLeft.id),
+    tempehSlideRightId: String(tempehSlideRight.id),
+    basicsSlideLeftId: String(basicsSlideLeft.id),
+    basicsSlideRightId: String(basicsSlideRight.id),
+  })
 
-  // ── Hero (EN) ──
-  const heroEN = {
-    type: 'heroSlider' as const,
-    richText: {
-      root: {
-        type: 'root',
-        children: [
-          {
-            type: 'heading',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Good food',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'heading',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Better Health',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'heading',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Real Joy',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            tag: 'h1',
-            version: 1,
-          },
-          {
-            type: 'paragraph',
-            children: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'We make fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods.',
-                version: 1,
-              },
-            ],
-            direction: 'ltr' as const,
-            format: '',
-            indent: 0,
-            textFormat: 0,
-            version: 1,
-          },
-        ],
-        direction: 'ltr' as const,
-        format: '' as const,
-        indent: 0,
-        version: 1,
-      },
-    },
-    links: [
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Workshop',
-          url: '/workshops',
-          appearance: 'default' as const,
-        },
-      },
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Products',
-          url: '/shop',
-          appearance: 'outline' as const,
-        },
-      },
-    ],
-    heroImages: [
-      { image: heroImage1.id },
-      { image: heroImage2.id },
-      { image: heroImage3.id },
-      { image: heroImage4.id },
-      { image: heroImage1.id },
-    ],
-    heroSlides: [
-      {
-        slideId: 'lakto',
-        eyebrow: 'Workshop Experience',
-        title: 'Discover the Art of\nLakto-Fermentation!',
-        description:
-          'Our hands-on workshop takes you on a journey through traditional lacto-fermentation, turning simple vegetables into probiotic-rich delicacies.',
-        attributes: [
-          { text: 'All-natural' },
-          { text: 'Probiotic-rich' },
-          { text: 'Made with Love' },
-        ],
-        ctaLabel: 'Learn More',
-        ctaHref: '/workshops/lakto',
-        panelColor: '#555954',
-        bgColor: '#D2DFD7',
-        leftImage: laktoSlideLeft.id,
-        rightImage: laktoSlideRight.id,
-      },
-      {
-        slideId: 'kombucha',
-        eyebrow: 'Workshop Experience',
-        title: 'Immerse Yourself in\nKombucha Brewing!',
-        description:
-          'Learn to brew your own kombucha from scratch — from growing the SCOBY to bottling your perfect fizzy, probiotic tea.',
-        attributes: [
-          { text: 'Live cultures' },
-          { text: 'Naturally fizzy' },
-          { text: 'Handcrafted' },
-        ],
-        ctaLabel: 'Learn More',
-        ctaHref: '/workshops/kombucha',
-        panelColor: '#555954',
-        bgColor: '#F6F0E8',
-        leftImage: kombuchaSlideLeft.id,
-        rightImage: kombuchaSlideRight.id,
-      },
-      {
-        slideId: 'tempeh',
-        eyebrow: 'Workshop Experience',
-        title: 'Master the Craft of\nTempeh Making!',
-        description:
-          'Explore the Indonesian tradition of tempeh — cultivate your own live cultures and create protein-rich, fermented goodness at home.',
-        attributes: [{ text: 'High protein' }, { text: 'Traditional' }, { text: 'Plant-based' }],
-        ctaLabel: 'Learn More',
-        ctaHref: '/workshops/tempeh',
-        panelColor: '#737672',
-        bgColor: '#F6F3F0',
-        leftImage: tempehSlideLeft.id,
-        rightImage: tempehSlideRight.id,
-      },
-      {
-        slideId: 'basics',
-        eyebrow: 'Workshop Experience',
-        title: 'Begin Your Journey with\nFermentation Basics!',
-        description:
-          'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
-        attributes: [
-          { text: 'Beginner-friendly' },
-          { text: 'Science-based' },
-          { text: 'Practical' },
-        ],
-        ctaLabel: 'Learn More',
-        ctaHref: '/workshops/basics',
-        panelColor: '#000000',
-        bgColor: '#AEB1AE',
-        leftImage: basicsSlideLeft.id,
-        rightImage: basicsSlideRight.id,
-      },
-    ],
-  }
+  const { de: workshopSliderDE, en: workshopSliderEN } = buildWorkshopSlider({
+    laktoImageId: String(laktoImage.id),
+    kombuchaImageId: String(kombuchaImage.id),
+    tempehImageId: String(tempehImage.id),
+    laktoImage2Id: String(laktoSlideLeft.id),
+    kombuchaImage2Id: String(kombuchaSlideLeft.id),
+    tempehImage2Id: String(tempehSlideLeft.id),
+  })
 
-  // ── Workshop slider (DE) ──
-  const workshopSliderDE = {
-    blockType: 'workshopSlider' as const,
-    eyebrow: 'Workshop-Erlebnis',
-    allWorkshopsButtonLabel: 'Alle Workshops',
-    allWorkshopsLink: '/workshops',
-    workshops: [
-      {
-        title: 'Lakto-Gemüse',
-        theme: 'light' as const,
-        description:
-          'Gemüse fermentieren und jeden Monat neue Geschmacksrichtungen erleben. Hast du saisonales Gemüse übrig und möchtest es in echte Geschmackserlebnisse verwandeln?',
-        features: [
-          { text: 'Dauer: ca. 3 Stunden' },
-          { text: 'Für alle – vom Anfänger bis zum Profi.' },
-          { text: 'Zutaten, Gläser und Gewürze werden gestellt.' },
-          { text: 'Nimm alle Gläser mit nach Hause.' },
-        ],
-        image: laktoImage.id,
-        ctaLink: '/workshops/lakto-gemuese',
-        detailsButtonLabel: 'Workshop Details',
-      },
-      {
-        title: 'Kombucha',
-        theme: 'dark' as const,
-        description:
-          'Tee fermentieren und mit jedem Brauvorgang ausgewogene Aromen kreieren. Neugierig, wie Kombucha natürlich spritzig, frisch und komplex wird?',
-        features: [
-          { text: 'Dauer: ca. 3 Stunden' },
-          { text: 'Für alle – vom Anfänger bis zum Profi.' },
-          { text: 'Tee, Flaschen und Aromen werden gestellt.' },
-          { text: 'Nimm deinen selbst gebrauten Kombucha mit nach Hause.' },
-        ],
-        image: kombuchaImage.id,
-        ctaLink: '/workshops/kombucha',
-        detailsButtonLabel: 'Workshop Details',
-      },
-      {
-        title: 'Tempeh',
-        theme: 'dark' as const,
-        description:
-          'Von Bohnen zu Tempeh – Textur, Geschmack und Technik verstehen. Lerne, wie diese traditionelle Fermentation zu einem vielseitigen, gesunden Protein wird.',
-        features: [
-          { text: 'Dauer: ca. 3 Stunden' },
-          { text: 'Für Hobbyköche und Profis geeignet.' },
-          { text: 'Bohnen, Starterkulturen und alles wird gestellt.' },
-          { text: 'Nimm frisch zubereitetes Tempeh mit nach Hause.' },
-        ],
-        image: tempehImage.id,
-        ctaLink: '/workshops/tempeh',
-        detailsButtonLabel: 'Workshop Details',
-      },
-    ],
-  }
+  const { de: voucherCtaDE, en: voucherCtaEN } = buildVoucherCta({ galleryMediaIds })
 
-  // ── Workshop slider (EN) ──
-  const workshopSliderEN = {
-    blockType: 'workshopSlider' as const,
-    eyebrow: 'Workshop Experience',
-    allWorkshopsButtonLabel: 'All Workshops',
-    allWorkshopsLink: '/workshops',
-    workshops: [
-      {
-        title: 'Lacto-Vegetables',
-        theme: 'light' as const,
-        description:
-          'Fermenting vegetables, experiencing different flavours every month. Do you have leftover seasonal vegetables and want to transform them into real taste sensations?',
-        features: [
-          { text: 'Duration: approx. 3 hours' },
-          { text: 'For everyone from beginner to pro.' },
-          { text: 'Ingredients, jars, and spices are all provided.' },
-          { text: 'Take all the jars home with you afterward.' },
-        ],
-        image: laktoImage.id,
-        ctaLink: '/workshops/lakto-gemuese',
-        detailsButtonLabel: 'Workshop Details',
-      },
-      {
-        title: 'Kombucha',
-        theme: 'dark' as const,
-        description:
-          'Fermenting tea, creating balanced flavours with every brew. Curious how kombucha becomes naturally fizzy, fresh, and complex?',
-        features: [
-          { text: 'Duration: approx. 3 hours' },
-          { text: 'For everyone from beginner to pro.' },
-          { text: 'Tea, bottles, and flavourings are all provided.' },
-          { text: 'Take home your own brewed kombucha.' },
-        ],
-        image: kombuchaImage.id,
-        ctaLink: '/workshops/kombucha',
-        detailsButtonLabel: 'Workshop Details',
-      },
-      {
-        title: 'Tempeh',
-        theme: 'dark' as const,
-        description:
-          'From beans to tempeh, understanding texture, taste, and technique. Learn how this traditional fermentation becomes a versatile, healthy protein.',
-        features: [
-          { text: 'Duration: approx. 3 hours' },
-          { text: 'Suitable for home cooks and professionals.' },
-          { text: 'Beans, starter cultures, and all are provided.' },
-          { text: 'Take home freshly made tempeh.' },
-        ],
-        image: tempehImage.id,
-        ctaLink: '/workshops/tempeh',
-        detailsButtonLabel: 'Workshop Details',
-      },
-    ],
-  }
+  const { de: heroBannerDE, en: heroBannerEN } = buildHeroBanner({
+    backgroundImageId: String(bannerImage.id),
+  })
 
-  // ── VoucherCta (DE) ──
-  const voucherCtaDE = {
-    blockType: 'voucherCta' as const,
-    heading: 'Verschenke ein besonderes Geschmacks-Erlebnis',
-    description: 'Teile ein leckeres Erlebnis mit jemandem Besonderem.',
-    buttonLabel: 'Gutschein',
-    buttonLink: '/voucher',
-    galleryImages: galleryMediaIds.map((id) => ({ image: id })),
-  }
+  const { de: featureCardsDE, en: featureCardsEN } = buildFeatureCards({
+    iconProbioticsId: String(iconProbiotics.id),
+    iconNutrientsId: String(iconNutrients.id),
+    iconFlavourId: String(iconFlavour.id),
+  })
 
-  // ── VoucherCta (EN) ──
-  const voucherCtaEN = {
-    blockType: 'voucherCta' as const,
-    heading: 'Gift a special tasty experience',
-    description: 'Share a tasty experience with someone special.',
-    buttonLabel: 'Voucher',
-    buttonLink: '/voucher',
-    galleryImages: galleryMediaIds.map((id) => ({ image: id })),
-  }
+  const { de: teamPreviewDE, en: teamPreviewEN } = buildTeamPreview({
+    davidPhotoId: String(davidPhoto.id),
+    marcelPhotoId: String(marcelPhoto.id),
+  })
 
-  // ── HeroBanner (DE) ──
-  const heroBannerDE = {
-    blockType: 'heroBanner' as const,
-    heading: 'Für Köche und Lebensmittel-Profis',
-    description:
-      'Wir arbeiten mit Restaurants, Hotels und Catering-Unternehmen zusammen, um fermentierte Produkte in professionelle Küchen zu bringen.',
-    buttonLabel: 'Erfahre hier mehr',
-    buttonLink: '/gastronomy',
-    backgroundImage: bannerImage.id,
-    backgroundVideoUrl: '/assets/videos/gastro-banner.mp4',
-  }
+  const { de: testimonialsDE, en: testimonialsEN } = buildTestimonials()
 
-  // ── HeroBanner (EN) ──
-  const heroBannerEN = {
-    blockType: 'heroBanner' as const,
-    heading: 'For Chefs and Food Professionals',
-    description:
-      'We work with restaurants, hotels, and catering companies to bring fermented products into professional kitchens.',
-    buttonLabel: 'Get to know more here',
-    buttonLink: '/gastronomy',
-    backgroundImage: bannerImage.id,
-    backgroundVideoUrl: '/assets/videos/gastro-banner.mp4',
-  }
+  const { de: sponsorsBarDE, en: sponsorsBarEN } = buildSponsorsBar({
+    sponsorLogo1Id: String(sponsorLogo1.id),
+    sponsorLogo2Id: String(sponsorLogo2.id),
+    sponsorLogo3Id: String(sponsorLogo3.id),
+    sponsorLogo4Id: String(sponsorLogo4.id),
+  })
 
-  // ── FeatureCards (DE) ──
-  const featureCardsDE = {
-    blockType: 'featureCards' as const,
-    eyebrow: 'FERMENTATION',
-    heading: 'Warum Fermentation?',
-    description:
-      'Fermentation ist eine der ältesten und natürlichsten Methoden der Lebensmittelkonservierung. Sie verbessert Geschmack, Nährwert und Verdaulichkeit.',
-    cards: [
-      {
-        title: 'Probiotika',
-        description:
-          'Fermentierte Lebensmittel sind reich an lebenden Kulturen, die deine Darmgesundheit und dein Immunsystem stärken.',
-        icon: iconProbiotics.id,
-      },
-      {
-        title: 'Nährstoffe',
-        description:
-          'Der Fermentationsprozess erhöht die Bioverfügbarkeit von Vitaminen und Mineralstoffen in deiner Nahrung.',
-        icon: iconNutrients.id,
-      },
-      {
-        title: 'Geschmack',
-        description:
-          'Fermentation erzeugt komplexe Umami-Aromen und einzigartige Geschmacksprofile, die kein anderes Verfahren erreicht.',
-        icon: iconFlavour.id,
-      },
-    ],
-    buttonLabel: 'Mehr erfahren',
-    buttonLink: '/about',
-  }
+  // ══════════════════════════════════════════════════════════════════════════
+  // 3. Find or create the Home page
+  // ══════════════════════════════════════════════════════════════════════════
 
-  // ── FeatureCards (EN) ──
-  const featureCardsEN = {
-    blockType: 'featureCards' as const,
-    eyebrow: 'FERMENTATION',
-    heading: 'Why Fermentation?',
-    description:
-      'Fermentation is one of the oldest and most natural methods of food preservation. It enhances flavour, nutritional value, and digestibility.',
-    cards: [
-      {
-        title: 'Probiotics',
-        description:
-          'Fermented foods are rich in live cultures that strengthen your gut health and immune system.',
-        icon: iconProbiotics.id,
-      },
-      {
-        title: 'Nutrients',
-        description:
-          'The fermentation process increases the bioavailability of vitamins and minerals in your food.',
-        icon: iconNutrients.id,
-      },
-      {
-        title: 'Flavour',
-        description:
-          'Fermentation creates complex umami flavours and unique taste profiles that no other process can achieve.',
-        icon: iconFlavour.id,
-      },
-    ],
-    buttonLabel: 'Read more about it',
-    buttonLink: '/about',
-  }
-
-  // ── TeamPreview (DE) ──
-  const teamPreviewDE = {
-    blockType: 'teamPreview' as const,
-    eyebrow: 'Unser Team',
-    heading: 'Nur die besten Instruktoren',
-    description:
-      'Unsere Gründer David und Marcel bringen jahrelange Erfahrung in Fermentation, Lebensmittelwissenschaft und kulinarischer Ausbildung mit. Jeder Workshop wird persönlich von ihnen geleitet.',
-    buttonLabel: 'Über uns',
-    buttonLink: '/about',
-    members: [
-      {
-        name: 'David Heider',
-        role: 'Gründer & Instruktor',
-        image: davidPhoto.id,
-      },
-      {
-        name: 'Marcel Rauminger',
-        role: 'Gründer & Instruktor',
-        image: marcelPhoto.id,
-      },
-    ],
-  }
-
-  // ── TeamPreview (EN) ──
-  const teamPreviewEN = {
-    blockType: 'teamPreview' as const,
-    eyebrow: 'Our Team',
-    heading: 'Only The Best Instructors',
-    description:
-      'Our founders David and Marcel bring years of experience in fermentation, food science, and culinary education. Every workshop is personally led by them.',
-    buttonLabel: 'About us',
-    buttonLink: '/about',
-    members: [
-      {
-        name: 'David Heider',
-        role: 'Founder & Instructor',
-        image: davidPhoto.id,
-      },
-      {
-        name: 'Marcel Rauminger',
-        role: 'Founder & Instructor',
-        image: marcelPhoto.id,
-      },
-    ],
-  }
-
-  // ── Testimonials (DE) ──
-  const testimonialsDE = {
-    blockType: 'testimonials' as const,
-    eyebrow: 'Testimonials',
-    heading: 'Was ihnen an unserem Fermentationskurs gefällt',
-    buttonLabel: 'Alle Bewertungen',
-    buttonLink: '/reviews',
-    testimonials: [
-      {
-        quote:
-          'Der Kombucha-Workshop war ein absolutes Highlight! David und Marcel erklären alles so verständlich und mit so viel Leidenschaft. Mein selbstgebrauter Kombucha schmeckt fantastisch.',
-        authorName: 'Sophie M.',
-        authorRole: 'Künstlerin',
-        rating: 5,
-      },
-      {
-        quote:
-          'Als Koch war ich beeindruckt von der Tiefe des Wissens. Die Lakto-Fermentation hat meine Speisekarte komplett verändert. Absolute Empfehlung für Profis und Hobbyköche.',
-        authorName: 'Thomas K.',
-        authorRole: 'Koch',
-        rating: 5,
-      },
-      {
-        quote:
-          'Ich habe den Tempeh-Workshop als Geschenk bekommen und es war das beste Geschenk überhaupt. Die Atmosphäre war warm und einladend, und ich habe so viel gelernt.',
-        authorName: 'Anna L.',
-        authorRole: 'Bloggerin',
-        rating: 5,
-      },
-      {
-        quote:
-          'Super organisiert, tolle Materialien und ein wunderbares Team. Mein Mann und ich machen jetzt jede Woche eigenes Sauerkraut. Danke FermentFreude!',
-        authorName: 'Maria B.',
-        authorRole: 'Lehrerin',
-        rating: 4,
-      },
-    ],
-  }
-
-  // ── Testimonials (EN) ──
-  const testimonialsEN = {
-    blockType: 'testimonials' as const,
-    eyebrow: 'Testimonials',
-    heading: 'What They Like About Our Fermentation Class',
-    buttonLabel: 'View All Reviews',
-    buttonLink: '/reviews',
-    testimonials: [
-      {
-        quote:
-          'The kombucha workshop was an absolute highlight! David and Marcel explain everything so clearly and with so much passion. My home-brewed kombucha tastes fantastic.',
-        authorName: 'Sophie M.',
-        authorRole: 'Artist',
-        rating: 5,
-      },
-      {
-        quote:
-          'As a chef, I was impressed by the depth of knowledge. The lacto-fermentation completely changed my menu. Absolutely recommended for professionals and home cooks alike.',
-        authorName: 'Thomas K.',
-        authorRole: 'Chef',
-        rating: 5,
-      },
-      {
-        quote:
-          'I received the tempeh workshop as a gift and it was the best gift ever. The atmosphere was warm and welcoming, and I learned so much.',
-        authorName: 'Anna L.',
-        authorRole: 'Blogger',
-        rating: 5,
-      },
-      {
-        quote:
-          'Super organised, great materials, and a wonderful team. My husband and I now make our own sauerkraut every week. Thank you FermentFreude!',
-        authorName: 'Maria B.',
-        authorRole: 'Teacher',
-        rating: 4,
-      },
-    ],
-  }
-
-  // ── SponsorsBar (DE) ──
-  const sponsorsBarDE = {
-    blockType: 'sponsorsBar' as const,
-    heading: 'Dieses Projekt wird unterstützt von:',
-    sponsors: [
-      { name: 'Partner 1', logo: sponsorLogo1.id, url: '' },
-      { name: 'Partner 2', logo: sponsorLogo2.id, url: '' },
-      { name: 'Partner 3', logo: sponsorLogo3.id, url: '' },
-      { name: 'Partner 4', logo: sponsorLogo4.id, url: '' },
-    ],
-  }
-
-  // ── SponsorsBar (EN) ──
-  const sponsorsBarEN = {
-    blockType: 'sponsorsBar' as const,
-    heading: 'This project is supported by:',
-    sponsors: [
-      { name: 'Partner 1', logo: sponsorLogo1.id, url: '' },
-      { name: 'Partner 2', logo: sponsorLogo2.id, url: '' },
-      { name: 'Partner 3', logo: sponsorLogo3.id, url: '' },
-      { name: 'Partner 4', logo: sponsorLogo4.id, url: '' },
-    ],
-  }
-
-  // ============================================================
-  // 3. Find or create home page
-  // ============================================================
   const existing = await payload.find({
     collection: 'pages',
     where: { slug: { equals: 'home' } },
@@ -1064,22 +331,18 @@ async function seedHome() {
     const created = await payload.create({
       collection: 'pages',
       locale: 'de',
-      draft: true, // Create as draft first to avoid validation issues
+      draft: true,
       context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
-      data: {
-        title: 'Home',
-        slug: 'home',
-        hero: { type: 'lowImpact' as const },
-        layout: [],
-      },
+      data: { title: 'Home', slug: 'home', hero: { type: 'lowImpact' as const }, layout: [] },
     })
     homeId = created.id
   }
 
-  // ============================================================
-  // 4. Update DE: hero + layout together (single save)
-  // ============================================================
-  payload.logger.info('Saving DE locale (hero + all layout blocks)...')
+  // ══════════════════════════════════════════════════════════════════════════
+  // 4. Save DE
+  // ══════════════════════════════════════════════════════════════════════════
+
+  payload.logger.info('Saving DE locale...')
 
   const layoutDE = [
     voucherCtaDE,
@@ -1111,10 +374,11 @@ async function seedHome() {
 
   payload.logger.info('✅ DE saved.')
 
-  // ============================================================
-  // 5. Read back to capture ALL auto-generated IDs
-  // ============================================================
-  payload.logger.info('Reading back to capture generated IDs...')
+  // ══════════════════════════════════════════════════════════════════════════
+  // 5. Read back to capture auto-generated IDs
+  // ══════════════════════════════════════════════════════════════════════════
+
+  payload.logger.info('Reading back generated IDs...')
 
   const freshDoc = (await payload.findByID({
     collection: 'pages',
@@ -1124,14 +388,16 @@ async function seedHome() {
   })) as Page
 
   const freshHero = (freshDoc.hero || {}) as Record<string, unknown>
-  const freshLinks = (freshHero.links || []) as WithId[]
-  const freshHeroImages = (freshHero.heroImages || []) as WithId[]
-  const freshHeroSlides = (freshHero.heroSlides || []) as (WithId & { attributes?: WithId[] })[]
+  const freshLinks = (freshHero.links || []) as { id?: string }[]
+  const freshHeroImages = (freshHero.heroImages || []) as { id?: string }[]
+  const freshHeroSlides = (freshHero.heroSlides || []) as {
+    id?: string
+    attributes?: { id?: string }[]
+  }[]
   const freshLayout = Array.isArray(freshDoc.layout) ? freshDoc.layout : []
 
-  // Helper to find blocks by type
   const findBlock = (type: string) =>
-    freshLayout.find((b) => 'blockType' in b && b.blockType === type) as BlockItem | undefined
+    freshLayout.find((b: unknown) => !!b && typeof b === 'object' && 'blockType' in b && (b as BlockItem).blockType === type) as BlockItem | undefined
 
   const wsBlock = findBlock('workshopSlider')
   const vcBlock = findBlock('voucherCta')
@@ -1146,106 +412,21 @@ async function seedHome() {
     process.exit(1)
   }
 
-  // ============================================================
-  // 6. Build EN data with same IDs from DE
-  // ============================================================
-  const heroEN_withIds = {
-    ...heroEN,
-    links: heroEN.links.map((l, i) => ({
-      ...l,
-      id: freshLinks[i]?.id,
-    })),
-    heroImages: heroEN.heroImages.map((img, i) => ({
-      ...img,
-      id: freshHeroImages[i]?.id,
-    })),
-    heroSlides: heroEN.heroSlides.map((s, i) => ({
-      ...s,
-      id: freshHeroSlides[i]?.id,
-      attributes: s.attributes.map((a: { text: string }, j: number) => ({
-        ...a,
-        id: freshHeroSlides[i]?.attributes?.[j]?.id,
-      })),
-    })),
-  }
+  // ══════════════════════════════════════════════════════════════════════════
+  // 6. Save EN reusing exact same IDs
+  // ══════════════════════════════════════════════════════════════════════════
 
-  const workshopSliderEN_withIds = {
-    ...workshopSliderEN,
-    id: wsBlock.id,
-    workshops: workshopSliderEN.workshops.map((w, i) => ({
-      ...w,
-      id: wsBlock.workshops?.[i]?.id,
-      features: w.features.map((f, j) => ({
-        ...f,
-        id: wsBlock.workshops?.[i]?.features?.[j]?.id,
-      })),
-    })),
-  }
-
-  const voucherCtaEN_withIds = {
-    ...voucherCtaEN,
-    id: vcBlock?.id,
-    galleryImages: voucherCtaEN.galleryImages.map((g, i) => ({
-      ...g,
-      id: vcBlock?.galleryImages?.[i]?.id,
-    })),
-  }
-
-  const heroBannerEN_withIds = {
-    ...heroBannerEN,
-    id: hbBlock?.id,
-  }
-
-  const featureCardsEN_withIds = {
-    ...featureCardsEN,
-    id: fcBlock?.id,
-    cards: featureCardsEN.cards.map((c, i) => ({
-      ...c,
-      id: fcBlock?.cards?.[i]?.id,
-    })),
-  }
-
-  const teamPreviewEN_withIds = {
-    ...teamPreviewEN,
-    id: tpBlock?.id,
-    members: teamPreviewEN.members.map((m, i) => ({
-      ...m,
-      id: tpBlock?.members?.[i]?.id,
-    })),
-  }
-
-  const testimonialsEN_withIds = {
-    ...testimonialsEN,
-    id: tmBlock?.id,
-    testimonials: testimonialsEN.testimonials.map((t, i) => ({
-      ...t,
-      id: tmBlock?.testimonials?.[i]?.id,
-    })),
-  }
-
-  const sponsorsBarEN_withIds = {
-    ...sponsorsBarEN,
-    id: sbBlock?.id,
-    sponsors: sponsorsBarEN.sponsors.map((s, i) => ({
-      ...s,
-      id: sbBlock?.sponsors?.[i]?.id,
-    })),
-  }
+  payload.logger.info('Saving EN locale (reusing IDs from DE)...')
 
   const layoutEN = [
-    voucherCtaEN_withIds,
-    featureCardsEN_withIds,
-    heroBannerEN_withIds,
-    workshopSliderEN_withIds,
-    teamPreviewEN_withIds,
-    testimonialsEN_withIds,
-    sponsorsBarEN_withIds,
+    mergeVoucherCtaEN(voucherCtaEN, vcBlock ?? {}),
+    mergeFeatureCardsEN(featureCardsEN, fcBlock ?? {}),
+    mergeHeroBannerEN(heroBannerEN, hbBlock ?? {}),
+    mergeWorkshopSliderEN(workshopSliderEN, wsBlock),
+    mergeTeamPreviewEN(teamPreviewEN, tpBlock ?? {}),
+    mergeTestimonialsEN(testimonialsEN, tmBlock ?? {}),
+    mergeSponsorsBarEN(sponsorsBarEN, sbBlock ?? {}),
   ]
-
-  // ============================================================
-  // 7. Update EN: hero + layout together (single save, same IDs)
-  // ============================================================
-  payload.logger.info('Saving EN locale (hero + all blocks with matching IDs)...')
 
   await payload.update({
     collection: 'pages',
@@ -1255,7 +436,7 @@ async function seedHome() {
     data: {
       _status: 'published',
       title: 'Home',
-      hero: heroEN_withIds,
+      hero: mergeHeroSliderEN(heroEN, freshLinks, freshHeroImages, freshHeroSlides),
       layout: layoutEN,
       meta: {
         title: 'FermentFreude — Good food, better health, real joy',
@@ -1267,17 +448,10 @@ async function seedHome() {
 
   payload.logger.info('✅ EN saved.')
   payload.logger.info('')
-  payload.logger.info('🎉 Home page fully seeded (DE + EN) with all blocks:')
-  payload.logger.info('   • Hero Slider (4 slides with product images)')
-  payload.logger.info('   • Workshop Slider (Lakto, Kombucha, Tempeh)')
-  payload.logger.info('   • Voucher CTA (gift experience)')
-  payload.logger.info('   • Hero Banner (for chefs)')
-  payload.logger.info('   • Feature Cards (why fermentation)')
-  payload.logger.info('   • Team Preview (David & Marcel)')
-  payload.logger.info('   • Testimonials (4 reviews)')
-  payload.logger.info('   • Sponsors Bar (4 logos)')
-  payload.logger.info('   All images uploaded to Media (Cloudflare R2).')
-  payload.logger.info('   Switch locale in admin to verify both languages.')
+  payload.logger.info('🎉 Home page fully seeded (DE + EN):')
+  payload.logger.info('   • Hero Slider   • Workshop Slider   • Voucher CTA')
+  payload.logger.info('   • Hero Banner   • Feature Cards     • Team Preview')
+  payload.logger.info('   • Testimonials  • Sponsors Bar')
   process.exit(0)
 }
 
