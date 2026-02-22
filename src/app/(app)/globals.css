@@ -334,6 +334,65 @@
 
 @plugin "@tailwindcss/typography";
 
+/* ── Splash Screen ────────────────────────────────────────────── */
+.splash-overlay {
+  will-change: transform;
+}
+
+/* CodePen-faithful SVG path morph: thin line → wavy curve → full fill
+   viewBox 0 0 469.539032 263.986786 — paths animate via CSS d property.
+   Power2.easeIn  ≈ cubic-bezier(0.55, 0.085, 0.68, 0.53)
+   Power2.easeOut ≈ cubic-bezier(0.25, 0.46, 0.45, 0.94) */
+.splash-wave-morph {
+  animation: splash-wave-morph 3s forwards;
+}
+
+.splash-wave-close {
+  animation: splash-wave-close 2s forwards;
+}
+
+/* Open wave: thin line at bottom → wavy → full rect (rises upward) */
+@keyframes splash-wave-morph {
+  0% {
+    d: path(
+      'M469.539032,263.986786H-0.000001L0,263.557617c66.11113,0.429169,351.088104,0.429169,469.539032,0.208344V263.986786z'
+    );
+    animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  }
+  50% {
+    d: path(
+      'M469.539032,263.986786H-0.000001L0,229.890961c310.649475,58.156982,255.61113,-98.5,469.539032,-65.062302V263.986786z'
+    );
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  100% {
+    d: path(
+      'M469.539032,263.986786H-0.000001L0,0c226.11113,0,182.887283,-0.414484,469.539032,0V263.986786z'
+    );
+  }
+}
+
+/* Close wave: full rect anchored to top → wavy → thin line at top (exits upward) */
+@keyframes splash-wave-close {
+  0% {
+    d: path(
+      'M469.539032,0H-0.000001L0,263.986786c226.11113,0,182.887283,0.414484,469.539032,0V0z'
+    );
+    animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  }
+  50% {
+    d: path(
+      'M469.539032,0H-0.000001L0,34.095825c310.649475,-58.156982,255.61113,98.5,469.539032,65.062302V0z'
+    );
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  100% {
+    d: path(
+      'M469.539032,0H-0.000001L0,0.429169c66.11113,-0.429169,351.088104,-0.429169,469.539032,-0.208344V0z'
+    );
+  }
+}
+
 /* ── Block Animations ────────────────────────────────────────── */
 @keyframes fade-in {
   from {

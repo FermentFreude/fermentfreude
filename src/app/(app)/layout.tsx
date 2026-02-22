@@ -4,6 +4,7 @@ import { AdminBar } from '@/components/AdminBar'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { SplashScreen } from '@/components/SplashScreen'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { getLocale } from '@/utilities/getLocale'
@@ -22,6 +23,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body suppressHydrationWarning={true}>
         <Providers>
+          <SplashScreen />
           <AdminBar />
           <LivePreviewListener />
 
