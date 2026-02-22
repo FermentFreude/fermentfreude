@@ -14,6 +14,8 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
+import type { Page } from '@/payload-types'
+
 import {
   ourStoryDE,
   ourStoryEN,
@@ -218,7 +220,7 @@ async function seedBootstrap() {
     teamCardsDE(), // no images
     sponsorsBarDE(), // empty sponsors
     readyToLearnDE(),
-  ] as Record<string, unknown>[]
+  ] as NonNullable<Page['layout']>
 
   const aboutPage = await payload.create({
     collection: 'pages',
@@ -233,8 +235,7 @@ async function seedBootstrap() {
       slug: 'about',
       _status: 'published',
       hero: aboutHeroDE,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      layout: aboutLayoutDE as any,
+      layout: aboutLayoutDE,
     },
   })
 
@@ -298,7 +299,7 @@ async function seedBootstrap() {
         { ...enTeamCards, id: blockIds[1] },
         { ...enSponsorsBar, id: blockIds[2] },
         { ...readyToLearnEN(), id: blockIds[3] },
-      ] as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      ] as NonNullable<Page['layout']>,
     },
   })
 
