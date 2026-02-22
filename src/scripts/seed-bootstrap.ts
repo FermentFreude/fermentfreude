@@ -233,6 +233,7 @@ async function seedBootstrap() {
       slug: 'about',
       _status: 'published',
       hero: aboutHeroDE,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       layout: aboutLayoutDE as any,
     },
   })
@@ -297,7 +298,7 @@ async function seedBootstrap() {
         { ...enTeamCards, id: blockIds[1] },
         { ...enSponsorsBar, id: blockIds[2] },
         { ...readyToLearnEN(), id: blockIds[3] },
-      ] as any,
+      ] as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   })
 

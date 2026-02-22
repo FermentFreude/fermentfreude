@@ -1186,6 +1186,7 @@ async function seedHome() {
     id: vcBlock?.id,
     galleryImages: voucherCtaEN.galleryImages.map((g, i) => ({
       ...g,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       id: (vcBlock as any)?.galleryImages?.[i]?.id,
     })),
   }
