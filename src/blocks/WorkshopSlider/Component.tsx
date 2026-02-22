@@ -6,13 +6,14 @@ import type {
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
 import { cn } from '@/utilities/cn'
-import Link from 'next/link'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+
+gsap.registerPlugin(ScrollTrigger)
 
 /* ═══════════════════════════════════════════════════════════════
  *  HARDCODED DEFAULTS (English)
- *  Shows immediately without any CMS setup.
- *  CMS data always wins when available.
  * ═══════════════════════════════════════════════════════════════ */
 
 const DEFAULT_EYEBROW = 'Workshop Experience'
@@ -62,16 +63,11 @@ const DEFAULT_WORKSHOPS = [
   },
 ]
 
-const DEFAULT_ALL_WORKSHOPS_BUTTON_LABEL = 'All Workshops'
-const DEFAULT_ALL_WORKSHOPS_LINK = '/workshops'
-
 /* ═══════════════════════════════════════════════════════════════ */
 
-type Props = WorkshopSliderBlockType & {
-  id?: string
-}
+type Props = WorkshopSliderBlockType & { id?: string }
 
-/** Format index as zero-padded number (e.g. 0 → "01") */
+/** Zero-padded index string (0 → "01") */
 function padIndex(i: number): string {
   return String(i + 1).padStart(2, '0')
 }
@@ -90,41 +86,43 @@ const themeStyles = {
     descColor: 'text-[#1A1A1A]',
     cardBg: 'bg-[var(--ff-ivory-mist,#FAF2E0)]',
     cardText: 'text-black',
-    cardDivider: 'border-black',
-    stepNumColor: 'text-[#C1C1C1]',
-    stepLineColor: 'border-[#C1C1C1]',
-    arrowBg: 'bg-[var(--ff-ivory-mist,#FCF4EA)]',
-    arrowIcon: 'text-[#C1C1C1]',
+    cardDivider: 'border-black/15',
   },
   dark: {
     titleColor: 'text-[#555954]',
     descColor: 'text-[#4B4B4B]',
     cardBg: 'bg-[#4B4B4B]',
     cardText: 'text-[#FCF4EA]',
-    cardDivider: 'border-[#FCF4EA]',
-    stepNumColor: 'text-[#351C0B]',
-    stepLineColor: 'border-[#351C0B]',
-    arrowBg: 'bg-[#4B4B4B]',
-    arrowIcon: 'text-[#E6BE68]',
+    cardDivider: 'border-[#FCF4EA]/20',
   },
 }
+
+/* ═══════════════════════════════════════════════════════════════
+ *  COMPONENT
+ *
+ *  Desktop (lg+): GSAP-pinned horizontal parallax scroll.
+ *    Vertical page scroll drives horizontal panel movement.
+ *    Each workshop image has an independent parallax offset.
+ *    (Codrops "Smooth Horizontal Parallax Gallery" style)
+ *
+ *  Mobile: panels stack vertically, natural scroll, no pinning.
+ * ═══════════════════════════════════════════════════════════════ */
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
   eyebrow,
   workshops,
-  allWorkshopsButtonLabel,
-  allWorkshopsLink,
   id,
 }) => {
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const slideRefs = useRef<(HTMLDivElement | null)[]>([])
+  const sectionRef = useRef<HTMLElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const panelRefs = useRef<(HTMLDivElement | null)[]>([])
+  const imageInnerRefs = useRef<(HTMLDivElement | null)[]>([])
+  const scrollTriggerRef = useRef<ScrollTrigger | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
-  const [visibilities, setVisibilities] = useState<number[]>([])
+  const [progress, setProgress] = useState(0)
 
-  /* ── Merge CMS data with defaults ──────────────────────────── */
+  /* ── Merge CMS data with defaults ────────────────────────── */
   const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
-  const resolvedAllWorkshopsLabel = allWorkshopsButtonLabel || DEFAULT_ALL_WORKSHOPS_BUTTON_LABEL
-  const resolvedAllWorkshopsLink = allWorkshopsLink || DEFAULT_ALL_WORKSHOPS_LINK
   const resolvedWorkshops =
     workshops && workshops.length > 0
       ? workshops.map((w, i) => ({
@@ -132,135 +130,240 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           description: w.description || DEFAULT_WORKSHOPS[i]?.description || '',
           theme: (w.theme as 'light' | 'dark') || DEFAULT_WORKSHOPS[i]?.theme || 'light',
           features:
-            w.features && w.features.length > 0 ? w.features : DEFAULT_WORKSHOPS[i]?.features || [],
+            w.features && w.features.length > 0
+              ? w.features
+              : DEFAULT_WORKSHOPS[i]?.features || [],
           image: resolveMedia(w.image as MediaType | string | number | null | undefined),
           ctaLink: w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || '#',
-          detailsButtonLabel:
-            w.detailsButtonLabel || DEFAULT_WORKSHOPS[i]?.detailsButtonLabel || 'Workshop Details',
         }))
       : DEFAULT_WORKSHOPS.map((w) => ({ ...w, image: null as MediaType | null }))
 
   const total = resolvedWorkshops.length
 
-  /* ── Track visibility per slide via IntersectionObserver ──── */
+  /* ── GSAP horizontal parallax scroll (desktop only) ──────── */
   useEffect(() => {
-    const vis = new Array(total).fill(0)
-    const observers: IntersectionObserver[] = []
+    const section = sectionRef.current
+    const track = trackRef.current
+    if (!section || !track) return
 
-    slideRefs.current.forEach((el, idx) => {
-      if (!el) return
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry) return
-          vis[idx] = entry.intersectionRatio
-          setVisibilities([...vis])
-          if (entry.intersectionRatio > 0.5) {
+    const mm = gsap.matchMedia()
+
+    mm.add('(min-width: 1024px)', () => {
+      const totalScroll = track.scrollWidth - window.innerWidth
+
+      /* Main horizontal scroll tween, scrubbed by vertical scroll */
+      const scrollTween = gsap.to(track, {
+        x: -totalScroll,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          pin: true,
+          scrub: 0.6,
+          end: () => `+=${totalScroll}`,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            setProgress(self.progress)
+            const idx = Math.min(
+              total - 1,
+              Math.round(self.progress * (total - 1)),
+            )
             setActiveIndex(idx)
-          }
+          },
         },
-        {
-          root: scrollRef.current,
-          threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-        },
-      )
-      obs.observe(el)
-      observers.push(obs)
+      })
+
+      scrollTriggerRef.current = scrollTween.scrollTrigger ?? null
+
+      /* Parallax offset on each image (Codrops-style) */
+      imageInnerRefs.current.forEach((img, i) => {
+        if (!img || !panelRefs.current[i]) return
+        gsap.fromTo(
+          img,
+          { xPercent: -8 },
+          {
+            xPercent: 8,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: panelRefs.current[i]!,
+              containerAnimation: scrollTween,
+              scrub: true,
+              start: 'left right',
+              end: 'right left',
+            },
+          },
+        )
+      })
+
+      /* Fade-in text per panel */
+      panelRefs.current.forEach((panel) => {
+        if (!panel) return
+        const texts = panel.querySelectorAll('[data-anim="fade"]')
+        gsap.fromTo(
+          texts,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.08,
+            ease: 'power3.out',
+            duration: 0.8,
+            scrollTrigger: {
+              trigger: panel,
+              containerAnimation: scrollTween,
+              start: 'left 80%',
+              end: 'left 30%',
+              toggleActions: 'play none none reverse',
+            },
+          },
+        )
+      })
     })
 
-    return () => observers.forEach((o) => o.disconnect())
+    return () => {
+      mm.revert()
+      scrollTriggerRef.current = null
+    }
   }, [total])
 
-  /* ── Navigate via arrows ───────────────────────────────────── */
-  const scrollToSlide = useCallback(
+  /* ── Navigate via arrows ─────────────────────────────────── */
+  const scrollToWorkshop = useCallback(
     (index: number) => {
-      const el = scrollRef.current
-      if (!el) return
+      const st = scrollTriggerRef.current
+      if (!st) return
       const clamped = Math.max(0, Math.min(index, total - 1))
-      const slide = el.children[clamped] as HTMLElement | undefined
-      if (slide) {
-        el.scrollTo({ left: slide.offsetLeft, behavior: 'smooth' })
-      }
+      const targetProgress = clamped / Math.max(1, total - 1)
+      const targetScroll = st.start + (st.end - st.start) * targetProgress
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' })
     },
     [total],
   )
 
-  const handlePrev = useCallback(() => scrollToSlide(activeIndex - 1), [activeIndex, scrollToSlide])
-  const handleNext = useCallback(() => scrollToSlide(activeIndex + 1), [activeIndex, scrollToSlide])
+  const handlePrev = useCallback(
+    () => scrollToWorkshop(activeIndex - 1),
+    [activeIndex, scrollToWorkshop],
+  )
+  const handleNext = useCallback(
+    () => scrollToWorkshop(activeIndex + 1),
+    [activeIndex, scrollToWorkshop],
+  )
 
-  /* ── Render ────────────────────────────────────────────────── */
+  /* ═══════════════════════════════════════════════════════════ */
+  /*  RENDER                                                    */
+  /* ═══════════════════════════════════════════════════════════ */
+
   return (
-    <section id={id ?? undefined} className="w-full section-padding-sm">
-      {/* ── Horizontal scroll track ──────────────────────────── */}
+    <section
+      ref={sectionRef}
+      id={id ?? undefined}
+      className="relative py-16 lg:py-0 lg:h-screen lg:overflow-hidden"
+    >
+      {/* ── Horizontal track ─────────────────────────────────── */}
       <div
-        ref={scrollRef}
+        ref={trackRef}
         className={cn(
-          'flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory',
-          'scroll-smooth scrollbar-none',
+          'flex flex-col gap-20',
+          'lg:flex-row lg:gap-0 lg:h-full lg:will-change-transform',
         )}
-        style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {resolvedWorkshops.map((workshop, wIdx) => {
           const feats = workshop.features ?? []
-          const ratio = visibilities[wIdx] ?? (wIdx === 0 ? 1 : 0)
-          const scale = 0.92 + 0.08 * ratio
-          const opacity = 0.35 + 0.65 * ratio
           const t = themeStyles[workshop.theme] ?? themeStyles.light
 
           return (
             <div
               key={wIdx}
               ref={(el) => {
-                slideRefs.current[wIdx] = el
+                panelRefs.current[wIdx] = el
               }}
-              className="snap-center shrink-0 w-screen"
+              className={cn(
+                'shrink-0 flex flex-col lg:flex-row items-start lg:items-center',
+                'w-full lg:w-screen lg:h-full',
+                'px-6 sm:px-8 lg:px-0',
+              )}
             >
-              <div
-                className="max-w-369 mx-auto px-(--space-container-x,1.5rem) flex flex-col gap-6 lg:gap-8"
-                style={{
-                  opacity,
-                  transform: `scale(${scale})`,
-                  transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
-                  transformOrigin: 'center top',
-                }}
-              >
-                {/* ── Eyebrow ─────────────────────────────── */}
-                <span className="text-(--ff-gold-accent,#E5B765) font-display font-black text-lg lg:text-[1.75rem] leading-snug">
+              {/* ── Left column: text + features ── */}
+              <div className="w-full lg:w-[42%] lg:h-full flex flex-col justify-center lg:pl-12 xl:pl-20 2xl:pl-24 lg:pr-6 xl:pr-10 py-6 lg:py-0">
+                {/* Eyebrow */}
+                <span
+                  data-anim="fade"
+                  className="text-(--ff-gold-accent,#E5B765) font-display font-black text-lg lg:text-[1.75rem] leading-snug"
+                >
                   {resolvedEyebrow}
                 </span>
 
-                {/* ── Counter ─────────────────────────────── */}
-                <span className="font-sans text-base lg:text-xl tabular-nums self-end -mt-12 lg:-mt-14">
-                  <span className="text-[#351C0B]">{activeIndex + 1}/ </span>
-                  <span className="text-[#351C0B]/30">{total}</span>
-                </span>
+                {/* Title */}
+                <h2
+                  data-anim="fade"
+                  className={cn(
+                    'font-display font-black tracking-tight',
+                    'text-4xl sm:text-5xl lg:text-6xl xl:text-[5rem] leading-[1.1]',
+                    'mt-3 lg:mt-5',
+                    t.titleColor,
+                  )}
+                >
+                  {workshop.title}
+                </h2>
 
-                {/* ── Title + Description ─────────────────── */}
-                <div className="flex flex-col">
-                  <h2
-                    className={cn(
-                      'font-display font-black leading-[1.2] tracking-tight',
-                      'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5rem]',
-                      t.titleColor,
-                    )}
-                  >
-                    {workshop.title}
-                  </h2>
-                  <p
-                    className={cn(
-                      'font-display font-bold text-base sm:text-lg lg:text-2xl',
-                      'leading-relaxed max-w-[55ch] whitespace-pre-line mt-2 lg:mt-4',
-                      workshop.theme === 'light' ? 'font-bold' : 'font-medium',
-                      t.descColor,
-                    )}
-                  >
-                    {workshop.description}
-                  </p>
+                {/* Description */}
+                <p
+                  data-anim="fade"
+                  className={cn(
+                    'font-display text-base sm:text-lg lg:text-xl',
+                    'leading-relaxed whitespace-pre-line max-w-[48ch]',
+                    'mt-3 lg:mt-4',
+                    workshop.theme === 'light' ? 'font-bold' : 'font-medium',
+                    t.descColor,
+                  )}
+                >
+                  {workshop.description}
+                </p>
+
+                {/* Feature card */}
+                <div
+                  data-anim="fade"
+                  className={cn(
+                    'mt-6 lg:mt-8 rounded-4xl px-6 lg:px-8 py-8 lg:py-10',
+                    t.cardBg,
+                  )}
+                >
+                  {feats.map((feature, fIdx) => (
+                    <React.Fragment key={fIdx}>
+                      <div
+                        className={cn('w-full border-t', t.cardDivider)}
+                        style={{ borderWidth: '0.84px' }}
+                      />
+                      <p
+                        className={cn(
+                          'font-display font-bold text-sm sm:text-base lg:text-lg',
+                          'leading-relaxed py-2.5 lg:py-3',
+                          t.cardText,
+                        )}
+                      >
+                        <span className="opacity-30 mr-3 tabular-nums text-xs font-bold">
+                          {padIndex(fIdx)}
+                        </span>
+                        {(feature as { text?: string }).text}
+                      </p>
+                    </React.Fragment>
+                  ))}
+                  {feats.length > 0 && (
+                    <div
+                      className={cn('w-full border-t', t.cardDivider)}
+                      style={{ borderWidth: '0.84px' }}
+                    />
+                  )}
                 </div>
+              </div>
 
-                {/* ── Image + Features layout ────────────────── */}
-                <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-10">
-                  {/* Image with nav button overlay */}
-                  <div className="relative w-full lg:w-[60%] aspect-879/495 rounded-2xl lg:rounded-3xl overflow-hidden shrink-0">
+              {/* ── Right column: image with parallax ── */}
+              <div className="w-full lg:w-[58%] lg:h-full flex items-center lg:py-8 lg:pr-8 xl:pr-16">
+                <div className="relative w-full aspect-16/10 lg:aspect-auto lg:h-[80vh] rounded-2xl lg:rounded-3xl overflow-hidden">
+                  <div
+                    ref={(el) => {
+                      imageInnerRefs.current[wIdx] = el
+                    }}
+                    className="relative w-full h-full lg:w-[120%] lg:-ml-[10%]"
+                  >
                     {workshop.image ? (
                       <Media
                         resource={workshop.image}
@@ -275,99 +378,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                         </span>
                       </div>
                     )}
-
-                    {/* Circular nav arrow overlaying the image */}
-                    <button
-                      onClick={handleNext}
-                      disabled={activeIndex === total - 1}
-                      aria-label="Next workshop"
-                      className={cn(
-                        'absolute bottom-4 left-1/2 -translate-x-1/2',
-                        'w-14 h-14 lg:w-17.5 lg:h-17.5 rounded-full',
-                        'flex items-center justify-center',
-                        'transition-all duration-300',
-                        'disabled:opacity-30 disabled:pointer-events-none',
-                        t.arrowBg,
-                      )}
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        className={cn('w-4 h-4 lg:w-5 lg:h-5', t.arrowIcon)}
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2.5}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M6 9l6 6 6-6" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Numbers + Feature card */}
-                  <div className="flex items-start gap-3 lg:gap-5 w-full lg:w-auto">
-                    {/* Numbered step indicators — hidden on mobile */}
-                    <div className="hidden sm:flex flex-col items-end shrink-0 pt-16 lg:pt-25">
-                      {feats.map((_, fIdx) => (
-                        <React.Fragment key={fIdx}>
-                          <span
-                            className={cn(
-                              'font-display font-bold text-base lg:text-xl tabular-nums py-2 lg:py-3',
-                              t.stepNumColor,
-                            )}
-                          >
-                            {padIndex(fIdx)}
-                          </span>
-                          {fIdx < feats.length - 1 && (
-                            <div
-                              className={cn('w-48.25 border-t', t.stepLineColor)}
-                              style={{ borderWidth: '0.84px' }}
-                            />
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </div>
-
-                    {/* Feature card */}
-                    <div
-                      className={cn(
-                        'rounded-[42px] backdrop-blur-sm',
-                        'px-6 sm:px-8 lg:px-11 py-12 sm:py-16 lg:py-25',
-                        'w-full sm:w-auto sm:min-w-[320px] lg:min-w-100 xl:min-w-140.25',
-                        'flex flex-col items-center justify-center gap-2.5',
-                        t.cardBg,
-                      )}
-                    >
-                      {feats.map((feature, fIdx) => (
-                        <React.Fragment key={fIdx}>
-                          {/* Divider line */}
-                          <div
-                            className={cn('w-full max-w-119.25 border-t', t.cardDivider)}
-                            style={{ borderWidth: '0.84px' }}
-                          />
-                          {/* Feature text */}
-                          <p
-                            className={cn(
-                              'w-full max-w-119.25 font-display font-bold text-base lg:text-xl leading-relaxed',
-                              t.cardText,
-                            )}
-                          >
-                            {/* Mobile-only number prefix */}
-                            <span className="sm:hidden text-xs opacity-50 mr-2 tabular-nums">
-                              {padIndex(fIdx)}
-                            </span>
-                            {(feature as { text?: string }).text}
-                          </p>
-                        </React.Fragment>
-                      ))}
-                      {/* Final divider */}
-                      {feats.length > 0 && (
-                        <div
-                          className={cn('w-full max-w-119.25 border-t', t.cardDivider)}
-                          style={{ borderWidth: '0.84px' }}
-                        />
-                      )}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -376,118 +386,71 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
         })}
       </div>
 
-      {/* ──── Bottom controls ─────────────────────────────────── */}
-      <div className="max-w-369 mx-auto px-(--space-container-x,1.5rem)">
+      {/* ── Bottom controls (desktop only, absolute inside pinned section) ── */}
+      <div className="hidden lg:flex absolute bottom-6 xl:bottom-8 left-0 right-0 z-10 items-center px-12 xl:px-20 2xl:px-24 gap-6">
         {/* Progress bar */}
-        <div className="flex items-center gap-6 mt-6 lg:mt-8">
-          <div className="flex-1 h-0.75 bg-(--ff-near-black,#1a1a1a)/10 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-(--ff-near-black,#1a1a1a) rounded-full transition-all duration-300"
-              style={{
-                width: `${(1 / total) * 100}%`,
-                transform: `translateX(${activeIndex * 100}%)`,
-              }}
-            />
-          </div>
+        <div className="flex-1 h-0.75 bg-black/10 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-(--ff-charcoal,#4B4B4B) rounded-full"
+            style={{ width: `${progress * 100}%`, transition: 'none' }}
+          />
         </div>
 
-        {/* Navigation + CTA row */}
-        <div className="flex items-center justify-between mt-5 lg:mt-6">
-          {/* Prev / "+" / Next */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={handlePrev}
-              aria-label="Previous workshop"
-              disabled={activeIndex === 0}
-              className={cn(
-                'w-10 h-10 sm:w-11 sm:h-11 rounded-full border',
-                'border-(--ff-near-black,#1a1a1a)/20',
-                'flex items-center justify-center transition-all duration-300',
-                'text-(--ff-near-black,#1a1a1a)',
-                'hover:bg-(--ff-near-black,#1a1a1a)/5 hover:border-(--ff-near-black,#1a1a1a)/40',
-                'disabled:opacity-30 disabled:pointer-events-none',
-              )}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-4 h-4 sm:w-5 sm:h-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
+        {/* Counter */}
+        <span className="font-display font-bold text-lg tabular-nums text-[#351C0B] shrink-0 select-none">
+          {activeIndex + 1}
+          <span className="opacity-30">/ {total}</span>
+        </span>
 
-            {/* "+" detail button */}
-            <Link
-              href={resolvedWorkshops[activeIndex]?.ctaLink || '#'}
-              aria-label={`More about ${resolvedWorkshops[activeIndex]?.title}`}
-              className={cn(
-                'inline-flex items-center justify-center',
-                'w-10 h-10 sm:w-11 sm:h-11 rounded-full',
-                'bg-(--ff-charcoal-dark,#403c39) text-(--ff-ivory-mist,#faf2e0)',
-                'transition-all duration-300 ease-out',
-                'hover:bg-(--ff-ivory-mist,#faf2e0) hover:text-(--ff-charcoal-dark,#403c39) hover:scale-110',
-              )}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </Link>
-
-            <button
-              onClick={handleNext}
-              aria-label="Next workshop"
-              disabled={activeIndex === total - 1}
-              className={cn(
-                'w-10 h-10 sm:w-11 sm:h-11 rounded-full border',
-                'border-(--ff-near-black,#1a1a1a)/20',
-                'flex items-center justify-center transition-all duration-300',
-                'text-(--ff-near-black,#1a1a1a)',
-                'hover:bg-(--ff-near-black,#1a1a1a)/5 hover:border-(--ff-near-black,#1a1a1a)/40',
-                'disabled:opacity-30 disabled:pointer-events-none',
-              )}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-4 h-4 sm:w-5 sm:h-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-          </div>
-
-          {/* "All Workshops" */}
-          <Link
-            href={resolvedAllWorkshopsLink}
+        {/* Arrows */}
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={handlePrev}
+            disabled={activeIndex === 0}
+            aria-label="Previous workshop"
             className={cn(
-              'inline-flex items-center justify-center',
-              'rounded-full',
-              'px-6 py-2.5 text-base',
-              'bg-(--ff-charcoal-dark,#403c39) text-(--ff-ivory-mist,#faf2e0)',
-              'font-display font-bold',
-              'transition-all duration-300 ease-out',
-              'hover:bg-(--ff-ivory-mist,#faf2e0) hover:text-(--ff-charcoal-dark,#403c39) hover:scale-[1.03] active:scale-[0.97]',
+              'w-11 h-11 rounded-full border border-[#B3B3B3]',
+              'flex items-center justify-center transition-colors duration-200',
+              'hover:border-[#4B4B4B]',
+              'disabled:opacity-30 disabled:pointer-events-none',
             )}
           >
-            {resolvedAllWorkshopsLabel}
-          </Link>
+            <svg
+              viewBox="0 0 24 24"
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={activeIndex === total - 1}
+            aria-label="Next workshop"
+            className={cn(
+              'w-11 h-11 rounded-full',
+              'bg-(--ff-charcoal,#4B4B4B) text-white',
+              'flex items-center justify-center transition-colors duration-200',
+              'hover:bg-[#333]',
+              'disabled:opacity-30 disabled:pointer-events-none',
+            )}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
         </div>
       </div>
     </section>
