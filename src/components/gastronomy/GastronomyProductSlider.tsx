@@ -98,7 +98,7 @@ export function GastronomyProductSlider({ slides, ctaLabel, ctaUrl }: Props) {
             >
               {/* Left: product image (~2/3) — diagonal edge, dark overlay */}
               <div
-                className="relative min-h-[40vh] overflow-hidden md:min-h-0 md:w-[65%]"
+                className="relative min-h-[40vh] overflow-hidden md:min-h-0 md:w-[58%] lg:w-[65%]"
                 style={{
                   clipPath: 'polygon(0 0, 100% 0, 85% 100%, 0 100%)',
                   backgroundColor: '#333333',
@@ -127,9 +127,9 @@ export function GastronomyProductSlider({ slides, ctaLabel, ctaUrl }: Props) {
               </div>
 
               {/* Right: light off-white/beige panel — same structure & spacing as Kitchen Knives */}
-              <div className="relative flex flex-1 flex-col justify-between bg-[#f5f4f2] py-12 pl-8 pr-6 md:py-16 md:pl-16 md:pr-10 lg:py-20 lg:pl-24 lg:pr-14">
+              <div className="relative flex flex-1 flex-col justify-between bg-[#f5f4f2] py-12 pl-8 pr-6 md:py-16 md:pl-12 md:pr-8 lg:pl-24 lg:pr-14 lg:py-20">
                 <div className="flex flex-1 flex-col justify-center">
-                  <h1 className="font-display text-3xl font-bold leading-tight text-[#1b1b1b] sm:text-4xl md:text-5xl lg:text-[3.75rem] lg:leading-[1.1]">
+                  <h1 className="font-display text-3xl font-bold leading-tight text-[#1b1b1b] sm:text-4xl md:text-4xl lg:text-[3.75rem] lg:leading-[1.1]">
                     {slide.title}
                   </h1>
                   {slide.description && (

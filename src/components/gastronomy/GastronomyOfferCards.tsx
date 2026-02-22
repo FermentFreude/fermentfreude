@@ -47,7 +47,7 @@ export function GastronomyOfferCards({ title, cards }: Props) {
         <h2 className="mb-10 font-display text-3xl font-bold text-ff-black md:text-4xl">
           {title}
         </h2>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((card, i) => (
             <div
               key={card.id ?? i}
