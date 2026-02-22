@@ -103,7 +103,7 @@
     "vitest": "4.0.18"
   },
   "engines": {
-    "node": "20.x"
+    "node": "^18.20.2 || >=20.9.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
