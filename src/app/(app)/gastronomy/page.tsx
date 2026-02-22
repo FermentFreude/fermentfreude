@@ -158,7 +158,7 @@ export default async function GastronomyPage() {
                 key={card.id ?? i}
                 className="overflow-hidden rounded-2xl bg-white shadow-md transition-shadow hover:shadow-lg"
               >
-                <div className="relative aspect-[5/4] overflow-hidden rounded-t-2xl">
+                <div className="relative aspect-5/4 overflow-hidden rounded-t-2xl">
                   {isResolvedMedia(card.image) ? (
                     <Media resource={card.image} fill imgClassName="object-cover" />
                   ) : (
@@ -222,7 +222,7 @@ export default async function GastronomyPage() {
       <section className="px-6 py-8 md:px-12 lg:px-20">
         <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl">
           {isResolvedMedia(collaborateImage) ? (
-            <div className="relative min-h-[220px] aspect-[4/3] md:aspect-[21/9] md:min-h-[280px]">
+            <div className="relative min-h-55 aspect-4/3 md:aspect-21/9 md:min-h-70">
               <Media
                 resource={collaborateImage}
                 fill
@@ -240,7 +240,7 @@ export default async function GastronomyPage() {
               </div>
             </div>
           ) : (
-            <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl bg-ff-charcoal px-6 py-12 md:aspect-[21/9] md:min-h-[280px] md:py-0">
+            <div className="flex min-h-55 flex-col items-center justify-center rounded-2xl bg-ff-charcoal px-6 py-12 md:aspect-21/9 md:min-h-70 md:py-0">
               <h2 className="text-center font-display text-2xl font-bold text-white md:text-4xl lg:text-5xl">
                 {collaborateTitle}
               </h2>

@@ -247,9 +247,9 @@ async function seedBootstrap() {
   })
 
   const blocks = createdAbout.layout ?? []
-  const ourStoryBlock = blocks[0] as Record<string, unknown>
-  const teamCardsBlock = blocks[1] as Record<string, unknown>
-  const sponsorsBarBlock = blocks[2] as Record<string, unknown>
+  const ourStoryBlock = blocks[0] as unknown as Record<string, unknown>
+  const teamCardsBlock = blocks[1] as unknown as Record<string, unknown>
+  const sponsorsBarBlock = blocks[2] as unknown as Record<string, unknown>
 
   const paragraphIds = ((ourStoryBlock?.paragraphs ?? []) as Array<{ id?: string }>).map(
     (p) => p.id,

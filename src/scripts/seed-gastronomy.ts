@@ -37,14 +37,14 @@ const LEXICAL_ROOT_WITH_PARAGRAPH = {
         type: 'paragraph' as const,
         children: [{ type: 'text' as const, detail: 0, format: 0, mode: 'normal' as const, style: '', text: '', version: 1 }],
         direction: 'ltr' as const,
-        format: '',
+        format: '' as const,
         indent: 0,
         textFormat: 0,
         version: 1,
       },
     ],
     direction: 'ltr' as const,
-    format: '',
+    format: '' as const,
     indent: 0,
     version: 1,
   },
@@ -484,7 +484,7 @@ async function seedGastronomy() {
       id: pageId,
       locale: 'de',
       depth: 0,
-    })) as Record<string, unknown>
+    })) as unknown as Record<string, unknown>
 
     const gastronomyDE = (freshDE.gastronomy ?? {}) as Record<string, unknown>
     const offerCardsDE = (gastronomyDE.gastronomyOfferCards as Array<{ id?: string }>) ?? []
@@ -563,7 +563,7 @@ async function seedGastronomy() {
     id: page.id,
     locale: 'de',
     depth: 0,
-  })) as Record<string, unknown>
+  })) as unknown as Record<string, unknown>
 
   const gastronomyDE = (freshDE.gastronomy ?? {}) as Record<string, unknown>
   const offerCardsDE = (gastronomyDE.gastronomyOfferCards as Array<{ id?: string }>) ?? []
