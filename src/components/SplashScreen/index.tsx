@@ -41,36 +41,12 @@ const LOGO_SCALE = 2
 
 export function SplashScreen() {
   const [phase, setPhase] = useState<'idle' | 'wave' | 'filled' | 'close' | 'done'>('idle')
-  const [useSimpleFallback, setUseSimpleFallback] = useState(false)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
     if (typeof window !== 'undefined' && sessionStorage.getItem('ff-splash-seen')) {
       setPhase('done')
       return
-    }
-
-    // Skip splash animation for users who prefer reduced motion
-    if (
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      sessionStorage.setItem('ff-splash-seen', '1')
-      setPhase('done')
-      return
-    }
-
-    // Mobile browsers (notably iOS Safari) often don't support CSS `d: path(...)` morphing.
-    // Detect support and fall back to a transform-based splash animation when needed.
-    try {
-      const cssObj =
-        typeof window !== 'undefined'
-          ? (window as unknown as { CSS?: { supports?: (prop: string) => boolean } }).CSS
-          : undefined
-      const supportsPathMorph = !!cssObj?.supports?.('d: path("M0,0 L1,1")')
-      if (!supportsPathMorph) setUseSimpleFallback(true)
-    } catch {
-      setUseSimpleFallback(true)
     }
 
     document.body.style.overflow = 'hidden'
@@ -82,19 +58,19 @@ export function SplashScreen() {
     }
 
     // Timeline:
-    // 0–0.3s : idle — plain ivory screen
-    // 0.3s   : wave open (2s CSS morph) — reveals charcoal + logo
-    // 2.3s   : filled — logo fully visible, hold 1.5s
-    // 3.8s   : close wave (1.5s CSS morph) — exits upward, reveals page
-    // 5.3s   : done
-    t(() => setPhase('wave'), 300)
-    t(() => setPhase('filled'), 2300)
-    t(() => setPhase('close'), 3800)
+    // 0–0.5s : idle — plain ivory screen
+    // 0.5s   : wave open (3s CSS morph) — reveals charcoal + logo
+    // 3.5s   : filled — logo fully visible, hold 2s
+    // 5.5s   : close wave (2s CSS morph) — exits upward, reveals page
+    // 7.5s   : done
+    t(() => setPhase('wave'), 500)
+    t(() => setPhase('filled'), 3500)
+    t(() => setPhase('close'), 5500)
     t(() => {
       setPhase('done')
       sessionStorage.setItem('ff-splash-seen', '1')
       document.body.style.overflow = ''
-    }, 5300)
+    }, 7500)
 
     const currentTimers = timers.current
     return () => {
@@ -107,38 +83,6 @@ export function SplashScreen() {
 
   const waveStarted = phase !== 'idle'
   const isClosing = phase === 'close'
-
-  if (useSimpleFallback) {
-    const started = phase !== 'idle'
-    const closing = phase === 'close'
-    return (
-      <div
-        className={[
-          'splash-overlay splash-simple fixed inset-0 z-9999',
-          started ? 'splash-simple--started' : '',
-          closing ? 'splash-simple--closing' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        aria-hidden="true"
-      >
-        <div className="splash-simple__ivory" />
-        <div className="splash-simple__charcoal">
-          <svg
-            className="splash-simple__logo"
-            viewBox="0 0 53 51"
-            width="106"
-            height="102"
-            aria-hidden="true"
-          >
-            <path d={LOGO.bg} fill="var(--ff-ivory)" />
-            <path d={LOGO.ff} fill="var(--ff-charcoal-dark)" />
-            <path d={LOGO.cutout} fill="var(--ff-ivory)" />
-          </svg>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="splash-overlay fixed inset-0 z-9999" aria-hidden="true">
