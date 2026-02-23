@@ -35,7 +35,9 @@ function buildRichText(lines: string[]) {
       children: [
         ...lines.slice(0, -1).map((text) => ({
           type: 'heading',
-          children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text, version: 1 }],
+          children: [
+            { type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text, version: 1 },
+          ],
           direction: 'ltr' as const,
           format: '',
           indent: 0,
@@ -82,8 +84,22 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
       'Wir machen Fermentation genussvoll & zugänglich und stärken die Darmgesundheit durch Geschmack, Bildung und hochwertige handgemachte Lebensmittel.',
     ]),
     links: [
-      { link: { type: 'custom' as const, label: 'Workshop', url: '/workshops', appearance: 'default' as const } },
-      { link: { type: 'custom' as const, label: 'Produkte', url: '/shop', appearance: 'outline' as const } },
+      {
+        link: {
+          type: 'custom' as const,
+          label: 'Workshop',
+          url: '/workshops',
+          appearance: 'default' as const,
+        },
+      },
+      {
+        link: {
+          type: 'custom' as const,
+          label: 'Produkte',
+          url: '/shop',
+          appearance: 'outline' as const,
+        },
+      },
     ],
     heroImages,
     heroSlides: [
@@ -107,7 +123,11 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
         title: 'Tauche ein in die Welt des\nKombucha-Brauens!',
         description:
           'Lerne, deinen eigenen Kombucha von Grund auf zu brauen — vom Züchten des SCOBY bis zum Abfüllen deines perfekten, sprudelnden Probiotik-Tees.',
-        attributes: [{ text: 'Lebende Kulturen' }, { text: 'Natürlich spritzig' }, { text: 'Handgemacht' }],
+        attributes: [
+          { text: 'Lebende Kulturen' },
+          { text: 'Natürlich spritzig' },
+          { text: 'Handgemacht' },
+        ],
         ctaLabel: 'Mehr erfahren',
         ctaHref: '/workshops/kombucha',
         panelColor: '#555954',
@@ -121,7 +141,11 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
         title: 'Meistere die Kunst der\nTempeh-Herstellung!',
         description:
           'Entdecke die indonesische Tradition des Tempeh — züchte deine eigenen Lebendkulturen und stelle proteinreiche, fermentierte Köstlichkeiten her.',
-        attributes: [{ text: 'Proteinreich' }, { text: 'Traditionell' }, { text: 'Pflanzenbasiert' }],
+        attributes: [
+          { text: 'Proteinreich' },
+          { text: 'Traditionell' },
+          { text: 'Pflanzenbasiert' },
+        ],
         ctaLabel: 'Mehr erfahren',
         ctaHref: '/workshops/tempeh',
         panelColor: '#737672',
@@ -159,8 +183,22 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
       'We make fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods.',
     ]),
     links: [
-      { link: { type: 'custom' as const, label: 'Workshop', url: '/workshops', appearance: 'default' as const } },
-      { link: { type: 'custom' as const, label: 'Products', url: '/shop', appearance: 'outline' as const } },
+      {
+        link: {
+          type: 'custom' as const,
+          label: 'Workshop',
+          url: '/workshops',
+          appearance: 'default' as const,
+        },
+      },
+      {
+        link: {
+          type: 'custom' as const,
+          label: 'Products',
+          url: '/shop',
+          appearance: 'outline' as const,
+        },
+      },
     ],
     heroImages,
     heroSlides: [
@@ -170,7 +208,11 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
         title: 'Discover the Art of\nLakto-Fermentation!',
         description:
           'Our hands-on workshop takes you on a journey through traditional lacto-fermentation, turning simple vegetables into probiotic-rich delicacies.',
-        attributes: [{ text: 'All-natural' }, { text: 'Probiotic-rich' }, { text: 'Made with Love' }],
+        attributes: [
+          { text: 'All-natural' },
+          { text: 'Probiotic-rich' },
+          { text: 'Made with Love' },
+        ],
         ctaLabel: 'Learn More',
         ctaHref: '/workshops/lakto',
         panelColor: '#555954',
@@ -184,7 +226,11 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
         title: 'Immerse Yourself in\nKombucha Brewing!',
         description:
           'Learn to brew your own kombucha from scratch — from growing the SCOBY to bottling your perfect fizzy, probiotic tea.',
-        attributes: [{ text: 'Live cultures' }, { text: 'Naturally fizzy' }, { text: 'Handcrafted' }],
+        attributes: [
+          { text: 'Live cultures' },
+          { text: 'Naturally fizzy' },
+          { text: 'Handcrafted' },
+        ],
         ctaLabel: 'Learn More',
         ctaHref: '/workshops/kombucha',
         panelColor: '#555954',
@@ -212,7 +258,11 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
         title: 'Begin Your Journey with\nFermentation Basics!',
         description:
           'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
-        attributes: [{ text: 'Beginner-friendly' }, { text: 'Science-based' }, { text: 'Practical' }],
+        attributes: [
+          { text: 'Beginner-friendly' },
+          { text: 'Science-based' },
+          { text: 'Practical' },
+        ],
         ctaLabel: 'Learn More',
         ctaHref: '/workshops/basics',
         panelColor: '#000000',
@@ -231,7 +281,7 @@ export function mergeHeroSliderEN(
   en: ReturnType<typeof buildHeroSlider>['en'],
   freshLinks: { id?: string }[],
   freshHeroImages: { id?: string }[],
-  freshHeroSlides: ({ id?: string; attributes?: { id?: string }[] })[],
+  freshHeroSlides: { id?: string; attributes?: { id?: string }[] }[],
 ) {
   return {
     ...en,
@@ -240,7 +290,10 @@ export function mergeHeroSliderEN(
     heroSlides: en.heroSlides.map((s, i) => ({
       ...s,
       id: freshHeroSlides[i]?.id,
-      attributes: s.attributes.map((a, j) => ({ ...a, id: freshHeroSlides[i]?.attributes?.[j]?.id })),
+      attributes: s.attributes.map((a, j) => ({
+        ...a,
+        id: freshHeroSlides[i]?.attributes?.[j]?.id,
+      })),
     })),
   }
 }

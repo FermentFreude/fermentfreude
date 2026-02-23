@@ -21,8 +21,8 @@ import { getPayload } from 'payload'
 
 import type { Page } from '@/payload-types'
 
-import { buildHeroBanner, mergeHeroBannerEN } from '../blocks/HeroBanner/seed'
 import { buildFeatureCards, mergeFeatureCardsEN } from '../blocks/FeatureCards/seed'
+import { buildHeroBanner, mergeHeroBannerEN } from '../blocks/HeroBanner/seed'
 import { buildSponsorsBar, mergeSponsorsBarEN } from '../blocks/SponsorsBar/seed'
 import { buildTeamPreview, mergeTeamPreviewEN } from '../blocks/TeamPreview/seed'
 import { buildTestimonials, mergeTestimonialsEN } from '../blocks/Testimonials/seed'
@@ -55,7 +55,6 @@ async function seedHome() {
   //    Delete stale copies first to avoid duplicates.
   // ══════════════════════════════════════════════════════════════════════════
 
-  const workshopsDir = path.resolve(process.cwd(), 'seed-assets/media/workshops')
   const heroDir = path.resolve(process.cwd(), 'seed-assets/media/hero')
   const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
   const galleryDir = path.resolve(process.cwd(), 'seed-assets/images/gallery')
@@ -64,28 +63,50 @@ async function seedHome() {
   // Clean up stale media
   for (const contains of ['workshop', 'hero', 'slide-', 'Gallery', 'icon-feature']) {
     await payload
-      .delete({ collection: 'media', where: { alt: { contains } }, context: { skipAutoTranslate: true } })
+      .delete({
+        collection: 'media',
+        where: { alt: { contains } },
+        context: { skipAutoTranslate: true },
+      })
       .catch(() => {})
   }
 
-  // ── Workshop cover images ─────────────────────────────────────────────────
+  // ── Workshop images — all 6 live in seed-assets/images/ ─────────────────
   const laktoImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Lakto-Gemüse workshop – fermented vegetables in glass jars' },
-    file: await optimizedFile(path.join(workshopsDir, 'lakto.png'), IMAGE_PRESETS.card),
+    file: await optimizedFile(path.join(imagesDir, 'lakto.png'), IMAGE_PRESETS.card),
+  })
+  const laktoImage2 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Lakto-Gemüse workshop – participants at table' },
+    file: await optimizedFile(path.join(imagesDir, 'lakto1.png'), IMAGE_PRESETS.card),
   })
   const kombuchaImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Kombucha workshop – kombucha SCOBY and fermented tea in jar' },
-    file: await optimizedFile(path.join(workshopsDir, 'kombucha.png'), IMAGE_PRESETS.card),
+    file: await optimizedFile(path.join(imagesDir, 'kombucha.png'), IMAGE_PRESETS.card),
+  })
+  const kombuchaImage2 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Kombucha workshop – pouring kombucha from bottle' },
+    file: await optimizedFile(path.join(imagesDir, 'kombucha1.png'), IMAGE_PRESETS.card),
   })
   const tempehImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'Tempeh workshop – homemade tempeh on ceramic plate' },
-    file: await optimizedFile(path.join(workshopsDir, 'tempeh.png'), IMAGE_PRESETS.card),
+    file: await optimizedFile(path.join(imagesDir, 'tempeh.png'), IMAGE_PRESETS.card),
+  })
+  const tempehImage2 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Tempeh workshop – tempeh sliced with knife on cutting board' },
+    file: await optimizedFile(path.join(imagesDir, 'tempeh1.png'), IMAGE_PRESETS.card),
   })
 
   // ── Hero carousel background images ──────────────────────────────────────
@@ -166,12 +187,21 @@ async function seedHome() {
 
   // ── VoucherCta gallery (8 images) ─────────────────────────────────────────
   const galleryImageConfigs = [
-    { file: path.join(galleryDir, 'gallery-1.png'), alt: 'Gallery – workshop scene, people laughing' },
-    { file: path.join(galleryDir, 'gallery-2.png'), alt: 'Gallery – fermented food bowls on slate' },
+    {
+      file: path.join(galleryDir, 'gallery-1.png'),
+      alt: 'Gallery – workshop scene, people laughing',
+    },
+    {
+      file: path.join(galleryDir, 'gallery-2.png'),
+      alt: 'Gallery – fermented food bowls on slate',
+    },
     { file: path.join(galleryDir, 'gallery-5.png'), alt: 'Gallery – overhead dinner with FF logo' },
     { file: path.join(galleryDir, 'gallery-4.png'), alt: 'Gallery – chopping fresh ingredients' },
     { file: path.join(galleryDir, 'gallery-3.png'), alt: 'Gallery – workshop preparation scene' },
-    { file: path.join(galleryDir, 'gallery-6.png'), alt: 'Gallery – table with bottles and flowers' },
+    {
+      file: path.join(galleryDir, 'gallery-6.png'),
+      alt: 'Gallery – table with bottles and flowers',
+    },
     { file: path.join(galleryDir, 'gallery-7.png'), alt: 'Gallery – kombucha SCOBY jar closeup' },
     { file: path.join(galleryDir, 'gallery-8.png'), alt: 'Gallery – workshop table with chairs' },
   ]
@@ -279,9 +309,9 @@ async function seedHome() {
     laktoImageId: String(laktoImage.id),
     kombuchaImageId: String(kombuchaImage.id),
     tempehImageId: String(tempehImage.id),
-    laktoImage2Id: String(laktoSlideLeft.id),
-    kombuchaImage2Id: String(kombuchaSlideLeft.id),
-    tempehImage2Id: String(tempehSlideLeft.id),
+    laktoImage2Id: String(laktoImage2.id),
+    kombuchaImage2Id: String(kombuchaImage2.id),
+    tempehImage2Id: String(tempehImage2.id),
   })
 
   const { de: voucherCtaDE, en: voucherCtaEN } = buildVoucherCta({ galleryMediaIds })
@@ -397,7 +427,10 @@ async function seedHome() {
   const freshLayout = Array.isArray(freshDoc.layout) ? freshDoc.layout : []
 
   const findBlock = (type: string) =>
-    freshLayout.find((b: unknown) => !!b && typeof b === 'object' && 'blockType' in b && (b as BlockItem).blockType === type) as BlockItem | undefined
+    freshLayout.find(
+      (b: unknown) =>
+        !!b && typeof b === 'object' && 'blockType' in b && (b as BlockItem).blockType === type,
+    ) as BlockItem | undefined
 
   const wsBlock = findBlock('workshopSlider')
   const vcBlock = findBlock('voucherCta')

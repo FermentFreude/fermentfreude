@@ -88,7 +88,9 @@ export const FeatureCardsBlock: React.FC<Props> = ({
         const text = el.textContent ?? ''
         el.innerHTML = text
           .split('')
-          .map((ch) => (ch === ' ' ? ' ' : `<span class="inline-block" style="opacity:0">${ch}</span>`))
+          .map((ch) =>
+            ch === ' ' ? ' ' : `<span class="inline-block" style="opacity:0">${ch}</span>`,
+          )
           .join('')
         const chars = el.querySelectorAll('span')
         gsap.fromTo(
@@ -187,7 +189,9 @@ export const FeatureCardsBlock: React.FC<Props> = ({
 
                 {/* Title + Description */}
                 <h3
-                  ref={(el) => { titlesRef.current[index] = el }}
+                  ref={(el) => {
+                    titlesRef.current[index] = el
+                  }}
                   className="font-display font-bold text-lg text-ff-black uppercase tracking-wide"
                 >
                   {card.title}

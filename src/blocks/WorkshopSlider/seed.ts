@@ -21,6 +21,7 @@ export function buildWorkshopSlider(imgs: WorkshopSliderImages) {
     workshops: [
       {
         title: 'Lakto-Gemüse',
+        audienceTag: 'Für Köche und Lebensmittelexperten',
         theme: 'light' as const,
         description:
           'Gemüse fermentieren und jeden Monat neue Geschmacksrichtungen erleben. Hast du saisonales Gemüse übrig und möchtest es in echte Geschmackserlebnisse verwandeln?',
@@ -37,6 +38,7 @@ export function buildWorkshopSlider(imgs: WorkshopSliderImages) {
       },
       {
         title: 'Kombucha',
+        audienceTag: 'Für Köche und Lebensmittelexperten',
         theme: 'dark' as const,
         description:
           'Tee fermentieren und mit jedem Brauvorgang ausgewogene Aromen kreieren. Neugierig, wie Kombucha natürlich spritzig, frisch und komplex wird?',
@@ -53,6 +55,7 @@ export function buildWorkshopSlider(imgs: WorkshopSliderImages) {
       },
       {
         title: 'Tempeh',
+        audienceTag: 'Für Köche und Lebensmittelexperten',
         theme: 'dark' as const,
         description:
           'Von Bohnen zu Tempeh – Textur, Geschmack und Technik verstehen. Lerne, wie diese traditionelle Fermentation zu einem vielseitigen, gesunden Protein wird.',
@@ -78,6 +81,7 @@ export function buildWorkshopSlider(imgs: WorkshopSliderImages) {
     workshops: [
       {
         title: 'Lacto-Vegetables',
+        audienceTag: 'For Chefs and Food Professionals',
         theme: 'light' as const,
         description:
           'Fermenting vegetables, experiencing different flavours every month. Do you have leftover seasonal vegetables and want to transform them into real taste sensations?',
@@ -94,6 +98,7 @@ export function buildWorkshopSlider(imgs: WorkshopSliderImages) {
       },
       {
         title: 'Kombucha',
+        audienceTag: 'For Chefs and Food Professionals',
         theme: 'dark' as const,
         description:
           'Fermenting tea, creating balanced flavours with every brew. Curious how kombucha becomes naturally fizzy, fresh, and complex?',
@@ -110,6 +115,7 @@ export function buildWorkshopSlider(imgs: WorkshopSliderImages) {
       },
       {
         title: 'Tempeh',
+        audienceTag: 'For Chefs and Food Professionals',
         theme: 'dark' as const,
         description:
           'From beans to tempeh, understanding texture, taste, and technique. Learn how this traditional fermentation becomes a versatile, healthy protein.',

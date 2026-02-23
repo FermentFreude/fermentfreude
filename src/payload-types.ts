@@ -1699,6 +1699,10 @@ export interface WorkshopSliderBlock {
      */
     title: string;
     /**
+     * Small label shown at the top of the info card (e.g. "For Chefs and Food Professionals").
+     */
+    audienceTag?: string | null;
+    /**
      * Short description of the workshop (1–2 sentences).
      */
     description: string;
@@ -1716,9 +1720,13 @@ export interface WorkshopSliderBlock {
         }[]
       | null;
     /**
-     * Product/workshop photo displayed above the feature card.
+     * First workshop photo — shown full height in the gallery with the title overlay.
      */
     image?: (string | null) | Media;
+    /**
+     * Optional second photo shown alongside the first. Falls back to the primary image when not set.
+     */
+    image2?: (string | null) | Media;
     /**
      * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
      */
@@ -2652,6 +2660,7 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
+        audienceTag?: T;
         description?: T;
         theme?: T;
         features?:
@@ -2661,6 +2670,7 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
               id?: T;
             };
         image?: T;
+        image2?: T;
         ctaLink?: T;
         detailsButtonLabel?: T;
         id?: T;

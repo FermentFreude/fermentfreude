@@ -41,6 +41,16 @@ export const WorkshopSlider: Block = {
           },
         },
         {
+          name: 'audienceTag',
+          type: 'text',
+          localized: true,
+          label: 'Audience Tag',
+          admin: {
+            description:
+              'Small label shown at the top of the info card (e.g. "For Chefs and Food Professionals").',
+          },
+        },
+        {
           name: 'description',
           type: 'textarea',
           localized: true,
@@ -88,9 +98,21 @@ export const WorkshopSlider: Block = {
           name: 'image',
           type: 'upload',
           relationTo: 'media',
-          label: 'Workshop Image',
+          label: 'Workshop Image (primary)',
           admin: {
-            description: 'Product/workshop photo displayed above the feature card.',
+            description:
+              'First workshop photo — shown full height in the gallery with the title overlay.',
+          },
+        },
+        {
+          name: 'image2',
+          type: 'upload',
+          relationTo: 'media',
+          required: false,
+          label: 'Workshop Image (secondary)',
+          admin: {
+            description:
+              'Optional second photo shown alongside the first. Falls back to the primary image when not set.',
           },
         },
         {
