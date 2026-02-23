@@ -64,6 +64,7 @@ export function MobileMenu({ menu }: Props) {
               width={200}
               height={24}
               className="h-6 w-auto dark:invert"
+              style={{ width: 'auto' }}
             />
           </SheetTitle>
           <SheetDescription className="sr-only">Navigation menu</SheetDescription>

@@ -12,6 +12,21 @@ import { cssVariables } from '@/cssVariables'
 
 const { breakpoints } = cssVariables
 
+function isValidImageSrc(src: unknown): src is string {
+  if (typeof src !== 'string' || !src.trim()) return false
+  if (/undefined|null|NaN/.test(src)) return false
+  try {
+    if (src.startsWith('/')) {
+      new URL(src, 'https://example.com')
+    } else {
+      new URL(src)
+    }
+    return true
+  } catch {
+    return false
+  }
+}
+
 export const Image: React.FC<MediaProps> = (props) => {
   const {
     alt: altFromProps,
@@ -34,6 +49,11 @@ export const Image: React.FC<MediaProps> = (props) => {
   let alt = altFromProps
   let src: StaticImageData | string = srcFromProps || ''
 
+  // Extract src string from StaticImageData (static imports)
+  if (typeof src === 'object' && src !== null && 'src' in src) {
+    src = (src as StaticImageData).src
+  }
+
   if (!src && resource && typeof resource === 'object') {
     const { alt: altFromResource, height: fullHeight, url, width: fullWidth } = resource
 
@@ -42,10 +62,23 @@ export const Image: React.FC<MediaProps> = (props) => {
     alt = altFromResource
 
     // Use path as-is when relative (/media/...) so images load from current origin
-    src =
-      url?.startsWith('http') || url?.startsWith('/')
-        ? url
-        : `${process.env.NEXT_PUBLIC_SERVER_URL || ''}${url}`
+    if (url && typeof url === 'string') {
+      const base = (process.env.NEXT_PUBLIC_SERVER_URL || '').replace(/\/$/, '')
+      src =
+        url.startsWith('http') || url.startsWith('/')
+          ? url
+          : base ? `${base}/${url.replace(/^\//, '')}` : url.startsWith('/') ? url : `/${url}`
+    }
+  }
+
+  if (!isValidImageSrc(src)) {
+    return (
+      <div
+        className={cn('bg-[#ECE5DE]', fill && 'absolute inset-0', imgClassName)}
+        style={!fill ? { width: width ?? 200, height: height ?? 300 } : undefined}
+        aria-hidden
+      />
+    )
   }
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
@@ -72,6 +105,7 @@ export const Image: React.FC<MediaProps> = (props) => {
       quality={90}
       sizes={sizes}
       src={src}
+      unoptimized
       width={!fill ? width || widthFromProps : undefined}
     />
   )

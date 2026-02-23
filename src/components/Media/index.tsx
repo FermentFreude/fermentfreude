@@ -1,12 +1,14 @@
 import React, { Fragment } from 'react'
 
+import { cn } from '@/utilities/cn'
+
 import type { Props } from './types'
 
 import { Image } from './Image'
 import { Video } from './Video'
 
 export const Media: React.FC<Props> = (props) => {
-  const { className, htmlElement = 'div', resource } = props
+  const { className, fill, htmlElement = 'div', resource } = props
 
   const isVideo = typeof resource === 'object' && resource?.mimeType?.includes('video')
   const Tag = (htmlElement as React.ElementType) || Fragment
@@ -15,7 +17,7 @@ export const Media: React.FC<Props> = (props) => {
     <Tag
       {...(htmlElement !== null
         ? {
-            className,
+            className: cn(className, fill && 'relative size-full'),
           }
         : {})}
     >

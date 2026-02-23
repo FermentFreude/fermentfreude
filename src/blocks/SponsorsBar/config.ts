@@ -22,9 +22,9 @@ export const SponsorsBar: Block = {
       name: 'sponsors',
       type: 'array',
       label: 'Sponsors',
-      minRows: 1,
+      minRows: 0,
       maxRows: 10,
-      required: true,
+      required: false,
       admin: {
         description: 'Sponsor/partner logos displayed in a horizontal row.',
       },

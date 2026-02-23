@@ -42,6 +42,7 @@ export async function Footer() {
                 width={90}
                 height={78}
                 className="h-auto w-17.5 md:w-22.5"
+                style={{ height: 'auto' }}
               />
             </Link>
             <div className="flex flex-col gap-3 text-sm md:text-base">

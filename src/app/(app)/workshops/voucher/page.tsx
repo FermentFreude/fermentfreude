@@ -16,7 +16,7 @@ async function getVoucherDocument(locale?: 'de' | 'en') {
   const payload = await getPayload({ config: configPromise })
   const result = await payload.find({
     collection: 'pages',
-    depth: 3,
+    depth: 4,
     limit: 1,
     locale: locale ?? 'de',
     where: {
@@ -27,10 +27,12 @@ async function getVoucherDocument(locale?: 'de' | 'en') {
 }
 
 const getCachedVoucher = (locale?: 'de' | 'en') =>
-  unstable_cache(async () => getVoucherDocument(locale), ['voucher', locale ?? 'de'], {
-    tags: ['voucher'],
-    revalidate: 60,
-  })
+  process.env.NODE_ENV === 'development'
+    ? () => getVoucherDocument(locale)
+    : unstable_cache(async () => getVoucherDocument(locale), ['voucher', locale ?? 'de'], {
+        tags: ['voucher'],
+        revalidate: 60,
+      })
 
 export const metadata: Metadata = {
   title: 'Geschenkgutschein | FermentFreude',

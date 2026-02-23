@@ -337,7 +337,6 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1446,21 +1445,23 @@ export interface SponsorsBarBlock {
   /**
    * Sponsor/partner logos displayed in a horizontal row.
    */
-  sponsors: {
-    /**
-     * Name used as alt text for the logo image.
-     */
-    name: string;
-    /**
-     * Sponsor logo. SVG or PNG recommended.
-     */
-    logo: string | Media;
-    /**
-     * Optional link to the sponsor website.
-     */
-    url?: string | null;
-    id?: string | null;
-  }[];
+  sponsors?:
+    | {
+        /**
+         * Name used as alt text for the logo image.
+         */
+        name: string;
+        /**
+         * Sponsor logo. SVG or PNG recommended.
+         */
+        logo: string | Media;
+        /**
+         * Optional link to the sponsor website.
+         */
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'sponsorsBar';
@@ -2698,7 +2699,6 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

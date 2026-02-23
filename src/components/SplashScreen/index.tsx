@@ -44,11 +44,10 @@ export function SplashScreen() {
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
-    // TODO: re-enable once splash design is final
-    // if (typeof window !== 'undefined' && sessionStorage.getItem('ff-splash-seen')) {
-    //   setPhase('done')
-    //   return
-    // }
+    if (typeof window !== 'undefined' && sessionStorage.getItem('ff-splash-seen')) {
+      setPhase('done')
+      return
+    }
 
     document.body.style.overflow = 'hidden'
 

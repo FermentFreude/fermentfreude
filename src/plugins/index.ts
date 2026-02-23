@@ -27,9 +27,14 @@ const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
   return doc?.slug ? `${url}/${doc.slug}` : url
 }
 
+const r2Enabled =
+  !!process.env.R2_BUCKET &&
+  !!process.env.R2_ENDPOINT &&
+  !process.env.R2_ENDPOINT.includes('<account-id>')
+
 export const plugins: Plugin[] = [
   s3Storage({
-    enabled: !!process.env.R2_BUCKET,
+    enabled: r2Enabled,
     collections: {
       media: {
         disablePayloadAccessControl: true,

@@ -27,70 +27,120 @@ import {
   teamCardsEN,
 } from './data/about'
 
-const heroDE = {
-  type: 'lowImpact' as const,
-  richText: {
-    root: {
-      type: 'root',
-      children: [
-        {
-          type: 'heading',
-          tag: 'h1',
-          children: [{ type: 'text', text: 'FermentFreude', version: 1 }],
-          version: 1,
-        },
-        {
-          type: 'paragraph',
-          children: [
-            {
-              type: 'text',
-              text: 'Gutes Essen · Bessere Gesundheit · Echte Freude',
-              version: 1,
-            },
-          ],
-          version: 1,
-        },
-      ],
-      direction: 'ltr' as const,
-      format: '' as const,
-      indent: 0,
-      version: 1,
-    },
+const homeLayoutDE = [readyToLearnDE()]
+const homeLayoutEN = [readyToLearnEN()]
+
+/* Hero Slider slides — same as HeroSlider DEFAULT_SLIDES, no images required */
+const heroSlidesDE = [
+  {
+    slideId: 'lakto',
+    eyebrow: 'Workshop Experience',
+    title: 'Entdecke die Kunst der Lakto-Fermentation!',
+    description:
+      'Unser Workshop führt dich durch traditionelle Milchsäuregärung – von einfachem Gemüse zu probiotischen Delikatessen.',
+    attributes: [{ text: 'Natürlich' }, { text: 'Probiotisch' }, { text: 'Mit Liebe gemacht' }],
+    ctaLabel: 'Mehr erfahren',
+    ctaHref: '/workshops/lakto',
+    panelColor: '#555954',
+    bgColor: '#D2DFD7',
   },
-  media: undefined,
+  {
+    slideId: 'kombucha',
+    eyebrow: 'Workshop Experience',
+    title: 'Tauche ein in die Welt des Kombucha!',
+    description:
+      'Lerne, deinen eigenen Kombucha von Grund auf zu brauen – vom SCOBY bis zur perfekten Flasche.',
+    attributes: [{ text: 'Lebende Kulturen' }, { text: 'Natürlich prickelnd' }, { text: 'Handgemacht' }],
+    ctaLabel: 'Mehr erfahren',
+    ctaHref: '/workshops/kombucha',
+    panelColor: '#555954',
+    bgColor: '#F6F0E8',
+  },
+  {
+    slideId: 'tempeh',
+    eyebrow: 'Workshop Experience',
+    title: 'Meistere die Kunst der Tempeh-Herstellung!',
+    description:
+      'Entdecke die indonesische Tradition – kultiviere deine eigenen Kulturen und erschaffe proteinreiches Ferment.',
+    attributes: [{ text: 'Hoher Proteingehalt' }, { text: 'Traditionell' }, { text: 'Pflanzlich' }],
+    ctaLabel: 'Mehr erfahren',
+    ctaHref: '/workshops/tempeh',
+    panelColor: '#737672',
+    bgColor: '#F6F3F0',
+  },
+  {
+    slideId: 'basics',
+    eyebrow: 'Workshop Experience',
+    title: 'Starte deine Reise mit Fermentations-Basics!',
+    description:
+      'Der perfekte Einstieg – lerne Wissenschaft, Sicherheit und Techniken, um selbstbewusst zu fermentieren.',
+    attributes: [{ text: 'Anfängerfreundlich' }, { text: 'Wissenschaftsbasiert' }, { text: 'Praktisch' }],
+    ctaLabel: 'Mehr erfahren',
+    ctaHref: '/workshops/basics',
+    panelColor: '#000000',
+    bgColor: '#AEB1AE',
+  },
+]
+
+const heroSlidesEN = [
+  {
+    slideId: 'lakto',
+    eyebrow: 'Workshop Experience',
+    title: 'Discover the Art of Lakto-Fermentation!',
+    description:
+      'Our hands-on workshop takes you through traditional lacto-fermentation, turning simple vegetables into probiotic-rich delicacies.',
+    attributes: [{ text: 'All-natural' }, { text: 'Probiotic-rich' }, { text: 'Made with Love' }],
+    ctaLabel: 'Learn More',
+    ctaHref: '/workshops/lakto',
+    panelColor: '#555954',
+    bgColor: '#D2DFD7',
+  },
+  {
+    slideId: 'kombucha',
+    eyebrow: 'Workshop Experience',
+    title: 'Immerse Yourself in Kombucha Brewing!',
+    description:
+      'Learn to brew your own kombucha from scratch — from growing the SCOBY to bottling your perfect fizzy tea.',
+    attributes: [{ text: 'Live cultures' }, { text: 'Naturally fizzy' }, { text: 'Handcrafted' }],
+    ctaLabel: 'Learn More',
+    ctaHref: '/workshops/kombucha',
+    panelColor: '#555954',
+    bgColor: '#F6F0E8',
+  },
+  {
+    slideId: 'tempeh',
+    eyebrow: 'Workshop Experience',
+    title: 'Master the Craft of Tempeh Making!',
+    description:
+      'Explore the Indonesian tradition of tempeh — cultivate your own live cultures and create protein-rich fermented goodness.',
+    attributes: [{ text: 'High protein' }, { text: 'Traditional' }, { text: 'Plant-based' }],
+    ctaLabel: 'Learn More',
+    ctaHref: '/workshops/tempeh',
+    panelColor: '#737672',
+    bgColor: '#F6F3F0',
+  },
+  {
+    slideId: 'basics',
+    eyebrow: 'Workshop Experience',
+    title: 'Begin Your Journey with Fermentation Basics!',
+    description:
+      'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment at home.',
+    attributes: [{ text: 'Beginner-friendly' }, { text: 'Science-based' }, { text: 'Practical' }],
+    ctaLabel: 'Learn More',
+    ctaHref: '/workshops/basics',
+    panelColor: '#000000',
+    bgColor: '#AEB1AE',
+  },
+]
+
+const heroDE = {
+  type: 'heroSlider' as const,
+  heroSlides: heroSlidesDE,
 }
 
 const heroEN = {
-  type: 'lowImpact' as const,
-  richText: {
-    root: {
-      type: 'root',
-      children: [
-        {
-          type: 'heading',
-          tag: 'h1',
-          children: [{ type: 'text', text: 'FermentFreude', version: 1 }],
-          version: 1,
-        },
-        {
-          type: 'paragraph',
-          children: [
-            {
-              type: 'text',
-              text: 'Good Food · Better Health · Real Joy',
-              version: 1,
-            },
-          ],
-          version: 1,
-        },
-      ],
-      direction: 'ltr' as const,
-      format: '' as const,
-      indent: 0,
-      version: 1,
-    },
-  },
-  media: undefined,
+  type: 'heroSlider' as const,
+  heroSlides: heroSlidesEN,
 }
 
 const aboutHeroDE = {
@@ -152,7 +202,7 @@ async function seedBootstrap() {
     await payload.delete({
       collection: 'pages',
       id: existing.docs[0]!.id,
-      context: { skipRevalidate: true },
+      context: { skipRevalidate: true, disableRevalidate: true },
     })
     console.log(`  🗑️  Deleted existing home page`)
   }
@@ -171,7 +221,7 @@ async function seedBootstrap() {
       slug: 'home',
       _status: 'published',
       hero: heroDE,
-      layout: [],
+      layout: homeLayoutDE as NonNullable<Page['layout']>,
     },
   })
 
@@ -191,6 +241,7 @@ async function seedBootstrap() {
       title: 'Home',
       _status: 'published',
       hero: heroEN,
+      layout: homeLayoutEN as NonNullable<Page['layout']>,
     },
   })
 
@@ -210,7 +261,7 @@ async function seedBootstrap() {
     await payload.delete({
       collection: 'pages',
       id: existingAbout.docs[0]!.id,
-      context: { skipRevalidate: true },
+      context: { skipRevalidate: true, disableRevalidate: true },
     })
     console.log(`  🗑️  Deleted existing about page`)
   }

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
+
+export const dynamic = 'force-dynamic'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
@@ -88,7 +90,7 @@ const queryPageBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' |
 
   const result = await payload.find({
     collection: 'pages',
-    depth: 3,
+    depth: 5,
     draft,
     limit: 1,
     locale,

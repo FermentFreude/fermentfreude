@@ -86,6 +86,7 @@ export function HeaderClient({ header }: Props) {
               width={200}
               height={28}
               className="h-4 md:h-5 lg:h-5 w-auto dark:invert"
+              style={{ width: 'auto' }}
               priority
             />
           </Link>

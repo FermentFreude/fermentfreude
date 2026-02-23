@@ -44,7 +44,7 @@ export default async function GastronomyPage() {
     collection: 'pages',
     where: { slug: { equals: 'gastronomy' } },
     limit: 1,
-    depth: 3,
+    depth: 4,
     locale,
   })
   const page = result.docs[0] as PageType | undefined
