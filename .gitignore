@@ -44,3 +44,7 @@ seed-assets/
 
 public/media
 
+# Cursor AI rules
+.cursor/
+.cursorrules
+
