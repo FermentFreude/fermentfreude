@@ -8,8 +8,8 @@ import {
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { isAdmin } from '@/access/isAdmin'
+import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -48,6 +48,47 @@ export const Media: CollectionConfig = {
   ],
   upload: {
     staticDir: path.resolve(dirname, '../../public/media'),
-    mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif', 'image/svg+xml', 'image/gif'],
+    mimeTypes: [
+      // Images
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+      'image/avif',
+      'image/svg+xml',
+      'image/gif',
+      // Videos
+      'video/mp4',
+      'video/webm',
+      'video/ogg',
+      'video/quicktime',
+    ],
+    // Automatically resize large images on upload (only applies to images, not videos)
+    resizeOptions: {
+      width: 1920,
+      height: 1920,
+      fit: 'inside',
+      withoutEnlargement: true,
+    },
+    // Generate optimized sizes for images
+    imageSizes: [
+      {
+        name: 'thumbnail',
+        width: 400,
+        height: 400,
+        fit: 'inside',
+      },
+      {
+        name: 'card',
+        width: 800,
+        height: 800,
+        fit: 'inside',
+      },
+      {
+        name: 'hero',
+        width: 1920,
+        height: 1080,
+        fit: 'inside',
+      },
+    ],
   },
 }

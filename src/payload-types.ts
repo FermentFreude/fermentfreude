@@ -349,6 +349,32 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -435,19 +461,17 @@ export interface Page {
   id: string;
   title: string;
   publishedOn?: string | null;
+  /**
+   * The large banner at the top of the page.
+   */
   hero: {
-    type:
-      | 'none'
-      | 'highImpact'
-      | 'mediumImpact'
-      | 'lowImpact'
-      | 'heroSlider'
-      | 'heroCarousel'
-      | 'foodPresentationSlider';
     /**
-     * Small uppercase text above the heading (e.g. "Fermentation for everyone").
+     * Choose how this page looks at the top. "Home Page Slider" is for the homepage with animated slides.
      */
-    eyebrow?: string | null;
+    type: 'heroSlider' | 'highImpact' | 'lowImpact' | 'heroCarousel' | 'foodPresentationSlider' | 'none';
+    /**
+     * The main headline and tagline. Use H1 for the big headline, then paragraph for the tagline.
+     */
     richText?: {
       root: {
         type: string;
@@ -463,6 +487,9 @@ export interface Page {
       };
       [k: string]: unknown;
     } | null;
+    /**
+     * Add 1-2 buttons below the headline (e.g., "Workshops" and "Shop").
+     */
     links?:
       | {
           link: {
@@ -483,24 +510,11 @@ export interface Page {
         }[]
       | null;
     /**
-     * Display the gold FERMENTFREUDE wordmark above the heading in the hero section.
+     * Show the gold "FERMENTFREUDE" text above the headline.
      */
     showWordmark?: boolean | null;
     /**
-     * Social media icons displayed alongside the hero content. Leave empty to hide.
-     */
-    socialLinks?:
-      | {
-          platform: 'facebook' | 'twitter' | 'instagram' | 'pinterest' | 'youtube' | 'tiktok';
-          /**
-           * Full URL to your social media profile (e.g. https://facebook.com/yourpage).
-           */
-          url: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Images for the hero carousel. Add 3–5 for the best visual effect. They appear in a stacked slider layout.
+     * Add 4-5 beautiful food photos. They cycle in the background.
      */
     heroImages?:
       | {
@@ -509,28 +523,28 @@ export interface Page {
         }[]
       | null;
     /**
-     * Each slide has its own text, product images, colors, and CTA. The slider cycles through these automatically.
+     * Each slide has its own title, description, colors, and product images.
      */
     heroSlides?:
       | {
           /**
-           * Internal ID for this slide (e.g. "lakto", "kombucha", "tempeh", "basics"). Not shown to visitors.
+           * e.g., "lakto", "kombucha"
            */
           slideId: string;
           /**
-           * Small uppercase text above the title (e.g. "Workshop Experience").
+           * e.g., "Workshop Experience"
            */
           eyebrow?: string | null;
           /**
-           * Main heading for this slide. Use \n for line breaks.
+           * The big title for this slide. Use \n for line breaks.
            */
           title: string;
           /**
-           * Short description text below the title.
+           * Short description below the title.
            */
           description?: string | null;
           /**
-           * Short tags displayed below the divider (e.g. "All-natural", "Probiotic-rich").
+           * Small tags like "Probiotic-rich", "All-natural"
            */
           attributes?:
             | {
@@ -539,61 +553,62 @@ export interface Page {
               }[]
             | null;
           /**
-           * Text for the primary call-to-action button (e.g. "Learn More").
+           * e.g., "Learn More"
            */
           ctaLabel?: string | null;
           /**
-           * URL the CTA button links to (e.g. "/workshops/lakto").
+           * e.g., "/workshops/lakto"
            */
           ctaHref?: string | null;
           /**
-           * Hex color for the central card background (e.g. "#555954").
+           * Center card: #555954
            */
           panelColor?: string | null;
           /**
-           * Hex color for the outer/page background (e.g. "#D2DFD7").
+           * Page background: #D2DFD7
            */
           bgColor?: string | null;
-          /**
-           * Product or person image shown to the left of the central card.
-           */
           leftImage?: (string | null) | Media;
-          /**
-           * Product or person image shown to the right of the central card.
-           */
           rightImage?: (string | null) | Media;
           id?: string | null;
         }[]
       | null;
-    media?: (string | null) | Media;
+    socialLinks?:
+      | {
+          platform: 'facebook' | 'instagram' | 'twitter' | 'youtube' | 'tiktok' | 'pinterest';
+          /**
+           * https://instagram.com/fermentfreude
+           */
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
     /**
-     * Each slide has a fullscreen image with overlay text and CTA.
+     * The big hero background image.
      */
+    media?: (string | null) | Media;
+    richTextLowImpact?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     slides?:
       | {
-          /**
-           * Fullscreen background for this slide.
-           */
           image: string | Media;
-          /**
-           * Main heading on the slide.
-           */
           title: string;
-          /**
-           * Elegant tagline below the title (e.g. "Elegance in Every Spoonful").
-           */
           tagline?: string | null;
-          /**
-           * Optional supporting text.
-           */
           description?: string | null;
-          /**
-           * CTA button text (e.g., "Order Now", "Learn More").
-           */
           buttonLabel?: string | null;
-          /**
-           * Where the button links to.
-           */
           buttonUrl?: string | null;
           id?: string | null;
         }[]
@@ -2074,7 +2089,6 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
-        eyebrow?: T;
         richText?: T;
         links?:
           | T
@@ -2092,13 +2106,6 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         showWordmark?: T;
-        socialLinks?:
-          | T
-          | {
-              platform?: T;
-              url?: T;
-              id?: T;
-            };
         heroImages?:
           | T
           | {
@@ -2126,7 +2133,15 @@ export interface PagesSelect<T extends boolean = true> {
               rightImage?: T;
               id?: T;
             };
+        socialLinks?:
+          | T
+          | {
+              platform?: T;
+              url?: T;
+              id?: T;
+            };
         media?: T;
+        richTextLowImpact?: T;
         slides?:
           | T
           | {
@@ -2712,6 +2727,40 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

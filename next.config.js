@@ -9,6 +9,7 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // All pages except /admin and /api
         source: '/((?!admin|api).*)',
         headers: [
           {
@@ -21,11 +22,21 @@ const nextConfig = {
           },
           {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN',
           },
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      {
+        // Allow preview iframe in admin (Payload's live preview)
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
           },
         ],
       },
@@ -41,9 +52,14 @@ const nextConfig = {
           protocol: url.protocol.replace(':', ''),
         }
       }),
-      // Cloudflare R2 public URL
+      // Cloudflare R2 public URL (production)
       {
         hostname: 'pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev',
+        protocol: 'https',
+      },
+      // Cloudflare R2 public URL (staging)
+      {
+        hostname: 'pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev',
         protocol: 'https',
       },
     ],

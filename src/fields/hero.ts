@@ -9,348 +9,499 @@ import {
 
 import { linkGroup } from './linkGroup'
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * HERO FIELD CONFIGURATION
+ * Clean, editor-friendly admin interface
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
 export const hero: Field = {
   name: 'hero',
   type: 'group',
+  label: 'Hero Section',
+  admin: {
+    description: 'The large banner at the top of the page.',
+  },
   fields: [
+    /* ═══════════════════════════════════════════════════════════════════════
+     * HERO TYPE - What kind of hero banner?
+     * ═══════════════════════════════════════════════════════════════════════ */
     {
       name: 'type',
       type: 'select',
-      defaultValue: 'lowImpact',
-      label: 'Type',
-      options: [
-        {
-          label: 'None',
-          value: 'none',
-        },
-        {
-          label: 'High Impact',
-          value: 'highImpact',
-        },
-        {
-          label: 'Medium Impact',
-          value: 'mediumImpact',
-        },
-        {
-          label: 'Low Impact',
-          value: 'lowImpact',
-        },
-        {
-          label: 'Hero Slider',
-          value: 'heroSlider',
-        },
-        {
-          label: 'Hero Carousel',
-          value: 'heroCarousel',
-        },
-        {
-          label: 'Food Presentation Slider',
-          value: 'foodPresentationSlider',
-        },
-      ],
+      label: 'Hero Style',
+      defaultValue: 'heroSlider',
       required: true,
-    },
-    {
-      name: 'eyebrow',
-      type: 'text',
-      localized: true,
-      label: 'Eyebrow Text',
       admin: {
-        description: 'Small uppercase text above the heading (e.g. "Fermentation for everyone").',
-        condition: (_, { type } = {}) => type === 'heroSlider',
+        description:
+          'Choose how this page looks at the top. "Home Page Slider" is for the homepage with animated slides.',
       },
+      options: [
+        { label: '🏠 Home Page Slider', value: 'heroSlider' },
+        { label: '📷 Full Image Banner', value: 'highImpact' },
+        { label: '📄 Simple Title', value: 'lowImpact' },
+        { label: '🎠 Photo Carousel', value: 'heroCarousel' },
+        { label: '🍽️ Food Presentation', value: 'foodPresentationSlider' },
+        { label: '➖ No Hero', value: 'none' },
+      ],
     },
+
+    /* ═══════════════════════════════════════════════════════════════════════
+     * HOME PAGE SLIDER (heroSlider)
+     * The main homepage hero with animated product slides
+     * ═══════════════════════════════════════════════════════════════════════ */
+
+    // HEADLINE SECTION
     {
-      name: 'richText',
-      type: 'richText',
-      localized: true,
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [
-            ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-            FixedToolbarFeature(),
-            InlineToolbarFeature(),
-          ]
-        },
-      }),
-      label: false,
-    },
-    linkGroup({
-      overrides: {
-        maxRows: 2,
-      },
-    }),
-    {
-      name: 'showWordmark',
-      type: 'checkbox',
-      defaultValue: true,
-      label: 'Show Brand Wordmark',
-      localized: false,
+      type: 'collapsible',
+      label: '✏️ Headline & Text',
       admin: {
         condition: (_, { type } = {}) => type === 'heroSlider',
-        description:
-          'Display the gold FERMENTFREUDE wordmark above the heading in the hero section.',
-      },
-    },
-    {
-      name: 'socialLinks',
-      type: 'array',
-      label: 'Social Media Links',
-      maxRows: 6,
-      admin: {
-        condition: (_, { type } = {}) =>
-          type === 'heroSlider' || type === 'foodPresentationSlider',
-        description:
-          'Social media icons displayed alongside the hero content. Leave empty to hide.',
+        initCollapsed: false,
+        description: 'The main text visitors see first on your homepage.',
       },
       fields: [
         {
-          name: 'platform',
-          type: 'select',
-          required: true,
-          label: 'Platform',
-          options: [
-            { label: 'Facebook', value: 'facebook' },
-            { label: 'Twitter / X', value: 'twitter' },
-            { label: 'Instagram', value: 'instagram' },
-            { label: 'Pinterest', value: 'pinterest' },
-            { label: 'YouTube', value: 'youtube' },
-            { label: 'TikTok', value: 'tiktok' },
-          ],
-        },
-        {
-          name: 'url',
-          type: 'text',
-          required: true,
-          label: 'Profile URL',
+          name: 'richText',
+          type: 'richText',
+          label: 'Hero Text',
+          localized: true,
           admin: {
             description:
-              'Full URL to your social media profile (e.g. https://facebook.com/yourpage).',
+              'The main headline and tagline. Use H1 for the big headline, then paragraph for the tagline.',
+          },
+          editor: lexicalEditor({
+            features: ({ rootFeatures }) => [
+              ...rootFeatures,
+              HeadingFeature({ enabledHeadingSizes: ['h1', 'h2'] }),
+              FixedToolbarFeature(),
+              InlineToolbarFeature(),
+            ],
+          }),
+        },
+        linkGroup({
+          overrides: {
+            label: 'Buttons',
+            maxRows: 2,
+            admin: {
+              description: 'Add 1-2 buttons below the headline (e.g., "Workshops" and "Shop").',
+            },
+          },
+        }),
+        {
+          name: 'showWordmark',
+          type: 'checkbox',
+          label: 'Show Logo Text',
+          defaultValue: true,
+          admin: {
+            description: 'Show the gold "FERMENTFREUDE" text above the headline.',
           },
         },
       ],
     },
+
+    // BACKGROUND IMAGES
     {
-      name: 'heroImages',
-      type: 'array',
-      label: 'Hero Carousel Images',
-      minRows: 1,
-      maxRows: 8,
+      type: 'collapsible',
+      label: '🖼️ Background Images',
       admin: {
         condition: (_, { type } = {}) => type === 'heroSlider',
-        description:
-          'Images for the hero carousel. Add 3–5 for the best visual effect. They appear in a stacked slider layout.',
+        initCollapsed: true,
+        description: 'The food photos that appear behind the slides.',
       },
       fields: [
         {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
-          label: 'Image',
-        },
-      ],
-    },
-    {
-      name: 'heroSlides',
-      type: 'array',
-      label: 'Hero Slides',
-      minRows: 1,
-      maxRows: 8,
-      admin: {
-        condition: (_, { type } = {}) => type === 'heroSlider',
-        description:
-          'Each slide has its own text, product images, colors, and CTA. The slider cycles through these automatically.',
-      },
-      fields: [
-        {
-          name: 'slideId',
-          type: 'text',
-          required: true,
-          label: 'Slide Identifier',
-          admin: {
-            description: 'Internal ID for this slide (e.g. "lakto", "kombucha", "tempeh", "basics"). Not shown to visitors.',
-          },
-        },
-        {
-          name: 'eyebrow',
-          type: 'text',
-          localized: true,
-          label: 'Eyebrow Text',
-          admin: {
-            description: 'Small uppercase text above the title (e.g. "Workshop Experience").',
-          },
-        },
-        {
-          name: 'title',
-          type: 'text',
-          localized: true,
-          required: true,
-          label: 'Slide Title',
-          admin: {
-            description: 'Main heading for this slide. Use \\n for line breaks.',
-          },
-        },
-        {
-          name: 'description',
-          type: 'textarea',
-          localized: true,
-          label: 'Slide Description',
-          admin: {
-            description: 'Short description text below the title.',
-          },
-        },
-        {
-          name: 'attributes',
+          name: 'heroImages',
           type: 'array',
-          label: 'Attributes',
-          maxRows: 5,
+          label: 'Background Photos',
+          minRows: 1,
+          maxRows: 8,
+          labels: {
+            singular: 'Photo',
+            plural: 'Photos',
+          },
           admin: {
-            description: 'Short tags displayed below the divider (e.g. "All-natural", "Probiotic-rich").',
+            description: 'Add 4-5 beautiful food photos. They cycle in the background.',
+            initCollapsed: true,
           },
           fields: [
             {
-              name: 'text',
-              type: 'text',
-              localized: true,
+              name: 'image',
+              type: 'upload',
+              relationTo: 'media',
               required: true,
-              label: 'Attribute Text',
+              label: 'Photo',
             },
           ],
         },
+      ],
+    },
+
+    // PRODUCT SLIDES
+    {
+      type: 'collapsible',
+      label: '🎯 Product Slides',
+      admin: {
+        condition: (_, { type } = {}) => type === 'heroSlider',
+        initCollapsed: false,
+        description: 'Each slide showcases a product category (Lakto, Kombucha, Tempeh, etc.)',
+      },
+      fields: [
         {
-          name: 'ctaLabel',
-          type: 'text',
-          localized: true,
-          label: 'CTA Button Label',
-          admin: {
-            description: 'Text for the primary call-to-action button (e.g. "Learn More").',
+          name: 'heroSlides',
+          type: 'array',
+          label: 'Slides',
+          minRows: 1,
+          maxRows: 6,
+          labels: {
+            singular: 'Slide',
+            plural: 'Slides',
           },
-        },
-        {
-          name: 'ctaHref',
-          type: 'text',
-          label: 'CTA Button Link',
           admin: {
-            description: 'URL the CTA button links to (e.g. "/workshops/lakto").',
+            initCollapsed: false,
+            description: 'Each slide has its own title, description, colors, and product images.',
+            components: {
+              RowLabel: '@/fields/heroSlideRowLabel.tsx#HeroSlideRowLabel',
+            },
           },
+          fields: [
+            // Basic Info Row
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'slideId',
+                  type: 'text',
+                  label: 'Slide Name',
+                  required: true,
+                  admin: {
+                    width: '30%',
+                    description: 'e.g., "lakto", "kombucha"',
+                  },
+                },
+                {
+                  name: 'eyebrow',
+                  type: 'text',
+                  label: 'Small Text Above Title',
+                  localized: true,
+                  admin: {
+                    width: '70%',
+                    description: 'e.g., "Workshop Experience"',
+                  },
+                },
+              ],
+            },
+            // Title
+            {
+              name: 'title',
+              type: 'text',
+              label: 'Slide Title',
+              localized: true,
+              required: true,
+              admin: {
+                description: 'The big title for this slide. Use \\n for line breaks.',
+              },
+            },
+            // Description
+            {
+              name: 'description',
+              type: 'textarea',
+              label: 'Slide Description',
+              localized: true,
+              admin: {
+                description: 'Short description below the title.',
+              },
+            },
+            // Tags/Attributes
+            {
+              name: 'attributes',
+              type: 'array',
+              label: 'Product Tags',
+              maxRows: 5,
+              admin: {
+                description: 'Small tags like "Probiotic-rich", "All-natural"',
+                initCollapsed: true,
+              },
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                  label: 'Tag',
+                  localized: true,
+                  required: true,
+                },
+              ],
+            },
+            // Button Row
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'ctaLabel',
+                  type: 'text',
+                  label: 'Button Text',
+                  localized: true,
+                  admin: {
+                    width: '50%',
+                    description: 'e.g., "Learn More"',
+                  },
+                },
+                {
+                  name: 'ctaHref',
+                  type: 'text',
+                  label: 'Button Link',
+                  admin: {
+                    width: '50%',
+                    description: 'e.g., "/workshops/lakto"',
+                  },
+                },
+              ],
+            },
+            // Colors Row
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'panelColor',
+                  type: 'text',
+                  label: 'Card Color',
+                  admin: {
+                    width: '50%',
+                    description: 'Center card: #555954',
+                  },
+                },
+                {
+                  name: 'bgColor',
+                  type: 'text',
+                  label: 'Background Color',
+                  admin: {
+                    width: '50%',
+                    description: 'Page background: #D2DFD7',
+                  },
+                },
+              ],
+            },
+            // Product Images Row
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'leftImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Left Product Image',
+                  admin: {
+                    width: '50%',
+                  },
+                },
+                {
+                  name: 'rightImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Right Product Image',
+                  admin: {
+                    width: '50%',
+                  },
+                },
+              ],
+            },
+          ],
         },
+      ],
+    },
+
+    // SOCIAL LINKS
+    {
+      type: 'collapsible',
+      label: '🔗 Social Media',
+      admin: {
+        condition: (_, { type } = {}) => type === 'heroSlider' || type === 'foodPresentationSlider',
+        initCollapsed: true,
+        description: 'Social icons on the hero. Leave empty to hide.',
+      },
+      fields: [
         {
-          name: 'panelColor',
-          type: 'text',
-          label: 'Panel Color',
+          name: 'socialLinks',
+          type: 'array',
+          label: 'Social Links',
+          maxRows: 6,
+          labels: {
+            singular: 'Link',
+            plural: 'Links',
+          },
           admin: {
-            description: 'Hex color for the central card background (e.g. "#555954").',
+            initCollapsed: true,
           },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'platform',
+                  type: 'select',
+                  label: 'Platform',
+                  required: true,
+                  admin: { width: '40%' },
+                  options: [
+                    { label: 'Facebook', value: 'facebook' },
+                    { label: 'Instagram', value: 'instagram' },
+                    { label: 'Twitter / X', value: 'twitter' },
+                    { label: 'YouTube', value: 'youtube' },
+                    { label: 'TikTok', value: 'tiktok' },
+                    { label: 'Pinterest', value: 'pinterest' },
+                  ],
+                },
+                {
+                  name: 'url',
+                  type: 'text',
+                  label: 'Profile URL',
+                  required: true,
+                  admin: {
+                    width: '60%',
+                    description: 'https://instagram.com/fermentfreude',
+                  },
+                },
+              ],
+            },
+          ],
         },
+      ],
+    },
+
+    /* ═══════════════════════════════════════════════════════════════════════
+     * FULL IMAGE BANNER (highImpact / mediumImpact)
+     * Simple hero with one big background image
+     * ═══════════════════════════════════════════════════════════════════════ */
+    {
+      type: 'collapsible',
+      label: '🖼️ Banner Image',
+      admin: {
+        condition: (_, { type } = {}) => type === 'highImpact' || type === 'mediumImpact',
+        initCollapsed: false,
+      },
+      fields: [
         {
-          name: 'bgColor',
-          type: 'text',
-          label: 'Background Color',
-          admin: {
-            description: 'Hex color for the outer/page background (e.g. "#D2DFD7").',
-          },
-        },
-        {
-          name: 'leftImage',
+          name: 'media',
           type: 'upload',
           relationTo: 'media',
-          label: 'Left Product Image',
+          label: 'Background Image',
           admin: {
-            description: 'Product or person image shown to the left of the central card.',
-          },
-        },
-        {
-          name: 'rightImage',
-          type: 'upload',
-          relationTo: 'media',
-          label: 'Right Product Image',
-          admin: {
-            description: 'Product or person image shown to the right of the central card.',
+            description: 'The big hero background image.',
           },
         },
       ],
     },
+
+    /* ═══════════════════════════════════════════════════════════════════════
+     * SIMPLE TITLE (lowImpact)
+     * Just text, no image
+     * ═══════════════════════════════════════════════════════════════════════ */
     {
-      name: 'media',
-      type: 'upload',
+      type: 'collapsible',
+      label: '📝 Page Title',
       admin: {
-        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
-      },
-      relationTo: 'media',
-      required: true,
-    },
-    {
-      name: 'slides',
-      type: 'array',
-      label: 'Carousel Slides',
-      minRows: 1,
-      maxRows: 8,
-      admin: {
-        condition: (_, { type } = {}) =>
-          type === 'heroCarousel' || type === 'foodPresentationSlider',
-        description: 'Each slide has a fullscreen image with overlay text and CTA.',
+        condition: (_, { type } = {}) => type === 'lowImpact',
+        initCollapsed: false,
       },
       fields: [
         {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
-          label: 'Background Image',
-          admin: {
-            description: 'Fullscreen background for this slide.',
-          },
-        },
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
+          name: 'richTextLowImpact',
+          type: 'richText',
+          label: 'Title & Text',
           localized: true,
-          label: 'Title',
-          admin: {
-            description: 'Main heading on the slide.',
-          },
+          editor: lexicalEditor({
+            features: ({ rootFeatures }) => [
+              ...rootFeatures,
+              HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3'] }),
+              FixedToolbarFeature(),
+              InlineToolbarFeature(),
+            ],
+          }),
         },
+      ],
+    },
+
+    /* ═══════════════════════════════════════════════════════════════════════
+     * PHOTO CAROUSEL (heroCarousel / foodPresentationSlider)
+     * Multiple fullscreen slides with text overlays
+     * ═══════════════════════════════════════════════════════════════════════ */
+    {
+      type: 'collapsible',
+      label: '🎠 Carousel Slides',
+      admin: {
+        condition: (_, { type } = {}) =>
+          type === 'heroCarousel' || type === 'foodPresentationSlider',
+        initCollapsed: false,
+        description: 'Fullscreen image slides with text.',
+      },
+      fields: [
         {
-          name: 'tagline',
-          type: 'text',
-          required: false,
-          localized: true,
-          label: 'Tagline',
-          admin: {
-            description: 'Elegant tagline below the title (e.g. "Elegance in Every Spoonful").',
+          name: 'slides',
+          type: 'array',
+          label: 'Slides',
+          minRows: 1,
+          maxRows: 8,
+          labels: {
+            singular: 'Slide',
+            plural: 'Slides',
           },
-        },
-        {
-          name: 'description',
-          type: 'textarea',
-          localized: true,
-          label: 'Description',
           admin: {
-            description: 'Optional supporting text.',
+            initCollapsed: false,
           },
-        },
-        {
-          name: 'buttonLabel',
-          type: 'text',
-          localized: true,
-          label: 'Button Label',
-          admin: {
-            description: 'CTA button text (e.g., "Order Now", "Learn More").',
-          },
-        },
-        {
-          name: 'buttonUrl',
-          type: 'text',
-          label: 'Button URL',
-          admin: {
-            description: 'Where the button links to.',
-          },
+          fields: [
+            {
+              name: 'image',
+              type: 'upload',
+              relationTo: 'media',
+              required: true,
+              label: 'Background Image',
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Title',
+                  required: true,
+                  localized: true,
+                  admin: { width: '50%' },
+                },
+                {
+                  name: 'tagline',
+                  type: 'text',
+                  label: 'Tagline',
+                  localized: true,
+                  admin: { width: '50%' },
+                },
+              ],
+            },
+            {
+              name: 'description',
+              type: 'textarea',
+              label: 'Description',
+              localized: true,
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'buttonLabel',
+                  type: 'text',
+                  label: 'Button Text',
+                  localized: true,
+                  admin: { width: '50%' },
+                },
+                {
+                  name: 'buttonUrl',
+                  type: 'text',
+                  label: 'Button Link',
+                  admin: { width: '50%' },
+                },
+              ],
+            },
+          ],
         },
       ],
     },
   ],
-  label: false,
 }

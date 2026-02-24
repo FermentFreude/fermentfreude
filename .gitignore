@@ -48,3 +48,5 @@ public/media
 .cursor/
 .cursorrules
 
+*.log
+*.backup
