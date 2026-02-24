@@ -33,6 +33,7 @@ export const Image: React.FC<MediaProps> = (props) => {
     fill,
     height: heightFromProps,
     imgClassName,
+    imgStyle,
     onClick,
     onLoad: onLoadFromProps,
     priority,
@@ -93,6 +94,7 @@ export const Image: React.FC<MediaProps> = (props) => {
       alt={alt || ''}
       className={cn(imgClassName)}
       fill={fill}
+      style={fill ? undefined : imgStyle}
       height={!fill ? height || heightFromProps : undefined}
       onClick={onClick}
       onLoad={() => {

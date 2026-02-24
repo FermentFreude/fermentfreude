@@ -740,6 +740,10 @@ export interface Page {
      * Introductory paragraph for the guide.
      */
     fermentationGuideBody?: string | null;
+    /**
+     * Optional image below the guide text (e.g. fermentation process, ingredients).
+     */
+    fermentationGuideImage?: (string | null) | Media;
     fermentationWhatTitle?: string | null;
     fermentationWhatBody?: string | null;
     /**
@@ -756,6 +760,10 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Optional image (e.g. fermented vegetables, jars, process).
+     */
+    fermentationWhatImage?: (string | null) | Media;
     fermentationWhyTitle?: string | null;
     /**
      * Six benefit items in two columns (e.g., Improved digestion, Rich in enzymes).
@@ -767,6 +775,10 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Optional image (e.g. gut health, fermentation benefits).
+     */
+    fermentationWhyImage?: (string | null) | Media;
     fermentationDangerTitle?: string | null;
     /**
      * Intro paragraph before the concerns list.
@@ -796,6 +808,10 @@ export interface Page {
      */
     fermentationPracticeBody?: string | null;
     /**
+     * Optional image (e.g. traditional fermentation, cultural foods).
+     */
+    fermentationPracticeImage?: (string | null) | Media;
+    /**
      * e.g. "Ready to learn?"
      */
     fermentationCtaTitle?: string | null;
@@ -810,6 +826,14 @@ export interface Page {
      */
     fermentationCtaSecondaryLabel?: string | null;
     fermentationCtaSecondaryUrl?: string | null;
+    /**
+     * Optional video as background. Download from pixabay.com/videos/search/cabbage, save to public/assets/videos/cabbage-cta.mp4, then set to /assets/videos/cabbage-cta.mp4. Or use /assets/videos/gastro-banner.mp4. Leave empty for solid gold background.
+     */
+    fermentationCtaVideoUrl?: string | null;
+    /**
+     * Used as poster when video is set, or fallback when video is absent.
+     */
+    fermentationCtaBackgroundImage?: (string | null) | Media;
     fermentationFaqTitle?: string | null;
     /**
      * e.g. "Common questions about fermentation answered"
@@ -2844,6 +2868,7 @@ export interface PagesSelect<T extends boolean = true> {
         fermentationGuideTag?: T;
         fermentationGuideTitle?: T;
         fermentationGuideBody?: T;
+        fermentationGuideImage?: T;
         fermentationWhatTitle?: T;
         fermentationWhatBody?: T;
         fermentationWhatMotto?: T;
@@ -2854,6 +2879,7 @@ export interface PagesSelect<T extends boolean = true> {
               url?: T;
               id?: T;
             };
+        fermentationWhatImage?: T;
         fermentationWhyTitle?: T;
         fermentationWhyItems?:
           | T
@@ -2862,6 +2888,7 @@ export interface PagesSelect<T extends boolean = true> {
               description?: T;
               id?: T;
             };
+        fermentationWhyImage?: T;
         fermentationDangerTitle?: T;
         fermentationDangerIntro?: T;
         fermentationDangerConcernsHeading?: T;
@@ -2875,12 +2902,15 @@ export interface PagesSelect<T extends boolean = true> {
         fermentationDangerClosing?: T;
         fermentationPracticeTitle?: T;
         fermentationPracticeBody?: T;
+        fermentationPracticeImage?: T;
         fermentationCtaTitle?: T;
         fermentationCtaDescription?: T;
         fermentationCtaPrimaryLabel?: T;
         fermentationCtaPrimaryUrl?: T;
         fermentationCtaSecondaryLabel?: T;
         fermentationCtaSecondaryUrl?: T;
+        fermentationCtaVideoUrl?: T;
+        fermentationCtaBackgroundImage?: T;
         fermentationFaqTitle?: T;
         fermentationFaqSubtitle?: T;
         fermentationFaqItems?:

@@ -113,7 +113,7 @@ export function WorkshopCardsSection({
                     href={card.buttonUrl}
                     className="mt-4 inline-flex items-center rounded-lg bg-[#333333] px-5 py-2.5 font-display text-sm font-bold text-white transition-colors hover:bg-[#1a1a1a]"
                   >
-                    {card.buttonLabel}
+                    {String(card.buttonLabel).replace(/\s+>\s*$/, '')}
                   </Link>
                 )}
                 {card.nextDate && nextDateLabel && (
