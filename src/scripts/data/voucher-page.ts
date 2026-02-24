@@ -45,11 +45,6 @@ export function voucherPageDataDE({
           title: 'Per E-Mail zum selber drucken',
           icon: 'email',
         },
-        {
-          type: 'post',
-          title: 'Per Post inkl. hochwertiger Karte',
-          icon: 'card',
-        },
       ],
       cardLabel: 'GESCHENK GUTSCHEIN',
       valueLabel: 'Wertgutschein',
@@ -128,10 +123,10 @@ export function voucherPageDataEN(
         id: item.id ?? undefined,
         amount: ['99€'][i] ?? item.amount,
       })),
-      deliveryOptions: (v.deliveryOptions ?? []).map((item, i) => ({
+      deliveryOptions: (v.deliveryOptions ?? []).map((item) => ({
         id: item.id ?? undefined,
         type: item.type,
-        title: i === 0 ? 'By email to print at home' : 'By post with premium card',
+        title: 'By email to print at home',
         icon: item.icon,
       })),
       cardLabel: 'GIFT VOUCHER',
