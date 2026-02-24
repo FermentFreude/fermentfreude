@@ -239,41 +239,46 @@ export default async function FermentationPage() {
       {/* Hero — title + description, image, 4 boxes overlapping */}
       <section className="relative bg-white">
         <div className="content-full mx-auto px-6 pt-16 pb-8 md:px-12 lg:px-20">
-          {/* Title + description */}
-          <h1 className="font-display text-hero font-bold text-ff-black md:text-display">
-            {heroTitle}
-          </h1>
-          {heroDescription && (
-            <p className="mt-4 max-w-2xl text-body-lg leading-relaxed text-ff-gray-text">
-              {heroDescription}
-            </p>
-          )}
-
-          {/* WHY FERMENTATION? — before image */}
-          <h2 className="mt-10 font-display text-subheading font-bold uppercase tracking-wide md:mt-12" style={{ color: '#555954' }}>
-            {heroBenefitsTitle}
-          </h2>
-
-          {/* Image of two people — hands visible above the boxes */}
-          <div className="relative z-0 mt-6 flex justify-center md:justify-end">
-            <div className="relative aspect-[4/3] w-full min-h-[200px] max-w-2xl overflow-hidden md:max-h-[320px]">
-              {isResolvedMedia(heroImage) ? (
-                <Media resource={heroImage} fill imgClassName="object-cover object-center" priority />
-              ) : (
-                <div className="flex size-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-ff-gray-text/30 bg-[#E8E6E3]">
-                  <span className="text-sm font-medium text-ff-gray-text">
-                    Hero image
-                  </span>
-                  <span className="text-xs text-ff-gray-text/80">
-                    Upload in Admin → Pages → Fermentation → Hero Image
-                  </span>
-                </div>
-              )}
-            </div>
+          {/* Title + description + WHY FERMENTATION? */}
+          <div className="relative z-20">
+            <h1 className="font-display text-hero font-bold text-ff-black md:text-display">
+              {heroTitle}
+            </h1>
+            {heroDescription && (
+              <p className="mt-4 max-w-2xl text-body-lg leading-relaxed text-ff-gray-text">
+                {heroDescription}
+              </p>
+            )}
+            <h2 className="mt-10 max-w-2xl font-display text-subheading font-bold uppercase tracking-wide md:mt-12" style={{ color: '#555954' }}>
+              {heroBenefitsTitle}
+            </h2>
           </div>
 
-          {/* 4 boxes — in front, positioned under their hands */}
-          <div className="relative z-10 mt-0 pb-16 md:-mt-20 lg:-mt-28">
+          {/* Image + 4 boxes — wrapped together */}
+          <div className="mt-6 pt-8 md:mt-12 md:pt-[120px]">
+            {/* Image of two people — in front of the boxes */}
+            <div className="relative z-20 flex justify-center md:justify-end">
+              <div
+                className="relative aspect-[4/3] w-full min-h-[240px] max-w-3xl overflow-hidden md:max-h-[420px]"
+                style={{ top: -80 }}
+              >
+                {isResolvedMedia(heroImage) ? (
+                  <Media resource={heroImage} fill imgClassName="object-cover object-center" priority />
+                ) : (
+                  <div className="flex size-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-ff-gray-text/30 bg-[#E8E6E3]">
+                    <span className="text-sm font-medium text-ff-gray-text">
+                      Hero image
+                    </span>
+                    <span className="text-xs text-ff-gray-text/80">
+                      Upload in Admin → Pages → Fermentation → Hero Image
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 4 boxes — behind the image */}
+            <div className="relative z-0 -mt-12 pb-16 md:-mt-20 lg:-mt-28">
             {heroBlocks.length > 0 && (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" style={{ position: 'inherit' }}>
                 {heroBlocks.slice(0, 4).map((block, i) => {
@@ -336,6 +341,7 @@ export default async function FermentationPage() {
                 })}
               </div>
             )}
+            </div>
           </div>
         </div>
       </section>
