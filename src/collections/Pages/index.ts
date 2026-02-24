@@ -599,6 +599,14 @@ export const Pages: CollectionConfig = {
                 description: 'Introductory paragraph for the guide.',
               },
             },
+            {
+              name: 'fermentationGuideImage',
+              type: 'upload',
+              relationTo: 'media',
+              required: false,
+              label: 'Guide Section Image',
+              admin: { description: 'Optional image below the guide text (e.g. fermentation process, ingredients).' },
+            },
               ],
             },
             {
@@ -641,6 +649,14 @@ export const Pages: CollectionConfig = {
                 { name: 'url', type: 'text', required: true, label: 'URL' },
               ],
             },
+            {
+              name: 'fermentationWhatImage',
+              type: 'upload',
+              relationTo: 'media',
+              required: false,
+              label: '"What" Section Image',
+              admin: { description: 'Optional image (e.g. fermented vegetables, jars, process).' },
+            },
               ],
             },
             {
@@ -675,6 +691,14 @@ export const Pages: CollectionConfig = {
                   label: 'Description',
                 },
               ],
+            },
+            {
+              name: 'fermentationWhyImage',
+              type: 'upload',
+              relationTo: 'media',
+              required: false,
+              label: '"Why" Section Image',
+              admin: { description: 'Optional image (e.g. gut health, fermentation benefits).' },
             },
               ],
             },
@@ -763,6 +787,14 @@ export const Pages: CollectionConfig = {
                 description: 'Multiple paragraphs supported. Separate with a blank line.',
               },
             },
+            {
+              name: 'fermentationPracticeImage',
+              type: 'upload',
+              relationTo: 'media',
+              required: false,
+              label: '"Practice" Section Image',
+              admin: { description: 'Optional image (e.g. traditional fermentation, cultural foods).' },
+            },
               ],
             },
             {
@@ -812,6 +844,26 @@ export const Pages: CollectionConfig = {
               type: 'text',
               required: false,
               label: 'CTA Secondary Button URL',
+            },
+            {
+              name: 'fermentationCtaVideoUrl',
+              type: 'text',
+              required: false,
+              label: 'CTA Background Video URL',
+              admin: {
+                description:
+                  'Optional video as background. Download from pixabay.com/videos/search/cabbage, save to public/assets/videos/cabbage-cta.mp4, then set to /assets/videos/cabbage-cta.mp4. Or use /assets/videos/gastro-banner.mp4. Leave empty for solid gold background.',
+              },
+            },
+            {
+              name: 'fermentationCtaBackgroundImage',
+              type: 'upload',
+              relationTo: 'media',
+              required: false,
+              label: 'CTA Background Image (fallback/poster)',
+              admin: {
+                description: 'Used as poster when video is set, or fallback when video is absent.',
+              },
             },
               ],
             },

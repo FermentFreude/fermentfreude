@@ -10,6 +10,7 @@ export interface Props {
   height?: number
   htmlElement?: ElementType | null
   imgClassName?: string
+  imgStyle?: React.CSSProperties
   onClick?: () => void
   onLoad?: () => void
   priority?: boolean // for NextImage only
