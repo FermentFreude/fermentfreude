@@ -8,47 +8,14 @@ type AboutSeedArgs = {
 }
 
 // ── Hero (page-level, not a block) ──────────────────────────
+// No richText overlay — image only (text removed per design)
 export const aboutHeroDE = (args: AboutSeedArgs = {}) => ({
   type: 'highImpact' as const,
-  richText: {
-    root: {
-      type: 'root',
-      children: [
-        {
-          type: 'heading',
-          tag: 'h1',
-          children: [{ type: 'text', text: 'Über uns', version: 1 }],
-          version: 1,
-        },
-      ],
-      direction: 'ltr' as const,
-      format: '' as const,
-      indent: 0,
-      version: 1,
-    },
-  },
   media: args.heroImage?.id ?? undefined,
 })
 
 export const aboutHeroEN = (args: AboutSeedArgs = {}) => ({
   type: 'highImpact' as const,
-  richText: {
-    root: {
-      type: 'root',
-      children: [
-        {
-          type: 'heading',
-          tag: 'h1',
-          children: [{ type: 'text', text: 'About Us', version: 1 }],
-          version: 1,
-        },
-      ],
-      direction: 'ltr' as const,
-      format: '' as const,
-      indent: 0,
-      version: 1,
-    },
-  },
   media: args.heroImage?.id ?? undefined,
 })
 

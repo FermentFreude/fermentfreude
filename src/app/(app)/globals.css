@@ -95,7 +95,7 @@
   }
 
   h1 {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 700;
     font-size: var(--text-display);
     line-height: var(--leading-display);
@@ -103,7 +103,7 @@
   }
 
   h2 {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 700;
     font-size: var(--text-heading);
     line-height: var(--leading-heading);
@@ -111,7 +111,7 @@
   }
 
   h3 {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 700;
     font-size: var(--text-subheading);
     line-height: var(--leading-subheading);
@@ -119,7 +119,7 @@
   }
 
   h4 {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 700;
     font-size: var(--text-title);
     line-height: var(--leading-title);
@@ -128,7 +128,7 @@
 
   h5,
   h6 {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 700;
     font-size: 1.125rem;
     line-height: 1.4;
@@ -149,7 +149,7 @@
   /* ── Hero title — based on Figma, scaled down ~20% ──────────
    * 26px → 32px → 38px → 48px → 60px */
   .text-hero {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 900;
     font-size: 1.625rem;
     line-height: 0.98;
@@ -179,7 +179,7 @@
   /* ── Hero body — based on Figma, scaled down ~20% ──────────
    * 12px → 14px → 15px → 16px → 18px */
   .text-hero-body {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 700;
     font-size: 0.75rem;
     line-height: 1.28;
@@ -226,7 +226,7 @@
 
   /* Display headline — page-level headings */
   .text-display {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 700;
     font-size: var(--text-display);
     line-height: var(--leading-display);
@@ -235,7 +235,7 @@
 
   /* Section heading */
   .text-section-heading {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 700;
     font-size: var(--text-heading);
     line-height: var(--leading-heading);
@@ -244,7 +244,7 @@
 
   /* Subheading */
   .text-subheading {
-    font-family: 'neue-haas-grotesk-display', sans-serif;
+    font-family: 'neue-haas-grotesk-display-pro', sans-serif;
     font-weight: 700;
     font-size: var(--text-subheading);
     line-height: var(--leading-subheading);
@@ -441,7 +441,7 @@
   --font-mono:
     ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
   --font-sans: 'neue-haas-grotesk-text', sans-serif;
-  --font-display: 'neue-haas-grotesk-display', sans-serif;
+  --font-display: 'neue-haas-grotesk-display-pro', sans-serif;
 }
 
 @layer utilities {

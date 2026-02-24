@@ -321,12 +321,12 @@ These use `oklch()` and automatically switch between themes:
 
 ### Fonts (Adobe Fonts / Typekit)
 
-Loaded via `<link rel="stylesheet" href="https://use.typekit.net/dtk7kir.css" />` in the root layout.
+Loaded via `<link rel="stylesheet" href="https://use.typekit.net/dtk7kir.css" />` in the root layout. Ensure your Adobe Fonts web project includes **Neue Haas Grotesk Text** and **Neue Haas Grotesk Display Pro**.
 
 | Tailwind class | Font name | CSS variable | Weight | Usage |
 |----------------|-----------|--------------|--------|-------|
 | `font-sans` | `neue-haas-grotesk-text` | `--font-sans` | 400 | Body text, paragraphs, labels |
-| `font-display` | `neue-haas-grotesk-display` | `--font-display` | 700 | Headings, nav links, buttons |
+| `font-display` | `neue-haas-grotesk-display-pro` | `--font-display` | 700 | Headings, nav links, buttons |
 | `font-mono` | System monospace stack | `--font-mono` | — | Code blocks |
 
 ### Base heading styles (`@layer base` in globals.css)
@@ -339,7 +339,7 @@ Loaded via `<link rel="stylesheet" href="https://use.typekit.net/dtk7kir.css" />
 | `h4` | `clamp(1.125rem, 2vw, 1.5rem)` | 1.3 | -0.01em |
 | `h5`/`h6` | `1.125rem` | 1.4 | — |
 
-All headings use `neue-haas-grotesk-display` weight 700.
+All headings use `neue-haas-grotesk-display-pro` weight 700.
 
 ### Body defaults
 

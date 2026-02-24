@@ -1,0 +1,10 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Test tube -->
+  <path d="M14 8h4v20h-4z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <!-- DNA helix -->
+  <path d="M26 10c0 0 2 4 2 8s-2 8-2 8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <path d="M26 14c0 0-2 4-2 8s2 8 2 8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <circle cx="26" cy="10" r="1.5" fill="currentColor"/>
+  <circle cx="24" cy="18" r="1.5" fill="currentColor"/>
+  <circle cx="26" cy="26" r="1.5" fill="currentColor"/>
+</svg>

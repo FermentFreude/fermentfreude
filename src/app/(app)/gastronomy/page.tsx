@@ -6,6 +6,7 @@ import { EditPageLink } from '@/components/EditPageLink'
 import { GastronomyOfferCards } from '@/components/gastronomy/GastronomyOfferCards'
 import { GastronomyProductSlider } from '@/components/gastronomy/GastronomyProductSlider'
 import { Media } from '@/components/Media'
+import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import Link from 'next/link'
@@ -156,68 +157,26 @@ export default async function GastronomyPage() {
         </div>
       </section>
 
-      {/* Next Workshop — Lakto-Gemüse card: image ~60%, white bg, pill button, next date */}
-      <section className="bg-white px-6 py-16 md:px-12 lg:px-20">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-center font-display text-3xl font-bold text-ff-black md:text-4xl">
-            {workshopSectionTitle}
-          </h2>
-          {workshopSectionSubtitle && (
-            <p className="mt-2 text-center text-ff-gray-text">{workshopSectionSubtitle}</p>
-          )}
-          {workshopClarification && (
-            <p className="mt-3 text-center text-base text-ff-gray-text md:max-w-2xl md:mx-auto">
-              {workshopClarification}
-            </p>
-          )}
-          <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {workshopCards.map((card, i) => (
-              <div
-                key={card.id ?? i}
-                className="overflow-hidden rounded-2xl bg-white shadow-md transition-shadow hover:shadow-lg"
-              >
-                <div className="relative aspect-5/4 overflow-hidden rounded-t-2xl">
-                  {isResolvedMedia(card.image) ? (
-                    <Media resource={card.image} fill imgClassName="object-cover" />
-                  ) : (
-                    <div className="flex size-full items-center justify-center bg-neutral-100" />
-                  )}
-                </div>
-                <div className="p-6">
-                  <h3 className="mb-2 font-display text-2xl font-bold text-[#1a1a1a]">
-                    {card.title}
-                  </h3>
-                  <p className="mb-4 text-base leading-relaxed text-[#333]">{card.description}</p>
-                  <div className="mb-5 flex items-baseline gap-2">
-                    <span className="font-display text-3xl font-bold text-[#E5B765]">
-                      {card.price}
-                    </span>
-                    {(card as { priceSuffix?: string }).priceSuffix && (
-                      <span className="font-sans text-xl text-[#555]">
-                        {(card as { priceSuffix?: string }).priceSuffix}
-                      </span>
-                    )}
-                  </div>
-                  <Link
-                    href={card.buttonUrl}
-                    className="inline-flex w-full items-center justify-center rounded-full bg-[#2a2a2a] px-8 py-3.5 font-display text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#1a1a1a]"
-                  >
-                    {card.buttonLabel}
-                  </Link>
-                  {(card as { nextDate?: string }).nextDate && (
-                    <div className="mt-5">
-                      <p className="font-sans text-sm text-[#666]">{workshopNextDateLabel}</p>
-                      <p className="mt-1 font-display text-lg font-bold text-[#1a1a1a]">
-                        {(card as { nextDate?: string }).nextDate}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Next Workshop — shared WorkshopCardsSection */}
+      <WorkshopCardsSection
+        title={workshopSectionTitle}
+        subtitle={workshopSectionSubtitle}
+        clarification={workshopClarification}
+        nextDateLabel={workshopNextDateLabel}
+        cards={workshopCards.map((c) => ({
+          id: c.id,
+          title: c.title,
+          description: c.description,
+          image: c.image,
+          price: c.price,
+          priceSuffix: (c as { priceSuffix?: string }).priceSuffix,
+          buttonLabel: c.buttonLabel,
+          buttonUrl: c.buttonUrl,
+          nextDate: (c as { nextDate?: string }).nextDate,
+        }))}
+        cardBg="#ffffff"
+        layout="centered"
+      />
 
       {/* What We Offer (Was wir anbieten) — bg #333333, heading gold #E5B765, paragraph white */}
       <section className="bg-[#333333] px-6 py-16 md:px-12 lg:px-20">
