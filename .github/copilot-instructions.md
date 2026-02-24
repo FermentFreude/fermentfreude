@@ -37,6 +37,22 @@
 
 ---
 
+## Branch Strategy
+
+| Branch      | Purpose                                                                                   |
+| ----------- | ----------------------------------------------------------------------------------------- |
+| **`main`**  | Production — auto-deploys to Vercel. **Never push directly.** Only merge from `staging`. |
+| **`staging`** | Integration branch. Alaa merges feature branches here first. Test, then merge → `main`.  |
+
+**Workflow:**
+1. Create feature branch from `staging`: `git checkout -b feature/xyz staging`
+2. Push feature branch, open PR into `staging`
+3. After review + CI passes, merge into `staging`
+4. Test on staging (local or preview deploy)
+5. When ready for production, merge `staging` → `main`
+
+---
+
 ## Quick Checklist
 
 - [ ] Localized field with `label` + `admin.description`?

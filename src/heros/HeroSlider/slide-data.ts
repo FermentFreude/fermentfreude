@@ -26,6 +26,20 @@ export function isResolvedMedia(val: unknown): val is MediaType {
 
 export const DEFAULT_SLIDES: ResolvedSlide[] = [
   {
+    slideId: 'basics',
+    eyebrow: 'Workshop Experience',
+    title: 'Begin Your Journey with\nFermentation Basics!',
+    description:
+      'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
+    attributes: ['Beginner-friendly', 'Science-based', 'Practical'],
+    ctaLabel: 'Learn More',
+    ctaHref: '/workshops/basics',
+    panelColor: '#000000',
+    bgColor: '#AEB1AE',
+    leftImage: null,
+    rightImage: null,
+  },
+  {
     slideId: 'lakto',
     eyebrow: 'Workshop Experience',
     title: 'Discover the Art of\nLakto-Fermentation!',
@@ -64,20 +78,6 @@ export const DEFAULT_SLIDES: ResolvedSlide[] = [
     ctaHref: '/workshops/tempeh',
     panelColor: '#737672',
     bgColor: '#F6F3F0',
-    leftImage: null,
-    rightImage: null,
-  },
-  {
-    slideId: 'basics',
-    eyebrow: 'Workshop Experience',
-    title: 'Begin Your Journey with\nFermentation Basics!',
-    description:
-      'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
-    attributes: ['Beginner-friendly', 'Science-based', 'Practical'],
-    ctaLabel: 'Learn More',
-    ctaHref: '/workshops/basics',
-    panelColor: '#000000',
-    bgColor: '#AEB1AE',
     leftImage: null,
     rightImage: null,
   },

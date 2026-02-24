@@ -104,6 +104,24 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
     heroImages,
     heroSlides: [
       {
+        slideId: 'basics',
+        eyebrow: 'Workshop-Erlebnis',
+        title: 'Starte deine Reise mit den\nFermentations-Grundlagen!',
+        description:
+          'Der perfekte Einstieg — lerne die grundlegende Fermentationswissenschaft, Sicherheit und Techniken, um zu Hause alles sicher zu fermentieren.',
+        attributes: [
+          { text: 'Anfängerfreundlich' },
+          { text: 'Wissenschaftlich fundiert' },
+          { text: 'Praktisch' },
+        ],
+        ctaLabel: 'Mehr erfahren',
+        ctaHref: '/workshops/basics',
+        panelColor: '#000000',
+        bgColor: '#AEB1AE',
+        leftImage: imgs.basicsSlideLeftId,
+        rightImage: imgs.basicsSlideRightId,
+      },
+      {
         slideId: 'lakto',
         eyebrow: 'Workshop-Erlebnis',
         title: 'Entdecke die Kunst der\nLakto-Fermentation!',
@@ -153,24 +171,6 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
         leftImage: imgs.tempehSlideLeftId,
         rightImage: imgs.tempehSlideRightId,
       },
-      {
-        slideId: 'basics',
-        eyebrow: 'Workshop-Erlebnis',
-        title: 'Starte deine Reise mit den\nFermentations-Grundlagen!',
-        description:
-          'Der perfekte Einstieg — lerne die grundlegende Fermentationswissenschaft, Sicherheit und Techniken, um zu Hause alles sicher zu fermentieren.',
-        attributes: [
-          { text: 'Anfängerfreundlich' },
-          { text: 'Wissenschaftlich fundiert' },
-          { text: 'Praktisch' },
-        ],
-        ctaLabel: 'Mehr erfahren',
-        ctaHref: '/workshops/basics',
-        panelColor: '#000000',
-        bgColor: '#AEB1AE',
-        leftImage: imgs.basicsSlideLeftId,
-        rightImage: imgs.basicsSlideRightId,
-      },
     ],
   }
 
@@ -202,6 +202,24 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
     ],
     heroImages,
     heroSlides: [
+      {
+        slideId: 'basics',
+        eyebrow: 'Workshop Experience',
+        title: 'Begin Your Journey with\nFermentation Basics!',
+        description:
+          'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
+        attributes: [
+          { text: 'Beginner-friendly' },
+          { text: 'Science-based' },
+          { text: 'Practical' },
+        ],
+        ctaLabel: 'Learn More',
+        ctaHref: '/workshops/basics',
+        panelColor: '#000000',
+        bgColor: '#AEB1AE',
+        leftImage: imgs.basicsSlideLeftId,
+        rightImage: imgs.basicsSlideRightId,
+      },
       {
         slideId: 'lakto',
         eyebrow: 'Workshop Experience',
@@ -251,24 +269,6 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
         bgColor: '#F6F3F0',
         leftImage: imgs.tempehSlideLeftId,
         rightImage: imgs.tempehSlideRightId,
-      },
-      {
-        slideId: 'basics',
-        eyebrow: 'Workshop Experience',
-        title: 'Begin Your Journey with\nFermentation Basics!',
-        description:
-          'The perfect starting point — learn fundamental fermentation science, safety, and techniques to confidently ferment anything at home.',
-        attributes: [
-          { text: 'Beginner-friendly' },
-          { text: 'Science-based' },
-          { text: 'Practical' },
-        ],
-        ctaLabel: 'Learn More',
-        ctaHref: '/workshops/basics',
-        panelColor: '#000000',
-        bgColor: '#AEB1AE',
-        leftImage: imgs.basicsSlideLeftId,
-        rightImage: imgs.basicsSlideRightId,
       },
     ],
   }

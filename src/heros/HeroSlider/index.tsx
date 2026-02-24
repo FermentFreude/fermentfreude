@@ -164,33 +164,33 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </svg>
         </button>
 
-        {/* Images — centered in the background area */}
-        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 z-20 flex items-end">
+        {/* Images — subtle tilt and overlapping */}
+        <div className="absolute top-[14%] left-1/2 -translate-x-1/2 z-20 flex items-end">
           <div
             className={cn(
-              'relative',
+              'relative -rotate-6',
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
           >
             <SlideImage
               media={slide.leftImage}
-              className="object-contain drop-shadow-xl h-[28vh] w-auto"
+              className="object-contain drop-shadow-xl h-[38vh] w-auto"
               priority={activeIndex === 0}
-              size="40vw"
+              size="45vw"
             />
           </div>
           <div
             className={cn(
-              'relative -ml-2',
+              'relative -ml-6 rotate-6',
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
           >
             <SlideImage
               media={slide.rightImage}
-              className="object-contain drop-shadow-xl h-[28vh] w-auto"
-              size="40vw"
+              className="object-contain drop-shadow-xl h-[38vh] w-auto"
+              size="45vw"
             />
           </div>
         </div>
@@ -284,34 +284,34 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
         {/* Image — Card — Image */}
         <div className="flex items-center justify-center w-full max-w-5xl mx-auto px-8 sm:px-14 lg:px-20 xl:px-24 gap-3 sm:gap-4 lg:gap-6">
-          {/* LEFT IMAGE */}
-          <div className="flex items-center justify-center">
+          {/* LEFT IMAGE — subtle tilt for visual interest */}
+          <div className="flex items-center justify-center -mr-4 lg:-mr-6">
             <div
               className={cn(
-                'relative group/img',
+                'relative group/img -rotate-3',
                 isEntering && 'hero-anim-image',
                 isExiting && 'hero-exit-image',
               )}
             >
               <SlideImage
                 media={slide.leftImage}
-                className="object-contain drop-shadow-2xl h-[45vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3"
+                className="object-contain drop-shadow-2xl h-[50vh] lg:h-[55vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3 group-hover/img:-rotate-1"
                 priority={activeIndex === 0}
-                size="(min-width: 768px) 20vw, 0px"
+                size="(min-width: 768px) 22vw, 0px"
               />
             </div>
           </div>
 
           {/* CENTER CARD */}
-          <div className="shrink min-w-0 flex justify-center relative z-20">
+          <div className="shrink-0 flex justify-center relative z-20">
             <div
-              className="w-full rounded-xl lg:rounded-2xl px-4 lg:px-6 py-5 lg:py-7 flex flex-col items-center text-center transition-colors duration-700"
+              className="rounded-xl lg:rounded-2xl px-4 lg:px-6 py-5 lg:py-7 flex flex-col items-center text-center transition-colors duration-700"
               style={{ backgroundColor: slide.panelColor }}
             >
-              {/* Logo */}
+              {/* Logo — fixed height container for consistent spacing */}
               <div
                 className={cn(
-                  'mb-1.5',
+                  'h-8 lg:h-10 flex items-center justify-center mb-1',
                   isEntering && 'hero-anim-eyebrow',
                   isExiting && 'hero-exit-content',
                 )}
@@ -411,19 +411,19 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             </div>
           </div>
 
-          {/* RIGHT IMAGE */}
-          <div className="flex items-center justify-center">
+          {/* RIGHT IMAGE — subtle tilt for visual interest */}
+          <div className="flex items-center justify-center -ml-4 lg:-ml-6">
             <div
               className={cn(
-                'relative group/img',
+                'relative group/img rotate-3',
                 isEntering && 'hero-anim-image',
                 isExiting && 'hero-exit-image',
               )}
             >
               <SlideImage
                 media={slide.rightImage}
-                className="object-contain drop-shadow-2xl h-[45vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3"
-                size="(min-width: 768px) 20vw, 0px"
+                className="object-contain drop-shadow-2xl h-[50vh] lg:h-[55vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3 group-hover/img:rotate-1"
+                size="(min-width: 768px) 22vw, 0px"
               />
             </div>
           </div>
