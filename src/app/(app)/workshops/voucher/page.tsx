@@ -46,10 +46,7 @@ const DEFAULTS = {
   heroDescription:
     'The perfect gift for foodies and the health-conscious. Choose an amount and optionally a greeting message for your voucher.',
   voucherAmounts: [{ amount: '99€' }],
-  deliveryOptions: [
-    { type: 'email', title: 'By email to print at home', icon: 'email' as const },
-    { type: 'post', title: 'By post with premium card', icon: 'card' as const },
-  ],
+  deliveryOptions: [{ type: 'email', title: 'By email to print at home', icon: 'email' as const }],
   cardLabel: 'GIFT VOUCHER',
   valueLabel: 'Voucher value',
   cardDisclaimer: 'Redeemable in our shop',
