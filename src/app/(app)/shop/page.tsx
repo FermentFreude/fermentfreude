@@ -1,104 +1,62 @@
-import { Grid } from '@/components/Grid'
-import { ProductGridItem } from '@/components/ProductGridItem'
+import { ShopFeaturedSection } from '@/components/shop/ShopFeaturedSection'
+import { ShopGiftSection } from '@/components/shop/ShopGiftSection'
+import { ShopHero } from '@/components/shop/ShopHero'
+import { ShopProductSection } from '@/components/shop/ShopProductSection'
+import { ShopWorkshopCta } from '@/components/shop/ShopWorkshopCta'
+import { getCachedGlobal } from '@/utilities/getGlobals'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 export const metadata = {
-  description: 'Search for products in the store.',
-  title: 'Shop',
+  description: 'Discover unique handcrafted ferments. Shop Kombucha, fermented vegetables, and more.',
+  title: 'Shop | FermentFreude',
 }
 
-type SearchParams = { [key: string]: string | string[] | undefined }
+const PRODUCTS_PER_PAGE = 12
 
 type Props = {
-  searchParams: Promise<SearchParams>
+  searchParams: Promise<{ page?: string }>
 }
 
 export default async function ShopPage({ searchParams }: Props) {
-  const { q: searchValue, sort, category } = await searchParams
-  const payload = await getPayload({ config: configPromise })
   const locale = await getLocale()
+  const { page: pageParam } = await searchParams
+  const page = Math.max(1, parseInt(String(pageParam || '1'), 10))
 
-  const products = await payload.find({
+  const getShop = getCachedGlobal('shop', 2, locale as 'de' | 'en')
+  const shopData = await getShop()
+
+  const payload = await getPayload({ config: configPromise })
+
+  const { docs: products, totalDocs } = await payload.find({
     collection: 'products',
     draft: false,
     locale,
     overrideAccess: false,
-    select: {
-      title: true,
-      slug: true,
-      gallery: true,
-      categories: true,
-      priceInUSD: true,
+    depth: 2,
+    limit: PRODUCTS_PER_PAGE,
+    page,
+    sort: 'title',
+    where: {
+      _status: { equals: 'published' },
     },
-    ...(sort ? { sort } : { sort: 'title' }),
-    ...(searchValue || category
-      ? {
-          where: {
-            and: [
-              {
-                _status: {
-                  equals: 'published',
-                },
-              },
-              ...(searchValue
-                ? [
-                    {
-                      or: [
-                        {
-                          title: {
-                            like: searchValue,
-                          },
-                        },
-                        {
-                          description: {
-                            like: searchValue,
-                          },
-                        },
-                      ],
-                    },
-                  ]
-                : []),
-              ...(category
-                ? [
-                    {
-                      categories: {
-                        contains: category,
-                      },
-                    },
-                  ]
-                : []),
-            ],
-          },
-        }
-      : {}),
   })
 
-  const resultsText = products.docs.length > 1 ? 'results' : 'result'
+  const hasMore = page * PRODUCTS_PER_PAGE < totalDocs
 
   return (
-    <div>
-      {searchValue ? (
-        <p className="mb-4">
-          {products.docs?.length === 0
-            ? 'There are no products that match '
-            : `Showing ${products.docs.length} ${resultsText} for `}
-          <span className="font-bold">&quot;{searchValue}&quot;</span>
-        </p>
-      ) : null}
-
-      {!searchValue && products.docs?.length === 0 && (
-        <p className="mb-4">No products found. Please try different filters.</p>
-      )}
-
-      {products?.docs.length > 0 ? (
-        <Grid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.docs.map((product) => {
-            return <ProductGridItem key={product.id} product={product} />
-          })}
-        </Grid>
-      ) : null}
-    </div>
+    <article className="pb-24">
+      <ShopHero data={shopData} />
+      <ShopProductSection
+        data={shopData}
+        products={products}
+        hasMore={hasMore}
+        nextPage={hasMore ? page + 1 : undefined}
+      />
+      <ShopGiftSection data={shopData} />
+      <ShopFeaturedSection data={shopData} />
+      <ShopWorkshopCta data={shopData} />
+    </article>
   )
 }

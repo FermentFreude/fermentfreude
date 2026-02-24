@@ -10,9 +10,12 @@ import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 type Props = {
   product: Product
+  className?: string
+  ariaLabel?: string
+  children?: React.ReactNode
 }
 
-export function AddToCart({ product }: Props) {
+export function AddToCart({ product, className, ariaLabel, children }: Props) {
   const { addItem, cart, isLoading } = useCart()
   const searchParams = useSearchParams()
 
@@ -95,16 +98,19 @@ export function AddToCart({ product }: Props) {
 
   return (
     <Button
-      aria-label="Add to cart"
-      variant={'outline'}
-      className={clsx({
-        'hover:opacity-90': true,
-      })}
+      aria-label={ariaLabel ?? 'Add to cart'}
+      variant="outline"
+      className={clsx(
+        {
+          'hover:opacity-90': !children,
+        },
+        className,
+      )}
       disabled={disabled || isLoading}
       onClick={addToCart}
-      type="submit"
+      type="button"
     >
-      Add To Cart
+      {children ?? 'Add To Cart'}
     </Button>
   )
 }

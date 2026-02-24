@@ -36,10 +36,22 @@ const scripts: Record<string, { name: string; file: string }> = {
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
   gastronomy: { name: 'Gastronomy page', file: 'seed-gastronomy.ts' },
+  fermentation: { name: 'Fermentation page (with images)', file: 'seed-fermentation.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
+  shop: { name: 'Shop page (global)', file: 'seed-shop.ts' },
 }
 
-const allOrder = ['header', 'products', 'home', 'about', 'contact', 'gastronomy', 'voucher']
+const allOrder = [
+  'header',
+  'products',
+  'home',
+  'about',
+  'contact',
+  'gastronomy',
+  'fermentation',
+  'voucher',
+  'shop',
+]
 
 function runSeed(key: string): boolean {
   const script = scripts[key]
@@ -56,6 +68,9 @@ function runSeed(key: string): boolean {
   const seedEnv = { ...process.env }
   if (key === 'gastronomy') {
     seedEnv.PAYLOAD_SKIP_GASTRONOMY_CONDITION = '1'
+  }
+  if (key === 'fermentation') {
+    seedEnv.PAYLOAD_SKIP_FERMENTATION_CONDITION = '1'
   }
   const result = spawnSync('npx', ['tsx', scriptPath, ...args], {
     stdio: 'inherit',

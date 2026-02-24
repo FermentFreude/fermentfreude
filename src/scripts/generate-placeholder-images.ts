@@ -70,6 +70,12 @@ const PLACEHOLDERS: Array<{ file: string; width: number; height: number; color?:
   { file: 'images/gastronomy-slide-professional-training.png', width: 800, height: 600 },
   { file: 'images/gastronomy-slide-menu-development.png', width: 800, height: 600 },
   { file: 'images/gastronomy-slide-corporate-events.png', width: 800, height: 600 },
+  // Fermentation (reuses gastronomy images)
+  { file: 'images/gastronomy/gastronomy-cutting-board-fermentation.png', width: 800, height: 600 },
+  { file: 'images/gastronomy/gastronomy-slide-fermentation-jars.png', width: 800, height: 600 },
+  { file: 'images/gastronomy/gastronomy-slide-flatlay-fermentation.png', width: 800, height: 600 },
+  { file: 'images/gastronomy/gastronomy-slide-01-cutting-board.png', width: 800, height: 600 },
+  { file: 'images/gastronomy/gastronomy-slide-professional-training.png', width: 800, height: 600 },
   // Voucher
   { file: 'images/Image (Gift Set).png', width: 800, height: 600 },
   { file: 'images/Geburtstage.png', width: 400, height: 400 },
