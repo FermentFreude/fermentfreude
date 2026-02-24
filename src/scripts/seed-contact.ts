@@ -134,8 +134,8 @@ async function seedContact() {
           title: 'Kontakt',
           description:
             'Du möchtest einen Workshop buchen oder hast Fragen? Wir freuen uns auf deine Nachricht.',
-          buttonLabel: 'Workshops entdecken',
-          buttonUrl: '/workshops',
+          buttonLabel: 'Kontakt',
+          buttonUrl: '/contact',
         },
         {
           image: (kombuchaWorkshopImage ?? workshopImage ?? sliderBannerImage).id,
@@ -218,8 +218,8 @@ async function seedContact() {
           title: 'Contact',
           description:
             'Would you like to book a workshop or have questions? We look forward to hearing from you.',
-          buttonLabel: 'Explore Workshops',
-          buttonUrl: '/workshops',
+          buttonLabel: 'Contact',
+          buttonUrl: '/contact',
         },
         {
           image: (kombuchaWorkshopImage ?? workshopImage ?? sliderBannerImage).id,

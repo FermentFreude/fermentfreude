@@ -12,8 +12,8 @@ export const contactDataDE = (args: ContactSeedArgs = {}) => ({
     heading: 'Kontakt',
     subtext:
       'Du möchtest einen Workshop buchen oder hast Fragen? Wir freuen uns auf deine Nachricht.',
-    buttonLabel: 'Workshops entdecken',
-    buttonHref: '/workshops',
+    buttonLabel: 'Kontakt',
+    buttonHref: '/contact',
   },
   contact: {
     heading: 'Kontakt',
@@ -55,8 +55,8 @@ export const contactDataEN = (args: ContactSeedArgs = {}) => ({
     heading: 'Contact',
     subtext:
       'Would you like to book a workshop or have questions? We look forward to hearing from you.',
-    buttonLabel: 'Explore Workshops',
-    buttonHref: '/workshops',
+    buttonLabel: 'Contact',
+    buttonHref: '/contact',
   },
   contact: {
     heading: 'Contact',
