@@ -49,6 +49,13 @@ export function SplashScreen() {
       return
     }
 
+    // Skip splash animation for users who prefer reduced motion
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      sessionStorage.setItem('ff-splash-seen', '1')
+      setPhase('done')
+      return
+    }
+
     document.body.style.overflow = 'hidden'
 
     const t = (fn: () => void, ms: number) => {

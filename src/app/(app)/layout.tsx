@@ -18,7 +18,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <head>
         <InitTheme />
         <link rel="stylesheet" href="https://use.typekit.net/dtk7kir.css" />
-        <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
       <body suppressHydrationWarning={true}>
@@ -27,8 +26,16 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <AdminBar />
           <LivePreviewListener />
 
+          {/* Skip-to-main-content link for keyboard / screen-reader users */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[10000] focus:rounded-md focus:bg-ff-charcoal focus:px-4 focus:py-2 focus:text-white focus:outline-none"
+          >
+            Skip to main content
+          </a>
+
           <Header />
-          <main>{children}</main>
+          <main id="main-content">{children}</main>
           <Footer />
         </Providers>
       </body>

@@ -37,6 +37,12 @@ export const FadeIn: React.FC<FadeInProps> = ({
     () => {
       if (!ref.current) return
 
+      // Respect prefers-reduced-motion: skip animation entirely
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        gsap.set(ref.current, { opacity: 1 })
+        return
+      }
+
       const { y, x, skewY } = initial[from]
 
       gsap.set(ref.current, { y, x, opacity: 0, skewY })

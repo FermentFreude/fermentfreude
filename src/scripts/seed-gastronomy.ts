@@ -361,7 +361,7 @@ async function seedGastronomy() {
   payload.logger.info('Seeding Gastronomy page…')
 
   // ── Upload images to Payload Media (Vercel Blob) — skip if Blob suspended ─
-  const imagesDir = path.resolve(process.cwd(), 'public/assets/images/gastronomy')
+  const imagesDir = path.resolve(process.cwd(), 'seed-assets/images/gastronomy')
   const media: {
     offer1?: Media
     offer2?: Media
