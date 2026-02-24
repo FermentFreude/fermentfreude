@@ -1,122 +1,130 @@
-import Link from 'next/link'
-import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
+import Link from 'next/link'
+
+import type { Media as MediaType } from '@/payload-types'
 
 function isResolvedMedia(img: unknown): img is MediaType {
   return typeof img === 'object' && img !== null && 'url' in img
 }
 
-export interface WorkshopCard {
+export type WorkshopCard = {
   id?: string | null
-  title: string
-  description: string
+  title?: string | null
+  description?: string | null
   image?: unknown
-  price?: string
-  priceSuffix?: string
-  buttonLabel?: string
-  buttonUrl?: string
-  nextDate?: string
+  price?: string | null
+  priceSuffix?: string | null
+  buttonLabel?: string | null
+  buttonUrl?: string | null
+  nextDate?: string | null
 }
 
-interface WorkshopCardsSectionProps {
+export type WorkshopCardsSectionProps = {
   title: string
-  subtitle?: string
-  nextDateLabel?: string
-  viewAllLabel?: string
-  viewAllUrl?: string
+  subtitle?: string | null
+  clarification?: string | null
+  nextDateLabel?: string | null
+  viewAllLabel?: string | null
+  viewAllUrl?: string | null
   cards: WorkshopCard[]
+  /** Card background. Default: #FAF2E0 */
   cardBg?: string
-  layout?: 'inline' | 'stacked'
-  /** Section wrapper background. Default: bg-ff-ivory. Use "white" for white. */
-  sectionBg?: 'ivory' | 'white'
+  /** Layout: 'centered' (gastronomy) or 'inline' (fermentation with View All button) */
+  layout?: 'centered' | 'inline'
 }
 
 export function WorkshopCardsSection({
   title,
   subtitle,
+  clarification,
   nextDateLabel,
   viewAllLabel,
   viewAllUrl,
   cards,
-  cardBg = '#ffffff',
-  sectionBg = 'ivory',
+  cardBg = '#FAF2E0',
+  layout = 'inline',
 }: WorkshopCardsSectionProps) {
   if (cards.length === 0) return null
 
   return (
-    <section
-      className={`section-padding-lg ${sectionBg === 'white' ? 'bg-white' : 'bg-ff-ivory'}`}
-    >
-      <div className="container mx-auto container-padding content-wide">
-        <h2 className="text-center text-section-heading font-display font-bold text-ff-black">
-          {title}
-        </h2>
-        {subtitle && (
-          <p className="mt-2 text-center text-ff-olive">{subtitle}</p>
+    <section className="section-padding-sm bg-white">
+      <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+        {layout === 'centered' ? (
+          <div className="text-center">
+            <h2 className="font-display text-section-heading font-bold text-ff-black md:text-4xl">
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="mt-2 text-body text-ff-black/80 sm:text-body-lg">{subtitle}</p>
+            )}
+            {clarification && (
+              <p className="mx-auto mt-3 max-w-2xl text-body text-ff-black/70">{clarification}</p>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between md:gap-8">
+            <div>
+              <h2 className="font-display text-section-heading font-bold text-ff-black">{title}</h2>
+              {subtitle && (
+                <p className="mt-3 max-w-2xl text-body text-ff-black/85 sm:text-body-lg">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+            {viewAllLabel && (
+              <Link
+                href={viewAllUrl ?? '/workshops'}
+                className="shrink-0 rounded-lg bg-[#333333] px-6 py-3 font-display text-sm font-bold text-white transition-colors hover:bg-[#1a1a1a]"
+              >
+                {viewAllLabel}
+              </Link>
+            )}
+          </div>
         )}
-        <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((card, i) => (
             <div
               key={card.id ?? i}
-              className="overflow-hidden rounded-2xl shadow-md transition-shadow hover:shadow-lg"
+              className="overflow-hidden rounded-2xl shadow-lg transition-shadow hover:shadow-xl"
               style={{ backgroundColor: cardBg }}
             >
-              <div className="relative aspect-[5/4] overflow-hidden rounded-t-2xl">
+              <div className="relative aspect-[4/3] overflow-hidden">
                 {isResolvedMedia(card.image) ? (
                   <Media resource={card.image} fill imgClassName="object-cover" />
                 ) : (
-                  <div className="flex size-full items-center justify-center bg-neutral-100" />
+                  <div className="flex size-full items-center justify-center bg-[#D8D6D1]" />
                 )}
               </div>
               <div className="p-6">
-                <h3 className="mb-2 font-display text-title font-bold text-ff-black">
+                <h3 className="font-display text-xl font-bold text-ff-black md:text-subheading">
                   {card.title}
                 </h3>
-                <p className="mb-4 text-body leading-relaxed text-ff-charcoal">
+                <p className="mt-2 text-body-sm leading-relaxed text-ff-black/90">
                   {card.description}
                 </p>
-                {card.price && (
-                  <div className="mb-5 flex items-baseline gap-2">
-                    <span className="font-display text-2xl font-bold text-ff-gold">
-                      {card.price}
-                    </span>
-                    {card.priceSuffix && (
-                      <span className="font-sans text-body text-ff-olive">
-                        {card.priceSuffix}
-                      </span>
-                    )}
-                  </div>
+                {(card.price || card.priceSuffix) && (
+                  <p className="mt-4 font-display text-lg font-bold text-ff-black">
+                    {card.price}
+                    {card.priceSuffix && ` ${card.priceSuffix}`}
+                  </p>
                 )}
                 {card.buttonUrl && card.buttonLabel && (
                   <Link
                     href={card.buttonUrl}
-                    className="inline-flex w-full items-center justify-center rounded-full bg-ff-charcoal hover:bg-ff-charcoal-hover px-6 py-2.5 font-display font-bold text-base text-ff-ivory transition-all hover:scale-[1.03] active:scale-[0.97]"
+                    className="mt-4 inline-flex items-center rounded-lg bg-[#333333] px-5 py-2.5 font-display text-sm font-bold text-white transition-colors hover:bg-[#1a1a1a]"
                   >
                     {card.buttonLabel}
                   </Link>
                 )}
                 {card.nextDate && nextDateLabel && (
-                  <div className="mt-5">
-                    <p className="font-sans text-body-sm text-ff-olive">{nextDateLabel}</p>
-                    <p className="mt-1 font-display text-lg font-bold text-ff-black">
-                      {card.nextDate}
-                    </p>
-                  </div>
+                  <p className="mt-4 text-body-sm text-ff-black/70">
+                    {nextDateLabel} {card.nextDate}
+                  </p>
                 )}
               </div>
             </div>
           ))}
         </div>
-        {viewAllLabel && viewAllUrl && (
-          <div className="mt-10 text-center">
-            <Link
-              href={viewAllUrl}
-              className="inline-flex items-center justify-center rounded-full border-2 border-ff-charcoal bg-transparent hover:bg-ff-charcoal hover:text-ff-ivory px-8 py-2.5 font-display font-bold text-base text-ff-charcoal transition-all hover:scale-[1.03] active:scale-[0.97]"
-            >
-              {viewAllLabel}
-            </Link>
-          </div>
-        )}
       </div>
     </section>
   )

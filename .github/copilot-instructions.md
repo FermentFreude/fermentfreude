@@ -16,7 +16,7 @@
 | **File storage**     | Cloudflare R2 via `@payloadcms/storage-s3` | S3-compatible API. Env: `R2_BUCKET`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, `R2_PUBLIC_URL`. |
 | **Media collection** | `src/collections/Media.ts`                 | Upload field, `alt` (text, required, localized), `caption` (richText, localized). Public read.                   |
 | **Payments**         | Stripe via `@payloadcms/plugin-ecommerce`  | `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOKS_SIGNING_SECRET`.                     |
-| **Fonts**            | Neue Haas Grotesk (Adobe Typekit)          | `font-sans` = body, `font-display` = headings/nav/buttons. **Never** Geist, Inter, or system fonts.              |
+| **Fonts**            | Neue Haas Grotesk (Adobe Typekit)          | `font-sans` = body (Text), `font-display` = headings/nav/buttons (Display Pro). **Never** Geist, Inter, or system fonts.              |
 
 ## Environments
 

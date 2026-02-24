@@ -109,7 +109,7 @@ const config = {
           'monospace',
         ],
         sans: ['neue-haas-grotesk-text', 'sans-serif'],
-        display: ['neue-haas-grotesk-display', 'sans-serif'],
+        display: ['neue-haas-grotesk-display-pro', 'sans-serif'],
       },
       keyframes: {
         fadeIn: {

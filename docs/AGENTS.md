@@ -15,14 +15,14 @@ This project uses **Neue Haas Grotesk** via Adobe Fonts (Typekit), loaded in `sr
 | Tailwind class | Font name | Usage |
 |---------------|-----------|-------|
 | `font-sans` | `neue-haas-grotesk-text` | Body text, paragraphs, labels |
-| `font-display` | `neue-haas-grotesk-display` | Headings, nav links, buttons |
+| `font-display` | `neue-haas-grotesk-display-pro` | Headings, nav links, buttons |
 
 ### Rules
 
 1. **Never use Geist, Inter, or system fonts** — always Neue Haas Grotesk.
 2. **Nav links & headings**: `font-display font-bold`.
 3. **Body text**: `font-sans` (default on `<body>`).
-4. **All headings** (h1–h6) use `neue-haas-grotesk-display` weight 700 via `@layer base` in globals.css.
+4. **All headings** (h1–h6) use `neue-haas-grotesk-display-pro` weight 700 via `@layer base` in globals.css.
 5. Typography tokens are defined in `docs/DESIGN_SYSTEM.md` — use those, never raw Tailwind text sizes for headings.
 
 ---

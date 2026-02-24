@@ -45,7 +45,7 @@
 | **File storage** | Cloudflare R2 | `@payloadcms/storage-s3` (S3-compatible API). Configured in `src/plugins/index.ts`. |
 | **Media collection** | `src/collections/Media.ts` | `slug: 'media'`, upload with `alt` (text, required, localized) and `caption` (richText, localized). Public read. |
 | **Payments** | Stripe | `@payloadcms/plugin-ecommerce` with `stripeAdapter()`. |
-| **Fonts** | Neue Haas Grotesk | Adobe Typekit. `font-sans` = body, `font-display` = headings/nav/buttons. |
+| **Fonts** | Neue Haas Grotesk | Adobe Typekit. `font-sans` = body (Text), `font-display` = headings/nav/buttons (Display Pro). |
 | **Locales** | `de` (default) + `en` | Bidirectional fallback. DeepL auto-translation hooks in production. |
 
 ### Environments
@@ -363,7 +363,7 @@ These rules apply to **every** new feature, section, field, or content block —
 | Tailwind class | Font | Usage |
 |---------------|------|-------|
 | `font-sans` | `neue-haas-grotesk-text` | Body text, paragraphs, labels |
-| `font-display` | `neue-haas-grotesk-display` | Headings, nav links, buttons |
+| `font-display` | `neue-haas-grotesk-display-pro` | Headings, nav links, buttons |
 
 **Never use Geist, Inter, or system fonts.**
 

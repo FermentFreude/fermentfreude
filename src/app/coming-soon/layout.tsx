@@ -17,7 +17,7 @@ export default function ComingSoonLayout({ children }: { children: React.ReactNo
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: '"neue-haas-grotesk-display", sans-serif',
+          fontFamily: '"neue-haas-grotesk-display-pro", sans-serif',
           fontWeight: 700,
           background: '#faf9f6',
           color: '#1a1a1a',
