@@ -44,8 +44,9 @@ seed-assets/
 
 public/media
 
-# Cursor AI rules
-.cursor/
+# Cursor AI - ignore local settings but keep shared rules
+.cursor/mcp.json
+.cursor/settings.json
 .cursorrules
 
 *.log

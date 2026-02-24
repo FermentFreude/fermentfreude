@@ -48,15 +48,47 @@
 | **Fonts** | Neue Haas Grotesk | Adobe Typekit. `font-sans` = body, `font-display` = headings/nav/buttons. |
 | **Locales** | `de` (default) + `en` | Bidirectional fallback. DeepL auto-translation hooks in production. |
 
+### Environments
+
+| Environment | Database | R2 Bucket | Deploys from |
+|-------------|----------|-----------|-------------|
+| **Production** | `fermentfreude` | `fermentfreude-media` | `main` branch (auto via Vercel) |
+| **Staging** | `fermentfreude-staging` | `fermentfreude-media-staging` | `staging` branch (preview) |
+
+- Local `.env` should point to **staging** values for safe development.
+- **Never** develop against production database locally.
+- Seed scripts run against whichever DB your `.env` points to — be careful.
+
 ### Environment Variables (R2)
 
 ```bash
+# Production
 R2_BUCKET=fermentfreude-media
+R2_PUBLIC_URL=https://pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev
+
+# Staging (use these in local .env)
+R2_BUCKET=fermentfreude-media-staging
+R2_PUBLIC_URL=https://pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev
+
+# Shared credentials (same API token for both buckets)
 R2_ACCESS_KEY_ID=...
 R2_SECRET_ACCESS_KEY=...
 R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
-R2_PUBLIC_URL=https://<your-public-url>.r2.dev
 ```
+
+### Branch Strategy
+
+| Branch | Purpose |
+|--------|---------|
+| **`main`** | Production — auto-deploys to Vercel. **Never push directly.** Only merge from `staging`. |
+| **`staging`** | Integration branch. Feature branches merge here first. Test, then merge → `main`. |
+
+**Workflow:**
+1. Create feature branch from `staging`: `git checkout -b feature/xyz staging`
+2. Push feature branch, open PR into `staging`
+3. After review + CI passes, merge into `staging`
+4. Test on staging (local or preview deploy)
+5. When ready for production, merge `staging` → `main`
 
 ### Why Not Vercel Blob?
 

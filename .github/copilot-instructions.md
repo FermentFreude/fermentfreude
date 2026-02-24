@@ -18,6 +18,17 @@
 | **Payments**         | Stripe via `@payloadcms/plugin-ecommerce`  | `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOKS_SIGNING_SECRET`.                     |
 | **Fonts**            | Neue Haas Grotesk (Adobe Typekit)          | `font-sans` = body, `font-display` = headings/nav/buttons. **Never** Geist, Inter, or system fonts.              |
 
+## Environments
+
+| Environment    | Database                 | R2 Bucket                       | Deploys from                        |
+| -------------- | ------------------------ | ------------------------------- | ----------------------------------- |
+| **Production** | `fermentfreude`          | `fermentfreude-media`           | `main` branch (auto via Vercel)     |
+| **Staging**    | `fermentfreude-staging`  | `fermentfreude-media-staging`   | `staging` branch (preview)          |
+
+- Local `.env` should point to **staging** values for safe development.
+- **Never** develop against production database locally.
+- Seed scripts run against whichever DB your `.env` points to — be careful.
+
 ---
 
 ## 12 Non-Negotiable Rules
