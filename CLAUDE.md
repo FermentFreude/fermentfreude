@@ -65,6 +65,63 @@ R2_PUBLIC_URL=https://pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev  (production b
 
 Run `pnpm seed`, then **immediately change them back** to staging values.
 
+## Content & Image Management (Staging → Production)
+
+**Production admin is the source of truth for content.** After the initial bootstrap, never overwrite production data with a full sync.
+
+### Prerequisites (already installed)
+
+- `mongodump` / `mongorestore` / `mongoexport` / `mongoimport` (MongoDB Database Tools via Homebrew)
+- `rclone` (`brew install rclone`) — configured in `~/.config/rclone/rclone.conf` with remotes `r2-staging` and `r2-prod`
+
+### When to do what
+
+| Scenario | Action | Touches production DB? |
+|---|---|---|
+| Code-only change (components, styles, fixes) | Merge PR staging → main | No |
+| New page with seed script | Point `.env` to prod, run `pnpm seed <page>`, switch back | Adds only |
+| Final images for existing pages | Upload directly in `fermentfreude.vercel.app/admin` | Yes (safe) |
+| Need specific staging images on production | Selective copy (see below) | Adds/updates only |
+
+### Selective image copy (staging → production)
+
+**Step 1 — Copy specific R2 files** (use `rclone copy`, never `rclone sync`):
+
+```bash
+# Single file
+rclone copy r2-staging:fermentfreude-media-staging/media/filename.webp r2-prod:fermentfreude-media/media/
+
+# Entire folder
+rclone copy r2-staging:fermentfreude-media-staging/media/new-folder/ r2-prod:fermentfreude-media/media/new-folder/
+```
+
+**Step 2 — Copy the MongoDB media documents** (metadata only):
+
+```bash
+# Export specific media docs from staging
+mongoexport --uri="<staging-connection-string>" --db=fermentfreude-staging \
+  --collection=media \
+  --query='{"filename": {"$in": ["image1.webp", "image2.webp"]}}' \
+  --out=/tmp/selected-media.json
+
+# Import into production (upsert = update if exists, insert if new)
+mongoimport --uri="<prod-connection-string>" --db=fermentfreude \
+  --collection=media --mode=upsert --file=/tmp/selected-media.json
+
+# Clean up
+rm /tmp/selected-media.json
+```
+
+### DANGER — Never do these on production
+
+- `rclone sync` staging → production (deletes production-only files)
+- `mongorestore --drop` (wipes entire collection before restoring)
+- `pnpm seed` with all pages (overwrites existing content)
+
+### Best practice
+
+Use staging for **code + layout testing** with placeholder images. Once code is merged to production, upload **final images** directly in `fermentfreude.vercel.app/admin`. This avoids cross-DB syncing entirely.
+
 ## Project Structure
 
 ```
