@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
 
-function isResolvedMedia(img: unknown): img is MediaType | { url: string } {
+function isResolvedMedia(img: unknown): img is MediaType {
   return typeof img === 'object' && img !== null && 'url' in img
 }
 
@@ -21,13 +21,12 @@ export interface WorkshopCard {
 interface WorkshopCardsSectionProps {
   title: string
   subtitle?: string
-  clarification?: string | null
   nextDateLabel?: string
   viewAllLabel?: string
   viewAllUrl?: string
   cards: WorkshopCard[]
   cardBg?: string
-  layout?: 'inline' | 'stacked' | 'centered'
+  layout?: 'inline' | 'stacked'
   /** Section wrapper background. Default: bg-ff-ivory. Use "white" for white. */
   sectionBg?: 'ivory' | 'white'
 }
@@ -35,7 +34,6 @@ interface WorkshopCardsSectionProps {
 export function WorkshopCardsSection({
   title,
   subtitle,
-  clarification,
   nextDateLabel,
   viewAllLabel,
   viewAllUrl,
@@ -56,9 +54,6 @@ export function WorkshopCardsSection({
         {subtitle && (
           <p className="mt-2 text-center text-ff-olive">{subtitle}</p>
         )}
-        {clarification && (
-          <p className="mt-2 text-center text-body text-ff-olive">{clarification}</p>
-        )}
         <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((card, i) => (
             <div
@@ -68,11 +63,7 @@ export function WorkshopCardsSection({
             >
               <div className="relative aspect-[5/4] overflow-hidden rounded-t-2xl">
                 {isResolvedMedia(card.image) ? (
-                  <Media
-                    resource={(card.image as { url: string }).url}
-                    fill
-                    imgClassName="object-cover"
-                  />
+                  <Media resource={card.image} fill imgClassName="object-cover" />
                 ) : (
                   <div className="flex size-full items-center justify-center bg-neutral-100" />
                 )}

@@ -12,15 +12,8 @@ import { getPayload } from 'payload'
 
 import type { Media as MediaType, Page as PageType } from '@/payload-types'
 
-import { DangerAccordion } from './DangerAccordion'
-import { FaqAccordion } from './FaqAccordion'
-import { PracticeAccordion } from './PracticeAccordion'
-import { WhySection } from './WhySection'
-
-type HeroBlock = { id?: string; title: string; description?: string; icon?: string | MediaType | null; url?: string }
-
 const HERO_BLOCK_COLORS = ['#FAF2E0', '#E6BE68', '#4B4B4B', '#EDD195'] as const
-const DEFAULT_HERO_BLOCKS: HeroBlock[] = [
+const DEFAULT_HERO_BLOCKS: Array<{ id?: string; title: string; description?: string; icon?: unknown; url?: string }> = [
   { title: 'Health & Well-being', description: 'Support your gut microbiome with probiotic-rich foods.' },
   { title: 'Unique Flavours', description: 'Discover complex umami and tangy taste profiles.' },
   { title: 'Simple Processes', description: 'No special equipment—just salt, time, and patience.' },
@@ -223,16 +216,14 @@ export default async function FermentationPage() {
   const heroTitle = f?.fermentationHeroTitle ?? DEFAULT_HERO_TITLE
   const heroDescription = f?.fermentationHeroDescription ?? DEFAULT_HERO_DESCRIPTION
   const heroBenefitsTitle = f?.fermentationHeroBenefitsTitle ?? 'WHY FERMENTATION?'
-  let heroBlocks: HeroBlock[] =
-    (f?.fermentationHeroBlocks?.length ?? 0) > 0
-      ? (f?.fermentationHeroBlocks ?? []) as HeroBlock[]
-      : DEFAULT_HERO_BLOCKS
+  let heroBlocks =
+    (f?.fermentationHeroBlocks?.length ?? 0) > 0 ? (f?.fermentationHeroBlocks ?? []) : DEFAULT_HERO_BLOCKS
 
   // Resolve hero block icons if they're just IDs
   if (heroBlocks.length > 0) {
-    heroBlocks = (await Promise.all(
-      heroBlocks.map(async (block): Promise<HeroBlock> => {
-        const icon = block.icon
+    heroBlocks = await Promise.all(
+      heroBlocks.map(async (block) => {
+        const icon = (block as { icon?: unknown }).icon
         if (icon && typeof icon === 'string') {
           try {
             const mediaDoc = await payload.findByID({
@@ -240,14 +231,14 @@ export default async function FermentationPage() {
               id: icon,
               depth: 0,
             })
-            return { ...block, icon: mediaDoc as MediaType }
+            return { ...block, icon: mediaDoc }
           } catch {
             return block
           }
         }
         return block
       }),
-    )) as HeroBlock[]
+    )
   }
 
   const _guideTag = f?.fermentationGuideTag ?? DEFAULT_GUIDE_TAG
@@ -319,8 +310,8 @@ export default async function FermentationPage() {
   return (
     <article className="font-sans">
       {/* Hero — title + description, image, 4 boxes overlapping */}
-      <section className="relative bg-[#FAFAF8]">
-        <div className="content-full mx-auto px-6 pt-20 pb-12 md:px-12 md:pt-24 lg:px-20 lg:pb-16">
+      <section className="relative bg-white">
+        <div className="content-full mx-auto px-6 pt-16 pb-8 md:px-12 lg:px-20">
           {/* Title + description + WHY FERMENTATION? */}
           <div className="relative z-20">
             <h1 className="font-display text-hero font-bold text-ff-black md:text-display">
@@ -367,7 +358,7 @@ export default async function FermentationPage() {
                 const isDark = bgColor === '#4B4B4B'
                   const blockContent = (
                     <div
-                      className="rounded-2xl p-6 text-center shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl"
+                      className="rounded-2xl p-6 text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl"
                       style={{ backgroundColor: bgColor }}
                     >
                       {/* 1. Icon (upload from Admin → Hero Blocks) */}
@@ -424,33 +415,22 @@ export default async function FermentationPage() {
             </div>
           </div>
         </div>
-        {/* Organic wave divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 overflow-hidden">
-          <svg viewBox="0 0 100 12" preserveAspectRatio="none" className="absolute bottom-0 left-0 right-0 h-full w-full">
-            <path d="M0 12 Q25 0 50 12 T100 12 V12 H0 Z" fill="white" />
-          </svg>
-        </div>
       </section>
 
       {/* Guide section — A complete guide to fermentation */}
-      <section className="bg-white pt-10 pb-4 md:pt-12 md:pb-5">
+      <section className="bg-white pt-4 pb-6 md:pt-6 md:pb-8">
         <FadeIn delay={0}>
-        <div className="content-medium mx-auto px-4 sm:px-6 text-center">
-          {_guideTag && (
-            <span className="font-display text-caption font-bold uppercase tracking-[0.2em] text-[#E6BE68]">
-              {_guideTag}
-            </span>
-          )}
-          <h2 className="font-display text-section-heading font-bold mt-2" style={{ color: '#555954' }}>
+        <div className="content-medium mx-auto px-4 sm:px-6">
+          <h2 className="font-display text-section-heading font-bold" style={{ color: '#555954' }}>
             {guideTitle}
           </h2>
           {guideBody && (
-            <p className="mt-4 text-body leading-relaxed sm:mt-6 sm:text-body-lg mx-auto max-w-2xl" style={{ color: '#555954' }}>
+            <p className="mt-4 text-body leading-relaxed sm:mt-6 sm:text-body-lg" style={{ color: '#555954' }}>
               {guideBody}
             </p>
           )}
           {isResolvedMedia(guideImage) && (
-            <div className="mx-auto mt-8 aspect-video w-full max-w-2xl overflow-hidden rounded-2xl shadow-md">
+            <div className="mt-8 aspect-video w-full max-w-2xl overflow-hidden rounded-2xl">
               <Media resource={guideImage} fill imgClassName="object-cover object-center" />
             </div>
           )}
@@ -458,103 +438,168 @@ export default async function FermentationPage() {
         </FadeIn>
       </section>
 
-      {/* What is fermentation? — warm, joyful block with image */}
-      <section id="what" className="bg-white pt-8 pb-8 md:pt-10 md:pb-10">
+      {/* What is fermentation? — light beige block */}
+      <section id="what" className="bg-white pt-4 pb-6 md:pt-6 md:pb-8">
         <FadeIn delay={100}>
-        <div className="mx-auto max-w-379 px-4 sm:px-6">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#F5F0E8] via-[#FAF2E0] to-[#F9F0DC] p-6 sm:p-8 md:p-12 shadow-sm">
-            <div className="pointer-events-none absolute -right-8 -top-8 size-40 rounded-full bg-[#E6BE68]/15 blur-3xl" aria-hidden />
-            <div className="relative grid grid-cols-1 gap-8 md:grid-cols-2 md:items-center md:gap-12">
-              <div className="order-2 md:order-1">
+        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+          <div className="rounded-2xl bg-[#F5F0E8] p-6 sm:p-8 md:p-12">
+            <div
+              className={
+                isResolvedMedia(whatImage)
+                  ? 'grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start'
+                  : ''
+              }
+            >
+              <div>
                 <h2 className="font-display text-2xl font-bold leading-tight text-ff-black sm:text-3xl md:text-4xl lg:text-[2.75rem]">
                   {whatTitle}
                 </h2>
                 {whatBody && (
-                  <p className="mt-4 leading-relaxed text-ff-black/90 text-base sm:mt-6 sm:text-lg md:text-xl">
+                  <p className="mt-4 font-bold leading-relaxed text-ff-black text-base sm:mt-6 sm:text-lg md:text-xl lg:text-[1.5625rem]">
                     {whatBody}
                   </p>
                 )}
                 {whatMotto && (
-                  <blockquote className="mt-8 sm:mt-10 md:mt-12">
-                    <p className="font-display text-lg font-bold leading-relaxed text-ff-black sm:text-xl md:text-2xl">
-                      <span className="text-[#E6BE68]">“</span>
-                      {whatMotto.split('. ').filter(Boolean).map((phrase, i, arr) => (
-                        <span key={i}>
-                          {phrase}{phrase.endsWith('.') ? '' : '.'}
-                          {i < arr.length - 1 && <br />}
-                        </span>
-                      ))}
-                      <span className="text-[#E6BE68]">”</span>
-                    </p>
-                  </blockquote>
+                  <p className="mt-8 font-bold leading-relaxed whitespace-pre-line text-ff-black text-base sm:mt-10 sm:text-lg md:mt-14 md:text-xl lg:mt-[62px] lg:text-[1.5625rem]">
+                    {whatMotto.replace('. Just ', '.\nJust ')}
+                  </p>
                 )}
               </div>
-              <div className="order-1 md:order-2 aspect-4/3 w-full overflow-hidden rounded-2xl shadow-md">
-                {isResolvedMedia(whatImage) ? (
+              {isResolvedMedia(whatImage) && (
+                <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl">
                   <Media resource={whatImage} fill imgClassName="object-cover object-center" />
-                ) : isResolvedMedia(guideImage) ? (
-                  <Media resource={guideImage} fill imgClassName="object-cover object-center" />
-                ) : (
-                  <div className="flex size-full flex-col items-center justify-center gap-3 bg-[#ECE5DE] text-center">
-                    <span className="text-4xl" aria-hidden>🫙</span>
-                    <span className="text-sm font-medium text-ff-gray-text max-w-[12rem]">
-                      Add image in Admin → Pages → Fermentation → What Image
-                    </span>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
         </FadeIn>
       </section>
 
-      {/* Why is it so special? — creative cards with icons */}
-      {(whyItems.length > 0 || isResolvedMedia(whyImage)) && (
-        <section className="bg-white pt-8 pb-8 md:pt-10 md:pb-10">
-          <FadeIn delay={150}>
-          <WhySection
-            title={whyTitle}
-            items={whyItems}
-            image={whyImage}
-          />
-          </FadeIn>
-        </section>
-      )}
+      {/* Why is it so special? — light beige block, 6 items in 2 columns */}
+      <section className="section-padding-sm bg-white">
+        <FadeIn delay={150}>
+          <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+            <div className="rounded-2xl bg-[#F9F0DC] p-6 sm:p-10 md:p-14 lg:p-16">
+              <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
+                <div className="flex-1">
+                  <h2 className="font-display text-section-heading font-bold tracking-tight text-ff-black">
+                    {whyTitle}
+                  </h2>
+                  <div className="mt-8 grid grid-cols-1 gap-x-16 gap-y-8 sm:mt-10 sm:gap-y-10 md:grid-cols-2 md:mt-12 md:gap-y-12 lg:gap-x-20">
+                    {whyItems.map((item, i) => (
+                  <div
+                    key={item.id ?? i}
+                    className="border-l-2 border-ff-black/20 pl-4 sm:pl-6 md:pl-8"
+                  >
+                    <h3 className="font-display text-title font-bold leading-tight text-ff-black md:text-subheading">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-body leading-relaxed text-ff-black md:text-body-lg">
+                      {item.description}
+                    </p>
+                  </div>
+                ))}
+                  </div>
+                </div>
+                {isResolvedMedia(whyImage) && (
+                  <div className="w-full shrink-0 md:w-80 lg:w-96">
+                    <div className="aspect-[4/3] overflow-hidden rounded-2xl">
+                      <Media resource={whyImage} fill imgClassName="object-cover object-center" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+      </section>
 
-      {/* Is it dangerous? — collapsible accordion */}
-      <section className="bg-white pt-8 pb-8 md:pt-10 md:pb-10">
+      {/* Is it dangerous? — light gray block */}
+      <section className="section-padding-sm bg-white">
         <FadeIn delay={200}>
-        <div className="mx-auto max-w-379 px-4 sm:px-6">
-          <DangerAccordion
-            title={dangerTitle}
-            intro={dangerIntro}
-            concernsHeading={dangerConcernsHeading}
-            concerns={dangerConcerns}
-            closing={dangerClosing}
-          />
+        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+          <div className="rounded-2xl bg-[#ECE5DE] p-6 sm:p-8 md:p-12">
+            <h2 className="font-display text-section-heading font-bold text-ff-black">
+              {dangerTitle}
+            </h2>
+            {dangerIntro && (
+              <p className="mt-4 text-body leading-relaxed text-ff-black sm:mt-6 sm:text-body-lg">
+                {dangerIntro}
+              </p>
+            )}
+            {dangerConcerns.length > 0 && dangerConcernsHeading && (
+              <div className="mt-8 sm:mt-10">
+                <h3 className="font-display text-title font-bold text-ff-black md:text-subheading">
+                  {dangerConcernsHeading}
+                </h3>
+                <ul className="mt-4 space-y-4 sm:mt-6 sm:space-y-5">
+                  {dangerConcerns.map((concern, i) => (
+                    <li key={concern.id ?? i} className="border-l-2 border-ff-black/20 pl-4 sm:pl-6">
+                      <span className="font-display font-bold text-ff-black">{concern.title}:</span>{' '}
+                      <span className="text-body leading-relaxed text-ff-black sm:text-body-lg">
+                        {concern.description}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {dangerClosing && (
+              <p className="mt-6 text-body leading-relaxed text-ff-black sm:mt-8 sm:text-body-lg">
+                {dangerClosing}
+              </p>
+            )}
+          </div>
         </div>
         </FadeIn>
       </section>
 
-      {/* A practice, not a trend — compact, collapsible */}
-      <section className="bg-white pt-8 pb-8 md:pt-10 md:pb-10">
+      {/* A practice, not a trend — light cream block */}
+      <section className="section-padding-sm bg-white">
         <FadeIn delay={250}>
-        <div className="mx-auto max-w-379 px-4 sm:px-6">
-          <PracticeAccordion
-            title={practiceTitle}
-            paragraphs={practiceParagraphs}
-            image={practiceImage}
-          />
+        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+          <div className="rounded-2xl bg-[#FAF2E0] p-6 sm:p-10 md:p-14 lg:p-16">
+            <div
+              className={
+                isResolvedMedia(practiceImage)
+                  ? 'grid grid-cols-1 gap-8 lg:grid-cols-4 lg:gap-12'
+                  : ''
+              }
+            >
+              <div className={isResolvedMedia(practiceImage) ? 'lg:col-span-3' : ''}>
+                <h2 className="font-display text-section-heading font-bold tracking-tight text-ff-black">
+                  {practiceTitle}
+                </h2>
+                <div className="mt-8 max-w-3xl space-y-6 sm:mt-10 sm:space-y-7 md:space-y-8">
+                  {practiceParagraphs.map((para, i) => (
+                    <p
+                      key={i}
+                      className="border-l-2 border-ff-black/20 pl-4 text-body leading-[1.7] text-ff-black sm:pl-6 sm:text-body-lg md:leading-[1.75]"
+                    >
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              </div>
+              {isResolvedMedia(practiceImage) && (
+                <div className="lg:col-span-1">
+                  <div className="aspect-[4/3] overflow-hidden rounded-2xl">
+                    <Media resource={practiceImage} fill imgClassName="object-cover object-center" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         </FadeIn>
       </section>
 
       {/* Ready to learn? CTA — gold block or video bg, two buttons */}
-      <section className="bg-white pt-8 pb-8 md:pt-10 md:pb-10">
+      <section className="section-padding-sm bg-white">
         <FadeIn delay={300}>
-        <div className="mx-auto max-w-379 px-4 sm:px-6 text-center">
-          <div className="relative min-h-70 overflow-hidden rounded-2xl bg-[#E6BE68] px-8 py-16 md:px-16 shadow-xl">
+        <div className="mx-auto max-w-[1516px] px-4 sm:px-6 text-center">
+          <div className="relative min-h-[280px] overflow-hidden rounded-2xl bg-[#E6BE68] px-8 py-16 md:px-16">
             {/* Optional video background */}
             {ctaVideoUrl ? (
               <>
@@ -576,7 +621,7 @@ export default async function FermentationPage() {
               </>
             ) : (
               <div
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(255,255,255,0.4),rgba(255,255,255,0.1)_50%,transparent_70%)]"
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(255,255,255,0.25),transparent)]"
                 aria-hidden
               />
             )}
@@ -625,8 +670,8 @@ export default async function FermentationPage() {
         </FadeIn>
       </section>
 
-      {/* FAQ — accordion */}
-      <section className="bg-white pt-8 pb-8 md:pt-10 md:pb-10">
+      {/* FAQ — centered, light gray container */}
+      <section className="section-padding-sm bg-white">
         <FadeIn delay={350}>
         <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
@@ -640,10 +685,29 @@ export default async function FermentationPage() {
             )}
           </div>
           <div className="mx-auto mt-8 max-w-4xl">
-            <div className="rounded-2xl border border-[#333333]/10 bg-[#E8E6E3] p-6 sm:p-8 md:p-10 shadow-sm">
-              <FaqAccordion items={faqItems} />
+            <div className="rounded-2xl border border-[#333333]/15 bg-[#E8E6E3] p-6 sm:p-8 md:p-10">
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
+                {faqItems.map((item, i) => (
+                  <div
+                    key={item.id ?? i}
+                    className="flex gap-4 rounded-xl bg-white/90 p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#333333]/10 font-display text-base font-bold text-ff-black">
+                      ?
+                    </span>
+                    <div>
+                      <h3 className="font-display text-title font-bold text-ff-black">
+                        {item.question}
+                      </h3>
+                      <p className="mt-2 text-body-sm leading-relaxed text-ff-black/90">
+                        {item.answer}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
               {(faqCtaTitle || faqCtaBody) && (
-                <div className="mt-8 rounded-xl bg-white/90 p-6 text-center sm:mt-10 sm:p-8 border border-[#333333]/5">
+                <div className="mt-8 rounded-xl bg-white/80 p-6 text-center sm:mt-10 sm:p-8">
                   {faqCtaTitle && (
                     <h3 className="font-display text-subheading font-bold text-ff-black">
                       {faqCtaTitle}
@@ -662,7 +726,7 @@ export default async function FermentationPage() {
         </FadeIn>
       </section>
 
-      {/* Workshop cards */}
+      {/* Workshop cards — shared with gastronomy, uses gastronomy data */}
       <FadeIn delay={400}>
       <WorkshopCardsSection
         title={
