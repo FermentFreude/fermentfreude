@@ -6,6 +6,10 @@ const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://loc
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Allow large image uploads (up to 50MB) — sharp resizes them after upload
+  serverActions: {
+    bodySizeLimit: '50mb',
+  },
   async headers() {
     return [
       {
