@@ -19,29 +19,51 @@
 ## Environment Variables (names only — never values)
 
 ```
-DATABASE_URI          # MongoDB Atlas connection string
-PAYLOAD_SECRET        # Min 32 chars random secret
-R2_BUCKET             # fermentfreude-media (prod) / fermentfreude-media-staging (dev)
-R2_ACCESS_KEY_ID      # Cloudflare R2 API token
-R2_SECRET_ACCESS_KEY  # Cloudflare R2 API secret
-R2_ENDPOINT           # https://<account-id>.r2.cloudflarestorage.com
-R2_PUBLIC_URL         # CDN URL for serving images
-STRIPE_SECRET_KEY
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-STRIPE_WEBHOOKS_SIGNING_SECRET
-DEEPL_API_KEY         # Auto-translation DE→EN (production only)
+DATABASE_URL                        # MongoDB Atlas connection string
+PAYLOAD_SECRET                      # Random secret (min 24 chars)
+PAYLOAD_PUBLIC_SERVER_URL            # Full URL with https:// (matches NEXT_PUBLIC_SERVER_URL)
+NEXT_PUBLIC_SERVER_URL               # Full URL with https:// (baked at build time!)
+PREVIEW_SECRET                       # Draft preview secret
+PREVIEW_PASSWORD                     # Coming-soon gate password
+R2_BUCKET                            # fermentfreude-media (prod) / fermentfreude-media-staging (staging)
+R2_ACCESS_KEY_ID                     # Cloudflare R2 API token
+R2_SECRET_ACCESS_KEY                 # Cloudflare R2 API secret
+R2_ENDPOINT                          # https://<account-id>.r2.cloudflarestorage.com
+R2_PUBLIC_URL                        # CDN URL for serving images (different per bucket!)
+STRIPE_SECRET_KEY                    # sk_test_ (dev) / sk_live_ (prod)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY   # pk_test_ (dev) / pk_live_ (prod)
+STRIPE_WEBHOOKS_SIGNING_SECRET       # whsec_
+DEEPL_API_KEY                        # Auto-translation DE→EN
 ```
+
+**CRITICAL:** `NEXT_PUBLIC_*` vars are baked in at **build time**. Changing them in Vercel requires a full redeploy **without cache**.
 
 ## Environments & Branches
 
-| Environment | Database                | R2 Bucket                     | Branch      | Deploys to     |
-| ----------- | ----------------------- | ----------------------------- | ----------- | -------------- |
-| Production  | `fermentfreude`         | `fermentfreude-media`         | `main`      | Vercel (auto)  |
-| Staging     | `fermentfreude-staging` | `fermentfreude-media-staging` | `staging`   | Vercel preview |
-| Local dev   | points to staging DB    | staging bucket                | `feature/*` | localhost:3000 |
+| Environment      | Database                | R2 Bucket                     | R2 Public URL                   | Branch      | Deploys to                                                      | Who uses it     |
+| ---------------- | ----------------------- | ----------------------------- | ------------------------------- | ----------- | --------------------------------------------------------------- | --------------- |
+| **Production**   | `fermentfreude`         | `fermentfreude-media`         | `pub-c70f47169a...r2.dev`       | `main`      | `fermentfreude.vercel.app` (auto)                               | Founders (live) |
+| **Staging**      | `fermentfreude-staging` | `fermentfreude-media-staging` | `pub-0cf8a1c18a...r2.dev`       | `staging`   | `fermentfreude-git-staging-raphaellas-projects.vercel.app`      | Dev testing     |
+| **Local dev**    | `fermentfreude-staging` | `fermentfreude-media-staging` | `pub-0cf8a1c18a...r2.dev`       | `feature/*` | `localhost:3000`                                                | You & Alaa      |
 
 **Branch flow:** `feature/*` → PR into `staging` → test → merge `staging` → `main`
-**Never push directly to `main`. Never run `pnpm seed` on production.**
+
+**Rules:**
+- **Never push directly to `main`.** Always: feature → staging → main
+- **Never run `pnpm seed` against production** unless intentionally populating it
+- Local dev is completely isolated from production — break things freely!
+
+## Seeding Production
+
+When production DB is empty and you're ready to populate it, temporarily change 3 values in your local `.env`:
+
+```
+DATABASE_URL=...fermentfreude?...          (remove -staging)
+R2_BUCKET=fermentfreude-media              (remove -staging)
+R2_PUBLIC_URL=https://pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev  (production bucket URL)
+```
+
+Run `pnpm seed`, then **immediately change them back** to staging values.
 
 ## Project Structure
 
