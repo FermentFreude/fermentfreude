@@ -48,6 +48,8 @@ export const Media: CollectionConfig = {
   ],
   upload: {
     staticDir: path.resolve(dirname, '../../public/media'),
+    // Allow focal point selection in admin for better cropping
+    focalPoint: true,
     mimeTypes: [
       // Images
       'image/png',
@@ -62,32 +64,42 @@ export const Media: CollectionConfig = {
       'video/ogg',
       'video/quicktime',
     ],
-    // Automatically resize large images on upload (only applies to images, not videos)
+    // Automatically resize the original on upload — caps at 2560px (only applies to images, not videos)
     resizeOptions: {
-      width: 1920,
-      height: 1920,
+      width: 2560,
+      height: 2560,
       fit: 'inside',
       withoutEnlargement: true,
     },
-    // Generate optimized sizes for images
+    // Convert all uploaded images to WebP for maximum compression
+    formatOptions: {
+      format: 'webp',
+      options: {
+        quality: 82,
+      },
+    },
+    // Generate optimized sizes for responsive images
     imageSizes: [
       {
         name: 'thumbnail',
         width: 400,
         height: 400,
         fit: 'inside',
+        formatOptions: { format: 'webp', options: { quality: 75 } },
       },
       {
         name: 'card',
         width: 800,
         height: 800,
         fit: 'inside',
+        formatOptions: { format: 'webp', options: { quality: 80 } },
       },
       {
         name: 'hero',
         width: 1920,
         height: 1080,
         fit: 'inside',
+        formatOptions: { format: 'webp', options: { quality: 85 } },
       },
     ],
   },
