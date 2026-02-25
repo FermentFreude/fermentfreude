@@ -485,7 +485,7 @@ async function seedGastronomy() {
           layout: [],
           meta: {
             title: 'Gastronomie | Fermentfreude',
-            description: 'Fermentierte Produkte für Restaurants, Hotels und Catering.,
+            description: 'Fermentierte Produkte für Restaurants, Hotels und Catering.',
           },
           gastronomy: gastronomyDataDE(media),
         },
@@ -544,7 +544,7 @@ async function seedGastronomy() {
             layout: [],
             meta: {
               title: 'Gastronomy | Fermentfreude',
-              description: 'Fermented products for restaurants, hotels and catering.,
+              description: 'Fermented products for restaurants, hotels and catering.',
             },
             gastronomy: dataENWithIds,
           },
@@ -572,7 +572,7 @@ async function seedGastronomy() {
       layout: [],
       meta: {
         title: 'Gastronomie | Fermentfreude',
-        description: 'Fermentierte Produkte für Restaurants, Hotels und Catering.,
+        description: 'Fermentierte Produkte für Restaurants, Hotels und Catering.',
       },
       gastronomy: gastronomyDataDE(media),
     },
@@ -629,7 +629,7 @@ async function seedGastronomy() {
         layout: [],
         meta: {
           title: 'Gastronomy | Fermentfreude',
-          description: 'Fermented products for restaurants, hotels and catering.,
+          description: 'Fermented products for restaurants, hotels and catering.',
         },
         gastronomy: dataENWithIds,
       },
