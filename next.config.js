@@ -6,10 +6,6 @@ const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://loc
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Allow large image uploads (up to 50MB) — sharp resizes them after upload
-  serverActions: {
-    bodySizeLimit: '50mb',
-  },
   async headers() {
     return [
       {
@@ -73,6 +69,10 @@ const nextConfig = {
   // Heavy packages resolved once on the server, not re-bundled
   serverExternalPackages: ['sharp', 'graphql'],
   experimental: {
+    // Allow large image uploads (up to 50MB) — sharp resizes them after upload
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
     // Tree-shake large libraries — only import what's used
     // NOTE: Do NOT add @payloadcms/* here — Payload uses its own import map system
     optimizePackageImports: [
