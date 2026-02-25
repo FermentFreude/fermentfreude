@@ -35,6 +35,9 @@ const r2Enabled =
 export const plugins: Plugin[] = [
   s3Storage({
     enabled: r2Enabled,
+    // Upload directly from browser to R2 via presigned URLs.
+    // Bypasses Vercel's 4.5 MB serverless function body limit.
+    clientUploads: true,
     collections: {
       media: {
         disablePayloadAccessControl: true,
