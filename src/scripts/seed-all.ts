@@ -31,42 +31,15 @@ const __dirname = path.dirname(__filename)
 
 const scripts: Record<string, { name: string; file: string }> = {
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
-  products: { name: 'Products (kombucha bottles)', file: 'seed-products.ts' },
-  placeholders: { name: 'Placeholder products (reset)', file: 'seed-placeholder-products.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
   gastronomy: { name: 'Gastronomy page', file: 'seed-gastronomy.ts' },
   fermentation: { name: 'Fermentation page (with images)', file: 'seed-fermentation.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
-  shop: { name: 'Shop page (global)', file: 'seed-shop.ts' },
-  'workshop-pages': {
-    name: 'Workshop pages (tempeh, lakto-gemuese, kombucha)',
-    file: 'seed-workshop-pages.ts',
-  },
-  posts: { name: 'How-To Articles (Posts collection)', file: 'seed-posts.ts' },
-  'tempeh-posts': { name: 'Tempeh How-To Articles', file: 'seed-tempeh-posts.ts' },
-  'lakto-detail': { name: 'Lakto Detail (workshopDetail tab)', file: 'seed-lakto-detail.ts' },
-  'tempeh-detail': { name: 'Tempeh Detail (workshopDetail tab)', file: 'seed-tempeh-detail.ts' },
-  'voucher-bg': { name: 'VoucherCta background image patch', file: 'seed-voucher-bg.ts' },
 }
 
-const allOrder = [
-  'header',
-  'products',
-  'home',
-  'about',
-  'contact',
-  'gastronomy',
-  'fermentation',
-  'voucher',
-  'shop',
-  'workshop-pages',
-  'posts',
-  'tempeh-posts',
-  'lakto-detail',
-  'tempeh-detail',
-]
+const allOrder = ['header', 'home', 'about', 'contact', 'gastronomy', 'fermentation', 'voucher']
 
 function runSeed(key: string): boolean {
   const script = scripts[key]
@@ -86,12 +59,6 @@ function runSeed(key: string): boolean {
   }
   if (key === 'fermentation') {
     seedEnv.PAYLOAD_SKIP_FERMENTATION_CONDITION = '1'
-  }
-  if (key === 'shop') {
-    seedEnv.PAYLOAD_SKIP_SHOP_CONDITION = '1'
-  }
-  if (key === 'workshop-pages' || key === 'lakto-detail' || key === 'tempeh-detail') {
-    seedEnv.PAYLOAD_SKIP_WORKSHOP_CONDITION = '1'
   }
   const result = spawnSync('npx', ['tsx', scriptPath, ...args], {
     stdio: 'inherit',
