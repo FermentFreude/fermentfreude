@@ -481,7 +481,7 @@ async function seedGastronomy() {
           title: 'Gastronomie',
           slug: 'gastronomy',
           _status: 'published',
-          hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+          hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
           layout: [],
           meta: {
             title: 'Gastronomie | Fermentfreude',
@@ -540,7 +540,7 @@ async function seedGastronomy() {
             title: 'Gastronomy',
             slug: 'gastronomy',
             _status: 'published',
-            hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+            hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
             layout: [],
             meta: {
               title: 'Gastronomy | Fermentfreude',
@@ -568,7 +568,7 @@ async function seedGastronomy() {
       title: 'Gastronomie',
       slug: 'gastronomy',
       _status: 'published',
-      hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+      hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
       layout: [],
       meta: {
         title: 'Gastronomie | Fermentfreude',
@@ -625,7 +625,7 @@ async function seedGastronomy() {
         title: 'Gastronomy',
         slug: 'gastronomy',
         _status: 'published',
-        hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+        hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
         layout: [],
         meta: {
           title: 'Gastronomy | Fermentfreude',

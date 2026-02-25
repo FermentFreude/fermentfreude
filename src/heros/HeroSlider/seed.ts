@@ -4,10 +4,6 @@
  */
 
 export interface HeroSliderImages {
-  heroImage1Id: string
-  heroImage2Id: string
-  heroImage3Id: string
-  heroImage4Id: string
   laktoSlideLeftId: string
   laktoSlideRightId: string
   kombuchaSlideLeftId: string
@@ -18,90 +14,9 @@ export interface HeroSliderImages {
   basicsSlideRightId: string
 }
 
-function buildHeroImages(imgs: HeroSliderImages) {
-  return [
-    { image: imgs.heroImage1Id },
-    { image: imgs.heroImage2Id },
-    { image: imgs.heroImage3Id },
-    { image: imgs.heroImage4Id },
-    { image: imgs.heroImage1Id },
-  ]
-}
-
-function buildRichText(lines: string[]) {
-  return {
-    root: {
-      type: 'root',
-      children: [
-        ...lines.slice(0, -1).map((text) => ({
-          type: 'heading',
-          children: [
-            { type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text, version: 1 },
-          ],
-          direction: 'ltr' as const,
-          format: '',
-          indent: 0,
-          tag: 'h1',
-          version: 1,
-        })),
-        {
-          type: 'paragraph',
-          children: [
-            {
-              type: 'text',
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: lines[lines.length - 1],
-              version: 1,
-            },
-          ],
-          direction: 'ltr' as const,
-          format: '',
-          indent: 0,
-          textFormat: 0,
-          version: 1,
-        },
-      ],
-      direction: 'ltr' as const,
-      format: '' as const,
-      indent: 0,
-      version: 1,
-    },
-  }
-}
-
 export function buildHeroSlider(imgs: HeroSliderImages) {
-  const heroImages = buildHeroImages(imgs)
-
   const de = {
     type: 'heroSlider' as const,
-    richText: buildRichText([
-      'Gutes Essen',
-      'Bessere Gesundheit',
-      'Echte Freude',
-      'Wir machen Fermentation genussvoll & zugänglich und stärken die Darmgesundheit durch Geschmack, Bildung und hochwertige handgemachte Lebensmittel.',
-    ]),
-    links: [
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Workshop',
-          url: '/workshops',
-          appearance: 'default' as const,
-        },
-      },
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Produkte',
-          url: '/shop',
-          appearance: 'outline' as const,
-        },
-      },
-    ],
-    heroImages,
     heroSlides: [
       {
         slideId: 'basics',
@@ -176,31 +91,6 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
 
   const en = {
     type: 'heroSlider' as const,
-    richText: buildRichText([
-      'Good food',
-      'Better Health',
-      'Real Joy',
-      'We make fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods.',
-    ]),
-    links: [
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Workshop',
-          url: '/workshops',
-          appearance: 'default' as const,
-        },
-      },
-      {
-        link: {
-          type: 'custom' as const,
-          label: 'Products',
-          url: '/shop',
-          appearance: 'outline' as const,
-        },
-      },
-    ],
-    heroImages,
     heroSlides: [
       {
         slideId: 'basics',
@@ -279,14 +169,10 @@ export function buildHeroSlider(imgs: HeroSliderImages) {
 /** Merge EN hero data with auto-generated IDs from the DE save read-back. */
 export function mergeHeroSliderEN(
   en: ReturnType<typeof buildHeroSlider>['en'],
-  freshLinks: { id?: string }[],
-  freshHeroImages: { id?: string }[],
   freshHeroSlides: { id?: string; attributes?: { id?: string }[] }[],
 ) {
   return {
     ...en,
-    links: en.links.map((l, i) => ({ ...l, id: freshLinks[i]?.id })),
-    heroImages: en.heroImages.map((img, i) => ({ ...img, id: freshHeroImages[i]?.id })),
     heroSlides: en.heroSlides.map((s, i) => ({
       ...s,
       id: freshHeroSlides[i]?.id,

@@ -23,6 +23,21 @@
         "uriFormat": "%s",
         "action": "debugWithChrome"
       }
+    },
+    {
+      "name": "Seed Script",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "set -a && source .env && set +a && npx tsx ${input:seedScript}",
+      "cwd": "${workspaceFolder}"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "seedScript",
+      "type": "promptString",
+      "description": "Path to seed script (e.g., src/scripts/seed-home.ts)",
+      "default": "src/scripts/seed-all.ts"
     }
   ]
 }

@@ -3,7 +3,6 @@
 import type { Page } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
-import Image from 'next/image'
 import Link from 'next/link'
 import React, { useEffect, useMemo } from 'react'
 
@@ -308,23 +307,6 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
               className="rounded-xl lg:rounded-2xl px-4 lg:px-6 py-5 lg:py-7 flex flex-col items-center text-center transition-colors duration-700"
               style={{ backgroundColor: slide.panelColor }}
             >
-              {/* Logo — fixed height container for consistent spacing */}
-              <div
-                className={cn(
-                  'h-8 lg:h-10 flex items-center justify-center mb-1',
-                  isEntering && 'hero-anim-eyebrow',
-                  isExiting && 'hero-exit-content',
-                )}
-              >
-                <Image
-                  src="/secondary-logo.svg"
-                  alt="FermentFreude"
-                  width={240}
-                  height={104}
-                  className="h-5 lg:h-7 w-auto brightness-0 invert"
-                />
-              </div>
-
               {/* Eyebrow */}
               <p
                 className={cn(

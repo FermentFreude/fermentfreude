@@ -92,32 +92,6 @@ async function seedHome() {
     file: await optimizedFile(path.join(workshopsDir, 'tempeh.png'), IMAGE_PRESETS.card),
   })
 
-  // ── Hero carousel background images ──────────────────────────────────────
-  const heroImage1 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude hero – fermented foods arrangement slide 1' },
-    file: await optimizedFile(path.join(heroDir, 'hero-slide-1.png'), IMAGE_PRESETS.card),
-  })
-  const heroImage2 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude hero – fermented foods arrangement slide 2' },
-    file: await optimizedFile(path.join(heroDir, 'hero-slide-2.png'), IMAGE_PRESETS.card),
-  })
-  const heroImage3 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude hero – fermented foods arrangement slide 3' },
-    file: await optimizedFile(path.join(heroDir, 'hero-slide-3.png'), IMAGE_PRESETS.card),
-  })
-  const heroImage4 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude hero – fermented foods arrangement slide 4' },
-    file: await optimizedFile(path.join(heroDir, 'hero-slide-4.png'), IMAGE_PRESETS.card),
-  })
-
   // ── Per-slide product images ──────────────────────────────────────────────
   const laktoSlideLeft = await payload.create({
     collection: 'media',
@@ -274,10 +248,6 @@ async function seedHome() {
   // ══════════════════════════════════════════════════════════════════════════
 
   const { de: heroDE, en: heroEN } = buildHeroSlider({
-    heroImage1Id: String(heroImage1.id),
-    heroImage2Id: String(heroImage2.id),
-    heroImage3Id: String(heroImage3.id),
-    heroImage4Id: String(heroImage4.id),
     laktoSlideLeftId: String(laktoSlideLeft.id),
     laktoSlideRightId: String(laktoSlideRight.id),
     kombuchaSlideLeftId: String(kombuchaSlideLeft.id),
@@ -401,8 +371,6 @@ async function seedHome() {
   })) as Page
 
   const freshHero = (freshDoc.hero || {}) as Record<string, unknown>
-  const freshLinks = (freshHero.links || []) as { id?: string }[]
-  const freshHeroImages = (freshHero.heroImages || []) as { id?: string }[]
   const freshHeroSlides = (freshHero.heroSlides || []) as {
     id?: string
     attributes?: { id?: string }[]
@@ -452,7 +420,7 @@ async function seedHome() {
     data: {
       _status: 'published',
       title: 'Home',
-      hero: mergeHeroSliderEN(heroEN, freshLinks, freshHeroImages, freshHeroSlides),
+      hero: mergeHeroSliderEN(heroEN, freshHeroSlides),
       layout: layoutEN,
       meta: {
         title: 'FermentFreude — Good food, better health, real joy',

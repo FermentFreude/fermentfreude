@@ -7,8 +7,6 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { linkGroup } from './linkGroup'
-
 /* ═══════════════════════════════════════════════════════════════════════════
  * HERO FIELD CONFIGURATION
  * Clean, editor-friendly admin interface
@@ -49,92 +47,6 @@ export const hero: Field = {
      * HOME PAGE SLIDER (heroSlider)
      * The main homepage hero with animated product slides
      * ═══════════════════════════════════════════════════════════════════════ */
-
-    // HEADLINE SECTION
-    {
-      type: 'collapsible',
-      label: '✏️ Headline & Text',
-      admin: {
-        condition: (_, { type } = {}) => type === 'heroSlider',
-        initCollapsed: false,
-        description: 'The main text visitors see first on your homepage.',
-      },
-      fields: [
-        {
-          name: 'richText',
-          type: 'richText',
-          label: 'Hero Text',
-          localized: true,
-          admin: {
-            description:
-              'The main headline and tagline. Use H1 for the big headline, then paragraph for the tagline.',
-          },
-          editor: lexicalEditor({
-            features: ({ rootFeatures }) => [
-              ...rootFeatures,
-              HeadingFeature({ enabledHeadingSizes: ['h1', 'h2'] }),
-              FixedToolbarFeature(),
-              InlineToolbarFeature(),
-            ],
-          }),
-        },
-        linkGroup({
-          overrides: {
-            label: 'Buttons',
-            maxRows: 2,
-            admin: {
-              description: 'Add 1-2 buttons below the headline (e.g., "Workshops" and "Shop").',
-            },
-          },
-        }),
-        {
-          name: 'showWordmark',
-          type: 'checkbox',
-          label: 'Show Logo Text',
-          defaultValue: true,
-          admin: {
-            description: 'Show the gold "FERMENTFREUDE" text above the headline.',
-          },
-        },
-      ],
-    },
-
-    // BACKGROUND IMAGES
-    {
-      type: 'collapsible',
-      label: '🖼️ Background Images',
-      admin: {
-        condition: (_, { type } = {}) => type === 'heroSlider',
-        initCollapsed: true,
-        description: 'The food photos that appear behind the slides.',
-      },
-      fields: [
-        {
-          name: 'heroImages',
-          type: 'array',
-          label: 'Background Photos',
-          minRows: 1,
-          maxRows: 8,
-          labels: {
-            singular: 'Photo',
-            plural: 'Photos',
-          },
-          admin: {
-            description: 'Add 4-5 beautiful food photos. They cycle in the background.',
-            initCollapsed: true,
-          },
-          fields: [
-            {
-              name: 'image',
-              type: 'upload',
-              relationTo: 'media',
-              required: true,
-              label: 'Photo',
-            },
-          ],
-        },
-      ],
-    },
 
     // PRODUCT SLIDES
     {

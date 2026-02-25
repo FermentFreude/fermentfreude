@@ -10,7 +10,7 @@ type AboutSeedArgs = {
 // ── Hero (page-level, not a block) ──────────────────────────
 export const aboutHeroDE = (args: AboutSeedArgs = {}) => ({
   type: 'highImpact' as const,
-  richText: {
+  richTextLowImpact: {
     root: {
       type: 'root',
       children: [
@@ -32,7 +32,7 @@ export const aboutHeroDE = (args: AboutSeedArgs = {}) => ({
 
 export const aboutHeroEN = (args: AboutSeedArgs = {}) => ({
   type: 'highImpact' as const,
-  richText: {
+  richTextLowImpact: {
     root: {
       type: 'root',
       children: [
