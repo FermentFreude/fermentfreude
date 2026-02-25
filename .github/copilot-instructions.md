@@ -20,10 +20,10 @@
 
 ## Environments
 
-| Environment    | Database                 | R2 Bucket                       | Deploys from                        |
-| -------------- | ------------------------ | ------------------------------- | ----------------------------------- |
-| **Production** | `fermentfreude`          | `fermentfreude-media`           | `main` branch (auto via Vercel)     |
-| **Staging**    | `fermentfreude-staging`  | `fermentfreude-media-staging`   | `staging` branch (preview)          |
+| Environment    | Database                | R2 Bucket                     | Deploys from                    |
+| -------------- | ----------------------- | ----------------------------- | ------------------------------- |
+| **Production** | `fermentfreude`         | `fermentfreude-media`         | `main` branch (auto via Vercel) |
+| **Staging**    | `fermentfreude-staging` | `fermentfreude-media-staging` | `staging` branch (preview)      |
 
 - Local `.env` should point to **staging** values for safe development.
 - **Never** develop against production database locally.
@@ -50,12 +50,13 @@
 
 ## Branch Strategy
 
-| Branch      | Purpose                                                                                   |
-| ----------- | ----------------------------------------------------------------------------------------- |
-| **`main`**  | Production — auto-deploys to Vercel. **Never push directly.** Only merge from `staging`. |
+| Branch        | Purpose                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| **`main`**    | Production — auto-deploys to Vercel. **Never push directly.** Only merge from `staging`. |
 | **`staging`** | Integration branch. Alaa merges feature branches here first. Test, then merge → `main`.  |
 
 **Workflow:**
+
 1. Create feature branch from `staging`: `git checkout -b feature/xyz staging`
 2. Push feature branch, open PR into `staging`
 3. After review + CI passes, merge into `staging`

@@ -470,59 +470,6 @@ export interface Page {
      */
     type: 'heroSlider' | 'highImpact' | 'lowImpact' | 'heroCarousel' | 'foodPresentationSlider' | 'none';
     /**
-     * The main headline and tagline. Use H1 for the big headline, then paragraph for the tagline.
-     */
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    /**
-     * Add 1-2 buttons below the headline (e.g., "Workshops" and "Shop").
-     */
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?: {
-              relationTo: 'pages';
-              value: string | Page;
-            } | null;
-            url?: string | null;
-            label: string;
-            /**
-             * Choose how the link should be rendered.
-             */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Show the gold "FERMENTFREUDE" text above the headline.
-     */
-    showWordmark?: boolean | null;
-    /**
-     * Add 4-5 beautiful food photos. They cycle in the background.
-     */
-    heroImages?:
-      | {
-          image: string | Media;
-          id?: string | null;
-        }[]
-      | null;
-    /**
      * Each slide has its own title, description, colors, and product images.
      */
     heroSlides?:
@@ -2089,29 +2036,6 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
-        richText?: T;
-        links?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
-                    label?: T;
-                    appearance?: T;
-                  };
-              id?: T;
-            };
-        showWordmark?: T;
-        heroImages?:
-          | T
-          | {
-              image?: T;
-              id?: T;
-            };
         heroSlides?:
           | T
           | {
