@@ -1,6 +1,7 @@
 'use client'
 
 import { Media } from '@/components/Media'
+import type { Media as MediaType } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import Link from 'next/link'
 import React, { useEffect } from 'react'
@@ -113,7 +114,7 @@ export const FermentationHero: React.FC<Props> = ({ data, heroTitle }) => {
               fill
               imgClassName="object-cover blur-sm"
               priority
-              resource={image as { url: string; alt?: string }}
+              resource={image as MediaType}
             />
           </>
         ) : (
