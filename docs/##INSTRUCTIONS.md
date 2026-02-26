@@ -363,7 +363,7 @@ These rules apply to **every** new feature, section, field, or content block —
 | Tailwind class | Font | Usage |
 |---------------|------|-------|
 | `font-sans` | `neue-haas-grotesk-text` | Body text, paragraphs, labels |
-| `font-display` | `neue-haas-grotesk-display-pro` | Headings, nav links, buttons |
+| `font-display` | `neue-haas-grotesk-display` | Headings, nav links, buttons |
 
 **Never use Geist, Inter, or system fonts.**
 
