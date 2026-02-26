@@ -39,7 +39,7 @@ export const ShopGiftSection: React.FC<Props> = ({ data }) => {
           {buttonUrl && (
             <Link
               href={buttonUrl}
-              className="inline-flex items-center justify-center rounded-full bg-ff-charcoal hover:bg-ff-charcoal-hover px-6 py-2.5 font-display font-bold text-base text-ff-ivory transition-all hover:scale-[1.03] active:scale-[0.97]"
+              className="inline-flex items-center justify-center rounded-full bg-ff-charcoal hover:bg-ff-charcoal-hover px-8 py-2.5 font-display font-bold text-base text-ff-ivory transition-all hover:scale-[1.03] active:scale-[0.97]"
             >
               {buttonLabel}
             </Link>

@@ -142,6 +142,33 @@
 /* ── Design System Utility Classes ───────────────────────────── */
 
 @layer components {
+  /* === Shop Product Card — add-to-cart circle (57.16px, burgundy) === */
+  .add-to-cart-custom .add-to-cart-custom-btn {
+    width: 57.16px;
+    height: 57.16px;
+    min-width: 57.16px;
+    min-height: 57.16px;
+    padding: 0;
+    border: none !important;
+    margin-left: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--add-to-cart-bg, var(--ff-charcoal)) !important;
+  }
+  .add-to-cart-custom .add-to-cart-custom-btn:hover:not(:disabled) {
+    background-color: var(--add-to-cart-hover-bg, var(--ff-charcoal-hover)) !important;
+  }
+
+  /* Best-seller card structure */
+  .card.product-box.box-minimal {
+    border: none;
+    background: transparent;
+  }
+  .card.product-box.box-minimal .card-body {
+    min-height: 320px;
+  }
+
   /* === Typography Presets === */
 
   /* Hero headline — Figma design: 80px / 900 / line-height 0.98
@@ -538,6 +565,11 @@
   --ff-charcoal-hover: #333333;
   --ff-sponsor-placeholder: #d9d2cb;
 
+  /* Shop / Homemade Jam palette */
+  --ff-shop-burgundy: #980c00;
+  --ff-shop-burgundy-hover: #680c00;
+  --ff-shop-cream: #f0ecdb;
+
   --sidebar: oklch(98.5% 0 0deg);
   --sidebar-foreground: oklch(14.5% 0 0deg);
   --sidebar-primary: oklch(20.5% 0 0deg);
@@ -657,6 +689,9 @@
   --color-ff-gray-muted: var(--ff-gray-muted);
   --color-ff-charcoal-hover: var(--ff-charcoal-hover);
   --color-ff-sponsor-placeholder: var(--ff-sponsor-placeholder);
+  --color-ff-shop-burgundy: var(--ff-shop-burgundy);
+  --color-ff-shop-burgundy-hover: var(--ff-shop-burgundy-hover);
+  --color-ff-shop-cream: var(--ff-shop-cream);
 
   /* ── Design System Spacing Tokens ──────────────────────────── */
   --spacing-section-sm: var(--space-section-sm);
@@ -747,6 +782,36 @@ button {
 .animate-delay-600 {
   animation-delay: 0.6s;
   opacity: 0;
+}
+
+.animate-delay-800 {
+  animation-delay: 0.8s;
+  opacity: 0;
+}
+
+@keyframes shopHeroProgress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Shop hero — product image slides in from left */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-from-left {
+  animation: slideInFromLeft 0.7s ease-out forwards;
 }
 
 /* Gastronomy Offer Cards — scroll-triggered fade-in-up with stagger */

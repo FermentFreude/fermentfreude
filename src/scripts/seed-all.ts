@@ -72,6 +72,9 @@ function runSeed(key: string): boolean {
   if (key === 'fermentation') {
     seedEnv.PAYLOAD_SKIP_FERMENTATION_CONDITION = '1'
   }
+  if (key === 'shop') {
+    seedEnv.PAYLOAD_SKIP_SHOP_CONDITION = '1'
+  }
   const result = spawnSync('npx', ['tsx', scriptPath, ...args], {
     stdio: 'inherit',
     env: seedEnv,

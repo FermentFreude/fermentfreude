@@ -59,7 +59,7 @@ export const ShopWorkshopCta: React.FC<Props> = ({ data }) => {
           <div className="absolute inset-0 bg-ff-charcoal" />
         )}
       </div>
-      <div className="container mx-auto container-padding relative z-10">
+      <div className="container mx-auto container-padding relative z-10 flex flex-col items-center text-center">
         <div className="content-narrow max-w-2xl">
           <h2 className="text-section-heading font-display font-bold text-white mb-4">
             {heading}
@@ -70,7 +70,7 @@ export const ShopWorkshopCta: React.FC<Props> = ({ data }) => {
           {buttonUrl && (
             <Link
               href={buttonUrl}
-              className="inline-flex items-center justify-center rounded-full bg-ff-gold hover:bg-ff-gold-accent px-6 py-2.5 font-display font-bold text-base text-ff-charcoal transition-all hover:scale-[1.03] active:scale-[0.97]"
+              className="inline-flex items-center justify-center rounded-full bg-ff-ivory hover:bg-ff-cream px-8 py-2.5 font-display font-bold text-base text-ff-charcoal transition-all hover:scale-[1.03] active:scale-[0.97]"
             >
               {buttonLabel}
             </Link>
