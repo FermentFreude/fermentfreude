@@ -668,7 +668,7 @@ export default async function FermentationPage() {
         viewAllLabel={workshopViewAllLabel}
         viewAllUrl={workshopViewAllUrl}
         cards={workshopCards.map((c) => ({
-          id: c.id,
+          id: (c as { id?: string }).id,
           title: c.title,
           description: c.description,
           image: c.image,
