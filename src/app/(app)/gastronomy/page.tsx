@@ -9,7 +9,6 @@ import { Media } from '@/components/Media'
 import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
-import Link from 'next/link'
 import { getPayload } from 'payload'
 
 import type { Media as MediaType, Page as PageType } from '@/payload-types'

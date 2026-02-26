@@ -172,7 +172,7 @@ export default async function FermentationPage() {
     )
   }
 
-  const guideTag = f?.fermentationGuideTag ?? DEFAULT_GUIDE_TAG
+  const _guideTag = f?.fermentationGuideTag ?? DEFAULT_GUIDE_TAG
   const guideTitle = f?.fermentationGuideTitle ?? DEFAULT_GUIDE_TITLE
   const guideBody = f?.fermentationGuideBody ?? DEFAULT_GUIDE_BODY
   const guideImage = f?.fermentationGuideImage
@@ -180,7 +180,7 @@ export default async function FermentationPage() {
   const whatTitle = f?.fermentationWhatTitle ?? DEFAULT_WHAT_TITLE
   const whatBody = f?.fermentationWhatBody ?? DEFAULT_WHAT_BODY
   const whatMotto = f?.fermentationWhatMotto ?? DEFAULT_WHAT_MOTTO
-  const whatLinks = f?.fermentationWhatLinks ?? []
+  const _whatLinks = f?.fermentationWhatLinks ?? []
   const whatImage = f?.fermentationWhatImage
 
   const whyTitle = f?.fermentationWhyTitle ?? DEFAULT_WHY_TITLE
@@ -230,9 +230,9 @@ export default async function FermentationPage() {
   const faqItems = f?.fermentationFaqItems ?? []
   const faqCtaTitle = f?.fermentationFaqCtaTitle ?? DEFAULT_FAQ_CTA_TITLE
   const faqCtaBody = f?.fermentationFaqCtaBody ?? DEFAULT_FAQ_CTA_BODY
-  const faqMoreText = f?.fermentationFaqMoreText ?? DEFAULT_FAQ_MORE
-  const faqContactLabel = f?.fermentationFaqContactLabel ?? DEFAULT_FAQ_CONTACT
-  const faqContactUrl = f?.fermentationFaqContactUrl ?? DEFAULT_FAQ_CONTACT_URL
+  const _faqMoreText = f?.fermentationFaqMoreText ?? DEFAULT_FAQ_MORE
+  const _faqContactLabel = f?.fermentationFaqContactLabel ?? DEFAULT_FAQ_CONTACT
+  const _faqContactUrl = f?.fermentationFaqContactUrl ?? DEFAULT_FAQ_CONTACT_URL
 
   return (
     <article className="font-sans">
@@ -667,17 +667,20 @@ export default async function FermentationPage() {
         nextDateLabel={workshopNextDateLabel}
         viewAllLabel={workshopViewAllLabel}
         viewAllUrl={workshopViewAllUrl}
-        cards={workshopCards.map((c) => ({
-          id: (c as { id?: string }).id,
-          title: c.title,
-          description: c.description,
-          image: c.image,
-          price: (c as { price?: string }).price,
-          priceSuffix: (c as { priceSuffix?: string }).priceSuffix,
-          buttonLabel: (c as { buttonLabel?: string }).buttonLabel,
-          buttonUrl: (c as { buttonUrl?: string }).buttonUrl,
-          nextDate: (c as { nextDate?: string }).nextDate,
-        }))}
+        cards={workshopCards.map((c) => {
+          const card = c as Record<string, unknown>
+          return {
+            id: card.id as string | undefined,
+            title: c.title,
+            description: c.description,
+            image: card.image as string | import('@/payload-types').Media | null | undefined,
+            price: card.price as string | undefined,
+            priceSuffix: card.priceSuffix as string | undefined,
+            buttonLabel: card.buttonLabel as string | undefined,
+            buttonUrl: card.buttonUrl as string | undefined,
+            nextDate: card.nextDate as string | undefined,
+          }
+        })}
         cardBg="#ffffff"
         layout="inline"
       />
