@@ -1,6 +1,7 @@
 'use client'
 
 import { Media } from '@/components/Media'
+import type { Media as MediaType } from '@/payload-types'
 import Link from 'next/link'
 import React from 'react'
 
@@ -52,7 +53,7 @@ export const ShopWorkshopCta: React.FC<Props> = ({ data }) => {
               fill
               imgClassName="object-cover"
               priority={false}
-              resource={image as { url: string; alt?: string }}
+              resource={image as MediaType}
             />
           </>
         ) : (

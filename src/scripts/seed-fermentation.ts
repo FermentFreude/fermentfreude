@@ -617,7 +617,7 @@ async function seedFermentation() {
           title: 'Fermentation',
           slug: 'fermentation',
           _status: 'published',
-          hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+          hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
           layout: [],
           meta: {
             title: 'Fermentation | Fermentfreude',
@@ -680,7 +680,7 @@ async function seedFermentation() {
             title: 'Fermentation',
             slug: 'fermentation',
             _status: 'published',
-            hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+            hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
             layout: [],
             meta: {
               title: 'Fermentation | Fermentfreude',
@@ -706,7 +706,7 @@ async function seedFermentation() {
       title: 'Fermentation',
       slug: 'fermentation',
       _status: 'published',
-      hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+      hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
       layout: [],
       meta: {
         title: 'Fermentation | Fermentfreude',
@@ -769,7 +769,7 @@ async function seedFermentation() {
         title: 'Fermentation',
         slug: 'fermentation',
         _status: 'published',
-        hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+        hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
         layout: [],
         meta: {
           title: 'Fermentation | Fermentfreude',

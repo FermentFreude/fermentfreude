@@ -24,7 +24,7 @@ async function main() {
   for (const doc of result.docs) {
     console.log(`  id: ${doc.id}  filename: ${(doc as { filename?: string }).filename ?? '(none)'}`)
   }
-  await payload.db.destroy()
+  if (payload.db.destroy) await payload.db.destroy()
 }
 
 main().catch((e) => {
