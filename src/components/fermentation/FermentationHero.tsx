@@ -109,7 +109,7 @@ export const FermentationHero: React.FC<Props> = ({ data, heroTitle }) => {
       <div className="absolute inset-0 -z-10">
         {image ? (
           <>
-            <div className="absolute inset-0 bg-ff-charcoal/40 z-[1]" />
+            <div className="absolute inset-0 bg-ff-charcoal/40 z-1" />
             <Media
               fill
               imgClassName="object-cover blur-sm"
