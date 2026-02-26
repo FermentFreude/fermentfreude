@@ -15,6 +15,7 @@ import { TeamCardsBlock } from '@/blocks/TeamCards/Component'
 import { TeamPreviewBlock } from '@/blocks/TeamPreview/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
+import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { VoucherCtaBlock } from '@/blocks/VoucherCta/Component'
 import { WorkshopSliderBlock } from '@/blocks/WorkshopSlider/Component'
 import { toKebabCase } from '@/utilities/toKebabCase'
@@ -40,6 +41,7 @@ const blockComponents = {
   teamPreview: TeamPreviewBlock,
   testimonials: TestimonialsBlock,
   threeItemGrid: ThreeItemGridBlock,
+  productSlider: ProductSliderBlock,
   voucherCta: VoucherCtaBlock,
   workshopSlider: WorkshopSliderBlock,
 }

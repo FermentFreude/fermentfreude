@@ -31,6 +31,7 @@ const __dirname = path.dirname(__filename)
 
 const scripts: Record<string, { name: string; file: string }> = {
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
+  products: { name: 'Products (kombucha bottles)', file: 'seed-products.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
@@ -38,7 +39,7 @@ const scripts: Record<string, { name: string; file: string }> = {
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
 }
 
-const allOrder = ['header', 'home', 'about', 'contact', 'gastronomy', 'voucher']
+const allOrder = ['header', 'products', 'home', 'about', 'contact', 'gastronomy', 'voucher']
 
 function runSeed(key: string): boolean {
   const script = scripts[key]

@@ -583,6 +583,7 @@ export interface Page {
         | ThreeItemGridBlock
         | BannerBlock
         | FormBlock
+        | ProductSliderBlock
         | VoucherCtaBlock
         | WorkshopSliderBlock
       )[]
@@ -1613,6 +1614,39 @@ export interface FormBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductSliderBlock".
+ */
+export interface ProductSliderBlock {
+  /**
+   * Large heading text (e.g. "Discover UNIQUE.").
+   */
+  heading: string;
+  /**
+   * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
+   */
+  headingAccent: string;
+  /**
+   * Short paragraph below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * Text on the CTA button (e.g. "View All Products").
+   */
+  buttonLabel: string;
+  /**
+   * URL the button links to (e.g. "/products").
+   */
+  buttonLink: string;
+  /**
+   * Select products to display in the slider. If empty, the latest products will be shown.
+   */
+  products?: (string | Product)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productSlider';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "VoucherCtaBlock".
  */
 export interface VoucherCtaBlock {
@@ -2098,6 +2132,7 @@ export interface PagesSelect<T extends boolean = true> {
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        productSlider?: T | ProductSliderBlockSelect<T>;
         voucherCta?: T | VoucherCtaBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
       };
@@ -2570,6 +2605,20 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductSliderBlock_select".
+ */
+export interface ProductSliderBlockSelect<T extends boolean = true> {
+  heading?: T;
+  headingAccent?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  products?: T;
   id?: T;
   blockName?: T;
 }

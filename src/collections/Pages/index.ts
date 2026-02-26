@@ -19,6 +19,7 @@ import { TeamCards } from '@/blocks/TeamCards/config'
 import { TeamPreview } from '@/blocks/TeamPreview/config'
 import { Testimonials } from '@/blocks/Testimonials/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
+import { ProductSlider } from '@/blocks/ProductSlider/config'
 import { VoucherCta } from '@/blocks/VoucherCta/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
@@ -118,6 +119,7 @@ export const Pages: CollectionConfig = {
                 ThreeItemGrid,
                 Banner,
                 FormBlock,
+                ProductSlider,
                 VoucherCta,
                 WorkshopSlider,
               ],

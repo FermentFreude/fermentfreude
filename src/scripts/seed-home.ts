@@ -26,10 +26,12 @@ import { buildHeroBanner, mergeHeroBannerEN } from '../blocks/HeroBanner/seed'
 import { buildSponsorsBar, mergeSponsorsBarEN } from '../blocks/SponsorsBar/seed'
 import { buildTeamPreview, mergeTeamPreviewEN } from '../blocks/TeamPreview/seed'
 import { buildTestimonials, mergeTestimonialsEN } from '../blocks/Testimonials/seed'
+import { buildProductSlider, mergeProductSliderEN } from '../blocks/ProductSlider/seed'
 import { buildVoucherCta, mergeVoucherCtaEN } from '../blocks/VoucherCta/seed'
 import { buildWorkshopSlider, mergeWorkshopSliderEN } from '../blocks/WorkshopSlider/seed'
 import { buildHeroSlider, mergeHeroSliderEN } from '../heros/HeroSlider/seed'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
+import { seedProducts } from './seed-products'
 
 // ── Shared type for reading back fresh IDs ─────────────────────────────────
 interface WithId {
@@ -293,6 +295,12 @@ async function seedHome() {
     sponsorLogo4Id: String(sponsorLogo4.id),
   })
 
+  // ── ProductSlider: seed products with bottle images ───────────────────────
+  payload.logger.info('Seeding products for ProductSlider...')
+  const productIds = await seedProducts(payload)
+
+  const { de: productSliderDE, en: productSliderEN } = buildProductSlider({ productIds })
+
   // ══════════════════════════════════════════════════════════════════════════
   // 3. Find or create the Home page
   // ══════════════════════════════════════════════════════════════════════════
@@ -329,6 +337,7 @@ async function seedHome() {
 
   const layoutDE = [
     voucherCtaDE,
+    productSliderDE,
     featureCardsDE,
     heroBannerDE,
     workshopSliderDE,
@@ -385,6 +394,7 @@ async function seedHome() {
 
   const wsBlock = findBlock('workshopSlider')
   const vcBlock = findBlock('voucherCta')
+  const psBlock = findBlock('productSlider')
   const hbBlock = findBlock('heroBanner')
   const fcBlock = findBlock('featureCards')
   const tpBlock = findBlock('teamPreview')
@@ -404,6 +414,7 @@ async function seedHome() {
 
   const layoutEN = [
     mergeVoucherCtaEN(voucherCtaEN, vcBlock ?? {}),
+    mergeProductSliderEN(productSliderEN, psBlock ?? {}),
     mergeFeatureCardsEN(featureCardsEN, fcBlock ?? {}),
     mergeHeroBannerEN(heroBannerEN, hbBlock ?? {}),
     mergeWorkshopSliderEN(workshopSliderEN, wsBlock),
@@ -435,7 +446,7 @@ async function seedHome() {
   payload.logger.info('🎉 Home page fully seeded (DE + EN):')
   payload.logger.info('   • Hero Slider   • Workshop Slider   • Voucher CTA')
   payload.logger.info('   • Hero Banner   • Feature Cards     • Team Preview')
-  payload.logger.info('   • Testimonials  • Sponsors Bar')
+  payload.logger.info('   • Testimonials  • Sponsors Bar      • Product Slider')
   process.exit(0)
 }
 
