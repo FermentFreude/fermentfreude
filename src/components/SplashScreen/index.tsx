@@ -65,19 +65,19 @@ export function SplashScreen() {
     }
 
     // Timeline:
-    // 0–0.5s : idle — plain ivory screen
-    // 0.5s   : wave open (3s CSS morph) — reveals charcoal + logo
-    // 3.5s   : filled — logo fully visible, hold 2s
-    // 5.5s   : close wave (2s CSS morph) — exits upward, reveals page
-    // 7.5s   : done
-    t(() => setPhase('wave'), 500)
-    t(() => setPhase('filled'), 3500)
-    t(() => setPhase('close'), 5500)
+    // 0–0.2s : idle — plain ivory screen
+    // 0.2s   : wave open (1.5s CSS morph) — reveals charcoal + logo
+    // 1.7s   : filled — logo fully visible, hold 1s
+    // 2.7s   : close wave (1s CSS morph) — exits upward, reveals page
+    // 3.7s   : done
+    t(() => setPhase('wave'), 200)
+    t(() => setPhase('filled'), 1700)
+    t(() => setPhase('close'), 2700)
     t(() => {
       setPhase('done')
       sessionStorage.setItem('ff-splash-seen', '1')
       document.body.style.overflow = ''
-    }, 7500)
+    }, 3700)
 
     const currentTimers = timers.current
     return () => {
