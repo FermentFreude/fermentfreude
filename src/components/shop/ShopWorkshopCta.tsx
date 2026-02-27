@@ -48,7 +48,7 @@ export const ShopWorkshopCta: React.FC<Props> = ({ data }) => {
       <div className="absolute inset-0 -z-10">
         {image ? (
           <>
-            <div className="absolute inset-0 bg-ff-charcoal/70 z-[1]" />
+            <div className="absolute inset-0 bg-ff-charcoal/70 z-1" />
             <Media
               fill
               imgClassName="object-cover"

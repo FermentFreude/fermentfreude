@@ -224,7 +224,7 @@ function HomemadeJamSlider({
 
       <div className="relative z-10 flex min-h-[90vh]">
         {/* Left content panel — warm parchment card (template: cream rounded panel) */}
-        <div className="absolute left-4 sm:left-6 md:left-10 lg:left-16 xl:left-24 top-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-[420px] sm:max-w-[480px] lg:max-w-[520px] rounded-2xl bg-ff-cream shadow-[0_8px_32px_rgba(75,75,75,0.12)] border border-ff-border-light p-6 sm:p-8 lg:p-10">
+        <div className="absolute left-4 sm:left-6 md:left-10 lg:left-16 xl:left-24 top-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-105 sm:max-w-120 lg:max-w-130 rounded-2xl bg-ff-cream shadow-[0_8px_32px_rgba(75,75,75,0.12)] border border-ff-border-light p-6 sm:p-8 lg:p-10">
           <div className="max-w-md">
             <span
               className={cn(
@@ -275,7 +275,7 @@ function HomemadeJamSlider({
         </div>
 
         {/* Center — product jar (template: jewel-toned jar with soft shadow) */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-[220px] sm:w-[280px] md:w-[340px] lg:w-[400px] xl:w-[420px] aspect-[3/4]">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-55 sm:w-70 md:w-85 lg:w-100 xl:w-105 aspect-3/4">
           {slide.productImage ? (
             <div
               className={cn(
@@ -413,7 +413,7 @@ function ClassicHeroSlider({
               }}
             />
           )}
-          <div className="absolute inset-0 bg-ff-charcoal/50 z-[1]" />
+          <div className="absolute inset-0 bg-ff-charcoal/50 z-1" />
         </div>
       ))}
 
