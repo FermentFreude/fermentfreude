@@ -23,14 +23,14 @@ export const FadeIn: React.FC<FadeInProps> = ({
   className = '',
   delay = 0,
   from = 'bottom',
-  duration = 0.9,
+  duration = 1.4,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const initial = {
-    bottom: { y: 60, x: 0, skewY: 1.5 },
-    left: { y: 0, x: -60, skewY: 0 },
-    right: { y: 0, x: 60, skewY: 0 },
+    bottom: { y: 80, x: 0, skewY: 1.5 },
+    left: { y: 0, x: -80, skewY: 0 },
+    right: { y: 0, x: 80, skewY: 0 },
   }
 
   useGSAP(
@@ -54,10 +54,10 @@ export const FadeIn: React.FC<FadeInProps> = ({
         skewY: 0,
         duration,
         delay: delay / 1000, // convert ms to seconds for backwards compat
-        ease: 'power3.out',
+        ease: 'power2.out',
         scrollTrigger: {
           trigger: ref.current,
-          start: 'top 88%',
+          start: 'top 82%',
           once: true,
         },
       })
