@@ -50,17 +50,19 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
   return (
     <div>
       <div className="relative w-full overflow-hidden mb-8">
-        <Media
-          resource={gallery[current].image}
-          className="w-full"
-          imgClassName="w-full rounded-lg"
-        />
+        {gallery[current]?.image && (
+          <Media
+            resource={gallery[current].image}
+            className="w-full"
+            imgClassName="w-full rounded-lg"
+          />
+        )}
       </div>
 
       <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: false }}>
         <CarouselContent>
           {gallery.map((item, i) => {
-            if (typeof item.image !== 'object') return null
+            if (typeof item.image !== 'object' || item.image === null) return null
 
             return (
               <CarouselItem

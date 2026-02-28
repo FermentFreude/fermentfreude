@@ -31,7 +31,6 @@ import { buildVoucherCta, mergeVoucherCtaEN } from '../blocks/VoucherCta/seed'
 import { buildWorkshopSlider, mergeWorkshopSliderEN } from '../blocks/WorkshopSlider/seed'
 import { buildHeroSlider, mergeHeroSliderEN } from '../heros/HeroSlider/seed'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
-import { seedProducts } from './seed-products'
 
 // ── Shared type for reading back fresh IDs ─────────────────────────────────
 interface WithId {
@@ -295,9 +294,18 @@ async function seedHome() {
     sponsorLogo4Id: String(sponsorLogo4.id),
   })
 
-  // ── ProductSlider: seed products with bottle images ───────────────────────
-  payload.logger.info('Seeding products for ProductSlider...')
-  const productIds = await seedProducts(payload)
+  // ── ProductSlider: use existing placeholder products ─────────────────────
+  payload.logger.info('Fetching placeholder products for ProductSlider...')
+  const existingProducts = await payload.find({
+    collection: 'products',
+    limit: 10,
+    depth: 0,
+  })
+  const productIds = existingProducts.docs.map((p) => String(p.id))
+  
+  if (productIds.length === 0) {
+    payload.logger.warn('No products found. Run "pnpm seed placeholders" first.')
+  }
 
   const { de: productSliderDE, en: productSliderEN } = buildProductSlider({ productIds })
 

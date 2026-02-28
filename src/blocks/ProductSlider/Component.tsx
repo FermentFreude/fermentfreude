@@ -6,7 +6,6 @@ import type {
   ProductSliderBlock as ProductSliderBlockType,
 } from '@/payload-types'
 import { Media } from '@/components/Media'
-import { Price } from '@/components/Price'
 import Link from 'next/link'
 import React, { useCallback, useRef, useState } from 'react'
 
@@ -250,10 +249,29 @@ export const ProductSliderBlock: React.FC<Props> = ({
 }
 
 /* ═══════════════════════════════════════════════════════════════
- *  SVG card background — curved cutout at bottom-right for cart button
- *  Original Figma viewBox 328×350, scaled to fill card via preserveAspectRatio
+ *  Combined SVG: card background + cart button in one unit
+ *  From the original Figma export — both shapes share the same
+ *  328×350 coordinate system so they always align perfectly.
+ *  The button circle + icon are a clickable <g> with hover state.
  * ═══════════════════════════════════════════════════════════════ */
-function CardBackground({ className }: { className?: string }) {
+function CardWithButton({
+  className,
+  cartHovered,
+  onCartEnter,
+  onCartLeave,
+  onCartClick,
+  ariaLabel,
+  opacity,
+}: {
+  className?: string
+  cartHovered?: boolean
+  onCartEnter?: () => void
+  onCartLeave?: () => void
+  onCartClick?: (e: React.MouseEvent) => void
+  ariaLabel?: string
+  opacity?: number
+}) {
+  const btnColor = cartHovered ? '#4B4B4B' : '#E5B765'
   return (
     <svg
       className={className}
@@ -262,24 +280,32 @@ function CardBackground({ className }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
       preserveAspectRatio="none"
     >
+      {/* Card background with cutout */}
       <path
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M327.018 17.5875C327.018 7.87419 319.144 0 309.43 0H17.5875C7.8737 0 0 7.8742 0 17.5875V331.964C0 341.678 7.8737 349.552 17.5875 349.552H251.689C257.932 349.552 262.052 342.503 261.028 336.344L259.404 326.564C255.047 300.346 277.37 277.427 303.693 281.089C313.197 282.411 327.018 275.987 327.018 266.392V17.5875Z"
+        d="M327.018 17.5875C327.018 7.87419 319.144 0 309.43 0H17.5875C7.87419 0 0 7.8742 0 17.5875V331.964C0 341.678 7.87421 349.552 17.5875 349.552H251.689C257.932 349.552 262.052 342.503 261.028 336.344L259.404 326.564C255.047 300.346 277.37 277.427 303.693 281.089C313.197 282.411 327.018 275.987 327.018 266.392V17.5875Z"
         fill="#F7F7F8"
       />
-    </svg>
-  )
-}
-
-/* ═══════════════════════════════════════════════════════════════
- *  Gold cart button SVG — exact Figma circle + cart icon
- * ═══════════════════════════════════════════════════════════════ */
-function CartButtonIcon() {
-  return (
-    <svg width="58" height="58" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M57.1594 28.5797C57.1594 12.7956 44.3638 0 28.5797 0C12.7956 0 0 12.7956 0 28.5797C0 44.3638 12.7956 57.1594 28.5797 57.1594C44.3638 57.1594 57.1594 44.3638 57.1594 28.5797Z" fill="#E5B765" />
-      <path d="M23.5518 36.1753C24.4641 36.1753 25.2105 36.9382 25.2105 37.8802C25.2105 38.8113 24.4641 39.5741 23.5518 39.5741C22.6295 39.5741 21.882 38.8113 21.882 37.8802C21.882 36.9382 22.6295 36.1753 23.5518 36.1753ZM35.9092 36.1753C36.8204 36.1753 37.5668 36.9382 37.5668 37.8802C37.5668 38.8113 36.8204 39.5741 35.9092 39.5741C34.9858 39.5741 34.2394 38.8113 34.2394 37.8802C34.2394 36.9382 34.9858 36.1753 35.9092 36.1753ZM18.5547 17.5996L21.1741 18.002C21.5479 18.0701 21.8227 18.3834 21.8556 18.7648L22.0645 21.2776C22.0975 21.6382 22.3822 21.9064 22.7339 21.9064H37.5679C38.2373 21.9064 38.677 22.1427 39.1156 22.6582C39.5553 23.1749 39.6322 23.9146 39.5333 24.5863L38.4901 31.9455C38.2923 33.3602 37.1062 34.4023 35.7113 34.4023H23.7276C22.2668 34.4023 21.0587 33.2591 20.9378 31.7785L19.9276 19.5496L18.2689 19.2584C17.8303 19.1803 17.5225 18.7429 17.5995 18.2933C17.6764 17.8349 18.104 17.5304 18.5547 17.5996ZM33.9536 26.0559H30.911C30.4504 26.0559 30.0877 26.4264 30.0877 26.8979C30.0877 27.3574 30.4504 27.7388 30.911 27.7388H33.9536C34.4153 27.7388 34.778 27.3574 34.778 26.8979C34.778 26.4264 34.4153 26.0559 33.9536 26.0559Z" fill="white" />
+      {/* Cart button circle + icon */}
+      <g
+        role="button"
+        aria-label={ariaLabel}
+        style={{ cursor: 'pointer', opacity: opacity ?? 1 }}
+        onMouseEnter={onCartEnter}
+        onMouseLeave={onCartLeave}
+        onClick={onCartClick}
+      >
+        <path
+          d="M327.019 320.974C327.019 305.19 314.223 292.395 298.439 292.395C282.655 292.395 269.859 305.19 269.859 320.974C269.859 336.758 282.655 349.554 298.439 349.554C314.223 349.554 327.019 336.758 327.019 320.974Z"
+          fill={btnColor}
+          className="transition-colors duration-200"
+        />
+        <path
+          d="M293.409 328.566C294.322 328.566 295.068 329.329 295.068 330.271C295.068 331.202 294.322 331.965 293.409 331.965C292.487 331.965 291.74 331.202 291.74 330.271C291.74 329.329 292.487 328.566 293.409 328.566ZM305.767 328.566C306.678 328.566 307.424 329.329 307.424 330.271C307.424 331.202 306.678 331.965 305.767 331.965C304.843 331.965 304.097 331.202 304.097 330.271C304.097 329.329 304.843 328.566 305.767 328.566ZM288.412 309.99L291.032 310.393C291.406 310.461 291.68 310.774 291.713 311.155L291.922 313.668C291.955 314.029 292.24 314.297 292.592 314.297H307.426C308.095 314.297 308.535 314.533 308.973 315.049C309.413 315.566 309.49 316.305 309.391 316.977L308.348 324.336C308.15 325.751 306.964 326.793 305.569 326.793H293.585C292.124 326.793 290.916 325.65 290.795 324.169L289.785 311.94L288.127 311.649C287.688 311.571 287.38 311.133 287.457 310.684C287.534 310.226 287.962 309.921 288.412 309.99ZM303.811 318.447H300.769C300.308 318.447 299.945 318.817 299.945 319.289C299.945 319.748 300.308 320.129 300.769 320.129H303.811C304.273 320.129 304.636 319.748 304.636 319.289C304.636 318.817 304.273 318.447 303.811 318.447Z"
+          fill="white"
+        />
+      </g>
     </svg>
   )
 }
@@ -293,6 +319,7 @@ function CartButtonIcon() {
  * ═══════════════════════════════════════════════════════════════ */
 
 function ProductCard({ product }: { product: Product }) {
+  const [cartHovered, setCartHovered] = useState(false)
   const image = getProductImage(product)
   const price = getProductPrice(product)
   const variantLabel = getVariantLabel(product)
@@ -304,15 +331,25 @@ function ProductCard({ product }: { product: Product }) {
       style={{ width: 'clamp(260px, 24vw, 340px)' }}
     >
       <Link href={`/products/${product.slug}`} className="group block">
-        {/* ── Card with SVG background + overflowing bottle ── */}
+        {/* ── Card with combined SVG (background + button) + overflowing bottle ── */}
         <div className="relative mb-2">
-          {/* SVG card background with cutout */}
           <div className="relative" style={{ aspectRatio: '328 / 350' }}>
-            <CardBackground className="absolute inset-0 w-full h-full" />
+            {/* Single SVG: card background + cart button always aligned */}
+            <CardWithButton
+              className="absolute inset-0 w-full h-full"
+              cartHovered={cartHovered}
+              onCartEnter={() => setCartHovered(true)}
+              onCartLeave={() => setCartHovered(false)}
+              onCartClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+              ariaLabel={`Add ${product.title} to cart`}
+            />
 
             {/* Product bottle — positioned over the SVG card, overflows bottom */}
             <div
-              className="absolute inset-0 flex items-end justify-center"
+              className="absolute inset-0 flex items-end justify-center pointer-events-none"
               style={{ bottom: '-14%' }}
             >
               {image ? (
@@ -326,24 +363,6 @@ function ProductCard({ product }: { product: Product }) {
               )}
             </div>
           </div>
-
-          {/* Gold cart button — nests into the SVG cutout at bottom-right */}
-          <button
-            type="button"
-            className="absolute z-10 transition-transform hover:scale-110"
-            style={{
-              width: '17.7%',
-              bottom: '0',
-              right: '0',
-            }}
-            aria-label={`Add ${product.title} to cart`}
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
-          >
-            <CartButtonIcon />
-          </button>
         </div>
 
         {/* ── Product info below card ─────────────── */}
@@ -369,11 +388,12 @@ function ProductCard({ product }: { product: Product }) {
             250ML
           </p>
           {typeof price === 'number' && (
-            <Price
-              amount={price}
+            <p
               className="font-semibold mb-0"
-              as="p"
-            />
+              style={{ fontSize: '0.95rem', lineHeight: 1.5, color: '#4B4F4A' }}
+            >
+              €{price.toFixed(2).replace('.', ',')}
+            </p>
           )}
         </div>
       </Link>
@@ -394,24 +414,13 @@ function PlaceholderCard() {
     >
       <div className="relative mb-2">
         <div className="relative" style={{ aspectRatio: '328 / 350' }}>
-          <CardBackground className="absolute inset-0 w-full h-full" />
+          <CardWithButton className="absolute inset-0 w-full h-full" opacity={0.5} />
           <div
-            className="absolute inset-0 flex items-end justify-center"
+            className="absolute inset-0 flex items-end justify-center pointer-events-none"
             style={{ bottom: '-14%' }}
           >
             <div className="w-[55%] h-[70%] bg-[#ECE5DE] rounded-lg" />
           </div>
-        </div>
-        {/* Gold cart button placeholder */}
-        <div
-          className="absolute z-10 opacity-50"
-          style={{
-            width: '17.7%',
-            bottom: '0',
-            right: '0',
-          }}
-        >
-          <CartButtonIcon />
         </div>
       </div>
       <div className="pt-8">
