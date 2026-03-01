@@ -1,6 +1,8 @@
-import { FadeIn } from '@/components/FadeIn'
+'use client'
+
 import { Media } from '@/components/Media'
 import type { Media as MediaType, SponsorsBarBlock as SponsorsBarBlockType } from '@/payload-types'
+import React, { useEffect, useRef, useState } from 'react'
 
 const DEFAULTS = {
   heading: 'This project is supported by:',
@@ -12,31 +14,68 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedSponsors = sponsors ?? []
 
-  return (
-    <section id={id ?? undefined} className="bg-ff-warm-gray section-padding-sm container-padding">
-      <div className="container mx-auto flex flex-col items-center gap-(--space-content-lg)">
-        <FadeIn>
-          <h3 className="text-ff-black text-center">{resolvedHeading}</h3>
-        </FadeIn>
+  const sectionRef = useRef<HTMLElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
-        <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 w-full content-wide mx-auto">
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) setIsVisible(true)
+      },
+      { threshold: 0.15 },
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
+  return (
+    <section
+      ref={sectionRef}
+      id={id ?? undefined}
+      className={`section-padding-md transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
+      style={{ backgroundColor: '#F0EDEA' }}
+    >
+      <div className="container mx-auto px-6">
+        {/* ── Heading ── */}
+        <p
+          className="text-center font-display font-bold uppercase tracking-widest mb-12 lg:mb-16"
+          style={{
+            fontSize: 'clamp(1.1rem, 2vw, 1.6rem)',
+            color: '#e5b765',
+            letterSpacing: '0.15em',
+          }}
+        >
+          {resolvedHeading}
+        </p>
+
+        {/* ── Logo grid — 2x2 on mobile, 4 across on lg ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-10 w-full mx-auto">
           {resolvedSponsors.map((sponsor, index) => {
             const logo = sponsor.logo
-            const content = (
-              <FadeIn
+
+            const logoContent = (
+              <div
                 key={index}
-                delay={index * 100}
-                className="flex items-center justify-center h-8 md:h-10 w-auto opacity-70 hover:opacity-100 transition-opacity duration-300"
+                className="flex items-center justify-center px-4 py-3 transition-all duration-500 ease-out"
+                style={{
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
+                  transitionDelay: `${200 + index * 120}ms`,
+                }}
               >
-                {logo && typeof logo === 'object' ? (
-                  <Media
-                    resource={logo as MediaType}
-                    className="h-full w-auto object-contain max-w-32"
-                  />
-                ) : (
-                  <div className="h-full w-28 bg-ff-sponsor-placeholder rounded-(--radius-md)" />
-                )}
-              </FadeIn>
+                <div className="flex items-center justify-center h-14 md:h-20 lg:h-24 w-full">
+                  {logo && typeof logo === 'object' ? (
+                    <Media
+                      resource={logo as MediaType}
+                      className="h-full w-auto object-contain max-w-48 md:max-w-56 lg:max-w-64"
+                    />
+                  ) : (
+                    <div className="h-full w-28 rounded-lg" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }} />
+                  )}
+                </div>
+              </div>
             )
 
             if (sponsor.url) {
@@ -46,14 +85,14 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
                   href={sponsor.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center"
+                  aria-label={sponsor.name || 'Sponsor'}
                 >
-                  {content}
+                  {logoContent}
                 </a>
               )
             }
 
-            return content
+            return logoContent
           })}
         </div>
       </div>

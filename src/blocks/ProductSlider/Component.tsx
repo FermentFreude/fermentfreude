@@ -131,37 +131,34 @@ export const ProductSliderBlock: React.FC<Props> = ({
     <section id={id} className="section-padding-md overflow-hidden">
       <div className="mx-auto container-padding" style={{ maxWidth: 'var(--content-full)' }}>
         {/* ── Header ─────────────────────────────────────── */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-16 mb-8 lg:mb-10">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-16 mb-8 lg:mb-10">
           {/* Left: Heading + Description */}
           <div className="flex-1 max-w-264">
-            <div className="flex items-baseline gap-2 flex-wrap">
+            {/* Heading row: "Discover UNIQUE." + eyebrow aligned top-right */}
+            <div className="flex items-start gap-3">
               <h2
                 className="font-display font-black"
                 style={{
-                  fontSize: 'clamp(2.25rem, 5.5vw, 5rem)',
-                  lineHeight: 1.2,
-                  letterSpacing: '0',
+                  fontSize: 'clamp(2rem, 4.5vw, 3.75rem)',
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.01em',
                   color: '#000',
                 }}
               >
                 {resolvedHeading}
               </h2>
               <span
-                className="font-display font-bold"
-                style={{
-                  color: '#E8C079',
-                  fontSize: 'clamp(1rem, 1.6vw, 1.5rem)',
-                  lineHeight: 1.5,
-                }}
+                className="text-eyebrow font-bold text-ff-gold-accent shrink-0"
+                style={{ marginTop: '0.35em' }}
               >
                 {resolvedAccent}
               </span>
             </div>
             <p
-              className="font-display font-bold mt-6 lg:mt-9"
+              className="font-display font-bold mt-6 lg:mt-8"
               style={{
-                fontSize: 'clamp(0.95rem, 1.6vw, 1.5rem)',
-                lineHeight: 1.5,
+                fontSize: 'clamp(0.9rem, 1.4vw, 1.25rem)',
+                lineHeight: 1.6,
                 color: '#000',
               }}
             >
@@ -170,15 +167,15 @@ export const ProductSliderBlock: React.FC<Props> = ({
           </div>
 
           {/* Right: CTA button */}
-          <div className="shrink-0">
+          <div className="shrink-0 lg:mt-2">
             <Link
               href={resolvedButtonLink}
               className="inline-flex items-center justify-center font-display font-bold text-[#F9F0DC] transition-opacity hover:opacity-90"
               style={{
                 backgroundColor: '#4B4B4B',
                 borderRadius: '2rem',
-                padding: '1.125rem 1.875rem',
-                fontSize: 'clamp(0.95rem, 1.3vw, 1.6rem)',
+                padding: '0.875rem 1.5rem',
+                fontSize: 'clamp(0.85rem, 1.1vw, 1.1rem)',
                 lineHeight: 1.5,
               }}
             >
@@ -191,8 +188,14 @@ export const ProductSliderBlock: React.FC<Props> = ({
         <div
           ref={scrollRef}
           onScroll={updateScrollState}
+          data-product-slider
           className="flex gap-5 overflow-x-auto pb-8 snap-x snap-mandatory"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            touchAction: 'pan-x',
+          }}
         >
           <style>{`[data-product-slider]::-webkit-scrollbar { display: none; }`}</style>
           {products.length > 0
@@ -390,28 +393,28 @@ function ProductCard({ product }: { product: Product }) {
         {/* ── Product info below card ─────────────── */}
         <div className="pt-8">
           <p
-            className="font-display font-medium mb-0"
+            className="font-display font-bold mb-0"
             style={{ fontSize: '1rem', lineHeight: 1.4, color: '#4B4F4A' }}
           >
             {product.title}
           </p>
           {variantLabel && (
             <p
-              className="font-display mb-0"
+              className="font-display font-bold mb-0"
               style={{ fontSize: '0.85rem', lineHeight: 1.5, color: '#4B4F4A' }}
             >
               {variantLabel}
             </p>
           )}
           <p
-            className="mb-0"
+            className="font-bold mb-0"
             style={{ fontSize: '0.775rem', lineHeight: 1.5, color: '#4B4F4A', opacity: 0.7 }}
           >
             250ML
           </p>
           {typeof price === 'number' && (
             <p
-              className="font-semibold mb-0"
+              className="font-bold mb-0"
               style={{ fontSize: '0.95rem', lineHeight: 1.5, color: '#4B4F4A' }}
             >
               €{price.toFixed(2).replace('.', ',')}

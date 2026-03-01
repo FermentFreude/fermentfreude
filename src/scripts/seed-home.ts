@@ -374,6 +374,9 @@ async function seedHome() {
 
   payload.logger.info('✅ DE saved.')
 
+  // Small delay to avoid WriteConflict on MongoDB Atlas M0
+  await new Promise((r) => setTimeout(r, 2000))
+
   // ══════════════════════════════════════════════════════════════════════════
   // 5. Read back to capture auto-generated IDs
   // ══════════════════════════════════════════════════════════════════════════

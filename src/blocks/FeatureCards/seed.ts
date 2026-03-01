@@ -11,7 +11,7 @@ export interface FeatureCardsImages {
 export function buildFeatureCards(imgs: FeatureCardsImages) {
   const de = {
     blockType: 'featureCards' as const,
-    eyebrow: 'FERMENTATION',
+    eyebrow: 'IST GESUND',
     heading: 'Warum Fermentation?',
     description:
       'Fermentation ist eine der ältesten und natürlichsten Methoden der Lebensmittelkonservierung. Sie verbessert Geschmack, Nährwert und Verdaulichkeit.',
@@ -41,7 +41,7 @@ export function buildFeatureCards(imgs: FeatureCardsImages) {
 
   const en = {
     blockType: 'featureCards' as const,
-    eyebrow: 'FERMENTATION',
+    eyebrow: 'IS HEALTHY',
     heading: 'Why Fermentation?',
     description:
       'Fermentation is one of the oldest and most natural methods of food preservation. It enhances flavour, nutritional value, and digestibility.',

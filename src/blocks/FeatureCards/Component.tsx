@@ -23,7 +23,7 @@ const FALLBACK_ICONS = [
 ]
 
 const DEFAULTS = {
-  eyebrow: 'FERMENTATION',
+  eyebrow: 'IS HEALTHY',
   heading: 'Why Fermentation?',
   description:
     'Fermentation is one of the oldest and most natural methods of food preservation. It enhances flavour, nutritional value, and digestibility.',
@@ -144,26 +144,73 @@ export const FeatureCardsBlock: React.FC<Props> = ({
 
   return (
     <section id={id ?? undefined} className="bg-white section-padding-md">
-      <div className="container mx-auto px-6 flex flex-col items-center gap-(--space-content-xl)">
-        {/* Header */}
-        <FadeIn className="flex flex-col items-center text-center gap-(--space-content-sm) content-medium">
-          {resolvedEyebrow && (
-            <span
-              ref={eyebrowRef}
-              className="text-eyebrow font-bold text-ff-gold-accent"
-              style={{ perspective: '600px' }}
-            >
-              {resolvedEyebrow}
-            </span>
-          )}
-          <h2 className="text-ff-black">{resolvedHeading}</h2>
-          {resolvedDescription && (
-            <p className="text-body text-ff-black/80">{resolvedDescription}</p>
-          )}
-        </FadeIn>
+      <div className="container mx-auto px-6 flex flex-col items-start gap-(--space-content-xl)">
+        {/* Header: heading row (title + eyebrow + button) then description */}
+        <div className="flex flex-col gap-(--space-content-sm) w-full">
+          {/* Top row: heading+eyebrow left, button right — vertically centered */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-16 w-full">
+            <FadeIn className="flex items-start gap-3 flex-1">
+              <h2
+                className="font-display font-black"
+                style={{
+                  fontSize: 'clamp(2rem, 4.5vw, 3.75rem)',
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.01em',
+                  color: '#000',
+                }}
+              >
+                {resolvedHeading}
+              </h2>
+              {resolvedEyebrow && (
+                <span
+                  ref={eyebrowRef}
+                  className="text-eyebrow font-bold text-ff-gold-accent shrink-0"
+                  style={{ marginTop: '0.35em', perspective: '600px' }}
+                >
+                  {resolvedEyebrow}
+                </span>
+              )}
+            </FadeIn>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-(--space-content-lg) w-full content-wide mx-auto">
+            {/* CTA button — centered with the heading */}
+            {resolvedButtonLabel && (
+              <FadeIn className="shrink-0">
+                <Link
+                  href={resolvedButtonLink}
+                  className="inline-flex items-center justify-center font-display font-bold text-[#F9F0DC] transition-opacity hover:opacity-90"
+                  style={{
+                    backgroundColor: '#4B4B4B',
+                    borderRadius: '2rem',
+                    padding: '0.875rem 1.5rem',
+                    fontSize: 'clamp(0.85rem, 1.1vw, 1.1rem)',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {resolvedButtonLabel}
+                </Link>
+              </FadeIn>
+            )}
+          </div>
+
+          {/* Description below the heading row */}
+          {resolvedDescription && (
+            <FadeIn className="max-w-264">
+              <p
+                className="font-display font-bold"
+                style={{
+                  fontSize: 'clamp(0.9rem, 1.4vw, 1.25rem)',
+                  lineHeight: 1.6,
+                  color: '#000',
+                }}
+              >
+                {resolvedDescription}
+              </p>
+            </FadeIn>
+          )}
+        </div>
+
+        {/* Cards — 3 across on desktop, 1 per row on mobile (never 2) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-(--space-content-lg) w-full">
           {resolvedCards.map((card, index) => (
             <FadeIn key={index} delay={index * 120}>
               <div className="flex flex-col items-center text-center p-6 rounded-2xl border-2 border-ff-gold-accent hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
@@ -201,18 +248,6 @@ export const FeatureCardsBlock: React.FC<Props> = ({
             </FadeIn>
           ))}
         </div>
-
-        {/* CTA Button */}
-        {resolvedButtonLabel && (
-          <FadeIn>
-            <Link
-              href={resolvedButtonLink}
-              className="inline-flex items-center justify-center rounded-full bg-ff-black text-white font-display font-bold text-base px-6 py-2.5 transition-all hover:bg-transparent hover:shadow-[inset_0_0_0_2px_var(--ff-black)] hover:text-ff-black hover:scale-[1.03] active:scale-[0.97]"
-            >
-              {resolvedButtonLabel}
-            </Link>
-          </FadeIn>
-        )}
       </div>
     </section>
   )

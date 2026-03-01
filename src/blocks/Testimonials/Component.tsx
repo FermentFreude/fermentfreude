@@ -1,34 +1,58 @@
 'use client'
 
 import type { TestimonialsBlock as TestimonialsBlockType } from '@/payload-types'
-import Link from 'next/link'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+
+/* ── Brand color ── */
+const STAR_COLOR = '#e5b765'
+const CARD_BG = '#FAF8F5'
 
 const DEFAULTS = {
   eyebrow: 'Testimonials',
-  heading: 'What They Like About Our Fermentation Class',
+  heading: 'What THEY LIKE ABOUT Our Fermentation Class',
   buttonLabel: 'View All',
-  buttonLink: '#',
+  buttonLink: 'https://www.google.com/maps/place/Fermentfreude//@?entry=ttu&reviews=1',
   testimonials: [
     {
       quote:
-        "I've been practicing for over a year now, and it has truly been a transformative journey. When I first stepped onto the mat, I was seeking relief from the stress and chaos of daily life. What I found was so much more.",
-      authorName: 'Clara Keihl',
-      authorRole: 'Artist',
+        'Being able to attend the course was one of the best birthday presents I can remember. It was wonderful to see Marcel share his passion for fermentation with the participants. And the best part is: it opens up a whole new culinary world for me.',
+      authorName: 'Ernst Michael Preininger',
+      authorRole: 'Workshop Participant',
       rating: 5,
     },
     {
       quote:
-        'The workshop was incredibly well organized. Marcel explained every step with such patience and passion. I left feeling inspired and confident to start fermenting at home.',
-      authorName: 'Thomas Weber',
-      authorRole: 'Home Cook',
+        'A highly recommended workshop, both for beginners and those with some experience. Marcel conveys the fascinating techniques with a passion for the subject, detailed but not boring explanations, and a good dose of humor. The highlight was definitely the excellent tasting.',
+      authorName: 'Mme Kuchar',
+      authorRole: 'Workshop Participant',
       rating: 5,
     },
     {
       quote:
-        'As a professional chef, I was looking for new techniques to add to my repertoire. The fermentation class exceeded my expectations — practical, creative, and delicious.',
-      authorName: 'Sofia Berger',
-      authorRole: 'Chef',
+        'Marcel and David are incredibly kind people who genuinely enjoy sharing their knowledge in various workshops. The kombucha workshop was the perfect introduction to the fascinating world of kombucha! I highly recommend it to anyone interested in fermentation!',
+      authorName: 'Vera Wagner',
+      authorRole: 'Workshop Participant',
+      rating: 5,
+    },
+    {
+      quote:
+        'I celebrated my birthday at Ferment-Freude. It was super fun, and David did a fantastic job guiding us through the afternoon. We immediately put all the technical information into practice. Highly recommended for anyone who wants a cool afternoon or has something to celebrate!',
+      authorName: 'Andi Wind',
+      authorRole: 'Workshop Participant',
+      rating: 5,
+    },
+    {
+      quote:
+        'Very informative workshops from a trained chef with a passion for fermentation, with plenty of practical experience and great homemade gifts to take home. The homemade fermented products tasted afterward are exquisite! The next workshop is already booked.',
+      authorName: 'Jorche Kanipcki',
+      authorRole: 'Workshop Participant',
+      rating: 5,
+    },
+    {
+      quote:
+        'We had a wonderful evening at the Tempeh workshop. We learned a lot and the tasting of the different fermented foods was a culinary highlight.',
+      authorName: 'Marlies Kern',
+      authorRole: 'Workshop Participant',
       rating: 5,
     },
   ],
@@ -40,7 +64,8 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }, (_, i) => (
         <svg
           key={i}
-          className={`w-4 h-4 ${i < rating ? 'text-ff-gold-accent' : 'text-gray-300'}`}
+          className="w-3.5 h-3.5"
+          style={{ color: i < rating ? STAR_COLOR : '#D1D5DB' }}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -51,27 +76,36 @@ function StarRating({ rating }: { rating: number }) {
   )
 }
 
+/* ── Big opening quotation mark ── */
+function QuoteMark() {
+  return (
+    <svg width="40" height="32" viewBox="0 0 40 32" fill="none" className="opacity-15">
+      <path
+        d="M0 32V19.2C0 13.867 1.333 9.6 4 6.4C6.667 3.2 10.4 1.067 15.2 0L17.6 4.8C14.4 5.867 12 7.467 10.4 9.6C8.8 11.733 8 14.133 8 16.8H16V32H0ZM22.4 32V19.2C22.4 13.867 23.733 9.6 26.4 6.4C29.067 3.2 32.8 1.067 37.6 0L40 4.8C36.8 5.867 34.4 7.467 32.8 9.6C31.2 11.733 30.4 14.133 30.4 16.8H38.4V32H22.4Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
 type Props = TestimonialsBlockType & { id?: string }
 
 export const TestimonialsBlock: React.FC<Props> = ({
   eyebrow,
   heading,
-  buttonLabel,
-  buttonLink,
   testimonials,
   id,
 }) => {
   const resolvedEyebrow = eyebrow ?? DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
-  const resolvedButtonLabel = buttonLabel ?? DEFAULTS.buttonLabel
-  const resolvedButtonLink = buttonLink ?? DEFAULTS.buttonLink
   const resolvedTestimonials =
     testimonials && testimonials.length > 0 ? testimonials : DEFAULTS.testimonials
 
-  const [activeIndex, setActiveIndex] = useState(0)
   const total = resolvedTestimonials.length
   const [isVisible, setIsVisible] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [direction, setDirection] = useState<1 | -1>(1)
 
   useEffect(() => {
     const el = sectionRef.current
@@ -86,11 +120,15 @@ export const TestimonialsBlock: React.FC<Props> = ({
     return () => obs.disconnect()
   }, [])
 
-  // Auto-advance every 6s
+  // Auto-advance every 10s
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startTimer = useCallback(() => {
-    timerRef.current = setInterval(() => setActiveIndex((p) => (p + 1) % total), 6000)
+    timerRef.current = setInterval(() => {
+      setDirection(1)
+      setActiveIndex((p) => (p + 1) % total)
+    }, 10000)
   }, [total])
+
   useEffect(() => {
     startTimer()
     return () => {
@@ -98,11 +136,63 @@ export const TestimonialsBlock: React.FC<Props> = ({
     }
   }, [startTimer])
 
-  const go = (dir: -1 | 1) => {
+  const go = useCallback((dir: -1 | 1) => {
+    setDirection(dir)
     setActiveIndex((p) => (p + dir + total) % total)
     if (timerRef.current) clearInterval(timerRef.current)
     startTimer()
-  }
+  }, [total, startTimer])
+
+  // Keep a stable ref to `go` for the pointer event listeners
+  const goRef = useRef(go)
+  useEffect(() => { goRef.current = go }, [go])
+
+  // Swipe / drag support (touch + mouse)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const dragStartX = useRef<number | null>(null)
+  const isDragging = useRef(false)
+
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+
+    const onPointerDown = (e: PointerEvent) => {
+      // Don't capture if clicking a button
+      if ((e.target as HTMLElement).closest('button')) return
+      dragStartX.current = e.clientX
+      isDragging.current = true
+      el.setPointerCapture(e.pointerId)
+    }
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isDragging.current) return
+      e.preventDefault()
+    }
+    const onPointerUp = (e: PointerEvent) => {
+      if (!isDragging.current || dragStartX.current === null) return
+      isDragging.current = false
+      const dx = e.clientX - dragStartX.current
+      dragStartX.current = null
+      if (Math.abs(dx) > 40) {
+        goRef.current(dx < 0 ? 1 : -1)
+      }
+    }
+    const onPointerCancel = () => {
+      isDragging.current = false
+      dragStartX.current = null
+    }
+
+    el.addEventListener('pointerdown', onPointerDown)
+    el.addEventListener('pointermove', onPointerMove)
+    el.addEventListener('pointerup', onPointerUp)
+    el.addEventListener('pointercancel', onPointerCancel)
+
+    return () => {
+      el.removeEventListener('pointerdown', onPointerDown)
+      el.removeEventListener('pointermove', onPointerMove)
+      el.removeEventListener('pointerup', onPointerUp)
+      el.removeEventListener('pointercancel', onPointerCancel)
+    }
+  }, []) // stable — uses goRef
 
   const current = resolvedTestimonials[activeIndex]
 
@@ -112,107 +202,178 @@ export const TestimonialsBlock: React.FC<Props> = ({
       id={id ?? undefined}
       className={`section-padding-md transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
     >
+      <style>{`
+        @keyframes testimonialSlideIn {
+          from { opacity: 0; transform: translateX(${direction > 0 ? '40px' : '-40px'}); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes testimonialFadeUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
       <div className="container mx-auto px-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-(--space-content-md) mb-(--space-content-xl)">
-          <div className="flex flex-col gap-(--space-content-xs) content-medium">
-            {resolvedEyebrow && (
-              <span className="text-eyebrow text-ff-gold-accent">{resolvedEyebrow}</span>
-            )}
-            <h2 className="text-ff-olive">{resolvedHeading}</h2>
-          </div>
-          {resolvedButtonLabel && (
-            <Link
-              href={resolvedButtonLink}
-              className="inline-flex items-center justify-center rounded-full bg-ff-gold-accent hover:bg-ff-gold-accent-dark hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-dark-deep font-display font-bold text-base px-6 py-2.5 shrink-0"
-            >
-              {resolvedButtonLabel}
-            </Link>
+        {/* ── Header ── */}
+        <div className="flex flex-col gap-2 mb-(--space-content-xl)">
+          {resolvedEyebrow && (
+            <span className="text-eyebrow font-bold text-ff-gold-accent">
+              {resolvedEyebrow}
+            </span>
           )}
+          <h2
+            className="font-display font-black whitespace-nowrap"
+            style={{
+              fontSize: 'clamp(1.5rem, 3.5vw, 3rem)',
+              lineHeight: 1.1,
+              letterSpacing: '-0.01em',
+              color: '#000',
+            }}
+          >
+            {resolvedHeading.split(/(\b[A-ZÄÖÜ]{2,}\b)/g).map((part, i) =>
+              /^[A-ZÄÖÜ]{2,}$/.test(part) ? (
+                <span key={i} style={{ fontSize: '1.35em', letterSpacing: '-0.03em' }}>{part}</span>
+              ) : (
+                <span key={i}>{part}</span>
+              ),
+            )}
+          </h2>
         </div>
 
-        {/* Testimonial card */}
-        <div className="relative bg-ff-ivory-mist rounded-2xl p-8 md:p-10 lg:p-12 flex flex-col items-center text-center gap-(--space-content-md)">
-          <StarRating rating={current?.rating ?? 5} />
+        {/* ── Testimonial Card ── */}
+        <div
+          ref={cardRef}
+          className="rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          style={{ backgroundColor: CARD_BG, touchAction: 'pan-y pinch-zoom' }}
+        >
+          <div className="grid lg:grid-cols-[1fr_auto]">
+            {/* Left: Quote content */}
+            <div
+              key={activeIndex}
+              className="p-8 md:p-12 lg:p-16 flex flex-col justify-between gap-8"
+              style={{ animation: 'testimonialSlideIn 0.5s ease-out forwards' }}
+            >
+              {/* Quote mark + text */}
+              <div className="flex flex-col gap-5">
+                <QuoteMark />
+                <blockquote
+                  className="font-sans"
+                  style={{
+                    fontSize: 'clamp(1rem, 1.6vw, 1.35rem)',
+                    lineHeight: 1.7,
+                    color: '#1A1A1A',
+                  }}
+                >
+                  {current?.quote ?? ''}
+                </blockquote>
+              </div>
 
-          <blockquote
-            key={activeIndex}
-            className="text-body-lg text-ff-dark content-medium animate-fade-in"
-          >
-            &ldquo;{current?.quote ?? ''}&rdquo;
-          </blockquote>
+              {/* Author info — clean horizontal layout */}
+              <div
+                className="flex items-center gap-4 pt-4"
+                style={{
+                  borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+                  animation: 'testimonialFadeUp 0.5s ease-out 0.15s both',
+                }}
+              >
+                {/* Name initial avatar */}
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-sm shrink-0"
+                  style={{
+                    backgroundColor: '#e5b765',
+                    color: '#fff',
+                  }}
+                >
+                  {(current?.authorName ?? 'A').charAt(0)}
+                </div>
+                <div className="flex flex-col">
+                  <p className="font-display font-bold text-sm" style={{ color: '#1A1A1A' }}>
+                    {current?.authorName ?? ''}
+                  </p>
+                  <div className="mt-0.5">
+                    <StarRating rating={current?.rating ?? 5} />
+                  </div>
+                  {current?.authorRole && (
+                    <span
+                      className="text-xs uppercase tracking-wider mt-2.5"
+                      style={{ color: '#1A1A1A', opacity: 0.45 }}
+                    >
+                      {current.authorRole}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
 
-          <div className="flex flex-col items-center gap-1">
-            <p className="font-display text-base text-ff-dark">{current?.authorName ?? ''}</p>
-            {current?.authorRole && (
-              <p className="text-caption text-ff-ivory-mist bg-ff-olive px-3 py-0.5 rounded-full">
-                {current.authorRole}
-              </p>
-            )}
-          </div>
-
-          {/* Navigation arrows */}
-          {total > 1 && (
-            <>
+            {/* Right: Navigation panel */}
+            <div
+              className="flex flex-row lg:flex-col items-center justify-center gap-3 px-6 py-4 lg:py-0 lg:px-8"
+              style={{ backgroundColor: 'rgba(0, 0, 0, 0.03)' }}
+            >
               <button
                 onClick={() => go(-1)}
                 aria-label="Previous testimonial"
-                className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-ff-olive hover:bg-black/5 transition-colors"
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-black/5"
+                style={{ color: '#1A1A1A' }}
               >
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2.5"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
+
+              {/* Counter */}
+              <div className="flex items-center gap-1">
+                <span className="font-display font-bold text-sm" style={{ color: '#1A1A1A' }}>
+                  {String(activeIndex + 1).padStart(2, '0')}
+                </span>
+                <span className="text-xs" style={{ color: '#1A1A1A', opacity: 0.3 }}>/</span>
+                <span className="text-xs" style={{ color: '#1A1A1A', opacity: 0.3 }}>
+                  {String(total).padStart(2, '0')}
+                </span>
+              </div>
+
               <button
                 onClick={() => go(1)}
                 aria-label="Next testimonial"
-                className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-ff-olive hover:bg-black/5 transition-colors"
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-black/5"
+                style={{ color: '#1A1A1A' }}
               >
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2.5"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </button>
-            </>
-          )}
-        </div>
-
-        {/* Dots */}
-        {total > 1 && (
-          <div className="flex justify-center gap-1.5 mt-4">
-            {resolvedTestimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setActiveIndex(index)
-                  if (timerRef.current) clearInterval(timerRef.current)
-                  startTimer()
-                }}
-                aria-label={`Go to testimonial ${index + 1}`}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === activeIndex ? 'bg-ff-gold-accent scale-125' : 'bg-ff-gold-accent/30'
-                }`}
-              />
-            ))}
+            </div>
           </div>
-        )}
+
+          {/* Progress bar */}
+          <div className="h-0.5 w-full" style={{ backgroundColor: 'rgba(0, 0, 0, 0.06)' }}>
+            <div
+              className="h-full transition-all duration-500 ease-out"
+              style={{
+                width: `${((activeIndex + 1) / total) * 100}%`,
+                backgroundColor: STAR_COLOR,
+              }}
+            />
+          </div>
+        </div>
       </div>
     </section>
   )
