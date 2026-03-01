@@ -1,3 +1,33 @@
+/* ── Glassmorphism nav bar ──────────────────────────────────── */
+.nav-glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+[data-theme='dark'] .nav-glass {
+  background: rgba(26, 26, 26, 0.7);
+}
+
+/* ── Glassmorphism dropdown panel ──────────────────────────── */
+.dropdown-glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] .dropdown-glass {
+  background: rgba(30, 30, 30, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
 .navLink {
   overflow: hidden;
   border-radius: unset;
@@ -39,6 +69,36 @@
   }
 }
 
+/* ── Burger bars → X morph ─────────────────────────────────── */
+.burger-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.burger-bar-top {
+  top: -4px;
+}
+
+.burger-bar-bottom {
+  top: 4px;
+}
+
+.burger-active .burger-bar-top {
+  transform: rotate(45deg);
+  top: -1px;
+}
+
+.burger-active .burger-bar-bottom {
+  transform: rotate(-45deg);
+  top: 1px;
+}
+
+/* ── Nav overlay ───────────────────────────────────────────── */
+.nav-overlay {
+  z-index: 40;
+}
+
 /* ── Transparent header on home page ────────────────────────── */
 /* Dark mode: white text on transparent */
 [data-theme='dark'] header[data-transparent] .navLink,
@@ -62,4 +122,43 @@
 
 [data-theme='dark'] header[data-transparent] nav svg {
   color: white;
+}
+
+/* ── Hide default cursor when elastic cursor is active ─────── */
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) {
+  /* Hide cursor globally by default */
+  * {
+    cursor: none !important;
+  }
+
+  /* Restore normal cursor on all interactive & media elements */
+  a,
+  a *,
+  button,
+  button *,
+  [data-slot='button'],
+  [data-slot='button'] *,
+  [role='button'],
+  [role='button'] *,
+  input,
+  select,
+  textarea,
+  .dropdown-glass,
+  .dropdown-glass *,
+  .cursor-normal-zone,
+  .cursor-normal-zone *,
+  img,
+  picture,
+  picture *,
+  video,
+  figure,
+  figure * {
+    cursor: pointer !important;
+  }
+
+  /* But cursor-can-hover elements keep cursor hidden (blob active) */
+  .cursor-can-hover,
+  .cursor-can-hover * {
+    cursor: none !important;
+  }
 }

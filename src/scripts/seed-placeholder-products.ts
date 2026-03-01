@@ -26,7 +26,15 @@ function buildDescription(text: string) {
         {
           type: 'paragraph' as const,
           children: [
-            { type: 'text' as const, detail: 0, format: 0, mode: 'normal' as const, style: '', text, version: 1 },
+            {
+              type: 'text' as const,
+              detail: 0,
+              format: 0,
+              mode: 'normal' as const,
+              style: '',
+              text,
+              version: 1,
+            },
           ],
           direction: 'ltr' as const,
           format: '' as const,
@@ -100,7 +108,7 @@ async function seedPlaceholderProducts() {
   const seedAssets = path.resolve(process.cwd(), 'seed-assets')
 
   console.log('🗑️  Deleting all existing products...')
-  
+
   // Delete all existing products
   const existingProducts = await payload.find({
     collection: 'products',
@@ -119,7 +127,7 @@ async function seedPlaceholderProducts() {
 
   // Upload placeholder image (kombucha bottle)
   console.log('📸 Uploading placeholder image...')
-  
+
   const placeholderImagePath = path.join(seedAssets, 'images/shop1.png')
   let placeholderImageId: string | null = null
 

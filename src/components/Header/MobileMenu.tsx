@@ -1,210 +1,408 @@
 'use client'
 
 import type { Header } from '@/payload-types'
+import { gsap } from 'gsap'
 
-import { CMSLink } from '@/components/Link'
-import { Button } from '@/components/ui/button'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
 import { useAuth } from '@/providers/Auth'
-import { MenuIcon } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { LanguageToggle } from './LanguageToggle'
-import { NavDropdownMobile } from './NavDropdown'
 import { ThemeToggle } from './ThemeToggle'
+import { CHAR_REVEAL } from './anim'
 import { defaultDropdowns, defaultNavItems, getDefaultDropdownKey } from './nav-defaults'
 
 interface Props {
   menu: Header['navItems'] | null
+  isActive: boolean
+  setIsActive: (v: boolean) => void
 }
 
-export function MobileMenu({ menu }: Props) {
+/**
+ * Full-page overlay navigation menu.
+ * - All pages shown as large text links
+ * - Per-character text reveal animation (GSAP — replicating portfolio's framer-motion translate)
+ * - Blur effect on non-hovered links
+ * - Footer with settings & auth
+ */
+export function MobileMenu({ menu, isActive, setIsActive }: Props) {
   const { user } = useAuth()
+  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [isOpen, setIsOpen] = useState(false)
+
+  const navRef = useRef<HTMLDivElement>(null)
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const footerRef = useRef<HTMLDivElement>(null)
+  const charRefs = useRef<Map<string, HTMLSpanElement[]>>(new Map())
+  const [selectedLink, setSelectedLink] = useState<number | null>(null)
+  const [touchedLink, setTouchedLink] = useState<number | null>(null)
+  const animTimeline = useRef<gsap.core.Timeline | null>(null)
+  const mobileBlobRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   const hasRealCMSItems = menu && menu.length > 0 && menu.some((i) => i.link?.label)
 
+  // Close on route change
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 1024) setIsOpen(false)
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [isOpen])
-
-  useEffect(() => {
-    setIsOpen(false)
+    if (isActive) setIsActive(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams])
 
-  const renderedDropdowns = new Set<string>()
+  // Lock body scroll when open
+  useEffect(() => {
+    if (isActive) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isActive])
+
+  // Build flat nav items list — all pages shown (including dropdown sub-items)
+  const navItemsList = buildNavItems(menu, !!hasRealCMSItems)
+
+  // Register character refs for a given link index
+  const setCharRef = useCallback((linkIdx: number, charIdx: number, el: HTMLSpanElement | null) => {
+    const key = String(linkIdx)
+    if (!charRefs.current.has(key)) {
+      charRefs.current.set(key, [])
+    }
+    const arr = charRefs.current.get(key)!
+    if (el) {
+      arr[charIdx] = el
+    }
+  }, [])
+
+  // Animate open
+  useEffect(() => {
+    if (!isActive) return
+    if (!navRef.current) return
+
+    // Kill any existing timeline
+    animTimeline.current?.kill()
+
+    const tl = gsap.timeline()
+    animTimeline.current = tl
+
+    // Nav container: height 0 → auto
+    tl.fromTo(
+      navRef.current,
+      { height: 0 },
+      { height: 'auto', duration: 1, ease: 'power4.inOut' },
+      0,
+    )
+
+    // Per-character reveal: each char slides up from y:100%
+    charRefs.current.forEach((chars, _key) => {
+      const validChars = chars.filter(Boolean)
+      if (validChars.length === 0) return
+
+      // Set initial state
+      gsap.set(validChars, { y: '100%' })
+
+      // Stagger reveal with per-character delay
+      validChars.forEach((char, i) => {
+        tl.to(
+          char,
+          {
+            y: '0%',
+            duration: CHAR_REVEAL.duration,
+            ease: CHAR_REVEAL.ease,
+          },
+          0.3 + i * CHAR_REVEAL.enterStagger, // offset slightly for nav height animation
+        )
+      })
+    })
+
+    // Footer fade in
+    if (footerRef.current) {
+      tl.fromTo(
+        footerRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        0.6,
+      )
+    }
+
+    return () => {
+      tl.kill()
+    }
+  }, [isActive])
+
+  // Animate close — optionally navigate after animation finishes
+  const handleClose = useCallback(
+    (href?: string) => {
+      if (!navRef.current) {
+        setIsActive(false)
+        if (href) router.push(href)
+        return
+      }
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          setIsActive(false)
+          if (href) router.push(href)
+        },
+      })
+
+      // Reverse character animations
+      charRefs.current.forEach((chars) => {
+        const validChars = chars.filter(Boolean)
+        validChars.forEach((char, i) => {
+          tl.to(
+            char,
+            {
+              y: '100%',
+              duration: 0.5,
+              ease: 'power4.inOut',
+            },
+            i * CHAR_REVEAL.exitStagger,
+          )
+        })
+      })
+
+      // Footer fade out
+      if (footerRef.current) {
+        tl.to(footerRef.current, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0)
+      }
+
+      // Nav collapse
+      tl.to(navRef.current, { height: 0, duration: 0.8, ease: 'power4.inOut' }, 0.2)
+    },
+    [setIsActive, router],
+  )
+
+  // Color switch on hovered link
+  useEffect(() => {
+    if (!bodyRef.current) return
+    const linkEls = bodyRef.current.querySelectorAll<HTMLElement>('.nav-overlay-link')
+
+    if (selectedLink === null) {
+      gsap.to(linkEls, {
+        color: '',
+        opacity: 1,
+        duration: 0.3,
+        ease: 'power2.out',
+      })
+    } else {
+      linkEls.forEach((el, i) => {
+        gsap.to(el, {
+          opacity: i === selectedLink ? 1 : 0.25,
+          duration: 0.3,
+          ease: 'power2.out',
+        })
+      })
+    }
+  }, [selectedLink])
+
+  // Mobile: animate blob behind touched link
+  useEffect(() => {
+    mobileBlobRefs.current.forEach((blob, idx) => {
+      if (idx === touchedLink) {
+        gsap.to(blob, { scaleX: 1, scaleY: 1, opacity: 1, duration: 0.35, ease: 'power3.out' })
+      } else {
+        gsap.to(blob, { scaleX: 0.95, scaleY: 0.8, opacity: 0, duration: 0.25, ease: 'power2.in' })
+      }
+    })
+  }, [touchedLink])
+
+  if (!isActive) return null
 
   return (
-    <Sheet onOpenChange={setIsOpen} open={isOpen}>
-      <SheetTrigger
-        aria-label="Open navigation menu"
-        className="flex h-10 w-10 items-center justify-center rounded-md text-ff-gray-15 dark:text-neutral-300 transition-colors hover:text-ff-charcoal dark:hover:text-white"
-      >
-        <MenuIcon className="h-5 w-5" />
-      </SheetTrigger>
+    <div
+      ref={navRef}
+      className="nav-overlay fixed left-0 top-0 w-full z-40 overflow-hidden"
+      style={{ height: 0 }}
+    >
+      {/* Background */}
+      <div className="absolute inset-0 bg-[#f5f2ed]/97 dark:bg-ff-near-black/97 backdrop-blur-xl" />
 
-      <SheetContent side="left" className="w-75 px-6 bg-ff-ivory dark:bg-ff-near-black">
-        <SheetHeader className="px-0 pt-4 pb-0">
-          <SheetTitle className="flex items-center">
-            <Image
-              src="/primary-logo.svg"
-              alt="Fermentfreude"
-              width={200}
-              height={24}
-              className="h-6 w-auto dark:invert"
-              style={{ width: 'auto' }}
-            />
-          </SheetTitle>
-          <SheetDescription className="sr-only">Navigation menu</SheetDescription>
-        </SheetHeader>
-
-        <div className="py-6">
-          <ul className="flex w-full flex-col gap-1">
-            {hasRealCMSItems
-              ? menu!.map((item) => {
-                  const url = item.link.url
-                  const label = item.link.label
-                  const cmsDropdownItems = item.dropdownItems
-                  const defaultKey = getDefaultDropdownKey(label, url)
-
-                  const dropdownItems =
-                    cmsDropdownItems && cmsDropdownItems.length > 0
-                      ? cmsDropdownItems
-                      : defaultKey
-                        ? defaultDropdowns[defaultKey]
-                        : null
-
-                  if (dropdownItems && dropdownItems.length > 0) {
-                    const key = defaultKey || label
-                    if (renderedDropdowns.has(key)) return null
-                    renderedDropdowns.add(key)
-
-                    return (
-                      <li key={item.id}>
-                        <NavDropdownMobile
-                          label={label}
-                          href={url || undefined}
-                          items={dropdownItems}
-                        />
-                      </li>
-                    )
-                  }
-
-                  return (
-                    <li key={item.id}>
-                      <CMSLink
-                        {...item.link}
-                        appearance="inline"
-                        className="block py-2.5 text-base font-display font-bold text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
-                      />
-                    </li>
-                  )
-                })
-              : defaultNavItems.map((item) => (
-                  <li key={item.url}>
-                    {item.dropdownItems ? (
-                      <NavDropdownMobile
-                        label={item.label}
-                        href={item.url}
-                        items={item.dropdownItems}
-                      />
-                    ) : (
-                      <Link
-                        href={item.url}
-                        className="block py-2.5 text-base font-display font-bold text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
-                      >
-                        {item.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-          </ul>
-        </div>
-
-        <hr className="border-ff-white-95 dark:border-neutral-800" />
-
-        {/* Settings: Language & Theme toggles */}
-        <div className="flex items-center justify-between py-4">
-          <span className="text-sm font-semibold text-ff-gray-text dark:text-neutral-400">
-            Settings
-          </span>
-          <div className="flex items-center gap-2">
-            <LanguageToggle />
-            <ThemeToggle />
+      {/* Content */}
+      <div className="relative h-full flex flex-col pt-20 md:pt-24">
+        {/* Body: large nav links */}
+        <div
+          ref={bodyRef}
+          className="flex-1 overflow-y-auto px-6 md:px-12 lg:px-20"
+          onMouseLeave={() => setSelectedLink(null)}
+        >
+          <div className="flex flex-col md:flex-row md:flex-wrap mt-10 md:mt-20 max-w-350">
+            {navItemsList.map((item, linkIdx) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                className="nav-overlay-link cursor-can-hover rounded-lg block text-ff-near-black dark:text-neutral-100 no-underline uppercase transition-colors relative"
+                onMouseOver={() => setSelectedLink(linkIdx)}
+                onMouseLeave={() => setSelectedLink(null)}
+                onTouchStart={() => setTouchedLink(linkIdx)}
+                onTouchEnd={() => {
+                  setTimeout(() => setTouchedLink(null), 200)
+                }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleClose(item.href)
+                }}
+              >
+                {/* Mobile touch blob */}
+                <div
+                  ref={(el) => {
+                    if (el) mobileBlobRefs.current.set(linkIdx, el)
+                  }}
+                  className="absolute -inset-x-1 -inset-y-0.5 rounded-md pointer-events-none md:hidden"
+                  style={{
+                    backgroundColor: 'rgba(26, 26, 26, 0.08)',
+                    opacity: 0,
+                    transformOrigin: 'center center',
+                  }}
+                />
+                <p className="pointer-events-none m-0 flex overflow-hidden text-[32px] md:text-[5vw] lg:text-[6vw] pr-7.5 md:pr-[2vw] pt-2.5 font-display font-light leading-[1.1] relative z-1">
+                  {item.label.split('').map((char, charIdx) => (
+                    <span
+                      key={`${linkIdx}-${charIdx}`}
+                      ref={(el) => setCharRef(linkIdx, charIdx, el)}
+                      className="inline-block pointer-events-none"
+                      style={{ transform: 'translateY(100%)' }}
+                    >
+                      {char === ' ' ? '\u00A0' : char}
+                    </span>
+                  ))}
+                </p>
+              </Link>
+            ))}
           </div>
         </div>
 
-        <hr className="border-ff-white-95 dark:border-neutral-800" />
+        {/* Footer: settings + auth */}
+        <div
+          ref={footerRef}
+          className="border-t border-ff-warm-gray/30 dark:border-neutral-800 px-6 md:px-12 lg:px-20 py-5"
+          style={{ opacity: 0 }}
+        >
+          <div className="flex items-center justify-between max-w-350">
+            {/* Settings */}
+            <div className="flex items-center gap-3">
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
 
-        {user ? (
-          <div className="py-6">
-            <h3 className="text-sm font-bold text-ff-gray-text dark:text-neutral-500 uppercase tracking-wider mb-4">
-              My Account
-            </h3>
-            <ul className="flex flex-col gap-2">
-              <li>
-                <Link
-                  href="/orders"
-                  className="text-base text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
-                >
-                  Orders
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/account/addresses"
-                  className="text-base text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
-                >
-                  Addresses
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/account"
-                  className="text-base text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
-                >
-                  Manage account
-                </Link>
-              </li>
-              <li className="mt-4">
-                <Button asChild variant="outline" className="w-full rounded-full">
-                  <Link href="/logout">Log out</Link>
-                </Button>
-              </li>
-            </ul>
+            {/* Auth links */}
+            <div className="flex items-center gap-4">
+              {user ? (
+                <>
+                  <Link
+                    href="/account"
+                    className="text-xs md:text-sm font-display font-bold text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors lowercase cursor-can-hover"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleClose('/account')
+                    }}
+                  >
+                    Account
+                  </Link>
+                  <Link
+                    href="/logout"
+                    className="text-xs md:text-sm text-ff-gray-text dark:text-neutral-400 hover:text-ff-charcoal dark:hover:text-white transition-colors lowercase cursor-can-hover"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleClose('/logout')
+                    }}
+                  >
+                    Log out
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-xs md:text-sm font-display font-bold text-ff-gray-15 dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors lowercase cursor-can-hover"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleClose('/login')
+                    }}
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/create-account"
+                    className="text-xs md:text-sm text-ff-gray-text dark:text-neutral-400 hover:text-ff-charcoal dark:hover:text-white transition-colors lowercase cursor-can-hover"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleClose('/create-account')
+                    }}
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
-        ) : (
-          <div className="py-6 flex flex-col gap-3">
-            <Link
-              href="/create-account"
-              className="w-full text-center rounded-full border border-ff-near-black dark:border-neutral-600 bg-ff-ivory dark:bg-transparent px-6 py-2.5 font-display text-base font-bold text-ff-near-black dark:text-neutral-200 transition-colors hover:bg-ff-near-black hover:text-ff-ivory dark:hover:bg-neutral-700 dark:hover:text-white"
-            >
-              Sign Up
-            </Link>
-            <Link
-              href="/login"
-              className="w-full text-center rounded-full bg-ff-near-black dark:bg-white px-6 py-2.5 font-display text-base font-bold text-ff-ivory dark:text-ff-near-black transition-colors hover:bg-ff-charcoal dark:hover:bg-neutral-200"
-            >
-              Log in
-            </Link>
-          </div>
-        )}
-      </SheetContent>
-    </Sheet>
+        </div>
+      </div>
+    </div>
   )
+}
+
+/* ── Helper: build flat nav items for overlay ──────────────── */
+
+interface NavOverlayItem {
+  id: string
+  label: string
+  href: string
+}
+
+function buildNavItems(
+  menu: Header['navItems'] | null,
+  hasRealCMSItems: boolean,
+): NavOverlayItem[] {
+  const items: NavOverlayItem[] = []
+
+  if (hasRealCMSItems && menu) {
+    for (const item of menu) {
+      const url = item.link.url || '/'
+      const label = item.link.label || ''
+      const cmsDropdownItems = item.dropdownItems
+      const defaultKey = getDefaultDropdownKey(label, url)
+
+      const dropdownItems =
+        cmsDropdownItems && cmsDropdownItems.length > 0
+          ? cmsDropdownItems
+          : defaultKey
+            ? defaultDropdowns[defaultKey]
+            : null
+
+      // Always add the parent
+      items.push({ id: String(item.id), label, href: url })
+
+      // Add dropdown children as separate links
+      if (dropdownItems) {
+        for (const sub of dropdownItems) {
+          // Skip if same as parent
+          if (sub.href === url || sub.label === label) continue
+          items.push({
+            id: `${item.id}-${sub.href}`,
+            label: sub.label,
+            href: sub.href,
+          })
+        }
+      }
+    }
+  } else {
+    for (const item of defaultNavItems) {
+      items.push({ id: item.url, label: item.label, href: item.url })
+
+      if (item.dropdownItems) {
+        for (const sub of item.dropdownItems) {
+          if (sub.href === item.url || sub.label === item.label) continue
+          items.push({
+            id: `${item.url}-${sub.href}`,
+            label: sub.label,
+            href: sub.href,
+          })
+        }
+      }
+    }
+  }
+
+  return items
 }

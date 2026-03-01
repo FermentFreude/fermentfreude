@@ -23,10 +23,10 @@ import type { Page } from '@/payload-types'
 
 import { buildFeatureCards, mergeFeatureCardsEN } from '../blocks/FeatureCards/seed'
 import { buildHeroBanner, mergeHeroBannerEN } from '../blocks/HeroBanner/seed'
+import { buildProductSlider, mergeProductSliderEN } from '../blocks/ProductSlider/seed'
 import { buildSponsorsBar, mergeSponsorsBarEN } from '../blocks/SponsorsBar/seed'
 import { buildTeamPreview, mergeTeamPreviewEN } from '../blocks/TeamPreview/seed'
 import { buildTestimonials, mergeTestimonialsEN } from '../blocks/Testimonials/seed'
-import { buildProductSlider, mergeProductSliderEN } from '../blocks/ProductSlider/seed'
 import { buildVoucherCta, mergeVoucherCtaEN } from '../blocks/VoucherCta/seed'
 import { buildWorkshopSlider, mergeWorkshopSliderEN } from '../blocks/WorkshopSlider/seed'
 import { buildHeroSlider, mergeHeroSliderEN } from '../heros/HeroSlider/seed'
@@ -302,7 +302,7 @@ async function seedHome() {
     depth: 0,
   })
   const productIds = existingProducts.docs.map((p) => String(p.id))
-  
+
   if (productIds.length === 0) {
     payload.logger.warn('No products found. Run "pnpm seed placeholders" first.')
   }

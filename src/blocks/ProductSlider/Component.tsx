@@ -1,11 +1,11 @@
 'use client'
 
+import { Media } from '@/components/Media'
 import type {
   Media as MediaType,
   Product,
   ProductSliderBlock as ProductSliderBlockType,
 } from '@/payload-types'
-import { Media } from '@/components/Media'
 import Link from 'next/link'
 import React, { useCallback, useRef, useState } from 'react'
 
@@ -196,9 +196,7 @@ export const ProductSliderBlock: React.FC<Props> = ({
         >
           <style>{`[data-product-slider]::-webkit-scrollbar { display: none; }`}</style>
           {products.length > 0
-            ? products.map((product, i) => (
-                <ProductCard key={product.id ?? i} product={product} />
-              ))
+            ? products.map((product, i) => <ProductCard key={product.id ?? i} product={product} />)
             : Array.from({ length: 4 }).map((_, i) => <PlaceholderCard key={i} />)}
         </div>
 
@@ -219,8 +217,20 @@ export const ProductSliderBlock: React.FC<Props> = ({
             aria-label="Scroll left"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M12.25 7H1.75" stroke="#4B4F4A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M7 1.75L1.75 7L7 12.25" stroke="#4B4F4A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M12.25 7H1.75"
+                stroke="#4B4F4A"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M7 1.75L1.75 7L7 12.25"
+                stroke="#4B4F4A"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
           <button
@@ -238,8 +248,20 @@ export const ProductSliderBlock: React.FC<Props> = ({
             aria-label="Scroll right"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M1.75 7H12.25" stroke="#4B4F4A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M7 1.75L12.25 7L7 12.25" stroke="#4B4F4A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M1.75 7H12.25"
+                stroke="#4B4F4A"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M7 1.75L12.25 7L7 12.25"
+                stroke="#4B4F4A"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         </div>
