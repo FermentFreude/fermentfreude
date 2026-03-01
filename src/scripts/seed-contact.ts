@@ -25,12 +25,13 @@ import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
 async function seedContact() {
   const payload = await getPayload({ config })
+  const forceRecreate = process.argv.includes('--force')
 
   console.log('🧪 Seeding Contact page…')
 
   const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
 
-  // ── 1. Delete any existing contact page ──────────────────────
+  // ── 0. Non-destructive check — skip if page already has content ──
   const existing = await payload.find({
     collection: 'pages',
     where: { slug: { equals: 'contact' } },
@@ -38,6 +39,23 @@ async function seedContact() {
     depth: 0,
   })
 
+  if (existing.docs.length > 0 && !forceRecreate) {
+    const doc = existing.docs[0]
+    const layout = Array.isArray(doc.layout) ? doc.layout : []
+    if (layout.length > 0) {
+      console.log(
+        `⏭️  Contact page already has content (${layout.length} blocks). Skipping seed to protect admin changes.`,
+      )
+      console.log('   To overwrite, run: pnpm seed contact --force')
+      process.exit(0)
+    }
+  }
+
+  if (forceRecreate) {
+    console.log('🔄 --force flag detected. Will overwrite existing contact page content.')
+  }
+
+  // ── 1. Delete any existing contact page ──────────────────────
   for (const doc of existing.docs) {
     await payload.delete({
       collection: 'pages',

@@ -49,6 +49,35 @@ interface BlockItem extends WithId {
 
 async function seedHome() {
   const payload = await getPayload({ config })
+  const forceRecreate = process.argv.includes('--force')
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 0. Non-destructive check — skip if page already has content
+  // ══════════════════════════════════════════════════════════════════════════
+
+  const existingCheck = await payload.find({
+    collection: 'pages',
+    where: { slug: { equals: 'home' } },
+    limit: 1,
+    depth: 0,
+  })
+
+  if (existingCheck.docs.length > 0 && !forceRecreate) {
+    const doc = existingCheck.docs[0]
+    const layout = Array.isArray(doc.layout) ? doc.layout : []
+    if (layout.length > 0) {
+      payload.logger.info(
+        '⏭️  Home page already has content (%d blocks). Skipping seed to protect admin changes.',
+        layout.length,
+      )
+      payload.logger.info('   To overwrite, run: pnpm seed home --force')
+      process.exit(0)
+    }
+  }
+
+  if (forceRecreate) {
+    payload.logger.info('🔄 --force flag detected. Will overwrite existing home page content.')
+  }
 
   // ══════════════════════════════════════════════════════════════════════════
   // 1. Upload images

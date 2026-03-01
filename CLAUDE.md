@@ -116,7 +116,7 @@ rm /tmp/selected-media.json
 
 - `rclone sync` staging → production (deletes production-only files)
 - `mongorestore --drop` (wipes entire collection before restoring)
-- `pnpm seed` with all pages (overwrites existing content)
+- `pnpm seed --force` on all pages (overwrites existing content)
 
 ### Best practice
 
@@ -181,7 +181,7 @@ src/
 8. **Optimize images before upload.** Use `optimizedFile()` with presets: `hero` (1920px), `card` (1200px), `logo` (600px).
 9. **One block = one section.** Editors compose pages from blocks in `/admin`.
 10. **After every schema change:** `pnpm generate:types` → `pnpm generate:importmap` → `npx tsc --noEmit` → re-run seed.
-11. **Seed scripts:** one per page (`seed-<page>.ts`), registered in `seed-all.ts`.
+11. **Seed scripts:** one per page (`seed-<page>.ts`), registered in `seed-all.ts`. **Non-destructive by default** — skips pages that already have content. Use `--force` to overwrite.
 12. **No per-page route files.** Dynamic `[slug]/page.tsx` renders all CMS pages.
 
 ## Bilingual Seeding Pattern
@@ -244,8 +244,9 @@ pnpm lint:fix               # Auto-fix
 pnpm generate:types         # Regenerate Payload types
 pnpm generate:importmap     # Regenerate import map (after component changes)
 npx tsc --noEmit            # Type-check (must be zero errors)
-pnpm seed                   # Seed ALL pages (both locales)
-pnpm seed home              # Seed one page
+pnpm seed                   # Seed ALL pages (skips pages with existing content)
+pnpm seed home              # Seed one page (skips if content exists)
+pnpm seed home --force      # Force overwrite existing content
 pnpm test:int               # Integration tests (vitest)
 pnpm test:e2e               # E2E tests (playwright)
 pnpm stripe-webhooks        # Forward Stripe webhooks locally

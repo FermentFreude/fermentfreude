@@ -43,7 +43,7 @@
 8. **Optimize images before upload.** Use `optimizedFile()` from `src/scripts/seed-image-utils.ts`. Presets: `hero` (1920px), `card` (1200px), `logo` (600px). Never raw PNGs.
 9. **One block = one section.** Never bundle multiple sections. Editors compose pages from blocks in `/admin`.
 10. **After every schema change:** `pnpm generate:types` → `pnpm generate:importmap` → `npx tsc --noEmit` → re-run seed.
-11. **Seed scripts:** one per page (`src/scripts/seed-<page>.ts`), registered in `seed-all.ts`. Run all: `pnpm seed`. Run one: `pnpm seed home`.
+11. **Seed scripts:** one per page (`src/scripts/seed-<page>.ts`), registered in `seed-all.ts`. **Non-destructive by default** — skips pages that already have content. Run all: `pnpm seed`. Run one: `pnpm seed home`. Force overwrite: `pnpm seed home --force`.
 12. **No per-page route files.** Dynamic `[slug]/page.tsx` renders all CMS pages. Only dedicated routes for non-CMS pages (checkout, account, cart).
 
 ---
@@ -73,6 +73,7 @@
 - [ ] Images use `<Media resource={...} />`?
 - [ ] Seed uses `optimizedFile()`?
 - [ ] Both locales seeded with ID reuse?
+- [ ] Seed is non-destructive (skips if content exists, `--force` to overwrite)?
 - [ ] Types regenerated + zero TS errors?
 - [ ] Block is small & focused?
 - [ ] Block registered in `Pages/index.ts` + `RenderBlocks.tsx`?

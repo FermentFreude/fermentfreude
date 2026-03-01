@@ -39,8 +39,9 @@ async function seedVoucher() {
   console.log('🧪 Seeding Voucher page…')
 
   const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
+  const forceRecreate = process.argv.includes('--force')
 
-  // ── 1. Delete any existing voucher page ──────────────────────
+  // ── 0. Non-destructive check — skip if page already has content ──
   const existing = await payload.find({
     collection: 'pages',
     where: { slug: { equals: 'voucher' } },
@@ -48,6 +49,23 @@ async function seedVoucher() {
     depth: 0,
   })
 
+  if (existing.docs.length > 0 && !forceRecreate) {
+    const doc = existing.docs[0]
+    const layout = Array.isArray(doc.layout) ? doc.layout : []
+    if (layout.length > 0) {
+      console.log(
+        `⏭️  Voucher page already has content (${layout.length} blocks). Skipping seed to protect admin changes.`,
+      )
+      console.log('   To overwrite, run: pnpm seed voucher --force')
+      process.exit(0)
+    }
+  }
+
+  if (forceRecreate) {
+    console.log('🔄 --force flag detected. Will overwrite existing voucher page content.')
+  }
+
+  // ── 1. Delete any existing voucher page ──────────────────────
   for (const doc of existing.docs) {
     await payload.delete({
       collection: 'pages',

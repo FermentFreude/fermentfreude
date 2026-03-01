@@ -407,7 +407,8 @@ These rules apply to **every** new feature, section, field, or content block —
 
 - One script per page: `src/scripts/seed-<page>.ts`
 - Registered in `src/scripts/seed-all.ts` (scripts map + allOrder array)
-- Run all: `pnpm seed` | Run one: `pnpm seed about`
+- Run all: `pnpm seed` | Run one: `pnpm seed about` | Force overwrite: `pnpm seed about --force`
+- **Non-destructive by default:** if a page already has content (layout blocks), the seed skips it to protect admin changes. Use `--force` to overwrite.
 - Each seed populates hero + layout blocks for both locales
 
 ### Seed Script Template
@@ -418,19 +419,37 @@ import config from '@payload-config'
 
 async function seed() {
   const payload = await getPayload({ config })
+  const forceRecreate = process.argv.includes('--force')
   const ctx = { skipRevalidate: true, skipAutoTranslate: true }
 
+  // 0. Non-destructive check — skip if page already has content
+  const existing = await payload.find({
+    collection: 'pages',
+    where: { slug: { equals: 'my-page' } },
+    limit: 1,
+    depth: 0,
+  })
+  if (existing.docs.length > 0 && !forceRecreate) {
+    const layout = Array.isArray(existing.docs[0].layout) ? existing.docs[0].layout : []
+    if (layout.length > 0) {
+      payload.logger.info('⏭️  Page already has content. Skipping. Use --force to overwrite.')
+      process.exit(0)
+    }
+  }
+
   // 1. Save DE first
-  await payload.updateGlobal({
-    slug: 'my-global',
+  await payload.update({
+    collection: 'pages',
+    id: pageId,
     locale: 'de',
     data: { /* German values */ },
     context: ctx,
   })
 
   // 2. Save EN (reuse IDs from DE save)
-  await payload.updateGlobal({
-    slug: 'my-global',
+  await payload.update({
+    collection: 'pages',
+    id: pageId,
     locale: 'en',
     data: { /* English values */ },
     context: ctx,
@@ -459,8 +478,9 @@ pnpm generate:types       # Regenerate Payload types
 pnpm generate:importmap   # Regenerate import map
 pnpm test:int             # Integration tests
 pnpm test:e2e             # E2E tests
-pnpm seed                 # Seed ALL pages
-pnpm seed home            # Seed one page
+pnpm seed                 # Seed ALL pages (skips pages with existing content)
+pnpm seed home            # Seed one page (skips if content exists)
+pnpm seed home --force    # Force overwrite existing content
 ```
 
 ---
