@@ -24,7 +24,7 @@ import type { Page } from '@/payload-types'
 import { buildFeatureCards, mergeFeatureCardsEN } from '../blocks/FeatureCards/seed'
 import { buildHeroBanner, mergeHeroBannerEN } from '../blocks/HeroBanner/seed'
 import { buildProductSlider, mergeProductSliderEN } from '../blocks/ProductSlider/seed'
-import { buildSponsorsBar, mergeSponsorsBarEN } from '../blocks/SponsorsBar/seed'
+
 import { buildTeamPreview, mergeTeamPreviewEN } from '../blocks/TeamPreview/seed'
 import { buildTestimonials, mergeTestimonialsEN } from '../blocks/Testimonials/seed'
 import { buildVoucherCta, mergeVoucherCtaEN } from '../blocks/VoucherCta/seed'
@@ -196,32 +196,6 @@ async function seedHome() {
     file: await optimizedFile(path.join(imagesDir, 'marcel-rauminger.jpg'), IMAGE_PRESETS.card),
   })
 
-  // ── Sponsor logos ─────────────────────────────────────────────────────────
-  const sponsorLogo1 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'Sponsor logo 1' },
-    file: await optimizedFile(path.join(imagesDir, 'sponsor-logo.png'), IMAGE_PRESETS.logo),
-  })
-  const sponsorLogo2 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'Sponsor logo 2' },
-    file: await optimizedFile(path.join(imagesDir, 'sponsor-logo-2.png'), IMAGE_PRESETS.logo),
-  })
-  const sponsorLogo3 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'Sponsor logo 3' },
-    file: await optimizedFile(path.join(imagesDir, 'sponsor-logo-3.png'), IMAGE_PRESETS.logo),
-  })
-  const sponsorLogo4 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'Sponsor logo 4' },
-    file: await optimizedFile(path.join(imagesDir, 'sponsor-logo-4.png'), IMAGE_PRESETS.logo),
-  })
-
   // ── FeatureCards icons (SVGs) ─────────────────────────────────────────────
   const iconProbiotics = await payload.create({
     collection: 'media',
@@ -287,12 +261,42 @@ async function seedHome() {
 
   const { de: testimonialsDE, en: testimonialsEN } = buildTestimonials()
 
-  const { de: sponsorsBarDE, en: sponsorsBarEN } = buildSponsorsBar({
-    sponsorLogo1Id: String(sponsorLogo1.id),
-    sponsorLogo2Id: String(sponsorLogo2.id),
-    sponsorLogo3Id: String(sponsorLogo3.id),
-    sponsorLogo4Id: String(sponsorLogo4.id),
+  // ── SponsorsBar: grab the exact block from the About page ───────────────
+  payload.logger.info('Reading SponsorsBar from About page...')
+  const aboutPage = await payload.find({
+    collection: 'pages',
+    where: { slug: { equals: 'about' } },
+    locale: 'de',
+    limit: 1,
+    depth: 0,
   })
+  let sponsorsBarDE: Record<string, unknown> | null = null
+  let sponsorsBarEN: Record<string, unknown> | null = null
+  if (aboutPage.docs.length > 0) {
+    const aboutDoc = aboutPage.docs[0]
+    const aboutLayout = Array.isArray(aboutDoc.layout) ? aboutDoc.layout : []
+    sponsorsBarDE = (aboutLayout.find(
+      (b: any) => b && b.blockType === 'sponsorsBar',
+    ) as Record<string, unknown>) ?? null
+
+    // Also read EN locale
+    const aboutEN = await payload.findByID({
+      collection: 'pages',
+      id: aboutDoc.id,
+      locale: 'en',
+      depth: 0,
+    })
+    const aboutLayoutEN = Array.isArray(aboutEN.layout) ? aboutEN.layout : []
+    sponsorsBarEN = (aboutLayoutEN.find(
+      (b: any) => b && b.blockType === 'sponsorsBar',
+    ) as Record<string, unknown>) ?? null
+  }
+
+  if (!sponsorsBarDE || !sponsorsBarEN) {
+    payload.logger.warn('⚠️  About page SponsorsBar not found. Skipping sponsors block on Home.')
+  } else {
+    payload.logger.info('✅ SponsorsBar copied from About page.')
+  }
 
   // ── ProductSlider: use existing placeholder products ─────────────────────
   payload.logger.info('Fetching placeholder products for ProductSlider...')
@@ -351,7 +355,7 @@ async function seedHome() {
     workshopSliderDE,
     teamPreviewDE,
     testimonialsDE,
-    sponsorsBarDE,
+    ...(sponsorsBarDE ? [{ ...sponsorsBarDE, id: undefined, sponsors: (sponsorsBarDE.sponsors as any[])?.map((s: any) => ({ ...s, id: undefined })) }] : []),
   ]
 
   await payload.update({
@@ -431,7 +435,10 @@ async function seedHome() {
     mergeWorkshopSliderEN(workshopSliderEN, wsBlock),
     mergeTeamPreviewEN(teamPreviewEN, tpBlock ?? {}),
     mergeTestimonialsEN(testimonialsEN, tmBlock ?? {}),
-    mergeSponsorsBarEN(sponsorsBarEN, sbBlock ?? {}),
+    ...(sponsorsBarEN && sbBlock
+      ? [{ ...sponsorsBarEN, id: sbBlock.id, sponsors: (sponsorsBarEN.sponsors as any[])?.map((s: any, i: number) => ({ ...s, id: sbBlock.sponsors?.[i]?.id })) }]
+      : []),
+  
   ]
 
   await payload.update({

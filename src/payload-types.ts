@@ -3848,9 +3848,8 @@ export interface Footer {
   newsletterDescription?: string | null;
   socialMedia?: {
     facebook?: string | null;
-    twitter?: string | null;
-    pinterest?: string | null;
-    youtube?: string | null;
+    instagram?: string | null;
+    linkedin?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -4124,9 +4123,8 @@ export interface FooterSelect<T extends boolean = true> {
     | T
     | {
         facebook?: T;
-        twitter?: T;
-        pinterest?: T;
-        youtube?: T;
+        instagram?: T;
+        linkedin?: T;
       };
   updatedAt?: T;
   createdAt?: T;

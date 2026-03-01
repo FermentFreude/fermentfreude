@@ -88,19 +88,14 @@ export const Footer: GlobalConfig = {
           label: 'Facebook URL',
         },
         {
-          name: 'twitter',
+          name: 'instagram',
           type: 'text',
-          label: 'Twitter / X URL',
+          label: 'Instagram URL',
         },
         {
-          name: 'pinterest',
+          name: 'linkedin',
           type: 'text',
-          label: 'Pinterest URL',
-        },
-        {
-          name: 'youtube',
-          type: 'text',
-          label: 'YouTube URL',
+          label: 'LinkedIn URL',
         },
       ],
     },

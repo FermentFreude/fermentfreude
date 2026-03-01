@@ -19,6 +19,7 @@ export function middleware(request: NextRequest) {
     pathname.endsWith('.svg') ||
     pathname.endsWith('.png') ||
     pathname.endsWith('.jpg') ||
+    pathname.endsWith('.webp') ||
     pathname.endsWith('.ico') ||
     pathname === '/robots.txt'
   ) {
