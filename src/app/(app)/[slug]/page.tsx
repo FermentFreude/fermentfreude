@@ -25,9 +25,10 @@ export async function generateStaticParams() {
     },
   })
 
+  const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
   const params = pages.docs
     ?.filter((doc) => {
-      return doc.slug !== 'home'
+      return doc.slug !== 'home' && !WORKSHOP_SLUGS.includes(doc.slug ?? '')
     })
     .map(({ slug }) => {
       return { slug }
@@ -42,9 +43,15 @@ type Args = {
   }>
 }
 
+const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
+
 export default async function Page({ params }: Args) {
   const { slug = 'home' } = await params
   const locale = await getLocale()
+
+  if (WORKSHOP_SLUGS.includes(slug)) {
+    return notFound()
+  }
 
   const page = await queryPageBySlug({
     slug,

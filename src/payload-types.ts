@@ -337,6 +337,7 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1064,6 +1065,61 @@ export interface Page {
       answer: string;
       id?: string | null;
     }[];
+  };
+  /**
+   * Gift voucher and online courses cards. Only for tempeh, lakto-gemuese, kombucha.
+   */
+  workshopGiftOnline?: {
+    giftTitle: string;
+    giftDescription: string;
+    giftBuyNowLabel: string;
+    giftBuyVoucherLabel: string;
+    giftBuyNowHref: string;
+    giftBuyVoucherHref: string;
+    onlineTitle: string;
+    onlineDescription: string;
+    onlineBullets: {
+      text: string;
+      id?: string | null;
+    }[];
+    onlineButtonLabel: string;
+    onlineButtonHref: string;
+  };
+  workshopLearnOnline?: {
+    learnOnlineHeading: string;
+    learnOnlineDescription: string;
+    learnOnlineButtonLabel: string;
+    learnOnlineButtonHref: string;
+  };
+  workshopFaq?: {
+    faqHeading: string;
+    faqSubtitle: string;
+    faqItems: {
+      question: string;
+      answer: string;
+      id?: string | null;
+    }[];
+  };
+  workshopWhyOnline?: {
+    whyOnlineHeading: string;
+    whyOnlineFeatures: {
+      icon: 'lightning' | 'clock' | 'home' | 'book';
+      title: string;
+      description: string;
+      id?: string | null;
+    }[];
+  };
+  workshopTeamBuilding?: {
+    teamEyebrow: string;
+    teamHeading: string;
+    teamDescription: string;
+    teamBullets: {
+      text: string;
+      id?: string | null;
+    }[];
+    teamCtaLabel: string;
+    teamCtaHref: string;
+    teamImage?: (string | null) | Media;
   };
   meta?: {
     title?: string | null;
@@ -1948,9 +2004,59 @@ export interface WorkshopSliderBlock {
      */
     image?: (string | null) | Media;
     /**
-     * Optional second photo shown alongside the first. Falls back to the primary image when not set.
+     * Featured image for "Our Workshop" section (e.g. plated dish). Also used as gallery thumbnail.
      */
     image2?: (string | null) | Media;
+    image3?: (string | null) | Media;
+    image4?: (string | null) | Media;
+    image5?: (string | null) | Media;
+    image6?: (string | null) | Media;
+    image7?: (string | null) | Media;
+    image8?: (string | null) | Media;
+    image9?: (string | null) | Media;
+    /**
+     * e.g. "Ab 199,00 € / Person"
+     */
+    price?: string | null;
+    /**
+     * e.g. "3 Stunden"
+     */
+    duration?: string | null;
+    /**
+     * e.g. "Online" or "Vor Ort"
+     */
+    format?: string | null;
+    /**
+     * e.g. "Berlin-Neukölln"
+     */
+    location?: string | null;
+    /**
+     * e.g. "6-12 Personen"
+     */
+    groupSize?: string | null;
+    /**
+     * e.g. "Termine folgen" or specific dates
+     */
+    dates?: string | null;
+    /**
+     * Expandable cards: "Was du lernst", "Was du bekommst", "Für wen ist der Kurs", etc.
+     */
+    topics?:
+      | {
+          title: string;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Bullet list shown in workshop module
+     */
+    learnList?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
     /**
      * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
      */
@@ -2608,6 +2714,76 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  workshopGiftOnline?:
+    | T
+    | {
+        giftTitle?: T;
+        giftDescription?: T;
+        giftBuyNowLabel?: T;
+        giftBuyVoucherLabel?: T;
+        giftBuyNowHref?: T;
+        giftBuyVoucherHref?: T;
+        onlineTitle?: T;
+        onlineDescription?: T;
+        onlineBullets?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        onlineButtonLabel?: T;
+        onlineButtonHref?: T;
+      };
+  workshopLearnOnline?:
+    | T
+    | {
+        learnOnlineHeading?: T;
+        learnOnlineDescription?: T;
+        learnOnlineButtonLabel?: T;
+        learnOnlineButtonHref?: T;
+      };
+  workshopFaq?:
+    | T
+    | {
+        faqHeading?: T;
+        faqSubtitle?: T;
+        faqItems?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+      };
+  workshopWhyOnline?:
+    | T
+    | {
+        whyOnlineHeading?: T;
+        whyOnlineFeatures?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  workshopTeamBuilding?:
+    | T
+    | {
+        teamEyebrow?: T;
+        teamHeading?: T;
+        teamDescription?: T;
+        teamBullets?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        teamCtaLabel?: T;
+        teamCtaHref?: T;
+        teamImage?: T;
+      };
   meta?:
     | T
     | {
@@ -2991,6 +3167,32 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
             };
         image?: T;
         image2?: T;
+        image3?: T;
+        image4?: T;
+        image5?: T;
+        image6?: T;
+        image7?: T;
+        image8?: T;
+        image9?: T;
+        price?: T;
+        duration?: T;
+        format?: T;
+        location?: T;
+        groupSize?: T;
+        dates?: T;
+        topics?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        learnList?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
         ctaLink?: T;
         detailsButtonLabel?: T;
         id?: T;
@@ -3018,6 +3220,7 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

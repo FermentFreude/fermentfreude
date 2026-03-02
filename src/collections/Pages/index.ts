@@ -1943,6 +1943,151 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
+          name: 'workshopGiftOnline',
+          label: 'Gift & Online',
+          admin: {
+            description: 'Gift voucher and online courses cards. Only for tempeh, lakto-gemuese, kombucha.',
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+            },
+          },
+          fields: [
+            { name: 'giftTitle', type: 'text', required: true, localized: true, label: 'Gift Card Title' },
+            { name: 'giftDescription', type: 'textarea', required: true, localized: true, label: 'Gift Card Description' },
+            { name: 'giftBuyNowLabel', type: 'text', required: true, localized: true, label: 'Gift Buy Now Button' },
+            { name: 'giftBuyVoucherLabel', type: 'text', required: true, localized: true, label: 'Gift Buy Voucher Button' },
+            { name: 'giftBuyNowHref', type: 'text', required: true, label: 'Gift Buy Now URL' },
+            { name: 'giftBuyVoucherHref', type: 'text', required: true, label: 'Gift Buy Voucher URL' },
+            { name: 'onlineTitle', type: 'text', required: true, localized: true, label: 'Online Card Title' },
+            { name: 'onlineDescription', type: 'textarea', required: true, localized: true, label: 'Online Card Description' },
+            {
+              name: 'onlineBullets',
+              type: 'array',
+              label: 'Online Card Bullets',
+              required: true,
+              minRows: 1,
+              fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Bullet Text' }],
+            },
+            { name: 'onlineButtonLabel', type: 'text', required: true, localized: true, label: 'Online Button Label' },
+            { name: 'onlineButtonHref', type: 'text', required: true, label: 'Online Button URL' },
+          ],
+        },
+        {
+          name: 'workshopLearnOnline',
+          label: 'Learn Online',
+          admin: {
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+            },
+          },
+          fields: [
+            { name: 'learnOnlineHeading', type: 'textarea', required: true, localized: true, label: 'Heading' },
+            { name: 'learnOnlineDescription', type: 'textarea', required: true, localized: true, label: 'Description' },
+            { name: 'learnOnlineButtonLabel', type: 'text', required: true, localized: true, label: 'Button Label' },
+            { name: 'learnOnlineButtonHref', type: 'text', required: true, label: 'Button URL' },
+          ],
+        },
+        {
+          name: 'workshopFaq',
+          label: 'FAQ Slider',
+          admin: {
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+            },
+          },
+          fields: [
+            { name: 'faqHeading', type: 'text', required: true, localized: true, label: 'FAQ Heading' },
+            { name: 'faqSubtitle', type: 'text', required: true, localized: true, label: 'FAQ Subtitle' },
+            {
+              name: 'faqItems',
+              type: 'array',
+              label: 'FAQ Items',
+              required: true,
+              minRows: 1,
+              fields: [
+                { name: 'question', type: 'text', required: true, localized: true, label: 'Question' },
+                { name: 'answer', type: 'textarea', required: true, localized: true, label: 'Answer' },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'workshopWhyOnline',
+          label: 'Why Online',
+          admin: {
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+            },
+          },
+          fields: [
+            { name: 'whyOnlineHeading', type: 'text', required: true, localized: true, label: 'Heading' },
+            {
+              name: 'whyOnlineFeatures',
+              type: 'array',
+              label: 'Features',
+              required: true,
+              minRows: 4,
+              maxRows: 4,
+              fields: [
+                {
+                  name: 'icon',
+                  type: 'select',
+                  required: true,
+                  label: 'Icon',
+                  options: [
+                    { label: 'Lightning', value: 'lightning' },
+                    { label: 'Clock', value: 'clock' },
+                    { label: 'Home', value: 'home' },
+                    { label: 'Book', value: 'book' },
+                  ],
+                },
+                { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                { name: 'description', type: 'text', required: true, localized: true, label: 'Description' },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'workshopTeamBuilding',
+          label: 'Team Building',
+          admin: {
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+            },
+          },
+          fields: [
+            { name: 'teamEyebrow', type: 'text', required: true, localized: true, label: 'Eyebrow' },
+            { name: 'teamHeading', type: 'text', required: true, localized: true, label: 'Heading' },
+            { name: 'teamDescription', type: 'textarea', required: true, localized: true, label: 'Description' },
+            {
+              name: 'teamBullets',
+              type: 'array',
+              label: 'Bullets',
+              required: true,
+              minRows: 1,
+              fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Bullet Text' }],
+            },
+            { name: 'teamCtaLabel', type: 'text', required: true, localized: true, label: 'CTA Button Label' },
+            { name: 'teamCtaHref', type: 'text', required: true, label: 'CTA Button URL' },
+            {
+              name: 'teamImage',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Team Building Image',
+            },
+          ],
+        },
+        {
           name: 'meta',
           label: 'SEO',
           fields: [
