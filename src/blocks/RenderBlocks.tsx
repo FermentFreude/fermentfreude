@@ -67,7 +67,7 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className="my-(--space-content-xl)" key={index}>
+                <div className={index === 0 ? 'mb-(--space-content-xl)' : 'my-(--space-content-xl)'} key={index}>
                   <Block {...block} id={blockName ? toKebabCase(blockName) : undefined} />
                 </div>
               )

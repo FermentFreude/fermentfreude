@@ -91,8 +91,17 @@ async function seedHome() {
   const galleryDir = path.resolve(process.cwd(), 'seed-assets/images/gallery')
   const iconsDir = path.resolve(process.cwd(), 'seed-assets/images/icons')
 
-  // Clean up stale media
-  for (const contains of ['workshop', 'hero', 'slide-', 'Gallery', 'icon-feature']) {
+  // Clean up stale media (prevents duplicates on --force re-runs)
+  for (const contains of [
+    'workshop',
+    'hero',
+    'slide-',
+    'Gallery',
+    'icon-feature',
+    'Banner',
+    'David Heider',
+    'Marcel Rauminger',
+  ]) {
     await payload
       .delete({
         collection: 'media',
@@ -325,9 +334,10 @@ async function seedHome() {
     const aboutDoc = aboutPage.docs[0]
     const aboutLayout = Array.isArray(aboutDoc.layout) ? aboutDoc.layout : []
     sponsorsBarDE =
-      (aboutLayout.find(
-        (b) => b && b.blockType === 'sponsorsBar',
-      ) as unknown as Record<string, unknown>) ?? null
+      (aboutLayout.find((b) => b && b.blockType === 'sponsorsBar') as unknown as Record<
+        string,
+        unknown
+      >) ?? null
 
     // Also read EN locale
     const aboutEN = await payload.findByID({
@@ -338,9 +348,10 @@ async function seedHome() {
     })
     const aboutLayoutEN = Array.isArray(aboutEN.layout) ? aboutEN.layout : []
     sponsorsBarEN =
-      (aboutLayoutEN.find(
-        (b) => b && b.blockType === 'sponsorsBar',
-      ) as unknown as Record<string, unknown>) ?? null
+      (aboutLayoutEN.find((b) => b && b.blockType === 'sponsorsBar') as unknown as Record<
+        string,
+        unknown
+      >) ?? null
   }
 
   if (!sponsorsBarDE || !sponsorsBarEN) {

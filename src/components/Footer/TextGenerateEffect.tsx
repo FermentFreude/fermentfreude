@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@/utilities/cn'
 import { motion, stagger, useAnimate } from 'motion/react'
 import * as React from 'react'
-import { cn } from '@/utilities/cn'
 
 type TextGenerateEffectProps = Omit<React.ComponentProps<'div'>, 'children'> & {
   words: string
@@ -21,7 +21,10 @@ function TextGenerateEffect({
   ...props
 }: TextGenerateEffectProps) {
   const localRef = React.useRef<HTMLDivElement>(null)
-  React.useImperativeHandle(ref as React.Ref<HTMLDivElement>, () => localRef.current as HTMLDivElement)
+  React.useImperativeHandle(
+    ref as React.Ref<HTMLDivElement>,
+    () => localRef.current as HTMLDivElement,
+  )
 
   const [scope, animate] = useAnimate()
   const wordsArray = React.useMemo(() => words.split(' '), [words])

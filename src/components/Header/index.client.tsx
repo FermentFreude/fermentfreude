@@ -40,8 +40,6 @@ export function HeaderClient({ header }: Props) {
   const [isAtTop, setIsAtTop] = useState(true)
   const lastScrollY = useRef(0)
 
-  // Track which nav link is hovered for blur effect
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const navLinksRef = useRef<HTMLUListElement>(null)
 
   // Refs for Menu/Close label animation
@@ -79,38 +77,7 @@ export function HeaderClient({ header }: Props) {
     }
   }, [isMenuActive])
 
-  // Apply blur/focus effect to sibling nav items
-  useEffect(() => {
-    if (!navLinksRef.current) return
-    const items = navLinksRef.current.querySelectorAll<HTMLElement>('.nav-link-item')
 
-    if (hoveredIndex === null) {
-      gsap.to(items, {
-        filter: 'blur(0px)',
-        opacity: 1,
-        duration: 0.3,
-        ease: 'power2.out',
-      })
-    } else {
-      items.forEach((item, i) => {
-        if (i === hoveredIndex) {
-          gsap.to(item, {
-            filter: 'blur(0px)',
-            opacity: 1,
-            duration: 0.3,
-            ease: 'power2.out',
-          })
-        } else {
-          gsap.to(item, {
-            filter: 'blur(3px)',
-            opacity: 0.45,
-            duration: 0.3,
-            ease: 'power2.out',
-          })
-        }
-      })
-    }
-  }, [hoveredIndex])
 
   // Transparent header on home page when at top
   const isTransparent = isHomePage && isAtTop && !isMenuActive
@@ -185,11 +152,10 @@ export function HeaderClient({ header }: Props) {
               </Link>
             </MagneticElement>
 
-            {/* Desktop Nav Links with blur effect */}
+            {/* Desktop Nav Links */}
             <ul
               ref={navLinksRef}
               className="hidden lg:flex items-center gap-6 xl:gap-8"
-              onMouseLeave={() => setHoveredIndex(null)}
             >
               {navItems.map((item, index) => {
                 const { dropdownItems, defaultKey, label, url } = item
@@ -203,7 +169,6 @@ export function HeaderClient({ header }: Props) {
                     <li
                       key={item.id}
                       className="nav-link-item"
-                      onMouseEnter={() => setHoveredIndex(index)}
                     >
                       <NavDropdown label={label} href={url || undefined} items={dropdownItems} />
                     </li>
@@ -222,7 +187,6 @@ export function HeaderClient({ header }: Props) {
                   <li
                     key={item.id}
                     className="nav-link-item"
-                    onMouseEnter={() => setHoveredIndex(index)}
                   >
                     <MagneticElement strength={0.3}>
                       {item.link ? (
