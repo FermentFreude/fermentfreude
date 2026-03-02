@@ -7,7 +7,11 @@ import React, { useEffect, useRef, useState } from 'react'
 
 /* ── Static fallback logos — always available, no seed needed ── */
 const STATIC_SPONSORS = [
-  { name: 'aws Sustainable Food Systems Initiative', src: '/assets/images/sponsors/sustainable-food.png', scale: 1 },
+  {
+    name: 'aws Sustainable Food Systems Initiative',
+    src: '/assets/images/sponsors/sustainable-food.png',
+    scale: 1,
+  },
   { name: 'Austria Wirtschafts Service', src: '/assets/images/sponsors/aws.png', scale: 0.85 },
   { name: 'Science Park Graz', src: '/assets/images/sponsors/science-park.png', scale: 1.45 },
   { name: 'Steiermärkische Sparkasse', src: '/assets/images/sponsors/sparkasse.png', scale: 1 },
@@ -124,7 +128,9 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
                 >
                   <div
                     className="relative h-20 md:h-28 lg:h-32 w-full"
-                    style={sponsor.scale !== 1 ? { transform: `scale(${sponsor.scale})` } : undefined}
+                    style={
+                      sponsor.scale !== 1 ? { transform: `scale(${sponsor.scale})` } : undefined
+                    }
                   >
                     <Image
                       src={sponsor.src}

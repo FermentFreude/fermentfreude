@@ -11,6 +11,7 @@ import type { Header } from 'src/payload-types'
 import { AnnouncementBar } from './AnnouncementBar'
 import { MobileMenu } from './MobileMenu'
 
+import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
 import { usePathname } from 'next/navigation'
 import { CartIconButton } from './CartIconButton'
@@ -27,6 +28,9 @@ export function HeaderClient({ header }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
+  const { headerTheme } = useHeaderTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // Menu active state (shared between header bar + overlay)
   const [isMenuActive, setIsMenuActive] = useState(false)
@@ -150,6 +154,7 @@ export function HeaderClient({ header }: Props) {
           hidden && !isMenuActive && '-translate-y-full',
         )}
         data-transparent={isTransparent ? '' : undefined}
+        data-header-theme={mounted && isTransparent && headerTheme === 'dark' ? 'dark' : undefined}
       >
         <AnnouncementBar
           enabled={header.announcementBar?.enabled}
@@ -236,16 +241,14 @@ export function HeaderClient({ header }: Props) {
             {/* Right side */}
             <div className="flex items-center gap-1 cursor-normal-zone">
               {/* User icon with dropdown (desktop) */}
-              <MagneticElement strength={0.3} className="hidden lg:block">
+              <div className="hidden lg:block">
                 <UserMenu />
-              </MagneticElement>
+              </div>
 
               {/* Cart icon */}
-              <MagneticElement strength={0.3}>
-                <Suspense fallback={<CartIconButton />}>
-                  <Cart />
-                </Suspense>
-              </MagneticElement>
+              <Suspense fallback={<CartIconButton />}>
+                <Cart />
+              </Suspense>
 
               {/* Menu / Close toggle — portfolio style */}
               <button

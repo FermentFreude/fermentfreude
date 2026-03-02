@@ -17,6 +17,10 @@ export interface ResolvedSlide {
   bgColor: string
   leftImage: MediaType | null
   rightImage: MediaType | null
+  /** Optional scale factor for left image (0–1). Default 1. Use to visually match jar sizes. */
+  leftImageScale?: number
+  /** Optional scale factor for right image (0–1). Default 1. */
+  rightImageScale?: number
 }
 
 /** Type guard: check if a value is a resolved Media object (not just a string ID) */
@@ -52,6 +56,8 @@ export const DEFAULT_SLIDES: ResolvedSlide[] = [
     bgColor: '#D2DFD7',
     leftImage: null,
     rightImage: null,
+    leftImageScale: 0.85,
+    rightImageScale: 0.85,
   },
   {
     slideId: 'kombucha',

@@ -80,19 +80,20 @@ export function AboutDropdown() {
           isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-1',
         )}
       >
-        <div className="w-48 rounded-xl border border-ff-white-95 bg-white shadow-lg overflow-hidden">
-          <div className="py-1.5">
+        <div className="dropdown-glass w-60 rounded-2xl overflow-hidden">
+          <div className="py-2">
             {aboutItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'block px-4 py-2.5 text-sm font-medium text-ff-gray-15 hover:bg-ff-ivory transition-colors',
-                  { 'bg-ff-ivory/50 text-ff-charcoal': pathname === item.href },
+                  'group block px-5 py-3 transition-colors duration-200',
+                  'hover:bg-ff-near-black dark:hover:bg-white',
+                  { 'bg-white/50 dark:bg-white/8': pathname === item.href },
                 )}
               >
-                <span className="font-bold text-sm">{item.label}</span>
-                <span className="block text-xs text-ff-gray-text mt-0.5">{item.description}</span>
+                <span className="block font-display font-bold text-sm text-ff-gray-15 dark:text-neutral-200 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">{item.label}</span>
+                <span className="block text-xs text-ff-gray-text/80 dark:text-neutral-500 group-hover:text-white/70 dark:group-hover:text-ff-near-black/60 mt-0.5 transition-colors">{item.description}</span>
               </Link>
             ))}
           </div>

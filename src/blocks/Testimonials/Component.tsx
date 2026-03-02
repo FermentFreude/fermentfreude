@@ -90,12 +90,7 @@ function QuoteMark() {
 
 type Props = TestimonialsBlockType & { id?: string }
 
-export const TestimonialsBlock: React.FC<Props> = ({
-  eyebrow,
-  heading,
-  testimonials,
-  id,
-}) => {
+export const TestimonialsBlock: React.FC<Props> = ({ eyebrow, heading, testimonials, id }) => {
   const resolvedEyebrow = eyebrow ?? DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedTestimonials =
@@ -136,16 +131,21 @@ export const TestimonialsBlock: React.FC<Props> = ({
     }
   }, [startTimer])
 
-  const go = useCallback((dir: -1 | 1) => {
-    setDirection(dir)
-    setActiveIndex((p) => (p + dir + total) % total)
-    if (timerRef.current) clearInterval(timerRef.current)
-    startTimer()
-  }, [total, startTimer])
+  const go = useCallback(
+    (dir: -1 | 1) => {
+      setDirection(dir)
+      setActiveIndex((p) => (p + dir + total) % total)
+      if (timerRef.current) clearInterval(timerRef.current)
+      startTimer()
+    },
+    [total, startTimer],
+  )
 
   // Keep a stable ref to `go` for the pointer event listeners
   const goRef = useRef(go)
-  useEffect(() => { goRef.current = go }, [go])
+  useEffect(() => {
+    goRef.current = go
+  }, [go])
 
   // Swipe / drag support (touch + mouse)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -217,9 +217,7 @@ export const TestimonialsBlock: React.FC<Props> = ({
         {/* ── Header ── */}
         <div className="flex flex-col gap-2 mb-(--space-content-xl)">
           {resolvedEyebrow && (
-            <span className="text-eyebrow font-bold text-ff-gold-accent">
-              {resolvedEyebrow}
-            </span>
+            <span className="text-eyebrow font-bold text-ff-gold-accent">{resolvedEyebrow}</span>
           )}
           <h2
             className="font-display font-black whitespace-nowrap"
@@ -232,7 +230,9 @@ export const TestimonialsBlock: React.FC<Props> = ({
           >
             {resolvedHeading.split(/(\b[A-ZÄÖÜ]{2,}\b)/g).map((part, i) =>
               /^[A-ZÄÖÜ]{2,}$/.test(part) ? (
-                <span key={i} style={{ fontSize: '1.35em', letterSpacing: '-0.03em' }}>{part}</span>
+                <span key={i} style={{ fontSize: '1.35em', letterSpacing: '-0.03em' }}>
+                  {part}
+                </span>
               ) : (
                 <span key={i}>{part}</span>
               ),
@@ -335,7 +335,9 @@ export const TestimonialsBlock: React.FC<Props> = ({
                 <span className="font-display font-bold text-sm" style={{ color: '#1A1A1A' }}>
                   {String(activeIndex + 1).padStart(2, '0')}
                 </span>
-                <span className="text-xs" style={{ color: '#1A1A1A', opacity: 0.3 }}>/</span>
+                <span className="text-xs" style={{ color: '#1A1A1A', opacity: 0.3 }}>
+                  /
+                </span>
                 <span className="text-xs" style={{ color: '#1A1A1A', opacity: 0.3 }}>
                   {String(total).padStart(2, '0')}
                 </span>

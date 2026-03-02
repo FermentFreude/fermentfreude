@@ -122,7 +122,7 @@ async function seedHome() {
     file: await optimizedFile(path.join(workshopsDir, 'tempeh.png'), IMAGE_PRESETS.card),
   })
 
-  // ── Per-slide product images ──────────────────────────────────────────────
+  // ── Per-slide product images (Hero Slider) ─────────────────────────────────
   const laktoSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
@@ -170,6 +170,26 @@ async function seedHome() {
     context: { skipAutoTranslate: true, skipRevalidate: true },
     data: { alt: 'slide-basics-right – Marcel Rauminger, FermentFreude founder' },
     file: await optimizedFile(path.join(heroDir, 'MarcelHero.png'), IMAGE_PRESETS.card),
+  })
+
+  // ── Workshop slider secondary images (SEPARATE uploads, not shared with hero) ──
+  const workshopLaktoImage2 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'workshop-lakto-secondary – Sauerkraut Jar product image' },
+    file: await optimizedFile(path.join(heroDir, 'lakto1.png'), IMAGE_PRESETS.card),
+  })
+  const workshopKombuchaImage2 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'workshop-kombucha-secondary – Kombucha Apple & Carrot product image' },
+    file: await optimizedFile(path.join(heroDir, 'kombucha1.png'), IMAGE_PRESETS.card),
+  })
+  const workshopTempehImage2 = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'workshop-tempeh-secondary – Tempeh Slices product image' },
+    file: await optimizedFile(path.join(heroDir, 'tempeh1.png'), IMAGE_PRESETS.card),
   })
 
   // ── VoucherCta gallery (8 images) ─────────────────────────────────────────
@@ -266,9 +286,9 @@ async function seedHome() {
     laktoImageId: String(laktoImage.id),
     kombuchaImageId: String(kombuchaImage.id),
     tempehImageId: String(tempehImage.id),
-    laktoImage2Id: String(laktoSlideLeft.id),
-    kombuchaImage2Id: String(kombuchaSlideLeft.id),
-    tempehImage2Id: String(tempehSlideLeft.id),
+    laktoImage2Id: String(workshopLaktoImage2.id),
+    kombuchaImage2Id: String(workshopKombuchaImage2.id),
+    tempehImage2Id: String(workshopTempehImage2.id),
   })
 
   const { de: voucherCtaDE, en: voucherCtaEN } = buildVoucherCta({ galleryMediaIds })
@@ -304,9 +324,11 @@ async function seedHome() {
   if (aboutPage.docs.length > 0) {
     const aboutDoc = aboutPage.docs[0]
     const aboutLayout = Array.isArray(aboutDoc.layout) ? aboutDoc.layout : []
-    sponsorsBarDE = (aboutLayout.find(
-      (b: any) => b && b.blockType === 'sponsorsBar',
-    ) as Record<string, unknown>) ?? null
+    sponsorsBarDE =
+      (aboutLayout.find((b: any) => b && b.blockType === 'sponsorsBar') as Record<
+        string,
+        unknown
+      >) ?? null
 
     // Also read EN locale
     const aboutEN = await payload.findByID({
@@ -316,9 +338,11 @@ async function seedHome() {
       depth: 0,
     })
     const aboutLayoutEN = Array.isArray(aboutEN.layout) ? aboutEN.layout : []
-    sponsorsBarEN = (aboutLayoutEN.find(
-      (b: any) => b && b.blockType === 'sponsorsBar',
-    ) as Record<string, unknown>) ?? null
+    sponsorsBarEN =
+      (aboutLayoutEN.find((b: any) => b && b.blockType === 'sponsorsBar') as Record<
+        string,
+        unknown
+      >) ?? null
   }
 
   if (!sponsorsBarDE || !sponsorsBarEN) {
@@ -384,7 +408,15 @@ async function seedHome() {
     workshopSliderDE,
     teamPreviewDE,
     testimonialsDE,
-    ...(sponsorsBarDE ? [{ ...sponsorsBarDE, id: undefined, sponsors: (sponsorsBarDE.sponsors as any[])?.map((s: any) => ({ ...s, id: undefined })) }] : []),
+    ...(sponsorsBarDE
+      ? [
+          {
+            ...sponsorsBarDE,
+            id: undefined,
+            sponsors: (sponsorsBarDE.sponsors as any[])?.map((s: any) => ({ ...s, id: undefined })),
+          },
+        ]
+      : []),
   ]
 
   await payload.update({
@@ -465,9 +497,17 @@ async function seedHome() {
     mergeTeamPreviewEN(teamPreviewEN, tpBlock ?? {}),
     mergeTestimonialsEN(testimonialsEN, tmBlock ?? {}),
     ...(sponsorsBarEN && sbBlock
-      ? [{ ...sponsorsBarEN, id: sbBlock.id, sponsors: (sponsorsBarEN.sponsors as any[])?.map((s: any, i: number) => ({ ...s, id: sbBlock.sponsors?.[i]?.id })) }]
+      ? [
+          {
+            ...sponsorsBarEN,
+            id: sbBlock.id,
+            sponsors: (sponsorsBarEN.sponsors as any[])?.map((s: any, i: number) => ({
+              ...s,
+              id: sbBlock.sponsors?.[i]?.id,
+            })),
+          },
+        ]
       : []),
-  
   ]
 
   await payload.update({

@@ -15,8 +15,9 @@ import { useSwipe } from './useSwipe'
 
 /* ═══════════════════════════════════════════════════════════════
  *  HERO SLIDER — Product Presentation Style
- *  Full-viewport slide with central dark panel, flanking product
- *  images, background color transitions, CSS animations, auto-play.
+ *  Full-viewport slides with a fixed full-height center panel,
+ *  flanking product images, smooth CSS animations, auto-play.
+ *  Inspired by Slider Revolution "Chocolate Bar" template.
  * ═══════════════════════════════════════════════════════════════ */
 
 type HeroSliderProps = Page['hero']
@@ -47,6 +48,8 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         bgColor: cs.bgColor ?? fallback?.bgColor ?? '#D2DFD7',
         leftImage: isResolvedMedia(cs.leftImage) ? cs.leftImage : (fallback?.leftImage ?? null),
         rightImage: isResolvedMedia(cs.rightImage) ? cs.rightImage : (fallback?.rightImage ?? null),
+        leftImageScale: fallback?.leftImageScale,
+        rightImageScale: fallback?.rightImageScale,
       }
     })
   }, [props])
@@ -68,7 +71,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
   const slide = slides[activeIndex]
 
   useEffect(() => {
-    setHeaderTheme('light')
+    setHeaderTheme('dark')
   }, [setHeaderTheme])
 
   /* ── Render ────────────────────────────────────────────────── */
@@ -80,7 +83,11 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* ── Mobile split background (below sm) ─────────────── */}
+      {/* ═══════════════════════════════════════════════════════
+       *  MOBILE LAYOUT (below sm)
+       * ═══════════════════════════════════════════════════════ */}
+
+      {/* ── Mobile split background ────────────────────────── */}
       <div className="sm:hidden absolute inset-0 pointer-events-none" aria-hidden="true">
         <div
           className="h-[42%] transition-colors duration-700"
@@ -92,20 +99,12 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         />
       </div>
 
-      {/* ── Desktop/tablet solid background (sm+) ──────────── */}
-      <div
-        className="hidden sm:block absolute inset-0 transition-colors duration-700 pointer-events-none"
-        style={{ backgroundColor: slide.bgColor }}
-        aria-hidden="true"
-      />
-
-      {/* ── Watermark ──────────────────────────────────────── */}
+      {/* ── Mobile watermark ───────────────────────────────── */}
       <div
         className={cn(
-          'pointer-events-none absolute left-0 right-0 flex items-center justify-center select-none',
+          'sm:hidden pointer-events-none absolute left-0 right-0 flex items-center justify-center select-none',
           'font-display font-black uppercase tracking-[-0.04em]',
-          'text-[18vw] sm:text-[10vw]',
-          'top-0 h-[42%] sm:top-0 sm:h-full',
+          'text-[18vw] top-0 h-[42%]',
           'transition-opacity duration-700',
           isExiting ? 'opacity-0' : 'opacity-[0.07]',
         )}
@@ -115,9 +114,6 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         FermentFreude
       </div>
 
-      {/* ═══════════════════════════════════════════════════════
-       *  MOBILE LAYOUT (below md)
-       * ═══════════════════════════════════════════════════════ */}
       <div className="sm:hidden relative z-10 flex flex-col h-full pt-24">
         {/* Mobile chevrons */}
         <button
@@ -198,7 +194,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         <div className="mt-auto h-[58%] flex flex-col items-center text-center justify-center px-6 pb-14 pt-4">
           <p
             className={cn(
-              'uppercase tracking-[0.2em] text-white text-[9px] font-display font-medium mb-1.5',
+              'uppercase tracking-[0.2em] text-white text-[9px] font-display font-bold mb-1.5',
               isEntering && 'hero-anim-eyebrow',
               isExiting && 'hero-exit-content',
             )}
@@ -216,7 +212,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </h1>
           <p
             className={cn(
-              'text-white text-[11px] sm:text-xs leading-relaxed max-w-[18rem] mb-3 font-sans',
+              'text-white text-[11px] sm:text-xs leading-relaxed max-w-[18rem] mb-3 font-sans font-medium',
               isEntering && 'hero-anim-desc',
               isExiting && 'hero-exit-content',
             )}
@@ -240,7 +236,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             >
               {slide.attributes.map((attr, i) => (
                 <React.Fragment key={attr}>
-                  <span className="text-white text-[9px] font-display font-medium tracking-wide">
+                  <span className="text-white text-[9px] font-display font-semibold tracking-wide">
                     {attr}
                   </span>
                   {i < slide.attributes.length - 1 && (
@@ -252,20 +248,20 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </div>
           <div
             className={cn(
-              'mt-4 flex items-center gap-2',
+              'mt-4 flex items-center justify-center gap-2',
               isEntering && 'hero-anim-cta',
               isExiting && 'hero-exit-content',
             )}
           >
             <Link
               href={slide.ctaHref}
-              className="inline-flex items-center justify-center font-display font-bold text-[10px] px-5 py-1.5 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 transition-all duration-300"
+              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-[10px] px-5 py-2 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 transition-all duration-300"
             >
               {slide.ctaLabel}
             </Link>
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center font-display font-bold text-[10px] px-5 py-1.5 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] transition-all duration-300"
+              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-[10px] px-5 py-2 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] transition-all duration-300"
             >
               Shop
             </Link>
@@ -274,146 +270,184 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
       </div>
 
       {/* ═══════════════════════════════════════════════════════
-       *  DESKTOP / TABLET LAYOUT (md+)
+       *  DESKTOP / TABLET LAYOUT (sm+)
+       *  Three-column: Left image | Full-height panel | Right image
+       *  Panel is FIXED on screen, content animates within it.
        * ═══════════════════════════════════════════════════════ */}
-      <div className="hidden sm:flex relative z-10 h-full items-center justify-center w-full pt-24 lg:pt-28">
+      <div className="hidden sm:flex relative z-10 h-full w-full">
         {/* Nav arrows at screen edges */}
         <NavArrow direction="left" onClick={goPrev} panelColor={slide.panelColor} />
         <NavArrow direction="right" onClick={goNext} panelColor={slide.panelColor} />
 
-        {/* Image — Card — Image */}
-        <div className="flex items-center justify-center w-full max-w-5xl mx-auto px-8 sm:px-14 lg:px-20 xl:px-24 gap-3 sm:gap-4 lg:gap-6">
-          {/* LEFT IMAGE — subtle tilt for visual interest */}
-          <div className="flex items-center justify-center -mr-4 lg:-mr-6">
-            <div
-              className={cn(
-                'relative group/img -rotate-3',
-                isEntering && 'hero-anim-image',
-                isExiting && 'hero-exit-image',
-              )}
-            >
-              <SlideImage
-                media={slide.leftImage}
-                className="object-contain drop-shadow-2xl h-[50vh] lg:h-[55vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3 group-hover/img:-rotate-1"
-                priority={activeIndex === 0}
-                size="(min-width: 768px) 22vw, 0px"
-              />
-            </div>
+        {/* ── LEFT IMAGE AREA ──────────────────────────────── */}
+        <div
+          className="flex-1 flex items-center justify-center relative transition-colors duration-700 overflow-hidden"
+          style={{ backgroundColor: slide.bgColor }}
+        >
+          {/* Background watermark */}
+          <div
+            className={cn(
+              'pointer-events-none absolute inset-0 flex items-center justify-center select-none',
+              'font-display font-black uppercase tracking-[-0.04em]',
+              'text-[12vw] lg:text-[10vw]',
+              'transition-opacity duration-700',
+              isExiting ? 'opacity-0' : 'opacity-[0.06]',
+            )}
+            style={{ color: slide.panelColor }}
+            aria-hidden="true"
+          >
+            Ferment
           </div>
 
-          {/* CENTER CARD */}
-          <div className="shrink-0 flex justify-center relative z-20">
-            <div
-              className="rounded-xl lg:rounded-2xl px-4 lg:px-6 py-5 lg:py-7 flex flex-col items-center text-center transition-colors duration-700"
-              style={{ backgroundColor: slide.panelColor }}
-            >
-              {/* Eyebrow */}
-              <p
-                className={cn(
-                  'uppercase tracking-[0.2em] text-white text-[8px] lg:text-[10px] font-display font-medium mb-1',
-                  isEntering && 'hero-anim-eyebrow',
-                  isExiting && 'hero-exit-content',
-                )}
-              >
-                {slide.eyebrow}
-              </p>
-
-              {/* Title */}
-              <h1
-                className={cn(
-                  'font-display font-black text-white text-base lg:text-[1.35rem] xl:text-[1.45rem] leading-[1.15] tracking-[-0.02em] whitespace-pre-line mb-1.5',
-                  isEntering && 'hero-anim-title',
-                  isExiting && 'hero-exit-content',
-                )}
-              >
-                {slide.title}
-              </h1>
-
-              {/* Description */}
-              <p
-                className={cn(
-                  'text-white text-[10px] lg:text-xs leading-relaxed max-w-[16rem] mb-2 font-sans',
-                  isEntering && 'hero-anim-desc',
-                  isExiting && 'hero-exit-content',
-                )}
-              >
-                {slide.description}
-              </p>
-
-              {/* Divider + attributes */}
-              <div
-                className={cn(
-                  'w-full max-w-[16rem]',
-                  isEntering && 'hero-anim-divider',
-                  isExiting && 'hero-exit-content',
-                )}
-              >
-                <div className="w-full h-px bg-white/20 mb-1.5" />
-                <div
-                  className={cn(
-                    'flex items-center justify-center flex-wrap gap-x-3 gap-y-1',
-                    isEntering && 'hero-anim-attrs',
-                    isExiting && 'hero-exit-content',
-                  )}
-                >
-                  {slide.attributes.map((attr, i) => (
-                    <React.Fragment key={attr}>
-                      <span className="text-white text-[8px] lg:text-[10px] font-display font-medium tracking-wide">
-                        {attr}
-                      </span>
-                      {i < slide.attributes.length - 1 && (
-                        <span className="w-px h-3 bg-white/30" aria-hidden="true" />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
-
-              {/* CTAs */}
-              <div
-                className={cn(
-                  'mt-3 lg:mt-4 flex items-center gap-1.5 lg:gap-2',
-                  isEntering && 'hero-anim-cta',
-                  isExiting && 'hero-exit-content',
-                )}
-              >
-                <Link
-                  href={slide.ctaHref}
-                  className="inline-flex items-center justify-center font-display font-bold text-[10px] lg:text-xs px-5 lg:px-6 py-1.5 lg:py-2 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 hover:scale-[1.03] transition-all duration-300"
-                >
-                  {slide.ctaLabel}
-                </Link>
-                <Link
-                  href="/shop"
-                  className="inline-flex items-center justify-center font-display font-bold text-[10px] lg:text-xs px-5 lg:px-6 py-1.5 lg:py-2 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] hover:scale-[1.03] transition-all duration-300"
-                >
-                  Shop
-                </Link>
-              </div>
-            </div>
+          <div
+            className={cn(
+              'relative z-10 -rotate-3 group/img',
+              isEntering && 'hero-anim-image',
+              isExiting && 'hero-exit-image',
+            )}
+            style={slide.leftImageScale ? { transform: `rotate(-3deg) scale(${slide.leftImageScale})` } : undefined}
+          >
+            <SlideImage
+              media={slide.leftImage}
+              className="object-contain drop-shadow-2xl h-[40vh] md:h-[50vh] lg:h-[60vh] xl:h-[65vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2"
+              priority={activeIndex === 0}
+              size="(min-width: 1280px) 28vw, (min-width: 1024px) 25vw, (min-width: 768px) 22vw, 0px"
+            />
           </div>
+        </div>
 
-          {/* RIGHT IMAGE — subtle tilt for visual interest */}
-          <div className="flex items-center justify-center -ml-4 lg:-ml-6">
-            <div
+        {/* ── CENTER PANEL (full-height, fixed structure) ───── */}
+        <div
+          className="w-[36%] lg:w-[34%] xl:w-[32%] h-full flex flex-col items-center transition-colors duration-700 relative z-20"
+          style={{ backgroundColor: slide.panelColor }}
+        >
+          {/* Content — vertically centered, padded for header + bottom nav */}
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-6 sm:px-8 lg:px-10 xl:px-12 pt-20 pb-16">
+            {/* Eyebrow */}
+            <p
               className={cn(
-                'relative group/img rotate-3',
-                isEntering && 'hero-anim-image',
-                isExiting && 'hero-exit-image',
+                'uppercase tracking-[0.2em] text-white text-[9px] sm:text-[10px] lg:text-xs font-display font-bold mb-2 lg:mb-3',
+                isEntering && 'hero-anim-eyebrow',
+                isExiting && 'hero-exit-content',
               )}
             >
-              <SlideImage
-                media={slide.rightImage}
-                className="object-contain drop-shadow-2xl h-[50vh] lg:h-[55vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-3 group-hover/img:rotate-1"
-                size="(min-width: 768px) 22vw, 0px"
-              />
+              {slide.eyebrow}
+            </p>
+
+            {/* Title */}
+            <h1
+              className={cn(
+                'font-display font-black text-white text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-[2.25rem] leading-[1.1] tracking-[-0.02em] whitespace-pre-line mb-3 lg:mb-5',
+                isEntering && 'hero-anim-title',
+                isExiting && 'hero-exit-content',
+              )}
+            >
+              {slide.title}
+            </h1>
+
+            {/* Description */}
+            <p
+              className={cn(
+                'text-white text-[11px] sm:text-xs lg:text-sm leading-relaxed max-w-[20rem] lg:max-w-[22rem] mb-4 lg:mb-6 font-sans font-medium',
+                isEntering && 'hero-anim-desc',
+                isExiting && 'hero-exit-content',
+              )}
+            >
+              {slide.description}
+            </p>
+
+            {/* Divider + attributes */}
+            <div
+              className={cn(
+                'w-full max-w-[20rem] lg:max-w-[22rem]',
+                isEntering && 'hero-anim-divider',
+                isExiting && 'hero-exit-content',
+              )}
+            >
+              <div className="w-full h-px bg-white/20 mb-3 lg:mb-4" />
+              <div
+                className={cn(
+                  'flex items-center justify-between px-2',
+                  isEntering && 'hero-anim-attrs',
+                  isExiting && 'hero-exit-content',
+                )}
+              >
+                {slide.attributes.map((attr, i) => (
+                  <React.Fragment key={attr}>
+                    <span className="text-white text-[9px] sm:text-[10px] lg:text-xs font-display font-semibold tracking-wide">
+                      {attr}
+                    </span>
+                    {i < slide.attributes.length - 1 && (
+                      <span className="w-px h-4 bg-white/25 mx-2 sm:mx-3" aria-hidden="true" />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
+
+            {/* CTAs */}
+            <div
+              className={cn(
+                'mt-6 lg:mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 w-full max-w-[20rem] lg:max-w-[22rem]',
+                isEntering && 'hero-anim-cta',
+                isExiting && 'hero-exit-content',
+              )}
+            >
+              <Link
+                href={slide.ctaHref}
+                className="inline-flex items-center justify-center whitespace-nowrap w-full sm:w-auto font-display font-bold text-xs lg:text-sm px-6 lg:px-8 py-2.5 lg:py-3 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 hover:scale-[1.03] transition-all duration-300"
+              >
+                {slide.ctaLabel}
+              </Link>
+              <Link
+                href="/shop"
+                className="inline-flex items-center justify-center whitespace-nowrap w-full sm:w-auto font-display font-bold text-xs lg:text-sm px-6 lg:px-8 py-2.5 lg:py-3 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] hover:scale-[1.03] transition-all duration-300"
+              >
+                Shop
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* ── RIGHT IMAGE AREA ──────────────────────────────── */}
+        <div
+          className="flex-1 flex items-center justify-center relative transition-colors duration-700 overflow-hidden"
+          style={{ backgroundColor: slide.bgColor }}
+        >
+          {/* Background watermark */}
+          <div
+            className={cn(
+              'pointer-events-none absolute inset-0 flex items-center justify-center select-none',
+              'font-display font-black uppercase tracking-[-0.04em]',
+              'text-[12vw] lg:text-[10vw]',
+              'transition-opacity duration-700',
+              isExiting ? 'opacity-0' : 'opacity-[0.06]',
+            )}
+            style={{ color: slide.panelColor }}
+            aria-hidden="true"
+          >
+            Freude
+          </div>
+
+          <div
+            className={cn(
+              'relative z-10 rotate-3 group/img',
+              isEntering && 'hero-anim-image',
+              isExiting && 'hero-exit-image',
+            )}
+            style={slide.rightImageScale ? { transform: `rotate(3deg) scale(${slide.rightImageScale})` } : undefined}
+          >
+            <SlideImage
+              media={slide.rightImage}
+              className="object-contain drop-shadow-2xl h-[40vh] md:h-[50vh] lg:h-[60vh] xl:h-[65vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2"
+              size="(min-width: 1280px) 28vw, (min-width: 1024px) 25vw, (min-width: 768px) 22vw, 0px"
+            />
           </div>
         </div>
       </div>
 
       {/* ── Bottom navigation (shared) ─────────────────────────── */}
-      <div className="absolute bottom-4 left-0 right-0 z-30 flex flex-col items-center gap-2">
+      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 z-30 flex flex-col items-center gap-2">
         <div className="flex items-center gap-2">
           {slides.map((_, i) => (
             <button

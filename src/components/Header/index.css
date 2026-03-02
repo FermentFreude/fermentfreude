@@ -11,21 +11,21 @@
 
 /* ── Glassmorphism dropdown panel ──────────────────────────── */
 .dropdown-glass {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.08),
     0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme='dark'] .dropdown-glass {
-  background: rgba(30, 30, 30, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(23, 23, 23, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 2px 8px rgba(0, 0, 0, 0.15);
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .navLink {
@@ -100,7 +100,7 @@
 }
 
 /* ── Transparent header on home page ────────────────────────── */
-/* Dark mode: white text on transparent */
+/* Dark mode: full white treatment on transparent */
 [data-theme='dark'] header[data-transparent] .navLink,
 [data-theme='dark'] header[data-transparent] .navLink:hover {
   color: white;
@@ -122,6 +122,16 @@
 
 [data-theme='dark'] header[data-transparent] nav svg {
   color: white;
+}
+
+/* Hero-requested dark theme: ONLY middle nav links go white */
+header[data-header-theme='dark'] .navLink,
+header[data-header-theme='dark'] .navLink:hover {
+  color: white;
+}
+
+header[data-header-theme='dark'] .navLink::after {
+  background-color: white;
 }
 
 /* ── Hide default cursor when elastic cursor is active ─────── */
