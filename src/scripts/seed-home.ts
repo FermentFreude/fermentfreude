@@ -325,10 +325,9 @@ async function seedHome() {
     const aboutDoc = aboutPage.docs[0]
     const aboutLayout = Array.isArray(aboutDoc.layout) ? aboutDoc.layout : []
     sponsorsBarDE =
-      (aboutLayout.find((b: any) => b && b.blockType === 'sponsorsBar') as unknown as Record<
-        string,
-        unknown
-      >) ?? null
+      (aboutLayout.find(
+        (b) => b && b.blockType === 'sponsorsBar',
+      ) as unknown as Record<string, unknown>) ?? null
 
     // Also read EN locale
     const aboutEN = await payload.findByID({
@@ -339,10 +338,9 @@ async function seedHome() {
     })
     const aboutLayoutEN = Array.isArray(aboutEN.layout) ? aboutEN.layout : []
     sponsorsBarEN =
-      (aboutLayoutEN.find((b: any) => b && b.blockType === 'sponsorsBar') as unknown as Record<
-        string,
-        unknown
-      >) ?? null
+      (aboutLayoutEN.find(
+        (b) => b && b.blockType === 'sponsorsBar',
+      ) as unknown as Record<string, unknown>) ?? null
   }
 
   if (!sponsorsBarDE || !sponsorsBarEN) {
@@ -413,7 +411,9 @@ async function seedHome() {
           {
             ...sponsorsBarDE,
             id: undefined,
-            sponsors: (sponsorsBarDE.sponsors as any[])?.map((s: any) => ({ ...s, id: undefined })),
+            sponsors: (sponsorsBarDE.sponsors as Record<string, unknown>[])?.map(
+              (s: Record<string, unknown>) => ({ ...s, id: undefined }),
+            ),
           },
         ]
       : []),
@@ -501,10 +501,12 @@ async function seedHome() {
           {
             ...sponsorsBarEN,
             id: sbBlock.id,
-            sponsors: (sponsorsBarEN.sponsors as any[])?.map((s: any, i: number) => ({
-              ...s,
-              id: sbBlock.sponsors?.[i]?.id,
-            })),
+            sponsors: (sponsorsBarEN.sponsors as Record<string, unknown>[])?.map(
+              (s: Record<string, unknown>, i: number) => ({
+                ...s,
+                id: sbBlock.sponsors?.[i]?.id,
+              }),
+            ),
           },
         ]
       : []),

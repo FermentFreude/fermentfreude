@@ -305,7 +305,11 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
-            style={slide.leftImageScale ? { transform: `rotate(-3deg) scale(${slide.leftImageScale})` } : undefined}
+            style={
+              slide.leftImageScale
+                ? { transform: `rotate(-3deg) scale(${slide.leftImageScale})` }
+                : undefined
+            }
           >
             <SlideImage
               media={slide.leftImage}
@@ -435,7 +439,11 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
-            style={slide.rightImageScale ? { transform: `rotate(3deg) scale(${slide.rightImageScale})` } : undefined}
+            style={
+              slide.rightImageScale
+                ? { transform: `rotate(3deg) scale(${slide.rightImageScale})` }
+                : undefined
+            }
           >
             <SlideImage
               media={slide.rightImage}

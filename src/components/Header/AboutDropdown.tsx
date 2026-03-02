@@ -92,8 +92,12 @@ export function AboutDropdown() {
                   { 'bg-white/50 dark:bg-white/8': pathname === item.href },
                 )}
               >
-                <span className="block font-display font-bold text-sm text-ff-gray-15 dark:text-neutral-200 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">{item.label}</span>
-                <span className="block text-xs text-ff-gray-text/80 dark:text-neutral-500 group-hover:text-white/70 dark:group-hover:text-ff-near-black/60 mt-0.5 transition-colors">{item.description}</span>
+                <span className="block font-display font-bold text-sm text-ff-gray-15 dark:text-neutral-200 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
+                  {item.label}
+                </span>
+                <span className="block text-xs text-ff-gray-text/80 dark:text-neutral-500 group-hover:text-white/70 dark:group-hover:text-ff-near-black/60 mt-0.5 transition-colors">
+                  {item.description}
+                </span>
               </Link>
             ))}
           </div>
