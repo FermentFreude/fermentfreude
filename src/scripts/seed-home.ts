@@ -325,7 +325,7 @@ async function seedHome() {
     const aboutDoc = aboutPage.docs[0]
     const aboutLayout = Array.isArray(aboutDoc.layout) ? aboutDoc.layout : []
     sponsorsBarDE =
-      (aboutLayout.find((b: any) => b && b.blockType === 'sponsorsBar') as Record<
+      (aboutLayout.find((b: any) => b && b.blockType === 'sponsorsBar') as unknown as Record<
         string,
         unknown
       >) ?? null
@@ -339,7 +339,7 @@ async function seedHome() {
     })
     const aboutLayoutEN = Array.isArray(aboutEN.layout) ? aboutEN.layout : []
     sponsorsBarEN =
-      (aboutLayoutEN.find((b: any) => b && b.blockType === 'sponsorsBar') as Record<
+      (aboutLayoutEN.find((b: any) => b && b.blockType === 'sponsorsBar') as unknown as Record<
         string,
         unknown
       >) ?? null
