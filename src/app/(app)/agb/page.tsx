@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'AGB | FermentFreude',
@@ -22,7 +23,7 @@ export default function AGBPage() {
             <p>
               Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für alle über die Webseite{' '}
               <span className="font-semibold text-[#1d1d1d]">fermentfreude.com</span> geschlossenen
-              Verträge zwischen der Fermentfreude OG (im Folgenden „Anbieter") und dem Kunden.
+              Verträge zwischen der Fermentfreude OG (im Folgenden „Anbieter“) und dem Kunden.
             </p>
             <p className="mt-3">
               <span className="font-semibold text-[#1d1d1d]">Fermentfreude OG</span>
@@ -40,7 +41,7 @@ export default function AGBPage() {
               2. Vertragsschluss
             </h2>
             <p>
-              Die Darstellung der Produkte und Workshops im Online-Shop stellt kein rechtlich bindendes Angebot, sondern einen unverbindlichen Online-Katalog dar. Durch Anklicken des Buttons „Jetzt kaufen" bzw. „Jetzt buchen" geben Sie eine verbindliche Bestellung ab. Der Kaufvertrag kommt zustande, wenn wir Ihre Bestellung per E-Mail bestätigen.
+              Die Darstellung der Produkte und Workshops im Online-Shop stellt kein rechtlich bindendes Angebot, sondern einen unverbindlichen Online-Katalog dar. Durch Anklicken des Buttons „Jetzt kaufen“ bzw. „Jetzt buchen“ geben Sie eine verbindliche Bestellung ab. Der Kaufvertrag kommt zustande, wenn wir Ihre Bestellung per E-Mail bestätigen.
             </p>
           </section>
 
@@ -111,9 +112,9 @@ export default function AGBPage() {
             </h2>
             <p>
               Informationen zur Verarbeitung Ihrer personenbezogenen Daten entnehmen Sie bitte unserer{' '}
-              <a href="/datenschutz" className="underline hover:text-[#e6be68] transition-colors">
+              <Link href="/datenschutz" className="underline hover:text-[#e6be68] transition-colors">
                 Datenschutzerklärung
-              </a>
+              </Link>
               .
             </p>
           </section>

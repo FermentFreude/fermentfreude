@@ -67,7 +67,7 @@ export default function DatenschutzPage() {
               Server-Log Files
             </h2>
             <p>
-              Diese Webseite und der damit verbundene Provider erhebt im Zuge der Webseitennutzung automatisch Informationen im Rahmen sogenannter „Server-Log Files". Dies betrifft insbesondere:
+              Diese Webseite und der damit verbundene Provider erhebt im Zuge der Webseitennutzung automatisch Informationen im Rahmen sogenannter „Server-Log Files“. Dies betrifft insbesondere:
             </p>
             <ul className="mt-3 list-disc list-inside space-y-1">
               <li>IP-Adresse oder Hostname</li>
@@ -75,7 +75,7 @@ export default function DatenschutzPage() {
               <li>Aufenthaltsdauer auf der Webseite sowie Datum und Uhrzeit</li>
               <li>aufgerufene Seiten der Webseite</li>
               <li>Spracheinstellungen und Betriebssystem</li>
-              <li>„Leaving-Page" (auf welcher URL hat der Benutzer die Webseite verlassen)</li>
+              <li>„Leaving-Page“ (auf welcher URL hat der Benutzer die Webseite verlassen)</li>
               <li>ISP (Internet Service Provider)</li>
             </ul>
             <p className="mt-3">
