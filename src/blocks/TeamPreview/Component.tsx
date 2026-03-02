@@ -68,12 +68,12 @@ export const TeamPreviewBlock: React.FC<Props> = ({
                 delay={index * 150}
                 className="flex flex-col items-center gap-(--space-content-sm) flex-1"
               >
-                <div className="relative w-full aspect-3/4 rounded-2xl overflow-hidden">
+                <div className="relative w-full max-w-xs mx-auto aspect-3/4 rounded-2xl overflow-hidden">
                   {'image' in member && member.image && typeof member.image === 'object' ? (
                     <Media
                       resource={member.image as MediaType}
                       fill
-                      imgClassName="object-cover hover:scale-105 transition-transform duration-500"
+                      imgClassName="object-contain hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <div className="w-full h-full bg-ff-warm-gray" />

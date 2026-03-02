@@ -17,7 +17,7 @@ interface AnnouncementBarProps {
 export function AnnouncementBar({ enabled, text, link }: AnnouncementBarProps) {
   const [visible, setVisible] = useState(true)
 
-  const resolvedEnabled = enabled ?? true
+  const resolvedEnabled = enabled ?? false
   const resolvedText = text ?? DEFAULT_TEXT
   const resolvedLink = link ?? DEFAULT_LINK
 

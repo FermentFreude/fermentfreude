@@ -77,7 +77,8 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
   /* ── Render ────────────────────────────────────────────────── */
   return (
     <section
-      className="relative w-full h-svh overflow-hidden max-w-[100vw] touch-pan-y"
+      className="relative w-full h-svh overflow-hidden max-w-[100vw] touch-pan-y transition-colors duration-700"
+      style={{ backgroundColor: slide.bgColor }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -352,7 +353,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             {/* Description */}
             <p
               className={cn(
-                'text-white text-[11px] sm:text-xs lg:text-sm leading-relaxed max-w-[20rem] lg:max-w-[22rem] mb-4 lg:mb-6 font-sans font-medium',
+                'text-white text-[11px] sm:text-xs lg:text-sm leading-relaxed max-w-[20rem] lg:max-w-88 mb-4 lg:mb-6 font-sans font-medium',
                 isEntering && 'hero-anim-desc',
                 isExiting && 'hero-exit-content',
               )}
@@ -363,7 +364,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             {/* Divider + attributes */}
             <div
               className={cn(
-                'w-full max-w-[20rem] lg:max-w-[22rem]',
+                'w-full max-w-[20rem] lg:max-w-88',
                 isEntering && 'hero-anim-divider',
                 isExiting && 'hero-exit-content',
               )}
@@ -392,7 +393,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             {/* CTAs */}
             <div
               className={cn(
-                'mt-6 lg:mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 w-full max-w-[20rem] lg:max-w-[22rem]',
+                'mt-6 lg:mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 w-full max-w-[20rem] lg:max-w-88',
                 isEntering && 'hero-anim-cta',
                 isExiting && 'hero-exit-content',
               )}

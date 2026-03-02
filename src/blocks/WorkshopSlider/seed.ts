@@ -15,7 +15,7 @@ export interface WorkshopSliderImages {
 export function buildWorkshopSlider(imgs: WorkshopSliderImages) {
   const de = {
     blockType: 'workshopSlider' as const,
-    eyebrow: 'Workshop-Erlebnis',
+    eyebrow: 'Erlebnis',
     allWorkshopsButtonLabel: 'Alle Workshops',
     allWorkshopsLink: '/workshops',
     workshops: [
@@ -75,7 +75,7 @@ export function buildWorkshopSlider(imgs: WorkshopSliderImages) {
 
   const en = {
     blockType: 'workshopSlider' as const,
-    eyebrow: 'Workshop Experience',
+    eyebrow: 'Experience',
     allWorkshopsButtonLabel: 'All Workshops',
     allWorkshopsLink: '/workshops',
     workshops: [
