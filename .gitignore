@@ -51,3 +51,4 @@ public/media
 
 *.log
 *.backup
+.env*.local
