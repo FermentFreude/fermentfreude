@@ -77,8 +77,6 @@ export function HeaderClient({ header }: Props) {
     }
   }, [isMenuActive])
 
-
-
   // Transparent header on home page when at top
   const isTransparent = isHomePage && isAtTop && !isMenuActive
 
@@ -153,10 +151,7 @@ export function HeaderClient({ header }: Props) {
             </MagneticElement>
 
             {/* Desktop Nav Links */}
-            <ul
-              ref={navLinksRef}
-              className="hidden lg:flex items-center gap-6 xl:gap-8"
-            >
+            <ul ref={navLinksRef} className="hidden lg:flex items-center gap-6 xl:gap-8">
               {navItems.map((item, index) => {
                 const { dropdownItems, defaultKey, label, url } = item
 
@@ -166,10 +161,7 @@ export function HeaderClient({ header }: Props) {
                   renderedDropdowns.add(key)
 
                   return (
-                    <li
-                      key={item.id}
-                      className="nav-link-item"
-                    >
+                    <li key={item.id} className="nav-link-item">
                       <NavDropdown label={label} href={url || undefined} items={dropdownItems} />
                     </li>
                   )
@@ -184,10 +176,7 @@ export function HeaderClient({ header }: Props) {
                 )
 
                 return (
-                  <li
-                    key={item.id}
-                    className="nav-link-item"
-                  >
+                  <li key={item.id} className="nav-link-item">
                     <MagneticElement strength={0.3}>
                       {item.link ? (
                         <CMSLink {...item.link} className={linkClassName} appearance="inline" />

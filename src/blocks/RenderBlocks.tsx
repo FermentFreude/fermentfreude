@@ -9,13 +9,13 @@ import { FormBlock } from '@/blocks/Form/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { OurStoryBlock } from '@/blocks/OurStory/Component'
+import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { ReadyToLearnCTABlock } from '@/blocks/ReadyToLearnCTA/Component'
 import { SponsorsBarBlock } from '@/blocks/SponsorsBar/Component'
 import { TeamCardsBlock } from '@/blocks/TeamCards/Component'
 import { TeamPreviewBlock } from '@/blocks/TeamPreview/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
-import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { VoucherCtaBlock } from '@/blocks/VoucherCta/Component'
 import { WorkshopSliderBlock } from '@/blocks/WorkshopSlider/Component'
 import { toKebabCase } from '@/utilities/toKebabCase'
@@ -67,7 +67,10 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className={index === 0 ? 'mb-(--space-content-xl)' : 'my-(--space-content-xl)'} key={index}>
+                <div
+                  className={index === 0 ? 'mb-(--space-content-xl)' : 'my-(--space-content-xl)'}
+                  key={index}
+                >
                   <Block {...block} id={blockName ? toKebabCase(blockName) : undefined} />
                 </div>
               )
