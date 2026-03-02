@@ -1,1 +1,8 @@
-# Build cache clear
+# Files/folders not needed in production
+seed-assets
+tests
+docs
+.cursor
+.claude
+*.md
+!README.md
