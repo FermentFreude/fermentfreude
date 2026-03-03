@@ -24,6 +24,7 @@ import { VoucherCta } from '@/blocks/VoucherCta/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
 import { shopPageFields } from '@/fields/shopPageFields'
+import { workshopDetailFields } from '@/fields/workshopDetailFields'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import {
@@ -1364,14 +1365,28 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
-          name: 'workshopGiftOnline',
-          label: 'Gift & Online',
+          name: 'workshopDetail',
+          label: 'Workshop Detail',
           admin: {
-            description: 'Gift voucher and online courses cards. Only for tempeh, lakto-gemuese, kombucha.',
+            description:
+              'All editable content for the workshop detail page (Hero, Booking, Calendar, Voucher, FAQ). Currently only for lakto-gemuese.',
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
               const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+              return slug === 'lakto-gemuese'
+            },
+          },
+          fields: workshopDetailFields,
+        },
+        {
+          name: 'workshopGiftOnline',
+          label: 'Gift & Online',
+          admin: {
+            description: 'Gift voucher and online courses cards. Only for tempeh, kombucha.',
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'tempeh' || slug === 'kombucha'
             },
           },
           fields: [
@@ -1402,7 +1417,7 @@ export const Pages: CollectionConfig = {
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
               const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+              return slug === 'tempeh' || slug === 'kombucha'
             },
           },
           fields: [
@@ -1419,7 +1434,7 @@ export const Pages: CollectionConfig = {
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
               const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+              return slug === 'tempeh' || slug === 'kombucha'
             },
           },
           fields: [
@@ -1445,7 +1460,7 @@ export const Pages: CollectionConfig = {
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
               const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+              return slug === 'tempeh' || slug === 'kombucha'
             },
           },
           fields: [
@@ -1483,7 +1498,7 @@ export const Pages: CollectionConfig = {
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
               const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'lakto-gemuese' || slug === 'kombucha'
+              return slug === 'tempeh' || slug === 'kombucha'
             },
           },
           fields: [

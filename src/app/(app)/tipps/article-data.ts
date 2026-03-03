@@ -26,7 +26,7 @@ export const ARTICLES: Article[] = [
   /* ────────────────────────────────────────────────── */
   {
     slug: 'gemuese-fermentieren-leitfaden',
-    title: 'Gemüse fermentieren — der komplette Leitfaden',
+    title: 'Gemüse fermentieren. Der komplette Leitfaden',
     description:
       'Alles, was du wissen musst, auf einer Seite: Zutaten, Salzanteil, Behälter, Temperatur und die häufigsten Fragen. Dein Startpunkt für jede Milchsäuregärung.',
     readTime: '12 Min.',
@@ -82,7 +82,7 @@ export const ARTICLES: Article[] = [
   /* ────────────────────────────────────────────────── */
   {
     slug: 'salz-und-lake',
-    title: 'Salz & Lake — das perfekte Verhältnis',
+    title: 'Salz & Lake richtig einsetzen',
     description:
       '2 % Salz ist der goldene Standard — aber wann trockensalzen, wann eine Lake ansetzen? Tabellen, Tipps und alles zur richtigen Salzauswahl.',
     readTime: '9 Min.',
@@ -291,7 +291,7 @@ export const ARTICLES: Article[] = [
   /* ────────────────────────────────────────────────── */
   {
     slug: 'fermentiertes-gemuese-ideen',
-    title: 'So isst du fermentiertes Gemüse — kreative Ideen',
+    title: 'Kreative Ideen für fermentiertes Gemüse',
     description:
       'Vom Frühstücks-Bagel bis zum Kimchi-Grilled-Cheese — entdecke kreative Wege, dein Ferment in jede Mahlzeit einzubauen.',
     readTime: '10 Min.',

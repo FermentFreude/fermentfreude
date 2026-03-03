@@ -55,7 +55,7 @@ export function FermentedVegHowTos() {
   return (
     <section
       ref={sectionRef}
-      className="my-12 bg-ff-cream py-section-padding-lg lg:my-20"
+      className="my-12 py-section-padding-lg lg:my-20"
     >
       <div className="container mx-auto container-padding">
       {/* Header */}
@@ -65,14 +65,13 @@ export function FermentedVegHowTos() {
         }`}
       >
         <p className="mb-3 font-display text-body-sm font-semibold uppercase tracking-[0.2em] text-ff-gold-accent">
-          How-Tos
+          Tipps & Guides
         </p>
-        <h2 className="font-display text-section-heading font-bold tracking-wide text-ff-near-black">
-          Fermentiertes Gemüse
+        <h2 className="font-display text-subheading font-bold tracking-wide text-ff-near-black">
+          Lerne fermentieren.
         </h2>
-        <p className="mt-4 max-w-2xl text-body-lg leading-relaxed text-ff-gray-text">
-          Mit unseren Guides lernst du ganz einfach, wie du zu Hause dein eigenes
-          Sauerkraut, Kimchi, milchsaure Pickles und mehr herstellst.
+        <p className="mt-3 max-w-lg text-body leading-relaxed text-ff-gray-text">
+          Einfache Anleitungen für dein erstes Ferment — direkt aus unserer Küche.
         </p>
       </div>
 
@@ -92,7 +91,7 @@ export function FermentedVegHowTos() {
             }}
           >
             {/* Image placeholder — replace via admin */}
-            <div className="aspect-[16/9] w-full bg-ff-warm-gray transition-opacity duration-300 group-hover:opacity-90" />
+            <div className="aspect-video w-full bg-ff-warm-gray transition-opacity duration-300 group-hover:opacity-90" />
 
             {/* Content */}
             <div className="flex flex-1 flex-col p-6 sm:p-8">
@@ -107,7 +106,7 @@ export function FermentedVegHowTos() {
               </p>
 
               {/* Footer: Read Time */}
-              <p className="font-display text-body-sm font-medium text-ff-gold-accent transition-colors group-hover:text-ff-gold-accent-dark">
+              <p className="font-display text-body-sm font-black uppercase tracking-widest text-ff-gold-accent">
                 {article.readTime} Lesezeit
               </p>
             </div>

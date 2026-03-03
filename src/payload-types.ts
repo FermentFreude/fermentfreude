@@ -1237,7 +1237,275 @@ export interface Page {
       | null;
   };
   /**
-   * Gift voucher and online courses cards. Only for tempeh, lakto-gemuese, kombucha.
+   * All editable content for the workshop detail page (Hero, Booking, Calendar, Voucher, FAQ). Currently only for lakto-gemuese.
+   */
+  workshopDetail?: {
+    /**
+     * Small text above the title (e.g. "Workshop Experience").
+     */
+    heroEyebrow?: string | null;
+    /**
+     * Main heading. Use a line break for two lines (e.g. "Die Kunst der\nLakto-Fermentation").
+     */
+    heroTitle?: string | null;
+    /**
+     * Short paragraph below the title.
+     */
+    heroDescription?: string | null;
+    /**
+     * Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").
+     */
+    heroAttributes?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Gold text above title (e.g. "3-HOUR HANDS-ON WORKSHOP").
+     */
+    bookingEyebrow?: string | null;
+    /**
+     * Workshop price in euros (e.g. 99).
+     */
+    bookingPrice?: number | null;
+    /**
+     * e.g. "/per person" or "/pro Person".
+     */
+    bookingPriceSuffix?: string | null;
+    /**
+     * e.g. "€". Defaults to €.
+     */
+    bookingCurrency?: string | null;
+    /**
+     * Wide image (21:9 ratio) shown between header and action buttons.
+     */
+    bookingImage?: (string | null) | Media;
+    /**
+     * Rounded pills in the header (e.g. "3 Stunden", "Hands-on", "Max. 12 Personen").
+     */
+    bookingAttributes?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Nächste Termine" / "Upcoming Dates"
+     */
+    bookingViewDatesLabel?: string | null;
+    /**
+     * e.g. "Termine ausblenden" / "Hide Dates"
+     */
+    bookingHideDatesLabel?: string | null;
+    /**
+     * e.g. "Mehr Details" / "More Details"
+     */
+    bookingMoreDetailsLabel?: string | null;
+    /**
+     * e.g. "Buchen" / "Book"
+     */
+    bookingBookLabel?: string | null;
+    /**
+     * e.g. "Plätze frei" / "spots left"
+     */
+    bookingSpotsLabel?: string | null;
+    /**
+     * e.g. "About the Workshop"
+     */
+    aboutHeading?: string | null;
+    aboutText?: string | null;
+    /**
+     * e.g. "Schedule (3 Hours)"
+     */
+    scheduleHeading?: string | null;
+    schedule?:
+      | {
+          /**
+           * e.g. "45 min"
+           */
+          duration: string;
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Included in Price (€99)"
+     */
+    includedHeading?: string | null;
+    includedItems?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Why This Workshop?"
+     */
+    whyHeading?: string | null;
+    whyPoints?:
+      | {
+          /**
+           * e.g. "Gut Health:"
+           */
+          bold: string;
+          rest: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"
+     */
+    experienceEyebrow?: string | null;
+    /**
+     * e.g. "Dein Workshop-Erlebnis" / "Your Workshop Experience"
+     */
+    experienceTitle?: string | null;
+    experienceCards?:
+      | {
+          /**
+           * Photo for this card (4:3 ratio).
+           */
+          image?: (string | null) | Media;
+          /**
+           * e.g. "THEORY", "PRACTICE", "TASTING"
+           */
+          eyebrow: string;
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Nächste Workshops" / "Next Workshops"
+     */
+    datesHeading?: string | null;
+    dates?:
+      | {
+          /**
+           * e.g. "15. Februar 2026" / "February 15, 2026"
+           */
+          date: string;
+          /**
+           * e.g. "14:00 – 17:00" / "2:00 PM – 5:00 PM"
+           */
+          time: string;
+          spotsLeft: number;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "SAISONALE REZEPTE" / "SEASONAL RECIPES"
+     */
+    calendarEyebrow?: string | null;
+    /**
+     * e.g. "Fermentkalender" / "Fermentation Calendar"
+     */
+    calendarTitle?: string | null;
+    calendarDescription?: string | null;
+    calendarMonths?:
+      | {
+          /**
+           * e.g. "März" / "March"
+           */
+          month: string;
+          /**
+           * 3-letter code (e.g. "MÄR" / "MAR").
+           */
+          monthShort: string;
+          /**
+           * Two-digit month number (e.g. "03").
+           */
+          monthNumber: string;
+          /**
+           * e.g. "FRÜHLING" / "SPRING"
+           */
+          season: string;
+          /**
+           * Hex color for month badge and accent lines (e.g. "#e6be68"). Leave empty for default.
+           */
+          accent?: string | null;
+          recipes?:
+            | {
+                name: string;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"
+     */
+    voucherEyebrow?: string | null;
+    /**
+     * e.g. "Go with a friend."
+     */
+    voucherTitle?: string | null;
+    voucherDescription?: string | null;
+    /**
+     * e.g. "Gutschein kaufen" / "Buy Voucher"
+     */
+    voucherPrimaryLabel?: string | null;
+    /**
+     * e.g. "/voucher"
+     */
+    voucherPrimaryHref?: string | null;
+    /**
+     * e.g. "Zum Shop" / "Visit Shop"
+     */
+    voucherSecondaryLabel?: string | null;
+    /**
+     * e.g. "/shop"
+     */
+    voucherSecondaryHref?: string | null;
+    /**
+     * Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").
+     */
+    voucherPills?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "HÄUFIGE FRAGEN" / "FAQ"
+     */
+    faqEyebrow?: string | null;
+    /**
+     * e.g. "Gut zu wissen" / "Good to Know"
+     */
+    faqTitle?: string | null;
+    faqDescription?: string | null;
+    faqItems?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Email shown at bottom (e.g. "info@fermentfreude.de").
+     */
+    faqContactEmail?: string | null;
+    /**
+     * e.g. "Buchung bestätigen" / "Confirm Booking"
+     */
+    modalConfirmHeading?: string | null;
+    /**
+     * e.g. "Details überprüfen" / "Review your details"
+     */
+    modalConfirmSubheading?: string | null;
+    modalWorkshopLabel?: string | null;
+    modalDateLabel?: string | null;
+    modalTimeLabel?: string | null;
+    modalTotalLabel?: string | null;
+    modalCancelLabel?: string | null;
+    modalConfirmLabel?: string | null;
+  };
+  /**
+   * Gift voucher and online courses cards. Only for tempeh, kombucha.
    */
   workshopGiftOnline?: {
     giftTitle: string;
@@ -2966,6 +3234,132 @@ export interface PagesSelect<T extends boolean = true> {
               nextDate?: T;
               id?: T;
             };
+      };
+  workshopDetail?:
+    | T
+    | {
+        heroEyebrow?: T;
+        heroTitle?: T;
+        heroDescription?: T;
+        heroAttributes?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        bookingEyebrow?: T;
+        bookingPrice?: T;
+        bookingPriceSuffix?: T;
+        bookingCurrency?: T;
+        bookingImage?: T;
+        bookingAttributes?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        bookingViewDatesLabel?: T;
+        bookingHideDatesLabel?: T;
+        bookingMoreDetailsLabel?: T;
+        bookingBookLabel?: T;
+        bookingSpotsLabel?: T;
+        aboutHeading?: T;
+        aboutText?: T;
+        scheduleHeading?: T;
+        schedule?:
+          | T
+          | {
+              duration?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        includedHeading?: T;
+        includedItems?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        whyHeading?: T;
+        whyPoints?:
+          | T
+          | {
+              bold?: T;
+              rest?: T;
+              id?: T;
+            };
+        experienceEyebrow?: T;
+        experienceTitle?: T;
+        experienceCards?:
+          | T
+          | {
+              image?: T;
+              eyebrow?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        datesHeading?: T;
+        dates?:
+          | T
+          | {
+              date?: T;
+              time?: T;
+              spotsLeft?: T;
+              id?: T;
+            };
+        calendarEyebrow?: T;
+        calendarTitle?: T;
+        calendarDescription?: T;
+        calendarMonths?:
+          | T
+          | {
+              month?: T;
+              monthShort?: T;
+              monthNumber?: T;
+              season?: T;
+              accent?: T;
+              recipes?:
+                | T
+                | {
+                    name?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        voucherEyebrow?: T;
+        voucherTitle?: T;
+        voucherDescription?: T;
+        voucherPrimaryLabel?: T;
+        voucherPrimaryHref?: T;
+        voucherSecondaryLabel?: T;
+        voucherSecondaryHref?: T;
+        voucherPills?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        faqEyebrow?: T;
+        faqTitle?: T;
+        faqDescription?: T;
+        faqItems?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        faqContactEmail?: T;
+        modalConfirmHeading?: T;
+        modalConfirmSubheading?: T;
+        modalWorkshopLabel?: T;
+        modalDateLabel?: T;
+        modalTimeLabel?: T;
+        modalTotalLabel?: T;
+        modalCancelLabel?: T;
+        modalConfirmLabel?: T;
       };
   workshopGiftOnline?:
     | T

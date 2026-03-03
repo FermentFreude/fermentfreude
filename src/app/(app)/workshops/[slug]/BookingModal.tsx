@@ -56,7 +56,7 @@ export function BookingModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-5 top-5 rounded-sm p-1 text-(--ff-near-black)/70 transition-colors hover:text-ff-near-black"
+          className="absolute right-5 top-5 rounded-sm p-1 text-ff-near-black/70 transition-colors hover:text-ff-near-black"
           aria-label="Close"
         >
           <svg

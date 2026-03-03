@@ -76,7 +76,7 @@ export function WorkshopTypesSlider({
               />
             </div>
           </div>
-          <CarouselContent className="-ml-0">
+          <CarouselContent className="ml-0">
             {workshops.map((w) => {
               const slug = getSlugFromCtaLink(w.ctaLink)
               const href = slug ? `/workshops/${slug}` : '/workshops'
@@ -85,7 +85,7 @@ export function WorkshopTypesSlider({
 
               return (
                 <CarouselItem key={w.title} className="pl-0">
-                  <div className={`flex h-[28rem] min-h-[28rem] overflow-hidden rounded-2xl ${cardBg}`}>
+                  <div className={`flex h-112 min-h-112 overflow-hidden rounded-2xl ${cardBg}`}>
                     <div className="grid min-h-full w-full grid-cols-1 lg:grid-cols-2">
                       {/* Left: text + buttons */}
                       <div className="flex flex-col justify-center p-8 md:p-12">
@@ -160,7 +160,7 @@ export function WorkshopTypesSlider({
                         <CarouselDots count={workshops.length} />
                       </div>
                       {/* Right: image */}
-                      <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[24rem]">
+                      <div className="relative aspect-4/3 lg:aspect-auto lg:min-h-96">
                         {isResolvedMedia(displayImage) ? (
                           <Media resource={displayImage} fill imgClassName="object-cover" />
                         ) : (

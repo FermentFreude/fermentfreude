@@ -18,7 +18,12 @@ import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 import { findWorkshopBySlug, getAllWorkshops } from '@/utilities/getWorkshops'
 import { getWorkshopTermine } from '@/utilities/getWorkshopTermine'
-import { FermentKalender } from '@/components/fermentation/FermentKalender'
+import { getWorkshopBySlug } from './workshop-data'
+import { LaktoHero } from './LaktoHero'
+import { LaktoBookingCard } from './LaktoBookingCard'
+import { LaktoCalendar } from './LaktoCalendar'
+import { LaktoVoucherCta } from './LaktoVoucherCta'
+import { LaktoFAQ } from './LaktoFAQ'
 import { FermentedVegHowTos } from '@/components/fermentation/FermentedVegHowTos'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -194,6 +199,69 @@ export default async function WorkshopDetailPage({ params }: Args) {
   ])
 
   const workshopPage = workshopPageResult.docs[0] as {
+    workshopDetail?: {
+      heroEyebrow?: string | null
+      heroTitle?: string | null
+      heroDescription?: string | null
+      heroAttributes?: Array<{ text?: string | null; id?: string }> | null
+      bookingEyebrow?: string | null
+      bookingPrice?: number | null
+      bookingPriceSuffix?: string | null
+      bookingCurrency?: string | null
+      bookingImage?: unknown
+      bookingAttributes?: Array<{ text?: string | null; id?: string }> | null
+      bookingViewDatesLabel?: string | null
+      bookingHideDatesLabel?: string | null
+      bookingMoreDetailsLabel?: string | null
+      bookingBookLabel?: string | null
+      bookingSpotsLabel?: string | null
+      aboutHeading?: string | null
+      aboutText?: string | null
+      scheduleHeading?: string | null
+      schedule?: Array<{ duration?: string | null; title?: string | null; description?: string | null; id?: string }> | null
+      includedHeading?: string | null
+      includedItems?: Array<{ text?: string | null; id?: string }> | null
+      whyHeading?: string | null
+      whyPoints?: Array<{ bold?: string | null; rest?: string | null; id?: string }> | null
+      experienceEyebrow?: string | null
+      experienceTitle?: string | null
+      experienceCards?: Array<{ image?: unknown; eyebrow?: string | null; title?: string | null; description?: string | null; id?: string }> | null
+      datesHeading?: string | null
+      dates?: Array<{ date?: string | null; time?: string | null; spotsLeft?: number | null; id?: string }> | null
+      calendarEyebrow?: string | null
+      calendarTitle?: string | null
+      calendarDescription?: string | null
+      calendarMonths?: Array<{
+        month?: string | null
+        monthShort?: string | null
+        monthNumber?: string | null
+        season?: string | null
+        accent?: string | null
+        recipes?: Array<{ name?: string | null; id?: string }> | null
+        id?: string
+      }> | null
+      voucherEyebrow?: string | null
+      voucherTitle?: string | null
+      voucherDescription?: string | null
+      voucherPrimaryLabel?: string | null
+      voucherPrimaryHref?: string | null
+      voucherSecondaryLabel?: string | null
+      voucherSecondaryHref?: string | null
+      voucherPills?: Array<{ text?: string | null; id?: string }> | null
+      faqEyebrow?: string | null
+      faqTitle?: string | null
+      faqDescription?: string | null
+      faqItems?: Array<{ question?: string | null; answer?: string | null; id?: string }> | null
+      faqContactEmail?: string | null
+      modalConfirmHeading?: string | null
+      modalConfirmSubheading?: string | null
+      modalWorkshopLabel?: string | null
+      modalDateLabel?: string | null
+      modalTimeLabel?: string | null
+      modalTotalLabel?: string | null
+      modalCancelLabel?: string | null
+      modalConfirmLabel?: string | null
+    }
     workshopGiftOnline?: {
       giftTitle?: string
       giftDescription?: string
@@ -233,6 +301,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
     }
   } | undefined
 
+  const detail = workshopPage?.workshopDetail
   const gift = workshopPage?.workshopGiftOnline
   const learn = workshopPage?.workshopLearnOnline
   const faq = workshopPage?.workshopFaq
@@ -254,6 +323,9 @@ export default async function WorkshopDetailPage({ params }: Args) {
     corporateCard?.image && isResolvedMedia(corporateCard.image) ? corporateCard.image : null
   const teamBuildingImage =
     team?.teamImage && isResolvedMedia(team.teamImage) ? team.teamImage : gastronomyTeamImage
+
+  // Get hardcoded workshop data for lakto-gemuese (booking card + details)
+  const workshopDetailData = slug === 'lakto-gemuese' ? getWorkshopBySlug(slug) : null
 
   if (!workshop) return notFound()
 
@@ -357,10 +429,73 @@ export default async function WorkshopDetailPage({ params }: Args) {
     workshop.image9,
   ].filter((img) => isResolvedMedia(img)) as MediaType[]
 
+  /* ══════════════════════════════════════════════════════════════
+   *  LAKTO-GEMÜSE — Dedicated standalone layout
+   *  Hero → Booking → Calendar → HowTos → Workshop Slider → Voucher → FAQ
+   * ══════════════════════════════════════════════════════════════ */
+  if (slug === 'lakto-gemuese' && workshopDetailData) {
+    return (
+      <article>
+        {/* 1. Dedicated Lakto Hero */}
+        <LaktoHero cms={detail ? {
+          eyebrow: detail.heroEyebrow,
+          title: detail.heroTitle,
+          description: detail.heroDescription,
+          attributes: detail.heroAttributes,
+        } : undefined} />
+
+        {/* 2. Modern Booking Card */}
+        <LaktoBookingCard workshop={workshopDetailData} cms={detail ?? undefined} />
+
+        {/* 3. Seasonal Fermentation Calendar */}
+        <LaktoCalendar cms={detail ? {
+          eyebrow: detail.calendarEyebrow,
+          title: detail.calendarTitle,
+          description: detail.calendarDescription,
+          months: detail.calendarMonths,
+        } : undefined} />
+
+        {/* 4. Fermented Vegetables How-Tos */}
+        <FermentedVegHowTos />
+
+        {/* 5. Other Workshops (slider — excludes lakto-gemuese) */}
+        <WorkshopTypesSlider
+          workshops={similarWorkshops}
+          heading={workshopTypesHeading}
+          subtitle={workshopTypesSub}
+          pillLabel={workshopTypePill}
+          buyLabel={bookLabel}
+          moreInfoLabel={learnMoreLabel}
+        />
+
+        {/* 6. Voucher CTA */}
+        <LaktoVoucherCta cms={detail ? {
+          eyebrow: detail.voucherEyebrow,
+          title: detail.voucherTitle,
+          description: detail.voucherDescription,
+          primaryLabel: detail.voucherPrimaryLabel,
+          primaryHref: detail.voucherPrimaryHref,
+          secondaryLabel: detail.voucherSecondaryLabel,
+          secondaryHref: detail.voucherSecondaryHref,
+          pills: detail.voucherPills,
+        } : undefined} />
+
+        {/* 7. Booking FAQ */}
+        <LaktoFAQ cms={detail ? {
+          eyebrow: detail.faqEyebrow,
+          title: detail.faqTitle,
+          description: detail.faqDescription,
+          items: detail.faqItems,
+          contactEmail: detail.faqContactEmail,
+        } : undefined} />
+      </article>
+    )
+  }
+
   return (
     <article className="pb-24">
       {/* ── 1. Hero ───────────────────────────────────────────────── */}
-      <section className="relative aspect-[16/9] w-full overflow-hidden lg:aspect-[21/9] lg:min-h-[28rem]">
+      <section className="relative aspect-video w-full overflow-hidden lg:aspect-21/9 lg:min-h-112">
         {isResolvedMedia(workshop.image) ? (
           <Media resource={workshop.image} fill imgClassName="object-cover" priority />
         ) : (
@@ -378,7 +513,8 @@ export default async function WorkshopDetailPage({ params }: Args) {
         moreInfoLabel={learnMoreLabel}
       />
 
-      {/* ── 3. Alle Termine (appointments list) ─────────────────────── */}
+      {/* ── 3. Booking & Details ─────────────────────────────────── */}
+      {/* Alle Termine (appointments list) */}
       <WorkshopTermineSection
         termins={termins}
         heading={alleTermineHeading}
@@ -388,7 +524,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
         filterAllLabel={filterAllLabel}
       />
 
-      {/* ── 4. Workshop Booking (image + booking panel, white bg) ───── */}
+      {/* Workshop Booking (image + booking panel, white bg) */}
       <WorkshopBookingSection
         mainImage={workshop.image}
         galleryImages={galleryImages}
@@ -445,12 +581,6 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
       {/* ── 9. Why Our Online Workshops (last section, bg white) ───── */}
       <WhyOnlineSection heading={whyOnlineHeading} features={whyOnlineFeatures} />
-
-      {/* ── 10. Fermentkalender (seasonal calendar) ────────────────── */}
-      {slug === 'lakto-gemuese' && <FermentKalender />}
-
-      {/* ── 11. Fermented Vegetables How-Tos (article cards) ────────── */}
-      {slug === 'lakto-gemuese' && <FermentedVegHowTos />}
     </article>
   )
 }

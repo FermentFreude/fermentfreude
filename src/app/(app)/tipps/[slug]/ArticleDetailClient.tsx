@@ -66,7 +66,7 @@ export function ArticleDetailClient({ article }: { article: Article }) {
 
       {/* ─── Hero Image Placeholder ─── */}
       <div>
-        <div className="aspect-[21/9] w-full rounded-2xl bg-ff-warm-gray" />
+        <div className="aspect-21/9 w-full rounded-2xl bg-ff-warm-gray" />
       </div>
 
       {/* ─── Article Content ─── */}
@@ -125,7 +125,7 @@ export function ArticleDetailClient({ article }: { article: Article }) {
                 className="group flex flex-col overflow-hidden rounded-2xl border border-ff-border-light bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               >
                 {/* Placeholder image */}
-                <div className="aspect-[16/9] w-full bg-ff-warm-gray transition-opacity duration-300 group-hover:opacity-90" />
+                <div className="aspect-video w-full bg-ff-warm-gray transition-opacity duration-300 group-hover:opacity-90" />
 
                 <div className="flex flex-1 flex-col p-6">
                   <h3 className="mb-2 font-display text-body-lg font-bold leading-snug text-ff-near-black transition-colors group-hover:text-ff-gray-text">
