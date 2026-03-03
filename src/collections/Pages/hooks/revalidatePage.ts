@@ -11,12 +11,15 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
 }) => {
   if (!context.disableRevalidate) {
     if (doc._status === 'published') {
+      const workshopSlugs = ['tempeh', 'lakto-gemuese', 'kombucha']
       const path =
         doc.slug === 'home'
           ? '/'
           : doc.slug === 'voucher'
             ? '/workshops/voucher'
-            : `/${doc.slug}`
+            : workshopSlugs.includes(doc.slug ?? '')
+              ? `/workshops/${doc.slug}`
+              : `/${doc.slug}`
 
       payload.logger.info(`Revalidating page at path: ${path}`)
 
@@ -29,12 +32,15 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
 
     // If the page was previously published, we need to revalidate the old path
     if (previousDoc?._status === 'published' && doc._status !== 'published') {
+      const workshopSlugs = ['tempeh', 'lakto-gemuese', 'kombucha']
       const oldPath =
         previousDoc.slug === 'home'
           ? '/'
           : previousDoc.slug === 'voucher'
             ? '/workshops/voucher'
-            : `/${previousDoc.slug}`
+            : workshopSlugs.includes(previousDoc.slug ?? '')
+              ? `/workshops/${previousDoc.slug}`
+              : `/${previousDoc.slug}`
 
       payload.logger.info(`Revalidating old page at path: ${oldPath}`)
 
@@ -50,12 +56,15 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
 
 export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { context } }) => {
   if (!context.disableRevalidate) {
+    const workshopSlugs = ['tempeh', 'lakto-gemuese', 'kombucha']
     const path =
       doc?.slug === 'home'
         ? '/'
         : doc?.slug === 'voucher'
           ? '/workshops/voucher'
-          : `/${doc?.slug}`
+          : workshopSlugs.includes(doc?.slug ?? '')
+            ? `/workshops/${doc?.slug}`
+            : `/${doc?.slug}`
     revalidatePath(path)
     if (doc?.slug === 'voucher') {
       revalidateTag('voucher')
