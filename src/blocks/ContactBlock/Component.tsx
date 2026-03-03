@@ -112,7 +112,7 @@ export const ContactBlockComponent: React.FC<
   const hideMap = (block as { hideMap?: boolean }).hideMap === true
 
   return (
-    <div id={id} className="min-h-screen bg-[#F9F0DC]">
+    <div id={id} className="min-h-screen bg-white">
       {/* Hero — heading + subtext, with optional background image (hidden when page uses page-level hero) */}
       {!hideHeroSection && (
         <section
@@ -164,7 +164,7 @@ export const ContactBlockComponent: React.FC<
       {/* Main contact card — image left, form right */}
       <section className="w-full px-6 py-12 md:py-24">
         <div className="mx-auto max-w-300">
-          <div className="overflow-hidden rounded-3xl bg-white shadow-lg md:rounded-[3rem]">
+          <div className="overflow-hidden rounded-3xl border border-ff-border-light bg-white shadow-lg md:rounded-[3rem]">
             <div className="grid md:grid-cols-2">
               {/* Left: Image */}
               <div className="relative aspect-4/3 md:aspect-auto md:min-h-100">

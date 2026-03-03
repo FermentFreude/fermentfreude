@@ -115,6 +115,13 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/50 to-black/30" />
 
+                {/* Slide counter — editorial style */}
+                {resolvedSlides.length > 1 && (
+                  <div className="absolute left-6 top-24 z-20 font-display text-sm font-bold tracking-widest text-white/70 sm:left-8 md:left-12 lg:left-16">
+                    {String(i + 1).padStart(2, '0')} / {String(resolvedSlides.length).padStart(2, '0')}
+                  </div>
+                )}
+
                 {/* Content */}
                 <div className="relative z-10 flex h-full items-center pt-16 sm:pt-20 lg:pt-24">
                   <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">

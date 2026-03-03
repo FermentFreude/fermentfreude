@@ -215,12 +215,12 @@ export const TestimonialsBlock: React.FC<Props> = ({ eyebrow, heading, testimoni
 
       <div className="container mx-auto px-6">
         {/* ── Header ── */}
-        <div className="flex flex-col gap-2 mb-(--space-content-xl)">
+        <div className="flex flex-col items-center gap-2 mb-(--space-content-xl) text-center">
           {resolvedEyebrow && (
             <span className="text-eyebrow font-bold text-ff-gold-accent">{resolvedEyebrow}</span>
           )}
           <h2
-            className="font-display font-black whitespace-nowrap"
+            className="font-display font-black"
             style={{
               fontSize: 'clamp(1.5rem, 3.5vw, 3rem)',
               lineHeight: 1.1,

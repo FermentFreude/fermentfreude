@@ -20,8 +20,8 @@ import path from 'path'
 import { getPayload } from 'payload'
 
 import {
-  aboutHeroDE,
-  aboutHeroEN,
+  aboutHeroSlidesDE,
+  aboutHeroSlidesEN,
   ourStoryDE,
   ourStoryEN,
   readyToLearnDE,
@@ -31,6 +31,8 @@ import {
   teamCardsDE,
   teamCardsEN,
 } from './data/about'
+import { buildTestimonials, mergeTestimonialsEN } from '../blocks/Testimonials/seed'
+import { contactDataDE, contactDataEN } from './data/contact'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
 async function seedAbout() {
@@ -132,6 +134,20 @@ async function seedAbout() {
     console.log(`    ✅ ${s.file}: ${img.id}`)
   }
 
+  // Upload contact form image for ContactBlock
+  const fs = await import('fs')
+  let contactFormImage: { id: string } | undefined
+  const contactFormPath = path.join(imagesDir, 'contact-form.png')
+  if (fs.existsSync(contactFormPath)) {
+    contactFormImage = await payload.create({
+      collection: 'media',
+      data: { alt: 'about-contact – FermentFreude team at workshop' },
+      file: await optimizedFile(contactFormPath, IMAGE_PRESETS.card),
+      context: { skipAutoTranslate: true },
+    })
+    console.log(`    ✅ Contact form image: ${contactFormImage.id}`)
+  }
+
   // ── 4. Build block data ────────────────────────────────────
   const imgArgs = {
     heroImage,
@@ -139,8 +155,17 @@ async function seedAbout() {
     davidImage,
     sponsorLogos: sponsorImages,
   }
+  const { de: testimonialsDE, en: testimonialsEN } = buildTestimonials()
+  const contactBlockDE = {
+    blockType: 'contactBlock' as const,
+    hideHeroSection: true,
+    hideCtaBanner: true,
+    hideMap: true,
+    ...contactDataDE({ contactImage: contactFormImage, heroImage: heroImage }),
+  }
 
   // ── 5. Create the About page in DE (default locale) ────────
+  const heroSlidesDE = aboutHeroSlidesDE(imgArgs)
   const aboutPage = await payload.create({
     collection: 'pages',
     locale: 'de',
@@ -153,19 +178,21 @@ async function seedAbout() {
       title: 'Über uns',
       slug: 'about',
       _status: 'published',
-      hero: aboutHeroDE(imgArgs),
+      hero: { type: 'heroCarousel' as const, slides: heroSlidesDE },
       layout: [
         ourStoryDE(),
         teamCardsDE(imgArgs),
         sponsorsBarDE(imgArgs),
+        testimonialsDE,
         readyToLearnDE(),
+        contactBlockDE,
       ] as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   })
 
   console.log(`  ✅ Created About page ${aboutPage.id} (DE)`)
 
-  // ── 6. Read back the layout to get array IDs ──────────────
+  // ── 6. Read back the layout and hero to get array IDs ──────
   const created = await payload.findByID({
     collection: 'pages',
     id: aboutPage.id,
@@ -173,9 +200,11 @@ async function seedAbout() {
     locale: 'de',
   })
 
+  const freshHero = (created.hero ?? {}) as { slides?: Array<{ id?: string }> }
+  const slideIds = (freshHero.slides ?? []).map((s) => s.id)
   const blocks = created.layout ?? []
-  if (blocks.length < 4) {
-    console.error(`  ❌ Expected 4 layout blocks, got ${blocks.length}`)
+  if (blocks.length < 6) {
+    console.error(`  ❌ Expected 6 layout blocks, got ${blocks.length}`)
     process.exit(1)
   }
 
@@ -183,7 +212,23 @@ async function seedAbout() {
   const ourStoryBlockId = blocks[0]!.id
   const teamCardsBlockId = blocks[1]!.id
   const sponsorsBarBlockId = blocks[2]!.id
-  const readyToLearnBlockId = blocks[3]!.id
+  const testimonialsBlockId = blocks[3]!.id
+  const readyToLearnBlockId = blocks[4]!.id
+  const contactBlockId = blocks[5]!.id
+
+  // Extract subject option IDs from ContactBlock
+  const contactBlock = blocks[5] as unknown as Record<string, unknown>
+  const contactForm = contactBlock?.contactForm as Record<string, unknown> | undefined
+  const subjectOptions = contactForm?.subjectOptions as Record<string, unknown> | undefined
+  const subjectOptionIds = ((subjectOptions?.options ?? []) as Array<{ id?: string }>).map(
+    (o) => o.id,
+  )
+
+  // Extract array IDs from Testimonials
+  const testimonialsBlock = blocks[3] as unknown as Record<string, unknown>
+  const testimonialIds = ((testimonialsBlock?.testimonials ?? []) as Array<{ id?: string }>).map(
+    (t) => t.id,
+  )
 
   // Extract array IDs from OurStory paragraphs
   const ourStoryBlock = blocks[0] as unknown as Record<string, unknown>
@@ -220,7 +265,37 @@ async function seedAbout() {
     }))
   }
 
+  const enTestimonials = mergeTestimonialsEN(testimonialsEN, {
+    id: testimonialsBlockId,
+    testimonials: testimonialIds.map((id) => ({ id })),
+  })
+
+  const enContactData = contactDataEN({
+    contactImage: contactFormImage,
+    heroImage: heroImage,
+  })
+  if (enContactData.contactForm?.subjectOptions?.options && subjectOptionIds.length > 0) {
+    enContactData.contactForm.subjectOptions.options =
+      enContactData.contactForm.subjectOptions.options.map(
+        (o: { label: string }, idx: number) => ({
+          ...o,
+          id: subjectOptionIds[idx],
+        }),
+      )
+  }
+  const contactBlockEN = {
+    blockType: 'contactBlock' as const,
+    hideHeroSection: true,
+    hideCtaBanner: true,
+    hideMap: true,
+    ...enContactData,
+  }
+
   // ── 8. Update EN locale ───────────────────────────────────
+  const heroSlidesEN = aboutHeroSlidesEN(imgArgs).map((s, i) => ({
+    ...s,
+    id: slideIds[i],
+  }))
   await payload.update({
     collection: 'pages',
     id: aboutPage.id,
@@ -233,19 +308,23 @@ async function seedAbout() {
     data: {
       title: 'About Us',
       _status: 'published',
-      hero: aboutHeroEN(imgArgs),
+      hero: { type: 'heroCarousel' as const, slides: heroSlidesEN },
       layout: [
         { id: ourStoryBlockId, ...enOurStory },
         { id: teamCardsBlockId, ...enTeamCards },
         { id: sponsorsBarBlockId, ...enSponsorsBar },
+        { id: testimonialsBlockId, ...enTestimonials },
         { id: readyToLearnBlockId, ...readyToLearnEN() },
+        { id: contactBlockId, ...contactBlockEN },
       ] as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   })
 
   console.log(`  ✅ Updated About page ${aboutPage.id} (EN)`)
   console.log('🎉 About page seeded successfully!')
-  console.log('   Blocks: hero → OurStory → TeamCards → SponsorsBar → ReadyToLearnCTA')
+  console.log(
+    '   Blocks: hero → OurStory → TeamCards → SponsorsBar → Testimonials → ReadyToLearnCTA → ContactBlock',
+  )
   console.log('   All images stored in Payload Media (Cloudflare R2) — editable from /admin')
 
   process.exit(0)

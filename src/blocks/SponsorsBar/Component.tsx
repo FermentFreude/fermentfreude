@@ -52,24 +52,16 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
     <section
       ref={sectionRef}
       id={id ?? undefined}
-      className={`section-padding-md transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-      style={{ backgroundColor: '#F0EDEA' }}
+      className={`section-padding-md border-t border-ff-border-light bg-ff-warm-gray transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
     >
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto container-padding">
         {/* ── Heading ── */}
-        <p
-          className="text-center font-display font-bold mb-12 lg:mb-16"
-          style={{
-            fontSize: 'clamp(1.4rem, 2.5vw, 2.2rem)',
-            color: '#1d1d1d',
-            lineHeight: 1.3,
-          }}
-        >
+        <p className="text-center font-display text-section-heading font-bold text-ff-black mb-12 lg:mb-16">
           {resolvedHeading}
         </p>
 
-        {/* ── Logo grid — 1 col mobile, 2 col tablet, 4 col desktop ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-10 w-full mx-auto">
+        {/* ── Logo grid — grayscale by default, full color on hover ── */}
+        <div className="grid grid-cols-1 gap-y-12 gap-x-8 md:grid-cols-2 lg:grid-cols-4 w-full mx-auto">
           {hasCmsLogos
             ? /* ── CMS logos ── */
               sponsors!.map((sponsor, index) => {
@@ -77,14 +69,14 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
                 const logoContent = (
                   <div
                     key={index}
-                    className="flex items-center justify-center px-4 py-3 transition-all duration-500 ease-out"
+                    className="group flex items-center justify-center px-4 py-3 transition-all duration-500 ease-out cursor-default"
                     style={{
                       opacity: isVisible ? 1 : 0,
                       transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
                       transitionDelay: `${200 + index * 120}ms`,
                     }}
                   >
-                    <div className="relative h-20 md:h-28 lg:h-32 w-full">
+                    <div className="relative h-20 md:h-28 lg:h-32 w-full [&_img]:grayscale [&_img]:transition-[filter] [&_img]:duration-500 group-hover:[&_img]:grayscale-0">
                       {logo && typeof logo === 'object' ? (
                         <Media
                           resource={logo as MediaType}
@@ -93,8 +85,7 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
                         />
                       ) : (
                         <div
-                          className="h-full w-28 rounded-lg"
-                          style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}
+                          className="h-full w-28 rounded-lg bg-ff-sponsor-placeholder"
                         />
                       )}
                     </div>
@@ -119,7 +110,7 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
               STATIC_SPONSORS.map((sponsor, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-center px-4 py-3 transition-all duration-500 ease-out"
+                  className="group flex items-center justify-center px-4 py-3 transition-all duration-500 ease-out cursor-default"
                   style={{
                     opacity: isVisible ? 1 : 0,
                     transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
@@ -127,7 +118,7 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
                   }}
                 >
                   <div
-                    className="relative h-20 md:h-28 lg:h-32 w-full"
+                    className="relative h-20 md:h-28 lg:h-32 w-full grayscale transition-[filter] duration-500 group-hover:grayscale-0"
                     style={
                       sponsor.scale !== 1 ? { transform: `scale(${sponsor.scale})` } : undefined
                     }

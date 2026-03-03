@@ -7,50 +7,58 @@ type AboutSeedArgs = {
   sponsorLogos?: Media[]
 }
 
-// ── Hero (page-level, not a block) ──────────────────────────
-export const aboutHeroDE = (args: AboutSeedArgs = {}) => ({
-  type: 'highImpact' as const,
-  richTextLowImpact: {
-    root: {
-      type: 'root',
-      children: [
-        {
-          type: 'heading',
-          tag: 'h1',
-          children: [{ type: 'text', text: 'Über uns', version: 1 }],
-          version: 1,
-        },
-      ],
-      direction: 'ltr' as const,
-      format: '' as const,
-      indent: 0,
-      version: 1,
-    },
+// ── Hero carousel (3 slides: banner, Marcel, David) ───────────
+export const aboutHeroSlidesDE = (args: AboutSeedArgs) => [
+  {
+    image: args.heroImage?.id ?? undefined,
+    title: 'Über uns',
+    description:
+      'Von Kimchi über Kombucha bis Tempeh — wir machen Fermentation erlebbar. Workshops, Kurse und handgemachte Produkte für mehr Darmgesundheit und Genuss.',
+    buttonLabel: 'Workshops entdecken',
+    buttonUrl: '/workshops',
   },
-  media: args.heroImage?.id ?? undefined,
-})
+  {
+    image: args.marcelImage?.id ?? undefined,
+    title: 'Marcel Rauminger',
+    description:
+      'Fermentationsspezialist & Koch — über 17 Jahre Erfahrung in kreativer fermentierter Küche.',
+    buttonLabel: 'Unser Team',
+    buttonUrl: '#team',
+  },
+  {
+    image: args.davidImage?.id ?? undefined,
+    title: 'David Heider',
+    description: 'Ernährungsspezialist & Lebensmittelentwickler — Wissenschaft und Genuss vereint.',
+    buttonLabel: 'Unser Team',
+    buttonUrl: '#team',
+  },
+]
 
-export const aboutHeroEN = (args: AboutSeedArgs = {}) => ({
-  type: 'highImpact' as const,
-  richTextLowImpact: {
-    root: {
-      type: 'root',
-      children: [
-        {
-          type: 'heading',
-          tag: 'h1',
-          children: [{ type: 'text', text: 'About Us', version: 1 }],
-          version: 1,
-        },
-      ],
-      direction: 'ltr' as const,
-      format: '' as const,
-      indent: 0,
-      version: 1,
-    },
+export const aboutHeroSlidesEN = (args: AboutSeedArgs) => [
+  {
+    image: args.heroImage?.id ?? undefined,
+    title: 'About Us',
+    description:
+      'From kimchi and kombucha to tempeh — we make fermentation tangible. Workshops, courses, and handmade products for gut health and enjoyment.',
+    buttonLabel: 'Explore workshops',
+    buttonUrl: '/workshops',
   },
-  media: args.heroImage?.id ?? undefined,
-})
+  {
+    image: args.marcelImage?.id ?? undefined,
+    title: 'Marcel Rauminger',
+    description:
+      'Fermentation Specialist & Chef — over 17 years in creative fermented cuisine.',
+    buttonLabel: 'Our Team',
+    buttonUrl: '#team',
+  },
+  {
+    image: args.davidImage?.id ?? undefined,
+    title: 'David Heider',
+    description: 'Nutrition Specialist & Food Developer — where science meets taste.',
+    buttonLabel: 'Our Team',
+    buttonUrl: '#team',
+  },
+]
 
 // ── OurStory block ─────────────────────────────────────────
 export const ourStoryDE = () => ({

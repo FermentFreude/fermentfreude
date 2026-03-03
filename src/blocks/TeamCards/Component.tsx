@@ -22,7 +22,7 @@ const DEFAULTS = {
 
 type Props = TeamCardsBlockType & { id?: string }
 
-export const TeamCardsBlock: React.FC<Props> = ({ label, heading, members, id }) => {
+export const TeamCardsBlock: React.FC<Props> = ({ label, heading, members }) => {
   const resolvedLabel = label ?? DEFAULTS.label
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedMembers =
@@ -31,42 +31,51 @@ export const TeamCardsBlock: React.FC<Props> = ({ label, heading, members, id })
       : DEFAULTS.members.map((m) => ({ ...m, image: null, id: null }))
 
   return (
-    <section id={id ?? undefined} className="w-full pt-4 pb-24 md:py-24">
-      <div className="mx-auto max-w-350 px-3 md:px-6">
-        <div className="flex flex-col items-center gap-12 md:gap-16">
-          <h2 className="font-display text-3xl font-bold text-[#E5B765] animate-fade-in">
-            {resolvedLabel}
-          </h2>
-          <h3 className="font-display text-center text-5xl font-bold text-[#1D1D1D] animate-fade-in-up animate-delay-200">
-            {resolvedHeading}
-          </h3>
-          <div className="grid w-full gap-12 md:grid-cols-2">
+    <section id="team" className="section-padding-lg bg-ff-ivory">
+      <div className="container mx-auto container-padding">
+        <div className="mx-auto max-w-[var(--content-wide)]">
+          <div className="text-center">
+            <span className="text-eyebrow text-ff-olive">{resolvedLabel}</span>
+            <h2 className="mt-2 text-ff-black">{resolvedHeading}</h2>
+            <div className="mx-auto mt-4 h-px w-16 bg-ff-gold-accent" />
+          </div>
+          <div className="mt-12 grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 md:gap-12 lg:gap-16">
             {resolvedMembers.map((member, idx) => {
               const hasImage = member.image && typeof member.image === 'object'
 
               return (
                 <div
                   key={idx}
-                  className="flex aspect-1/2 flex-col overflow-hidden rounded-3xl bg-white shadow-lg animate-fade-in-up hover:scale-[1.02] transition-transform duration-300"
-                  style={{ animationDelay: `${(idx + 1) * 200}ms` }}
+                  className="flex h-full flex-col overflow-hidden rounded-[var(--radius-xl)] border border-ff-border-light bg-white shadow-md transition-shadow duration-300 hover:shadow-lg"
                 >
-                  <div className="relative aspect-3/4 w-full overflow-hidden">
+                  <div className="relative aspect-[3/4] w-full overflow-hidden">
                     {hasImage ? (
                       <Media
                         resource={member.image as MediaType}
                         fill
-                        imgClassName="object-cover"
+                        imgClassName="object-cover transition-transform duration-500 hover:scale-105"
                       />
                     ) : (
-                      <div className="absolute inset-0 size-full bg-[#ECE5DE]" />
+                      <div className="absolute inset-0 size-full bg-ff-warm-gray" />
                     )}
+                    {/* Light gradient overlay at bottom */}
+                    <div
+                      className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent"
+                      aria-hidden
+                    />
                   </div>
-                  <div className="flex flex-col gap-4 px-8 pb-8 pt-6 text-center">
-                    <h3 className="font-display text-3xl font-bold text-[#1D1D1D]">
-                      {member.name}
-                    </h3>
-                    <p className="font-sans text-base font-normal text-[#E5B765]">{member.role}</p>
-                    <p className="font-sans text-base leading-relaxed text-[#1D1D1D]">
+                  <div className="flex min-h-0 flex-1 flex-col gap-3 px-6 pb-6 pt-5">
+                    <span
+                      className="font-display text-caption font-bold uppercase tracking-widest text-ff-gold-accent"
+                      aria-hidden
+                    >
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <h3 className="font-display text-subheading text-ff-black">{member.name}</h3>
+                    <p className="font-sans text-body-sm font-bold uppercase tracking-wide text-ff-olive">
+                      {member.role}
+                    </p>
+                    <p className="font-sans text-body leading-relaxed text-ff-black/80">
                       {member.description}
                     </p>
                   </div>
