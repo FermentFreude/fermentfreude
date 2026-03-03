@@ -154,7 +154,7 @@ const TITLES: Record<(typeof WORKSHOP_SLUGS)[number], { de: string; en: string }
 
 async function seedWorkshopPages() {
   const payload = await getPayload({ config })
-  const env = { ...process.env, PAYLOAD_SKIP_WORKSHOP_CONDITION: '1' }
+  const _env = { ...process.env, PAYLOAD_SKIP_WORKSHOP_CONDITION: '1' }
 
   for (const slug of WORKSHOP_SLUGS) {
     const titles = TITLES[slug]

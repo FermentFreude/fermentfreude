@@ -86,7 +86,7 @@ function resolveMedia(image: MediaType | string | number | null | undefined): Me
  * ═══════════════════════════════════════════════════════════════ */
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
-  eyebrow,
+  eyebrow: _eyebrow,
   workshops,
   allWorkshopsButtonLabel,
   allWorkshopsLink,

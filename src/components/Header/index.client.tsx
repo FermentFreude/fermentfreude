@@ -152,7 +152,7 @@ export function HeaderClient({ header }: Props) {
 
             {/* Desktop Nav Links */}
             <ul ref={navLinksRef} className="hidden lg:flex items-center gap-6 xl:gap-8">
-              {navItems.map((item, index) => {
+              {navItems.map((item, _index) => {
                 const { dropdownItems, defaultKey, label, url } = item
 
                 if (dropdownItems && dropdownItems.length > 0) {

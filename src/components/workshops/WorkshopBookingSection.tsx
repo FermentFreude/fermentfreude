@@ -44,7 +44,7 @@ export function WorkshopBookingSection({
   location,
   timeLabel,
   duration,
-  slug,
+  slug: _slug,
   dateLabel,
   quantityLabel,
   detailsLabel,
