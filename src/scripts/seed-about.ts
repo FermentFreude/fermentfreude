@@ -20,16 +20,22 @@ import path from 'path'
 import { getPayload } from 'payload'
 
 import {
-  aboutHeroDE,
-  aboutHeroEN,
+  aboutHeroSlidesDE,
+  aboutHeroSlidesEN,
+  closingTaglineDE,
+  closingTaglineEN,
   ourStoryDE,
   ourStoryEN,
   readyToLearnDE,
   readyToLearnEN,
   sponsorsBarDE,
   sponsorsBarEN,
+  statsDE,
+  statsEN,
   teamCardsDE,
   teamCardsEN,
+  valuesDE,
+  valuesEN,
 } from './data/about'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
@@ -123,6 +129,9 @@ async function seedAbout() {
   }
 
   // ── 5. Create the About page in DE (default locale) ────────
+  const heroSlidesDE = aboutHeroSlidesDE(imgArgs)
+  const heroSlidesEN = aboutHeroSlidesEN(imgArgs)
+
   const aboutPage = await payload.create({
     collection: 'pages',
     locale: 'de',
@@ -135,19 +144,25 @@ async function seedAbout() {
       title: 'Über uns',
       slug: 'about',
       _status: 'published',
-      hero: aboutHeroDE(imgArgs),
+      hero:
+        heroSlidesDE.length > 0
+          ? ({ type: 'heroCarousel' as const, slides: heroSlidesDE } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+          : ({ type: 'highImpact' as const, media: imgArgs.heroImage?.id } as any), // eslint-disable-line @typescript-eslint/no-explicit-any
       layout: [
         ourStoryDE(),
+        valuesDE(),
+        statsDE(),
         teamCardsDE(imgArgs),
         sponsorsBarDE(imgArgs),
         readyToLearnDE(),
+        closingTaglineDE(),
       ] as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   })
 
   console.log(`  ✅ Created About page ${aboutPage.id} (DE)`)
 
-  // ── 6. Read back the layout to get array IDs ──────────────
+  // ── 6. Read back the layout and hero to get array IDs ──────────────
   const created = await payload.findByID({
     collection: 'pages',
     id: aboutPage.id,
@@ -156,16 +171,22 @@ async function seedAbout() {
   })
 
   const blocks = created.layout ?? []
-  if (blocks.length < 4) {
-    console.error(`  ❌ Expected 4 layout blocks, got ${blocks.length}`)
+  if (blocks.length < 7) {
+    console.error(`  ❌ Expected 7 layout blocks, got ${blocks.length}`)
     process.exit(1)
   }
 
+  const freshHero = (created.hero ?? {}) as { slides?: Array<{ id?: string }> }
+  const slideIds = (freshHero.slides ?? []).map((s) => s.id)
+
   // Block IDs
   const ourStoryBlockId = blocks[0]!.id
-  const teamCardsBlockId = blocks[1]!.id
-  const sponsorsBarBlockId = blocks[2]!.id
-  const readyToLearnBlockId = blocks[3]!.id
+  const valuesBlockId = blocks[1]!.id
+  const statsBlockId = blocks[2]!.id
+  const teamCardsBlockId = blocks[3]!.id
+  const sponsorsBarBlockId = blocks[4]!.id
+  const readyToLearnBlockId = blocks[5]!.id
+  const closingTaglineBlockId = blocks[6]!.id
 
   // Extract array IDs from OurStory paragraphs
   const ourStoryBlock = blocks[0] as unknown as Record<string, unknown>
@@ -173,12 +194,20 @@ async function seedAbout() {
     (p) => p.id,
   )
 
+  // Extract array IDs from Values items
+  const valuesBlock = blocks[1] as unknown as Record<string, unknown>
+  const valuesItemIds = ((valuesBlock?.items ?? []) as Array<{ id?: string }>).map((i) => i.id)
+
+  // Extract array IDs from Stats items
+  const statsBlock = blocks[2] as unknown as Record<string, unknown>
+  const statsItemIds = ((statsBlock?.items ?? []) as Array<{ id?: string }>).map((i) => i.id)
+
   // Extract array IDs from TeamCards members
-  const teamCardsBlock = blocks[1] as unknown as Record<string, unknown>
+  const teamCardsBlock = blocks[3] as unknown as Record<string, unknown>
   const memberIds = ((teamCardsBlock?.members ?? []) as Array<{ id?: string }>).map((m) => m.id)
 
   // Extract array IDs from SponsorsBar sponsors
-  const sponsorsBarBlock = blocks[2] as unknown as Record<string, unknown>
+  const sponsorsBarBlock = blocks[4] as unknown as Record<string, unknown>
   const sponsorIds = ((sponsorsBarBlock?.sponsors ?? []) as Array<{ id?: string }>).map((s) => s.id)
 
   // ── 7. Build EN data with same array IDs ──────────────────
@@ -187,6 +216,22 @@ async function seedAbout() {
     ...p,
     id: paragraphIds[idx],
   }))
+
+  const enValues = valuesEN()
+  if (enValues.items && valuesItemIds.length > 0) {
+    enValues.items = enValues.items.map((item, idx) => ({
+      ...item,
+      id: valuesItemIds[idx],
+    }))
+  }
+
+  const enStats = statsEN()
+  if (enStats.items && statsItemIds.length > 0) {
+    enStats.items = enStats.items.map((item, idx) => ({
+      ...item,
+      id: statsItemIds[idx],
+    }))
+  }
 
   const enTeamCards = teamCardsEN(imgArgs)
   enTeamCards.members = enTeamCards.members.map((m, idx) => ({
@@ -203,6 +248,11 @@ async function seedAbout() {
   }
 
   // ── 8. Update EN locale ───────────────────────────────────
+  const enSlides =
+    heroSlidesEN.length > 0 && slideIds.length === heroSlidesEN.length
+      ? heroSlidesEN.map((s, i) => ({ ...s, id: slideIds[i] }))
+      : heroSlidesEN
+
   await payload.update({
     collection: 'pages',
     id: aboutPage.id,
@@ -215,19 +265,25 @@ async function seedAbout() {
     data: {
       title: 'About Us',
       _status: 'published',
-      hero: aboutHeroEN(imgArgs),
+      hero:
+        enSlides.length > 0
+          ? ({ type: 'heroCarousel' as const, slides: enSlides } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+          : ({ type: 'highImpact' as const, media: imgArgs.heroImage?.id } as any), // eslint-disable-line @typescript-eslint/no-explicit-any
       layout: [
         { id: ourStoryBlockId, ...enOurStory },
+        { id: valuesBlockId, ...enValues },
+        { id: statsBlockId, ...enStats },
         { id: teamCardsBlockId, ...enTeamCards },
         { id: sponsorsBarBlockId, ...enSponsorsBar },
         { id: readyToLearnBlockId, ...readyToLearnEN() },
+        { id: closingTaglineBlockId, ...closingTaglineEN() },
       ] as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   })
 
   console.log(`  ✅ Updated About page ${aboutPage.id} (EN)`)
   console.log('🎉 About page seeded successfully!')
-  console.log('   Blocks: hero → OurStory → TeamCards → SponsorsBar → ReadyToLearnCTA')
+  console.log('   Hero: carousel with 3 slides | Blocks: OurStory → Values → Stats → TeamCards → SponsorsBar → ReadyToLearnCTA → ClosingTagline')
   console.log('   All images stored in Payload Media (Cloudflare R2) — editable from /admin')
 
   process.exit(0)

@@ -468,7 +468,14 @@ export interface Page {
     /**
      * Choose how this page looks at the top. "Home Page Slider" is for the homepage with animated slides.
      */
-    type: 'heroSlider' | 'highImpact' | 'lowImpact' | 'heroCarousel' | 'foodPresentationSlider' | 'none';
+    type:
+      | 'heroSlider'
+      | 'highImpact'
+      | 'videoBackground'
+      | 'lowImpact'
+      | 'heroCarousel'
+      | 'foodPresentationSlider'
+      | 'none';
     /**
      * The main headline and tagline. Use H1 for the big headline, then paragraph for the tagline.
      */
@@ -587,6 +594,54 @@ export interface Page {
      * The big hero background image.
      */
     media?: (string | null) | Media;
+    /**
+     * e.g. https://vimeo.com/123456789 or https://player.vimeo.com/video/123456789. Leave empty to use fallback image only.
+     */
+    vimeoUrl?: string | null;
+    /**
+     * Shown while video loads or if video fails. Optional.
+     */
+    videoFallbackImage?: (string | null) | Media;
+    /**
+     * Headline and optional tagline over the video.
+     */
+    videoRichText?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    /**
+     * Optional CTA buttons below the headline.
+     */
+    videoLinks?:
+      | {
+          link: {
+            type?: ('reference' | 'custom') | null;
+            newTab?: boolean | null;
+            reference?: {
+              relationTo: 'pages';
+              value: string | Page;
+            } | null;
+            url?: string | null;
+            label: string;
+            /**
+             * Choose how the link should be rendered.
+             */
+            appearance?: ('default' | 'outline') | null;
+          };
+          id?: string | null;
+        }[]
+      | null;
     richTextLowImpact?: {
       root: {
         type: string;
@@ -619,6 +674,7 @@ export interface Page {
    */
   layout?:
     | (
+        | ClosingTaglineBlock
         | ContactBlock
         | CallToActionBlock
         | ContentBlock
@@ -630,6 +686,8 @@ export interface Page {
         | OurStoryBlock
         | ReadyToLearnCtaBlock
         | SponsorsBarBlock
+        | StatsBlock
+        | ValuesBlock
         | TeamCardsBlock
         | TeamPreviewBlock
         | TestimonialsBlock
@@ -1137,6 +1195,31 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ClosingTaglineBlock".
+ */
+export interface ClosingTaglineBlock {
+  /**
+   * Short closing line (e.g. "Fermentation for everyone").
+   */
+  tagline: string;
+  /**
+   * Optional smaller text below (e.g. "Get in touch").
+   */
+  subtext?: string | null;
+  /**
+   * CTA button (e.g. "Contact us"). Leave empty to hide.
+   */
+  linkLabel?: string | null;
+  /**
+   * Where the button links (e.g. /contact).
+   */
+  linkUrl?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'closingTagline';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1744,6 +1827,68 @@ export interface SponsorsBarBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'sponsorsBar';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock".
+ */
+export interface StatsBlock {
+  /**
+   * Small accent text above the heading (e.g. "By the Numbers").
+   */
+  label?: string | null;
+  /**
+   * Section heading (e.g. "FermentFreude in Numbers").
+   */
+  heading: string;
+  /**
+   * 3–4 stat items. Each has a value (number or text) and label.
+   */
+  items: {
+    /**
+     * Number or short text (e.g. "500+", "10", "2"). Not localized — same in all languages.
+     */
+    value: string;
+    /**
+     * Description below the value (e.g. "Workshops held", "Years experience").
+     */
+    label: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'stats';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ValuesBlock".
+ */
+export interface ValuesBlock {
+  /**
+   * Small accent text above the heading (e.g. "Our Values", "Unsere Werte").
+   */
+  label?: string | null;
+  /**
+   * Section heading (e.g. "What We Stand For").
+   */
+  heading: string;
+  /**
+   * 3–4 values or principles. Each has a title and optional short description.
+   */
+  items: {
+    /**
+     * Value name (e.g. "Tradition meets Science").
+     */
+    title: string;
+    /**
+     * Short explanation. Leave empty for title-only.
+     */
+    description?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'values';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2454,6 +2599,24 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         media?: T;
+        vimeoUrl?: T;
+        videoFallbackImage?: T;
+        videoRichText?: T;
+        videoLinks?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                    appearance?: T;
+                  };
+              id?: T;
+            };
         richTextLowImpact?: T;
         slides?:
           | T
@@ -2470,6 +2633,7 @@ export interface PagesSelect<T extends boolean = true> {
   layout?:
     | T
     | {
+        closingTagline?: T | ClosingTaglineBlockSelect<T>;
         contactBlock?: T | ContactBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
@@ -2481,6 +2645,8 @@ export interface PagesSelect<T extends boolean = true> {
         ourStory?: T | OurStoryBlockSelect<T>;
         readyToLearnCta?: T | ReadyToLearnCtaBlockSelect<T>;
         sponsorsBar?: T | SponsorsBarBlockSelect<T>;
+        stats?: T | StatsBlockSelect<T>;
+        values?: T | ValuesBlockSelect<T>;
         teamCards?: T | TeamCardsBlockSelect<T>;
         teamPreview?: T | TeamPreviewBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
@@ -2799,6 +2965,18 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ClosingTaglineBlock_select".
+ */
+export interface ClosingTaglineBlockSelect<T extends boolean = true> {
+  tagline?: T;
+  subtext?: T;
+  linkLabel?: T;
+  linkUrl?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ContactBlock_select".
  */
 export interface ContactBlockSelect<T extends boolean = true> {
@@ -3032,6 +3210,40 @@ export interface SponsorsBarBlockSelect<T extends boolean = true> {
         name?: T;
         logo?: T;
         url?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock_select".
+ */
+export interface StatsBlockSelect<T extends boolean = true> {
+  label?: T;
+  heading?: T;
+  items?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ValuesBlock_select".
+ */
+export interface ValuesBlockSelect<T extends boolean = true> {
+  label?: T;
+  heading?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        description?: T;
         id?: T;
       };
   id?: T;

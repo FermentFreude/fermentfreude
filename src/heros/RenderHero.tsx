@@ -8,6 +8,7 @@ import { HeroSlider } from '@/heros/HeroSlider'
 import { HighImpactHero } from '@/heros/HighImpact'
 import { LowImpactHero } from '@/heros/LowImpact'
 import { MediumImpactHero } from '@/heros/MediumImpact'
+import { VideoBackgroundHero } from '@/heros/VideoBackground'
 
 const heroes = {
   foodPresentationSlider: FoodPresentationSlider,
@@ -16,6 +17,7 @@ const heroes = {
   heroSlider: HeroSlider,
   lowImpact: LowImpactHero,
   mediumImpact: MediumImpactHero,
+  videoBackground: VideoBackgroundHero,
 }
 
 export const RenderHero: React.FC<Page['hero']> = (props) => {

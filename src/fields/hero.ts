@@ -38,6 +38,7 @@ export const hero: Field = {
       options: [
         { label: '🏠 Home Page Slider', value: 'heroSlider' },
         { label: '📷 Full Image Banner', value: 'highImpact' },
+        { label: '🎬 Video Background (Vimeo)', value: 'videoBackground' },
         { label: '📄 Simple Title', value: 'lowImpact' },
         { label: '🎠 Photo Carousel', value: 'heroCarousel' },
         { label: '🍽️ Food Presentation', value: 'foodPresentationSlider' },
@@ -388,6 +389,66 @@ export const hero: Field = {
             description: 'The big hero background image.',
           },
         },
+      ],
+    },
+
+    /* ═══════════════════════════════════════════════════════════════════════
+     * VIDEO BACKGROUND (videoBackground)
+     * Fullscreen Vimeo video with text overlay — cinematic hero
+     * ═══════════════════════════════════════════════════════════════════════ */
+    {
+      type: 'collapsible',
+      label: '🎬 Video & Text',
+      admin: {
+        condition: (_, { type } = {}) => type === 'videoBackground',
+        initCollapsed: false,
+        description: 'Vimeo video plays fullscreen behind the text. Autoplay, loop, muted.',
+      },
+      fields: [
+        {
+          name: 'vimeoUrl',
+          type: 'text',
+          label: 'Vimeo Video URL',
+          admin: {
+            description: 'e.g. https://vimeo.com/123456789 or https://player.vimeo.com/video/123456789. Leave empty to use fallback image only.',
+          },
+        },
+        {
+          name: 'videoFallbackImage',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Fallback Image',
+          admin: {
+            description: 'Shown while video loads or if video fails. Optional.',
+          },
+        },
+        {
+          name: 'videoRichText',
+          type: 'richText',
+          label: 'Title & Tagline',
+          localized: true,
+          admin: {
+            description: 'Headline and optional tagline over the video.',
+          },
+          editor: lexicalEditor({
+            features: ({ rootFeatures }) => [
+              ...rootFeatures,
+              HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3'] }),
+              FixedToolbarFeature(),
+              InlineToolbarFeature(),
+            ],
+          }),
+        },
+        linkGroup({
+          overrides: {
+            name: 'videoLinks',
+            label: 'Buttons',
+            maxRows: 2,
+            admin: {
+              description: 'Optional CTA buttons below the headline.',
+            },
+          },
+        }),
       ],
     },
 

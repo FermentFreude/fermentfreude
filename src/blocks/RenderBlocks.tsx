@@ -2,6 +2,7 @@ import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { CarouselBlock } from '@/blocks/Carousel/Component'
+import { ClosingTaglineBlock } from '@/blocks/ClosingTagline/Component'
 import { ContactBlockComponent } from '@/blocks/ContactBlock/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FeatureCardsBlock } from '@/blocks/FeatureCards/Component'
@@ -10,6 +11,8 @@ import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { OurStoryBlock } from '@/blocks/OurStory/Component'
 import { ReadyToLearnCTABlock } from '@/blocks/ReadyToLearnCTA/Component'
+import { StatsBlock } from '@/blocks/Stats/Component'
+import { ValuesBlock } from '@/blocks/Values/Component'
 import { SponsorsBarBlock } from '@/blocks/SponsorsBar/Component'
 import { TeamCardsBlock } from '@/blocks/TeamCards/Component'
 import { TeamPreviewBlock } from '@/blocks/TeamPreview/Component'
@@ -23,6 +26,7 @@ import React, { Fragment } from 'react'
 import type { Page } from '../payload-types'
 
 const blockComponents = {
+  closingTagline: ClosingTaglineBlock,
   contactBlock: ContactBlockComponent,
   archive: ArchiveBlock,
   banner: BannerBlock,
@@ -36,6 +40,8 @@ const blockComponents = {
   ourStory: OurStoryBlock,
   readyToLearnCta: ReadyToLearnCTABlock,
   sponsorsBar: SponsorsBarBlock,
+  stats: StatsBlock,
+  values: ValuesBlock,
   teamCards: TeamCardsBlock,
   teamPreview: TeamPreviewBlock,
   testimonials: TestimonialsBlock,

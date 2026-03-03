@@ -7,50 +7,66 @@ type AboutSeedArgs = {
   sponsorLogos?: Media[]
 }
 
-// ── Hero (page-level, not a block) ──────────────────────────
-export const aboutHeroDE = (args: AboutSeedArgs = {}) => ({
-  type: 'highImpact' as const,
-  richText: {
-    root: {
-      type: 'root',
-      children: [
+// ── Hero (page-level, not a block) — Carousel with multiple slides ──
+export const aboutHeroSlidesDE = (args: AboutSeedArgs = {}) =>
+  args.heroImage && args.marcelImage && args.davidImage
+    ? [
         {
-          type: 'heading',
-          tag: 'h1',
-          children: [{ type: 'text', text: 'Über uns', version: 1 }],
-          version: 1,
+          image: args.heroImage.id,
+          title: 'Über uns',
+          description:
+            'Ihr Partner für Fermentation — Workshops, Beratung und handgemachte Produkte für Gastronomie und Privatkunden.',
+          buttonLabel: 'Workshops entdecken',
+          buttonUrl: '/workshops',
         },
-      ],
-      direction: 'ltr' as const,
-      format: '' as const,
-      indent: 0,
-      version: 1,
-    },
-  },
-  media: args.heroImage?.id ?? undefined,
-})
+        {
+          image: args.marcelImage.id,
+          title: 'Unser Team',
+          description:
+            'Erfahrene Köche und Ernährungsexperten vermitteln praxisnahes Wissen in Workshops und Kursen.',
+          buttonLabel: 'Team kennenlernen',
+          buttonUrl: '/about#team',
+        },
+        {
+          image: args.davidImage.id,
+          title: 'Workshops & Kurse',
+          description:
+            'Von Lakto-Gemüse über Kombucha bis Tempeh — praxisorientierte Fermentationstechniken für jeden Anspruch.',
+          buttonLabel: 'Workshop buchen',
+          buttonUrl: '/workshops',
+        },
+      ]
+    : []
 
-export const aboutHeroEN = (args: AboutSeedArgs = {}) => ({
-  type: 'highImpact' as const,
-  richText: {
-    root: {
-      type: 'root',
-      children: [
+export const aboutHeroSlidesEN = (args: AboutSeedArgs = {}) =>
+  args.heroImage && args.marcelImage && args.davidImage
+    ? [
         {
-          type: 'heading',
-          tag: 'h1',
-          children: [{ type: 'text', text: 'About Us', version: 1 }],
-          version: 1,
+          image: args.heroImage.id,
+          title: 'About Us',
+          description:
+            'Your partner for fermentation — workshops, consulting, and handmade products for gastronomy and private customers.',
+          buttonLabel: 'Explore Workshops',
+          buttonUrl: '/workshops',
         },
-      ],
-      direction: 'ltr' as const,
-      format: '' as const,
-      indent: 0,
-      version: 1,
-    },
-  },
-  media: args.heroImage?.id ?? undefined,
-})
+        {
+          image: args.marcelImage.id,
+          title: 'Our Team',
+          description:
+            'Experienced chefs and nutrition experts deliver hands-on knowledge through workshops and courses.',
+          buttonLabel: 'Meet the Team',
+          buttonUrl: '/about#team',
+        },
+        {
+          image: args.davidImage.id,
+          title: 'Workshops & Courses',
+          description:
+            'From lacto vegetables to kombucha and tempeh — practical fermentation techniques for every level.',
+          buttonLabel: 'Book Workshop',
+          buttonUrl: '/workshops',
+        },
+      ]
+    : []
 
 // ── OurStory block ─────────────────────────────────────────
 export const ourStoryDE = () => ({
@@ -58,13 +74,13 @@ export const ourStoryDE = () => ({
   label: 'Unsere Geschichte',
   heading: 'Freude an der Fermentation',
   subheading:
-    'Fermentation zugänglich und genussvoll machen, während wir Darmgesundheit durch Geschmack, Bildung und qualitativ hochwertige handgemachte Lebensmittel fördern',
+    'Fermentation zugänglich und genussvoll — Darmgesundheit durch Geschmack, Bildung und qualitativ hochwertige handgemachte Lebensmittel.',
   paragraphs: [
     {
-      text: 'FermentFreude ist ein modernes österreichisches Food-Tech-Startup, das Menschen hilft, Fermentation durch unterhaltsame Workshops und hochwertige fermentierte Produkte zu entdecken. Wir kombinieren Gesundheit, Genuss und Wissen, um Fermentation zu einem Teil des Alltags zu machen.',
+      text: 'FermentFreude ist ein österreichisches Food-Tech-Unternehmen, das Fermentation durch praxisnahe Workshops und hochwertige fermentierte Produkte vermittelt. Wir verbinden Gesundheit, Genuss und Wissen, um Fermentation zum selbstverständlichen Teil des Alltags zu machen.',
     },
     {
-      text: 'Durch die Verbindung traditioneller Fermentationsmethoden mit moderner Wissenschaft und regionaler Beschaffung ermöglichen wir Hobbyköchen und Profis, mit Selbstvertrauen, Neugier und Freude an Lebensmittel heranzugehen.',
+      text: 'Durch die Verbindung traditioneller Methoden mit moderner Wissenschaft und regionaler Beschaffung ermöglichen wir Hobbyköchen und Profis einen selbstbewussten, neugierigen Zugang zu fermentierten Lebensmitteln.',
     },
   ],
 })
@@ -74,14 +90,96 @@ export const ourStoryEN = () => ({
   label: 'Our Story',
   heading: 'Bringing Joy to Fermentation',
   subheading:
-    'Making fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods',
+    'Making fermentation accessible and enjoyable — gut health through taste, education, and quality handmade foods.',
   paragraphs: [
     {
-      text: 'FermentFreude is a modern Austrian food-tech startup helping people discover fermentation through fun workshops and premium fermented products. We combine health, enjoyment, and knowledge to make fermentation part of everyday life.',
+      text: 'FermentFreude is an Austrian food-tech company that teaches fermentation through hands-on workshops and premium fermented products. We combine health, enjoyment, and knowledge to make fermentation a natural part of everyday life.',
     },
     {
-      text: 'By merging traditional fermentation methods with modern science and regional sourcing, we empower home cooks and professionals to approach food with confidence, curiosity, and pleasure.',
+      text: 'By merging traditional methods with modern science and regional sourcing, we empower home cooks and professionals to approach fermented foods with confidence and curiosity.',
     },
+  ],
+})
+
+// ── Values block ───────────────────────────────────────────
+export const valuesDE = () => ({
+  blockType: 'values' as const,
+  label: 'Unsere Werte',
+  heading: 'Wofür wir stehen',
+  items: [
+    {
+      title: 'Tradition trifft Wissenschaft',
+      description:
+        'Wir verbinden bewährte Fermentationsmethoden mit moderner Forschung für sichere, köstliche Ergebnisse.',
+    },
+    {
+      title: 'Qualität vor Quantität',
+      description:
+        'Regionale Zutaten, sorgfältige Verarbeitung und keine Kompromisse beim Geschmack.',
+    },
+    {
+      title: 'Bildung & Zugänglichkeit',
+      description:
+        'Fermentation für alle — von Hobbyköchen bis Profis, in Workshops und Online-Kursen.',
+    },
+    {
+      title: 'Nachhaltigkeit',
+      description:
+        'Lange Haltbarkeit ohne Kühlung, weniger Verschwendung, regionale Kreisläufe.',
+    },
+  ],
+})
+
+export const valuesEN = () => ({
+  blockType: 'values' as const,
+  label: 'Our Values',
+  heading: 'What We Stand For',
+  items: [
+    {
+      title: 'Tradition Meets Science',
+      description:
+        'We combine time-tested fermentation methods with modern research for safe, delicious results.',
+    },
+    {
+      title: 'Quality over Quantity',
+      description:
+        'Regional ingredients, careful processing, and no compromises on flavour.',
+    },
+    {
+      title: 'Education & Accessibility',
+      description:
+        'Fermentation for everyone — from home cooks to professionals, in workshops and online courses.',
+    },
+    {
+      title: 'Sustainability',
+      description:
+        'Long shelf life without refrigeration, less waste, regional cycles.',
+    },
+  ],
+})
+
+// ── Stats block ────────────────────────────────────────────
+export const statsDE = () => ({
+  blockType: 'stats' as const,
+  label: 'In Zahlen',
+  heading: 'FermentFreude in Zahlen',
+  items: [
+    { value: '500+', label: 'Workshops durchgeführt' },
+    { value: '17', label: 'Jahre Erfahrung' },
+    { value: '2', label: 'Gründer' },
+    { value: '4', label: 'Workshop-Formate' },
+  ],
+})
+
+export const statsEN = () => ({
+  blockType: 'stats' as const,
+  label: 'By the Numbers',
+  heading: 'FermentFreude in Numbers',
+  items: [
+    { value: '500+', label: 'Workshops held' },
+    { value: '17', label: 'Years of experience' },
+    { value: '2', label: 'Founders' },
+    { value: '4', label: 'Workshop formats' },
   ],
 })
 
@@ -89,21 +187,21 @@ export const ourStoryEN = () => ({
 export const teamCardsDE = (args: AboutSeedArgs = {}) => ({
   blockType: 'teamCards' as const,
   label: 'Unser Team',
-  heading: 'Lernen Sie die Experten hinter FermentFreude kennen',
+  heading: 'Die Experten hinter FermentFreude',
   members: [
     {
       image: args.marcelImage?.id ?? undefined,
       name: 'Marcel Rauminger',
       role: 'Fermentationsspezialist & Koch',
       description:
-        'Mit über 17 Jahren als leidenschaftlicher Koch und Zertifikat in veganer Küche, angereichert durch Monate in einem thailändischen Kloster, entdeckte Marcel die Schlüssel zur Fermentation und ist zu einem Spezialisten für kreative fermentierte Küche geworden. Sein Wunsch, durch Workshops zu experten, neue Entdeckungen und Leidenschaft für feinen Geschmack zu teilen.',
+        'Mit über 17 Jahren Erfahrung als Koch und Zertifikat in veganer Küche entdeckte Marcel die Schlüssel zur Fermentation und hat sich zum Spezialisten für kreative fermentierte Küche entwickelt. In Workshops teilt er seine Leidenschaft für feinen Geschmack und praxisnahes Wissen.',
     },
     {
       image: args.davidImage?.id ?? undefined,
       name: 'David Heider',
       role: 'Ernährungsspezialist & Lebensmittelentwickler',
       description:
-        'Mit einem Hintergrund in Lebensmittelwissenschaften und Wirtschaftswissenschaften ist David leidenschaftlich daran interessiert, komplexe wissenschaftliche Konzepte für alle verdaulich zu machen. Er entwickelt quelloffene Fermentationstechniken basierend auf fermentierten Lebensmitteln, die fantastisch schmecken und das Wohlbefinden unterstützen und die perfekte Brücke zwischen Wissenschaft und Kunst von FermentFreude schaffen.',
+        'Mit Hintergrund in Lebensmittelwissenschaften und Wirtschaft macht David komplexe wissenschaftliche Konzepte verständlich. Er entwickelt Fermentationstechniken, die hervorragend schmecken, das Wohlbefinden fördern und die Brücke zwischen Wissenschaft und Handwerk schlagen.',
     },
   ],
 })
@@ -111,21 +209,21 @@ export const teamCardsDE = (args: AboutSeedArgs = {}) => ({
 export const teamCardsEN = (args: AboutSeedArgs = {}) => ({
   blockType: 'teamCards' as const,
   label: 'Our Team',
-  heading: 'Meet the Experts Behind FermentFreude',
+  heading: 'The Experts Behind FermentFreude',
   members: [
     {
       image: args.marcelImage?.id ?? undefined,
       name: 'Marcel Rauminger',
       role: 'Fermentation Specialist & Chef',
       description:
-        'With over 17 years as a passionate chef and certificate in vegan cooking enriched by months in a Thai monastery, Marcel discovered the keys to fermentation and has become a specialist in creative fermented cuisine. His desire to expertise through workshops, sharing new discoveries and passion for fine flavor.',
+        'With over 17 years of experience as a chef and a certificate in vegan cooking, Marcel discovered the keys to fermentation and has become a specialist in creative fermented cuisine. In workshops, he shares his passion for fine flavor and hands-on knowledge.',
     },
     {
       image: args.davidImage?.id ?? undefined,
       name: 'David Heider',
       role: 'Nutrition Specialist & Food Developer',
       description:
-        'With a background in food science and economics, David is passionate about making complex scientific concepts digestible for everyone. He develops open-sourced fermentation techniques based fermented foods that taste amazing and support wellbeing, creating the perfect bridge between science and art of FermentFreude.',
+        'With a background in food science and economics, David makes complex scientific concepts accessible. He develops fermentation techniques that taste exceptional, support wellbeing, and bridge the gap between science and craft.',
     },
   ],
 })
@@ -153,12 +251,29 @@ export const sponsorsBarEN = (args: AboutSeedArgs = {}) => ({
     : [],
 })
 
+// ── ClosingTagline block ───────────────────────────────────
+export const closingTaglineDE = () => ({
+  blockType: 'closingTagline' as const,
+  tagline: 'Lust auf Fermentation? Wir freuen uns auf Sie.',
+  subtext: 'Workshops, Beratung oder einfach nur ein Gespräch — schreiben Sie uns.',
+  linkLabel: 'Kontakt aufnehmen',
+  linkUrl: '/contact',
+})
+
+export const closingTaglineEN = () => ({
+  blockType: 'closingTagline' as const,
+  tagline: 'Curious about fermentation? We\'d love to meet you.',
+  subtext: 'Workshops, consulting, or just a chat — get in touch.',
+  linkLabel: 'Get in touch',
+  linkUrl: '/contact',
+})
+
 // ── ReadyToLearnCTA block ──────────────────────────────────
 export const readyToLearnDE = () => ({
   blockType: 'readyToLearnCta' as const,
-  heading: 'Bereit zu lernen?',
+  heading: 'Bereit für den nächsten Schritt?',
   description:
-    'Nehmen Sie an unseren Workshops und Online-Kursen teil, um praktische Fermentationstechniken zu erlernen, Fragen zu stellen und sich mit einer Gemeinschaft von Lernenden zu verbinden.',
+    'Lernen Sie praktische Fermentationstechniken in unseren Workshops und Online-Kursen — und verbinden Sie sich mit einer Gemeinschaft von Gleichgesinnten.',
   primaryButton: {
     label: 'Workshops ansehen',
     href: '/workshops',
@@ -171,9 +286,9 @@ export const readyToLearnDE = () => ({
 
 export const readyToLearnEN = () => ({
   blockType: 'readyToLearnCta' as const,
-  heading: 'Ready to learn?',
+  heading: 'Ready for the next step?',
   description:
-    'Join our workshops and online courses to learn hands-on fermentation techniques, ask questions, and connect with a community of learners.',
+    'Learn practical fermentation techniques in our workshops and online courses — and connect with a community of like-minded learners.',
   primaryButton: {
     label: 'View workshops',
     href: '/workshops',

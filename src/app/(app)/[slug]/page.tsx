@@ -12,6 +12,8 @@ import { getPayload } from 'payload'
 
 import { notFound } from 'next/navigation'
 
+import type { Page as PageType } from '@/payload-types'
+
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
   const pages = await payload.find({
@@ -62,13 +64,54 @@ export default async function Page({ params }: Args) {
     return notFound()
   }
 
-  const { hero, layout } = page
+  let { hero, layout } = page
+  const payload = await getPayload({ config: configPromise })
+
+  // Resolve hero.media when depth didn't populate it (returns ID instead of object)
+  if (hero?.media && typeof hero.media === 'string') {
+    try {
+      const mediaDoc = await payload.findByID({
+        collection: 'media',
+        id: hero.media,
+        depth: 0,
+      })
+      hero = { ...hero, media: mediaDoc } as PageType['hero']
+    } catch {
+      hero = { ...hero, media: undefined } as PageType['hero']
+    }
+  }
+
+  // Resolve heroCarousel slide images when depth didn't populate them
+  if (hero?.type === 'heroCarousel' && hero.slides && hero.slides.length > 0) {
+    hero = {
+      ...hero,
+      slides: await Promise.all(
+        hero.slides.map(async (slide) => {
+          const img = (slide as { image?: unknown }).image
+          if (img && typeof img === 'string') {
+            try {
+              const mediaDoc = await payload.findByID({
+                collection: 'media',
+                id: img,
+                depth: 0,
+              })
+              return { ...slide, image: mediaDoc }
+            } catch {
+              return slide
+            }
+          }
+          return slide
+        }),
+      ),
+    } as PageType['hero']
+  }
 
   const isFullBleedHero =
     hero.type === 'heroSlider' ||
     hero.type === 'heroCarousel' ||
     hero.type === 'foodPresentationSlider' ||
-    hero.type === 'highImpact'
+    hero.type === 'highImpact' ||
+    hero.type === 'videoBackground'
 
   return (
     <article className={isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'}>

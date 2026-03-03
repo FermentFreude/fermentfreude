@@ -5,7 +5,9 @@ import { getCachedGlobal } from '@/utilities/getGlobals'
 import { getLocale } from '@/utilities/getLocale'
 import Image from 'next/image'
 import Link from 'next/link'
-import { NewsletterForm } from './NewsletterForm'
+import dynamic from 'next/dynamic'
+
+const NewsletterForm = dynamic(() => import('./NewsletterForm').then((m) => ({ default: m.NewsletterForm })))
 
 const DEFAULTS = {
   location: 'Grabenstraße 15,\n8010 Graz, Austria',

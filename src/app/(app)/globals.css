@@ -330,6 +330,16 @@
   .content-full {
     max-width: var(--content-full);
   }
+
+  /* Subtle dot pattern — creative background */
+  .bg-dot-pattern {
+    background-image: radial-gradient(circle at 1px 1px, rgb(0 0 0 / 0.06) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+  .bg-dot-pattern-light {
+    background-image: radial-gradient(circle at 1px 1px, rgb(0 0 0 / 0.04) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
 }
 
 @plugin "@tailwindcss/typography";

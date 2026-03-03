@@ -6,6 +6,7 @@ import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
+import { ClosingTagline } from '@/blocks/ClosingTagline/config'
 import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Content } from '@/blocks/Content/config'
 import { FeatureCards } from '@/blocks/FeatureCards/config'
@@ -14,6 +15,8 @@ import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { OurStory } from '@/blocks/OurStory/config'
 import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
+import { Stats } from '@/blocks/Stats/config'
+import { Values } from '@/blocks/Values/config'
 import { SponsorsBar } from '@/blocks/SponsorsBar/config'
 import { TeamCards } from '@/blocks/TeamCards/config'
 import { TeamPreview } from '@/blocks/TeamPreview/config'
@@ -101,6 +104,7 @@ export const Pages: CollectionConfig = {
               name: 'layout',
               type: 'blocks',
               blocks: [
+                ClosingTagline,
                 ContactBlock,
                 CallToAction,
                 Content,
@@ -112,6 +116,8 @@ export const Pages: CollectionConfig = {
                 OurStory,
                 ReadyToLearnCTA,
                 SponsorsBar,
+                Stats,
+                Values,
                 TeamCards,
                 TeamPreview,
                 Testimonials,

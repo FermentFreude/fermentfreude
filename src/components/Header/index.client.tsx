@@ -25,6 +25,7 @@ export function HeaderClient({ header }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
+  const isAboutPage = pathname === '/about'
 
   // Hide-on-scroll-down, show-on-scroll-up + track "at top"
   const [hidden, setHidden] = useState(false)
@@ -48,8 +49,8 @@ export function HeaderClient({ header }: Props) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [handleScroll])
 
-  // Transparent header on home page when at top
-  const isTransparent = isHomePage && isAtTop
+  // Transparent header on home or about (full-bleed hero) when at top
+  const isTransparent = (isHomePage || isAboutPage) && isAtTop
 
   // Use CMS items if they exist with labels, otherwise fall back to hardcoded defaults
   const hasRealCMSItems = cmsItems.length > 0 && cmsItems.some((i) => i.link?.label)
@@ -59,7 +60,7 @@ export function HeaderClient({ header }: Props) {
     <header
       className={cn(
         'z-50 w-full transition-all duration-300',
-        isHomePage ? 'fixed top-0' : 'sticky top-0',
+        isHomePage || isAboutPage ? 'fixed top-0' : 'sticky top-0',
         hidden && '-translate-y-full',
       )}
       data-transparent={isTransparent ? '' : undefined}

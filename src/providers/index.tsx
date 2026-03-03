@@ -1,3 +1,5 @@
+'use client'
+
 import { AuthProvider } from '@/providers/Auth'
 import { LocaleProvider } from '@/providers/Locale'
 import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/client/react'
