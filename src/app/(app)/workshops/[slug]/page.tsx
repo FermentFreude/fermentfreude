@@ -18,6 +18,8 @@ import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 import { findWorkshopBySlug, getAllWorkshops } from '@/utilities/getWorkshops'
 import { getWorkshopTermine } from '@/utilities/getWorkshopTermine'
+import { FermentKalender } from '@/components/fermentation/FermentKalender'
+import { FermentedVegHowTos } from '@/components/fermentation/FermentedVegHowTos'
 
 /* ═══════════════════════════════════════════════════════════════
  *  Workshop detail page — /workshops/[slug]
@@ -443,6 +445,12 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
       {/* ── 9. Why Our Online Workshops (last section, bg white) ───── */}
       <WhyOnlineSection heading={whyOnlineHeading} features={whyOnlineFeatures} />
+
+      {/* ── 10. Fermentkalender (seasonal calendar) ────────────────── */}
+      {slug === 'lakto-gemuese' && <FermentKalender />}
+
+      {/* ── 11. Fermented Vegetables How-Tos (article cards) ────────── */}
+      {slug === 'lakto-gemuese' && <FermentedVegHowTos />}
     </article>
   )
 }
