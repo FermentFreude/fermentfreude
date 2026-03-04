@@ -643,7 +643,6 @@ export default async function WorkshopDetailPage({ params }: Args) {
                   title: detail.faqTitle,
                   description: detail.faqDescription,
                   items: detail.faqItems,
-                  contactEmail: detail.faqContactEmail,
                 }
               : undefined
           }

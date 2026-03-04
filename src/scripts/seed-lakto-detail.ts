@@ -525,19 +525,13 @@ async function seedLaktoDetail() {
     process.exit(0)
   }
 
-  // ── Preserve admin-uploaded images (don't overwrite) ─────
-  // Each image field is managed individually in /admin
-  const deData = {
-    ...workshopDetailDE,
-    // Preserve images: only use seed values if images don't already exist
-    heroImage: detail?.heroImage ?? workshopDetailDE.heroImage,
-    bookingImage: detail?.bookingImage ?? workshopDetailDE.bookingImage,
-    voucherBackgroundImage: detail?.voucherBackgroundImage ?? workshopDetailDE.voucherBackgroundImage,
-  }
+  // ── Build DE data (images managed in admin, never seeded) ──
+  const deData = workshopDetailDE
 
-  if (detail?.heroImage) payload.logger.info('  🖼️  Preserving existing heroImage')
-  if (detail?.bookingImage) payload.logger.info('  🖼️  Preserving existing bookingImage')
-  if (detail?.voucherBackgroundImage) payload.logger.info('  🖼️  Preserving existing voucherBackgroundImage')
+  // Preserve existing images if they're already set
+  if (detail?.heroImage) payload.logger.info('  🖼️  Existing heroImage will be preserved')
+  if (detail?.bookingImage) payload.logger.info('  🖼️  Existing bookingImage will be preserved')
+  if (detail?.voucherBackgroundImage) payload.logger.info('  🖼️  Existing voucherBackgroundImage will be preserved')
 
   // ── Save DE ─────────────────────────────────────────────
   payload.logger.info('  Saving DE locale...')
@@ -562,13 +556,7 @@ async function seedLaktoDetail() {
     | undefined
 
   // ── Merge EN arrays with DE-generated IDs ───────────────
-  // Also preserve images across locales (same images for both DE and EN)
-  const enData = {
-    ...workshopDetailEN,
-    heroImage: deData.heroImage,
-    bookingImage: deData.bookingImage,
-    voucherBackgroundImage: deData.voucherBackgroundImage,
-  } as Record<string, unknown>
+  const enData = { ...workshopDetailEN } as Record<string, unknown>
 
   // For each array field, copy the `id` from the saved DE doc
   const arrayFields = [

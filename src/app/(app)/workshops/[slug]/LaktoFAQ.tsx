@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -16,7 +17,6 @@ export type LaktoFAQCMS = {
   title?: string | null
   description?: string | null
   items?: Array<{ question?: string | null; answer?: string | null }> | null
-  contactEmail?: string | null
 }
 
 type FAQItem = {
@@ -98,12 +98,12 @@ function AccordionItem({
         </h3>
         <div
           className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
-            isOpen ? 'bg-[#555954] rotate-0' : 'bg-ff-warm-gray rotate-0'
+            isOpen ? 'bg-[#e6be68]' : 'bg-[#e6be68] hover:bg-[#d4a854]'
           }`}
         >
           <svg
             className={`size-4 transition-all duration-300 ${
-              isOpen ? 'rotate-45 text-white' : 'text-ff-near-black'
+              isOpen ? 'rotate-45 text-[#555954]' : 'text-[#555954]'
             }`}
             viewBox="0 0 16 16"
             fill="none"
@@ -136,7 +136,6 @@ export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
   const description =
     cms?.description ??
     'Alles was du vor deiner Buchung wissen solltest — von Stornierung bis Verpflegung.'
-  const contactEmail = cms?.contactEmail ?? 'info@fermentfreude.de'
   const faqItems: FAQItem[] =
     (cms?.items?.length ?? 0) > 0
       ? cms!.items!.map((item) => ({ question: item.question ?? '', answer: item.answer ?? '' }))
@@ -172,7 +171,7 @@ export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
             }`}
           >
-            <p className="mb-3 font-display text-caption font-bold uppercase tracking-[0.2em] text-[#555954]/60">
+            <p className="mb-3 font-display text-caption font-bold uppercase tracking-[0.2em] text-[#e6be68]">
               {eyebrow}
             </p>
             <h2 className="font-display text-section-heading font-bold tracking-tight text-ff-near-black">
@@ -206,12 +205,12 @@ export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
           >
             <p className="text-body text-ff-gray-text-light">
               Noch Fragen?{' '}
-              <a
-                href={`mailto:${contactEmail}`}
-                className="font-medium text-[#555954] underline decoration-[#555954]/30 underline-offset-4 transition-colors hover:text-ff-near-black hover:decoration-ff-near-black"
+              <Link
+                href="/contact"
+                className="font-medium text-[#e6be68] underline decoration-[#e6be68]/30 underline-offset-4 transition-colors hover:text-ff-near-black hover:decoration-ff-near-black"
               >
                 Schreib uns
-              </a>
+              </Link>
             </p>
           </div>
         </div>
