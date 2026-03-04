@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { Media } from '@/components/Media'
+import type { Media as MediaType } from '@/payload-types'
 
 /* ═══════════════════════════════════════════════════════════════
  *  LaktoHero — Dedicated hero for /workshops/lakto-gemuese
@@ -36,6 +38,7 @@ export type LaktoHeroCMS = {
   title?: string | null
   description?: string | null
   attributes?: Array<{ text?: string | null }> | null
+  image?: MediaType | string | null
 }
 
 // ─── Main Component ─────────────────────────────────────────
@@ -52,6 +55,11 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
     (cms?.attributes?.length ?? 0) > 0
       ? cms!.attributes!.map((a) => a.text ?? '').filter(Boolean)
       : ['3 Stunden', 'Hands-on', 'Experience']
+
+  const heroImage =
+    cms?.image && typeof cms.image === 'object' && 'url' in cms.image
+      ? (cms.image as MediaType)
+      : null
 
   const [isVisible, setIsVisible] = useState(false)
   const heroRef = useRef<HTMLElement>(null)
@@ -84,17 +92,32 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
 
       {/* ── Mobile Layout (below lg) ───────────────────── */}
       <div className="flex w-full flex-col lg:hidden">
-        {/* Mobile top — jars */}
-        <div className="relative flex flex-1 items-center justify-center pt-28 pb-8">
-          <div
-            className={`flex items-end gap-3 transition-all duration-1000 ${
-              isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-            }`}
-          >
-            <JarSilhouette className="h-32 w-16 -rotate-6" delay={200} />
-            <JarSilhouette className="h-40 w-18 rotate-2" delay={350} />
-            <JarSilhouette className="h-28 w-14 rotate-6" delay={500} />
-          </div>
+        {/* Mobile top — image or jars */}
+        <div className="relative flex flex-1 items-center justify-center overflow-hidden pt-28 pb-8">
+          {heroImage ? (
+            <div
+              className={`relative h-64 w-full transition-all duration-1000 ${
+                isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              }`}
+            >
+              <Media
+                resource={heroImage}
+                fill
+                imgClassName="object-cover"
+                priority
+              />
+            </div>
+          ) : (
+            <div
+              className={`flex items-end gap-3 transition-all duration-1000 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}
+            >
+              <JarSilhouette className="h-32 w-16 -rotate-6" delay={200} />
+              <JarSilhouette className="h-40 w-18 rotate-2" delay={350} />
+              <JarSilhouette className="h-28 w-14 rotate-6" delay={500} />
+            </div>
+          )}
         </div>
 
         {/* Mobile bottom — text */}
@@ -159,17 +182,32 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
 
       {/* ── Desktop Layout (lg+) ───────────────────────── */}
       <div className="hidden h-full min-h-svh w-full lg:flex">
-        {/* LEFT — Jars cluster */}
-        <div className="flex flex-1 items-center justify-center">
-          <div
-            className={`relative flex items-end gap-4 xl:gap-6 transition-all duration-1200 ${
-              isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-12 opacity-0 scale-95'
-            }`}
-          >
-            <JarSilhouette className="h-44 w-20 -rotate-6 xl:h-52 xl:w-24" delay={300} />
-            <JarSilhouette className="h-56 w-24 rotate-2 xl:h-64 xl:w-28" delay={450} />
-            <JarSilhouette className="h-40 w-18 rotate-6 xl:h-48 xl:w-22" delay={600} />
-          </div>
+        {/* LEFT — image or jar cluster */}
+        <div className="flex flex-1 items-center justify-center overflow-hidden">
+          {heroImage ? (
+            <div
+              className={`relative h-full w-full transition-all duration-1200 ${
+                isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              }`}
+            >
+              <Media
+                resource={heroImage}
+                fill
+                imgClassName="object-cover"
+                priority
+              />
+            </div>
+          ) : (
+            <div
+              className={`relative flex items-end gap-4 xl:gap-6 transition-all duration-1200 ${
+                isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-12 opacity-0 scale-95'
+              }`}
+            >
+              <JarSilhouette className="h-44 w-20 -rotate-6 xl:h-52 xl:w-24" delay={300} />
+              <JarSilhouette className="h-56 w-24 rotate-2 xl:h-64 xl:w-28" delay={450} />
+              <JarSilhouette className="h-40 w-18 rotate-6 xl:h-48 xl:w-22" delay={600} />
+            </div>
+          )}
         </div>
 
         {/* RIGHT — Panel with text */}

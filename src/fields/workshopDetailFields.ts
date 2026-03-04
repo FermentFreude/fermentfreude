@@ -42,6 +42,16 @@ export const workshopDetailFields: Field[] = [
         admin: { description: 'Short paragraph below the title.' },
       },
       {
+        name: 'heroImage',
+        type: 'upload',
+        relationTo: 'media',
+        label: 'Hero Image',
+        admin: {
+          description:
+            'Image shown on the left side of the hero (portrait or square, min 800px tall). When empty, decorative jar illustrations are shown instead.',
+        },
+      },
+      {
         name: 'heroAttributes',
         type: 'array',
         label: 'Attribute Pills',
@@ -651,6 +661,94 @@ export const workshopDetailFields: Field[] = [
         fields: [
           { name: 'modalCancelLabel', type: 'text', localized: true, label: 'Cancel Button' },
           { name: 'modalConfirmLabel', type: 'text', localized: true, label: 'Confirm Button' },
+        ],
+      },
+    ],
+  },
+
+  // ── 10. How-To Articles ──────────────────────────────────
+  {
+    type: 'collapsible',
+    label: '10. How-To Articles',
+    admin: {
+      initCollapsed: true,
+      description:
+        '6 educational article cards shown below the Fermentation Calendar. Edit the section heading and each article\'s title, description, read time, link and cover image.',
+    },
+    fields: [
+      {
+        name: 'howToEyebrow',
+        type: 'text',
+        localized: true,
+        label: 'Eyebrow',
+        admin: { description: 'Small label above the heading (e.g. "TIPPS & GUIDES").' },
+      },
+      {
+        name: 'howToTitle',
+        type: 'text',
+        localized: true,
+        label: 'Section Title',
+        admin: { description: 'Main heading (e.g. "Lerne fermentieren.").' },
+      },
+      {
+        name: 'howToDescription',
+        type: 'textarea',
+        localized: true,
+        label: 'Section Description',
+        admin: { description: 'Short paragraph below the heading.' },
+      },
+      {
+        name: 'howToArticles',
+        type: 'array',
+        label: 'Articles (6)',
+        minRows: 6,
+        maxRows: 6,
+        admin: {
+          description:
+            'Exactly 6 article cards. Paste the text for each article and upload a cover image. The "Link" field is the URL the card links to (e.g. "/tipps/salz-und-lake").',
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+            localized: true,
+            label: 'Article Title',
+            admin: { description: 'Card heading text.' },
+          },
+          {
+            name: 'description',
+            type: 'textarea',
+            localized: true,
+            label: 'Article Description',
+            admin: { description: 'Short summary shown on the card.' },
+          },
+          {
+            name: 'readTime',
+            type: 'text',
+            localized: true,
+            label: 'Read Time',
+            admin: { description: 'e.g. "12 Min." — shown at the bottom of the card.' },
+          },
+          {
+            name: 'image',
+            type: 'upload',
+            relationTo: 'media',
+            label: 'Cover Image',
+            admin: {
+              description:
+                'Card cover image (16:9 ratio recommended). Shown at the top of the card.',
+            },
+          },
+          {
+            name: 'href',
+            type: 'text',
+            label: 'Link (URL)',
+            admin: {
+              description:
+                'Internal path the card links to (e.g. "/tipps/gemuese-fermentieren-leitfaden").',
+            },
+          },
         ],
       },
     ],

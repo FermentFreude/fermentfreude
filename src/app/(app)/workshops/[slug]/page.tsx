@@ -203,6 +203,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
       heroEyebrow?: string | null
       heroTitle?: string | null
       heroDescription?: string | null
+      heroImage?: import('@/payload-types').Media | string | null
       heroAttributes?: Array<{ text?: string | null; id?: string }> | null
       bookingEyebrow?: string | null
       bookingPrice?: number | null
@@ -261,6 +262,17 @@ export default async function WorkshopDetailPage({ params }: Args) {
       modalTotalLabel?: string | null
       modalCancelLabel?: string | null
       modalConfirmLabel?: string | null
+      howToEyebrow?: string | null
+      howToTitle?: string | null
+      howToDescription?: string | null
+      howToArticles?: Array<{
+        title?: string | null
+        description?: string | null
+        readTime?: string | null
+        image?: import('@/payload-types').Media | string | null
+        href?: string | null
+        id?: string | null
+      }> | null
     }
     workshopGiftOnline?: {
       giftTitle?: string
@@ -442,6 +454,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
           title: detail.heroTitle,
           description: detail.heroDescription,
           attributes: detail.heroAttributes,
+          image: detail.heroImage,
         } : undefined} />
 
         {/* 2. Modern Booking Card */}
@@ -456,7 +469,12 @@ export default async function WorkshopDetailPage({ params }: Args) {
         } : undefined} />
 
         {/* 4. Fermented Vegetables How-Tos */}
-        <FermentedVegHowTos />
+        <FermentedVegHowTos cms={detail ? {
+          eyebrow: detail.howToEyebrow,
+          title: detail.howToTitle,
+          description: detail.howToDescription,
+          howToArticles: detail.howToArticles,
+        } : undefined} />
 
         {/* 5. Other Workshops (slider — excludes lakto-gemuese) */}
         <WorkshopTypesSlider

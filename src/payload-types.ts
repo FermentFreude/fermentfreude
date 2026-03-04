@@ -1253,6 +1253,10 @@ export interface Page {
      */
     heroDescription?: string | null;
     /**
+     * Image shown on the left side of the hero (portrait or square, min 800px tall). When empty, decorative jar illustrations are shown instead.
+     */
+    heroImage?: (string | null) | Media;
+    /**
      * Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").
      */
     heroAttributes?:
@@ -1503,6 +1507,46 @@ export interface Page {
     modalTotalLabel?: string | null;
     modalCancelLabel?: string | null;
     modalConfirmLabel?: string | null;
+    /**
+     * Small label above the heading (e.g. "TIPPS & GUIDES").
+     */
+    howToEyebrow?: string | null;
+    /**
+     * Main heading (e.g. "Lerne fermentieren.").
+     */
+    howToTitle?: string | null;
+    /**
+     * Short paragraph below the heading.
+     */
+    howToDescription?: string | null;
+    /**
+     * Exactly 6 article cards. Paste the text for each article and upload a cover image. The "Link" field is the URL the card links to (e.g. "/tipps/salz-und-lake").
+     */
+    howToArticles?:
+      | {
+          /**
+           * Card heading text.
+           */
+          title: string;
+          /**
+           * Short summary shown on the card.
+           */
+          description?: string | null;
+          /**
+           * e.g. "12 Min." — shown at the bottom of the card.
+           */
+          readTime?: string | null;
+          /**
+           * Card cover image (16:9 ratio recommended). Shown at the top of the card.
+           */
+          image?: (string | null) | Media;
+          /**
+           * Internal path the card links to (e.g. "/tipps/gemuese-fermentieren-leitfaden").
+           */
+          href?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   /**
    * Gift voucher and online courses cards. Only for tempeh, kombucha.
@@ -3241,6 +3285,7 @@ export interface PagesSelect<T extends boolean = true> {
         heroEyebrow?: T;
         heroTitle?: T;
         heroDescription?: T;
+        heroImage?: T;
         heroAttributes?:
           | T
           | {
@@ -3360,6 +3405,19 @@ export interface PagesSelect<T extends boolean = true> {
         modalTotalLabel?: T;
         modalCancelLabel?: T;
         modalConfirmLabel?: T;
+        howToEyebrow?: T;
+        howToTitle?: T;
+        howToDescription?: T;
+        howToArticles?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              readTime?: T;
+              image?: T;
+              href?: T;
+              id?: T;
+            };
       };
   workshopGiftOnline?:
     | T

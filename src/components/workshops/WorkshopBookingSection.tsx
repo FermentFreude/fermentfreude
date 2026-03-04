@@ -66,7 +66,7 @@ export function WorkshopBookingSection({
           <div className="grid grid-cols-1 lg:grid-cols-2">
             {/* Left: Image + thumbnails */}
             <div className="space-y-4 p-6 lg:p-8">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
+              <div className="relative aspect-4/3 overflow-hidden rounded-xl">
                 {displayedImage && isResolvedMedia(displayedImage) ? (
                   <Media resource={displayedImage} fill imgClassName="object-cover" />
                 ) : (
@@ -197,7 +197,7 @@ export function WorkshopBookingSection({
                     >
                       −
                     </button>
-                    <span className="min-w-[3rem] text-center font-sans text-lg font-medium text-[#1a1a1a]">
+                    <span className="min-w-12 text-center font-sans text-lg font-medium text-[#1a1a1a]">
                       {quantity}
                     </span>
                     <button
