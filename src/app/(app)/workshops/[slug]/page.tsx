@@ -4,12 +4,13 @@ import type { Metadata } from 'next'
 import { Media } from '@/components/Media'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import { notFound } from 'next/navigation'
+import { getPayload } from 'payload'
 
+import { FermentedVegHowTos } from '@/components/fermentation/FermentedVegHowTos'
 import { FAQSliderSection } from '@/components/workshops/FAQSliderSection'
-import { LearnOnlineSection } from '@/components/workshops/LearnOnlineSection'
 import { GiftAndOnlineSection } from '@/components/workshops/GiftAndOnlineSection'
+import { LearnOnlineSection } from '@/components/workshops/LearnOnlineSection'
 import { TeamBuildingSection } from '@/components/workshops/TeamBuildingSection'
 import { WhyOnlineSection } from '@/components/workshops/WhyOnlineSection'
 import { WorkshopBookingSection } from '@/components/workshops/WorkshopBookingSection'
@@ -18,13 +19,12 @@ import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 import { findWorkshopBySlug, getAllWorkshops } from '@/utilities/getWorkshops'
 import { getWorkshopTermine } from '@/utilities/getWorkshopTermine'
-import { getWorkshopBySlug } from './workshop-data'
-import { LaktoHero } from './LaktoHero'
 import { LaktoBookingCard } from './LaktoBookingCard'
 import { LaktoCalendar } from './LaktoCalendar'
-import { LaktoVoucherCta } from './LaktoVoucherCta'
 import { LaktoFAQ } from './LaktoFAQ'
-import { FermentedVegHowTos } from '@/components/fermentation/FermentedVegHowTos'
+import { LaktoHero } from './LaktoHero'
+import { LaktoVoucherCta } from './LaktoVoucherCta'
+import { getWorkshopBySlug } from './workshop-data'
 
 /* ═══════════════════════════════════════════════════════════════
  *  Workshop detail page — /workshops/[slug]
@@ -85,21 +85,54 @@ const DEFAULT_FAQ_SUBTITLE_DE = 'Klicke, um alle Antworten zu sehen!'
 const DEFAULT_FAQ_SUBTITLE_EN = 'Click to view all the answers!'
 
 const DEFAULT_FAQ_ITEMS_DE: Array<{ question: string; answer: string }> = [
-  { question: 'Wie lange dauert ein Workshop?', answer: 'Unsere Workshops dauern in der Regel 2,5 bis 3 Stunden.' },
-  { question: 'Muss ich Vorkenntnisse mitbringen?', answer: 'Nein, alle Workshops sind für Einsteiger konzipiert.' },
-  { question: 'Kann ich den Workshop verschenken?', answer: 'Ja, wir bieten Gutscheine für alle Workshops an.' },
-  { question: 'Wo finden die Workshops statt?', answer: 'In Berlin-Neukölln. Die genaue Adresse erhältst du nach der Buchung.' },
-  { question: 'Was passiert bei Absage?', answer: 'Du kannst bis 48 Stunden vorher kostenlos stornieren.' },
-  { question: 'Gibt es Online-Alternativen?', answer: 'Ja, wir bieten auch digitale Workshops und Kurse an.' },
+  {
+    question: 'Wie lange dauert ein Workshop?',
+    answer: 'Unsere Workshops dauern in der Regel 2,5 bis 3 Stunden.',
+  },
+  {
+    question: 'Muss ich Vorkenntnisse mitbringen?',
+    answer: 'Nein, alle Workshops sind für Einsteiger konzipiert.',
+  },
+  {
+    question: 'Kann ich den Workshop verschenken?',
+    answer: 'Ja, wir bieten Gutscheine für alle Workshops an.',
+  },
+  {
+    question: 'Wo finden die Workshops statt?',
+    answer: 'In Berlin-Neukölln. Die genaue Adresse erhältst du nach der Buchung.',
+  },
+  {
+    question: 'Was passiert bei Absage?',
+    answer: 'Du kannst bis 48 Stunden vorher kostenlos stornieren.',
+  },
+  {
+    question: 'Gibt es Online-Alternativen?',
+    answer: 'Ja, wir bieten auch digitale Workshops und Kurse an.',
+  },
 ]
 
 const DEFAULT_FAQ_ITEMS_EN: Array<{ question: string; answer: string }> = [
-  { question: 'How long does a workshop last?', answer: 'Our workshops typically last 2.5 to 3 hours.' },
-  { question: 'Do I need prior experience?', answer: 'No, all workshops are designed for beginners.' },
+  {
+    question: 'How long does a workshop last?',
+    answer: 'Our workshops typically last 2.5 to 3 hours.',
+  },
+  {
+    question: 'Do I need prior experience?',
+    answer: 'No, all workshops are designed for beginners.',
+  },
   { question: 'Can I gift a workshop?', answer: 'Yes, we offer vouchers for all workshops.' },
-  { question: 'Where do the workshops take place?', answer: 'In Berlin-Neukölln. You\'ll receive the exact address after booking.' },
-  { question: 'What happens if I cancel?', answer: 'You can cancel free of charge up to 48 hours before.' },
-  { question: 'Are there online alternatives?', answer: 'Yes, we also offer digital workshops and courses.' },
+  {
+    question: 'Where do the workshops take place?',
+    answer: "In Berlin-Neukölln. You'll receive the exact address after booking.",
+  },
+  {
+    question: 'What happens if I cancel?',
+    answer: 'You can cancel free of charge up to 48 hours before.',
+  },
+  {
+    question: 'Are there online alternatives?',
+    answer: 'Yes, we also offer digital workshops and courses.',
+  },
 ]
 
 const DEFAULT_TEAM_EYEBROW_DE = 'Firmenveranstaltungen'
@@ -136,17 +169,45 @@ const DEFAULT_WHY_ONLINE_HEADING_DE = 'Warum unsere Online-Workshops?'
 const DEFAULT_WHY_ONLINE_HEADING_EN = 'Why Our Online Workshops?'
 
 const DEFAULT_WHY_ONLINE_FEATURES_DE = [
-  { icon: 'lightning' as const, title: 'Sofortiger Zugang', description: 'Direkter Zugang nach dem Kauf – keine Wartezeit' },
-  { icon: 'clock' as const, title: 'Dein Tempo', description: 'Pausieren, wiederholen, wann immer du möchtest' },
-  { icon: 'home' as const, title: 'Von Zuhause', description: 'Lerne bequem in deiner eigenen Küche' },
-  { icon: 'book' as const, title: 'Rezepte & PDFs', description: 'Alle Rezepte zum Download verfügbar' },
+  {
+    icon: 'lightning' as const,
+    title: 'Sofortiger Zugang',
+    description: 'Direkter Zugang nach dem Kauf – keine Wartezeit',
+  },
+  {
+    icon: 'clock' as const,
+    title: 'Dein Tempo',
+    description: 'Pausieren, wiederholen, wann immer du möchtest',
+  },
+  {
+    icon: 'home' as const,
+    title: 'Von Zuhause',
+    description: 'Lerne bequem in deiner eigenen Küche',
+  },
+  {
+    icon: 'book' as const,
+    title: 'Rezepte & PDFs',
+    description: 'Alle Rezepte zum Download verfügbar',
+  },
 ]
 
 const DEFAULT_WHY_ONLINE_FEATURES_EN = [
-  { icon: 'lightning' as const, title: 'Instant Access', description: 'Direct access after purchase – no waiting time' },
+  {
+    icon: 'lightning' as const,
+    title: 'Instant Access',
+    description: 'Direct access after purchase – no waiting time',
+  },
   { icon: 'clock' as const, title: 'Your Pace', description: 'Pause, repeat, whenever you want' },
-  { icon: 'home' as const, title: 'From Home', description: 'Learn comfortably in your own kitchen' },
-  { icon: 'book' as const, title: 'Recipes & PDFs', description: 'All recipes available for download' },
+  {
+    icon: 'home' as const,
+    title: 'From Home',
+    description: 'Learn comfortably in your own kitchen',
+  },
+  {
+    icon: 'book' as const,
+    title: 'Recipes & PDFs',
+    description: 'All recipes available for download',
+  },
 ]
 
 type Args = { params: Promise<{ slug: string }> }
@@ -178,140 +239,170 @@ export default async function WorkshopDetailPage({ params }: Args) {
   const { slug } = await params
   const locale = await getLocale()
   const WORKSHOP_PAGE_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
-  const [workshop, allWorkshops, termins, gastronomyResult, workshopPageResult] = await Promise.all([
-    findWorkshopBySlug(slug, locale),
-    getAllWorkshops(locale),
-    getWorkshopTermine(locale),
-    getPayload({ config: configPromise }).then((p) =>
-      p.find({ collection: 'pages', where: { slug: { equals: 'gastronomy' } }, limit: 1, depth: 3, locale }),
-    ),
-    WORKSHOP_PAGE_SLUGS.includes(slug)
-      ? getPayload({ config: configPromise }).then((p) =>
-          p.find({
-            collection: 'pages',
-            where: { slug: { equals: slug }, _status: { equals: 'published' } },
-            limit: 1,
-            depth: 2,
-            locale,
-          }),
-        )
-      : Promise.resolve({ docs: [] }),
-  ])
+  const [workshop, allWorkshops, termins, gastronomyResult, workshopPageResult] = await Promise.all(
+    [
+      findWorkshopBySlug(slug, locale),
+      getAllWorkshops(locale),
+      getWorkshopTermine(locale),
+      getPayload({ config: configPromise }).then((p) =>
+        p.find({
+          collection: 'pages',
+          where: { slug: { equals: 'gastronomy' } },
+          limit: 1,
+          depth: 3,
+          locale,
+        }),
+      ),
+      WORKSHOP_PAGE_SLUGS.includes(slug)
+        ? getPayload({ config: configPromise }).then((p) =>
+            p.find({
+              collection: 'pages',
+              where: { slug: { equals: slug }, _status: { equals: 'published' } },
+              limit: 1,
+              depth: 2,
+              locale,
+            }),
+          )
+        : Promise.resolve({ docs: [] }),
+    ],
+  )
 
-  const workshopPage = workshopPageResult.docs[0] as {
-    workshopDetail?: {
-      heroEyebrow?: string | null
-      heroTitle?: string | null
-      heroDescription?: string | null
-      heroImage?: import('@/payload-types').Media | string | null
-      heroAttributes?: Array<{ text?: string | null; id?: string }> | null
-      bookingEyebrow?: string | null
-      bookingPrice?: number | null
-      bookingPriceSuffix?: string | null
-      bookingCurrency?: string | null
-      bookingImage?: unknown
-      bookingAttributes?: Array<{ text?: string | null; id?: string }> | null
-      bookingViewDatesLabel?: string | null
-      bookingHideDatesLabel?: string | null
-      bookingMoreDetailsLabel?: string | null
-      bookingBookLabel?: string | null
-      bookingSpotsLabel?: string | null
-      aboutHeading?: string | null
-      aboutText?: string | null
-      scheduleHeading?: string | null
-      schedule?: Array<{ duration?: string | null; title?: string | null; description?: string | null; id?: string }> | null
-      includedHeading?: string | null
-      includedItems?: Array<{ text?: string | null; id?: string }> | null
-      whyHeading?: string | null
-      whyPoints?: Array<{ bold?: string | null; rest?: string | null; id?: string }> | null
-      experienceEyebrow?: string | null
-      experienceTitle?: string | null
-      experienceCards?: Array<{ image?: unknown; eyebrow?: string | null; title?: string | null; description?: string | null; id?: string }> | null
-      datesHeading?: string | null
-      dates?: Array<{ date?: string | null; time?: string | null; spotsLeft?: number | null; id?: string }> | null
-      calendarEyebrow?: string | null
-      calendarTitle?: string | null
-      calendarDescription?: string | null
-      calendarMonths?: Array<{
-        month?: string | null
-        monthShort?: string | null
-        monthNumber?: string | null
-        season?: string | null
-        accent?: string | null
-        recipes?: Array<{ name?: string | null; id?: string }> | null
-        id?: string
-      }> | null
-      voucherEyebrow?: string | null
-      voucherTitle?: string | null
-      voucherDescription?: string | null
-      voucherPrimaryLabel?: string | null
-      voucherPrimaryHref?: string | null
-      voucherSecondaryLabel?: string | null
-      voucherSecondaryHref?: string | null
-      voucherPills?: Array<{ text?: string | null; id?: string }> | null
-      faqEyebrow?: string | null
-      faqTitle?: string | null
-      faqDescription?: string | null
-      faqItems?: Array<{ question?: string | null; answer?: string | null; id?: string }> | null
-      faqContactEmail?: string | null
-      modalConfirmHeading?: string | null
-      modalConfirmSubheading?: string | null
-      modalWorkshopLabel?: string | null
-      modalDateLabel?: string | null
-      modalTimeLabel?: string | null
-      modalTotalLabel?: string | null
-      modalCancelLabel?: string | null
-      modalConfirmLabel?: string | null
-      howToEyebrow?: string | null
-      howToTitle?: string | null
-      howToDescription?: string | null
-      howToArticles?: Array<{
-        title?: string | null
-        description?: string | null
-        readTime?: string | null
-        image?: import('@/payload-types').Media | string | null
-        href?: string | null
-        id?: string | null
-      }> | null
-    }
-    workshopGiftOnline?: {
-      giftTitle?: string
-      giftDescription?: string
-      giftBuyNowLabel?: string
-      giftBuyVoucherLabel?: string
-      giftBuyNowHref?: string
-      giftBuyVoucherHref?: string
-      onlineTitle?: string
-      onlineDescription?: string
-      onlineBullets?: Array<{ text?: string }>
-      onlineButtonLabel?: string
-      onlineButtonHref?: string
-    }
-    workshopLearnOnline?: {
-      learnOnlineHeading?: string
-      learnOnlineDescription?: string
-      learnOnlineButtonLabel?: string
-      learnOnlineButtonHref?: string
-    }
-    workshopFaq?: {
-      faqHeading?: string
-      faqSubtitle?: string
-      faqItems?: Array<{ question?: string; answer?: string }>
-    }
-    workshopWhyOnline?: {
-      whyOnlineHeading?: string
-      whyOnlineFeatures?: Array<{ icon?: string; title?: string; description?: string }>
-    }
-    workshopTeamBuilding?: {
-      teamEyebrow?: string
-      teamHeading?: string
-      teamDescription?: string
-      teamBullets?: Array<{ text?: string }>
-      teamCtaLabel?: string
-      teamCtaHref?: string
-      teamImage?: unknown
-    }
-  } | undefined
+  const workshopPage = workshopPageResult.docs[0] as
+    | {
+        workshopDetail?: {
+          heroEyebrow?: string | null
+          heroTitle?: string | null
+          heroDescription?: string | null
+          heroImage?: import('@/payload-types').Media | string | null
+          heroAttributes?: Array<{ text?: string | null; id?: string }> | null
+          bookingEyebrow?: string | null
+          bookingPrice?: number | null
+          bookingPriceSuffix?: string | null
+          bookingCurrency?: string | null
+          bookingImage?: unknown
+          bookingAttributes?: Array<{ text?: string | null; id?: string }> | null
+          bookingViewDatesLabel?: string | null
+          bookingHideDatesLabel?: string | null
+          bookingMoreDetailsLabel?: string | null
+          bookingBookLabel?: string | null
+          bookingSpotsLabel?: string | null
+          aboutHeading?: string | null
+          aboutText?: string | null
+          scheduleHeading?: string | null
+          schedule?: Array<{
+            duration?: string | null
+            title?: string | null
+            description?: string | null
+            id?: string
+          }> | null
+          includedHeading?: string | null
+          includedItems?: Array<{ text?: string | null; id?: string }> | null
+          whyHeading?: string | null
+          whyPoints?: Array<{ bold?: string | null; rest?: string | null; id?: string }> | null
+          experienceEyebrow?: string | null
+          experienceTitle?: string | null
+          experienceCards?: Array<{
+            image?: unknown
+            eyebrow?: string | null
+            title?: string | null
+            description?: string | null
+            id?: string
+          }> | null
+          datesHeading?: string | null
+          dates?: Array<{
+            date?: string | null
+            time?: string | null
+            spotsLeft?: number | null
+            id?: string
+          }> | null
+          calendarEyebrow?: string | null
+          calendarTitle?: string | null
+          calendarDescription?: string | null
+          calendarMonths?: Array<{
+            month?: string | null
+            monthShort?: string | null
+            monthNumber?: string | null
+            season?: string | null
+            accent?: string | null
+            recipes?: Array<{ name?: string | null; id?: string }> | null
+            id?: string
+          }> | null
+          voucherEyebrow?: string | null
+          voucherTitle?: string | null
+          voucherDescription?: string | null
+          voucherPrimaryLabel?: string | null
+          voucherPrimaryHref?: string | null
+          voucherSecondaryLabel?: string | null
+          voucherSecondaryHref?: string | null
+          voucherPills?: Array<{ text?: string | null; id?: string }> | null
+          faqEyebrow?: string | null
+          faqTitle?: string | null
+          faqDescription?: string | null
+          faqItems?: Array<{ question?: string | null; answer?: string | null; id?: string }> | null
+          faqContactEmail?: string | null
+          modalConfirmHeading?: string | null
+          modalConfirmSubheading?: string | null
+          modalWorkshopLabel?: string | null
+          modalDateLabel?: string | null
+          modalTimeLabel?: string | null
+          modalTotalLabel?: string | null
+          modalCancelLabel?: string | null
+          modalConfirmLabel?: string | null
+          howToEyebrow?: string | null
+          howToTitle?: string | null
+          howToDescription?: string | null
+          /** Relationship to Posts collection — resolved at depth 2 */
+          howToArticles?: Array<
+            | string
+            | {
+                id: string
+                slug?: string | null
+                title?: string | null
+                summary?: string | null
+                readTime?: string | null
+                heroImage?: import('@/payload-types').Media | string | null
+              }
+          > | null
+        }
+        workshopGiftOnline?: {
+          giftTitle?: string
+          giftDescription?: string
+          giftBuyNowLabel?: string
+          giftBuyVoucherLabel?: string
+          giftBuyNowHref?: string
+          giftBuyVoucherHref?: string
+          onlineTitle?: string
+          onlineDescription?: string
+          onlineBullets?: Array<{ text?: string }>
+          onlineButtonLabel?: string
+          onlineButtonHref?: string
+        }
+        workshopLearnOnline?: {
+          learnOnlineHeading?: string
+          learnOnlineDescription?: string
+          learnOnlineButtonLabel?: string
+          learnOnlineButtonHref?: string
+        }
+        workshopFaq?: {
+          faqHeading?: string
+          faqSubtitle?: string
+          faqItems?: Array<{ question?: string; answer?: string }>
+        }
+        workshopWhyOnline?: {
+          whyOnlineHeading?: string
+          whyOnlineFeatures?: Array<{ icon?: string; title?: string; description?: string }>
+        }
+        workshopTeamBuilding?: {
+          teamEyebrow?: string
+          teamHeading?: string
+          teamDescription?: string
+          teamBullets?: Array<{ text?: string }>
+          teamCtaLabel?: string
+          teamCtaHref?: string
+          teamImage?: unknown
+        }
+      }
+    | undefined
 
   const detail = workshopPage?.workshopDetail
   const gift = workshopPage?.workshopGiftOnline
@@ -363,13 +454,16 @@ export default async function WorkshopDetailPage({ params }: Args) {
   const timeStartsLabel = isDe ? DEFAULT_TIME_STARTS_DE : DEFAULT_TIME_STARTS_EN
   const giftTitle = gift?.giftTitle ?? (isDe ? DEFAULT_GIFT_TITLE_DE : DEFAULT_GIFT_TITLE_EN)
   const giftDesc = gift?.giftDescription ?? (isDe ? DEFAULT_GIFT_DESC_DE : DEFAULT_GIFT_DESC_EN)
-  const giftBuyNowLabel = gift?.giftBuyNowLabel ?? (isDe ? DEFAULT_GIFT_BUY_NOW_DE : DEFAULT_GIFT_BUY_NOW_EN)
+  const giftBuyNowLabel =
+    gift?.giftBuyNowLabel ?? (isDe ? DEFAULT_GIFT_BUY_NOW_DE : DEFAULT_GIFT_BUY_NOW_EN)
   const giftBuyVoucherLabel =
     gift?.giftBuyVoucherLabel ?? (isDe ? DEFAULT_GIFT_BUY_VOUCHER_DE : DEFAULT_GIFT_BUY_VOUCHER_EN)
   const giftBuyNowHref = gift?.giftBuyNowHref ?? '/shop'
   const giftBuyVoucherHref = gift?.giftBuyVoucherHref ?? '/workshops/voucher'
-  const onlineTitle = gift?.onlineTitle ?? (isDe ? DEFAULT_ONLINE_TITLE_DE : DEFAULT_ONLINE_TITLE_EN)
-  const onlineDesc = gift?.onlineDescription ?? (isDe ? DEFAULT_ONLINE_DESC_DE : DEFAULT_ONLINE_DESC_EN)
+  const onlineTitle =
+    gift?.onlineTitle ?? (isDe ? DEFAULT_ONLINE_TITLE_DE : DEFAULT_ONLINE_TITLE_EN)
+  const onlineDesc =
+    gift?.onlineDescription ?? (isDe ? DEFAULT_ONLINE_DESC_DE : DEFAULT_ONLINE_DESC_EN)
   const onlineButtonLabel =
     gift?.onlineButtonLabel ?? (isDe ? DEFAULT_ONLINE_BUTTON_DE : DEFAULT_ONLINE_BUTTON_EN)
   const onlineButtonHref = gift?.onlineButtonHref ?? '/workshops'
@@ -378,8 +472,16 @@ export default async function WorkshopDetailPage({ params }: Args) {
     (gift?.onlineBullets?.length ?? 0) > 0
       ? gift!.onlineBullets!.map((b) => b.text ?? '').filter(Boolean)
       : isDe
-        ? ['Lebenslanger Zugang zu allen Inhalten', 'Herunterladbare Rezeptbücher', 'Direkte Unterstützung im Schülerforum']
-        : ['Lifetime access to all content', 'Downloadable recipe books', 'Direct support in the student forum']
+        ? [
+            'Lebenslanger Zugang zu allen Inhalten',
+            'Herunterladbare Rezeptbücher',
+            'Direkte Unterstützung im Schülerforum',
+          ]
+        : [
+            'Lifetime access to all content',
+            'Downloadable recipe books',
+            'Direct support in the student forum',
+          ]
 
   const faqHeading = faq?.faqHeading ?? (isDe ? DEFAULT_FAQ_HEADING_DE : DEFAULT_FAQ_HEADING_EN)
   const faqSubtitle = faq?.faqSubtitle ?? (isDe ? DEFAULT_FAQ_SUBTITLE_DE : DEFAULT_FAQ_SUBTITLE_EN)
@@ -390,8 +492,10 @@ export default async function WorkshopDetailPage({ params }: Args) {
         ? DEFAULT_FAQ_ITEMS_DE
         : DEFAULT_FAQ_ITEMS_EN
 
-  const teamEyebrow = team?.teamEyebrow ?? (isDe ? DEFAULT_TEAM_EYEBROW_DE : DEFAULT_TEAM_EYEBROW_EN)
-  const teamHeading = team?.teamHeading ?? (isDe ? DEFAULT_TEAM_HEADING_DE : DEFAULT_TEAM_HEADING_EN)
+  const teamEyebrow =
+    team?.teamEyebrow ?? (isDe ? DEFAULT_TEAM_EYEBROW_DE : DEFAULT_TEAM_EYEBROW_EN)
+  const teamHeading =
+    team?.teamHeading ?? (isDe ? DEFAULT_TEAM_HEADING_DE : DEFAULT_TEAM_HEADING_EN)
   const teamDesc = team?.teamDescription ?? (isDe ? DEFAULT_TEAM_DESC_DE : DEFAULT_TEAM_DESC_EN)
   const teamBullets =
     (team?.teamBullets?.length ?? 0) > 0
@@ -404,13 +508,19 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
   const learnOnlineHeading =
     learn?.learnOnlineHeading ??
-    (isDe ? `${DEFAULT_LEARN_ONLINE_HEADING_DE}\n${DEFAULT_LEARN_ONLINE_HEADING_2_DE}` : `${DEFAULT_LEARN_ONLINE_HEADING_EN}\n${DEFAULT_LEARN_ONLINE_HEADING_2_EN}`)
-  const learnOnlineDesc = learn?.learnOnlineDescription ?? (isDe ? DEFAULT_LEARN_ONLINE_DESC_DE : DEFAULT_LEARN_ONLINE_DESC_EN)
+    (isDe
+      ? `${DEFAULT_LEARN_ONLINE_HEADING_DE}\n${DEFAULT_LEARN_ONLINE_HEADING_2_DE}`
+      : `${DEFAULT_LEARN_ONLINE_HEADING_EN}\n${DEFAULT_LEARN_ONLINE_HEADING_2_EN}`)
+  const learnOnlineDesc =
+    learn?.learnOnlineDescription ??
+    (isDe ? DEFAULT_LEARN_ONLINE_DESC_DE : DEFAULT_LEARN_ONLINE_DESC_EN)
   const learnOnlineBtnLabel =
-    learn?.learnOnlineButtonLabel ?? (isDe ? DEFAULT_LEARN_ONLINE_BTN_DE : DEFAULT_LEARN_ONLINE_BTN_EN)
+    learn?.learnOnlineButtonLabel ??
+    (isDe ? DEFAULT_LEARN_ONLINE_BTN_DE : DEFAULT_LEARN_ONLINE_BTN_EN)
   const learnOnlineButtonHref = learn?.learnOnlineButtonHref ?? '/workshops'
 
-  const whyOnlineHeading = why?.whyOnlineHeading ?? (isDe ? DEFAULT_WHY_ONLINE_HEADING_DE : DEFAULT_WHY_ONLINE_HEADING_EN)
+  const whyOnlineHeading =
+    why?.whyOnlineHeading ?? (isDe ? DEFAULT_WHY_ONLINE_HEADING_DE : DEFAULT_WHY_ONLINE_HEADING_EN)
   const whyOnlineFeatures =
     (why?.whyOnlineFeatures?.length ?? 0) >= 4
       ? why!.whyOnlineFeatures!.map((f) => ({
@@ -449,32 +559,50 @@ export default async function WorkshopDetailPage({ params }: Args) {
     return (
       <article>
         {/* 1. Dedicated Lakto Hero */}
-        <LaktoHero cms={detail ? {
-          eyebrow: detail.heroEyebrow,
-          title: detail.heroTitle,
-          description: detail.heroDescription,
-          attributes: detail.heroAttributes,
-          image: detail.heroImage,
-        } : undefined} />
+        <LaktoHero
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.heroEyebrow,
+                  title: detail.heroTitle,
+                  description: detail.heroDescription,
+                  attributes: detail.heroAttributes,
+                  image: detail.heroImage,
+                }
+              : undefined
+          }
+        />
 
         {/* 2. Modern Booking Card */}
         <LaktoBookingCard workshop={workshopDetailData} cms={detail ?? undefined} />
 
         {/* 3. Seasonal Fermentation Calendar */}
-        <LaktoCalendar cms={detail ? {
-          eyebrow: detail.calendarEyebrow,
-          title: detail.calendarTitle,
-          description: detail.calendarDescription,
-          months: detail.calendarMonths,
-        } : undefined} />
+        <LaktoCalendar
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.calendarEyebrow,
+                  title: detail.calendarTitle,
+                  description: detail.calendarDescription,
+                  months: detail.calendarMonths,
+                }
+              : undefined
+          }
+        />
 
         {/* 4. Fermented Vegetables How-Tos */}
-        <FermentedVegHowTos cms={detail ? {
-          eyebrow: detail.howToEyebrow,
-          title: detail.howToTitle,
-          description: detail.howToDescription,
-          howToArticles: detail.howToArticles,
-        } : undefined} />
+        <FermentedVegHowTos
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.howToEyebrow,
+                  title: detail.howToTitle,
+                  description: detail.howToDescription,
+                  howToArticles: detail.howToArticles,
+                }
+              : undefined
+          }
+        />
 
         {/* 5. Other Workshops (slider — excludes lakto-gemuese) */}
         <WorkshopTypesSlider
@@ -487,25 +615,37 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 6. Voucher CTA */}
-        <LaktoVoucherCta cms={detail ? {
-          eyebrow: detail.voucherEyebrow,
-          title: detail.voucherTitle,
-          description: detail.voucherDescription,
-          primaryLabel: detail.voucherPrimaryLabel,
-          primaryHref: detail.voucherPrimaryHref,
-          secondaryLabel: detail.voucherSecondaryLabel,
-          secondaryHref: detail.voucherSecondaryHref,
-          pills: detail.voucherPills,
-        } : undefined} />
+        <LaktoVoucherCta
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.voucherEyebrow,
+                  title: detail.voucherTitle,
+                  description: detail.voucherDescription,
+                  primaryLabel: detail.voucherPrimaryLabel,
+                  primaryHref: detail.voucherPrimaryHref,
+                  secondaryLabel: detail.voucherSecondaryLabel,
+                  secondaryHref: detail.voucherSecondaryHref,
+                  pills: detail.voucherPills,
+                }
+              : undefined
+          }
+        />
 
         {/* 7. Booking FAQ */}
-        <LaktoFAQ cms={detail ? {
-          eyebrow: detail.faqEyebrow,
-          title: detail.faqTitle,
-          description: detail.faqDescription,
-          items: detail.faqItems,
-          contactEmail: detail.faqContactEmail,
-        } : undefined} />
+        <LaktoFAQ
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.faqEyebrow,
+                  title: detail.faqTitle,
+                  description: detail.faqDescription,
+                  items: detail.faqItems,
+                  contactEmail: detail.faqContactEmail,
+                }
+              : undefined
+          }
+        />
       </article>
     )
   }

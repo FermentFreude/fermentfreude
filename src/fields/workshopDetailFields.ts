@@ -14,7 +14,8 @@ export const workshopDetailFields: Field[] = [
     label: '1. Hero',
     admin: {
       initCollapsed: false,
-      description: 'Full-viewport hero with panel + text. Jar silhouettes are decorative (code-only).',
+      description:
+        'Full-viewport hero with panel + text. Jar silhouettes are decorative (code-only).',
     },
     fields: [
       {
@@ -57,7 +58,8 @@ export const workshopDetailFields: Field[] = [
         label: 'Attribute Pills',
         maxRows: 6,
         admin: {
-          description: 'Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").',
+          description:
+            'Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").',
         },
         fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
       },
@@ -180,8 +182,7 @@ export const workshopDetailFields: Field[] = [
     label: '3. Workshop Details (Expandable)',
     admin: {
       initCollapsed: true,
-      description:
-        'Content shown when "Mehr Details" is clicked: About, Schedule, Included, Why.',
+      description: 'Content shown when "Mehr Details" is clicked: About, Schedule, Included, Why.',
     },
     fields: [
       {
@@ -239,9 +240,7 @@ export const workshopDetailFields: Field[] = [
         type: 'array',
         label: 'Included Items',
         maxRows: 12,
-        fields: [
-          { name: 'text', type: 'text', required: true, localized: true, label: 'Item' },
-        ],
+        fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Item' }],
       },
       {
         name: 'whyHeading',
@@ -282,8 +281,7 @@ export const workshopDetailFields: Field[] = [
     label: '4. Experience Cards (Was dich erwartet)',
     admin: {
       initCollapsed: true,
-      description:
-        'Three alternating image+text cards: Theory, Practice, Tasting.',
+      description: 'Three alternating image+text cards: Theory, Practice, Tasting.',
     },
     fields: [
       {
@@ -557,9 +555,7 @@ export const workshopDetailFields: Field[] = [
         admin: {
           description: 'Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").',
         },
-        fields: [
-          { name: 'text', type: 'text', required: true, localized: true, label: 'Text' },
-        ],
+        fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
       },
     ],
   },
@@ -673,7 +669,7 @@ export const workshopDetailFields: Field[] = [
     admin: {
       initCollapsed: true,
       description:
-        '6 educational article cards shown below the Fermentation Calendar. Edit the section heading and each article\'s title, description, read time, link and cover image.',
+        "6 educational article cards shown below the Fermentation Calendar. Edit the section heading and each article's title, description, read time, link and cover image.",
     },
     fields: [
       {
@@ -699,57 +695,15 @@ export const workshopDetailFields: Field[] = [
       },
       {
         name: 'howToArticles',
-        type: 'array',
-        label: 'Articles (6)',
-        minRows: 6,
-        maxRows: 6,
+        type: 'relationship',
+        relationTo: 'posts',
+        hasMany: true,
+        label: 'Articles (pick 6)',
         admin: {
           description:
-            'Exactly 6 article cards. Paste the text for each article and upload a cover image. The "Link" field is the URL the card links to (e.g. "/tipps/salz-und-lake").',
+            'Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article\'s title, image and content is edited directly inside the Posts collection.',
+          allowCreate: false,
         },
-        fields: [
-          {
-            name: 'title',
-            type: 'text',
-            required: true,
-            localized: true,
-            label: 'Article Title',
-            admin: { description: 'Card heading text.' },
-          },
-          {
-            name: 'description',
-            type: 'textarea',
-            localized: true,
-            label: 'Article Description',
-            admin: { description: 'Short summary shown on the card.' },
-          },
-          {
-            name: 'readTime',
-            type: 'text',
-            localized: true,
-            label: 'Read Time',
-            admin: { description: 'e.g. "12 Min." — shown at the bottom of the card.' },
-          },
-          {
-            name: 'image',
-            type: 'upload',
-            relationTo: 'media',
-            label: 'Cover Image',
-            admin: {
-              description:
-                'Card cover image (16:9 ratio recommended). Shown at the top of the card.',
-            },
-          },
-          {
-            name: 'href',
-            type: 'text',
-            label: 'Link (URL)',
-            admin: {
-              description:
-                'Internal path the card links to (e.g. "/tipps/gemuese-fermentieren-leitfaden").',
-            },
-          },
-        ],
       },
     ],
   },

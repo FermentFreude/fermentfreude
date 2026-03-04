@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
+import { ARTICLES as ARTICLE_DATA } from '@/app/(app)/tipps/article-data'
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
-import { ARTICLES as ARTICLE_DATA } from '@/app/(app)/tipps/article-data'
+import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
  *  Fermented Vegetables How-Tos — Article Card Grid
@@ -24,20 +24,25 @@ import { ARTICLES as ARTICLE_DATA } from '@/app/(app)/tipps/article-data'
 
 // ─── CMS types ──────────────────────────────────────────────
 
-export type HowToArticleCMS = {
+/**
+ * Represents a resolved Post document from the `posts` relationship.
+ * Populated at depth ≥ 1 when querying workshopDetail.howToArticles.
+ */
+export type PostCard = {
+  id: string
+  slug?: string | null
   title?: string | null
-  description?: string | null
+  summary?: string | null
   readTime?: string | null
-  image?: MediaType | string | null
-  href?: string | null
-  id?: string | null
+  heroImage?: MediaType | string | null
 }
 
 export type FermentedVegHowTosCMS = {
   eyebrow?: string | null
   title?: string | null
   description?: string | null
-  howToArticles?: HowToArticleCMS[] | null
+  /** Relationship to Posts collection, resolved by depth ≥ 1 */
+  howToArticles?: (string | PostCard)[] | null
 }
 
 // ─── Hardcoded defaults ──────────────────────────────────────
@@ -81,18 +86,23 @@ export function FermentedVegHowTos({ cms }: { cms?: FermentedVegHowTosCMS }) {
   const sectionTitle = cms?.title ?? DEFAULT_TITLE
   const sectionDescription = cms?.description ?? DEFAULT_DESCRIPTION
 
-  // Merge CMS articles over defaults (CMS overrides per-field; keeps default if CMS field is empty)
+  // Build card list from CMS posts (relationship resolved at depth ≥ 1),
+  // falling back to hardcoded defaults when no CMS data or fewer than expected posts.
+  const resolvedPosts: PostCard[] = (cms?.howToArticles ?? [])
+    .filter((item): item is PostCard => typeof item === 'object' && item !== null)
+
   const articles = DEFAULT_ARTICLES.map((def, i) => {
-    const cmsArticle = cms?.howToArticles?.[i]
+    const post = resolvedPosts[i]
     return {
-      id: def.id,
-      title: cmsArticle?.title ?? def.title,
-      description: cmsArticle?.description ?? def.description,
-      readTime: cmsArticle?.readTime ?? def.readTime,
-      image: (cmsArticle?.image && typeof cmsArticle.image === 'object' && 'url' in cmsArticle.image)
-        ? (cmsArticle.image as MediaType)
-        : null,
-      href: cmsArticle?.href ?? def.href,
+      id: post?.id ?? def.id,
+      title: post?.title ?? def.title,
+      description: post?.summary ?? def.description,
+      readTime: post?.readTime ?? def.readTime,
+      image:
+        post?.heroImage && typeof post.heroImage === 'object' && 'url' in post.heroImage
+          ? (post.heroImage as MediaType)
+          : null,
+      href: post?.slug ? `/tipps/${post.slug}` : def.href,
     }
   })
 
@@ -130,10 +140,7 @@ export function FermentedVegHowTos({ cms }: { cms?: FermentedVegHowTosCMS }) {
               {/* Cover image */}
               <div className="aspect-video w-full overflow-hidden bg-ff-warm-gray transition-opacity duration-300 group-hover:opacity-90">
                 {article.image ? (
-                  <Media
-                    resource={article.image}
-                    imgClassName="size-full object-cover"
-                  />
+                  <Media resource={article.image} imgClassName="size-full object-cover" />
                 ) : (
                   <div className="size-full bg-[#ECE5DE]" />
                 )}

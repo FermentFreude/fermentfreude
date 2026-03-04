@@ -25,11 +25,7 @@ const workshopDetailDE = {
   heroTitle: 'Die Kunst der\nLakto-Fermentation',
   heroDescription:
     'Verwandle frisches Gemüse in probiotische Köstlichkeiten — mit Salz, Zeit und der Magie nützlicher Bakterien.',
-  heroAttributes: [
-    { text: '3 Stunden' },
-    { text: 'Hands-on' },
-    { text: 'Experience' },
-  ],
+  heroAttributes: [{ text: '3 Stunden' }, { text: 'Hands-on' }, { text: 'Experience' }],
 
   // ── 2. Booking Card ────────────────────────────────────
   bookingEyebrow: '3-STUNDEN HANDS-ON WORKSHOP',
@@ -238,8 +234,7 @@ const workshopDetailDE = {
   // ── 10. How-To Articles ────────────────────────────────
   howToEyebrow: 'TIPPS & GUIDES',
   howToTitle: 'Lerne fermentieren.',
-  howToDescription:
-    'Einfache Anleitungen für dein erstes Ferment — direkt aus unserer Küche.',
+  howToDescription: 'Einfache Anleitungen für dein erstes Ferment — direkt aus unserer Küche.',
   howToArticles: [
     {
       title: 'Gemüse fermentieren. Der komplette Leitfaden',
@@ -306,11 +301,7 @@ const workshopDetailEN = {
   heroTitle: 'The Art of\nLacto-Fermentation',
   heroDescription:
     'Transform fresh vegetables into probiotic-rich delicacies — with salt, time, and the magic of beneficial bacteria.',
-  heroAttributes: [
-    { text: '3 Hours' },
-    { text: 'Hands-on' },
-    { text: 'Experience' },
-  ],
+  heroAttributes: [{ text: '3 Hours' }, { text: 'Hands-on' }, { text: 'Experience' }],
 
   // ── 2. Booking Card ────────────────────────────────────
   bookingEyebrow: '3-HOUR HANDS-ON WORKSHOP',
@@ -480,8 +471,7 @@ const workshopDetailEN = {
   // ── 8. FAQ ─────────────────────────────────────────────
   faqEyebrow: 'FAQ',
   faqTitle: 'Good to Know',
-  faqDescription:
-    'Everything you need to know before booking — from cancellation to catering.',
+  faqDescription: 'Everything you need to know before booking — from cancellation to catering.',
   faqItems: [
     {
       question: 'How can I cancel or reschedule?',
@@ -491,7 +481,7 @@ const workshopDetailEN = {
     {
       question: 'What do I need to bring?',
       answer:
-        "Just a good mood! We provide all ingredients, tools, aprons, and jars to take home. Comfortable clothing is recommended. If you have allergies, please let us know in advance.",
+        'Just a good mood! We provide all ingredients, tools, aprons, and jars to take home. Comfortable clothing is recommended. If you have allergies, please let us know in advance.',
     },
     {
       question: 'How big are the groups?',
@@ -506,7 +496,7 @@ const workshopDetailEN = {
     {
       question: 'Is the workshop suitable for beginners?',
       answer:
-        'Absolutely! Our workshops are specifically designed for beginners. You don\'t need any prior knowledge. We explain everything step by step — from the science to the practice.',
+        "Absolutely! Our workshops are specifically designed for beginners. You don't need any prior knowledge. We explain everything step by step — from the science to the practice.",
     },
     {
       question: 'Are there vegetarian/vegan options?',
@@ -519,8 +509,7 @@ const workshopDetailEN = {
   // ── 10. How-To Articles ────────────────────────────────
   howToEyebrow: 'TIPS & GUIDES',
   howToTitle: 'Learn to ferment.',
-  howToDescription:
-    'Simple guides for your first ferment — straight from our kitchen.',
+  howToDescription: 'Simple guides for your first ferment — straight from our kitchen.',
   howToArticles: [
     {
       title: 'Fermenting Vegetables. The Complete Guide',
@@ -605,7 +594,9 @@ async function seedLaktoDetail() {
   const pageId = page.id
 
   // ── Non-destructive check ───────────────────────────────
-  const detail = (page as unknown as Record<string, unknown>).workshopDetail as Record<string, unknown> | undefined
+  const detail = (page as unknown as Record<string, unknown>).workshopDetail as
+    | Record<string, unknown>
+    | undefined
   if (detail?.heroTitle && !isForce) {
     payload.logger.info(
       `⏭️  workshopDetail already has data for "${slug}". Use --force to overwrite.`,
@@ -631,7 +622,9 @@ async function seedLaktoDetail() {
     depth: 0,
   })
 
-  const savedDetail = (saved as unknown as Record<string, unknown>).workshopDetail as Record<string, unknown> | undefined
+  const savedDetail = (saved as unknown as Record<string, unknown>).workshopDetail as
+    | Record<string, unknown>
+    | undefined
 
   // ── Merge EN arrays with DE-generated IDs ───────────────
   const enData = { ...workshopDetailEN } as Record<string, unknown>
@@ -665,7 +658,8 @@ async function seedLaktoDetail() {
   }
 
   // Also handle nested recipes arrays inside calendarMonths
-  const savedMonths = (savedDetail?.calendarMonths as Array<{ id?: string; recipes?: Array<{ id?: string }> }>) ?? []
+  const savedMonths =
+    (savedDetail?.calendarMonths as Array<{ id?: string; recipes?: Array<{ id?: string }> }>) ?? []
   const enMonths = (enData.calendarMonths as Array<Record<string, unknown>>) ?? []
   for (let m = 0; m < Math.min(savedMonths.length, enMonths.length); m++) {
     const savedRecipes = savedMonths[m].recipes ?? []

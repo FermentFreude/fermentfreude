@@ -235,7 +235,12 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                     key={wIdx}
                     data-workshop-group
                     className="shrink-0 flex items-center justify-center"
-                    style={{ width: '85vw', gap: 'clamp(0.75rem, 1.5vw, 1.5rem)', paddingLeft: '3vw', paddingRight: '3vw' }}
+                    style={{
+                      width: '85vw',
+                      gap: 'clamp(0.75rem, 1.5vw, 1.5rem)',
+                      paddingLeft: '3vw',
+                      paddingRight: '3vw',
+                    }}
                   >
                     {/* ── LEFT COLUMN — title + small image ── */}
                     <div

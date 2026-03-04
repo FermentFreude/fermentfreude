@@ -76,6 +76,7 @@ export interface Config {
     pages: Page;
     categories: Category;
     media: Media;
+    posts: Post;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -109,6 +110,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -1520,33 +1522,9 @@ export interface Page {
      */
     howToDescription?: string | null;
     /**
-     * Exactly 6 article cards. Paste the text for each article and upload a cover image. The "Link" field is the URL the card links to (e.g. "/tipps/salz-und-lake").
+     * Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article's title, image and content is edited directly inside the Posts collection.
      */
-    howToArticles?:
-      | {
-          /**
-           * Card heading text.
-           */
-          title: string;
-          /**
-           * Short summary shown on the card.
-           */
-          description?: string | null;
-          /**
-           * e.g. "12 Min." — shown at the bottom of the card.
-           */
-          readTime?: string | null;
-          /**
-           * Card cover image (16:9 ratio recommended). Shown at the top of the card.
-           */
-          image?: (string | null) | Media;
-          /**
-           * Internal path the card links to (e.g. "/tipps/gemuese-fermentieren-leitfaden").
-           */
-          href?: string | null;
-          id?: string | null;
-        }[]
-      | null;
+    howToArticles?: (string | Post)[] | null;
   };
   /**
    * Gift voucher and online courses cards. Only for tempeh, kombucha.
@@ -2595,6 +2573,55 @@ export interface WorkshopSliderBlock {
   blockType: 'workshopSlider';
 }
 /**
+ * How-to articles shown on the Lakto workshop page and at /tipps/[slug]. Edit the title, summary, cover image and article content here.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  /**
+   * URL path used in /tipps/[slug]. Use lowercase with hyphens only (e.g. "salz-und-lake"). Do not change after publishing — it will break existing links.
+   */
+  slug: string;
+  /**
+   * Main heading used on both the card and the article page (e.g. "Salz & Lake richtig einsetzen").
+   */
+  title: string;
+  /**
+   * Short 1–2 sentence description shown on the card. Keep it under 150 characters.
+   */
+  summary?: string | null;
+  /**
+   * Displayed at the bottom of the card (e.g. "9 Min.").
+   */
+  readTime?: string | null;
+  /**
+   * Image shown at the top of the card AND as the article hero. Use 16:9 ratio (e.g. 1200×675 px). Upload a WebP for best performance.
+   */
+  heroImage?: (string | null) | Media;
+  /**
+   * Full article text. Use H2 for section titles. Each paragraph is a separate block. Supports bold, italic, unordered and ordered lists, and links.
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants".
  */
@@ -2796,6 +2823,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'forms';
@@ -3408,16 +3439,7 @@ export interface PagesSelect<T extends boolean = true> {
         howToEyebrow?: T;
         howToTitle?: T;
         howToDescription?: T;
-        howToArticles?:
-          | T
-          | {
-              title?: T;
-              description?: T;
-              readTime?: T;
-              image?: T;
-              href?: T;
-              id?: T;
-            };
+        howToArticles?: T;
       };
   workshopGiftOnline?:
     | T
@@ -3985,6 +4007,20 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  summary?: T;
+  readTime?: T;
+  heroImage?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

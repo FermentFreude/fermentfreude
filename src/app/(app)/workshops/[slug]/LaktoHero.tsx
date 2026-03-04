@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import { useEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
  *  LaktoHero — Dedicated hero for /workshops/lakto-gemuese
@@ -100,12 +100,7 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
                 isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
               }`}
             >
-              <Media
-                resource={heroImage}
-                fill
-                imgClassName="object-cover"
-                priority
-              />
+              <Media resource={heroImage} fill imgClassName="object-cover" priority />
             </div>
           ) : (
             <div
@@ -173,7 +168,9 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
                 <span className="font-display text-[9px] font-semibold uppercase tracking-widest text-white/90">
                   {attr}
                 </span>
-                {i < attributes.length - 1 && <span className="h-3 w-px bg-white/25" aria-hidden="true" />}
+                {i < attributes.length - 1 && (
+                  <span className="h-3 w-px bg-white/25" aria-hidden="true" />
+                )}
               </span>
             ))}
           </div>
@@ -190,17 +187,14 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
                 isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
               }`}
             >
-              <Media
-                resource={heroImage}
-                fill
-                imgClassName="object-cover"
-                priority
-              />
+              <Media resource={heroImage} fill imgClassName="object-cover" priority />
             </div>
           ) : (
             <div
               className={`relative flex items-end gap-4 xl:gap-6 transition-all duration-1200 ${
-                isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-12 opacity-0 scale-95'
+                isVisible
+                  ? 'translate-y-0 opacity-100 scale-100'
+                  : 'translate-y-12 opacity-0 scale-95'
               }`}
             >
               <JarSilhouette className="h-44 w-20 -rotate-6 xl:h-52 xl:w-24" delay={300} />
@@ -264,7 +258,9 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
                   <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-white/90 xl:text-xs">
                     {attr}
                   </span>
-                  {i < attributes.length - 1 && <span className="h-4 w-px bg-white/25" aria-hidden="true" />}
+                  {i < attributes.length - 1 && (
+                    <span className="h-4 w-px bg-white/25" aria-hidden="true" />
+                  )}
                 </span>
               ))}
             </div>
