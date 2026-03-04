@@ -24,7 +24,12 @@ import { LaktoCalendar } from './LaktoCalendar'
 import { LaktoFAQ } from './LaktoFAQ'
 import { LaktoHero } from './LaktoHero'
 import { LaktoVoucherCta } from './LaktoVoucherCta'
+import { TempehBookingCard } from './TempehBookingCard'
+import { TempehFAQ } from './TempehFAQ'
+import { TempehHero } from './TempehHero'
+import { TempehVoucherCta } from './TempehVoucherCta'
 import { getWorkshopBySlug } from './workshop-data'
+import { tempehDefaults } from './tempeh-data'
 
 /* ═══════════════════════════════════════════════════════════════
  *  Workshop detail page — /workshops/[slug]
@@ -636,6 +641,77 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
         {/* 7. Booking FAQ */}
         <LaktoFAQ
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.faqEyebrow,
+                  title: detail.faqTitle,
+                  description: detail.faqDescription,
+                  items: detail.faqItems,
+                }
+              : undefined
+          }
+        />
+      </article>
+    )
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+   *  TEMPEH — Dedicated standalone layout
+   *  Hero → Booking → Voucher → FAQ
+   * ══════════════════════════════════════════════════════════════ */
+  if (slug === 'tempeh') {
+    return (
+      <article>
+        {/* 1. Dedicated Tempeh Hero */}
+        <TempehHero
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.heroEyebrow,
+                  title: detail.heroTitle,
+                  description: detail.heroDescription,
+                  attributes: detail.heroAttributes,
+                  image: detail.heroImage,
+                }
+              : undefined
+          }
+        />
+
+        {/* 2. Modern Booking Card */}
+        <TempehBookingCard workshop={tempehDefaults} cms={detail ?? undefined} />
+
+        {/* 3. Other Workshops (slider — excludes tempeh) */}
+        <WorkshopTypesSlider
+          workshops={similarWorkshops}
+          heading={workshopTypesHeading}
+          subtitle={workshopTypesSub}
+          pillLabel={workshopTypePill}
+          buyLabel={bookLabel}
+          moreInfoLabel={learnMoreLabel}
+        />
+
+        {/* 4. Voucher CTA */}
+        <TempehVoucherCta
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.voucherEyebrow,
+                  title: detail.voucherTitle,
+                  description: detail.voucherDescription,
+                  primaryLabel: detail.voucherPrimaryLabel,
+                  primaryHref: detail.voucherPrimaryHref,
+                  secondaryLabel: detail.voucherSecondaryLabel,
+                  secondaryHref: detail.voucherSecondaryHref,
+                  pills: detail.voucherPills,
+                  backgroundImage: detail.voucherBackgroundImage,
+                }
+              : undefined
+          }
+        />
+
+        {/* 5. FAQ */}
+        <TempehFAQ
           cms={
             detail
               ? {
