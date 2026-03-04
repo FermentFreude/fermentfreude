@@ -56,24 +56,24 @@ export function WorkshopTypesSlider({
   if (workshops.length === 0) return null
 
   return (
-    <section className="relative overflow-visible bg-white py-16 md:py-24">
+    <section className="relative overflow-visible bg-white py-12 sm:py-16 md:py-20 lg:py-24">
       <div className="container-padding relative mx-auto max-w-7xl">
         <Carousel opts={{ align: 'start', loop: true }} className="w-full">
-          {/* Header with nav arrows - inside Carousel for context */}
-          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 className="font-display text-3xl font-bold text-[#1a1a1a] md:text-4xl">
+          {/* Header with nav arrows */}
+          <div className="mb-6 flex flex-col gap-4 sm:gap-6 md:mb-10 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex-1">
+              <h2 className="font-display text-2xl font-bold text-[#1a1a1a] sm:text-3xl md:text-4xl">
                 {heading}
               </h2>
-              <p className="mt-3 max-w-xl text-body-lg text-[#333]">{subtitle}</p>
+              <p className="mt-2 text-sm text-[#555954] sm:mt-3 sm:text-body-lg md:max-w-xl">{subtitle}</p>
             </div>
             <div className="flex shrink-0 gap-2">
               <CarouselPrevious
-                className="static size-12 translate-y-0 rounded-full border-0 bg-[#E5B765] text-[#1a1a1a] hover:bg-[#d4a654] hover:text-[#1a1a1a]"
+                className="h-10 w-10 rounded-full border-0 bg-[#E5B765] text-[#1a1a1a] transition-colors hover:bg-[#d4a654] sm:h-12 sm:w-12"
                 variant="default"
               />
               <CarouselNext
-                className="static size-12 translate-y-0 rounded-full border-0 bg-[#E5B765] text-[#1a1a1a] hover:bg-[#d4a654] hover:text-[#1a1a1a]"
+                className="h-10 w-10 rounded-full border-0 bg-[#E5B765] text-[#1a1a1a] transition-colors hover:bg-[#d4a654] sm:h-12 sm:w-12"
                 variant="default"
               />
             </div>
@@ -87,69 +87,21 @@ export function WorkshopTypesSlider({
 
               return (
                 <CarouselItem key={w.title} className="pl-0">
-                  <div className={`flex h-112 min-h-112 overflow-hidden rounded-2xl ${cardBg}`}>
-                    <div className="grid min-h-full w-full grid-cols-1 lg:grid-cols-2">
-                      {/* Left: text + buttons */}
-                      <div className="flex flex-col justify-center p-8 md:p-12">
-                        <span className="inline-flex w-fit rounded-full bg-[#ECE5DE] px-4 py-1.5 font-display text-xs font-bold uppercase tracking-wider text-[#555954]">
-                          {pillLabel}
-                        </span>
-                        <h3 className="mt-4 font-display text-3xl font-bold text-[#1a1a1a] md:text-4xl">
-                          {w.title}
-                        </h3>
-                        <p className="mt-3 text-body-lg text-[#333]">{w.description}</p>
-                        <div className="mt-6 flex flex-col gap-2 text-base text-[#333]">
-                          {w.duration && (
-                            <span className="flex items-center gap-2">
-                              <svg
-                                className="size-5 shrink-0 text-[#555954]"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                              {w.duration}
-                            </span>
-                          )}
-                          {(w.location || w.format) && (
-                            <span className="flex items-center gap-2 text-[#333]">
-                              <svg
-                                className="size-5 shrink-0 text-[#555954]"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                />
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                              </svg>
-                              {w.location ?? w.format}
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                          <Link
-                            href="/contact"
-                            className="inline-flex items-center justify-center rounded-2xl bg-[#555954] px-8 py-4 font-display text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#333]"
-                          >
-                            {buyLabel}
+                  <div className={`flex min-h-screen flex-col overflow-hidden rounded-xl sm:rounded-2xl md:min-h-96 lg:min-h-112 lg:flex-row ${cardBg}`}>
+                    {/* Left: text + buttons */}
+                    <div className="flex flex-col justify-center px-4 py-8 sm:px-8 md:px-10 lg:px-12 lg:py-0">
+                      <span className="inline-flex w-fit rounded-full bg-[#ECE5DE] px-3 py-1 font-display text-xs font-bold uppercase tracking-wide text-[#555954] sm:px-4 sm:py-1.5">
+                        {pillLabel}
+                      </span>
+                      <h3 className="mt-3 font-display text-xl font-bold text-[#1a1a1a] sm:mt-4 sm:text-2xl md:text-3xl lg:text-4xl">
+                        {w.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-[#555954] sm:mt-3 sm:text-body-lg">{w.description}</p>
+                      <div className="mt-4 flex flex-col gap-2 text-xs text-[#555954] sm:mt-6 sm:text-sm">
+                        {w.duration && (
+                          <span className="flex items-center gap-2">
                             <svg
-                              className="ml-2 size-4"
+                              className="h-4 w-4 shrink-0 sm:h-5 sm:w-5"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -158,27 +110,73 @@ export function WorkshopTypesSlider({
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M9 5l7 7-7 7"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                               />
                             </svg>
-                          </Link>
-                          <Link
-                            href={href}
-                            className="inline-flex items-center justify-center rounded-2xl border-2 border-[#E5B765] bg-transparent px-8 py-4 font-display text-sm font-bold uppercase tracking-wider text-[#4B4B4B] transition-colors hover:bg-[#E5B765]/10"
-                          >
-                            {moreInfoLabel}
-                          </Link>
-                        </div>
-                        <CarouselDots count={workshops.length} />
-                      </div>
-                      {/* Right: image */}
-                      <div className="relative aspect-4/3 lg:aspect-auto lg:min-h-96">
-                        {isResolvedMedia(displayImage) ? (
-                          <Media resource={displayImage} fill imgClassName="object-cover" />
-                        ) : (
-                          <div className="flex size-full items-center justify-center bg-[#ECE5DE]" />
+                            {w.duration}
+                          </span>
+                        )}
+                        {(w.location || w.format) && (
+                          <span className="flex items-center gap-2">
+                            <svg
+                              className="h-4 w-4 shrink-0 sm:h-5 sm:w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                            </svg>
+                            {w.location ?? w.format}
+                          </span>
                         )}
                       </div>
+                      <div className="mt-6 flex flex-col gap-2 sm:gap-3 sm:flex-row md:mt-8">
+                        <Link
+                          href="/contact"
+                          className="inline-flex items-center justify-center rounded-lg bg-[#555954] px-6 py-2.5 font-display text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#333] sm:rounded-2xl sm:px-8 sm:py-4 sm:text-sm"
+                        >
+                          {buyLabel}
+                          <svg
+                            className="ml-2 h-3 w-3 sm:h-4 sm:w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </Link>
+                        <Link
+                          href={href}
+                          className="inline-flex items-center justify-center rounded-lg border-2 border-[#E5B765] bg-transparent px-6 py-2.5 font-display text-xs font-bold uppercase tracking-wider text-[#555954] transition-colors hover:bg-[#E5B765]/10 sm:rounded-2xl sm:px-8 sm:py-4 sm:text-sm"
+                        >
+                          {moreInfoLabel}
+                        </Link>
+                      </div>
+                      <CarouselDots count={workshops.length} />
+                    </div>
+                    {/* Right: image - hidden on mobile, visible on lg */}
+                    <div className="relative hidden aspect-4/3 w-full lg:block lg:w-1/2 lg:aspect-auto lg:min-h-96">
+                      {isResolvedMedia(displayImage) ? (
+                        <Media resource={displayImage} fill imgClassName="object-cover" />
+                      ) : (
+                        <div className="flex size-full items-center justify-center bg-[#ECE5DE]" />
+                      )}
                     </div>
                   </div>
                 </CarouselItem>
@@ -193,11 +191,11 @@ export function WorkshopTypesSlider({
 
 function CarouselDots({ count }: { count: number }) {
   return (
-    <div className="mt-8 flex gap-2" aria-hidden>
+    <div className="mt-6 flex gap-1.5 sm:mt-8 sm:gap-2" aria-hidden>
       {Array.from({ length: count }).map((_, i) => (
         <span
           key={i}
-          className={`h-1 w-8 rounded-full transition-colors ${i === 0 ? 'bg-[#555954]' : 'bg-[#555954]/30'}`}
+          className={`h-0.5 w-4 rounded-full transition-colors sm:h-1 sm:w-8 ${i === 0 ? 'bg-[#555954]' : 'bg-[#555954]/30'}`}
         />
       ))}
     </div>
