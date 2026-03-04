@@ -88,8 +88,9 @@ export function FermentedVegHowTos({ cms }: { cms?: FermentedVegHowTosCMS }) {
 
   // Build card list from CMS posts (relationship resolved at depth ≥ 1),
   // falling back to hardcoded defaults when no CMS data or fewer than expected posts.
-  const resolvedPosts: PostCard[] = (cms?.howToArticles ?? [])
-    .filter((item): item is PostCard => typeof item === 'object' && item !== null)
+  const resolvedPosts: PostCard[] = (cms?.howToArticles ?? []).filter(
+    (item): item is PostCard => typeof item === 'object' && item !== null,
+  )
 
   const articles = DEFAULT_ARTICLES.map((def, i) => {
     const post = resolvedPosts[i]

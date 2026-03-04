@@ -159,8 +159,7 @@ export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
   return (
     <section
       ref={sectionRef}
-      className="section-padding-lg"
-      style={{ backgroundColor: '#F6F0E8' }}
+      className="section-padding-lg bg-white"
     >
       <div className="container mx-auto container-padding">
         <div className="mx-auto max-w-3xl">

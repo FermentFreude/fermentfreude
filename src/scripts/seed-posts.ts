@@ -8,9 +8,9 @@
  * Run:  pnpm seed posts
  *       pnpm seed posts --force
  */
+import { ARTICLES } from '@/app/(app)/tipps/article-data'
 import config from '@payload-config'
 import { getPayload } from 'payload'
-import { ARTICLES } from '@/app/(app)/tipps/article-data'
 
 const isForce = process.argv.includes('--force')
 const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
@@ -101,7 +101,12 @@ function sectionsToLexical(sections: Array<{ heading: string; body: string[] }>)
 
 const EN_OVERRIDES: Record<
   string,
-  { title: string; summary: string; readTime: string; sections: Array<{ heading: string; body: string[] }> }
+  {
+    title: string
+    summary: string
+    readTime: string
+    sections: Array<{ heading: string; body: string[] }>
+  }
 > = {
   'gemuese-fermentieren-leitfaden': {
     title: 'Fermenting Vegetables. The Complete Guide',
@@ -192,7 +197,7 @@ const EN_OVERRIDES: Record<
       {
         heading: 'Common salting mistakes',
         body: [
-          'Too little salt (below 1.5%): the vegetables become mushy and fermentation doesn\'t start properly.',
+          "Too little salt (below 1.5%): the vegetables become mushy and fermentation doesn't start properly.",
           'Too much salt (above 5%): the lactic acid bacteria are inhibited and the ferment tastes too salty.',
           'Wrong scales: a teaspoon of salt is 5–8 g depending on the type. Always weigh — guessing leads to inconsistent results.',
         ],
@@ -236,7 +241,7 @@ const EN_OVERRIDES: Record<
         heading: '5. Giving up too soon',
         body: [
           'Cloudy brine? Normal. White film on the surface? Usually harmless kahm yeast — skim it off and carry on. Strange smell in the first few days? The bacterial culture is settling in, it will pass.',
-          'Fermentation is a living process, not a sterile lab procedure. Trust the process, observe, taste — and don\'t throw anything away before reading our troubleshooting article.',
+          "Fermentation is a living process, not a sterile lab procedure. Trust the process, observe, taste — and don't throw anything away before reading our troubleshooting article.",
         ],
       },
     ],
@@ -258,21 +263,21 @@ const EN_OVERRIDES: Record<
         heading: 'The ideal range: 18–24 °C',
         body: [
           'For most vegetable ferments the sweet spot is 18–24 °C. In this range the lactic acid bacteria start reliably, the vegetables stay crunchy and the flavour develops in a balanced way.',
-          'A normal living space between spring and autumn is usually perfect. Don\'t put your jar on the windowsill in full sun — find a shaded spot in the kitchen or hallway.',
+          "A normal living space between spring and autumn is usually perfect. Don't put your jar on the windowsill in full sun — find a shaded spot in the kitchen or hallway.",
         ],
       },
       {
         heading: 'Fermenting in summer',
         body: [
           'When room temperature rises above 28 °C, fermentation becomes too fast. The vegetables go soft and the flavour becomes flat or even musty.',
-          'Tips for hot days: put jars in the cellar or the coolest room. Increase salt content slightly to 2.5–3%. Start fermentation in the evening when it\'s cooler. Check and taste more often.',
+          "Tips for hot days: put jars in the cellar or the coolest room. Increase salt content slightly to 2.5–3%. Start fermentation in the evening when it's cooler. Check and taste more often.",
         ],
       },
       {
         heading: 'Fermenting in winter',
         body: [
           'Heated rooms often have 20–22 °C — ideal. If your kitchen is cooler (below 18 °C), fermentation simply takes longer. That is not a problem — on the contrary: slowly fermented vegetables often develop deeper, more complex flavours.',
-          'Don\'t put the jar on a cold windowsill or directly next to the heater. A shelf in the kitchen at eye level is perfect.',
+          "Don't put the jar on a cold windowsill or directly next to the heater. A shelf in the kitchen at eye level is perfect.",
         ],
       },
       {
@@ -287,7 +292,7 @@ const EN_OVERRIDES: Record<
   troubleshooting: {
     title: "Problems Fermenting? Don't Panic!",
     summary:
-      'White film, cloudy brine, sulphur smell — almost everything is harmless. Here you\'ll find answers to the most common troubleshooting questions.',
+      "White film, cloudy brine, sulphur smell — almost everything is harmless. Here you'll find answers to the most common troubleshooting questions.",
     readTime: '8 min.',
     sections: [
       {
@@ -316,7 +321,7 @@ const EN_OVERRIDES: Record<
         heading: 'Strange smell',
         body: [
           'Slightly sulphurous smell in the first few days: normal, especially with cabbage and broccoli. It passes after 2–3 days.',
-          'Pleasantly sour: that\'s how it should smell! Like mild-sour pickles or young sauerkraut.',
+          "Pleasantly sour: that's how it should smell! Like mild-sour pickles or young sauerkraut.",
           'Rotten, acrid or off: trust your nose. What obviously smells bad probably is. When in doubt: better to discard and start again.',
         ],
       },
@@ -330,7 +335,7 @@ const EN_OVERRIDES: Record<
       {
         heading: 'Too little brine',
         body: [
-          'Sometimes the vegetables don\'t draw enough water. This happens especially with dense vegetables (carrots, turnips) or if you didn\'t knead enough when dry-salting.',
+          "Sometimes the vegetables don't draw enough water. This happens especially with dense vegetables (carrots, turnips) or if you didn't knead enough when dry-salting.",
           'Solution: simply mix a little extra 2% brine (20 g salt to 1 litre water) and pour over the vegetables until everything is covered.',
         ],
       },
@@ -363,7 +368,7 @@ const EN_OVERRIDES: Record<
         body: [
           'Grilled cheese with kimchi: cheddar + kimchi between two slices of sourdough bread, pan-fried golden brown. THE comfort food.',
           'Sauerkraut stew: classic German — sauerkraut with potatoes, apples and bay leaf. Or as Polish bigos with mushrooms and smoked tofu.',
-          'Fermented vegetable stir-fry: stir-fried vegetables with a spoonful of kimchi or fermented chillies. Add only at the end — don\'t cook too long so the cultures survive.',
+          "Fermented vegetable stir-fry: stir-fried vegetables with a spoonful of kimchi or fermented chillies. Add only at the end — don't cook too long so the cultures survive.",
         ],
       },
       {
@@ -409,7 +414,9 @@ async function seedPosts() {
     })
 
     if (existing.docs.length > 0 && !isForce) {
-      payload.logger.info(`  ⏭️  "${article.slug}" already exists — skipping. Use --force to overwrite.`)
+      payload.logger.info(
+        `  ⏭️  "${article.slug}" already exists — skipping. Use --force to overwrite.`,
+      )
       continue
     }
 

@@ -1,15 +1,23 @@
 /**
  * Seed the workshopDetail tab for the lakto-gemuese page.
  *
- * Populates all 9 CMS sections (Hero, Booking Card, Workshop Details,
+ * Populates all 10 CMS sections (Hero, Booking Card, Workshop Details,
  * Experience Cards, Upcoming Dates, Calendar, Voucher CTA, FAQ,
- * Booking Modal Labels) in both DE and EN.
+ * Booking Modal Labels, How-To Articles) in both DE and EN.
+ *
+ * 🖼️ Image uploads:
+ * - heroImage: lakto1.png (portrait)
+ * - bookingImage: lakto.png (landscape/cinematic)
+ * - experienceCards: Gallery images (3 cards)
+ * - voucherBackgroundImage: voucher.jpg (banner)
  *
  * Run:  pnpm seed lakto-detail
  *       pnpm seed lakto-detail --force   (overwrite existing data)
  */
+import path from 'path'
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
 const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
 
@@ -232,53 +240,11 @@ const workshopDetailDE = {
   faqContactEmail: 'info@fermentfreude.de',
 
   // ── 10. How-To Articles ────────────────────────────────
-  howToEyebrow: 'TIPPS & GUIDES',
-  howToTitle: 'Lerne fermentieren.',
-  howToDescription: 'Einfache Anleitungen für dein erstes Ferment — direkt aus unserer Küche.',
-  howToArticles: [
-    {
-      title: 'Gemüse fermentieren. Der komplette Leitfaden',
-      description:
-        'Alles, was du wissen musst, auf einer Seite: Zutaten, Salzanteil, Behälter, Temperatur und die häufigsten Fragen. Dein Startpunkt für jede Milchsäuregärung.',
-      readTime: '12 Min.',
-      href: '/tipps/gemuese-fermentieren-leitfaden',
-    },
-    {
-      title: 'Salz & Lake richtig einsetzen',
-      description:
-        '2 % Salz ist der goldene Standard — aber wann trockensalzen, wann eine Lake ansetzen? Tabellen, Tipps und alles zur richtigen Salzauswahl.',
-      readTime: '9 Min.',
-      href: '/tipps/salz-und-lake',
-    },
-    {
-      title: '5 Fehler, die Anfänger vermeiden sollten',
-      description:
-        'Gemüse nicht abgewogen? Glas zu früh geöffnet? Wir zeigen dir die häufigsten Stolperfallen — und wie du sie ganz einfach umgehst.',
-      readTime: '3 Min.',
-      href: '/tipps/anfaenger-fehler',
-    },
-    {
-      title: 'Die ideale Temperatur für Milchsäuregärung',
-      description:
-        '18–24 °C zum Starten, anschließend kühl lagern. Erfahre, warum Temperatur den Geschmack, die Textur und die Sicherheit deines Ferments beeinflusst.',
-      readTime: '5 Min.',
-      href: '/tipps/ideale-temperatur',
-    },
-    {
-      title: 'Probleme beim Fermentieren? Keine Panik!',
-      description:
-        'Weißer Film, trübe Lake, Schwefelgeruch — fast alles ist harmlos. Hier findest du Antworten auf die häufigsten Fragen rund ums Troubleshooting.',
-      readTime: '8 Min.',
-      href: '/tipps/troubleshooting',
-    },
-    {
-      title: 'Kreative Ideen für fermentiertes Gemüse',
-      description:
-        'Vom Frühstücks-Bagel bis zum Kimchi-Grilled-Cheese — entdecke kreative Wege, dein Ferment in jede Mahlzeit einzubauen.',
-      readTime: '10 Min.',
-      href: '/tipps/fermentiertes-gemuese-ideen',
-    },
-  ],
+  // Note: If no posts exist yet, this remains empty []
+  // Posts are seeded separately. Link them through the admin UI.
+  // howToEyebrow: 'TIPPS & GUIDES',
+  // howToTitle: 'Lerne fermentieren.',
+  // howToDescription: 'Einfache Anleitungen für dein erstes Ferment — direkt aus unserer Küche.',
 
   // ── 9. Modal Labels ────────────────────────────────────
   modalConfirmHeading: 'Buchung bestätigen',
@@ -507,53 +473,11 @@ const workshopDetailEN = {
   faqContactEmail: 'info@fermentfreude.de',
 
   // ── 10. How-To Articles ────────────────────────────────
-  howToEyebrow: 'TIPS & GUIDES',
-  howToTitle: 'Learn to ferment.',
-  howToDescription: 'Simple guides for your first ferment — straight from our kitchen.',
-  howToArticles: [
-    {
-      title: 'Fermenting Vegetables. The Complete Guide',
-      description:
-        'Everything you need to know on one page: ingredients, salt ratio, containers, temperature and the most common questions. Your starting point for any lacto-fermentation.',
-      readTime: '12 min.',
-      href: '/tipps/gemuese-fermentieren-leitfaden',
-    },
-    {
-      title: 'Using Salt & Brine Correctly',
-      description:
-        '2% salt is the golden standard — but when to dry-salt, when to make a brine? Charts, tips and everything about choosing the right salt.',
-      readTime: '9 min.',
-      href: '/tipps/salz-und-lake',
-    },
-    {
-      title: '5 Mistakes Beginners Should Avoid',
-      description:
-        "Didn't weigh your vegetables? Opened the jar too early? We show you the most common pitfalls — and how to avoid them easily.",
-      readTime: '3 min.',
-      href: '/tipps/anfaenger-fehler',
-    },
-    {
-      title: 'The Ideal Temperature for Lacto-Fermentation',
-      description:
-        '18–24 °C to start, then store cool. Learn why temperature affects the taste, texture and safety of your ferment.',
-      readTime: '5 min.',
-      href: '/tipps/ideale-temperatur',
-    },
-    {
-      title: "Problems Fermenting? Don't Panic!",
-      description:
-        "White film, cloudy brine, sulphur smell — almost everything is harmless. Here you'll find answers to the most common troubleshooting questions.",
-      readTime: '8 min.',
-      href: '/tipps/troubleshooting',
-    },
-    {
-      title: 'Creative Ideas for Fermented Vegetables',
-      description:
-        'From breakfast bagel to kimchi grilled cheese — discover creative ways to incorporate your ferment into every meal.',
-      readTime: '10 min.',
-      href: '/tipps/fermentiertes-gemuese-ideen',
-    },
-  ],
+  // Note: If no posts exist yet, this remains empty []
+  // Posts are seeded separately. Link them through the admin UI.
+  // howToEyebrow: 'TIPS & GUIDES',
+  // howToTitle: 'Learn to ferment.',
+  // howToDescription: 'Simple guides for your first ferment — straight from our kitchen.',
 
   // ── 9. Modal Labels ────────────────────────────────────
   modalConfirmHeading: 'Confirm Booking',
@@ -575,6 +499,35 @@ async function seedLaktoDetail() {
   const slug = 'lakto-gemuese'
 
   payload.logger.info(`Seeding workshopDetail for "${slug}"...`)
+
+  // ── Define image directories ────────────────────────────
+  const imagesDir = path.join(process.cwd(), 'seed-assets', 'images')
+
+  // ── Upload images to Media collection ───────────────────
+  payload.logger.info('  🖼️  Uploading images...')
+
+  const heroImage = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Lakto-Gemüse Workshop – Hero Image' },
+    file: await optimizedFile(path.join(imagesDir, 'lakto1.png'), IMAGE_PRESETS.hero),
+  })
+
+  const bookingImage = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Lakto-Gemüse – Cinematic workspace for booking card' },
+    file: await optimizedFile(path.join(imagesDir, 'lakto.png'), IMAGE_PRESETS.card),
+  })
+
+  const voucherImage = await payload.create({
+    collection: 'media',
+    context: { skipAutoTranslate: true, skipRevalidate: true },
+    data: { alt: 'Voucher CTA – Friends enjoy fermented foods together' },
+    file: await optimizedFile(path.join(imagesDir, 'voucher.jpg'), IMAGE_PRESETS.hero),
+  })
+
+  payload.logger.info(`   ✅ Images uploaded: hero, booking, voucher`)
 
   // ── Find the existing page ──────────────────────────────
   const existing = await payload.find({
@@ -604,13 +557,35 @@ async function seedLaktoDetail() {
     process.exit(0)
   }
 
+  // ── Preserve admin-managed images on re-seed, else use newly uploaded ──
+  // (only applicable if --force, since non-destructive check exits above)
+  const existingHeroImage = (detail?.heroImage as string | undefined) ?? String(heroImage.id)
+  const existingBookingImage =
+    (detail?.bookingImage as string | undefined) ?? String(bookingImage.id)
+  const existingVoucherImage =
+    (detail?.voucherBackgroundImage as string | undefined) ?? String(voucherImage.id)
+
+  if (existing.docs[0] && isForce) {
+    if (detail?.heroImage) payload.logger.info('  🖼️  Preserving existing heroImage')
+    if (detail?.bookingImage) payload.logger.info('  🖼️  Preserving existing bookingImage')
+    if (detail?.voucherBackgroundImage) payload.logger.info('  🖼️  Preserving existing voucherImage')
+  }
+
+  // ── Build DE data with images ──────────────────────────
+  const deData = {
+    ...workshopDetailDE,
+    heroImage: existingHeroImage,
+    bookingImage: existingBookingImage,
+    voucherBackgroundImage: existingVoucherImage,
+  }
+
   // ── Save DE ─────────────────────────────────────────────
   payload.logger.info('  Saving DE locale...')
   await payload.update({
     collection: 'pages',
     id: pageId,
     locale: 'de',
-    data: { workshopDetail: workshopDetailDE } as never,
+    data: { workshopDetail: deData } as never,
     context: ctx,
   })
 
@@ -629,6 +604,11 @@ async function seedLaktoDetail() {
   // ── Merge EN arrays with DE-generated IDs ───────────────
   const enData = { ...workshopDetailEN } as Record<string, unknown>
 
+  // Add images to EN data (same as DE)
+  enData.heroImage = existingHeroImage
+  enData.bookingImage = existingBookingImage
+  enData.voucherBackgroundImage = existingVoucherImage
+
   // For each array field, copy the `id` from the saved DE doc
   const arrayFields = [
     'heroAttributes',
@@ -641,7 +621,7 @@ async function seedLaktoDetail() {
     'calendarMonths',
     'voucherPills',
     'faqItems',
-    'howToArticles',
+    // howToArticles is a relationship to Posts — linked manually in admin
   ] as const
 
   for (const field of arrayFields) {

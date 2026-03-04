@@ -512,6 +512,16 @@ export const workshopDetailFields: Field[] = [
         label: 'Description',
       },
       {
+        name: 'voucherBackgroundImage',
+        type: 'upload',
+        relationTo: 'media',
+        label: 'Background Image',
+        admin: {
+          description:
+            'Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.',
+        },
+      },
+      {
         type: 'row',
         fields: [
           {
@@ -701,7 +711,7 @@ export const workshopDetailFields: Field[] = [
         label: 'Articles (pick 6)',
         admin: {
           description:
-            'Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article\'s title, image and content is edited directly inside the Posts collection.',
+            "Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article's title, image and content is edited directly inside the Posts collection.",
           allowCreate: false,
         },
       },

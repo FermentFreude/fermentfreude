@@ -1451,6 +1451,10 @@ export interface Page {
     voucherTitle?: string | null;
     voucherDescription?: string | null;
     /**
+     * Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.
+     */
+    voucherBackgroundImage?: (string | null) | Media;
+    /**
      * e.g. "Gutschein kaufen" / "Buy Voucher"
      */
     voucherPrimaryLabel?: string | null;
@@ -3407,6 +3411,7 @@ export interface PagesSelect<T extends boolean = true> {
         voucherEyebrow?: T;
         voucherTitle?: T;
         voucherDescription?: T;
+        voucherBackgroundImage?: T;
         voucherPrimaryLabel?: T;
         voucherPrimaryHref?: T;
         voucherSecondaryLabel?: T;

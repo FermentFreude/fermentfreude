@@ -122,6 +122,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   )
 
   const images = galleryImages ?? []
+  const bgImgUrl = '/voucher-bg.jpg'
 
   return (
     <section ref={sectionRef} id={id ?? undefined} className="w-full">
@@ -152,20 +153,39 @@ export const VoucherCtaBlock: React.FC<Props> = ({
       {/* ── Text + Button below gallery ── */}
       <div
         data-anim="content"
-        className="flex flex-col items-center text-center section-padding-md container-padding"
-        style={{ backgroundColor: '#E8E6E3' }}
+        className="relative flex flex-col items-center overflow-hidden text-center section-padding-md container-padding"
       >
-        <div className="max-w-2xl flex flex-col items-center gap-3 sm:gap-5">
-          <h2 data-anim="heading" className="text-ff-black">
+        {/* Background image with dark overlay */}
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={bgImgUrl}
+            alt="Friends clinking kombucha glasses"
+            className="absolute inset-0 h-full w-full object-cover blur-[2px] scale-105"
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-[#1A1510]/60" />
+        </>
+
+        <div
+          className="relative z-10 max-w-2xl flex flex-col items-center gap-3 sm:gap-5"
+        >
+          <h2
+            data-anim="heading"
+            className="text-white"
+          >
             {resolvedHeading}
           </h2>
-          <p data-anim="desc" className="text-body-lg max-w-lg text-ff-charcoal leading-relaxed">
+          <p
+            data-anim="desc"
+            className="text-body-lg max-w-lg leading-relaxed text-white/85"
+          >
             {resolvedDescription}
           </p>
           <Link
             data-anim="cta"
             href={resolvedButtonLink}
-            className="shadow-[inset_0_0_0_2px_#616467] text-ff-charcoal px-6 py-2.5 rounded-full tracking-widest uppercase font-display font-bold bg-transparent hover:bg-[#616467] hover:text-white hover:scale-[1.03] active:scale-[0.97] transition-all text-base"
+            className="shadow-[inset_0_0_0_2px_rgba(255,255,255,0.7)] text-white px-6 py-2.5 rounded-full tracking-widest uppercase font-display font-bold bg-transparent hover:bg-white hover:text-[#2A2520] hover:scale-[1.03] active:scale-[0.97] transition-all text-base"
           >
             {resolvedButtonLabel}
           </Link>

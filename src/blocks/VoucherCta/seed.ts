@@ -4,6 +4,7 @@
 
 export interface VoucherCtaImages {
   galleryMediaIds: string[]
+  backgroundImageId?: string
 }
 
 export function buildVoucherCta(imgs: VoucherCtaImages) {
@@ -15,6 +16,7 @@ export function buildVoucherCta(imgs: VoucherCtaImages) {
     description: 'Teile ein leckeres Erlebnis mit jemandem Besonderem.',
     buttonLabel: 'Gutschein',
     buttonLink: '/voucher',
+    ...(imgs.backgroundImageId ? { backgroundImage: imgs.backgroundImageId } : {}),
     galleryImages,
   }
 
@@ -24,6 +26,7 @@ export function buildVoucherCta(imgs: VoucherCtaImages) {
     description: 'Share a tasty experience with someone special.',
     buttonLabel: 'Voucher',
     buttonLink: '/voucher',
+    ...(imgs.backgroundImageId ? { backgroundImage: imgs.backgroundImageId } : {}),
     galleryImages,
   }
 

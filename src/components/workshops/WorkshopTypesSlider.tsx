@@ -26,13 +26,13 @@ function getSlugFromCtaLink(ctaLink: string | null | undefined): string | null {
 function getWorkshopCardBg(slug: string | null): string {
   switch (slug) {
     case 'tempeh':
-      return 'bg-[#F5F1E8]'
+      return 'bg-[#F4F3F1]'
     case 'kombucha':
-      return 'bg-[#F9F0DC]'
+      return 'bg-[#F6F5F3]'
     case 'lakto-gemuese':
-      return 'bg-[#E8E4D9]'
+      return 'bg-[#F2F1EF]'
     default:
-      return 'bg-[#FAFAF9]'
+      return 'bg-[#F8F7F6]'
   }
 }
 

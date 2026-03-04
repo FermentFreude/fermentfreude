@@ -34,7 +34,13 @@ export type PostData = {
 
 function ArrowLeftIcon({ className = 'size-5' }: { className?: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={2}
+      stroke="currentColor"
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
     </svg>
   )
@@ -42,8 +48,18 @@ function ArrowLeftIcon({ className = 'size-5' }: { className?: string }) {
 
 function ClockIcon({ className = 'size-4' }: { className?: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+      />
     </svg>
   )
 }
@@ -84,7 +100,9 @@ export function ArticleDetailClient({
           {post.readTime && (
             <div className="mt-4 flex items-center gap-2 text-ff-gray-text-light">
               <ClockIcon />
-              <span className="font-display text-body-sm font-medium">{post.readTime} Lesezeit</span>
+              <span className="font-display text-body-sm font-medium">
+                {post.readTime} Lesezeit
+              </span>
             </div>
           )}
           {post.summary && (
@@ -132,9 +150,8 @@ export function ArticleDetailClient({
               Lerne Fermentieren in unserem Workshop
             </h3>
             <p className="mb-8 text-body leading-relaxed text-ff-gray-text">
-              In unserem Lakto-Gemüse-Workshop zeigen wir dir Schritt für Schritt,
-              wie du dein erstes Ferment ansetzt — mit frischen Zutaten, Profi-Tipps
-              und ganz viel Spaß.
+              In unserem Lakto-Gemüse-Workshop zeigen wir dir Schritt für Schritt, wie du dein
+              erstes Ferment ansetzt — mit frischen Zutaten, Profi-Tipps und ganz viel Spaß.
             </p>
             <Link
               href="/workshops/lakto-gemuese"
@@ -193,4 +210,3 @@ export function ArticleDetailClient({
     </main>
   )
 }
-

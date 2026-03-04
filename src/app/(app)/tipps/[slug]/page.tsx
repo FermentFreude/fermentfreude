@@ -71,4 +71,3 @@ export default async function TippsArticlePage({ params }: { params: Params }) {
 
   return <ArticleDetailClient post={post} relatedPosts={relatedResult.docs} />
 }
-

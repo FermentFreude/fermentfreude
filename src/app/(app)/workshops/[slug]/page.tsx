@@ -259,7 +259,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
               collection: 'pages',
               where: { slug: { equals: slug }, _status: { equals: 'published' } },
               limit: 1,
-              depth: 2,
+              depth: 3,
               locale,
             }),
           )
@@ -330,6 +330,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
           voucherEyebrow?: string | null
           voucherTitle?: string | null
           voucherDescription?: string | null
+          voucherBackgroundImage?: import('@/payload-types').Media | string | null
           voucherPrimaryLabel?: string | null
           voucherPrimaryHref?: string | null
           voucherSecondaryLabel?: string | null
@@ -627,6 +628,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
                   secondaryLabel: detail.voucherSecondaryLabel,
                   secondaryHref: detail.voucherSecondaryHref,
                   pills: detail.voucherPills,
+                  backgroundImage: detail.voucherBackgroundImage,
                 }
               : undefined
           }
