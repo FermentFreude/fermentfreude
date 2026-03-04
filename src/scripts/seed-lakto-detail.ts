@@ -1,12 +1,16 @@
 /**
  * Seed the workshopDetail tab for the lakto-gemuese page.
  *
- * Populates all 9 CMS sections (Hero, Booking Card, Workshop Details,
- * Experience Cards, Upcoming Dates, Calendar, Voucher CTA, FAQ,
- * Booking Modal Labels) in both DE and EN.
+ * Populates all 10 CMS sections with TEXT CONTENT ONLY:
+ * 1. Hero, 2. Booking Card, 3. Workshop Details, 4. Experience Cards,
+ * 5. Upcoming Dates, 6. Calendar, 7. Voucher CTA, 8. FAQ, 9. Modal Labels, 10. How-To Articles
+ *
+ * ⚠️  IMAGES ARE NOT SEEDED
+ * Images (heroImage, bookingImage, voucherBackgroundImage) are managed entirely through the admin UI.
+ * The schema defines upload fields — you upload them in /admin/collections/pages and they persist across re-seeds.
  *
  * Run:  pnpm seed lakto-detail
- *       pnpm seed lakto-detail --force   (overwrite existing data)
+ *       pnpm seed lakto-detail --force   (overwrite existing text content)
  */
 import config from '@payload-config'
 import { getPayload } from 'payload'
@@ -25,11 +29,7 @@ const workshopDetailDE = {
   heroTitle: 'Die Kunst der\nLakto-Fermentation',
   heroDescription:
     'Verwandle frisches Gemüse in probiotische Köstlichkeiten — mit Salz, Zeit und der Magie nützlicher Bakterien.',
-  heroAttributes: [
-    { text: '3 Stunden' },
-    { text: 'Hands-on' },
-    { text: 'Experience' },
-  ],
+  heroAttributes: [{ text: '3 Stunden' }, { text: 'Hands-on' }, { text: 'Experience' }],
 
   // ── 2. Booking Card ────────────────────────────────────
   bookingEyebrow: '3-STUNDEN HANDS-ON WORKSHOP',
@@ -236,8 +236,11 @@ const workshopDetailDE = {
   faqContactEmail: 'info@fermentfreude.de',
 
   // ── 10. How-To Articles ────────────────────────────────
-  // Note: howToArticles is a relationship to Posts — link manually in /admin
-  // (Leave empty; posts must be created first in seed-posts.ts)
+  // Note: If no posts exist yet, this remains empty []
+  // Posts are seeded separately. Link them through the admin UI.
+  // howToEyebrow: 'TIPPS & GUIDES',
+  // howToTitle: 'Lerne fermentieren.',
+  // howToDescription: 'Einfache Anleitungen für dein erstes Ferment — direkt aus unserer Küche.',
 
   // ── 9. Modal Labels ────────────────────────────────────
   modalConfirmHeading: 'Buchung bestätigen',
@@ -260,11 +263,7 @@ const workshopDetailEN = {
   heroTitle: 'The Art of\nLacto-Fermentation',
   heroDescription:
     'Transform fresh vegetables into probiotic-rich delicacies — with salt, time, and the magic of beneficial bacteria.',
-  heroAttributes: [
-    { text: '3 Hours' },
-    { text: 'Hands-on' },
-    { text: 'Experience' },
-  ],
+  heroAttributes: [{ text: '3 Hours' }, { text: 'Hands-on' }, { text: 'Experience' }],
 
   // ── 2. Booking Card ────────────────────────────────────
   bookingEyebrow: '3-HOUR HANDS-ON WORKSHOP',
@@ -434,8 +433,7 @@ const workshopDetailEN = {
   // ── 8. FAQ ─────────────────────────────────────────────
   faqEyebrow: 'FAQ',
   faqTitle: 'Good to Know',
-  faqDescription:
-    'Everything you need to know before booking — from cancellation to catering.',
+  faqDescription: 'Everything you need to know before booking — from cancellation to catering.',
   faqItems: [
     {
       question: 'How can I cancel or reschedule?',
@@ -445,7 +443,7 @@ const workshopDetailEN = {
     {
       question: 'What do I need to bring?',
       answer:
-        "Just a good mood! We provide all ingredients, tools, aprons, and jars to take home. Comfortable clothing is recommended. If you have allergies, please let us know in advance.",
+        'Just a good mood! We provide all ingredients, tools, aprons, and jars to take home. Comfortable clothing is recommended. If you have allergies, please let us know in advance.',
     },
     {
       question: 'How big are the groups?',
@@ -460,7 +458,7 @@ const workshopDetailEN = {
     {
       question: 'Is the workshop suitable for beginners?',
       answer:
-        'Absolutely! Our workshops are specifically designed for beginners. You don\'t need any prior knowledge. We explain everything step by step — from the science to the practice.',
+        "Absolutely! Our workshops are specifically designed for beginners. You don't need any prior knowledge. We explain everything step by step — from the science to the practice.",
     },
     {
       question: 'Are there vegetarian/vegan options?',
@@ -471,8 +469,11 @@ const workshopDetailEN = {
   faqContactEmail: 'info@fermentfreude.de',
 
   // ── 10. How-To Articles ────────────────────────────────
-  // Note: howToArticles is a relationship to Posts — link manually in /admin
-  // (Leave empty; posts must be created first in seed-posts.ts)
+  // Note: If no posts exist yet, this remains empty []
+  // Posts are seeded separately. Link them through the admin UI.
+  // howToEyebrow: 'TIPS & GUIDES',
+  // howToTitle: 'Learn to ferment.',
+  // howToDescription: 'Simple guides for your first ferment — straight from our kitchen.',
 
   // ── 9. Modal Labels ────────────────────────────────────
   modalConfirmHeading: 'Confirm Booking',
@@ -494,6 +495,7 @@ async function seedLaktoDetail() {
   const slug = 'lakto-gemuese'
 
   payload.logger.info(`Seeding workshopDetail for "${slug}"...`)
+  payload.logger.info('  📝 Seeding text content only (images managed in /admin)')
 
   // ── Find the existing page ──────────────────────────────
   const existing = await payload.find({
@@ -513,7 +515,9 @@ async function seedLaktoDetail() {
   const pageId = page.id
 
   // ── Non-destructive check ───────────────────────────────
-  const detail = (page as unknown as Record<string, unknown>).workshopDetail as Record<string, unknown> | undefined
+  const detail = (page as unknown as Record<string, unknown>).workshopDetail as
+    | Record<string, unknown>
+    | undefined
   if (detail?.heroTitle && !isForce) {
     payload.logger.info(
       `⏭️  workshopDetail already has data for "${slug}". Use --force to overwrite.`,
@@ -521,13 +525,27 @@ async function seedLaktoDetail() {
     process.exit(0)
   }
 
+  // ── Preserve admin-uploaded images (don't overwrite) ─────
+  // Each image field is managed individually in /admin
+  const deData = {
+    ...workshopDetailDE,
+    // Preserve images: only use seed values if images don't already exist
+    heroImage: detail?.heroImage ?? workshopDetailDE.heroImage,
+    bookingImage: detail?.bookingImage ?? workshopDetailDE.bookingImage,
+    voucherBackgroundImage: detail?.voucherBackgroundImage ?? workshopDetailDE.voucherBackgroundImage,
+  }
+
+  if (detail?.heroImage) payload.logger.info('  🖼️  Preserving existing heroImage')
+  if (detail?.bookingImage) payload.logger.info('  🖼️  Preserving existing bookingImage')
+  if (detail?.voucherBackgroundImage) payload.logger.info('  🖼️  Preserving existing voucherBackgroundImage')
+
   // ── Save DE ─────────────────────────────────────────────
   payload.logger.info('  Saving DE locale...')
   await payload.update({
     collection: 'pages',
     id: pageId,
     locale: 'de',
-    data: { workshopDetail: workshopDetailDE } as never,
+    data: { workshopDetail: deData } as never,
     context: ctx,
   })
 
@@ -539,10 +557,18 @@ async function seedLaktoDetail() {
     depth: 0,
   })
 
-  const savedDetail = (saved as unknown as Record<string, unknown>).workshopDetail as Record<string, unknown> | undefined
+  const savedDetail = (saved as unknown as Record<string, unknown>).workshopDetail as
+    | Record<string, unknown>
+    | undefined
 
   // ── Merge EN arrays with DE-generated IDs ───────────────
-  const enData = { ...workshopDetailEN } as Record<string, unknown>
+  // Also preserve images across locales (same images for both DE and EN)
+  const enData = {
+    ...workshopDetailEN,
+    heroImage: deData.heroImage,
+    bookingImage: deData.bookingImage,
+    voucherBackgroundImage: deData.voucherBackgroundImage,
+  } as Record<string, unknown>
 
   // For each array field, copy the `id` from the saved DE doc
   const arrayFields = [
@@ -556,6 +582,7 @@ async function seedLaktoDetail() {
     'calendarMonths',
     'voucherPills',
     'faqItems',
+    // howToArticles is a relationship to Posts — linked manually in admin
   ] as const
 
   for (const field of arrayFields) {
@@ -572,7 +599,8 @@ async function seedLaktoDetail() {
   }
 
   // Also handle nested recipes arrays inside calendarMonths
-  const savedMonths = (savedDetail?.calendarMonths as Array<{ id?: string; recipes?: Array<{ id?: string }> }>) ?? []
+  const savedMonths =
+    (savedDetail?.calendarMonths as Array<{ id?: string; recipes?: Array<{ id?: string }> }>) ?? []
   const enMonths = (enData.calendarMonths as Array<Record<string, unknown>>) ?? []
   for (let m = 0; m < Math.min(savedMonths.length, enMonths.length); m++) {
     const savedRecipes = savedMonths[m].recipes ?? []

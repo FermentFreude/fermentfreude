@@ -62,7 +62,9 @@ export function WorkshopTypesSlider({
           {/* Header with nav arrows - inside Carousel for context */}
           <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="font-display text-3xl font-bold text-[#1a1a1a] md:text-4xl">{heading}</h2>
+              <h2 className="font-display text-3xl font-bold text-[#1a1a1a] md:text-4xl">
+                {heading}
+              </h2>
               <p className="mt-3 max-w-xl text-body-lg text-[#333]">{subtitle}</p>
             </div>
             <div className="flex shrink-0 gap-2">
@@ -146,8 +148,18 @@ export function WorkshopTypesSlider({
                             className="inline-flex items-center justify-center rounded-2xl bg-[#555954] px-8 py-4 font-display text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#333]"
                           >
                             {buyLabel}
-                            <svg className="ml-2 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            <svg
+                              className="ml-2 size-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
                             </svg>
                           </Link>
                           <Link

@@ -167,19 +167,11 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           <div className="absolute inset-0 bg-[#1A1510]/60" />
         </>
 
-        <div
-          className="relative z-10 max-w-2xl flex flex-col items-center gap-3 sm:gap-5"
-        >
-          <h2
-            data-anim="heading"
-            className="text-white"
-          >
+        <div className="relative z-10 max-w-2xl flex flex-col items-center gap-3 sm:gap-5">
+          <h2 data-anim="heading" className="text-white">
             {resolvedHeading}
           </h2>
-          <p
-            data-anim="desc"
-            className="text-body-lg max-w-lg leading-relaxed text-white/85"
-          >
+          <p data-anim="desc" className="text-body-lg max-w-lg leading-relaxed text-white/85">
             {resolvedDescription}
           </p>
           <Link

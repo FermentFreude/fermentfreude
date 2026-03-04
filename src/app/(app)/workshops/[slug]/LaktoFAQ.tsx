@@ -120,9 +120,7 @@ function AccordionItem({
         style={{ maxHeight: height }}
       >
         <div ref={contentRef} className="pb-6 pr-16">
-          <p className="text-body leading-relaxed text-ff-gray-text">
-            {item.answer}
-          </p>
+          <p className="text-body leading-relaxed text-ff-gray-text">{item.answer}</p>
         </div>
       </div>
     </div>
@@ -135,11 +133,14 @@ export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
   // ── CMS values → fallback to hardcoded defaults ──
   const eyebrow = cms?.eyebrow ?? 'HÄUFIGE FRAGEN'
   const title = cms?.title ?? 'Gut zu wissen'
-  const description = cms?.description ?? 'Alles was du vor deiner Buchung wissen solltest — von Stornierung bis Verpflegung.'
+  const description =
+    cms?.description ??
+    'Alles was du vor deiner Buchung wissen solltest — von Stornierung bis Verpflegung.'
   const contactEmail = cms?.contactEmail ?? 'info@fermentfreude.de'
-  const faqItems: FAQItem[] = (cms?.items?.length ?? 0) > 0
-    ? cms!.items!.map((item) => ({ question: item.question ?? '', answer: item.answer ?? '' }))
-    : BOOKING_FAQ
+  const faqItems: FAQItem[] =
+    (cms?.items?.length ?? 0) > 0
+      ? cms!.items!.map((item) => ({ question: item.question ?? '', answer: item.answer ?? '' }))
+      : BOOKING_FAQ
 
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -149,7 +150,12 @@ export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
     const el = sectionRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect() } },
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
       { threshold: 0.1 },
     )
     observer.observe(el)
@@ -157,10 +163,7 @@ export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
   }, [])
 
   return (
-    <section
-      ref={sectionRef}
-      className="section-padding-lg bg-white"
-    >
+    <section ref={sectionRef} className="section-padding-lg bg-white">
       <div className="container mx-auto container-padding">
         <div className="mx-auto max-w-3xl">
           {/* Header */}

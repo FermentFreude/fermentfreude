@@ -43,15 +43,23 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
       {hasBackgroundImage ? (
         <div className="overflow-hidden rounded-lg">
           <div className="relative aspect-4/3 md:aspect-21/9 md:min-h-72 w-full">
-            <Media resource={cms.backgroundImage as MediaType} fill imgClassName="object-cover blur-[2px]" />
+            <Media
+              resource={cms.backgroundImage as MediaType}
+              fill
+              imgClassName="object-cover blur-[2px]"
+            />
             <div className="absolute inset-0 bg-black/45" />
             <div className="absolute inset-0 flex items-center justify-center px-6 py-12">
               <div className="mx-auto max-w-3xl text-center">
                 <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-white/80">
                   {eyebrow}
                 </p>
-                <h2 className="font-display text-display font-bold tracking-tight text-white">{title}</h2>
-                <p className="mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white/90">{description}</p>
+                <h2 className="font-display text-display font-bold tracking-tight text-white">
+                  {title}
+                </h2>
+                <p className="mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white/90">
+                  {description}
+                </p>
 
                 <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Link
@@ -89,8 +97,12 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
             <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-[#555954]/60">
               {eyebrow}
             </p>
-            <h2 className="font-display text-display font-bold tracking-tight text-ff-near-black">{title}</h2>
-            <p className="mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-ff-gray-text">{description}</p>
+            <h2 className="font-display text-display font-bold tracking-tight text-ff-near-black">
+              {title}
+            </h2>
+            <p className="mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-ff-gray-text">
+              {description}
+            </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
