@@ -414,7 +414,7 @@ async function seedFermentation() {
   payload.logger.info('Seeding Fermentation page…')
 
   const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
-  const gastronomyDir = path.join(imagesDir, 'gastronomy')
+  const _gastronomyDir = path.join(imagesDir, 'gastronomy')
   const media: FermentationMedia = {}
 
   // Reuse gastronomy images (fermentation-related) — fallback paths
@@ -469,12 +469,12 @@ async function seedFermentation() {
       })
       ;(media as Record<string, Media>)[key] = created as Media
     }
-  } catch (err) {
-    payload.logger.warn('Image upload skipped. Seeding text only.', err)
+  } catch {
+    payload.logger.warn('Image upload skipped. Seeding text only.')
   }
 
   const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
-  const seedEnv = { ...process.env, PAYLOAD_SKIP_FERMENTATION_CONDITION: '1' }
+  const _seedEnv = { ...process.env, PAYLOAD_SKIP_FERMENTATION_CONDITION: '1' }
 
   const existing = await payload.find({
     collection: 'pages',
@@ -503,7 +503,7 @@ async function seedFermentation() {
           title: 'Fermentation',
           slug: 'fermentation',
           _status: 'published',
-          hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+          hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
           layout: [],
           meta: {
             title: 'Fermentation | Fermentfreude',
@@ -560,7 +560,7 @@ async function seedFermentation() {
             title: 'Fermentation',
             slug: 'fermentation',
             _status: 'published',
-            hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+            hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
             layout: [],
             meta: {
               title: 'Fermentation | Fermentfreude',
@@ -587,7 +587,7 @@ async function seedFermentation() {
       title: 'Fermentation',
       slug: 'fermentation',
       _status: 'published',
-      hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+      hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
       layout: [],
       meta: {
         title: 'Fermentation | Fermentfreude',
@@ -644,7 +644,7 @@ async function seedFermentation() {
         title: 'Fermentation',
         slug: 'fermentation',
         _status: 'published',
-        hero: { type: 'lowImpact' as const, richText: LEXICAL_ROOT_WITH_PARAGRAPH },
+        hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
         layout: [],
         meta: {
           title: 'Fermentation | Fermentfreude',
