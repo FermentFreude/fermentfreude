@@ -587,7 +587,6 @@ export interface Page {
         | ThreeItemGridBlock
         | BannerBlock
         | FormBlock
-        | ProductSliderBlock
         | VoucherCtaBlock
         | WorkshopSliderBlock
       )[]
@@ -692,343 +691,6 @@ export interface Page {
       buttonHref?: string | null;
     };
     gastronomyMapEmbedUrl?: string | null;
-  };
-  /**
-   * Content for the Gift Voucher page. These fields only apply when this page's slug is "voucher".
-   */
-  voucher?: {
-    /**
-     * Main headline above the voucher form (e.g. "Give the gift of fermentation").
-     */
-    heroHeading: string;
-    /**
-     * Short intro text below the heading explaining the voucher.
-     */
-    heroDescription: string;
-    /**
-     * List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.
-     */
-    voucherAmounts: {
-      amount: string;
-      id?: string | null;
-    }[];
-    /**
-     * Ways to receive the voucher (e.g. by email or post).
-     */
-    deliveryOptions: {
-      /**
-       * Internal key, e.g. "email" or "post". Used for logic, not shown.
-       */
-      type: string;
-      /**
-       * Label shown to the user (e.g. "By email to print at home").
-       */
-      title: string;
-      /**
-       * Icon displayed next to this option.
-       */
-      icon: 'email' | 'card';
-      id?: string | null;
-    }[];
-    /**
-     * Logo displayed on the voucher preview card. Leave empty to use fallback.
-     */
-    cardLogo?: (string | null) | Media;
-    /**
-     * Label on the voucher preview card (e.g. "GIFT VOUCHER").
-     */
-    cardLabel: string;
-    /**
-     * Label above the amount on the card (e.g. "Voucher value").
-     */
-    valueLabel: string;
-    /**
-     * Small text under the amount (e.g. "Redeemable in our shop").
-     */
-    cardDisclaimer: string;
-    /**
-     * Label above the amount buttons (e.g. "VOUCHER VALUE").
-     */
-    amountSectionLabel: string;
-    /**
-     * Label above delivery options (e.g. "DELIVERY METHOD").
-     */
-    deliverySectionLabel: string;
-    /**
-     * Label for the optional greeting message field.
-     */
-    greetingLabel: string;
-    /**
-     * Placeholder text in the greeting textarea (e.g. "Max. 250 characters").
-     */
-    greetingPlaceholder: string;
-    /**
-     * Text for the main CTA button (e.g. "Add to cart").
-     */
-    addToCartButton: string;
-    /**
-     * Heading for the "Combine with Starter Set" section.
-     */
-    starterSetHeading: string;
-    /**
-     * Body text for the starter set section.
-     */
-    starterSetDescription: string;
-    /**
-     * Button text (e.g. "View Starter Sets").
-     */
-    starterSetButton: string;
-    /**
-     * Image shown in the starter set section. Leave empty to use fallback.
-     */
-    starterSetImage?: (string | null) | Media;
-    /**
-     * Heading for the "Gift for every occasion" section.
-     */
-    giftOccasionsHeading: string;
-    /**
-     * Occasion cards with image and caption (e.g. Birthdays, Weddings).
-     */
-    giftOccasions: {
-      /**
-       * Optional. Uses fallback if empty.
-       */
-      image?: (string | null) | Media;
-      caption: string;
-      id?: string | null;
-    }[];
-    /**
-     * Heading above the voucher FAQ accordion.
-     */
-    faqHeading: string;
-    /**
-     * Frequently asked questions about vouchers.
-     */
-    faqs: {
-      question: string;
-      answer: string;
-      id?: string | null;
-    }[];
-  };
-  /**
-   * Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.
-   */
-  shop?: {
-    /**
-     * Add slides for a hero slider. If empty, the single hero below is used.
-     */
-    heroSlides?:
-      | {
-          /**
-           * Full-bleed background (or poster when video is set).
-           */
-          image: string | Media;
-          /**
-           * Optional looping video (e.g. bubbling ingredients). Homemade Jam style.
-           */
-          backgroundVideo?: (string | null) | Media;
-          /**
-           * Optional center product/jar image (Homemade Jam style).
-           */
-          productImage?: (string | null) | Media;
-          /**
-           * e.g. "Discover UNIQUE Flavours".
-           */
-          title: string;
-          /**
-           * Short text below the title.
-           */
-          description?: string | null;
-          /**
-           * e.g. "Explore Now".
-           */
-          ctaLabel?: string | null;
-          /**
-           * e.g. "#products".
-           */
-          ctaUrl?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * First line (e.g. "Discover").
-     */
-    heroTitleLine1?: string | null;
-    /**
-     * Second line with highlighted word (e.g. "UNIQUE Flavours").
-     */
-    heroTitleLine2?: string | null;
-    /**
-     * Word to highlight in gold in line 2 (e.g. "UNIQUE").
-     */
-    heroTitleHighlight?: string | null;
-    /**
-     * Short welcoming text below the title.
-     */
-    heroDescription?: string | null;
-    /**
-     * Background image.
-     */
-    heroBackgroundImage?: (string | null) | Media;
-    /**
-     * e.g. "Explore Now".
-     */
-    heroCtaPrimaryLabel?: string | null;
-    /**
-     * e.g. "#products".
-     */
-    heroCtaPrimaryUrl?: string | null;
-    /**
-     * e.g. "Learn More".
-     */
-    heroCtaSecondaryLabel?: string | null;
-    heroCtaSecondaryUrl?: string | null;
-    /**
-     * e.g. "Discover UNIQUE."
-     */
-    productSectionHeading?: string | null;
-    /**
-     * e.g. "FLAVOURS" (smaller, lighter).
-     */
-    productSectionSubheading?: string | null;
-    /**
-     * Paragraph describing the product collection (handcrafted ferments, curated collection).
-     */
-    productSectionIntro?: string | null;
-    /**
-     * e.g. "View All Products".
-     */
-    viewAllButtonLabel?: string | null;
-    /**
-     * e.g. "/shop".
-     */
-    viewAllButtonUrl?: string | null;
-    /**
-     * e.g. "Load More".
-     */
-    loadMoreLabel?: string | null;
-    /**
-     * Label for the add-to-cart icon/button on product cards.
-     */
-    addToCartLabel?: string | null;
-    /**
-     * Decorative shape with organic cutout (bottom-right). Mask for card background.
-     */
-    productCardBackgroundImage?: (string | null) | Media;
-    /**
-     * Hex color for card shape (e.g. #F7F7F8).
-     */
-    productCardBackgroundColor?: string | null;
-    /**
-     * Hex color for product section (e.g. #FFFFFF).
-     */
-    productSectionBackgroundColor?: string | null;
-    /**
-     * Hex color for add-to-cart circle (e.g. #E5B765).
-     */
-    productCardAddToCartColor?: string | null;
-    /**
-     * Hex color on hover (e.g. #d9a854).
-     */
-    productCardAddToCartHoverColor?: string | null;
-    /**
-     * e.g. "Why fermented products?"
-     */
-    benefitsHeading?: string | null;
-    /**
-     * Exactly 3 benefits. Product-focused (gut health, nutrients, preservation).
-     */
-    benefitsItems?:
-      | {
-          title: string;
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Gift a special tasty experience."
-     */
-    giftHeading?: string | null;
-    /**
-     * Text encouraging users to buy gift vouchers.
-     */
-    giftDescription?: string | null;
-    /**
-     * e.g. "Find Out More".
-     */
-    giftButtonLabel?: string | null;
-    /**
-     * e.g. "/voucher".
-     */
-    giftButtonUrl?: string | null;
-    /**
-     * e.g. "Learn UNIQUE Flavours."
-     */
-    featuredHeading?: string | null;
-    /**
-     * Word to highlight in gold (e.g. "UNIQUE").
-     */
-    featuredHeadingHighlight?: string | null;
-    /**
-     * e.g. "See All Workshops".
-     */
-    featuredViewAllLabel?: string | null;
-    /**
-     * Link for View all.
-     */
-    featuredViewAllUrl?: string | null;
-    /**
-     * Workshop cards with image, date, seats, price, and booking button.
-     */
-    featuredItems?:
-      | {
-          image?: (string | null) | Media;
-          title: string;
-          description?: string | null;
-          /**
-           * e.g. "12. March 2026".
-           */
-          date?: string | null;
-          /**
-           * Available seats (e.g. 12).
-           */
-          seats?: number | null;
-          /**
-           * e.g. "€89".
-           */
-          price?: string | null;
-          /**
-           * e.g. "Info & Buchen".
-           */
-          buttonLabel?: string | null;
-          /**
-           * Used when buttonLabel is empty (e.g. "Read More").
-           */
-          readMoreLabel?: string | null;
-          url: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Learn Fermentation Anytime, Anywhere".
-     */
-    workshopCtaHeading?: string | null;
-    /**
-     * Text about online courses.
-     */
-    workshopCtaDescription?: string | null;
-    /**
-     * Dark industrial image (fermentation vats).
-     */
-    workshopCtaBackgroundImage?: (string | null) | Media;
-    /**
-     * e.g. "View All Workshops".
-     */
-    workshopCtaButtonLabel?: string | null;
-    /**
-     * e.g. "/workshops".
-     */
-    workshopCtaButtonUrl?: string | null;
   };
   /**
    * Content for the Fermentation page (/fermentation). Only applies when slug is "fermentation".
@@ -1239,379 +901,121 @@ export interface Page {
       | null;
   };
   /**
-   * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.
+   * Content for the Gift Voucher page. These fields only apply when this page's slug is "voucher".
    */
-  workshopDetail?: {
+  voucher?: {
     /**
-     * Enable this to show the seasonal calendar section on this workshop page. Disable to hide all calendar fields from the admin.
+     * Main headline above the voucher form (e.g. "Give the gift of fermentation").
      */
-    showSeasonalCalendar?: boolean | null;
+    heroHeading: string;
     /**
-     * Small text above the title (e.g. "Workshop Experience").
+     * Short intro text below the heading explaining the voucher.
      */
-    heroEyebrow?: string | null;
+    heroDescription: string;
     /**
-     * Main heading. Use a line break for two lines (e.g. "Die Kunst der\nLakto-Fermentation").
+     * List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.
      */
-    heroTitle?: string | null;
-    /**
-     * Short paragraph below the title.
-     */
-    heroDescription?: string | null;
-    /**
-     * Image shown on the left side of the hero (portrait or square, min 800px tall). When empty, decorative jar illustrations are shown instead.
-     */
-    heroImage?: (string | null) | Media;
-    /**
-     * Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").
-     */
-    heroAttributes?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"
-     */
-    bookingEyebrow?: string | null;
-    /**
-     * e.g. "99"
-     */
-    bookingPrice?: number | null;
-    /**
-     * e.g. "pro Person" / "per person"
-     */
-    bookingPriceSuffix?: string | null;
-    /**
-     * e.g. "€"
-     */
-    bookingCurrency?: string | null;
-    /**
-     * Optional background image for the booking card header.
-     */
-    bookingImage?: (string | null) | Media;
-    /**
-     * Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").
-     */
-    bookingAttributes?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Termine & Buchen" / "View Dates & Book"
-     */
-    bookingViewDatesLabel?: string | null;
-    /**
-     * e.g. "Termine ausblenden" / "Hide Dates"
-     */
-    bookingHideDatesLabel?: string | null;
-    /**
-     * e.g. "Mehr Informationen" / "Learn More"
-     */
-    bookingMoreDetailsLabel?: string | null;
-    /**
-     * e.g. "Buchen" / "Book"
-     */
-    bookingBookLabel?: string | null;
-    /**
-     * e.g. "Plätze frei" / "spots available"
-     */
-    bookingSpotsLabel?: string | null;
-    /**
-     * e.g. "Über den Workshop" / "About this Workshop"
-     */
-    aboutHeading?: string | null;
-    /**
-     * Long prose description of what the workshop is about.
-     */
-    aboutText?: string | null;
-    /**
-     * e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"
-     */
-    scheduleHeading?: string | null;
-    schedule?:
-      | {
-          /**
-           * e.g. "45 Min" / "45 minutes"
-           */
-          duration: string;
-          title: string;
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Im Preis enthalten (€99)" / "Included in the Price (€99)"
-     */
-    includedHeading?: string | null;
-    /**
-     * List of items/benefits included in the workshop.
-     */
-    includedItems?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Warum dieser Workshop?" / "Why This Workshop?"
-     */
-    whyHeading?: string | null;
-    whyPoints?:
-      | {
-          /**
-           * The bolded title of this point (e.g. "Darmgesundheit:")
-           */
-          bold: string;
-          /**
-           * The explanatory text that follows the bold title.
-           */
-          rest: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"
-     */
-    experienceEyebrow?: string | null;
-    /**
-     * Main heading for the experience section.
-     */
-    experienceTitle?: string | null;
-    experienceCards?:
-      | {
-          /**
-           * e.g. "THEORIE" / "THEORY"
-           */
-          eyebrow: string;
-          title: string;
-          description: string;
-          image?: (string | null) | Media;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Nächste Workshops" / "Upcoming Workshops"
-     */
-    datesHeading?: string | null;
-    dates?:
-      | {
-          /**
-           * e.g. "15. Februar 2026"
-           */
-          date: string;
-          /**
-           * e.g. "14:00 – 17:00"
-           */
-          time: string;
-          /**
-           * Number of available spots for this date.
-           */
-          spotsLeft?: number | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Reservierung bestätigen" / "Confirm Reservation"
-     */
-    modalConfirmHeading?: string | null;
-    modalConfirmSubheading?: string | null;
-    /**
-     * e.g. "Workshop"
-     */
-    modalWorkshopLabel?: string | null;
-    /**
-     * e.g. "Datum"
-     */
-    modalDateLabel?: string | null;
-    /**
-     * e.g. "Uhrzeit"
-     */
-    modalTimeLabel?: string | null;
-    /**
-     * e.g. "Gesamtbetrag"
-     */
-    modalTotalLabel?: string | null;
-    /**
-     * e.g. "Abbrechen" / "Cancel"
-     */
-    modalCancelLabel?: string | null;
-    /**
-     * e.g. "Bestätigen" / "Confirm"
-     */
-    modalConfirmLabel?: string | null;
-    /**
-     * e.g. "SAISONALE REZEPTE" / "SEASONAL RECIPES"
-     */
-    calendarEyebrow?: string | null;
-    /**
-     * e.g. "Fermentkalender" / "Fermentation Calendar"
-     */
-    calendarTitle?: string | null;
-    calendarDescription?: string | null;
-    calendarMonths?:
-      | {
-          /**
-           * e.g. "März" / "March"
-           */
-          month: string;
-          /**
-           * 3-letter code (e.g. "MÄR" / "MAR").
-           */
-          monthShort: string;
-          /**
-           * Two-digit month number (e.g. "03").
-           */
-          monthNumber: string;
-          /**
-           * e.g. "FRÜHLING" / "SPRING"
-           */
-          season: string;
-          /**
-           * Hex color for month badge and accent lines (e.g. "#e6be68"). Leave empty for default.
-           */
-          accent?: string | null;
-          recipes?:
-            | {
-                name: string;
-                id?: string | null;
-              }[]
-            | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"
-     */
-    voucherEyebrow?: string | null;
-    /**
-     * e.g. "Go with a friend."
-     */
-    voucherTitle?: string | null;
-    voucherDescription?: string | null;
-    /**
-     * Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.
-     */
-    voucherBackgroundImage?: (string | null) | Media;
-    /**
-     * e.g. "Gutschein kaufen" / "Buy Voucher"
-     */
-    voucherPrimaryLabel?: string | null;
-    /**
-     * e.g. "/voucher"
-     */
-    voucherPrimaryHref?: string | null;
-    /**
-     * e.g. "Zum Shop" / "Visit Shop"
-     */
-    voucherSecondaryLabel?: string | null;
-    /**
-     * e.g. "/shop"
-     */
-    voucherSecondaryHref?: string | null;
-    /**
-     * Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").
-     */
-    voucherPills?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "HÄUFIGE FRAGEN" / "FAQ"
-     */
-    faqEyebrow?: string | null;
-    /**
-     * e.g. "Gut zu wissen" / "Good to Know"
-     */
-    faqTitle?: string | null;
-    faqDescription?: string | null;
-    faqItems?:
-      | {
-          question: string;
-          answer: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Email shown at bottom (e.g. "info@fermentfreude.de").
-     */
-    faqContactEmail?: string | null;
-    /**
-     * Small label above the heading (e.g. "TIPPS & GUIDES").
-     */
-    howToEyebrow?: string | null;
-    /**
-     * Main heading (e.g. "Lerne fermentieren.").
-     */
-    howToTitle?: string | null;
-    /**
-     * Short paragraph below the heading.
-     */
-    howToDescription?: string | null;
-    /**
-     * Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article's title, image and content is edited directly inside the Posts collection.
-     */
-    howToArticles?: (string | Post)[] | null;
-  };
-  /**
-   * DEPRECATED - not used on any workshop UI
-   */
-  workshopGiftOnline?: {
-    giftTitle: string;
-    giftDescription: string;
-    giftBuyNowLabel: string;
-    giftBuyVoucherLabel: string;
-    giftBuyNowHref: string;
-    giftBuyVoucherHref: string;
-    onlineTitle: string;
-    onlineDescription: string;
-    onlineBullets: {
-      text: string;
+    voucherAmounts: {
+      amount: string;
       id?: string | null;
     }[];
-    onlineButtonLabel: string;
-    onlineButtonHref: string;
-  };
-  workshopLearnOnline?: {
-    learnOnlineHeading: string;
-    learnOnlineDescription: string;
-    learnOnlineButtonLabel: string;
-    learnOnlineButtonHref: string;
-  };
-  workshopFaq?: {
+    /**
+     * Ways to receive the voucher (e.g. by email or post).
+     */
+    deliveryOptions: {
+      /**
+       * Internal key, e.g. "email" or "post". Used for logic, not shown.
+       */
+      type: string;
+      /**
+       * Label shown to the user (e.g. "By email to print at home").
+       */
+      title: string;
+      /**
+       * Icon displayed next to this option.
+       */
+      icon: 'email' | 'card';
+      id?: string | null;
+    }[];
+    /**
+     * Logo displayed on the voucher preview card. Leave empty to use fallback.
+     */
+    cardLogo?: (string | null) | Media;
+    /**
+     * Label on the voucher preview card (e.g. "GIFT VOUCHER").
+     */
+    cardLabel: string;
+    /**
+     * Label above the amount on the card (e.g. "Voucher value").
+     */
+    valueLabel: string;
+    /**
+     * Small text under the amount (e.g. "Redeemable in our shop").
+     */
+    cardDisclaimer: string;
+    /**
+     * Label above the amount buttons (e.g. "VOUCHER VALUE").
+     */
+    amountSectionLabel: string;
+    /**
+     * Label above delivery options (e.g. "DELIVERY METHOD").
+     */
+    deliverySectionLabel: string;
+    /**
+     * Label for the optional greeting message field.
+     */
+    greetingLabel: string;
+    /**
+     * Placeholder text in the greeting textarea (e.g. "Max. 250 characters").
+     */
+    greetingPlaceholder: string;
+    /**
+     * Text for the main CTA button (e.g. "Add to cart").
+     */
+    addToCartButton: string;
+    /**
+     * Heading for the "Combine with Starter Set" section.
+     */
+    starterSetHeading: string;
+    /**
+     * Body text for the starter set section.
+     */
+    starterSetDescription: string;
+    /**
+     * Button text (e.g. "View Starter Sets").
+     */
+    starterSetButton: string;
+    /**
+     * Image shown in the starter set section. Leave empty to use fallback.
+     */
+    starterSetImage?: (string | null) | Media;
+    /**
+     * Heading for the "Gift for every occasion" section.
+     */
+    giftOccasionsHeading: string;
+    /**
+     * Occasion cards with image and caption (e.g. Birthdays, Weddings).
+     */
+    giftOccasions: {
+      /**
+       * Optional. Uses fallback if empty.
+       */
+      image?: (string | null) | Media;
+      caption: string;
+      id?: string | null;
+    }[];
+    /**
+     * Heading above the voucher FAQ accordion.
+     */
     faqHeading: string;
-    faqSubtitle: string;
-    faqItems: {
+    /**
+     * Frequently asked questions about vouchers.
+     */
+    faqs: {
       question: string;
       answer: string;
       id?: string | null;
     }[];
-  };
-  workshopWhyOnline?: {
-    whyOnlineHeading: string;
-    whyOnlineFeatures: {
-      icon: 'lightning' | 'clock' | 'home' | 'book';
-      title: string;
-      description: string;
-      id?: string | null;
-    }[];
-  };
-  workshopTeamBuilding?: {
-    teamEyebrow: string;
-    teamHeading: string;
-    teamDescription: string;
-    teamBullets: {
-      text: string;
-      id?: string | null;
-    }[];
-    teamCtaLabel: string;
-    teamCtaHref: string;
-    teamImage?: (string | null) | Media;
   };
   meta?: {
     title?: string | null;
@@ -1678,20 +1082,40 @@ export interface ContactBlock {
   contactImage?: (string | null) | Media;
   contact: {
     /**
-     * Heading above the form (e.g., "Kontakt").
+     * Heading for the contact details panel (e.g., "Contact Detail").
      */
     heading: string;
     /**
-     * Short intro text above the form fields.
+     * Intro text for the contact details panel (e.g., "If you need any help...").
      */
     description: string;
+    /**
+     * Physical address (e.g. Grabenstraße 15, 8010 Graz, Austria).
+     */
+    address?: string | null;
+    /**
+     * Displayed on the contact page (e.g. +43 660 4943577).
+     */
+    phone?: string | null;
+    /**
+     * Displayed on the contact page (e.g. fermentfreude@gmail.com).
+     */
+    email?: string | null;
   };
   contactForm: {
     /**
      * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
      */
     form?: (string | null) | Form;
+    /**
+     * Heading above the form (e.g., "Ask About Anything").
+     */
+    formHeading?: string | null;
     placeholders: {
+      /**
+       * When set, a single "Your Name" field is shown. Leave empty to use First + Last Name.
+       */
+      name?: string | null;
       /**
        * Placeholder for first name (e.g., "Vorname").
        */
@@ -1704,6 +1128,10 @@ export interface ContactBlock {
        * Placeholder for email field.
        */
       email: string;
+      /**
+       * Placeholder for phone field (e.g., "Your Phone").
+       */
+      phone?: string | null;
       /**
        * Placeholder for message textarea.
        */
@@ -2421,39 +1849,6 @@ export interface FormBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ProductSliderBlock".
- */
-export interface ProductSliderBlock {
-  /**
-   * Large heading text (e.g. "Discover UNIQUE.").
-   */
-  heading: string;
-  /**
-   * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
-   */
-  headingAccent: string;
-  /**
-   * Short paragraph below the heading (1–2 sentences).
-   */
-  description: string;
-  /**
-   * Text on the CTA button (e.g. "View All Products").
-   */
-  buttonLabel: string;
-  /**
-   * URL the button links to (e.g. "/products").
-   */
-  buttonLink: string;
-  /**
-   * Select products to display in the slider. If empty, the latest products will be shown.
-   */
-  products?: (string | Product)[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'productSlider';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "VoucherCtaBlock".
  */
 export interface VoucherCtaBlock {
@@ -2605,59 +2000,6 @@ export interface WorkshopSliderBlock {
   blockType: 'workshopSlider';
 }
 /**
- * Educational how-to articles organized by workshop type (Lakto, Tempeh, Kombucha). Each article can be viewed at /tipps/[slug] and displayed on its workshop page.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  /**
-   * Article category. Determines which workshop page this article appears on and how it is filtered. Required.
-   */
-  workshopType: 'lakto' | 'tempeh' | 'kombucha';
-  /**
-   * URL path used in /tipps/[slug]. Use lowercase with hyphens only (e.g. "salz-und-lake"). Do not change after publishing — it will break existing links.
-   */
-  slug: string;
-  /**
-   * Main heading used on both the card and the article page (e.g. "Tempeh selbst machen").
-   */
-  title: string;
-  /**
-   * Short 1–2 sentence description shown on the card. Keep it under 150 characters.
-   */
-  summary?: string | null;
-  /**
-   * Displayed at the bottom of the card (e.g. "9 Min.").
-   */
-  readTime?: string | null;
-  /**
-   * Image shown at the top of the card AND as the article hero. Use 16:9 ratio (e.g. 1200×675 px). Upload a WebP for best performance.
-   */
-  heroImage?: (string | null) | Media;
-  /**
-   * Full article text. Use H2 for section titles. Each paragraph is a separate block. Supports bold, italic, unordered and ordered lists, and links.
-   */
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants".
  */
@@ -2800,6 +2142,59 @@ export interface Address {
     | 'SE'
     | 'CH';
   phone?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Educational how-to articles organized by workshop type (Lakto, Tempeh, Kombucha). Each article can be viewed at /tipps/[slug] and displayed on its workshop page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  /**
+   * Article category. Determines which workshop page this article appears on and how it is filtered. Required.
+   */
+  workshopType: 'lakto' | 'tempeh' | 'kombucha';
+  /**
+   * URL path used in /tipps/[slug]. Use lowercase with hyphens only (e.g. "salz-und-lake"). Do not change after publishing — it will break existing links.
+   */
+  slug: string;
+  /**
+   * Main heading used on both the card and the article page (e.g. "Tempeh selbst machen").
+   */
+  title: string;
+  /**
+   * Short 1–2 sentence description shown on the card. Keep it under 150 characters.
+   */
+  summary?: string | null;
+  /**
+   * Displayed at the bottom of the card (e.g. "9 Min.").
+   */
+  readTime?: string | null;
+  /**
+   * Image shown at the top of the card AND as the article hero. Use 16:9 ratio (e.g. 1200×675 px). Upload a WebP for best performance.
+   */
+  heroImage?: (string | null) | Media;
+  /**
+   * Full article text. Use H2 for section titles. Each paragraph is a separate block. Supports bold, italic, unordered and ordered lists, and links.
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3046,7 +2441,6 @@ export interface PagesSelect<T extends boolean = true> {
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
-        productSlider?: T | ProductSliderBlockSelect<T>;
         voucherCta?: T | VoucherCtaBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
       };
@@ -3128,127 +2522,6 @@ export interface PagesSelect<T extends boolean = true> {
               buttonHref?: T;
             };
         gastronomyMapEmbedUrl?: T;
-      };
-  voucher?:
-    | T
-    | {
-        heroHeading?: T;
-        heroDescription?: T;
-        voucherAmounts?:
-          | T
-          | {
-              amount?: T;
-              id?: T;
-            };
-        deliveryOptions?:
-          | T
-          | {
-              type?: T;
-              title?: T;
-              icon?: T;
-              id?: T;
-            };
-        cardLogo?: T;
-        cardLabel?: T;
-        valueLabel?: T;
-        cardDisclaimer?: T;
-        amountSectionLabel?: T;
-        deliverySectionLabel?: T;
-        greetingLabel?: T;
-        greetingPlaceholder?: T;
-        addToCartButton?: T;
-        starterSetHeading?: T;
-        starterSetDescription?: T;
-        starterSetButton?: T;
-        starterSetImage?: T;
-        giftOccasionsHeading?: T;
-        giftOccasions?:
-          | T
-          | {
-              image?: T;
-              caption?: T;
-              id?: T;
-            };
-        faqHeading?: T;
-        faqs?:
-          | T
-          | {
-              question?: T;
-              answer?: T;
-              id?: T;
-            };
-      };
-  shop?:
-    | T
-    | {
-        heroSlides?:
-          | T
-          | {
-              image?: T;
-              backgroundVideo?: T;
-              productImage?: T;
-              title?: T;
-              description?: T;
-              ctaLabel?: T;
-              ctaUrl?: T;
-              id?: T;
-            };
-        heroTitleLine1?: T;
-        heroTitleLine2?: T;
-        heroTitleHighlight?: T;
-        heroDescription?: T;
-        heroBackgroundImage?: T;
-        heroCtaPrimaryLabel?: T;
-        heroCtaPrimaryUrl?: T;
-        heroCtaSecondaryLabel?: T;
-        heroCtaSecondaryUrl?: T;
-        productSectionHeading?: T;
-        productSectionSubheading?: T;
-        productSectionIntro?: T;
-        viewAllButtonLabel?: T;
-        viewAllButtonUrl?: T;
-        loadMoreLabel?: T;
-        addToCartLabel?: T;
-        productCardBackgroundImage?: T;
-        productCardBackgroundColor?: T;
-        productSectionBackgroundColor?: T;
-        productCardAddToCartColor?: T;
-        productCardAddToCartHoverColor?: T;
-        benefitsHeading?: T;
-        benefitsItems?:
-          | T
-          | {
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-        giftHeading?: T;
-        giftDescription?: T;
-        giftButtonLabel?: T;
-        giftButtonUrl?: T;
-        featuredHeading?: T;
-        featuredHeadingHighlight?: T;
-        featuredViewAllLabel?: T;
-        featuredViewAllUrl?: T;
-        featuredItems?:
-          | T
-          | {
-              image?: T;
-              title?: T;
-              description?: T;
-              date?: T;
-              seats?: T;
-              price?: T;
-              buttonLabel?: T;
-              readMoreLabel?: T;
-              url?: T;
-              id?: T;
-            };
-        workshopCtaHeading?: T;
-        workshopCtaDescription?: T;
-        workshopCtaBackgroundImage?: T;
-        workshopCtaButtonLabel?: T;
-        workshopCtaButtonUrl?: T;
       };
   fermentation?:
     | T
@@ -3346,208 +2619,54 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
       };
-  workshopDetail?:
+  voucher?:
     | T
     | {
-        showSeasonalCalendar?: T;
-        heroEyebrow?: T;
-        heroTitle?: T;
+        heroHeading?: T;
         heroDescription?: T;
-        heroImage?: T;
-        heroAttributes?:
+        voucherAmounts?:
           | T
           | {
-              text?: T;
+              amount?: T;
               id?: T;
             };
-        bookingEyebrow?: T;
-        bookingPrice?: T;
-        bookingPriceSuffix?: T;
-        bookingCurrency?: T;
-        bookingImage?: T;
-        bookingAttributes?:
+        deliveryOptions?:
           | T
           | {
-              text?: T;
-              id?: T;
-            };
-        bookingViewDatesLabel?: T;
-        bookingHideDatesLabel?: T;
-        bookingMoreDetailsLabel?: T;
-        bookingBookLabel?: T;
-        bookingSpotsLabel?: T;
-        aboutHeading?: T;
-        aboutText?: T;
-        scheduleHeading?: T;
-        schedule?:
-          | T
-          | {
-              duration?: T;
+              type?: T;
               title?: T;
-              description?: T;
-              id?: T;
-            };
-        includedHeading?: T;
-        includedItems?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        whyHeading?: T;
-        whyPoints?:
-          | T
-          | {
-              bold?: T;
-              rest?: T;
-              id?: T;
-            };
-        experienceEyebrow?: T;
-        experienceTitle?: T;
-        experienceCards?:
-          | T
-          | {
-              eyebrow?: T;
-              title?: T;
-              description?: T;
-              image?: T;
-              id?: T;
-            };
-        datesHeading?: T;
-        dates?:
-          | T
-          | {
-              date?: T;
-              time?: T;
-              spotsLeft?: T;
-              id?: T;
-            };
-        modalConfirmHeading?: T;
-        modalConfirmSubheading?: T;
-        modalWorkshopLabel?: T;
-        modalDateLabel?: T;
-        modalTimeLabel?: T;
-        modalTotalLabel?: T;
-        modalCancelLabel?: T;
-        modalConfirmLabel?: T;
-        calendarEyebrow?: T;
-        calendarTitle?: T;
-        calendarDescription?: T;
-        calendarMonths?:
-          | T
-          | {
-              month?: T;
-              monthShort?: T;
-              monthNumber?: T;
-              season?: T;
-              accent?: T;
-              recipes?:
-                | T
-                | {
-                    name?: T;
-                    id?: T;
-                  };
-              id?: T;
-            };
-        voucherEyebrow?: T;
-        voucherTitle?: T;
-        voucherDescription?: T;
-        voucherBackgroundImage?: T;
-        voucherPrimaryLabel?: T;
-        voucherPrimaryHref?: T;
-        voucherSecondaryLabel?: T;
-        voucherSecondaryHref?: T;
-        voucherPills?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        faqEyebrow?: T;
-        faqTitle?: T;
-        faqDescription?: T;
-        faqItems?:
-          | T
-          | {
-              question?: T;
-              answer?: T;
-              id?: T;
-            };
-        faqContactEmail?: T;
-        howToEyebrow?: T;
-        howToTitle?: T;
-        howToDescription?: T;
-        howToArticles?: T;
-      };
-  workshopGiftOnline?:
-    | T
-    | {
-        giftTitle?: T;
-        giftDescription?: T;
-        giftBuyNowLabel?: T;
-        giftBuyVoucherLabel?: T;
-        giftBuyNowHref?: T;
-        giftBuyVoucherHref?: T;
-        onlineTitle?: T;
-        onlineDescription?: T;
-        onlineBullets?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        onlineButtonLabel?: T;
-        onlineButtonHref?: T;
-      };
-  workshopLearnOnline?:
-    | T
-    | {
-        learnOnlineHeading?: T;
-        learnOnlineDescription?: T;
-        learnOnlineButtonLabel?: T;
-        learnOnlineButtonHref?: T;
-      };
-  workshopFaq?:
-    | T
-    | {
-        faqHeading?: T;
-        faqSubtitle?: T;
-        faqItems?:
-          | T
-          | {
-              question?: T;
-              answer?: T;
-              id?: T;
-            };
-      };
-  workshopWhyOnline?:
-    | T
-    | {
-        whyOnlineHeading?: T;
-        whyOnlineFeatures?:
-          | T
-          | {
               icon?: T;
-              title?: T;
-              description?: T;
               id?: T;
             };
-      };
-  workshopTeamBuilding?:
-    | T
-    | {
-        teamEyebrow?: T;
-        teamHeading?: T;
-        teamDescription?: T;
-        teamBullets?:
+        cardLogo?: T;
+        cardLabel?: T;
+        valueLabel?: T;
+        cardDisclaimer?: T;
+        amountSectionLabel?: T;
+        deliverySectionLabel?: T;
+        greetingLabel?: T;
+        greetingPlaceholder?: T;
+        addToCartButton?: T;
+        starterSetHeading?: T;
+        starterSetDescription?: T;
+        starterSetButton?: T;
+        starterSetImage?: T;
+        giftOccasionsHeading?: T;
+        giftOccasions?:
           | T
           | {
-              text?: T;
+              image?: T;
+              caption?: T;
               id?: T;
             };
-        teamCtaLabel?: T;
-        teamCtaHref?: T;
-        teamImage?: T;
+        faqHeading?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
       };
   meta?:
     | T
@@ -3585,17 +2704,23 @@ export interface ContactBlockSelect<T extends boolean = true> {
     | {
         heading?: T;
         description?: T;
+        address?: T;
+        phone?: T;
+        email?: T;
       };
   contactForm?:
     | T
     | {
         form?: T;
+        formHeading?: T;
         placeholders?:
           | T
           | {
+              name?: T;
               firstName?: T;
               lastName?: T;
               email?: T;
+              phone?: T;
               message?: T;
             };
         subjectOptions?:
@@ -3890,20 +3015,6 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ProductSliderBlock_select".
- */
-export interface ProductSliderBlockSelect<T extends boolean = true> {
-  heading?: T;
-  headingAccent?: T;
-  description?: T;
-  buttonLabel?: T;
-  buttonLink?: T;
-  products?: T;
   id?: T;
   blockName?: T;
 }
