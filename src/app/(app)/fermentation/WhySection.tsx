@@ -123,7 +123,7 @@ export function WhySection({ title, items, image }: WhySectionProps) {
           </div>
           <div className="mt-8 flex justify-center">
             <div className="aspect-video w-full max-w-2xl overflow-hidden rounded-3xl shadow-xl">
-              <Media resource={image} fill imgClassName="object-cover object-center" />
+              <Media resource={image.url} fill imgClassName="object-cover object-center" />
             </div>
           </div>
         </>

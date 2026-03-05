@@ -55,20 +55,28 @@ export const Image: React.FC<MediaProps> = (props) => {
     src = (src as StaticImageData).src
   }
 
-  if (!src && resource && typeof resource === 'object') {
-    const { alt: altFromResource, height: fullHeight, url, width: fullWidth } = resource
-
-    width = widthFromProps ?? fullWidth
-    height = heightFromProps ?? fullHeight
-    alt = altFromResource
-
-    // Use path as-is when relative (/media/...) so images load from current origin
-    if (url && typeof url === 'string') {
+  if (!src && resource) {
+    if (typeof resource === 'string') {
       const base = (process.env.NEXT_PUBLIC_SERVER_URL || '').replace(/\/$/, '')
       src =
-        url.startsWith('http') || url.startsWith('/')
-          ? url
-          : base ? `${base}/${url.replace(/^\//, '')}` : url.startsWith('/') ? url : `/${url}`
+        resource.startsWith('http') || resource.startsWith('/')
+          ? resource
+          : base ? `${base}/${resource.replace(/^\//, '')}` : resource.startsWith('/') ? resource : `/${resource}`
+    } else if (typeof resource === 'object') {
+      const { alt: altFromResource, height: fullHeight, url, width: fullWidth } = resource
+
+      width = widthFromProps ?? fullWidth
+      height = heightFromProps ?? fullHeight
+      alt = altFromResource
+
+      // Use path as-is when relative (/media/...) so images load from current origin
+      if (url && typeof url === 'string') {
+        const base = (process.env.NEXT_PUBLIC_SERVER_URL || '').replace(/\/$/, '')
+        src =
+          url.startsWith('http') || url.startsWith('/')
+            ? url
+            : base ? `${base}/${url.replace(/^\//, '')}` : url.startsWith('/') ? url : `/${url}`
+      }
     }
   }
 

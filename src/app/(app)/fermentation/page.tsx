@@ -17,8 +17,10 @@ import { FaqAccordion } from './FaqAccordion'
 import { PracticeAccordion } from './PracticeAccordion'
 import { WhySection } from './WhySection'
 
+type HeroBlock = { id?: string; title: string; description?: string; icon?: string | MediaType | null; url?: string }
+
 const HERO_BLOCK_COLORS = ['#FAF2E0', '#E6BE68', '#4B4B4B', '#EDD195'] as const
-const DEFAULT_HERO_BLOCKS: Array<{ id?: string; title: string; description?: string; icon?: unknown; url?: string }> = [
+const DEFAULT_HERO_BLOCKS: HeroBlock[] = [
   { title: 'Health & Well-being', description: 'Support your gut microbiome with probiotic-rich foods.' },
   { title: 'Unique Flavours', description: 'Discover complex umami and tangy taste profiles.' },
   { title: 'Simple Processes', description: 'No special equipment—just salt, time, and patience.' },
@@ -221,14 +223,16 @@ export default async function FermentationPage() {
   const heroTitle = f?.fermentationHeroTitle ?? DEFAULT_HERO_TITLE
   const heroDescription = f?.fermentationHeroDescription ?? DEFAULT_HERO_DESCRIPTION
   const heroBenefitsTitle = f?.fermentationHeroBenefitsTitle ?? 'WHY FERMENTATION?'
-  let heroBlocks =
-    (f?.fermentationHeroBlocks?.length ?? 0) > 0 ? (f?.fermentationHeroBlocks ?? []) : DEFAULT_HERO_BLOCKS
+  let heroBlocks: HeroBlock[] =
+    (f?.fermentationHeroBlocks?.length ?? 0) > 0
+      ? (f?.fermentationHeroBlocks ?? []) as HeroBlock[]
+      : DEFAULT_HERO_BLOCKS
 
   // Resolve hero block icons if they're just IDs
   if (heroBlocks.length > 0) {
-    heroBlocks = await Promise.all(
-      heroBlocks.map(async (block) => {
-        const icon = (block as { icon?: unknown }).icon
+    heroBlocks = (await Promise.all(
+      heroBlocks.map(async (block): Promise<HeroBlock> => {
+        const icon = block.icon
         if (icon && typeof icon === 'string') {
           try {
             const mediaDoc = await payload.findByID({
@@ -236,14 +240,14 @@ export default async function FermentationPage() {
               id: icon,
               depth: 0,
             })
-            return { ...block, icon: mediaDoc }
+            return { ...block, icon: mediaDoc as MediaType }
           } catch {
             return block
           }
         }
         return block
       }),
-    )
+    )) as HeroBlock[]
   }
 
   const _guideTag = f?.fermentationGuideTag ?? DEFAULT_GUIDE_TAG
