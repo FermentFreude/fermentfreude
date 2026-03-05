@@ -13,6 +13,12 @@ import { getPayload } from 'payload'
 import type { Media as MediaType, Page as PageType } from '@/payload-types'
 
 const HERO_BLOCK_COLORS = ['#FAF2E0', '#E6BE68', '#4B4B4B', '#EDD195'] as const
+const DEFAULT_HERO_BLOCKS: Array<{ id?: string; title: string; description?: string; icon?: unknown; url?: string }> = [
+  { title: 'Health & Well-being', description: 'Support your gut microbiome with probiotic-rich foods.' },
+  { title: 'Unique Flavours', description: 'Discover complex umami and tangy taste profiles.' },
+  { title: 'Simple Processes', description: 'No special equipment—just salt, time, and patience.' },
+  { title: 'Learn & Share', description: 'Join workshops and connect with fermentation enthusiasts.' },
+]
 
 const DEFAULT_HERO_TITLE = 'Innovation meets Tradition'
 const DEFAULT_HERO_DESCRIPTION =
@@ -26,12 +32,42 @@ const DEFAULT_WHAT_BODY =
   'Fermentation is a natural metabolic process where microorganisms like bacteria, yeast, and fungi convert organic compounds—usually carbohydrates—into alcohol, gases, or organic acids.'
 const DEFAULT_WHAT_MOTTO = 'No additives. No shortcuts. Just patience and care.'
 const DEFAULT_WHY_TITLE = 'Why is it so special?'
+const DEFAULT_WHY_ITEMS: Array<{ id?: string; title: string; description: string }> = [
+  { title: 'Improves gut flora and overall well-being', description: 'Fermented foods support a healthy microbiome.' },
+  { title: 'Easy and cost-effective', description: 'No special equipment needed—just salt, time, and patience.' },
+  { title: 'Eco-friendly and sustainable', description: 'Reduces food waste and extends shelf life naturally.' },
+  { title: 'Rich in flavors and aromas', description: 'Creates complex umami and tangy profiles.' },
+  { title: 'Supports a balanced lifestyle', description: 'Integrates traditional wisdom with modern nutrition.' },
+  { title: 'Diverse applications', description: 'From vegetables to dairy, grains to beverages.' },
+]
 const DEFAULT_DANGER_TITLE = 'Is it dangerous?'
 const DEFAULT_DANGER_INTRO =
   'Fermentation is one of the safest food preservation methods when done correctly. The acidic environment created during lacto-fermentation prevents harmful bacteria from growing.'
 const DEFAULT_DANGER_CONCERNS_HEADING = 'Common concerns addressed:'
 const DEFAULT_DANGER_CLOSING =
   'With proper hygiene, quality ingredients, and correct salt ratios, fermentation is a reliable and time-tested practice.'
+const DEFAULT_DANGER_CONCERNS: Array<{ id?: string; title: string; description: string }> = [
+  {
+    title: 'Mold',
+    description:
+      'Common mold generally forms a fuzzy, green, black, or white layer on the surface. It\'s usually harmless if removed—fermentation creates an acidic environment that prevents harmful mold from penetrating.',
+  },
+  {
+    title: 'Botulism',
+    description:
+      'Clostridium botulinum cannot grow in acidic environments (pH below 4.6). Lacto-fermented vegetables are well below that, making them safe.',
+  },
+  {
+    title: 'Pathogens',
+    description:
+      'Fermentation increases acidity, which inhibits harmful bacteria. Proper salt ratios and hygiene further reduce risk.',
+  },
+  {
+    title: 'Cross-contamination',
+    description:
+      'Using clean utensils and equipment, and keeping vegetables submerged in brine, prevents contamination.',
+  },
+]
 const DEFAULT_PRACTICE_TITLE = 'A practice, not a trend'
 const DEFAULT_PRACTICE_PARAGRAPHS = [
   'Fermentation has existed across cultures for thousands of years—from Korean kimchi to German sauerkraut, from Japanese miso to Ethiopian injera.',
@@ -93,6 +129,38 @@ const DEFAULT_FAQ_CTA_BODY =
 const DEFAULT_FAQ_MORE = "Can't find your answer?"
 const DEFAULT_FAQ_CONTACT = 'Contact Us'
 const DEFAULT_FAQ_CONTACT_URL = '/contact'
+const DEFAULT_FAQ_ITEMS: Array<{ id?: string; question: string; answer: string }> = [
+  {
+    question: 'Does fermentation kill bacteria?',
+    answer:
+      'Fermentation encourages beneficial bacteria (lactobacilli) while creating an acidic environment that inhibits harmful pathogens.',
+  },
+  {
+    question: 'Can I ferment at room temperature?',
+    answer:
+      'Yes. Most lacto-fermentation works best at 18–24°C (65–75°F). Cooler slows the process; warmer speeds it up.',
+  },
+  {
+    question: 'How long does fermentation take?',
+    answer:
+      'It varies. Sauerkraut can be ready in 1–2 weeks; kimchi in 3–5 days. Taste regularly to find your preference.',
+  },
+  {
+    question: 'Is fermentation the same as pickling?',
+    answer:
+      'Not exactly. Pickling often uses vinegar (acid added). Fermentation creates acid naturally through bacteria.',
+  },
+  {
+    question: 'Can I eat fermented foods every day?',
+    answer:
+      'Yes. Many cultures consume fermented foods daily. Start small and increase gradually to let your gut adjust.',
+  },
+  {
+    question: 'Do fermented foods go bad?',
+    answer:
+      'They can. Signs: mold, off smell, slimy texture. Properly fermented foods stored in the fridge last months.',
+  },
+]
 
 function isResolvedMedia(img: unknown): img is MediaType {
   return typeof img === 'object' && img !== null && 'url' in img
@@ -148,11 +216,12 @@ export default async function FermentationPage() {
   const heroTitle = f?.fermentationHeroTitle ?? DEFAULT_HERO_TITLE
   const heroDescription = f?.fermentationHeroDescription ?? DEFAULT_HERO_DESCRIPTION
   const heroBenefitsTitle = f?.fermentationHeroBenefitsTitle ?? 'WHY FERMENTATION?'
-  let heroBlocks = f?.fermentationHeroBlocks ?? []
+  let heroBlocks =
+    (f?.fermentationHeroBlocks?.length ?? 0) > 0 ? (f?.fermentationHeroBlocks ?? []) : DEFAULT_HERO_BLOCKS
 
   // Resolve hero block icons if they're just IDs
   if (heroBlocks.length > 0) {
-    heroBlocks = await Promise.all(
+    heroBlocks = (await Promise.all(
       heroBlocks.map(async (block) => {
         const icon = (block as { icon?: unknown }).icon
         if (icon && typeof icon === 'string') {
@@ -169,7 +238,7 @@ export default async function FermentationPage() {
         }
         return block
       }),
-    )
+    )) as typeof heroBlocks
   }
 
   const _guideTag = f?.fermentationGuideTag ?? DEFAULT_GUIDE_TAG
@@ -184,13 +253,16 @@ export default async function FermentationPage() {
   const whatImage = f?.fermentationWhatImage
 
   const whyTitle = f?.fermentationWhyTitle ?? DEFAULT_WHY_TITLE
-  const whyItems = f?.fermentationWhyItems ?? []
+  const whyItems = (f?.fermentationWhyItems?.length ?? 0) > 0 ? (f?.fermentationWhyItems ?? []) : DEFAULT_WHY_ITEMS
   const whyImage = f?.fermentationWhyImage
 
   const dangerTitle = f?.fermentationDangerTitle ?? DEFAULT_DANGER_TITLE
   const dangerIntro = f?.fermentationDangerIntro ?? DEFAULT_DANGER_INTRO
   const dangerConcernsHeading = f?.fermentationDangerConcernsHeading ?? DEFAULT_DANGER_CONCERNS_HEADING
-  const dangerConcerns = f?.fermentationDangerConcerns ?? []
+  const dangerConcerns =
+    (f?.fermentationDangerConcerns?.length ?? 0) > 0
+      ? (f?.fermentationDangerConcerns ?? [])
+      : DEFAULT_DANGER_CONCERNS
   const dangerClosing = f?.fermentationDangerClosing ?? DEFAULT_DANGER_CLOSING
 
   const practiceTitle = f?.fermentationPracticeTitle ?? DEFAULT_PRACTICE_TITLE
@@ -227,7 +299,8 @@ export default async function FermentationPage() {
 
   const faqTitle = f?.fermentationFaqTitle ?? DEFAULT_FAQ_TITLE
   const faqSubtitle = f?.fermentationFaqSubtitle ?? DEFAULT_FAQ_SUBTITLE
-  const faqItems = f?.fermentationFaqItems ?? []
+  const faqItems =
+    (f?.fermentationFaqItems?.length ?? 0) > 0 ? (f?.fermentationFaqItems ?? []) : DEFAULT_FAQ_ITEMS
   const faqCtaTitle = f?.fermentationFaqCtaTitle ?? DEFAULT_FAQ_CTA_TITLE
   const faqCtaBody = f?.fermentationFaqCtaBody ?? DEFAULT_FAQ_CTA_BODY
   const _faqMoreText = f?.fermentationFaqMoreText ?? DEFAULT_FAQ_MORE
@@ -255,11 +328,11 @@ export default async function FermentationPage() {
           </div>
 
           {/* Image + 4 boxes — wrapped together */}
-          <div className="mt-6 pt-8 md:mt-12 md:pt-30">
+          <div className="mt-6 pt-8 md:mt-12 md:pt-[120px]">
             {/* Image of two people — in front of the boxes */}
             <div className="relative z-20 flex justify-center md:justify-end">
               <div
-                className="relative aspect-4/3 w-full min-h-60 max-w-3xl overflow-hidden md:max-h-105"
+                className="relative aspect-[4/3] w-full min-h-[240px] max-w-3xl overflow-hidden md:max-h-[420px]"
                 style={{ top: -80 }}
               >
                 {isResolvedMedia(heroImage) ? (
@@ -279,7 +352,6 @@ export default async function FermentationPage() {
 
             {/* 4 boxes — behind the image */}
             <div className="relative z-0 -mt-12 pb-16 md:-mt-20 lg:-mt-28">
-            {heroBlocks.length > 0 && (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" style={{ position: 'inherit' }}>
                 {heroBlocks.slice(0, 4).map((block, i) => {
                 const bgColor = HERO_BLOCK_COLORS[i] ?? HERO_BLOCK_COLORS[0]
@@ -340,7 +412,6 @@ export default async function FermentationPage() {
                   )
                 })}
               </div>
-            )}
             </div>
           </div>
         </div>
@@ -370,7 +441,7 @@ export default async function FermentationPage() {
       {/* What is fermentation? — light beige block */}
       <section id="what" className="bg-white pt-4 pb-6 md:pt-6 md:pb-8">
         <FadeIn delay={100}>
-        <div className="mx-auto max-w-379 px-4 sm:px-6">
+        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
           <div className="rounded-2xl bg-[#F5F0E8] p-6 sm:p-8 md:p-12">
             <div
               className={
@@ -389,13 +460,13 @@ export default async function FermentationPage() {
                   </p>
                 )}
                 {whatMotto && (
-                  <p className="mt-8 font-bold leading-relaxed whitespace-pre-line text-ff-black text-base sm:mt-10 sm:text-lg md:mt-14 md:text-xl lg:mt-15.5 lg:text-[1.5625rem]">
+                  <p className="mt-8 font-bold leading-relaxed whitespace-pre-line text-ff-black text-base sm:mt-10 sm:text-lg md:mt-14 md:text-xl lg:mt-[62px] lg:text-[1.5625rem]">
                     {whatMotto.replace('. Just ', '.\nJust ')}
                   </p>
                 )}
               </div>
               {isResolvedMedia(whatImage) && (
-                <div className="aspect-4/3 w-full overflow-hidden rounded-2xl">
+                <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl">
                   <Media resource={whatImage} fill imgClassName="object-cover object-center" />
                 </div>
               )}
@@ -406,10 +477,9 @@ export default async function FermentationPage() {
       </section>
 
       {/* Why is it so special? — light beige block, 6 items in 2 columns */}
-      {(whyItems.length > 0 || isResolvedMedia(whyImage)) && (
-        <section className="section-padding-sm bg-white">
-          <FadeIn delay={150}>
-          <div className="mx-auto max-w-379 px-4 sm:px-6">
+      <section className="section-padding-sm bg-white">
+        <FadeIn delay={150}>
+          <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
             <div className="rounded-2xl bg-[#F9F0DC] p-6 sm:p-10 md:p-14 lg:p-16">
               <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
                 <div className="flex-1">
@@ -434,7 +504,7 @@ export default async function FermentationPage() {
                 </div>
                 {isResolvedMedia(whyImage) && (
                   <div className="w-full shrink-0 md:w-80 lg:w-96">
-                    <div className="aspect-4/3 overflow-hidden rounded-2xl">
+                    <div className="aspect-[4/3] overflow-hidden rounded-2xl">
                       <Media resource={whyImage} fill imgClassName="object-cover object-center" />
                     </div>
                   </div>
@@ -442,14 +512,13 @@ export default async function FermentationPage() {
               </div>
             </div>
           </div>
-          </FadeIn>
-        </section>
-      )}
+        </FadeIn>
+      </section>
 
       {/* Is it dangerous? — light gray block */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={200}>
-        <div className="mx-auto max-w-379 px-4 sm:px-6">
+        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
           <div className="rounded-2xl bg-[#ECE5DE] p-6 sm:p-8 md:p-12">
             <h2 className="font-display text-section-heading font-bold text-ff-black">
               {dangerTitle}
@@ -489,7 +558,7 @@ export default async function FermentationPage() {
       {/* A practice, not a trend — light cream block */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={250}>
-        <div className="mx-auto max-w-379 px-4 sm:px-6">
+        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
           <div className="rounded-2xl bg-[#FAF2E0] p-6 sm:p-10 md:p-14 lg:p-16">
             <div
               className={
@@ -515,7 +584,7 @@ export default async function FermentationPage() {
               </div>
               {isResolvedMedia(practiceImage) && (
                 <div className="lg:col-span-1">
-                  <div className="aspect-4/3 overflow-hidden rounded-2xl">
+                  <div className="aspect-[4/3] overflow-hidden rounded-2xl">
                     <Media resource={practiceImage} fill imgClassName="object-cover object-center" />
                   </div>
                 </div>
@@ -529,8 +598,8 @@ export default async function FermentationPage() {
       {/* Ready to learn? CTA — gold block or video bg, two buttons */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={300}>
-        <div className="mx-auto max-w-379 px-4 sm:px-6 text-center">
-          <div className="relative min-h-70 overflow-hidden rounded-2xl bg-[#E6BE68] px-8 py-16 md:px-16">
+        <div className="mx-auto max-w-[1516px] px-4 sm:px-6 text-center">
+          <div className="relative min-h-[280px] overflow-hidden rounded-2xl bg-[#E6BE68] px-8 py-16 md:px-16">
             {/* Optional video background */}
             {ctaVideoUrl ? (
               <>
@@ -604,7 +673,7 @@ export default async function FermentationPage() {
       {/* FAQ — centered, light gray container */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={350}>
-        <div className="mx-auto max-w-379 px-4 sm:px-6">
+        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="font-display text-section-heading font-bold text-ff-black">
               {faqTitle}
@@ -667,20 +736,17 @@ export default async function FermentationPage() {
         nextDateLabel={workshopNextDateLabel}
         viewAllLabel={workshopViewAllLabel}
         viewAllUrl={workshopViewAllUrl}
-        cards={workshopCards.map((c) => {
-          const card = c as Record<string, unknown>
-          return {
-            id: card.id as string | undefined,
-            title: c.title,
-            description: c.description,
-            image: card.image as string | import('@/payload-types').Media | null | undefined,
-            price: card.price as string | undefined,
-            priceSuffix: card.priceSuffix as string | undefined,
-            buttonLabel: card.buttonLabel as string | undefined,
-            buttonUrl: card.buttonUrl as string | undefined,
-            nextDate: card.nextDate as string | undefined,
-          }
-        })}
+        cards={workshopCards.map((c) => ({
+          id: (c as { id?: string }).id,
+          title: c.title,
+          description: c.description,
+          image: (c as { image?: unknown }).image,
+          price: (c as { price?: string }).price,
+          priceSuffix: (c as { priceSuffix?: string }).priceSuffix,
+          buttonLabel: (c as { buttonLabel?: string }).buttonLabel,
+          buttonUrl: (c as { buttonUrl?: string }).buttonUrl,
+          nextDate: (c as { nextDate?: string }).nextDate,
+        }))}
         cardBg="#ffffff"
         layout="inline"
       />
