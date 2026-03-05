@@ -1,6 +1,5 @@
 'use client'
 
-import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
 import {
   Carousel,
@@ -9,6 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
+import type { Media as MediaType } from '@/payload-types'
 import Link from 'next/link'
 
 import type { WorkshopItem } from '@/utilities/getWorkshops'
@@ -65,7 +65,9 @@ export function WorkshopTypesSlider({
               <h2 className="font-display text-2xl font-bold text-[#1a1a1a] sm:text-3xl md:text-4xl">
                 {heading}
               </h2>
-              <p className="mt-2 text-sm text-[#555954] sm:mt-3 sm:text-body-lg md:max-w-xl">{subtitle}</p>
+              <p className="mt-2 text-sm text-[#555954] sm:mt-3 sm:text-body-lg md:max-w-xl">
+                {subtitle}
+              </p>
             </div>
             <div className="flex shrink-0 gap-2">
               <CarouselPrevious
@@ -87,7 +89,9 @@ export function WorkshopTypesSlider({
 
               return (
                 <CarouselItem key={w.title} className="pl-0">
-                  <div className={`flex min-h-screen flex-col overflow-hidden rounded-xl sm:rounded-2xl md:min-h-96 lg:min-h-112 lg:flex-row ${cardBg}`}>
+                  <div
+                    className={`flex min-h-screen flex-col overflow-hidden rounded-xl sm:rounded-2xl md:min-h-96 lg:min-h-112 lg:flex-row ${cardBg}`}
+                  >
                     {/* Left: text + buttons */}
                     <div className="flex flex-col justify-center px-4 py-8 sm:px-8 md:px-10 lg:px-12 lg:py-0">
                       <span className="inline-flex w-fit rounded-full bg-[#ECE5DE] px-3 py-1 font-display text-xs font-bold uppercase tracking-wide text-[#555954] sm:px-4 sm:py-1.5">
@@ -96,7 +100,9 @@ export function WorkshopTypesSlider({
                       <h3 className="mt-3 font-display text-xl font-bold text-[#1a1a1a] sm:mt-4 sm:text-2xl md:text-3xl lg:text-4xl">
                         {w.title}
                       </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-[#555954] sm:mt-3 sm:text-body-lg">{w.description}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-[#555954] sm:mt-3 sm:text-body-lg">
+                        {w.description}
+                      </p>
                       <div className="mt-4 flex flex-col gap-2 text-xs text-[#555954] sm:mt-6 sm:text-sm">
                         {w.duration && (
                           <span className="flex items-center gap-2">

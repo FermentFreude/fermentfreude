@@ -35,6 +35,7 @@ export interface WorkshopIncluded {
 
 export interface WorkshopDetailData {
   slug: string
+  workshopType?: 'lakto' | 'tempeh' | 'kombucha'
   title: string
   subtitle: string // e.g. "3-hour hands-on workshop"
   description: string // Full about paragraph
@@ -91,6 +92,7 @@ export interface WorkshopDetailData {
 
 const lakto: WorkshopDetailData = {
   slug: 'lakto-gemuese',
+  workshopType: 'lakto',
   title: 'Lacto-Fermented Vegetables',
   subtitle: '3-hour hands-on workshop',
   description:

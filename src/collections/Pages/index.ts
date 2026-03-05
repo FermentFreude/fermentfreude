@@ -1369,11 +1369,11 @@ export const Pages: CollectionConfig = {
           label: 'Workshop Detail',
           admin: {
             description:
-              'All editable content for the workshop detail page (Hero, Booking, Calendar, Voucher, FAQ). Currently only for lakto-gemuese.',
+              'All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.',
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
               const slug = data?.slug ?? siblingData?.slug
-              return slug === 'lakto-gemuese'
+              return slug === 'lakto-gemuese' || slug === 'tempeh' || slug === 'kombucha'
             },
           },
           fields: workshopDetailFields,
@@ -1382,12 +1382,8 @@ export const Pages: CollectionConfig = {
           name: 'workshopGiftOnline',
           label: 'Gift & Online',
           admin: {
-            description: 'Gift voucher and online courses cards. Only for tempeh, kombucha.',
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'kombucha'
-            },
+            description: 'DEPRECATED - not used on any workshop UI',
+            condition: () => false,
           },
           fields: [
             { name: 'giftTitle', type: 'text', required: true, localized: true, label: 'Gift Card Title' },
@@ -1414,11 +1410,7 @@ export const Pages: CollectionConfig = {
           name: 'workshopLearnOnline',
           label: 'Learn Online',
           admin: {
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'kombucha'
-            },
+            condition: () => false,
           },
           fields: [
             { name: 'learnOnlineHeading', type: 'textarea', required: true, localized: true, label: 'Heading' },
@@ -1431,11 +1423,7 @@ export const Pages: CollectionConfig = {
           name: 'workshopFaq',
           label: 'FAQ Slider',
           admin: {
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'kombucha'
-            },
+            condition: () => false,
           },
           fields: [
             { name: 'faqHeading', type: 'text', required: true, localized: true, label: 'FAQ Heading' },
@@ -1457,11 +1445,7 @@ export const Pages: CollectionConfig = {
           name: 'workshopWhyOnline',
           label: 'Why Online',
           admin: {
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'kombucha'
-            },
+            condition: () => false,
           },
           fields: [
             { name: 'whyOnlineHeading', type: 'text', required: true, localized: true, label: 'Heading' },
@@ -1495,11 +1479,7 @@ export const Pages: CollectionConfig = {
           name: 'workshopTeamBuilding',
           label: 'Team Building',
           admin: {
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'tempeh' || slug === 'kombucha'
-            },
+            condition: () => false,
           },
           fields: [
             { name: 'teamEyebrow', type: 'text', required: true, localized: true, label: 'Eyebrow' },

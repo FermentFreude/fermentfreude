@@ -1,11 +1,14 @@
 /**
  * Seed the workshopDetail tab for the tempeh page.
  *
- * Populates all 10 CMS sections with TEXT CONTENT ONLY:
- * Structure matches lakto-gemuese pattern.
+ * Populates ONLY the sections rendered on tempeh frontend:
+ * - Hero (eyebrow, title, description, attributes, image)
+ * - Voucher CTA (eyebrow, title, description, pills, primary/secondary labels)
+ * - FAQ (eyebrow, title, description, faqItems)
+ * - How-To (eyebrow, title, description — articles loaded from Posts collection)
  *
  * ⚠️  IMAGES ARE NOT SEEDED
- * Images (heroImage, bookingImage, voucherBackgroundImage) are managed entirely through the admin UI.
+ * Images (heroImage, voucherBackgroundImage) are managed entirely through the admin UI.
  *
  * Run:  pnpm seed tempeh-detail
  *       pnpm seed tempeh-detail --force   (overwrite existing text content)
@@ -22,6 +25,9 @@ const isForce = process.argv.includes('--force')
 // ═══════════════════════════════════════════════════════════════
 
 const workshopDetailDE = {
+  // ── Calendar Toggle ────────────────────────────────────
+  showSeasonalCalendar: false,
+
   // ── 1. Hero ────────────────────────────────────────────
   heroEyebrow: 'Workshop Experience',
   heroTitle: 'Die Kunst der\nTempeh-Fermentation',
@@ -31,14 +37,14 @@ const workshopDetailDE = {
 
   // ── 2. Booking Card ────────────────────────────────────
   bookingEyebrow: '3-STUNDEN HANDS-ON WORKSHOP',
-  bookingPrice: 99,
+  bookingPrice: 85,
   bookingPriceSuffix: 'pro Person',
   bookingCurrency: '€',
   bookingAttributes: [
     { text: '3 Stunden' },
     { text: 'Hands-on' },
-    { text: 'Experience' },
-    { text: 'Max. 12 Personen' },
+    { text: 'Exklusiv' },
+    { text: 'Max. 10 Personen' },
   ],
   bookingViewDatesLabel: 'Termine & Buchen',
   bookingHideDatesLabel: 'Termine ausblenden',
@@ -46,42 +52,45 @@ const workshopDetailDE = {
   bookingBookLabel: 'Buchen',
   bookingSpotsLabel: 'Plätze frei',
 
-  // ── 3. Workshop Details ────────────────────────────────
+  // ── 3. Workshop Details (About, Schedule, Included, Why, Experience, Dates) ────
   aboutHeading: 'Über den Workshop',
   aboutText:
-    'Entdecke die faszinierende Welt des Tempehs — ein indonesischer Fermentationsklassiker mit großem Zukunftspotenzial. In diesem Hands-on-Workshop lernst du Schritt für Schritt, wie du Tempeh selbst herstellst: vom Ansetzen bis zum fertigen, aromatischen Ferment. Du erfährst, welche Bedingungen Tempeh für ein optimales Wachstum braucht — Wissen, das du sofort zuhause anwenden kannst.',
+    'Tauche ein in die faszinierende Welt des Tempehs — ein indonesisches Fermentationsklassiker mit großem Potenzial für Liebhaber pflanzlicher Proteine. In diesem praxisorientierten Workshop lernst du Schritt für Schritt, wie du Tempeh selbst herstellst, von der Vorbereitung bis zur fertigen Fermentation. Du wirst entdecken, welche Bedingungen Tempeh für optimales Wachstum benötigt — Wissen, das du sofort zu Hause anwenden kannst. Egal ob Anfänger oder neugieriger Feinschmecker, dieser Workshop ist für alle gedacht, die ihre Fermentationsfähigkeiten erweitern und pflanzliche Proteine entdecken möchten.',
+
   scheduleHeading: 'Ablauf (3 Stunden)',
   schedule: [
     {
       duration: '45 Min',
       title: 'Fermentations-Grundlagen',
       description:
-        'Tauche gemeinsam in die Welt der Fermentation ein. Erfahre, wie Fermentation funktioniert, welche Vorteile sie hat, und bekomme einen spannenden Überblick über die wichtigsten Techniken.',
+        'Tauche zusammen mit uns in die Welt der Fermentation ein. Lerne, wie Fermentation funktioniert, welche Vorteile sie bietet, und erhalte einen spannenden Überblick über die wichtigsten Techniken.',
     },
     {
       duration: '90 Min',
-      title: 'Praxis: Deinen Tempeh ansetzen',
+      title: 'Praxis: Dein eigenes Tempeh ansetzen',
       description:
-        'Jetzt geht\'s ans Eingemachte: Unter Anleitung setzt du deinen eigenen Tempeh an — inklusive Starter, Bohnen und Gärgefäß. Wir zeigen dir, wie du zuhause mit einfachen Mitteln (Backrohr mit Lichtfunktion, Dörrautomat, Thermobox oder Heizraum) die ideale Umgebung schaffst.',
+        'Jetzt wird es praktisch. Unter Anleitung stellst du dein eigenes Tempeh her – komplett mit Starter, Bohnen und Gärgefäß. Wir zeigen dir, wie du die ideale Umgebung zu Hause mit einfachen Mitteln schaffst (Ofen mit Lampenfunktion, Dörrautomat, Wärmekiste oder Heizraum).',
     },
     {
       duration: '45 Min',
       title: 'Verkostung: Tempeh-Burger',
       description:
-        'Zum Abschluss wird\'s lecker: Gemeinsam braten wir frisch gereiften Tempeh an und bauen daraus saftige Tempeh-Burger mit verschiedenen fermentierten Beilagen. Ein echtes Geschmackserlebnis — natürlich auch in veganer Variante.',
+        'Zum Abschluss wird es köstlich. Wir braten frisch gereiftes Tempeh und kreieren saftige Tempeh-Burger mit verschiedenen fermentierten Beilagen. Ein echtes Geschmackserlebnis — natürlich auch in veganer Form.',
     },
   ],
+
   includedHeading: 'Im Preis enthalten (€99)',
   includedItems: [
-    { text: 'Ein frisch angesetzter Tempeh im Gärgefäß zum Mitnehmen' },
-    { text: 'Ein kompletter Tempehkit für zuhause (Bohnen, Starter & Gärgefäß)' },
-    { text: 'Ausführliches Skript mit allen Infos & Rezepten' },
+    { text: 'Frisch angesetztes Tempeh im Gärgefäß zum Mitnehmen' },
+    { text: 'Komplettes Tempeh-Set für zu Hause (Bohnen, Starter & Gefäß)' },
+    { text: 'Umfassendes Skript mit allen Infos & Rezepten' },
     { text: 'Gemeinsame Verkostung (Tempeh-Burger + fermentierte Beilagen) + Getränke' },
-    { text: 'Anleitung zu Umgebungsbedingungen für zuhause' },
-    { text: 'Troubleshooting-Referenzkarte' },
+    { text: 'Anleitung zur Fermentationsumgebung zu Hause' },
+    { text: 'Fehlerbehebbungs-Referenzkarte' },
     { text: 'Digitale Ressourcensammlung' },
     { text: '14-Tage E-Mail-Support' },
   ],
+
   whyHeading: 'Warum dieser Workshop?',
   whyPoints: [
     {
@@ -90,45 +99,100 @@ const workshopDetailDE = {
     },
     {
       bold: 'Lebende Kulturen:',
-      rest: ' Anders als Tofu ist Tempeh ein lebendes, atmendes Ferment mit einzigartigen Aromen und Nährwerten, die sich im Laufe der Zeit entwickeln.',
+      rest: ' Im Gegensatz zu Tofu ist Tempeh ein lebendiges, atmendes Ferment mit einzigartigen Aromen und Nährstoffvorteilen, die sich im Laufe der Zeit entwickeln.',
     },
     {
       bold: 'DIY-Nachhaltigkeit:',
-      rest: ' Stelle Tempeh zu Hause mit einfachen, erschwinglichen Zutaten her — keine spezielle Ausrüstung oder komplizierte Prozesse nötig.',
+      rest: ' Stelle dein eigenes Tempeh zu Hause mit einfachen, erschwinglichen Zutaten her — keine spezielle Ausrüstung oder komplizierte Prozesse erforderlich.',
     },
     {
       bold: 'Kulinarische Vielseitigkeit:',
-      rest: ' Sobald du Tempeh beherrschst, entdeckst du unzählige Wege, es zuzubereiten — von Burgers bis Stir-Fries, Salate und Sandwiche.',
+      rest: ' Wenn du Tempeh beherrschst, wirst du unzählige Möglichkeiten entdecken, es zuzubereiten — von Burgern bis zu Pfannengerichten, Salaten und Sandwiches.',
     },
   ],
 
-  // ── 4. Calendar (copy from lakto for now) ──────────────
-  calendarEyebrow: 'DIE SAISONEN DER FERMENTATION',
-  calendarTitle: 'Wann fermentierst du am besten?',
-  calendarDescription:
-    'Der Fermentationsprozess ist ein natürlicher Prozess, der von den Jahreszeiten beeinflusst wird. Hier sind die idealen Monate für jede Fermentationsmethode.',
-  calendarMonths: [
-    { month: 'January', icon: 'snowflake' },
-    { month: 'February', icon: 'snowflake' },
-    { month: 'March', icon: 'sprout' },
-    { month: 'April', icon: 'sprout' },
-    { month: 'May', icon: 'flower' },
-    { month: 'June', icon: 'sun' },
-    { month: 'July', icon: 'sun' },
-    { month: 'August', icon: 'sun' },
-    { month: 'September', icon: 'leaf' },
-    { month: 'October', icon: 'leaf' },
-    { month: 'November', icon: 'wind' },
-    { month: 'December', icon: 'snowflake' },
+  experienceEyebrow: 'WAS DICH ERWARTET',
+  experienceTitle: 'Dein Workshop-Erlebnis',
+  experienceCards: [
+    {
+      eyebrow: 'THEORIE',
+      title: 'Fermentations-Mikrobiologie',
+      description:
+        'Entdecke die Wissenschaft hinter der Tempeh-Fermentation. Lerne, warum Tempeh eine vollständige pflanzliche Proteinquelle mit allen essentiellen Aminosäuren ist, und verstehe die Biologie, die es so besonders macht.',
+    },
+    {
+      eyebrow: 'PRAXIS',
+      title: 'Dein eigenes Tempeh ansetzen',
+      description:
+        'Unter fachkundiger Anleitung stellst du dein eigenes Tempeh mit Starterkultur und Sojabohnen her. Du kreierst ein lebendiges Ferment, das du mit nach Hause nimmst — bereit, in deiner eigenen Küche 24 Stunden zu reifen.',
+    },
+    {
+      eyebrow: 'VERKOSTUNG',
+      title: 'Tempeh-Burger',
+      description:
+        'Brate frisches Tempeh an und kreiere köstliche Burger mit fermentierten Beilagen und handwerklichem Brot. Triff den Unterschied, den frisch hergestelltes Tempeh auf dem Teller macht — vegane Option selbstverständlich enthalten.',
+    },
   ],
 
-  // ── 5. How-To Articles (empty for now, can add later) ───
+  datesHeading: 'Nächste Workshops',
+  dates: [
+    {
+      id: 'tempeh-1',
+      date: '20. Februar 2026',
+      time: '14:00 – 17:00',
+      spotsLeft: 6,
+    },
+    {
+      id: 'tempeh-2',
+      date: '27. Februar 2026',
+      time: '10:00 – 13:00',
+      spotsLeft: 4,
+    },
+    {
+      id: 'tempeh-3',
+      date: '10. März 2026',
+      time: '14:00 – 17:00',
+      spotsLeft: 9,
+    },
+    {
+      id: 'tempeh-4',
+      date: '20. März 2026',
+      time: '10:00 – 13:00',
+      spotsLeft: 10,
+    },
+  ],
+
+  // UI labels (German defaults)
+  viewDatesLabel: 'Termine & Buchen',
+  hideDatesLabel: 'Termine ausblenden',
+  moreInfoLabel: 'Mehr Informationen',
+  bookLabel: 'Buchen',
+  spotsLabel: 'Plätze verfügbar',
+  closeLabel: 'Schließen',
+
+  // Booking modal
+  confirmHeading: 'Buchung bestätigen',
+  confirmSubheading: 'Überprüfe deine Angaben',
+  workshopLabel: 'Workshop',
+  dateLabel: 'Datum',
+  timeLabel: 'Uhrzeit',
+  totalLabel: 'Summe',
+  cancelLabel: 'Abbrechen',
+  confirmLabel: 'Buchung bestätigen',
+  modalConfirmSubheading: 'Bitte überprüfe deine Buchung',
+  modalWorkshopLabel: 'Workshop',
+  modalDateLabel: 'Datum',
+  modalTimeLabel: 'Uhrzeit',
+  modalTotalLabel: 'Gesamtbetrag',
+  modalCancelLabel: 'Abbrechen',
+  modalConfirmLabel: 'Bestätigen',
+
+  // ── 3. How-To Articles ─────────────────────────────────
   howToEyebrow: 'FERMENTATIONS-LEITFADEN',
   howToTitle: 'Schritt-für-Schritt Anleitungen',
   howToDescription: 'Detaillierte Anleitungen für jede Fermentationsmethode.',
-  howToArticles: [],
 
-  // ── 6. Voucher CTA ────────────────────────────────────
+  // ── 4. Voucher CTA ─────────────────────────────────────
   voucherEyebrow: 'GEMEINSAM FERMENTIEREN',
   voucherTitle: 'Schenke Tempeh-Abenteuer',
   voucherDescription:
@@ -137,9 +201,13 @@ const workshopDetailDE = {
   voucherPrimaryHref: '/voucher',
   voucherSecondaryLabel: 'Zum Shop',
   voucherSecondaryHref: '/shop',
-  voucherPills: [{ text: 'Sofort einlösbar' }, { text: 'Für alle Workshops' }, { text: 'Digital oder gedruckt' }],
+  voucherPills: [
+    { text: 'Sofort einlösbar' },
+    { text: 'Für alle Workshops' },
+    { text: 'Digital oder gedruckt' },
+  ],
 
-  // ── 7. FAQ ────────────────────────────────────────────
+  // ── 5. FAQ ──────────────────────────────────────────────
   faqEyebrow: 'HÄUFIG GESTELLTE FRAGEN',
   faqTitle: 'Du hast Fragen zu Tempeh?',
   faqItems: [
@@ -155,11 +223,13 @@ const workshopDetailDE = {
     },
     {
       question: 'Kann ich den Workshop verschenken?',
-      answer: 'Ja, wir bieten Gutscheine für alle Workshops an, die jederzeit eingelöst werden können.',
+      answer:
+        'Ja, wir bieten Gutscheine für alle Workshops an, die jederzeit eingelöst werden können.',
     },
     {
       question: 'Ist der Tempeh vegan?',
-      answer: 'Tempeh ist pflanzlich, wird aber aus Sojabohnen hergestellt. Im Workshop zeigen wir auch Alternativen mit anderen Hülsenfrüchten.',
+      answer:
+        'Tempeh ist pflanzlich, wird aber aus Sojabohnen hergestellt. Im Workshop zeigen wir auch Alternativen mit anderen Hülsenfrüchten.',
     },
     {
       question: 'Was passiert nach dem Workshop?',
@@ -172,16 +242,6 @@ const workshopDetailDE = {
         'Derzeit bieten wir den Tempeh-Workshop nur vor Ort an. Aber wir arbeiten an digitalen Ressourcen für Online-Lerner!',
     },
   ],
-
-  // ── 8. Booking Modal Labels ────────────────────────────
-  modalConfirmHeading: 'Booking bestätigen',
-  modalConfirmSubheading: 'Bitte überprüfe deine Angaben',
-  modalWorkshopLabel: 'Workshop',
-  modalDateLabel: 'Datum',
-  modalTimeLabel: 'Uhrzeit',
-  modalTotalLabel: 'Gesamtpreis',
-  modalCancelLabel: 'Abbrechen',
-  modalConfirmLabel: 'Buchen bestätigen',
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -189,44 +249,50 @@ const workshopDetailDE = {
 // ═══════════════════════════════════════════════════════════════
 
 const workshopDetailEN = {
+  // ── Calendar Toggle ────────────────────────────────────
+  showSeasonalCalendar: false,
+
   heroEyebrow: 'Workshop Experience',
   heroTitle: 'The Art of\nTempeh Fermentation',
   heroDescription:
     'Dive into the fascinating world of tempeh. Learn step by step how to make tempeh yourself — from setup to finished, aromatic ferment.',
   heroAttributes: [{ text: '3 Hours' }, { text: 'Hands-on' }, { text: 'Experience' }],
 
+  // ── 2. Booking Card ────────────────────────────────────
   bookingEyebrow: '3-HOUR HANDS-ON WORKSHOP',
-  bookingPrice: 99,
+  bookingPrice: 85,
   bookingPriceSuffix: 'per person',
   bookingCurrency: '€',
   bookingAttributes: [
     { text: '3 Hours' },
     { text: 'Hands-on' },
-    { text: 'Experience' },
-    { text: 'Max. 12 People' },
+    { text: 'Exclusive' },
+    { text: 'Max. 10 people' },
   ],
   bookingViewDatesLabel: 'View Dates & Book',
   bookingHideDatesLabel: 'Hide Dates',
   bookingMoreDetailsLabel: 'More Information',
   bookingBookLabel: 'Book',
-  bookingSpotsLabel: 'spots left',
+  bookingSpotsLabel: 'spots available',
 
+  // ── 3. Workshop Details (About, Schedule, Included, Why, Experience, Dates) ────
   aboutHeading: 'About the Workshop',
   aboutText:
-    'Explore the fascinating world of tempeh — an Indonesian fermentation classic with huge potential for plant-based protein lovers. In this hands-on workshop, you will learn step by step how to make tempeh yourself, from setup to finished ferment. You will discover what conditions tempeh needs for optimal growth — knowledge you can apply immediately at home.',
+    "Explore the fascinating world of tempeh — an Indonesian fermentation classic with huge potential for plant-based protein lovers. In this hands-on workshop, you will learn step by step how to make tempeh yourself, from setup to finished ferment. You will discover what conditions tempeh needs for optimal growth — knowledge you can apply immediately at home. Whether you're a beginner or a curious food enthusiast, this workshop is designed for everyone interested in expanding their fermentation skills and discovering plant-based proteins.",
+
   scheduleHeading: 'Schedule (3 Hours)',
   schedule: [
     {
       duration: '45 min',
       title: 'Fermentation Fundamentals',
       description:
-        'Dive into fermentation together. Learn how fermentation works, what benefits it offers, and get an exciting overview of the most important techniques.',
+        'Dive into the world of fermentation together. Learn how fermentation works, what benefits it offers, and get an exciting overview of the most important techniques.',
     },
     {
       duration: '90 min',
       title: 'Practice: Setting Your Tempeh',
       description:
-        'Now it gets practical. Under guidance, you set up your own tempeh — complete with starter, beans, and fermentation vessel. We show you how to create the ideal environment at home using simple means.',
+        'Now it gets practical. Under guidance, you set up your own tempeh - complete with starter, beans, and fermentation vessel. We show you how to create the ideal environment at home using simple means (oven with light function, dehydrator, heat box, or heating room).',
     },
     {
       duration: '45 min',
@@ -256,42 +322,93 @@ const workshopDetailEN = {
     },
     {
       bold: 'Living Cultures:',
-      rest: ' Unlike tofu, tempeh is a living, breathing ferment with unique flavors and nutritional values that develop over time.',
+      rest: ' Unlike tofu, tempeh is a living, breathing ferment with unique flavors and nutritional benefits that develop over time.',
     },
     {
       bold: 'DIY Sustainability:',
-      rest: ' Make your own tempeh at home using simple, affordable ingredients — no special equipment needed.',
+      rest: ' Make your own tempeh at home using simple, affordable ingredients — no special equipment or complicated processes.',
     },
     {
       bold: 'Culinary Versatility:',
-      rest: ' Once you master tempeh, you\'ll discover countless ways to cook it — from burgers to stir-fries, salads, and sandwiches.',
+      rest: " Once you master tempeh, you'll discover countless ways to cook it — from burgers to stir-fries, salads, and sandwiches.",
     },
   ],
 
-  calendarEyebrow: 'FERMENTATION SEASONS',
-  calendarTitle: 'When is the best time to ferment?',
-  calendarDescription:
-    'Fermentation is a natural process influenced by the seasons. Here are the ideal months for each fermentation method.',
-  calendarMonths: [
-    { month: 'January', icon: 'snowflake' },
-    { month: 'February', icon: 'snowflake' },
-    { month: 'March', icon: 'sprout' },
-    { month: 'April', icon: 'sprout' },
-    { month: 'May', icon: 'flower' },
-    { month: 'June', icon: 'sun' },
-    { month: 'July', icon: 'sun' },
-    { month: 'August', icon: 'sun' },
-    { month: 'September', icon: 'leaf' },
-    { month: 'October', icon: 'leaf' },
-    { month: 'November', icon: 'wind' },
-    { month: 'December', icon: 'snowflake' },
+  experienceEyebrow: 'WHAT TO EXPECT',
+  experienceTitle: 'Your Workshop Experience',
+  experienceCards: [
+    {
+      eyebrow: 'THEORY',
+      title: 'Fermentation Science',
+      description:
+        'Discover the science behind tempeh fermentation. Learn why tempeh is a complete plant-based protein with all essential amino acids, and understand the biology that makes it so special.',
+    },
+    {
+      eyebrow: 'PRACTICE',
+      title: 'Set Your Own Tempeh',
+      description:
+        "Under expert guidance, set up your own tempeh with starter culture and soybeans. You'll create a living ferment that goes home with you — ready to mature over 24 hours in your own kitchen.",
+    },
+    {
+      eyebrow: 'TASTING',
+      title: 'Tempeh Burgers',
+      description:
+        'Sauté fresh tempeh and build delicious burgers with fermented sides and artisan bread. Taste the difference freshly made tempeh brings to your plate — vegan option always included.',
+    },
   ],
 
+  datesHeading: 'Next Workshops',
+  dates: [
+    {
+      id: 'tempeh-1',
+      date: 'February 20, 2026',
+      time: '2:00 PM – 5:00 PM',
+      spotsLeft: 6,
+    },
+    {
+      id: 'tempeh-2',
+      date: 'February 27, 2026',
+      time: '10:00 AM – 1:00 PM',
+      spotsLeft: 4,
+    },
+    {
+      id: 'tempeh-3',
+      date: 'March 10, 2026',
+      time: '2:00 PM – 5:00 PM',
+      spotsLeft: 9,
+    },
+    {
+      id: 'tempeh-4',
+      date: 'March 20, 2026',
+      time: '10:00 AM – 1:00 PM',
+      spotsLeft: 10,
+    },
+  ],
+
+  // UI labels (English defaults)
+  viewDatesLabel: 'View Dates & Book',
+  hideDatesLabel: 'Hide Dates',
+  moreInfoLabel: 'More Information',
+  bookLabel: 'Book',
+  spotsLabel: 'spots left',
+  closeLabel: 'Close',
+
+  // Booking modal
+  confirmHeading: 'Confirm Booking',
+  confirmSubheading: 'Review your details',
+  workshopLabel: 'Workshop',
+  dateLabel: 'Date',
+  timeLabel: 'Time',
+  totalLabel: 'Total',
+  cancelLabel: 'Cancel',
+  confirmLabel: 'Confirm Booking',
+
+  // ── 3. How-To Articles ─────────────────────────────────
   howToEyebrow: 'FERMENTATION GUIDE',
   howToTitle: 'Step-by-Step Instructions',
   howToDescription: 'Detailed guides for each fermentation method.',
-  howToArticles: [],
 
+  // ── 4. Voucher CTA ─────────────────────────────────────
   voucherEyebrow: 'FERMENT TOGETHER',
   voucherTitle: 'Give a Tempeh Adventure',
   voucherDescription:
@@ -300,7 +417,11 @@ const workshopDetailEN = {
   voucherPrimaryHref: '/voucher',
   voucherSecondaryLabel: 'Visit Shop',
   voucherSecondaryHref: '/shop',
-  voucherPills: [{ text: 'Instantly Redeemable' }, { text: 'For All Workshops' }, { text: 'Digital or Printed' }],
+  voucherPills: [
+    { text: 'Instantly Redeemable' },
+    { text: 'For All Workshops' },
+    { text: 'Digital or Printed' },
+  ],
 
   faqEyebrow: 'FREQUENTLY ASKED QUESTIONS',
   faqTitle: 'Do you have questions about tempeh?',
@@ -321,28 +442,20 @@ const workshopDetailEN = {
     },
     {
       question: 'Is tempeh vegan?',
-      answer: 'Tempeh is plant-based, made from soybeans. In the workshop we also show alternatives using other legumes.',
+      answer:
+        'Tempeh is plant-based, made from soybeans. In the workshop we also show alternatives using other legumes.',
     },
     {
       question: 'What happens after the workshop?',
       answer:
-        'Your freshly set tempeh ferments at home. After about 24 hours it\'s ready to cook. You receive a complete kit with instructions.',
+        "Your freshly set tempeh ferments at home. After about 24 hours it's ready to cook. You receive a complete kit with instructions.",
     },
     {
       question: 'Are there online options?',
       answer:
-        'Currently we only offer the Tempeh workshop on-site. But we\'re working on digital resources for online learners!',
+        "Currently we only offer the Tempeh workshop on-site. But we're working on digital resources for online learners!",
     },
   ],
-
-  modalConfirmHeading: 'Confirm Booking',
-  modalConfirmSubheading: 'Please review your details',
-  modalWorkshopLabel: 'Workshop',
-  modalDateLabel: 'Date',
-  modalTimeLabel: 'Time',
-  modalTotalLabel: 'Total',
-  modalCancelLabel: 'Cancel',
-  modalConfirmLabel: 'Confirm Booking',
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -364,9 +477,7 @@ async function seedTempehDetail() {
     })
 
     if (existing.docs.length === 0) {
-      payload.logger.error(
-        `❌ Page "${pageSlug}" not found. Run "pnpm seed workshop-pages" first.`,
-      )
+      payload.logger.error(`❌ Page "${pageSlug}" not found. Run "pnpm seed workshop-pages" first.`)
       process.exit(1)
     }
 
@@ -410,22 +521,6 @@ async function seedTempehDetail() {
         ...workshopDetailEN.heroAttributes?.[i],
         id: attr.id,
       })),
-      bookingAttributes: dePage.workshopDetail?.bookingAttributes?.map((attr, i) => ({
-        ...workshopDetailEN.bookingAttributes?.[i],
-        id: attr.id,
-      })),
-      schedule: dePage.workshopDetail?.schedule?.map((item, i) => ({
-        ...workshopDetailEN.schedule?.[i],
-        id: item.id,
-      })),
-      includedItems: dePage.workshopDetail?.includedItems?.map((item, i) => ({
-        ...workshopDetailEN.includedItems?.[i],
-        id: item.id,
-      })),
-      whyPoints: dePage.workshopDetail?.whyPoints?.map((point, i) => ({
-        ...workshopDetailEN.whyPoints?.[i],
-        id: point.id,
-      })),
       voucherPills: dePage.workshopDetail?.voucherPills?.map((pill, i) => ({
         ...workshopDetailEN.voucherPills?.[i],
         id: pill.id,
@@ -445,6 +540,57 @@ async function seedTempehDetail() {
       data: { workshopDetail: mergedEN },
       context: ctx,
     })
+
+    // STEP 5: Link tempeh posts as howToArticles (if not already linked)
+    const currentPage = await payload.findByID({
+      collection: 'pages',
+      id: pageId,
+      locale: 'de',
+      depth: 0,
+    })
+
+    const hasHowToArticles =
+      currentPage.workshopDetail?.howToArticles &&
+      Array.isArray(currentPage.workshopDetail.howToArticles) &&
+      currentPage.workshopDetail.howToArticles.length > 0
+
+    if (!hasHowToArticles) {
+      console.log(`[${new Date().toLocaleTimeString()}] Linking tempeh articles...`)
+
+      // Query for tempeh posts
+      const tempehPosts = await payload.find({
+        collection: 'posts',
+        where: { workshopType: { equals: 'tempeh' } },
+        limit: 50,
+        locale: 'de',
+        depth: 0,
+      })
+
+      const postIds = tempehPosts.docs.map((post) => post.id)
+
+      if (postIds.length > 0) {
+        // Update both locales with post IDs
+        await payload.update({
+          collection: 'pages',
+          id: pageId,
+          locale: 'de',
+          data: { workshopDetail: { ...workshopDetailDE, howToArticles: postIds } },
+          context: ctx,
+        })
+
+        await payload.update({
+          collection: 'pages',
+          id: pageId,
+          locale: 'en',
+          data: { workshopDetail: { ...mergedEN, howToArticles: postIds } },
+          context: ctx,
+        })
+
+        console.log(
+          `[${new Date().toLocaleTimeString()}] ✅ Linked ${postIds.length} tempeh articles to workshopDetail`,
+        )
+      }
+    }
 
     console.log(
       `[${new Date().toLocaleTimeString()}] ✅ workshopDetail seeded for "${pageSlug}" (DE + EN)`,

@@ -24,6 +24,9 @@ const isForce = process.argv.includes('--force')
 // ═══════════════════════════════════════════════════════════════
 
 const workshopDetailDE = {
+  // ── Calendar Toggle ────────────────────────────────────
+  showSeasonalCalendar: true,
+
   // ── 1. Hero ────────────────────────────────────────────
   heroEyebrow: 'Workshop Experience',
   heroTitle: 'Die Kunst der\nLakto-Fermentation',
@@ -258,6 +261,9 @@ const workshopDetailDE = {
 // ═══════════════════════════════════════════════════════════════
 
 const workshopDetailEN = {
+  // ── Calendar Toggle ────────────────────────────────────
+  showSeasonalCalendar: true,
+
   // ── 1. Hero ────────────────────────────────────────────
   heroEyebrow: 'Workshop Experience',
   heroTitle: 'The Art of\nLacto-Fermentation',
@@ -531,7 +537,8 @@ async function seedLaktoDetail() {
   // Preserve existing images if they're already set
   if (detail?.heroImage) payload.logger.info('  🖼️  Existing heroImage will be preserved')
   if (detail?.bookingImage) payload.logger.info('  🖼️  Existing bookingImage will be preserved')
-  if (detail?.voucherBackgroundImage) payload.logger.info('  🖼️  Existing voucherBackgroundImage will be preserved')
+  if (detail?.voucherBackgroundImage)
+    payload.logger.info('  🖼️  Existing voucherBackgroundImage will be preserved')
 
   // ── Save DE ─────────────────────────────────────────────
   payload.logger.info('  Saving DE locale...')

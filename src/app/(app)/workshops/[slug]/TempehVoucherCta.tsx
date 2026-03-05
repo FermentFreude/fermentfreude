@@ -1,8 +1,8 @@
 'use client'
 
-import Link from 'next/link'
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import Link from 'next/link'
 
 export type TempehVoucherCMS = {
   eyebrow?: string | null

@@ -9,6 +9,7 @@ import type { WorkshopDetailData } from './workshop-data'
 
 export const tempehDefaults: WorkshopDetailData = {
   slug: 'tempeh',
+  workshopType: 'tempeh',
   title: 'Tempeh',
   subtitle: '3-hour hands-on workshop',
   description:
@@ -25,7 +26,8 @@ export const tempehDefaults: WorkshopDetailData = {
     },
     {
       title: 'Practice: Your Own Tempeh',
-      description: 'Set up your own tempeh with starter, beans, and fermentation vessel to take home',
+      description:
+        'Set up your own tempeh with starter, beans, and fermentation vessel to take home',
     },
     {
       title: 'Tasting: Tempeh Burgers',
@@ -35,7 +37,7 @@ export const tempehDefaults: WorkshopDetailData = {
 
   aboutHeading: 'About the Workshop',
   aboutText:
-    'Explore the fascinating world of tempeh — an Indonesian fermentation classic with huge potential for plant-based protein lovers. In this hands-on workshop, you will learn step by step how to make tempeh yourself, from setup to finished ferment. You will discover what conditions tempeh needs for optimal growth — knowledge you can apply immediately at home. Whether you\'re a beginner or a curious food enthusiast, this workshop is designed for everyone interested in expanding their fermentation skills and discovering plant-based proteins.',
+    "Explore the fascinating world of tempeh — an Indonesian fermentation classic with huge potential for plant-based protein lovers. In this hands-on workshop, you will learn step by step how to make tempeh yourself, from setup to finished ferment. You will discover what conditions tempeh needs for optimal growth — knowledge you can apply immediately at home. Whether you're a beginner or a curious food enthusiast, this workshop is designed for everyone interested in expanding their fermentation skills and discovering plant-based proteins.",
 
   scheduleHeading: 'Schedule (3 Hours)',
   schedule: [
@@ -87,7 +89,7 @@ export const tempehDefaults: WorkshopDetailData = {
     },
     {
       bold: 'Culinary Versatility:',
-      rest: ' Once you master tempeh, you\'ll discover countless ways to cook it — from burgers to stir-fries, salads, and sandwiches.',
+      rest: " Once you master tempeh, you'll discover countless ways to cook it — from burgers to stir-fries, salads, and sandwiches.",
     },
   ],
 

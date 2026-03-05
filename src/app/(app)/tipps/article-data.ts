@@ -17,6 +17,7 @@ export type Article = {
   description: string
   readTime: string
   imageAlt: string
+  workshopType: 'lakto' | 'tempeh' | 'kombucha'
   sections: ArticleSection[]
 }
 
@@ -31,6 +32,7 @@ export const ARTICLES: Article[] = [
       'Alles, was du wissen musst, auf einer Seite: Zutaten, Salzanteil, Behälter, Temperatur und die häufigsten Fragen. Dein Startpunkt für jede Milchsäuregärung.',
     readTime: '12 Min.',
     imageAlt: 'Frisches Gemüse wird für die Milchsäuregärung vorbereitet',
+    workshopType: 'lakto',
     sections: [
       {
         heading: 'Was ist Milchsäuregärung?',
@@ -87,6 +89,7 @@ export const ARTICLES: Article[] = [
       '2 % Salz ist der goldene Standard — aber wann trockensalzen, wann eine Lake ansetzen? Tabellen, Tipps und alles zur richtigen Salzauswahl.',
     readTime: '9 Min.',
     imageAlt: 'Salz und Lake in einer Schüssel für die Gemüsefermentation',
+    workshopType: 'lakto',
     sections: [
       {
         heading: 'Warum Salz?',
@@ -140,6 +143,7 @@ export const ARTICLES: Article[] = [
       'Gemüse nicht abgewogen? Glas zu früh geöffnet? Wir zeigen dir die häufigsten Stolperfallen — und wie du sie ganz einfach umgehst.',
     readTime: '3 Min.',
     imageAlt: 'Fermentiertes Gemüse in Gläsern — häufige Anfängerfehler',
+    workshopType: 'lakto',
     sections: [
       {
         heading: '1. Salz nach Augenmaß',
@@ -188,6 +192,7 @@ export const ARTICLES: Article[] = [
       '18–24 °C zum Starten, anschließend kühl lagern. Erfahre, warum Temperatur den Geschmack, die Textur und die Sicherheit deines Ferments beeinflusst.',
     readTime: '5 Min.',
     imageAlt: 'Fermentationsgläser bei Raumtemperatur auf einem Küchenregal',
+    workshopType: 'lakto',
     sections: [
       {
         heading: 'Warum Temperatur eine Rolle spielt',
@@ -237,6 +242,7 @@ export const ARTICLES: Article[] = [
       'Weißer Film, trübe Lake, Schwefelgeruch — fast alles ist harmlos. Hier findest du Antworten auf die häufigsten Fragen rund ums Troubleshooting.',
     readTime: '8 Min.',
     imageAlt: 'Nahaufnahme eines Fermentationsglases mit trüber Lake',
+    workshopType: 'lakto',
     sections: [
       {
         heading: 'Trübe Lake',
@@ -296,6 +302,7 @@ export const ARTICLES: Article[] = [
       'Vom Frühstücks-Bagel bis zum Kimchi-Grilled-Cheese — entdecke kreative Wege, dein Ferment in jede Mahlzeit einzubauen.',
     readTime: '10 Min.',
     imageAlt: 'Fermentiertes Gemüse als Topping auf verschiedenen Gerichten',
+    workshopType: 'lakto',
     sections: [
       {
         heading: 'Zum Frühstück',

@@ -1239,9 +1239,13 @@ export interface Page {
       | null;
   };
   /**
-   * All editable content for the workshop detail page (Hero, Booking, Calendar, Voucher, FAQ). Currently only for lakto-gemuese.
+   * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.
    */
   workshopDetail?: {
+    /**
+     * Enable this to show the seasonal calendar section on this workshop page. Disable to hide all calendar fields from the admin.
+     */
+    showSeasonalCalendar?: boolean | null;
     /**
      * Small text above the title (e.g. "Workshop Experience").
      */
@@ -1268,27 +1272,27 @@ export interface Page {
         }[]
       | null;
     /**
-     * Gold text above title (e.g. "3-HOUR HANDS-ON WORKSHOP").
+     * e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"
      */
     bookingEyebrow?: string | null;
     /**
-     * Workshop price in euros (e.g. 99).
+     * e.g. "99"
      */
     bookingPrice?: number | null;
     /**
-     * e.g. "/per person" or "/pro Person".
+     * e.g. "pro Person" / "per person"
      */
     bookingPriceSuffix?: string | null;
     /**
-     * e.g. "€". Defaults to €.
+     * e.g. "€"
      */
     bookingCurrency?: string | null;
     /**
-     * Wide image (21:9 ratio) shown between header and action buttons.
+     * Optional background image for the booking card header.
      */
     bookingImage?: (string | null) | Media;
     /**
-     * Rounded pills in the header (e.g. "3 Stunden", "Hands-on", "Max. 12 Personen").
+     * Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").
      */
     bookingAttributes?:
       | {
@@ -1297,7 +1301,7 @@ export interface Page {
         }[]
       | null;
     /**
-     * e.g. "Nächste Termine" / "Upcoming Dates"
+     * e.g. "Termine & Buchen" / "View Dates & Book"
      */
     bookingViewDatesLabel?: string | null;
     /**
@@ -1305,7 +1309,7 @@ export interface Page {
      */
     bookingHideDatesLabel?: string | null;
     /**
-     * e.g. "Mehr Details" / "More Details"
+     * e.g. "Mehr Informationen" / "Learn More"
      */
     bookingMoreDetailsLabel?: string | null;
     /**
@@ -1313,22 +1317,25 @@ export interface Page {
      */
     bookingBookLabel?: string | null;
     /**
-     * e.g. "Plätze frei" / "spots left"
+     * e.g. "Plätze frei" / "spots available"
      */
     bookingSpotsLabel?: string | null;
     /**
-     * e.g. "About the Workshop"
+     * e.g. "Über den Workshop" / "About this Workshop"
      */
     aboutHeading?: string | null;
+    /**
+     * Long prose description of what the workshop is about.
+     */
     aboutText?: string | null;
     /**
-     * e.g. "Schedule (3 Hours)"
+     * e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"
      */
     scheduleHeading?: string | null;
     schedule?:
       | {
           /**
-           * e.g. "45 min"
+           * e.g. "45 Min" / "45 minutes"
            */
           duration: string;
           title: string;
@@ -1337,9 +1344,12 @@ export interface Page {
         }[]
       | null;
     /**
-     * e.g. "Included in Price (€99)"
+     * e.g. "Im Preis enthalten (€99)" / "Included in the Price (€99)"
      */
     includedHeading?: string | null;
+    /**
+     * List of items/benefits included in the workshop.
+     */
     includedItems?:
       | {
           text: string;
@@ -1347,15 +1357,18 @@ export interface Page {
         }[]
       | null;
     /**
-     * e.g. "Why This Workshop?"
+     * e.g. "Warum dieser Workshop?" / "Why This Workshop?"
      */
     whyHeading?: string | null;
     whyPoints?:
       | {
           /**
-           * e.g. "Gut Health:"
+           * The bolded title of this point (e.g. "Darmgesundheit:")
            */
           bold: string;
+          /**
+           * The explanatory text that follows the bold title.
+           */
           rest: string;
           id?: string | null;
         }[]
@@ -1365,42 +1378,71 @@ export interface Page {
      */
     experienceEyebrow?: string | null;
     /**
-     * e.g. "Dein Workshop-Erlebnis" / "Your Workshop Experience"
+     * Main heading for the experience section.
      */
     experienceTitle?: string | null;
     experienceCards?:
       | {
           /**
-           * Photo for this card (4:3 ratio).
-           */
-          image?: (string | null) | Media;
-          /**
-           * e.g. "THEORY", "PRACTICE", "TASTING"
+           * e.g. "THEORIE" / "THEORY"
            */
           eyebrow: string;
           title: string;
           description: string;
+          image?: (string | null) | Media;
           id?: string | null;
         }[]
       | null;
     /**
-     * e.g. "Nächste Workshops" / "Next Workshops"
+     * e.g. "Nächste Workshops" / "Upcoming Workshops"
      */
     datesHeading?: string | null;
     dates?:
       | {
           /**
-           * e.g. "15. Februar 2026" / "February 15, 2026"
+           * e.g. "15. Februar 2026"
            */
           date: string;
           /**
-           * e.g. "14:00 – 17:00" / "2:00 PM – 5:00 PM"
+           * e.g. "14:00 – 17:00"
            */
           time: string;
-          spotsLeft: number;
+          /**
+           * Number of available spots for this date.
+           */
+          spotsLeft?: number | null;
           id?: string | null;
         }[]
       | null;
+    /**
+     * e.g. "Reservierung bestätigen" / "Confirm Reservation"
+     */
+    modalConfirmHeading?: string | null;
+    modalConfirmSubheading?: string | null;
+    /**
+     * e.g. "Workshop"
+     */
+    modalWorkshopLabel?: string | null;
+    /**
+     * e.g. "Datum"
+     */
+    modalDateLabel?: string | null;
+    /**
+     * e.g. "Uhrzeit"
+     */
+    modalTimeLabel?: string | null;
+    /**
+     * e.g. "Gesamtbetrag"
+     */
+    modalTotalLabel?: string | null;
+    /**
+     * e.g. "Abbrechen" / "Cancel"
+     */
+    modalCancelLabel?: string | null;
+    /**
+     * e.g. "Bestätigen" / "Confirm"
+     */
+    modalConfirmLabel?: string | null;
     /**
      * e.g. "SAISONALE REZEPTE" / "SEASONAL RECIPES"
      */
@@ -1500,20 +1542,6 @@ export interface Page {
      */
     faqContactEmail?: string | null;
     /**
-     * e.g. "Buchung bestätigen" / "Confirm Booking"
-     */
-    modalConfirmHeading?: string | null;
-    /**
-     * e.g. "Details überprüfen" / "Review your details"
-     */
-    modalConfirmSubheading?: string | null;
-    modalWorkshopLabel?: string | null;
-    modalDateLabel?: string | null;
-    modalTimeLabel?: string | null;
-    modalTotalLabel?: string | null;
-    modalCancelLabel?: string | null;
-    modalConfirmLabel?: string | null;
-    /**
      * Small label above the heading (e.g. "TIPPS & GUIDES").
      */
     howToEyebrow?: string | null;
@@ -1531,7 +1559,7 @@ export interface Page {
     howToArticles?: (string | Post)[] | null;
   };
   /**
-   * Gift voucher and online courses cards. Only for tempeh, kombucha.
+   * DEPRECATED - not used on any workshop UI
    */
   workshopGiftOnline?: {
     giftTitle: string;
@@ -2577,7 +2605,7 @@ export interface WorkshopSliderBlock {
   blockType: 'workshopSlider';
 }
 /**
- * How-to articles shown on the Lakto workshop page and at /tipps/[slug]. Edit the title, summary, cover image and article content here.
+ * Educational how-to articles organized by workshop type (Lakto, Tempeh, Kombucha). Each article can be viewed at /tipps/[slug] and displayed on its workshop page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
@@ -2585,11 +2613,15 @@ export interface WorkshopSliderBlock {
 export interface Post {
   id: string;
   /**
+   * Article category. Determines which workshop page this article appears on and how it is filtered. Required.
+   */
+  workshopType: 'lakto' | 'tempeh' | 'kombucha';
+  /**
    * URL path used in /tipps/[slug]. Use lowercase with hyphens only (e.g. "salz-und-lake"). Do not change after publishing — it will break existing links.
    */
   slug: string;
   /**
-   * Main heading used on both the card and the article page (e.g. "Salz & Lake richtig einsetzen").
+   * Main heading used on both the card and the article page (e.g. "Tempeh selbst machen").
    */
   title: string;
   /**
@@ -3317,6 +3349,7 @@ export interface PagesSelect<T extends boolean = true> {
   workshopDetail?:
     | T
     | {
+        showSeasonalCalendar?: T;
         heroEyebrow?: T;
         heroTitle?: T;
         heroDescription?: T;
@@ -3374,10 +3407,10 @@ export interface PagesSelect<T extends boolean = true> {
         experienceCards?:
           | T
           | {
-              image?: T;
               eyebrow?: T;
               title?: T;
               description?: T;
+              image?: T;
               id?: T;
             };
         datesHeading?: T;
@@ -3389,6 +3422,14 @@ export interface PagesSelect<T extends boolean = true> {
               spotsLeft?: T;
               id?: T;
             };
+        modalConfirmHeading?: T;
+        modalConfirmSubheading?: T;
+        modalWorkshopLabel?: T;
+        modalDateLabel?: T;
+        modalTimeLabel?: T;
+        modalTotalLabel?: T;
+        modalCancelLabel?: T;
+        modalConfirmLabel?: T;
         calendarEyebrow?: T;
         calendarTitle?: T;
         calendarDescription?: T;
@@ -3433,14 +3474,6 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         faqContactEmail?: T;
-        modalConfirmHeading?: T;
-        modalConfirmSubheading?: T;
-        modalWorkshopLabel?: T;
-        modalDateLabel?: T;
-        modalTimeLabel?: T;
-        modalTotalLabel?: T;
-        modalCancelLabel?: T;
-        modalConfirmLabel?: T;
         howToEyebrow?: T;
         howToTitle?: T;
         howToDescription?: T;
@@ -4018,6 +4051,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
+  workshopType?: T;
   slug?: T;
   title?: T;
   summary?: T;

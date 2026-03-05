@@ -24,12 +24,12 @@ import { LaktoCalendar } from './LaktoCalendar'
 import { LaktoFAQ } from './LaktoFAQ'
 import { LaktoHero } from './LaktoHero'
 import { LaktoVoucherCta } from './LaktoVoucherCta'
+import { tempehDefaults } from './tempeh-data'
 import { TempehBookingCard } from './TempehBookingCard'
 import { TempehFAQ } from './TempehFAQ'
 import { TempehHero } from './TempehHero'
 import { TempehVoucherCta } from './TempehVoucherCta'
 import { getWorkshopBySlug } from './workshop-data'
-import { tempehDefaults } from './tempeh-data'
 
 /* ═══════════════════════════════════════════════════════════════
  *  Workshop detail page — /workshops/[slug]
@@ -254,7 +254,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
           collection: 'pages',
           where: { slug: { equals: 'gastronomy' } },
           limit: 1,
-          depth: 3,
+          depth: 20,
           locale,
         }),
       ),
@@ -264,7 +264,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
               collection: 'pages',
               where: { slug: { equals: slug }, _status: { equals: 'published' } },
               limit: 1,
-              depth: 3,
+              depth: 20,
               locale,
             }),
           )
@@ -565,52 +565,26 @@ export default async function WorkshopDetailPage({ params }: Args) {
     return (
       <article>
         {/* 1. Dedicated Lakto Hero */}
-        <LaktoHero
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.heroEyebrow,
-                  title: detail.heroTitle,
-                  description: detail.heroDescription,
-                  attributes: detail.heroAttributes,
-                  image: detail.heroImage,
-                }
-              : undefined
-          }
-        />
+        <LaktoHero cms={{ image: detail?.heroImage }} />
 
         {/* 2. Modern Booking Card */}
-        <LaktoBookingCard workshop={workshopDetailData} cms={detail ?? undefined} />
+        <LaktoBookingCard workshop={workshopDetailData} cms={detail ? { bookingImage: detail.bookingImage, experienceEyebrow: detail.experienceEyebrow, experienceTitle: detail.experienceTitle, experienceCards: detail.experienceCards } : undefined} />
 
         {/* 3. Seasonal Fermentation Calendar */}
-        <LaktoCalendar
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.calendarEyebrow,
-                  title: detail.calendarTitle,
-                  description: detail.calendarDescription,
-                  months: detail.calendarMonths,
-                }
-              : undefined
-          }
-        />
+        <LaktoCalendar />
 
         {/* 4. Fermented Vegetables How-Tos */}
         <FermentedVegHowTos
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.howToEyebrow,
-                  title: detail.howToTitle,
-                  description: detail.howToDescription,
-                  howToArticles: detail.howToArticles,
-                }
-              : undefined
-          }
+          workshopType="lakto"
+          cms={detail ? {
+            howToArticles: detail.howToArticles,
+          } : undefined}
         />
 
-        {/* 5. Other Workshops (slider — excludes lakto-gemuese) */}
+        {/* 5. Booking FAQ */}
+        <LaktoFAQ />
+
+        {/* 6. Other Workshops (slider — excludes lakto-gemuese) */}
         <WorkshopTypesSlider
           workshops={similarWorkshops}
           heading={workshopTypesHeading}
@@ -620,38 +594,8 @@ export default async function WorkshopDetailPage({ params }: Args) {
           moreInfoLabel={learnMoreLabel}
         />
 
-        {/* 6. Voucher CTA */}
-        <LaktoVoucherCta
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.voucherEyebrow,
-                  title: detail.voucherTitle,
-                  description: detail.voucherDescription,
-                  primaryLabel: detail.voucherPrimaryLabel,
-                  primaryHref: detail.voucherPrimaryHref,
-                  secondaryLabel: detail.voucherSecondaryLabel,
-                  secondaryHref: detail.voucherSecondaryHref,
-                  pills: detail.voucherPills,
-                  backgroundImage: detail.voucherBackgroundImage,
-                }
-              : undefined
-          }
-        />
-
-        {/* 7. Booking FAQ */}
-        <LaktoFAQ
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.faqEyebrow,
-                  title: detail.faqTitle,
-                  description: detail.faqDescription,
-                  items: detail.faqItems,
-                }
-              : undefined
-          }
-        />
+        {/* 7. Voucher CTA */}
+        <LaktoVoucherCta cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined} />
       </article>
     )
   }
@@ -664,22 +608,10 @@ export default async function WorkshopDetailPage({ params }: Args) {
     return (
       <article>
         {/* 1. Dedicated Tempeh Hero */}
-        <TempehHero
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.heroEyebrow,
-                  title: detail.heroTitle,
-                  description: detail.heroDescription,
-                  attributes: detail.heroAttributes,
-                  image: detail.heroImage,
-                }
-              : undefined
-          }
-        />
+        <TempehHero cms={{ image: detail?.heroImage }} />
 
         {/* 2. Modern Booking Card */}
-        <TempehBookingCard workshop={tempehDefaults} cms={detail ?? undefined} />
+        <TempehBookingCard workshop={tempehDefaults} cms={detail ? { bookingImage: detail.bookingImage, experienceEyebrow: detail.experienceEyebrow, experienceTitle: detail.experienceTitle, experienceCards: detail.experienceCards } : undefined} />
 
         {/* 3. Other Workshops (slider — excludes tempeh) */}
         <WorkshopTypesSlider
@@ -692,37 +624,18 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 4. Voucher CTA */}
-        <TempehVoucherCta
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.voucherEyebrow,
-                  title: detail.voucherTitle,
-                  description: detail.voucherDescription,
-                  primaryLabel: detail.voucherPrimaryLabel,
-                  primaryHref: detail.voucherPrimaryHref,
-                  secondaryLabel: detail.voucherSecondaryLabel,
-                  secondaryHref: detail.voucherSecondaryHref,
-                  pills: detail.voucherPills,
-                  backgroundImage: detail.voucherBackgroundImage,
-                }
-              : undefined
-          }
+        <TempehVoucherCta cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined} />
+
+        {/* 5. How-To Articles */}
+        <FermentedVegHowTos
+          workshopType="tempeh"
+          cms={detail ? {
+            howToArticles: detail.howToArticles,
+          } : undefined}
         />
 
-        {/* 5. FAQ */}
-        <TempehFAQ
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.faqEyebrow,
-                  title: detail.faqTitle,
-                  description: detail.faqDescription,
-                  items: detail.faqItems,
-                }
-              : undefined
-          }
-        />
+        {/* 6. FAQ */}
+        <TempehFAQ />
       </article>
     )
   }

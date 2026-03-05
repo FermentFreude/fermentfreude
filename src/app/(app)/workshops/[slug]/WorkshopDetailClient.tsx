@@ -189,9 +189,7 @@ export function WorkshopDetailClient({ workshop }: { workshop: WorkshopDetailDat
                   <span className="font-display text-[2.25rem] font-medium tracking-wide text-ff-near-black">
                     {formattedPrice}
                   </span>
-                  <span className="text-body text-ff-gray-text-light">
-                    {workshop.priceSuffix}
-                  </span>
+                  <span className="text-body text-ff-gray-text-light">{workshop.priceSuffix}</span>
                 </div>
               </div>
 
@@ -242,10 +240,7 @@ export function WorkshopDetailClient({ workshop }: { workshop: WorkshopDetailDat
 
         {/* ── Available Dates ────────────────────────────── */}
         {showDates && (
-          <section
-            ref={datesRef}
-            className="container mx-auto container-padding pt-10"
-          >
+          <section ref={datesRef} className="container mx-auto container-padding pt-10">
             <h2 className="mb-8 font-display text-section-heading font-bold tracking-wide text-[#3c3c3c]">
               {workshop.datesHeading}
             </h2>
@@ -273,10 +268,7 @@ export function WorkshopDetailClient({ workshop }: { workshop: WorkshopDetailDat
 
         {/* ── More Information Panel ─────────────────────── */}
         {showInfo && (
-          <section
-            ref={infoRef}
-            className="container mx-auto container-padding pb-20 pt-16"
-          >
+          <section ref={infoRef} className="container mx-auto container-padding pb-20 pt-16">
             {/* About */}
             <div className="mb-20">
               <h2 className="mb-6 font-display text-section-heading font-bold tracking-wide text-[#3c3c3c]">
@@ -351,7 +343,9 @@ export function WorkshopDetailClient({ workshop }: { workshop: WorkshopDetailDat
         <FermentKalender />
 
         {/* ── Fermented Vegetables How-Tos ──────────── */}
-        <FermentedVegHowTos />
+        <FermentedVegHowTos
+          workshopType={workshop.workshopType as 'lakto' | 'tempeh' | 'kombucha'}
+        />
       </article>
 
       {/* ── Booking Confirmation Modal ───────────────────── */}

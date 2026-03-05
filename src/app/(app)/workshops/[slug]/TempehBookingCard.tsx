@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import type { WorkshopDetailData, WorkshopDate } from './workshop-data'
-import { BookingModal } from './BookingModal'
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import { useEffect, useRef, useState } from 'react'
+import { BookingModal } from './BookingModal'
+import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
 
 /* ═══════════════════════════════════════════════════════════════
  *  TempehBookingCard — Modern booking experience
@@ -30,16 +30,30 @@ export type TempehBookingCMS = {
   aboutHeading?: string | null
   aboutText?: string | null
   scheduleHeading?: string | null
-  schedule?: Array<{ duration?: string | null; title?: string | null; description?: string | null }> | null
+  schedule?: Array<{
+    duration?: string | null
+    title?: string | null
+    description?: string | null
+  }> | null
   includedHeading?: string | null
   includedItems?: Array<{ text?: string | null }> | null
   whyHeading?: string | null
   whyPoints?: Array<{ bold?: string | null; rest?: string | null }> | null
   experienceEyebrow?: string | null
   experienceTitle?: string | null
-  experienceCards?: Array<{ image?: unknown; eyebrow?: string | null; title?: string | null; description?: string | null }> | null
+  experienceCards?: Array<{
+    image?: unknown
+    eyebrow?: string | null
+    title?: string | null
+    description?: string | null
+  }> | null
   datesHeading?: string | null
-  dates?: Array<{ date?: string | null; time?: string | null; spotsLeft?: number | null; id?: string }> | null
+  dates?: Array<{
+    date?: string | null
+    time?: string | null
+    spotsLeft?: number | null
+    id?: string
+  }> | null
   modalConfirmHeading?: string | null
   modalConfirmSubheading?: string | null
   modalWorkshopLabel?: string | null
@@ -58,7 +72,15 @@ function isResolvedMedia(img: unknown): img is MediaType {
 
 function CalendarIcon({ className = 'size-5' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="3" y="4" width="14" height="14" rx="2" />
       <path d="M3 8h14M7 2v4M13 2v4" />
     </svg>
@@ -67,7 +89,15 @@ function CalendarIcon({ className = 'size-5' }: { className?: string }) {
 
 function ClockIcon({ className = 'size-4' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="10" cy="10" r="8" />
       <path d="M10 6v4l3 2" />
     </svg>
@@ -115,16 +145,23 @@ const EXPERIENCE_CARDS = [
 
 // ─── Main Component ─────────────────────────────────────────
 
-export function TempehBookingCard({ workshop, cms }: { workshop: WorkshopDetailData; cms?: TempehBookingCMS }) {
+export function TempehBookingCard({
+  workshop,
+  cms,
+}: {
+  workshop: WorkshopDetailData
+  cms?: TempehBookingCMS
+}) {
   // ── CMS values → fallback to workshop-data.ts defaults ──
   const bookingEyebrow = cms?.bookingEyebrow ?? workshop.subtitle.toUpperCase()
   const price = cms?.bookingPrice ?? workshop.price
   const priceSuffix = cms?.bookingPriceSuffix ?? workshop.priceSuffix
   const currency = cms?.bookingCurrency ?? workshop.currency
   const bookingImage = cms?.bookingImage
-  const bookingAttributes = (cms?.bookingAttributes?.length ?? 0) > 0
-    ? cms!.bookingAttributes!.map((a) => a.text ?? '').filter(Boolean)
-    : ['3 Stunden', 'Hands-on', 'Experience', 'Max. 12 Personen']
+  const bookingAttributes =
+    (cms?.bookingAttributes?.length ?? 0) > 0
+      ? cms!.bookingAttributes!.map((a) => a.text ?? '').filter(Boolean)
+      : ['3 Stunden', 'Hands-on', 'Experience', 'Max. 12 Personen']
   const viewDatesLabel = cms?.bookingViewDatesLabel ?? workshop.viewDatesLabel
   const hideDatesLabel = cms?.bookingHideDatesLabel ?? workshop.hideDatesLabel
   const moreDetailsLabel = cms?.bookingMoreDetailsLabel ?? workshop.moreInfoLabel
@@ -134,38 +171,47 @@ export function TempehBookingCard({ workshop, cms }: { workshop: WorkshopDetailD
   const aboutHeading = cms?.aboutHeading ?? workshop.aboutHeading
   const aboutText = cms?.aboutText ?? workshop.aboutText
   const scheduleHeading = cms?.scheduleHeading ?? workshop.scheduleHeading
-  const scheduleItems = (cms?.schedule?.length ?? 0) > 0
-    ? cms!.schedule!.map((s) => ({ duration: s.duration ?? '', title: s.title ?? '', description: s.description ?? '' }))
-    : workshop.schedule
+  const scheduleItems =
+    (cms?.schedule?.length ?? 0) > 0
+      ? cms!.schedule!.map((s) => ({
+          duration: s.duration ?? '',
+          title: s.title ?? '',
+          description: s.description ?? '',
+        }))
+      : workshop.schedule
   const includedHeading = cms?.includedHeading ?? workshop.includedHeading
-  const includedItems = (cms?.includedItems?.length ?? 0) > 0
-    ? cms!.includedItems!.map((item) => ({ text: item.text ?? '' }))
-    : workshop.includedItems
+  const includedItems =
+    (cms?.includedItems?.length ?? 0) > 0
+      ? cms!.includedItems!.map((item) => ({ text: item.text ?? '' }))
+      : workshop.includedItems
   const whyHeading = cms?.whyHeading ?? workshop.whyHeading
-  const whyPoints = (cms?.whyPoints?.length ?? 0) > 0
-    ? cms!.whyPoints!.map((p) => ({ bold: p.bold ?? '', rest: p.rest ?? '' }))
-    : workshop.whyPoints
+  const whyPoints =
+    (cms?.whyPoints?.length ?? 0) > 0
+      ? cms!.whyPoints!.map((p) => ({ bold: p.bold ?? '', rest: p.rest ?? '' }))
+      : workshop.whyPoints
 
   const experienceEyebrow = cms?.experienceEyebrow ?? 'WAS DICH ERWARTET'
   const experienceTitle = cms?.experienceTitle ?? 'Dein Workshop-Erlebnis'
-  const experienceCardsData = (cms?.experienceCards?.length ?? 0) > 0
-    ? cms!.experienceCards!.map((c) => ({
-        image: c.image,
-        eyebrow: c.eyebrow ?? '',
-        title: c.title ?? '',
-        description: c.description ?? '',
-      }))
-    : EXPERIENCE_CARDS.map((c) => ({ ...c, image: undefined as unknown }))
+  const experienceCardsData =
+    (cms?.experienceCards?.length ?? 0) > 0
+      ? cms!.experienceCards!.map((c) => ({
+          image: c.image,
+          eyebrow: c.eyebrow ?? '',
+          title: c.title ?? '',
+          description: c.description ?? '',
+        }))
+      : EXPERIENCE_CARDS.map((c) => ({ ...c, image: undefined as unknown }))
 
   const datesHeading = cms?.datesHeading ?? workshop.datesHeading
-  const cmsDates: WorkshopDate[] = (cms?.dates?.length ?? 0) > 0
-    ? cms!.dates!.map((d, i) => ({
-        id: d.id ?? `cms-${i}`,
-        date: d.date ?? '',
-        time: d.time ?? '',
-        spotsLeft: d.spotsLeft ?? 0,
-      }))
-    : workshop.dates
+  const cmsDates: WorkshopDate[] =
+    (cms?.dates?.length ?? 0) > 0
+      ? cms!.dates!.map((d, i) => ({
+          id: d.id ?? `cms-${i}`,
+          date: d.date ?? '',
+          time: d.time ?? '',
+          spotsLeft: d.spotsLeft ?? 0,
+        }))
+      : workshop.dates
 
   // Build merged workshop for BookingModal
   const mergedWorkshop: WorkshopDetailData = {
@@ -265,7 +311,8 @@ export function TempehBookingCard({ workshop, cms }: { workshop: WorkshopDetailD
                       className="font-display text-4xl font-black tracking-tight sm:text-5xl"
                       style={{ color: 'var(--ff-gold, #e6be68)' }}
                     >
-                      {currency}{price}
+                      {currency}
+                      {price}
                     </span>
                     <span className="ml-1.5 font-display text-sm font-medium text-white/50">
                       /{priceSuffix}
@@ -431,7 +478,10 @@ export function TempehBookingCard({ workshop, cms }: { workshop: WorkshopDetailD
                       </div>
                       <div className="pt-1">
                         <div className="mb-1 inline-flex items-center gap-2">
-                          <span className="rounded-full px-3 py-1 font-display text-caption font-semibold text-[#555954]" style={{ backgroundColor: '#F6F0E8' }}>
+                          <span
+                            className="rounded-full px-3 py-1 font-display text-caption font-semibold text-[#555954]"
+                            style={{ backgroundColor: '#F6F0E8' }}
+                          >
                             {step.duration}
                           </span>
                         </div>
@@ -455,7 +505,11 @@ export function TempehBookingCard({ workshop, cms }: { workshop: WorkshopDetailD
                 </h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {includedItems.map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 rounded-xl px-5 py-3" style={{ backgroundColor: '#F6F0E8' }}>
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 rounded-xl px-5 py-3"
+                      style={{ backgroundColor: '#F6F0E8' }}
+                    >
                       <div
                         className="size-2 shrink-0 rounded-full"
                         style={{ backgroundColor: 'var(--ff-gold, #e6be68)' }}
@@ -467,7 +521,10 @@ export function TempehBookingCard({ workshop, cms }: { workshop: WorkshopDetailD
               </div>
 
               {/* Why */}
-              <div className="rounded-2xl px-8 py-10 sm:px-10" style={{ backgroundColor: '#F6F0E8' }}>
+              <div
+                className="rounded-2xl px-8 py-10 sm:px-10"
+                style={{ backgroundColor: '#F6F0E8' }}
+              >
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
                   DARUM DIESER WORKSHOP
                 </p>
@@ -532,9 +589,13 @@ export function TempehBookingCard({ workshop, cms }: { workshop: WorkshopDetailD
                   >
                     {/* Image */}
                     <div className="flex-1">
-                      <div className="aspect-4/3 w-full overflow-hidden rounded-3xl bg-ff-warm-gray">
+                      <div className="relative aspect-4/3 w-full overflow-hidden rounded-3xl bg-ff-warm-gray">
                         {isResolvedMedia(card.image) ? (
-                          <Media resource={card.image as MediaType} fill imgClassName="object-cover" />
+                          <Media
+                            resource={card.image as MediaType}
+                            fill
+                            imgClassName="object-cover"
+                          />
                         ) : (
                           <div className="flex size-full items-center justify-center">
                             <span className="font-display text-lg font-bold uppercase tracking-widest text-ff-gray-text-light/40">

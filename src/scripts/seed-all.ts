@@ -45,6 +45,7 @@ const scripts: Record<string, { name: string; file: string }> = {
     file: 'seed-workshop-pages.ts',
   },
   posts: { name: 'How-To Articles (Posts collection)', file: 'seed-posts.ts' },
+  'tempeh-posts': { name: 'Tempeh How-To Articles', file: 'seed-tempeh-posts.ts' },
   'lakto-detail': { name: 'Lakto Detail (workshopDetail tab)', file: 'seed-lakto-detail.ts' },
   'tempeh-detail': { name: 'Tempeh Detail (workshopDetail tab)', file: 'seed-tempeh-detail.ts' },
   'voucher-bg': { name: 'VoucherCta background image patch', file: 'seed-voucher-bg.ts' },
@@ -62,6 +63,7 @@ const allOrder = [
   'shop',
   'workshop-pages',
   'posts',
+  'tempeh-posts',
   'lakto-detail',
   'tempeh-detail',
 ]

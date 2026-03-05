@@ -30,8 +30,8 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     group: 'Content',
     description:
-      'How-to articles shown on the Lakto workshop page and at /tipps/[slug]. Edit the title, summary, cover image and article content here.',
-    defaultColumns: ['title', 'slug', 'readTime', 'updatedAt'],
+      'Educational how-to articles organized by workshop type (Lakto, Tempeh, Kombucha). Each article can be viewed at /tipps/[slug] and displayed on its workshop page.',
+    defaultColumns: ['title', 'slug', 'workshopType', 'readTime', 'updatedAt'],
     pagination: {
       defaultLimit: 20,
     },
@@ -46,6 +46,23 @@ export const Posts: CollectionConfig = {
     afterChange: [autoTranslateCollection],
   },
   fields: [
+    // ── Workshop Type (categorization) ───────────────────
+    {
+      name: 'workshopType',
+      type: 'select',
+      required: true,
+      options: [
+        { label: 'Lakto (Gemüse fermentieren)', value: 'lakto' },
+        { label: 'Tempeh (Soja & Hülsenfrüchte)', value: 'tempeh' },
+        { label: 'Kombucha (Tee fermentieren)', value: 'kombucha' },
+      ],
+      admin: {
+        description:
+          'Article category. Determines which workshop page this article appears on and how it is filtered. Required.',
+        position: 'sidebar',
+      },
+    },
+
     // ── Slug (URL identifier) ────────────────────────────
     {
       name: 'slug',
@@ -60,14 +77,14 @@ export const Posts: CollectionConfig = {
       },
     },
 
-    // ── Card Fields (shown on the Lakto page card grid) ──
+    // ── Card Fields (shown on the workshop page card grid) ──
     {
       type: 'collapsible',
-      label: '📋 Card — shown on the Lakto workshop page',
+      label: '📋 Card — shown on workshop page',
       admin: {
         initCollapsed: false,
         description:
-          'These fields control how the article appears as a card on the Lakto workshop page.',
+          'These fields control how the article appears as a card on its workshop page (Lakto, Tempeh, or Kombucha).',
       },
       fields: [
         {
@@ -78,7 +95,7 @@ export const Posts: CollectionConfig = {
           label: 'Article Title',
           admin: {
             description:
-              'Main heading used on both the card and the article page (e.g. "Salz & Lake richtig einsetzen").',
+              'Main heading used on both the card and the article page (e.g. "Tempeh selbst machen").',
           },
         },
         {

@@ -435,6 +435,7 @@ async function seedPosts() {
         locale: 'de',
         data: {
           slug: article.slug,
+          workshopType: 'lakto',
           title: article.title,
           summary: article.description,
           readTime: article.readTime,
@@ -448,6 +449,7 @@ async function seedPosts() {
         id,
         locale: 'en',
         data: {
+          workshopType: 'lakto',
           title: enOverride?.title ?? article.title,
           summary: enOverride?.summary ?? article.description,
           readTime: enOverride?.readTime ?? article.readTime,
@@ -464,6 +466,7 @@ async function seedPosts() {
         locale: 'de',
         data: {
           slug: article.slug,
+          workshopType: 'lakto',
           title: article.title,
           summary: article.description,
           readTime: article.readTime,
@@ -477,6 +480,7 @@ async function seedPosts() {
         id: created.id,
         locale: 'en',
         data: {
+          workshopType: 'lakto',
           title: enOverride?.title ?? article.title,
           summary: enOverride?.summary ?? article.description,
           readTime: enOverride?.readTime ?? article.readTime,

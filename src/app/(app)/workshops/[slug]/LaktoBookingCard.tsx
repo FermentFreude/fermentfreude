@@ -532,7 +532,7 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
                   >
                     {/* Image */}
                     <div className="flex-1">
-                      <div className="aspect-4/3 w-full overflow-hidden rounded-3xl bg-ff-warm-gray">
+                      <div className="relative aspect-4/3 w-full overflow-hidden rounded-3xl bg-ff-warm-gray">
                         {isResolvedMedia(card.image) ? (
                           <Media resource={card.image as MediaType} fill imgClassName="object-cover" />
                         ) : (

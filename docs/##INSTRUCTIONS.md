@@ -198,11 +198,14 @@ Every content block must represent **one self-contained page section**, not an e
 ### Rules
 
 1. **One block = one section.** A block handles exactly one concern: a CTA, text, team grid, slider, contact form. Never bundle multiple sections into one block.
-2. **Editors compose pages from blocks.** Pages are built by adding blocks to the `layout` field in `/admin`.
-3. **Blocks are reusable across pages.** Design for reuse, not for a specific page.
-4. **No per-page route files.** The dynamic `[slug]/page.tsx` renders ALL CMS pages. Never create `src/app/(app)/about/page.tsx`.
-5. **Block size guide:**
-   - ✅ Good (40–120 lines config): `CallToAction`, `Content`, `WorkshopSlider`, `TeamGrid`, `ContactForm`
+2. **Editors compose pages from blocks.** Pages are built by adding blocks to the `layout` field in `/admin`, NOT separate admin tabs.
+3. **NO SEPARATE ADMIN TABS FOR PAGE SECTIONS.** ❌ **NEVER** create separate admin tabs (e.g., "Hero", "Voucher CTA", "FAQ") for page-specific content. Instead, **create blocks** that can be reused. Every section should be a block that editors add to the Content tab.
+   - ❌ Bad: Pages collection → separate "Hero" tab, "Voucher CTA" tab, "FAQ" tab (locked to one page, not reusable)
+   - ✅ Good: Pages collection → Content tab → [HeroWorkshop block], [VoucherCTA block], [WorkshopFAQ block] (reusable across any page)
+4. **Blocks are reusable across pages.** Design for reuse, not for a specific page. A "Seasonal Calendar" block can appear on any page, not just workshops.
+5. **No per-page route files.** The dynamic `[slug]/page.tsx` renders ALL CMS pages. Never create `src/app/(app)/about/page.tsx`.
+6. **Block size guide:**
+   - ✅ Good (40–120 lines config): `CallToAction`, `Content`, `WorkshopSlider`, `TeamGrid`, `ContactForm`, `HeroWorkshop`, `VoucherCTA`
    - ❌ Bad (500+ lines): monolith blocks that bundle hero + story + team + sponsors + form
 
 ### How to Add a New Block

@@ -8,6 +8,18 @@ import type { Field } from 'payload'
  * Collapsible groups map 1:1 to page sections for easy admin editing.
  */
 export const workshopDetailFields: Field[] = [
+  // ── Calendar Toggle ──────────────────────────────────────
+  {
+    type: 'checkbox',
+    name: 'showSeasonalCalendar',
+    label: 'Show Seasonal Calendar?',
+    admin: {
+      description:
+        'Enable this to show the seasonal calendar section on this workshop page. Disable to hide all calendar fields from the admin.',
+    },
+    defaultValue: true,
+  },
+
   // ── 1. Hero ──────────────────────────────────────────────
   {
     type: 'collapsible',
@@ -72,17 +84,16 @@ export const workshopDetailFields: Field[] = [
     label: '2. Booking Card',
     admin: {
       initCollapsed: true,
-      description: 'Dark header with price, cinematic image, and action buttons.',
+      description: 'Complete booking experience: header, about, schedule, included items, why, experience cards, and dates.',
     },
     fields: [
+      // ── Header ────────────────────────────────────────────
       {
         name: 'bookingEyebrow',
         type: 'text',
         localized: true,
         label: 'Header Eyebrow',
-        admin: {
-          description: 'Gold text above title (e.g. "3-HOUR HANDS-ON WORKSHOP").',
-        },
+        admin: { description: 'e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"' },
       },
       {
         type: 'row',
@@ -91,41 +102,36 @@ export const workshopDetailFields: Field[] = [
             name: 'bookingPrice',
             type: 'number',
             label: 'Price (€)',
-            admin: { description: 'Workshop price in euros (e.g. 99).' },
+            admin: { description: 'e.g. "99"' },
           },
           {
             name: 'bookingPriceSuffix',
             type: 'text',
             localized: true,
             label: 'Price Suffix',
-            admin: { description: 'e.g. "/per person" or "/pro Person".' },
-          },
-          {
-            name: 'bookingCurrency',
-            type: 'text',
-            label: 'Currency Symbol',
-            admin: { description: 'e.g. "€". Defaults to €.' },
+            admin: { description: 'e.g. "pro Person" / "per person"' },
           },
         ],
+      },
+      {
+        name: 'bookingCurrency',
+        type: 'text',
+        label: 'Currency Symbol',
+        admin: { description: 'e.g. "€"' },
       },
       {
         name: 'bookingImage',
         type: 'upload',
         relationTo: 'media',
-        label: 'Cinematic Image',
-        admin: {
-          description: 'Wide image (21:9 ratio) shown between header and action buttons.',
-        },
+        label: 'Header Background Image',
+        admin: { description: 'Optional background image for the booking card header.' },
       },
       {
         name: 'bookingAttributes',
         type: 'array',
         label: 'Attribute Pills',
-        maxRows: 8,
-        admin: {
-          description:
-            'Rounded pills in the header (e.g. "3 Stunden", "Hands-on", "Max. 12 Personen").',
-        },
+        maxRows: 6,
+        admin: { description: 'Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").' },
         fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
       },
       {
@@ -135,22 +141,15 @@ export const workshopDetailFields: Field[] = [
             name: 'bookingViewDatesLabel',
             type: 'text',
             localized: true,
-            label: 'View Dates Button',
-            admin: { description: 'e.g. "Nächste Termine" / "Upcoming Dates"' },
+            label: 'Show Dates Button',
+            admin: { description: 'e.g. "Termine & Buchen" / "View Dates & Book"' },
           },
           {
             name: 'bookingHideDatesLabel',
             type: 'text',
             localized: true,
-            label: 'Hide Dates Text',
+            label: 'Hide Dates Button',
             admin: { description: 'e.g. "Termine ausblenden" / "Hide Dates"' },
-          },
-          {
-            name: 'bookingMoreDetailsLabel',
-            type: 'text',
-            localized: true,
-            label: 'More Details Button',
-            admin: { description: 'e.g. "Mehr Details" / "More Details"' },
           },
         ],
       },
@@ -158,96 +157,108 @@ export const workshopDetailFields: Field[] = [
         type: 'row',
         fields: [
           {
+            name: 'bookingMoreDetailsLabel',
+            type: 'text',
+            localized: true,
+            label: 'More Details Button',
+            admin: { description: 'e.g. "Mehr Informationen" / "Learn More"' },
+          },
+          {
             name: 'bookingBookLabel',
             type: 'text',
             localized: true,
             label: 'Book Button',
             admin: { description: 'e.g. "Buchen" / "Book"' },
           },
-          {
-            name: 'bookingSpotsLabel',
-            type: 'text',
-            localized: true,
-            label: 'Spots Suffix',
-            admin: { description: 'e.g. "Plätze frei" / "spots left"' },
-          },
         ],
       },
-    ],
-  },
+      {
+        name: 'bookingSpotsLabel',
+        type: 'text',
+        localized: true,
+        label: 'Spots Available Label',
+        admin: { description: 'e.g. "Plätze frei" / "spots available"' },
+      },
 
-  // ── 3. Workshop Details (expandable drawer) ──────────────
-  {
-    type: 'collapsible',
-    label: '3. Workshop Details (Expandable)',
-    admin: {
-      initCollapsed: true,
-      description: 'Content shown when "Mehr Details" is clicked: About, Schedule, Included, Why.',
-    },
-    fields: [
+      // ── About Section ─────────────────────────────────────
       {
         name: 'aboutHeading',
         type: 'text',
         localized: true,
         label: 'About Heading',
-        admin: { description: 'e.g. "About the Workshop"' },
+        admin: { description: 'e.g. "Über den Workshop" / "About this Workshop"' },
       },
       {
         name: 'aboutText',
         type: 'textarea',
         localized: true,
         label: 'About Text',
+        admin: { description: 'Long prose description of what the workshop is about.' },
       },
+
+      // ── Schedule Section ──────────────────────────────────
       {
         name: 'scheduleHeading',
         type: 'text',
         localized: true,
         label: 'Schedule Heading',
-        admin: { description: 'e.g. "Schedule (3 Hours)"' },
+        admin: { description: 'e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"' },
       },
       {
         name: 'schedule',
         type: 'array',
-        label: 'Schedule Steps',
+        label: 'Schedule Items',
         maxRows: 6,
         fields: [
           {
             name: 'duration',
             type: 'text',
             required: true,
+            localized: true,
             label: 'Duration',
-            admin: { description: 'e.g. "45 min"' },
+            admin: { description: 'e.g. "45 Min" / "45 minutes"' },
           },
-          { name: 'title', type: 'text', required: true, localized: true, label: 'Step Title' },
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+            localized: true,
+            label: 'Title',
+          },
           {
             name: 'description',
             type: 'textarea',
             required: true,
             localized: true,
-            label: 'Step Description',
+            label: 'Description',
           },
         ],
       },
+
+      // ── Included Items ────────────────────────────────────
       {
         name: 'includedHeading',
         type: 'text',
         localized: true,
         label: 'Included Heading',
-        admin: { description: 'e.g. "Included in Price (€99)"' },
+        admin: { description: 'e.g. "Im Preis enthalten (€99)" / "Included in the Price (€99)"' },
       },
       {
         name: 'includedItems',
         type: 'array',
         label: 'Included Items',
         maxRows: 12,
+        admin: { description: 'List of items/benefits included in the workshop.' },
         fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Item' }],
       },
+
+      // ── Why Section ───────────────────────────────────────
       {
         name: 'whyHeading',
         type: 'text',
         localized: true,
         label: 'Why This Workshop Heading',
-        admin: { description: 'e.g. "Why This Workshop?"' },
+        admin: { description: 'e.g. "Warum dieser Workshop?" / "Why This Workshop?"' },
       },
       {
         name: 'whyPoints',
@@ -260,8 +271,8 @@ export const workshopDetailFields: Field[] = [
             type: 'text',
             required: true,
             localized: true,
-            label: 'Bold Intro',
-            admin: { description: 'e.g. "Gut Health:"' },
+            label: 'Bold Text',
+            admin: { description: 'The bolded title of this point (e.g. "Darmgesundheit:")' },
           },
           {
             name: 'rest',
@@ -269,55 +280,39 @@ export const workshopDetailFields: Field[] = [
             required: true,
             localized: true,
             label: 'Description',
+            admin: { description: 'The explanatory text that follows the bold title.' },
           },
         ],
       },
-    ],
-  },
 
-  // ── 4. Experience Cards (Was dich erwartet) ──────────────
-  {
-    type: 'collapsible',
-    label: '4. Experience Cards (Was dich erwartet)',
-    admin: {
-      initCollapsed: true,
-      description: 'Three alternating image+text cards: Theory, Practice, Tasting.',
-    },
-    fields: [
+      // ── Experience Cards ──────────────────────────────────
       {
         name: 'experienceEyebrow',
         type: 'text',
         localized: true,
-        label: 'Section Eyebrow',
+        label: 'Experience Cards Eyebrow',
         admin: { description: 'e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"' },
       },
       {
         name: 'experienceTitle',
         type: 'text',
         localized: true,
-        label: 'Section Title',
-        admin: { description: 'e.g. "Dein Workshop-Erlebnis" / "Your Workshop Experience"' },
+        label: 'Experience Cards Title',
+        admin: { description: 'Main heading for the experience section.' },
       },
       {
         name: 'experienceCards',
         type: 'array',
-        label: 'Cards',
+        label: 'Experience Cards',
         maxRows: 6,
         fields: [
-          {
-            name: 'image',
-            type: 'upload',
-            relationTo: 'media',
-            label: 'Image',
-            admin: { description: 'Photo for this card (4:3 ratio).' },
-          },
           {
             name: 'eyebrow',
             type: 'text',
             required: true,
             localized: true,
             label: 'Card Eyebrow',
-            admin: { description: 'e.g. "THEORY", "PRACTICE", "TASTING"' },
+            admin: { description: 'e.g. "THEORIE" / "THEORY"' },
           },
           {
             name: 'title',
@@ -333,67 +328,134 @@ export const workshopDetailFields: Field[] = [
             localized: true,
             label: 'Card Description',
           },
+          {
+            name: 'image',
+            type: 'upload',
+            relationTo: 'media',
+            label: 'Card Image (optional)',
+          },
         ],
       },
-    ],
-  },
 
-  // ── 5. Upcoming Dates ────────────────────────────────────
-  {
-    type: 'collapsible',
-    label: '5. Upcoming Dates',
-    admin: {
-      initCollapsed: true,
-      description: 'Workshop dates shown in the expandable booking panel.',
-    },
-    fields: [
+      // ── Upcoming Dates ────────────────────────────────────
       {
         name: 'datesHeading',
         type: 'text',
         localized: true,
         label: 'Dates Heading',
-        admin: { description: 'e.g. "Nächste Workshops" / "Next Workshops"' },
+        admin: { description: 'e.g. "Nächste Workshops" / "Upcoming Workshops"' },
       },
       {
         name: 'dates',
         type: 'array',
-        label: 'Available Dates',
+        label: 'Workshop Dates',
         maxRows: 20,
         fields: [
           {
             name: 'date',
             type: 'text',
             required: true,
-            localized: true,
             label: 'Date',
-            admin: { description: 'e.g. "15. Februar 2026" / "February 15, 2026"' },
+            admin: { description: 'e.g. "15. Februar 2026"' },
           },
           {
             name: 'time',
             type: 'text',
             required: true,
-            localized: true,
             label: 'Time',
-            admin: { description: 'e.g. "14:00 – 17:00" / "2:00 PM – 5:00 PM"' },
+            admin: { description: 'e.g. "14:00 – 17:00"' },
           },
           {
             name: 'spotsLeft',
             type: 'number',
-            required: true,
-            label: 'Spots Left',
+            label: 'Spots Available',
+            admin: { description: 'Number of available spots for this date.' },
+          },
+        ],
+      },
+
+      // ── Booking Modal Labels ──────────────────────────────
+      {
+        name: 'modalConfirmHeading',
+        type: 'text',
+        localized: true,
+        label: 'Modal Confirmation Heading',
+        admin: { description: 'e.g. "Reservierung bestätigen" / "Confirm Reservation"' },
+      },
+      {
+        name: 'modalConfirmSubheading',
+        type: 'text',
+        localized: true,
+        label: 'Modal Confirmation Subheading',
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'modalWorkshopLabel',
+            type: 'text',
+            localized: true,
+            label: 'Modal Workshop Label',
+            admin: { description: 'e.g. "Workshop"' },
+          },
+          {
+            name: 'modalDateLabel',
+            type: 'text',
+            localized: true,
+            label: 'Modal Date Label',
+            admin: { description: 'e.g. "Datum"' },
+          },
+        ],
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'modalTimeLabel',
+            type: 'text',
+            localized: true,
+            label: 'Modal Time Label',
+            admin: { description: 'e.g. "Uhrzeit"' },
+          },
+          {
+            name: 'modalTotalLabel',
+            type: 'text',
+            localized: true,
+            label: 'Modal Total Label',
+            admin: { description: 'e.g. "Gesamtbetrag"' },
+          },
+        ],
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'modalCancelLabel',
+            type: 'text',
+            localized: true,
+            label: 'Modal Cancel Button',
+            admin: { description: 'e.g. "Abbrechen" / "Cancel"' },
+          },
+          {
+            name: 'modalConfirmLabel',
+            type: 'text',
+            localized: true,
+            label: 'Modal Confirm Button',
+            admin: { description: 'e.g. "Bestätigen" / "Confirm"' },
           },
         ],
       },
     ],
   },
 
-  // ── 6. Seasonal Calendar ─────────────────────────────────
+  // ── 3. Seasonal Calendar ─────────────────────────────────
   {
     type: 'collapsible',
-    label: '6. Seasonal Calendar',
+    label: '3. Seasonal Calendar',
     admin: {
       initCollapsed: true,
       description: 'Horizontal timeline with seasonal months and recipes.',
+      condition: (data) => data?.showSeasonalCalendar === true,
     },
     fields: [
       {
@@ -482,10 +544,10 @@ export const workshopDetailFields: Field[] = [
     ],
   },
 
-  // ── 7. Voucher CTA ──────────────────────────────────────
+  // ── 4. Voucher CTA ──────────────────────────────────────
   {
     type: 'collapsible',
-    label: '7. Voucher CTA',
+    label: '4. Voucher CTA',
     admin: {
       initCollapsed: true,
       description: '"Go with a friend" voucher section.',
@@ -570,10 +632,10 @@ export const workshopDetailFields: Field[] = [
     ],
   },
 
-  // ── 8. FAQ ──────────────────────────────────────────────
+  // ── 5. FAQ ──────────────────────────────────────────────
   {
     type: 'collapsible',
-    label: '8. FAQ',
+    label: '5. FAQ',
     admin: {
       initCollapsed: true,
       description: 'Booking-specific FAQ accordion.',
@@ -630,52 +692,10 @@ export const workshopDetailFields: Field[] = [
     ],
   },
 
-  // ── 9. Booking Modal Labels ──────────────────────────────
+  // ── 6. How-To Articles ──────────────────────────────
   {
     type: 'collapsible',
-    label: '9. Booking Modal Labels',
-    admin: {
-      initCollapsed: true,
-      description: 'Labels for the booking confirmation popup.',
-    },
-    fields: [
-      {
-        name: 'modalConfirmHeading',
-        type: 'text',
-        localized: true,
-        label: 'Confirm Heading',
-        admin: { description: 'e.g. "Buchung bestätigen" / "Confirm Booking"' },
-      },
-      {
-        name: 'modalConfirmSubheading',
-        type: 'text',
-        localized: true,
-        label: 'Confirm Subheading',
-        admin: { description: 'e.g. "Details überprüfen" / "Review your details"' },
-      },
-      {
-        type: 'row',
-        fields: [
-          { name: 'modalWorkshopLabel', type: 'text', localized: true, label: 'Workshop Label' },
-          { name: 'modalDateLabel', type: 'text', localized: true, label: 'Date Label' },
-          { name: 'modalTimeLabel', type: 'text', localized: true, label: 'Time Label' },
-          { name: 'modalTotalLabel', type: 'text', localized: true, label: 'Total Label' },
-        ],
-      },
-      {
-        type: 'row',
-        fields: [
-          { name: 'modalCancelLabel', type: 'text', localized: true, label: 'Cancel Button' },
-          { name: 'modalConfirmLabel', type: 'text', localized: true, label: 'Confirm Button' },
-        ],
-      },
-    ],
-  },
-
-  // ── 10. How-To Articles ──────────────────────────────────
-  {
-    type: 'collapsible',
-    label: '10. How-To Articles',
+    label: '6. How-To Articles',
     admin: {
       initCollapsed: true,
       description:
