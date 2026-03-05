@@ -48,7 +48,7 @@ export function PracticeAccordion({
             {isResolvedMedia(image) && (
               <div className="lg:col-span-2">
                 <div className="aspect-4/3 overflow-hidden rounded-2xl shadow-md">
-                  <Media resource={image} fill imgClassName="object-cover object-center" />
+                  <Media resource={image.url} fill imgClassName="object-cover object-center" />
                 </div>
               </div>
             )}
