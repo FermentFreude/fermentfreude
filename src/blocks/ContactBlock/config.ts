@@ -116,9 +116,9 @@ export const ContactBlock: Block = {
           type: 'text',
           required: true,
           localized: true,
-          label: 'Form Heading',
+          label: 'Contact Detail Heading',
           admin: {
-            description: 'Heading above the form (e.g., "Kontakt").',
+            description: 'Heading for the contact details panel (e.g., "Contact Detail").',
           },
         },
         {
@@ -126,9 +126,37 @@ export const ContactBlock: Block = {
           type: 'textarea',
           required: true,
           localized: true,
-          label: 'Intro Description',
+          label: 'Contact Detail Description',
           admin: {
-            description: 'Short intro text above the form fields.',
+            description: 'Intro text for the contact details panel (e.g., "If you need any help...").',
+          },
+        },
+        {
+          name: 'address',
+          type: 'textarea',
+          required: false,
+          localized: true,
+          label: 'Address',
+          admin: {
+            description: 'Physical address (e.g. Grabenstraße 15, 8010 Graz, Austria).',
+          },
+        },
+        {
+          name: 'phone',
+          type: 'text',
+          required: false,
+          label: 'Phone Number',
+          admin: {
+            description: 'Displayed on the contact page (e.g. +43 660 4943577).',
+          },
+        },
+        {
+          name: 'email',
+          type: 'text',
+          required: false,
+          label: 'Email Address',
+          admin: {
+            description: 'Displayed on the contact page (e.g. fermentfreude@gmail.com).',
           },
         },
       ],
@@ -149,10 +177,30 @@ export const ContactBlock: Block = {
           },
         },
         {
+          name: 'formHeading',
+          type: 'text',
+          required: false,
+          localized: true,
+          label: 'Form Heading',
+          admin: {
+            description: 'Heading above the form (e.g., "Ask About Anything").',
+          },
+        },
+        {
           name: 'placeholders',
           type: 'group',
           label: 'Form Placeholders',
           fields: [
+            {
+              name: 'name',
+              type: 'text',
+              required: false,
+              localized: true,
+              label: 'Name Placeholder (single field)',
+              admin: {
+                description: 'When set, a single "Your Name" field is shown. Leave empty to use First + Last Name.',
+              },
+            },
             {
               name: 'firstName',
               type: 'text',
@@ -181,6 +229,16 @@ export const ContactBlock: Block = {
               label: 'Email Placeholder',
               admin: {
                 description: 'Placeholder for email field.',
+              },
+            },
+            {
+              name: 'phone',
+              type: 'text',
+              required: false,
+              localized: true,
+              label: 'Phone Placeholder',
+              admin: {
+                description: 'Placeholder for phone field (e.g., "Your Phone").',
               },
             },
             {

@@ -1114,20 +1114,40 @@ export interface ContactBlock {
   contactImage?: (string | null) | Media;
   contact: {
     /**
-     * Heading above the form (e.g., "Kontakt").
+     * Heading for the contact details panel (e.g., "Contact Detail").
      */
     heading: string;
     /**
-     * Short intro text above the form fields.
+     * Intro text for the contact details panel (e.g., "If you need any help...").
      */
     description: string;
+    /**
+     * Physical address (e.g. Grabenstraße 15, 8010 Graz, Austria).
+     */
+    address?: string | null;
+    /**
+     * Displayed on the contact page (e.g. +43 660 4943577).
+     */
+    phone?: string | null;
+    /**
+     * Displayed on the contact page (e.g. fermentfreude@gmail.com).
+     */
+    email?: string | null;
   };
   contactForm: {
     /**
      * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
      */
     form?: (string | null) | Form;
+    /**
+     * Heading above the form (e.g., "Ask About Anything").
+     */
+    formHeading?: string | null;
     placeholders: {
+      /**
+       * When set, a single "Your Name" field is shown. Leave empty to use First + Last Name.
+       */
+      name?: string | null;
       /**
        * Placeholder for first name (e.g., "Vorname").
        */
@@ -1140,6 +1160,10 @@ export interface ContactBlock {
        * Placeholder for email field.
        */
       email: string;
+      /**
+       * Placeholder for phone field (e.g., "Your Phone").
+       */
+      phone?: string | null;
       /**
        * Placeholder for message textarea.
        */
@@ -2722,17 +2746,23 @@ export interface ContactBlockSelect<T extends boolean = true> {
     | {
         heading?: T;
         description?: T;
+        address?: T;
+        phone?: T;
+        email?: T;
       };
   contactForm?:
     | T
     | {
         form?: T;
+        formHeading?: T;
         placeholders?:
           | T
           | {
+              name?: T;
               firstName?: T;
               lastName?: T;
               email?: T;
+              phone?: T;
               message?: T;
             };
         subjectOptions?:
