@@ -67,13 +67,17 @@ export default async function Page({ params }: Args) {
   const isFullBleedHero =
     hero.type === 'heroSlider' ||
     hero.type === 'heroCarousel' ||
+    hero.type === 'heroGrid' ||
+    hero.type === 'heroSplit' ||
     hero.type === 'foodPresentationSlider' ||
     hero.type === 'highImpact'
 
   return (
-    <article className={isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'}>
+    <article
+      className={`${isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'} ${slug === 'about' ? 'page-about' : ''}`}
+    >
       <RenderHero {...hero} />
-      <RenderBlocks blocks={layout ?? []} />
+      <RenderBlocks blocks={layout ?? []} slug={slug} />
     </article>
   )
 }

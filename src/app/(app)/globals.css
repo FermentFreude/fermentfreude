@@ -339,6 +339,24 @@
     padding-block: var(--space-section-xl);
   }
 
+  /* About page: tighter section padding and hero spacing */
+  .page-about .section-padding-md {
+    padding-block: var(--space-content-lg);
+  }
+  .page-about > section:first-child {
+    margin-bottom: var(--space-content-lg) !important;
+  }
+  .page-about.pb-24 {
+    padding-bottom: var(--space-content-sm) !important;
+  }
+  /* Contact form on about page: remove min-height and extra padding to eliminate white space */
+  .page-about div.min-h-screen.bg-white {
+    min-height: auto;
+  }
+  .page-about div.min-h-screen.bg-white section:last-of-type {
+    padding-bottom: 0;
+  }
+
   /* Container horizontal padding — use on any full-width wrapper */
   .container-padding {
     padding-inline: var(--space-container-x);

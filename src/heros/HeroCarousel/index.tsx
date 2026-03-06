@@ -27,7 +27,7 @@ const DEFAULT_SLIDES = [
 
 function getImageUrl(image: unknown): string {
   if (!image) return ''
-  if (typeof image === 'string') return image
+  if (typeof image === 'string' && (image.startsWith('http') || image.startsWith('/'))) return image
   if (typeof image === 'object' && image !== null && 'url' in image) {
     const url = (image as { url?: string }).url
     if (!url) return ''
@@ -91,23 +91,31 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
         <div className="flex h-full">
           {resolvedSlides.map((slide, i) => {
             const imageUrl = getImageUrl(slide.image)
+            const hasMediaResource =
+              slide.image &&
+              (typeof slide.image === 'object' ||
+                (typeof slide.image === 'string' && (slide.image.startsWith('http') || slide.image.startsWith('/'))))
             return (
               <div key={i} className="relative min-w-0 flex-[0_0_100%] h-full">
-                {/* Background image */}
-                {imageUrl ? (
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${imageUrl})` }}
-                  />
-                ) : slide.image && typeof slide.image === 'object' ? (
+                {/* Background image — prefer Media for proper URL handling (R2, etc.) */}
+                {hasMediaResource ? (
                   <div className="absolute inset-0">
                     <Media
-                      resource={slide.image}
+                      resource={
+                        (typeof slide.image === 'string'
+                          ? { url: slide.image, alt: '' }
+                          : slide.image) as Parameters<typeof Media>[0]['resource']
+                      }
                       fill
                       imgClassName="object-cover"
                       priority={i === 0}
                     />
                   </div>
+                ) : imageUrl ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${imageUrl})` }}
+                  />
                 ) : (
                   <div className="absolute inset-0 bg-linear-to-br from-[#2a2a2a] to-[#1a1a1a]" />
                 )}

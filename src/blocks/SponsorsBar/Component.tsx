@@ -26,11 +26,8 @@ type Props = SponsorsBarBlockType & { id?: string }
 export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => {
   const resolvedHeading = heading ?? DEFAULTS.heading
 
-  // Use CMS sponsors if they have valid logo objects, otherwise fall back to static images
-  const hasCmsLogos =
-    Array.isArray(sponsors) &&
-    sponsors.length > 0 &&
-    sponsors.some((s) => s.logo && typeof s.logo === 'object' && 'url' in s.logo)
+  // Always use static images — same as Home page, guaranteed to load (no R2 dependency)
+  const hasCmsLogos = false
 
   const sectionRef = useRef<HTMLElement>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -52,24 +49,14 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
     <section
       ref={sectionRef}
       id={id ?? undefined}
-      className={`section-padding-md transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-      style={{ backgroundColor: '#F0EDEA' }}
+      className={`section-padding-md bg-ff-warm-gray border-t border-ff-border-light transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
     >
-      <div className="container mx-auto px-6">
-        {/* ── Heading ── */}
-        <p
-          className="text-center font-display font-bold mb-12 lg:mb-16"
-          style={{
-            fontSize: 'clamp(1.4rem, 2.5vw, 2.2rem)',
-            color: '#1d1d1d',
-            lineHeight: 1.3,
-          }}
-        >
+      <div className="container mx-auto container-padding">
+        <h2 className="text-section-heading font-display font-bold text-ff-near-black text-center mb-6 lg:mb-8">
           {resolvedHeading}
-        </p>
+        </h2>
 
-        {/* ── Logo grid — 1 col mobile, 2 col tablet, 4 col desktop ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-10 w-full mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-6 w-full max-w-[var(--content-wide)] mx-auto">
           {hasCmsLogos
             ? /* ── CMS logos ── */
               sponsors!.map((sponsor, index) => {
@@ -84,7 +71,7 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
                       transitionDelay: `${200 + index * 120}ms`,
                     }}
                   >
-                    <div className="relative h-20 md:h-28 lg:h-32 w-full">
+                    <div className="relative h-14 md:h-16 lg:h-20 w-full">
                       {logo && typeof logo === 'object' ? (
                         <Media
                           resource={logo as MediaType}
@@ -119,7 +106,7 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
               STATIC_SPONSORS.map((sponsor, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-center px-4 py-3 transition-all duration-500 ease-out"
+                  className="flex items-center justify-center px-6 py-6 transition-all duration-500 ease-out"
                   style={{
                     opacity: isVisible ? 1 : 0,
                     transform: isVisible ? 'translateY(0)' : 'translateY(16px)',

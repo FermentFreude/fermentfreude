@@ -31,13 +31,15 @@ export const hero: Field = {
       required: true,
       admin: {
         description:
-          'Choose how this page looks at the top. "Home Page Slider" is for the homepage with animated slides.',
+          'Choose how this page looks at the top. "Offerings Grid" shows all items at once (no carousel).',
       },
       options: [
         { label: '🏠 Home Page Slider', value: 'heroSlider' },
         { label: '📷 Full Image Banner', value: 'highImpact' },
         { label: '📄 Simple Title', value: 'lowImpact' },
+        { label: '⬜ Split (Text + Image)', value: 'heroSplit' },
         { label: '🎠 Photo Carousel', value: 'heroCarousel' },
+        { label: '▦ Offerings Grid', value: 'heroGrid' },
         { label: '🍽️ Food Presentation', value: 'foodPresentationSlider' },
         { label: '➖ No Hero', value: 'none' },
       ],
@@ -304,6 +306,77 @@ export const hero: Field = {
     },
 
     /* ═══════════════════════════════════════════════════════════════════════
+     * SPLIT HERO (heroSplit)
+     * Text left, image right — simple editorial layout
+     * ═══════════════════════════════════════════════════════════════════════ */
+    {
+      type: 'collapsible',
+      label: '⬜ Split Content',
+      admin: {
+        condition: (_, { type } = {}) => type === 'heroSplit',
+        initCollapsed: false,
+        description: 'Label, heading, description, and link on the left. Image on the right.',
+      },
+      fields: [
+        {
+          name: 'splitLabel',
+          type: 'text',
+          label: 'Label',
+          localized: true,
+          admin: {
+            description: 'Small pill above the heading (e.g. "About Us")',
+          },
+        },
+        {
+          name: 'splitHeading',
+          type: 'text',
+          label: 'Heading',
+          localized: true,
+          required: false,
+          admin: {
+            description: 'Main headline',
+          },
+        },
+        {
+          name: 'splitDescription',
+          type: 'textarea',
+          label: 'Description',
+          localized: true,
+          admin: {
+            description: 'Short paragraph below the heading',
+          },
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'splitCtaLabel',
+              type: 'text',
+              label: 'Link Text',
+              localized: true,
+              admin: { width: '50%', description: 'e.g. "Learn more"' },
+            },
+            {
+              name: 'splitCtaUrl',
+              type: 'text',
+              label: 'Link URL',
+              admin: { width: '50%', description: 'e.g. /workshops' },
+            },
+          ],
+        },
+        {
+          name: 'splitMedia',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Image',
+          admin: {
+            description: 'Large image on the right side',
+          },
+        },
+      ],
+    },
+
+    /* ═══════════════════════════════════════════════════════════════════════
      * SIMPLE TITLE (lowImpact)
      * Just text, no image
      * ═══════════════════════════════════════════════════════════════════════ */
@@ -341,7 +414,7 @@ export const hero: Field = {
       label: '🎠 Carousel Slides',
       admin: {
         condition: (_, { type } = {}) =>
-          type === 'heroCarousel' || type === 'foodPresentationSlider',
+          type === 'heroCarousel' || type === 'heroGrid' || type === 'foodPresentationSlider',
         initCollapsed: false,
         description: 'Fullscreen image slides with text.',
       },
