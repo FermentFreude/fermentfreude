@@ -328,11 +328,11 @@ export default async function FermentationPage() {
           </div>
 
           {/* Image + 4 boxes — wrapped together */}
-          <div className="mt-6 pt-8 md:mt-12 md:pt-[120px]">
+          <div className="mt-6 pt-8 md:mt-12 md:pt-30">
             {/* Image of two people — in front of the boxes */}
             <div className="relative z-20 flex justify-center md:justify-end">
               <div
-                className="relative aspect-[4/3] w-full min-h-[240px] max-w-3xl overflow-hidden md:max-h-[420px]"
+                className="relative aspect-4/3 w-full min-h-60 max-w-3xl overflow-hidden md:max-h-105"
                 style={{ top: -80 }}
               >
                 {isResolvedMedia(heroImage) ? (
@@ -441,7 +441,7 @@ export default async function FermentationPage() {
       {/* What is fermentation? — light beige block */}
       <section id="what" className="bg-white pt-4 pb-6 md:pt-6 md:pb-8">
         <FadeIn delay={100}>
-        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+        <div className="mx-auto max-w-379 px-4 sm:px-6">
           <div className="rounded-2xl bg-[#F5F0E8] p-6 sm:p-8 md:p-12">
             <div
               className={
@@ -460,13 +460,13 @@ export default async function FermentationPage() {
                   </p>
                 )}
                 {whatMotto && (
-                  <p className="mt-8 font-bold leading-relaxed whitespace-pre-line text-ff-black text-base sm:mt-10 sm:text-lg md:mt-14 md:text-xl lg:mt-[62px] lg:text-[1.5625rem]">
+                  <p className="mt-8 font-bold leading-relaxed whitespace-pre-line text-ff-black text-base sm:mt-10 sm:text-lg md:mt-14 md:text-xl lg:mt-15.5 lg:text-[1.5625rem]">
                     {whatMotto.replace('. Just ', '.\nJust ')}
                   </p>
                 )}
               </div>
               {isResolvedMedia(whatImage) && (
-                <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+                <div className="aspect-4/3 w-full overflow-hidden rounded-2xl">
                   <Media resource={whatImage} fill imgClassName="object-cover object-center" />
                 </div>
               )}
@@ -504,7 +504,7 @@ export default async function FermentationPage() {
                 </div>
                 {isResolvedMedia(whyImage) && (
                   <div className="w-full shrink-0 md:w-80 lg:w-96">
-                    <div className="aspect-[4/3] overflow-hidden rounded-2xl">
+                    <div className="aspect-4/3 overflow-hidden rounded-2xl">
                       <Media resource={whyImage} fill imgClassName="object-cover object-center" />
                     </div>
                   </div>
@@ -518,7 +518,7 @@ export default async function FermentationPage() {
       {/* Is it dangerous? — light gray block */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={200}>
-        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+        <div className="mx-auto max-w-379 px-4 sm:px-6">
           <div className="rounded-2xl bg-[#ECE5DE] p-6 sm:p-8 md:p-12">
             <h2 className="font-display text-section-heading font-bold text-ff-black">
               {dangerTitle}
@@ -558,7 +558,7 @@ export default async function FermentationPage() {
       {/* A practice, not a trend — light cream block */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={250}>
-        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+        <div className="mx-auto max-w-379 px-4 sm:px-6">
           <div className="rounded-2xl bg-[#FAF2E0] p-6 sm:p-10 md:p-14 lg:p-16">
             <div
               className={
@@ -584,7 +584,7 @@ export default async function FermentationPage() {
               </div>
               {isResolvedMedia(practiceImage) && (
                 <div className="lg:col-span-1">
-                  <div className="aspect-[4/3] overflow-hidden rounded-2xl">
+                  <div className="aspect-4/3 overflow-hidden rounded-2xl">
                     <Media resource={practiceImage} fill imgClassName="object-cover object-center" />
                   </div>
                 </div>
@@ -598,8 +598,8 @@ export default async function FermentationPage() {
       {/* Ready to learn? CTA — gold block or video bg, two buttons */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={300}>
-        <div className="mx-auto max-w-[1516px] px-4 sm:px-6 text-center">
-          <div className="relative min-h-[280px] overflow-hidden rounded-2xl bg-[#E6BE68] px-8 py-16 md:px-16">
+        <div className="mx-auto max-w-379 px-4 sm:px-6 text-center">
+          <div className="relative min-h-70 overflow-hidden rounded-2xl bg-[#E6BE68] px-8 py-16 md:px-16">
             {/* Optional video background */}
             {ctaVideoUrl ? (
               <>
@@ -673,7 +673,7 @@ export default async function FermentationPage() {
       {/* FAQ — centered, light gray container */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={350}>
-        <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+        <div className="mx-auto max-w-379 px-4 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="font-display text-section-heading font-bold text-ff-black">
               {faqTitle}

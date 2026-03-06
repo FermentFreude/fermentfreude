@@ -32,7 +32,7 @@ export function WhySection({ title, items, image }: WhySectionProps) {
   return (
     <div className="relative content-wide mx-auto px-4 sm:px-6">
       {/* Decorative blobs */}
-      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 -translate-y-1/2 size-[500px] rounded-full bg-[#E6BE68]/5 blur-[100px]" aria-hidden />
+      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 -translate-y-1/2 size-125 rounded-full bg-[#E6BE68]/5 blur-[100px]" aria-hidden />
       <div className="pointer-events-none absolute -left-32 top-1/3 -z-10 size-64 rounded-full bg-[#EDD195]/10 blur-[80px]" aria-hidden />
       <div className="pointer-events-none absolute -right-32 bottom-1/4 -z-10 size-80 rounded-full bg-[#E6BE68]/8 blur-[90px]" aria-hidden />
 
@@ -67,7 +67,7 @@ export function WhySection({ title, items, image }: WhySectionProps) {
             return (
               <div
                 key={item.id ?? i}
-                className={`group relative flex flex-col items-center overflow-hidden rounded-3xl bg-gradient-to-br ${accent} p-8 sm:p-9 text-center shadow-lg transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#E6BE68]/15 ${stagger} ${rotate}`}
+                className={`group relative flex flex-col items-center overflow-hidden rounded-3xl bg-linear-to-br ${accent} p-8 sm:p-9 text-center shadow-lg transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#E6BE68]/15 ${stagger} ${rotate}`}
               >
                 {/* Number badge */}
                 <div className="absolute left-4 top-4 font-display text-3xl font-bold text-[#E6BE68]/30 transition-colors group-hover:text-[#E6BE68]/50">
@@ -95,11 +95,11 @@ export function WhySection({ title, items, image }: WhySectionProps) {
       {isResolvedMedia(image) && (
         <>
           <div className="mt-14 flex items-center justify-center gap-4">
-            <div className="h-px flex-1 max-w-24 bg-gradient-to-r from-transparent to-[#E6BE68]/40" />
+            <div className="h-px flex-1 max-w-24 bg-linear-to-r from-transparent to-[#E6BE68]/40" />
             <span className="font-display text-caption font-bold uppercase tracking-[0.2em] text-[#E6BE68]/60">
               See the magic
             </span>
-            <div className="h-px flex-1 max-w-24 bg-gradient-to-l from-transparent to-[#E6BE68]/40" />
+            <div className="h-px flex-1 max-w-24 bg-linear-to-l from-transparent to-[#E6BE68]/40" />
           </div>
           <div className="mt-8 flex justify-center">
             <div className="aspect-video w-full max-w-2xl overflow-hidden rounded-3xl shadow-xl">

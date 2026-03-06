@@ -48,7 +48,7 @@ export function WorkshopCardsSection({
 
   return (
     <section className="section-padding-sm bg-white">
-      <div className="mx-auto max-w-[1516px] px-4 sm:px-6">
+      <div className="mx-auto max-w-379 px-4 sm:px-6">
         {layout === 'centered' ? (
           <div className="text-center">
             <h2 className="font-display text-section-heading font-bold text-ff-black md:text-4xl">
@@ -88,7 +88,7 @@ export function WorkshopCardsSection({
               className="overflow-hidden rounded-2xl shadow-lg transition-shadow hover:shadow-xl"
               style={{ backgroundColor: cardBg }}
             >
-              <div className="relative aspect-[4/3] overflow-hidden">
+              <div className="relative aspect-4/3 overflow-hidden">
                 {isResolvedMedia(card.image) ? (
                   <Media resource={card.image} fill imgClassName="object-cover" />
                 ) : (
