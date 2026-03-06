@@ -1124,7 +1124,10 @@ export const Pages: CollectionConfig = {
               label: 'Delivery Options',
               required: true,
               minRows: 1,
-              admin: { description: 'Ways to receive the voucher (e.g. by email or post).' },
+              admin: {
+                description:
+                  'Email or pick up from store. Post/card removed for product freshness.',
+              },
               fields: [
                 {
                   name: 'type',
@@ -1152,9 +1155,13 @@ export const Pages: CollectionConfig = {
                   label: 'Icon',
                   options: [
                     { label: 'Email', value: 'email' },
-                    { label: 'Card / Post', value: 'card' },
+                    { label: 'Pick up from store', value: 'pickup' },
+                    { label: 'Card / Post (deprecated)', value: 'card' },
                   ],
-                  admin: { description: 'Icon displayed next to this option.' },
+                  admin: {
+                    description:
+                      'Icon displayed next to this option. Use email or pickup only.',
+                  },
                 },
               ],
             },
@@ -1216,6 +1223,16 @@ export const Pages: CollectionConfig = {
               label: 'Delivery Section Label',
               admin: {
                 description: 'Label above delivery options (e.g. "DELIVERY METHOD").',
+              },
+            },
+            {
+              name: 'deliveryDisclaimer',
+              type: 'textarea',
+              label: 'Delivery Disclaimer',
+              localized: true,
+              admin: {
+                description:
+                  'Explains why products cannot be sent by post (e.g. freshness). Shown under the delivery option.',
               },
             },
             {

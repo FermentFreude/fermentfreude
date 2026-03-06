@@ -954,7 +954,7 @@ export interface Page {
       id?: string | null;
     }[];
     /**
-     * Ways to receive the voucher (e.g. by email or post).
+     * Email or pick up from store. Post/card removed for product freshness.
      */
     deliveryOptions: {
       /**
@@ -966,9 +966,9 @@ export interface Page {
        */
       title: string;
       /**
-       * Icon displayed next to this option.
+       * Icon displayed next to this option. Use email or pickup only.
        */
-      icon: 'email' | 'card';
+      icon: 'email' | 'pickup' | 'card';
       id?: string | null;
     }[];
     /**
@@ -995,6 +995,10 @@ export interface Page {
      * Label above delivery options (e.g. "DELIVERY METHOD").
      */
     deliverySectionLabel: string;
+    /**
+     * Explains why products cannot be sent by post (e.g. freshness). Shown under the delivery option.
+     */
+    deliveryDisclaimer?: string | null;
     /**
      * Label for the optional greeting message field.
      */
@@ -3304,6 +3308,7 @@ export interface PagesSelect<T extends boolean = true> {
         cardDisclaimer?: T;
         amountSectionLabel?: T;
         deliverySectionLabel?: T;
+        deliveryDisclaimer?: T;
         greetingLabel?: T;
         greetingPlaceholder?: T;
         addToCartButton?: T;
