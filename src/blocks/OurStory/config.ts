@@ -56,6 +56,15 @@ export const OurStory: Block = {
           localized: true,
           label: 'Paragraph Text',
         },
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Image',
+          admin: {
+            description: 'Optional image for this paragraph. Shown in alternating layout.',
+          },
+        },
       ],
     },
   ],

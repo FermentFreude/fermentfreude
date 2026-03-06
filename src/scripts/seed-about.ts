@@ -1,7 +1,7 @@
 /**
  * Seed the About page with decomposed blocks.
  * Creates an "Über uns" / "About Us" page composed from:
- *   Hero (highImpact) + OurStory + TeamCards + SponsorsBar + ReadyToLearnCTA
+ *   Hero (heroSplit: text + image) + OurStory + TeamCards + SponsorsBar + Testimonials + ReadyToLearnCTA + ContactBlock
  *
  * Uploads images to Payload Media (Cloudflare R2) so they're editable from /admin.
  * Seeds both DE (default) and EN locales, reusing array IDs.
@@ -31,6 +31,8 @@ import {
   teamCardsDE,
   teamCardsEN,
 } from './data/about'
+import { buildTestimonials, mergeTestimonialsEN } from '../blocks/Testimonials/seed'
+import { contactDataDE, contactDataEN } from './data/contact'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
 async function seedAbout() {
@@ -88,6 +90,8 @@ async function seedAbout() {
   // ── 3. Upload images to Payload Media (Cloudflare R2) ────────
   console.log('  📸 Uploading images to Media collection…')
 
+  const fs = await import('fs')
+
   const heroImage = await payload.create({
     collection: 'media',
     data: { alt: 'about-hero – FermentFreude about page banner' },
@@ -96,10 +100,23 @@ async function seedAbout() {
   })
   console.log(`    ✅ Hero banner: ${heroImage.id}`)
 
+  // Hero split image (apple cider still life)
+  let heroSplitImage = heroImage
+  const appleCiderPath = path.join(imagesDir, 'about-hero-apple-cider.png')
+  if (fs.existsSync(appleCiderPath)) {
+    heroSplitImage = await payload.create({
+      collection: 'media',
+      data: { alt: 'about-hero – apple cider and fresh apples, fermentation still life' },
+      file: await optimizedFile(appleCiderPath, IMAGE_PRESETS.card),
+      context: { skipAutoTranslate: true },
+    })
+    console.log(`    ✅ Hero split image (apple cider): ${heroSplitImage.id}`)
+  }
+
   const marcelImage = await payload.create({
     collection: 'media',
     data: { alt: 'about-team – Marcel Rauminger, Fermentation Specialist & Chef' },
-    file: await optimizedFile(path.join(imagesDir, 'marcel-rauminger.jpg'), IMAGE_PRESETS.card),
+    file: await optimizedFile(path.join(imagesDir, 'marcel-rauminger.png'), IMAGE_PRESETS.card),
     context: { skipAutoTranslate: true },
   })
   console.log(`    ✅ Marcel photo: ${marcelImage.id}`)
@@ -107,25 +124,52 @@ async function seedAbout() {
   const davidImage = await payload.create({
     collection: 'media',
     data: { alt: 'about-team – David Heider, Nutrition Specialist & Food Developer' },
-    file: await optimizedFile(path.join(imagesDir, 'david-heider.jpg'), IMAGE_PRESETS.card),
+    file: await optimizedFile(path.join(imagesDir, 'david-heider.png'), IMAGE_PRESETS.card),
     context: { skipAutoTranslate: true },
   })
   console.log(`    ✅ David photo: ${davidImage.id}`)
 
-  // Upload sponsor logos
+  let ourStoryImage1 = heroImage
+  let ourStoryImage2 = marcelImage
+  const vegetablesPath = path.join(imagesDir, 'our-story-vegetables.png')
+  const kitchenPath = path.join(imagesDir, 'our-story-kitchen.png')
+  if (fs.existsSync(vegetablesPath)) {
+    ourStoryImage1 = await payload.create({
+      collection: 'media',
+      data: { alt: 'about-our-story – fresh vegetables in brown paper' },
+      file: await optimizedFile(vegetablesPath, IMAGE_PRESETS.card),
+      context: { skipAutoTranslate: true },
+    })
+    console.log(`    ✅ Our Story image 1 (vegetables): ${ourStoryImage1.id}`)
+  }
+  if (fs.existsSync(kitchenPath)) {
+    ourStoryImage2 = await payload.create({
+      collection: 'media',
+      data: { alt: 'about-our-story – kitchen fermentation still life' },
+      file: await optimizedFile(kitchenPath, IMAGE_PRESETS.card),
+      context: { skipAutoTranslate: true },
+    })
+    console.log(`    ✅ Our Story image 2 (kitchen): ${ourStoryImage2.id}`)
+  }
+
+  // Upload sponsor logos — same images as Home page (public/assets/images/sponsors/)
   const sponsorImages = []
-  const sponsorFiles = [
-    { file: 'sponsor-logo.png', alt: 'about-sponsor – Sponsor Logo 1' },
-    { file: 'sponsor-logo-2.png', alt: 'about-sponsor – Sponsor Logo 2' },
-    { file: 'sponsor-logo-3.png', alt: 'about-sponsor – Sponsor Logo 3' },
-    { file: 'sponsor-logo-4.png', alt: 'about-sponsor – Sponsor Logo 4' },
+  const sponsorsDir = path.resolve(process.cwd(), 'public/assets/images/sponsors')
+  const sponsorFiles: { file: string; fallback: string; alt: string }[] = [
+    { file: 'sustainable-food.png', fallback: 'sponsor-logo.png', alt: 'about-sponsor – aws Sustainable Food Systems Initiative' },
+    { file: 'aws.png', fallback: 'sponsor-logo-2.png', alt: 'about-sponsor – Austria Wirtschafts Service' },
+    { file: 'science-park.png', fallback: 'sponsor-logo-3.png', alt: 'about-sponsor – Science Park Graz' },
+    { file: 'sparkasse.png', fallback: 'sponsor-logo-4.png', alt: 'about-sponsor – Steiermärkische Sparkasse' },
   ]
 
   for (const s of sponsorFiles) {
+    const preferredPath = path.join(sponsorsDir, s.file)
+    const fallbackPath = path.join(imagesDir, s.fallback)
+    const filePath = fs.existsSync(preferredPath) ? preferredPath : fallbackPath
     const img = await payload.create({
       collection: 'media',
       data: { alt: s.alt },
-      file: await optimizedFile(path.join(imagesDir, s.file), IMAGE_PRESETS.logo),
+      file: await optimizedFile(filePath, IMAGE_PRESETS.logo),
       context: { skipAutoTranslate: true },
     })
     sponsorImages.push(img)
@@ -135,9 +179,12 @@ async function seedAbout() {
   // ── 4. Build block data ────────────────────────────────────
   const imgArgs = {
     heroImage,
+    heroSplitImage,
     marcelImage,
     davidImage,
     sponsorLogos: sponsorImages,
+    ourStoryImage1,
+    ourStoryImage2,
   }
 
   // ── 5. Create the About page in DE (default locale) ────────
@@ -158,7 +205,15 @@ async function seedAbout() {
         ourStoryDE(),
         teamCardsDE(imgArgs),
         sponsorsBarDE(imgArgs),
+        buildTestimonials().de,
         readyToLearnDE(),
+        {
+          blockType: 'contactBlock',
+          hideHeroSection: true,
+          hideCtaBanner: true,
+          hideMap: true,
+          ...contactDataDE({}),
+        },
       ] as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   })
@@ -174,16 +229,24 @@ async function seedAbout() {
   })
 
   const blocks = created.layout ?? []
-  if (blocks.length < 4) {
-    console.error(`  ❌ Expected 4 layout blocks, got ${blocks.length}`)
+  if (blocks.length < 6) {
+    console.error(`  ❌ Expected 6 layout blocks, got ${blocks.length}`)
     process.exit(1)
   }
 
-  // Block IDs
+  // Block IDs (order: OurStory, TeamCards, SponsorsBar, Testimonials, ReadyToLearnCTA, ContactBlock)
   const ourStoryBlockId = blocks[0]!.id
   const teamCardsBlockId = blocks[1]!.id
   const sponsorsBarBlockId = blocks[2]!.id
-  const readyToLearnBlockId = blocks[3]!.id
+  const testimonialsBlockId = blocks[3]!.id
+  const readyToLearnBlockId = blocks[4]!.id
+  const contactBlockId = blocks[5]!.id
+
+  // Extract subject option IDs from ContactBlock
+  const contactBlock = blocks[5] as unknown as Record<string, unknown>
+  const contactForm = contactBlock?.contactForm as Record<string, unknown> | undefined
+  const subjectOptions = contactForm?.subjectOptions as Record<string, unknown> | undefined
+  const subjectOptionIds = ((subjectOptions?.options ?? []) as Array<{ id?: string }>).map((o) => o.id)
 
   // Extract array IDs from OurStory paragraphs
   const ourStoryBlock = blocks[0] as unknown as Record<string, unknown>
@@ -200,7 +263,7 @@ async function seedAbout() {
   const sponsorIds = ((sponsorsBarBlock?.sponsors ?? []) as Array<{ id?: string }>).map((s) => s.id)
 
   // ── 7. Build EN data with same array IDs ──────────────────
-  const enOurStory = ourStoryEN()
+  const enOurStory = ourStoryEN(imgArgs)
   enOurStory.paragraphs = enOurStory.paragraphs.map((p, idx) => ({
     ...p,
     id: paragraphIds[idx],
@@ -220,7 +283,22 @@ async function seedAbout() {
     }))
   }
 
+  const enContactData = contactDataEN({})
+  if (enContactData.contactForm?.subjectOptions?.options && subjectOptionIds.length > 0) {
+    enContactData.contactForm.subjectOptions.options = enContactData.contactForm.subjectOptions.options.map(
+      (o: { label: string }, idx: number) => ({
+        ...o,
+        id: subjectOptionIds[idx],
+      }),
+    )
+  }
+
+  const testimonialsBlock = blocks[3] as unknown as { id?: string; testimonials?: { id?: string }[] }
+  const enTestimonials = mergeTestimonialsEN(buildTestimonials().en, testimonialsBlock ?? {})
+
   // ── 8. Update EN locale ───────────────────────────────────
+  const enHero = aboutHeroEN(imgArgs)
+
   await payload.update({
     collection: 'pages',
     id: aboutPage.id,
@@ -233,19 +311,28 @@ async function seedAbout() {
     data: {
       title: 'About Us',
       _status: 'published',
-      hero: aboutHeroEN(imgArgs),
+      hero: enHero,
       layout: [
         { id: ourStoryBlockId, ...enOurStory },
         { id: teamCardsBlockId, ...enTeamCards },
         { id: sponsorsBarBlockId, ...enSponsorsBar },
+        { ...enTestimonials, id: testimonialsBlockId },
         { id: readyToLearnBlockId, ...readyToLearnEN() },
+        {
+          id: contactBlockId,
+          blockType: 'contactBlock',
+          hideHeroSection: true,
+          hideCtaBanner: true,
+          hideMap: true,
+          ...enContactData,
+        },
       ] as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   })
 
   console.log(`  ✅ Updated About page ${aboutPage.id} (EN)`)
   console.log('🎉 About page seeded successfully!')
-  console.log('   Blocks: hero → OurStory → TeamCards → SponsorsBar → ReadyToLearnCTA')
+  console.log('   Blocks: hero → OurStory → TeamCards → SponsorsBar → Testimonials → ReadyToLearnCTA → ContactBlock')
   console.log('   All images stored in Payload Media (Cloudflare R2) — editable from /admin')
 
   process.exit(0)
