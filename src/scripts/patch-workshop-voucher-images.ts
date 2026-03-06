@@ -6,7 +6,6 @@
  */
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-// @ts-expect-error — dotenv types not resolved via package.json exports
 import config from '@payload-config'
 import { config as dotenvConfig } from 'dotenv'
 import { getPayload } from 'payload'
