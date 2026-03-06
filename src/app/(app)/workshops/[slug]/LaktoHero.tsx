@@ -282,15 +282,15 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
 
       {/* ── Scroll indicator ───────────────────────────── */}
       <div
-        className={`absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-2 transition-all duration-700 ${
+        className={`absolute bottom-6 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 transition-all duration-700 lg:flex ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
         }`}
         style={{ transitionDelay: '1000ms' }}
       >
-        <span className="font-display text-[9px] font-semibold uppercase tracking-[0.2em] text-[#555954]/60 lg:text-white/50">
+        <span className="font-display text-[9px] font-semibold uppercase tracking-[0.2em] text-white/50">
           Scroll
         </span>
-        <div className="h-8 w-px animate-pulse bg-[#555954]/30 lg:bg-white/30" />
+        <div className="h-8 w-px animate-pulse bg-white/30" />
       </div>
     </section>
   )
