@@ -40,17 +40,16 @@ export function voucherPageDataDE({
         'Das perfekte Geschenk für Foodies und Gesundheitsbewusste. Wähle einen Betrag und optional eine Grußnachricht für deinen Gutschein.',
       voucherAmounts: [{ amount: '99€' }],
       deliveryOptions: [
-        {
-          type: 'email',
-          title: 'Per E-Mail zum selber drucken',
-          icon: 'email',
-        },
+        { type: 'email', title: 'Per E-Mail zum selber drucken', icon: 'email' },
+        { type: 'pickup', title: 'Abholung im Laden', icon: 'pickup' },
       ],
       cardLabel: 'GESCHENK GUTSCHEIN',
       valueLabel: 'Wertgutschein',
       cardDisclaimer: 'Einlösbar in unserem Shop',
       amountSectionLabel: 'WERTGUTSCHEIN',
       deliverySectionLabel: 'VERSANDART',
+      deliveryDisclaimer:
+        'Wir versenden keine Produkte per Post, damit alles frisch bleibt.',
       greetingLabel: 'Deine Grußnachricht',
       greetingPlaceholder: 'Max. 250 Zeichen',
       addToCartButton: 'In den Warenkorb',
@@ -123,10 +122,10 @@ export function voucherPageDataEN(
         id: item.id ?? undefined,
         amount: ['99€'][i] ?? item.amount,
       })),
-      deliveryOptions: (v.deliveryOptions ?? []).map((item) => ({
+      deliveryOptions: (v.deliveryOptions ?? []).map((item, i) => ({
         id: item.id ?? undefined,
         type: item.type,
-        title: 'By email to print at home',
+        title: item.type === 'pickup' ? 'Pick up from store' : 'By email to print at home',
         icon: item.icon,
       })),
       cardLabel: 'GIFT VOUCHER',
@@ -134,6 +133,7 @@ export function voucherPageDataEN(
       cardDisclaimer: 'Redeemable in our shop',
       amountSectionLabel: 'VOUCHER VALUE',
       deliverySectionLabel: 'DELIVERY METHOD',
+      deliveryDisclaimer: 'We cannot ship products by post to ensure freshness.',
       greetingLabel: 'Your greeting message',
       greetingPlaceholder: 'Max. 250 characters',
       addToCartButton: 'Add to cart',

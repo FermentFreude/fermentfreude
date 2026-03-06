@@ -46,12 +46,16 @@ const DEFAULTS = {
   heroDescription:
     'The perfect gift for foodies and the health-conscious. Choose an amount and optionally a greeting message for your voucher.',
   voucherAmounts: [{ amount: '99€' }],
-  deliveryOptions: [{ type: 'email', title: 'By email to print at home', icon: 'email' as const }],
+  deliveryOptions: [
+    { type: 'email', title: 'By email to print at home', icon: 'email' as const },
+    { type: 'pickup', title: 'Pick up from store', icon: 'pickup' as const },
+  ],
   cardLabel: 'GIFT VOUCHER',
   valueLabel: 'Voucher value',
   cardDisclaimer: 'Redeemable in our shop',
   amountSectionLabel: 'VOUCHER VALUE',
   deliverySectionLabel: 'DELIVERY METHOD',
+  deliveryDisclaimer: 'We cannot ship products by post to ensure freshness.',
   greetingLabel: 'Your greeting message',
   greetingPlaceholder: 'Max. 250 characters',
   addToCartButton: 'Add to cart',
@@ -121,6 +125,7 @@ export default async function VoucherPage() {
   const cardDisclaimer = resolve(v?.cardDisclaimer, DEFAULTS.cardDisclaimer)
   const amountSectionLabel = resolve(v?.amountSectionLabel, DEFAULTS.amountSectionLabel)
   const deliverySectionLabel = resolve(v?.deliverySectionLabel, DEFAULTS.deliverySectionLabel)
+  const deliveryDisclaimer = v?.deliveryDisclaimer ?? DEFAULTS.deliveryDisclaimer
   const greetingLabel = resolve(v?.greetingLabel, DEFAULTS.greetingLabel)
   const greetingPlaceholder = resolve(v?.greetingPlaceholder, DEFAULTS.greetingPlaceholder)
   const addToCartButton = resolve(v?.addToCartButton, DEFAULTS.addToCartButton)
@@ -149,7 +154,7 @@ export default async function VoucherPage() {
       : DEFAULTS.faqs
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-ff-cream">
       <VoucherHero
         heading={heroHeading}
         description={heroDescription}
@@ -161,6 +166,7 @@ export default async function VoucherPage() {
         cardDisclaimer={cardDisclaimer}
         amountSectionLabel={amountSectionLabel}
         deliverySectionLabel={deliverySectionLabel}
+        deliveryDisclaimer={deliveryDisclaimer}
         greetingLabel={greetingLabel}
         greetingPlaceholder={greetingPlaceholder}
         addToCartButton={addToCartButton}
