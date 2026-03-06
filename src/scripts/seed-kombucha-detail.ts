@@ -100,7 +100,7 @@ const workshopDetailDE = {
     },
     {
       bold: 'Lebende Kulturen:',
-      rest: ' Deine SCOBY ist ein lebendiger, atmendes Organismus. Mit der richtigen Pflege produziert sie endlos Kombucha — eine Kultur für\'s Leben.',
+      rest: " Deine SCOBY ist ein lebendiger, atmendes Organismus. Mit der richtigen Pflege produziert sie endlos Kombucha — eine Kultur für's Leben.",
     },
     {
       bold: 'DIY-Nachhaltigkeit:',
@@ -447,7 +447,7 @@ const workshopDetailEN = {
     {
       question: 'How long is the workshop and when does it start?',
       answer:
-        'The Kombucha workshop lasts about 3 hours. Please arrive 10 minutes early so we can start on time. You\'ll find exact times listed with each date above.',
+        "The Kombucha workshop lasts about 3 hours. Please arrive 10 minutes early so we can start on time. You'll find exact times listed with each date above.",
     },
     {
       question: 'Is this workshop suitable for beginners?',
@@ -524,39 +524,51 @@ async function seedKombuchaDetail() {
     const mergedEN = {
       ...workshopDetailEN,
       // Preserve any generated IDs from German arrays
-      heroAttributes: dePage.workshopDetail?.heroAttributes?.map((attr: any, i: number) => ({
-        ...workshopDetailEN.heroAttributes?.[i],
-        id: attr.id,
-      })),
-      bookingAttributes: dePage.workshopDetail?.bookingAttributes?.map((attr: any, i: number) => ({
-        ...workshopDetailEN.bookingAttributes?.[i],
-        id: attr.id,
-      })),
-      schedule: dePage.workshopDetail?.schedule?.map((step: any, i: number) => ({
+      heroAttributes: dePage.workshopDetail?.heroAttributes?.map(
+        (attr: { id?: string | null }, i: number) => ({
+          ...workshopDetailEN.heroAttributes?.[i],
+          id: attr.id,
+        }),
+      ),
+      bookingAttributes: dePage.workshopDetail?.bookingAttributes?.map(
+        (attr: { id?: string | null }, i: number) => ({
+          ...workshopDetailEN.bookingAttributes?.[i],
+          id: attr.id,
+        }),
+      ),
+      schedule: dePage.workshopDetail?.schedule?.map((step: { id?: string | null }, i: number) => ({
         ...workshopDetailEN.schedule?.[i],
         id: step.id,
       })),
-      includedItems: dePage.workshopDetail?.includedItems?.map((item: any, i: number) => ({
-        ...workshopDetailEN.includedItems?.[i],
-        id: item.id,
-      })),
-      whyPoints: dePage.workshopDetail?.whyPoints?.map((point: any, i: number) => ({
-        ...workshopDetailEN.whyPoints?.[i],
-        id: point.id,
-      })),
-      experienceCards: dePage.workshopDetail?.experienceCards?.map((card: any, i: number) => ({
-        ...workshopDetailEN.experienceCards?.[i],
-        id: card.id,
-      })),
-      voucherPills: dePage.workshopDetail?.voucherPills?.map((pill: any, i: number) => ({
-        ...workshopDetailEN.voucherPills?.[i],
-        id: pill.id,
-      })),
-      faqItems: dePage.workshopDetail?.faqItems?.map((item: any, i: number) => ({
+      includedItems: dePage.workshopDetail?.includedItems?.map(
+        (item: { id?: string | null }, i: number) => ({
+          ...workshopDetailEN.includedItems?.[i],
+          id: item.id,
+        }),
+      ),
+      whyPoints: dePage.workshopDetail?.whyPoints?.map(
+        (point: { id?: string | null }, i: number) => ({
+          ...workshopDetailEN.whyPoints?.[i],
+          id: point.id,
+        }),
+      ),
+      experienceCards: dePage.workshopDetail?.experienceCards?.map(
+        (card: { id?: string | null }, i: number) => ({
+          ...workshopDetailEN.experienceCards?.[i],
+          id: card.id,
+        }),
+      ),
+      voucherPills: dePage.workshopDetail?.voucherPills?.map(
+        (pill: { id?: string | null }, i: number) => ({
+          ...workshopDetailEN.voucherPills?.[i],
+          id: pill.id,
+        }),
+      ),
+      faqItems: dePage.workshopDetail?.faqItems?.map((item: { id?: string | null }, i: number) => ({
         ...workshopDetailEN.faqItems?.[i],
         id: item.id,
       })),
-      dates: dePage.workshopDetail?.dates?.map((date: any, i: number) => ({
+      dates: dePage.workshopDetail?.dates?.map((date: { id?: string | null }, i: number) => ({
         ...workshopDetailEN.dates?.[i],
         id: date.id,
       })),

@@ -19,6 +19,10 @@ import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 import { findWorkshopBySlug, getAllWorkshops } from '@/utilities/getWorkshops'
 import { getWorkshopTermine } from '@/utilities/getWorkshopTermine'
+import { KombuchaBookingCard } from './KombuchaBookingCard'
+import { KombuchaFAQ } from './KombuchaFAQ'
+import { KombuchaHero } from './KombuchaHero'
+import { KombuchaVoucherCta } from './KombuchaVoucherCta'
 import { LaktoBookingCard } from './LaktoBookingCard'
 import { LaktoCalendar } from './LaktoCalendar'
 import { LaktoFAQ } from './LaktoFAQ'
@@ -29,10 +33,6 @@ import { TempehBookingCard } from './TempehBookingCard'
 import { TempehFAQ } from './TempehFAQ'
 import { TempehHero } from './TempehHero'
 import { TempehVoucherCta } from './TempehVoucherCta'
-import { KombuchaBookingCard } from './KombuchaBookingCard'
-import { KombuchaFAQ } from './KombuchaFAQ'
-import { KombuchaHero } from './KombuchaHero'
-import { KombuchaVoucherCta } from './KombuchaVoucherCta'
 import { getWorkshopBySlug } from './workshop-data'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -572,7 +572,19 @@ export default async function WorkshopDetailPage({ params }: Args) {
         <LaktoHero cms={{ image: detail?.heroImage }} />
 
         {/* 2. Modern Booking Card */}
-        <LaktoBookingCard workshop={workshopDetailData} cms={detail ? { bookingImage: detail.bookingImage, experienceEyebrow: detail.experienceEyebrow, experienceTitle: detail.experienceTitle, experienceCards: detail.experienceCards } : undefined} />
+        <LaktoBookingCard
+          workshop={workshopDetailData}
+          cms={
+            detail
+              ? {
+                  bookingImage: detail.bookingImage,
+                  experienceEyebrow: detail.experienceEyebrow,
+                  experienceTitle: detail.experienceTitle,
+                  experienceCards: detail.experienceCards,
+                }
+              : undefined
+          }
+        />
 
         {/* 3. Seasonal Fermentation Calendar */}
         <LaktoCalendar />
@@ -580,9 +592,13 @@ export default async function WorkshopDetailPage({ params }: Args) {
         {/* 4. Fermented Vegetables How-Tos */}
         <FermentedVegHowTos
           workshopType="lakto"
-          cms={detail ? {
-            howToArticles: detail.howToArticles,
-          } : undefined}
+          cms={
+            detail
+              ? {
+                  howToArticles: detail.howToArticles,
+                }
+              : undefined
+          }
         />
 
         {/* 5. Booking FAQ */}
@@ -599,7 +615,9 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 7. Voucher CTA */}
-        <LaktoVoucherCta cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined} />
+        <LaktoVoucherCta
+          cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined}
+        />
       </article>
     )
   }
@@ -615,7 +633,19 @@ export default async function WorkshopDetailPage({ params }: Args) {
         <TempehHero cms={{ image: detail?.heroImage }} />
 
         {/* 2. Modern Booking Card */}
-        <TempehBookingCard workshop={tempehDefaults} cms={detail ? { bookingImage: detail.bookingImage, experienceEyebrow: detail.experienceEyebrow, experienceTitle: detail.experienceTitle, experienceCards: detail.experienceCards } : undefined} />
+        <TempehBookingCard
+          workshop={tempehDefaults}
+          cms={
+            detail
+              ? {
+                  bookingImage: detail.bookingImage,
+                  experienceEyebrow: detail.experienceEyebrow,
+                  experienceTitle: detail.experienceTitle,
+                  experienceCards: detail.experienceCards,
+                }
+              : undefined
+          }
+        />
 
         {/* 3. Other Workshops (slider — excludes tempeh) */}
         <WorkshopTypesSlider
@@ -628,14 +658,20 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 4. Voucher CTA */}
-        <TempehVoucherCta cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined} />
+        <TempehVoucherCta
+          cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined}
+        />
 
         {/* 5. How-To Articles */}
         <FermentedVegHowTos
           workshopType="tempeh"
-          cms={detail ? {
-            howToArticles: detail.howToArticles,
-          } : undefined}
+          cms={
+            detail
+              ? {
+                  howToArticles: detail.howToArticles,
+                }
+              : undefined
+          }
         />
 
         {/* 6. FAQ */}
@@ -655,7 +691,19 @@ export default async function WorkshopDetailPage({ params }: Args) {
         <KombuchaHero cms={{ image: detail?.heroImage }} />
 
         {/* 2. Modern Booking Card */}
-        <KombuchaBookingCard workshop={undefined} cms={detail ? { bookingImage: detail.bookingImage, experienceEyebrow: detail.experienceEyebrow, experienceTitle: detail.experienceTitle, experienceCards: detail.experienceCards } : undefined} />
+        <KombuchaBookingCard
+          _workshop={undefined}
+          cms={
+            detail
+              ? {
+                  bookingImage: detail.bookingImage,
+                  experienceEyebrow: detail.experienceEyebrow,
+                  experienceTitle: detail.experienceTitle,
+                  experienceCards: detail.experienceCards,
+                }
+              : undefined
+          }
+        />
 
         {/* 3. Other Workshops (slider — excludes kombucha) */}
         <WorkshopTypesSlider
@@ -668,14 +716,20 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 4. Voucher CTA */}
-        <KombuchaVoucherCta cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined} />
+        <KombuchaVoucherCta
+          cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined}
+        />
 
         {/* 5. How-To Articles */}
         <FermentedVegHowTos
           workshopType="kombucha"
-          cms={detail ? {
-            howToArticles: detail.howToArticles,
-          } : undefined}
+          cms={
+            detail
+              ? {
+                  howToArticles: detail.howToArticles,
+                }
+              : undefined
+          }
         />
 
         {/* 6. FAQ */}

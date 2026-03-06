@@ -1,200 +1,157 @@
 'use client'
 
-import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
+
+/* ═══════════════════════════════════════════════════════════════
+ *  KombuchaFAQ — Accordion with gold styling
+ *
+ *  CMS-driven via `cms` prop (workshopDetail tab in admin).
+ *  Falls back to hardcoded Kombucha FAQ defaults.
+ * ═══════════════════════════════════════════════════════════════ */
+
+// ─── CMS Props Type ─────────────────────────────────────────
 
 export type KombuchaFAQCMS = {
-  eyebrow?: string | null
-  title?: string | null
-  description?: string | null
-  items?: Array<{ question?: string | null; answer?: string | null }> | null
+  faqEyebrow?: string | null
+  faqTitle?: string | null
+  faqDescription?: string | null
+  faqItems?: Array<{
+    question?: string | null
+    answer?: string | null
+  }> | null
+  faqContactLabel?: string | null
+  faqContactText?: string | null
+  faqContactEmail?: string | null
 }
 
-type FAQItem = {
-  question: string
-  answer: string
-}
+// ─── FAQ Items Data ─────────────────────────────────────────
 
-const BOOKING_FAQ: FAQItem[] = [
+const BOOKING_FAQ = [
   {
-    question: 'Do I need to keep my SCOBY in the fridge after the workshop?',
-    answer:
-      'No! Your fresh SCOBY and starter liquid should stay at room temperature (20-25°C) to stay active. Store it in a glass jar covered with a cloth. Check it once a week and refresh with sweet tea if resting for more than a month.',
+    question: `How do I store and care for my SCOBY after the workshop?`,
+    answer: `Keep your SCOBY in a "starter culture jar" at room temperature (65–75°F/18–24°C) with about 1 cup of kombucha liquid. Cover loosely with a cloth. Check it monthly—it should look opaque and pale. After 1–2 months, you can brew your next batch or maintain it indefinitely with minimal care.`,
   },
   {
-    question: 'What do I need to bring to the workshop?',
-    answer:
-      "Nothing! We provide everything: organic tea, spring water, SCOBY starter culture, glass jars, bottles, and brewing equipment to take home. Wear comfortable clothes and let us know about any allergies in advance.",
+    question: `What should I bring to the workshop?`,
+    answer: `Just yourself! We provide all materials: tea, water, bottles, SCOBY, and equipment. Wear comfortable clothing you don't mind getting splashed in, and avoid heavy perfumes if you're sensitive to fermentation aromas.`,
   },
   {
-    question: 'How large are the workshop groups?',
-    answer:
-      'Our workshops have a maximum of 12 participants to ensure everyone gets personal attention. For groups of 8 or more, we also offer private workshop bookings — email us at info@fermentfreude.de for a custom quote.',
+    question: `Can I book a private session for my group?`,
+    answer: `Absolutely. Private groups of 8–12 are welcome. Email us with your preferred date, and we'll arrange an exclusive session tailored to your team, family, or friends.`,
   },
   {
-    question: 'How long is the workshop and when does it start?',
-    answer:
-      "The Kombucha workshop lasts about 3 hours. Please arrive 10 minutes early so we can start on time. You'll find exact times listed with each date above.",
+    question: `How long is the workshop, and what time does it start?`,
+    answer: `Our workshops are 3 hours long. Morning sessions start at 10 AM, afternoon sessions at 2 PM. You'll receive confirmation with exact times 48 hours before your date.`,
   },
   {
-    question: 'Is this workshop suitable for beginners?',
-    answer:
-      'Absolutely! Our workshops are designed specifically for beginners. You need zero prior experience. We explain everything step by step — from the science to the brewing, fermentation, and flavoring.',
+    question: `Is this workshop beginner-friendly?`,
+    answer: `Yes! We design the entire workshop for complete beginners. No prior fermentation experience is required. Our instructors guide you through every step with encouragement and practical tips.`,
   },
   {
-    question: 'Is kombucha vegan?',
-    answer:
-      "Yes, kombucha is naturally vegan — it's made from black or green tea, sugar, and a SCOBY (symbiotic culture of bacteria and yeast). Our entire workshop and tasting use plant-based ingredients.",
+    question: `Is kombucha vegan?`,
+    answer: `Yes, kombucha is vegan. It's made from tea, sugar, and water fermented with SCOBY (a living bacterial and yeast culture). No animal products are involved in the fermentation process.`,
   },
 ]
 
-function AccordionItem({
-  item,
-  isOpen,
-  onToggle,
-  index,
-  isVisible,
-}: {
-  item: FAQItem
-  isOpen: boolean
-  onToggle: () => void
-  index: number
-  isVisible: boolean
-}) {
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [height, setHeight] = useState(0)
+// ─── Plus Icon Component ────────────────────────────────────
 
-  useEffect(() => {
-    if (contentRef.current) {
-      setHeight(isOpen ? contentRef.current.scrollHeight : 0)
-    }
-  }, [isOpen])
+function RotatingPlusIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      className={`size-6 transition-transform duration-300 ${open ? 'rotate-45' : ''}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  )
+}
+
+// ─── Accordion Item ─────────────────────────────────────────
+
+function FAQAccordion({
+  question,
+  answer,
+  _index,
+}: {
+  question: string
+  answer: string
+  _index: number
+}) {
+  const [open, setOpen] = useState(false)
 
   return (
-    <div
-      className={`border-b border-ff-border-light transition-all duration-500 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-      }`}
-      style={{ transitionDelay: `${index * 80}ms` }}
-    >
+    <div className="border-b border-ff-border-light last:border-0">
       <button
-        onClick={onToggle}
-        className="flex w-full items-center justify-between py-6 text-left transition-colors group"
-        aria-expanded={isOpen}
+        onClick={() => setOpen(!open)}
+        className="w-full text-left transition-all duration-200"
       >
-        <h3 className="pr-8 font-display text-body-lg font-bold text-ff-near-black transition-colors group-hover:text-[#555954]">
-          {item.question}
-        </h3>
-        <div
-          className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
-            isOpen ? 'bg-[#9fc9d9]' : 'bg-[#9fc9d9] hover:bg-[#7fb8cf]'
-          }`}
-        >
-          <svg
-            className={`size-4 transition-all duration-300 ${
-              isOpen ? 'rotate-45 text-[#555954]' : 'text-[#555954]'
-            }`}
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M8 3v10M3 8h10" />
-          </svg>
+        <div className="flex items-start justify-between gap-4 px-8 py-6 sm:px-10 hover:bg-ff-cream/40">
+          <h3 className="flex-1 font-display text-body-lg font-bold leading-relaxed text-ff-near-black">
+            {question}
+          </h3>
+          <div className="mt-0.5 shrink-0" style={{ color: 'var(--ff-gold, #e6be68)' }}>
+            <RotatingPlusIcon open={open} />
+          </div>
         </div>
       </button>
 
-      {/* Animated content */}
+      {/* Expandable answer */}
       <div
-        className="overflow-hidden transition-all duration-300"
-        style={{ maxHeight: `${height}px` }}
+        className={`overflow-hidden transition-all duration-300 ${open ? 'max-h-96' : 'max-h-0'}`}
       >
-        <div ref={contentRef} className="pb-6 text-body leading-relaxed text-[#555954]">
-          {item.answer}
+        <div className="px-8 pb-6 sm:px-10">
+          <p className="text-body leading-relaxed text-ff-gray-text">{answer}</p>
         </div>
       </div>
     </div>
   )
 }
 
-export type KombuchaFAQProps = {
-  cms?: KombuchaFAQCMS
-}
+// ─── Main Component ─────────────────────────────────────────
 
-export function KombuchaFAQ({ cms }: KombuchaFAQProps) {
-  const [openIndex, setOpenIndex] = useState<number | null>(0)
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 50)
-    return () => clearTimeout(timer)
-  }, [])
-
-  const eyebrow = cms?.eyebrow ?? 'QUESTIONS?'
-  const title = cms?.title ?? 'Workshop FAQ'
-  const description =
-    cms?.description ??
-    'Everything you need to know to brew amazing kombucha and get the most out of your workshop experience.'
-
-  const items: FAQItem[] =
-    cms?.items && cms.items.length > 0
-      ? cms.items.map((item) => ({
+export function KombuchaFAQ({ cms }: { cms?: KombuchaFAQCMS }) {
+  const faqEyebrow = cms?.faqEyebrow ?? 'HÄUFIG GESTELLT'
+  const faqTitle = cms?.faqTitle ?? 'Deine Fragen beantwortet'
+  const _faqDescription =
+    cms?.faqDescription ??
+    'Sie haben mehr Fragen? Senden Sie uns gerne eine E-Mail. Wir freuen uns auf Sie.'
+  const faqItems =
+    (cms?.faqItems?.length ?? 0) > 0
+      ? cms!.faqItems!.map((item) => ({
           question: item.question ?? '',
           answer: item.answer ?? '',
         }))
       : BOOKING_FAQ
 
   return (
-    <section className="section-padding-lg bg-white">
-      <div className="mx-auto max-w-3xl">
-        {/* Header */}
-        <div
-          className={`mb-12 transition-all duration-700 ${
-            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-          }`}
-        >
-          <p className="mb-3 font-display text-caption font-bold uppercase tracking-[0.25em] text-[#9fc9d9]">
-            {eyebrow}
-          </p>
-          <h2 className="mb-4 font-display text-3xl font-bold tracking-tight text-ff-near-black lg:text-4xl">
-            {title}
-          </h2>
-          <p className="text-body-lg leading-relaxed text-[#555954]">{description}</p>
-        </div>
+    <section id="faq" className="section-padding-lg bg-white">
+      <div className="container mx-auto container-padding">
+        <div className="mx-auto max-w-4xl">
+          {/* Header */}
+          <div className="mb-12 text-center">
+            <p
+              className="mb-3 font-display text-caption font-bold uppercase tracking-[0.2em]"
+              style={{ color: 'var(--ff-gold, #e6be68)' }}
+            >
+              {faqEyebrow}
+            </p>
+            <h2 className="font-display text-section-heading font-bold tracking-tight text-ff-near-black">
+              {faqTitle}
+            </h2>
+          </div>
 
-        {/* Accordion */}
-        <div className="space-y-0 border-t border-ff-border-light">
-          {items.map((item, i) => (
-            <AccordionItem
-              key={`faq-${i}`}
-              item={item}
-              isOpen={openIndex === i}
-              onToggle={() => setOpenIndex(openIndex === i ? null : i)}
-              index={i}
-              isVisible={isVisible}
-            />
-          ))}
-        </div>
-
-        {/* Support footer */}
-        <div
-          className={`mt-12 rounded-lg bg-[#E8F3F8] px-6 py-8 text-center transition-all duration-700 ${
-            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-          }`}
-          style={{ transitionDelay: '600ms' }}
-        >
-          <p className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-[#555954]">
-            Still have questions?
-          </p>
-          <p className="text-body leading-relaxed text-[#555954]">
-            Write us at{' '}
-            <Link href="mailto:info@fermentfreude.de" className="font-bold underline hover:no-underline">
-              info@fermentfreude.de
-            </Link>{' '}
-            — we usually reply within 24 hours.
-          </p>
+          {/* Accordion */}
+          <div className="mb-12 overflow-hidden rounded-2xl border border-ff-border-light bg-white">
+            {faqItems.map((item, i) => (
+              <FAQAccordion key={i} question={item.question} answer={item.answer} _index={i} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
