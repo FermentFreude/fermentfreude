@@ -80,19 +80,22 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
   // ── CMS values → fallback to hardcoded defaults ──
   const eyebrow = cms?.eyebrow ?? 'SAISONALE REZEPTE'
   const title = cms?.title ?? 'Fermentkalender'
-  const description = cms?.description ?? 'Entdecke was du in jedem Monat fermentieren kannst — frisch, saisonal und voller Geschmack.'
+  const description =
+    cms?.description ??
+    'Entdecke was du in jedem Monat fermentieren kannst — frisch, saisonal und voller Geschmack.'
 
-  const months: MonthEntry[] = (cms?.months?.length ?? 0) > 0
-    ? cms!.months!.map((m) => ({
-        month: m.month ?? '',
-        monthShort: m.monthShort ?? '',
-        monthNumber: m.monthNumber ?? '',
-        season: m.season ?? '',
-        recipes: (m.recipes ?? []).map((r) => r.name ?? '').filter(Boolean),
-        accent: m.accent ?? '#e6be68',
-        accentDot: m.accent ? adjustColor(m.accent, -20) : '#d4a94e',
-      }))
-    : MONTHS
+  const months: MonthEntry[] =
+    (cms?.months?.length ?? 0) > 0
+      ? cms!.months!.map((m) => ({
+          month: m.month ?? '',
+          monthShort: m.monthShort ?? '',
+          monthNumber: m.monthNumber ?? '',
+          season: m.season ?? '',
+          recipes: (m.recipes ?? []).map((r) => r.name ?? '').filter(Boolean),
+          accent: m.accent ?? '#e6be68',
+          accentDot: m.accent ? adjustColor(m.accent, -20) : '#d4a94e',
+        }))
+      : MONTHS
 
   const [activeIndex, setActiveIndex] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
@@ -102,7 +105,12 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
     const el = sectionRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect() } },
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
       { threshold: 0.15 },
     )
     observer.observe(el)
@@ -123,10 +131,7 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
   if (months.length === 0) return null
 
   return (
-    <section
-      ref={sectionRef}
-      className="section-padding-lg overflow-hidden bg-ff-cream"
-    >
+    <section ref={sectionRef} className="section-padding-lg overflow-hidden bg-ff-cream">
       <div className="container mx-auto container-padding">
         {/* ── Header ─────────────────────────────────── */}
         <div
@@ -178,7 +183,9 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
                 >
                   <span
                     className={`font-display text-[11px] font-bold tracking-wide transition-colors duration-300 ${
-                      activeIndex === i ? 'text-white' : 'text-ff-gray-text-light group-hover:text-ff-near-black'
+                      activeIndex === i
+                        ? 'text-white'
+                        : 'text-ff-gray-text-light group-hover:text-ff-near-black'
                     }`}
                   >
                     {entry.monthShort}
@@ -257,9 +264,7 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
                         style={{ backgroundColor: active.accentDot }}
                       />
                     </span>
-                    <span className="text-body-lg font-medium text-ff-near-black">
-                      {recipe}
-                    </span>
+                    <span className="text-body-lg font-medium text-ff-near-black">{recipe}</span>
                   </li>
                 ))}
               </ul>

@@ -144,13 +144,11 @@ function fermentationDataDE(media: {
       },
       {
         title: 'Botulismus',
-        description:
-          'Äußerst selten bei Gemüsefermentation aufgrund des sauren Milieus.',
+        description: 'Äußerst selten bei Gemüsefermentation aufgrund des sauren Milieus.',
       },
       {
         title: 'Vertraue deinen Sinnen',
-        description:
-          'Riecht es faul, sieht schleimig aus oder schmeckt falsch – nicht essen.',
+        description: 'Riecht es faul, sieht schleimig aus oder schmeckt falsch – nicht essen.',
       },
     ],
     fermentationDangerClosing:
@@ -308,33 +306,27 @@ function fermentationDataEN(media: {
     fermentationWhyItems: [
       {
         title: 'Improves gut flora and overall well-being',
-        description:
-          'Probiotics support a healthy gut microbiome and can aid digestion.',
+        description: 'Probiotics support a healthy gut microbiome and can aid digestion.',
       },
       {
         title: 'Rich in flavors and aromas',
-        description:
-          'Fermented foods develop unique, complex flavor profiles.',
+        description: 'Fermented foods develop unique, complex flavor profiles.',
       },
       {
         title: 'Easy and cost-effective',
-        description:
-          'With few ingredients and simple techniques, you can ferment at home.',
+        description: 'With few ingredients and simple techniques, you can ferment at home.',
       },
       {
         title: 'Supports a balanced lifestyle',
-        description:
-          'Fermented foods fit perfectly into a mindful diet.',
+        description: 'Fermented foods fit perfectly into a mindful diet.',
       },
       {
         title: 'Eco-friendly and sustainable',
-        description:
-          'Fermentation reduces food waste and extends shelf life naturally.',
+        description: 'Fermentation reduces food waste and extends shelf life naturally.',
       },
       {
         title: 'Diverse applications',
-        description:
-          'From vegetables to drinks to soy products – fermentation is versatile.',
+        description: 'From vegetables to drinks to soy products – fermentation is versatile.',
       },
     ],
     fermentationDangerTitle: 'Is it dangerous?',
@@ -344,23 +336,19 @@ function fermentationDataEN(media: {
     fermentationDangerConcerns: [
       {
         title: 'Mold',
-        description:
-          'Surface mold can be skimmed off. If it\'s throughout the batch, discard it.',
+        description: "Surface mold can be skimmed off. If it's throughout the batch, discard it.",
       },
       {
         title: 'Smell',
-        description:
-          'Fermented foods have a distinctive tangy smell—this is normal and healthy.',
+        description: 'Fermented foods have a distinctive tangy smell—this is normal and healthy.',
       },
       {
         title: 'Botulism',
-        description:
-          'Extremely rare in vegetable fermentation due to the acidic environment.',
+        description: 'Extremely rare in vegetable fermentation due to the acidic environment.',
       },
       {
         title: 'Trust your senses',
-        description:
-          'If it smells off, looks slimy, or tastes wrong, don\'t eat it.',
+        description: "If it smells off, looks slimy, or tastes wrong, don't eat it.",
       },
     ],
     fermentationDangerClosing:
@@ -520,7 +508,9 @@ async function seedFermentation() {
     const nutritionIconPath = fs.existsSync(path.join(process.cwd(), 'public/media/Layer_3.png'))
       ? path.join(process.cwd(), 'public/media/Layer_3.png')
       : path.join(fermentationDir, 'icon-nutrition.svg')
-    const preservationIconPath = fs.existsSync(path.join(process.cwd(), 'public/media/Layer_24.png'))
+    const preservationIconPath = fs.existsSync(
+      path.join(process.cwd(), 'public/media/Layer_24.png'),
+    )
       ? path.join(process.cwd(), 'public/media/Layer_24.png')
       : path.join(fermentationDir, 'icon-preservation.svg')
     const iconPaths = [
@@ -559,16 +549,27 @@ async function seedFermentation() {
       depth: 0,
     })
     const byAlt = (s: string) =>
-      workshopMedia.docs.find((d) => (d as { alt?: string }).alt?.toLowerCase().includes(s)) as Media | undefined
+      workshopMedia.docs.find((d) => (d as { alt?: string }).alt?.toLowerCase().includes(s)) as
+        | Media
+        | undefined
     media.workshopLakto = byAlt('lakto') ?? byAlt('fermentation')
     media.workshopKombucha = byAlt('kombucha')
     media.workshopTempeh = byAlt('tempeh')
     if (!media.workshopLakto || !media.workshopKombucha || !media.workshopTempeh) {
       const gastronomyDir = path.resolve(process.cwd(), 'public/assets/images/gastronomy')
       const workshopPaths = [
-        { path: path.join(gastronomyDir, 'gastronomy-slide-fermentation-jars.png'), key: 'workshopLakto' },
-        { path: path.join(gastronomyDir, 'gastronomy-slide-flatlay-fermentation.png'), key: 'workshopKombucha' },
-        { path: path.join(gastronomyDir, 'gastronomy-slide-01-cutting-board.png'), key: 'workshopTempeh' },
+        {
+          path: path.join(gastronomyDir, 'gastronomy-slide-fermentation-jars.png'),
+          key: 'workshopLakto',
+        },
+        {
+          path: path.join(gastronomyDir, 'gastronomy-slide-flatlay-fermentation.png'),
+          key: 'workshopKombucha',
+        },
+        {
+          path: path.join(gastronomyDir, 'gastronomy-slide-01-cutting-board.png'),
+          key: 'workshopTempeh',
+        },
       ]
       for (const { path: wp, key } of workshopPaths) {
         if (fs.existsSync(wp) && !(media as Record<string, Media>)[key]) {
@@ -638,8 +639,10 @@ async function seedFermentation() {
       const heroBlocksDE = (fermentationDE.fermentationHeroBlocks as Array<{ id?: string }>) ?? []
       const whatLinksDE = (fermentationDE.fermentationWhatLinks as Array<{ id?: string }>) ?? []
       const whyItemsDE = (fermentationDE.fermentationWhyItems as Array<{ id?: string }>) ?? []
-      const dangerConcernsDE = (fermentationDE.fermentationDangerConcerns as Array<{ id?: string }>) ?? []
-      const workshopCardsDE = (fermentationDE.fermentationWorkshopCards as Array<{ id?: string }>) ?? []
+      const dangerConcernsDE =
+        (fermentationDE.fermentationDangerConcerns as Array<{ id?: string }>) ?? []
+      const workshopCardsDE =
+        (fermentationDE.fermentationWorkshopCards as Array<{ id?: string }>) ?? []
       const faqItemsDE = (fermentationDE.fermentationFaqItems as Array<{ id?: string }>) ?? []
 
       const dataENWithIds = {
@@ -656,14 +659,18 @@ async function seedFermentation() {
           ...item,
           id: whyItemsDE[i]?.id,
         })),
-        fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map((item, i) => ({
-          ...item,
-          id: dangerConcernsDE[i]?.id,
-        })),
-        fermentationWorkshopCards: fermentationDataEN(media).fermentationWorkshopCards.map((item, i) => ({
-          ...item,
-          id: workshopCardsDE[i]?.id,
-        })),
+        fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map(
+          (item, i) => ({
+            ...item,
+            id: dangerConcernsDE[i]?.id,
+          }),
+        ),
+        fermentationWorkshopCards: fermentationDataEN(media).fermentationWorkshopCards.map(
+          (item, i) => ({
+            ...item,
+            id: workshopCardsDE[i]?.id,
+          }),
+        ),
         fermentationFaqItems: fermentationDataEN(media).fermentationFaqItems.map((item, i) => ({
           ...item,
           id: faqItemsDE[i]?.id,
@@ -727,7 +734,8 @@ async function seedFermentation() {
   const heroBlocksDE = (fermentationDE.fermentationHeroBlocks as Array<{ id?: string }>) ?? []
   const whatLinksDE = (fermentationDE.fermentationWhatLinks as Array<{ id?: string }>) ?? []
   const whyItemsDE = (fermentationDE.fermentationWhyItems as Array<{ id?: string }>) ?? []
-  const dangerConcernsDE = (fermentationDE.fermentationDangerConcerns as Array<{ id?: string }>) ?? []
+  const dangerConcernsDE =
+    (fermentationDE.fermentationDangerConcerns as Array<{ id?: string }>) ?? []
   const workshopCardsDE = (fermentationDE.fermentationWorkshopCards as Array<{ id?: string }>) ?? []
   const faqItemsDE = (fermentationDE.fermentationFaqItems as Array<{ id?: string }>) ?? []
 
@@ -745,14 +753,18 @@ async function seedFermentation() {
       ...item,
       id: whyItemsDE[i]?.id,
     })),
-    fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map((item, i) => ({
-      ...item,
-      id: dangerConcernsDE[i]?.id,
-    })),
-    fermentationWorkshopCards: fermentationDataEN(media).fermentationWorkshopCards.map((item, i) => ({
-      ...item,
-      id: workshopCardsDE[i]?.id,
-    })),
+    fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map(
+      (item, i) => ({
+        ...item,
+        id: dangerConcernsDE[i]?.id,
+      }),
+    ),
+    fermentationWorkshopCards: fermentationDataEN(media).fermentationWorkshopCards.map(
+      (item, i) => ({
+        ...item,
+        id: workshopCardsDE[i]?.id,
+      }),
+    ),
     fermentationFaqItems: fermentationDataEN(media).fermentationFaqItems.map((item, i) => ({
       ...item,
       id: faqItemsDE[i]?.id,

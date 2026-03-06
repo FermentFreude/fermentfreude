@@ -1,8 +1,8 @@
 'use client'
 
 import { Media } from '@/components/Media'
-import { Award, BookOpen, Heart, Leaf, Shield, Sparkles, type LucideIcon } from 'lucide-react'
 import type { Media as MediaType } from '@/payload-types'
+import { Award, BookOpen, Heart, Leaf, Shield, Sparkles, type LucideIcon } from 'lucide-react'
 
 const WHY_ICONS: LucideIcon[] = [Heart, Leaf, Sparkles, Shield, Award, BookOpen]
 
@@ -32,19 +32,52 @@ export function WhySection({ title, items, image }: WhySectionProps) {
   return (
     <div className="relative content-wide mx-auto px-4 sm:px-6">
       {/* Decorative blobs */}
-      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 -translate-y-1/2 size-125 rounded-full bg-[#E6BE68]/5 blur-[100px]" aria-hidden />
-      <div className="pointer-events-none absolute -left-32 top-1/3 -z-10 size-64 rounded-full bg-[#EDD195]/10 blur-[80px]" aria-hidden />
-      <div className="pointer-events-none absolute -right-32 bottom-1/4 -z-10 size-80 rounded-full bg-[#E6BE68]/8 blur-[90px]" aria-hidden />
+      <div
+        className="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 -translate-y-1/2 size-125 rounded-full bg-[#E6BE68]/5 blur-[100px]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -left-32 top-1/3 -z-10 size-64 rounded-full bg-[#EDD195]/10 blur-[80px]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -right-32 bottom-1/4 -z-10 size-80 rounded-full bg-[#E6BE68]/8 blur-[90px]"
+        aria-hidden
+      />
 
       {/* Floating dots — some with pulse */}
-      <div className="pointer-events-none absolute left-[10%] top-20 size-2 animate-pulse rounded-full bg-[#E6BE68]/30" aria-hidden style={{ animationDuration: '2s' }} />
-      <div className="pointer-events-none absolute right-[15%] top-32 size-3 rounded-full bg-[#EDD195]/40" aria-hidden />
-      <div className="pointer-events-none absolute left-[20%] bottom-24 size-2 animate-pulse rounded-full bg-[#E6BE68]/25" aria-hidden style={{ animationDuration: '2.5s' }} />
-      <div className="pointer-events-none absolute right-[8%] bottom-32 size-2.5 rounded-full bg-[#555954]/20" aria-hidden />
-      <div className="pointer-events-none absolute left-1/2 top-40 size-1.5 -translate-x-1/2 rounded-full bg-[#EDD195]/30" aria-hidden />
+      <div
+        className="pointer-events-none absolute left-[10%] top-20 size-2 animate-pulse rounded-full bg-[#E6BE68]/30"
+        aria-hidden
+        style={{ animationDuration: '2s' }}
+      />
+      <div
+        className="pointer-events-none absolute right-[15%] top-32 size-3 rounded-full bg-[#EDD195]/40"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute left-[20%] bottom-24 size-2 animate-pulse rounded-full bg-[#E6BE68]/25"
+        aria-hidden
+        style={{ animationDuration: '2.5s' }}
+      />
+      <div
+        className="pointer-events-none absolute right-[8%] bottom-32 size-2.5 rounded-full bg-[#555954]/20"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute left-1/2 top-40 size-1.5 -translate-x-1/2 rounded-full bg-[#EDD195]/30"
+        aria-hidden
+      />
 
       {/* Dot grid pattern */}
-      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.4]" aria-hidden style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #E6BE68 0.5px, transparent 0)', backgroundSize: '24px 24px' }} />
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.4]"
+        aria-hidden
+        style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, #E6BE68 0.5px, transparent 0)',
+          backgroundSize: '24px 24px',
+        }}
+      />
 
       <div className="mb-4 text-center">
         <span className="font-display text-caption font-bold uppercase tracking-[0.25em] text-[#E6BE68]">

@@ -17,7 +17,7 @@ import config from '@payload-config' assert { type: 'json' }
 import path, { dirname } from 'path'
 import { getPayload } from 'payload'
 import { fileURLToPath } from 'url'
-import { optimizedFile, IMAGE_PRESETS } from './seed-image-utils'
+import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -35,12 +35,12 @@ const isForce = process.argv.includes('--force')
 // ═══════════════════════════════════════════════════════════════
 const SEED_IMAGES_DIR = path.resolve(__dirname, '../../seed-assets/images')
 const TEMPEH_IMAGES = [
-  path.join(SEED_IMAGES_DIR, 'tempeh.png'),    // What is Tempeh?
-  path.join(SEED_IMAGES_DIR, 'tempeh1.png'),   // Protein Powerhouse
-  path.join(SEED_IMAGES_DIR, 'tempeh.png'),    // Gut Health Hero
-  path.join(SEED_IMAGES_DIR, 'tempeh1.png'),   // Stir-Fries & Bowls
-  path.join(SEED_IMAGES_DIR, 'tempeh.png'),    // Sandwiches & Wraps
-  path.join(SEED_IMAGES_DIR, 'tempeh1.png'),   // Grilled & BBQ
+  path.join(SEED_IMAGES_DIR, 'tempeh.png'), // What is Tempeh?
+  path.join(SEED_IMAGES_DIR, 'tempeh1.png'), // Protein Powerhouse
+  path.join(SEED_IMAGES_DIR, 'tempeh.png'), // Gut Health Hero
+  path.join(SEED_IMAGES_DIR, 'tempeh1.png'), // Stir-Fries & Bowls
+  path.join(SEED_IMAGES_DIR, 'tempeh.png'), // Sandwiches & Wraps
+  path.join(SEED_IMAGES_DIR, 'tempeh1.png'), // Grilled & BBQ
 ]
 
 // ═══════════════════════════════════════════════════════════════
@@ -260,13 +260,11 @@ async function seedTempehSlider() {
   })
 
   // Find the slider block we just created
-  const sliderBlockWithId = deWithIds.layout?.find(
-    (b: unknown): b is TempehTypeSliderBlock => {
-      if (typeof b !== 'object' || b === null) return false
-      const blockType = (b as Record<string, unknown>).blockType
-      return blockType === 'tempehTypeSlider'
-    },
-  )
+  const sliderBlockWithId = deWithIds.layout?.find((b: unknown): b is TempehTypeSliderBlock => {
+    if (typeof b !== 'object' || b === null) return false
+    const blockType = (b as Record<string, unknown>).blockType
+    return blockType === 'tempehTypeSlider'
+  })
 
   if (!sliderBlockWithId) {
     payload.logger.error('❌ Failed to retrieve slider block ID from DE save.')

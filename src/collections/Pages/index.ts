@@ -13,13 +13,13 @@ import { FormBlock } from '@/blocks/Form/config'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { OurStory } from '@/blocks/OurStory/config'
+import { ProductSlider } from '@/blocks/ProductSlider/config'
 import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
 import { SponsorsBar } from '@/blocks/SponsorsBar/config'
 import { TeamCards } from '@/blocks/TeamCards/config'
 import { TeamPreview } from '@/blocks/TeamPreview/config'
 import { Testimonials } from '@/blocks/Testimonials/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
-import { ProductSlider } from '@/blocks/ProductSlider/config'
 import { VoucherCta } from '@/blocks/VoucherCta/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
@@ -821,7 +821,8 @@ export const Pages: CollectionConfig = {
                   required: false,
                   label: 'Hero Image',
                   admin: {
-                    description: 'Large hero image (e.g., founders/team). Shown above the 4 feature blocks.',
+                    description:
+                      'Large hero image (e.g., founders/team). Shown above the 4 feature blocks.',
                   },
                 },
                 {
@@ -830,7 +831,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Hero Benefits Section Title',
-                  admin: { description: 'Heading above the 4 benefit cards (e.g., "WHY FERMENTATION?").' },
+                  admin: {
+                    description: 'Heading above the 4 benefit cards (e.g., "WHY FERMENTATION?").',
+                  },
                 },
                 {
                   name: 'fermentationHeroBlocks',
@@ -852,7 +855,13 @@ export const Pages: CollectionConfig = {
                       label: 'Icon',
                       admin: { description: 'Small icon at top of block.' },
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -882,7 +891,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Guide Section Tag',
-                  admin: { description: 'Small label above the guide heading (e.g., "START HERE").' },
+                  admin: {
+                    description: 'Small label above the guide heading (e.g., "START HERE").',
+                  },
                 },
                 {
                   name: 'fermentationGuideTitle',
@@ -890,7 +901,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Guide Section Title',
-                  admin: { description: 'Main heading (e.g., "A complete guide to fermentation").' },
+                  admin: {
+                    description: 'Main heading (e.g., "A complete guide to fermentation").',
+                  },
                 },
                 {
                   name: 'fermentationGuideBody',
@@ -907,7 +920,8 @@ export const Pages: CollectionConfig = {
                   required: false,
                   label: 'Guide Section Image',
                   admin: {
-                    description: 'Optional image below the guide text (e.g. fermentation process, ingredients).',
+                    description:
+                      'Optional image below the guide text (e.g. fermentation process, ingredients).',
                   },
                 },
               ],
@@ -937,7 +951,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: '"What is fermentation?" Motto',
-                  admin: { description: 'e.g. "No additives. No shortcuts. Just patience and care."' },
+                  admin: {
+                    description: 'e.g. "No additives. No shortcuts. Just patience and care."',
+                  },
                 },
                 {
                   name: 'fermentationWhatLinks',
@@ -948,7 +964,13 @@ export const Pages: CollectionConfig = {
                   label: 'What Section Links',
                   admin: { description: 'e.g. "Ready to Learn?", "Our Story"' },
                   fields: [
-                    { name: 'label', type: 'text', required: true, localized: true, label: 'Label' },
+                    {
+                      name: 'label',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Label',
+                    },
                     { name: 'url', type: 'text', required: true, label: 'URL' },
                   ],
                 },
@@ -958,7 +980,9 @@ export const Pages: CollectionConfig = {
                   relationTo: 'media',
                   required: false,
                   label: '"What" Section Image',
-                  admin: { description: 'Optional image (e.g. fermented vegetables, jars, process).' },
+                  admin: {
+                    description: 'Optional image (e.g. fermented vegetables, jars, process).',
+                  },
                 },
               ],
             },
@@ -986,7 +1010,13 @@ export const Pages: CollectionConfig = {
                       'Six benefit items in two columns (e.g., Improved digestion, Rich in enzymes).',
                   },
                   fields: [
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -1002,7 +1032,9 @@ export const Pages: CollectionConfig = {
                   relationTo: 'media',
                   required: false,
                   label: '"Why" Section Image',
-                  admin: { description: 'Optional image (e.g. gut health, fermentation benefits).' },
+                  admin: {
+                    description: 'Optional image (e.g. gut health, fermentation benefits).',
+                  },
                 },
               ],
             },
@@ -1045,7 +1077,13 @@ export const Pages: CollectionConfig = {
                     description: 'Concern items (e.g., Mold, Smell, Botulism, Trust your senses).',
                   },
                   fields: [
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -1083,7 +1121,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: '"A practice, not a trend" Body',
-                  admin: { description: 'Multiple paragraphs supported. Separate with a blank line.' },
+                  admin: {
+                    description: 'Multiple paragraphs supported. Separate with a blank line.',
+                  },
                 },
                 {
                   name: 'fermentationPracticeImage',
@@ -1162,7 +1202,8 @@ export const Pages: CollectionConfig = {
                   required: false,
                   label: 'CTA Background Image (fallback/poster)',
                   admin: {
-                    description: 'Used as poster when video is set, or fallback when video is absent.',
+                    description:
+                      'Used as poster when video is set, or fallback when video is absent.',
                   },
                 },
               ],
@@ -1196,7 +1237,13 @@ export const Pages: CollectionConfig = {
                   label: 'FAQ Items',
                   admin: { description: 'Questions and answers.' },
                   fields: [
-                    { name: 'question', type: 'text', required: true, localized: true, label: 'Question' },
+                    {
+                      name: 'question',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Question',
+                    },
                     {
                       name: 'answer',
                       type: 'textarea',
@@ -1231,7 +1278,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'FAQ "More" Text (legacy)',
-                  admin: { description: 'Fallback if CTA title empty. e.g. "Still have questions?"' },
+                  admin: {
+                    description: 'Fallback if CTA title empty. e.g. "Still have questions?"',
+                  },
                 },
                 {
                   name: 'fermentationFaqContactLabel',
@@ -1326,7 +1375,13 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Image',
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -1386,23 +1441,78 @@ export const Pages: CollectionConfig = {
             condition: () => false,
           },
           fields: [
-            { name: 'giftTitle', type: 'text', required: true, localized: true, label: 'Gift Card Title' },
-            { name: 'giftDescription', type: 'textarea', required: true, localized: true, label: 'Gift Card Description' },
-            { name: 'giftBuyNowLabel', type: 'text', required: true, localized: true, label: 'Gift Buy Now Button' },
-            { name: 'giftBuyVoucherLabel', type: 'text', required: true, localized: true, label: 'Gift Buy Voucher Button' },
+            {
+              name: 'giftTitle',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Gift Card Title',
+            },
+            {
+              name: 'giftDescription',
+              type: 'textarea',
+              required: true,
+              localized: true,
+              label: 'Gift Card Description',
+            },
+            {
+              name: 'giftBuyNowLabel',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Gift Buy Now Button',
+            },
+            {
+              name: 'giftBuyVoucherLabel',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Gift Buy Voucher Button',
+            },
             { name: 'giftBuyNowHref', type: 'text', required: true, label: 'Gift Buy Now URL' },
-            { name: 'giftBuyVoucherHref', type: 'text', required: true, label: 'Gift Buy Voucher URL' },
-            { name: 'onlineTitle', type: 'text', required: true, localized: true, label: 'Online Card Title' },
-            { name: 'onlineDescription', type: 'textarea', required: true, localized: true, label: 'Online Card Description' },
+            {
+              name: 'giftBuyVoucherHref',
+              type: 'text',
+              required: true,
+              label: 'Gift Buy Voucher URL',
+            },
+            {
+              name: 'onlineTitle',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Online Card Title',
+            },
+            {
+              name: 'onlineDescription',
+              type: 'textarea',
+              required: true,
+              localized: true,
+              label: 'Online Card Description',
+            },
             {
               name: 'onlineBullets',
               type: 'array',
               label: 'Online Card Bullets',
               required: true,
               minRows: 1,
-              fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Bullet Text' }],
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Bullet Text',
+                },
+              ],
             },
-            { name: 'onlineButtonLabel', type: 'text', required: true, localized: true, label: 'Online Button Label' },
+            {
+              name: 'onlineButtonLabel',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Online Button Label',
+            },
             { name: 'onlineButtonHref', type: 'text', required: true, label: 'Online Button URL' },
           ],
         },
@@ -1413,9 +1523,27 @@ export const Pages: CollectionConfig = {
             condition: () => false,
           },
           fields: [
-            { name: 'learnOnlineHeading', type: 'textarea', required: true, localized: true, label: 'Heading' },
-            { name: 'learnOnlineDescription', type: 'textarea', required: true, localized: true, label: 'Description' },
-            { name: 'learnOnlineButtonLabel', type: 'text', required: true, localized: true, label: 'Button Label' },
+            {
+              name: 'learnOnlineHeading',
+              type: 'textarea',
+              required: true,
+              localized: true,
+              label: 'Heading',
+            },
+            {
+              name: 'learnOnlineDescription',
+              type: 'textarea',
+              required: true,
+              localized: true,
+              label: 'Description',
+            },
+            {
+              name: 'learnOnlineButtonLabel',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Button Label',
+            },
             { name: 'learnOnlineButtonHref', type: 'text', required: true, label: 'Button URL' },
           ],
         },
@@ -1426,8 +1554,20 @@ export const Pages: CollectionConfig = {
             condition: () => false,
           },
           fields: [
-            { name: 'faqHeading', type: 'text', required: true, localized: true, label: 'FAQ Heading' },
-            { name: 'faqSubtitle', type: 'text', required: true, localized: true, label: 'FAQ Subtitle' },
+            {
+              name: 'faqHeading',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'FAQ Heading',
+            },
+            {
+              name: 'faqSubtitle',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'FAQ Subtitle',
+            },
             {
               name: 'faqItems',
               type: 'array',
@@ -1435,8 +1575,20 @@ export const Pages: CollectionConfig = {
               required: true,
               minRows: 1,
               fields: [
-                { name: 'question', type: 'text', required: true, localized: true, label: 'Question' },
-                { name: 'answer', type: 'textarea', required: true, localized: true, label: 'Answer' },
+                {
+                  name: 'question',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Question',
+                },
+                {
+                  name: 'answer',
+                  type: 'textarea',
+                  required: true,
+                  localized: true,
+                  label: 'Answer',
+                },
               ],
             },
           ],
@@ -1448,7 +1600,13 @@ export const Pages: CollectionConfig = {
             condition: () => false,
           },
           fields: [
-            { name: 'whyOnlineHeading', type: 'text', required: true, localized: true, label: 'Heading' },
+            {
+              name: 'whyOnlineHeading',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Heading',
+            },
             {
               name: 'whyOnlineFeatures',
               type: 'array',
@@ -1470,7 +1628,13 @@ export const Pages: CollectionConfig = {
                   ],
                 },
                 { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
-                { name: 'description', type: 'text', required: true, localized: true, label: 'Description' },
+                {
+                  name: 'description',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Description',
+                },
               ],
             },
           ],
@@ -1482,18 +1646,50 @@ export const Pages: CollectionConfig = {
             condition: () => false,
           },
           fields: [
-            { name: 'teamEyebrow', type: 'text', required: true, localized: true, label: 'Eyebrow' },
-            { name: 'teamHeading', type: 'text', required: true, localized: true, label: 'Heading' },
-            { name: 'teamDescription', type: 'textarea', required: true, localized: true, label: 'Description' },
+            {
+              name: 'teamEyebrow',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Eyebrow',
+            },
+            {
+              name: 'teamHeading',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Heading',
+            },
+            {
+              name: 'teamDescription',
+              type: 'textarea',
+              required: true,
+              localized: true,
+              label: 'Description',
+            },
             {
               name: 'teamBullets',
               type: 'array',
               label: 'Bullets',
               required: true,
               minRows: 1,
-              fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Bullet Text' }],
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Bullet Text',
+                },
+              ],
             },
-            { name: 'teamCtaLabel', type: 'text', required: true, localized: true, label: 'CTA Button Label' },
+            {
+              name: 'teamCtaLabel',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'CTA Button Label',
+            },
             { name: 'teamCtaHref', type: 'text', required: true, label: 'CTA Button URL' },
             {
               name: 'teamImage',

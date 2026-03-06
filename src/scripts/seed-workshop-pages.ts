@@ -72,12 +72,30 @@ const workshopFaqDE = {
   faqHeading: 'Du hast Fragen zu Fermentieren?',
   faqSubtitle: 'Klicke, um alle Antworten zu sehen!',
   faqItems: [
-    { question: 'Wie lange dauert ein Workshop?', answer: 'Unsere Workshops dauern in der Regel 2,5 bis 3 Stunden.' },
-    { question: 'Muss ich Vorkenntnisse mitbringen?', answer: 'Nein, alle Workshops sind für Einsteiger konzipiert.' },
-    { question: 'Kann ich den Workshop verschenken?', answer: 'Ja, wir bieten Gutscheine für alle Workshops an.' },
-    { question: 'Wo finden die Workshops statt?', answer: 'In Berlin-Neukölln. Die genaue Adresse erhältst du nach der Buchung.' },
-    { question: 'Was passiert bei Absage?', answer: 'Du kannst bis 48 Stunden vorher kostenlos stornieren.' },
-    { question: 'Gibt es Online-Alternativen?', answer: 'Ja, wir bieten auch digitale Workshops und Kurse an.' },
+    {
+      question: 'Wie lange dauert ein Workshop?',
+      answer: 'Unsere Workshops dauern in der Regel 2,5 bis 3 Stunden.',
+    },
+    {
+      question: 'Muss ich Vorkenntnisse mitbringen?',
+      answer: 'Nein, alle Workshops sind für Einsteiger konzipiert.',
+    },
+    {
+      question: 'Kann ich den Workshop verschenken?',
+      answer: 'Ja, wir bieten Gutscheine für alle Workshops an.',
+    },
+    {
+      question: 'Wo finden die Workshops statt?',
+      answer: 'In Berlin-Neukölln. Die genaue Adresse erhältst du nach der Buchung.',
+    },
+    {
+      question: 'Was passiert bei Absage?',
+      answer: 'Du kannst bis 48 Stunden vorher kostenlos stornieren.',
+    },
+    {
+      question: 'Gibt es Online-Alternativen?',
+      answer: 'Ja, wir bieten auch digitale Workshops und Kurse an.',
+    },
   ],
 }
 
@@ -85,20 +103,51 @@ const workshopFaqEN = {
   faqHeading: 'Do you have questions about Fermentation?',
   faqSubtitle: 'Click to view all the answers!',
   faqItems: [
-    { question: 'How long does a workshop last?', answer: 'Our workshops typically last 2.5 to 3 hours.' },
-    { question: 'Do I need prior experience?', answer: 'No, all workshops are designed for beginners.' },
+    {
+      question: 'How long does a workshop last?',
+      answer: 'Our workshops typically last 2.5 to 3 hours.',
+    },
+    {
+      question: 'Do I need prior experience?',
+      answer: 'No, all workshops are designed for beginners.',
+    },
     { question: 'Can I gift a workshop?', answer: 'Yes, we offer vouchers for all workshops.' },
-    { question: 'Where do the workshops take place?', answer: "In Berlin-Neukölln. You'll receive the exact address after booking." },
-    { question: 'What happens if I cancel?', answer: 'You can cancel free of charge up to 48 hours before.' },
-    { question: 'Are there online alternatives?', answer: 'Yes, we also offer digital workshops and courses.' },
+    {
+      question: 'Where do the workshops take place?',
+      answer: "In Berlin-Neukölln. You'll receive the exact address after booking.",
+    },
+    {
+      question: 'What happens if I cancel?',
+      answer: 'You can cancel free of charge up to 48 hours before.',
+    },
+    {
+      question: 'Are there online alternatives?',
+      answer: 'Yes, we also offer digital workshops and courses.',
+    },
   ],
 }
 
 const whyOnlineFeaturesDE = [
-  { icon: 'lightning' as const, title: 'Sofortiger Zugang', description: 'Direkter Zugang nach dem Kauf – keine Wartezeit' },
-  { icon: 'clock' as const, title: 'Dein Tempo', description: 'Pausieren, wiederholen, wann immer du möchtest' },
-  { icon: 'home' as const, title: 'Von Zuhause', description: 'Lerne bequem in deiner eigenen Küche' },
-  { icon: 'book' as const, title: 'Rezepte & PDFs', description: 'Alle Rezepte zum Download verfügbar' },
+  {
+    icon: 'lightning' as const,
+    title: 'Sofortiger Zugang',
+    description: 'Direkter Zugang nach dem Kauf – keine Wartezeit',
+  },
+  {
+    icon: 'clock' as const,
+    title: 'Dein Tempo',
+    description: 'Pausieren, wiederholen, wann immer du möchtest',
+  },
+  {
+    icon: 'home' as const,
+    title: 'Von Zuhause',
+    description: 'Lerne bequem in deiner eigenen Küche',
+  },
+  {
+    icon: 'book' as const,
+    title: 'Rezepte & PDFs',
+    description: 'Alle Rezepte zum Download verfügbar',
+  },
 ]
 
 const workshopWhyOnlineDE = {
@@ -107,10 +156,22 @@ const workshopWhyOnlineDE = {
 }
 
 const whyOnlineFeaturesEN = [
-  { icon: 'lightning' as const, title: 'Instant Access', description: 'Direct access after purchase – no waiting time' },
+  {
+    icon: 'lightning' as const,
+    title: 'Instant Access',
+    description: 'Direct access after purchase – no waiting time',
+  },
   { icon: 'clock' as const, title: 'Your Pace', description: 'Pause, repeat, whenever you want' },
-  { icon: 'home' as const, title: 'From Home', description: 'Learn comfortably in your own kitchen' },
-  { icon: 'book' as const, title: 'Recipes & PDFs', description: 'All recipes available for download' },
+  {
+    icon: 'home' as const,
+    title: 'From Home',
+    description: 'Learn comfortably in your own kitchen',
+  },
+  {
+    icon: 'book' as const,
+    title: 'Recipes & PDFs',
+    description: 'All recipes available for download',
+  },
 ]
 
 const workshopWhyOnlineEN = {

@@ -23,11 +23,7 @@ export function FaqAccordion({ items, type = 'single' }: FaqAccordionProps) {
   if (items.length === 0) return null
 
   return (
-    <Accordion
-      type={type}
-      collapsible
-      className="w-full"
-    >
+    <Accordion type={type} collapsible className="w-full">
       {items.map((item, i) => (
         <AccordionItem
           key={item.id ?? i}

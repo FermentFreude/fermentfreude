@@ -1,12 +1,12 @@
 'use client'
 
+import { Media } from '@/components/Media'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 
 function isResolvedMedia(img: unknown): img is MediaType {
@@ -19,11 +19,7 @@ interface PracticeAccordionProps {
   image?: unknown
 }
 
-export function PracticeAccordion({
-  title,
-  paragraphs,
-  image,
-}: PracticeAccordionProps) {
+export function PracticeAccordion({ title, paragraphs, image }: PracticeAccordionProps) {
   return (
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem
@@ -38,10 +34,7 @@ export function PracticeAccordion({
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-10 lg:items-start">
             <div className="space-y-5 lg:col-span-3">
               {paragraphs.map((para, i) => (
-                <p
-                  key={i}
-                  className="text-body leading-relaxed text-ff-black/90 sm:text-body-lg"
-                >
+                <p key={i} className="text-body leading-relaxed text-ff-black/90 sm:text-body-lg">
                   {para}
                 </p>
               ))}
