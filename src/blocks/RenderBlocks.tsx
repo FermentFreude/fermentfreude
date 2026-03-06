@@ -50,15 +50,22 @@ const blockComponents = {
 
 export const RenderBlocks: React.FC<{
   blocks: NonNullable<Page['layout']>
+  slug?: string
 }> = (props) => {
-  const { blocks } = props
+  const { blocks, slug } = props
   const blockList = blocks ?? []
+  const isAbout = slug === 'about'
+  const gapClass = isAbout
+    ? 'mb-[var(--space-content-lg)] last:mb-0'
+    : 'my-[var(--space-section-md)] first:mt-0 last:mb-0'
 
   const hasBlocks = blockList.length > 0
 
   if (hasBlocks) {
+    const Wrapper = isAbout ? 'div' : Fragment
+    const wrapperProps = isAbout ? { className: 'page-about' } : {}
     return (
-      <Fragment>
+      <Wrapper {...wrapperProps}>
         {blockList.map((block, index) => {
           const { blockName, blockType } = block
 
@@ -70,7 +77,7 @@ export const RenderBlocks: React.FC<{
             if (Block) {
               return (
                 <div
-                  className="my-[var(--space-section-md)] first:mt-0 last:mb-0"
+                  className={gapClass}
                   key={index}
                 >
                   <Block {...block} id={blockName ? toKebabCase(blockName) : undefined} />
@@ -80,7 +87,7 @@ export const RenderBlocks: React.FC<{
           }
           return null
         })}
-      </Fragment>
+      </Wrapper>
     )
   }
 
