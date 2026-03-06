@@ -332,7 +332,7 @@ export const hero: Field = {
           type: 'text',
           label: 'Heading',
           localized: true,
-          required: true,
+          required: false,
           admin: {
             description: 'Main headline',
           },
