@@ -49,6 +49,7 @@ const scripts: Record<string, { name: string; file: string }> = {
   'lakto-detail': { name: 'Lakto Detail (workshopDetail tab)', file: 'seed-lakto-detail.ts' },
   'tempeh-detail': { name: 'Tempeh Detail (workshopDetail tab)', file: 'seed-tempeh-detail.ts' },
   'kombucha-detail': { name: 'Kombucha Detail (workshopDetail tab)', file: 'seed-kombucha-detail.ts' },
+  'kombucha-phases': { name: 'Kombucha WorkshopPhases block', file: 'seed-kombucha-phases.ts' },
   'voucher-bg': { name: 'VoucherCta background image patch', file: 'seed-voucher-bg.ts' },
 }
 
@@ -68,6 +69,7 @@ const allOrder = [
   'lakto-detail',
   'tempeh-detail',
   'kombucha-detail',
+  'kombucha-phases',
 ]
 
 function runSeed(key: string): boolean {

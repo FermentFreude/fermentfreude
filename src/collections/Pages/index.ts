@@ -21,6 +21,7 @@ import { TeamPreview } from '@/blocks/TeamPreview/config'
 import { Testimonials } from '@/blocks/Testimonials/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { VoucherCta } from '@/blocks/VoucherCta/config'
+import { WorkshopPhases } from '@/blocks/WorkshopPhases/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
 import { shopPageFields } from '@/fields/shopPageFields'
@@ -124,6 +125,7 @@ export const Pages: CollectionConfig = {
                 ProductSlider,
                 VoucherCta,
                 WorkshopSlider,
+                WorkshopPhases,
               ],
               required: false,
               admin: {

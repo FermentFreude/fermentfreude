@@ -590,6 +590,7 @@ export interface Page {
         | ProductSliderBlock
         | VoucherCtaBlock
         | WorkshopSliderBlock
+        | WorkshopPhasesBlock
       )[]
     | null;
   /**
@@ -2605,6 +2606,47 @@ export interface WorkshopSliderBlock {
   blockType: 'workshopSlider';
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkshopPhasesBlock".
+ */
+export interface WorkshopPhasesBlock {
+  /**
+   * Small accent text above the heading (e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main heading for the phases section (e.g. "Dein Workshop-Erlebnis" / "Your Workshop Experience").
+   */
+  heading?: string | null;
+  /**
+   * Each phase represents a part of the workshop experience (e.g., Theory → Practice → Flavor).
+   */
+  phases?:
+    | {
+        /**
+         * Short label for this phase (e.g. "THEORIE" / "THEORY", "PRAXIS" / "PRACTICE").
+         */
+        label: string;
+        /**
+         * Main title for this phase (e.g. "Kombucha-Mikrobiologie").
+         */
+        title: string;
+        /**
+         * Detailed description of what happens in this phase.
+         */
+        description: string;
+        /**
+         * Visual for this phase. Recommended: square or landscape image (800x600px or larger).
+         */
+        image?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'workshopPhases';
+}
+/**
  * Educational how-to articles organized by workshop type (Lakto, Tempeh, Kombucha). Each article can be viewed at /tipps/[slug] and displayed on its workshop page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3049,6 +3091,7 @@ export interface PagesSelect<T extends boolean = true> {
         productSlider?: T | ProductSliderBlockSelect<T>;
         voucherCta?: T | VoucherCtaBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
+        workshopPhases?: T | WorkshopPhasesBlockSelect<T>;
       };
   gastronomy?:
     | T
@@ -3978,6 +4021,25 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
       };
   allWorkshopsButtonLabel?: T;
   allWorkshopsLink?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkshopPhasesBlock_select".
+ */
+export interface WorkshopPhasesBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  phases?:
+    | T
+    | {
+        label?: T;
+        title?: T;
+        description?: T;
+        image?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }

@@ -97,7 +97,7 @@ const queryPageBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' |
 
   const result = await payload.find({
     collection: 'pages',
-    depth: 5,
+    depth: 20,
     draft,
     limit: 1,
     locale,

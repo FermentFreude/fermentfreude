@@ -17,6 +17,7 @@ import { TeamPreviewBlock } from '@/blocks/TeamPreview/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
 import { VoucherCtaBlock } from '@/blocks/VoucherCta/Component'
+import { WorkshopPhasesComponent } from '@/blocks/WorkshopPhases/Component'
 import { WorkshopSliderBlock } from '@/blocks/WorkshopSlider/Component'
 import { toKebabCase } from '@/utilities/toKebabCase'
 import React, { Fragment } from 'react'
@@ -44,6 +45,7 @@ const blockComponents = {
   productSlider: ProductSliderBlock,
   voucherCta: VoucherCtaBlock,
   workshopSlider: WorkshopSliderBlock,
+  workshopPhases: WorkshopPhasesComponent,
 }
 
 export const RenderBlocks: React.FC<{

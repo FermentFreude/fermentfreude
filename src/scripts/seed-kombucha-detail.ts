@@ -3,13 +3,14 @@
  *
  * Populates ONLY the sections rendered on kombucha frontend:
  * - Hero (eyebrow, title, description, attributes, image)
- * - Booking Card (about, schedule, included, why, experience cards, dates)
+ * - Booking Card (about, schedule, included, why, experience cards with image support, dates)
  * - Voucher CTA (eyebrow, title, description, pills, primary/secondary labels)
  * - FAQ (eyebrow, title, description, faqItems)
  * - How-To (eyebrow, title, description — articles loaded from Posts collection)
  *
- * ⚠️  IMAGES ARE NOT SEEDED
- * Images (heroImage, voucherBackgroundImage) are managed entirely through the admin UI.
+ * ⚠️  IMAGE UPLOADS
+ * Images (heroImage, voucherBackgroundImage, experienceCards images) are managed entirely through the admin UI.
+ * Seed initializes image fields as null — upload via CMS admin dashboard at /admin/collections/pages.
  *
  * Run:  pnpm seed kombucha-detail
  *       pnpm seed kombucha-detail --force   (overwrite existing text content)
@@ -120,18 +121,21 @@ const workshopDetailDE = {
       title: 'Kombucha-Mikrobiologie',
       description:
         'Entdecke die Wissenschaft hinter Kombucha. Lerne, wie Bakterien und Hefen zusammenarbeiten, warum eine SCOBY so wertvoll ist, und welche Vorteile probiotische Getränke bieten.',
+      image: null,
     },
     {
       eyebrow: 'PRAXIS',
       title: 'Dein Kombucha brauen',
       description:
         'Unter fachkundiger Anleitung stellst du deine erste Charge Kombucha her. Mit einer frischen SCOBY und hochwertigen Zutaten kreierst du einen lebendigen Ferment zum Mitnehmen.',
+      image: null,
     },
     {
       eyebrow: 'GESCHMACK',
       title: 'Kreative Variationen',
       description:
         'Erkunde unzählige Geschmackskombinationen — von fruchtigen Varianten bis zu würzigen Experimenten. Verkoste verschiedene Variationen und finde deine Lieblingskombination.',
+      image: null,
     },
   ],
 
@@ -344,18 +348,21 @@ const workshopDetailEN = {
       title: 'Kombucha Microbiology',
       description:
         'Discover the science behind kombucha. Learn how bacteria and yeasts work together, why a SCOBY is so valuable, and what benefits probiotic drinks offer.',
+      image: null as null,
     },
     {
       eyebrow: 'PRACTICE',
       title: 'Brew Your Kombucha',
       description:
         "Under expert guidance, brew your first batch of kombucha. With a fresh SCOBY and quality ingredients, you'll create a living ferment to take home.",
+      image: null as null,
     },
     {
       eyebrow: 'FLAVOR',
       title: 'Creative Variations',
       description:
         'Explore endless flavor possibilities — from fruity variations to spicy experiments. Taste different options and discover your favorite combination.',
+      image: null as null,
     },
   ],
 
@@ -553,9 +560,10 @@ async function seedKombuchaDetail() {
         }),
       ),
       experienceCards: dePage.workshopDetail?.experienceCards?.map(
-        (card: { id?: string | null }, i: number) => ({
+        (card: { id?: string | null; image?: unknown }, i: number) => ({
           ...workshopDetailEN.experienceCards?.[i],
           id: card.id,
+          image: card.image || null, // Preserve German image if present, else null
         }),
       ),
       voucherPills: dePage.workshopDetail?.voucherPills?.map(
