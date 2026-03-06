@@ -1056,6 +1056,226 @@ export interface Page {
     }[];
   };
   /**
+   * Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.
+   */
+  shop?: {
+    /**
+     * Add slides for a hero slider. If empty, the single hero below is used.
+     */
+    heroSlides?:
+      | {
+          /**
+           * Full-bleed background (or poster when video is set).
+           */
+          image: string | Media;
+          /**
+           * Optional looping video (e.g. bubbling ingredients). Homemade Jam style.
+           */
+          backgroundVideo?: (string | null) | Media;
+          /**
+           * Optional center product/jar image (Homemade Jam style).
+           */
+          productImage?: (string | null) | Media;
+          /**
+           * e.g. "Discover UNIQUE Flavours".
+           */
+          title: string;
+          /**
+           * Short text below the title.
+           */
+          description?: string | null;
+          /**
+           * e.g. "Explore Now".
+           */
+          ctaLabel?: string | null;
+          /**
+           * e.g. "#products".
+           */
+          ctaUrl?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * First line (e.g. "Discover").
+     */
+    heroTitleLine1?: string | null;
+    /**
+     * Second line with highlighted word (e.g. "UNIQUE Flavours").
+     */
+    heroTitleLine2?: string | null;
+    /**
+     * Word to highlight in gold in line 2 (e.g. "UNIQUE").
+     */
+    heroTitleHighlight?: string | null;
+    /**
+     * Short welcoming text below the title.
+     */
+    heroDescription?: string | null;
+    /**
+     * Background image.
+     */
+    heroBackgroundImage?: (string | null) | Media;
+    /**
+     * e.g. "Explore Now".
+     */
+    heroCtaPrimaryLabel?: string | null;
+    /**
+     * e.g. "#products".
+     */
+    heroCtaPrimaryUrl?: string | null;
+    /**
+     * e.g. "Learn More".
+     */
+    heroCtaSecondaryLabel?: string | null;
+    heroCtaSecondaryUrl?: string | null;
+    /**
+     * e.g. "Discover UNIQUE."
+     */
+    productSectionHeading?: string | null;
+    /**
+     * e.g. "FLAVOURS" (smaller, lighter).
+     */
+    productSectionSubheading?: string | null;
+    /**
+     * Paragraph describing the product collection (handcrafted ferments, curated collection).
+     */
+    productSectionIntro?: string | null;
+    /**
+     * e.g. "View All Products".
+     */
+    viewAllButtonLabel?: string | null;
+    /**
+     * e.g. "/shop".
+     */
+    viewAllButtonUrl?: string | null;
+    /**
+     * e.g. "Load More".
+     */
+    loadMoreLabel?: string | null;
+    /**
+     * Label for the add-to-cart icon/button on product cards.
+     */
+    addToCartLabel?: string | null;
+    /**
+     * Decorative shape with organic cutout (bottom-right). Mask for card background.
+     */
+    productCardBackgroundImage?: (string | null) | Media;
+    /**
+     * Hex color for card shape (e.g. #F7F7F8).
+     */
+    productCardBackgroundColor?: string | null;
+    /**
+     * Hex color for product section (e.g. #FFFFFF).
+     */
+    productSectionBackgroundColor?: string | null;
+    /**
+     * Hex color for add-to-cart circle (e.g. #E5B765).
+     */
+    productCardAddToCartColor?: string | null;
+    /**
+     * Hex color on hover (e.g. #d9a854).
+     */
+    productCardAddToCartHoverColor?: string | null;
+    /**
+     * e.g. "Why fermented products?"
+     */
+    benefitsHeading?: string | null;
+    /**
+     * Exactly 3 benefits. Product-focused (gut health, nutrients, preservation).
+     */
+    benefitsItems?:
+      | {
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Gift a special tasty experience."
+     */
+    giftHeading?: string | null;
+    /**
+     * Text encouraging users to buy gift vouchers.
+     */
+    giftDescription?: string | null;
+    /**
+     * e.g. "Find Out More".
+     */
+    giftButtonLabel?: string | null;
+    /**
+     * e.g. "/voucher".
+     */
+    giftButtonUrl?: string | null;
+    /**
+     * e.g. "Learn UNIQUE Flavours."
+     */
+    featuredHeading?: string | null;
+    /**
+     * Word to highlight in gold (e.g. "UNIQUE").
+     */
+    featuredHeadingHighlight?: string | null;
+    /**
+     * e.g. "See All Workshops".
+     */
+    featuredViewAllLabel?: string | null;
+    /**
+     * Link for View all.
+     */
+    featuredViewAllUrl?: string | null;
+    /**
+     * Workshop cards with image, date, seats, price, and booking button.
+     */
+    featuredItems?:
+      | {
+          image?: (string | null) | Media;
+          title: string;
+          description?: string | null;
+          /**
+           * e.g. "12. March 2026".
+           */
+          date?: string | null;
+          /**
+           * Available seats (e.g. 12).
+           */
+          seats?: number | null;
+          /**
+           * e.g. "€89".
+           */
+          price?: string | null;
+          /**
+           * e.g. "Info & Buchen".
+           */
+          buttonLabel?: string | null;
+          /**
+           * Used when buttonLabel is empty (e.g. "Read More").
+           */
+          readMoreLabel?: string | null;
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Learn Fermentation Anytime, Anywhere".
+     */
+    workshopCtaHeading?: string | null;
+    /**
+     * Text about online courses.
+     */
+    workshopCtaDescription?: string | null;
+    /**
+     * Dark industrial image (fermentation vats).
+     */
+    workshopCtaBackgroundImage?: (string | null) | Media;
+    /**
+     * e.g. "View All Workshops".
+     */
+    workshopCtaButtonLabel?: string | null;
+    /**
+     * e.g. "/workshops".
+     */
+    workshopCtaButtonUrl?: string | null;
+  };
+  /**
    * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.
    */
   workshopDetail?: {
@@ -3112,6 +3332,78 @@ export interface PagesSelect<T extends boolean = true> {
               answer?: T;
               id?: T;
             };
+      };
+  shop?:
+    | T
+    | {
+        heroSlides?:
+          | T
+          | {
+              image?: T;
+              backgroundVideo?: T;
+              productImage?: T;
+              title?: T;
+              description?: T;
+              ctaLabel?: T;
+              ctaUrl?: T;
+              id?: T;
+            };
+        heroTitleLine1?: T;
+        heroTitleLine2?: T;
+        heroTitleHighlight?: T;
+        heroDescription?: T;
+        heroBackgroundImage?: T;
+        heroCtaPrimaryLabel?: T;
+        heroCtaPrimaryUrl?: T;
+        heroCtaSecondaryLabel?: T;
+        heroCtaSecondaryUrl?: T;
+        productSectionHeading?: T;
+        productSectionSubheading?: T;
+        productSectionIntro?: T;
+        viewAllButtonLabel?: T;
+        viewAllButtonUrl?: T;
+        loadMoreLabel?: T;
+        addToCartLabel?: T;
+        productCardBackgroundImage?: T;
+        productCardBackgroundColor?: T;
+        productSectionBackgroundColor?: T;
+        productCardAddToCartColor?: T;
+        productCardAddToCartHoverColor?: T;
+        benefitsHeading?: T;
+        benefitsItems?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        giftHeading?: T;
+        giftDescription?: T;
+        giftButtonLabel?: T;
+        giftButtonUrl?: T;
+        featuredHeading?: T;
+        featuredHeadingHighlight?: T;
+        featuredViewAllLabel?: T;
+        featuredViewAllUrl?: T;
+        featuredItems?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              description?: T;
+              date?: T;
+              seats?: T;
+              price?: T;
+              buttonLabel?: T;
+              readMoreLabel?: T;
+              url?: T;
+              id?: T;
+            };
+        workshopCtaHeading?: T;
+        workshopCtaDescription?: T;
+        workshopCtaBackgroundImage?: T;
+        workshopCtaButtonLabel?: T;
+        workshopCtaButtonUrl?: T;
       };
   workshopDetail?:
     | T
