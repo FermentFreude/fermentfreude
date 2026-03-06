@@ -48,6 +48,7 @@ const scripts: Record<string, { name: string; file: string }> = {
   'tempeh-posts': { name: 'Tempeh How-To Articles', file: 'seed-tempeh-posts.ts' },
   'lakto-detail': { name: 'Lakto Detail (workshopDetail tab)', file: 'seed-lakto-detail.ts' },
   'tempeh-detail': { name: 'Tempeh Detail (workshopDetail tab)', file: 'seed-tempeh-detail.ts' },
+  'kombucha-detail': { name: 'Kombucha Detail (workshopDetail tab)', file: 'seed-kombucha-detail.ts' },
   'voucher-bg': { name: 'VoucherCta background image patch', file: 'seed-voucher-bg.ts' },
 }
 
@@ -66,6 +67,7 @@ const allOrder = [
   'tempeh-posts',
   'lakto-detail',
   'tempeh-detail',
+  'kombucha-detail',
 ]
 
 function runSeed(key: string): boolean {
@@ -90,7 +92,7 @@ function runSeed(key: string): boolean {
   if (key === 'shop') {
     seedEnv.PAYLOAD_SKIP_SHOP_CONDITION = '1'
   }
-  if (key === 'workshop-pages' || key === 'lakto-detail' || key === 'tempeh-detail') {
+  if (key === 'workshop-pages' || key === 'lakto-detail' || key === 'tempeh-detail' || key === 'kombucha-detail') {
     seedEnv.PAYLOAD_SKIP_WORKSHOP_CONDITION = '1'
   }
   const result = spawnSync('npx', ['tsx', scriptPath, ...args], {

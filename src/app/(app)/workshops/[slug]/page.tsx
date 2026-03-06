@@ -29,6 +29,10 @@ import { TempehBookingCard } from './TempehBookingCard'
 import { TempehFAQ } from './TempehFAQ'
 import { TempehHero } from './TempehHero'
 import { TempehVoucherCta } from './TempehVoucherCta'
+import { KombuchaBookingCard } from './KombuchaBookingCard'
+import { KombuchaFAQ } from './KombuchaFAQ'
+import { KombuchaHero } from './KombuchaHero'
+import { KombuchaVoucherCta } from './KombuchaVoucherCta'
 import { getWorkshopBySlug } from './workshop-data'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -636,6 +640,46 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
         {/* 6. FAQ */}
         <TempehFAQ />
+      </article>
+    )
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+   *  KOMBUCHA — Dedicated standalone layout
+   *  Hero → Booking → Voucher → FAQ (same as Tempeh, no calendar)
+   * ══════════════════════════════════════════════════════════════ */
+  if (slug === 'kombucha') {
+    return (
+      <article>
+        {/* 1. Dedicated Kombucha Hero */}
+        <KombuchaHero cms={{ image: detail?.heroImage }} />
+
+        {/* 2. Modern Booking Card */}
+        <KombuchaBookingCard workshop={undefined} cms={detail ? { bookingImage: detail.bookingImage, experienceEyebrow: detail.experienceEyebrow, experienceTitle: detail.experienceTitle, experienceCards: detail.experienceCards } : undefined} />
+
+        {/* 3. Other Workshops (slider — excludes kombucha) */}
+        <WorkshopTypesSlider
+          workshops={similarWorkshops}
+          heading={workshopTypesHeading}
+          subtitle={workshopTypesSub}
+          pillLabel={workshopTypePill}
+          buyLabel={bookLabel}
+          moreInfoLabel={learnMoreLabel}
+        />
+
+        {/* 4. Voucher CTA */}
+        <KombuchaVoucherCta cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined} />
+
+        {/* 5. How-To Articles */}
+        <FermentedVegHowTos
+          workshopType="kombucha"
+          cms={detail ? {
+            howToArticles: detail.howToArticles,
+          } : undefined}
+        />
+
+        {/* 6. FAQ */}
+        <KombuchaFAQ />
       </article>
     )
   }

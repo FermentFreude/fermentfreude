@@ -1,5 +1,6 @@
 /**
- * Seed workshop pages (tempeh, lakto-gemuese, kombucha) in the Pages collection.
+ * Seed workshop pages (tempeh, lakto-gemuese) in the Pages collection.
+ * KOMBUCHA: Excluded — will be seeded separately via seed-kombucha-detail.ts
  * Each page has the Workshop Page Sections tab with Gift & Online, Learn Online, FAQ, Why Online, Team Building.
  *
  * Run: pnpm seed workshop-pages
@@ -10,7 +11,7 @@ import { getPayload } from 'payload'
 
 const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
 
-const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha'] as const
+const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese'] as const
 
 const workshopGiftOnlineDE = {
   giftTitle: 'Verschenke ein besonderes Geschmackserlebnis',
@@ -210,7 +211,6 @@ const workshopTeamBuildingEN = {
 const TITLES: Record<(typeof WORKSHOP_SLUGS)[number], { de: string; en: string }> = {
   tempeh: { de: 'Tempeh', en: 'Tempeh' },
   'lakto-gemuese': { de: 'Lakto-Gemüse', en: 'Lacto-Vegetables' },
-  kombucha: { de: 'Kombucha', en: 'Kombucha' },
 }
 
 async function seedWorkshopPages() {
@@ -281,7 +281,8 @@ async function seedWorkshopPages() {
     }
   }
 
-  payload.logger.info('✅ Workshop pages seeded (tempeh, lakto-gemuese, kombucha)')
+  payload.logger.info('✅ Workshop pages seeded (tempeh, lakto-gemuese)')
+  payload.logger.info('   Kombucha: seeded separately via seed-kombucha-detail.ts')
   payload.logger.info('   Edit at: /admin/collections/pages')
 }
 
