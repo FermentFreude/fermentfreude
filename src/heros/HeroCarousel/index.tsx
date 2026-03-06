@@ -102,9 +102,9 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
                   <div className="absolute inset-0">
                     <Media
                       resource={
-                        typeof slide.image === 'string'
+                        (typeof slide.image === 'string'
                           ? { url: slide.image, alt: '' }
-                          : (slide.image as { url?: string; alt?: string })
+                          : slide.image) as Parameters<typeof Media>[0]['resource']
                       }
                       fill
                       imgClassName="object-cover"

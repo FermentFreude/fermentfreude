@@ -13,6 +13,7 @@ import { FormBlock } from '@/blocks/Form/config'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { OurStory } from '@/blocks/OurStory/config'
+import { ProductSlider } from '@/blocks/ProductSlider/config'
 import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
 import { SponsorsBar } from '@/blocks/SponsorsBar/config'
 import { TeamCards } from '@/blocks/TeamCards/config'
@@ -20,8 +21,11 @@ import { TeamPreview } from '@/blocks/TeamPreview/config'
 import { Testimonials } from '@/blocks/Testimonials/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { VoucherCta } from '@/blocks/VoucherCta/config'
+import { WorkshopPhases } from '@/blocks/WorkshopPhases/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
+import { shopPageFields } from '@/fields/shopPageFields'
+import { workshopDetailFields } from '@/fields/workshopDetailFields'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import {
@@ -110,6 +114,7 @@ export const Pages: CollectionConfig = {
                 Archive,
                 Carousel,
                 OurStory,
+                ProductSlider,
                 ReadyToLearnCTA,
                 SponsorsBar,
                 TeamCards,
@@ -120,6 +125,7 @@ export const Pages: CollectionConfig = {
                 FormBlock,
                 VoucherCta,
                 WorkshopSlider,
+                WorkshopPhases,
               ],
               required: false,
               admin: {
@@ -1359,6 +1365,20 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
+          name: 'shop',
+          label: 'Shop Page',
+          admin: {
+            description:
+              'Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.',
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_SHOP_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'shop'
+            },
+          },
+          fields: shopPageFields,
+        },
+        {
           name: 'fermentation',
           label: 'Fermentation Page',
           admin: {
@@ -1941,6 +1961,20 @@ export const Pages: CollectionConfig = {
               ],
             },
           ],
+        },
+        {
+          name: 'workshopDetail',
+          label: 'Workshop Detail',
+          admin: {
+            description:
+              'All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.',
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'lakto-gemuese' || slug === 'tempeh' || slug === 'kombucha'
+            },
+          },
+          fields: workshopDetailFields,
         },
         {
           name: 'meta',
