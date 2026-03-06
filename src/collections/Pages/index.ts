@@ -24,7 +24,6 @@ import { VoucherCta } from '@/blocks/VoucherCta/config'
 import { WorkshopPhases } from '@/blocks/WorkshopPhases/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
-import { shopPageFields } from '@/fields/shopPageFields'
 import { workshopDetailFields } from '@/fields/workshopDetailFields'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
@@ -1380,20 +1379,6 @@ export const Pages: CollectionConfig = {
               ],
             },
           ],
-        },
-        {
-          name: 'shop',
-          label: 'Shop Page',
-          admin: {
-            description:
-              'Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.',
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_SHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'shop'
-            },
-          },
-          fields: shopPageFields,
         },
         {
           name: 'fermentation',
