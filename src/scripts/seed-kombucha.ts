@@ -1,9 +1,9 @@
 /**
  * Seed Kombucha Workshop Page Data
- * 
+ *
  * Populates the workshopDetail section with experienceCards + images.
  * Seeds both DE (German) and EN (English) with proper ID reuse.
- * 
+ *
  * Run:  pnpm seed kombucha
  *       pnpm seed kombucha --force   (overwrite existing content)
  */
@@ -21,8 +21,9 @@ const kombucha_DE = {
   // Hero
   heroEyebrow: 'KOMBUCHA-WORKSHOP',
   heroTitle: 'Fermentiere deinen eigenen Kombucha',
-  heroDescription: 'Lerne die Kunst der Kombucha-Fermentation von Grund auf. In 3 Stunden wirst du eine lebendige SCOBY-Kultur erschaffen und deine erste Charge brauen.',
-  
+  heroDescription:
+    'Lerne die Kunst der Kombucha-Fermentation von Grund auf. In 3 Stunden wirst du eine lebendige SCOBY-Kultur erschaffen und deine erste Charge brauen.',
+
   // Booking Card
   bookingEyebrow: 'KOMBUCHA-WORKSHOP BUCHEN',
   bookingPrice: 79,
@@ -50,17 +51,20 @@ const kombucha_DE = {
     {
       duration: '15–75 Min',
       title: 'Theorie & Praxis',
-      description: 'Verstehe die Mikrobiologie, lerne die richtige Temperatur, infiziere dein erstes Gebräu.',
+      description:
+        'Verstehe die Mikrobiologie, lerne die richtige Temperatur, infiziere dein erstes Gebräu.',
     },
     {
       duration: '75–165 Min',
       title: 'Brauen & Verkostung',
-      description: 'Brau deine Charge mit einer echten SCOBY. Verkoste fertige Sorten und Variationen.',
+      description:
+        'Brau deine Charge mit einer echten SCOBY. Verkoste fertige Sorten und Variationen.',
     },
     {
       duration: '165–180 Min',
       title: 'Mitnehmen & Support',
-      description: 'Bekomme eine SCOBY-Starterkultur, Pflegeanleitung und Links für lebenslanges Coaching.',
+      description:
+        'Bekomme eine SCOBY-Starterkultur, Pflegeanleitung und Links für lebenslanges Coaching.',
     },
   ],
 
@@ -145,7 +149,8 @@ const kombucha_EN = {
   // Hero
   heroEyebrow: 'KOMBUCHA WORKSHOP',
   heroTitle: 'Brew Your Own Kombucha',
-  heroDescription: 'Learn kombucha fermentation from scratch. In 3 hours, you\'ll create a living SCOBY culture and brew your first batch.',
+  heroDescription:
+    "Learn kombucha fermentation from scratch. In 3 hours, you'll create a living SCOBY culture and brew your first batch.",
 
   // Booking Card
   bookingEyebrow: 'KOMBUCHA WORKSHOP',
@@ -161,7 +166,7 @@ const kombucha_EN = {
   // About
   aboutHeading: 'About the workshop',
   aboutText:
-    'Kombucha is more than a trendy drink—it\'s a centuries-old fermentation tradition that combines health and flavor. In this workshop, we dive deep into the science behind SCOBY and brew your first probiotic batch from the ground up.',
+    "Kombucha is more than a trendy drink—it's a centuries-old fermentation tradition that combines health and flavor. In this workshop, we dive deep into the science behind SCOBY and brew your first probiotic batch from the ground up.",
 
   // Schedule
   scheduleHeading: 'Workshop Schedule',
@@ -179,12 +184,14 @@ const kombucha_EN = {
     {
       duration: '75–165 min',
       title: 'Brewing & Tasting',
-      description: 'Brew your batch with a real SCOBY. Taste finished varieties and creative variations.',
+      description:
+        'Brew your batch with a real SCOBY. Taste finished varieties and creative variations.',
     },
     {
       duration: '165–180 min',
       title: 'Take-Home & Support',
-      description: 'Get a SCOBY starter culture, care instructions, and links for lifetime coaching.',
+      description:
+        'Get a SCOBY starter culture, care instructions, and links for lifetime coaching.',
     },
   ],
 
@@ -252,7 +259,7 @@ const kombucha_EN = {
 
   // Modal
   modalConfirmHeading: 'Booking confirmed!',
-  modalConfirmSubheading: 'You\'re registered for:',
+  modalConfirmSubheading: "You're registered for:",
   modalWorkshopLabel: 'Workshop',
   modalDateLabel: 'Date',
   modalTimeLabel: 'Time',

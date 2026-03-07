@@ -691,8 +691,6 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
       {/* ── 9. Why Our Online Workshops (last section, bg white) ───── */}
       <WhyOnlineSection heading={whyOnlineHeading} features={whyOnlineFeatures} />
-
-
     </article>
   )
 }

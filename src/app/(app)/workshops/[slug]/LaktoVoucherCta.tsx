@@ -1,8 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import Link from 'next/link'
+import React from 'react'
 
 export type LaktoVoucherCMS = {
   eyebrow?: string | null
@@ -54,10 +55,10 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
                 <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-white/80">
                   {eyebrow}
                 </p>
-                <h2 className="font-display text-display font-bold tracking-tight text-white">
+                <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-white">
                   {title}
                 </h2>
-                <p className="mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white/90">
+                <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white/90">
                   {description}
                 </p>
 
@@ -76,14 +77,16 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
                   </Link>
                 </div>
 
-                <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-                  {pills.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-white/25 bg-white/10 px-5 py-2 font-display text-caption font-semibold uppercase tracking-wide text-white"
-                    >
-                      {tag}
-                    </span>
+                <div className="mt-10 flex items-center justify-center px-2">
+                  {pills.map((tag, i) => (
+                    <React.Fragment key={tag}>
+                      <span className="text-white text-[9px] sm:text-[10px] lg:text-xs font-display font-semibold tracking-wide">
+                        {tag}
+                      </span>
+                      {i < pills.length - 1 && (
+                        <span className="w-px h-4 bg-white/25 mx-2 sm:mx-3" aria-hidden="true" />
+                      )}
+                    </React.Fragment>
                   ))}
                 </div>
               </div>
@@ -97,10 +100,10 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
             <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-[#555954]/60">
               {eyebrow}
             </p>
-            <h2 className="font-display text-display font-bold tracking-tight text-ff-near-black">
+            <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-ff-near-black">
               {title}
             </h2>
-            <p className="mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-ff-gray-text">
+            <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-ff-gray-text">
               {description}
             </p>
 
@@ -119,14 +122,16 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
               </Link>
             </div>
 
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-              {pills.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-[#555954]/15 bg-white/60 px-5 py-2 font-display text-caption font-semibold uppercase tracking-wide text-ff-gray-text"
-                >
-                  {tag}
-                </span>
+            <div className="mt-10 flex items-center justify-center px-2">
+              {pills.map((tag, i) => (
+                <React.Fragment key={tag}>
+                  <span className="text-[#555954] text-[9px] sm:text-[10px] lg:text-xs font-display font-semibold tracking-wide">
+                    {tag}
+                  </span>
+                  {i < pills.length - 1 && (
+                    <span className="w-px h-4 bg-[#555954]/20 mx-2 sm:mx-3" aria-hidden="true" />
+                  )}
+                </React.Fragment>
               ))}
             </div>
           </div>

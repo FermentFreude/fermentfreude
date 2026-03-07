@@ -512,7 +512,7 @@ async function seedKombuchaDetail() {
     const imageFilenameMap: Record<string, string> = {
       'FF-Vorschau-90': 'FF-Vorschau-90.webp',
       'FF-Vorschau-62': 'FF-Vorschau-62.webp',
-      '_H8A5827': '_H8A5827.webp',
+      _H8A5827: '_H8A5827.webp',
     }
 
     // Find media IDs for each experience card image
@@ -566,7 +566,7 @@ async function seedKombuchaDetail() {
 
     // STEP 2: Clean broken layout blocks + save German content
     console.log(`[${new Date().toLocaleTimeString()}] Updating "${pageSlug}" (DE)...`)
-    
+
     // Clean layout: remove WorkshopPhases blocks with empty required fields
     const cleanLayout = (page.layout || []).filter((block: any) => {
       if (block.blockType === 'WorkshopPhases') {
@@ -618,10 +618,12 @@ async function seedKombuchaDetail() {
           id: attr.id,
         }),
       ),
-      schedule: (dePage as any).workshopDetail?.schedule?.map((step: { id?: string | null }, i: number) => ({
-        ...workshopDetailEN.schedule?.[i],
-        id: step.id,
-      })),
+      schedule: (dePage as any).workshopDetail?.schedule?.map(
+        (step: { id?: string | null }, i: number) => ({
+          ...workshopDetailEN.schedule?.[i],
+          id: step.id,
+        }),
+      ),
       includedItems: (dePage as any).workshopDetail?.includedItems?.map(
         (item: { id?: string | null }, i: number) => ({
           ...workshopDetailEN.includedItems?.[i],
@@ -647,14 +649,18 @@ async function seedKombuchaDetail() {
           id: pill.id,
         }),
       ),
-      faqItems: (dePage as any).workshopDetail?.faqItems?.map((item: { id?: string | null }, i: number) => ({
-        ...workshopDetailEN.faqItems?.[i],
-        id: item.id,
-      })),
-      dates: (dePage as any).workshopDetail?.dates?.map((date: { id?: string | null }, i: number) => ({
-        ...workshopDetailEN.dates?.[i],
-        id: date.id,
-      })),
+      faqItems: (dePage as any).workshopDetail?.faqItems?.map(
+        (item: { id?: string | null }, i: number) => ({
+          ...workshopDetailEN.faqItems?.[i],
+          id: item.id,
+        }),
+      ),
+      dates: (dePage as any).workshopDetail?.dates?.map(
+        (date: { id?: string | null }, i: number) => ({
+          ...workshopDetailEN.dates?.[i],
+          id: date.id,
+        }),
+      ),
     }
 
     // STEP 5: Save English content
@@ -667,7 +673,9 @@ async function seedKombuchaDetail() {
       context: ctx,
     })
 
-    payload.logger.info(`✅ Seeded "${pageSlug}" workshopDetail in both languages (German IDs replicated to English).`)
+    payload.logger.info(
+      `✅ Seeded "${pageSlug}" workshopDetail in both languages (German IDs replicated to English).`,
+    )
     console.log(
       `\n✨ Success! Check /admin/collections/pages to verify the workshopDetail section.`,
     )

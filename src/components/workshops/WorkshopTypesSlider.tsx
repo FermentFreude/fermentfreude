@@ -3,7 +3,7 @@
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import Link from 'next/link'
-import { useRef, useState, useCallback } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 
@@ -77,24 +77,26 @@ export function WorkshopTypesSlider({
   if (workshops.length === 0) return null
 
   return (
-    <section className="relative bg-white py-12 sm:py-16 md:py-20 lg:py-24">
-      <div className="container-padding relative mx-auto max-w-7xl">
-        {/* Header: Title + Subtitle */}
-        <div className="mb-8 md:mb-12">
-          <h2 className="font-display text-2xl font-bold text-[#1a1a1a] sm:text-3xl md:text-4xl">
-            {heading}
-          </h2>
-          <p className="mt-2 max-w-3xl text-sm text-[#555954] sm:mt-3 sm:text-body-lg">
-            {subtitle}
-          </p>
-        </div>
+    <section className="relative bg-white">
+      {/* Header: Title + Subtitle */}
+      <div className="container-padding relative mx-auto max-w-7xl py-12 sm:py-16 md:py-20">
+        <h2 className="font-display text-section-heading font-bold text-[#1a1a1a]">{heading}</h2>
+        <p className="mt-3 max-w-3xl text-body-lg text-[#555954]">{subtitle}</p>
+      </div>
 
-        {/* Scrollable Workshop Cards */}
+      {/* Container-width Scrollable Workshop Cards */}
+      <div
+        className="container-padding relative mx-auto max-w-7xl"
+        style={{
+          height: '600px',
+          minHeight: '600px',
+        }}
+      >
         <div
           ref={scrollRef}
           onScroll={updateScrollState}
           data-workshop-slider
-          className="flex gap-4 overflow-x-auto pb-0 snap-x snap-mandatory"
+          className="relative flex h-full gap-0 overflow-x-auto snap-x snap-mandatory"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -113,28 +115,22 @@ export function WorkshopTypesSlider({
               <div
                 key={w.title}
                 data-workshop-card
-                className="flex shrink-0 snap-start"
-                style={{ width: 'calc(100vw - 2rem)', maxWidth: '900px' }}
+                className="flex shrink-0 snap-start h-full w-full"
               >
-                <div
-                  className={`flex w-full flex-col overflow-hidden rounded-xl sm:rounded-2xl lg:flex-row ${cardBg}`}
-                >
+                <div className={`flex w-full flex-col lg:flex-row ${cardBg}`}>
                   {/* Left: text + buttons */}
-                  <div className="flex flex-col justify-center px-4 py-8 sm:px-8 md:px-10 lg:px-12 lg:py-0 lg:w-1/2">
-                    <span className="inline-flex w-fit rounded-full bg-[#ECE5DE] px-3 py-1 font-display text-xs font-bold uppercase tracking-wide text-[#555954] sm:px-4 sm:py-1.5">
-                      {pillLabel}
-                    </span>
-                    <h3 className="mt-3 font-display text-xl font-bold text-[#1a1a1a] sm:mt-4 sm:text-2xl md:text-3xl lg:text-3xl">
+                  <div className="flex flex-col justify-center px-6 py-8 sm:px-8 md:px-12 lg:w-1/2">
+                    <h3 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-[#1a1a1a] leading-tight">
                       {w.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[#555954] sm:mt-3 sm:text-body-lg line-clamp-2 lg:line-clamp-3">
+                    <p className="mt-4 text-base sm:text-lg leading-relaxed text-[#555954] line-clamp-3 lg:line-clamp-4 max-w-lg">
                       {w.description}
                     </p>
-                    <div className="mt-4 flex flex-col gap-2 text-xs text-[#555954] sm:mt-6 sm:text-sm">
+                    <div className="mt-6 flex flex-col gap-2 text-sm text-[#555954] sm:text-base">
                       {w.duration && (
                         <span className="flex items-center gap-2">
                           <svg
-                            className="h-4 w-4 shrink-0 sm:h-5 sm:w-5"
+                            className="h-5 w-5 shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -152,7 +148,7 @@ export function WorkshopTypesSlider({
                       {(w.location || w.format) && (
                         <span className="flex items-center gap-2">
                           <svg
-                            className="h-4 w-4 shrink-0 sm:h-5 sm:w-5"
+                            className="h-5 w-5 shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -174,14 +170,14 @@ export function WorkshopTypesSlider({
                         </span>
                       )}
                     </div>
-                    <div className="mt-6 flex flex-col gap-2 sm:gap-3 sm:flex-row md:mt-8">
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                       <Link
                         href="/contact"
-                        className="inline-flex items-center justify-center rounded-lg bg-[#555954] px-6 py-2.5 font-display text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#333] sm:rounded-2xl sm:px-8 sm:py-4 sm:text-sm"
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-[#555954] px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#333]"
                       >
                         {buyLabel}
                         <svg
-                          className="ml-2 h-3 w-3 sm:h-4 sm:w-4"
+                          className="ml-2 h-4 w-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -196,62 +192,62 @@ export function WorkshopTypesSlider({
                       </Link>
                       <Link
                         href={href}
-                        className="inline-flex items-center justify-center rounded-lg border-2 border-[#E5B765] bg-transparent px-6 py-2.5 font-display text-xs font-bold uppercase tracking-wider text-[#555954] transition-colors hover:bg-[#E5B765]/10 sm:rounded-2xl sm:px-8 sm:py-4 sm:text-sm"
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-lg border-2 border-[#E5B765] bg-transparent px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-[#555954] transition-colors hover:bg-[#E5B765]/10"
                       >
                         {moreInfoLabel}
                       </Link>
                     </div>
                   </div>
                   {/* Right: image - hidden on mobile, visible on lg */}
-                  <div className="relative hidden aspect-4/3 w-full lg:block lg:w-1/2 lg:aspect-auto lg:min-h-80">
+                  <div className="relative hidden h-full w-full lg:block lg:w-1/2">
                     {isResolvedMedia(displayImage) ? (
                       <Media resource={displayImage} fill imgClassName="object-cover" />
                     ) : (
-                      <div className="flex size-full items-center justify-center bg-[#ECE5DE]" />
+                      <div className="flex h-full items-center justify-center bg-[#ECE5DE]" />
                     )}
                   </div>
                 </div>
               </div>
             )
           })}
-        </div>
 
-        {/* ── Bottom Navigation Arrows ───────────────────── */}
-        <div className="flex justify-end items-center gap-3 mt-6 md:mt-8">
-          <button
-            type="button"
-            onClick={() => scroll('left')}
-            disabled={!canScrollLeft}
-            className="flex items-center justify-center transition-all hover:bg-[#E5B765]/80 disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{
-              width: '2.75rem',
-              height: '2.75rem',
-              borderRadius: '0.5rem',
-              backgroundColor: '#E5B765',
-            }}
-            aria-label="Scroll left"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={() => scroll('right')}
-            disabled={!canScrollRight}
-            className="flex items-center justify-center transition-all hover:bg-[#E5B765]/80 disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{
-              width: '2.75rem',
-              height: '2.75rem',
-              borderRadius: '0.5rem',
-              backgroundColor: '#E5B765',
-            }}
-            aria-label="Scroll right"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          {/* ── Bottom Navigation Arrows ───────────────────── */}
+          <div className="absolute bottom-4 md:bottom-6 right-6 md:right-8 flex items-center gap-2 z-10">
+            <button
+              type="button"
+              onClick={() => scroll('left')}
+              disabled={!canScrollLeft}
+              className="flex items-center justify-center h-10 w-10 rounded transition-all hover:bg-[#c5c5c5] disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ backgroundColor: '#e0e0e0' }}
+              aria-label="Scroll left"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="white" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => scroll('right')}
+              disabled={!canScrollRight}
+              className="flex items-center justify-center h-10 w-10 rounded transition-all hover:bg-[#c5c5c5] disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ backgroundColor: '#e0e0e0' }}
+              aria-label="Scroll right"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="white" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </section>
