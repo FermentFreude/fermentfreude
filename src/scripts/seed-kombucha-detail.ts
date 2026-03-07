@@ -479,6 +479,7 @@ async function seedKombuchaDetail() {
 
   try {
     // ── Find the existing page ──────────────────────────────
+    console.log(`[${new Date().toLocaleTimeString()}] Seeding "${pageSlug}" workshopDetail...`)
     const existing = await payload.find({
       collection: 'pages',
       where: { slug: { equals: pageSlug } },
@@ -492,13 +493,11 @@ async function seedKombuchaDetail() {
       process.exit(1)
     }
 
-    const page = existing.docs[0]
+    const page = existing.docs[0] as unknown as Record<string, any>
     const pageId = page.id
 
     // ── Non-destructive check ───────────────────────────────
-    const detail = (page as unknown as Record<string, unknown>).workshopDetail as
-      | Record<string, unknown>
-      | undefined
+    const detail = page.workshopDetail as Record<string, unknown> | undefined
     if (detail?.aboutText && !isForce) {
       payload.logger.info(
         `⏭️  workshopDetail already has data for "${pageSlug}". Use --force to overwrite.`,
@@ -506,7 +505,7 @@ async function seedKombuchaDetail() {
       process.exit(0)
     }
 
-    // STEP 0.5: Link experience card images from Media collection (by filename)
+    // STEP 1: Link experience card images from Media collection (by filename)
     console.log(
       `[${new Date().toLocaleTimeString()}] Linking experience card images from Media collection...`,
     )
@@ -565,17 +564,34 @@ async function seedKombuchaDetail() {
       })),
     }
 
-    // STEP 1: Save German content
-    console.log(`[${new Date().toLocaleTimeString()}] Seeding "${pageSlug}" (DE)...`)
+    // STEP 2: Clean broken layout blocks + save German content
+    console.log(`[${new Date().toLocaleTimeString()}] Updating "${pageSlug}" (DE)...`)
+    
+    // Clean layout: remove WorkshopPhases blocks with empty required fields
+    const cleanLayout = (page.layout || []).filter((block: any) => {
+      if (block.blockType === 'WorkshopPhases') {
+        const phases = block.workshopPhases || []
+        // Keep only if all phases have required fields
+        const allValid = phases.every(
+          (p: any) => p.phaseLabel && p.phaseTitle && p.phaseDescription,
+        )
+        if (!allValid) {
+          console.log('  🧹 Removing broken WorkshopPhases block')
+          return false
+        }
+      }
+      return true
+    })
+
     await payload.update({
       collection: 'pages',
       id: pageId,
       locale: 'de',
-      data: { workshopDetail: workshopDetailDEWithMedia },
+      data: { workshopDetail: workshopDetailDEWithMedia, layout: cleanLayout },
       context: ctx,
     })
 
-    // STEP 2: Read back the saved document to capture any generated array IDs
+    // STEP 3: Read back and capture generated IDs (depth: 1 to resolve media objects)
     console.log(
       `[${new Date().toLocaleTimeString()}] Reading saved German content to capture generated IDs...`,
     )
@@ -583,78 +599,78 @@ async function seedKombuchaDetail() {
       collection: 'pages',
       id: pageId,
       locale: 'de',
-      depth: 0,
+      depth: 1, // CRITICAL: Resolve media IDs to full objects so <Media> component can render them
     })
 
-    // STEP 3: Merge English data (reuse any IDs from German)
+    // STEP 4: Merge English data with German IDs
     const mergedEN = {
-      ...workshopDetailEN,
-      // Preserve any generated IDs from German arrays
-      heroAttributes: dePage.workshopDetail?.heroAttributes?.map(
+      ...workshopDetailENWithMedia,
+      // Preserve generated IDs from German arrays
+      heroAttributes: (dePage as any).workshopDetail?.heroAttributes?.map(
         (attr: { id?: string | null }, i: number) => ({
           ...workshopDetailEN.heroAttributes?.[i],
           id: attr.id,
         }),
       ),
-      bookingAttributes: dePage.workshopDetail?.bookingAttributes?.map(
+      bookingAttributes: (dePage as any).workshopDetail?.bookingAttributes?.map(
         (attr: { id?: string | null }, i: number) => ({
           ...workshopDetailEN.bookingAttributes?.[i],
           id: attr.id,
         }),
       ),
-      schedule: dePage.workshopDetail?.schedule?.map((step: { id?: string | null }, i: number) => ({
+      schedule: (dePage as any).workshopDetail?.schedule?.map((step: { id?: string | null }, i: number) => ({
         ...workshopDetailEN.schedule?.[i],
         id: step.id,
       })),
-      includedItems: dePage.workshopDetail?.includedItems?.map(
+      includedItems: (dePage as any).workshopDetail?.includedItems?.map(
         (item: { id?: string | null }, i: number) => ({
           ...workshopDetailEN.includedItems?.[i],
           id: item.id,
         }),
       ),
-      whyPoints: dePage.workshopDetail?.whyPoints?.map(
+      whyPoints: (dePage as any).workshopDetail?.whyPoints?.map(
         (point: { id?: string | null }, i: number) => ({
           ...workshopDetailEN.whyPoints?.[i],
           id: point.id,
         }),
       ),
-      experienceCards: dePage.workshopDetail?.experienceCards?.map(
+      experienceCards: (dePage as any).workshopDetail?.experienceCards?.map(
         (card: { id?: string | null; image?: unknown }, i: number) => ({
           ...workshopDetailEN.experienceCards?.[i],
           id: card.id,
-          image: card.image || null, // Preserve German image if present, else null
+          image: card.image || null,
         }),
       ),
-      voucherPills: dePage.workshopDetail?.voucherPills?.map(
+      voucherPills: (dePage as any).workshopDetail?.voucherPills?.map(
         (pill: { id?: string | null }, i: number) => ({
           ...workshopDetailEN.voucherPills?.[i],
           id: pill.id,
         }),
       ),
-      faqItems: dePage.workshopDetail?.faqItems?.map((item: { id?: string | null }, i: number) => ({
+      faqItems: (dePage as any).workshopDetail?.faqItems?.map((item: { id?: string | null }, i: number) => ({
         ...workshopDetailEN.faqItems?.[i],
         id: item.id,
       })),
-      dates: dePage.workshopDetail?.dates?.map((date: { id?: string | null }, i: number) => ({
+      dates: (dePage as any).workshopDetail?.dates?.map((date: { id?: string | null }, i: number) => ({
         ...workshopDetailEN.dates?.[i],
         id: date.id,
       })),
     }
 
-    // STEP 4: Save English content with preserved IDs
-    console.log(`[${new Date().toLocaleTimeString()}] Seeding "${pageSlug}" (EN)...`)
+    // STEP 5: Save English content
+    console.log(`[${new Date().toLocaleTimeString()}] Updating "${pageSlug}" (EN)...`)
     await payload.update({
       collection: 'pages',
       id: pageId,
       locale: 'en',
-      data: { workshopDetail: mergedEN },
+      data: { workshopDetail: mergedEN, layout: cleanLayout },
       context: ctx,
     })
 
-    payload.logger.info(`✅ German content seeded for "${pageSlug}".`)
-
-    payload.logger.info(`✅ English content seeded for "${pageSlug}".`)
-    console.log(`\n✨ Successfully seeded "${pageSlug}" in both languages!`)
+    payload.logger.info(`✅ Seeded "${pageSlug}" workshopDetail in both languages (German IDs replicated to English).`)
+    console.log(
+      `\n✨ Success! Check /admin/collections/pages to verify the workshopDetail section.`,
+    )
     process.exit(0)
   } catch (error) {
     console.error(`❌ Error seeding "${pageSlug}":`, error)
