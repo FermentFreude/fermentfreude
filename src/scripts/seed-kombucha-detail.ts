@@ -506,13 +506,72 @@ async function seedKombuchaDetail() {
       process.exit(0)
     }
 
+    // STEP 0.5: Link experience card images from Media collection (by filename)
+    console.log(
+      `[${new Date().toLocaleTimeString()}] Linking experience card images from Media collection...`,
+    )
+    const imageFilenameMap: Record<string, string> = {
+      'FF-Vorschau-90': 'FF-Vorschau-90.webp',
+      'FF-Vorschau-62': 'FF-Vorschau-62.webp',
+      '_H8A5827': '_H8A5827.webp',
+    }
+
+    // Find media IDs for each experience card image
+    const mediaIds: Record<string, string | null> = {}
+    for (const [key, filename] of Object.entries(imageFilenameMap)) {
+      const mediaResult = await payload.find({
+        collection: 'media',
+        where: { filename: { contains: filename.replace('.webp', '') } },
+        limit: 1,
+      })
+      if (mediaResult.docs.length > 0) {
+        mediaIds[key] = mediaResult.docs[0].id as string
+        console.log(`  ✓ Found ${filename} (ID: ${mediaIds[key]})`)
+      } else {
+        console.log(`  ⚠️  Could not find ${filename} in Media collection`)
+        mediaIds[key] = null
+      }
+    }
+
+    // Update German content with media IDs
+    const workshopDetailDEWithMedia = {
+      ...workshopDetailDE,
+      experienceCards: workshopDetailDE.experienceCards?.map((card: any) => ({
+        ...card,
+        image:
+          mediaIds['FF-Vorschau-90'] && card.eyebrow === 'THEORIE'
+            ? mediaIds['FF-Vorschau-90']
+            : mediaIds['FF-Vorschau-62'] && card.eyebrow === 'PRAXIS'
+              ? mediaIds['FF-Vorschau-62']
+              : mediaIds['_H8A5827'] && card.eyebrow === 'GESCHMACK'
+                ? mediaIds['_H8A5827']
+                : null,
+      })),
+    }
+
+    // Same for English
+    const workshopDetailENWithMedia = {
+      ...workshopDetailEN,
+      experienceCards: workshopDetailEN.experienceCards?.map((card: any) => ({
+        ...card,
+        image:
+          mediaIds['FF-Vorschau-90'] && card.eyebrow === 'THEORY'
+            ? mediaIds['FF-Vorschau-90']
+            : mediaIds['FF-Vorschau-62'] && card.eyebrow === 'PRACTICE'
+              ? mediaIds['FF-Vorschau-62']
+              : mediaIds['_H8A5827'] && card.eyebrow === 'FLAVOR'
+                ? mediaIds['_H8A5827']
+                : null,
+      })),
+    }
+
     // STEP 1: Save German content
     console.log(`[${new Date().toLocaleTimeString()}] Seeding "${pageSlug}" (DE)...`)
     await payload.update({
       collection: 'pages',
       id: pageId,
       locale: 'de',
-      data: { workshopDetail: workshopDetailDE },
+      data: { workshopDetail: workshopDetailDEWithMedia },
       context: ctx,
     })
 
