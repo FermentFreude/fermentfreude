@@ -344,6 +344,15 @@ These rules apply to **every** new feature, section, field, or content block —
   const payload = await getPayload({ config })
   const data = await payload.find({ collection: 'products' })
   ```
+- **CRITICAL:** If fetching pages/blocks with nested image fields in arrays (e.g., `experienceCards[].image`), use `depth: 1` or higher to resolve image relationships:
+  ```typescript
+  // ❌ Wrong — image returns as ID string only
+  const page = await payload.find({ collection: 'pages', depth: 0 })
+  
+  // ✅ Correct — image resolves to full object with url
+  const page = await payload.find({ collection: 'pages', depth: 1 })
+  ```
+  See `docs/AGENTS.md` → "Relationship Depth" for details.
 - Never expose secrets in client code.
 
 ### Route Groups

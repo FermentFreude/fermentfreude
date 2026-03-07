@@ -344,6 +344,52 @@ await payload.delete({ collection: 'products', id: '123' })
 { image: { exists: true } }
 ```
 
+### Relationship Depth (CRITICAL for Image Fields in Arrays)
+
+**This is a common gotcha!** When relationships (especially images) are nested inside array fields, you **must use `depth: 1`** or higher to resolve them.
+
+#### Problem: `depth: 0` (IDs only)
+
+```typescript
+// workshopDetail.ts has: experienceCards[] with image fields
+const page = await payload.find({
+  collection: 'pages',
+  where: { slug: { equals: 'kombucha' } },
+  depth: 0,  // ❌ BUG: Returns image as ID string only
+})
+
+page.workshopDetail.experienceCards[0].image
+// Returns: "69ab245ad7b218fa276dd38d" (just an ID)
+
+// Component check fails:
+function isResolvedMedia(img) {
+  return typeof img === 'object' && img !== null && 'url' in img
+}
+isResolvedMedia(image) // ❌ false — "string" is not an object!
+```
+
+#### Solution: `depth: 1` (Resolve relationships)
+
+```typescript
+const page = await payload.find({
+  collection: 'pages',
+  where: { slug: { equals: 'kombucha' } },
+  depth: 1,  // ✅ CORRECT: Resolves nested image objects
+})
+
+page.workshopDetail.experienceCards[0].image
+// Returns: { id, url, width, height, alt, ... } (full object)
+
+isResolvedMedia(image) // ✅ true — object with 'url' property
+<Media resource={image} />  // ✅ Works!
+```
+
+#### Rule of Thumb
+
+- **depth: 0** = Just IDs (use for listing pages, API optimization)
+- **depth: 1** = Resolve one level (needed for arrays with relationships → **workshop pages, block images, etc.**)
+- **depth: 2+** = Resolve multiple levels (rarely needed)
+
 ---
 
 ## Components
