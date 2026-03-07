@@ -1032,6 +1032,68 @@ export interface Page {
     workshopCtaButtonUrl?: string | null;
   };
   /**
+   * Content for the Workshops overview page (/workshops). Only applies when slug is "workshops".
+   */
+  workshops?: {
+    /**
+     * Small text above the title (e.g., "Fermentation Workshops").
+     */
+    workshopsHeroEyebrow?: string | null;
+    /**
+     * Main heading. Use \n for line breaks (e.g., "Discover the Art\nof Fermentation").
+     */
+    workshopsHeroTitle?: string | null;
+    /**
+     * Short intro text describing the workshops.
+     */
+    workshopsHeroDescription?: string | null;
+    /**
+     * Small text items (e.g., "3 Hours", "Hands-on", "Experience").
+     */
+    workshopsHeroAttributes?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional background image for the hero. If empty, jar silhouettes are shown.
+     */
+    workshopsHeroImage?: (string | null) | Media;
+    /**
+     * e.g., "Unsere Termine" / "Our Dates"
+     */
+    workshopsCalendarTitle?: string | null;
+    /**
+     * Intro text above the calendar.
+     */
+    workshopsCalendarDescription?: string | null;
+    /**
+     * e.g., "Fermentation Starter Kits" / "Fermentation Products"
+     */
+    workshopsProductSliderTitle?: string | null;
+    /**
+     * Intro text above the product slider.
+     */
+    workshopsProductSliderDescription?: string | null;
+    /**
+     * e.g., "Was unsere Teilnehmer sagen" / "What Our Students Say"
+     */
+    workshopsTestimonialsTitle?: string | null;
+    /**
+     * Intro text above the testimonials.
+     */
+    workshopsTestimonialsDescription?: string | null;
+    /**
+     * e.g., "Unsere Partner" / "Our Partners"
+     */
+    workshopsSponsorsTitle?: string | null;
+    /**
+     * Intro text above the sponsors.
+     */
+    workshopsSponsorsDescription?: string | null;
+  };
+  /**
    * Content for the Fermentation page (/fermentation). Only applies when slug is "fermentation".
    */
   fermentation?: {
@@ -3292,6 +3354,28 @@ export interface PagesSelect<T extends boolean = true> {
         workshopCtaBackgroundImage?: T;
         workshopCtaButtonLabel?: T;
         workshopCtaButtonUrl?: T;
+      };
+  workshops?:
+    | T
+    | {
+        workshopsHeroEyebrow?: T;
+        workshopsHeroTitle?: T;
+        workshopsHeroDescription?: T;
+        workshopsHeroAttributes?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        workshopsHeroImage?: T;
+        workshopsCalendarTitle?: T;
+        workshopsCalendarDescription?: T;
+        workshopsProductSliderTitle?: T;
+        workshopsProductSliderDescription?: T;
+        workshopsTestimonialsTitle?: T;
+        workshopsTestimonialsDescription?: T;
+        workshopsSponsorsTitle?: T;
+        workshopsSponsorsDescription?: T;
       };
   fermentation?:
     | T

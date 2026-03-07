@@ -783,6 +783,179 @@ export const Pages: CollectionConfig = {
           fields: shopPageFields,
         },
         {
+          name: 'workshops',
+          label: 'Workshops Overview Page',
+          admin: {
+            description:
+              'Content for the Workshops overview page (/workshops). Only applies when slug is "workshops".',
+            condition: (data, siblingData) => {
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'workshops'
+            },
+          },
+          fields: [
+            {
+              type: 'collapsible',
+              label: '🎯 Hero Section',
+              admin: { initCollapsed: false },
+              fields: [
+                {
+                  name: 'workshopsHeroEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Eyebrow Text',
+                  admin: {
+                    description: 'Small text above the title (e.g., "Fermentation Workshops").',
+                  },
+                },
+                {
+                  name: 'workshopsHeroTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Hero Title',
+                  admin: {
+                    description:
+                      'Main heading. Use \\n for line breaks (e.g., "Discover the Art\\nof Fermentation").',
+                  },
+                },
+                {
+                  name: 'workshopsHeroDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Hero Description',
+                  admin: { description: 'Short intro text describing the workshops.' },
+                },
+                {
+                  name: 'workshopsHeroAttributes',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 5,
+                  label: 'Hero Attributes',
+                  admin: {
+                    description: 'Small text items (e.g., "3 Hours", "Hands-on", "Experience").',
+                  },
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Attribute Text',
+                    },
+                  ],
+                },
+                {
+                  name: 'workshopsHeroImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Hero Image',
+                  admin: {
+                    description:
+                      'Optional background image for the hero. If empty, jar silhouettes are shown.',
+                  },
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '📅 Workshop Calendar Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'workshopsCalendarTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Title',
+                  admin: { description: 'e.g., "Unsere Termine" / "Our Dates"' },
+                },
+                {
+                  name: 'workshopsCalendarDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Section Description',
+                  admin: { description: 'Intro text above the calendar.' },
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '🛍️ Product Slider Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'workshopsProductSliderTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Title',
+                  admin: { description: 'e.g., "Fermentation Starter Kits" / "Fermentation Products"' },
+                },
+                {
+                  name: 'workshopsProductSliderDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Section Description',
+                  admin: { description: 'Intro text above the product slider.' },
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '⭐ Testimonials Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'workshopsTestimonialsTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Title',
+                  admin: { description: 'e.g., "Was unsere Teilnehmer sagen" / "What Our Students Say"' },
+                },
+                {
+                  name: 'workshopsTestimonialsDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Section Description',
+                  admin: { description: 'Intro text above the testimonials.' },
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '🤝 Sponsors Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'workshopsSponsorsTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Title',
+                  admin: { description: 'e.g., "Unsere Partner" / "Our Partners"' },
+                },
+                {
+                  name: 'workshopsSponsorsDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Section Description',
+                  admin: { description: 'Intro text above the sponsors.' },
+                },
+              ],
+            },
+          ],
+        },
+        {
           name: 'fermentation',
           label: 'Fermentation Page',
           admin: {
