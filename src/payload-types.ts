@@ -1069,6 +1069,31 @@ export interface Page {
      */
     workshopsCalendarDescription?: string | null;
     /**
+     * Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).
+     */
+    workshopsCalendarCards?:
+      | {
+          workshopType: 'basics' | 'lakto' | 'kombucha' | 'tempeh';
+          /**
+           * Card background image for this workshop type.
+           */
+          cardImage?: (string | null) | Media;
+          /**
+           * e.g., "20. Mär" / "Mar 20"
+           */
+          nextDate?: string | null;
+          /**
+           * e.g., "3h 30m" / "3.5 Stunden"
+           */
+          duration?: string | null;
+          /**
+           * e.g., "Buchen" / "Book Now"
+           */
+          buttonLabel?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
      * e.g., "Fermentation Starter Kits" / "Fermentation Products"
      */
     workshopsProductSliderTitle?: string | null;
@@ -3370,6 +3395,16 @@ export interface PagesSelect<T extends boolean = true> {
         workshopsHeroImage?: T;
         workshopsCalendarTitle?: T;
         workshopsCalendarDescription?: T;
+        workshopsCalendarCards?:
+          | T
+          | {
+              workshopType?: T;
+              cardImage?: T;
+              nextDate?: T;
+              duration?: T;
+              buttonLabel?: T;
+              id?: T;
+            };
         workshopsProductSliderTitle?: T;
         workshopsProductSliderDescription?: T;
         workshopsTestimonialsTitle?: T;

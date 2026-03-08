@@ -34,6 +34,26 @@ const workshopsCalendarDE = {
   workshopsCalendarTitle: 'Unsere nächsten Termine',
   workshopsCalendarDescription:
     'Buche deinen Workshop für Lakto-Gemüse, Kombucha oder Tempeh. Verfügbare Plätze sind begrenzt.',
+  workshopsCalendarCards: [
+    {
+      workshopType: 'lakto' as const,
+      nextDate: '20. März',
+      duration: '3 Stunden',
+      buttonLabel: 'Mehr Infos & Buchen',
+    },
+    {
+      workshopType: 'kombucha' as const,
+      nextDate: '22. März',
+      duration: '3 Stunden',
+      buttonLabel: 'Mehr Infos & Buchen',
+    },
+    {
+      workshopType: 'tempeh' as const,
+      nextDate: '24. März',
+      duration: '3 Stunden',
+      buttonLabel: 'Mehr Infos & Buchen',
+    },
+  ],
 }
 
 const workshopsProductSliderDE = {
@@ -82,6 +102,26 @@ const workshopsCalendarEN = {
   workshopsCalendarTitle: 'Our Upcoming Dates',
   workshopsCalendarDescription:
     'Book your workshop for Lacto-vegetables, Kombucha, or Tempeh. Available spots are limited.',
+  workshopsCalendarCards: [
+    {
+      workshopType: 'lakto' as const,
+      nextDate: 'Mar 20',
+      duration: '3 Hours',
+      buttonLabel: 'More Info & Book',
+    },
+    {
+      workshopType: 'kombucha' as const,
+      nextDate: 'Mar 22',
+      duration: '3 Hours',
+      buttonLabel: 'More Info & Book',
+    },
+    {
+      workshopType: 'tempeh' as const,
+      nextDate: 'Mar 24',
+      duration: '3 Hours',
+      buttonLabel: 'More Info & Book',
+    },
+  ],
 }
 
 const workshopsProductSliderEN = {
@@ -156,10 +196,71 @@ async function seedWorkshops() {
     payload.logger.info('ℹ️  workshops-hero.png not found. Hero will use jar silhouettes.')
   }
 
-  // 2. Build workshops data with image if available
+  // 2. Upload workshop card images (lakto, kombucha, tempeh)
+  const workshopsDir = path.resolve(process.cwd(), 'seed-assets/media/workshops')
+  const cardImageIds: Record<string, string> = {}
+
+  for (const [type, filename] of Object.entries({
+    lakto: 'lakto.png',
+    kombucha: 'kombucha.png',
+    tempeh: 'tempeh.png',
+  })) {
+    try {
+      const cardImage = await payload.create({
+        collection: 'media',
+        context: { skipAutoTranslate: true, skipRevalidate: true },
+        data: {
+          alt:
+            type === 'lakto'
+              ? 'Lakto-Gemüse Workshop'
+              : type === 'kombucha'
+                ? 'Kombucha Workshop'
+                : 'Tempeh Workshop',
+        },
+        file: await optimizedFile(path.join(workshopsDir, filename), IMAGE_PRESETS.card),
+      })
+      cardImageIds[type] = cardImage.id
+      payload.logger.info(`✅ Uploaded ${type} workshop card image`)
+    } catch (err) {
+      payload.logger.warn(`⚠️  Could not upload ${type}.png: ${err}`)
+    }
+  }
+
+  // 3. Build workshops data with images and calendar cards
   const workshopsImageField = heroImageId ? { workshopsHeroImage: heroImageId } : {}
 
-  // 3. Save DE locale
+  // 4. Build calendar cards with images (merge uploaded IDs with base card data)
+  const addImagesToCards = (
+    cards: Array<{
+      workshopType: 'lakto' | 'kombucha' | 'tempeh' | 'basics'
+      nextDate: string
+      duration: string
+      buttonLabel: string
+    }>,
+  ) =>
+    cards.map((card) => ({
+      ...card,
+      ...(cardImageIds[card.workshopType]
+        ? { cardImage: cardImageIds[card.workshopType] }
+        : {}),
+    }))
+
+  // 5. Update locale data with calendar cards + images
+  const workshopsDataDEWithCards = {
+    ...workshopsPageDataDE.workshops,
+    workshopsCalendarCards: addImagesToCards(
+      workshopsPageDataDE.workshops.workshopsCalendarCards,
+    ),
+  }
+
+  const workshopsDataENWithCards = {
+    ...workshopsPageDataEN.workshops,
+    workshopsCalendarCards: addImagesToCards(
+      workshopsPageDataEN.workshops.workshopsCalendarCards,
+    ),
+  }
+
+  // 6. Save DE locale
   let workshopsPageId: string | number
 
   if (existing.docs.length > 0) {
@@ -172,7 +273,7 @@ async function seedWorkshops() {
       data: {
         ...workshopsPageDataDE,
         workshops: {
-          ...workshopsPageDataDE.workshops,
+          ...workshopsDataDEWithCards,
           ...workshopsImageField,
         },
       },
@@ -188,7 +289,7 @@ async function seedWorkshops() {
       data: {
         ...workshopsPageDataDE,
         workshops: {
-          ...workshopsPageDataDE.workshops,
+          ...workshopsDataDEWithCards,
           ...workshopsImageField,
         },
       },
@@ -198,7 +299,7 @@ async function seedWorkshops() {
     payload.logger.info('✅ Created German /workshops page')
   }
 
-  // 4. Save EN locale with same IDs
+  // 7. Save EN locale with same IDs
   await payload.update({
     collection: 'pages',
     id: workshopsPageId as string | number,
@@ -206,7 +307,7 @@ async function seedWorkshops() {
     data: {
       ...workshopsPageDataEN,
       workshops: {
-        ...workshopsPageDataEN.workshops,
+        ...workshopsDataENWithCards,
         ...workshopsImageField,
       },
     },

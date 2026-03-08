@@ -1,5 +1,6 @@
 'use client'
 
+import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { useEffect, useRef, useState } from 'react'
 
@@ -56,6 +57,12 @@ export function AllWorkshopsHero({ cms }: { cms?: AllWorkshopsHeroCMS }) {
       ? cms!.attributes!.map((a) => a.text ?? '').filter(Boolean)
       : ['3 Stunden', 'Hands-on', 'Experience']
 
+  // Handle Media objects — must have 'url' property to render
+  const heroImage =
+    cms?.image && typeof cms.image === 'object' && 'url' in cms.image
+      ? (cms.image as MediaType)
+      : null
+
   const [isVisible, setIsVisible] = useState(false)
   const heroRef = useRef<HTMLElement>(null)
 
@@ -87,17 +94,28 @@ export function AllWorkshopsHero({ cms }: { cms?: AllWorkshopsHeroCMS }) {
 
       {/* ── Mobile Layout (below lg) ───────────────────── */}
       <div className="flex w-full flex-col lg:hidden">
-        {/* Mobile top — jar silhouettes */}
+        {/* Mobile top — image or jar silhouettes */}
         <div className="relative h-[58vh] min-h-56 w-full overflow-hidden flex items-end justify-center pb-8 pt-28">
-          <div
-            className={`flex items-end gap-3 transition-all duration-1000 ${
-              isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-            }`}
-          >
-            <JarSilhouette className="h-32 w-16 -rotate-6" delay={200} />
-            <JarSilhouette className="h-40 w-18 rotate-2" delay={350} />
-            <JarSilhouette className="h-28 w-14 rotate-6" delay={500} />
-          </div>
+          {heroImage ? (
+            <div className="absolute inset-0">
+              <Media
+                resource={heroImage}
+                priority
+                className="h-full w-full object-cover"
+                imgClassName="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div
+              className={`flex items-end gap-3 transition-all duration-1000 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}
+            >
+              <JarSilhouette className="h-32 w-16 -rotate-6" delay={200} />
+              <JarSilhouette className="h-40 w-18 rotate-2" delay={350} />
+              <JarSilhouette className="h-28 w-14 rotate-6" delay={500} />
+            </div>
+          )}
         </div>
 
         {/* Mobile bottom — text */}
@@ -164,24 +182,35 @@ export function AllWorkshopsHero({ cms }: { cms?: AllWorkshopsHeroCMS }) {
 
       {/* ── Desktop Layout (lg+) ───────────────────────── */}
       <div className="hidden h-full min-h-svh w-full lg:flex">
-        {/* LEFT — jar silhouettes fill the entire left half */}
+        {/* LEFT — Background image or jar silhouettes */}
         <div className="relative flex-1 overflow-hidden flex items-end justify-center pb-16">
-          <div
-            className={`relative flex items-end gap-4 xl:gap-6 transition-all duration-1200 ${
-              isVisible
-                ? 'translate-y-0 opacity-100 scale-100'
-                : 'translate-y-12 opacity-0 scale-95'
-            }`}
-          >
-            <JarSilhouette className="h-44 w-20 -rotate-6 xl:h-52 xl:w-24" delay={300} />
-            <JarSilhouette className="h-56 w-24 rotate-2 xl:h-64 xl:w-28" delay={450} />
-            <JarSilhouette className="h-40 w-18 rotate-6 xl:h-48 xl:w-22" delay={600} />
-          </div>
+          {heroImage ? (
+            <div className="absolute inset-0">
+              <Media
+                resource={heroImage}
+                priority
+                className="h-full w-full object-cover"
+                imgClassName="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div
+              className={`relative flex items-end gap-4 xl:gap-6 transition-all duration-1200 ${
+                isVisible
+                  ? 'translate-y-0 opacity-100 scale-100'
+                  : 'translate-y-12 opacity-0 scale-95'
+              }`}
+            >
+              <JarSilhouette className="h-44 w-20 -rotate-6 xl:h-52 xl:w-24" delay={300} />
+              <JarSilhouette className="h-56 w-24 rotate-2 xl:h-64 xl:w-28" delay={450} />
+              <JarSilhouette className="h-40 w-18 rotate-6 xl:h-48 xl:w-22" delay={600} />
+            </div>
+          )}
         </div>
 
         {/* RIGHT — Panel with text */}
         <div
-          className="flex w-[44%] xl:w-[40%] flex-col items-center justify-center px-10 xl:px-16 text-center transition-colors duration-700"
+          className="relative z-10 flex w-[44%] xl:w-[40%] flex-col items-center justify-center px-10 xl:px-16 text-center transition-colors duration-700"
           style={{ backgroundColor: '#555954' }}
         >
           {/* Eyebrow */}

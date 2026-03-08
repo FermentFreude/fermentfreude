@@ -10,6 +10,7 @@ import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Content } from '@/blocks/Content/config'
 import { FeatureCards } from '@/blocks/FeatureCards/config'
 import { FormBlock } from '@/blocks/Form/config'
+import type { Field } from 'payload'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { OurStory } from '@/blocks/OurStory/config'
@@ -881,6 +882,64 @@ export const Pages: CollectionConfig = {
                   localized: true,
                   label: 'Section Description',
                   admin: { description: 'Intro text above the calendar.' },
+                },
+                {
+                  name: 'workshopsCalendarCards',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 10,
+                  label: 'Workshop Cards',
+                  admin: {
+                    description: 'Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).',
+                  },
+                  fields: [
+                    {
+                      name: 'workshopType',
+                      type: 'select',
+                      required: true,
+                      localized: true,
+                      label: 'Workshop Type',
+                      options: [
+                        { label: '🥬 Basics (Lacto-vegetables)', value: 'basics' },
+                        { label: '🥒 Lakto-Gemüse', value: 'lakto' },
+                        { label: '🫖 Kombucha', value: 'kombucha' },
+                        { label: '🌱 Tempeh', value: 'tempeh' },
+                      ],
+                    },
+                    {
+                      name: 'cardImage',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Card Image',
+                      admin: { description: 'Card background image for this workshop type.' },
+                    },
+                    {
+                      name: 'nextDate',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Next Date',
+                      admin: { description: 'e.g., "20. Mär" / "Mar 20"' },
+                    },
+                    {
+                      name: 'duration',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Duration',
+                      admin: { description: 'e.g., "3h 30m" / "3.5 Stunden"' },
+                    },
+                    {
+                      name: 'buttonLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Button Label',
+                      admin: { description: 'e.g., "Buchen" / "Book Now"' },
+                    },
+                  ],
                 },
               ],
             },

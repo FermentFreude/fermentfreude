@@ -79,7 +79,7 @@ export default async function WorkshopsPage() {
             </p>
           )}
         </div>
-        <WorkshopCalendar />
+        <WorkshopCalendar cards={workshopsData?.workshops?.workshopsCalendarCards} />
       </section>
 
       {/* 3. Product Slider - CMS editable title/description */}
@@ -159,7 +159,7 @@ const queryPageBySlug = async ({
     draft,
     limit: 1,
     locale,
-    overrideAccess: draft,
+    overrideAccess: true,
     pagination: false,
     where: {
       and: [
