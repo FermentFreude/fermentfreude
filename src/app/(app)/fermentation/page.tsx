@@ -12,18 +12,16 @@ import { Fragment } from 'react'
 
 import type { Media as MediaType, Page as PageType } from '@/payload-types'
 
+type HeroBlock = { id?: string; title: string; description?: string; icon?: string | MediaType | null; url?: string }
 const HERO_BLOCK_COLORS = ['#FAF2E0', '#E6BE68', '#4B4B4B', '#EDD195'] as const
-const DEFAULT_HERO_BLOCKS: Array<{
-  id?: string
-  title: string
-  description?: string
-  icon?: unknown
-  url?: string
-}> = [
-  {
-    title: 'Health & Well-being',
-    description: 'Support your gut microbiome with probiotic-rich foods.',
-  },
+const HERO_BLOCK_ICONS = [
+  '/assets/images/fermentation/icon-probiotics.svg',
+  '/assets/images/fermentation/icon-enzymes.svg',
+  '/assets/images/fermentation/icon-nutrition.svg',
+  '/assets/images/fermentation/icon-preservation.svg',
+] as const
+const DEFAULT_HERO_BLOCKS: HeroBlock[] = [
+  { title: 'Health & Well-being', description: 'Support your gut microbiome with probiotic-rich foods.' },
   { title: 'Unique Flavours', description: 'Discover complex umami and tangy taste profiles.' },
   { title: 'Simple Processes', description: 'No special equipment—just salt, time, and patience.' },
   {
@@ -102,6 +100,7 @@ const DEFAULT_PRACTICE_PARAGRAPHS = [
 const DEFAULT_CTA_TITLE = 'Ready to learn?'
 const DEFAULT_CTA_DESCRIPTION =
   'Join our workshops and online courses to learn hands-on fermentation techniques, ask questions, and connect with a community of learners.'
+const DEFAULT_CTA_VIDEO = '/assets/videos/VIDEO-2026-02-06-12-18-34.mp4'
 const DEFAULT_CTA_PRIMARY = 'View workshops'
 const DEFAULT_CTA_PRIMARY_URL = '/workshops'
 const DEFAULT_CTA_SECONDARY = 'Browse online courses'
@@ -305,7 +304,33 @@ export default async function FermentationPage() {
   const ctaPrimaryUrl = f?.fermentationCtaPrimaryUrl ?? DEFAULT_CTA_PRIMARY_URL
   const ctaSecondaryLabel = f?.fermentationCtaSecondaryLabel ?? DEFAULT_CTA_SECONDARY
   const ctaSecondaryUrl = f?.fermentationCtaSecondaryUrl ?? DEFAULT_CTA_SECONDARY_URL
-  const ctaVideoUrl = f?.fermentationCtaVideoUrl
+  let ctaVideoMedia = f?.fermentationCtaVideo
+  if (ctaVideoMedia && typeof ctaVideoMedia === 'string') {
+    try {
+      const mediaDoc = await payload.findByID({
+        collection: 'media',
+        id: ctaVideoMedia,
+        depth: 0,
+      })
+      ctaVideoMedia = mediaDoc as MediaType
+    } catch {
+      ctaVideoMedia = undefined
+    }
+  }
+  const ctaVideoUrlFromText = f?.fermentationCtaVideoUrl
+  const ctaVideoUrl =
+    (typeof ctaVideoMedia === 'object' &&
+    ctaVideoMedia !== null &&
+    'url' in ctaVideoMedia &&
+    typeof (ctaVideoMedia as { url?: string; mimeType?: string }).url === 'string')
+      ? (ctaVideoMedia as { url: string }).url
+      : ctaVideoUrlFromText ?? DEFAULT_CTA_VIDEO
+  const ctaVideoMimeType =
+    typeof ctaVideoMedia === 'object' &&
+    ctaVideoMedia !== null &&
+    typeof (ctaVideoMedia as { mimeType?: string }).mimeType === 'string'
+      ? (ctaVideoMedia as { mimeType: string }).mimeType
+      : 'video/mp4'
   const ctaBackgroundImage = f?.fermentationCtaBackgroundImage
 
   // Workshop section — fermentation or gastronomy fallback
@@ -370,29 +395,21 @@ export default async function FermentationPage() {
                 style={{ top: -80 }}
               >
                 {isResolvedMedia(heroImage) ? (
-                  <Media
-                    resource={heroImage}
-                    fill
-                    imgClassName="object-cover object-center"
-                    priority
-                  />
+                  <Media resource={heroImage} fill imgClassName="object-contain" priority />
                 ) : (
-                  <div className="flex size-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-ff-gray-text/30 bg-[#E8E6E3]">
-                    <span className="text-sm font-medium text-ff-gray-text">Hero image</span>
-                    <span className="text-xs text-ff-gray-text/80">
-                      Upload in Admin → Pages → Fermentation → Hero Image
-                    </span>
-                  </div>
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src="/assets/images/fermentation/hero-founders.png"
+                    alt="Fermentation – founders"
+                    className="size-full object-contain object-bottom"
+                  />
                 )}
               </div>
             </div>
 
             {/* 4 boxes — behind the image */}
-            <div className="relative z-0 -mt-12 pb-16 md:-mt-20 lg:-mt-28">
-              <div
-                className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-                style={{ position: 'inherit' }}
-              >
+            <div className="relative z-0 -mt-32 pb-16 md:-mt-20 lg:-mt-28">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" style={{ position: 'inherit' }}>
                 {heroBlocks.slice(0, 4).map((block, i) => {
                   const bgColor = HERO_BLOCK_COLORS[i] ?? HERO_BLOCK_COLORS[0]
                   const isDark = bgColor === '#4B4B4B'
@@ -401,7 +418,7 @@ export default async function FermentationPage() {
                       className="rounded-2xl p-6 text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl"
                       style={{ backgroundColor: bgColor }}
                     >
-                      {/* 1. Icon (upload from Admin → Hero Blocks) */}
+                      {/* 1. Icon (from CMS or fallback to static SVG) */}
                       <div className="mx-auto mb-4 flex size-12 items-center justify-center [&_img]:animate-[gentle-float_3s_ease-in-out_infinite]">
                         {isResolvedMedia((block as { icon?: unknown }).icon) ? (
                           <Media
@@ -411,11 +428,12 @@ export default async function FermentationPage() {
                             imgClassName={`size-12 object-contain ${isDark ? 'brightness-0 invert' : ''}`}
                           />
                         ) : (
-                          <div
-                            className={`size-12 rounded-lg ${
-                              isDark ? 'bg-white/20' : 'bg-ff-gray-text/10'
-                            }`}
-                            title="Upload icon in Admin → Pages → Fermentation → Hero Blocks"
+                          <img
+                            src={HERO_BLOCK_ICONS[i] ?? HERO_BLOCK_ICONS[0]}
+                            alt=""
+                            width={48}
+                            height={48}
+                            className={`size-12 object-contain ${isDark ? 'brightness-0 invert' : ''}`}
                           />
                         )}
                       </div>
@@ -489,13 +507,7 @@ export default async function FermentationPage() {
         <FadeIn delay={100}>
           <div className="mx-auto max-w-379 px-4 sm:px-6">
             <div className="rounded-2xl bg-[#F5F0E8] p-6 sm:p-8 md:p-12">
-              <div
-                className={
-                  isResolvedMedia(whatImage)
-                    ? 'grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start'
-                    : ''
-                }
-              >
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start">
                 <div>
                   <h2 className="font-display text-2xl font-bold leading-tight text-ff-black sm:text-3xl md:text-4xl lg:text-[2.75rem]">
                     {whatTitle}
@@ -506,16 +518,34 @@ export default async function FermentationPage() {
                     </p>
                   )}
                   {whatMotto && (
-                    <p className="mt-8 font-bold leading-relaxed whitespace-pre-line text-ff-black text-base sm:mt-10 sm:text-lg md:mt-14 md:text-xl lg:mt-15.5 lg:text-[1.5625rem]">
-                      {whatMotto.replace('. Just ', '.\nJust ')}
-                    </p>
+                    <blockquote className="mt-8 sm:mt-10 md:mt-12">
+                      <p className="font-display text-lg font-bold leading-relaxed text-ff-black sm:text-xl md:text-2xl">
+                        <span className="text-[#E6BE68]">&quot;</span>
+                        {whatMotto.split('. ').filter(Boolean).map((phrase, i, arr) => (
+                          <span key={i}>
+                            {phrase}{phrase.endsWith('.') ? '' : '.'}
+                            {i < arr.length - 1 && <br />}
+                          </span>
+                        ))}
+                        <span className="text-[#E6BE68]">&quot;</span>
+                      </p>
+                    </blockquote>
                   )}
                 </div>
-                {isResolvedMedia(whatImage) && (
-                  <div className="aspect-4/3 w-full overflow-hidden rounded-2xl">
+                <div className="aspect-4/3 w-full overflow-hidden rounded-2xl shadow-md">
+                  {isResolvedMedia(whatImage) ? (
                     <Media resource={whatImage} fill imgClassName="object-cover object-center" />
-                  </div>
-                )}
+                  ) : isResolvedMedia(guideImage) ? (
+                    <Media resource={guideImage} fill imgClassName="object-cover object-center" />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src="/assets/images/fermentation/what-is-fermentation.png"
+                      alt="What is fermentation – daikon kimchi"
+                      className="size-full object-cover object-center"
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -670,7 +700,7 @@ export default async function FermentationPage() {
                         : undefined
                     }
                   >
-                    <source src={ctaVideoUrl} type="video/mp4" />
+                    <source src={ctaVideoUrl} type={ctaVideoMimeType} />
                   </video>
                   <div className="absolute inset-0 bg-black/60" aria-hidden />
                 </>
@@ -782,25 +812,53 @@ export default async function FermentationPage() {
       {/* Workshop cards — shared with gastronomy, uses gastronomy data */}
       <FadeIn delay={400}>
         <WorkshopCardsSection
-          title={workshopTitleSuffix ? `${workshopTitle} ${workshopTitleSuffix}` : workshopTitle}
-          subtitle={workshopSubtitle}
-          nextDateLabel={workshopNextDateLabel}
-          viewAllLabel={workshopViewAllLabel}
-          viewAllUrl={workshopViewAllUrl}
-          cards={workshopCards.map((c) => ({
-            id: (c as { id?: string }).id,
-            title: c.title,
-            description: c.description,
-            image: (c as { image?: unknown }).image,
-            price: (c as { price?: string }).price,
-            priceSuffix: (c as { priceSuffix?: string }).priceSuffix,
-            buttonLabel: (c as { buttonLabel?: string }).buttonLabel,
-            buttonUrl: (c as { buttonUrl?: string }).buttonUrl,
-            nextDate: (c as { nextDate?: string }).nextDate,
-          }))}
-          cardBg="#ffffff"
-          layout="inline"
-        />
+        title={
+          workshopTitleSuffix ? `${workshopTitle} ${workshopTitleSuffix}` : workshopTitle
+        }
+        subtitle={workshopSubtitle}
+        nextDateLabel={workshopNextDateLabel}
+        viewAllLabel={workshopViewAllLabel}
+        viewAllUrl={workshopViewAllUrl}
+        cards={workshopCards.map((c, idx) => {
+          const card = c as {
+            id?: string
+            title: string
+            description: string
+            image?: unknown
+            price?: string
+            priceSuffix?: string
+            buttonLabel?: string
+            buttonUrl?: string
+            nextDate?: string
+          }
+          const fallbacksByUrl: Record<string, string> = {
+            '/workshops/lakto-gemuese': '/assets/images/fermentation/workshop-lakto.png',
+            '/workshops/kombucha': '/assets/images/fermentation/workshop-kombucha.png',
+            '/workshops/tempeh': '/assets/images/fermentation/workshop-tempeh.png',
+          }
+          const fallbacksByIndex = [
+            '/assets/images/fermentation/workshop-lakto.png',
+            '/assets/images/fermentation/workshop-kombucha.png',
+            '/assets/images/fermentation/workshop-tempeh.png',
+          ]
+          const fallback =
+            (card.buttonUrl && fallbacksByUrl[card.buttonUrl]) ?? fallbacksByIndex[idx]
+          const image = fallback ? { url: fallback } : card.image
+          return {
+            id: card.id,
+            title: card.title,
+            description: card.description,
+            image,
+            price: card.price,
+            priceSuffix: card.priceSuffix,
+            buttonLabel: card.buttonLabel,
+            buttonUrl: card.buttonUrl,
+            nextDate: card.nextDate,
+          }
+        })}
+        cardBg="#ffffff"
+        layout="inline"
+      />
       </FadeIn>
 
       {page?.id && (
