@@ -133,9 +133,9 @@ export function WorkshopCardsSection({
                     {String(card.buttonLabel).replace(/\s+>\s*$/, '')}
                   </Link>
                 )}
-                {card.nextDate && nextDateLabel && (
+                {card.nextDate && (
                   <p className="mt-4 text-body-sm text-ff-black/70">
-                    {nextDateLabel} {card.nextDate}
+                    {nextDateLabel ? `${nextDateLabel} ` : ''}{card.nextDate}
                   </p>
                 )}
               </div>

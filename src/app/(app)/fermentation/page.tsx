@@ -4,6 +4,10 @@ import { EditPageLink } from '@/components/EditPageLink'
 import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
 import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
+import { DangerAccordion } from '@/app/(app)/fermentation/DangerAccordion'
+import { FaqAccordion } from '@/app/(app)/fermentation/FaqAccordion'
+import { PracticeAccordion } from '@/app/(app)/fermentation/PracticeAccordion'
+import { WhySection } from '@/app/(app)/fermentation/WhySection'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import Link from 'next/link'
@@ -21,46 +25,50 @@ const HERO_BLOCK_ICONS = [
   '/assets/images/fermentation/icon-preservation.svg',
 ] as const
 const DEFAULT_HERO_BLOCKS: HeroBlock[] = [
-  { title: 'START NOW', description: 'Embrace the world of fermentation with us.', url: '/workshops' },
-  { title: 'PRODUCTS', description: 'Discover our unique selection of fermented delights.', url: '/shop' },
-  { title: 'WORKSHOPS', description: 'Learn the art of fermentation from our experts.', url: '/workshops' },
-  { title: 'VOUCHER', description: 'Give the gift of flavor and health to your loved ones.', url: '/workshops/voucher' },
+  { title: 'RAW MILK', description: 'Learn more about dairy fermentation.', url: '/workshops/basics' },
+  { title: 'KOMBUCHA', description: 'Discover fermented tea and its benefits.', url: '/workshops/kombucha' },
+  { title: 'FERMENTS', description: 'Explore lacto-fermentation and vegetables.', url: '/workshops/lakto-gemuese' },
+  { title: 'TEMPEH', description: 'Master plant-based protein fermentation.', url: '/workshops/tempeh' },
 ]
 
 const DEFAULT_HERO_TITLE = 'Innovation meets Tradition'
 const DEFAULT_HERO_DESCRIPTION =
-  'Unlock the secrets of ancient preservation techniques and transform your kitchen into a hub of delicious, gut-friendly creations.'
+  'Our courses combine ancient fermentation techniques with modern culinary applications. Learn how to craft delicious and nutritious fermented foods at home.'
 const DEFAULT_GUIDE_TAG = 'Quick Guide'
 const DEFAULT_GUIDE_TITLE = 'A complete guide to fermentation'
 const DEFAULT_GUIDE_BODY =
   'Unlock the secrets of traditional preservation and create your own fermented delights.'
 const DEFAULT_WHAT_TITLE = 'What is fermentation?'
 const DEFAULT_WHAT_BODY =
-  'Fermentation is a natural metabolic process where microorganisms like bacteria, yeast, and fungi convert organic compounds—usually carbohydrates—into alcohol, gases, or organic acids.'
+  "This is an ancient food preservation technique. Why not learn how to get started? We'll help you master the art of fermentation in the comfort of your own kitchen."
 const DEFAULT_WHAT_MOTTO = 'No additives. No shortcuts. Just patience and care.'
+const DEFAULT_WHAT_LIST_ITEMS = ['Microbiome', 'Botanical', 'Living microorganisms']
 const DEFAULT_WHY_TITLE = 'Why is it so special?'
 const DEFAULT_WHY_ITEMS: Array<{ id?: string; title: string; description: string }> = [
   {
-    title: 'Improved gut health and well-being',
-    description: 'Fermented foods support a healthy microbiome.',
+    title: 'Improves gut flora and overall well-being',
+    description: 'Probiotics support a healthy gut microbiome and can aid digestion.',
   },
   {
-    title: 'Rich flavors and aromas',
-    description: 'Creates complex umami and tangy profiles.',
+    title: 'Rich in flavors and aromas',
+    description: 'Fermented foods develop unique, complex flavor profiles.',
   },
   {
     title: 'Easy and cost-effective',
-    description: 'No special equipment needed—just salt, time, and patience.',
+    description: 'With few ingredients and simple techniques, you can ferment at home.',
   },
   {
-    title: 'Part of a balanced lifestyle',
-    description: 'Integrates traditional wisdom with modern nutrition.',
+    title: 'Supports a balanced lifestyle',
+    description: 'Fermented foods fit perfectly into a mindful diet.',
   },
   {
     title: 'Eco-friendly and sustainable',
-    description: 'Reduces food waste and extends shelf life naturally.',
+    description: 'Fermentation reduces food waste and extends shelf life naturally.',
   },
-  { title: 'Diverse applications', description: 'From vegetables to dairy, grains to beverages.' },
+  {
+    title: 'Diverse applications',
+    description: 'From vegetables to drinks to soy products - fermentation is versatile.',
+  },
 ]
 const DEFAULT_DANGER_TITLE = 'Is it dangerous?'
 const DEFAULT_DANGER_INTRO =
@@ -99,60 +107,85 @@ const DEFAULT_PRACTICE_PARAGRAPHS = [
 ]
 const DEFAULT_CTA_TITLE = 'Ready to learn?'
 const DEFAULT_CTA_DESCRIPTION =
-  'Join our workshops and online courses to learn hands-on fermentation techniques, ask questions, and connect with a community of learners.'
+  'Join our workshops and discover the fascinating world of fermented foods.'
 const DEFAULT_CTA_VIDEO = '/assets/videos/VIDEO-2026-02-06-12-18-34.mp4'
-const DEFAULT_CTA_PRIMARY = 'Workshops'
+const DEFAULT_CTA_PRIMARY = 'View workshops'
 const DEFAULT_CTA_PRIMARY_URL = '/workshops'
-const DEFAULT_CTA_SECONDARY = 'Recipes'
-const DEFAULT_CTA_SECONDARY_URL = '/tipps'
+const DEFAULT_CTA_SECONDARY = 'Browse online courses'
+const DEFAULT_CTA_SECONDARY_URL = '/workshops'
 const DEFAULT_WORKSHOP_TITLE = 'Learn UNIQUE.'
 const DEFAULT_WORKSHOP_TITLE_SUFFIX = 'FLAVOURS'
 const DEFAULT_WORKSHOP_SUBTITLE =
-  'Explore a variety of fermented foods and beverages that will tantalize your taste buds.'
+  'Explore our different courses and discover what you can create.'
 const DEFAULT_WORKSHOP_VIEW_ALL = 'View All'
 const DEFAULT_WORKSHOP_VIEW_ALL_URL = '/workshops'
 const DEFAULT_WORKSHOP_NEXT_DATE_LABEL = 'Next Date:'
 const DEFAULT_WORKSHOP_CARDS = [
   {
-    title: 'Lacto-Gamba',
+    title: 'Lakto-Gemüse',
     description:
       'Ferment vegetables, experience flavours – different every month. Live online session.',
-    price: '€14.99',
+    price: 'From €4,200',
     priceSuffix: '',
-    buttonLabel: 'Add to Cart',
+    buttonLabel: 'BOOK NOW',
     buttonUrl: '/workshops/lakto-gemuese',
-    nextDate: '',
+    nextDate: 'Starts May 4, 2026',
   },
   {
     title: 'Kombucha',
     description:
       'Dive into the world of fermented tea – full of character and aromas. Interactive online.',
-    price: '€8.99',
+    price: 'From €1,800',
     priceSuffix: '',
-    buttonLabel: 'Add to Cart',
+    buttonLabel: 'BOOK NOW',
     buttonUrl: '/workshops/kombucha',
-    nextDate: '',
+    nextDate: 'Starts May 4, 2026',
   },
   {
     title: 'Tempeh',
     description:
       'Rediscover a plant-based protein source – mild, nutty and versatile. Online masterclass.',
-    price: '€23.99',
+    price: 'From €2,500',
     priceSuffix: '',
-    buttonLabel: 'Add to Cart',
+    buttonLabel: 'BOOK NOW',
     buttonUrl: '/workshops/tempeh',
-    nextDate: '',
+    nextDate: 'Starts May 4, 2026',
   },
 ]
 const DEFAULT_FAQ_TITLE = 'Frequently Asked Questions'
-const DEFAULT_FAQ_SUBTITLE = 'Here are some common questions we get about fermentation.'
+const DEFAULT_FAQ_SUBTITLE = 'Common questions about fermentation answered.'
 const DEFAULT_FAQ_CTA_TITLE = 'Ready to Start Fermenting?'
 const DEFAULT_FAQ_CTA_BODY =
-  'Begin with simple vegetables like cabbage or cucumbers, use the proper salt ratio (2-3% by weight), and trust the process!'
+  'Begin with simple vegetables like cabbage or cucumbers, use the proper salt ratio (2–3% by weight), and trust the process!'
 const DEFAULT_FAQ_MORE = "Can't find your answer?"
 const DEFAULT_FAQ_CONTACT = 'Contact Us'
 const DEFAULT_FAQ_CONTACT_URL = '/contact'
 const DEFAULT_FAQ_ITEMS: Array<{ id?: string; question: string; answer: string }> = [
+  {
+    question: 'What ingredients do I need?',
+    answer:
+      'Basic lacto-fermentation needs vegetables, salt (2–3% by weight), and water. No special equipment required.',
+  },
+  {
+    question: 'Do I need special equipment?',
+    answer:
+      'No. A clean jar, a weight to keep vegetables submerged, and a lid are enough. Our workshops cover simple setups.',
+  },
+  {
+    question: 'How long does fermentation take?',
+    answer:
+      'It varies. Sauerkraut can be ready in 1–2 weeks; kimchi in 3–5 days. Taste regularly to find your preference.',
+  },
+  {
+    question: 'What if I make a mistake?',
+    answer:
+      'Most mistakes are fixable. Mold on the surface can often be removed. Our workshops teach you how to troubleshoot.',
+  },
+  {
+    question: 'Is it safe to eat?',
+    answer:
+      'Yes. Fermentation creates an acidic environment that inhibits harmful bacteria. When done correctly, it is one of the safest preservation methods.',
+  },
   {
     question: 'Does fermentation kill bacteria?',
     answer:
@@ -162,11 +195,6 @@ const DEFAULT_FAQ_ITEMS: Array<{ id?: string; question: string; answer: string }
     question: 'Can I ferment at room temperature?',
     answer:
       'Yes. Most lacto-fermentation works best at 18–24°C (65–75°F). Cooler slows the process; warmer speeds it up.',
-  },
-  {
-    question: 'How long does fermentation take?',
-    answer:
-      'It varies. Sauerkraut can be ready in 1–2 weeks; kimchi in 3–5 days. Taste regularly to find your preference.',
   },
   {
     question: 'Is fermentation the same as pickling?',
@@ -288,7 +316,11 @@ export default async function FermentationPage({ searchParams }: FermentationPag
   const whatTitle = f?.fermentationWhatTitle ?? DEFAULT_WHAT_TITLE
   const whatBody = f?.fermentationWhatBody ?? DEFAULT_WHAT_BODY
   const whatMotto = f?.fermentationWhatMotto ?? DEFAULT_WHAT_MOTTO
-  const _whatLinks = f?.fermentationWhatLinks ?? []
+  const whatLinks = f?.fermentationWhatLinks ?? []
+  const whatListItems =
+    whatLinks.length > 0
+      ? whatLinks.map((l) => (typeof l === 'object' && l !== null && 'label' in l ? String((l as { label?: string }).label) : '')).filter(Boolean)
+      : DEFAULT_WHAT_LIST_ITEMS
   const whatImage = f?.fermentationWhatImage
 
   const whyTitle = f?.fermentationWhyTitle ?? DEFAULT_WHY_TITLE
@@ -394,12 +426,13 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                 {heroDescription}
               </p>
             )}
-            <h2
-              className="mt-10 max-w-2xl font-display text-subheading font-bold uppercase tracking-wide md:mt-12"
+            <Link
+              href="#what"
+              className="mt-10 inline-block font-display text-subheading font-bold uppercase tracking-wide transition-colors hover:text-ff-black md:mt-12"
               style={{ color: '#555954' }}
             >
               {heroBenefitsTitle}
-            </h2>
+            </Link>
           </div>
 
           {/* Image + 4 boxes — wrapped together */}
@@ -533,6 +566,19 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                       {whatBody}
                     </p>
                   )}
+                  {whatListItems.length > 0 && (
+                    <ul className="mt-6 space-y-2 sm:mt-8">
+                      {whatListItems.map((item, i) => (
+                        <li
+                          key={i}
+                          className="flex items-center gap-2 text-body font-medium text-ff-black sm:text-lg"
+                        >
+                          <span className="size-1.5 shrink-0 rounded-full bg-[#E6BE68]" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {whatMotto && (
                     <blockquote className="mt-8 sm:mt-10 md:mt-12">
                       <p className="font-display text-lg font-bold leading-relaxed text-ff-black sm:text-xl md:text-2xl">
@@ -568,140 +614,39 @@ export default async function FermentationPage({ searchParams }: FermentationPag
         </FadeIn>
       </section>
 
-      {/* Why is it so special? — light beige block, 6 items in 2 columns */}
+      {/* Why is it so special? — BENEFITS label, 2x3 cards with numbers & icons */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={150}>
-          <div className="mx-auto max-w-379 px-4 sm:px-6">
-            <div className="rounded-2xl bg-[#F9F0DC] p-6 sm:p-10 md:p-14 lg:p-16">
-              <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
-                <div className="flex-1">
-                  <h2 className="font-display text-section-heading font-bold tracking-tight text-ff-black">
-                    {whyTitle}
-                  </h2>
-                  <div className="mt-8 grid grid-cols-1 gap-x-16 gap-y-8 sm:mt-10 sm:gap-y-10 md:grid-cols-2 md:mt-12 md:gap-y-12 lg:gap-x-20">
-                    {whyItems.map((item, i) => (
-                      <div
-                        key={item.id ?? i}
-                        className="border-l-2 border-ff-black/20 pl-4 sm:pl-6 md:pl-8"
-                      >
-                        <h3 className="font-display text-title font-bold leading-tight text-ff-black md:text-subheading">
-                          {item.title}
-                        </h3>
-                        <p className="mt-3 text-body leading-relaxed text-ff-black md:text-body-lg">
-                          {item.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {isResolvedMedia(whyImage) && (
-                  <div className="w-full shrink-0 md:w-80 lg:w-96">
-                    <div className="aspect-4/3 overflow-hidden rounded-2xl">
-                      <Media resource={whyImage} fill imgClassName="object-cover object-center" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+          <WhySection title={whyTitle} items={whyItems} image={whyImage} />
+        </FadeIn>
+      </section>
+
+      {/* Is it dangerous? / A practice, not a trend — accordions */}
+      <section className="section-padding-sm bg-white">
+        <FadeIn delay={185}>
+          <div className="mx-auto max-w-379 space-y-6 px-4 sm:px-6">
+            <DangerAccordion
+              title={dangerTitle}
+              intro={dangerIntro ?? ''}
+              concernsHeading={dangerConcernsHeading ?? ''}
+              concerns={dangerConcerns}
+              closing={dangerClosing ?? ''}
+            />
+            <PracticeAccordion
+              title={practiceTitle}
+              paragraphs={practiceParagraphs}
+              image={practiceImage}
+            />
           </div>
         </FadeIn>
       </section>
 
-      {/* Is it dangerous? — light gray block */}
+      {/* Ready to learn? CTA — dark banner with image/video, EXPLORE WORKSHOPS button */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={200}>
-          <div className="mx-auto max-w-379 px-4 sm:px-6">
-            <div className="rounded-2xl bg-[#ECE5DE] p-6 sm:p-8 md:p-12">
-              <h2 className="font-display text-section-heading font-bold text-ff-black">
-                {dangerTitle}
-              </h2>
-              {dangerIntro && (
-                <p className="mt-4 text-body leading-relaxed text-ff-black sm:mt-6 sm:text-body-lg">
-                  {dangerIntro}
-                </p>
-              )}
-              {dangerConcerns.length > 0 && dangerConcernsHeading && (
-                <div className="mt-8 sm:mt-10">
-                  <h3 className="font-display text-title font-bold text-ff-black md:text-subheading">
-                    {dangerConcernsHeading}
-                  </h3>
-                  <ul className="mt-4 space-y-4 sm:mt-6 sm:space-y-5">
-                    {dangerConcerns.map((concern, i) => (
-                      <li
-                        key={concern.id ?? i}
-                        className="border-l-2 border-ff-black/20 pl-4 sm:pl-6"
-                      >
-                        <span className="font-display font-bold text-ff-black">
-                          {concern.title}:
-                        </span>{' '}
-                        <span className="text-body leading-relaxed text-ff-black sm:text-body-lg">
-                          {concern.description}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {dangerClosing && (
-                <p className="mt-6 text-body leading-relaxed text-ff-black sm:mt-8 sm:text-body-lg">
-                  {dangerClosing}
-                </p>
-              )}
-            </div>
-          </div>
-        </FadeIn>
-      </section>
-
-      {/* A practice, not a trend — light cream block */}
-      <section className="section-padding-sm bg-white">
-        <FadeIn delay={250}>
-          <div className="mx-auto max-w-379 px-4 sm:px-6">
-            <div className="rounded-2xl bg-[#FAF2E0] p-6 sm:p-10 md:p-14 lg:p-16">
-              <div
-                className={
-                  isResolvedMedia(practiceImage)
-                    ? 'grid grid-cols-1 gap-8 lg:grid-cols-4 lg:gap-12'
-                    : ''
-                }
-              >
-                <div className={isResolvedMedia(practiceImage) ? 'lg:col-span-3' : ''}>
-                  <h2 className="font-display text-section-heading font-bold tracking-tight text-ff-black">
-                    {practiceTitle}
-                  </h2>
-                  <div className="mt-8 max-w-3xl space-y-6 sm:mt-10 sm:space-y-7 md:space-y-8">
-                    {practiceParagraphs.map((para, i) => (
-                      <p
-                        key={i}
-                        className="border-l-2 border-ff-black/20 pl-4 text-body leading-[1.7] text-ff-black sm:pl-6 sm:text-body-lg md:leading-[1.75]"
-                      >
-                        {para}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-                {isResolvedMedia(practiceImage) && (
-                  <div className="lg:col-span-1">
-                    <div className="aspect-4/3 overflow-hidden rounded-2xl">
-                      <Media
-                        resource={practiceImage}
-                        fill
-                        imgClassName="object-cover object-center"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </FadeIn>
-      </section>
-
-      {/* Ready to learn? CTA — gold block or video bg, two buttons */}
-      <section className="section-padding-sm bg-white">
-        <FadeIn delay={300}>
           <div className="mx-auto max-w-379 px-4 sm:px-6 text-center">
-            <div className="relative min-h-70 overflow-hidden rounded-2xl bg-[#E6BE68] px-8 py-16 md:px-16">
-              {/* Optional video background */}
+            <div className="relative min-h-70 overflow-hidden rounded-2xl bg-[#555954] px-8 py-16 md:px-16">
+              {/* Optional video or image background */}
               {ctaVideoUrl ? (
                 <>
                   <video
@@ -718,52 +663,47 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                   >
                     <source src={ctaVideoUrl} type={ctaVideoMimeType} />
                   </video>
-                  <div className="absolute inset-0 bg-black/60" aria-hidden />
+                  <div className="absolute inset-0 bg-[#333333]/80" aria-hidden />
+                </>
+              ) : isResolvedMedia(ctaBackgroundImage) ? (
+                <>
+                  <Media
+                    resource={ctaBackgroundImage as MediaType}
+                    fill
+                    imgClassName="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-[#333333]/80" aria-hidden />
                 </>
               ) : (
                 <div
-                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(255,255,255,0.25),transparent)]"
+                  className="pointer-events-none absolute inset-0 bg-[#555954]"
                   aria-hidden
                 />
               )}
               <div className="relative z-10">
-                <h2
-                  className={`font-display text-section-heading font-bold drop-shadow-md ${
-                    ctaVideoUrl ? 'text-white' : 'text-ff-black'
-                  }`}
-                >
+                <h2 className="font-display text-section-heading font-bold text-white drop-shadow-md">
                   {ctaTitle}
                 </h2>
                 {ctaDescription && (
-                  <p
-                    className={`mt-4 text-body-lg leading-relaxed drop-shadow-md ${
-                      ctaVideoUrl ? 'text-white/95' : 'text-ff-black/90'
-                    }`}
-                  >
+                  <p className="mt-4 text-body-lg leading-relaxed text-white/95 drop-shadow-md">
                     {ctaDescription}
                   </p>
                 )}
                 <div className="mt-8 flex flex-wrap justify-center gap-4">
                   <Link
                     href={ctaPrimaryUrl}
-                    className={
-                      ctaVideoUrl
-                        ? 'inline-flex items-center justify-center rounded-full bg-[#E6BE68] px-8 py-3.5 font-display text-sm font-bold text-[#1a1a1a] shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.05] hover:bg-[#EDD195] hover:shadow-xl'
-                        : 'inline-flex items-center justify-center rounded-full bg-[#333333] px-8 py-3.5 font-display text-sm font-bold text-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.05] hover:bg-[#1a1a1a] hover:shadow-xl'
-                    }
+                    className="inline-flex items-center justify-center rounded-full bg-[#E6BE68] px-8 py-3.5 font-display text-sm font-bold text-[#1a1a1a] shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-[1.05] hover:bg-[#EDD195] hover:shadow-xl"
                   >
                     {ctaPrimaryLabel}
                   </Link>
-                  <Link
-                    href={ctaSecondaryUrl}
-                    className={
-                      ctaVideoUrl
-                        ? 'inline-flex items-center justify-center rounded-full bg-white/10 px-8 py-3.5 font-display text-sm font-bold text-white backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:scale-[1.05] hover:bg-white/20 hover:shadow-lg'
-                        : 'inline-flex items-center justify-center rounded-full border-2 border-[#333333] bg-white px-8 py-3.5 font-display text-sm font-bold text-[#333333] shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-[1.05] hover:border-[#1a1a1a] hover:bg-[#f5f5f5] hover:shadow-lg'
-                    }
-                  >
-                    {ctaSecondaryLabel}
-                  </Link>
+                  {ctaSecondaryLabel && (
+                    <Link
+                      href={ctaSecondaryUrl ?? '#'}
+                      className="inline-flex items-center justify-center rounded-full bg-white/10 px-8 py-3.5 font-display text-sm font-bold text-white backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:scale-[1.05] hover:bg-white/20 hover:shadow-lg"
+                    >
+                      {ctaSecondaryLabel}
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
@@ -771,9 +711,9 @@ export default async function FermentationPage({ searchParams }: FermentationPag
         </FadeIn>
       </section>
 
-      {/* FAQ — centered, light gray container */}
+      {/* FAQ — accordion style */}
       <section className="section-padding-sm bg-white">
-        <FadeIn delay={350}>
+        <FadeIn delay={250}>
           <div className="mx-auto max-w-379 px-4 sm:px-6">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="font-display text-section-heading font-bold text-ff-black">
@@ -784,29 +724,10 @@ export default async function FermentationPage({ searchParams }: FermentationPag
               )}
             </div>
             <div className="mx-auto mt-8 max-w-4xl">
-              <div className="rounded-2xl border border-[#333333]/15 bg-[#E8E6E3] p-6 sm:p-8 md:p-10">
-                <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
-                  {faqItems.map((item, i) => (
-                    <div
-                      key={item.id ?? i}
-                      className="flex gap-4 rounded-xl bg-white/90 p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-                    >
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#333333]/10 font-display text-base font-bold text-ff-black">
-                        ?
-                      </span>
-                      <div>
-                        <h3 className="font-display text-title font-bold text-ff-black">
-                          {item.question}
-                        </h3>
-                        <p className="mt-2 text-body-sm leading-relaxed text-ff-black/90">
-                          {item.answer}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className="overflow-hidden rounded-2xl border border-[#333333]/15 bg-[#E8E6E3] p-6 sm:p-8 md:p-10">
+                <FaqAccordion items={faqItems} type="single" />
                 {(faqCtaTitle || faqCtaBody) && (
-                  <div className="mt-8 rounded-xl bg-white/80 p-6 text-center sm:mt-10 sm:p-8">
+                  <div className="mt-8 rounded-xl bg-white p-6 text-center sm:mt-10 sm:p-8">
                     {faqCtaTitle && (
                       <h3 className="font-display text-subheading font-bold text-ff-black">
                         {faqCtaTitle}

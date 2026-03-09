@@ -5,18 +5,18 @@ import {
   Leaf,
   Sparkles,
   Shield,
-  Award,
+  User,
   BookOpen,
   type LucideIcon,
 } from 'lucide-react'
-import { Media } from '@/components/Media'
+import Image from 'next/image'
 
 const WHY_ICONS: LucideIcon[] = [
   Heart,
   Leaf,
   Sparkles,
   Shield,
-  Award,
+  User,
   BookOpen,
 ]
 
@@ -27,7 +27,7 @@ const CARD_ACCENTS = [
 ]
 
 function isResolvedMedia(img: unknown): img is { url: string } {
-  return typeof img === 'object' && img !== null && 'url' in img
+  return typeof img === 'object' && img !== null && 'url' in img && typeof (img as { url?: unknown }).url === 'string'
 }
 
 export interface WhyItem {
@@ -122,8 +122,14 @@ export function WhySection({ title, items, image }: WhySectionProps) {
             <div className="h-px flex-1 max-w-24 bg-gradient-to-l from-transparent to-[#E6BE68]/40" />
           </div>
           <div className="mt-8 flex justify-center">
-            <div className="aspect-video w-full max-w-2xl overflow-hidden rounded-3xl shadow-xl">
-              <Media resource={image.url} fill imgClassName="object-cover object-center" />
+            <div className="relative aspect-video w-full max-w-2xl overflow-hidden rounded-3xl shadow-xl">
+              <Image
+                src={image.url}
+                alt=""
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 768px) 100vw, 672px"
+              />
             </div>
           </div>
         </>
