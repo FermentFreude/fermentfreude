@@ -1093,30 +1093,6 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
-    /**
-     * e.g., "Fermentation Starter Kits" / "Fermentation Products"
-     */
-    workshopsProductSliderTitle?: string | null;
-    /**
-     * Intro text above the product slider.
-     */
-    workshopsProductSliderDescription?: string | null;
-    /**
-     * e.g., "Was unsere Teilnehmer sagen" / "What Our Students Say"
-     */
-    workshopsTestimonialsTitle?: string | null;
-    /**
-     * Intro text above the testimonials.
-     */
-    workshopsTestimonialsDescription?: string | null;
-    /**
-     * e.g., "Unsere Partner" / "Our Partners"
-     */
-    workshopsSponsorsTitle?: string | null;
-    /**
-     * Intro text above the sponsors.
-     */
-    workshopsSponsorsDescription?: string | null;
   };
   /**
    * Content for the Fermentation page (/fermentation). Only applies when slug is "fermentation".
@@ -3405,12 +3381,6 @@ export interface PagesSelect<T extends boolean = true> {
               buttonLabel?: T;
               id?: T;
             };
-        workshopsProductSliderTitle?: T;
-        workshopsProductSliderDescription?: T;
-        workshopsTestimonialsTitle?: T;
-        workshopsTestimonialsDescription?: T;
-        workshopsSponsorsTitle?: T;
-        workshopsSponsorsDescription?: T;
       };
   fermentation?:
     | T

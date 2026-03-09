@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { unstable_noStore as noStore } from 'next/cache'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { AllWorkshopsHero } from '@/components/workshops/AllWorkshopsHero'
 import { WorkshopCalendar } from '@/components/workshops/WorkshopCalendar'
@@ -21,6 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function WorkshopsPage() {
+  noStore()
   const locale = await getLocale()
   const { isEnabled: draft } = await draftMode()
 
@@ -31,18 +33,31 @@ export default async function WorkshopsPage() {
     draft,
   })
 
-  // Get home page to extract reusable block components
+  // Get home page to extract blocks
   const homeData = await queryPageBySlug({
     slug: 'home',
     locale,
     draft,
   })
 
-  // Extract block components from home page (ProductSlider, Testimonials, Sponsors default content)
+  // Get lakto page to extract voucher block (has background image)
+  const laktoData = await queryPageBySlug({
+    slug: 'lakto',
+    locale,
+    draft,
+  })
+
+  // Extract blocks from home and lakto
   const homeBlocks = homeData?.layout ?? []
+  const laktoBlocks = laktoData?.layout ?? []
+  
+  // Get voucher block FROM LAKTO (has the background image)
+  const voucherBlock = laktoBlocks.find((block) => block?.blockType === 'voucherCta')
+  
   const productSliderBlock = homeBlocks.find((block) => block?.blockType === 'productSlider')
-  const testimonialsBlock = homeBlocks.find((block) => block?.blockType === 'testimonials')
   const sponsorsBlock = homeBlocks.find((block) => block?.blockType === 'sponsorsBar')
+  const gastroBlock = homeBlocks.find((block) => block?.blockType === 'heroBanner')
+  const testimonialsBlock = homeBlocks.find((block) => block?.blockType === 'testimonials')
 
   // Get CMS data for section titles/descriptions
   const workshopsData = workshopsPageData as Page | undefined
@@ -65,79 +80,27 @@ export default async function WorkshopsPage() {
           }
       />
 
-      {/* 2. Workshop Calendar - CMS editable title/description */}
-      <section className="py-20 px-6">
-        <div className="mx-auto max-w-5xl">
-          {workshopsData?.workshops?.workshopsCalendarTitle && (
-            <h2 className="mb-4 text-section-heading font-bold tracking-tight">
-              {workshopsData.workshops.workshopsCalendarTitle}
-            </h2>
-          )}
-          {workshopsData?.workshops?.workshopsCalendarDescription && (
-            <p className="mb-12 max-w-2xl text-body-lg leading-relaxed text-gray-600">
-              {workshopsData.workshops.workshopsCalendarDescription}
-            </p>
-          )}
-        </div>
-        <WorkshopCalendar cards={workshopsData?.workshops?.workshopsCalendarCards} />
-      </section>
+      {/* 2. Workshop Calendar Section */}
+      <WorkshopCalendar 
+        cards={workshopsData?.workshops?.workshopsCalendarCards}
+        title={workshopsData?.workshops?.workshopsCalendarTitle}
+        description={workshopsData?.workshops?.workshopsCalendarDescription}
+      />
 
-      {/* 3. Product Slider - CMS editable title/description */}
-      {productSliderBlock && (
-        <section className="py-20 px-6">
-          <div className="mx-auto max-w-5xl">
-            {workshopsData?.workshops?.workshopsProductSliderTitle && (
-              <h2 className="mb-4 text-section-heading font-bold tracking-tight">
-                {workshopsData.workshops.workshopsProductSliderTitle}
-              </h2>
-            )}
-            {workshopsData?.workshops?.workshopsProductSliderDescription && (
-              <p className="mb-12 max-w-2xl text-body-lg leading-relaxed text-gray-600">
-                {workshopsData.workshops.workshopsProductSliderDescription}
-              </p>
-            )}
-          </div>
-          <RenderBlocks blocks={[productSliderBlock]} />
-        </section>
-      )}
+      {/* 3. Voucher Block (from Lakto — with background image) */}
+      {voucherBlock && <RenderBlocks blocks={[voucherBlock]} />}
 
-      {/* 4. Testimonials - CMS editable title/description */}
-      {testimonialsBlock && (
-        <section className="py-20 px-6">
-          <div className="mx-auto max-w-5xl">
-            {workshopsData?.workshops?.workshopsTestimonialsTitle && (
-              <h2 className="mb-4 text-section-heading font-bold tracking-tight">
-                {workshopsData.workshops.workshopsTestimonialsTitle}
-              </h2>
-            )}
-            {workshopsData?.workshops?.workshopsTestimonialsDescription && (
-              <p className="mb-12 max-w-2xl text-body-lg leading-relaxed text-gray-600">
-                {workshopsData.workshops.workshopsTestimonialsDescription}
-              </p>
-            )}
-          </div>
-          <RenderBlocks blocks={[testimonialsBlock]} />
-        </section>
-      )}
+      {/* 4. Product Slider (from Home) */}
+      {productSliderBlock && <RenderBlocks blocks={[productSliderBlock]} />}
 
-      {/* 5. Sponsors - CMS editable title/description */}
-      {sponsorsBlock && (
-        <section className="py-20 px-6">
-          <div className="mx-auto max-w-5xl">
-            {workshopsData?.workshops?.workshopsSponsorsTitle && (
-              <h2 className="mb-4 text-section-heading font-bold tracking-tight">
-                {workshopsData.workshops.workshopsSponsorsTitle}
-              </h2>
-            )}
-            {workshopsData?.workshops?.workshopsSponsorsDescription && (
-              <p className="mb-12 max-w-2xl text-body-lg leading-relaxed text-gray-600">
-                {workshopsData.workshops.workshopsSponsorsDescription}
-              </p>
-            )}
-          </div>
-          <RenderBlocks blocks={[sponsorsBlock]} />
-        </section>
-      )}
+      {/* 5. Sponsors Bar (from Home) */}
+      {sponsorsBlock && <RenderBlocks blocks={[sponsorsBlock]} />}
+
+      {/* 6. Gastronomy Banner (from Home) */}
+      {gastroBlock && <RenderBlocks blocks={[gastroBlock]} />}
+
+      {/* 7. Testimonials (from Home) */}
+      {testimonialsBlock && <RenderBlocks blocks={[testimonialsBlock]} />}
     </article>
   )
 }

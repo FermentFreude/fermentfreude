@@ -56,24 +56,6 @@ const workshopsCalendarDE = {
   ],
 }
 
-const workshopsProductSliderDE = {
-  workshopsProductSliderTitle: 'Starter Kits & Fermentations-Zubehör',
-  workshopsProductSliderDescription:
-    'Alles, was du brauchst, um zu Hause zu fermentieren. Von Glas-Behältern bis hin zu unseren eigenen fermentierten Produkten.',
-}
-
-const workshopsTestimonialsDE = {
-  workshopsTestimonialsTitle: 'Das sagen unsere Workshop-Teilnehmer',
-  workshopsTestimonialsDescription:
-    'Höre von echten Menschen, deren Leben sich durch unsere Workshops verändert hat.',
-}
-
-const workshopsSponsorsDE = {
-  workshopsSponsorsTitle: 'Unsere Partner & Sponsoren',
-  workshopsSponsorsDescription:
-    'Wir arbeiten mit den besten Unternehmen zusammen, um workshop-Erlebnisse zu schaffen.',
-}
-
 const workshopsPageDataDE = {
   title: 'Workshops',
   slug: 'workshops',
@@ -82,9 +64,6 @@ const workshopsPageDataDE = {
   workshops: {
     ...workshopsHeroDE,
     ...workshopsCalendarDE,
-    ...workshopsProductSliderDE,
-    ...workshopsTestimonialsDE,
-    ...workshopsSponsorsDE,
   },
 }
 
@@ -124,24 +103,6 @@ const workshopsCalendarEN = {
   ],
 }
 
-const workshopsProductSliderEN = {
-  workshopsProductSliderTitle: 'Starter Kits & Fermentation Supplies',
-  workshopsProductSliderDescription:
-    'Everything you need to start fermenting at home. From glass containers to our own fermented products.',
-}
-
-const workshopsTestimonialsEN = {
-  workshopsTestimonialsTitle: 'What Our Workshop Students Say',
-  workshopsTestimonialsDescription:
-    'Hear from real people whose lives have been transformed through our workshops.',
-}
-
-const workshopsSponsorsEN = {
-  workshopsSponsorsTitle: 'Our Partners & Sponsors',
-  workshopsSponsorsDescription:
-    'We partner with the best brands to create unforgettable workshop experiences.',
-}
-
 const workshopsPageDataEN = {
   title: 'Workshops',
   slug: 'workshops',
@@ -150,9 +111,6 @@ const workshopsPageDataEN = {
   workshops: {
     ...workshopsHeroEN,
     ...workshopsCalendarEN,
-    ...workshopsProductSliderEN,
-    ...workshopsTestimonialsEN,
-    ...workshopsSponsorsEN,
   },
 }
 
@@ -241,7 +199,10 @@ async function seedWorkshops() {
     cards.map((card) => ({
       ...card,
       ...(cardImageIds[card.workshopType]
-        ? { cardImage: cardImageIds[card.workshopType] }
+        ? { 
+            cardImage: cardImageIds[card.workshopType],
+            cardImageId: cardImageIds[card.workshopType],
+          }
         : {}),
     }))
 

@@ -258,7 +258,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
           collection: 'pages',
           where: { slug: { equals: 'gastronomy' } },
           limit: 1,
-          depth: 1,
+          depth: 20,
           locale,
         }),
       ),
@@ -268,7 +268,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
               collection: 'pages',
               where: { slug: { equals: slug }, _status: { equals: 'published' } },
               limit: 1,
-              depth: 1,
+              depth: 20,
               locale,
             }),
           )
@@ -276,7 +276,143 @@ export default async function WorkshopDetailPage({ params }: Args) {
     ],
   )
 
-  const workshopPage = workshopPageResult.docs[0] as PageType | undefined
+  const workshopPage = workshopPageResult.docs[0] as
+    | {
+        workshopDetail?: {
+          heroEyebrow?: string | null
+          heroTitle?: string | null
+          heroDescription?: string | null
+          heroImage?: import('@/payload-types').Media | string | null
+          heroAttributes?: Array<{ text?: string | null; id?: string }> | null
+          bookingEyebrow?: string | null
+          bookingPrice?: number | null
+          bookingPriceSuffix?: string | null
+          bookingCurrency?: string | null
+          bookingImage?: unknown
+          bookingAttributes?: Array<{ text?: string | null; id?: string }> | null
+          bookingViewDatesLabel?: string | null
+          bookingHideDatesLabel?: string | null
+          bookingMoreDetailsLabel?: string | null
+          bookingBookLabel?: string | null
+          bookingSpotsLabel?: string | null
+          aboutHeading?: string | null
+          aboutText?: string | null
+          scheduleHeading?: string | null
+          schedule?: Array<{
+            duration?: string | null
+            title?: string | null
+            description?: string | null
+            id?: string
+          }> | null
+          includedHeading?: string | null
+          includedItems?: Array<{ text?: string | null; id?: string }> | null
+          whyHeading?: string | null
+          whyPoints?: Array<{ bold?: string | null; rest?: string | null; id?: string }> | null
+          experienceEyebrow?: string | null
+          experienceTitle?: string | null
+          experienceCards?: Array<{
+            image?: unknown
+            eyebrow?: string | null
+            title?: string | null
+            description?: string | null
+            id?: string
+          }> | null
+          datesHeading?: string | null
+          dates?: Array<{
+            date?: string | null
+            time?: string | null
+            spotsLeft?: number | null
+            id?: string
+          }> | null
+          calendarEyebrow?: string | null
+          calendarTitle?: string | null
+          calendarDescription?: string | null
+          calendarMonths?: Array<{
+            month?: string | null
+            monthShort?: string | null
+            monthNumber?: string | null
+            season?: string | null
+            accent?: string | null
+            recipes?: Array<{ name?: string | null; id?: string }> | null
+            id?: string
+          }> | null
+          voucherEyebrow?: string | null
+          voucherTitle?: string | null
+          voucherDescription?: string | null
+          voucherBackgroundImage?: import('@/payload-types').Media | string | null
+          voucherPrimaryLabel?: string | null
+          voucherPrimaryHref?: string | null
+          voucherSecondaryLabel?: string | null
+          voucherSecondaryHref?: string | null
+          voucherPills?: Array<{ text?: string | null; id?: string }> | null
+          faqEyebrow?: string | null
+          faqTitle?: string | null
+          faqDescription?: string | null
+          faqItems?: Array<{ question?: string | null; answer?: string | null; id?: string }> | null
+          faqContactEmail?: string | null
+          modalConfirmHeading?: string | null
+          modalConfirmSubheading?: string | null
+          modalWorkshopLabel?: string | null
+          modalDateLabel?: string | null
+          modalTimeLabel?: string | null
+          modalTotalLabel?: string | null
+          modalCancelLabel?: string | null
+          modalConfirmLabel?: string | null
+          howToEyebrow?: string | null
+          howToTitle?: string | null
+          howToDescription?: string | null
+          /** Relationship to Posts collection — resolved at depth 2 */
+          howToArticles?: Array<
+            | string
+            | {
+                id: string
+                slug?: string | null
+                title?: string | null
+                summary?: string | null
+                readTime?: string | null
+                heroImage?: import('@/payload-types').Media | string | null
+              }
+          > | null
+        }
+        workshopGiftOnline?: {
+          giftTitle?: string
+          giftDescription?: string
+          giftBuyNowLabel?: string
+          giftBuyVoucherLabel?: string
+          giftBuyNowHref?: string
+          giftBuyVoucherHref?: string
+          onlineTitle?: string
+          onlineDescription?: string
+          onlineBullets?: Array<{ text?: string }>
+          onlineButtonLabel?: string
+          onlineButtonHref?: string
+        }
+        workshopLearnOnline?: {
+          learnOnlineHeading?: string
+          learnOnlineDescription?: string
+          learnOnlineButtonLabel?: string
+          learnOnlineButtonHref?: string
+        }
+        workshopFaq?: {
+          faqHeading?: string
+          faqSubtitle?: string
+          faqItems?: Array<{ question?: string; answer?: string }>
+        }
+        workshopWhyOnline?: {
+          whyOnlineHeading?: string
+          whyOnlineFeatures?: Array<{ icon?: string; title?: string; description?: string }>
+        }
+        workshopTeamBuilding?: {
+          teamEyebrow?: string
+          teamHeading?: string
+          teamDescription?: string
+          teamBullets?: Array<{ text?: string }>
+          teamCtaLabel?: string
+          teamCtaHref?: string
+          teamImage?: unknown
+        }
+      }
+    | undefined
 
   const detail = workshopPage?.workshopDetail
   const gift = workshopPage?.workshopGiftOnline
