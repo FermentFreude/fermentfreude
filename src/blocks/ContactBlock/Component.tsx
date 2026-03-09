@@ -19,9 +19,9 @@ const DEFAULTS = {
     heading: 'Contact Detail',
     description:
       'If you need any help and prefer to reach out directly, feel free to do it via phone or email.',
-    phone: null,
-    email: null,
-    address: null,
+    phone: '+43 660 4943577',
+    email: 'fermentfreude@gmail.com',
+    address: 'Grabenstraße 15, 8010 Graz, Austria',
   },
   contactForm: {
     formHeading: 'Ask About Anything',
@@ -60,6 +60,9 @@ export const ContactBlockComponent: React.FC<
   const footer = await getCachedGlobal('footer', 1, locale)()
   const social = footer?.socialMedia
 
+  // Fallback to Footer global when block contact details are empty (e.g. embedded on About page)
+  const footerContact = footer as { location?: string; phone?: string } | undefined
+
   const heroImage = data?.hero?.image
   const hasHeroImage =
     heroImage && typeof heroImage === 'object' && heroImage !== null && 'url' in heroImage
@@ -75,9 +78,9 @@ export const ContactBlockComponent: React.FC<
   const contact = {
     heading: data?.contact?.heading ?? DEFAULTS.contact.heading,
     description: data?.contact?.description ?? DEFAULTS.contact.description,
-    phone: data?.contact?.phone ?? null,
-    email: data?.contact?.email ?? null,
-    address: data?.contact?.address ?? null,
+    phone: data?.contact?.phone ?? footerContact?.phone ?? DEFAULTS.contact.phone,
+    email: data?.contact?.email ?? DEFAULTS.contact.email,
+    address: data?.contact?.address ?? footerContact?.location ?? DEFAULTS.contact.address,
   }
 
   const rawOptions = data?.contactForm?.subjectOptions?.options
@@ -124,6 +127,7 @@ export const ContactBlockComponent: React.FC<
   const hideHeroSection = (block as { hideHeroSection?: boolean }).hideHeroSection === true
   const hideCtaBanner = (block as { hideCtaBanner?: boolean }).hideCtaBanner === true
   const hideMap = (block as { hideMap?: boolean }).hideMap === true
+  const isEmbedded = hideHeroSection && hideCtaBanner && hideMap
 
   const inputBase =
     'w-full rounded-lg border border-ff-gold-accent/50 bg-white px-4 py-3 font-sans text-base text-ff-charcoal placeholder:text-ff-gray-text-light transition-all duration-200 focus:border-ff-gold-accent focus:outline-none focus:ring-1 focus:ring-ff-gold-accent'
@@ -133,7 +137,7 @@ export const ContactBlockComponent: React.FC<
     social?.facebook || social?.instagram || social?.linkedin
 
   return (
-    <div id={id} className="min-h-screen bg-white">
+    <div id={id} className={isEmbedded ? 'bg-ff-cream py-12 md:py-16' : 'min-h-screen bg-white'}>
       {/* Hero */}
       {!hideHeroSection && (
         <section
