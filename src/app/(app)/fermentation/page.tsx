@@ -21,15 +21,15 @@ const HERO_BLOCK_ICONS = [
   '/assets/images/fermentation/icon-preservation.svg',
 ] as const
 const DEFAULT_HERO_BLOCKS: HeroBlock[] = [
-  { title: 'WHAT IS FERMENTATION?', description: 'Discover the science behind this ancient preservation method.' },
-  { title: 'HISTORY', description: 'From kimchi to sauerkraut—fermentation across cultures and centuries.' },
-  { title: 'INNOVATION', description: '30 MINUTES' },
-  { title: 'OUR PRODUCTS', description: 'Explore our handcrafted ferments and workshops.' },
+  { title: 'START NOW', description: 'Embrace the world of fermentation with us.', url: '/workshops' },
+  { title: 'PRODUCTS', description: 'Discover our unique selection of fermented delights.', url: '/shop' },
+  { title: 'WORKSHOPS', description: 'Learn the art of fermentation from our experts.', url: '/workshops' },
+  { title: 'VOUCHER', description: 'Give the gift of flavor and health to your loved ones.', url: '/workshops/voucher' },
 ]
 
 const DEFAULT_HERO_TITLE = 'Innovation meets Tradition'
 const DEFAULT_HERO_DESCRIPTION =
-  'Fermentation is more than sauerkraut or yogurt. It is a world full of taste, creativity and surprising aromas.'
+  'Unlock the secrets of ancient preservation techniques and transform your kitchen into a hub of delicious, gut-friendly creations.'
 const DEFAULT_GUIDE_TAG = 'Quick Guide'
 const DEFAULT_GUIDE_TITLE = 'A complete guide to fermentation'
 const DEFAULT_GUIDE_BODY =
@@ -41,21 +41,24 @@ const DEFAULT_WHAT_MOTTO = 'No additives. No shortcuts. Just patience and care.'
 const DEFAULT_WHY_TITLE = 'Why is it so special?'
 const DEFAULT_WHY_ITEMS: Array<{ id?: string; title: string; description: string }> = [
   {
-    title: 'Improves gut flora and overall well-being',
+    title: 'Improved gut health and well-being',
     description: 'Fermented foods support a healthy microbiome.',
+  },
+  {
+    title: 'Rich flavors and aromas',
+    description: 'Creates complex umami and tangy profiles.',
   },
   {
     title: 'Easy and cost-effective',
     description: 'No special equipment needed—just salt, time, and patience.',
   },
   {
+    title: 'Part of a balanced lifestyle',
+    description: 'Integrates traditional wisdom with modern nutrition.',
+  },
+  {
     title: 'Eco-friendly and sustainable',
     description: 'Reduces food waste and extends shelf life naturally.',
-  },
-  { title: 'Rich in flavors and aromas', description: 'Creates complex umami and tangy profiles.' },
-  {
-    title: 'Supports a balanced lifestyle',
-    description: 'Integrates traditional wisdom with modern nutrition.',
   },
   { title: 'Diverse applications', description: 'From vegetables to dairy, grains to beverages.' },
 ]
@@ -98,51 +101,51 @@ const DEFAULT_CTA_TITLE = 'Ready to learn?'
 const DEFAULT_CTA_DESCRIPTION =
   'Join our workshops and online courses to learn hands-on fermentation techniques, ask questions, and connect with a community of learners.'
 const DEFAULT_CTA_VIDEO = '/assets/videos/VIDEO-2026-02-06-12-18-34.mp4'
-const DEFAULT_CTA_PRIMARY = 'LEARN MORE'
+const DEFAULT_CTA_PRIMARY = 'Workshops'
 const DEFAULT_CTA_PRIMARY_URL = '/workshops'
-const DEFAULT_CTA_SECONDARY = 'EXPLORE'
-const DEFAULT_CTA_SECONDARY_URL = '/workshops'
+const DEFAULT_CTA_SECONDARY = 'Recipes'
+const DEFAULT_CTA_SECONDARY_URL = '/tipps'
 const DEFAULT_WORKSHOP_TITLE = 'Learn UNIQUE.'
 const DEFAULT_WORKSHOP_TITLE_SUFFIX = 'FLAVOURS'
 const DEFAULT_WORKSHOP_SUBTITLE =
-  'Dive into the world of diverse and delicious flavors that fermentation can offer.'
+  'Explore a variety of fermented foods and beverages that will tantalize your taste buds.'
 const DEFAULT_WORKSHOP_VIEW_ALL = 'View All'
 const DEFAULT_WORKSHOP_VIEW_ALL_URL = '/workshops'
 const DEFAULT_WORKSHOP_NEXT_DATE_LABEL = 'Next Date:'
 const DEFAULT_WORKSHOP_CARDS = [
   {
-    title: 'Lakto-Gemüse',
+    title: 'Lacto-Gamba',
     description:
       'Ferment vegetables, experience flavours – different every month. Live online session.',
-    price: 'Starting at €10.99',
+    price: '€14.99',
     priceSuffix: '',
-    buttonLabel: 'View Product',
+    buttonLabel: 'Add to Cart',
     buttonUrl: '/workshops/lakto-gemuese',
-    nextDate: '27. Jan. 2026',
+    nextDate: '',
   },
   {
     title: 'Kombucha',
     description:
       'Dive into the world of fermented tea – full of character and aromas. Interactive online.',
-    price: 'Starting at €10.99',
+    price: '€8.99',
     priceSuffix: '',
-    buttonLabel: 'View Product',
+    buttonLabel: 'Add to Cart',
     buttonUrl: '/workshops/kombucha',
-    nextDate: '27. Jan. 2026',
+    nextDate: '',
   },
   {
     title: 'Tempeh',
     description:
       'Rediscover a plant-based protein source – mild, nutty and versatile. Online masterclass.',
-    price: 'Starting at €10.99',
+    price: '€23.99',
     priceSuffix: '',
-    buttonLabel: 'View Product',
+    buttonLabel: 'Add to Cart',
     buttonUrl: '/workshops/tempeh',
-    nextDate: '27. Jan. 2026',
+    nextDate: '',
   },
 ]
 const DEFAULT_FAQ_TITLE = 'Frequently Asked Questions'
-const DEFAULT_FAQ_SUBTITLE = 'Do you have specific questions?'
+const DEFAULT_FAQ_SUBTITLE = 'Here are some common questions we get about fermentation.'
 const DEFAULT_FAQ_CTA_TITLE = 'Ready to Start Fermenting?'
 const DEFAULT_FAQ_CTA_BODY =
   'Begin with simple vegetables like cabbage or cucumbers, use the proper salt ratio (2-3% by weight), and trust the process!'
@@ -186,6 +189,8 @@ function isResolvedMedia(img: unknown): img is MediaType {
   return typeof img === 'object' && img !== null && 'url' in img
 }
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'Fermentation | Fermentfreude',
@@ -194,17 +199,30 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function FermentationPage() {
+type FermentationPageProps = {
+  searchParams?: Promise<{ defaults?: string }>
+}
+
+export default async function FermentationPage({ searchParams }: FermentationPageProps) {
   const locale = await getLocale()
+  const params = await searchParams
+  // Use code defaults when ?defaults=1 or FERMENTATION_USE_DEFAULTS=1. Set in .env to always see design.
+  const forceDefaults =
+    params?.defaults === '1' ||
+    process.env.FERMENTATION_USE_DEFAULTS === '1' ||
+    process.env.FERMENTATION_USE_DEFAULTS === 'true'
+
   const payload = await getPayload({ config: configPromise })
   const [fermentationResult, gastronomyResult] = await Promise.all([
-    payload.find({
-      collection: 'pages',
-      where: { slug: { equals: 'fermentation' } },
-      limit: 1,
-      depth: 4,
-      locale,
-    }),
+    forceDefaults
+      ? { docs: [] as PageType[] }
+      : payload.find({
+          collection: 'pages',
+          where: { slug: { equals: 'fermentation' } },
+          limit: 1,
+          depth: 4,
+          locale,
+        }),
     payload.find({
       collection: 'pages',
       where: { slug: { equals: 'gastronomy' } },
@@ -213,8 +231,8 @@ export default async function FermentationPage() {
       locale,
     }),
   ])
-  const page = fermentationResult.docs[0] as PageType | undefined
-  const f = page?.fermentation
+  const page = fermentationResult.docs?.[0] as PageType | undefined
+  const f = forceDefaults ? undefined : page?.fermentation
   const g = (gastronomyResult.docs[0] as PageType | undefined)?.gastronomy
 
   // Resolve hero image if it's just an ID (depth didn't populate)
@@ -301,7 +319,7 @@ export default async function FermentationPage() {
   const ctaPrimaryUrl = f?.fermentationCtaPrimaryUrl ?? DEFAULT_CTA_PRIMARY_URL
   const ctaSecondaryLabel = f?.fermentationCtaSecondaryLabel ?? DEFAULT_CTA_SECONDARY
   const ctaSecondaryUrl = f?.fermentationCtaSecondaryUrl ?? DEFAULT_CTA_SECONDARY_URL
-  let ctaVideoMedia = f?.fermentationCtaVideo
+  let ctaVideoMedia = (f as { fermentationCtaVideo?: unknown } | undefined)?.fermentationCtaVideo
   if (ctaVideoMedia && typeof ctaVideoMedia === 'string') {
     try {
       const mediaDoc = await payload.findByID({
@@ -330,21 +348,22 @@ export default async function FermentationPage() {
       : 'video/mp4'
   const ctaBackgroundImage = f?.fermentationCtaBackgroundImage
 
-  // Workshop section — fermentation or gastronomy fallback
+  // Workshop section — fermentation or gastronomy fallback (skip gastronomy when forceDefaults)
   const workshopTitle = f?.fermentationWorkshopTitle ?? DEFAULT_WORKSHOP_TITLE
   const workshopTitleSuffix = f?.fermentationWorkshopTitleSuffix ?? DEFAULT_WORKSHOP_TITLE_SUFFIX
   const workshopSubtitle =
     f?.fermentationWorkshopSubtitle ??
-    g?.gastronomyWorkshopSectionSubtitle ??
+    (forceDefaults ? undefined : g?.gastronomyWorkshopSectionSubtitle) ??
     DEFAULT_WORKSHOP_SUBTITLE
   const workshopViewAllLabel = f?.fermentationWorkshopViewAllLabel ?? DEFAULT_WORKSHOP_VIEW_ALL
   const workshopViewAllUrl = f?.fermentationWorkshopViewAllUrl ?? DEFAULT_WORKSHOP_VIEW_ALL_URL
   const workshopNextDateLabel =
     f?.fermentationWorkshopNextDateLabel ??
-    g?.gastronomyWorkshopNextDateLabel ??
+    (forceDefaults ? undefined : g?.gastronomyWorkshopNextDateLabel) ??
     DEFAULT_WORKSHOP_NEXT_DATE_LABEL
-  const workshopCards =
-    (f?.fermentationWorkshopCards?.length ?? 0) > 0
+  const workshopCards = forceDefaults
+    ? DEFAULT_WORKSHOP_CARDS
+    : (f?.fermentationWorkshopCards?.length ?? 0) > 0
       ? (f?.fermentationWorkshopCards ?? [])
       : (g?.gastronomyWorkshopCards?.length ?? 0) > 0
         ? (g?.gastronomyWorkshopCards ?? [])
