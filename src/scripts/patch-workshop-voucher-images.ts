@@ -4,10 +4,10 @@
  *
  * Run: pnpm tsx src/scripts/patch-workshop-voucher-images.ts
  */
+import config from '@payload-config'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-import config from '@payload-config'
-// @ts-expect-error — dotenv types not resolved via package.json exports
+// @ts-expect-error dotenv types not resolved via package.json exports
 import { config as dotenvConfig } from 'dotenv'
 import { getPayload } from 'payload'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'

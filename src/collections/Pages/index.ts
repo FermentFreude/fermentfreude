@@ -10,6 +10,7 @@ import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Content } from '@/blocks/Content/config'
 import { FeatureCards } from '@/blocks/FeatureCards/config'
 import { FormBlock } from '@/blocks/Form/config'
+import type { Field } from 'payload'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { OurStory } from '@/blocks/OurStory/config'
@@ -852,13 +853,24 @@ export const Pages: CollectionConfig = {
               label: 'CTA Secondary Button URL',
             },
             {
+              name: 'fermentationCtaVideo',
+              type: 'upload',
+              relationTo: 'media',
+              required: false,
+              label: 'CTA Background Video',
+              admin: {
+                description:
+                  'Upload a video (MP4) as background. Or use the URL field below for videos in public/assets/videos/.',
+              },
+            },
+            {
               name: 'fermentationCtaVideoUrl',
               type: 'text',
               required: false,
-              label: 'CTA Background Video URL',
+              label: 'CTA Background Video URL (alternative)',
               admin: {
                 description:
-                  'Optional video as background. Download from pixabay.com/videos/search/cabbage, save to public/assets/videos/cabbage-cta.mp4, then set to /assets/videos/cabbage-cta.mp4. Or use /assets/videos/gastro-banner.mp4. Leave empty for solid gold background.',
+                  'If not using upload above: path like /assets/videos/cabbage-cta.mp4. Leave empty for solid gold background.',
               },
             },
             {
@@ -1382,6 +1394,182 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
+          name: 'shop',
+          label: 'Shop Page',
+          admin: {
+            description:
+              'Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.',
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_SHOP_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'shop'
+            },
+          },
+          fields: shopPageFields,
+        },
+        {
+          name: 'workshops',
+          label: 'Workshops Overview Page',
+          admin: {
+            description:
+              'Content for the Workshops overview page (/workshops). Only applies when slug is "workshops".',
+            condition: (data, siblingData) => {
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'workshops'
+            },
+          },
+          fields: [
+            {
+              type: 'collapsible',
+              label: '🎯 Hero Section',
+              admin: { initCollapsed: false },
+              fields: [
+                {
+                  name: 'workshopsHeroEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Eyebrow Text',
+                  admin: {
+                    description: 'Small text above the title (e.g., "Fermentation Workshops").',
+                  },
+                },
+                {
+                  name: 'workshopsHeroTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Hero Title',
+                  admin: {
+                    description:
+                      'Main heading. Use \\n for line breaks (e.g., "Discover the Art\\nof Fermentation").',
+                  },
+                },
+                {
+                  name: 'workshopsHeroDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Hero Description',
+                  admin: { description: 'Short intro text describing the workshops.' },
+                },
+                {
+                  name: 'workshopsHeroAttributes',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 5,
+                  label: 'Hero Attributes',
+                  admin: {
+                    description: 'Small text items (e.g., "3 Hours", "Hands-on", "Experience").',
+                  },
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Attribute Text',
+                    },
+                  ],
+                },
+                {
+                  name: 'workshopsHeroImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Hero Image',
+                  admin: {
+                    description:
+                      'Optional background image for the hero. If empty, jar silhouettes are shown.',
+                  },
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '📅 Workshop Calendar Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'workshopsCalendarTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Title',
+                  admin: { description: 'e.g., "Unsere Termine" / "Our Dates"' },
+                },
+                {
+                  name: 'workshopsCalendarDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Section Description',
+                  admin: { description: 'Intro text above the calendar.' },
+                },
+                {
+                  name: 'workshopsCalendarCards',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 10,
+                  label: 'Workshop Cards',
+                  admin: {
+                    description: 'Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).',
+                  },
+                  fields: [
+                    {
+                      name: 'workshopType',
+                      type: 'select',
+                      required: true,
+                      localized: true,
+                      label: 'Workshop Type',
+                      options: [
+                        { label: '🥬 Basics (Lacto-vegetables)', value: 'basics' },
+                        { label: '🥒 Lakto-Gemüse', value: 'lakto' },
+                        { label: '🫖 Kombucha', value: 'kombucha' },
+                        { label: '🌱 Tempeh', value: 'tempeh' },
+                      ],
+                    },
+                    {
+                      name: 'cardImage',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Card Image',
+                      admin: { description: 'Card background image for this workshop type.' },
+                    },
+                    {
+                      name: 'nextDate',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Next Date',
+                      admin: { description: 'e.g., "20. Mär" / "Mar 20"' },
+                    },
+                    {
+                      name: 'duration',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Duration',
+                      admin: { description: 'e.g., "3h 30m" / "3.5 Stunden"' },
+                    },
+                    {
+                      name: 'buttonLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Button Label',
+                      admin: { description: 'e.g., "Buchen" / "Book Now"' },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           name: 'fermentation',
           label: 'Fermentation Page',
           admin: {
@@ -1747,13 +1935,23 @@ export const Pages: CollectionConfig = {
                   label: 'CTA Secondary Button URL',
                 },
                 {
+                  name: 'fermentationCtaVideo',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'CTA Background Video',
+                  admin: {
+                    description: 'Upload a video (MP4) as background. Or use the URL field below.',
+                  },
+                },
+                {
                   name: 'fermentationCtaVideoUrl',
                   type: 'text',
                   required: false,
-                  label: 'CTA Background Video URL',
+                  label: 'CTA Background Video URL (alternative)',
                   admin: {
                     description:
-                      'Optional video as background. Leave empty for solid gold background.',
+                      'If not using upload above: path like /assets/videos/cabbage-cta.mp4. Leave empty for solid gold background.',
                   },
                 },
                 {

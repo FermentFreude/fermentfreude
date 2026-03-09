@@ -14,7 +14,8 @@ export const WorkshopPhases: Block = {
       localized: true,
       label: 'Eyebrow / Section Label',
       admin: {
-        description: 'Small accent text above the heading (e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT").',
+        description:
+          'Small accent text above the heading (e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT").',
       },
     },
     {
@@ -23,7 +24,8 @@ export const WorkshopPhases: Block = {
       localized: true,
       label: 'Heading',
       admin: {
-        description: 'Main heading for the phases section (e.g. "Dein Workshop-Erlebnis" / "Your Workshop Experience").',
+        description:
+          'Main heading for the phases section (e.g. "Dein Workshop-Erlebnis" / "Your Workshop Experience").',
       },
     },
     {
@@ -33,7 +35,8 @@ export const WorkshopPhases: Block = {
       minRows: 1,
       maxRows: 6,
       admin: {
-        description: 'Each phase represents a part of the workshop experience (e.g., Theory → Practice → Flavor).',
+        description:
+          'Each phase represents a part of the workshop experience (e.g., Theory → Practice → Flavor).',
       },
       fields: [
         {
@@ -43,7 +46,8 @@ export const WorkshopPhases: Block = {
           localized: true,
           label: 'Phase Label',
           admin: {
-            description: 'Short label for this phase (e.g. "THEORIE" / "THEORY", "PRAXIS" / "PRACTICE").',
+            description:
+              'Short label for this phase (e.g. "THEORIE" / "THEORY", "PRAXIS" / "PRACTICE").',
           },
         },
         {
@@ -72,7 +76,8 @@ export const WorkshopPhases: Block = {
           relationTo: 'media',
           label: 'Phase Image',
           admin: {
-            description: 'Visual for this phase. Recommended: square or landscape image (800x600px or larger).',
+            description:
+              'Visual for this phase. Recommended: square or landscape image (800x600px or larger).',
           },
         },
       ],

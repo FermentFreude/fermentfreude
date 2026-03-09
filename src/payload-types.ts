@@ -470,17 +470,9 @@ export interface Page {
    */
   hero: {
     /**
-     * Choose how this page looks at the top. "Offerings Grid" shows all items at once (no carousel).
+     * Choose how this page looks at the top. "Home Page Slider" is for the homepage with animated slides.
      */
-    type:
-      | 'heroSlider'
-      | 'highImpact'
-      | 'lowImpact'
-      | 'heroSplit'
-      | 'heroCarousel'
-      | 'heroGrid'
-      | 'foodPresentationSlider'
-      | 'none';
+    type: 'heroSlider' | 'highImpact' | 'lowImpact' | 'heroCarousel' | 'foodPresentationSlider' | 'none';
     /**
      * Each slide has its own title, description, colors, and product images.
      */
@@ -546,30 +538,6 @@ export interface Page {
      * The big hero background image.
      */
     media?: (string | null) | Media;
-    /**
-     * Small pill above the heading (e.g. "About Us")
-     */
-    splitLabel?: string | null;
-    /**
-     * Main headline
-     */
-    splitHeading?: string | null;
-    /**
-     * Short paragraph below the heading
-     */
-    splitDescription?: string | null;
-    /**
-     * e.g. "Learn more"
-     */
-    splitCtaLabel?: string | null;
-    /**
-     * e.g. /workshops
-     */
-    splitCtaUrl?: string | null;
-    /**
-     * Large image on the right side
-     */
-    splitMedia?: (string | null) | Media;
     richTextLowImpact?: {
       root: {
         type: string;
@@ -611,7 +579,6 @@ export interface Page {
         | ArchiveBlock
         | CarouselBlock
         | OurStoryBlock
-        | ProductSliderBlock
         | ReadyToLearnCtaBlock
         | SponsorsBarBlock
         | TeamCardsBlock
@@ -620,6 +587,7 @@ export interface Page {
         | ThreeItemGridBlock
         | BannerBlock
         | FormBlock
+        | ProductSliderBlock
         | VoucherCtaBlock
         | WorkshopSliderBlock
         | WorkshopPhasesBlock
@@ -863,7 +831,11 @@ export interface Page {
     fermentationCtaSecondaryLabel?: string | null;
     fermentationCtaSecondaryUrl?: string | null;
     /**
-     * Optional video as background. Leave empty for solid gold background.
+     * Upload a video (MP4) as background. Or use the URL field below.
+     */
+    fermentationCtaVideo?: (string | null) | Media;
+    /**
+     * If not using upload above: path like /assets/videos/cabbage-cta.mp4. Leave empty for solid gold background.
      */
     fermentationCtaVideoUrl?: string | null;
     /**
@@ -954,7 +926,7 @@ export interface Page {
       id?: string | null;
     }[];
     /**
-     * Email or pick up from store. Post/card removed for product freshness.
+     * Ways to receive the voucher (e.g. by email or post).
      */
     deliveryOptions: {
       /**
@@ -966,9 +938,9 @@ export interface Page {
        */
       title: string;
       /**
-       * Icon displayed next to this option. Use email or pickup only.
+       * Icon displayed next to this option.
        */
-      icon: 'email' | 'pickup' | 'card';
+      icon: 'email' | 'card';
       id?: string | null;
     }[];
     /**
@@ -995,10 +967,6 @@ export interface Page {
      * Label above delivery options (e.g. "DELIVERY METHOD").
      */
     deliverySectionLabel: string;
-    /**
-     * Explains why products cannot be sent by post (e.g. freshness). Shown under the delivery option.
-     */
-    deliveryDisclaimer?: string | null;
     /**
      * Label for the optional greeting message field.
      */
@@ -1274,6 +1242,69 @@ export interface Page {
      * e.g. "/workshops".
      */
     workshopCtaButtonUrl?: string | null;
+  };
+  /**
+   * Content for the Workshops overview page (/workshops). Only applies when slug is "workshops".
+   */
+  workshops?: {
+    /**
+     * Small text above the title (e.g., "Fermentation Workshops").
+     */
+    workshopsHeroEyebrow?: string | null;
+    /**
+     * Main heading. Use \n for line breaks (e.g., "Discover the Art\nof Fermentation").
+     */
+    workshopsHeroTitle?: string | null;
+    /**
+     * Short intro text describing the workshops.
+     */
+    workshopsHeroDescription?: string | null;
+    /**
+     * Small text items (e.g., "3 Hours", "Hands-on", "Experience").
+     */
+    workshopsHeroAttributes?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional background image for the hero. If empty, jar silhouettes are shown.
+     */
+    workshopsHeroImage?: (string | null) | Media;
+    /**
+     * e.g., "Unsere Termine" / "Our Dates"
+     */
+    workshopsCalendarTitle?: string | null;
+    /**
+     * Intro text above the calendar.
+     */
+    workshopsCalendarDescription?: string | null;
+    /**
+     * Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).
+     */
+    workshopsCalendarCards?:
+      | {
+          workshopType: 'basics' | 'lakto' | 'kombucha' | 'tempeh';
+          /**
+           * Card background image for this workshop type.
+           */
+          cardImage?: (string | null) | Media;
+          /**
+           * e.g., "20. Mär" / "Mar 20"
+           */
+          nextDate?: string | null;
+          /**
+           * e.g., "3h 30m" / "3.5 Stunden"
+           */
+          duration?: string | null;
+          /**
+           * e.g., "Buchen" / "Book Now"
+           */
+          buttonLabel?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   /**
    * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.
@@ -1595,6 +1626,61 @@ export interface Page {
      */
     howToArticles?: (string | Post)[] | null;
   };
+  /**
+   * DEPRECATED - not used on any workshop UI
+   */
+  workshopGiftOnline?: {
+    giftTitle: string;
+    giftDescription: string;
+    giftBuyNowLabel: string;
+    giftBuyVoucherLabel: string;
+    giftBuyNowHref: string;
+    giftBuyVoucherHref: string;
+    onlineTitle: string;
+    onlineDescription: string;
+    onlineBullets: {
+      text: string;
+      id?: string | null;
+    }[];
+    onlineButtonLabel: string;
+    onlineButtonHref: string;
+  };
+  workshopLearnOnline?: {
+    learnOnlineHeading: string;
+    learnOnlineDescription: string;
+    learnOnlineButtonLabel: string;
+    learnOnlineButtonHref: string;
+  };
+  workshopFaq?: {
+    faqHeading: string;
+    faqSubtitle: string;
+    faqItems: {
+      question: string;
+      answer: string;
+      id?: string | null;
+    }[];
+  };
+  workshopWhyOnline?: {
+    whyOnlineHeading: string;
+    whyOnlineFeatures: {
+      icon: 'lightning' | 'clock' | 'home' | 'book';
+      title: string;
+      description: string;
+      id?: string | null;
+    }[];
+  };
+  workshopTeamBuilding?: {
+    teamEyebrow: string;
+    teamHeading: string;
+    teamDescription: string;
+    teamBullets: {
+      text: string;
+      id?: string | null;
+    }[];
+    teamCtaLabel: string;
+    teamCtaHref: string;
+    teamImage?: (string | null) | Media;
+  };
   meta?: {
     title?: string | null;
     /**
@@ -1660,40 +1746,20 @@ export interface ContactBlock {
   contactImage?: (string | null) | Media;
   contact: {
     /**
-     * Heading for the contact details panel (e.g., "Contact Detail").
+     * Heading above the form (e.g., "Kontakt").
      */
     heading: string;
     /**
-     * Intro text for the contact details panel (e.g., "If you need any help...").
+     * Short intro text above the form fields.
      */
     description: string;
-    /**
-     * Physical address (e.g. Grabenstraße 15, 8010 Graz, Austria).
-     */
-    address?: string | null;
-    /**
-     * Displayed on the contact page (e.g. +43 660 4943577).
-     */
-    phone?: string | null;
-    /**
-     * Displayed on the contact page (e.g. fermentfreude@gmail.com).
-     */
-    email?: string | null;
   };
   contactForm: {
     /**
      * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
      */
     form?: (string | null) | Form;
-    /**
-     * Heading above the form (e.g., "Ask About Anything").
-     */
-    formHeading?: string | null;
     placeholders: {
-      /**
-       * When set, a single "Your Name" field is shown. Leave empty to use First + Last Name.
-       */
-      name?: string | null;
       /**
        * Placeholder for first name (e.g., "Vorname").
        */
@@ -1706,10 +1772,6 @@ export interface ContactBlock {
        * Placeholder for email field.
        */
       email: string;
-      /**
-       * Placeholder for phone field (e.g., "Your Phone").
-       */
-      phone?: string | null;
       /**
        * Placeholder for message textarea.
        */
@@ -2173,48 +2235,11 @@ export interface OurStoryBlock {
    */
   paragraphs: {
     text: string;
-    /**
-     * Optional image for this paragraph. Shown in alternating layout.
-     */
-    image?: (string | null) | Media;
     id?: string | null;
   }[];
   id?: string | null;
   blockName?: string | null;
   blockType: 'ourStory';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ProductSliderBlock".
- */
-export interface ProductSliderBlock {
-  /**
-   * Large heading text (e.g. "Discover UNIQUE.").
-   */
-  heading: string;
-  /**
-   * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
-   */
-  headingAccent: string;
-  /**
-   * Short paragraph below the heading (1–2 sentences).
-   */
-  description: string;
-  /**
-   * Text on the CTA button (e.g. "View All Products").
-   */
-  buttonLabel: string;
-  /**
-   * URL the button links to (e.g. "/products").
-   */
-  buttonLink: string;
-  /**
-   * Select products to display in the slider. If empty, the latest products will be shown.
-   */
-  products?: (string | Product)[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'productSlider';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2461,6 +2486,39 @@ export interface FormBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductSliderBlock".
+ */
+export interface ProductSliderBlock {
+  /**
+   * Large heading text (e.g. "Discover UNIQUE.").
+   */
+  heading: string;
+  /**
+   * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
+   */
+  headingAccent: string;
+  /**
+   * Short paragraph below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * Text on the CTA button (e.g. "View All Products").
+   */
+  buttonLabel: string;
+  /**
+   * URL the button links to (e.g. "/products").
+   */
+  buttonLink: string;
+  /**
+   * Select products to display in the slider. If empty, the latest products will be shown.
+   */
+  products?: (string | Product)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productSlider';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3064,12 +3122,6 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         media?: T;
-        splitLabel?: T;
-        splitHeading?: T;
-        splitDescription?: T;
-        splitCtaLabel?: T;
-        splitCtaUrl?: T;
-        splitMedia?: T;
         richTextLowImpact?: T;
         slides?:
           | T
@@ -3095,7 +3147,6 @@ export interface PagesSelect<T extends boolean = true> {
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         ourStory?: T | OurStoryBlockSelect<T>;
-        productSlider?: T | ProductSliderBlockSelect<T>;
         readyToLearnCta?: T | ReadyToLearnCtaBlockSelect<T>;
         sponsorsBar?: T | SponsorsBarBlockSelect<T>;
         teamCards?: T | TeamCardsBlockSelect<T>;
@@ -3104,6 +3155,7 @@ export interface PagesSelect<T extends boolean = true> {
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        productSlider?: T | ProductSliderBlockSelect<T>;
         voucherCta?: T | VoucherCtaBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
         workshopPhases?: T | WorkshopPhasesBlockSelect<T>;
@@ -3247,6 +3299,7 @@ export interface PagesSelect<T extends boolean = true> {
         fermentationCtaPrimaryUrl?: T;
         fermentationCtaSecondaryLabel?: T;
         fermentationCtaSecondaryUrl?: T;
+        fermentationCtaVideo?: T;
         fermentationCtaVideoUrl?: T;
         fermentationCtaBackgroundImage?: T;
         fermentationFaqTitle?: T;
@@ -3308,7 +3361,6 @@ export interface PagesSelect<T extends boolean = true> {
         cardDisclaimer?: T;
         amountSectionLabel?: T;
         deliverySectionLabel?: T;
-        deliveryDisclaimer?: T;
         greetingLabel?: T;
         greetingPlaceholder?: T;
         addToCartButton?: T;
@@ -3404,6 +3456,32 @@ export interface PagesSelect<T extends boolean = true> {
         workshopCtaBackgroundImage?: T;
         workshopCtaButtonLabel?: T;
         workshopCtaButtonUrl?: T;
+      };
+  workshops?:
+    | T
+    | {
+        workshopsHeroEyebrow?: T;
+        workshopsHeroTitle?: T;
+        workshopsHeroDescription?: T;
+        workshopsHeroAttributes?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        workshopsHeroImage?: T;
+        workshopsCalendarTitle?: T;
+        workshopsCalendarDescription?: T;
+        workshopsCalendarCards?:
+          | T
+          | {
+              workshopType?: T;
+              cardImage?: T;
+              nextDate?: T;
+              duration?: T;
+              buttonLabel?: T;
+              id?: T;
+            };
       };
   workshopDetail?:
     | T
@@ -3538,6 +3616,76 @@ export interface PagesSelect<T extends boolean = true> {
         howToDescription?: T;
         howToArticles?: T;
       };
+  workshopGiftOnline?:
+    | T
+    | {
+        giftTitle?: T;
+        giftDescription?: T;
+        giftBuyNowLabel?: T;
+        giftBuyVoucherLabel?: T;
+        giftBuyNowHref?: T;
+        giftBuyVoucherHref?: T;
+        onlineTitle?: T;
+        onlineDescription?: T;
+        onlineBullets?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        onlineButtonLabel?: T;
+        onlineButtonHref?: T;
+      };
+  workshopLearnOnline?:
+    | T
+    | {
+        learnOnlineHeading?: T;
+        learnOnlineDescription?: T;
+        learnOnlineButtonLabel?: T;
+        learnOnlineButtonHref?: T;
+      };
+  workshopFaq?:
+    | T
+    | {
+        faqHeading?: T;
+        faqSubtitle?: T;
+        faqItems?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+      };
+  workshopWhyOnline?:
+    | T
+    | {
+        whyOnlineHeading?: T;
+        whyOnlineFeatures?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  workshopTeamBuilding?:
+    | T
+    | {
+        teamEyebrow?: T;
+        teamHeading?: T;
+        teamDescription?: T;
+        teamBullets?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        teamCtaLabel?: T;
+        teamCtaHref?: T;
+        teamImage?: T;
+      };
   meta?:
     | T
     | {
@@ -3574,23 +3722,17 @@ export interface ContactBlockSelect<T extends boolean = true> {
     | {
         heading?: T;
         description?: T;
-        address?: T;
-        phone?: T;
-        email?: T;
       };
   contactForm?:
     | T
     | {
         form?: T;
-        formHeading?: T;
         placeholders?:
           | T
           | {
-              name?: T;
               firstName?: T;
               lastName?: T;
               email?: T;
-              phone?: T;
               message?: T;
             };
         subjectOptions?:
@@ -3753,23 +3895,8 @@ export interface OurStoryBlockSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
-        image?: T;
         id?: T;
       };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ProductSliderBlock_select".
- */
-export interface ProductSliderBlockSelect<T extends boolean = true> {
-  heading?: T;
-  headingAccent?: T;
-  description?: T;
-  buttonLabel?: T;
-  buttonLink?: T;
-  products?: T;
   id?: T;
   blockName?: T;
 }
@@ -3900,6 +4027,20 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductSliderBlock_select".
+ */
+export interface ProductSliderBlockSelect<T extends boolean = true> {
+  heading?: T;
+  headingAccent?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  products?: T;
   id?: T;
   blockName?: T;
 }

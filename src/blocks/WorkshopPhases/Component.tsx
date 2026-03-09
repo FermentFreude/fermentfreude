@@ -4,6 +4,10 @@ import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { useEffect, useState } from 'react'
 
+function isResolvedMedia(img: unknown): img is MediaType {
+  return typeof img === 'object' && img !== null && 'url' in img
+}
+
 /* ═══════════════════════════════════════════════════════════════
  *  WorkshopPhases — Three-phase workshop experience section
  *
@@ -85,8 +89,8 @@ export const WorkshopPhasesComponent: React.FC<
       <div className="mx-auto mt-12 max-w-379 px-4 sm:px-6 sm:mt-16 md:mt-20">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8 lg:gap-10">
           {displayPhases.map((phase: Phase, idx) => {
-            // Follow TeamCards pattern: check if object, then cast
-            const hasImage = phase.image && typeof phase.image === 'object'
+            // Use the isResolvedMedia helper (consistent with WorkshopCardsSection)
+            const hasImage = isResolvedMedia(phase.image)
 
             return (
               <div
@@ -97,18 +101,18 @@ export const WorkshopPhasesComponent: React.FC<
                 style={{ transitionDelay: `${400 + idx * 100}ms` }}
               >
                 {/* ── Phase Image ────────────────────────────────── */}
-                {hasImage ? (
-                  <div className="relative h-40 overflow-hidden bg-ff-warm-gray">
+                <div className="relative aspect-4/3 overflow-hidden bg-ff-warm-gray">
+                  {hasImage ? (
                     <Media
                       resource={phase.image as MediaType}
                       fill
-                      imgClassName="object-cover transition-transform duration-500 group-hover:scale-105"
+                      imgClassName="object-cover"
                       alt={phase.title || `Phase ${idx + 1}`}
                     />
-                  </div>
-                ) : (
-                  <div className="h-40 bg-linear-to-br from-ff-warm-gray to-ff-warm-gray/50" />
-                )}
+                  ) : (
+                    <div className="flex size-full items-center justify-center bg-ff-warm-gray/50" />
+                  )}
+                </div>
 
                 {/* ── Phase Content ──────────────────────────────── */}
                 <div className="flex flex-col p-6 md:p-7 lg:p-8">

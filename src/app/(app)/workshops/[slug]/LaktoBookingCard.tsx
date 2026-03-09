@@ -329,7 +329,7 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
           <div
             ref={datesRef}
             className={`mx-auto max-w-4xl overflow-hidden transition-all duration-500 ${
-              showDates ? 'mt-8 max-h-500 opacity-100' : 'max-h-0 opacity-0'
+              showDates ? 'mt-8 max-h-125 opacity-100' : 'max-h-0 opacity-0'
             }`}
           >
             <div className="rounded-3xl border border-ff-border-light bg-white p-8 shadow-sm sm:p-10">
