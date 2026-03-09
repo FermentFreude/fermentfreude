@@ -220,7 +220,7 @@ export const TestimonialsBlock: React.FC<Props> = ({ eyebrow, heading, testimoni
             <span className="text-eyebrow font-bold text-ff-gold-accent">{resolvedEyebrow}</span>
           )}
           <h2
-            className="font-display font-black whitespace-nowrap"
+            className="font-display font-black lg:whitespace-nowrap"
             style={{
               fontSize: 'clamp(1.5rem, 3.5vw, 3rem)',
               lineHeight: 1.1,
