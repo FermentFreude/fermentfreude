@@ -21,13 +21,10 @@ const HERO_BLOCK_ICONS = [
   '/assets/images/fermentation/icon-preservation.svg',
 ] as const
 const DEFAULT_HERO_BLOCKS: HeroBlock[] = [
-  { title: 'Health & Well-being', description: 'Support your gut microbiome with probiotic-rich foods.' },
-  { title: 'Unique Flavours', description: 'Discover complex umami and tangy taste profiles.' },
-  { title: 'Simple Processes', description: 'No special equipment—just salt, time, and patience.' },
-  {
-    title: 'Learn & Share',
-    description: 'Join workshops and connect with fermentation enthusiasts.',
-  },
+  { title: 'WHAT IS FERMENTATION?', description: 'Discover the science behind this ancient preservation method.' },
+  { title: 'HISTORY', description: 'From kimchi to sauerkraut—fermentation across cultures and centuries.' },
+  { title: 'INNOVATION', description: '30 MINUTES' },
+  { title: 'OUR PRODUCTS', description: 'Explore our handcrafted ferments and workshops.' },
 ]
 
 const DEFAULT_HERO_TITLE = 'Innovation meets Tradition'
@@ -101,15 +98,15 @@ const DEFAULT_CTA_TITLE = 'Ready to learn?'
 const DEFAULT_CTA_DESCRIPTION =
   'Join our workshops and online courses to learn hands-on fermentation techniques, ask questions, and connect with a community of learners.'
 const DEFAULT_CTA_VIDEO = '/assets/videos/VIDEO-2026-02-06-12-18-34.mp4'
-const DEFAULT_CTA_PRIMARY = 'View workshops'
+const DEFAULT_CTA_PRIMARY = 'LEARN MORE'
 const DEFAULT_CTA_PRIMARY_URL = '/workshops'
-const DEFAULT_CTA_SECONDARY = 'Browse online courses'
+const DEFAULT_CTA_SECONDARY = 'EXPLORE'
 const DEFAULT_CTA_SECONDARY_URL = '/workshops'
 const DEFAULT_WORKSHOP_TITLE = 'Learn UNIQUE.'
 const DEFAULT_WORKSHOP_TITLE_SUFFIX = 'FLAVOURS'
 const DEFAULT_WORKSHOP_SUBTITLE =
-  'Learn fermentation through taste hands-on workshops that turn fresh ingredients into vibrant, living food.'
-const DEFAULT_WORKSHOP_VIEW_ALL = 'View All Dates'
+  'Dive into the world of diverse and delicious flavors that fermentation can offer.'
+const DEFAULT_WORKSHOP_VIEW_ALL = 'View All'
 const DEFAULT_WORKSHOP_VIEW_ALL_URL = '/workshops'
 const DEFAULT_WORKSHOP_NEXT_DATE_LABEL = 'Next Date:'
 const DEFAULT_WORKSHOP_CARDS = [
@@ -117,35 +114,35 @@ const DEFAULT_WORKSHOP_CARDS = [
     title: 'Lakto-Gemüse',
     description:
       'Ferment vegetables, experience flavours – different every month. Live online session.',
-    price: '€99',
-    priceSuffix: 'per person',
-    buttonLabel: 'More Info & Book',
+    price: 'Starting at €10.99',
+    priceSuffix: '',
+    buttonLabel: 'View Product',
     buttonUrl: '/workshops/lakto-gemuese',
-    nextDate: 'February 15, 2026',
+    nextDate: '27. Jan. 2026',
   },
   {
     title: 'Kombucha',
     description:
       'Dive into the world of fermented tea – full of character and aromas. Interactive online.',
-    price: '€99',
-    priceSuffix: 'per person',
-    buttonLabel: 'More Info & Book',
+    price: 'Starting at €10.99',
+    priceSuffix: '',
+    buttonLabel: 'View Product',
     buttonUrl: '/workshops/kombucha',
-    nextDate: 'February 18, 2026',
+    nextDate: '27. Jan. 2026',
   },
   {
     title: 'Tempeh',
     description:
       'Rediscover a plant-based protein source – mild, nutty and versatile. Online masterclass.',
-    price: '€99',
-    priceSuffix: 'per person',
-    buttonLabel: 'More Info & Book',
+    price: 'Starting at €10.99',
+    priceSuffix: '',
+    buttonLabel: 'View Product',
     buttonUrl: '/workshops/tempeh',
-    nextDate: 'February 20, 2026',
+    nextDate: '27. Jan. 2026',
   },
 ]
 const DEFAULT_FAQ_TITLE = 'Frequently Asked Questions'
-const DEFAULT_FAQ_SUBTITLE = 'Common questions about fermentation answered'
+const DEFAULT_FAQ_SUBTITLE = 'Do you have specific questions?'
 const DEFAULT_FAQ_CTA_TITLE = 'Ready to Start Fermenting?'
 const DEFAULT_FAQ_CTA_BODY =
   'Begin with simple vegetables like cabbage or cucumbers, use the proper salt ratio (2-3% by weight), and trust the process!'
