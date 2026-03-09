@@ -39,6 +39,10 @@ const scripts: Record<string, { name: string; file: string }> = {
   workshops: { name: 'Workshops overview page (hero)', file: 'seed-workshops.ts' },
   gastronomy: { name: 'Gastronomy page', file: 'seed-gastronomy.ts' },
   fermentation: { name: 'Fermentation page (with images)', file: 'seed-fermentation.ts' },
+  'fermentation-reset': {
+    name: 'Fermentation reset (clear CMS data so code defaults show)',
+    file: 'seed-fermentation-reset.ts',
+  },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
   shop: { name: 'Shop page (global)', file: 'seed-shop.ts' },
   'workshop-pages': {
