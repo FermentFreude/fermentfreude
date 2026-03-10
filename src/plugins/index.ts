@@ -102,6 +102,17 @@ export const plugins: Plugin[] = [
       isAdmin,
       isDocumentOwner,
     },
+    currencies: {
+      defaultCurrency: 'EUR',
+      supportedCurrencies: [
+        {
+          code: 'EUR',
+          label: 'Euro (€)',
+          symbol: '€',
+          decimals: 2,
+        },
+      ],
+    },
     customers: {
       slug: 'users',
     },

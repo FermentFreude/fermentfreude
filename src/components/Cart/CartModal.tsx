@@ -64,6 +64,22 @@ export function CartModal() {
     return cart.items.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
   }, [cart])
 
+  // Check if cart is truly empty (no Payload items AND no localStorage bookings)
+  const isCartEmpty =
+    (!cart || cart?.items?.length === 0) && Object.keys(bookingMetadata).length === 0
+
+  // Debug logging
+  useEffect(() => {
+    if (isOpen) {
+      console.log('📊 Cart Debug:', {
+        payloadCart: cart,
+        payloadItems: cart?.items?.length || 0,
+        bookingMetadata: Object.keys(bookingMetadata).length,
+        isCartEmpty,
+      })
+    }
+  }, [isOpen, cart, bookingMetadata, isCartEmpty])
+
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
       <SheetTrigger asChild>
@@ -77,7 +93,7 @@ export function CartModal() {
           <SheetDescription>Manage your cart here, add items to view the total.</SheetDescription>
         </SheetHeader>
 
-        {!cart || cart?.items?.length === 0 ? (
+        {isCartEmpty ? (
           <div className="text-center flex flex-col items-center gap-2">
             <ShoppingCart className="h-16" />
             <p className="text-center text-2xl font-bold">Your cart is empty.</p>
@@ -107,12 +123,12 @@ export function CartModal() {
                       : undefined
 
                   let image = firstGalleryImage || metaImage
-                  let price = product.priceInUSD
+                  let price = product.priceInEUR
 
                   const isVariant = Boolean(variant) && typeof variant === 'object'
 
                   if (isVariant) {
-                    price = variant?.priceInUSD
+                    price = variant?.priceInEUR
 
                     const imageVariant = product.gallery?.find(
                       (item: {
@@ -214,9 +230,9 @@ export function CartModal() {
                         </Link>
                         <div className="flex h-16 flex-col justify-between">
                           {isWorkshopBooking ? (
-                            // Workshop: show base price in euros
+                            // Workshop: show base price per person in euros (convert from cents)
                             <span className="flex justify-end text-right text-sm">
-                              €{typeof price === 'number' ? price.toFixed(2) : '0.00'}
+                              €{typeof price === 'number' ? (price / 100).toFixed(2) : '0.00'}
                             </span>
                           ) : (
                             // Regular product: show price and quantity controls
@@ -250,7 +266,6 @@ export function CartModal() {
                       <p>Total</p>
                       <Price
                         amount={cart?.subtotal}
-                        currencyCode="EUR"
                         className="text-right text-base text-black dark:text-white"
                       />
                     </div>

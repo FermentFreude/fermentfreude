@@ -11,7 +11,7 @@ import { toast } from 'sonner'
  * ═══════════════════════════════════════════════════════════════ */
 
 type AddWorkshopToCartParams = {
-  addItem: (item: { product: string }) => Promise<void>
+  addItem: (item: { product: string; variant?: string }, quantity?: number) => Promise<void>
   appointmentId: string
   workshopSlug: string
   workshopTitle: string
@@ -64,10 +64,13 @@ export async function addWorkshopToCart({
     existingBookings[appointmentId] = bookingMetadata
     localStorage.setItem('workshopBookings', JSON.stringify(existingBookings))
 
-    // Step 4: Add to cart (only after server validation passes)
-    await addItem({
-      product: data.cartItem.productId,
-    })
+    // Step 4: Add to cart with correct quantity (guestCount)
+    // This ensures Payload cart calculates: basePrice × quantity = totalPrice
+    // NOTE: addItem signature is addItem(item, quantity) - quantity is SECOND parameter
+    await addItem(
+      { product: data.cartItem.productId },
+      guestCount, // Pass quantity as second argument, not inside item object
+    )
 
     // Step 4: Success feedback
     toast.success(

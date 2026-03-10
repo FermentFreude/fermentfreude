@@ -66,7 +66,7 @@ const WORKSHOP_PRODUCTS = [
     slug: 'workshop-lakto',
     titleDe: 'Lakto-Gemüse Workshop',
     titleEn: 'Fermented Vegetables Workshop',
-    priceInUSD: 99,
+    priceInEUR: 9900, // €99.00 in cents
     imagePath: 'media/workshops/lakto.png',
     alt: 'Lakto-fermented vegetables workshop',
     descriptionDe: 'Workshop-Buchung (Details siehe Warenkorb)',
@@ -76,7 +76,7 @@ const WORKSHOP_PRODUCTS = [
     slug: 'workshop-kombucha',
     titleDe: 'Kombucha Workshop',
     titleEn: 'Kombucha Workshop',
-    priceInUSD: 99,
+    priceInEUR: 9900, // €99.00 in cents
     imagePath: 'media/workshops/kombucha.png',
     alt: 'Kombucha brewing workshop',
     descriptionDe: 'Workshop-Buchung (Details siehe Warenkorb)',
@@ -86,7 +86,7 @@ const WORKSHOP_PRODUCTS = [
     slug: 'workshop-tempeh',
     titleDe: 'Tempeh Workshop',
     titleEn: 'Tempeh Workshop',
-    priceInUSD: 89,
+    priceInEUR: 9900, // €99.00 in cents
     imagePath: 'media/workshops/tempeh.png',
     alt: 'Tempeh making workshop',
     descriptionDe: 'Workshop-Buchung (Details siehe Warenkorb)',
@@ -115,7 +115,25 @@ async function seedWorkshopProducts() {
     })
 
     if (existing.docs.length > 0) {
-      console.log(`  ✓ Workshop product already exists (${workshop.slug})`)
+      // Update existing product with correct pricing
+      try {
+        await payload.update({
+          collection: 'products',
+          id: existing.docs[0].id,
+          locale: 'de',
+          data: {
+            title: workshop.titleDe,
+            priceInEUR: workshop.priceInEUR,
+            priceInEUREnabled: true,
+            inventory: 999,
+            _status: 'published',
+          },
+          context: ctx,
+        })
+        console.log(`  ✓ Updated existing product with pricing (${workshop.slug})`)
+      } catch (error) {
+        console.error(`  ✗ Failed to update existing product:`, error)
+      }
       continue
     }
 
@@ -148,7 +166,9 @@ async function seedWorkshopProducts() {
         data: {
           title: workshop.titleDe,
           slug: workshop.slug,
-          priceInUSD: workshop.priceInUSD,
+          priceInEUR: workshop.priceInEUR,
+          priceInEUREnabled: true,
+          inventory: 999,
           description: buildDescription(workshop.descriptionDe),
           _status: 'published',
           ...(uploadedImage && {

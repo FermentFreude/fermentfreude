@@ -4,9 +4,9 @@ import { AddToCart } from '@/components/Cart/AddToCart'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import type { Product } from '@/payload-types'
+import { ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
-import { ShoppingCart } from 'lucide-react'
 
 type Props = {
   product: Product
@@ -32,16 +32,16 @@ export const ShopProductCard: React.FC<Props> = ({
   const bgColor = cardBackgroundColor?.trim() || CARD_DEFAULTS.cardBackgroundColor
   const btnColor = addToCartColor?.trim() || CARD_DEFAULTS.addToCartColor
   const btnHoverColor = addToCartHoverColor?.trim() || CARD_DEFAULTS.addToCartHoverColor
-  const { gallery, priceInUSD, title, slug } = product
+  const { gallery, priceInEUR, title, slug } = product
 
-  let price = priceInUSD
+  let price = priceInEUR
   let variantTitle: string | null = null
   const variants = product.variants?.docs
   if (variants && variants.length > 0) {
     const variant = variants[0]
     if (variant && typeof variant === 'object') {
-      if (variant.priceInUSD && typeof variant.priceInUSD === 'number') {
-        price = variant.priceInUSD
+      if (variant.priceInEUR && typeof variant.priceInEUR === 'number') {
+        price = variant.priceInEUR
       }
       if (variant.title) {
         variantTitle = variant.title
@@ -55,10 +55,8 @@ export const ShopProductCard: React.FC<Props> = ({
   const label = addToCartLabel ?? 'Add to cart'
 
   const parts = title.split(' ')
-  const productName =
-    variantTitle || parts.length > 1 ? (parts[0] ?? title) : title
-  const flavorRaw =
-    variantTitle ?? (parts.length > 1 ? parts.slice(1).join(' ') : null)
+  const productName = variantTitle || parts.length > 1 ? (parts[0] ?? title) : title
+  const flavorRaw = variantTitle ?? (parts.length > 1 ? parts.slice(1).join(' ') : null)
   const flavor = flavorRaw
     ? productName === 'Kombucha'
       ? `${flavorRaw} Flavour`
@@ -101,10 +99,7 @@ export const ShopProductCard: React.FC<Props> = ({
                 {productName}
               </p>
               {flavor && (
-                <p
-                  className="text-ff-charcoal/80"
-                  style={{ fontSize: 12.39, lineHeight: 1.6 }}
-                >
+                <p className="text-ff-charcoal/80" style={{ fontSize: 12.39, lineHeight: 1.6 }}>
                   {flavor}
                 </p>
               )}

@@ -46,13 +46,13 @@ function getProductPrice(product: Product): number | null {
     if (
       variant &&
       typeof variant === 'object' &&
-      variant?.priceInUSD &&
-      typeof variant.priceInUSD === 'number'
+      variant?.priceInEUR &&
+      typeof variant.priceInEUR === 'number'
     ) {
-      return variant.priceInUSD
+      return variant.priceInEUR
     }
   }
-  return typeof product.priceInUSD === 'number' ? product.priceInUSD : null
+  return typeof product.priceInEUR === 'number' ? product.priceInEUR : null
 }
 
 function getVariantLabel(product: Product): string {

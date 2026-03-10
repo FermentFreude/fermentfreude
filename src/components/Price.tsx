@@ -40,7 +40,17 @@ export const Price = ({
     if (currencyCodeFromProps) {
       return supportedCurrencies.find((currency) => currency.code === currencyCodeFromProps)
     }
-    return undefined
+    // Default to EUR if no currency specified
+    const eurCurrency = supportedCurrencies.find((currency) => currency.code === 'EUR')
+    if (eurCurrency) return eurCurrency
+
+    // Fallback: create EUR currency config if not in supportedCurrencies
+    return {
+      code: 'EUR',
+      label: 'Euro (€)',
+      symbol: '€',
+      decimals: 2,
+    }
   }, [currencyCodeFromProps, supportedCurrencies])
 
   if (typeof amount === 'number') {

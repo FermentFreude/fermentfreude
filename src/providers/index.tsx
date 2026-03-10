@@ -19,6 +19,17 @@ export const Providers: React.FC<{
             <SonnerProvider>
               <EcommerceProvider
                 enableVariants={true}
+                currenciesConfig={{
+                  defaultCurrency: 'EUR',
+                  supportedCurrencies: [
+                    {
+                      code: 'EUR',
+                      label: 'Euro (€)',
+                      symbol: '€',
+                      decimals: 2,
+                    },
+                  ],
+                }}
                 api={{
                   cartsFetchQuery: {
                     depth: 2,
@@ -28,10 +39,12 @@ export const Providers: React.FC<{
                         title: true,
                         gallery: true,
                         inventory: true,
+                        priceInEUR: true,
                       },
                       variants: {
                         title: true,
                         inventory: true,
+                        priceInEUR: true,
                       },
                     },
                   },

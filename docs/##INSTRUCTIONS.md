@@ -105,6 +105,144 @@ The project migrated from Vercel Blob to Cloudflare R2 because:
 3. Frontend renders `<Media resource={...} />` → Next.js `<Image>` with the R2 URL
 4. Browser fetches the image from the R2 CDN
 
+### Product Pricing — Cents System (CRITICAL)
+
+**All product prices MUST be stored in cents (integers), not euros (decimals).**
+
+This is the industry standard for e-commerce and is required by Stripe. The system automatically converts for display.
+
+#### Why Cents?
+
+1. **Stripe requires it:** Payment intents accept only integers in smallest currency unit (cents for EUR)
+2. **No floating-point errors:** JavaScript decimals have precision bugs (`0.1 + 0.2 = 0.30000000000000004`)
+3. **Industry standard:** Shopify, WooCommerce, Stripe, PayPal all use cents/pennies
+4. **Automatic conversion:** Display components handle euros → no manual conversion needed
+
+#### Configuration
+
+In `src/plugins/index.ts`, the ecommerce plugin is configured:
+
+```typescript
+currencies: {
+  defaultCurrency: 'EUR',
+  supportedCurrencies: [
+    {
+      code: 'EUR',
+      label: 'Euro (€)',
+      symbol: '€',
+      decimals: 2,  // ← Tells Payload: "divide by 100 for display"
+    }
+  ]
+}
+```
+
+This `decimals: 2` setting means: **all prices are stored in cents and automatically divided by 100 when displayed**.
+
+#### How It Works
+
+| Layer | Format | Example | Auto-Convert? |
+|-------|--------|---------|---------------|
+| **Database** | Cents (integer) | `9900` | ❌ No |
+| **Seed scripts** | Cents (integer) | `priceInEUR: 9900` | ❌ No |
+| **Admin input** | Cents (integer) | Enter: `9900` | ❌ No |
+| **Cart display** | Euros (formatted) | Shows: "€99.00" | ✅ Yes |
+| **Product pages** | Euros (formatted) | Shows: "€99.00" | ✅ Yes |
+| **Checkout** | Euros (formatted) | Shows: "€99.00" | ✅ Yes |
+| **Stripe API** | Cents (integer) | Sends: `9900` | ❌ No |
+
+#### Adding New Products
+
+**In seed scripts** (vouchers, shop items, workshops):
+
+```typescript
+// ✅ Correct:
+const product = await payload.create({
+  collection: 'products',
+  data: {
+    title: 'Starter Kit',
+    priceInEUR: 4999,        // €49.99 in cents
+    priceInEUREnabled: true,
+    inventory: 100,
+    // ...
+  },
+})
+
+// ❌ Wrong:
+priceInEUR: 49.99  // Will display as €0.49!
+```
+
+**In /admin** (manual product creation):
+
+Editors must enter prices **in cents**:
+- Want €79.99? → Enter: `7999`
+- Want €120.00? → Enter: `12000`
+- Want €5.50? → Enter: `550`
+
+**Admin UI helper:** The price field in `/admin` shows:
+> "Price in EUR (in cents, e.g., 9900 = €99.00)"
+
+#### Display Components
+
+**Automatic conversion** via `<Price>` component:
+
+```tsx
+// In any component:
+<Price amount={9900} />  
+// Displays: €99.00
+
+// Price.tsx uses formatCurrency() which automatically:
+// 9900 / 100 = 99.00 → "€99.00"
+```
+
+**For workshop products** (special case in CartModal):
+
+```tsx
+// Manual conversion only for workshop line items:
+€{(price / 100).toFixed(2)}  // 9900 → "€99.00"
+
+// Regular products use <Price> component (auto-converts)
+```
+
+#### Product Types
+
+This system applies to **ALL products**:
+
+- **Workshop bookings:** €99/person = `priceInEUR: 9900`
+- **Vouchers:** €50 voucher = `priceInEUR: 5000`
+- **Shop items:** €24.99 kit = `priceInEUR: 2499`
+- **Merchandise:** €12.50 mug = `priceInEUR: 1250`
+
+#### Common Pitfalls
+
+❌ **Don't** store prices as floats:
+```typescript
+priceInEUR: 99.00  // BAD: Will show as €0.99
+```
+
+❌ **Don't** manually convert everywhere:
+```typescript
+// BAD: Manual conversion in every component
+<span>€{product.priceInEUR / 100}</span>
+```
+
+✅ **Do** use the Price component:
+```typescript
+// GOOD: Automatic conversion
+<Price amount={product.priceInEUR} />
+```
+
+#### Verification
+
+After seeding products, verify prices are correct:
+
+```bash
+# Check product prices in database
+npx tsx --env-file=.env src/scripts/check-prices.ts
+
+# Should output:
+# workshop-kombucha: €99.00 (9900 cents) ✓
+```
+
 ---
 
 ## 2 — Operating Principles

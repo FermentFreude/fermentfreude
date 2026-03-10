@@ -10,9 +10,7 @@
  */
 
 // Load .env file
-// @ts-expect-error — dotenv types not resolved via package.json exports
-import { config } from 'dotenv'
-config()
+import 'dotenv/config'
 
 import payloadConfig from '@payload-config'
 import { getPayload } from 'payload'
@@ -53,8 +51,8 @@ async function diagnose() {
         console.log(`   ✅ ${product.slug}`)
         console.log(`      ID: ${product.id}`)
         console.log(`      Title (DE): ${product.title}`)
-        console.log(`      Price: €${product.priceInUSD}`)
-        console.log(`      Status: ${(product as any)._status}`)
+        console.log(`      Price: €${product.priceInEUR}`)
+        console.log(`      Status: ${product._status || 'published'}`)
       })
     }
     console.log()
