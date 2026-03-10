@@ -21,6 +21,10 @@ import { Media } from '@/collections/Media'
 import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
 import { Users } from '@/collections/Users'
+import { Vouchers } from '@/collections/Vouchers'
+import { WorkshopAppointments } from '@/collections/WorkshopAppointments'
+import { WorkshopLocations } from '@/collections/WorkshopLocations'
+import { Workshops } from '@/collections/Workshops'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { Shop } from '@/globals/Shop'
@@ -41,6 +45,9 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     components: {},
+    livePreview: {
+      collections: ['pages'],
+    },
   },
   localization: {
     locales: [
@@ -58,7 +65,17 @@ export default buildConfig({
     defaultLocale: 'de',
     fallback: true,
   },
-  collections: [Users, Pages, Categories, Media, Posts],
+  collections: [
+    Users,
+    Pages,
+    Categories,
+    Media,
+    Posts,
+    Workshops,
+    WorkshopLocations,
+    WorkshopAppointments,
+    Vouchers,
+  ],
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
   }),

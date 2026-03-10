@@ -1,13 +1,14 @@
-import type { Metadata } from 'next'
-import { unstable_noStore as noStore } from 'next/cache'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { AllWorkshopsHero } from '@/components/workshops/AllWorkshopsHero'
 import { WorkshopCalendar } from '@/components/workshops/WorkshopCalendar'
+import type { Page } from '@/payload-types'
+import { getAllWorkshopAppointments } from '@/utilities/getAllWorkshopAppointments'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
+import type { Metadata } from 'next'
+import { unstable_noStore as noStore } from 'next/cache'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
-import type { Page } from '@/payload-types'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,9 @@ export default async function WorkshopsPage() {
   noStore()
   const locale = await getLocale()
   const { isEnabled: draft } = await draftMode()
+
+  // Fetch all upcoming workshop appointments from database
+  const upcomingAppointments = await getAllWorkshopAppointments()
 
   // Get workshops page data (all sections editable from admin)
   const workshopsPageData = await queryPageBySlug({
@@ -50,10 +54,10 @@ export default async function WorkshopsPage() {
   // Extract blocks from home and lakto
   const homeBlocks = homeData?.layout ?? []
   const laktoBlocks = laktoData?.layout ?? []
-  
+
   // Get voucher block FROM LAKTO (has the background image)
   const voucherBlock = laktoBlocks.find((block) => block?.blockType === 'voucherCta')
-  
+
   const productSliderBlock = homeBlocks.find((block) => block?.blockType === 'productSlider')
   const sponsorsBlock = homeBlocks.find((block) => block?.blockType === 'sponsorsBar')
   const gastroBlock = homeBlocks.find((block) => block?.blockType === 'heroBanner')
@@ -62,29 +66,42 @@ export default async function WorkshopsPage() {
   // Get CMS data for section titles/descriptions
   const workshopsData = workshopsPageData as Page | undefined
 
+  // Enhance workshop cards with real next dates from database
+  const enhancedCards = workshopsData?.workshops?.workshopsCalendarCards?.map((card) => {
+    // Find the next (soonest) appointment for this workshop type
+    const nextAppointment = upcomingAppointments.find(
+      (apt) => apt.workshopType === card.workshopType,
+    )
+
+    return {
+      ...card,
+      nextDate: nextAppointment?.date || card.nextDate, // Use DB date or fallback to CMS
+    }
+  })
+
   return (
     <article className="pb-24">
       {/* 1. Hero Section - CMS editable */}
       <AllWorkshopsHero
-        cms=
-          {
-            workshopsData?.workshops
-              ? {
-                  eyebrow: workshopsData.workshops.workshopsHeroEyebrow,
-                  title: workshopsData.workshops.workshopsHeroTitle,
-                  description: workshopsData.workshops.workshopsHeroDescription,
-                  attributes: workshopsData.workshops.workshopsHeroAttributes,
-                  image: workshopsData.workshops.workshopsHeroImage,
-                }
-              : undefined
-          }
+        cms={
+          workshopsData?.workshops
+            ? {
+                eyebrow: workshopsData.workshops.workshopsHeroEyebrow,
+                title: workshopsData.workshops.workshopsHeroTitle,
+                description: workshopsData.workshops.workshopsHeroDescription,
+                attributes: workshopsData.workshops.workshopsHeroAttributes,
+                image: workshopsData.workshops.workshopsHeroImage,
+              }
+            : undefined
+        }
       />
 
       {/* 2. Workshop Calendar Section */}
-      <WorkshopCalendar 
-        cards={workshopsData?.workshops?.workshopsCalendarCards}
+      <WorkshopCalendar
+        cards={enhancedCards}
         title={workshopsData?.workshops?.workshopsCalendarTitle}
         description={workshopsData?.workshops?.workshopsCalendarDescription}
+        appointments={upcomingAppointments}
       />
 
       {/* 3. Voucher Block (from Lakto — with background image) */}

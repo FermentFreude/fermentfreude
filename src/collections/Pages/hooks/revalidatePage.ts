@@ -12,7 +12,7 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
   if (context?.disableRevalidate) return doc
 
   const workshopDetailSlugs = ['tempeh', 'lakto-gemuese', 'kombucha', 'basics']
-  
+
   // Always revalidate if workshops page changes (draft or published)
   if (doc.slug === 'workshops') {
     payload.logger.info(`Revalidating /workshops page`)

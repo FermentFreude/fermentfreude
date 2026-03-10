@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import type { WorkshopDetailData, WorkshopDate } from './workshop-data'
-import { BookingModal } from './BookingModal'
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
+import { useEffect, useRef, useState } from 'react'
+import { BookingModal } from './BookingModal'
+import { addWorkshopToCart } from './add-to-cart-utils'
+import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
 
 /* ═══════════════════════════════════════════════════════════════
  *  LaktoBookingCard — Modern booking experience
@@ -30,16 +32,30 @@ export type LaktoBookingCMS = {
   aboutHeading?: string | null
   aboutText?: string | null
   scheduleHeading?: string | null
-  schedule?: Array<{ duration?: string | null; title?: string | null; description?: string | null }> | null
+  schedule?: Array<{
+    duration?: string | null
+    title?: string | null
+    description?: string | null
+  }> | null
   includedHeading?: string | null
   includedItems?: Array<{ text?: string | null }> | null
   whyHeading?: string | null
   whyPoints?: Array<{ bold?: string | null; rest?: string | null }> | null
   experienceEyebrow?: string | null
   experienceTitle?: string | null
-  experienceCards?: Array<{ image?: unknown; eyebrow?: string | null; title?: string | null; description?: string | null }> | null
+  experienceCards?: Array<{
+    image?: unknown
+    eyebrow?: string | null
+    title?: string | null
+    description?: string | null
+  }> | null
   datesHeading?: string | null
-  dates?: Array<{ date?: string | null; time?: string | null; spotsLeft?: number | null; id?: string }> | null
+  dates?: Array<{
+    date?: string | null
+    time?: string | null
+    spotsLeft?: number | null
+    id?: string
+  }> | null
   modalConfirmHeading?: string | null
   modalConfirmSubheading?: string | null
   modalWorkshopLabel?: string | null
@@ -58,18 +74,17 @@ function isResolvedMedia(img: unknown): img is MediaType {
 
 function CalendarIcon({ className = 'size-5' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="3" y="4" width="14" height="14" rx="2" />
       <path d="M3 8h14M7 2v4M13 2v4" />
-    </svg>
-  )
-}
-
-function ClockIcon({ className = 'size-4' }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="10" cy="10" r="8" />
-      <path d="M10 6v4l3 2" />
     </svg>
   )
 }
@@ -115,57 +130,73 @@ const EXPERIENCE_CARDS = [
 
 // ─── Main Component ─────────────────────────────────────────
 
-export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailData; cms?: LaktoBookingCMS }) {
+export function LaktoBookingCard({
+  workshop,
+  cms,
+}: {
+  workshop: WorkshopDetailData
+  cms?: LaktoBookingCMS
+}) {
   // ── CMS values → fallback to workshop-data.ts defaults ──
   const bookingEyebrow = cms?.bookingEyebrow ?? workshop.subtitle.toUpperCase()
   const price = cms?.bookingPrice ?? workshop.price
   const priceSuffix = cms?.bookingPriceSuffix ?? workshop.priceSuffix
   const currency = cms?.bookingCurrency ?? workshop.currency
   const bookingImage = cms?.bookingImage
-  const bookingAttributes = (cms?.bookingAttributes?.length ?? 0) > 0
-    ? cms!.bookingAttributes!.map((a) => a.text ?? '').filter(Boolean)
-    : ['3 Stunden', 'Hands-on', 'Experience', 'Max. 12 Personen']
+  const bookingAttributes =
+    (cms?.bookingAttributes?.length ?? 0) > 0
+      ? cms!.bookingAttributes!.map((a) => a.text ?? '').filter(Boolean)
+      : ['3 Stunden', 'Hands-on', 'Experience', 'Max. 12 Personen']
   const viewDatesLabel = cms?.bookingViewDatesLabel ?? workshop.viewDatesLabel
   const hideDatesLabel = cms?.bookingHideDatesLabel ?? workshop.hideDatesLabel
   const moreDetailsLabel = cms?.bookingMoreDetailsLabel ?? workshop.moreInfoLabel
-  const bookLabel = cms?.bookingBookLabel ?? workshop.bookLabel
-  const spotsLabel = cms?.bookingSpotsLabel ?? workshop.spotsLabel
 
   const aboutHeading = cms?.aboutHeading ?? workshop.aboutHeading
   const aboutText = cms?.aboutText ?? workshop.aboutText
   const scheduleHeading = cms?.scheduleHeading ?? workshop.scheduleHeading
-  const scheduleItems = (cms?.schedule?.length ?? 0) > 0
-    ? cms!.schedule!.map((s) => ({ duration: s.duration ?? '', title: s.title ?? '', description: s.description ?? '' }))
-    : workshop.schedule
+  const scheduleItems =
+    (cms?.schedule?.length ?? 0) > 0
+      ? cms!.schedule!.map((s) => ({
+          duration: s.duration ?? '',
+          title: s.title ?? '',
+          description: s.description ?? '',
+        }))
+      : workshop.schedule
   const includedHeading = cms?.includedHeading ?? workshop.includedHeading
-  const includedItems = (cms?.includedItems?.length ?? 0) > 0
-    ? cms!.includedItems!.map((item) => ({ text: item.text ?? '' }))
-    : workshop.includedItems
+  const includedItems =
+    (cms?.includedItems?.length ?? 0) > 0
+      ? cms!.includedItems!.map((item) => ({ text: item.text ?? '' }))
+      : workshop.includedItems
   const whyHeading = cms?.whyHeading ?? workshop.whyHeading
-  const whyPoints = (cms?.whyPoints?.length ?? 0) > 0
-    ? cms!.whyPoints!.map((p) => ({ bold: p.bold ?? '', rest: p.rest ?? '' }))
-    : workshop.whyPoints
+  const whyPoints =
+    (cms?.whyPoints?.length ?? 0) > 0
+      ? cms!.whyPoints!.map((p) => ({ bold: p.bold ?? '', rest: p.rest ?? '' }))
+      : workshop.whyPoints
 
   const experienceEyebrow = cms?.experienceEyebrow ?? 'WAS DICH ERWARTET'
   const experienceTitle = cms?.experienceTitle ?? 'Dein Workshop-Erlebnis'
-  const experienceCardsData = (cms?.experienceCards?.length ?? 0) > 0
-    ? cms!.experienceCards!.map((c) => ({
-        image: c.image,
-        eyebrow: c.eyebrow ?? '',
-        title: c.title ?? '',
-        description: c.description ?? '',
-      }))
-    : EXPERIENCE_CARDS.map((c) => ({ ...c, image: undefined as unknown }))
+  const experienceCardsData =
+    (cms?.experienceCards?.length ?? 0) > 0
+      ? cms!.experienceCards!.map((c) => ({
+          image: c.image,
+          eyebrow: c.eyebrow ?? '',
+          title: c.title ?? '',
+          description: c.description ?? '',
+        }))
+      : EXPERIENCE_CARDS.map((c) => ({ ...c, image: undefined as unknown }))
 
   const datesHeading = cms?.datesHeading ?? workshop.datesHeading
-  const cmsDates: WorkshopDate[] = (cms?.dates?.length ?? 0) > 0
-    ? cms!.dates!.map((d, i) => ({
-        id: d.id ?? `cms-${i}`,
-        date: d.date ?? '',
-        time: d.time ?? '',
-        spotsLeft: d.spotsLeft ?? 0,
-      }))
-    : workshop.dates
+  const cmsDates: WorkshopDate[] =
+    (cms?.dates?.length ?? 0) > 0
+      ? cms!.dates!.map((d, i) => ({
+          id: d.id ?? `cms-${i}`,
+          date: d.date ?? '',
+          time: d.time ?? '',
+          spotsLeft: d.spotsLeft ?? 0,
+          appointmentId: (d as { appointmentId?: string }).appointmentId ?? d.id ?? `cms-${i}`,
+          availableSpots: d.spotsLeft ?? 0,
+        }))
+      : workshop.dates
 
   // Build merged workshop for BookingModal
   const mergedWorkshop: WorkshopDetailData = {
@@ -190,6 +221,7 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
   const sectionRef = useRef<HTMLElement>(null)
   const datesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
+  const { addItem } = useCart()
 
   useEffect(() => {
     const el = sectionRef.current
@@ -265,7 +297,8 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
                       className="font-display text-4xl font-black tracking-tight sm:text-5xl"
                       style={{ color: 'var(--ff-gold, #e6be68)' }}
                     >
-                      {currency}{price}
+                      {currency}
+                      {price}
                     </span>
                     <span className="ml-1.5 font-display text-sm font-medium text-white/50">
                       /{priceSuffix}
@@ -328,18 +361,18 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
            * ──────────────────────────────────────────── */}
           <div
             ref={datesRef}
-            className={`mx-auto max-w-4xl overflow-hidden transition-all duration-500 ${
-              showDates ? 'mt-8 max-h-125 opacity-100' : 'max-h-0 opacity-0'
+            className={`mx-auto max-w-6xl overflow-hidden transition-all duration-500 ${
+              showDates ? 'mt-8 max-h-200' : 'max-h-0 opacity-0'
             }`}
           >
-            <div className="rounded-3xl border border-ff-border-light bg-white p-8 shadow-sm sm:p-10">
+            <div className="rounded-xl border border-[#e8e4d9] bg-white p-6 shadow-sm sm:p-8">
               <div className="mb-6 flex items-center justify-between">
-                <h3 className="font-display text-subheading font-bold text-ff-near-black">
+                <h3 className="font-display text-xl sm:text-2xl font-bold text-[#1a1a1a]">
                   {datesHeading}
                 </h3>
                 <button
                   onClick={() => setShowDates(false)}
-                  className="rounded-full p-2 text-ff-gray-text-light transition-colors hover:bg-ff-warm-gray hover:text-ff-near-black"
+                  className="rounded-full p-2 text-[#9a9a9a] transition-colors hover:bg-[#f5f1e8] hover:text-[#1a1a1a]"
                   aria-label="Termine schließen"
                 >
                   <svg
@@ -354,31 +387,64 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
                   </svg>
                 </button>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 sm:space-y-4">
                 {cmsDates.map((d) => (
                   <div
                     key={d.id}
-                    className="flex items-center justify-between rounded-2xl border border-ff-border-light bg-ff-cream px-6 py-5 transition-all duration-200 hover:shadow-md"
+                    className="bg-[#f9f7f3] border border-[#e8e4d9] rounded-lg p-4 sm:p-5 hover:border-[#555954] transition-all duration-300"
                   >
-                    <div className="space-y-1">
-                      <p className="font-display text-body-lg font-bold text-ff-near-black">
-                        {d.date}
-                      </p>
-                      <div className="flex items-center gap-3 text-body-sm text-ff-gray-text-light">
-                        <ClockIcon />
-                        <span>{d.time}</span>
-                        <span className="text-ff-border-light">·</span>
-                        <span className="font-bold" style={{ color: 'var(--ff-gold, #e6be68)' }}>
-                          {d.spotsLeft} {spotsLabel}
-                        </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-start sm:items-center">
+                      {/* Date */}
+                      <div>
+                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                          Datum
+                        </p>
+                        <p className="font-display font-bold text-base text-[#1a1a1a]">{d.date}</p>
+                      </div>
+
+                      {/* Time */}
+                      <div>
+                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                          Zeit
+                        </p>
+                        <div className="flex items-center gap-2 text-sm text-[#555954]">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <span>{d.time}</span>
+                        </div>
+                      </div>
+
+                      {/* Availability */}
+                      <div>
+                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                          Plätze frei
+                        </p>
+                        <p className="font-display font-bold text-base text-[#1a1a1a]">
+                          {d.spotsLeft > 0 ? `${d.spotsLeft} Plätze` : 'Ausgebucht'}
+                        </p>
+                      </div>
+
+                      {/* Action Button */}
+                      <div className="pt-2 sm:pt-0">
+                        <button
+                          onClick={() => setBookingDate(d)}
+                          className="inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954] transition-all duration-300"
+                        >
+                          → Buchen
+                        </button>
                       </div>
                     </div>
-                    <button
-                      onClick={() => setBookingDate(d)}
-                      className="rounded-full border-2 border-ff-near-black bg-ff-near-black px-6 py-2.5 font-display text-body-sm font-bold text-white transition-all duration-300 hover:bg-transparent hover:text-ff-near-black hover:scale-[1.03] active:scale-[0.97]"
-                    >
-                      {bookLabel}
-                    </button>
                   </div>
                 ))}
               </div>
@@ -431,7 +497,10 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
                       </div>
                       <div className="pt-1">
                         <div className="mb-1 inline-flex items-center gap-2">
-                          <span className="rounded-full px-3 py-1 font-display text-caption font-semibold text-[#555954]" style={{ backgroundColor: '#F6F0E8' }}>
+                          <span
+                            className="rounded-full px-3 py-1 font-display text-caption font-semibold text-[#555954]"
+                            style={{ backgroundColor: '#F6F0E8' }}
+                          >
                             {step.duration}
                           </span>
                         </div>
@@ -455,7 +524,11 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
                 </h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {includedItems.map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 rounded-xl px-5 py-3" style={{ backgroundColor: '#F6F0E8' }}>
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 rounded-xl px-5 py-3"
+                      style={{ backgroundColor: '#F6F0E8' }}
+                    >
                       <div
                         className="size-2 shrink-0 rounded-full"
                         style={{ backgroundColor: 'var(--ff-gold, #e6be68)' }}
@@ -467,7 +540,10 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
               </div>
 
               {/* Why */}
-              <div className="rounded-2xl px-8 py-10 sm:px-10" style={{ backgroundColor: '#F6F0E8' }}>
+              <div
+                className="rounded-2xl px-8 py-10 sm:px-10"
+                style={{ backgroundColor: '#F6F0E8' }}
+              >
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
                   DARUM DIESER WORKSHOP
                 </p>
@@ -534,7 +610,11 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
                     <div className="flex-1">
                       <div className="relative aspect-4/3 w-full overflow-hidden rounded-3xl bg-ff-warm-gray">
                         {isResolvedMedia(card.image) ? (
-                          <Media resource={card.image as MediaType} fill imgClassName="object-cover" />
+                          <Media
+                            resource={card.image as MediaType}
+                            fill
+                            imgClassName="object-cover"
+                          />
                         ) : (
                           <div className="flex size-full items-center justify-center">
                             <span className="font-display text-lg font-bold uppercase tracking-widest text-ff-gray-text-light/40">
@@ -573,10 +653,25 @@ export function LaktoBookingCard({ workshop, cms }: { workshop: WorkshopDetailDa
         <BookingModal
           workshop={mergedWorkshop}
           selectedDate={bookingDate}
+          maxCapacity={mergedWorkshop.maxCapacity ?? 12}
           onClose={() => setBookingDate(null)}
-          onConfirm={() => {
-            alert(`Booking confirmed for ${bookingDate.date}!`)
+          onConfirm={async (guestCount) => {
+            try {
+              await addWorkshopToCart({
+                addItem,
+                appointmentId: bookingDate.appointmentId ?? bookingDate.id,
+                workshopSlug: 'lakto',
+                workshopTitle: 'Lakto-fermentiertes Gemüse Workshop',
+                guestCount,
+              })
+              setBookingDate(null)
+            } catch (error) {
+              console.error('Booking failed:', error)
+            }
+          }}
+          onSelectDifferentDate={() => {
             setBookingDate(null)
+            setShowDates(true)
           }}
         />
       )}

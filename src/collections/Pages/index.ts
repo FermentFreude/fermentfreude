@@ -10,7 +10,6 @@ import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Content } from '@/blocks/Content/config'
 import { FeatureCards } from '@/blocks/FeatureCards/config'
 import { FormBlock } from '@/blocks/Form/config'
-import type { Field } from 'payload'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { OurStory } from '@/blocks/OurStory/config'
@@ -48,7 +47,7 @@ export const Pages: CollectionConfig = {
     update: adminOnly,
   },
   admin: {
-    group: 'Content',
+    group: 'content',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) =>
@@ -891,7 +890,8 @@ export const Pages: CollectionConfig = {
                   maxRows: 10,
                   label: 'Workshop Cards',
                   admin: {
-                    description: 'Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).',
+                    description:
+                      'Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).',
                   },
                   fields: [
                     {

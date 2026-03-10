@@ -11,6 +11,8 @@ export interface WorkshopDate {
   date: string // Display date, e.g. "February 15, 2026"
   time: string // Display time, e.g. "2:00 PM - 5:00 PM"
   spotsLeft: number
+  appointmentId?: string // NEW: From WorkshopAppointments._id
+  availableSpots?: number // NEW: From WorkshopAppointments.availableSpots
 }
 
 export interface ScheduleStep {
@@ -43,6 +45,7 @@ export interface WorkshopDetailData {
   priceSuffix: string // e.g. "per person"
   currency: string
   heroImage: string | null // URL or null for placeholder
+  maxCapacity?: number // NEW: Max people per workshop slot (default 12)
 
   // "What's included" summary (card view — 3 items w/ icons)
   highlights: WorkshopIncluded[]

@@ -77,6 +77,10 @@ export interface Config {
     categories: Category;
     media: Media;
     posts: Post;
+    workshops: Workshop;
+    'workshop-locations': WorkshopLocation;
+    'workshop-appointments': WorkshopAppointment;
+    vouchers: Voucher;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -111,6 +115,10 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    workshops: WorkshopsSelect<false> | WorkshopsSelect<true>;
+    'workshop-locations': WorkshopLocationsSelect<false> | WorkshopLocationsSelect<true>;
+    'workshop-appointments': WorkshopAppointmentsSelect<false> | WorkshopAppointmentsSelect<true>;
+    vouchers: VouchersSelect<false> | VouchersSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -2909,6 +2917,160 @@ export interface Address {
   createdAt: string;
 }
 /**
+ * Define workshop metadata. Price and capacity apply to all dates and locations.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshops".
+ */
+export interface Workshop {
+  id: string;
+  /**
+   * URL-friendly identifier (e.g., kombucha, lakto, tempeh, basics)
+   */
+  slug: string;
+  /**
+   * Workshop name (displayed on frontend)
+   */
+  title: string;
+  /**
+   * Detailed workshop description
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Price per person in EUR (default: €99)
+   */
+  basePrice: number;
+  /**
+   * Maximum number of people per workshop session (locked at 12 for quality control)
+   */
+  maxCapacityPerSlot: number;
+  /**
+   * Workshop hero image
+   */
+  image?: (string | null) | Media;
+  /**
+   * Hide workshop from frontend if unchecked
+   */
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Workshop locations. Used to organize appointments by geography.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-locations".
+ */
+export interface WorkshopLocation {
+  id: string;
+  /**
+   * Location name (e.g., Berlin Studio, Munich Workshop)
+   */
+  name: string;
+  /**
+   * Full address including street, city, and postal code
+   */
+  address: string;
+  /**
+   * Optional timezone (e.g., Europe/Berlin) for date/time clarity
+   */
+  timezone?: string | null;
+  /**
+   * Hide location from frontend if unchecked
+   */
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * ⭐ Manage workshop availability. **This is where you control dates, times, and available spots.** Changes here instantly update the booking pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-appointments".
+ */
+export interface WorkshopAppointment {
+  id: string;
+  /**
+   * Select the workshop (Kombucha, Lakto, Tempeh, Basics)
+   */
+  workshop: string | Workshop;
+  /**
+   * Select the location where this workshop takes place
+   */
+  location: string | WorkshopLocation;
+  /**
+   * Workshop date and time (must be in the future)
+   */
+  dateTime: string;
+  /**
+   * Number of spots available for booking (0 = sold out, max 12 per workshop)
+   */
+  availableSpots: number;
+  /**
+   * Uncheck to hide this date from the website (useful for sold-out or cancelled sessions)
+   */
+  isPublished?: boolean | null;
+  /**
+   * Internal notes (not visible to customers)
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Gift vouchers that can be purchased as products and redeemed on the /redeem-voucher page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vouchers".
+ */
+export interface Voucher {
+  id: string;
+  /**
+   * Auto-generated unique voucher code
+   */
+  code: string;
+  /**
+   * Workshop this voucher is valid for
+   */
+  workshop: string | Workshop;
+  /**
+   * Voucher value in EUR (should match workshop price)
+   */
+  value: number;
+  /**
+   * Automatically set to true when voucher is used
+   */
+  redeemed?: boolean | null;
+  /**
+   * Date when voucher was redeemed
+   */
+  redeemedOn?: string | null;
+  /**
+   * User who redeemed the voucher
+   */
+  redeemedBy?: (string | null) | User;
+  /**
+   * Internal notes about this voucher
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
@@ -2968,6 +3130,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'workshops';
+        value: string | Workshop;
+      } | null)
+    | ({
+        relationTo: 'workshop-locations';
+        value: string | WorkshopLocation;
+      } | null)
+    | ({
+        relationTo: 'workshop-appointments';
+        value: string | WorkshopAppointment;
+      } | null)
+    | ({
+        relationTo: 'vouchers';
+        value: string | Voucher;
       } | null)
     | ({
         relationTo: 'forms';
@@ -4209,6 +4387,62 @@ export interface PostsSelect<T extends boolean = true> {
   readTime?: T;
   heroImage?: T;
   content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshops_select".
+ */
+export interface WorkshopsSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  description?: T;
+  basePrice?: T;
+  maxCapacityPerSlot?: T;
+  image?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-locations_select".
+ */
+export interface WorkshopLocationsSelect<T extends boolean = true> {
+  name?: T;
+  address?: T;
+  timezone?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-appointments_select".
+ */
+export interface WorkshopAppointmentsSelect<T extends boolean = true> {
+  workshop?: T;
+  location?: T;
+  dateTime?: T;
+  availableSpots?: T;
+  isPublished?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vouchers_select".
+ */
+export interface VouchersSelect<T extends boolean = true> {
+  code?: T;
+  workshop?: T;
+  value?: T;
+  redeemed?: T;
+  redeemedOn?: T;
+  redeemedBy?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }

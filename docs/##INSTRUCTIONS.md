@@ -497,6 +497,34 @@ pnpm seed home --force    # Force overwrite existing content
 
 ---
 
+## 15.5 — Common Issues & Troubleshooting
+
+### Admin Can't Edit Fields (Field Access Denied Error)
+
+**Problem:** Admin user is logged in but gets "You are not allowed to make this change" when trying to edit product fields (e.g., gallery, images).
+
+**Cause:** The ecommerce plugin applies field-level access controls. By default, `customerOnlyFieldAccess` restricts fields to users with the 'customer' role. Admin users don't have this role and are therefore blocked.
+
+**Solution:** The `customerOnlyFieldAccess` function in `src/access/customerOnlyFieldAccess.ts` is configured to allow admins to always access fields:
+
+```typescript
+// Admins can always edit
+if (isAdmin(args)) {
+  return true  // Admin bypass
+}
+
+// Otherwise, only customers
+if (req.user) return checkRole(['customer'], req.user)
+```
+
+If you still get access denied errors:
+1. Check the admin panel → Your Account → verify your role is 'admin'
+2. Clear browser cache and refresh `/admin`
+3. Verify you're logged in (check network tab)
+4. Contact developer if issue persists
+
+---
+
 ## 16 — Checklist Before Finishing Any Feature
 
 - [ ] Schema field added with `localized: true`, `label`, and `admin.description`?

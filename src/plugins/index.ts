@@ -10,7 +10,7 @@ import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 
 import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
-import { customerOnlyFieldAccess } from '@/access/customerOnlyFieldAccess'
+
 import { isAdmin } from '@/access/isAdmin'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
 import { ProductsCollection } from '@/collections/Products'
@@ -99,7 +99,6 @@ export const plugins: Plugin[] = [
     access: {
       adminOnlyFieldAccess,
       adminOrPublishedStatus,
-      customerOnlyFieldAccess,
       isAdmin,
       isDocumentOwner,
     },

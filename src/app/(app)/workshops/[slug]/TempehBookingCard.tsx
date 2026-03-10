@@ -2,8 +2,10 @@
 
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { useEffect, useRef, useState } from 'react'
 import { BookingModal } from './BookingModal'
+import { addWorkshopToCart } from './add-to-cart-utils'
 import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -87,23 +89,6 @@ function CalendarIcon({ className = 'size-5' }: { className?: string }) {
   )
 }
 
-function ClockIcon({ className = 'size-4' }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="10" cy="10" r="8" />
-      <path d="M10 6v4l3 2" />
-    </svg>
-  )
-}
-
 function ChevronDown({ open }: { open: boolean }) {
   return (
     <svg
@@ -165,8 +150,6 @@ export function TempehBookingCard({
   const viewDatesLabel = cms?.bookingViewDatesLabel ?? workshop.viewDatesLabel
   const hideDatesLabel = cms?.bookingHideDatesLabel ?? workshop.hideDatesLabel
   const moreDetailsLabel = cms?.bookingMoreDetailsLabel ?? workshop.moreInfoLabel
-  const bookLabel = cms?.bookingBookLabel ?? workshop.bookLabel
-  const spotsLabel = cms?.bookingSpotsLabel ?? workshop.spotsLabel
 
   const aboutHeading = cms?.aboutHeading ?? workshop.aboutHeading
   const aboutText = cms?.aboutText ?? workshop.aboutText
@@ -210,6 +193,8 @@ export function TempehBookingCard({
           date: d.date ?? '',
           time: d.time ?? '',
           spotsLeft: d.spotsLeft ?? 0,
+          appointmentId: (d as { appointmentId?: string }).appointmentId ?? d.id ?? `cms-${i}`,
+          availableSpots: d.spotsLeft ?? 0,
         }))
       : workshop.dates
 
@@ -236,6 +221,7 @@ export function TempehBookingCard({
   const sectionRef = useRef<HTMLElement>(null)
   const datesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
+  const { addItem } = useCart()
 
   useEffect(() => {
     const el = sectionRef.current
@@ -375,18 +361,18 @@ export function TempehBookingCard({
            * ──────────────────────────────────────────── */}
           <div
             ref={datesRef}
-            className={`mx-auto max-w-4xl overflow-hidden transition-all duration-500 ${
-              showDates ? 'mt-8 max-h-500 opacity-100' : 'max-h-0 opacity-0'
+            className={`mx-auto max-w-6xl overflow-hidden transition-all duration-500 ${
+              showDates ? 'mt-8 max-h-200' : 'max-h-0 opacity-0'
             }`}
           >
-            <div className="rounded-3xl border border-ff-border-light bg-white p-8 shadow-sm sm:p-10">
+            <div className="rounded-xl border border-[#e8e4d9] bg-white p-6 shadow-sm sm:p-8">
               <div className="mb-6 flex items-center justify-between">
-                <h3 className="font-display text-subheading font-bold text-ff-near-black">
+                <h3 className="font-display text-xl sm:text-2xl font-bold text-[#1a1a1a]">
                   {datesHeading}
                 </h3>
                 <button
                   onClick={() => setShowDates(false)}
-                  className="rounded-full p-2 text-ff-gray-text-light transition-colors hover:bg-ff-warm-gray hover:text-ff-near-black"
+                  className="rounded-full p-2 text-[#9a9a9a] transition-colors hover:bg-[#f5f1e8] hover:text-[#1a1a1a]"
                   aria-label="Termine schließen"
                 >
                   <svg
@@ -401,31 +387,64 @@ export function TempehBookingCard({
                   </svg>
                 </button>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 sm:space-y-4">
                 {cmsDates.map((d) => (
                   <div
                     key={d.id}
-                    className="flex items-center justify-between rounded-2xl border border-ff-border-light bg-ff-cream px-6 py-5 transition-all duration-200 hover:shadow-md"
+                    className="bg-[#f9f7f3] border border-[#e8e4d9] rounded-lg p-4 sm:p-5 hover:border-[#555954] transition-all duration-300"
                   >
-                    <div className="space-y-1">
-                      <p className="font-display text-body-lg font-bold text-ff-near-black">
-                        {d.date}
-                      </p>
-                      <div className="flex items-center gap-3 text-body-sm text-ff-gray-text-light">
-                        <ClockIcon />
-                        <span>{d.time}</span>
-                        <span className="text-ff-border-light">·</span>
-                        <span className="font-bold" style={{ color: 'var(--ff-gold, #e6be68)' }}>
-                          {d.spotsLeft} {spotsLabel}
-                        </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-start sm:items-center">
+                      {/* Date */}
+                      <div>
+                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                          Datum
+                        </p>
+                        <p className="font-display font-bold text-base text-[#1a1a1a]">{d.date}</p>
+                      </div>
+
+                      {/* Time */}
+                      <div>
+                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                          Zeit
+                        </p>
+                        <div className="flex items-center gap-2 text-sm text-[#555954]">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <span>{d.time}</span>
+                        </div>
+                      </div>
+
+                      {/* Availability */}
+                      <div>
+                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                          Plätze frei
+                        </p>
+                        <p className="font-display font-bold text-base text-[#1a1a1a]">
+                          {d.spotsLeft > 0 ? `${d.spotsLeft} Plätze` : 'Ausgebucht'}
+                        </p>
+                      </div>
+
+                      {/* Action Button */}
+                      <div className="pt-2 sm:pt-0">
+                        <button
+                          onClick={() => setBookingDate(d)}
+                          className="inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954] transition-all duration-300"
+                        >
+                          → Buchen
+                        </button>
                       </div>
                     </div>
-                    <button
-                      onClick={() => setBookingDate(d)}
-                      className="rounded-full border-2 border-ff-near-black bg-ff-near-black px-6 py-2.5 font-display text-body-sm font-bold text-white transition-all duration-300 hover:bg-transparent hover:text-ff-near-black hover:scale-[1.03] active:scale-[0.97]"
-                    >
-                      {bookLabel}
-                    </button>
                   </div>
                 ))}
               </div>
@@ -634,10 +653,25 @@ export function TempehBookingCard({
         <BookingModal
           workshop={mergedWorkshop}
           selectedDate={bookingDate}
+          maxCapacity={mergedWorkshop.maxCapacity ?? 12}
           onClose={() => setBookingDate(null)}
-          onConfirm={() => {
-            alert(`Booking confirmed for ${bookingDate.date}!`)
+          onConfirm={async (guestCount) => {
+            try {
+              await addWorkshopToCart({
+                addItem,
+                appointmentId: bookingDate.appointmentId ?? bookingDate.id,
+                workshopSlug: 'tempeh',
+                workshopTitle: 'Tempeh Workshop',
+                guestCount,
+              })
+              setBookingDate(null)
+            } catch (error) {
+              console.error('Booking failed:', error)
+            }
+          }}
+          onSelectDifferentDate={() => {
             setBookingDate(null)
+            setShowDates(true)
           }}
         />
       )}

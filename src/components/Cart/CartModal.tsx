@@ -22,11 +22,37 @@ import { Product } from '@/payload-types'
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
 
+type WorkshopBooking = {
+  appointmentId: string
+  workshopSlug: string
+  workshopTitle: string
+  guestCount: number
+  date: string
+  time: string
+  pricePerPerson: number
+  totalPrice: number
+}
+
 export function CartModal() {
   const { cart } = useCart()
   const [isOpen, setIsOpen] = useState(false)
+  const [bookingMetadata, setBookingMetadata] = useState<Record<string, WorkshopBooking>>({})
 
   const pathname = usePathname()
+
+  // Load workshop booking metadata from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('workshopBookings')
+      if (stored) {
+        try {
+          setBookingMetadata(JSON.parse(stored))
+        } catch (error) {
+          console.error('Failed to parse workshop bookings from localStorage:', error)
+        }
+      }
+    }
+  }, [isOpen]) // Reload when cart opens
 
   useEffect(() => {
     // Close the cart modal when the pathname changes.
@@ -66,6 +92,9 @@ export function CartModal() {
 
                   if (typeof product !== 'object' || !item || !product || !product.slug)
                     return <React.Fragment key={i} />
+
+                  // Check if this is a workshop booking (product slug starts with "workshop-")
+                  const isWorkshopBooking = product.slug?.startsWith('workshop-')
 
                   const metaImage =
                     product.meta?.image && typeof product.meta?.image === 'object'
@@ -121,7 +150,11 @@ export function CartModal() {
                         </div>
                         <Link
                           className="z-30 flex flex-row space-x-4"
-                          href={`/products/${(item.product as Product)?.slug}`}
+                          href={
+                            isWorkshopBooking
+                              ? `/workshops/${product.slug.replace('workshop-', '')}`
+                              : `/products/${(item.product as Product)?.slug}`
+                          }
                         >
                           <div className="relative h-16 w-16 cursor-pointer overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
                             {image?.url && (
@@ -137,7 +170,35 @@ export function CartModal() {
 
                           <div className="flex flex-1 flex-col text-base">
                             <span className="leading-tight">{product?.title}</span>
-                            {isVariant && variant ? (
+                            {isWorkshopBooking ? (
+                              // For workshop bookings, display full booking details from localStorage
+                              (() => {
+                                const productSlugWithoutPrefix = product.slug?.replace(
+                                  'workshop-',
+                                  '',
+                                )
+                                const booking = Object.values(bookingMetadata).find(
+                                  (b) => b.workshopSlug === productSlugWithoutPrefix,
+                                )
+                                if (booking) {
+                                  return (
+                                    <div className="text-sm text-neutral-500 dark:text-neutral-400 space-y-0.5">
+                                      <p>{booking.date}</p>
+                                      <p>{booking.time} Uhr</p>
+                                      <p>{booking.guestCount} Gäste</p>
+                                      <div className="font-semibold text-neutral-700 dark:text-neutral-300">
+                                        Total: €{booking.totalPrice.toFixed(2)}
+                                      </div>
+                                    </div>
+                                  )
+                                }
+                                return (
+                                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                    Workshop Buchung
+                                  </p>
+                                )
+                              })()
+                            ) : isVariant && variant ? (
                               <p className="text-sm text-neutral-500 dark:text-neutral-400 capitalize">
                                 {variant.options
                                   ?.map(
@@ -152,19 +213,29 @@ export function CartModal() {
                           </div>
                         </Link>
                         <div className="flex h-16 flex-col justify-between">
-                          {typeof price === 'number' && (
-                            <Price
-                              amount={price}
-                              className="flex justify-end space-y-2 text-right text-sm"
-                            />
+                          {isWorkshopBooking ? (
+                            // Workshop: show base price in euros
+                            <span className="flex justify-end text-right text-sm">
+                              €{typeof price === 'number' ? price.toFixed(2) : '0.00'}
+                            </span>
+                          ) : (
+                            // Regular product: show price and quantity controls
+                            <>
+                              {typeof price === 'number' && (
+                                <Price
+                                  amount={price}
+                                  className="flex justify-end space-y-2 text-right text-sm"
+                                />
+                              )}
+                              <div className="ml-auto flex h-9 flex-row items-center rounded-lg border">
+                                <EditItemQuantityButton item={item} type="minus" />
+                                <p className="w-6 text-center">
+                                  <span className="w-full text-sm">{item.quantity}</span>
+                                </p>
+                                <EditItemQuantityButton item={item} type="plus" />
+                              </div>
+                            </>
                           )}
-                          <div className="ml-auto flex h-9 flex-row items-center rounded-lg border">
-                            <EditItemQuantityButton item={item} type="minus" />
-                            <p className="w-6 text-center">
-                              <span className="w-full text-sm">{item.quantity}</span>
-                            </p>
-                            <EditItemQuantityButton item={item} type="plus" />
-                          </div>
                         </div>
                       </div>
                     </li>
@@ -179,6 +250,7 @@ export function CartModal() {
                       <p>Total</p>
                       <Price
                         amount={cart?.subtotal}
+                        currencyCode="EUR"
                         className="text-right text-base text-black dark:text-white"
                       />
                     </div>

@@ -19,6 +19,7 @@ import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 import { findWorkshopBySlug, getAllWorkshops } from '@/utilities/getWorkshops'
 import { getWorkshopTermine } from '@/utilities/getWorkshopTermine'
+import { getWorkshopAppointments } from './get-workshop-appointments'
 import { KombuchaBookingCard } from './KombuchaBookingCard'
 import { KombuchaFAQ } from './KombuchaFAQ'
 import { KombuchaHero } from './KombuchaHero'
@@ -248,6 +249,9 @@ export default async function WorkshopDetailPage({ params }: Args) {
   const { slug } = await params
   const locale = await getLocale()
   const WORKSHOP_PAGE_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
+
+  // Fetch workshop appointments from database
+  const workshopAppointments = await getWorkshopAppointments(slug)
   const [workshop, allWorkshops, termins, gastronomyResult, workshopPageResult] = await Promise.all(
     [
       findWorkshopBySlug(slug, locale),
@@ -574,16 +578,17 @@ export default async function WorkshopDetailPage({ params }: Args) {
         {/* 2. Modern Booking Card */}
         <LaktoBookingCard
           workshop={workshopDetailData}
-          cms={
-            detail
+          cms={{
+            ...(detail
               ? {
                   bookingImage: detail.bookingImage,
                   experienceEyebrow: detail.experienceEyebrow,
                   experienceTitle: detail.experienceTitle,
                   experienceCards: detail.experienceCards,
                 }
-              : undefined
-          }
+              : {}),
+            dates: workshopAppointments,
+          }}
         />
 
         {/* 3. Seasonal Fermentation Calendar */}
@@ -635,16 +640,17 @@ export default async function WorkshopDetailPage({ params }: Args) {
         {/* 2. Modern Booking Card */}
         <TempehBookingCard
           workshop={tempehDefaults}
-          cms={
-            detail
+          cms={{
+            ...(detail
               ? {
                   bookingImage: detail.bookingImage,
                   experienceEyebrow: detail.experienceEyebrow,
                   experienceTitle: detail.experienceTitle,
                   experienceCards: detail.experienceCards,
                 }
-              : undefined
-          }
+              : {}),
+            dates: workshopAppointments,
+          }}
         />
 
         {/* 3. Other Workshops (slider — excludes tempeh) */}
@@ -693,16 +699,17 @@ export default async function WorkshopDetailPage({ params }: Args) {
         {/* 2. Modern Booking Card */}
         <KombuchaBookingCard
           _workshop={undefined}
-          cms={
-            detail
+          cms={{
+            ...(detail
               ? {
                   bookingImage: detail.bookingImage,
                   experienceEyebrow: detail.experienceEyebrow,
                   experienceTitle: detail.experienceTitle,
                   experienceCards: detail.experienceCards,
                 }
-              : undefined
-          }
+              : {}),
+            dates: workshopAppointments,
+          }}
         />
 
         {/* 3. Other Workshops (slider — excludes kombucha) */}

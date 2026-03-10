@@ -32,6 +32,10 @@ const __dirname = path.dirname(__filename)
 const scripts: Record<string, { name: string; file: string }> = {
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
   products: { name: 'Products (kombucha bottles)', file: 'seed-products.ts' },
+  'workshop-products': {
+    name: 'Workshop Products (bookable workshops)',
+    file: 'seed-workshop-products.ts',
+  },
   placeholders: { name: 'Placeholder products (reset)', file: 'seed-placeholder-products.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
@@ -44,6 +48,10 @@ const scripts: Record<string, { name: string; file: string }> = {
   'workshop-pages': {
     name: 'Workshop pages (tempeh, lakto-gemuese, kombucha)',
     file: 'seed-workshop-pages.ts',
+  },
+  'workshop-collections': {
+    name: 'Workshop Collections (Workshops, Locations, Appointments)',
+    file: 'seed-workshop-collections.ts',
   },
   posts: { name: 'How-To Articles (Posts collection)', file: 'seed-posts.ts' },
   'tempeh-posts': { name: 'Tempeh How-To Articles', file: 'seed-tempeh-posts.ts' },
@@ -60,6 +68,7 @@ const scripts: Record<string, { name: string; file: string }> = {
 const allOrder = [
   'header',
   'products',
+  'workshop-products',
   'home',
   'about',
   'contact',

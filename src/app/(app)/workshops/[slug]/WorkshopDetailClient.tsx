@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import Image from 'next/image'
-import type { WorkshopDetailData, WorkshopDate } from './workshop-data'
-import { BookingModal } from './BookingModal'
 import { FermentKalender } from '@/components/fermentation/FermentKalender'
 import { FermentedVegHowTos } from '@/components/fermentation/FermentedVegHowTos'
+import Image from 'next/image'
+import { useRef, useState } from 'react'
+import { BookingModal } from './BookingModal'
+import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
 
 /* ═══════════════════════════════════════════════════════════════
  *  Workshop Detail Client Component
@@ -353,10 +353,14 @@ export function WorkshopDetailClient({ workshop }: { workshop: WorkshopDetailDat
         <BookingModal
           workshop={workshop}
           selectedDate={bookingDate}
+          maxCapacity={workshop.maxCapacity ?? 12}
           onClose={() => setBookingDate(null)}
-          onConfirm={() => {
+          onConfirm={async (guestCount) => {
             // TODO: integrate with Stripe / booking system
-            alert(`Booking confirmed for ${bookingDate.date}!`)
+            alert(`Booking confirmed for ${bookingDate.date}! Guests: ${guestCount}`)
+            setBookingDate(null)
+          }}
+          onSelectDifferentDate={() => {
             setBookingDate(null)
           }}
         />

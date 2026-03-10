@@ -199,7 +199,7 @@ async function seedWorkshops() {
     cards.map((card) => ({
       ...card,
       ...(cardImageIds[card.workshopType]
-        ? { 
+        ? {
             cardImage: cardImageIds[card.workshopType],
             cardImageId: cardImageIds[card.workshopType],
           }
@@ -209,16 +209,12 @@ async function seedWorkshops() {
   // 5. Update locale data with calendar cards + images
   const workshopsDataDEWithCards = {
     ...workshopsPageDataDE.workshops,
-    workshopsCalendarCards: addImagesToCards(
-      workshopsPageDataDE.workshops.workshopsCalendarCards,
-    ),
+    workshopsCalendarCards: addImagesToCards(workshopsPageDataDE.workshops.workshopsCalendarCards),
   }
 
   const workshopsDataENWithCards = {
     ...workshopsPageDataEN.workshops,
-    workshopsCalendarCards: addImagesToCards(
-      workshopsPageDataEN.workshops.workshopsCalendarCards,
-    ),
+    workshopsCalendarCards: addImagesToCards(workshopsPageDataEN.workshops.workshopsCalendarCards),
   }
 
   // 6. Save DE locale

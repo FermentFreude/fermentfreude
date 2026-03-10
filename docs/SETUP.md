@@ -432,7 +432,7 @@ First user created is automatically promoted to `admin` via `ensureFirstUserIsAd
 | `adminOrSelf` | Query constraint `{ id: { equals: user.id } }` | Admins see all, users see own |
 | `adminOrPublishedStatus` | Query constraint `{ _status: { equals: 'published' } }` | Admins see all, public sees published only |
 | `adminOnlyFieldAccess` | `boolean` | Field-level, admin only |
-| `customerOnlyFieldAccess` | `boolean` | Field-level, customer only |
+| `adminOnlyFieldAccess` | `FieldAccess` | Field-level, admin only (product fields) |
 | `isAdmin` | `boolean` | Role check |
 | `isDocumentOwner` | `boolean` | Checks document ownership |
 | `adminOrCustomerOwner` | `boolean` or query | Admin or document owner |
