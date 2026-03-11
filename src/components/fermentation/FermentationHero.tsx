@@ -1,7 +1,6 @@
 'use client'
 
 import { Media } from '@/components/Media'
-import type { Media as MediaType } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import Link from 'next/link'
 import React, { useEffect } from 'react'
@@ -41,8 +40,7 @@ export const FermentationHero: React.FC<Props> = ({ data, heroTitle }) => {
   useEffect(() => setHeaderTheme('dark'), [setHeaderTheme])
 
   const words = heroTitle?.trim().split(/\s+/) ?? []
-  const fallbackLine1 =
-    words.length > 1 ? words.slice(0, -1).join(' ') : (words[0] ?? DEFAULTS.heroTitleLine1)
+  const fallbackLine1 = words.length > 1 ? words.slice(0, -1).join(' ') : (words[0] ?? DEFAULTS.heroTitleLine1)
   const fallbackLine2 = words.length > 1 ? words.slice(-1).join(' ') : DEFAULTS.heroTitleLine2
   const line1 = data?.heroTitleLine1 ?? fallbackLine1
   const line2 = data?.heroTitleLine2 ?? fallbackLine2
@@ -84,7 +82,9 @@ export const FermentationHero: React.FC<Props> = ({ data, heroTitle }) => {
               )}
             </span>
           </h1>
-          {description && <p className="text-body-lg text-white/90 mb-6 max-w-xl">{description}</p>}
+          {description && (
+            <p className="text-body-lg text-white/90 mb-6 max-w-xl">{description}</p>
+          )}
           <div className="flex flex-wrap gap-4">
             {primaryUrl && (
               <Link
@@ -108,12 +108,12 @@ export const FermentationHero: React.FC<Props> = ({ data, heroTitle }) => {
       <div className="absolute inset-0 -z-10">
         {image ? (
           <>
-            <div className="absolute inset-0 bg-ff-charcoal/40 z-1" />
+            <div className="absolute inset-0 bg-ff-charcoal/40 z-[1]" />
             <Media
               fill
               imgClassName="object-cover blur-sm"
               priority
-              resource={image as MediaType}
+              resource={(image as { url: string }).url}
             />
           </>
         ) : (

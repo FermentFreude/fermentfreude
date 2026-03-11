@@ -1,10 +1,24 @@
 'use client'
 
-import { Media } from '@/components/Media'
-import type { Media as MediaType } from '@/payload-types'
-import { Award, BookOpen, Heart, Leaf, Shield, Sparkles, type LucideIcon } from 'lucide-react'
+import {
+  Heart,
+  Leaf,
+  Sparkles,
+  Shield,
+  User,
+  BookOpen,
+  type LucideIcon,
+} from 'lucide-react'
+import Image from 'next/image'
 
-const WHY_ICONS: LucideIcon[] = [Heart, Leaf, Sparkles, Shield, Award, BookOpen]
+const WHY_ICONS: LucideIcon[] = [
+  Heart,
+  Leaf,
+  Sparkles,
+  Shield,
+  User,
+  BookOpen,
+]
 
 const CARD_ACCENTS = [
   'from-[#FAF2E0] via-[#F9F0DC] to-[#EDD195]/30',
@@ -12,8 +26,8 @@ const CARD_ACCENTS = [
   'from-[#F9F0DC] via-[#FAF2E0] to-[#EDD195]/25',
 ]
 
-function isResolvedMedia(img: unknown): img is MediaType {
-  return typeof img === 'object' && img !== null && 'url' in img
+function isResolvedMedia(img: unknown): img is { url: string } {
+  return typeof img === 'object' && img !== null && 'url' in img && typeof (img as { url?: unknown }).url === 'string'
 }
 
 export interface WhyItem {
@@ -32,42 +46,16 @@ export function WhySection({ title, items, image }: WhySectionProps) {
   return (
     <div className="relative content-wide mx-auto px-4 sm:px-6">
       {/* Decorative blobs */}
-      <div
-        className="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 -translate-y-1/2 size-125 rounded-full bg-[#E6BE68]/5 blur-[100px]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute -left-32 top-1/3 -z-10 size-64 rounded-full bg-[#EDD195]/10 blur-[80px]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute -right-32 bottom-1/4 -z-10 size-80 rounded-full bg-[#E6BE68]/8 blur-[90px]"
-        aria-hidden
-      />
+      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 -translate-y-1/2 size-[500px] rounded-full bg-[#E6BE68]/5 blur-[100px]" aria-hidden />
+      <div className="pointer-events-none absolute -left-32 top-1/3 -z-10 size-64 rounded-full bg-[#EDD195]/10 blur-[80px]" aria-hidden />
+      <div className="pointer-events-none absolute -right-32 bottom-1/4 -z-10 size-80 rounded-full bg-[#E6BE68]/8 blur-[90px]" aria-hidden />
 
       {/* Floating dots — some with pulse */}
-      <div
-        className="pointer-events-none absolute left-[10%] top-20 size-2 animate-pulse rounded-full bg-[#E6BE68]/30"
-        aria-hidden
-        style={{ animationDuration: '2s' }}
-      />
-      <div
-        className="pointer-events-none absolute right-[15%] top-32 size-3 rounded-full bg-[#EDD195]/40"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute left-[20%] bottom-24 size-2 animate-pulse rounded-full bg-[#E6BE68]/25"
-        aria-hidden
-        style={{ animationDuration: '2.5s' }}
-      />
-      <div
-        className="pointer-events-none absolute right-[8%] bottom-32 size-2.5 rounded-full bg-[#555954]/20"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute left-1/2 top-40 size-1.5 -translate-x-1/2 rounded-full bg-[#EDD195]/30"
-        aria-hidden
-      />
+      <div className="pointer-events-none absolute left-[10%] top-20 size-2 animate-pulse rounded-full bg-[#E6BE68]/30" aria-hidden style={{ animationDuration: '2s' }} />
+      <div className="pointer-events-none absolute right-[15%] top-32 size-3 rounded-full bg-[#EDD195]/40" aria-hidden />
+      <div className="pointer-events-none absolute left-[20%] bottom-24 size-2 animate-pulse rounded-full bg-[#E6BE68]/25" aria-hidden style={{ animationDuration: '2.5s' }} />
+      <div className="pointer-events-none absolute right-[8%] bottom-32 size-2.5 rounded-full bg-[#555954]/20" aria-hidden />
+      <div className="pointer-events-none absolute left-1/2 top-40 size-1.5 -translate-x-1/2 rounded-full bg-[#EDD195]/30" aria-hidden />
 
       {/* Dot grid pattern */}
       <div
@@ -94,13 +82,12 @@ export function WhySection({ title, items, image }: WhySectionProps) {
             const Icon = WHY_ICONS[i % WHY_ICONS.length]
             const accent = CARD_ACCENTS[i % CARD_ACCENTS.length]
             const stagger = i % 2 === 1 ? 'sm:mt-6 lg:mt-8' : ''
-            const rotate =
-              i % 3 === 0 ? 'hover:rotate-[-0.5deg]' : i % 3 === 1 ? 'hover:rotate-[0.5deg]' : ''
+            const rotate = i % 3 === 0 ? 'hover:rotate-[-0.5deg]' : i % 3 === 1 ? 'hover:rotate-[0.5deg]' : ''
             const num = String(i + 1).padStart(2, '0')
             return (
               <div
                 key={item.id ?? i}
-                className={`group relative flex flex-col items-center overflow-hidden rounded-3xl bg-linear-to-br ${accent} p-8 sm:p-9 text-center shadow-lg transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#E6BE68]/15 ${stagger} ${rotate}`}
+                className={`group relative flex flex-col items-center overflow-hidden rounded-3xl bg-gradient-to-br ${accent} p-8 sm:p-9 text-center shadow-lg transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#E6BE68]/15 ${stagger} ${rotate}`}
               >
                 {/* Number badge */}
                 <div className="absolute left-4 top-4 font-display text-3xl font-bold text-[#E6BE68]/30 transition-colors group-hover:text-[#E6BE68]/50">
@@ -128,15 +115,21 @@ export function WhySection({ title, items, image }: WhySectionProps) {
       {isResolvedMedia(image) && (
         <>
           <div className="mt-14 flex items-center justify-center gap-4">
-            <div className="h-px flex-1 max-w-24 bg-linear-to-r from-transparent to-[#E6BE68]/40" />
+            <div className="h-px flex-1 max-w-24 bg-gradient-to-r from-transparent to-[#E6BE68]/40" />
             <span className="font-display text-caption font-bold uppercase tracking-[0.2em] text-[#E6BE68]/60">
               See the magic
             </span>
-            <div className="h-px flex-1 max-w-24 bg-linear-to-l from-transparent to-[#E6BE68]/40" />
+            <div className="h-px flex-1 max-w-24 bg-gradient-to-l from-transparent to-[#E6BE68]/40" />
           </div>
           <div className="mt-8 flex justify-center">
-            <div className="aspect-video w-full max-w-2xl overflow-hidden rounded-3xl shadow-xl">
-              <Media resource={image} fill imgClassName="object-cover object-center" />
+            <div className="relative aspect-video w-full max-w-2xl overflow-hidden rounded-3xl shadow-xl">
+              <Image
+                src={image.url}
+                alt=""
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 768px) 100vw, 672px"
+              />
             </div>
           </div>
         </>

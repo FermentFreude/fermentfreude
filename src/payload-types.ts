@@ -478,9 +478,17 @@ export interface Page {
    */
   hero: {
     /**
-     * Choose how this page looks at the top. "Home Page Slider" is for the homepage with animated slides.
+     * Choose how this page looks at the top. "Offerings Grid" shows all items at once (no carousel).
      */
-    type: 'heroSlider' | 'highImpact' | 'lowImpact' | 'heroCarousel' | 'foodPresentationSlider' | 'none';
+    type:
+      | 'heroSlider'
+      | 'highImpact'
+      | 'lowImpact'
+      | 'heroSplit'
+      | 'heroCarousel'
+      | 'heroGrid'
+      | 'foodPresentationSlider'
+      | 'none';
     /**
      * Each slide has its own title, description, colors, and product images.
      */
@@ -546,6 +554,30 @@ export interface Page {
      * The big hero background image.
      */
     media?: (string | null) | Media;
+    /**
+     * Small pill above the heading (e.g. "About Us")
+     */
+    splitLabel?: string | null;
+    /**
+     * Main headline
+     */
+    splitHeading?: string | null;
+    /**
+     * Short paragraph below the heading
+     */
+    splitDescription?: string | null;
+    /**
+     * e.g. "Learn more"
+     */
+    splitCtaLabel?: string | null;
+    /**
+     * e.g. /workshops
+     */
+    splitCtaUrl?: string | null;
+    /**
+     * Large image on the right side
+     */
+    splitMedia?: (string | null) | Media;
     richTextLowImpact?: {
       root: {
         type: string;
@@ -587,6 +619,7 @@ export interface Page {
         | ArchiveBlock
         | CarouselBlock
         | OurStoryBlock
+        | ProductSliderBlock
         | ReadyToLearnCtaBlock
         | SponsorsBarBlock
         | TeamCardsBlock
@@ -595,7 +628,6 @@ export interface Page {
         | ThreeItemGridBlock
         | BannerBlock
         | FormBlock
-        | ProductSliderBlock
         | VoucherCtaBlock
         | WorkshopSliderBlock
         | WorkshopPhasesBlock
@@ -701,6 +733,218 @@ export interface Page {
       buttonHref?: string | null;
     };
     gastronomyMapEmbedUrl?: string | null;
+  };
+  /**
+   * Content for the Fermentation page (/fermentation). Only applies when slug is "fermentation".
+   */
+  fermentation?: {
+    /**
+     * Main headline (e.g., "Innovation meets Tradition").
+     */
+    fermentationHeroTitle?: string | null;
+    /**
+     * Short intro text below the heading.
+     */
+    fermentationHeroDescription?: string | null;
+    /**
+     * Large hero image (e.g., founders/team). Shown above the 4 feature blocks.
+     */
+    fermentationHeroImage?: (string | null) | Media;
+    /**
+     * Heading above the 4 benefit cards (e.g., "WHY FERMENTATION?").
+     */
+    fermentationHeroBenefitsTitle?: string | null;
+    /**
+     * Four cards: PROBIOTICS, ENZIMES, NUTRITION, PRESERVATION. Order: beige, gold, dark, beige. Each can have an icon.
+     */
+    fermentationHeroBlocks?:
+      | {
+          /**
+           * Small icon at top of block.
+           */
+          icon?: (string | null) | Media;
+          title: string;
+          description?: string | null;
+          /**
+           * Where this block links.
+           */
+          url?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Small label above the guide heading (e.g., "START HERE").
+     */
+    fermentationGuideTag?: string | null;
+    /**
+     * Main heading (e.g., "A complete guide to fermentation").
+     */
+    fermentationGuideTitle?: string | null;
+    /**
+     * Introductory paragraph for the guide.
+     */
+    fermentationGuideBody?: string | null;
+    /**
+     * Optional image below the guide text (e.g. fermentation process, ingredients).
+     */
+    fermentationGuideImage?: (string | null) | Media;
+    fermentationWhatTitle?: string | null;
+    fermentationWhatBody?: string | null;
+    /**
+     * e.g. "No additives. No shortcuts. Just patience and care."
+     */
+    fermentationWhatMotto?: string | null;
+    /**
+     * e.g. "Ready to Learn?", "Our Story"
+     */
+    fermentationWhatLinks?:
+      | {
+          label: string;
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional image (e.g. fermented vegetables, jars, process).
+     */
+    fermentationWhatImage?: (string | null) | Media;
+    fermentationWhyTitle?: string | null;
+    /**
+     * Six benefit items in two columns (e.g., Improved digestion, Rich in enzymes).
+     */
+    fermentationWhyItems?:
+      | {
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional image (e.g. gut health, fermentation benefits).
+     */
+    fermentationWhyImage?: (string | null) | Media;
+    fermentationDangerTitle?: string | null;
+    /**
+     * Intro paragraph before the concerns list.
+     */
+    fermentationDangerIntro?: string | null;
+    /**
+     * e.g. "Common concerns addressed:"
+     */
+    fermentationDangerConcernsHeading?: string | null;
+    /**
+     * Concern items (e.g., Mold, Smell, Botulism, Trust your senses).
+     */
+    fermentationDangerConcerns?:
+      | {
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Closing paragraph after the concerns list.
+     */
+    fermentationDangerClosing?: string | null;
+    fermentationPracticeTitle?: string | null;
+    /**
+     * Multiple paragraphs supported. Separate with a blank line.
+     */
+    fermentationPracticeBody?: string | null;
+    /**
+     * Optional image (e.g. traditional fermentation, cultural foods).
+     */
+    fermentationPracticeImage?: (string | null) | Media;
+    /**
+     * e.g. "Ready to learn?"
+     */
+    fermentationCtaTitle?: string | null;
+    fermentationCtaDescription?: string | null;
+    /**
+     * e.g. "Find course" / "Kurs finden"
+     */
+    fermentationCtaPrimaryLabel?: string | null;
+    fermentationCtaPrimaryUrl?: string | null;
+    /**
+     * e.g. "All courses" / "Alle Kurse"
+     */
+    fermentationCtaSecondaryLabel?: string | null;
+    fermentationCtaSecondaryUrl?: string | null;
+    /**
+     * Upload a video (MP4) as background. Or use the URL field below.
+     */
+    fermentationCtaVideo?: (string | null) | Media;
+    /**
+     * If not using upload above: path like /assets/videos/cabbage-cta.mp4. Leave empty for solid gold background.
+     */
+    fermentationCtaVideoUrl?: string | null;
+    /**
+     * Used as poster when video is set, or fallback when video is absent.
+     */
+    fermentationCtaBackgroundImage?: (string | null) | Media;
+    fermentationFaqTitle?: string | null;
+    /**
+     * e.g. "Common questions about fermentation answered"
+     */
+    fermentationFaqSubtitle?: string | null;
+    /**
+     * Questions and answers.
+     */
+    fermentationFaqItems?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Ready to Start Fermenting?"
+     */
+    fermentationFaqCtaTitle?: string | null;
+    /**
+     * Instructional paragraph below the FAQ grid (e.g. "Begin with simple vegetables...")
+     */
+    fermentationFaqCtaBody?: string | null;
+    /**
+     * Fallback if CTA title empty. e.g. "Still have questions?"
+     */
+    fermentationFaqMoreText?: string | null;
+    /**
+     * e.g. "Contact Us"
+     */
+    fermentationFaqContactLabel?: string | null;
+    fermentationFaqContactUrl?: string | null;
+    /**
+     * e.g. "Learn UNIQUE." — Last section on page.
+     */
+    fermentationWorkshopTitle?: string | null;
+    /**
+     * e.g. "FLAVOURS"
+     */
+    fermentationWorkshopTitleSuffix?: string | null;
+    fermentationWorkshopSubtitle?: string | null;
+    fermentationWorkshopViewAllLabel?: string | null;
+    fermentationWorkshopViewAllUrl?: string | null;
+    fermentationWorkshopNextDateLabel?: string | null;
+    /**
+     * Leave empty to use Gastronomy workshop cards. Add here to override for fermentation only.
+     */
+    fermentationWorkshopCards?:
+      | {
+          image?: (string | null) | Media;
+          title: string;
+          description: string;
+          price?: string | null;
+          priceSuffix?: string | null;
+          buttonLabel: string;
+          buttonUrl: string;
+          /**
+           * e.g. "February 15, 2026"
+           */
+          nextDate?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   /**
    * Content for the Gift Voucher page. These fields only apply when this page's slug is "voucher".
@@ -1107,214 +1351,6 @@ export interface Page {
       | null;
   };
   /**
-   * Content for the Fermentation page (/fermentation). Only applies when slug is "fermentation".
-   */
-  fermentation?: {
-    /**
-     * Main headline (e.g., "Innovation meets Tradition").
-     */
-    fermentationHeroTitle?: string | null;
-    /**
-     * Short intro text below the heading.
-     */
-    fermentationHeroDescription?: string | null;
-    /**
-     * Large hero image (e.g., founders/team). Shown above the 4 feature blocks.
-     */
-    fermentationHeroImage?: (string | null) | Media;
-    /**
-     * Heading above the 4 benefit cards (e.g., "WHY FERMENTATION?").
-     */
-    fermentationHeroBenefitsTitle?: string | null;
-    /**
-     * Four cards: PROBIOTICS, ENZIMES, NUTRITION, PRESERVATION. Order: beige, gold, dark, beige. Each can have an icon.
-     */
-    fermentationHeroBlocks?:
-      | {
-          /**
-           * Small icon at top of block.
-           */
-          icon?: (string | null) | Media;
-          title: string;
-          description?: string | null;
-          /**
-           * Where this block links.
-           */
-          url?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Small label above the guide heading (e.g., "START HERE").
-     */
-    fermentationGuideTag?: string | null;
-    /**
-     * Main heading (e.g., "A complete guide to fermentation").
-     */
-    fermentationGuideTitle?: string | null;
-    /**
-     * Introductory paragraph for the guide.
-     */
-    fermentationGuideBody?: string | null;
-    /**
-     * Optional image below the guide text (e.g. fermentation process, ingredients).
-     */
-    fermentationGuideImage?: (string | null) | Media;
-    fermentationWhatTitle?: string | null;
-    fermentationWhatBody?: string | null;
-    /**
-     * e.g. "No additives. No shortcuts. Just patience and care."
-     */
-    fermentationWhatMotto?: string | null;
-    /**
-     * e.g. "Ready to Learn?", "Our Story"
-     */
-    fermentationWhatLinks?:
-      | {
-          label: string;
-          url: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Optional image (e.g. fermented vegetables, jars, process).
-     */
-    fermentationWhatImage?: (string | null) | Media;
-    fermentationWhyTitle?: string | null;
-    /**
-     * Six benefit items in two columns (e.g., Improved digestion, Rich in enzymes).
-     */
-    fermentationWhyItems?:
-      | {
-          title: string;
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Optional image (e.g. gut health, fermentation benefits).
-     */
-    fermentationWhyImage?: (string | null) | Media;
-    fermentationDangerTitle?: string | null;
-    /**
-     * Intro paragraph before the concerns list.
-     */
-    fermentationDangerIntro?: string | null;
-    /**
-     * e.g. "Common concerns addressed:"
-     */
-    fermentationDangerConcernsHeading?: string | null;
-    /**
-     * Concern items (e.g., Mold, Smell, Botulism, Trust your senses).
-     */
-    fermentationDangerConcerns?:
-      | {
-          title: string;
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Closing paragraph after the concerns list.
-     */
-    fermentationDangerClosing?: string | null;
-    fermentationPracticeTitle?: string | null;
-    /**
-     * Multiple paragraphs supported. Separate with a blank line.
-     */
-    fermentationPracticeBody?: string | null;
-    /**
-     * Optional image (e.g. traditional fermentation, cultural foods).
-     */
-    fermentationPracticeImage?: (string | null) | Media;
-    /**
-     * e.g. "Ready to learn?"
-     */
-    fermentationCtaTitle?: string | null;
-    fermentationCtaDescription?: string | null;
-    /**
-     * e.g. "Find course" / "Kurs finden"
-     */
-    fermentationCtaPrimaryLabel?: string | null;
-    fermentationCtaPrimaryUrl?: string | null;
-    /**
-     * e.g. "All courses" / "Alle Kurse"
-     */
-    fermentationCtaSecondaryLabel?: string | null;
-    fermentationCtaSecondaryUrl?: string | null;
-    /**
-     * Optional video as background. Leave empty for solid gold background.
-     */
-    fermentationCtaVideoUrl?: string | null;
-    /**
-     * Used as poster when video is set, or fallback when video is absent.
-     */
-    fermentationCtaBackgroundImage?: (string | null) | Media;
-    fermentationFaqTitle?: string | null;
-    /**
-     * e.g. "Common questions about fermentation answered"
-     */
-    fermentationFaqSubtitle?: string | null;
-    /**
-     * Questions and answers.
-     */
-    fermentationFaqItems?:
-      | {
-          question: string;
-          answer: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Ready to Start Fermenting?"
-     */
-    fermentationFaqCtaTitle?: string | null;
-    /**
-     * Instructional paragraph below the FAQ grid (e.g. "Begin with simple vegetables...")
-     */
-    fermentationFaqCtaBody?: string | null;
-    /**
-     * Fallback if CTA title empty. e.g. "Still have questions?"
-     */
-    fermentationFaqMoreText?: string | null;
-    /**
-     * e.g. "Contact Us"
-     */
-    fermentationFaqContactLabel?: string | null;
-    fermentationFaqContactUrl?: string | null;
-    /**
-     * e.g. "Learn UNIQUE." — Last section on page.
-     */
-    fermentationWorkshopTitle?: string | null;
-    /**
-     * e.g. "FLAVOURS"
-     */
-    fermentationWorkshopTitleSuffix?: string | null;
-    fermentationWorkshopSubtitle?: string | null;
-    fermentationWorkshopViewAllLabel?: string | null;
-    fermentationWorkshopViewAllUrl?: string | null;
-    fermentationWorkshopNextDateLabel?: string | null;
-    /**
-     * Leave empty to use Gastronomy workshop cards. Add here to override for fermentation only.
-     */
-    fermentationWorkshopCards?:
-      | {
-          image?: (string | null) | Media;
-          title: string;
-          description: string;
-          price?: string | null;
-          priceSuffix?: string | null;
-          buttonLabel: string;
-          buttonUrl: string;
-          /**
-           * e.g. "February 15, 2026"
-           */
-          nextDate?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  /**
    * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.
    */
   workshopDetail?: {
@@ -1634,61 +1670,6 @@ export interface Page {
      */
     howToArticles?: (string | Post)[] | null;
   };
-  /**
-   * DEPRECATED - not used on any workshop UI
-   */
-  workshopGiftOnline?: {
-    giftTitle: string;
-    giftDescription: string;
-    giftBuyNowLabel: string;
-    giftBuyVoucherLabel: string;
-    giftBuyNowHref: string;
-    giftBuyVoucherHref: string;
-    onlineTitle: string;
-    onlineDescription: string;
-    onlineBullets: {
-      text: string;
-      id?: string | null;
-    }[];
-    onlineButtonLabel: string;
-    onlineButtonHref: string;
-  };
-  workshopLearnOnline?: {
-    learnOnlineHeading: string;
-    learnOnlineDescription: string;
-    learnOnlineButtonLabel: string;
-    learnOnlineButtonHref: string;
-  };
-  workshopFaq?: {
-    faqHeading: string;
-    faqSubtitle: string;
-    faqItems: {
-      question: string;
-      answer: string;
-      id?: string | null;
-    }[];
-  };
-  workshopWhyOnline?: {
-    whyOnlineHeading: string;
-    whyOnlineFeatures: {
-      icon: 'lightning' | 'clock' | 'home' | 'book';
-      title: string;
-      description: string;
-      id?: string | null;
-    }[];
-  };
-  workshopTeamBuilding?: {
-    teamEyebrow: string;
-    teamHeading: string;
-    teamDescription: string;
-    teamBullets: {
-      text: string;
-      id?: string | null;
-    }[];
-    teamCtaLabel: string;
-    teamCtaHref: string;
-    teamImage?: (string | null) | Media;
-  };
   meta?: {
     title?: string | null;
     /**
@@ -1754,20 +1735,40 @@ export interface ContactBlock {
   contactImage?: (string | null) | Media;
   contact: {
     /**
-     * Heading above the form (e.g., "Kontakt").
+     * Heading for the contact details panel (e.g., "Contact Detail").
      */
     heading: string;
     /**
-     * Short intro text above the form fields.
+     * Intro text for the contact details panel (e.g., "If you need any help...").
      */
     description: string;
+    /**
+     * Physical address (e.g. Grabenstraße 15, 8010 Graz, Austria).
+     */
+    address?: string | null;
+    /**
+     * Displayed on the contact page (e.g. +43 660 4943577).
+     */
+    phone?: string | null;
+    /**
+     * Displayed on the contact page (e.g. fermentfreude@gmail.com).
+     */
+    email?: string | null;
   };
   contactForm: {
     /**
      * Optional: Link to a Payload Form Builder form. If not set, a static form will be displayed.
      */
     form?: (string | null) | Form;
+    /**
+     * Heading above the form (e.g., "Ask About Anything").
+     */
+    formHeading?: string | null;
     placeholders: {
+      /**
+       * When set, a single "Your Name" field is shown. Leave empty to use First + Last Name.
+       */
+      name?: string | null;
       /**
        * Placeholder for first name (e.g., "Vorname").
        */
@@ -1780,6 +1781,10 @@ export interface ContactBlock {
        * Placeholder for email field.
        */
       email: string;
+      /**
+       * Placeholder for phone field (e.g., "Your Phone").
+       */
+      phone?: string | null;
       /**
        * Placeholder for message textarea.
        */
@@ -2243,11 +2248,48 @@ export interface OurStoryBlock {
    */
   paragraphs: {
     text: string;
+    /**
+     * Optional image for this paragraph. Shown in alternating layout.
+     */
+    image?: (string | null) | Media;
     id?: string | null;
   }[];
   id?: string | null;
   blockName?: string | null;
   blockType: 'ourStory';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductSliderBlock".
+ */
+export interface ProductSliderBlock {
+  /**
+   * Large heading text (e.g. "Discover UNIQUE.").
+   */
+  heading: string;
+  /**
+   * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
+   */
+  headingAccent: string;
+  /**
+   * Short paragraph below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * Text on the CTA button (e.g. "View All Products").
+   */
+  buttonLabel: string;
+  /**
+   * URL the button links to (e.g. "/products").
+   */
+  buttonLink: string;
+  /**
+   * Select products to display in the slider. If empty, the latest products will be shown.
+   */
+  products?: (string | Product)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productSlider';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2494,39 +2536,6 @@ export interface FormBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ProductSliderBlock".
- */
-export interface ProductSliderBlock {
-  /**
-   * Large heading text (e.g. "Discover UNIQUE.").
-   */
-  heading: string;
-  /**
-   * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
-   */
-  headingAccent: string;
-  /**
-   * Short paragraph below the heading (1–2 sentences).
-   */
-  description: string;
-  /**
-   * Text on the CTA button (e.g. "View All Products").
-   */
-  buttonLabel: string;
-  /**
-   * URL the button links to (e.g. "/products").
-   */
-  buttonLink: string;
-  /**
-   * Select products to display in the slider. If empty, the latest products will be shown.
-   */
-  products?: (string | Product)[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'productSlider';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3300,6 +3309,12 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         media?: T;
+        splitLabel?: T;
+        splitHeading?: T;
+        splitDescription?: T;
+        splitCtaLabel?: T;
+        splitCtaUrl?: T;
+        splitMedia?: T;
         richTextLowImpact?: T;
         slides?:
           | T
@@ -3325,6 +3340,7 @@ export interface PagesSelect<T extends boolean = true> {
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         ourStory?: T | OurStoryBlockSelect<T>;
+        productSlider?: T | ProductSliderBlockSelect<T>;
         readyToLearnCta?: T | ReadyToLearnCtaBlockSelect<T>;
         sponsorsBar?: T | SponsorsBarBlockSelect<T>;
         teamCards?: T | TeamCardsBlockSelect<T>;
@@ -3333,7 +3349,6 @@ export interface PagesSelect<T extends boolean = true> {
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
-        productSlider?: T | ProductSliderBlockSelect<T>;
         voucherCta?: T | VoucherCtaBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
         workshopPhases?: T | WorkshopPhasesBlockSelect<T>;
@@ -3416,6 +3431,103 @@ export interface PagesSelect<T extends boolean = true> {
               buttonHref?: T;
             };
         gastronomyMapEmbedUrl?: T;
+      };
+  fermentation?:
+    | T
+    | {
+        fermentationHeroTitle?: T;
+        fermentationHeroDescription?: T;
+        fermentationHeroImage?: T;
+        fermentationHeroBenefitsTitle?: T;
+        fermentationHeroBlocks?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              description?: T;
+              url?: T;
+              id?: T;
+            };
+        fermentationGuideTag?: T;
+        fermentationGuideTitle?: T;
+        fermentationGuideBody?: T;
+        fermentationGuideImage?: T;
+        fermentationWhatTitle?: T;
+        fermentationWhatBody?: T;
+        fermentationWhatMotto?: T;
+        fermentationWhatLinks?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
+        fermentationWhatImage?: T;
+        fermentationWhyTitle?: T;
+        fermentationWhyItems?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        fermentationWhyImage?: T;
+        fermentationDangerTitle?: T;
+        fermentationDangerIntro?: T;
+        fermentationDangerConcernsHeading?: T;
+        fermentationDangerConcerns?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        fermentationDangerClosing?: T;
+        fermentationPracticeTitle?: T;
+        fermentationPracticeBody?: T;
+        fermentationPracticeImage?: T;
+        fermentationCtaTitle?: T;
+        fermentationCtaDescription?: T;
+        fermentationCtaPrimaryLabel?: T;
+        fermentationCtaPrimaryUrl?: T;
+        fermentationCtaSecondaryLabel?: T;
+        fermentationCtaSecondaryUrl?: T;
+        fermentationCtaVideo?: T;
+        fermentationCtaVideoUrl?: T;
+        fermentationCtaBackgroundImage?: T;
+        fermentationFaqTitle?: T;
+        fermentationFaqSubtitle?: T;
+        fermentationFaqItems?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        fermentationFaqCtaTitle?: T;
+        fermentationFaqCtaBody?: T;
+        fermentationFaqMoreText?: T;
+        fermentationFaqContactLabel?: T;
+        fermentationFaqContactUrl?: T;
+        fermentationWorkshopTitle?: T;
+        fermentationWorkshopTitleSuffix?: T;
+        fermentationWorkshopSubtitle?: T;
+        fermentationWorkshopViewAllLabel?: T;
+        fermentationWorkshopViewAllUrl?: T;
+        fermentationWorkshopNextDateLabel?: T;
+        fermentationWorkshopCards?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              description?: T;
+              price?: T;
+              priceSuffix?: T;
+              buttonLabel?: T;
+              buttonUrl?: T;
+              nextDate?: T;
+              id?: T;
+            };
       };
   voucher?:
     | T
@@ -3565,102 +3677,6 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
       };
-  fermentation?:
-    | T
-    | {
-        fermentationHeroTitle?: T;
-        fermentationHeroDescription?: T;
-        fermentationHeroImage?: T;
-        fermentationHeroBenefitsTitle?: T;
-        fermentationHeroBlocks?:
-          | T
-          | {
-              icon?: T;
-              title?: T;
-              description?: T;
-              url?: T;
-              id?: T;
-            };
-        fermentationGuideTag?: T;
-        fermentationGuideTitle?: T;
-        fermentationGuideBody?: T;
-        fermentationGuideImage?: T;
-        fermentationWhatTitle?: T;
-        fermentationWhatBody?: T;
-        fermentationWhatMotto?: T;
-        fermentationWhatLinks?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              id?: T;
-            };
-        fermentationWhatImage?: T;
-        fermentationWhyTitle?: T;
-        fermentationWhyItems?:
-          | T
-          | {
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-        fermentationWhyImage?: T;
-        fermentationDangerTitle?: T;
-        fermentationDangerIntro?: T;
-        fermentationDangerConcernsHeading?: T;
-        fermentationDangerConcerns?:
-          | T
-          | {
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-        fermentationDangerClosing?: T;
-        fermentationPracticeTitle?: T;
-        fermentationPracticeBody?: T;
-        fermentationPracticeImage?: T;
-        fermentationCtaTitle?: T;
-        fermentationCtaDescription?: T;
-        fermentationCtaPrimaryLabel?: T;
-        fermentationCtaPrimaryUrl?: T;
-        fermentationCtaSecondaryLabel?: T;
-        fermentationCtaSecondaryUrl?: T;
-        fermentationCtaVideoUrl?: T;
-        fermentationCtaBackgroundImage?: T;
-        fermentationFaqTitle?: T;
-        fermentationFaqSubtitle?: T;
-        fermentationFaqItems?:
-          | T
-          | {
-              question?: T;
-              answer?: T;
-              id?: T;
-            };
-        fermentationFaqCtaTitle?: T;
-        fermentationFaqCtaBody?: T;
-        fermentationFaqMoreText?: T;
-        fermentationFaqContactLabel?: T;
-        fermentationFaqContactUrl?: T;
-        fermentationWorkshopTitle?: T;
-        fermentationWorkshopTitleSuffix?: T;
-        fermentationWorkshopSubtitle?: T;
-        fermentationWorkshopViewAllLabel?: T;
-        fermentationWorkshopViewAllUrl?: T;
-        fermentationWorkshopNextDateLabel?: T;
-        fermentationWorkshopCards?:
-          | T
-          | {
-              image?: T;
-              title?: T;
-              description?: T;
-              price?: T;
-              priceSuffix?: T;
-              buttonLabel?: T;
-              buttonUrl?: T;
-              nextDate?: T;
-              id?: T;
-            };
-      };
   workshopDetail?:
     | T
     | {
@@ -3794,76 +3810,6 @@ export interface PagesSelect<T extends boolean = true> {
         howToDescription?: T;
         howToArticles?: T;
       };
-  workshopGiftOnline?:
-    | T
-    | {
-        giftTitle?: T;
-        giftDescription?: T;
-        giftBuyNowLabel?: T;
-        giftBuyVoucherLabel?: T;
-        giftBuyNowHref?: T;
-        giftBuyVoucherHref?: T;
-        onlineTitle?: T;
-        onlineDescription?: T;
-        onlineBullets?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        onlineButtonLabel?: T;
-        onlineButtonHref?: T;
-      };
-  workshopLearnOnline?:
-    | T
-    | {
-        learnOnlineHeading?: T;
-        learnOnlineDescription?: T;
-        learnOnlineButtonLabel?: T;
-        learnOnlineButtonHref?: T;
-      };
-  workshopFaq?:
-    | T
-    | {
-        faqHeading?: T;
-        faqSubtitle?: T;
-        faqItems?:
-          | T
-          | {
-              question?: T;
-              answer?: T;
-              id?: T;
-            };
-      };
-  workshopWhyOnline?:
-    | T
-    | {
-        whyOnlineHeading?: T;
-        whyOnlineFeatures?:
-          | T
-          | {
-              icon?: T;
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-      };
-  workshopTeamBuilding?:
-    | T
-    | {
-        teamEyebrow?: T;
-        teamHeading?: T;
-        teamDescription?: T;
-        teamBullets?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        teamCtaLabel?: T;
-        teamCtaHref?: T;
-        teamImage?: T;
-      };
   meta?:
     | T
     | {
@@ -3900,17 +3846,23 @@ export interface ContactBlockSelect<T extends boolean = true> {
     | {
         heading?: T;
         description?: T;
+        address?: T;
+        phone?: T;
+        email?: T;
       };
   contactForm?:
     | T
     | {
         form?: T;
+        formHeading?: T;
         placeholders?:
           | T
           | {
+              name?: T;
               firstName?: T;
               lastName?: T;
               email?: T;
+              phone?: T;
               message?: T;
             };
         subjectOptions?:
@@ -4073,8 +4025,23 @@ export interface OurStoryBlockSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
+        image?: T;
         id?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductSliderBlock_select".
+ */
+export interface ProductSliderBlockSelect<T extends boolean = true> {
+  heading?: T;
+  headingAccent?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  products?: T;
   id?: T;
   blockName?: T;
 }
@@ -4205,20 +4172,6 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ProductSliderBlock_select".
- */
-export interface ProductSliderBlockSelect<T extends boolean = true> {
-  heading?: T;
-  headingAccent?: T;
-  description?: T;
-  buttonLabel?: T;
-  buttonLink?: T;
-  products?: T;
   id?: T;
   blockName?: T;
 }

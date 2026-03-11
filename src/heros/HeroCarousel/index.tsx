@@ -27,7 +27,7 @@ const DEFAULT_SLIDES = [
 
 function getImageUrl(image: unknown): string {
   if (!image) return ''
-  if (typeof image === 'string') return image
+  if (typeof image === 'string' && (image.startsWith('http') || image.startsWith('/'))) return image
   if (typeof image === 'object' && image !== null && 'url' in image) {
     const url = (image as { url?: string }).url
     if (!url) return ''
@@ -86,51 +86,59 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
   }, [emblaApi, resolvedSlides.length])
 
   return (
-    <section className="relative w-full h-svh overflow-hidden">
+    <section className="relative w-full h-svh overflow-hidden mb-[var(--space-section-md)]">
       <div ref={emblaRef} className="h-full overflow-hidden">
         <div className="flex h-full">
           {resolvedSlides.map((slide, i) => {
             const imageUrl = getImageUrl(slide.image)
+            const hasMediaResource =
+              slide.image &&
+              (typeof slide.image === 'object' ||
+                (typeof slide.image === 'string' && (slide.image.startsWith('http') || slide.image.startsWith('/'))))
             return (
               <div key={i} className="relative min-w-0 flex-[0_0_100%] h-full">
-                {/* Background image */}
-                {imageUrl ? (
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${imageUrl})` }}
-                  />
-                ) : slide.image && typeof slide.image === 'object' ? (
+                {/* Background image — prefer Media for proper URL handling (R2, etc.) */}
+                {hasMediaResource ? (
                   <div className="absolute inset-0">
                     <Media
-                      resource={slide.image}
+                      resource={
+                        (typeof slide.image === 'string'
+                          ? { url: slide.image, alt: '' }
+                          : slide.image) as Parameters<typeof Media>[0]['resource']
+                      }
                       fill
                       imgClassName="object-cover"
                       priority={i === 0}
                     />
                   </div>
+                ) : imageUrl ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${imageUrl})` }}
+                  />
                 ) : (
-                  <div className="absolute inset-0 bg-linear-to-br from-[#2a2a2a] to-[#1a1a1a]" />
+                  <div className="absolute inset-0 bg-linear-to-br from-ff-charcoal-dark to-ff-charcoal" />
                 )}
 
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/50 to-black/30" />
 
                 {/* Content */}
-                <div className="relative z-10 flex h-full items-center pt-16 sm:pt-20 lg:pt-24">
-                  <div className="w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
+                <div className="relative z-10 flex h-full items-center container-padding pt-16 sm:pt-20 lg:pt-24">
+                  <div className="w-full">
                     <div className="max-w-3xl">
-                      <h1 className="font-display text-4xl font-bold leading-tight text-[#F6EFDD] sm:text-5xl md:text-6xl lg:text-7xl">
+                      <h1 className="font-display text-hero font-bold leading-tight text-ff-ivory">
                         {slide.title}
                       </h1>
                       {slide.description && (
-                        <p className="mt-4 max-w-xl font-sans text-lg leading-relaxed text-[#D8D8D8] md:text-xl">
+                        <p className="mt-4 max-w-xl font-sans text-body-lg leading-relaxed text-white/85">
                           {slide.description}
                         </p>
                       )}
                       {slide.buttonLabel && slide.buttonUrl && (
                         <Link
                           href={slide.buttonUrl}
-                          className="mt-6 inline-flex rounded-full bg-[#E5B765] px-6 py-3 font-display text-base font-bold text-black transition-all hover:bg-[#d4a654] hover:scale-105 md:mt-8 md:px-8 md:py-4 md:text-lg"
+                          className="mt-6 inline-flex rounded-(--radius-pill) bg-ff-gold-accent px-6 py-3 font-display text-base font-bold text-ff-near-black transition-all hover:bg-ff-gold-accent-dark hover:scale-[1.02] md:mt-8 md:px-8 md:py-4 md:text-lg"
                         >
                           {slide.buttonLabel}
                         </Link>
@@ -155,7 +163,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides }) => {
               onClick={() => emblaApi?.scrollTo(i)}
               className={cn(
                 'h-2 w-2 rounded-full transition-all duration-300',
-                i === selectedIndex ? 'w-8 bg-[#E5B765]' : 'bg-white/50 hover:bg-white/70',
+                i === selectedIndex ? 'w-8 bg-ff-gold-accent' : 'bg-white/50 hover:bg-white/70',
               )}
             />
           ))}

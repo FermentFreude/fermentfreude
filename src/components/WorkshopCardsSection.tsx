@@ -90,7 +90,24 @@ export function WorkshopCardsSection({
             >
               <div className="relative aspect-4/3 overflow-hidden">
                 {isResolvedMedia(card.image) ? (
-                  <Media resource={card.image} fill imgClassName="object-cover" />
+                  (() => {
+                    const res = card.image as { url?: string }
+                    const url = res?.url
+                    return url?.startsWith('/assets/') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={url}
+                        alt=""
+                        className="absolute inset-0 size-full object-cover"
+                      />
+                    ) : (
+                      <Media
+                        resource={res as MediaType}
+                        fill
+                        imgClassName="object-cover"
+                      />
+                    )
+                  })()
                 ) : (
                   <div className="flex size-full items-center justify-center bg-[#D8D6D1]" />
                 )}
@@ -116,9 +133,9 @@ export function WorkshopCardsSection({
                     {String(card.buttonLabel).replace(/\s+>\s*$/, '')}
                   </Link>
                 )}
-                {card.nextDate && nextDateLabel && (
+                {card.nextDate && (
                   <p className="mt-4 text-body-sm text-ff-black/70">
-                    {nextDateLabel} {card.nextDate}
+                    {nextDateLabel ? `${nextDateLabel} ` : ''}{card.nextDate}
                   </p>
                 )}
               </div>

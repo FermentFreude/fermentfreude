@@ -12,7 +12,8 @@
  * - Sequential DB writes (no Promise.all) for MongoDB Atlas M0
  * - Images uploaded via Payload Media collection (stored in Cloudflare R2)
  *
- * Run: set -a && source .env && set +a && npx tsx src/scripts/seed-contact.ts
+ * Run: pnpm seed contact --force   (full seed with uploads)
+ *       pnpm seed contact --quick  (update hero slides only, ~2s)
  */
 import type { Media } from '@/payload-types'
 import config from '@payload-config'
@@ -26,10 +27,63 @@ import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 async function seedContact() {
   const payload = await getPayload({ config })
   const forceRecreate = process.argv.includes('--force')
+  const quick = process.argv.includes('--quick')
 
   console.log('🧪 Seeding Contact page…')
 
   const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
+
+  // ── QUICK: Reuse existing media, update hero slides only (no uploads) ──
+  if (quick) {
+    const pageRes = await payload.find({
+      collection: 'pages',
+      where: { slug: { equals: 'contact' } },
+      limit: 1,
+      depth: 2,
+    })
+    const page = pageRes.docs[0]
+    if (!page) {
+      console.log('❌ No contact page found. Run without --quick first.')
+      process.exit(1)
+    }
+    const hero = page.hero as { slides?: Array<{ image?: string | { id: string } }> } | undefined
+    const getId = (img: unknown) => (typeof img === 'object' && img && 'id' in img ? (img as { id: string }).id : typeof img === 'string' ? img : null)
+    const contactHeroId = getId(hero?.slides?.[0]?.image)
+    const voucherId = getId(hero?.slides?.[1]?.image)
+    const companyId = getId(hero?.slides?.[2]?.image)
+    if (!contactHeroId || !voucherId || !companyId) {
+      console.log('❌ Quick mode needs existing hero slides. Run: pnpm seed contact --force')
+      process.exit(1)
+    }
+    const heroSlidesDE = [
+      { image: contactHeroId, title: 'Workshops', description: 'Du möchtest einen Workshop buchen oder hast Fragen? Wir freuen uns auf deine Nachricht.', buttonLabel: 'Workshops entdecken', buttonUrl: '/workshops' },
+      { image: voucherId, title: 'Gutschein', description: 'Das perfekte Geschenk für Foodies und Gesundheitsbewusste. Verschenke einen Workshop oder ein Starter-Set.', buttonLabel: 'Gutschein kaufen', buttonUrl: '/workshops/voucher' },
+      { image: companyId, title: 'Für Firmen', description: 'Fermentierte, pflanzliche Optionen für professionelle Küchen. Wir liefern Produkte und Wissen.', buttonLabel: 'Mehr erfahren', buttonUrl: '/gastronomy' },
+    ]
+    const heroSlidesEN = [
+      { image: contactHeroId, title: 'Workshops', description: 'Would you like to book a workshop or have questions? We look forward to hearing from you.', buttonLabel: 'Explore Workshops', buttonUrl: '/workshops' },
+      { image: voucherId, title: 'Gift Voucher', description: 'The perfect gift for foodies and the health-conscious. Gift a workshop or a starter set.', buttonLabel: 'Buy Voucher', buttonUrl: '/workshops/voucher' },
+      { image: companyId, title: 'For Businesses', description: 'Fermented, plant-based options for professional kitchens. We supply products and knowledge.', buttonLabel: 'Learn More', buttonUrl: '/gastronomy' },
+    ]
+    const fresh = await payload.findByID({ collection: 'pages', id: page.id, depth: 0, locale: 'de' })
+    const ids = ((fresh.hero as { slides?: Array<{ id?: string }> })?.slides ?? []).map((s) => s.id)
+    await payload.update({
+      collection: 'pages',
+      id: page.id,
+      locale: 'de',
+      context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
+      data: { hero: { type: 'heroCarousel' as const, slides: heroSlidesDE.map((s, i) => ({ ...s, id: ids[i] })) } },
+    })
+    await payload.update({
+      collection: 'pages',
+      id: page.id,
+      locale: 'en',
+      context: { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true },
+      data: { hero: { type: 'heroCarousel' as const, slides: heroSlidesEN.map((s, i) => ({ ...s, id: ids[i] })) } },
+    })
+    console.log('✅ Quick update done (hero slides only)')
+    process.exit(0)
+  }
 
   // ── 0. Non-destructive check — skip if page already has content ──
   const existing = await payload.find({
@@ -70,8 +124,21 @@ async function seedContact() {
   let sliderBannerImage: Media | undefined // for hero slider (Banner.png – previous)
   let workshopImage: Media | undefined
   const contactFormImagePath = path.join(imagesDir, 'contact-form.png')
+  const contactHeroPath = path.join(imagesDir, 'contact-hero.png')
   const bannerPath = path.join(imagesDir, 'Banner.png')
   const workshopImagePath = path.join(imagesDir, 'workshop-slider.png')
+
+  let contactHeroImage: Media | undefined
+  if (fs.existsSync(contactHeroPath)) {
+    const created = await payload.create({
+      collection: 'media',
+      data: { alt: 'Contact hero – FermentFreude fermented foods and workshop' },
+      file: await optimizedFile(contactHeroPath, IMAGE_PRESETS.hero),
+      context: { skipAutoTranslate: true },
+    })
+    contactHeroImage = created as Media
+    console.log(`  📸 Contact hero image: ${contactHeroImage.id}`)
+  }
 
   if (fs.existsSync(contactFormImagePath)) {
     const created = await payload.create({
@@ -139,40 +206,66 @@ async function seedContact() {
     console.log(`  📸 Company/B2B slide image: ${companyImage.id}`)
   }
 
+  const giftSetImagePath = path.join(imagesDir, 'Image (Gift Set).png')
+  const voucherImagePath = path.join(imagesDir, 'voucher.png')
+  let voucherImage: Media | undefined
+  const voucherSourcePath = fs.existsSync(voucherImagePath)
+    ? voucherImagePath
+    : fs.existsSync(giftSetImagePath)
+      ? giftSetImagePath
+      : null
+  if (voucherSourcePath) {
+    const created = await payload.create({
+      collection: 'media',
+      data: { alt: 'Gift voucher – FermentFreude gift set for workshops' },
+      file: await optimizedFile(voucherSourcePath, IMAGE_PRESETS.card),
+      context: { skipAutoTranslate: true },
+    })
+    voucherImage = created as Media
+    console.log(`  📸 Voucher slide image: ${voucherImage.id}`)
+  }
+
   // ── 3. Create the Contact page in DE (default locale) ─────────
+  // Hero image: prefer contact-hero (generated), then Banner, then others
+  const heroImageForBlock =
+    contactHeroImage ?? sliderBannerImage ?? contactFormImage ?? workshopImage ?? kombuchaWorkshopImage ?? companyImage
+
   const deData = contactDataDE({
     contactImage: contactFormImage,
-    heroImage: sliderBannerImage,
+    heroImage: heroImageForBlock,
   })
 
-  const heroSlidesDE = sliderBannerImage
-    ? [
-        {
-          image: sliderBannerImage.id,
-          title: 'Kontakt',
-          description:
-            'Du möchtest einen Workshop buchen oder hast Fragen? Wir freuen uns auf deine Nachricht.',
-          buttonLabel: 'Kontakt',
-          buttonUrl: '/contact',
-        },
-        {
-          image: (kombuchaWorkshopImage ?? workshopImage ?? sliderBannerImage).id,
-          title: 'Workshops',
-          description:
-            'Entdecke die Kunst der Fermentation. Von Lakto-Gemüse über Kombucha bis Tempeh – lerne mit uns.',
-          buttonLabel: 'Workshop buchen',
-          buttonUrl: '/workshops',
-        },
-        {
-          image: (companyImage ?? workshopImage ?? sliderBannerImage).id,
-          title: 'Für Firmen',
-          description:
-            'Fermentierte, pflanzliche Optionen für professionelle Küchen. Wir liefern Produkte und Wissen.',
-          buttonLabel: 'Mehr erfahren',
-          buttonUrl: '/gastronomy',
-        },
-      ]
-    : []
+  const heroSlidesDE =
+    (contactHeroImage ?? sliderBannerImage) &&
+    (voucherImage ?? companyImage ?? workshopImage ?? kombuchaWorkshopImage) &&
+    companyImage
+      ? [
+          {
+            image: (contactHeroImage ?? sliderBannerImage)!.id,
+            title: 'Workshops',
+            description:
+              'Du möchtest einen Workshop buchen oder hast Fragen? Wir freuen uns auf deine Nachricht.',
+            buttonLabel: 'Workshops entdecken',
+            buttonUrl: '/workshops',
+          },
+          {
+            image: (voucherImage ?? companyImage ?? workshopImage ?? kombuchaWorkshopImage)!.id,
+            title: 'Gutschein',
+            description:
+              'Das perfekte Geschenk für Foodies und Gesundheitsbewusste. Verschenke einen Workshop oder ein Starter-Set.',
+            buttonLabel: 'Gutschein kaufen',
+            buttonUrl: '/workshops/voucher',
+          },
+          {
+            image: companyImage.id,
+            title: 'Für Firmen',
+            description:
+              'Fermentierte, pflanzliche Optionen für professionelle Küchen. Wir liefern Produkte und Wissen.',
+            buttonLabel: 'Mehr erfahren',
+            buttonUrl: '/gastronomy',
+          },
+        ]
+      : []
 
   const contactPage = await payload.create({
     collection: 'pages',
@@ -193,7 +286,7 @@ async function seedContact() {
       layout: [
         {
           blockType: 'contactBlock',
-          hideHeroSection: heroSlidesDE.length > 0,
+          hideHeroSection: heroSlidesDE.length > 0, // Hide block hero when page carousel is shown
           ...deData,
         },
       ],
@@ -227,36 +320,39 @@ async function seedContact() {
   const optionIds = ((subjectOptions?.options ?? []) as Array<{ id?: string }>).map((o) => o.id)
 
   // ── 5. Build EN data ──────────────────────────────────────────
-  const enData = contactDataEN({ contactImage: contactFormImage, heroImage: sliderBannerImage })
+  const enData = contactDataEN({ contactImage: contactFormImage, heroImage: heroImageForBlock })
 
-  const heroSlidesEN = sliderBannerImage
-    ? [
-        {
-          image: sliderBannerImage.id,
-          title: 'Contact',
-          description:
-            'Would you like to book a workshop or have questions? We look forward to hearing from you.',
-          buttonLabel: 'Contact',
-          buttonUrl: '/contact',
-        },
-        {
-          image: (kombuchaWorkshopImage ?? workshopImage ?? sliderBannerImage).id,
-          title: 'Workshops',
-          description:
-            'Discover the art of fermentation. From lacto vegetables to kombucha and tempeh – learn with us.',
-          buttonLabel: 'Book Workshop',
-          buttonUrl: '/workshops',
-        },
-        {
-          image: (companyImage ?? workshopImage ?? sliderBannerImage).id,
-          title: 'For Businesses',
-          description:
-            'Fermented, plant-based options for professional kitchens. We supply products and knowledge.',
-          buttonLabel: 'Learn More',
-          buttonUrl: '/gastronomy',
-        },
-      ]
-    : []
+  const heroSlidesEN =
+    (contactHeroImage ?? sliderBannerImage) &&
+    (voucherImage ?? companyImage ?? workshopImage ?? kombuchaWorkshopImage) &&
+    companyImage
+      ? [
+          {
+            image: (contactHeroImage ?? sliderBannerImage)!.id,
+            title: 'Workshops',
+            description:
+              'Would you like to book a workshop or have questions? We look forward to hearing from you.',
+            buttonLabel: 'Explore Workshops',
+            buttonUrl: '/workshops',
+          },
+          {
+            image: (voucherImage ?? companyImage ?? workshopImage ?? kombuchaWorkshopImage)!.id,
+            title: 'Gift Voucher',
+            description:
+              'The perfect gift for foodies and the health-conscious. Gift a workshop or a starter set.',
+            buttonLabel: 'Buy Voucher',
+            buttonUrl: '/workshops/voucher',
+          },
+          {
+            image: companyImage.id,
+            title: 'For Businesses',
+            description:
+              'Fermented, plant-based options for professional kitchens. We supply products and knowledge.',
+            buttonLabel: 'Learn More',
+            buttonUrl: '/gastronomy',
+          },
+        ]
+      : []
 
   if (enData.contactForm?.subjectOptions?.options && optionIds.length > 0) {
     enData.contactForm.subjectOptions.options = enData.contactForm.subjectOptions.options.map(

@@ -11,21 +11,27 @@ export const contactDataDE = (args: ContactSeedArgs = {}) => ({
     image: args.heroImage,
     heading: 'Kontakt',
     subtext:
-      'Du möchtest einen Workshop buchen oder hast Fragen? Wir freuen uns auf deine Nachricht.',
-    buttonLabel: 'Kontakt',
-    buttonHref: '/contact',
+      'Du möchtest einen Workshop buchen oder hast Fragen? Wir freuen uns auf deine Nachricht — schreib uns einfach.',
+    buttonLabel: 'Workshops entdecken',
+    buttonHref: '/workshops',
   },
   contact: {
-    heading: 'Kontakt',
+    heading: 'Kontaktdaten',
     description:
-      'Du möchtest einen Workshop buchen oder hast Fragen zu Fermentation, Produkten oder B2B-Angeboten? Melde dich gerne bei uns.',
+      'Wenn Sie Hilfe benötigen und uns direkt erreichen möchten, können Sie uns gerne per Telefon oder E-Mail kontaktieren.',
+    phone: '+43 660 4943577',
+    email: 'fermentfreude@gmail.com',
+    address: 'Grabenstraße 15, 8010 Graz, Austria',
   },
   contactForm: {
+    formHeading: 'Fragen Sie uns',
     placeholders: {
+      name: 'Ihr Name',
       firstName: 'Vorname',
       lastName: 'Nachname',
-      email: 'E-Mail',
-      message: 'Nachricht',
+      email: 'Ihre E-Mail',
+      phone: 'Ihre Telefonnummer',
+      message: 'Ihre Nachricht',
     },
     subjectOptions: {
       default: 'Betreff',
@@ -42,10 +48,10 @@ export const contactDataDE = (args: ContactSeedArgs = {}) => ({
     heading: 'Für Köche und Lebensmittelprofis',
     description:
       'Suchen Sie fermentierte, pflanzliche Optionen für professionelle Küchen? Wir liefern Produkte und Wissen für moderne Menüs.',
-    buttonLabel: 'Hier mehr erfahren',
+    buttonLabel: 'Mehr erfahren',
     buttonHref: '/gastronomy',
   },
-  mapEmbedUrl: '', // Add Google Maps embed URL in CMS (Share → Embed a map)
+  mapEmbedUrl: '',
 })
 
 export const contactDataEN = (args: ContactSeedArgs = {}) => ({
@@ -54,21 +60,27 @@ export const contactDataEN = (args: ContactSeedArgs = {}) => ({
     image: args.heroImage,
     heading: 'Contact',
     subtext:
-      'Would you like to book a workshop or have questions? We look forward to hearing from you.',
-    buttonLabel: 'Contact',
-    buttonHref: '/contact',
+      'We are happy to assist with workshop bookings or any questions.',
+    buttonLabel: 'Explore Workshops',
+    buttonHref: '/workshops',
   },
   contact: {
-    heading: 'Contact',
+    heading: 'Contact Detail',
     description:
-      'Would you like to book a workshop or have questions about fermentation, products or B2B offers? Feel free to contact us.',
+      'If you need any help and prefer to reach out directly, feel free to do it via phone or email.',
+    phone: '+43 660 4943577',
+    email: 'fermentfreude@gmail.com',
+    address: 'Grabenstraße 15, 8010 Graz, Austria',
   },
   contactForm: {
+    formHeading: 'Ask About Anything',
     placeholders: {
+      name: 'Your Name',
       firstName: 'First Name',
       lastName: 'Last Name',
-      email: 'Email',
-      message: 'Message',
+      email: 'Your Email',
+      phone: 'Your Phone',
+      message: 'Your Message',
     },
     subjectOptions: {
       default: 'Subject',
@@ -85,8 +97,8 @@ export const contactDataEN = (args: ContactSeedArgs = {}) => ({
     heading: 'For Chefs and Food Professionals',
     description:
       'Looking for fermented, plant-based options that work in professional kitchens? We supply products and knowledge for modern menus.',
-    buttonLabel: 'Get to know more here',
+    buttonLabel: 'Learn More',
     buttonHref: '/gastronomy',
   },
-  mapEmbedUrl: '', // Add Google Maps embed URL in CMS (Share → Embed a map)
+  mapEmbedUrl: '',
 })

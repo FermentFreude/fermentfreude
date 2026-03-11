@@ -90,6 +90,11 @@ const COPY_MAP: Array<{ from: string; to: string }> = [
   { from: 'assets/images/feature-probiotics.svg', to: 'images/icons/probiotics.svg' },
   { from: 'assets/images/feature-nutrients.svg', to: 'images/icons/nutrients.svg' },
   { from: 'assets/images/feature-taste.svg', to: 'images/icons/taste.svg' },
+  // Fermentation hero block icons
+  { from: 'assets/images/fermentation/icon-probiotics.svg', to: 'images/icons/icon-probiotics.svg' },
+  { from: 'assets/images/fermentation/icon-enzymes.svg', to: 'images/icons/icon-enzymes.svg' },
+  { from: 'assets/images/fermentation/icon-nutrition.svg', to: 'images/icons/icon-nutrition.svg' },
+  { from: 'assets/images/fermentation/icon-preservation.svg', to: 'images/icons/icon-preservation.svg' },
   // Gastronomy images are in seed-assets/ (not public/) — copy from there
 ];
 

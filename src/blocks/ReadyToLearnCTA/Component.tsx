@@ -30,21 +30,26 @@ export const ReadyToLearnCTABlock: React.FC<Props> = ({
   }
 
   return (
-    <section id={id ?? undefined} className="bg-ff-ivory section-padding-md">
-      <div className="container mx-auto container-padding">
-        <div className="flex flex-col items-center gap-(--space-content-xl) content-medium mx-auto text-center">
-          <h2 className="text-ff-black">{resolvedHeading}</h2>
-          <p className="text-body-lg text-ff-olive content-medium">{resolvedDescription}</p>
-          <div className="flex flex-wrap items-center justify-center gap-(--space-content-md)">
+    <section id={id ?? undefined} className="relative section-padding-md bg-ff-charcoal overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} aria-hidden />
+      <div className="container relative mx-auto container-padding">
+        <div className="flex flex-col items-center gap-(--space-content-lg) content-narrow mx-auto text-center">
+          <h2 className="text-section-heading font-display font-bold text-white">
+            {resolvedHeading}
+          </h2>
+          <p className="text-body-lg text-white/90 leading-relaxed">
+            {resolvedDescription}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <Link
               href={resolvedPrimary.href}
-              className="inline-flex items-center justify-center rounded-full bg-ff-charcoal hover:bg-ff-charcoal-hover hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-ivory font-display font-bold text-base px-6 py-2.5"
+              className="inline-flex items-center justify-center rounded-(--radius-pill) bg-ff-gold-accent hover:bg-ff-gold-accent-dark text-ff-near-black font-display font-bold text-base px-8 py-3 transition-all hover:scale-[1.03] active:scale-[0.97]"
             >
               {resolvedPrimary.label}
             </Link>
             <Link
               href={resolvedSecondary.href}
-              className="inline-flex items-center justify-center rounded-full border-2 border-ff-charcoal bg-transparent hover:bg-ff-charcoal hover:text-ff-ivory hover:scale-[1.03] active:scale-[0.97] transition-all text-ff-charcoal font-display font-bold text-base px-6 py-2.5"
+              className="inline-flex items-center justify-center rounded-(--radius-pill) border-2 border-white/80 bg-transparent text-white font-display font-bold text-base px-8 py-3 transition-all hover:bg-white hover:text-ff-charcoal hover:scale-[1.03] active:scale-[0.97]"
             >
               {resolvedSecondary.label}
             </Link>
