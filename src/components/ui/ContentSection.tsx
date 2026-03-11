@@ -6,6 +6,7 @@ interface ContentSectionProps {
   className?: string
   bg?: 'ivory' | 'ivory-mist' | 'warm-gray' | 'cream' | 'white' | 'none'
   padding?: 'sm' | 'md' | 'lg' | 'xl'
+  id?: string
 }
 
 const bgStyles = {
@@ -33,9 +34,10 @@ export function ContentSection({
   className,
   bg = 'none',
   padding = 'md',
+  id,
 }: ContentSectionProps) {
   return (
-    <section className={cn(bgStyles[bg], paddingStyles[padding], className)}>
+    <section id={id} className={cn(bgStyles[bg], paddingStyles[padding], className)}>
       <div className="container mx-auto container-padding">{children}</div>
     </section>
   )

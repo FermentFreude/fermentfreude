@@ -63,12 +63,18 @@ export const Image: React.FC<MediaProps> = (props) => {
     alt = altFromResource
 
     // Use path as-is when relative (/media/...) so images load from current origin
-    if (url && typeof url === 'string') {
+    const urlValid = url && typeof url === 'string' && !url.includes('undefined') && (url.startsWith('http') || url.startsWith('/'))
+    if (urlValid) {
       const base = (process.env.NEXT_PUBLIC_SERVER_URL || '').replace(/\/$/, '')
       src =
         url.startsWith('http') || url.startsWith('/')
           ? url
           : base ? `${base}/${url.replace(/^\//, '')}` : url.startsWith('/') ? url : `/${url}`
+    } else {
+      const filename = typeof resource === 'object' && resource !== null && 'filename' in resource ? (resource as { filename?: string }).filename : null
+      if (filename && typeof filename === 'string' && filename.trim()) {
+        src = `/media/${filename.replace(/^\//, '')}`
+      }
     }
   }
 

@@ -474,6 +474,298 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
+          name: 'onlineCourses',
+          label: 'Online Courses Page',
+          admin: {
+            description:
+              'Content for the Online Courses page (/courses). Only applies when slug is "courses".',
+            condition: (data, siblingData) => {
+              if (process.env.PAYLOAD_SKIP_ONLINE_COURSES_CONDITION === '1') return false
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'courses'
+            },
+          },
+          fields: [
+            {
+              type: 'collapsible',
+              label: '1. Hero',
+              admin: { initCollapsed: false },
+              fields: [
+                {
+                  name: 'onlineCoursesHeroEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Eyebrow Text',
+                  admin: {
+                    description:
+                      'Small label above the headline (e.g., "Online Workshops"). Leave empty to hide.',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Hero Title',
+                  admin: {
+                    description:
+                      'Main headline (e.g., "Learn Fermentation Anytime, Anywhere").',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Hero Description',
+                  admin: {
+                    description: 'Subtext below the heading (1–2 sentences).',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroCtaLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'CTA Button Label',
+                  admin: {
+                    description:
+                      'Button text. Use "Explore workshops" to scroll to the workshop grid. Leave empty to hide.',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroCtaUrl',
+                  type: 'text',
+                  required: false,
+                  label: 'CTA Button URL',
+                  admin: {
+                    description:
+                      'Use #workshops to scroll to the workshop grid on this page. Or use /workshops for in-person workshops.',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroCtaHint',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'CTA Hint (below button)',
+                  admin: {
+                    description:
+                      'Small text under the button when URL starts with # (e.g., "Scroll to explore"). Leave empty to hide.',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Featured Image',
+                  admin: {
+                    description:
+                      'Course thumbnail (e.g., jars of fermented food). Shown on the right in hero.',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroImageBread',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Hero Image – Bread',
+                  admin: {
+                    description:
+                      'Optional image for the bottom bread card in the hero collage. Falls back to Featured Image when empty.',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroImageVeg',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Hero Image – Vegetables',
+                  admin: {
+                    description:
+                      'Optional image for the middle vegetables card in the hero collage. Falls back to Featured Image when empty.',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroImageKimchi',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Hero Image – Kimchi',
+                  admin: {
+                    description:
+                      'Optional image for the top kimchi card in the hero collage. Falls back to Featured Image when empty.',
+                  },
+                },
+                {
+                  name: 'onlineCoursesLearnEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Learn Section Eyebrow',
+                  admin: { description: 'Small label above "What You\'ll Learn". Leave empty to hide.' },
+                },
+                {
+                  name: 'onlineCoursesWhyHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Learn Section Heading',
+                  admin: { description: 'e.g., "What You\'ll Learn".' },
+                },
+                {
+                  name: 'onlineCoursesWhyDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Learn Section Description',
+                  admin: { description: 'Optional intro text for the learn cards.' },
+                },
+                {
+                  name: 'onlineCoursesWhyCards',
+                  type: 'array',
+                  label: 'Learn Cards',
+                  admin: { description: 'Up to 6 cards (icon + title + description).' },
+                  fields: [
+                    {
+                      name: 'icon',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Icon',
+                    },
+                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Description',
+                    },
+                  ],
+                },
+                {
+                  name: 'onlineCoursesModulesEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Modules Section Eyebrow',
+                  admin: { description: 'Small label above "Course Modules". Leave empty to hide.' },
+                },
+                {
+                  name: 'onlineCoursesModulesHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Modules Section Heading',
+                  admin: { description: 'e.g., "Course Modules".' },
+                },
+                {
+                  name: 'onlineCoursesModules',
+                  type: 'array',
+                  label: 'Modules',
+                  admin: { description: 'List of modules with lessons.' },
+                  fields: [
+                    { name: 'title', type: 'text', required: true, localized: true, label: 'Module Title' },
+                    {
+                      name: 'lessons',
+                      type: 'array',
+                      label: 'Lessons',
+                      fields: [
+                        { name: 'title', type: 'text', required: true, localized: true, label: 'Lesson Title' },
+                        { name: 'locked', type: 'checkbox', label: 'Locked', defaultValue: false },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  name: 'onlineCoursesModulesButtonLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Modules CTA Label',
+                  admin: { description: 'e.g., "View all lessons". Leave empty to hide.' },
+                },
+                {
+                  name: 'onlineCoursesModulesButtonUrl',
+                  type: 'text',
+                  required: false,
+                  label: 'Modules CTA URL',
+                  admin: { description: 'Link to product or #workshops.' },
+                },
+                {
+                  name: 'onlineCoursesExploreEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Workshops Section Eyebrow',
+                  admin: { description: 'Small label above workshop cards. Leave empty to hide.' },
+                },
+                {
+                  name: 'onlineCoursesWorkshopsHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Workshops Section Heading',
+                  admin: { description: 'e.g., "More Courses on the Way".' },
+                },
+                {
+                  name: 'onlineCoursesWorkshopsDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Workshops Section Description',
+                  admin: { description: 'Optional text above the workshop cards.' },
+                },
+                {
+                  name: 'onlineCoursesComingSoonSectionBadge',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Coming Soon Badge',
+                  admin: { description: 'e.g., "Coming Soon". Leave empty to hide.' },
+                },
+                {
+                  name: 'onlineCoursesWorkshopCards',
+                  type: 'array',
+                  label: 'Workshop Cards',
+                  admin: { description: 'Cards for coming-soon or live courses (image, title, description, badge).' },
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Card Image',
+                    },
+                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Description',
+                    },
+                    { name: 'durationText', type: 'text', required: false, localized: true, label: 'Duration' },
+                    { name: 'instructor', type: 'text', required: false, localized: true, label: 'Instructor' },
+                    { name: 'levelText', type: 'text', required: false, localized: true, label: 'Level' },
+                    {
+                      name: 'comingSoonBadge',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Badge (e.g. "Coming Soon")',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'voucher',
           name: 'voucher',
           label: 'Voucher Page',
           admin: {

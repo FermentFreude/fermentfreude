@@ -118,6 +118,16 @@ const PRODUCTS: Array<{
       'Traditionally fermented vegetables with lactic acid bacteria. Crispy, tangy and good for gut health.',
   },
   {
+    titleDe: 'Grundkurs Fermentation',
+    titleEn: 'Basic Fermentation Course',
+    slug: 'basic-fermentation-course',
+    priceInUSD: 49,
+    imagePath: 'media/workshops/lakto.png',
+    alt: 'Basic Fermentation Course – lacto-fermented vegetables',
+    descriptionDe: 'Online-Kurs: Lerne Schritt für Schritt, Gemüse sicher und selbstbewusst zu Hause zu fermentieren. 7 Module, 35 Lektionen.',
+    descriptionEn: 'Online course: Learn step by step how to ferment vegetables safely and confidently at home. 7 modules, 35 lessons.',
+  },
+  {
     titleDe: 'Tempeh Starter',
     titleEn: 'Tempeh Starter',
     slug: 'tempeh-starter',
@@ -308,6 +318,8 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
       where: { slug: { equals: product.slug } },
       limit: 1,
       depth: 0,
+      locale: 'all',
+      overrideAccess: true,
     })
 
     if (existing.docs.length > 0) {
@@ -351,6 +363,7 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
       where: { slug: { equals: product.slug } },
       limit: 1,
       depth: 0,
+      locale: 'all',
     })
 
     if (existing.docs.length > 0 && existing.docs[0]) {

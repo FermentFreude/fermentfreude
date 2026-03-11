@@ -306,6 +306,43 @@
     line-height: 1.4;
   }
 
+  /* Courses why section: force center alignment */
+  .courses-why-section,
+  .courses-why-section h2,
+  .courses-why-section p,
+  .courses-why-card,
+  .courses-why-card h3,
+  .courses-why-card p {
+    text-align: center !important;
+  }
+
+  /* Courses page — premium wow effects */
+  .courses-hero-gradient {
+    background: linear-gradient(135deg, rgba(249, 240, 220, 0.97) 0%, rgba(250, 242, 224, 0.9) 50%, rgba(236, 229, 222, 0.85) 100%);
+  }
+  .courses-gift-glow {
+    box-shadow: 0 0 0 1px rgba(229, 183, 101, 0.3), 0 20px 60px -15px rgba(0, 0, 0, 0.2), 0 0 80px -20px rgba(229, 183, 101, 0.15);
+  }
+  .courses-gift-glow:hover {
+    box-shadow: 0 0 0 1px rgba(229, 183, 101, 0.5), 0 30px 80px -20px rgba(0, 0, 0, 0.25), 0 0 100px -15px rgba(229, 183, 101, 0.2);
+  }
+  .courses-card-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .courses-card-shine::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.4) 50%, transparent 60%);
+    transform: translateX(-100%) skewX(-15deg);
+    transition: transform 0.6s ease;
+    pointer-events: none;
+  }
+  .courses-card-shine:hover::before {
+    transform: translateX(100%) skewX(-15deg);
+  }
+
   /* Editorial uppercase labels */
   .label-uppercase {
     font-family: 'neue-haas-grotesk-text', sans-serif;

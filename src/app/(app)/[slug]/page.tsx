@@ -32,6 +32,7 @@ export async function generateStaticParams() {
         doc.slug !== 'home' &&
         doc.slug !== 'gastronomy' &&
         doc.slug !== 'fermentation' &&
+        doc.slug !== 'courses' &&
         !WORKSHOP_SLUGS.includes(doc.slug ?? '')
       )
     })

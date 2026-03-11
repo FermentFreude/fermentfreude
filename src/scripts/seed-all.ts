@@ -43,6 +43,11 @@ const scripts: Record<string, { name: string; file: string }> = {
   workshops: { name: 'Workshops overview page (hero)', file: 'seed-workshops.ts' },
   gastronomy: { name: 'Gastronomy page', file: 'seed-gastronomy.ts' },
   fermentation: { name: 'Fermentation page (with images)', file: 'seed-fermentation.ts' },
+  courses: { name: 'Online Courses page', file: 'seed-courses.ts' },
+  'basic-fermentation-course': {
+    name: 'Basic Fermentation Course (curriculum global)',
+    file: 'seed-basic-fermentation-course.ts',
+  },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
   shop: { name: 'Shop page (global)', file: 'seed-shop.ts' },
   'workshop-pages': {
@@ -75,6 +80,8 @@ const allOrder = [
   'workshops',
   'gastronomy',
   'fermentation',
+  'courses',
+  'basic-fermentation-course',
   'voucher',
   'shop',
   'workshop-pages',
@@ -104,6 +111,9 @@ function runSeed(key: string): boolean {
   }
   if (key === 'fermentation') {
     seedEnv.PAYLOAD_SKIP_FERMENTATION_CONDITION = '1'
+  }
+  if (key === 'courses') {
+    seedEnv.PAYLOAD_SKIP_ONLINE_COURSES_CONDITION = '1'
   }
   if (key === 'shop') {
     seedEnv.PAYLOAD_SKIP_SHOP_CONDITION = '1'

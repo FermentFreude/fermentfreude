@@ -57,7 +57,7 @@ export const FadeIn: React.FC<FadeInProps> = ({
         ease: 'power2.out',
         scrollTrigger: {
           trigger: ref.current,
-          start: 'top 82%',
+          start: 'top top',
           once: true,
         },
       })

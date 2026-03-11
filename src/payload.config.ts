@@ -22,9 +22,11 @@ import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
 import { Users } from '@/collections/Users'
 import { Vouchers } from '@/collections/Vouchers'
+import { Waitlists } from '@/collections/Waitlists'
 import { WorkshopAppointments } from '@/collections/WorkshopAppointments'
 import { WorkshopLocations } from '@/collections/WorkshopLocations'
 import { Workshops } from '@/collections/Workshops'
+import { BasicFermentationCourse } from '@/globals/BasicFermentationCourse'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { Shop } from '@/globals/Shop'
@@ -75,6 +77,7 @@ export default buildConfig({
     WorkshopLocations,
     WorkshopAppointments,
     Vouchers,
+    Waitlists,
   ],
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
@@ -115,7 +118,7 @@ export default buildConfig({
     },
   }),
   //email: nodemailerAdapter(),
-  globals: [Header, Footer, Shop],
+  globals: [Header, Footer, Shop, BasicFermentationCourse],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,

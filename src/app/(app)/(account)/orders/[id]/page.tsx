@@ -7,6 +7,7 @@ import { ProductItem } from '@/components/ProductItem'
 import { AddressItem } from '@/components/addresses/AddressItem'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/utilities/formatDateTime'
+import { getLocale } from '@/utilities/getLocale'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import configPromise from '@payload-config'
 import { ChevronLeftIcon } from 'lucide-react'
@@ -105,6 +106,12 @@ export default async function Order({ params, searchParams }: PageProps) {
     notFound()
   }
 
+  const locale = (await getLocale()) as 'de' | 'en'
+  const hasCourseProduct = order.items?.some((item) => {
+    const p = item.product
+    return typeof p === 'object' && p !== null && 'slug' in p && (p as { slug?: string }).slug === 'basic-fermentation-course'
+  })
+
   return (
     <div className="">
       <div className="flex gap-8 justify-between items-center mb-6">
@@ -177,6 +184,24 @@ export default async function Order({ params, searchParams }: PageProps) {
                 )
               })}
             </ul>
+          </div>
+        )}
+
+        {hasCourseProduct && (
+          <div className="rounded-lg border border-ff-gold-accent/30 bg-ff-gold-accent/10 p-6">
+            <h2 className="mb-2 font-display text-subheading font-bold text-ff-near-black">
+              {locale === 'de' ? 'Dein Online-Kurs' : 'Your online course'}
+            </h2>
+            <p className="mb-4 text-body-sm text-ff-gray-text">
+              {locale === 'de'
+                ? 'Du hast den Grundkurs Fermentation erworben. Starte jetzt mit den Lektionen.'
+                : 'You purchased the Basic Fermentation Course. Start your lessons now.'}
+            </p>
+            <Button asChild className="bg-ff-gold-accent text-ff-near-black hover:bg-ff-gold-accent-dark">
+              <Link href="/courses/basic-fermentation">
+                {locale === 'de' ? 'Zum Kurs' : 'Start your course'}
+              </Link>
+            </Button>
           </div>
         )}
 
