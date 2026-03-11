@@ -86,7 +86,7 @@ export function BookingModal({
   }
 
   const totalPrice = workshop.price * guestCount
-  const formattedTotal = `${workshop.currency}${totalPrice}.00`
+  const formattedTotal = `€${totalPrice}.00`
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -124,11 +124,11 @@ export function BookingModal({
         <div className="mb-6 space-y-1">
           <h2
             id="booking-modal-title"
-            className="font-display text-subheading font-semibold text-ff-near-black"
+            className="font-display text-subheading font-bold text-ff-near-black"
           >
             {workshop.confirmHeading}
           </h2>
-          <p className="text-body text-ff-gray-text-light">{workshop.confirmSubheading}</p>
+          <p className="text-body font-bold text-ff-gray-text-light">{workshop.confirmSubheading}</p>
         </div>
 
         {/* Booking details card */}
@@ -140,7 +140,7 @@ export function BookingModal({
           {/* Guest count selector */}
           <div className="border-t border-ff-border-light pt-5">
             <div className="mb-2">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[#9a9a9a]">
+              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#9a9a9a]">
                 Anzahl Personen
               </label>
               <div className="flex items-center justify-center gap-4 rounded-lg bg-white p-4">
@@ -182,7 +182,7 @@ export function BookingModal({
                   </svg>
                 </button>
               </div>
-              <p className="mt-2 text-center text-sm text-[#9a9a9a]">
+              <p className="mt-2 text-center text-sm font-bold text-[#9a9a9a]">
                 Verfügbar für dieses Datum:{' '}
                 <span className="font-bold text-[#555954]">
                   {availableSpots - guestCount} Plätze
@@ -194,10 +194,10 @@ export function BookingModal({
           {/* Total price */}
           <div className="border-t border-ff-border-light pt-4">
             <div className="flex items-center justify-between">
-              <span className="font-display text-body-lg font-medium text-ff-near-black">
+              <span className="font-display text-body-lg font-bold text-ff-near-black">
                 {workshop.totalLabel}
               </span>
-              <span className="font-display text-subheading font-medium text-ff-near-black">
+              <span className="font-display text-subheading font-bold text-ff-near-black">
                 {formattedTotal}
               </span>
             </div>
@@ -207,20 +207,20 @@ export function BookingModal({
         {/* Warning if trying to book more than available */}
         {showWarning && (
           <div className="mb-6 rounded-xl border-2 border-yellow-500/30 bg-yellow-50 px-5 py-4">
-            <p className="mb-3 text-body font-medium text-ff-near-black">
+            <p className="mb-3 text-body font-bold text-ff-near-black">
               ⚠️ Sie möchten {guestCount} Plätze buchen, aber nur {availableSpots} sind verfügbar.
             </p>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleReduceToAvailable}
-                className="rounded-full bg-ff-near-black px-5 py-2 font-display text-body-sm font-medium text-white transition-colors hover:bg-ff-near-black/80"
+                className="rounded-full bg-ff-near-black px-5 py-2 font-display text-body-sm font-bold text-white transition-colors hover:bg-ff-near-black/80"
               >
                 Auf {availableSpots} reduzieren
               </button>
               {onSelectDifferentDate && (
                 <button
                   onClick={handleChooseDifferentDate}
-                  className="rounded-full border border-ff-border-light px-5 py-2 font-display text-body-sm font-medium text-ff-near-black transition-colors hover:bg-ff-warm-gray"
+                  className="rounded-full border border-ff-border-light px-5 py-2 font-display text-body-sm font-bold text-ff-near-black transition-colors hover:bg-ff-warm-gray"
                 >
                   Anderes Datum wählen
                 </button>
@@ -234,14 +234,14 @@ export function BookingModal({
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-(--radius-pill) border border-ff-border-light px-6 py-3 font-display text-body font-medium text-ff-near-black transition-colors hover:bg-[#f5f1e8] disabled:opacity-50"
+            className="rounded-(--radius-pill) border border-ff-border-light px-6 py-3 font-display text-body font-bold text-ff-near-black transition-colors hover:bg-[#f5f1e8] disabled:opacity-50"
           >
             {workshop.cancelLabel}
           </button>
           <button
             onClick={handleAddToCart}
             disabled={!canBook || isSubmitting}
-            className="rounded-(--radius-pill) bg-[#c1c1c1] px-8 py-3 font-display text-body font-medium text-ff-near-black transition-colors hover:bg-[#b3b3b3] disabled:opacity-50 disabled:hover:bg-[#c1c1c1]"
+            className="rounded-(--radius-pill) bg-[#c1c1c1] px-8 py-3 font-display text-body font-bold text-ff-near-black transition-colors hover:bg-[#b3b3b3] disabled:opacity-50 disabled:hover:bg-[#c1c1c1]"
           >
             {isSubmitting ? 'Wird hinzugefügt...' : 'In den Warenkorb'}
           </button>
@@ -256,8 +256,8 @@ export function BookingModal({
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-body text-ff-gray-text-light">{label}</span>
-      <span className="font-display text-body font-medium text-ff-near-black">{value}</span>
+      <span className="text-body font-bold text-ff-gray-text-light">{label}</span>
+      <span className="font-display text-body font-bold text-ff-near-black">{value}</span>
     </div>
   )
 }

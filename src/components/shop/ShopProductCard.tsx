@@ -64,7 +64,7 @@ export const ShopProductCard: React.FC<Props> = ({
     : null
 
   return (
-    <div className="card product-box box-minimal group relative w-full max-w-[327px] overflow-visible">
+    <div className="card product-box box-minimal group relative w-full max-w-81.75 overflow-visible">
       <div
         className="card-body relative flex flex-col rounded-2xl"
         style={{ backgroundColor: bgColor }}
@@ -75,9 +75,9 @@ export const ShopProductCard: React.FC<Props> = ({
           aria-label={`${productName}${flavor ? ` - ${flavor}` : ''}`}
         >
           {/* Image area */}
-          <div className="relative flex flex-1 min-h-[200px] items-center justify-center p-4">
+          <div className="relative flex flex-1 min-h-50 items-center justify-center p-4">
             {image ? (
-              <div className="relative h-[220px] w-full max-w-[200px] shrink-0 overflow-hidden rounded-2xl">
+              <div className="relative h-55 w-full max-w-50 shrink-0 overflow-hidden rounded-2xl">
                 <Media
                   className="object-contain transition duration-300 ease-in-out group-hover:scale-105"
                   imgClassName="object-contain"
@@ -86,7 +86,7 @@ export const ShopProductCard: React.FC<Props> = ({
                 />
               </div>
             ) : (
-              <div className="h-[220px] w-32 shrink-0 rounded-2xl bg-ff-ivory-mist/50" />
+              <div className="h-55 w-32 shrink-0 rounded-2xl bg-ff-ivory-mist/50" />
             )}
           </div>
           {/* Product info */}
@@ -116,7 +116,7 @@ export const ShopProductCard: React.FC<Props> = ({
 
         {/* Add to cart: bottom-right gold circle */}
         <div
-          className="add-to-cart-custom pointer-events-auto absolute bottom-4 right-4 z-[100] rounded-full"
+          className="add-to-cart-custom pointer-events-auto absolute bottom-4 right-4 z-100 rounded-full"
           style={
             {
               width: 57.16,

@@ -6,6 +6,9 @@ import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import Link from 'next/link'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+import { BookingModal } from '@/app/(app)/workshops/[slug]/BookingModal'
+import { addWorkshopToCart } from '@/app/(app)/workshops/[slug]/add-to-cart-utils'
+import type { WorkshopDetailData } from '@/app/(app)/workshops/[slug]/workshop-data'
 
 export type WorkshopCalendarCard = {
   id?: string | null
@@ -173,34 +176,135 @@ export function WorkshopCalendar({
   const [selectedType, setSelectedType] = useState<string | null>(null)
   const [bookingDate, setBookingDate] = useState<WorkshopDate | null>(null)
   const [bookingWorkshop, setBookingWorkshop] = useState<WorkshopCalendarCard | null>(null)
+  // Separate state for card bookings
+  const [cardBookingDate, setCardBookingDate] = useState<WorkshopDate | null>(null)
+  const [cardBookingWorkshop, setCardBookingWorkshop] = useState<WorkshopCalendarCard | null>(null)
   const { addItem } = useCart()
 
   // Use real appointments from database, or empty array if none
   const upcomingDates = appointments || []
+
+  // Helper: Get next available appointment for a workshop type
+  const getNextAppointment = useCallback(
+    (workshopType: string): WorkshopDate | null => {
+      const typeAppointments = upcomingDates.filter((d) => d.workshopType === workshopType)
+      return typeAppointments.length > 0 ? typeAppointments[0] : null
+    },
+    [upcomingDates],
+  )
+
+  // Convert card to WorkshopDetailData format for BookingModal
+  const convertToWorkshopDetail = useCallback(
+    (card: WorkshopCalendarCard): WorkshopDetailData => {
+      return {
+        slug: card.workshopType,
+        workshopType: card.workshopType as 'lakto' | 'kombucha' | 'tempeh',
+        title: getWorkshopTypeLabel(card.workshopType),
+        subtitle: card.duration || '3-hour hands-on workshop',
+        description: '',
+        price: 99,
+        priceSuffix: 'per person',
+        currency: 'EUR',
+        heroImage: null,
+        maxCapacity: 12,
+        highlights: [],
+        aboutHeading: '',
+        aboutText: '',
+        scheduleHeading: '',
+        schedule: [],
+        includedHeading: '',
+        includedItems: [],
+        whyHeading: '',
+        whyPoints: [],
+        datesHeading: '',
+        dates: [],
+        viewDatesLabel: '',
+        hideDatesLabel: '',
+        moreInfoLabel: '',
+        bookLabel: '',
+        spotsLabel: '',
+        closeLabel: '',
+        confirmHeading: 'Buchung bestätigen',
+        confirmSubheading: 'Workshop zum Warenkorb hinzufügen?',
+        workshopLabel: 'Workshop',
+        dateLabel: 'Datum',
+        timeLabel: 'Zeit',
+        totalLabel: 'Preis',
+        cancelLabel: 'Abbrechen',
+        confirmLabel: 'Zum Warenkorb',
+      }
+    },
+    [],
+  )
+
+  // Handle card booking click
+  const handleCardBookingClick = useCallback(
+    (workshop: WorkshopCalendarCard) => {
+      const nextDate = getNextAppointment(workshop.workshopType)
+      if (nextDate) {
+        setCardBookingDate(nextDate)
+        setCardBookingWorkshop(workshop)
+      } else {
+        toast.error('Keine verfügbaren Termine für diesen Workshop')
+      }
+    },
+    [getNextAppointment],
+  )
+
+  // Handle card booking confirmation with guest count
+  const handleCardBookingConfirm = useCallback(
+    async (guestCount: number) => {
+      if (!cardBookingDate || !cardBookingWorkshop) return
+
+      const appointmentId = cardBookingDate.appointmentId
+      if (!appointmentId) {
+        toast.error('Ungültige Terminauswahl')
+        return
+      }
+
+      await addWorkshopToCart({
+        addItem,
+        appointmentId,
+        workshopSlug: cardBookingWorkshop.workshopType,
+        workshopTitle: getWorkshopTypeLabel(cardBookingWorkshop.workshopType),
+        guestCount,
+      })
+
+      // Clear card booking states
+      setCardBookingDate(null)
+      setCardBookingWorkshop(null)
+    },
+    [cardBookingDate, cardBookingWorkshop, addItem],
+  )
   const filteredDates = selectedType
     ? upcomingDates.filter((d) => d.workshopType === selectedType)
     : upcomingDates
 
-  // Handle booking confirmation
-  const handleConfirmBooking = useCallback(async () => {
-    if (!bookingDate || !bookingWorkshop) return
+  // Handle date list booking confirmation with guest count
+  const handleDateListBookingConfirm = useCallback(
+    async (guestCount: number) => {
+      if (!bookingDate || !bookingWorkshop) return
 
-    // Workshops are added to cart with their product ID
-    // Format: workshop-{type} (e.g., workshop-lakto, workshop-kombucha)
-    const productId = bookingWorkshop.productId || `workshop-${bookingWorkshop.workshopType}`
+      const appointmentId = bookingDate.appointmentId
+      if (!appointmentId) {
+        toast.error('Ungültige Terminauswahl')
+        return
+      }
 
-    try {
-      await addItem({
-        product: productId,
+      await addWorkshopToCart({
+        addItem,
+        appointmentId,
+        workshopSlug: bookingWorkshop.workshopType,
+        workshopTitle: getWorkshopTypeLabel(bookingWorkshop.workshopType),
+        guestCount,
       })
-      toast.success(`Booking for ${bookingDate.date} added to cart!`)
+
+      // Clear date list booking states
       setBookingDate(null)
       setBookingWorkshop(null)
-    } catch (error) {
-      toast.error('Failed to add booking to cart')
-      console.error(error)
-    }
-  }, [bookingDate, bookingWorkshop, addItem])
+    },
+    [bookingDate, bookingWorkshop, addItem],
+  )
 
   return (
     <>
@@ -233,7 +337,7 @@ export function WorkshopCalendar({
                     key={workshop.workshopType}
                     workshop={workshop}
                     cardImage={cardImage}
-                    onBookingClick={() => setBookingWorkshop(workshop)}
+                    onBookingClick={() => handleCardBookingClick(workshop)}
                   />
                 )
               })}
@@ -361,108 +465,38 @@ export function WorkshopCalendar({
         </div>
       </section>
 
-      {/* Booking Confirmation Modal */}
+      {/* Card Booking Modal with Guest Selection */}
+      {cardBookingDate && cardBookingWorkshop && (
+        <BookingModal
+          workshop={convertToWorkshopDetail(cardBookingWorkshop)}
+          selectedDate={{
+            ...cardBookingDate,
+            spotsLeft: cardBookingDate.availableSpots,
+          }}
+          maxCapacity={12}
+          onClose={() => {
+            setCardBookingDate(null)
+            setCardBookingWorkshop(null)
+          }}
+          onConfirm={handleCardBookingConfirm}
+        />
+      )}
+
+      {/* Date List Booking Modal with Guest Selection */}
       {bookingDate && bookingWorkshop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Overlay */}
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => {
-              setBookingDate(null)
-              setBookingWorkshop(null)
-            }}
-            aria-hidden="true"
-          />
-
-          {/* Modal */}
-          <div
-            className="relative mx-4 w-full max-w-md rounded-2xl border border-[#e8e4d9] bg-white p-8 shadow-2xl"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="booking-modal-title"
-          >
-            {/* Close button */}
-            <button
-              onClick={() => {
-                setBookingDate(null)
-                setBookingWorkshop(null)
-              }}
-              className="absolute right-5 top-5 rounded-sm p-1 text-[#555954]/70 transition-colors hover:text-[#555954]"
-              aria-label="Close"
-            >
-              <svg
-                className="size-5"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 5l10 10" />
-                <path d="M15 5L5 15" />
-              </svg>
-            </button>
-
-            {/* Header */}
-            <div className="mb-6 space-y-1">
-              <h2
-                id="booking-modal-title"
-                className="font-display text-2xl font-bold text-[#1a1a1a]"
-              >
-                Buchung bestätigen
-              </h2>
-              <p className="text-body text-[#555954]">Workshop zum Warenkorb hinzufügen?</p>
-            </div>
-
-            {/* Booking details card */}
-            <div className="mb-8 space-y-3 rounded-xl bg-[#f5f1e8] px-6 py-6">
-              <div className="flex items-center justify-between">
-                <span className="text-[#9a9a9a] font-semibold uppercase text-xs">Workshop</span>
-                <span className="font-display font-bold text-[#1a1a1a]">
-                  {getWorkshopTypeLabel(bookingWorkshop.workshopType)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#9a9a9a] font-semibold uppercase text-xs">Datum</span>
-                <span className="font-display font-bold text-[#1a1a1a]">{bookingDate.date}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#9a9a9a] font-semibold uppercase text-xs">Zeit</span>
-                <span className="font-display font-bold text-[#1a1a1a]">{bookingDate.time}</span>
-              </div>
-              <div className="border-t border-[#e8e4d9] pt-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-display text-body-lg font-medium text-[#1a1a1a]">
-                    Preis
-                  </span>
-                  <span className="font-display text-2xl font-bold text-[#1a1a1a]">
-                    €{bookingDate.price}.00
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setBookingDate(null)
-                  setBookingWorkshop(null)
-                }}
-                className="rounded-full border border-[#e8e4d9] px-6 py-3 font-display text-body font-medium text-[#1a1a1a] transition-colors hover:bg-[#f5f1e8]"
-              >
-                Abbrechen
-              </button>
-              <button
-                onClick={handleConfirmBooking}
-                className="rounded-full bg-[#555954] px-8 py-3 font-display text-body font-medium text-white transition-colors hover:bg-[#3d3d3a]"
-              >
-                Zum Warenkorb
-              </button>
-            </div>
-          </div>
-        </div>
+        <BookingModal
+          workshop={convertToWorkshopDetail(bookingWorkshop)}
+          selectedDate={{
+            ...bookingDate,
+            spotsLeft: bookingDate.availableSpots,
+          }}
+          maxCapacity={12}
+          onClose={() => {
+            setBookingDate(null)
+            setBookingWorkshop(null)
+          }}
+          onConfirm={handleDateListBookingConfirm}
+        />
       )}
     </>
   )
