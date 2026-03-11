@@ -1,14 +1,14 @@
 'use client'
 
+import { BookingModal } from '@/app/(app)/workshops/[slug]/BookingModal'
+import { addWorkshopToCart } from '@/app/(app)/workshops/[slug]/add-to-cart-utils'
+import type { WorkshopDetailData } from '@/app/(app)/workshops/[slug]/workshop-data'
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import Link from 'next/link'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import { BookingModal } from '@/app/(app)/workshops/[slug]/BookingModal'
-import { addWorkshopToCart } from '@/app/(app)/workshops/[slug]/add-to-cart-utils'
-import type { WorkshopDetailData } from '@/app/(app)/workshops/[slug]/workshop-data'
 
 export type WorkshopCalendarCard = {
   id?: string | null
@@ -194,48 +194,45 @@ export function WorkshopCalendar({
   )
 
   // Convert card to WorkshopDetailData format for BookingModal
-  const convertToWorkshopDetail = useCallback(
-    (card: WorkshopCalendarCard): WorkshopDetailData => {
-      return {
-        slug: card.workshopType,
-        workshopType: card.workshopType as 'lakto' | 'kombucha' | 'tempeh',
-        title: getWorkshopTypeLabel(card.workshopType),
-        subtitle: card.duration || '3-hour hands-on workshop',
-        description: '',
-        price: 99,
-        priceSuffix: 'per person',
-        currency: 'EUR',
-        heroImage: null,
-        maxCapacity: 12,
-        highlights: [],
-        aboutHeading: '',
-        aboutText: '',
-        scheduleHeading: '',
-        schedule: [],
-        includedHeading: '',
-        includedItems: [],
-        whyHeading: '',
-        whyPoints: [],
-        datesHeading: '',
-        dates: [],
-        viewDatesLabel: '',
-        hideDatesLabel: '',
-        moreInfoLabel: '',
-        bookLabel: '',
-        spotsLabel: '',
-        closeLabel: '',
-        confirmHeading: 'Buchung bestätigen',
-        confirmSubheading: 'Workshop zum Warenkorb hinzufügen?',
-        workshopLabel: 'Workshop',
-        dateLabel: 'Datum',
-        timeLabel: 'Zeit',
-        totalLabel: 'Preis',
-        cancelLabel: 'Abbrechen',
-        confirmLabel: 'Zum Warenkorb',
-      }
-    },
-    [],
-  )
+  const convertToWorkshopDetail = useCallback((card: WorkshopCalendarCard): WorkshopDetailData => {
+    return {
+      slug: card.workshopType,
+      workshopType: card.workshopType as 'lakto' | 'kombucha' | 'tempeh',
+      title: getWorkshopTypeLabel(card.workshopType),
+      subtitle: card.duration || '3-hour hands-on workshop',
+      description: '',
+      price: 99,
+      priceSuffix: 'per person',
+      currency: 'EUR',
+      heroImage: null,
+      maxCapacity: 12,
+      highlights: [],
+      aboutHeading: '',
+      aboutText: '',
+      scheduleHeading: '',
+      schedule: [],
+      includedHeading: '',
+      includedItems: [],
+      whyHeading: '',
+      whyPoints: [],
+      datesHeading: '',
+      dates: [],
+      viewDatesLabel: '',
+      hideDatesLabel: '',
+      moreInfoLabel: '',
+      bookLabel: '',
+      spotsLabel: '',
+      closeLabel: '',
+      confirmHeading: 'Buchung bestätigen',
+      confirmSubheading: 'Workshop zum Warenkorb hinzufügen?',
+      workshopLabel: 'Workshop',
+      dateLabel: 'Datum',
+      timeLabel: 'Zeit',
+      totalLabel: 'Preis',
+      cancelLabel: 'Abbrechen',
+      confirmLabel: 'Zum Warenkorb',
+    }
+  }, [])
 
   // Handle card booking click
   const handleCardBookingClick = useCallback(

@@ -128,7 +128,9 @@ export function BookingModal({
           >
             {workshop.confirmHeading}
           </h2>
-          <p className="text-body font-bold text-ff-gray-text-light">{workshop.confirmSubheading}</p>
+          <p className="text-body font-bold text-ff-gray-text-light">
+            {workshop.confirmSubheading}
+          </p>
         </div>
 
         {/* Booking details card */}
