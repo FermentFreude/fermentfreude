@@ -81,6 +81,7 @@ export interface Config {
     'workshop-locations': WorkshopLocation;
     'workshop-appointments': WorkshopAppointment;
     vouchers: Voucher;
+    waitlists: Waitlist;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -119,6 +120,7 @@ export interface Config {
     'workshop-locations': WorkshopLocationsSelect<false> | WorkshopLocationsSelect<true>;
     'workshop-appointments': WorkshopAppointmentsSelect<false> | WorkshopAppointmentsSelect<true>;
     vouchers: VouchersSelect<false> | VouchersSelect<true>;
+    waitlists: WaitlistsSelect<false> | WaitlistsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -142,11 +144,13 @@ export interface Config {
     header: Header;
     footer: Footer;
     shop: Shop;
+    'basic-fermentation-course': BasicFermentationCourse;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     shop: ShopSelect<false> | ShopSelect<true>;
+    'basic-fermentation-course': BasicFermentationCourseSelect<false> | BasicFermentationCourseSelect<true>;
   };
   locale: 'de' | 'en';
   user: User;
@@ -701,6 +705,137 @@ export interface Page {
       buttonHref?: string | null;
     };
     gastronomyMapEmbedUrl?: string | null;
+  };
+  /**
+   * Content for the Online Courses page (/courses). Only applies when slug is "courses".
+   */
+  onlineCourses?: {
+    /**
+     * Small label above the headline (e.g., "Online Workshops"). Leave empty to hide.
+     */
+    onlineCoursesHeroEyebrow?: string | null;
+    /**
+     * Main headline (e.g., "Learn Fermentation Anytime, Anywhere").
+     */
+    onlineCoursesHeroTitle?: string | null;
+    /**
+     * Subtext below the heading (1–2 sentences).
+     */
+    onlineCoursesHeroDescription?: string | null;
+    /**
+     * Button text. Use "Explore workshops" to scroll to the workshop grid. Leave empty to hide.
+     */
+    onlineCoursesHeroCtaLabel?: string | null;
+    /**
+     * Use #workshops to scroll to the workshop grid on this page. Or use /workshops for in-person workshops.
+     */
+    onlineCoursesHeroCtaUrl?: string | null;
+    /**
+     * Small text under the button when URL starts with # (e.g., "Scroll to explore"). Leave empty to hide.
+     */
+    onlineCoursesHeroCtaHint?: string | null;
+    /**
+     * Course thumbnail (e.g., jars of fermented food). Shown on the right in hero.
+     */
+    onlineCoursesHeroImage?: (string | null) | Media;
+    /**
+     * Optional image for the bottom bread card in the hero collage. Falls back to Featured Image when empty.
+     */
+    onlineCoursesHeroImageBread?: (string | null) | Media;
+    /**
+     * Optional image for the middle vegetables card in the hero collage. Falls back to Featured Image when empty.
+     */
+    onlineCoursesHeroImageVeg?: (string | null) | Media;
+    /**
+     * Optional image for the top kimchi card in the hero collage. Falls back to Featured Image when empty.
+     */
+    onlineCoursesHeroImageKimchi?: (string | null) | Media;
+    /**
+     * Small label above "What You'll Learn". Leave empty to hide.
+     */
+    onlineCoursesLearnEyebrow?: string | null;
+    /**
+     * e.g., "What You'll Learn".
+     */
+    onlineCoursesWhyHeading?: string | null;
+    /**
+     * Optional intro text for the learn cards.
+     */
+    onlineCoursesWhyDescription?: string | null;
+    /**
+     * Up to 6 cards (icon + title + description).
+     */
+    onlineCoursesWhyCards?:
+      | {
+          icon?: (string | null) | Media;
+          title: string;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Small label above "Course Modules". Leave empty to hide.
+     */
+    onlineCoursesModulesEyebrow?: string | null;
+    /**
+     * e.g., "Course Modules".
+     */
+    onlineCoursesModulesHeading?: string | null;
+    /**
+     * List of modules with lessons.
+     */
+    onlineCoursesModules?:
+      | {
+          title: string;
+          lessons?:
+            | {
+                title: string;
+                locked?: boolean | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g., "View all lessons". Leave empty to hide.
+     */
+    onlineCoursesModulesButtonLabel?: string | null;
+    /**
+     * Link to product or #workshops.
+     */
+    onlineCoursesModulesButtonUrl?: string | null;
+    /**
+     * Small label above workshop cards. Leave empty to hide.
+     */
+    onlineCoursesExploreEyebrow?: string | null;
+    /**
+     * e.g., "More Courses on the Way".
+     */
+    onlineCoursesWorkshopsHeading?: string | null;
+    /**
+     * Optional text above the workshop cards.
+     */
+    onlineCoursesWorkshopsDescription?: string | null;
+    /**
+     * e.g., "Coming Soon". Leave empty to hide.
+     */
+    onlineCoursesComingSoonSectionBadge?: string | null;
+    /**
+     * Cards for coming-soon or live courses (image, title, description, badge).
+     */
+    onlineCoursesWorkshopCards?:
+      | {
+          image?: (string | null) | Media;
+          title: string;
+          description?: string | null;
+          durationText?: string | null;
+          instructor?: string | null;
+          levelText?: string | null;
+          comingSoonBadge?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   /**
    * Content for the Gift Voucher page. These fields only apply when this page's slug is "voucher".
@@ -3071,6 +3206,28 @@ export interface Voucher {
   createdAt: string;
 }
 /**
+ * People who clicked "Notify Me When Available" for upcoming online courses.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "waitlists".
+ */
+export interface Waitlist {
+  id: string;
+  /**
+   * We will notify this address when the course is available.
+   */
+  email: string;
+  /**
+   * Internal slug, e.g. "advanced-miso-koji-mastery".
+   */
+  courseSlug: string;
+  courseTitle: string;
+  locale?: string | null;
+  status: 'pending' | 'notified';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
@@ -3146,6 +3303,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'vouchers';
         value: string | Voucher;
+      } | null)
+    | ({
+        relationTo: 'waitlists';
+        value: string | Waitlist;
       } | null)
     | ({
         relationTo: 'forms';
@@ -3412,6 +3573,64 @@ export interface PagesSelect<T extends boolean = true> {
               buttonHref?: T;
             };
         gastronomyMapEmbedUrl?: T;
+      };
+  onlineCourses?:
+    | T
+    | {
+        onlineCoursesHeroEyebrow?: T;
+        onlineCoursesHeroTitle?: T;
+        onlineCoursesHeroDescription?: T;
+        onlineCoursesHeroCtaLabel?: T;
+        onlineCoursesHeroCtaUrl?: T;
+        onlineCoursesHeroCtaHint?: T;
+        onlineCoursesHeroImage?: T;
+        onlineCoursesHeroImageBread?: T;
+        onlineCoursesHeroImageVeg?: T;
+        onlineCoursesHeroImageKimchi?: T;
+        onlineCoursesLearnEyebrow?: T;
+        onlineCoursesWhyHeading?: T;
+        onlineCoursesWhyDescription?: T;
+        onlineCoursesWhyCards?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        onlineCoursesModulesEyebrow?: T;
+        onlineCoursesModulesHeading?: T;
+        onlineCoursesModules?:
+          | T
+          | {
+              title?: T;
+              lessons?:
+                | T
+                | {
+                    title?: T;
+                    locked?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        onlineCoursesModulesButtonLabel?: T;
+        onlineCoursesModulesButtonUrl?: T;
+        onlineCoursesExploreEyebrow?: T;
+        onlineCoursesWorkshopsHeading?: T;
+        onlineCoursesWorkshopsDescription?: T;
+        onlineCoursesComingSoonSectionBadge?: T;
+        onlineCoursesWorkshopCards?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              description?: T;
+              durationText?: T;
+              instructor?: T;
+              levelText?: T;
+              comingSoonBadge?: T;
+              id?: T;
+            };
       };
   voucher?:
     | T
@@ -4448,6 +4667,19 @@ export interface VouchersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "waitlists_select".
+ */
+export interface WaitlistsSelect<T extends boolean = true> {
+  email?: T;
+  courseSlug?: T;
+  courseTitle?: T;
+  locale?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
@@ -5158,6 +5390,86 @@ export interface Shop {
   createdAt?: string | null;
 }
 /**
+ * Content for the course curriculum page at /courses/basic-fermentation. Hero, modules with lessons, and What You'll Learn.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "basic-fermentation-course".
+ */
+export interface BasicFermentationCourse {
+  id: string;
+  /**
+   * e.g. "Course"
+   */
+  heroEyebrow?: string | null;
+  /**
+   * e.g. "The Complete Fermentation Course"
+   */
+  heroTitle: string;
+  heroSubtitle?: string | null;
+  heroDescription?: string | null;
+  /**
+   * e.g. "4.8 rating"
+   */
+  heroRating?: string | null;
+  /**
+   * e.g. "12,847+ Happy students"
+   */
+  heroStudentsCount?: string | null;
+  /**
+   * e.g. "5h 15m"
+   */
+  heroDuration?: string | null;
+  /**
+   * e.g. "48 Lessons"
+   */
+  heroLessonsCount?: string | null;
+  /**
+   * Large image (e.g. jars of fermented foods).
+   */
+  heroImage?: (string | null) | Media;
+  /**
+   * Label above the progress bar, e.g. "Your Progress" / "Dein Fortschritt".
+   */
+  heroProgressHeading?: string | null;
+  /**
+   * e.g. "Course Curriculum"
+   */
+  curriculumHeading?: string | null;
+  /**
+   * Course modules with lessons (title, description, duration).
+   */
+  modules?:
+    | {
+        title: string;
+        description?: string | null;
+        lessons?:
+          | {
+              title: string;
+              description?: string | null;
+              /**
+               * e.g. 5
+               */
+              durationMinutes?: number | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. "What You'll Learn"
+   */
+  learnHeading?: string | null;
+  learnItems?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -5307,6 +5619,48 @@ export interface ShopSelect<T extends boolean = true> {
   workshopCtaBackgroundImage?: T;
   workshopCtaButtonLabel?: T;
   workshopCtaButtonUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "basic-fermentation-course_select".
+ */
+export interface BasicFermentationCourseSelect<T extends boolean = true> {
+  heroEyebrow?: T;
+  heroTitle?: T;
+  heroSubtitle?: T;
+  heroDescription?: T;
+  heroRating?: T;
+  heroStudentsCount?: T;
+  heroDuration?: T;
+  heroLessonsCount?: T;
+  heroImage?: T;
+  heroProgressHeading?: T;
+  curriculumHeading?: T;
+  modules?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        lessons?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              durationMinutes?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  learnHeading?: T;
+  learnItems?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
