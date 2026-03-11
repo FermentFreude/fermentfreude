@@ -735,6 +735,14 @@ export interface Page {
      */
     onlineCoursesHeroCtaHint?: string | null;
     /**
+     * e.g., "Browse Workshops". Leave empty to hide.
+     */
+    onlineCoursesHeroCta2Label?: string | null;
+    /**
+     * e.g., "#workshops" or "/workshops".
+     */
+    onlineCoursesHeroCta2Url?: string | null;
+    /**
      * Course thumbnail (e.g., jars of fermented food). Shown on the right in hero.
      */
     onlineCoursesHeroImage?: (string | null) | Media;
@@ -805,6 +813,24 @@ export interface Page {
      * Link to product or #workshops.
      */
     onlineCoursesModulesButtonUrl?: string | null;
+    /**
+     * Content for the curriculum page at /courses/basic-fermentation (progress bar, etc.).
+     */
+    onlineCoursesCurriculumProgressHeading?: string | null;
+    /**
+     * e.g., "How It Works".
+     */
+    onlineCoursesHowHeading?: string | null;
+    /**
+     * Steps (title + description).
+     */
+    onlineCoursesHowSteps?:
+      | {
+          title?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
     /**
      * Small label above workshop cards. Leave empty to hide.
      */
@@ -3583,6 +3609,8 @@ export interface PagesSelect<T extends boolean = true> {
         onlineCoursesHeroCtaLabel?: T;
         onlineCoursesHeroCtaUrl?: T;
         onlineCoursesHeroCtaHint?: T;
+        onlineCoursesHeroCta2Label?: T;
+        onlineCoursesHeroCta2Url?: T;
         onlineCoursesHeroImage?: T;
         onlineCoursesHeroImageBread?: T;
         onlineCoursesHeroImageVeg?: T;
@@ -3615,6 +3643,15 @@ export interface PagesSelect<T extends boolean = true> {
             };
         onlineCoursesModulesButtonLabel?: T;
         onlineCoursesModulesButtonUrl?: T;
+        onlineCoursesCurriculumProgressHeading?: T;
+        onlineCoursesHowHeading?: T;
+        onlineCoursesHowSteps?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
         onlineCoursesExploreEyebrow?: T;
         onlineCoursesWorkshopsHeading?: T;
         onlineCoursesWorkshopsDescription?: T;

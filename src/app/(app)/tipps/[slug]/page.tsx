@@ -15,13 +15,17 @@ import { ArticleDetailClient } from './ArticleDetailClient'
 type Params = Promise<{ slug: string }>
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const posts = await payload.find({
-    collection: 'posts',
-    limit: 1000,
-    depth: 0,
-  })
-  return posts.docs.map((p) => ({ slug: p.slug }))
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const posts = await payload.find({
+      collection: 'posts',
+      limit: 1000,
+      depth: 0,
+    })
+    return posts.docs.map((p) => ({ slug: p.slug ?? '' })).filter((p) => p.slug)
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({ params }: { params: Params }) {

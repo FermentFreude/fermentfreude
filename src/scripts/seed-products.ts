@@ -121,7 +121,7 @@ const PRODUCTS: Array<{
     titleDe: 'Grundkurs Fermentation',
     titleEn: 'Basic Fermentation Course',
     slug: 'basic-fermentation-course',
-    priceInUSD: 49,
+    priceInEUR: 49,
     imagePath: 'media/workshops/lakto.png',
     alt: 'Basic Fermentation Course – lacto-fermented vegetables',
     descriptionDe: 'Online-Kurs: Lerne Schritt für Schritt, Gemüse sicher und selbstbewusst zu Hause zu fermentieren. 7 Module, 35 Lektionen.',

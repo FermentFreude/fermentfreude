@@ -7,7 +7,7 @@ import { getLocale } from '@/utilities/getLocale'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { Clock, Play, Star, Users } from 'lucide-react'
+import { Play } from 'lucide-react'
 
 import type { Media as MediaType } from '@/payload-types'
 
@@ -71,7 +71,7 @@ export default async function BasicFermentationCoursePage() {
 
   const heroEyebrow = data?.heroEyebrow ?? (locale === 'de' ? 'Kurs' : 'Course')
   const heroTitle = data?.heroTitle ?? DEFAULT_HERO_TITLE
-  const heroSubtitle = data?.heroSubtitle ?? null
+  const _heroSubtitle = data?.heroSubtitle ?? null
   const heroDescription = data?.heroDescription ?? DEFAULT_HERO_DESCRIPTION
   const heroImage = data?.heroImage
   const progressHeading =

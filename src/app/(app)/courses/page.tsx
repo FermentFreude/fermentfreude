@@ -51,9 +51,9 @@ const DEFAULT_WORKSHOPS_HEADING = 'More Courses on the Way'
 const DEFAULT_ADD_TO_CART = 'Buy Now'
 const DEFAULT_DETAILS = 'More Info'
 const DEFAULT_AVAILABLE = 'Available Immediately'
-const DEFAULT_COMING_SOON_TITLE = 'Course Coming Soon'
-const DEFAULT_COMING_SOON_DESC = 'New courses are in the works. Stay tuned!'
-const DEFAULT_LEARN_MORE = 'Learn More'
+const _DEFAULT_COMING_SOON_TITLE = 'Course Coming Soon'
+const _DEFAULT_COMING_SOON_DESC = 'New courses are in the works. Stay tuned!'
+const _DEFAULT_LEARN_MORE = 'Learn More'
 const DEFAULT_NOTIFY_ME = 'Notify Me When Available'
 
 const DEFAULT_LEARN_CARDS: Array<{ title: string; description: string }> = [
@@ -192,8 +192,8 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
           : null
     const fromMap = id ? mediaMap.get(String(id)) : null
     if (fromMap && typeof fromMap.url === 'string') return fromMap
-    if (typeof v === 'object' && v !== null && 'url' in v && typeof (v as MediaType).url === 'string' && (v as MediaType).url?.length > 0)
-      return v as MediaType
+    const mediaUrl = typeof v === 'object' && v !== null && 'url' in v ? (v as MediaType).url : undefined
+    if (typeof mediaUrl === 'string' && mediaUrl.length > 0) return v as MediaType
     return fromMap ?? null
   }
 
@@ -313,6 +313,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
                   {/* Bottom card (bread) — CMS url or static fallback /courses-hero/bread.webp */}
                   <div className="absolute left-0 bottom-4 z-10 w-4/5 max-w-sm origin-bottom-left -rotate-4 overflow-hidden rounded-3xl bg-white shadow-2xl transition-transform duration-500 ease-out hover:-translate-y-1 hover:rotate-1">
                     <div className="relative aspect-[4/3]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={heroImageBreadResolved?.url ?? '/courses-hero/bread.webp'}
                         alt={typeof heroImageBreadResolved?.alt === 'string' ? heroImageBreadResolved.alt : 'Sourdough bread'}
@@ -325,6 +326,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
                   {/* Top/front card (veg) */}
                   <div className="absolute left-10 top-6 z-30 w-4/5 max-w-sm origin-center rotate-1 overflow-hidden rounded-3xl bg-white shadow-2xl transition-transform duration-500 ease-out hover:-translate-y-1.5 hover:scale-[1.03] lg:left-16 lg:top-10">
                     <div className="relative aspect-[4/3]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={heroImageVegResolved?.url ?? '/courses-hero/veg.webp'}
                         alt={typeof heroImageVegResolved?.alt === 'string' ? heroImageVegResolved.alt : 'Vegetables in jar'}
@@ -337,6 +339,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
                   {/* Upper-right card (kimchi) */}
                   <div className="absolute right-0 top-2 z-20 w-3/4 max-w-sm origin-top-right rotate-5 overflow-hidden rounded-3xl bg-white shadow-2xl transition-transform duration-500 ease-out hover:-translate-y-1 hover:-rotate-1">
                     <div className="relative aspect-[4/3]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={heroImageKimchiResolved?.url ?? '/courses-hero/kimchi.webp'}
                         alt={typeof heroImageKimchiResolved?.alt === 'string' ? heroImageKimchiResolved.alt : 'Kimchi'}

@@ -13,34 +13,39 @@ export const dynamic = 'force-dynamic'
 import { notFound } from 'next/navigation'
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const pages = await payload.find({
-    collection: 'pages',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-    pagination: false,
-    select: {
-      slug: true,
-    },
-  })
-
-  const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
-  const params = pages.docs
-    ?.filter((doc) => {
-      return (
-        doc.slug !== 'home' &&
-        doc.slug !== 'gastronomy' &&
-        doc.slug !== 'fermentation' &&
-        doc.slug !== 'courses' &&
-        !WORKSHOP_SLUGS.includes(doc.slug ?? '')
-      )
-    })
-    .map(({ slug }) => {
-      return { slug }
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const pages = await payload.find({
+      collection: 'pages',
+      draft: false,
+      limit: 1000,
+      overrideAccess: false,
+      pagination: false,
+      select: {
+        slug: true,
+      },
     })
 
-  return params
+    const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
+    const params =
+      pages.docs
+        ?.filter((doc) => {
+          return (
+            doc.slug !== 'home' &&
+            doc.slug !== 'gastronomy' &&
+            doc.slug !== 'fermentation' &&
+            doc.slug !== 'courses' &&
+            !WORKSHOP_SLUGS.includes(doc.slug ?? '')
+          )
+        })
+        .map(({ slug }) => {
+          return { slug }
+        }) ?? []
+    return params
+  } catch {
+    // Build-time DB unreachable (e.g. Vercel build without DB): skip static params; pages are generated on-demand (force-dynamic)
+    return []
+  }
 }
 
 type Args = {

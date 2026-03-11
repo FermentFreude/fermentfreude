@@ -556,6 +556,21 @@ export const Pages: CollectionConfig = {
                   },
                 },
                 {
+                  name: 'onlineCoursesHeroCta2Label',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Second CTA Button Label',
+                  admin: { description: 'e.g., "Browse Workshops". Leave empty to hide.' },
+                },
+                {
+                  name: 'onlineCoursesHeroCta2Url',
+                  type: 'text',
+                  required: false,
+                  label: 'Second CTA Button URL',
+                  admin: { description: 'e.g., "#workshops" or "/workshops".' },
+                },
+                {
                   name: 'onlineCoursesHeroImage',
                   type: 'upload',
                   relationTo: 'media',
@@ -696,6 +711,32 @@ export const Pages: CollectionConfig = {
                   admin: { description: 'Link to product or #workshops.' },
                 },
                 {
+                  name: 'onlineCoursesCurriculumProgressHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Curriculum Progress Heading',
+                  admin: { description: 'Content for the curriculum page at /courses/basic-fermentation (progress bar, etc.).' },
+                },
+                {
+                  name: 'onlineCoursesHowHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'How It Works Heading',
+                  admin: { description: 'e.g., "How It Works".' },
+                },
+                {
+                  name: 'onlineCoursesHowSteps',
+                  type: 'array',
+                  label: 'How It Works Steps',
+                  admin: { description: 'Steps (title + description).' },
+                  fields: [
+                    { name: 'title', type: 'text', required: false, localized: true, label: 'Step Title' },
+                    { name: 'description', type: 'textarea', required: false, localized: true, label: 'Step Description' },
+                  ],
+                },
+                {
                   name: 'onlineCoursesExploreEyebrow',
                   type: 'text',
                   required: false,
@@ -765,7 +806,6 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
-          name: 'voucher',
           name: 'voucher',
           label: 'Voucher Page',
           admin: {
