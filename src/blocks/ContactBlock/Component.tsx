@@ -1,4 +1,4 @@
-import type { ContactBlock as ContactBlockProps } from '@/payload-types'
+import type { ContactBlock as ContactBlockProps, Footer as FooterGlobal } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { getCachedGlobal } from '@/utilities/getGlobals'
@@ -57,7 +57,7 @@ export const ContactBlockComponent: React.FC<
   const block = props as ContactBlockProps
   const data = block
   const locale = await getLocale()
-  const footer = await getCachedGlobal('footer', 1, locale)()
+  const footer = (await getCachedGlobal<FooterGlobal>('footer', 1, locale)()) as FooterGlobal
   const social = footer?.socialMedia
 
   // Fallback to Footer global when block contact details are empty (e.g. embedded on About page)

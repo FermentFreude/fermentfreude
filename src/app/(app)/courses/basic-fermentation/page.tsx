@@ -311,18 +311,20 @@ export default async function BasicFermentationCoursePage() {
       </section>
 
       {/* Course Curriculum */}
-      <ContentSection bg="white" padding="lg" id="curriculum" className="pt-10 md:pt-14">
-        <FadeIn delay={0}>
-          <CurriculumWithProgress
-            modules={curriculumForClient}
-            completedLessonIds={completedLessonIds}
-            courseSlug="basic-fermentation"
-            locale={locale}
-            curriculumHeading={curriculumHeading}
-            isLoggedIn={Boolean(user)}
-          />
-        </FadeIn>
-      </ContentSection>
+      <section id="curriculum">
+        <ContentSection bg="white" padding="lg" className="pt-10 md:pt-14">
+          <FadeIn delay={0}>
+            <CurriculumWithProgress
+              modules={curriculumForClient}
+              completedLessonIds={completedLessonIds}
+              courseSlug="basic-fermentation"
+              locale={locale}
+              curriculumHeading={curriculumHeading}
+              isLoggedIn={Boolean(user)}
+            />
+          </FadeIn>
+        </ContentSection>
+      </section>
 
       {/* What You'll Learn */}
       <ContentSection bg="white" padding="lg" className="pt-0">

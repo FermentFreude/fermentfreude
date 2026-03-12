@@ -583,9 +583,10 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
       )}
 
       {/* 4. More Courses on the Way — workshop cards + coming soon */}
-      <ContentSection bg="white" padding="sm" id="workshops">
-        <FadeIn delay={150}>
-          <div className="mx-auto max-w-3xl text-center">
+      <section id="workshops">
+        <ContentSection bg="white" padding="sm">
+          <FadeIn delay={150}>
+            <div className="mx-auto max-w-3xl text-center">
             {workshopsSectionBadge && (
               <div className="inline-flex items-center gap-2 rounded-full bg-ff-gold-accent/20 px-4 py-1.5 text-sm font-semibold text-ff-gold-accent-dark">
                 <Bell className="size-4 shrink-0" strokeWidth={2} />
@@ -607,7 +608,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
               </p>
             )}
           </div>
-          <div
+            <div
             className={`mt-14 grid auto-rows-fr gap-6 sm:gap-8 ${
               workshopCards.length <= 2 ? 'mx-auto max-w-4xl sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'
             }`}
@@ -760,9 +761,10 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
                 </FadeIn>
               )
             })}
-          </div>
-        </FadeIn>
-      </ContentSection>
+            </div>
+          </FadeIn>
+        </ContentSection>
+      </section>
       {/* 5. Unser Team — courses-specific */}
       {hasCoursesTeam ? (
         <ContentSection bg="white" padding="sm">
