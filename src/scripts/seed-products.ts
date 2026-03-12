@@ -118,6 +118,18 @@ const PRODUCTS: Array<{
       'Traditionally fermented vegetables with lactic acid bacteria. Crispy, tangy and good for gut health.',
   },
   {
+    titleDe: 'Grundkurs Fermentation',
+    titleEn: 'Basic Fermentation Course',
+    slug: 'basic-fermentation-course',
+    priceInEUR: 49,
+    imagePath: 'courses/lakto-fermented-jars.png',
+    alt: 'Basic Fermentation Course – jars of lacto-fermented vegetables',
+    descriptionDe:
+      'Online-Kurs: Lerne Schritt für Schritt, Gemüse sicher und selbstbewusst zu Hause zu fermentieren. 7 Module, 35 Lektionen.',
+    descriptionEn:
+      'Online course: Learn step by step how to ferment vegetables safely and confidently at home. 7 modules, 35 lessons.',
+  },
+  {
     titleDe: 'Tempeh Starter',
     titleEn: 'Tempeh Starter',
     slug: 'tempeh-starter',

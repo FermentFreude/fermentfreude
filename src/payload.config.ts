@@ -17,6 +17,7 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from '@/collections/Categories'
+import { CourseProgress } from '@/collections/CourseProgress'
 import { Media } from '@/collections/Media'
 import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
@@ -69,6 +70,7 @@ export default buildConfig({
     Users,
     Pages,
     Categories,
+    CourseProgress,
     Media,
     Posts,
     Workshops,
