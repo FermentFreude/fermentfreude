@@ -59,17 +59,19 @@ export const TeamCardsBlock: React.FC<Props> = ({ label, heading, members, id })
     <section
       ref={sectionRef}
       id={id ?? undefined}
-      className={`section-padding-md bg-white transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+      className={`block-team-cards pt-0 pb-0 bg-white transition-all duration-700 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+      }`}
     >
       <div className="container mx-auto container-padding">
-        <div className="flex flex-col items-center gap-(--space-content-xl) content-wide mx-auto">
+        <div className="flex flex-col items-center gap-1 content-wide mx-auto">
           <span className="text-eyebrow text-ff-gold-accent font-display font-semibold tracking-[0.2em]">
             {resolvedLabel}
           </span>
-          <h2 className="mt-4 text-section-heading font-display font-bold tracking-tight text-ff-near-black text-center">
+          <h2 className="mt-1 mb-[70px] text-section-heading font-display font-bold tracking-tight text-ff-near-black text-center">
             {resolvedHeading}
           </h2>
-          <div className="grid w-full gap-8 md:gap-12 lg:grid-cols-2 content-wide mx-auto items-stretch">
+          <div className="grid w-full gap-2 md:gap-4 lg:grid-cols-2 content-wide mx-auto items-stretch">
             {resolvedMembers.map((member, idx) => {
               const staticSrc = member.name
                 ? STATIC_TEAM_IMAGES[(member.name as string).toLowerCase()]
@@ -109,7 +111,7 @@ export const TeamCardsBlock: React.FC<Props> = ({ label, heading, members, id })
                       <div className="absolute inset-0 size-full bg-ff-warm-gray" />
                     )}
                   </div>
-                  <div className="flex flex-1 flex-col gap-3 px-6 pb-8 pt-6 min-h-[11rem]">
+                  <div className="flex flex-1 flex-col gap-1 px-4 pb-3 pt-3 min-h-[9rem]">
                     <h3 className="font-display text-subheading font-bold text-ff-near-black">
                       {member.name}
                     </h3>

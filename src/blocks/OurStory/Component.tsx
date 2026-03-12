@@ -55,7 +55,7 @@ export const OurStoryBlock: React.FC<Props> = ({ label, heading, subheading, par
     <section
       ref={sectionRef}
       id={id ?? undefined}
-      className={`section-padding-md bg-white transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+      className={`our-story-block section-padding-md bg-white transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
     >
       <div className="container mx-auto container-padding">
         <div className="mx-auto max-w-5xl">
@@ -63,7 +63,7 @@ export const OurStoryBlock: React.FC<Props> = ({ label, heading, subheading, par
             <span className="text-eyebrow text-ff-gold-accent font-display font-semibold tracking-[0.2em]">
               {resolvedLabel}
             </span>
-            <h2 className="mt-4 text-section-heading font-display font-bold tracking-tight text-ff-near-black">
+            <h2 className="mt-2 text-section-heading font-display font-bold tracking-tight text-ff-near-black">
               {resolvedHeading}
             </h2>
             <blockquote className="mt-8 text-body-lg leading-relaxed italic text-ff-gray-text">

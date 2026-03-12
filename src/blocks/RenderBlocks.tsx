@@ -56,7 +56,7 @@ export const RenderBlocks: React.FC<{
   const blockList = blocks ?? []
   const isAbout = slug === 'about'
   const gapClass = isAbout
-    ? 'mb-[var(--space-content-lg)] last:mb-0'
+    ? 'mb-12 last:mb-0' // increased margin between sections on About
     : 'my-[var(--space-section-md)] first:mt-0 last:mb-0'
 
   const hasBlocks = blockList.length > 0
@@ -76,10 +76,7 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div
-                  className={gapClass}
-                  key={index}
-                >
+                <div className={gapClass} key={index}>
                   <Block {...block} id={blockName ? toKebabCase(blockName) : undefined} />
                 </div>
               )

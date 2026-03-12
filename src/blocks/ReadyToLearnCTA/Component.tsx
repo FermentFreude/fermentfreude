@@ -30,7 +30,7 @@ export const ReadyToLearnCTABlock: React.FC<Props> = ({
   }
 
   return (
-    <section id={id ?? undefined} className="relative section-padding-md bg-ff-charcoal overflow-hidden">
+    <section id={id ?? undefined} className="block-ready-to-learn relative section-padding-md bg-ff-charcoal overflow-hidden">
       <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} aria-hidden />
       <div className="container relative mx-auto container-padding">
         <div className="flex flex-col items-center gap-(--space-content-lg) content-narrow mx-auto text-center">

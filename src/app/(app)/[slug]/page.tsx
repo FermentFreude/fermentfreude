@@ -75,7 +75,7 @@ export default async function Page({ params }: Args) {
   return (
     <article className={isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'}>
       <RenderHero {...hero} />
-      <RenderBlocks blocks={layout ?? []} />
+      <RenderBlocks blocks={layout ?? []} slug={slug} />
     </article>
   )
 }
