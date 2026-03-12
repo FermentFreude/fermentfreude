@@ -1570,6 +1570,545 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
+          name: 'onlineCourses',
+          label: 'Online Courses Page',
+          admin: {
+            description:
+              'Content for the Online Courses overview page (/courses). Only applies when slug is "courses".',
+            condition: (data, siblingData) => {
+              const slug = data?.slug ?? siblingData?.slug
+              return slug === 'courses'
+            },
+          },
+          fields: [
+            {
+              type: 'collapsible',
+              label: '1. Hero',
+              admin: { initCollapsed: false },
+              fields: [
+                {
+                  name: 'onlineCoursesHeroEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Hero Eyebrow',
+                  admin: {
+                    description: 'Small label above the hero title (e.g., "Online Courses"). Leave empty to hide.',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Hero Title',
+                  admin: {
+                    description: 'Main hero heading (e.g., "Master Fermentation from Scratch").',
+                  },
+                },
+                {
+                  name: 'onlineCoursesHeroDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Hero Description',
+                  admin: {
+                    description: 'Intro text under the title describing your online courses.',
+                  },
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'onlineCoursesHeroCtaLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Primary CTA Label',
+                      admin: { description: 'Button text (e.g., "View Workshops").' },
+                    },
+                    {
+                      name: 'onlineCoursesHeroCtaUrl',
+                      type: 'text',
+                      required: false,
+                      label: 'Primary CTA URL',
+                      admin: { description: 'Link for the primary button (e.g., "/workshops").' },
+                    },
+                    {
+                      name: 'onlineCoursesHeroCta2Label',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Secondary CTA Label',
+                      admin: { description: 'Second button text (e.g., "Contact us").' },
+                    },
+                    {
+                      name: 'onlineCoursesHeroCta2Url',
+                      type: 'text',
+                      required: false,
+                      label: 'Secondary CTA URL',
+                      admin: { description: 'Link for the secondary button (e.g., "/contact").' },
+                    },
+                  ],
+                },
+                {
+                  name: 'onlineCoursesHeroCtaHint',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'CTA Hint Text',
+                  admin: {
+                    description: 'Optional small line under the buttons (e.g., "No prior knowledge required").',
+                  },
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'onlineCoursesHeroImage',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Hero Featured Image',
+                      admin: {
+                        description:
+                          'Main hero image (e.g., jars of fermented food). Used as fallback for collage images.',
+                      },
+                    },
+                    {
+                      name: 'onlineCoursesHeroImageBread',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Hero Image – Bread',
+                      admin: {
+                        description:
+                          'Bottom card image in collage. Falls back to Featured Image when empty.',
+                      },
+                    },
+                    {
+                      name: 'onlineCoursesHeroImageVeg',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Hero Image – Vegetables',
+                      admin: {
+                        description:
+                          'Middle card image in collage. Falls back to Featured Image when empty.',
+                      },
+                    },
+                    {
+                      name: 'onlineCoursesHeroImageKimchi',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Hero Image – Kimchi',
+                      admin: {
+                        description:
+                          'Top-right card image in collage. Falls back to Featured Image when empty.',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '2. What You’ll Learn',
+              admin: { initCollapsed: false },
+              fields: [
+                {
+                  name: 'onlineCoursesLearnEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Eyebrow',
+                  admin: { description: 'Small label above the "What you’ll learn" heading.' },
+                },
+                {
+                  name: 'onlineCoursesWhyHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Heading',
+                  admin: { description: 'Heading for the learning outcomes section.' },
+                },
+                {
+                  name: 'onlineCoursesWhyDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Section Description',
+                  admin: { description: 'Optional intro paragraph under the heading.' },
+                },
+                {
+                  name: 'onlineCoursesWhyCards',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 12,
+                  label: 'Learning Cards',
+                  admin: { description: 'Grid of 3–6 cards describing what people will learn.' },
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Card Title',
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Card Description',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '3. Course Modules',
+              admin: { initCollapsed: false },
+              fields: [
+                {
+                  name: 'onlineCoursesModulesEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Modules Eyebrow',
+                  admin: { description: 'Small label above the course modules heading.' },
+                },
+                {
+                  name: 'onlineCoursesModulesHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Modules Heading',
+                  admin: { description: 'Heading for the "Course Modules" section.' },
+                },
+                {
+                  name: 'onlineCoursesModules',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 12,
+                  label: 'Modules',
+                  admin: { description: 'Course modules with short lesson lists.' },
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Module Title',
+                    },
+                    {
+                      name: 'lessons',
+                      type: 'array',
+                      required: false,
+                      minRows: 0,
+                      maxRows: 30,
+                      label: 'Lessons',
+                      fields: [
+                        {
+                          name: 'title',
+                          type: 'text',
+                          required: true,
+                          localized: true,
+                          label: 'Lesson Title',
+                        },
+                        {
+                          name: 'locked',
+                          type: 'checkbox',
+                          required: false,
+                          label: 'Locked (Coming soon / preview only)',
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'onlineCoursesModulesButtonLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Modules CTA Label',
+                      admin: { description: 'Button label under modules (e.g., "See all lessons").' },
+                    },
+                    {
+                      name: 'onlineCoursesModulesButtonUrl',
+                      type: 'text',
+                      required: false,
+                      label: 'Modules CTA URL',
+                      admin: {
+                        description: 'Where the button links (e.g., product page for the basic course).',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '4. How It Works',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'onlineCoursesHowHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'How It Works Heading',
+                },
+                {
+                  name: 'onlineCoursesHowSteps',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 8,
+                  label: 'Steps',
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Step Title',
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Step Description',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '5. More Courses on the Way',
+              admin: { initCollapsed: false },
+              fields: [
+                {
+                  name: 'onlineCoursesExploreEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Eyebrow',
+                  admin: { description: 'Small label above "More courses on the way".' },
+                },
+                {
+                  name: 'onlineCoursesWorkshopsHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Heading',
+                },
+                {
+                  name: 'onlineCoursesWorkshopsDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Section Description',
+                },
+                {
+                  name: 'onlineCoursesComingSoonSectionBadge',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section Badge',
+                  admin: { description: 'Optional badge above heading (e.g., "New in 2026").' },
+                },
+                {
+                  name: 'onlineCoursesWorkshopCards',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 12,
+                  label: 'Workshop Cards',
+                  admin: {
+                    description:
+                      'Cards for upcoming or coming-soon online courses, including notify-me button.',
+                  },
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Card Image',
+                    },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Course Title',
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Short Description',
+                    },
+                    {
+                      name: 'price',
+                      type: 'text',
+                      required: false,
+                      label: 'Display Price (optional)',
+                      admin: { description: 'Optional static price text (e.g., "€99").' },
+                    },
+                    {
+                      name: 'durationText',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Duration Text',
+                      admin: { description: 'e.g., "10 hours of content".' },
+                    },
+                    {
+                      name: 'product',
+                      type: 'relationship',
+                      relationTo: 'products',
+                      required: false,
+                      label: 'Linked Product (optional)',
+                      admin: {
+                        description:
+                          'If set, the card will use this product for add-to-cart behaviour (instead of being "coming soon").',
+                      },
+                    },
+                    {
+                      name: 'detailsUrl',
+                      type: 'text',
+                      required: false,
+                      label: 'Details URL',
+                      admin: { description: 'Link to course detail or product page.' },
+                    },
+                    {
+                      name: 'detailsLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Details Button Label',
+                      admin: { description: 'Text for the "More Info" button.' },
+                    },
+                    {
+                      name: 'instructor',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Instructor Text',
+                      admin: { description: 'e.g., "Instructor: David Heider & Marcel Rauminger".' },
+                    },
+                    {
+                      name: 'levelText',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Level Text',
+                      admin: { description: 'e.g., "Advanced Level".' },
+                    },
+                    {
+                      name: 'comingSoonBadge',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Coming Soon Badge',
+                      admin: { description: 'Small pill at top-right (e.g., "Summer 2026").' },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: '6. Instructor / Team Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'onlineCoursesInstructorEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Instructor Eyebrow',
+                },
+                {
+                  name: 'onlineCoursesTeamHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Team Heading',
+                },
+                {
+                  name: 'onlineCoursesTeamDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Team Description',
+                },
+                {
+                  name: 'onlineCoursesInstructorStats',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Instructor Stats / Credibility Line',
+                  admin: {
+                    description:
+                      'Optional line with stats, e.g., "10+ years of experience, hundreds of workshop participants".',
+                  },
+                },
+                {
+                  name: 'onlineCoursesTeamImages',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 4,
+                  label: 'Team Images',
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Image',
+                      admin: { description: 'Team or instructor photos for the right-hand grid.' },
+                    },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'onlineCoursesTeamButtonLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Team Button Label',
+                      admin: { description: 'Button text (e.g., "Meet the founders").' },
+                    },
+                    {
+                      name: 'onlineCoursesTeamButtonUrl',
+                      type: 'text',
+                      required: false,
+                      label: 'Team Button URL',
+                      admin: { description: 'Link to About / Team page.' },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           name: 'fermentation',
           label: 'Fermentation Page',
           admin: {

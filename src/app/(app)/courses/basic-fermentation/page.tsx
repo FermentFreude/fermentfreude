@@ -11,7 +11,7 @@ import { ContentSection } from '@/components/ui/ContentSection'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import { getLocale } from '@/utilities/getLocale'
 
-import type { Media as MediaType } from '@/payload-types'
+import type { BasicFermentationCourse, Media as MediaType } from '@/payload-types'
 import { BackToTop } from './BackToTop'
 import { CurriculumWithProgress } from './CurriculumWithProgress'
 import { StickyCurriculumBar } from './StickyCurriculumBar'
@@ -71,7 +71,7 @@ function toCompletedIds(
 
 export default async function BasicFermentationCoursePage() {
   const locale = (await getLocale()) as 'de' | 'en'
-  const getGlobal = getCachedGlobal('basic-fermentation-course', 4, locale)
+  const getGlobal = getCachedGlobal<BasicFermentationCourse>('basic-fermentation-course', 4, locale)
   const data = await getGlobal()
 
   const heroEyebrow = data?.heroEyebrow ?? (locale === 'de' ? 'Kurs' : 'Course')

@@ -1355,6 +1355,198 @@ export interface Page {
       | null;
   };
   /**
+   * Content for the Online Courses overview page (/courses). Only applies when slug is "courses".
+   */
+  onlineCourses?: {
+    /**
+     * Small label above the hero title (e.g., "Online Courses"). Leave empty to hide.
+     */
+    onlineCoursesHeroEyebrow?: string | null;
+    /**
+     * Main hero heading (e.g., "Master Fermentation from Scratch").
+     */
+    onlineCoursesHeroTitle?: string | null;
+    /**
+     * Intro text under the title describing your online courses.
+     */
+    onlineCoursesHeroDescription?: string | null;
+    /**
+     * Button text (e.g., "View Workshops").
+     */
+    onlineCoursesHeroCtaLabel?: string | null;
+    /**
+     * Link for the primary button (e.g., "/workshops").
+     */
+    onlineCoursesHeroCtaUrl?: string | null;
+    /**
+     * Second button text (e.g., "Contact us").
+     */
+    onlineCoursesHeroCta2Label?: string | null;
+    /**
+     * Link for the secondary button (e.g., "/contact").
+     */
+    onlineCoursesHeroCta2Url?: string | null;
+    /**
+     * Optional small line under the buttons (e.g., "No prior knowledge required").
+     */
+    onlineCoursesHeroCtaHint?: string | null;
+    /**
+     * Main hero image (e.g., jars of fermented food). Used as fallback for collage images.
+     */
+    onlineCoursesHeroImage?: (string | null) | Media;
+    /**
+     * Bottom card image in collage. Falls back to Featured Image when empty.
+     */
+    onlineCoursesHeroImageBread?: (string | null) | Media;
+    /**
+     * Middle card image in collage. Falls back to Featured Image when empty.
+     */
+    onlineCoursesHeroImageVeg?: (string | null) | Media;
+    /**
+     * Top-right card image in collage. Falls back to Featured Image when empty.
+     */
+    onlineCoursesHeroImageKimchi?: (string | null) | Media;
+    /**
+     * Small label above the "What you’ll learn" heading.
+     */
+    onlineCoursesLearnEyebrow?: string | null;
+    /**
+     * Heading for the learning outcomes section.
+     */
+    onlineCoursesWhyHeading?: string | null;
+    /**
+     * Optional intro paragraph under the heading.
+     */
+    onlineCoursesWhyDescription?: string | null;
+    /**
+     * Grid of 3–6 cards describing what people will learn.
+     */
+    onlineCoursesWhyCards?:
+      | {
+          title: string;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Small label above the course modules heading.
+     */
+    onlineCoursesModulesEyebrow?: string | null;
+    /**
+     * Heading for the "Course Modules" section.
+     */
+    onlineCoursesModulesHeading?: string | null;
+    /**
+     * Course modules with short lesson lists.
+     */
+    onlineCoursesModules?:
+      | {
+          title: string;
+          lessons?:
+            | {
+                title: string;
+                locked?: boolean | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Button label under modules (e.g., "See all lessons").
+     */
+    onlineCoursesModulesButtonLabel?: string | null;
+    /**
+     * Where the button links (e.g., product page for the basic course).
+     */
+    onlineCoursesModulesButtonUrl?: string | null;
+    onlineCoursesHowHeading?: string | null;
+    onlineCoursesHowSteps?:
+      | {
+          title?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Small label above "More courses on the way".
+     */
+    onlineCoursesExploreEyebrow?: string | null;
+    onlineCoursesWorkshopsHeading?: string | null;
+    onlineCoursesWorkshopsDescription?: string | null;
+    /**
+     * Optional badge above heading (e.g., "New in 2026").
+     */
+    onlineCoursesComingSoonSectionBadge?: string | null;
+    /**
+     * Cards for upcoming or coming-soon online courses, including notify-me button.
+     */
+    onlineCoursesWorkshopCards?:
+      | {
+          image?: (string | null) | Media;
+          title: string;
+          description?: string | null;
+          /**
+           * Optional static price text (e.g., "€99").
+           */
+          price?: string | null;
+          /**
+           * e.g., "10 hours of content".
+           */
+          durationText?: string | null;
+          /**
+           * If set, the card will use this product for add-to-cart behaviour (instead of being "coming soon").
+           */
+          product?: (string | null) | Product;
+          /**
+           * Link to course detail or product page.
+           */
+          detailsUrl?: string | null;
+          /**
+           * Text for the "More Info" button.
+           */
+          detailsLabel?: string | null;
+          /**
+           * e.g., "Instructor: David Heider & Marcel Rauminger".
+           */
+          instructor?: string | null;
+          /**
+           * e.g., "Advanced Level".
+           */
+          levelText?: string | null;
+          /**
+           * Small pill at top-right (e.g., "Summer 2026").
+           */
+          comingSoonBadge?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    onlineCoursesInstructorEyebrow?: string | null;
+    onlineCoursesTeamHeading?: string | null;
+    onlineCoursesTeamDescription?: string | null;
+    /**
+     * Optional line with stats, e.g., "10+ years of experience, hundreds of workshop participants".
+     */
+    onlineCoursesInstructorStats?: string | null;
+    onlineCoursesTeamImages?:
+      | {
+          /**
+           * Team or instructor photos for the right-hand grid.
+           */
+          image?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Button text (e.g., "Meet the founders").
+     */
+    onlineCoursesTeamButtonLabel?: string | null;
+    /**
+     * Link to About / Team page.
+     */
+    onlineCoursesTeamButtonUrl?: string | null;
+  };
+  /**
    * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.
    */
   workshopDetail?: {
@@ -3712,6 +3904,89 @@ export interface PagesSelect<T extends boolean = true> {
               buttonLabel?: T;
               id?: T;
             };
+      };
+  onlineCourses?:
+    | T
+    | {
+        onlineCoursesHeroEyebrow?: T;
+        onlineCoursesHeroTitle?: T;
+        onlineCoursesHeroDescription?: T;
+        onlineCoursesHeroCtaLabel?: T;
+        onlineCoursesHeroCtaUrl?: T;
+        onlineCoursesHeroCta2Label?: T;
+        onlineCoursesHeroCta2Url?: T;
+        onlineCoursesHeroCtaHint?: T;
+        onlineCoursesHeroImage?: T;
+        onlineCoursesHeroImageBread?: T;
+        onlineCoursesHeroImageVeg?: T;
+        onlineCoursesHeroImageKimchi?: T;
+        onlineCoursesLearnEyebrow?: T;
+        onlineCoursesWhyHeading?: T;
+        onlineCoursesWhyDescription?: T;
+        onlineCoursesWhyCards?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        onlineCoursesModulesEyebrow?: T;
+        onlineCoursesModulesHeading?: T;
+        onlineCoursesModules?:
+          | T
+          | {
+              title?: T;
+              lessons?:
+                | T
+                | {
+                    title?: T;
+                    locked?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        onlineCoursesModulesButtonLabel?: T;
+        onlineCoursesModulesButtonUrl?: T;
+        onlineCoursesHowHeading?: T;
+        onlineCoursesHowSteps?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        onlineCoursesExploreEyebrow?: T;
+        onlineCoursesWorkshopsHeading?: T;
+        onlineCoursesWorkshopsDescription?: T;
+        onlineCoursesComingSoonSectionBadge?: T;
+        onlineCoursesWorkshopCards?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              description?: T;
+              price?: T;
+              durationText?: T;
+              product?: T;
+              detailsUrl?: T;
+              detailsLabel?: T;
+              instructor?: T;
+              levelText?: T;
+              comingSoonBadge?: T;
+              id?: T;
+            };
+        onlineCoursesInstructorEyebrow?: T;
+        onlineCoursesTeamHeading?: T;
+        onlineCoursesTeamDescription?: T;
+        onlineCoursesInstructorStats?: T;
+        onlineCoursesTeamImages?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
+        onlineCoursesTeamButtonLabel?: T;
+        onlineCoursesTeamButtonUrl?: T;
       };
   workshopDetail?:
     | T

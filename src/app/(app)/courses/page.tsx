@@ -26,6 +26,7 @@ import { unstable_noStore as noStore } from 'next/cache'
 import { getPayload } from 'payload'
 
 import type { Media as MediaType, Page as PageType, Product } from '@/payload-types'
+import { NotifyMeDialog } from '@/components/courses/NotifyMeDialog'
 
 const LEARN_CARD_ICONS: LucideIcon[] = [
   Carrot, // Vegetable Fermentation
@@ -75,10 +76,38 @@ const DEFAULT_MODULES: Array<{ title: string; lessons: Array<{ title: string; lo
   },
 ]
 
-const DEFAULT_WORKSHOP_CARDS: Array<{ title: string; description: string; comingSoonBadge?: string }> = [
-  { title: 'Advanced Miso & Koji', description: 'Deep dive into koji and miso making.', comingSoonBadge: 'Coming Soon' },
-  { title: 'Fermented Hot Sauces', description: 'Craft fermented hot sauces and condiments.', comingSoonBadge: 'Coming Soon' },
-  { title: 'Tempeh & Plant-Based', description: 'Master tempeh and plant-based fermentation.', comingSoonBadge: 'Coming Soon' },
+const DEFAULT_WORKSHOP_CARDS: Array<{
+  title: string
+  description: string
+  comingSoonBadge?: string
+  instructor?: string
+  durationText?: string
+  levelText?: string
+}> = [
+  {
+    title: 'Advanced Miso & Koji Mastery',
+    description: 'Deep dive into Japanese fermentation techniques, koji cultivation, and traditional miso making.',
+    comingSoonBadge: 'Summer 2026',
+    instructor: 'Instructor: David Heider & Marcel Rauminger',
+    durationText: '10 hours of content',
+    levelText: 'Advanced Level',
+  },
+  {
+    title: 'Fermented Hot Sauces & Condiments',
+    description: 'Create unique fermented hot sauces, mustards, and condiments with bold flavors.',
+    comingSoonBadge: 'Fall 2026',
+    instructor: 'Instructor: Maria Rodriguez',
+    durationText: '5 hours of content',
+    levelText: 'Intermediate Level',
+  },
+  {
+    title: 'Tempeh & Plant-Based Fermentation',
+    description: 'Master tempeh production and explore innovative plant-based fermentation techniques.',
+    comingSoonBadge: 'Winter 2027',
+    instructor: 'Instructor: Emma Green',
+    durationText: '6 hours of content',
+    levelText: 'Intermediate Level',
+  },
 ]
 
 function isResolvedProduct(p: unknown): p is Product {
@@ -241,10 +270,14 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
 
   const heroTitle = oc?.onlineCoursesHeroTitle ?? DEFAULT_HERO_TITLE
   const heroDescription = oc?.onlineCoursesHeroDescription ?? DEFAULT_HERO_DESCRIPTION
-  const heroCtaLabel = oc?.onlineCoursesHeroCtaLabel
-  const heroCtaUrl = oc?.onlineCoursesHeroCtaUrl ?? '#workshops'
-  const heroCta2Label = oc?.onlineCoursesHeroCta2Label
-  const heroCta2Url = oc?.onlineCoursesHeroCta2Url ?? '#workshops'
+  const heroCtaLabel =
+    oc?.onlineCoursesHeroCtaLabel ??
+    (locale === 'de' ? 'Zu den Workshops' : 'View Workshops')
+  const heroCtaUrl = oc?.onlineCoursesHeroCtaUrl ?? '/workshops'
+  const heroCta2Label =
+    oc?.onlineCoursesHeroCta2Label ??
+    (locale === 'de' ? 'Kontakt aufnehmen' : 'Contact us')
+  const heroCta2Url = oc?.onlineCoursesHeroCta2Url ?? '/contact'
   const heroImageBreadResolved = resolveMedia(oc?.onlineCoursesHeroImageBread ?? oc?.onlineCoursesHeroImage)
   const heroImageVegResolved = resolveMedia(oc?.onlineCoursesHeroImageVeg ?? oc?.onlineCoursesHeroImage)
   const heroImageKimchiResolved = resolveMedia(oc?.onlineCoursesHeroImageKimchi ?? oc?.onlineCoursesHeroImage)
@@ -255,7 +288,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   const learnCardsRaw = oc?.onlineCoursesWhyCards ?? []
   const learnCards = learnCardsRaw.length > 0 ? learnCardsRaw : DEFAULT_LEARN_CARDS.map((c) => ({ title: c.title, description: c.description }))
 
-  const modulesEyebrow = oc?.onlineCoursesModulesEyebrow ?? 'Course Overview'
+  const modulesEyebrow = oc?.onlineCoursesModulesEyebrow ?? (locale === 'de' ? 'Kursübersicht' : 'Course Overview')
   const modulesHeading = oc?.onlineCoursesModulesHeading ?? DEFAULT_MODULES_HEADING
   const modulesRaw = (oc?.onlineCoursesModules ?? []) as Array<{
     id?: string
@@ -263,15 +296,26 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
     lessons?: Array<{ id?: string; title?: string; locked?: boolean }>
   }>
   const modules = modulesRaw.length > 0 ? modulesRaw : DEFAULT_MODULES.map((m) => ({ title: m.title, lessons: m.lessons }))
-  const modulesButtonLabel = oc?.onlineCoursesModulesButtonLabel
-  const modulesButtonUrl = oc?.onlineCoursesModulesButtonUrl ?? '#workshops'
+  const modulesButtonLabel =
+    oc?.onlineCoursesModulesButtonLabel ?? (locale === 'de' ? 'Alle Lektionen anzeigen' : 'See all lessons')
+  const modulesButtonUrl = oc?.onlineCoursesModulesButtonUrl ?? '/products/basic-fermentation-course'
 
-  const exploreEyebrow = oc?.onlineCoursesExploreEyebrow ?? 'Explore'
+  const exploreEyebrow = oc?.onlineCoursesExploreEyebrow ?? (locale === 'de' ? 'Entdecken' : 'Explore')
   const workshopsHeading = oc?.onlineCoursesWorkshopsHeading ?? DEFAULT_WORKSHOPS_HEADING
   const workshopsDescription = oc?.onlineCoursesWorkshopsDescription
   const workshopsSectionBadge = oc?.onlineCoursesComingSoonSectionBadge
   const workshopCardsRaw = oc?.onlineCoursesWorkshopCards ?? []
-  const workshopCards = workshopCardsRaw.length > 0 ? workshopCardsRaw : DEFAULT_WORKSHOP_CARDS.map((c) => ({ title: c.title, description: c.description, comingSoonBadge: c.comingSoonBadge }))
+  const workshopCards =
+    workshopCardsRaw.length > 0
+      ? workshopCardsRaw
+      : DEFAULT_WORKSHOP_CARDS.map((c) => ({
+          title: c.title,
+          description: c.description,
+          comingSoonBadge: c.comingSoonBadge,
+          instructor: c.instructor,
+          durationText: c.durationText,
+          levelText: c.levelText,
+        }))
   const notifyMeLabel = locale === 'de' ? 'Benachrichtige mich' : DEFAULT_NOTIFY_ME
 
   const instructorEyebrow = oc?.onlineCoursesInstructorEyebrow
@@ -649,12 +693,13 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
                             )}
                           </div>
                           <div className="mt-5 flex-1" aria-hidden />
-                          <Link
-                            href="/contact"
-                            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ff-border-light bg-ff-cream/50 py-3 text-[0.875rem] font-semibold text-ff-gray-text transition-colors hover:bg-ff-cream"
-                          >
-                            {notifyMeLabel}
-                          </Link>
+                          <NotifyMeDialog
+                            courseTitle={c.title ?? 'FermentFreude course'}
+                            courseSlug={c.detailsUrl}
+                            locale={locale}
+                            buttonLabel={notifyMeLabel}
+                            triggerClassName="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ff-border-light bg-ff-cream/50 py-3 text-[0.875rem] font-semibold text-ff-gray-text transition-colors hover:bg-ff-cream"
+                          />
                         </>
                       ) : (
                         <>
