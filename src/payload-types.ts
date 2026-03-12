@@ -75,6 +75,7 @@ export interface Config {
     users: User;
     pages: Page;
     categories: Category;
+    'course-progress': CourseProgress;
     media: Media;
     posts: Post;
     workshops: Workshop;
@@ -113,6 +114,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    'course-progress': CourseProgressSelect<false> | CourseProgressSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     workshops: WorkshopsSelect<false> | WorkshopsSelect<true>;
@@ -142,11 +144,13 @@ export interface Config {
     header: Header;
     footer: Footer;
     shop: Shop;
+    'basic-fermentation-course': BasicFermentationCourse;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     shop: ShopSelect<false> | ShopSelect<true>;
+    'basic-fermentation-course': BasicFermentationCourseSelect<false> | BasicFermentationCourseSelect<true>;
   };
   locale: 'de' | 'en';
   user: User;
@@ -2930,6 +2934,34 @@ export interface Address {
   createdAt: string;
 }
 /**
+ * Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-progress".
+ */
+export interface CourseProgress {
+  id: string;
+  /**
+   * The user this progress belongs to.
+   */
+  user: string | User;
+  /**
+   * e.g. "basic-fermentation". One document per user per course.
+   */
+  courseSlug: string;
+  /**
+   * Payload array item IDs for completed lessons. Updated when user marks a lesson done.
+   */
+  completedLessonIds?:
+    | {
+        lessonId: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Define workshop metadata. Price and capacity apply to all dates and locations.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3135,6 +3167,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'course-progress';
+        value: string | CourseProgress;
       } | null)
     | ({
         relationTo: 'media';
@@ -4281,6 +4317,22 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-progress_select".
+ */
+export interface CourseProgressSelect<T extends boolean = true> {
+  user?: T;
+  courseSlug?: T;
+  completedLessonIds?:
+    | T
+    | {
+        lessonId?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -5116,6 +5168,90 @@ export interface Shop {
   createdAt?: string | null;
 }
 /**
+ * Content for the course curriculum page at /courses/basic-fermentation. Hero, modules with lessons, and What You'll Learn.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "basic-fermentation-course".
+ */
+export interface BasicFermentationCourse {
+  id: string;
+  /**
+   * e.g. "Course"
+   */
+  heroEyebrow?: string | null;
+  /**
+   * e.g. "The Complete Fermentation Course"
+   */
+  heroTitle: string;
+  heroSubtitle?: string | null;
+  heroDescription?: string | null;
+  /**
+   * e.g. "4.8 rating"
+   */
+  heroRating?: string | null;
+  /**
+   * e.g. "12,847+ Happy students"
+   */
+  heroStudentsCount?: string | null;
+  /**
+   * e.g. "5h 15m"
+   */
+  heroDuration?: string | null;
+  /**
+   * e.g. "48 Lessons"
+   */
+  heroLessonsCount?: string | null;
+  /**
+   * Large image (e.g. jars of fermented foods).
+   */
+  heroImage?: (string | null) | Media;
+  /**
+   * Label above the progress bar, e.g. "Your Progress" / "Dein Fortschritt".
+   */
+  heroProgressHeading?: string | null;
+  /**
+   * e.g. "Course Curriculum"
+   */
+  curriculumHeading?: string | null;
+  /**
+   * Course modules with lessons (title, description, duration).
+   */
+  modules?:
+    | {
+        title: string;
+        description?: string | null;
+        lessons?:
+          | {
+              title: string;
+              description?: string | null;
+              /**
+               * e.g. 5
+               */
+              durationMinutes?: number | null;
+              /**
+               * Optional video for this lesson. Upload MP4/WebM here; will be used on the curriculum page.
+               */
+              video?: (string | null) | Media;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. "What You'll Learn"
+   */
+  learnHeading?: string | null;
+  learnItems?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -5265,6 +5401,49 @@ export interface ShopSelect<T extends boolean = true> {
   workshopCtaBackgroundImage?: T;
   workshopCtaButtonLabel?: T;
   workshopCtaButtonUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "basic-fermentation-course_select".
+ */
+export interface BasicFermentationCourseSelect<T extends boolean = true> {
+  heroEyebrow?: T;
+  heroTitle?: T;
+  heroSubtitle?: T;
+  heroDescription?: T;
+  heroRating?: T;
+  heroStudentsCount?: T;
+  heroDuration?: T;
+  heroLessonsCount?: T;
+  heroImage?: T;
+  heroProgressHeading?: T;
+  curriculumHeading?: T;
+  modules?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        lessons?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              durationMinutes?: T;
+              video?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  learnHeading?: T;
+  learnItems?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

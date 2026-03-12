@@ -26,7 +26,6 @@ import { unstable_noStore as noStore } from 'next/cache'
 import { getPayload } from 'payload'
 
 import type { Media as MediaType, Page as PageType, Product } from '@/payload-types'
-import { NotifyMeDialog } from '@/components/courses/NotifyMeDialog'
 
 const LEARN_CARD_ICONS: LucideIcon[] = [
   Carrot, // Vegetable Fermentation
@@ -650,13 +649,12 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
                             )}
                           </div>
                           <div className="mt-5 flex-1" aria-hidden />
-                          <NotifyMeDialog
-                            courseTitle={c.title ?? 'FermentFreude course'}
-                            courseSlug={c.detailsUrl}
-                            locale={locale}
-                            buttonLabel={notifyMeLabel}
-                            triggerClassName="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ff-border-light bg-ff-cream/50 py-3 text-[0.875rem] font-semibold text-ff-gray-text transition-colors hover:bg-ff-cream"
-                          />
+                          <Link
+                            href="/contact"
+                            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ff-border-light bg-ff-cream/50 py-3 text-[0.875rem] font-semibold text-ff-gray-text transition-colors hover:bg-ff-cream"
+                          >
+                            {notifyMeLabel}
+                          </Link>
                         </>
                       ) : (
                         <>

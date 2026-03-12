@@ -29,6 +29,7 @@ import { Workshops } from '@/collections/Workshops'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { Shop } from '@/globals/Shop'
+import { BasicFermentationCourse } from '@/globals/BasicFermentationCourse'
 import { plugins } from './plugins'
 
 const filename = fileURLToPath(import.meta.url)
@@ -117,7 +118,7 @@ export default buildConfig({
     },
   }),
   //email: nodemailerAdapter(),
-  globals: [Header, Footer, Shop],
+  globals: [Header, Footer, Shop, BasicFermentationCourse],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,
