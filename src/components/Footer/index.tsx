@@ -33,7 +33,7 @@ const WORKSHOP_LINKS = [
 
 export async function Footer() {
   const locale = await getLocale()
-  const footer: Footer = await getCachedGlobal('footer', 1, locale)()
+  const footer = (await getCachedGlobal<Footer>('footer', 1, locale)()) as Footer
 
   const newsletterHeading = footer.newsletterHeading || DEFAULTS.newsletterHeading
   const social = footer.socialMedia

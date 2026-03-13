@@ -7,6 +7,7 @@ import { ShopProductSection } from '@/components/shop/ShopProductSection'
 import { ShopWorkshopCta } from '@/components/shop/ShopWorkshopCta'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import { getLocale } from '@/utilities/getLocale'
+import type { Shop } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
@@ -18,7 +19,7 @@ export const metadata = {
 const PRODUCTS_PER_PAGE = 12
 
 /** Fetches shop content from Page (slug=shop) if it exists, else from Shop global. */
-async function getShopData(locale: 'de' | 'en') {
+async function getShopData(locale: 'de' | 'en'): Promise<Shop> {
   const payload = await getPayload({ config: configPromise })
   const shopPage = await payload.find({
     collection: 'pages',
@@ -28,9 +29,9 @@ async function getShopData(locale: 'de' | 'en') {
     limit: 1,
     overrideAccess: false,
   })
-  const page = shopPage.docs?.[0] as { shop?: Record<string, unknown> } | undefined
+  const page = shopPage.docs?.[0] as { shop?: Shop } | undefined
   if (page?.shop) return page.shop
-  const getShop = getCachedGlobal('shop', 2, locale)
+  const getShop = getCachedGlobal<Shop>('shop', 2, locale)
   return await getShop()
 }
 

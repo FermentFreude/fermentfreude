@@ -75,6 +75,7 @@ export interface Config {
     users: User;
     pages: Page;
     categories: Category;
+    'course-progress': CourseProgress;
     media: Media;
     posts: Post;
     workshops: Workshop;
@@ -113,6 +114,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    'course-progress': CourseProgressSelect<false> | CourseProgressSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     workshops: WorkshopsSelect<false> | WorkshopsSelect<true>;
@@ -142,11 +144,13 @@ export interface Config {
     header: Header;
     footer: Footer;
     shop: Shop;
+    'basic-fermentation-course': BasicFermentationCourse;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     shop: ShopSelect<false> | ShopSelect<true>;
+    'basic-fermentation-course': BasicFermentationCourseSelect<false> | BasicFermentationCourseSelect<true>;
   };
   locale: 'de' | 'en';
   user: User;
@@ -1349,6 +1353,198 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+  };
+  /**
+   * Content for the Online Courses overview page (/courses). Only applies when slug is "courses".
+   */
+  onlineCourses?: {
+    /**
+     * Small label above the hero title (e.g., "Online Courses"). Leave empty to hide.
+     */
+    onlineCoursesHeroEyebrow?: string | null;
+    /**
+     * Main hero heading (e.g., "Master Fermentation from Scratch").
+     */
+    onlineCoursesHeroTitle?: string | null;
+    /**
+     * Intro text under the title describing your online courses.
+     */
+    onlineCoursesHeroDescription?: string | null;
+    /**
+     * Button text (e.g., "View Workshops").
+     */
+    onlineCoursesHeroCtaLabel?: string | null;
+    /**
+     * Link for the primary button (e.g., "/workshops").
+     */
+    onlineCoursesHeroCtaUrl?: string | null;
+    /**
+     * Second button text (e.g., "Contact us").
+     */
+    onlineCoursesHeroCta2Label?: string | null;
+    /**
+     * Link for the secondary button (e.g., "/contact").
+     */
+    onlineCoursesHeroCta2Url?: string | null;
+    /**
+     * Optional small line under the buttons (e.g., "No prior knowledge required").
+     */
+    onlineCoursesHeroCtaHint?: string | null;
+    /**
+     * Main hero image (e.g., jars of fermented food). Used as fallback for collage images.
+     */
+    onlineCoursesHeroImage?: (string | null) | Media;
+    /**
+     * Bottom card image in collage. Falls back to Featured Image when empty.
+     */
+    onlineCoursesHeroImageBread?: (string | null) | Media;
+    /**
+     * Middle card image in collage. Falls back to Featured Image when empty.
+     */
+    onlineCoursesHeroImageVeg?: (string | null) | Media;
+    /**
+     * Top-right card image in collage. Falls back to Featured Image when empty.
+     */
+    onlineCoursesHeroImageKimchi?: (string | null) | Media;
+    /**
+     * Small label above the "What you’ll learn" heading.
+     */
+    onlineCoursesLearnEyebrow?: string | null;
+    /**
+     * Heading for the learning outcomes section.
+     */
+    onlineCoursesWhyHeading?: string | null;
+    /**
+     * Optional intro paragraph under the heading.
+     */
+    onlineCoursesWhyDescription?: string | null;
+    /**
+     * Grid of 3–6 cards describing what people will learn.
+     */
+    onlineCoursesWhyCards?:
+      | {
+          title: string;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Small label above the course modules heading.
+     */
+    onlineCoursesModulesEyebrow?: string | null;
+    /**
+     * Heading for the "Course Modules" section.
+     */
+    onlineCoursesModulesHeading?: string | null;
+    /**
+     * Course modules with short lesson lists.
+     */
+    onlineCoursesModules?:
+      | {
+          title: string;
+          lessons?:
+            | {
+                title: string;
+                locked?: boolean | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Button label under modules (e.g., "See all lessons").
+     */
+    onlineCoursesModulesButtonLabel?: string | null;
+    /**
+     * Where the button links (e.g., product page for the basic course).
+     */
+    onlineCoursesModulesButtonUrl?: string | null;
+    onlineCoursesHowHeading?: string | null;
+    onlineCoursesHowSteps?:
+      | {
+          title?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Small label above "More courses on the way".
+     */
+    onlineCoursesExploreEyebrow?: string | null;
+    onlineCoursesWorkshopsHeading?: string | null;
+    onlineCoursesWorkshopsDescription?: string | null;
+    /**
+     * Optional badge above heading (e.g., "New in 2026").
+     */
+    onlineCoursesComingSoonSectionBadge?: string | null;
+    /**
+     * Cards for upcoming or coming-soon online courses, including notify-me button.
+     */
+    onlineCoursesWorkshopCards?:
+      | {
+          image?: (string | null) | Media;
+          title: string;
+          description?: string | null;
+          /**
+           * Optional static price text (e.g., "€99").
+           */
+          price?: string | null;
+          /**
+           * e.g., "10 hours of content".
+           */
+          durationText?: string | null;
+          /**
+           * If set, the card will use this product for add-to-cart behaviour (instead of being "coming soon").
+           */
+          product?: (string | null) | Product;
+          /**
+           * Link to course detail or product page.
+           */
+          detailsUrl?: string | null;
+          /**
+           * Text for the "More Info" button.
+           */
+          detailsLabel?: string | null;
+          /**
+           * e.g., "Instructor: David Heider & Marcel Rauminger".
+           */
+          instructor?: string | null;
+          /**
+           * e.g., "Advanced Level".
+           */
+          levelText?: string | null;
+          /**
+           * Small pill at top-right (e.g., "Summer 2026").
+           */
+          comingSoonBadge?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    onlineCoursesInstructorEyebrow?: string | null;
+    onlineCoursesTeamHeading?: string | null;
+    onlineCoursesTeamDescription?: string | null;
+    /**
+     * Optional line with stats, e.g., "10+ years of experience, hundreds of workshop participants".
+     */
+    onlineCoursesInstructorStats?: string | null;
+    onlineCoursesTeamImages?:
+      | {
+          /**
+           * Team or instructor photos for the right-hand grid.
+           */
+          image?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Button text (e.g., "Meet the founders").
+     */
+    onlineCoursesTeamButtonLabel?: string | null;
+    /**
+     * Link to About / Team page.
+     */
+    onlineCoursesTeamButtonUrl?: string | null;
   };
   /**
    * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.
@@ -2930,6 +3126,34 @@ export interface Address {
   createdAt: string;
 }
 /**
+ * Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-progress".
+ */
+export interface CourseProgress {
+  id: string;
+  /**
+   * The user this progress belongs to.
+   */
+  user: string | User;
+  /**
+   * e.g. "basic-fermentation". One document per user per course.
+   */
+  courseSlug: string;
+  /**
+   * Payload array item IDs for completed lessons. Updated when user marks a lesson done.
+   */
+  completedLessonIds?:
+    | {
+        lessonId: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Define workshop metadata. Price and capacity apply to all dates and locations.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3135,6 +3359,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'course-progress';
+        value: string | CourseProgress;
       } | null)
     | ({
         relationTo: 'media';
@@ -3676,6 +3904,89 @@ export interface PagesSelect<T extends boolean = true> {
               buttonLabel?: T;
               id?: T;
             };
+      };
+  onlineCourses?:
+    | T
+    | {
+        onlineCoursesHeroEyebrow?: T;
+        onlineCoursesHeroTitle?: T;
+        onlineCoursesHeroDescription?: T;
+        onlineCoursesHeroCtaLabel?: T;
+        onlineCoursesHeroCtaUrl?: T;
+        onlineCoursesHeroCta2Label?: T;
+        onlineCoursesHeroCta2Url?: T;
+        onlineCoursesHeroCtaHint?: T;
+        onlineCoursesHeroImage?: T;
+        onlineCoursesHeroImageBread?: T;
+        onlineCoursesHeroImageVeg?: T;
+        onlineCoursesHeroImageKimchi?: T;
+        onlineCoursesLearnEyebrow?: T;
+        onlineCoursesWhyHeading?: T;
+        onlineCoursesWhyDescription?: T;
+        onlineCoursesWhyCards?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        onlineCoursesModulesEyebrow?: T;
+        onlineCoursesModulesHeading?: T;
+        onlineCoursesModules?:
+          | T
+          | {
+              title?: T;
+              lessons?:
+                | T
+                | {
+                    title?: T;
+                    locked?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        onlineCoursesModulesButtonLabel?: T;
+        onlineCoursesModulesButtonUrl?: T;
+        onlineCoursesHowHeading?: T;
+        onlineCoursesHowSteps?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        onlineCoursesExploreEyebrow?: T;
+        onlineCoursesWorkshopsHeading?: T;
+        onlineCoursesWorkshopsDescription?: T;
+        onlineCoursesComingSoonSectionBadge?: T;
+        onlineCoursesWorkshopCards?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              description?: T;
+              price?: T;
+              durationText?: T;
+              product?: T;
+              detailsUrl?: T;
+              detailsLabel?: T;
+              instructor?: T;
+              levelText?: T;
+              comingSoonBadge?: T;
+              id?: T;
+            };
+        onlineCoursesInstructorEyebrow?: T;
+        onlineCoursesTeamHeading?: T;
+        onlineCoursesTeamDescription?: T;
+        onlineCoursesInstructorStats?: T;
+        onlineCoursesTeamImages?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
+        onlineCoursesTeamButtonLabel?: T;
+        onlineCoursesTeamButtonUrl?: T;
       };
   workshopDetail?:
     | T
@@ -4276,6 +4587,22 @@ export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   generateSlug?: T;
   slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "course-progress_select".
+ */
+export interface CourseProgressSelect<T extends boolean = true> {
+  user?: T;
+  courseSlug?: T;
+  completedLessonIds?:
+    | T
+    | {
+        lessonId?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5116,6 +5443,90 @@ export interface Shop {
   createdAt?: string | null;
 }
 /**
+ * Content for the course curriculum page at /courses/basic-fermentation. Hero, modules with lessons, and What You'll Learn.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "basic-fermentation-course".
+ */
+export interface BasicFermentationCourse {
+  id: string;
+  /**
+   * e.g. "Course"
+   */
+  heroEyebrow?: string | null;
+  /**
+   * e.g. "The Complete Fermentation Course"
+   */
+  heroTitle: string;
+  heroSubtitle?: string | null;
+  heroDescription?: string | null;
+  /**
+   * e.g. "4.8 rating"
+   */
+  heroRating?: string | null;
+  /**
+   * e.g. "12,847+ Happy students"
+   */
+  heroStudentsCount?: string | null;
+  /**
+   * e.g. "5h 15m"
+   */
+  heroDuration?: string | null;
+  /**
+   * e.g. "48 Lessons"
+   */
+  heroLessonsCount?: string | null;
+  /**
+   * Large image (e.g. jars of fermented foods).
+   */
+  heroImage?: (string | null) | Media;
+  /**
+   * Label above the progress bar, e.g. "Your Progress" / "Dein Fortschritt".
+   */
+  heroProgressHeading?: string | null;
+  /**
+   * e.g. "Course Curriculum"
+   */
+  curriculumHeading?: string | null;
+  /**
+   * Course modules with lessons (title, description, duration).
+   */
+  modules?:
+    | {
+        title: string;
+        description?: string | null;
+        lessons?:
+          | {
+              title: string;
+              description?: string | null;
+              /**
+               * e.g. 5
+               */
+              durationMinutes?: number | null;
+              /**
+               * Optional video for this lesson. Upload MP4/WebM here; will be used on the curriculum page.
+               */
+              video?: (string | null) | Media;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. "What You'll Learn"
+   */
+  learnHeading?: string | null;
+  learnItems?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -5265,6 +5676,49 @@ export interface ShopSelect<T extends boolean = true> {
   workshopCtaBackgroundImage?: T;
   workshopCtaButtonLabel?: T;
   workshopCtaButtonUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "basic-fermentation-course_select".
+ */
+export interface BasicFermentationCourseSelect<T extends boolean = true> {
+  heroEyebrow?: T;
+  heroTitle?: T;
+  heroSubtitle?: T;
+  heroDescription?: T;
+  heroRating?: T;
+  heroStudentsCount?: T;
+  heroDuration?: T;
+  heroLessonsCount?: T;
+  heroImage?: T;
+  heroProgressHeading?: T;
+  curriculumHeading?: T;
+  modules?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        lessons?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              durationMinutes?: T;
+              video?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  learnHeading?: T;
+  learnItems?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
