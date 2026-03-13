@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
+import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
@@ -63,6 +64,17 @@ export default async function Page({ params }: Args) {
   }
 
   const { hero, layout } = page
+  const nextWorkshopDatesByHref = await getNextWorkshopDatesByHref(locale)
+
+  const enrichedLayout = (layout ?? []).map((block) => {
+    if (block?.blockType !== 'workshopSlider') return block
+
+    return {
+      ...block,
+      upcomingLabel: locale === 'de' ? 'Nächster Termin' : 'Upcoming',
+      upcomingDatesByHref: nextWorkshopDatesByHref,
+    }
+  })
 
   const isFullBleedHero =
     hero.type === 'heroSlider' ||
@@ -75,7 +87,7 @@ export default async function Page({ params }: Args) {
   return (
     <article className={isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'}>
       <RenderHero {...hero} />
-      <RenderBlocks blocks={layout ?? []} slug={slug} />
+      <RenderBlocks blocks={enrichedLayout} slug={slug} />
     </article>
   )
 }

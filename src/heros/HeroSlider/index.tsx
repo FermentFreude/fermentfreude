@@ -69,6 +69,8 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
   const { handleTouchStart, handleTouchEnd } = useSwipe({ goNext, goPrev })
 
   const slide = slides[activeIndex]
+  const isKombucha = slide.slideId === 'kombucha'
+  const isFoundersOrLakto = slide.slideId === 'basics' || slide.slideId === 'lakto'
 
   useEffect(() => {
     setHeaderTheme('dark')
@@ -117,12 +119,12 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         FermentFreude
       </div>
 
-      <div className="sm:hidden relative z-10 flex flex-col h-full pt-24">
+      <div className="sm:hidden relative z-10 flex flex-col h-full pt-20">
         {/* Mobile chevrons */}
         <button
           onClick={goPrev}
           aria-label="Previous slide"
-          className="absolute left-0 top-[21%] -translate-y-1/2 z-30 flex items-center justify-center w-10 h-24 group/arrow cursor-pointer"
+          className="absolute left-0 top-[20%] -translate-y-1/2 z-30 flex items-center justify-center w-10 h-24 group/arrow cursor-pointer"
         >
           <span
             className="absolute rounded-full w-24 h-24 -left-12 group-hover/arrow:w-44 group-hover/arrow:h-44 group-hover/arrow:-left-22 transition-all duration-300 ease-out"
@@ -143,7 +145,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         <button
           onClick={goNext}
           aria-label="Next slide"
-          className="absolute right-0 top-[21%] -translate-y-1/2 z-30 flex items-center justify-center w-10 h-24 group/arrow cursor-pointer"
+          className="absolute right-0 top-[20%] -translate-y-1/2 z-30 flex items-center justify-center w-10 h-24 group/arrow cursor-pointer"
         >
           <span
             className="absolute rounded-full w-24 h-24 -right-12 group-hover/arrow:w-44 group-hover/arrow:h-44 group-hover/arrow:-right-22 transition-all duration-300 ease-out"
@@ -163,7 +165,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         </button>
 
         {/* Images — subtle tilt and overlapping */}
-        <div className="absolute top-[14%] left-1/2 -translate-x-1/2 z-20 flex items-end">
+        <div className="absolute top-[12%] left-1/2 -translate-x-1/2 z-20 flex items-end">
           <div
             className={cn(
               'relative -rotate-6',
@@ -173,7 +175,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           >
             <SlideImage
               media={slide.leftImage}
-              className="object-contain drop-shadow-xl h-[38vh] w-auto"
+              className={cn(
+                'object-contain drop-shadow-xl w-auto',
+                isKombucha ? 'h-[32vh]' : 'h-[38vh]',
+              )}
               priority={activeIndex === 0}
               size="45vw"
             />
@@ -187,17 +192,20 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           >
             <SlideImage
               media={slide.rightImage}
-              className="object-contain drop-shadow-xl h-[38vh] w-auto"
+              className={cn(
+                'object-contain drop-shadow-xl w-auto',
+                isKombucha ? 'h-[32vh]' : 'h-[38vh]',
+              )}
               size="45vw"
             />
           </div>
         </div>
 
         {/* Text content — bottom panel area */}
-        <div className="mt-auto h-[58%] flex flex-col items-center text-center justify-center px-6 pb-14 pt-4">
+        <div className="mt-auto h-[58%] flex flex-col items-center text-center justify-start px-6 pb-12 pt-4">
           <p
             className={cn(
-              'uppercase tracking-[0.2em] text-white text-[9px] font-display font-bold mb-1.5',
+              'uppercase tracking-[0.2em] text-white text-[8px] font-display font-bold mb-0.5',
               isEntering && 'hero-anim-eyebrow',
               isExiting && 'hero-exit-content',
             )}
@@ -206,7 +214,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </p>
           <h1
             className={cn(
-              'font-display font-black text-white text-lg sm:text-xl leading-[1.15] tracking-[-0.02em] whitespace-pre-line mb-2',
+              'font-display font-black text-white text-base sm:text-xl leading-[1.15] tracking-[-0.02em] whitespace-pre-line mb-1',
               isEntering && 'hero-anim-title',
               isExiting && 'hero-exit-content',
             )}
@@ -215,7 +223,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </h1>
           <p
             className={cn(
-              'text-white text-[11px] sm:text-xs leading-relaxed max-w-[18rem] mb-3 font-sans font-medium',
+              'text-white text-[10px] sm:text-xs leading-tight max-w-[18rem] mb-1.5 font-sans font-medium',
               isEntering && 'hero-anim-desc',
               isExiting && 'hero-exit-content',
             )}
@@ -229,21 +237,21 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
               isExiting && 'hero-exit-content',
             )}
           >
-            <div className="w-full h-px bg-white/20 mb-1.5" />
+            <div className="w-full h-px bg-white/20 mb-0.5" />
             <div
               className={cn(
-                'flex items-center justify-center flex-wrap gap-x-3 gap-y-1',
+                'flex items-center justify-center flex-wrap gap-x-2 gap-y-0.5',
                 isEntering && 'hero-anim-attrs',
                 isExiting && 'hero-exit-content',
               )}
             >
               {slide.attributes.map((attr, i) => (
                 <React.Fragment key={attr}>
-                  <span className="text-white text-[9px] font-display font-semibold tracking-wide">
+                  <span className="text-white text-[8px] font-display font-semibold tracking-wide">
                     {attr}
                   </span>
                   {i < slide.attributes.length - 1 && (
-                    <span className="w-px h-3 bg-white/30" aria-hidden="true" />
+                    <span className="w-px h-2 bg-white/30" aria-hidden="true" />
                   )}
                 </React.Fragment>
               ))}
@@ -251,20 +259,20 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </div>
           <div
             className={cn(
-              'mt-4 flex items-center justify-center gap-2',
+              'mt-1.5 flex items-center justify-center gap-2',
               isEntering && 'hero-anim-cta',
               isExiting && 'hero-exit-content',
             )}
           >
             <Link
               href={slide.ctaHref}
-              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-[10px] px-5 py-2 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 transition-all duration-300"
+              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-[9px] px-4 py-1.5 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 transition-all duration-300"
             >
               {slide.ctaLabel}
             </Link>
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-[10px] px-5 py-2 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] transition-all duration-300"
+              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-[9px] px-4 py-1.5 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] transition-all duration-300"
             >
               Shop
             </Link>
@@ -284,7 +292,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
         {/* ── LEFT IMAGE AREA ──────────────────────────────── */}
         <div
-          className="flex-1 flex items-center justify-center relative transition-colors duration-700 overflow-hidden"
+          className="flex-1 flex items-center justify-center relative transition-colors duration-700 sm:overflow-visible lg:overflow-hidden"
           style={{ backgroundColor: slide.bgColor }}
         >
           {/* Background watermark */}
@@ -304,7 +312,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
           <div
             className={cn(
-              'relative z-10 -rotate-3 group/img',
+              'relative z-10 sm:z-30 lg:z-10 -rotate-3 group/img sm:translate-x-[14%] lg:translate-x-0',
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
@@ -316,9 +324,12 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           >
             <SlideImage
               media={slide.leftImage}
-              className="object-contain drop-shadow-2xl h-[40vh] md:h-[50vh] lg:h-[60vh] xl:h-[65vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2"
+              className={cn(
+                'object-contain drop-shadow-2xl h-[36vh] md:h-[44vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2',
+                isFoundersOrLakto ? 'lg:h-[56vh] xl:h-[61vh]' : 'lg:h-[60vh] xl:h-[65vh]',
+              )}
               priority={activeIndex === 0}
-              size="(min-width: 1280px) 28vw, (min-width: 1024px) 25vw, (min-width: 768px) 22vw, 0px"
+              size="(min-width: 1280px) 30vw, (min-width: 1024px) 26vw, (min-width: 768px) 24vw, 45vw"
             />
           </div>
         </div>
@@ -329,7 +340,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           style={{ backgroundColor: slide.panelColor }}
         >
           {/* Content — vertically centered, padded for header + bottom nav */}
-          <div className="flex-1 flex flex-col items-center justify-center text-center px-6 sm:px-8 lg:px-10 xl:px-12 pt-20 pb-16">
+          <div className="relative z-40 flex-1 flex flex-col items-center justify-center text-center px-6 sm:px-8 lg:px-10 xl:px-12 pt-20 pb-16">
             {/* Eyebrow */}
             <p
               className={cn(
@@ -418,7 +429,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
         {/* ── RIGHT IMAGE AREA ──────────────────────────────── */}
         <div
-          className="flex-1 flex items-center justify-center relative transition-colors duration-700 overflow-hidden"
+          className="flex-1 flex items-center justify-center relative transition-colors duration-700 sm:overflow-visible lg:overflow-hidden"
           style={{ backgroundColor: slide.bgColor }}
         >
           {/* Background watermark */}
@@ -438,7 +449,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
           <div
             className={cn(
-              'relative z-10 rotate-3 group/img',
+              'relative z-10 sm:z-30 lg:z-10 rotate-3 group/img sm:-translate-x-[14%] lg:translate-x-0',
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
@@ -450,8 +461,11 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           >
             <SlideImage
               media={slide.rightImage}
-              className="object-contain drop-shadow-2xl h-[40vh] md:h-[50vh] lg:h-[60vh] xl:h-[65vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2"
-              size="(min-width: 1280px) 28vw, (min-width: 1024px) 25vw, (min-width: 768px) 22vw, 0px"
+              className={cn(
+                'object-contain drop-shadow-2xl h-[36vh] md:h-[44vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2',
+                isFoundersOrLakto ? 'lg:h-[56vh] xl:h-[61vh]' : 'lg:h-[60vh] xl:h-[65vh]',
+              )}
+              size="(min-width: 1280px) 30vw, (min-width: 1024px) 26vw, (min-width: 768px) 24vw, 45vw"
             />
           </div>
         </div>

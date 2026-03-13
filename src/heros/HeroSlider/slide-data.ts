@@ -42,6 +42,8 @@ export const DEFAULT_SLIDES: ResolvedSlide[] = [
     bgColor: '#D2DFD7',
     leftImage: null,
     rightImage: null,
+    leftImageScale: 1.08,
+    rightImageScale: 1.08,
   },
   {
     slideId: 'lakto',
@@ -56,8 +58,8 @@ export const DEFAULT_SLIDES: ResolvedSlide[] = [
     bgColor: '#AEB1AE',
     leftImage: null,
     rightImage: null,
-    leftImageScale: 0.85,
-    rightImageScale: 0.85,
+    leftImageScale: 1.05,
+    rightImageScale: 1.05,
   },
   {
     slideId: 'kombucha',
@@ -86,5 +88,7 @@ export const DEFAULT_SLIDES: ResolvedSlide[] = [
     bgColor: '#F6F3F0',
     leftImage: null,
     rightImage: null,
+    leftImageScale: 1.15,
+    rightImageScale: 1.15,
   },
 ]

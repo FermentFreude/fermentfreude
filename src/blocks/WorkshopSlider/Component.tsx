@@ -6,6 +6,7 @@ import type {
   Media as MediaType,
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
+import Link from 'next/link'
 import React, { useEffect, useRef } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -58,7 +59,11 @@ const DEFAULT_WORKSHOPS = [
 
 /* ═══════════════════════════════════════════════════════════════ */
 
-type Props = WorkshopSliderBlockType & { id?: string }
+type Props = WorkshopSliderBlockType & {
+  id?: string
+  upcomingLabel?: string
+  upcomingDatesByHref?: Record<string, string>
+}
 
 function resolveMedia(image: MediaType | string | number | null | undefined): MediaType | null {
   if (!image) return null
@@ -69,26 +74,29 @@ function resolveMedia(image: MediaType | string | number | null | undefined): Me
 /* ═══════════════════════════════════════════════════════════════
  *  COMPONENT
  *
- *  DOM parallax gallery — exact Codrops approach:
- *    · Wheel events drive a lerp'd horizontal scroll value
- *    · Container translateX(-scroll px)
- *    · Each image inner div is 125% wide, left: -12.5% (headroom)
- *    · Per-frame: t = (elementCenter - viewportCenter) / viewportCenter
- *    · Image shifts: translate3d(-t * 10%, 0, 0)  → counter-motion
- *
- *  Layout per workshop  [IMG-A 60vh]  [IMG-B 50vh offset]  [CARD]
- *  Touch drag support included for mobile.
+ *  All breakpoints: Sticky-scroll horizontal gallery
+ *    · Outer div height = 100svh + horizontal overshoot
+ *    · Inner <section> is position:sticky top:0 h-svh overflow:hidden
+ *    · window.scroll progress → translateX on the track
+ *    · Per-frame lerp (EASE 0.08) + per-image parallax
+ *    · Same composition as desktop, scaled responsively
+ *    · On mobile the middle image is hidden and CTA text is removed
  * ═══════════════════════════════════════════════════════════════ */
 
-export const WorkshopSliderBlock: React.FC<Props> = ({ eyebrow, workshops, id }) => {
-  const sectionRef = useRef<HTMLElement>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
+export const WorkshopSliderBlock: React.FC<Props> = ({
+  eyebrow,
+  workshops,
+  id,
+  upcomingLabel,
+  upcomingDatesByHref,
+}) => {
+  /* ── refs ──────────────────────────────────────────────────── */
+  const outerRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  /* Refs to INNER divs of images only (not info-cards) */
   const imgInnerRefs = useRef<(HTMLDivElement | null)[]>([])
   const scrollRef = useRef({ current: 0, target: 0, limit: 0 })
   const rafRef = useRef<number>(0)
-  const touchXRef = useRef(0)
+  const isActiveRef = useRef(false)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
   const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
@@ -106,240 +114,264 @@ export const WorkshopSliderBlock: React.FC<Props> = ({ eyebrow, workshops, id })
           image: resolveMedia(w.image as MediaType | string | number | null | undefined),
           image2: resolveMedia(w.image2 as MediaType | string | number | null | undefined),
           ctaLink: w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || '#',
+          nextDate:
+            upcomingDatesByHref?.[w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''] || undefined,
         }))
       : DEFAULT_WORKSHOPS.map((w) => ({
           ...w,
           audienceTag: w.audienceTag,
           image: null as MediaType | null,
           image2: null as MediaType | null,
+          nextDate: upcomingDatesByHref?.[w.ctaLink],
         }))
 
-  /* ── Codrops DOM scroll + parallax engine ─────────────────── */
+  /* ── Sticky scroll + parallax engine (all breakpoints) ─────── */
   useEffect(() => {
-    const section = sectionRef.current
-    const wrapper = wrapperRef.current
+    const outer = outerRef.current
     const container = containerRef.current
-    if (!section || !wrapper || !container) return
+    if (!outer || !container) return
 
-    const EASE = 0.07
-    const MAX_SHIFT = 10 // % of image width
+    const EASE = 0.08
+    const MAX_SHIFT = 8
 
-    const setLimit = () => {
-      scrollRef.current.limit = Math.max(0, container.scrollWidth - wrapper.clientWidth)
-    }
-    setLimit()
+    /* Recalculate outer height and scroll limit */
+    const updateDimensions = () => {
+      const overshoot = Math.max(0, container.scrollWidth - window.innerWidth)
+      isActiveRef.current = overshoot > 0
+      outer.style.height = `${window.innerHeight + overshoot}px`
+      scrollRef.current.limit = overshoot
 
-    /* Wheel — captured only when gallery has room to scroll */
-    const onWheel = (e: WheelEvent) => {
-      const s = scrollRef.current
-      const next = s.target + e.deltaY
-      /* At the edges let the page scroll through */
-      if ((e.deltaY < 0 && s.target <= 0) || (e.deltaY > 0 && s.target >= s.limit)) {
-        return
+      if (!isActiveRef.current) {
+        scrollRef.current.target = 0
+        scrollRef.current.current = 0
+        container.style.transform = 'translateX(0)'
       }
-      e.preventDefault()
-      s.target = Math.max(0, Math.min(s.limit, next))
     }
 
-    /* Touch drag */
-    const onTouchStart = (e: TouchEvent) => {
-      touchXRef.current = e.touches[0].clientX
-    }
-    const onTouchMove = (e: TouchEvent) => {
-      const delta = touchXRef.current - e.touches[0].clientX
-      touchXRef.current = e.touches[0].clientX
-      scrollRef.current.target = Math.max(
-        0,
-        Math.min(scrollRef.current.limit, scrollRef.current.target + delta),
-      )
+    updateDimensions()
+
+    /* Map vertical page scroll → horizontal translateX target */
+    const onScroll = () => {
+      if (!isActiveRef.current) return
+      const outerTop = outer.getBoundingClientRect().top + window.scrollY
+      const overshoot = scrollRef.current.limit
+      if (overshoot <= 0) return
+      const progress = Math.max(0, Math.min(1, (window.scrollY - outerTop) / overshoot))
+      scrollRef.current.target = progress * overshoot
     }
 
     /* RAF loop — lerp + parallax */
     const tick = () => {
-      const s = scrollRef.current
-      s.current += (s.target - s.current) * EASE
+      if (isActiveRef.current) {
+        const s = scrollRef.current
+        s.current += (s.target - s.current) * EASE
+        container.style.transform = `translateX(-${s.current}px)`
 
-      /* Move gallery */
-      container.style.transform = `translateX(-${s.current}px)`
-
-      /* Parallax each image inner */
-      const vCenter = window.innerWidth * 0.5
-      imgInnerRefs.current.forEach((inner) => {
-        if (!inner) return
-        const outer = inner.parentElement
-        if (!outer) return
-        const rect = outer.getBoundingClientRect()
-        const ec = rect.left + rect.width * 0.5
-        const t = Math.max(-1, Math.min(1, (ec - vCenter) / vCenter))
-        inner.style.transform = `translate3d(${-t * MAX_SHIFT}%, 0, 0)`
-      })
-
+        /* Parallax each image inner */
+        const vCenter = window.innerWidth * 0.5
+        imgInnerRefs.current.forEach((inner) => {
+          if (!inner) return
+          const outerEl = inner.parentElement
+          if (!outerEl) return
+          const rect = outerEl.getBoundingClientRect()
+          const ec = rect.left + rect.width * 0.5
+          const t = Math.max(-1, Math.min(1, (ec - vCenter) / vCenter))
+          inner.style.transform = `translate3d(${-t * MAX_SHIFT}%, 0, 0)`
+        })
+      }
       rafRef.current = requestAnimationFrame(tick)
     }
     rafRef.current = requestAnimationFrame(tick)
 
-    window.addEventListener('resize', setLimit)
-    section.addEventListener('wheel', onWheel, { passive: false })
-    wrapper.addEventListener('touchstart', onTouchStart, { passive: true })
-    wrapper.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', updateDimensions)
 
     return () => {
       cancelAnimationFrame(rafRef.current)
-      window.removeEventListener('resize', setLimit)
-      section.removeEventListener('wheel', onWheel)
-      wrapper.removeEventListener('touchstart', onTouchStart)
-      wrapper.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', updateDimensions)
     }
   }, [])
 
   /* ═══════════════════════════════════════════════════════════ */
-  /*  RENDER                                                    */
+  /*  RENDER                                                     */
   /* ═══════════════════════════════════════════════════════════ */
 
   return (
-    <section
-      ref={sectionRef}
+    /* Outer pin div — JS sets height to 100svh + overshoot on lg+ */
+    <div
+      ref={outerRef}
       id={id ?? undefined}
-      className="relative w-full overflow-hidden bg-white"
-      style={{ height: '100svh' }}
+      className="relative w-full bg-white"
+      style={{ minHeight: '100svh' }}
     >
-      {/* ── Scroll hint ─────────────────────────────────────── */}
-      <p className="absolute bottom-8 right-[5vw] z-10 text-black/20 text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
-        scroll →
-      </p>
+      {/* ── Sticky viewport (always visible while scrolling through outer) */}
+      <section
+        className="sticky top-0 w-full bg-white overflow-hidden"
+        style={{ height: '100svh' }}
+      >
+        {/* ── Scroll hint ─────────────────────────────────────── */}
+        <p className="absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
+          scroll →
+        </p>
 
-      {/* ── Gallery wrapper (overflow:hidden clips the track) ── */}
-      <div ref={wrapperRef} className="absolute inset-0 overflow-hidden select-none">
-        {/* ── Scrolling track ──────────────────────────────── */}
-        <div
-          ref={containerRef}
-          className="flex items-center h-full will-change-transform"
-          style={{ gap: '1.5rem', paddingLeft: '5vw', paddingRight: '5vw' }}
-        >
-          {resolvedWorkshops.map((workshop, wIdx) => {
-            const imgARef = wIdx * 2
-            const imgBRef = wIdx * 2 + 1
-            const secondImg = workshop.image2 ?? workshop.image
+        {/* ══════════════════════════════════════════════════════
+         *  RESPONSIVE TRACK — same composition across sizes
+         * ══════════════════════════════════════════════════════ */}
+        <div className="absolute inset-0 overflow-hidden select-none">
+          <div
+            ref={containerRef}
+            className="flex items-center h-full will-change-transform"
+            style={{ gap: 'clamp(0.75rem, 2vw, 1.5rem)', paddingLeft: '5vw', paddingRight: '5vw' }}
+          >
+            {resolvedWorkshops.map((workshop, wIdx) => {
+              const imgAIdx = wIdx * 2
+              const imgBIdx = wIdx * 2 + 1
+              const secondImg = workshop.image2 ?? workshop.image
 
-            return (
-              <React.Fragment key={wIdx}>
-                {/* ── LEFT COLUMN — title on top, small image below ── */}
-                <div
-                  className="shrink-0 flex flex-col self-center"
-                  style={{ height: '78vh', width: 'auto' }}
-                >
-                  {/* Eyebrow + title + subtitle */}
-                  <div className="shrink-0 pb-5 w-85">
-                    <FadeIn>
-                      <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
-                        {resolvedEyebrow}
-                      </p>
-                      <h2 className="text-ff-black mb-4">{workshop.title}</h2>
-                      <p className="text-body-sm text-ff-olive">
-                        {(() => {
-                          const match = workshop.description.match(/^(.+?[.!?])\s*(.*)$/s)
-                          return match?.[1] ?? workshop.description
-                        })()}
-                      </p>
-                    </FadeIn>
+              return (
+                <React.Fragment key={wIdx}>
+                  {/* ── LEFT COLUMN — title on top, small image below ── */}
+                  <div
+                    className="shrink-0 flex flex-col self-center w-[72vw] sm:w-[20rem] md:w-88 lg:w-85"
+                    style={{ height: 'clamp(62svh, 74svh, 78vh)' }}
+                  >
+                    <div className="shrink-0 pb-4 md:pb-5 w-full">
+                      <FadeIn>
+                        <p
+                          className="text-eyebrow font-bold mb-2 md:mb-3 text-[10px] md:text-inherit tracking-[0.18em] uppercase"
+                          style={{ color: 'var(--ff-gold)' }}
+                        >
+                          {resolvedEyebrow}
+                        </p>
+                        <h2 className="text-ff-black mb-3 md:mb-4 text-[1.9rem] sm:text-[2.2rem] md:text-[2.5rem] lg:text-inherit leading-[0.95]">
+                          {workshop.title}
+                        </h2>
+                        <p className="text-body-sm text-ff-olive text-[13px] sm:text-sm md:text-[15px] leading-relaxed">
+                          {(() => {
+                            const match = workshop.description.match(/^(.+?[.!?])\s*(.*)$/s)
+                            return match?.[1] ?? workshop.description
+                          })()}
+                        </p>
+                      </FadeIn>
+                    </div>
+
+                    {/* Small image — fills remaining height */}
+                    <div
+                      className="relative overflow-hidden rounded-2xl"
+                      style={{ flex: 1, aspectRatio: '4 / 3', minHeight: 0 }}
+                    >
+                      <div
+                        ref={(el) => {
+                          imgInnerRefs.current[imgBIdx] = el
+                        }}
+                        className="absolute top-0 h-full will-change-transform"
+                        style={{ left: '-12.5%', width: '125%' }}
+                      >
+                        {secondImg ? (
+                          <Media
+                            resource={secondImg}
+                            fill
+                            imgClassName="object-cover"
+                            className="absolute inset-0"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-[#e0e0e0]" />
+                        )}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Small image — fills remaining height */}
+                  {/* ── BIG IMAGE ───────────────────────────────────── */}
                   <div
-                    className="relative overflow-hidden"
-                    style={{ flex: 1, aspectRatio: '4 / 3', minHeight: 0 }}
+                    className="relative shrink-0 overflow-hidden self-center hidden sm:block rounded-2xl"
+                    style={{ aspectRatio: '3 / 4', height: 'clamp(52svh, 62svh, 68vh)' }}
                   >
                     <div
                       ref={(el) => {
-                        imgInnerRefs.current[imgBRef] = el
+                        imgInnerRefs.current[imgAIdx] = el
                       }}
                       className="absolute top-0 h-full will-change-transform"
                       style={{ left: '-12.5%', width: '125%' }}
                     >
-                      {secondImg ? (
+                      {workshop.image ? (
                         <Media
-                          resource={secondImg}
+                          resource={workshop.image}
                           fill
                           imgClassName="object-cover"
                           className="absolute inset-0"
                         />
                       ) : (
-                        <div className="w-full h-full bg-[#e0e0e0]" />
+                        <div className="w-full h-full bg-[#141414]" />
                       )}
                     </div>
                   </div>
-                </div>
 
-                {/* ── BIG IMAGE — right ──────────────────────────────── */}
-                <div
-                  className="relative shrink-0 overflow-hidden self-center"
-                  style={{ aspectRatio: '3 / 4', height: '68vh' }}
-                >
+                  {/* ── DETAILS CARD ────────────────────────────────── */}
                   <div
-                    ref={(el) => {
-                      imgInnerRefs.current[imgARef] = el
+                    className="shrink-0 relative flex flex-col justify-between self-center rounded-2xl"
+                    style={{
+                      width: 'clamp(220px, 24vw, 280px)',
+                      padding: 'clamp(1.25rem, 2.2vw, 2rem)',
+                      background: 'rgba(255,255,255,0.5)',
+                      backdropFilter: 'blur(18px)',
+                      WebkitBackdropFilter: 'blur(18px)',
+                      border: '1px solid rgba(255,255,255,0.8)',
+                      boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
                     }}
-                    className="absolute top-0 h-full will-change-transform"
-                    style={{ left: '-12.5%', width: '125%' }}
                   >
-                    {workshop.image ? (
-                      <Media
-                        resource={workshop.image}
-                        fill
-                        imgClassName="object-cover"
-                        className="absolute inset-0"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-[#141414]" />
-                    )}
-                  </div>
-                </div>
+                    {workshop.nextDate ? (
+                      <div className="mb-4 pb-3 border-b border-black/10">
+                        <p className="text-[10px] font-display font-bold tracking-widest uppercase text-black/45 mb-1">
+                          {upcomingLabel || 'Upcoming'}
+                        </p>
+                        <p className="text-sm md:text-base font-display font-bold text-black/85">
+                          {workshop.nextDate}
+                        </p>
+                      </div>
+                    ) : null}
 
-                {/* ── DETAILS CARD — glassmorphism, features only ── */}
-                <div
-                  className="shrink-0 relative flex flex-col justify-between self-center"
-                  style={{
-                    width: '280px',
-                    padding: '2rem',
-                    background: 'rgba(255,255,255,0.5)',
-                    backdropFilter: 'blur(18px)',
-                    WebkitBackdropFilter: 'blur(18px)',
-                    border: '1px solid rgba(255,255,255,0.8)',
-                    boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
-                  }}
-                >
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {workshop.features.map((feature, fIdx) => (
-                      <p
-                        key={fIdx}
-                        className="text-black/70 font-display font-bold text-xs leading-relaxed flex gap-3"
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      {workshop.features.map((feature, fIdx) => (
+                        <p
+                          key={fIdx}
+                          className="text-black/70 font-display font-bold text-[11px] md:text-xs leading-relaxed flex gap-3"
+                        >
+                          <span className="tabular-nums shrink-0 font-bold">
+                            {String(fIdx + 1).padStart(2, '0')}
+                          </span>
+                          {(feature as { text?: string }).text}
+                        </p>
+                      ))}
+                    </div>
+
+                    {/* ── CTA link — text + circle "+" ─────────────── */}
+                    <div className="mt-6 pt-4 border-t border-black/10">
+                      <Link
+                        href={workshop.ctaLink}
+                        className="flex items-center justify-end sm:justify-between group/cta"
+                        aria-label={`Workshop Seite: ${workshop.title}`}
                       >
-                        <span className="tabular-nums shrink-0 font-bold">
-                          {String(fIdx + 1).padStart(2, '0')}
+                        <span className="hidden sm:block text-[11px] font-display font-bold tracking-widest uppercase text-black/40 group-hover/cta:text-black transition-colors duration-200">
+                          Entdecken
                         </span>
-                        {(feature as { text?: string }).text}
-                      </p>
-                    ))}
+                        <span className="size-9 rounded-full border border-black/25 flex items-center justify-center text-base leading-none text-black/35 transition-all duration-200 group-hover/cta:border-black group-hover/cta:text-black group-hover/cta:scale-110">
+                          +
+                        </span>
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex justify-end mt-6">
-                    <button
-                      aria-label={`View details for ${workshop.title}`}
-                      className="size-10 rounded-full border border-black/30 flex items-center justify-center text-black/40 text-lg leading-none transition-all duration-200 hover:border-black hover:text-black hover:scale-110 bg-transparent cursor-pointer"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
 
-                {/* ── Gap between workshop groups ─────────── */}
-                {wIdx < resolvedWorkshops.length - 1 && (
-                  <div className="shrink-0" style={{ width: '4vw' }} />
-                )}
-              </React.Fragment>
-            )
-          })}
+                  {/* ── Gap between workshop groups ─────────────────── */}
+                  {wIdx < resolvedWorkshops.length - 1 && (
+                    <div className="shrink-0" style={{ width: 'clamp(1rem, 4vw, 4vw)' }} />
+                  )}
+                </React.Fragment>
+              )
+            })}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   )
 }

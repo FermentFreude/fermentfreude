@@ -21,7 +21,7 @@ export function NavArrow({
       className={cn(
         'hidden sm:flex absolute top-1/2 -translate-y-1/2 z-40',
         'items-center justify-center',
-        'w-10 h-24',
+        'w-10 md:w-12 h-24 md:h-32 lg:h-40',
         'group/arrow cursor-pointer',
         isLeft ? 'left-0' : 'right-0',
       )}
@@ -30,8 +30,10 @@ export function NavArrow({
       <span
         className={cn(
           'absolute rounded-full transition-all duration-300 ease-out',
-          'w-24 h-24 group-hover/arrow:w-44 group-hover/arrow:h-44',
-          isLeft ? '-left-12 group-hover/arrow:-left-22' : '-right-12 group-hover/arrow:-right-22',
+          'w-24 md:w-32 h-24 md:h-32 group-hover/arrow:w-44 md:group-hover/arrow:w-52 group-hover/arrow:h-44 md:group-hover/arrow:h-52',
+          isLeft
+            ? '-left-12 md:-left-16 group-hover/arrow:-left-22 md:group-hover/arrow:-left-26'
+            : '-right-12 md:-right-16 group-hover/arrow:-right-22 md:group-hover/arrow:-right-26',
         )}
         style={{ backgroundColor: panelColor }}
         aria-hidden="true"
@@ -39,7 +41,7 @@ export function NavArrow({
       {/* Chevron — always on screen, nudges inward on hover */}
       <svg
         className={cn(
-          'relative w-5 h-5 transition-transform duration-300',
+          'relative w-5 md:w-6 h-5 md:h-6 transition-transform duration-300',
           'text-white',
           isLeft ? 'ml-1 group-hover/arrow:translate-x-1' : 'mr-1 group-hover/arrow:-translate-x-1',
         )}
