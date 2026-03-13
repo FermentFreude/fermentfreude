@@ -527,7 +527,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
       {/* Guide section — A complete guide to fermentation */}
       <section className="bg-white pt-4 pb-6 md:pt-6 md:pb-8">
         <FadeIn delay={0}>
-          <div className="content-medium mx-auto px-4 sm:px-6">
+          <div className="content-medium mx-auto px-4 sm:px-6 text-center">
             <h2
               className="font-display text-section-heading font-bold"
               style={{ color: '#555954' }}
@@ -536,7 +536,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
             </h2>
             {guideBody && (
               <p
-                className="mt-4 text-body leading-relaxed sm:mt-6 sm:text-body-lg"
+                className="mt-4 text-body leading-relaxed sm:mt-6 sm:text-body-lg mx-auto max-w-2xl"
                 style={{ color: '#555954' }}
               >
                 {guideBody}

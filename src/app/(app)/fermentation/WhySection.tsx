@@ -99,7 +99,7 @@ export function WhySection({ title, items, image }: WhySectionProps) {
                 <div className="relative mb-5 flex size-16 items-center justify-center rounded-2xl bg-white/70 text-[#555954] shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:bg-white [&>svg]:animate-[gentle-float_3s_ease-in-out_infinite]">
                   <Icon className="size-8" strokeWidth={1.5} />
                 </div>
-                <h3 className="font-display text-title font-bold leading-tight text-ff-black relative">
+                <h3 className="font-display text-body-lg font-semibold leading-snug text-ff-black relative">
                   {item.title}
                 </h3>
                 <p className="mt-4 text-body leading-relaxed text-ff-black/85 sm:text-body-lg relative flex-1 max-w-sm">
