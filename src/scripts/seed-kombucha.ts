@@ -337,40 +337,38 @@ async function seedKombucha() {
       depth: 0,
     })
 
-    const deExperienceCardsWithIds = await Promise.all(
-      (deDoc.workshopDetail?.experienceCards ?? []).map(async (card, _idx) => {
-        // Map filename to actual media IDs (needs to exist in Media collection)
-        let mediaId = null
-        if (card.image === 'FF-Vorschau-90') {
-          // Find media by filename
-          const mediaResult = await payload.find({
-            collection: 'media',
-            where: { filename: { equals: 'FF-Vorschau-90.webp' } },
-            limit: 1,
-          })
-          mediaId = mediaResult.docs[0]?.id ?? null
-        } else if (card.image === 'FF-Vorschau-62') {
-          const mediaResult = await payload.find({
-            collection: 'media',
-            where: { filename: { equals: 'FF-Vorschau-62.webp' } },
-            limit: 1,
-          })
-          mediaId = mediaResult.docs[0]?.id ?? null
-        } else if (card.image === '_H8A5827') {
-          const mediaResult = await payload.find({
-            collection: 'media',
-            where: { filename: { contains: '_H8A5827' } },
-            limit: 1,
-          })
-          mediaId = mediaResult.docs[0]?.id ?? null
-        }
+    const deExperienceCardsWithIds: Array<Record<string, unknown>> = []
+    for (const card of deDoc.workshopDetail?.experienceCards ?? []) {
+      let mediaId = null
 
-        return {
-          ...card,
-          image: mediaId || null,
-        }
-      }),
-    )
+      if (card.image === 'FF-Vorschau-90') {
+        const mediaResult = await payload.find({
+          collection: 'media',
+          where: { filename: { equals: 'FF-Vorschau-90.webp' } },
+          limit: 1,
+        })
+        mediaId = mediaResult.docs[0]?.id ?? null
+      } else if (card.image === 'FF-Vorschau-62') {
+        const mediaResult = await payload.find({
+          collection: 'media',
+          where: { filename: { equals: 'FF-Vorschau-62.webp' } },
+          limit: 1,
+        })
+        mediaId = mediaResult.docs[0]?.id ?? null
+      } else if (card.image === '_H8A5827') {
+        const mediaResult = await payload.find({
+          collection: 'media',
+          where: { filename: { contains: '_H8A5827' } },
+          limit: 1,
+        })
+        mediaId = mediaResult.docs[0]?.id ?? null
+      }
+
+      deExperienceCardsWithIds.push({
+        ...card,
+        image: mediaId || null,
+      })
+    }
 
     // 3. SAVE DE WITH MEDIA IDS ─────────────────────────
     const deFullData = { ...deSaveData, experienceCards: deExperienceCardsWithIds }

@@ -2763,6 +2763,10 @@ export interface VoucherCtaBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Background image shown behind heading and button below the gallery. Uses a neutral fallback color if not set.
+   */
+  backgroundImage?: (string | null) | Media;
   id?: string | null;
   blockName?: string | null;
   blockType: 'voucherCta';
@@ -2810,59 +2814,9 @@ export interface WorkshopSliderBlock {
      */
     image?: (string | null) | Media;
     /**
-     * Featured image for "Our Workshop" section (e.g. plated dish). Also used as gallery thumbnail.
+     * Optional second photo shown alongside the first. Falls back to the primary image when not set.
      */
     image2?: (string | null) | Media;
-    image3?: (string | null) | Media;
-    image4?: (string | null) | Media;
-    image5?: (string | null) | Media;
-    image6?: (string | null) | Media;
-    image7?: (string | null) | Media;
-    image8?: (string | null) | Media;
-    image9?: (string | null) | Media;
-    /**
-     * e.g. "Ab 199,00 € / Person"
-     */
-    price?: string | null;
-    /**
-     * e.g. "3 Stunden"
-     */
-    duration?: string | null;
-    /**
-     * e.g. "Online" or "Vor Ort"
-     */
-    format?: string | null;
-    /**
-     * e.g. "Berlin-Neukölln"
-     */
-    location?: string | null;
-    /**
-     * e.g. "6-12 Personen"
-     */
-    groupSize?: string | null;
-    /**
-     * e.g. "Termine folgen" or specific dates
-     */
-    dates?: string | null;
-    /**
-     * Expandable cards: "Was du lernst", "Was du bekommst", "Für wen ist der Kurs", etc.
-     */
-    topics?:
-      | {
-          title: string;
-          description?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Bullet list shown in workshop module
-     */
-    learnList?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
     /**
      * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
      */
@@ -4501,6 +4455,7 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
         image?: T;
         id?: T;
       };
+  backgroundImage?: T;
   id?: T;
   blockName?: T;
 }
@@ -4525,32 +4480,6 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
             };
         image?: T;
         image2?: T;
-        image3?: T;
-        image4?: T;
-        image5?: T;
-        image6?: T;
-        image7?: T;
-        image8?: T;
-        image9?: T;
-        price?: T;
-        duration?: T;
-        format?: T;
-        location?: T;
-        groupSize?: T;
-        dates?: T;
-        topics?:
-          | T
-          | {
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-        learnList?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
         ctaLink?: T;
         detailsButtonLabel?: T;
         id?: T;

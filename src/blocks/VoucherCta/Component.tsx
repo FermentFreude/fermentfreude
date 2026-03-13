@@ -1,5 +1,6 @@
 'use client'
 
+import { Media } from '@/components/Media'
 import type { Media as MediaType, VoucherCtaBlock as VoucherCtaBlockType } from '@/payload-types'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
@@ -18,7 +19,10 @@ const DEFAULTS = {
   buttonLink: '/voucher',
 }
 
-type Props = VoucherCtaBlockType & { id?: string }
+type Props = VoucherCtaBlockType & {
+  id?: string
+  backgroundImage?: string | MediaType | null
+}
 
 export const VoucherCtaBlock: React.FC<Props> = ({
   heading,
@@ -26,6 +30,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   buttonLabel,
   buttonLink,
   galleryImages,
+  backgroundImage,
   id,
 }) => {
   const resolvedHeading = heading ?? DEFAULTS.heading
@@ -122,7 +127,6 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   )
 
   const images = galleryImages ?? []
-  const bgImgUrl = '/voucher-bg.jpg'
 
   return (
     <section ref={sectionRef} id={id ?? undefined} className="w-full">
@@ -131,16 +135,15 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         <div ref={galleryRef} className="bento-gallery bento-gallery--bento">
           {images.slice(0, 8).map((item, i) => {
             const img = typeof item.image === 'object' ? (item.image as MediaType) : null
-            const imgUrl = img?.url
-              ? img.url.startsWith('http') || img.url.startsWith('/')
-                ? img.url
-                : `${process.env.NEXT_PUBLIC_SERVER_URL || ''}${img.url}`
-              : null
             return (
               <div key={item.id ?? i} className="bento-gallery__item" data-flip-id={`bento-${i}`}>
-                {imgUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={imgUrl} alt={img?.alt || ''} />
+                {item.image ? (
+                  <Media
+                    resource={item.image}
+                    fill
+                    imgClassName="object-cover"
+                    className="absolute inset-0"
+                  />
                 ) : (
                   <div className="bento-gallery__placeholder" />
                 )}
@@ -157,13 +160,16 @@ export const VoucherCtaBlock: React.FC<Props> = ({
       >
         {/* Background image with dark overlay */}
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={bgImgUrl}
-            alt="Friends clinking kombucha glasses"
-            className="absolute inset-0 h-full w-full object-cover blur-[2px] scale-105"
-            aria-hidden="true"
-          />
+          {backgroundImage ? (
+            <Media
+              resource={backgroundImage}
+              fill
+              imgClassName="object-cover blur-[2px] scale-105"
+              className="absolute inset-0"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-[#2A2520]" aria-hidden="true" />
+          )}
           <div className="absolute inset-0 bg-[#1A1510]/60" />
         </>
 

@@ -68,5 +68,16 @@ export const VoucherCta: Block = {
         },
       ],
     },
+    {
+      name: 'backgroundImage',
+      type: 'upload',
+      relationTo: 'media',
+      required: false,
+      label: 'Background Image (CTA section)',
+      admin: {
+        description:
+          'Background image shown behind heading and button below the gallery. Uses a neutral fallback color if not set.',
+      },
+    },
   ],
 }

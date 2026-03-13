@@ -23,21 +23,19 @@ const ctx = { skipRevalidate: true, skipAutoTranslate: true }
 async function seedShop() {
   const payload = await getPayload({ config })
 
-  // Clean up stale shop media (avoid duplicates on re-run)
-  for (const alt of [
-    'Shop hero',
-    'Workshop CTA – fermentation',
-    'Featured – Kombucha',
-    'Featured – Lakto',
-    'Featured – Tempeh',
-  ]) {
-    await payload
-      .delete({
-        collection: 'media',
-        where: { alt: { contains: alt } },
-        context: { skipAutoTranslate: true },
-      })
-      .catch(() => {})
+  // ── Non-destructive check ──────────────────────────────────────────────────
+  // Skip if shop already exists (to protect admin images)
+  const forceRecreate = process.argv.includes('--force')
+  const existingShop = await payload.findGlobal({
+    slug: 'shop',
+    locale: 'de',
+    depth: 0,
+  })
+
+  if (existingShop && !forceRecreate) {
+    payload.logger.info('⏭️  Shop global already exists. Skipping to protect admin images.')
+    payload.logger.info('   To overwrite, run: pnpm seed shop --force')
+    process.exit(0)
   }
 
   const heroDir = path.resolve(process.cwd(), 'seed-assets/media/hero')

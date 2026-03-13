@@ -80,9 +80,7 @@ async function seedHome() {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 1. Upload images
-  //    Sequential writes — MongoDB Atlas M0 has no transactions.
-  //    Delete stale copies first to avoid duplicates.
+  // 1. Extract existing image IDs (preserve admin-uploaded images!)
   // ══════════════════════════════════════════════════════════════════════════
 
   const workshopsDir = path.resolve(process.cwd(), 'seed-assets/media/workshops')
@@ -91,115 +89,355 @@ async function seedHome() {
   const galleryDir = path.resolve(process.cwd(), 'seed-assets/images/gallery')
   const iconsDir = path.resolve(process.cwd(), 'seed-assets/images/icons')
 
-  // Clean up stale media (prevents duplicates on --force re-runs)
-  for (const contains of [
-    'workshop',
-    'hero',
-    'slide-',
-    'Gallery',
-    'icon-feature',
-    'Banner',
-    'David Heider',
-    'Marcel Rauminger',
-  ]) {
-    await payload
-      .delete({
-        collection: 'media',
-        where: { alt: { contains } },
-        context: { skipAutoTranslate: true },
-      })
-      .catch(() => {})
+  // Extract existing image IDs from current page if it exists
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const existingImageIds: Record<string, any> = {}
+
+  if (existingCheck.docs.length > 0 && forceRecreate) {
+    payload.logger.info('Extracting existing image IDs to preserve admin-uploaded images...')
+    const existingPage = (await payload.findByID({
+      collection: 'pages',
+      id: existingCheck.docs[0].id,
+      locale: 'de',
+      depth: 2,
+    })) as Page
+
+    // Extract hero slide images
+    if (existingPage.hero && typeof existingPage.hero === 'object' && 'heroSlides' in existingPage.hero) {
+      const heroSlides = existingPage.hero.heroSlides as unknown[]
+      if (Array.isArray(heroSlides)) {
+        for (const slide of heroSlides) {
+          if (slide && typeof slide === 'object' && 'slideId' in slide) {
+            const slideObj = slide as { slideId?: string; leftImage?: unknown; rightImage?: unknown }
+            const slideId = slideObj.slideId
+            if (slideObj.leftImage && typeof slideObj.leftImage === 'object' && 'id' in slideObj.leftImage) {
+              existingImageIds[`${slideId}SlideLeft`] = String((slideObj.leftImage as { id: string }).id)
+            }
+            if (slideObj.rightImage && typeof slideObj.rightImage === 'object' && 'id' in slideObj.rightImage) {
+              existingImageIds[`${slideId}SlideRight`] = String((slideObj.rightImage as { id: string }).id)
+            }
+          }
+        }
+      }
+    }
+
+    // Extract workshop slider images
+    const layout = Array.isArray(existingPage.layout) ? existingPage.layout : []
+    const workshopBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'workshopSlider')
+    if (workshopBlock && typeof workshopBlock === 'object' && 'workshops' in workshopBlock) {
+      const workshops = (workshopBlock as { workshops?: unknown[] }).workshops
+      if (Array.isArray(workshops)) {
+        for (const w of workshops) {
+          if (w && typeof w === 'object' && 'slug' in w) {
+            const workshop = w as { slug?: string; image?: unknown; images?: unknown[] }
+            // Main image
+            if (workshop.image && typeof workshop.image === 'object' && 'id' in workshop.image) {
+              if (workshop.slug === 'lakto-gemuese') {
+                existingImageIds.laktoImage = String((workshop.image as { id: string }).id)
+              } else if (workshop.slug === 'kombucha') {
+                existingImageIds.kombuchaImage = String((workshop.image as { id: string }).id)
+              } else if (workshop.slug === 'tempeh') {
+                existingImageIds.tempehImage = String((workshop.image as { id: string }).id)
+              }
+            }
+            // Secondary images array
+            if (Array.isArray(workshop.images) && workshop.images.length > 0) {
+              const firstImg = workshop.images[0]
+              if (firstImg && typeof firstImg === 'object' && 'image' in firstImg) {
+                const imgObj = (firstImg as { image?: unknown }).image
+                if (imgObj && typeof imgObj === 'object' && 'id' in imgObj) {
+                  if (workshop.slug === 'lakto-gemuese') {
+                    existingImageIds.workshopLaktoImage2 = String((imgObj as { id: string }).id)
+                  } else if (workshop.slug === 'kombucha') {
+                    existingImageIds.workshopKombuchaImage2 = String((imgObj as { id: string }).id)
+                  } else if (workshop.slug === 'tempeh') {
+                    existingImageIds.workshopTempehImage2 = String((imgObj as { id: string }).id)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Extract gallery images (VoucherCta)
+    const voucherBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'voucherCta')
+    if (voucherBlock && typeof voucherBlock === 'object' && 'galleryImages' in voucherBlock) {
+      const galleryImages = (voucherBlock as { galleryImages?: unknown[] }).galleryImages
+      if (Array.isArray(galleryImages)) {
+        existingImageIds.galleryMediaIds = galleryImages
+          .filter((img: unknown) => img && typeof img === 'object' && 'image' in img)
+          .map((img: unknown) => {
+            const imgObj = (img as { image?: unknown }).image
+            return imgObj && typeof imgObj === 'object' && 'id' in imgObj ? String((imgObj as { id: string }).id) : null
+          })
+          .filter((id: string | null): id is string => id !== null)
+      }
+    }
+
+    // Extract HeroBanner background
+    const heroBannerBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'heroBanner')
+    if (heroBannerBlock && typeof heroBannerBlock === 'object' && 'backgroundImage' in heroBannerBlock) {
+      const bgImg = (heroBannerBlock as { backgroundImage?: unknown }).backgroundImage
+      if (bgImg && typeof bgImg === 'object' && 'id' in bgImg) {
+        existingImageIds.bannerImage = String((bgImg as { id: string }).id)
+      }
+    }
+
+    // Extract team photos
+    const teamBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'teamPreview')
+    if (teamBlock && typeof teamBlock === 'object' && 'members' in teamBlock) {
+      const members = (teamBlock as { members?: unknown[] }).members
+      if (Array.isArray(members)) {
+        for (const member of members) {
+          if (member && typeof member === 'object' && 'name' in member && 'photo' in member) {
+            const m = member as { name?: string; photo?: unknown }
+            const photo = m.photo
+            if (photo && typeof photo === 'object' && 'id' in photo) {
+              if (m.name === 'David Heider') {
+                existingImageIds.davidPhoto = String((photo as { id: string }).id)
+              } else if (m.name === 'Marcel Rauminger') {
+                existingImageIds.marcelPhoto = String((photo as { id: string }).id)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Extract feature card icons
+    const featureCardsBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'featureCards')
+    if (featureCardsBlock && typeof featureCardsBlock === 'object' && 'cards' in featureCardsBlock) {
+      const cards = (featureCardsBlock as { cards?: unknown[] }).cards
+      if (Array.isArray(cards)) {
+        for (const card of cards) {
+          if (card && typeof card === 'object' && 'titleDe' in card && 'icon' in card) {
+            const c = card as { titleDe?: string; icon?: unknown }
+            const icon = c.icon
+            if (icon && typeof icon === 'object' && 'id' in icon) {
+              if (c.titleDe?.includes('Probiotika')) {
+                existingImageIds.iconProbiotics = String((icon as { id: string }).id)
+              } else if (c.titleDe?.includes('Nährstoffe')) {
+                existingImageIds.iconNutrients = String((icon as { id: string }).id)
+              } else if (c.titleDe?.includes('Geschmack')) {
+                existingImageIds.iconFlavour = String((icon as { id: string }).id)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const preserved = Object.keys(existingImageIds).filter(k => existingImageIds[k as keyof typeof existingImageIds]).length
+    payload.logger.info(`✅ Preserved ${preserved} existing image reference(s).`)
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // 2. Upload images ONLY if they don't already exist
+  //    Sequential writes — MongoDB Atlas M0 has no transactions.
+  // ══════════════════════════════════════════════════════════════════════════
+
+  payload.logger.info('Checking which images need to be uploaded...')
+
   // ── Workshop cover images ─────────────────────────────────────────────────
-  const laktoImage = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'Lakto-Gemüse workshop – fermented vegetables in glass jars' },
-    file: await optimizedFile(path.join(workshopsDir, 'lakto.png'), IMAGE_PRESETS.card),
-  })
-  const kombuchaImage = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'Kombucha workshop – kombucha SCOBY and fermented tea in jar' },
-    file: await optimizedFile(path.join(workshopsDir, 'kombucha.png'), IMAGE_PRESETS.card),
-  })
-  const tempehImage = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'Tempeh workshop – homemade tempeh on ceramic plate' },
-    file: await optimizedFile(path.join(workshopsDir, 'tempeh.png'), IMAGE_PRESETS.card),
-  })
+  let laktoImageId: string | undefined = existingImageIds.laktoImage
+  if (!laktoImageId) {
+    const laktoImage = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'Lakto-Gemüse workshop – fermented vegetables in glass jars' },
+      file: await optimizedFile(path.join(workshopsDir, 'lakto.png'), IMAGE_PRESETS.card),
+    })
+    laktoImageId = String(laktoImage.id)
+    payload.logger.info('  ✓ Uploaded lakto workshop image')
+  } else {
+    payload.logger.info('  → Reusing existing lakto workshop image')
+  }
+
+  let kombuchaImageId: string | undefined = existingImageIds.kombuchaImage
+  if (!kombuchaImageId) {
+    const kombuchaImage = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'Kombucha workshop – kombucha SCOBY and fermented tea in jar' },
+      file: await optimizedFile(path.join(workshopsDir, 'kombucha.png'), IMAGE_PRESETS.card),
+    })
+    kombuchaImageId = String(kombuchaImage.id)
+    payload.logger.info('  ✓ Uploaded kombucha workshop image')
+  } else {
+    payload.logger.info('  → Reusing existing kombucha workshop image')
+  }
+
+  let tempehImageId: string | undefined = existingImageIds.tempehImage
+  if (!tempehImageId) {
+    const tempehImage = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'Tempeh workshop – homemade tempeh on ceramic plate' },
+      file: await optimizedFile(path.join(workshopsDir, 'tempeh.png'), IMAGE_PRESETS.card),
+    })
+    tempehImageId = String(tempehImage.id)
+    payload.logger.info('  ✓ Uploaded tempeh workshop image')
+  } else {
+    payload.logger.info('  → Reusing existing tempeh workshop image')
+  }
 
   // ── Per-slide product images (Hero Slider) ─────────────────────────────────
-  const laktoSlideLeft = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-lakto-left – FermentFreude Sauerkraut Jar' },
-    file: await optimizedFile(path.join(heroDir, 'lakto1.png'), IMAGE_PRESETS.card),
-  })
-  const laktoSlideRight = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-lakto-right – FermentFreude Sauerkraut Jar' },
-    file: await optimizedFile(path.join(heroDir, 'lakto2.png'), IMAGE_PRESETS.card),
-  })
-  const kombuchaSlideLeft = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-kombucha-left – FermentFreude Kombucha Apple & Carrot' },
-    file: await optimizedFile(path.join(heroDir, 'kombucha1.png'), IMAGE_PRESETS.card),
-  })
-  const kombuchaSlideRight = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-kombucha-right – FermentFreude Kombucha Coffee Flavour' },
-    file: await optimizedFile(path.join(heroDir, 'kombucha2.png'), IMAGE_PRESETS.card),
-  })
-  const tempehSlideLeft = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-tempeh-left – FermentFreude Tempeh Slices' },
-    file: await optimizedFile(path.join(heroDir, 'tempeh1.png'), IMAGE_PRESETS.card),
-  })
-  const tempehSlideRight = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-tempeh-right – FermentFreude Black Bean Tempeh' },
-    file: await optimizedFile(path.join(heroDir, 'tempeh2.png'), IMAGE_PRESETS.card),
-  })
-  const basicsSlideLeft = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-basics-left – David Heider, FermentFreude founder' },
-    file: await optimizedFile(path.join(heroDir, 'DavidHeroCopy.png'), IMAGE_PRESETS.card),
-  })
-  const basicsSlideRight = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-basics-right – Marcel Rauminger, FermentFreude founder' },
-    file: await optimizedFile(path.join(heroDir, 'MarcelHero.png'), IMAGE_PRESETS.card),
-  })
+  let laktoSlideLeftId: string | undefined = existingImageIds.laktoSlideLeft
+  if (!laktoSlideLeftId) {
+    const laktoSlideLeft = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'slide-lakto-left – FermentFreude Sauerkraut Jar' },
+      file: await optimizedFile(path.join(heroDir, 'lakto1.png'), IMAGE_PRESETS.card),
+    })
+    laktoSlideLeftId = String(laktoSlideLeft.id)
+    payload.logger.info('  ✓ Uploaded lakto slide left image')
+  } else {
+    payload.logger.info('  → Reusing existing lakto slide left image')
+  }
+
+  let laktoSlideRightId: string | undefined = existingImageIds.laktoSlideRight
+  if (!laktoSlideRightId) {
+    const laktoSlideRight = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'slide-lakto-right – FermentFreude Sauerkraut Jar' },
+      file: await optimizedFile(path.join(heroDir, 'lakto2.png'), IMAGE_PRESETS.card),
+    })
+    laktoSlideRightId = String(laktoSlideRight.id)
+    payload.logger.info('  ✓ Uploaded lakto slide right image')
+  } else {
+    payload.logger.info('  → Reusing existing lakto slide right image')
+  }
+
+  let kombuchaSlideLeftId: string | undefined = existingImageIds.kombuchaSlideLeft
+  if (!kombuchaSlideLeftId) {
+    const kombuchaSlideLeft = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'slide-kombucha-left – FermentFreude Kombucha Apple & Carrot' },
+      file: await optimizedFile(path.join(heroDir, 'kombucha1.png'), IMAGE_PRESETS.card),
+    })
+    kombuchaSlideLeftId = String(kombuchaSlideLeft.id)
+    payload.logger.info('  ✓ Uploaded kombucha slide left image')
+  } else {
+    payload.logger.info('  → Reusing existing kombucha slide left image')
+  }
+
+  let kombuchaSlideRightId: string | undefined = existingImageIds.kombuchaSlideRight
+  if (!kombuchaSlideRightId) {
+    const kombuchaSlideRight = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'slide-kombucha-right – FermentFreude Kombucha Coffee Flavour' },
+      file: await optimizedFile(path.join(heroDir, 'kombucha2.png'), IMAGE_PRESETS.card),
+    })
+    kombuchaSlideRightId = String(kombuchaSlideRight.id)
+    payload.logger.info('  ✓ Uploaded kombucha slide right image')
+  } else {
+    payload.logger.info('  → Reusing existing kombucha slide right image')
+  }
+
+  let tempehSlideLeftId: string | undefined = existingImageIds.tempehSlideLeft
+  if (!tempehSlideLeftId) {
+    const tempehSlideLeft = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'slide-tempeh-left – FermentFreude Tempeh Slices' },
+      file: await optimizedFile(path.join(heroDir, 'tempeh1.png'), IMAGE_PRESETS.card),
+    })
+    tempehSlideLeftId = String(tempehSlideLeft.id)
+    payload.logger.info('  ✓ Uploaded tempeh slide left image')
+  } else {
+    payload.logger.info('  → Reusing existing tempeh slide left image')
+  }
+
+  let tempehSlideRightId: string | undefined = existingImageIds.tempehSlideRight
+  if (!tempehSlideRightId) {
+    const tempehSlideRight = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'slide-tempeh-right – FermentFreude Black Bean Tempeh' },
+      file: await optimizedFile(path.join(heroDir, 'tempeh2.png'), IMAGE_PRESETS.card),
+    })
+    tempehSlideRightId = String(tempehSlideRight.id)
+    payload.logger.info('  ✓ Uploaded tempeh slide right image')
+  } else {
+    payload.logger.info('  → Reusing existing tempeh slide right image')
+  }
+
+  let basicsSlideLeftId: string | undefined = existingImageIds.basicsSlideLeft
+  if (!basicsSlideLeftId) {
+    const basicsSlideLeft = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'slide-basics-left – David Heider, FermentFreude founder' },
+      file: await optimizedFile(path.join(heroDir, 'DavidHeroCopy.png'), IMAGE_PRESETS.card),
+    })
+    basicsSlideLeftId = String(basicsSlideLeft.id)
+    payload.logger.info('  ✓ Uploaded basics slide left image')
+  } else {
+    payload.logger.info('  → Reusing existing basics slide left image')
+  }
+
+  let basicsSlideRightId: string | undefined = existingImageIds.basicsSlideRight
+  if (!basicsSlideRightId) {
+    const basicsSlideRight = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'slide-basics-right – Marcel Rauminger, FermentFreude founder' },
+      file: await optimizedFile(path.join(heroDir, 'MarcelHero.png'), IMAGE_PRESETS.card),
+    })
+    basicsSlideRightId = String(basicsSlideRight.id)
+    payload.logger.info('  ✓ Uploaded basics slide right image')
+  } else {
+    payload.logger.info('  → Reusing existing basics slide right image')
+  }
 
   // ── Workshop slider secondary images (SEPARATE uploads, not shared with hero) ──
-  const workshopLaktoImage2 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'workshop-lakto-secondary – Sauerkraut Jar product image' },
-    file: await optimizedFile(path.join(heroDir, 'lakto1.png'), IMAGE_PRESETS.card),
-  })
-  const workshopKombuchaImage2 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'workshop-kombucha-secondary – Kombucha Apple & Carrot product image' },
-    file: await optimizedFile(path.join(heroDir, 'kombucha1.png'), IMAGE_PRESETS.card),
-  })
-  const workshopTempehImage2 = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'workshop-tempeh-secondary – Tempeh Slices product image' },
-    file: await optimizedFile(path.join(heroDir, 'tempeh1.png'), IMAGE_PRESETS.card),
-  })
+  let workshopLaktoImage2Id: string | undefined = existingImageIds.workshopLaktoImage2
+  if (!workshopLaktoImage2Id) {
+    const workshopLaktoImage2 = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'workshop-lakto-secondary – Sauerkraut Jar product image' },
+      file: await optimizedFile(path.join(heroDir, 'lakto1.png'), IMAGE_PRESETS.card),
+    })
+    workshopLaktoImage2Id = String(workshopLaktoImage2.id)
+    payload.logger.info('  ✓ Uploaded workshop lakto secondary image')
+  } else {
+    payload.logger.info('  → Reusing existing workshop lakto secondary image')
+  }
+
+  let workshopKombuchaImage2Id: string | undefined = existingImageIds.workshopKombuchaImage2
+  if (!workshopKombuchaImage2Id) {
+    const workshopKombuchaImage2 = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'workshop-kombucha-secondary – Kombucha Apple & Carrot product image' },
+      file: await optimizedFile(path.join(heroDir, 'kombucha1.png'), IMAGE_PRESETS.card),
+    })
+    workshopKombuchaImage2Id = String(workshopKombuchaImage2.id)
+    payload.logger.info('  ✓ Uploaded workshop kombucha secondary image')
+  } else {
+    payload.logger.info('  → Reusing existing workshop kombucha secondary image')
+  }
+
+  let workshopTempehImage2Id: string | undefined = existingImageIds.workshopTempehImage2
+  if (!workshopTempehImage2Id) {
+    const workshopTempehImage2 = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'workshop-tempeh-secondary – Tempeh Slices product image' },
+      file: await optimizedFile(path.join(heroDir, 'tempeh1.png'), IMAGE_PRESETS.card),
+    })
+    workshopTempehImage2Id = String(workshopTempehImage2.id)
+    payload.logger.info('  ✓ Uploaded workshop tempeh secondary image')
+  } else {
+    payload.logger.info('  → Reusing existing workshop tempeh secondary image')
+  }
 
   // ── VoucherCta gallery (8 images) ─────────────────────────────────────────
   const galleryImageConfigs = [
@@ -221,100 +459,153 @@ async function seedHome() {
     { file: path.join(galleryDir, 'gallery-7.png'), alt: 'Gallery – kombucha SCOBY jar closeup' },
     { file: path.join(galleryDir, 'gallery-8.png'), alt: 'Gallery – workshop table with chairs' },
   ]
-  const galleryMediaIds: string[] = []
-  for (const cfg of galleryImageConfigs) {
-    const m = await payload.create({
-      collection: 'media',
-      context: { skipAutoTranslate: true, skipRevalidate: true },
-      data: { alt: cfg.alt },
-      file: await optimizedFile(cfg.file, IMAGE_PRESETS.card),
-    })
-    galleryMediaIds.push(String(m.id))
+  let galleryMediaIds: string[] = []
+  
+  if (existingImageIds.galleryMediaIds && Array.isArray(existingImageIds.galleryMediaIds) && existingImageIds.galleryMediaIds.length === 8) {
+    galleryMediaIds = existingImageIds.galleryMediaIds as string[]
+    payload.logger.info('  → Reusing existing gallery images (8 images)')
+  } else {
+    payload.logger.info('  ✓ Uploading gallery images...')
+    for (const cfg of galleryImageConfigs) {
+      const m = await payload.create({
+        collection: 'media',
+        context: { skipAutoTranslate: true, skipRevalidate: true },
+        data: { alt: cfg.alt },
+        file: await optimizedFile(cfg.file, IMAGE_PRESETS.card),
+      })
+      galleryMediaIds.push(String(m.id))
+    }
+    payload.logger.info(`  ✓ Uploaded ${galleryMediaIds.length} gallery images`)
   }
 
   // ── HeroBanner background ─────────────────────────────────────────────────
-  const bannerImage = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude chefs banner – professional kitchen scene' },
-    file: await optimizedFile(path.join(imagesDir, 'Banner.png'), IMAGE_PRESETS.hero),
-  })
+  let bannerImageId: string | undefined = existingImageIds.bannerImage
+  if (!bannerImageId) {
+    const bannerImage = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'FermentFreude chefs banner – professional kitchen scene' },
+      file: await optimizedFile(path.join(imagesDir, 'Banner.png'), IMAGE_PRESETS.hero),
+    })
+    bannerImageId = String(bannerImage.id)
+    payload.logger.info('  ✓ Uploaded banner image')
+  } else {
+    payload.logger.info('  → Reusing existing banner image')
+  }
 
   // ── Team photos ───────────────────────────────────────────────────────────
-  const davidPhoto = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'David Heider – FermentFreude co-founder and instructor' },
-    file: await optimizedFile(path.join(imagesDir, 'david-heider.jpg'), IMAGE_PRESETS.card),
-  })
-  const marcelPhoto = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'Marcel Rauminger – FermentFreude co-founder and instructor' },
-    file: await optimizedFile(path.join(imagesDir, 'marcel-rauminger.jpg'), IMAGE_PRESETS.card),
-  })
+  let davidPhotoId: string | undefined = existingImageIds.davidPhoto
+  if (!davidPhotoId) {
+    const davidPhoto = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'David Heider – FermentFreude co-founder and instructor' },
+      file: await optimizedFile(path.join(imagesDir, 'david-heider.jpg'), IMAGE_PRESETS.card),
+    })
+    davidPhotoId = String(davidPhoto.id)
+    payload.logger.info('  ✓ Uploaded David photo')
+  } else {
+    payload.logger.info('  → Reusing existing David photo')
+  }
+
+  let marcelPhotoId: string | undefined = existingImageIds.marcelPhoto
+  if (!marcelPhotoId) {
+    const marcelPhoto = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'Marcel Rauminger – FermentFreude co-founder and instructor' },
+      file: await optimizedFile(path.join(imagesDir, 'marcel-rauminger.jpg'), IMAGE_PRESETS.card),
+    })
+    marcelPhotoId = String(marcelPhoto.id)
+    payload.logger.info('  ✓ Uploaded Marcel photo')
+  } else {
+    payload.logger.info('  → Reusing existing Marcel photo')
+  }
 
   // ── FeatureCards icons (SVGs) ─────────────────────────────────────────────
-  const iconProbiotics = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'icon-feature – probiotics test tube and DNA' },
-    file: await optimizedFile(path.join(iconsDir, 'probiotics.svg'), IMAGE_PRESETS.logo),
-  })
-  const iconNutrients = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'icon-feature – nutrients bowl with vegetables' },
-    file: await optimizedFile(path.join(iconsDir, 'nutrients.svg'), IMAGE_PRESETS.logo),
-  })
-  const iconFlavour = await payload.create({
-    collection: 'media',
-    context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'icon-feature – taste wine glasses' },
-    file: await optimizedFile(path.join(iconsDir, 'taste.svg'), IMAGE_PRESETS.logo),
-  })
+  let iconProbioticsId: string | undefined = existingImageIds.iconProbiotics
+  if (!iconProbioticsId) {
+    const iconProbiotics = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'icon-feature – probiotics test tube and DNA' },
+      file: await optimizedFile(path.join(iconsDir, 'probiotics.svg'), IMAGE_PRESETS.logo),
+    })
+    iconProbioticsId = String(iconProbiotics.id)
+    payload.logger.info('  ✓ Uploaded probiotics icon')
+  } else {
+    payload.logger.info('  → Reusing existing probiotics icon')
+  }
 
-  payload.logger.info('✅ All images uploaded.')
+  let iconNutrientsId: string | undefined = existingImageIds.iconNutrients
+  if (!iconNutrientsId) {
+    const iconNutrients = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'icon-feature – nutrients bowl with vegetables' },
+      file: await optimizedFile(path.join(iconsDir, 'nutrients.svg'), IMAGE_PRESETS.logo),
+    })
+    iconNutrientsId = String(iconNutrients.id)
+    payload.logger.info('  ✓ Uploaded nutrients icon')
+  } else {
+    payload.logger.info('  → Reusing existing nutrients icon')
+  }
+
+  let iconFlavourId: string | undefined = existingImageIds.iconFlavour
+  if (!iconFlavourId) {
+    const iconFlavour = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: { alt: 'icon-feature – taste wine glasses' },
+      file: await optimizedFile(path.join(iconsDir, 'taste.svg'), IMAGE_PRESETS.logo),
+    })
+    iconFlavourId = String(iconFlavour.id)
+    payload.logger.info('  ✓ Uploaded flavour icon')
+  } else {
+    payload.logger.info('  → Reusing existing flavour icon')
+  }
+
+  payload.logger.info('✅ Image handling complete.')
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 2. Build block data (content lives in each block's seed.ts)
+  // 3. Build block data (content lives in each block's seed.ts)
   // ══════════════════════════════════════════════════════════════════════════
 
   const { de: heroDE, en: heroEN } = buildHeroSlider({
-    laktoSlideLeftId: String(laktoSlideLeft.id),
-    laktoSlideRightId: String(laktoSlideRight.id),
-    kombuchaSlideLeftId: String(kombuchaSlideLeft.id),
-    kombuchaSlideRightId: String(kombuchaSlideRight.id),
-    tempehSlideLeftId: String(tempehSlideLeft.id),
-    tempehSlideRightId: String(tempehSlideRight.id),
-    basicsSlideLeftId: String(basicsSlideLeft.id),
-    basicsSlideRightId: String(basicsSlideRight.id),
+    laktoSlideLeftId,
+    laktoSlideRightId,
+    kombuchaSlideLeftId,
+    kombuchaSlideRightId,
+    tempehSlideLeftId,
+    tempehSlideRightId,
+    basicsSlideLeftId,
+    basicsSlideRightId,
   })
 
   const { de: workshopSliderDE, en: workshopSliderEN } = buildWorkshopSlider({
-    laktoImageId: String(laktoImage.id),
-    kombuchaImageId: String(kombuchaImage.id),
-    tempehImageId: String(tempehImage.id),
-    laktoImage2Id: String(workshopLaktoImage2.id),
-    kombuchaImage2Id: String(workshopKombuchaImage2.id),
-    tempehImage2Id: String(workshopTempehImage2.id),
+    laktoImageId,
+    kombuchaImageId,
+    tempehImageId,
+    laktoImage2Id: workshopLaktoImage2Id,
+    kombuchaImage2Id: workshopKombuchaImage2Id,
+    tempehImage2Id: workshopTempehImage2Id,
   })
 
   const { de: voucherCtaDE, en: voucherCtaEN } = buildVoucherCta({ galleryMediaIds })
 
   const { de: heroBannerDE, en: heroBannerEN } = buildHeroBanner({
-    backgroundImageId: String(bannerImage.id),
+    backgroundImageId: bannerImageId,
   })
 
   const { de: featureCardsDE, en: featureCardsEN } = buildFeatureCards({
-    iconProbioticsId: String(iconProbiotics.id),
-    iconNutrientsId: String(iconNutrients.id),
-    iconFlavourId: String(iconFlavour.id),
+    iconProbioticsId,
+    iconNutrientsId,
+    iconFlavourId,
   })
 
   const { de: teamPreviewDE, en: teamPreviewEN } = buildTeamPreview({
-    davidPhotoId: String(davidPhoto.id),
-    marcelPhotoId: String(marcelPhoto.id),
+    davidPhotoId,
+    marcelPhotoId,
   })
 
   const { de: testimonialsDE, en: testimonialsEN } = buildTestimonials()
@@ -376,7 +667,7 @@ async function seedHome() {
   const { de: productSliderDE, en: productSliderEN } = buildProductSlider({ productIds })
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 3. Find or create the Home page
+  // 4. Find or create the Home page
   // ══════════════════════════════════════════════════════════════════════════
 
   const existing = await payload.find({
@@ -404,7 +695,7 @@ async function seedHome() {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 4. Save DE
+  // 5. Save DE
   // ══════════════════════════════════════════════════════════════════════════
 
   payload.logger.info('Saving DE locale...')
