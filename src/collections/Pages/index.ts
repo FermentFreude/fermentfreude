@@ -18,7 +18,6 @@ import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
 import { SponsorsBar } from '@/blocks/SponsorsBar/config'
 import { TeamCards } from '@/blocks/TeamCards/config'
 import { TeamPreview } from '@/blocks/TeamPreview/config'
-import { Testimonials } from '@/blocks/Testimonials/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { VoucherCta } from '@/blocks/VoucherCta/config'
 import { WorkshopPhases } from '@/blocks/WorkshopPhases/config'
@@ -119,7 +118,6 @@ export const Pages: CollectionConfig = {
                 SponsorsBar,
                 TeamCards,
                 TeamPreview,
-                Testimonials,
                 ThreeItemGrid,
                 Banner,
                 FormBlock,
@@ -493,81 +491,88 @@ export const Pages: CollectionConfig = {
               fields: [
                 {
                   name: 'fermentationHeroTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Hero Title',
-              admin: {
-                description: 'Main headline (e.g., "Innovation meets Tradition").',
-              },
-            },
-            {
-              name: 'fermentationHeroDescription',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: 'Hero Description',
-              admin: {
-                description: 'Short intro text below the heading.',
-              },
-            },
-            {
-              name: 'fermentationHeroImage',
-              type: 'upload',
-              relationTo: 'media',
-              required: false,
-              label: 'Hero Image',
-              admin: {
-                description: 'Large hero image (e.g., founders/team). Shown above the 4 feature blocks.',
-              },
-            },
-            {
-              name: 'fermentationHeroBenefitsTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Hero Benefits Section Title',
-              admin: {
-                description: 'Heading above the 4 benefit cards (e.g., "WHY FERMENTATION?").',
-              },
-            },
-            {
-              name: 'fermentationHeroBlocks',
-              type: 'array',
-              required: false,
-              minRows: 0,
-              maxRows: 4,
-              label: 'Hero Benefit Cards',
-              admin: {
-                description:
-                  'Four cards: PROBIOTICS, ENZIMES, NUTRITION, PRESERVATION. Order: beige, gold, dark, beige. Each can have an icon.',
-              },
-              fields: [
-                {
-                  name: 'icon',
-                  type: 'upload',
-                  relationTo: 'media',
+                  type: 'text',
                   required: false,
-                  label: 'Icon',
-                  admin: { description: 'Small icon at top of block.' },
+                  localized: true,
+                  label: 'Hero Title',
+                  admin: {
+                    description: 'Main headline (e.g., "Innovation meets Tradition").',
+                  },
                 },
-                { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
                 {
-                  name: 'description',
+                  name: 'fermentationHeroDescription',
                   type: 'textarea',
                   required: false,
                   localized: true,
-                  label: 'Description',
+                  label: 'Hero Description',
+                  admin: {
+                    description: 'Short intro text below the heading.',
+                  },
                 },
                 {
-                  name: 'url',
+                  name: 'fermentationHeroImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Hero Image',
+                  admin: {
+                    description:
+                      'Large hero image (e.g., founders/team). Shown above the 4 feature blocks.',
+                  },
+                },
+                {
+                  name: 'fermentationHeroBenefitsTitle',
                   type: 'text',
                   required: false,
-                  label: 'Link URL',
-                  admin: { description: 'Where this block links.' },
+                  localized: true,
+                  label: 'Hero Benefits Section Title',
+                  admin: {
+                    description: 'Heading above the 4 benefit cards (e.g., "WHY FERMENTATION?").',
+                  },
                 },
-              ],
-            },
+                {
+                  name: 'fermentationHeroBlocks',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 4,
+                  label: 'Hero Benefit Cards',
+                  admin: {
+                    description:
+                      'Four cards: PROBIOTICS, ENZIMES, NUTRITION, PRESERVATION. Order: beige, gold, dark, beige. Each can have an icon.',
+                  },
+                  fields: [
+                    {
+                      name: 'icon',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Icon',
+                      admin: { description: 'Small icon at top of block.' },
+                    },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Description',
+                    },
+                    {
+                      name: 'url',
+                      type: 'text',
+                      required: false,
+                      label: 'Link URL',
+                      admin: { description: 'Where this block links.' },
+                    },
+                  ],
+                },
               ],
             },
             {
@@ -577,42 +582,45 @@ export const Pages: CollectionConfig = {
               fields: [
                 {
                   name: 'fermentationGuideTag',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Guide Section Tag',
-              admin: {
-                description: 'Small label above the guide heading (e.g., "START HERE").',
-              },
-            },
-            {
-              name: 'fermentationGuideTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Guide Section Title',
-              admin: {
-                description: 'Main heading (e.g., "A complete guide to fermentation").',
-              },
-            },
-            {
-              name: 'fermentationGuideBody',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: 'Guide Section Body',
-              admin: {
-                description: 'Introductory paragraph for the guide.',
-              },
-            },
-            {
-              name: 'fermentationGuideImage',
-              type: 'upload',
-              relationTo: 'media',
-              required: false,
-              label: 'Guide Section Image',
-              admin: { description: 'Optional image below the guide text (e.g. fermentation process, ingredients).' },
-            },
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Guide Section Tag',
+                  admin: {
+                    description: 'Small label above the guide heading (e.g., "START HERE").',
+                  },
+                },
+                {
+                  name: 'fermentationGuideTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Guide Section Title',
+                  admin: {
+                    description: 'Main heading (e.g., "A complete guide to fermentation").',
+                  },
+                },
+                {
+                  name: 'fermentationGuideBody',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Guide Section Body',
+                  admin: {
+                    description: 'Introductory paragraph for the guide.',
+                  },
+                },
+                {
+                  name: 'fermentationGuideImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Guide Section Image',
+                  admin: {
+                    description:
+                      'Optional image below the guide text (e.g. fermentation process, ingredients).',
+                  },
+                },
               ],
             },
             {
@@ -622,47 +630,57 @@ export const Pages: CollectionConfig = {
               fields: [
                 {
                   name: 'fermentationWhatTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: '"What is fermentation?" Title',
-            },
-            {
-              name: 'fermentationWhatBody',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: '"What is fermentation?" Body',
-            },
-            {
-              name: 'fermentationWhatMotto',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: '"What is fermentation?" Motto',
-              admin: { description: 'e.g. "No additives. No shortcuts. Just patience and care."' },
-            },
-            {
-              name: 'fermentationWhatLinks',
-              type: 'array',
-              required: false,
-              minRows: 0,
-              maxRows: 3,
-              label: 'What Section Links',
-              admin: { description: 'e.g. "Ready to Learn?", "Our Story"' },
-              fields: [
-                { name: 'label', type: 'text', required: true, localized: true, label: 'Label' },
-                { name: 'url', type: 'text', required: true, label: 'URL' },
-              ],
-            },
-            {
-              name: 'fermentationWhatImage',
-              type: 'upload',
-              relationTo: 'media',
-              required: false,
-              label: '"What" Section Image',
-              admin: { description: 'Optional image (e.g. fermented vegetables, jars, process).' },
-            },
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: '"What is fermentation?" Title',
+                },
+                {
+                  name: 'fermentationWhatBody',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: '"What is fermentation?" Body',
+                },
+                {
+                  name: 'fermentationWhatMotto',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: '"What is fermentation?" Motto',
+                  admin: {
+                    description: 'e.g. "No additives. No shortcuts. Just patience and care."',
+                  },
+                },
+                {
+                  name: 'fermentationWhatLinks',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 3,
+                  label: 'What Section Links',
+                  admin: { description: 'e.g. "Ready to Learn?", "Our Story"' },
+                  fields: [
+                    {
+                      name: 'label',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Label',
+                    },
+                    { name: 'url', type: 'text', required: true, label: 'URL' },
+                  ],
+                },
+                {
+                  name: 'fermentationWhatImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: '"What" Section Image',
+                  admin: {
+                    description: 'Optional image (e.g. fermented vegetables, jars, process).',
+                  },
+                },
               ],
             },
             {
@@ -672,40 +690,49 @@ export const Pages: CollectionConfig = {
               fields: [
                 {
                   name: 'fermentationWhyTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: '"Why is it so special?" Title',
-            },
-            {
-              name: 'fermentationWhyItems',
-              type: 'array',
-              required: false,
-              minRows: 0,
-              maxRows: 6,
-              label: 'Why Special Items',
-              admin: {
-                description: 'Six benefit items in two columns (e.g., Improved digestion, Rich in enzymes).',
-              },
-              fields: [
-                { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
-                {
-                  name: 'description',
-                  type: 'textarea',
-                  required: true,
+                  type: 'text',
+                  required: false,
                   localized: true,
-                  label: 'Description',
+                  label: '"Why is it so special?" Title',
                 },
-              ],
-            },
-            {
-              name: 'fermentationWhyImage',
-              type: 'upload',
-              relationTo: 'media',
-              required: false,
-              label: '"Why" Section Image',
-              admin: { description: 'Optional image (e.g. gut health, fermentation benefits).' },
-            },
+                {
+                  name: 'fermentationWhyItems',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 6,
+                  label: 'Why Special Items',
+                  admin: {
+                    description:
+                      'Six benefit items in two columns (e.g., Improved digestion, Rich in enzymes).',
+                  },
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: true,
+                      localized: true,
+                      label: 'Description',
+                    },
+                  ],
+                },
+                {
+                  name: 'fermentationWhyImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: '"Why" Section Image',
+                  admin: {
+                    description: 'Optional image (e.g. gut health, fermentation benefits).',
+                  },
+                },
               ],
             },
             {
@@ -715,60 +742,66 @@ export const Pages: CollectionConfig = {
               fields: [
                 {
                   name: 'fermentationDangerTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: '"Is it dangerous?" Title',
-            },
-            {
-              name: 'fermentationDangerIntro',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: '"Is it dangerous?" Intro',
-              admin: {
-                description: 'Intro paragraph before the concerns list.',
-              },
-            },
-            {
-              name: 'fermentationDangerConcernsHeading',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: '"Is it dangerous?" Concerns Heading',
-              admin: { description: 'e.g. "Common concerns addressed:"' },
-            },
-            {
-              name: 'fermentationDangerConcerns',
-              type: 'array',
-              required: false,
-              minRows: 0,
-              maxRows: 8,
-              label: '"Is it dangerous?" Concerns',
-              admin: {
-                description: 'Concern items (e.g., Mold, Smell, Botulism, Trust your senses).',
-              },
-              fields: [
-                { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
-                {
-                  name: 'description',
-                  type: 'textarea',
-                  required: true,
+                  type: 'text',
+                  required: false,
                   localized: true,
-                  label: 'Description',
+                  label: '"Is it dangerous?" Title',
                 },
-              ],
-            },
-            {
-              name: 'fermentationDangerClosing',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: '"Is it dangerous?" Closing',
-              admin: {
-                description: 'Closing paragraph after the concerns list.',
-              },
-            },
+                {
+                  name: 'fermentationDangerIntro',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: '"Is it dangerous?" Intro',
+                  admin: {
+                    description: 'Intro paragraph before the concerns list.',
+                  },
+                },
+                {
+                  name: 'fermentationDangerConcernsHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: '"Is it dangerous?" Concerns Heading',
+                  admin: { description: 'e.g. "Common concerns addressed:"' },
+                },
+                {
+                  name: 'fermentationDangerConcerns',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 8,
+                  label: '"Is it dangerous?" Concerns',
+                  admin: {
+                    description: 'Concern items (e.g., Mold, Smell, Botulism, Trust your senses).',
+                  },
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: true,
+                      localized: true,
+                      label: 'Description',
+                    },
+                  ],
+                },
+                {
+                  name: 'fermentationDangerClosing',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: '"Is it dangerous?" Closing',
+                  admin: {
+                    description: 'Closing paragraph after the concerns list.',
+                  },
+                },
               ],
             },
             {
@@ -778,29 +811,31 @@ export const Pages: CollectionConfig = {
               fields: [
                 {
                   name: 'fermentationPracticeTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: '"A practice, not a trend" Title',
-            },
-            {
-              name: 'fermentationPracticeBody',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: '"A practice, not a trend" Body',
-              admin: {
-                description: 'Multiple paragraphs supported. Separate with a blank line.',
-              },
-            },
-            {
-              name: 'fermentationPracticeImage',
-              type: 'upload',
-              relationTo: 'media',
-              required: false,
-              label: '"Practice" Section Image',
-              admin: { description: 'Optional image (e.g. traditional fermentation, cultural foods).' },
-            },
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: '"A practice, not a trend" Title',
+                },
+                {
+                  name: 'fermentationPracticeBody',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: '"A practice, not a trend" Body',
+                  admin: {
+                    description: 'Multiple paragraphs supported. Separate with a blank line.',
+                  },
+                },
+                {
+                  name: 'fermentationPracticeImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: '"Practice" Section Image',
+                  admin: {
+                    description: 'Optional image (e.g. traditional fermentation, cultural foods).',
+                  },
+                },
               ],
             },
             {
@@ -810,78 +845,79 @@ export const Pages: CollectionConfig = {
               fields: [
                 {
                   name: 'fermentationCtaTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'CTA Section Title',
-              admin: { description: 'e.g. "Ready to learn?"' },
-            },
-            {
-              name: 'fermentationCtaDescription',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: 'CTA Section Description',
-            },
-            {
-              name: 'fermentationCtaPrimaryLabel',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'CTA Primary Button Label',
-              admin: { description: 'e.g. "Find course" / "Kurs finden"' },
-            },
-            {
-              name: 'fermentationCtaPrimaryUrl',
-              type: 'text',
-              required: false,
-              label: 'CTA Primary Button URL',
-            },
-            {
-              name: 'fermentationCtaSecondaryLabel',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'CTA Secondary Button Label',
-              admin: { description: 'e.g. "All courses" / "Alle Kurse"' },
-            },
-            {
-              name: 'fermentationCtaSecondaryUrl',
-              type: 'text',
-              required: false,
-              label: 'CTA Secondary Button URL',
-            },
-            {
-              name: 'fermentationCtaVideo',
-              type: 'upload',
-              relationTo: 'media',
-              required: false,
-              label: 'CTA Background Video',
-              admin: {
-                description:
-                  'Upload a video (MP4) as background. Or use the URL field below for videos in public/assets/videos/.',
-              },
-            },
-            {
-              name: 'fermentationCtaVideoUrl',
-              type: 'text',
-              required: false,
-              label: 'CTA Background Video URL (alternative)',
-              admin: {
-                description:
-                  'If not using upload above: path like /assets/videos/cabbage-cta.mp4. Leave empty for solid gold background.',
-              },
-            },
-            {
-              name: 'fermentationCtaBackgroundImage',
-              type: 'upload',
-              relationTo: 'media',
-              required: false,
-              label: 'CTA Background Image (fallback/poster)',
-              admin: {
-                description: 'Used as poster when video is set, or fallback when video is absent.',
-              },
-            },
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'CTA Section Title',
+                  admin: { description: 'e.g. "Ready to learn?"' },
+                },
+                {
+                  name: 'fermentationCtaDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'CTA Section Description',
+                },
+                {
+                  name: 'fermentationCtaPrimaryLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'CTA Primary Button Label',
+                  admin: { description: 'e.g. "Find course" / "Kurs finden"' },
+                },
+                {
+                  name: 'fermentationCtaPrimaryUrl',
+                  type: 'text',
+                  required: false,
+                  label: 'CTA Primary Button URL',
+                },
+                {
+                  name: 'fermentationCtaSecondaryLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'CTA Secondary Button Label',
+                  admin: { description: 'e.g. "All courses" / "Alle Kurse"' },
+                },
+                {
+                  name: 'fermentationCtaSecondaryUrl',
+                  type: 'text',
+                  required: false,
+                  label: 'CTA Secondary Button URL',
+                },
+                {
+                  name: 'fermentationCtaVideo',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'CTA Background Video',
+                  admin: {
+                    description:
+                      'Upload a video (MP4) as background. Or use the URL field below for videos in public/assets/videos/.',
+                  },
+                },
+                {
+                  name: 'fermentationCtaVideoUrl',
+                  type: 'text',
+                  required: false,
+                  label: 'CTA Background Video URL (alternative)',
+                  admin: {
+                    description:
+                      'If not using upload above: path like /assets/videos/cabbage-cta.mp4. Leave empty for solid gold background.',
+                  },
+                },
+                {
+                  name: 'fermentationCtaBackgroundImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'CTA Background Image (fallback/poster)',
+                  admin: {
+                    description:
+                      'Used as poster when video is set, or fallback when video is absent.',
+                  },
+                },
               ],
             },
             {
@@ -891,79 +927,87 @@ export const Pages: CollectionConfig = {
               fields: [
                 {
                   name: 'fermentationFaqTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'FAQ Section Title',
-            },
-            {
-              name: 'fermentationFaqSubtitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'FAQ Section Subtitle',
-              admin: { description: 'e.g. "Common questions about fermentation answered"' },
-            },
-            {
-              name: 'fermentationFaqItems',
-              type: 'array',
-              required: false,
-              minRows: 0,
-              maxRows: 12,
-              label: 'FAQ Items',
-              admin: { description: 'Questions and answers.' },
-              fields: [
-                { name: 'question', type: 'text', required: true, localized: true, label: 'Question' },
-                {
-                  name: 'answer',
-                  type: 'textarea',
-                  required: true,
+                  type: 'text',
+                  required: false,
                   localized: true,
-                  label: 'Answer',
+                  label: 'FAQ Section Title',
                 },
-              ],
-            },
-            {
-              name: 'fermentationFaqCtaTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'FAQ Bottom CTA Title',
-              admin: { description: 'e.g. "Ready to Start Fermenting?"' },
-            },
-            {
-              name: 'fermentationFaqCtaBody',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: 'FAQ Bottom CTA Body',
-              admin: {
-                description:
-                  'Instructional paragraph below the FAQ grid (e.g. "Begin with simple vegetables...")',
-              },
-            },
-            {
-              name: 'fermentationFaqMoreText',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'FAQ "More" Text (legacy)',
-              admin: { description: 'Fallback if CTA title empty. e.g. "Still have questions?"' },
-            },
-            {
-              name: 'fermentationFaqContactLabel',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'FAQ Contact Button Label',
-              admin: { description: 'e.g. "Contact Us"' },
-            },
-            {
-              name: 'fermentationFaqContactUrl',
-              type: 'text',
-              required: false,
-              label: 'FAQ Contact Button URL',
-            },
+                {
+                  name: 'fermentationFaqSubtitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'FAQ Section Subtitle',
+                  admin: { description: 'e.g. "Common questions about fermentation answered"' },
+                },
+                {
+                  name: 'fermentationFaqItems',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 12,
+                  label: 'FAQ Items',
+                  admin: { description: 'Questions and answers.' },
+                  fields: [
+                    {
+                      name: 'question',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Question',
+                    },
+                    {
+                      name: 'answer',
+                      type: 'textarea',
+                      required: true,
+                      localized: true,
+                      label: 'Answer',
+                    },
+                  ],
+                },
+                {
+                  name: 'fermentationFaqCtaTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'FAQ Bottom CTA Title',
+                  admin: { description: 'e.g. "Ready to Start Fermenting?"' },
+                },
+                {
+                  name: 'fermentationFaqCtaBody',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'FAQ Bottom CTA Body',
+                  admin: {
+                    description:
+                      'Instructional paragraph below the FAQ grid (e.g. "Begin with simple vegetables...")',
+                  },
+                },
+                {
+                  name: 'fermentationFaqMoreText',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'FAQ "More" Text (legacy)',
+                  admin: {
+                    description: 'Fallback if CTA title empty. e.g. "Still have questions?"',
+                  },
+                },
+                {
+                  name: 'fermentationFaqContactLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'FAQ Contact Button Label',
+                  admin: { description: 'e.g. "Contact Us"' },
+                },
+                {
+                  name: 'fermentationFaqContactUrl',
+                  type: 'text',
+                  required: false,
+                  label: 'FAQ Contact Button URL',
+                },
               ],
             },
             {
@@ -1043,7 +1087,13 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Image',
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -1170,8 +1220,7 @@ export const Pages: CollectionConfig = {
                     { label: 'Card / Post (deprecated)', value: 'card' },
                   ],
                   admin: {
-                    description:
-                      'Icon displayed next to this option. Use email or pickup only.',
+                    description: 'Icon displayed next to this option. Use email or pickup only.',
                   },
                 },
               ],
@@ -1593,7 +1642,8 @@ export const Pages: CollectionConfig = {
                   localized: true,
                   label: 'Hero Eyebrow',
                   admin: {
-                    description: 'Small label above the hero title (e.g., "Online Courses"). Leave empty to hide.',
+                    description:
+                      'Small label above the hero title (e.g., "Online Courses"). Leave empty to hide.',
                   },
                 },
                 {
@@ -1658,7 +1708,8 @@ export const Pages: CollectionConfig = {
                   localized: true,
                   label: 'CTA Hint Text',
                   admin: {
-                    description: 'Optional small line under the buttons (e.g., "No prior knowledge required").',
+                    description:
+                      'Optional small line under the buttons (e.g., "No prior knowledge required").',
                   },
                 },
                 {
@@ -1839,7 +1890,9 @@ export const Pages: CollectionConfig = {
                       required: false,
                       localized: true,
                       label: 'Modules CTA Label',
-                      admin: { description: 'Button label under modules (e.g., "See all lessons").' },
+                      admin: {
+                        description: 'Button label under modules (e.g., "See all lessons").',
+                      },
                     },
                     {
                       name: 'onlineCoursesModulesButtonUrl',
@@ -1847,7 +1900,8 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Modules CTA URL',
                       admin: {
-                        description: 'Where the button links (e.g., product page for the basic course).',
+                        description:
+                          'Where the button links (e.g., product page for the basic course).',
                       },
                     },
                   ],
@@ -2007,7 +2061,9 @@ export const Pages: CollectionConfig = {
                       required: false,
                       localized: true,
                       label: 'Instructor Text',
-                      admin: { description: 'e.g., "Instructor: David Heider & Marcel Rauminger".' },
+                      admin: {
+                        description: 'e.g., "Instructor: David Heider & Marcel Rauminger".',
+                      },
                     },
                     {
                       name: 'levelText',
@@ -2149,7 +2205,8 @@ export const Pages: CollectionConfig = {
                   required: false,
                   label: 'Hero Image',
                   admin: {
-                    description: 'Large hero image (e.g., founders/team). Shown above the 4 feature blocks.',
+                    description:
+                      'Large hero image (e.g., founders/team). Shown above the 4 feature blocks.',
                   },
                 },
                 {
@@ -2158,7 +2215,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Hero Benefits Section Title',
-                  admin: { description: 'Heading above the 4 benefit cards (e.g., "WHY FERMENTATION?").' },
+                  admin: {
+                    description: 'Heading above the 4 benefit cards (e.g., "WHY FERMENTATION?").',
+                  },
                 },
                 {
                   name: 'fermentationHeroBlocks',
@@ -2180,7 +2239,13 @@ export const Pages: CollectionConfig = {
                       label: 'Icon',
                       admin: { description: 'Small icon at top of block.' },
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -2210,7 +2275,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Guide Section Tag',
-                  admin: { description: 'Small label above the guide heading (e.g., "START HERE").' },
+                  admin: {
+                    description: 'Small label above the guide heading (e.g., "START HERE").',
+                  },
                 },
                 {
                   name: 'fermentationGuideTitle',
@@ -2218,7 +2285,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Guide Section Title',
-                  admin: { description: 'Main heading (e.g., "A complete guide to fermentation").' },
+                  admin: {
+                    description: 'Main heading (e.g., "A complete guide to fermentation").',
+                  },
                 },
                 {
                   name: 'fermentationGuideBody',
@@ -2235,7 +2304,8 @@ export const Pages: CollectionConfig = {
                   required: false,
                   label: 'Guide Section Image',
                   admin: {
-                    description: 'Optional image below the guide text (e.g. fermentation process, ingredients).',
+                    description:
+                      'Optional image below the guide text (e.g. fermentation process, ingredients).',
                   },
                 },
               ],
@@ -2265,7 +2335,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: '"What is fermentation?" Motto',
-                  admin: { description: 'e.g. "No additives. No shortcuts. Just patience and care."' },
+                  admin: {
+                    description: 'e.g. "No additives. No shortcuts. Just patience and care."',
+                  },
                 },
                 {
                   name: 'fermentationWhatLinks',
@@ -2276,7 +2348,13 @@ export const Pages: CollectionConfig = {
                   label: 'What Section Links',
                   admin: { description: 'e.g. "Ready to Learn?", "Our Story"' },
                   fields: [
-                    { name: 'label', type: 'text', required: true, localized: true, label: 'Label' },
+                    {
+                      name: 'label',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Label',
+                    },
                     { name: 'url', type: 'text', required: true, label: 'URL' },
                   ],
                 },
@@ -2286,7 +2364,9 @@ export const Pages: CollectionConfig = {
                   relationTo: 'media',
                   required: false,
                   label: '"What" Section Image',
-                  admin: { description: 'Optional image (e.g. fermented vegetables, jars, process).' },
+                  admin: {
+                    description: 'Optional image (e.g. fermented vegetables, jars, process).',
+                  },
                 },
               ],
             },
@@ -2314,7 +2394,13 @@ export const Pages: CollectionConfig = {
                       'Six benefit items in two columns (e.g., Improved digestion, Rich in enzymes).',
                   },
                   fields: [
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -2330,7 +2416,9 @@ export const Pages: CollectionConfig = {
                   relationTo: 'media',
                   required: false,
                   label: '"Why" Section Image',
-                  admin: { description: 'Optional image (e.g. gut health, fermentation benefits).' },
+                  admin: {
+                    description: 'Optional image (e.g. gut health, fermentation benefits).',
+                  },
                 },
               ],
             },
@@ -2373,7 +2461,13 @@ export const Pages: CollectionConfig = {
                     description: 'Concern items (e.g., Mold, Smell, Botulism, Trust your senses).',
                   },
                   fields: [
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -2411,7 +2505,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: '"A practice, not a trend" Body',
-                  admin: { description: 'Multiple paragraphs supported. Separate with a blank line.' },
+                  admin: {
+                    description: 'Multiple paragraphs supported. Separate with a blank line.',
+                  },
                 },
                 {
                   name: 'fermentationPracticeImage',
@@ -2500,7 +2596,8 @@ export const Pages: CollectionConfig = {
                   required: false,
                   label: 'CTA Background Image (fallback/poster)',
                   admin: {
-                    description: 'Used as poster when video is set, or fallback when video is absent.',
+                    description:
+                      'Used as poster when video is set, or fallback when video is absent.',
                   },
                 },
               ],
@@ -2534,7 +2631,13 @@ export const Pages: CollectionConfig = {
                   label: 'FAQ Items',
                   admin: { description: 'Questions and answers.' },
                   fields: [
-                    { name: 'question', type: 'text', required: true, localized: true, label: 'Question' },
+                    {
+                      name: 'question',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Question',
+                    },
                     {
                       name: 'answer',
                       type: 'textarea',
@@ -2569,7 +2672,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'FAQ "More" Text (legacy)',
-                  admin: { description: 'Fallback if CTA title empty. e.g. "Still have questions?"' },
+                  admin: {
+                    description: 'Fallback if CTA title empty. e.g. "Still have questions?"',
+                  },
                 },
                 {
                   name: 'fermentationFaqContactLabel',
@@ -2664,7 +2769,13 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Image',
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',

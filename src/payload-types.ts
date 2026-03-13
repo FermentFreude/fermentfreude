@@ -145,12 +145,14 @@ export interface Config {
     footer: Footer;
     shop: Shop;
     'basic-fermentation-course': BasicFermentationCourse;
+    'testimonials-global': TestimonialsGlobal;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     shop: ShopSelect<false> | ShopSelect<true>;
     'basic-fermentation-course': BasicFermentationCourseSelect<false> | BasicFermentationCourseSelect<true>;
+    'testimonials-global': TestimonialsGlobalSelect<false> | TestimonialsGlobalSelect<true>;
   };
   locale: 'de' | 'en';
   user: User;
@@ -628,7 +630,6 @@ export interface Page {
         | SponsorsBarBlock
         | TeamCardsBlock
         | TeamPreviewBlock
-        | TestimonialsBlock
         | ThreeItemGridBlock
         | BannerBlock
         | FormBlock
@@ -2633,47 +2634,6 @@ export interface TeamPreviewBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TestimonialsBlock".
- */
-export interface TestimonialsBlock {
-  /**
-   * Small text above the heading (e.g. "Testimonials").
-   */
-  eyebrow?: string | null;
-  /**
-   * Section heading (e.g. "What They Like About Our Fermentation Class").
-   */
-  heading: string;
-  /**
-   * Optional "View All" button text. Leave empty to hide.
-   */
-  buttonLabel?: string | null;
-  buttonLink?: string | null;
-  /**
-   * Individual testimonial entries displayed as a slider.
-   */
-  testimonials: {
-    /**
-     * The testimonial text.
-     */
-    quote: string;
-    authorName: string;
-    /**
-     * Optional role/title of the author (e.g. "Artist").
-     */
-    authorRole?: string | null;
-    /**
-     * Star rating from 1 to 5.
-     */
-    rating?: number | null;
-    id?: string | null;
-  }[];
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'testimonials';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ThreeItemGridBlock".
  */
 export interface ThreeItemGridBlock {
@@ -3527,7 +3487,6 @@ export interface PagesSelect<T extends boolean = true> {
         sponsorsBar?: T | SponsorsBarBlockSelect<T>;
         teamCards?: T | TeamCardsBlockSelect<T>;
         teamPreview?: T | TeamPreviewBlockSelect<T>;
-        testimonials?: T | TestimonialsBlockSelect<T>;
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
@@ -4384,27 +4343,6 @@ export interface TeamPreviewBlockSelect<T extends boolean = true> {
         name?: T;
         role?: T;
         image?: T;
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TestimonialsBlock_select".
- */
-export interface TestimonialsBlockSelect<T extends boolean = true> {
-  eyebrow?: T;
-  heading?: T;
-  buttonLabel?: T;
-  buttonLink?: T;
-  testimonials?:
-    | T
-    | {
-        quote?: T;
-        authorName?: T;
-        authorRole?: T;
-        rating?: T;
         id?: T;
       };
   id?: T;
@@ -5456,6 +5394,44 @@ export interface BasicFermentationCourse {
   createdAt?: string | null;
 }
 /**
+ * Global testimonials section used across Home, Courses, and Workshops pages. Edit once, appears everywhere.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials-global".
+ */
+export interface TestimonialsGlobal {
+  id: string;
+  /**
+   * Small text above the heading (e.g. "Testimonials").
+   */
+  eyebrow?: string | null;
+  /**
+   * Section heading (e.g. "What Our Community Says").
+   */
+  heading: string;
+  /**
+   * Individual testimonial entries displayed as a slider.
+   */
+  testimonials: {
+    /**
+     * The testimonial text.
+     */
+    quote: string;
+    authorName: string;
+    /**
+     * Optional role/title of the author (e.g. "Workshop Participant").
+     */
+    authorRole?: string | null;
+    /**
+     * Star rating from 1 to 5.
+     */
+    rating?: number | null;
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -5646,6 +5622,26 @@ export interface BasicFermentationCourseSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials-global_select".
+ */
+export interface TestimonialsGlobalSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  testimonials?:
+    | T
+    | {
+        quote?: T;
+        authorName?: T;
+        authorRole?: T;
+        rating?: T;
         id?: T;
       };
   updatedAt?: T;

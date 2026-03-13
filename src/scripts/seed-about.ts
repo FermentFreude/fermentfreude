@@ -1,7 +1,7 @@
 /**
  * Seed the About page with decomposed blocks.
  * Creates an "Über uns" / "About Us" page composed from:
- *   Hero (heroSplit: text + image) + OurStory + TeamCards + SponsorsBar + Testimonials + ReadyToLearnCTA + ContactBlock
+ *   Hero (heroSplit: text + image) + TeamCards + OurStory + SponsorsBar + ReadyToLearnCTA + ContactBlock
  *
  * Uploads images to Payload Media (Cloudflare R2) so they're editable from /admin.
  * Seeds both DE (default) and EN locales, reusing array IDs.
@@ -12,6 +12,8 @@
  * - Context flags: skipRevalidate, disableRevalidate, skipAutoTranslate
  * - Sequential DB writes (no Promise.all) for MongoDB Atlas M0
  * - Images uploaded via Payload Media collection (stored in Cloudflare R2)
+ *
+ * Testimonials are now a global (edit-once in /admin), not a per-page block.
  *
  * Run: set -a && source .env && set +a && npx tsx src/scripts/seed-about.ts
  */
@@ -31,7 +33,6 @@ import {
   teamCardsDE,
   teamCardsEN,
 } from './data/about'
-import { buildTestimonials, mergeTestimonialsEN } from '../blocks/Testimonials/seed'
 import { contactDataDE, contactDataEN } from './data/contact'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
@@ -156,10 +157,26 @@ async function seedAbout() {
   const sponsorImages = []
   const sponsorsDir = path.resolve(process.cwd(), 'public/assets/images/sponsors')
   const sponsorFiles: { file: string; fallback: string; alt: string }[] = [
-    { file: 'sustainable-food.png', fallback: 'sponsor-logo.png', alt: 'about-sponsor – aws Sustainable Food Systems Initiative' },
-    { file: 'aws.png', fallback: 'sponsor-logo-2.png', alt: 'about-sponsor – Austria Wirtschafts Service' },
-    { file: 'science-park.png', fallback: 'sponsor-logo-3.png', alt: 'about-sponsor – Science Park Graz' },
-    { file: 'sparkasse.png', fallback: 'sponsor-logo-4.png', alt: 'about-sponsor – Steiermärkische Sparkasse' },
+    {
+      file: 'sustainable-food.png',
+      fallback: 'sponsor-logo.png',
+      alt: 'about-sponsor – aws Sustainable Food Systems Initiative',
+    },
+    {
+      file: 'aws.png',
+      fallback: 'sponsor-logo-2.png',
+      alt: 'about-sponsor – Austria Wirtschafts Service',
+    },
+    {
+      file: 'science-park.png',
+      fallback: 'sponsor-logo-3.png',
+      alt: 'about-sponsor – Science Park Graz',
+    },
+    {
+      file: 'sparkasse.png',
+      fallback: 'sponsor-logo-4.png',
+      alt: 'about-sponsor – Steiermärkische Sparkasse',
+    },
   ]
 
   for (const s of sponsorFiles) {
@@ -205,7 +222,6 @@ async function seedAbout() {
         teamCardsDE(imgArgs),
         ourStoryDE(),
         sponsorsBarDE(imgArgs),
-        buildTestimonials().de,
         readyToLearnDE(),
         {
           blockType: 'contactBlock',
@@ -229,24 +245,25 @@ async function seedAbout() {
   })
 
   const blocks = created.layout ?? []
-  if (blocks.length < 6) {
-    console.error(`  ❌ Expected 6 layout blocks, got ${blocks.length}`)
+  if (blocks.length < 5) {
+    console.error(`  ❌ Expected 5 layout blocks, got ${blocks.length}`)
     process.exit(1)
   }
 
-  // Block IDs (order: OurStory, TeamCards, SponsorsBar, Testimonials, ReadyToLearnCTA, ContactBlock)
-  const ourStoryBlockId = blocks[0]!.id
-  const teamCardsBlockId = blocks[1]!.id
+  // Block IDs (order: TeamCards, OurStory, SponsorsBar, ReadyToLearnCTA, ContactBlock)
+  const teamCardsBlockId = blocks[0]!.id
+  const ourStoryBlockId = blocks[1]!.id
   const sponsorsBarBlockId = blocks[2]!.id
-  const testimonialsBlockId = blocks[3]!.id
-  const readyToLearnBlockId = blocks[4]!.id
-  const contactBlockId = blocks[5]!.id
+  const readyToLearnBlockId = blocks[3]!.id
+  const contactBlockId = blocks[4]!.id
 
   // Extract subject option IDs from ContactBlock
-  const contactBlock = blocks[5] as unknown as Record<string, unknown>
+  const contactBlock = blocks[4] as unknown as Record<string, unknown>
   const contactForm = contactBlock?.contactForm as Record<string, unknown> | undefined
   const subjectOptions = contactForm?.subjectOptions as Record<string, unknown> | undefined
-  const subjectOptionIds = ((subjectOptions?.options ?? []) as Array<{ id?: string }>).map((o) => o.id)
+  const subjectOptionIds = ((subjectOptions?.options ?? []) as Array<{ id?: string }>).map(
+    (o) => o.id,
+  )
 
   // Extract array IDs from OurStory paragraphs
   const ourStoryBlock = blocks[1] as unknown as Record<string, unknown>
@@ -285,16 +302,12 @@ async function seedAbout() {
 
   const enContactData = contactDataEN({})
   if (enContactData.contactForm?.subjectOptions?.options && subjectOptionIds.length > 0) {
-    enContactData.contactForm.subjectOptions.options = enContactData.contactForm.subjectOptions.options.map(
-      (o: { label: string }, idx: number) => ({
+    enContactData.contactForm.subjectOptions.options =
+      enContactData.contactForm.subjectOptions.options.map((o: { label: string }, idx: number) => ({
         ...o,
         id: subjectOptionIds[idx],
-      }),
-    )
+      }))
   }
-
-  const testimonialsBlock = blocks[3] as unknown as { id?: string; testimonials?: { id?: string }[] }
-  const enTestimonials = mergeTestimonialsEN(buildTestimonials().en, testimonialsBlock ?? {})
 
   // ── 8. Update EN locale ───────────────────────────────────
   const enHero = aboutHeroEN(imgArgs)
@@ -316,7 +329,6 @@ async function seedAbout() {
         { id: teamCardsBlockId, ...enTeamCards },
         { id: ourStoryBlockId, ...enOurStory },
         { id: sponsorsBarBlockId, ...enSponsorsBar },
-        { ...enTestimonials, id: testimonialsBlockId },
         { id: readyToLearnBlockId, ...readyToLearnEN() },
         {
           id: contactBlockId,
@@ -332,7 +344,9 @@ async function seedAbout() {
 
   console.log(`  ✅ Updated About page ${aboutPage.id} (EN)`)
   console.log('🎉 About page seeded successfully!')
-  console.log('   Blocks: hero → OurStory → TeamCards → SponsorsBar → Testimonials → ReadyToLearnCTA → ContactBlock')
+  console.log(
+    '   Blocks: hero → OurStory → TeamCards → SponsorsBar → Testimonials → ReadyToLearnCTA → ContactBlock',
+  )
   console.log('   All images stored in Payload Media (Cloudflare R2) — editable from /admin')
 
   process.exit(0)

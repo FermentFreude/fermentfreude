@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
-
-export const dynamic = 'force-dynamic'
+import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
@@ -10,6 +9,8 @@ import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHr
 import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
+
+export const dynamic = 'force-dynamic'
 
 import { notFound } from 'next/navigation'
 
@@ -29,7 +30,12 @@ export async function generateStaticParams() {
   const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
   const params = pages.docs
     ?.filter((doc) => {
-      return doc.slug !== 'home' && doc.slug !== 'gastronomy' && doc.slug !== 'fermentation' && !WORKSHOP_SLUGS.includes(doc.slug ?? '')
+      return (
+        doc.slug !== 'home' &&
+        doc.slug !== 'gastronomy' &&
+        doc.slug !== 'fermentation' &&
+        !WORKSHOP_SLUGS.includes(doc.slug ?? '')
+      )
     })
     .map(({ slug }) => {
       return { slug }
@@ -88,6 +94,7 @@ export default async function Page({ params }: Args) {
     <article className={isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'}>
       <RenderHero {...hero} />
       <RenderBlocks blocks={enrichedLayout} slug={slug} />
+      {slug === 'home' && <TestimonialsGlobalWrapper id="testimonials" />}
     </article>
   )
 }

@@ -1,4 +1,5 @@
 import { RenderBlocks } from '@/blocks/RenderBlocks'
+import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
 import { AllWorkshopsHero } from '@/components/workshops/AllWorkshopsHero'
 import { WorkshopCalendar } from '@/components/workshops/WorkshopCalendar'
 import type { Page } from '@/payload-types'
@@ -61,7 +62,6 @@ export default async function WorkshopsPage() {
   const productSliderBlock = homeBlocks.find((block) => block?.blockType === 'productSlider')
   const sponsorsBlock = homeBlocks.find((block) => block?.blockType === 'sponsorsBar')
   const gastroBlock = homeBlocks.find((block) => block?.blockType === 'heroBanner')
-  const testimonialsBlock = homeBlocks.find((block) => block?.blockType === 'testimonials')
 
   // Get CMS data for section titles/descriptions
   const workshopsData = workshopsPageData as Page | undefined
@@ -116,8 +116,8 @@ export default async function WorkshopsPage() {
       {/* 6. Gastronomy Banner (from Home) */}
       {gastroBlock && <RenderBlocks blocks={[gastroBlock]} />}
 
-      {/* 7. Testimonials (from Home) */}
-      {testimonialsBlock && <RenderBlocks blocks={[testimonialsBlock]} />}
+      {/* 7. Testimonials (from Global) */}
+      <TestimonialsGlobalWrapper />
     </article>
   )
 }

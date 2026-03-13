@@ -26,7 +26,6 @@ import { buildHeroBanner, mergeHeroBannerEN } from '../blocks/HeroBanner/seed'
 import { buildProductSlider, mergeProductSliderEN } from '../blocks/ProductSlider/seed'
 
 import { buildTeamPreview, mergeTeamPreviewEN } from '../blocks/TeamPreview/seed'
-import { buildTestimonials, mergeTestimonialsEN } from '../blocks/Testimonials/seed'
 import { buildVoucherCta, mergeVoucherCtaEN } from '../blocks/VoucherCta/seed'
 import { buildWorkshopSlider, mergeWorkshopSliderEN } from '../blocks/WorkshopSlider/seed'
 import { buildHeroSlider, mergeHeroSliderEN } from '../heros/HeroSlider/seed'
@@ -103,18 +102,38 @@ async function seedHome() {
     })) as Page
 
     // Extract hero slide images
-    if (existingPage.hero && typeof existingPage.hero === 'object' && 'heroSlides' in existingPage.hero) {
+    if (
+      existingPage.hero &&
+      typeof existingPage.hero === 'object' &&
+      'heroSlides' in existingPage.hero
+    ) {
       const heroSlides = existingPage.hero.heroSlides as unknown[]
       if (Array.isArray(heroSlides)) {
         for (const slide of heroSlides) {
           if (slide && typeof slide === 'object' && 'slideId' in slide) {
-            const slideObj = slide as { slideId?: string; leftImage?: unknown; rightImage?: unknown }
-            const slideId = slideObj.slideId
-            if (slideObj.leftImage && typeof slideObj.leftImage === 'object' && 'id' in slideObj.leftImage) {
-              existingImageIds[`${slideId}SlideLeft`] = String((slideObj.leftImage as { id: string }).id)
+            const slideObj = slide as {
+              slideId?: string
+              leftImage?: unknown
+              rightImage?: unknown
             }
-            if (slideObj.rightImage && typeof slideObj.rightImage === 'object' && 'id' in slideObj.rightImage) {
-              existingImageIds[`${slideId}SlideRight`] = String((slideObj.rightImage as { id: string }).id)
+            const slideId = slideObj.slideId
+            if (
+              slideObj.leftImage &&
+              typeof slideObj.leftImage === 'object' &&
+              'id' in slideObj.leftImage
+            ) {
+              existingImageIds[`${slideId}SlideLeft`] = String(
+                (slideObj.leftImage as { id: string }).id,
+              )
+            }
+            if (
+              slideObj.rightImage &&
+              typeof slideObj.rightImage === 'object' &&
+              'id' in slideObj.rightImage
+            ) {
+              existingImageIds[`${slideId}SlideRight`] = String(
+                (slideObj.rightImage as { id: string }).id,
+              )
             }
           }
         }
@@ -123,7 +142,13 @@ async function seedHome() {
 
     // Extract workshop slider images
     const layout = Array.isArray(existingPage.layout) ? existingPage.layout : []
-    const workshopBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'workshopSlider')
+    const workshopBlock = layout.find(
+      (b: unknown) =>
+        b &&
+        typeof b === 'object' &&
+        'blockType' in b &&
+        (b as { blockType: string }).blockType === 'workshopSlider',
+    )
     if (workshopBlock && typeof workshopBlock === 'object' && 'workshops' in workshopBlock) {
       const workshops = (workshopBlock as { workshops?: unknown[] }).workshops
       if (Array.isArray(workshops)) {
@@ -162,7 +187,13 @@ async function seedHome() {
     }
 
     // Extract gallery images (VoucherCta)
-    const voucherBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'voucherCta')
+    const voucherBlock = layout.find(
+      (b: unknown) =>
+        b &&
+        typeof b === 'object' &&
+        'blockType' in b &&
+        (b as { blockType: string }).blockType === 'voucherCta',
+    )
     if (voucherBlock && typeof voucherBlock === 'object' && 'galleryImages' in voucherBlock) {
       const galleryImages = (voucherBlock as { galleryImages?: unknown[] }).galleryImages
       if (Array.isArray(galleryImages)) {
@@ -170,15 +201,27 @@ async function seedHome() {
           .filter((img: unknown) => img && typeof img === 'object' && 'image' in img)
           .map((img: unknown) => {
             const imgObj = (img as { image?: unknown }).image
-            return imgObj && typeof imgObj === 'object' && 'id' in imgObj ? String((imgObj as { id: string }).id) : null
+            return imgObj && typeof imgObj === 'object' && 'id' in imgObj
+              ? String((imgObj as { id: string }).id)
+              : null
           })
           .filter((id: string | null): id is string => id !== null)
       }
     }
 
     // Extract HeroBanner background
-    const heroBannerBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'heroBanner')
-    if (heroBannerBlock && typeof heroBannerBlock === 'object' && 'backgroundImage' in heroBannerBlock) {
+    const heroBannerBlock = layout.find(
+      (b: unknown) =>
+        b &&
+        typeof b === 'object' &&
+        'blockType' in b &&
+        (b as { blockType: string }).blockType === 'heroBanner',
+    )
+    if (
+      heroBannerBlock &&
+      typeof heroBannerBlock === 'object' &&
+      'backgroundImage' in heroBannerBlock
+    ) {
       const bgImg = (heroBannerBlock as { backgroundImage?: unknown }).backgroundImage
       if (bgImg && typeof bgImg === 'object' && 'id' in bgImg) {
         existingImageIds.bannerImage = String((bgImg as { id: string }).id)
@@ -186,7 +229,13 @@ async function seedHome() {
     }
 
     // Extract team photos
-    const teamBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'teamPreview')
+    const teamBlock = layout.find(
+      (b: unknown) =>
+        b &&
+        typeof b === 'object' &&
+        'blockType' in b &&
+        (b as { blockType: string }).blockType === 'teamPreview',
+    )
     if (teamBlock && typeof teamBlock === 'object' && 'members' in teamBlock) {
       const members = (teamBlock as { members?: unknown[] }).members
       if (Array.isArray(members)) {
@@ -207,8 +256,18 @@ async function seedHome() {
     }
 
     // Extract feature card icons
-    const featureCardsBlock = layout.find((b: unknown) => b && typeof b === 'object' && 'blockType' in b && (b as { blockType: string }).blockType === 'featureCards')
-    if (featureCardsBlock && typeof featureCardsBlock === 'object' && 'cards' in featureCardsBlock) {
+    const featureCardsBlock = layout.find(
+      (b: unknown) =>
+        b &&
+        typeof b === 'object' &&
+        'blockType' in b &&
+        (b as { blockType: string }).blockType === 'featureCards',
+    )
+    if (
+      featureCardsBlock &&
+      typeof featureCardsBlock === 'object' &&
+      'cards' in featureCardsBlock
+    ) {
       const cards = (featureCardsBlock as { cards?: unknown[] }).cards
       if (Array.isArray(cards)) {
         for (const card of cards) {
@@ -229,7 +288,9 @@ async function seedHome() {
       }
     }
 
-    const preserved = Object.keys(existingImageIds).filter(k => existingImageIds[k as keyof typeof existingImageIds]).length
+    const preserved = Object.keys(existingImageIds).filter(
+      (k) => existingImageIds[k as keyof typeof existingImageIds],
+    ).length
     payload.logger.info(`✅ Preserved ${preserved} existing image reference(s).`)
   }
 
@@ -460,8 +521,12 @@ async function seedHome() {
     { file: path.join(galleryDir, 'gallery-8.png'), alt: 'Gallery – workshop table with chairs' },
   ]
   let galleryMediaIds: string[] = []
-  
-  if (existingImageIds.galleryMediaIds && Array.isArray(existingImageIds.galleryMediaIds) && existingImageIds.galleryMediaIds.length === 8) {
+
+  if (
+    existingImageIds.galleryMediaIds &&
+    Array.isArray(existingImageIds.galleryMediaIds) &&
+    existingImageIds.galleryMediaIds.length === 8
+  ) {
     galleryMediaIds = existingImageIds.galleryMediaIds as string[]
     payload.logger.info('  → Reusing existing gallery images (8 images)')
   } else {
@@ -608,8 +673,6 @@ async function seedHome() {
     marcelPhotoId,
   })
 
-  const { de: testimonialsDE, en: testimonialsEN } = buildTestimonials()
-
   // ── SponsorsBar: grab the exact block from the About page ───────────────
   payload.logger.info('Reading SponsorsBar from About page...')
   const aboutPage = await payload.find({
@@ -707,7 +770,6 @@ async function seedHome() {
     heroBannerDE,
     workshopSliderDE,
     teamPreviewDE,
-    testimonialsDE,
     ...(sponsorsBarDE
       ? [
           {
@@ -776,7 +838,6 @@ async function seedHome() {
   const hbBlock = findBlock('heroBanner')
   const fcBlock = findBlock('featureCards')
   const tpBlock = findBlock('teamPreview')
-  const tmBlock = findBlock('testimonials')
   const sbBlock = findBlock('sponsorsBar')
 
   if (!wsBlock) {
@@ -797,7 +858,6 @@ async function seedHome() {
     mergeHeroBannerEN(heroBannerEN, hbBlock ?? {}),
     mergeWorkshopSliderEN(workshopSliderEN, wsBlock),
     mergeTeamPreviewEN(teamPreviewEN, tpBlock ?? {}),
-    mergeTestimonialsEN(testimonialsEN, tmBlock ?? {}),
     ...(sponsorsBarEN && sbBlock
       ? [
           {
