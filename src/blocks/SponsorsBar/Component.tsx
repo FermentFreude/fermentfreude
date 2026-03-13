@@ -49,7 +49,7 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
     <section
       ref={sectionRef}
       id={id ?? undefined}
-      className={`section-padding-md bg-ff-warm-gray border-t border-ff-border-light transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
+      className={`block-sponsors-bar section-padding-md bg-ff-warm-gray border-t border-ff-border-light transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
     >
       <div className="container mx-auto container-padding">
         <h2 className="text-section-heading font-display font-bold text-ff-near-black text-center mb-6 lg:mb-8">

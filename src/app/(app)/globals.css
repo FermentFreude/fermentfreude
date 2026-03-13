@@ -339,12 +339,30 @@
     padding-block: var(--space-section-xl);
   }
 
-  /* About page: tighter section padding and hero spacing */
+  /* About page: tight, consistent spacing between sections */
   .page-about .section-padding-md {
-    padding-block: var(--space-content-lg);
+    padding-block: 0 !important;
   }
-  .page-about > section:first-child {
-    margin-bottom: var(--space-content-lg) !important;
+  .page-about section {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .page-about .block-team-cards {
+    padding-top: 80px !important;
+  }
+  .page-about section.block-sponsors-bar {
+    padding-top: 70px !important;
+  }
+  .page-about section.block-ready-to-learn {
+    padding-top: 80px !important;
+    padding-bottom: 80px !important;
+  }
+  .page-about .our-story-block {
+    padding-top: 80px !important;
+    margin-top: 0;
+  }
+  .page-about .our-story-block.section-padding-md {
+    padding-block-start: 80px;
   }
   .page-about.pb-24 {
     padding-bottom: var(--space-content-sm) !important;

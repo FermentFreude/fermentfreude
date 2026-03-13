@@ -40,7 +40,7 @@ export const aboutHeroEN = (args: AboutSeedArgs = {}) => ({
 export const ourStoryDE = (args: AboutSeedArgs = {}) => ({
   blockType: 'ourStory' as const,
   label: 'Unsere Geschichte',
-  heading: 'Freude an der Fermentation',
+  heading: 'Unsere Geschichte',
   subheading:
     'Fermentation zugänglich und genussvoll machen, während wir Darmgesundheit durch Geschmack, Bildung und qualitativ hochwertige handgemachte Lebensmittel fördern',
   paragraphs: [

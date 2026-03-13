@@ -47,7 +47,7 @@ export const HeroSplit: React.FC<HeroSplitProps> = (props) => {
   const hasImage = splitMedia && typeof splitMedia === 'object' && 'url' in splitMedia
 
   return (
-    <section className="relative w-full overflow-hidden mb-[var(--space-section-md)]">
+    <section className="relative w-full overflow-hidden mb-0">
       <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[28rem] lg:min-h-[32rem]">
         {/* Left — text */}
         <div className="flex flex-col justify-center bg-[#F8F8F8] px-6 sm:px-10 lg:px-16 py-16 sm:py-20 lg:py-24">

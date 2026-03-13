@@ -202,8 +202,8 @@ async function seedAbout() {
       _status: 'published',
       hero: aboutHeroDE(imgArgs),
       layout: [
-        ourStoryDE(),
         teamCardsDE(imgArgs),
+        ourStoryDE(),
         sponsorsBarDE(imgArgs),
         buildTestimonials().de,
         readyToLearnDE(),
@@ -249,13 +249,13 @@ async function seedAbout() {
   const subjectOptionIds = ((subjectOptions?.options ?? []) as Array<{ id?: string }>).map((o) => o.id)
 
   // Extract array IDs from OurStory paragraphs
-  const ourStoryBlock = blocks[0] as unknown as Record<string, unknown>
+  const ourStoryBlock = blocks[1] as unknown as Record<string, unknown>
   const paragraphIds = ((ourStoryBlock?.paragraphs ?? []) as Array<{ id?: string }>).map(
     (p) => p.id,
   )
 
   // Extract array IDs from TeamCards members
-  const teamCardsBlock = blocks[1] as unknown as Record<string, unknown>
+  const teamCardsBlock = blocks[0] as unknown as Record<string, unknown>
   const memberIds = ((teamCardsBlock?.members ?? []) as Array<{ id?: string }>).map((m) => m.id)
 
   // Extract array IDs from SponsorsBar sponsors
@@ -313,8 +313,8 @@ async function seedAbout() {
       _status: 'published',
       hero: enHero,
       layout: [
-        { id: ourStoryBlockId, ...enOurStory },
         { id: teamCardsBlockId, ...enTeamCards },
+        { id: ourStoryBlockId, ...enOurStory },
         { id: sponsorsBarBlockId, ...enSponsorsBar },
         { ...enTestimonials, id: testimonialsBlockId },
         { id: readyToLearnBlockId, ...readyToLearnEN() },
