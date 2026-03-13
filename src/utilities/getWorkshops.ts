@@ -51,6 +51,23 @@ export async function getAllWorkshops(locale: 'de' | 'en'): Promise<WorkshopItem
         hasWorkshopSlider = true
         const wsBlock = block as WorkshopSliderBlock
         for (const w of wsBlock.workshops ?? []) {
+          const legacy = w as {
+            topics?: { title: string; description?: string | null }[]
+            learnList?: { text: string }[]
+            image3?: MediaType | string | null
+            image4?: MediaType | string | null
+            image5?: MediaType | string | null
+            image6?: MediaType | string | null
+            image7?: MediaType | string | null
+            image8?: MediaType | string | null
+            image9?: MediaType | string | null
+            price?: string | null
+            duration?: string | null
+            format?: string | null
+            location?: string | null
+            groupSize?: string | null
+            dates?: string | null
+          }
           const cta = w.ctaLink ?? null
           if (cta && !seenCtaLinks.has(cta)) {
             seenCtaLinks.add(cta)
@@ -58,23 +75,26 @@ export async function getAllWorkshops(locale: 'de' | 'en'): Promise<WorkshopItem
               title: w.title ?? '',
               description: w.description ?? '',
               features: (w.features ?? []).map((f) => ({ text: f.text })),
-              topics: (w.topics ?? []).map((t) => ({ title: t.title, description: t.description })),
-              learnList: (w.learnList ?? []).map((l) => ({ text: l.text })),
+              topics: (legacy.topics ?? []).map((topic) => ({
+                title: topic.title,
+                description: topic.description,
+              })),
+              learnList: (legacy.learnList ?? []).map((item) => ({ text: item.text })),
               image: w.image ?? null,
               image2: w.image2 ?? null,
-              image3: w.image3 ?? null,
-              image4: w.image4 ?? null,
-              image5: w.image5 ?? null,
-              image6: w.image6 ?? null,
-              image7: w.image7 ?? null,
-              image8: w.image8 ?? null,
-              image9: w.image9 ?? null,
-              price: w.price ?? null,
-              duration: w.duration ?? null,
-              format: w.format ?? null,
-              location: w.location ?? null,
-              groupSize: w.groupSize ?? null,
-              dates: w.dates ?? null,
+              image3: legacy.image3 ?? null,
+              image4: legacy.image4 ?? null,
+              image5: legacy.image5 ?? null,
+              image6: legacy.image6 ?? null,
+              image7: legacy.image7 ?? null,
+              image8: legacy.image8 ?? null,
+              image9: legacy.image9 ?? null,
+              price: legacy.price ?? null,
+              duration: legacy.duration ?? null,
+              format: legacy.format ?? null,
+              location: legacy.location ?? null,
+              groupSize: legacy.groupSize ?? null,
+              dates: legacy.dates ?? null,
               ctaLink: cta,
             })
           }

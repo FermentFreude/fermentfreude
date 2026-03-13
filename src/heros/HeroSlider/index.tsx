@@ -78,7 +78,9 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
   return (
     <section
       className="relative w-full h-svh overflow-hidden max-w-[100vw] touch-pan-y transition-colors duration-700"
-      style={{ backgroundColor: slide.bgColor }}
+      style={{
+        backgroundColor: slide.bgColor,
+      }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -290,7 +292,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             className={cn(
               'pointer-events-none absolute inset-0 flex items-center justify-center select-none',
               'font-display font-black uppercase tracking-[-0.04em]',
-              'text-[12vw] lg:text-[10vw]',
+              'text-[8vw] lg:text-[7vw] xl:text-[6vw]',
               'transition-opacity duration-700',
               isExiting ? 'opacity-0' : 'opacity-[0.06]',
             )}
@@ -323,7 +325,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
         {/* ── CENTER PANEL (full-height, fixed structure) ───── */}
         <div
-          className="w-[36%] lg:w-[34%] xl:w-[32%] h-full flex flex-col items-center transition-colors duration-700 relative z-20"
+          className="w-[40%] lg:w-[38%] xl:w-[36%] h-full flex flex-col items-center transition-colors duration-700 relative z-20"
           style={{ backgroundColor: slide.panelColor }}
         >
           {/* Content — vertically centered, padded for header + bottom nav */}
@@ -424,7 +426,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             className={cn(
               'pointer-events-none absolute inset-0 flex items-center justify-center select-none',
               'font-display font-black uppercase tracking-[-0.04em]',
-              'text-[12vw] lg:text-[10vw]',
+              'text-[8vw] lg:text-[7vw] xl:text-[6vw]',
               'transition-opacity duration-700',
               isExiting ? 'opacity-0' : 'opacity-[0.06]',
             )}

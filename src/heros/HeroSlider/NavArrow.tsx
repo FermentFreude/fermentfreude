@@ -19,7 +19,7 @@ export function NavArrow({
       onClick={onClick}
       aria-label={isLeft ? 'Previous slide' : 'Next slide'}
       className={cn(
-        'hidden md:flex absolute top-1/2 -translate-y-1/2 z-40',
+        'hidden sm:flex absolute top-1/2 -translate-y-1/2 z-40',
         'items-center justify-center',
         'w-10 h-24',
         'group/arrow cursor-pointer',

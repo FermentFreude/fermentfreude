@@ -462,101 +462,92 @@ async function seedGastronomy() {
     const pageId = existing.docs[0].id
     const forceRecreate = process.argv.includes('--force')
 
-    if (forceRecreate) {
-      await payload.delete({
-        collection: 'pages',
-        id: pageId,
-        context: { skipRevalidate: true, disableRevalidate: true },
-      })
-      payload.logger.info('Deleted existing Gastronomy page. Recreating…')
-      // Fall through to create path
-    } else {
-      // Update existing page — save DE first to get IDs
+    // Always update existing page (whether forceRecreate or not)
+    // Images are preserved by updating instead of deleting
+    await payload.update({
+      collection: 'pages',
+      id: pageId,
+      locale: 'de',
+      context: ctx,
+      data: {
+        title: 'Gastronomie',
+        slug: 'gastronomy',
+        _status: 'published',
+        hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
+        layout: [],
+        meta: {
+          title: 'Gastronomie | Fermentfreude',
+          description: 'Fermentierte Produkte für Restaurants, Hotels und Catering.',
+        },
+        gastronomy: gastronomyDataDE(media),
+      },
+    })
+
+    const freshDE = (await payload.findByID({
+      collection: 'pages',
+      id: pageId,
+      locale: 'de',
+      depth: 0,
+    })) as unknown as Record<string, unknown>
+
+    const gastronomyDE = (freshDE.gastronomy ?? {}) as Record<string, unknown>
+    const offerCardsDE = (gastronomyDE.gastronomyOfferCards as Array<{ id?: string }>) ?? []
+    const workshopCardsDE = (gastronomyDE.gastronomyWorkshopCards as Array<{ id?: string }>) ?? []
+    const offerDetailsDE = (gastronomyDE.gastronomyOfferDetails as Array<{ id?: string }>) ?? []
+    const subjectOpts = gastronomyDE.gastronomySubjectOptions as {
+      options?: Array<{ id?: string }>
+    }
+    const subjectItemsDE = subjectOpts?.options ?? []
+
+    const dataENWithIds = {
+      ...gastronomyDataEN(media),
+      gastronomyOfferCards: gastronomyDataEN(media).gastronomyOfferCards.map((c, i) => ({
+        ...c,
+        id: offerCardsDE[i]?.id,
+      })),
+      gastronomyWorkshopCards: gastronomyDataEN(media).gastronomyWorkshopCards.map((c, i) => ({
+        ...c,
+        id: workshopCardsDE[i]?.id,
+      })),
+      gastronomyOfferDetails: gastronomyDataEN(media).gastronomyOfferDetails.map((item, i) => ({
+        ...item,
+        id: offerDetailsDE[i]?.id,
+      })),
+      gastronomySubjectOptions: {
+        ...gastronomyDataEN(media).gastronomySubjectOptions,
+        options: gastronomyDataEN(media).gastronomySubjectOptions.options.map((o, i) => ({
+          ...o,
+          id: subjectItemsDE[i]?.id,
+        })),
+      },
+    }
+
+    try {
       await payload.update({
         collection: 'pages',
         id: pageId,
-        locale: 'de',
+        locale: 'en',
         context: ctx,
         data: {
-          title: 'Gastronomie',
+          title: 'Gastronomy',
           slug: 'gastronomy',
           _status: 'published',
           hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
           layout: [],
           meta: {
-            title: 'Gastronomie | Fermentfreude',
-            description: 'Fermentierte Produkte für Restaurants, Hotels und Catering.',
+            title: 'Gastronomy | Fermentfreude',
+            description: 'Fermented products for restaurants, hotels and catering.',
           },
-          gastronomy: gastronomyDataDE(media),
+          gastronomy: dataENWithIds,
         },
       })
-
-      const freshDE = (await payload.findByID({
-        collection: 'pages',
-        id: pageId,
-        locale: 'de',
-        depth: 0,
-      })) as unknown as Record<string, unknown>
-
-      const gastronomyDE = (freshDE.gastronomy ?? {}) as Record<string, unknown>
-      const offerCardsDE = (gastronomyDE.gastronomyOfferCards as Array<{ id?: string }>) ?? []
-      const workshopCardsDE = (gastronomyDE.gastronomyWorkshopCards as Array<{ id?: string }>) ?? []
-      const offerDetailsDE = (gastronomyDE.gastronomyOfferDetails as Array<{ id?: string }>) ?? []
-      const subjectOpts = gastronomyDE.gastronomySubjectOptions as {
-        options?: Array<{ id?: string }>
-      }
-      const subjectItemsDE = subjectOpts?.options ?? []
-
-      const dataENWithIds = {
-        ...gastronomyDataEN(media),
-        gastronomyOfferCards: gastronomyDataEN(media).gastronomyOfferCards.map((c, i) => ({
-          ...c,
-          id: offerCardsDE[i]?.id,
-        })),
-        gastronomyWorkshopCards: gastronomyDataEN(media).gastronomyWorkshopCards.map((c, i) => ({
-          ...c,
-          id: workshopCardsDE[i]?.id,
-        })),
-        gastronomyOfferDetails: gastronomyDataEN(media).gastronomyOfferDetails.map((item, i) => ({
-          ...item,
-          id: offerDetailsDE[i]?.id,
-        })),
-        gastronomySubjectOptions: {
-          ...gastronomyDataEN(media).gastronomySubjectOptions,
-          options: gastronomyDataEN(media).gastronomySubjectOptions.options.map((o, i) => ({
-            ...o,
-            id: subjectItemsDE[i]?.id,
-          })),
-        },
-      }
-
-      try {
-        await payload.update({
-          collection: 'pages',
-          id: pageId,
-          locale: 'en',
-          context: ctx,
-          data: {
-            title: 'Gastronomy',
-            slug: 'gastronomy',
-            _status: 'published',
-            hero: { type: 'lowImpact' as const, richTextLowImpact: LEXICAL_ROOT_WITH_PARAGRAPH },
-            layout: [],
-            meta: {
-              title: 'Gastronomy | Fermentfreude',
-              description: 'Fermented products for restaurants, hotels and catering.',
-            },
-            gastronomy: dataENWithIds,
-          },
-        })
-        payload.logger.info('Gastronomy page updated (DE + EN). Edit at /admin/collections/pages')
-      } catch (_err) {
-        payload.logger.warn('EN locale update failed. DE content saved. Add EN manually in admin.')
-        payload.logger.info('Gastronomy page updated (DE only). Edit at /admin/collections/pages')
-      }
-      process.exit(0)
-      return
+      payload.logger.info('Gastronomy page updated (DE + EN). Edit at /admin/collections/pages')
+    } catch (_err) {
+      payload.logger.warn('EN locale update failed. DE content saved. Edit EN in admin.')
+      payload.logger.info('Gastronomy page updated (DE only). Edit at /admin/collections/pages')
     }
+    process.exit(0)
+    return
   }
 
   // Create new page

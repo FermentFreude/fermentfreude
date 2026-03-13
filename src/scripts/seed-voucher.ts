@@ -65,27 +65,10 @@ async function seedVoucher() {
     console.log('🔄 --force flag detected. Will overwrite existing voucher page content.')
   }
 
-  // ── 1. Delete any existing voucher page ──────────────────────
-  for (const doc of existing.docs) {
-    await payload.delete({
-      collection: 'pages',
-      id: doc.id,
-      context: { skipRevalidate: true, disableRevalidate: true },
-    })
-    console.log(`  🗑️  Deleted existing voucher page ${doc.id}`)
-  }
+  // ── 1. Skip deletion — will update existing page if it exists ──────────────────────
+  // (Images are preserved by updating instead of deleting)
 
-  // ── 2. Delete old voucher-related media to avoid duplicates ──
-  await payload
-    .delete({
-      collection: 'media',
-      where: { alt: { contains: 'voucher-' } },
-    })
-    .catch(() => {
-      /* none found */
-    })
-
-  // ── 3. Upload images to Payload Media (Cloudflare R2) ────────
+  // ── 2. Upload images to Payload Media (Cloudflare R2) ────────
   console.log('  📸 Uploading images to Media collection…')
 
   // Upload card logo
@@ -145,21 +128,42 @@ async function seedVoucher() {
     }
   }
 
-  // ── 4. Create the Voucher page in DE (default locale) ────────
-  console.log('  📄 Creating voucher page (DE)...')
-  const voucherPageDE = await payload.create({
-    collection: 'pages',
-    locale: 'de',
-    depth: 0,
-    data: voucherPageDataDE({
-      cardLogo,
-      starterSetImage,
-      giftOccasionImages,
-    }),
-    context: voucherSeedContext,
-  })
+  // ── 4. Create or update the Voucher page in DE (default locale) ────────
+  console.log('  📄 Creating/updating voucher page (DE)...')
 
-  console.log(`  ✅ Created voucher page ${voucherPageDE.id} (DE)`)
+  let voucherPageDE: any
+  const pageId = existing.docs.length > 0 ? existing.docs[0]!.id : undefined
+
+  if (pageId && forceRecreate) {
+    // Update existing page
+    voucherPageDE = await payload.update({
+      collection: 'pages',
+      id: pageId,
+      locale: 'de',
+      depth: 0,
+      data: voucherPageDataDE({
+        cardLogo,
+        starterSetImage,
+        giftOccasionImages,
+      }),
+      context: voucherSeedContext,
+    })
+    console.log(`  ✅ Updated voucher page ${pageId} (DE)`)
+  } else {
+    // Create new page
+    voucherPageDE = await payload.create({
+      collection: 'pages',
+      locale: 'de',
+      depth: 0,
+      data: voucherPageDataDE({
+        cardLogo,
+        starterSetImage,
+        giftOccasionImages,
+      }),
+      context: voucherSeedContext,
+    })
+    console.log(`  ✅ Created voucher page ${voucherPageDE.id} (DE)`)
+  }
 
   // ── 5. Read back the page to get array IDs ──────────────
   const savedVoucherDoc = await payload.findByID({

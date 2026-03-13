@@ -66,6 +66,10 @@ const scripts: Record<string, { name: string; file: string }> = {
     file: 'seed-kombucha-detail.ts',
   },
   kombucha: { name: 'Kombucha Workshop Detail (workshopDetail)', file: 'seed-kombucha.ts' },
+  'kombucha-phases': {
+    name: 'Kombucha Workshop Phases block',
+    file: 'seed-kombucha-phases.ts',
+  },
   'voucher-bg': { name: 'VoucherCta background image patch', file: 'seed-voucher-bg.ts' },
 }
 
