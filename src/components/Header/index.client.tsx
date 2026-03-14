@@ -28,7 +28,7 @@ export function HeaderClient({ header }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
-  const { headerTheme } = useHeaderTheme()
+  const { headerTheme, heroBackgroundColor } = useHeaderTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -73,7 +73,15 @@ export function HeaderClient({ header }: Props) {
   const renderedDropdowns = new Set<string>()
 
   // Build nav items array for consistent indexing
-  const navItems = hasRealCMSItems
+  const navItems: Array<{
+    id: string | null | undefined
+    label: string
+    url: string | null | undefined
+    link: any
+    dropdownItems: any
+    defaultKey: string | null
+    dropdownImage: any
+  }> = hasRealCMSItems
     ? cmsItems.map((item) => {
         const url = item.link.url
         const label = item.link.label
@@ -87,7 +95,18 @@ export function HeaderClient({ header }: Props) {
               ? defaultDropdowns[defaultKey]
               : null
 
-        return { id: item.id, label, url, link: item.link, dropdownItems, defaultKey }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dropdownImage = (item as any).dropdownImage
+
+        return {
+          id: item.id,
+          label,
+          url,
+          link: item.link,
+          dropdownItems,
+          defaultKey,
+          dropdownImage,
+        }
       })
     : defaultNavItems.map((item) => ({
         id: item.url,
@@ -96,6 +115,7 @@ export function HeaderClient({ header }: Props) {
         link: null,
         dropdownItems: item.dropdownItems || null,
         defaultKey: item.dropdownKey || null,
+        dropdownImage: null,
       }))
 
   return (
@@ -141,7 +161,7 @@ export function HeaderClient({ header }: Props) {
             {/* Desktop Nav Links */}
             <ul ref={navLinksRef} className="hidden lg:flex items-center gap-6 xl:gap-8">
               {navItems.map((item, _index) => {
-                const { dropdownItems, defaultKey, label, url } = item
+                const { dropdownItems, defaultKey, label, url, dropdownImage } = item
 
                 if (dropdownItems && dropdownItems.length > 0) {
                   const key = defaultKey || label
@@ -150,7 +170,11 @@ export function HeaderClient({ header }: Props) {
 
                   return (
                     <li key={item.id} className="nav-link-item">
-                      <NavDropdownDesktop label={label} items={dropdownItems} />
+                      <NavDropdownDesktop
+                        label={label}
+                        items={dropdownItems}
+                        modalImage={dropdownImage}
+                      />
                     </li>
                   )
                 }
@@ -180,7 +204,7 @@ export function HeaderClient({ header }: Props) {
             </ul>
 
             {/* Right side */}
-            <div className="flex items-center gap-1 cursor-normal-zone">
+            <div className="flex items-center gap-2 lg:gap-3 cursor-normal-zone">
               {/* User icon with dropdown (desktop) */}
               <div className="hidden lg:block">
                 <UserMenu />

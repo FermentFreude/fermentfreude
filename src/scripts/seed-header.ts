@@ -77,11 +77,6 @@ async function seedHeader() {
           },
           dropdownItems: [
             {
-              label: 'Alle Workshops',
-              href: '/workshops',
-              description: 'Übersicht aller Workshops',
-            },
-            {
               label: 'Lakto Gemüse',
               href: '/workshops/lakto-gemuese',
               description: 'Fermentierte Gemüse-Workshops',
@@ -95,6 +90,11 @@ async function seedHeader() {
               label: 'Kombucha',
               href: '/workshops/kombucha',
               description: 'Kombucha brauen lernen',
+            },
+            {
+              label: 'Alle Workshops',
+              href: '/workshops',
+              description: 'Übersicht aller Workshops',
             },
             {
               label: 'Upcoming Online Courses',
@@ -140,20 +140,17 @@ async function seedHeader() {
 
   // EN nav data with labels only (reuse IDs from DE)
   const enLabels = ['Home', 'About', 'Chefs', 'Shop', 'Workshops', 'Online Courses']
-  const enDropdowns: Record<
-    number,
-    Array<{ label: string; description: string }>
-  > = {
+  const enDropdowns: Record<number, Array<{ label: string; description: string }>> = {
     1: [
       { label: 'About Us', description: 'Our Team & Mission' },
       { label: 'Fermentation', description: 'What is Fermentation?' },
       { label: 'Contact', description: 'Get in touch' },
     ],
     4: [
-      { label: 'View All Workshops', description: 'Overview of all workshops' },
       { label: 'Lacto Vegetables', description: 'Fermented vegetable workshops' },
       { label: 'Tempeh', description: 'Learn to make tempeh' },
       { label: 'Kombucha', description: 'Learn to brew kombucha' },
+      { label: 'View All Workshops', description: 'Overview of all workshops' },
       {
         label: 'Upcoming Online Courses',
         description: 'Learn fermentation online',
@@ -212,11 +209,10 @@ async function seedHeader() {
   payload.logger.info('  • Chefs / Für Köche → /gastronomy')
   payload.logger.info('  • Shop → /shop')
   payload.logger.info('  • Workshops → /workshops (6 dropdown items)')
-  payload.logger.info('    ├─ View All / Alle Workshops → /workshops')
   payload.logger.info('    ├─ Lakto Gemüse / Lacto Vegetables')
   payload.logger.info('    ├─ Tempeh')
   payload.logger.info('    ├─ Kombucha')
-  payload.logger.info('    ├─ [separator]')
+  payload.logger.info('    ├─ View All / Alle Workshops → /workshops')
   payload.logger.info('    ├─ Upcoming Online Courses')
   payload.logger.info('    └─ Workshop Vouchers / Workshop Gutschein')
   payload.logger.info(

@@ -5051,6 +5051,10 @@ export interface Header {
               id?: string | null;
             }[]
           | null;
+        /**
+         * Single image displayed on the right side of the dropdown modal (desktop only).
+         */
+        dropdownImage?: (string | null) | Media;
         id?: string | null;
       }[]
     | null;
@@ -5468,6 +5472,7 @@ export interface HeaderSelect<T extends boolean = true> {
               description?: T;
               id?: T;
             };
+        dropdownImage?: T;
         id?: T;
       };
   updatedAt?: T;

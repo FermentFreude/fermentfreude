@@ -1,5 +1,7 @@
 'use client'
 
+import { Media } from '@/components/Media'
+import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
 import { gsap } from 'gsap'
 import { ChevronDown } from 'lucide-react'
@@ -21,26 +23,19 @@ interface NavDropdownProps {
   /** Optional top-level href — if provided, the label itself is a link */
   href?: string
   items: DropdownItem[]
+  /** Single image shown on the right side of the dropdown modal */
+  modalImage?: Record<string, unknown> | null
 }
 
 /** Desktop Megamenu Modal with Internal Navigation Tabs */
-export function NavDropdownDesktop({ label, href, items }: NavDropdownProps) {
+export function NavDropdownDesktop({ label, href, items, modalImage }: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const pathname = usePathname()
+  const { heroBackgroundColor } = useHeaderTheme()
 
   const isActive = items.some(
     (item) => pathname === item.href || pathname.startsWith(item.href + '/'),
   )
-
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    setIsOpen(true)
-  }
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => setIsOpen(false), 150)
-  }
 
   const handleBackdropClick = useCallback((e: React.MouseEvent) => {
     // Close only if clicking directly on the backdrop (not on the modal card)
@@ -64,13 +59,6 @@ export function NavDropdownDesktop({ label, href, items }: NavDropdownProps) {
     setIsOpen(false)
   }, [pathname])
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      document.body.style.overflow = ''
-    }
-  }, [])
-
   const chevron = (
     <ChevronDown
       className={cn(
@@ -89,13 +77,9 @@ export function NavDropdownDesktop({ label, href, items }: NavDropdownProps) {
   return (
     <>
       {/* Button trigger */}
-      <div
-        className="contents"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
+      <div className="contents">
         <MagneticElement strength={0.25}>
-          <button className={sharedClassName}>
+          <button onClick={() => setIsOpen(!isOpen)} className={sharedClassName}>
             {label}
             {chevron}
           </button>
@@ -111,50 +95,68 @@ export function NavDropdownDesktop({ label, href, items }: NavDropdownProps) {
               isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
             )}
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              backgroundColor: heroBackgroundColor
+                ? `${heroBackgroundColor}cc`
+                : 'rgba(0, 0, 0, 0.4)',
               backdropFilter: 'blur(8px)',
               zIndex: 9999,
             }}
             onClick={handleBackdropClick}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
           >
             {/* Modal Card */}
-            <div className={cn(
-              'dropdown-glass rounded-3xl overflow-hidden max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl transition-all duration-300',
-              isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
-            )}>
+            <div
+              className={cn(
+                'dropdown-glass rounded-2xl overflow-hidden max-w-3xl w-full max-h-[75vh] flex flex-col shadow-2xl transition-all duration-300',
+                isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
+              )}
+            >
               {/* Modal Header with Tabs */}
-              <div className="border-b border-white/10 dark:border-white/10 bg-linear-to-r from-white/5 to-white/5 dark:from-white/5 dark:to-white/5 backdrop-blur-xl px-8 py-6">
-                <h2 className="text-2xl font-display font-bold text-ff-near-black dark:text-white mb-6">
+              <div className="border-b border-white/10 dark:border-white/10 bg-linear-to-r from-white/5 to-white/5 dark:from-white/5 dark:to-white/5 backdrop-blur-xl px-6 py-5">
+                <h2 className="text-xl font-display font-bold text-ff-near-black dark:text-white">
                   {label}
                 </h2>
               </div>
 
-              {/* Modal Content - Grid */}
-              <div className="overflow-y-auto flex-1 px-8 py-8">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {items.map((item, i) => (
+              {/* Modal Content - Items grid + right image */}
+              <div className="overflow-y-auto flex-1 px-6 py-6 flex gap-6">
+                {/* Left: Items Grid */}
+                <div className="flex-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                  {items.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        'group flex flex-col gap-2 py-4 px-4 rounded-xl transition-all duration-300',
+                        'group flex flex-col gap-1.5 py-3 px-3 rounded-lg transition-all duration-300',
                         'hover:bg-ff-near-black dark:hover:bg-white cursor-pointer',
                         pathname === item.href && 'bg-ff-near-black/10 dark:bg-white/10',
                       )}
                     >
-                      <h4 className="font-display font-bold text-sm md:text-base text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
+                      <h4 className="font-display font-bold text-xs md:text-sm text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
                         {item.label}
                       </h4>
                       {item.description && (
-                        <p className="text-xs md:text-sm text-ff-gray-text/70 dark:text-neutral-400 leading-relaxed group-hover:text-white/80 dark:group-hover:text-ff-near-black/80 transition-colors">
+                        <p className="text-xs text-ff-gray-text/70 dark:text-neutral-400 leading-tight group-hover:text-white/80 dark:group-hover:text-ff-near-black/80 transition-colors">
                           {item.description}
                         </p>
                       )}
                     </Link>
                   ))}
+                </div>
+
+                {/* Right: Single Image */}
+                <div className="hidden lg:flex flex-col shrink-0 w-64">
+                  <div className="rounded-xl overflow-hidden bg-gradient-to-br from-neutral-200 to-neutral-300 dark:from-neutral-700 dark:to-neutral-800 h-72 flex items-center justify-center border border-white/20 dark:border-white/10">
+                    {modalImage && typeof modalImage === 'object' && modalImage !== null ? (
+                      <Media resource={modalImage as any} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-center text-neutral-400 dark:text-neutral-500 text-sm font-display">
+                        <p className="text-2xl mb-2">📸</p>
+                        <p>Add image</p>
+                        <p className="text-xs mt-1">in /admin</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

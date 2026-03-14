@@ -23,7 +23,7 @@ import { useSwipe } from './useSwipe'
 type HeroSliderProps = Page['hero']
 
 export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
-  const { setHeaderTheme } = useHeaderTheme()
+  const { setHeaderTheme, setHeroBackgroundColor } = useHeaderTheme()
 
   /* ── Merge CMS heroSlides with defaults ───────────────────── */
   const slides: ResolvedSlide[] = useMemo(() => {
@@ -74,7 +74,8 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
   useEffect(() => {
     setHeaderTheme('dark')
-  }, [setHeaderTheme])
+    setHeroBackgroundColor(slide.bgColor)
+  }, [setHeaderTheme, setHeroBackgroundColor, slide.bgColor])
 
   /* ── Render ────────────────────────────────────────────────── */
   return (
@@ -102,21 +103,6 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           className="h-[58%] transition-colors duration-700"
           style={{ backgroundColor: slide.panelColor }}
         />
-      </div>
-
-      {/* ── Mobile watermark ───────────────────────────────── */}
-      <div
-        className={cn(
-          'sm:hidden pointer-events-none absolute left-0 right-0 flex items-center justify-center select-none',
-          'font-display font-black uppercase tracking-[-0.04em]',
-          'text-[18vw] top-0 h-[42%]',
-          'transition-opacity duration-700',
-          isExiting ? 'opacity-0' : 'opacity-[0.07]',
-        )}
-        style={{ color: slide.panelColor }}
-        aria-hidden="true"
-      >
-        FermentFreude
       </div>
 
       <div className="sm:hidden relative z-10 flex flex-col h-full pt-20">
@@ -284,6 +270,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
        *  DESKTOP / TABLET LAYOUT (sm+)
        *  Three-column: Left image | Full-height panel | Right image
        *  Panel is FIXED on screen, content animates within it.
+       *  Center panel width matches navbar container for alignment.
        * ═══════════════════════════════════════════════════════ */}
       <div className="hidden sm:flex relative z-10 h-full w-full">
         {/* Nav arrows at screen edges */}
@@ -295,24 +282,9 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           className="flex-1 flex items-center justify-center relative transition-colors duration-700 sm:overflow-visible lg:overflow-hidden"
           style={{ backgroundColor: slide.bgColor }}
         >
-          {/* Background watermark */}
           <div
             className={cn(
-              'pointer-events-none absolute inset-0 flex items-center justify-center select-none',
-              'font-display font-black uppercase tracking-[-0.04em]',
-              'text-[8vw] lg:text-[7vw] xl:text-[6vw]',
-              'transition-opacity duration-700',
-              isExiting ? 'opacity-0' : 'opacity-[0.06]',
-            )}
-            style={{ color: slide.panelColor }}
-            aria-hidden="true"
-          >
-            Ferment
-          </div>
-
-          <div
-            className={cn(
-              'relative z-10 sm:z-30 lg:z-10 -rotate-3 group/img sm:translate-x-[14%] lg:translate-x-0',
+              'relative z-10 sm:z-30 lg:z-30 -rotate-3 group/img sm:translate-x-[14%] lg:translate-x-0',
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
@@ -336,7 +308,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
         {/* ── CENTER PANEL (full-height, fixed structure) ───── */}
         <div
-          className="w-[40%] lg:w-[38%] xl:w-[36%] h-full flex flex-col items-center transition-colors duration-700 relative z-20"
+          className="w-[38%] md:w-[40%] lg:w-[42%] xl:w-[44%] h-full flex flex-col items-center transition-colors duration-700 relative z-10"
           style={{ backgroundColor: slide.panelColor }}
         >
           {/* Content — vertically centered, padded for header + bottom nav */}
@@ -432,24 +404,9 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           className="flex-1 flex items-center justify-center relative transition-colors duration-700 sm:overflow-visible lg:overflow-hidden"
           style={{ backgroundColor: slide.bgColor }}
         >
-          {/* Background watermark */}
           <div
             className={cn(
-              'pointer-events-none absolute inset-0 flex items-center justify-center select-none',
-              'font-display font-black uppercase tracking-[-0.04em]',
-              'text-[8vw] lg:text-[7vw] xl:text-[6vw]',
-              'transition-opacity duration-700',
-              isExiting ? 'opacity-0' : 'opacity-[0.06]',
-            )}
-            style={{ color: slide.panelColor }}
-            aria-hidden="true"
-          >
-            Freude
-          </div>
-
-          <div
-            className={cn(
-              'relative z-10 sm:z-30 lg:z-10 rotate-3 group/img sm:-translate-x-[14%] lg:translate-x-0',
+              'relative z-10 sm:z-30 lg:z-30 rotate-3 group/img sm:-translate-x-[14%] lg:translate-x-0',
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}

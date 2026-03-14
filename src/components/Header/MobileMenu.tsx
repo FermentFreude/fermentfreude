@@ -2,7 +2,7 @@
 
 import type { Header } from '@/payload-types'
 import { gsap } from 'gsap'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, X } from 'lucide-react'
 
 import { useAuth } from '@/providers/Auth'
 import { cn } from '@/utilities/cn'
@@ -237,12 +237,21 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
 
       {/* Content */}
       <div className="relative h-full flex flex-col pt-24 sm:pt-28 md:pt-32">
-        {/* Language Toggle Header */}
+        {/* Header with Close Button and Language Toggle */}
         <div className="shrink-0 border-b border-ff-warm-gray/20 dark:border-white/10 px-5 sm:px-6 md:px-8 py-3 sm:py-4 flex items-center justify-between">
           <span className="text-xs text-ff-gray-text dark:text-neutral-400 uppercase tracking-wide">
             Language
           </span>
-          <LanguageToggle />
+          <div className="flex items-center gap-3">
+            <LanguageToggle />
+            <button
+              onClick={() => setIsActive(false)}
+              className="p-2 hover:bg-ff-near-black/10 dark:hover:bg-white/15 rounded-lg transition-colors shrink-0 flex items-center justify-center"
+              aria-label="Close menu"
+            >
+              <X className="w-6 h-6 text-ff-near-black dark:text-white" />
+            </button>
+          </div>
         </div>
 
         {/* Nav items list - scrollable */}
@@ -357,15 +366,15 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
             <div className="relative bg-[#f5f2ed] dark:bg-ff-near-black rounded-3xl shadow-2xl max-w-md w-full max-h-[85vh] pointer-events-auto overflow-hidden border border-ff-warm-gray/20 dark:border-white/10">
               {/* Header with Close */}
               <div className="sticky top-0 bg-[#f5f2ed]/95 dark:bg-ff-near-black/95 backdrop-blur-sm border-b border-ff-warm-gray/20 dark:border-white/10 px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
-                <h2 className="text-2xl sm:text-3xl font-display font-bold text-ff-near-black dark:text-white">
+                <h2 className="text-2xl sm:text-3xl font-display font-bold text-ff-near-black dark:text-white flex-1">
                   {navItemsList.find((i) => i.id === detailViewItem)?.label}
                 </h2>
                 <button
                   onClick={closeDetailView}
-                  className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition-colors shrink-0"
+                  className="p-2 ml-4 hover:bg-ff-near-black/10 dark:hover:bg-white/15 rounded-lg transition-colors shrink-0 flex items-center justify-center"
                   aria-label="Close"
                 >
-                  <ChevronDown className="w-5 h-5 rotate-180" />
+                  <X className="w-6 h-6 text-ff-near-black dark:text-white" />
                 </button>
               </div>
 

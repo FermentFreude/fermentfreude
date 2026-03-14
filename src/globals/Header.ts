@@ -169,6 +169,16 @@ export const Header: GlobalConfig = {
             },
           ],
         },
+        {
+          name: 'dropdownImage',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Dropdown Image',
+          admin: {
+            description:
+              'Single image displayed on the right side of the dropdown modal (desktop only).',
+          },
+        },
       ],
       maxRows: 6,
     },
