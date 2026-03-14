@@ -21,7 +21,7 @@ async function seedHeader() {
       announcementBar: {
         enabled: true,
         text: 'Wir haben auch digitale Workshops, schau mal rein',
-        link: '/workshops',
+        link: '/courses',
       },
       navItems: [
         {
@@ -77,6 +77,11 @@ async function seedHeader() {
           },
           dropdownItems: [
             {
+              label: 'Alle Workshops',
+              href: '/workshops',
+              description: 'Übersicht aller Workshops',
+            },
+            {
               label: 'Lakto Gemüse',
               href: '/workshops/lakto-gemuese',
               description: 'Fermentierte Gemüse-Workshops',
@@ -92,9 +97,28 @@ async function seedHeader() {
               description: 'Kombucha brauen lernen',
             },
             {
-              label: 'Gutschein',
+              label: 'Upcoming Online Courses',
+              href: '/courses',
+              description: 'Lerne Fermentation online',
+            },
+            {
+              label: 'Workshop Vouchers',
               href: '/workshops/voucher',
               description: 'Workshop-Gutschein verschenken',
+            },
+          ],
+        },
+        {
+          link: {
+            type: 'custom',
+            label: 'Online Kurse',
+            url: '/courses',
+          },
+          dropdownItems: [
+            {
+              label: 'Fermentation Grundlagen',
+              href: '/courses',
+              description: 'Lerne Fermentation online',
             },
           ],
         },
@@ -115,19 +139,28 @@ async function seedHeader() {
   const freshNavItems = freshHeader.navItems || []
 
   // EN nav data with labels only (reuse IDs from DE)
-  const enLabels = ['Home', 'About', 'Chefs', 'Shop', 'Workshops']
-  const enDropdowns: Record<number, Array<{ label: string; description: string }>> = {
+  const enLabels = ['Home', 'About', 'Chefs', 'Shop', 'Workshops', 'Online Courses']
+  const enDropdowns: Record<
+    number,
+    Array<{ label: string; description: string }>
+  > = {
     1: [
       { label: 'About Us', description: 'Our Team & Mission' },
       { label: 'Fermentation', description: 'What is Fermentation?' },
       { label: 'Contact', description: 'Get in touch' },
     ],
     4: [
+      { label: 'View All Workshops', description: 'Overview of all workshops' },
       { label: 'Lacto Vegetables', description: 'Fermented vegetable workshops' },
       { label: 'Tempeh', description: 'Learn to make tempeh' },
       { label: 'Kombucha', description: 'Learn to brew kombucha' },
-      { label: 'Gift Voucher', description: 'Give a workshop voucher' },
+      {
+        label: 'Upcoming Online Courses',
+        description: 'Learn fermentation online',
+      },
+      { label: 'Workshop Vouchers', description: 'Give a workshop voucher' },
     ],
+    5: [{ label: 'Fermentation Basics', description: 'Learn fermentation fundamentals online' }],
   }
 
   // Build EN navItems reusing IDs from DE
@@ -145,6 +178,7 @@ async function seedHeader() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       result.dropdownItems = navItem.dropdownItems.map((dd: any, ddIdx: number) => ({
         id: dd.id,
+        isDivider: dd.isDivider || false,
         href: dd.href,
         label: enDropdowns[idx][ddIdx]?.label || dd.label,
         description: enDropdowns[idx][ddIdx]?.description || dd.description,
@@ -164,7 +198,7 @@ async function seedHeader() {
       announcementBar: {
         enabled: true,
         text: 'We Have Digital Workshops too, take a look',
-        link: '/workshops',
+        link: '/courses',
       },
       navItems: enNavItems,
     },
@@ -177,7 +211,17 @@ async function seedHeader() {
   payload.logger.info('  • About / Über uns → /about (dropdown: About Us, Fermentation, Contact)')
   payload.logger.info('  • Chefs / Für Köche → /gastronomy')
   payload.logger.info('  • Shop → /shop')
-  payload.logger.info('  • Workshops → /workshops (4 dropdown sub-items)')
+  payload.logger.info('  • Workshops → /workshops (6 dropdown items)')
+  payload.logger.info('    ├─ View All / Alle Workshops → /workshops')
+  payload.logger.info('    ├─ Lakto Gemüse / Lacto Vegetables')
+  payload.logger.info('    ├─ Tempeh')
+  payload.logger.info('    ├─ Kombucha')
+  payload.logger.info('    ├─ [separator]')
+  payload.logger.info('    ├─ Upcoming Online Courses')
+  payload.logger.info('    └─ Workshop Vouchers / Workshop Gutschein')
+  payload.logger.info(
+    '  • Online Courses / Online Kurse → /courses (dropdown: Fermentation Basics)',
+  )
   payload.logger.info('')
   payload.logger.info(
     'Editors can manage both languages from /admin → Header (switch locale in top bar)',

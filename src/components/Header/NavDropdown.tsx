@@ -6,12 +6,14 @@ import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { MagneticElement } from './MagneticElement'
 
 export interface DropdownItem {
   label: string
   href: string
   description?: string | null
+  isDivider?: boolean | null
 }
 
 interface NavDropdownProps {
@@ -21,53 +23,15 @@ interface NavDropdownProps {
   items: DropdownItem[]
 }
 
-/** Desktop hover dropdown with glassmorphism panel + GSAP animations */
-export function NavDropdown({ label, href, items }: NavDropdownProps) {
+/** Desktop Megamenu Modal with Internal Navigation Tabs */
+export function NavDropdownDesktop({ label, href, items }: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const panelRef = useRef<HTMLDivElement>(null)
-  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([])
   const pathname = usePathname()
 
   const isActive = items.some(
     (item) => pathname === item.href || pathname.startsWith(item.href + '/'),
   )
-
-  const animateOpen = useCallback(() => {
-    if (!panelRef.current) return
-    gsap.killTweensOf(panelRef.current)
-    gsap.killTweensOf(itemRefs.current)
-    gsap.set(panelRef.current, { display: 'block', opacity: 0, y: -8, scale: 0.97 })
-    gsap.to(panelRef.current, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.4,
-      ease: 'power3.out',
-    })
-    // Stagger items in
-    gsap.fromTo(
-      itemRefs.current.filter(Boolean),
-      { opacity: 0, y: 12 },
-      { opacity: 1, y: 0, duration: 0.35, stagger: 0.04, ease: 'power2.out', delay: 0.08 },
-    )
-  }, [])
-
-  const animateClose = useCallback(() => {
-    if (!panelRef.current) return
-    gsap.killTweensOf(panelRef.current)
-    gsap.to(panelRef.current, {
-      opacity: 0,
-      y: -6,
-      scale: 0.97,
-      duration: 0.25,
-      ease: 'power2.inOut',
-      onComplete: () => {
-        if (panelRef.current) gsap.set(panelRef.current, { display: 'none' })
-      },
-    })
-  }, [])
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -75,16 +39,26 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
   }
 
   const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => setIsOpen(false), 180)
+    timeoutRef.current = setTimeout(() => setIsOpen(false), 150)
   }
+
+  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+    // Close only if clicking directly on the backdrop (not on the modal card)
+    if (e.target === e.currentTarget) {
+      setIsOpen(false)
+    }
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
-      animateOpen()
+      document.body.style.overflow = 'hidden'
     } else {
-      animateClose()
+      document.body.style.overflow = ''
     }
-  }, [isOpen, animateOpen, animateClose])
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
 
   useEffect(() => {
     setIsOpen(false)
@@ -93,13 +67,9 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      document.body.style.overflow = ''
     }
   }, [])
-
-  const sharedClassName = cn(
-    'relative navLink inline-flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors',
-    { active: isActive },
-  )
 
   const chevron = (
     <ChevronDown
@@ -111,64 +81,87 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
     />
   )
 
+  const sharedClassName = cn(
+    'relative navLink inline-flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors',
+    { active: isActive },
+  )
+
   return (
-    <div
-      ref={dropdownRef}
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <MagneticElement strength={0.25}>
-        {href ? (
-          <Link href={href} className={sharedClassName}>
-            {label}
-            {chevron}
-          </Link>
-        ) : (
+    <>
+      {/* Button trigger */}
+      <div
+        className="contents"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <MagneticElement strength={0.25}>
           <button className={sharedClassName}>
             {label}
             {chevron}
           </button>
-        )}
-      </MagneticElement>
-
-      {/* Glassmorphism dropdown panel */}
-      <div
-        ref={panelRef}
-        className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50 cursor-normal-zone"
-        style={{ display: 'none' }}
-      >
-        <div className="dropdown-glass w-60 rounded-2xl overflow-hidden">
-          <div className="py-2">
-            {items.map((item, i) => (
-              <Link
-                key={item.href}
-                ref={(el) => {
-                  itemRefs.current[i] = el
-                }}
-                href={item.href}
-                className={cn(
-                  'group block px-5 py-3 transition-colors duration-200',
-                  'hover:bg-ff-near-black dark:hover:bg-white',
-                  {
-                    'bg-white/50 dark:bg-white/8': pathname === item.href,
-                  },
-                )}
-              >
-                <span className="block font-display font-bold text-sm text-ff-gray-15 dark:text-neutral-200 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                  {item.label}
-                </span>
-                {item.description && (
-                  <span className="block text-xs text-ff-gray-text/80 dark:text-neutral-500 group-hover:text-white/70 dark:group-hover:text-ff-near-black/60 mt-0.5 transition-colors">
-                    {item.description}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </div>
-        </div>
+        </MagneticElement>
       </div>
-    </div>
+
+      {/* Modal rendered via portal */}
+      {isOpen &&
+        createPortal(
+          <div
+            className={cn(
+              'fixed inset-0 flex items-center justify-center cursor-normal-zone md:flex p-4 transition-opacity duration-300',
+              isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
+            )}
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 9999,
+            }}
+            onClick={handleBackdropClick}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {/* Modal Card */}
+            <div className={cn(
+              'dropdown-glass rounded-3xl overflow-hidden max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl transition-all duration-300',
+              isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
+            )}>
+              {/* Modal Header with Tabs */}
+              <div className="border-b border-white/10 dark:border-white/10 bg-linear-to-r from-white/5 to-white/5 dark:from-white/5 dark:to-white/5 backdrop-blur-xl px-8 py-6">
+                <h2 className="text-2xl font-display font-bold text-ff-near-black dark:text-white mb-6">
+                  {label}
+                </h2>
+              </div>
+
+              {/* Modal Content - Grid */}
+              <div className="overflow-y-auto flex-1 px-8 py-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {items.map((item, i) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={cn(
+                        'group flex flex-col gap-2 py-4 px-4 rounded-xl transition-all duration-300',
+                        'hover:bg-ff-near-black dark:hover:bg-white cursor-pointer',
+                        pathname === item.href && 'bg-ff-near-black/10 dark:bg-white/10',
+                      )}
+                    >
+                      <h4 className="font-display font-bold text-sm md:text-base text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
+                        {item.label}
+                      </h4>
+                      {item.description && (
+                        <p className="text-xs md:text-sm text-ff-gray-text/70 dark:text-neutral-400 leading-relaxed group-hover:text-white/80 dark:group-hover:text-ff-near-black/80 transition-colors">
+                          {item.description}
+                        </p>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+    </>
   )
 }
 

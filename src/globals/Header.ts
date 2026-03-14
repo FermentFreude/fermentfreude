@@ -139,6 +139,14 @@ export const Header: GlobalConfig = {
           },
           fields: [
             {
+              name: 'isDivider',
+              type: 'checkbox',
+              label: 'Visual Separator',
+              admin: {
+                description: 'Check to add a visual divider line above this item (for grouping).',
+              },
+            },
+            {
               name: 'label',
               type: 'text',
               required: true,

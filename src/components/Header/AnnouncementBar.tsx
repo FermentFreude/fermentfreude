@@ -6,7 +6,7 @@ import { useState } from 'react'
 
 /* ── Hardcoded English defaults ──────────────────────────────── */
 const DEFAULT_TEXT = 'We Have Digital Workshops too, take a look'
-const DEFAULT_LINK = '/workshops'
+const DEFAULT_LINK = '/courses'
 
 interface AnnouncementBarProps {
   enabled?: boolean | null

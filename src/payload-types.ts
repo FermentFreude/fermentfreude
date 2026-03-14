@@ -5038,6 +5038,10 @@ export interface Header {
          */
         dropdownItems?:
           | {
+              /**
+               * Check to add a visual divider line above this item (for grouping).
+               */
+              isDivider?: boolean | null;
               label: string;
               href: string;
               /**
@@ -5458,6 +5462,7 @@ export interface HeaderSelect<T extends boolean = true> {
         dropdownItems?:
           | T
           | {
+              isDivider?: T;
               label?: T;
               href?: T;
               description?: T;

@@ -2,7 +2,6 @@
 
 import { Cart } from '@/components/Cart'
 import { CMSLink } from '@/components/Link'
-import { gsap } from 'gsap'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
@@ -15,8 +14,9 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
 import { usePathname } from 'next/navigation'
 import { CartIconButton } from './CartIconButton'
+import { LanguageToggle } from './LanguageToggle'
 import { MagneticElement } from './MagneticElement'
-import { NavDropdown } from './NavDropdown'
+import { NavDropdownDesktop } from './NavDropdown'
 import { UserMenu } from './UserMenu'
 import { defaultDropdowns, defaultNavItems, getDefaultDropdownKey } from './nav-defaults'
 
@@ -42,10 +42,6 @@ export function HeaderClient({ header }: Props) {
 
   const navLinksRef = useRef<HTMLUListElement>(null)
 
-  // Refs for Menu/Close label animation
-  const menuLabelRef = useRef<HTMLParagraphElement>(null)
-  const closeLabelRef = useRef<HTMLParagraphElement>(null)
-
   const handleScroll = useCallback(() => {
     const y = window.scrollY
     setIsAtTop(y < 10)
@@ -66,16 +62,8 @@ export function HeaderClient({ header }: Props) {
 
   // Animate Menu/Close label crossfade
   useEffect(() => {
-    if (menuLabelRef.current && closeLabelRef.current) {
-      if (isMenuActive) {
-        gsap.to(menuLabelRef.current, { opacity: 0, duration: 0.35, ease: 'power2.out' })
-        gsap.to(closeLabelRef.current, { opacity: 1, duration: 0.35, ease: 'power2.out' })
-      } else {
-        gsap.to(menuLabelRef.current, { opacity: 1, duration: 0.35, ease: 'power2.out' })
-        gsap.to(closeLabelRef.current, { opacity: 0, duration: 0.35, ease: 'power2.out' })
-      }
-    }
-  }, [isMenuActive])
+    setIsAtTop(true)
+  }, [])
 
   // Transparent header on home page when at top
   const isTransparent = isHomePage && isAtTop && !isMenuActive
@@ -116,7 +104,7 @@ export function HeaderClient({ header }: Props) {
         className={cn(
           'z-50 w-full transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
           isHomePage ? 'fixed top-0' : 'sticky top-0',
-          hidden && !isMenuActive && '-translate-y-full',
+          (hidden && !isMenuActive) || isMenuActive ? '-translate-y-full' : '',
         )}
         data-transparent={isTransparent ? '' : undefined}
         data-header-theme={mounted && isTransparent && headerTheme === 'dark' ? 'dark' : undefined}
@@ -162,7 +150,7 @@ export function HeaderClient({ header }: Props) {
 
                   return (
                     <li key={item.id} className="nav-link-item">
-                      <NavDropdown label={label} href={url || undefined} items={dropdownItems} />
+                      <NavDropdownDesktop label={label} items={dropdownItems} />
                     </li>
                   )
                 }
@@ -203,28 +191,17 @@ export function HeaderClient({ header }: Props) {
                 <Cart />
               </Suspense>
 
-              {/* Menu / Close toggle — portfolio style */}
+              {/* Language toggle (desktop) - after cart */}
+              <div className="hidden lg:block">
+                <LanguageToggle />
+              </div>
+
+              {/* Menu / Close toggle icon - only on tablet & mobile */}
               <button
                 onClick={() => setIsMenuActive(!isMenuActive)}
-                className="flex items-center justify-center gap-3 h-10 px-1 text-ff-gray-15 dark:text-neutral-300 transition-colors hover:text-ff-near-black dark:hover:text-white"
+                className="lg:hidden flex items-center justify-center h-10 px-1 text-ff-gray-15 dark:text-neutral-300 transition-colors hover:text-ff-near-black dark:hover:text-white"
                 aria-label={isMenuActive ? 'Close navigation menu' : 'Open navigation menu'}
               >
-                {/* Menu / Close label */}
-                <div className="relative flex items-center">
-                  <p
-                    ref={menuLabelRef}
-                    className="m-0 text-sm md:text-base font-display font-bold lowercase leading-none select-none"
-                  >
-                    Menu
-                  </p>
-                  <p
-                    ref={closeLabelRef}
-                    className="m-0 text-sm md:text-base font-display font-bold lowercase leading-none select-none absolute left-0 opacity-0"
-                  >
-                    Close
-                  </p>
-                </div>
-
                 {/* Burger bars → X */}
                 <div
                   className={cn(
