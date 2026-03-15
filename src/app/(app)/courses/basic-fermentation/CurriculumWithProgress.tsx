@@ -192,7 +192,6 @@ export function CurriculumWithProgress({
                     const rowKey = `${mod.id ?? idx}-${lesson.id ?? lidx}`
                     const isExpanded = expandedKey === rowKey
                     const onToggleVideo = () => setExpandedKey(isExpanded ? null : rowKey)
-                    const videoSrc = videoUrls[rowKey] ?? lesson.videoUrl ?? undefined
                     return (
                       <li key={lesson.id ?? lidx} className="flex flex-col gap-3">
                         <div className="flex flex-wrap items-center gap-3 gap-y-1 rounded-xl px-3 py-2 transition-colors hover:bg-ff-warm-gray/30">
