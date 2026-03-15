@@ -2,7 +2,7 @@
 
 import { cn } from '@/utilities/cn'
 import { gsap } from 'gsap'
-import { Plus } from 'lucide-react'
+import { ChevronDown, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -40,9 +40,7 @@ export function NavDropdownDesktop({ label, items }: NavDropdownProps) {
       <MagneticElement strength={0.25}>
         <button className={sharedClassName}>
           {label}
-          {items.length > 0 && (
-            <Plus className="w-3 h-3 transition-transform" />
-          )}
+          {items.length > 0 && <Plus className="w-3 h-3 transition-transform" />}
         </button>
       </MagneticElement>
 
@@ -55,13 +53,15 @@ export function NavDropdownDesktop({ label, items }: NavDropdownProps) {
           border: '1px solid rgba(0, 0, 0, 0.1)',
         }}
       >
-        {items.map((item) => (
+        {items.map((item, idx) => (
           <li key={item.href} className="relative group/item">
             <Link
               href={item.href}
               className={cn(
                 'block px-4 py-3 text-sm font-display font-bold text-ff-near-black transition-colors whitespace-nowrap',
                 'hover:bg-ff-near-black hover:text-white dark:hover:bg-white dark:hover:text-ff-near-black',
+                idx === 0 && 'rounded-t-lg',
+                idx === items.length - 1 && 'rounded-b-lg',
                 pathname === item.href && 'bg-ff-near-black/8',
               )}
             >
@@ -83,13 +83,15 @@ export function NavDropdownDesktop({ label, items }: NavDropdownProps) {
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                 }}
               >
-                {item.submenu.map((subitem) => (
+                {item.submenu.map((subitem, subIdx) => (
                   <li key={subitem.href}>
                     <Link
                       href={subitem.href}
                       className={cn(
                         'block px-4 py-3 text-sm font-display font-bold text-ff-near-black transition-colors whitespace-nowrap',
                         'hover:bg-ff-near-black hover:text-white dark:hover:bg-white dark:hover:text-ff-near-black',
+                        subIdx === 0 && 'rounded-t-lg',
+                        subIdx === item.submenu.length - 1 && 'rounded-b-lg',
                         pathname === subitem.href && 'bg-ff-near-black/8',
                       )}
                     >
