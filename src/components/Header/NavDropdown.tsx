@@ -83,7 +83,7 @@ export function NavDropdownDesktop({ label, items }: NavDropdownProps) {
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                 }}
               >
-                {item.submenu.map((subitem, subIdx) => (
+                {item.submenu?.map((subitem, subIdx) => (
                   <li key={subitem.href}>
                     <Link
                       href={subitem.href}
@@ -91,7 +91,7 @@ export function NavDropdownDesktop({ label, items }: NavDropdownProps) {
                         'block px-4 py-3 text-sm font-display font-bold text-ff-near-black transition-colors whitespace-nowrap',
                         'hover:bg-ff-near-black hover:text-white dark:hover:bg-white dark:hover:text-ff-near-black',
                         subIdx === 0 && 'rounded-t-lg',
-                        subIdx === item.submenu.length - 1 && 'rounded-b-lg',
+                        subIdx === (item.submenu?.length ?? 0) - 1 && 'rounded-b-lg',
                         pathname === subitem.href && 'bg-ff-near-black/8',
                       )}
                     >
