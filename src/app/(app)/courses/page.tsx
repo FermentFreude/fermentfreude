@@ -213,7 +213,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
     const mediaIds = new Set<string>()
     const addId = (v: unknown) => {
       if (v == null) return
-      if (typeof v === 'object' && v !== null && 'id' in v) {
+      if (v && typeof v === 'object' && 'id' in v) {
         const id = (v as { id: unknown }).id
         if (typeof id === 'string' || typeof id === 'number') mediaIds.add(String(id))
       } else if (typeof v === 'string' || typeof v === 'number') mediaIds.add(String(v))
