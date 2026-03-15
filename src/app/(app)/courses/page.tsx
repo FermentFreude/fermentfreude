@@ -274,7 +274,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   const resolveMedia = (v: unknown): MediaType | null => {
     if (v == null) return null
     const id =
-      typeof v === 'object' && v !== null && 'id' in v
+      typeof v === 'object' && 'id' in v
         ? String((v as { id: unknown }).id)
         : typeof v === 'string' || typeof v === 'number'
           ? String(v)
