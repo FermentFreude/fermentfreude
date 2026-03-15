@@ -5048,6 +5048,16 @@ export interface Header {
                * Short description shown below the label in the dropdown.
                */
               description?: string | null;
+              /**
+               * Optional nested items that appear to the side on hover (e.g., course list under "Online Courses"). Admin can add/remove items here.
+               */
+              submenu?:
+                | {
+                    label: string;
+                    href: string;
+                    id?: string | null;
+                  }[]
+                | null;
               id?: string | null;
             }[]
           | null;
@@ -5470,6 +5480,13 @@ export interface HeaderSelect<T extends boolean = true> {
               label?: T;
               href?: T;
               description?: T;
+              submenu?:
+                | T
+                | {
+                    label?: T;
+                    href?: T;
+                    id?: T;
+                  };
               id?: T;
             };
         dropdownImage?: T;

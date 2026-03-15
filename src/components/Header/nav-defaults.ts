@@ -8,6 +8,7 @@ export interface DropdownItem {
   href: string
   description?: string | null
   isDivider?: boolean | null
+  submenu?: DropdownItem[]
 }
 
 export interface DefaultNavItem {
@@ -28,25 +29,20 @@ export const defaultNavItems: DefaultNavItem[] = [
       {
         label: 'View All Workshops',
         href: '/workshops',
-        description: 'Overview of all workshops',
+        submenu: [
+          { label: 'Lacto Vegetables', href: '/workshops/lakto-gemuese' },
+          { label: 'Tempeh', href: '/workshops/tempeh' },
+          { label: 'Kombucha', href: '/workshops/kombucha' },
+        ],
       },
       {
-        label: 'Lacto Vegetables',
-        href: '/workshops/lakto-gemuese',
-        description: 'Fermented vegetable workshops',
-      },
-      { label: 'Tempeh', href: '/workshops/tempeh', description: 'Learn to make tempeh' },
-      { label: 'Kombucha', href: '/workshops/kombucha', description: 'Learn to brew kombucha' },
-      {
-        isDivider: true,
         label: 'Upcoming Online Courses',
         href: '/courses',
-        description: 'Learn fermentation online',
+        submenu: [{ label: 'Fermentation Basics', href: '/courses' }],
       },
       {
         label: 'Workshop Vouchers',
         href: '/workshops/voucher',
-        description: 'Give a workshop voucher',
       },
     ],
   },
@@ -88,7 +84,8 @@ for (const item of defaultNavItems) {
 export function getDefaultDropdownKey(label?: string | null, url?: string | null): string | null {
   const l = label?.toLowerCase()
   if (l === 'workshops' || url === '/workshops') return 'workshops'
-  if (l === 'online courses' || (url === '/courses' && l?.includes('online'))) return 'onlineCourses'
+  if (l === 'online courses' || (url === '/courses' && l?.includes('online')))
+    return 'onlineCourses'
   if (
     l === 'about us' ||
     l === 'about' ||

@@ -229,14 +229,14 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
   return (
     <div
       ref={navRef}
-      className="nav-overlay fixed left-0 top-0 w-full h-screen z-50 overflow-hidden"
-      style={{ height: 0 }}
+      className="nav-overlay fixed left-0 top-0 w-full z-50 overflow-hidden"
+      style={{ height: 0, minHeight: '100dvh' }}
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-[#f5f2ed]/97 dark:bg-ff-near-black/97 backdrop-blur-xl" />
+      <div className="absolute inset-0 bg-[#ECE5DE]/95 dark:bg-ff-near-black/97 backdrop-blur-xl" />
 
       {/* Content */}
-      <div className="relative h-full flex flex-col pt-24 sm:pt-28 md:pt-32">
+      <div className="relative min-h-dvh flex flex-col pt-24 sm:pt-28 md:pt-32">
         {/* Header with Close Button and Language Toggle */}
         <div className="shrink-0 border-b border-ff-warm-gray/20 dark:border-white/10 px-5 sm:px-6 md:px-8 py-3 sm:py-4 flex items-center justify-between">
           <span className="text-xs text-ff-gray-text dark:text-neutral-400 uppercase tracking-wide">

@@ -167,6 +167,30 @@ export const Header: GlobalConfig = {
                 description: 'Short description shown below the label in the dropdown.',
               },
             },
+            {
+              name: 'submenu',
+              type: 'array',
+              label: 'Nested Sub-Menu Items',
+              admin: {
+                description:
+                  'Optional nested items that appear to the side on hover (e.g., course list under "Online Courses"). Admin can add/remove items here.',
+              },
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Item Label',
+                },
+                {
+                  name: 'href',
+                  type: 'text',
+                  required: true,
+                  label: 'URL',
+                },
+              ],
+            },
           ],
         },
         {

@@ -30,6 +30,28 @@ export function HeaderClient({ header }: Props) {
   const isHomePage = pathname === '/'
   const { headerTheme, heroBackgroundColor } = useHeaderTheme()
   const [mounted, setMounted] = useState(false)
+
+  // DEBUG: Log CMS nav items structure in browser console
+  useEffect(() => {
+    console.log('%c=== DEBUG: HeaderClient Received ===', 'color: blue; font-weight: bold')
+    console.log('CMS nav items:', cmsItems)
+    cmsItems.forEach((item, idx) => {
+      if (item.dropdownItems && item.dropdownItems.length > 0) {
+        console.log(`[${idx}] ${item.link?.label}:`, {
+          dropdownItems: item.dropdownItems,
+        })
+        item.dropdownItems.forEach((dd: any, ddIdx: number) => {
+          console.log(`  [${ddIdx}] ${dd.label}:`, {
+            href: dd.href,
+            submenu: dd.submenu,
+            hasSubmenu: !!dd.submenu && dd.submenu.length > 0,
+          })
+        })
+      }
+    })
+    console.log('%c===============================', 'color: blue; font-weight: bold')
+  }, [cmsItems])
+
   useEffect(() => setMounted(true), [])
 
   // Menu active state (shared between header bar + overlay)
@@ -170,11 +192,7 @@ export function HeaderClient({ header }: Props) {
 
                   return (
                     <li key={item.id} className="nav-link-item">
-                      <NavDropdownDesktop
-                        label={label}
-                        items={dropdownItems}
-                        modalImage={dropdownImage}
-                      />
+                      <NavDropdownDesktop label={label} items={dropdownItems} />
                     </li>
                   )
                 }

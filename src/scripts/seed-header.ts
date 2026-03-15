@@ -77,48 +77,36 @@ async function seedHeader() {
           },
           dropdownItems: [
             {
-              label: 'Lakto Gemüse',
-              href: '/workshops/lakto-gemuese',
-              description: 'Fermentierte Gemüse-Workshops',
-            },
-            {
-              label: 'Tempeh',
-              href: '/workshops/tempeh',
-              description: 'Tempeh selber machen',
-            },
-            {
-              label: 'Kombucha',
-              href: '/workshops/kombucha',
-              description: 'Kombucha brauen lernen',
-            },
-            {
               label: 'Alle Workshops',
               href: '/workshops',
-              description: 'Übersicht aller Workshops',
+              submenu: [
+                {
+                  label: 'Lakto Gemüse',
+                  href: '/workshops/lakto-gemuese',
+                },
+                {
+                  label: 'Tempeh',
+                  href: '/workshops/tempeh',
+                },
+                {
+                  label: 'Kombucha',
+                  href: '/workshops/kombucha',
+                },
+              ],
             },
             {
-              label: 'Upcoming Online Courses',
+              label: 'Online Kurse',
               href: '/courses',
-              description: 'Lerne Fermentation online',
+              submenu: [
+                {
+                  label: 'Fermentation Basics',
+                  href: '/courses/fermentation-basics',
+                },
+              ],
             },
             {
               label: 'Workshop Vouchers',
               href: '/workshops/voucher',
-              description: 'Workshop-Gutschein verschenken',
-            },
-          ],
-        },
-        {
-          link: {
-            type: 'custom',
-            label: 'Online Kurse',
-            url: '/courses',
-          },
-          dropdownItems: [
-            {
-              label: 'Fermentation Grundlagen',
-              href: '/courses',
-              description: 'Lerne Fermentation online',
             },
           ],
         },
@@ -139,25 +127,27 @@ async function seedHeader() {
   const freshNavItems = freshHeader.navItems || []
 
   // EN nav data with labels only (reuse IDs from DE)
-  const enLabels = ['Home', 'About', 'Chefs', 'Shop', 'Workshops', 'Online Courses']
-  const enDropdowns: Record<number, Array<{ label: string; description: string }>> = {
+  const enLabels = ['Home', 'About', 'Chefs', 'Shop', 'Workshops']
+  const enDropdowns: Record<
+    number,
+    Array<{ label: string; description?: string; submenu?: Array<{ label: string }> }>
+  > = {
     1: [
       { label: 'About Us', description: 'Our Team & Mission' },
       { label: 'Fermentation', description: 'What is Fermentation?' },
       { label: 'Contact', description: 'Get in touch' },
     ],
     4: [
-      { label: 'Lacto Vegetables', description: 'Fermented vegetable workshops' },
-      { label: 'Tempeh', description: 'Learn to make tempeh' },
-      { label: 'Kombucha', description: 'Learn to brew kombucha' },
-      { label: 'View All Workshops', description: 'Overview of all workshops' },
       {
-        label: 'Upcoming Online Courses',
-        description: 'Learn fermentation online',
+        label: 'View All Workshops',
+        submenu: [{ label: 'Lacto Vegetables' }, { label: 'Tempeh' }, { label: 'Kombucha' }],
       },
-      { label: 'Workshop Vouchers', description: 'Give a workshop voucher' },
+      {
+        label: 'Online Courses',
+        submenu: [{ label: 'Fermentation Basics' }],
+      },
+      { label: 'Workshop Vouchers' },
     ],
-    5: [{ label: 'Fermentation Basics', description: 'Learn fermentation fundamentals online' }],
   }
 
   // Build EN navItems reusing IDs from DE
@@ -173,13 +163,24 @@ async function seedHeader() {
     }
     if (enDropdowns[idx] && navItem.dropdownItems) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      result.dropdownItems = navItem.dropdownItems.map((dd: any, ddIdx: number) => ({
-        id: dd.id,
-        isDivider: dd.isDivider || false,
-        href: dd.href,
-        label: enDropdowns[idx][ddIdx]?.label || dd.label,
-        description: enDropdowns[idx][ddIdx]?.description || dd.description,
-      }))
+      result.dropdownItems = navItem.dropdownItems.map((dd: any, ddIdx: number) => {
+        const enItem: any = {
+          id: dd.id,
+          isDivider: dd.isDivider || false,
+          href: dd.href,
+          label: enDropdowns[idx][ddIdx]?.label || dd.label,
+          description: enDropdowns[idx][ddIdx]?.description || dd.description,
+        }
+        // Handle nested submenu (let Payload auto-generate IDs)
+        if (dd.submenu && enDropdowns[idx]?.[ddIdx]?.submenu) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          enItem.submenu = dd.submenu.map((sub: any, subIdx: number) => ({
+            href: sub.href,
+            label: enDropdowns[idx]?.[ddIdx]?.submenu?.[subIdx]?.label || sub.label,
+          }))
+        }
+        return enItem
+      })
     }
     return result
   })
