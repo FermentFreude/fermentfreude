@@ -18,7 +18,6 @@ import { StickyCurriculumBar } from './StickyCurriculumBar'
 
 export const dynamic = 'force-dynamic'
 const DEFAULT_HERO_TITLE = 'The Complete Fermentation Course'
-const DEFAULT_HERO_SUBTITLE = 'Master the Art of Fermenting Foods and Beverages at Home'
 const DEFAULT_HERO_DESCRIPTION =
   'Learn everything you need to know about fermentation, from basic vegetable ferments to advanced techniques.'
 const DEFAULT_CURRICULUM_HEADING = 'Course Curriculum'
