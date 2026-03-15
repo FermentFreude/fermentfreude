@@ -9,7 +9,7 @@ export async function Header() {
   const cookieStore = await cookies()
   const localeValue = cookieStore.get('fermentfreude-locale')?.value
   const locale = (localeValue === 'en' ? 'en' : 'de') as 'de' | 'en'
-  const header = (await getCachedGlobal<HeaderGlobal>('header', 2, locale)()) as HeaderGlobal
+  const header = (await getCachedGlobal<HeaderGlobal>('header', 3, locale)()) as HeaderGlobal
 
   return <HeaderClient header={header} />
 }
