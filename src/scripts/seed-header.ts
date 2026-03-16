@@ -171,10 +171,11 @@ async function seedHeader() {
           label: enDropdowns[idx][ddIdx]?.label || dd.label,
           description: enDropdowns[idx][ddIdx]?.description || dd.description,
         }
-        // Handle nested submenu (let Payload auto-generate IDs)
+        // Handle nested submenu - preserve German IDs and apply English labels
         if (dd.submenu && enDropdowns[idx]?.[ddIdx]?.submenu) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           enItem.submenu = dd.submenu.map((sub: any, subIdx: number) => ({
+            id: sub.id, // PRESERVE German submenu item ID
             href: sub.href,
             label: enDropdowns[idx]?.[ddIdx]?.submenu?.[subIdx]?.label || sub.label,
           }))
