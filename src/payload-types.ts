@@ -5038,10 +5038,6 @@ export interface Header {
          */
         dropdownItems?:
           | {
-              /**
-               * Check to add a visual divider line above this item (for grouping).
-               */
-              isDivider?: boolean | null;
               label: string;
               href: string;
               /**
@@ -5049,15 +5045,9 @@ export interface Header {
                */
               description?: string | null;
               /**
-               * Optional nested items shown below a dropdown item in desktop navigation and grouped inside the mobile menu.
+               * Check to render this item with smaller font size (for workshop types).
                */
-              submenu?:
-                | {
-                    label: string;
-                    href: string;
-                    id?: string | null;
-                  }[]
-                | null;
+              isSmall?: boolean | null;
               id?: string | null;
             }[]
           | null;
@@ -5472,17 +5462,10 @@ export interface HeaderSelect<T extends boolean = true> {
         dropdownItems?:
           | T
           | {
-              isDivider?: T;
               label?: T;
               href?: T;
               description?: T;
-              submenu?:
-                | T
-                | {
-                    label?: T;
-                    href?: T;
-                    id?: T;
-                  };
+              isSmall?: T;
               id?: T;
             };
         id?: T;

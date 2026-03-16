@@ -1,14 +1,14 @@
 /**
  * Hardcoded fallback nav items + dropdown sub-items.
  * These render immediately and can be overridden by CMS editors.
+ * Flat structure — no nested submenus. Simple and reliable.
  */
 
 export interface DropdownItem {
   label: string
   href: string
   description?: string | null
-  isDivider?: boolean | null
-  submenu?: DropdownItem[] | null // Nested submenu items (can be null)
+  isSmall?: boolean | null
 }
 
 export interface DefaultNavItem {
@@ -30,23 +30,18 @@ export const defaultNavItems: DefaultNavItem[] = [
         label: 'All Workshops',
         href: '/workshops',
         description: 'Browse all in-person workshops',
-        submenu: [
-          { label: 'Lacto Vegetables', href: '/workshops/lakto-gemuese' },
-          { label: 'Tempeh', href: '/workshops/tempeh' },
-          { label: 'Kombucha', href: '/workshops/kombucha' },
-        ],
       },
+      { label: 'Lacto Vegetables', href: '/workshops/lakto-gemuese', isSmall: true },
+      { label: 'Tempeh', href: '/workshops/tempeh', isSmall: true },
+      { label: 'Kombucha', href: '/workshops/kombucha', isSmall: true },
       {
         label: 'Online Courses',
         href: '/courses',
-        description: 'Preview digital learning options',
-        submenu: [{ label: 'Fermentation Basics', href: '/courses/basic-fermentation' }],
+        description: 'Coming soon',
       },
       {
         label: 'Gift Voucher',
-        href: '/workshops/voucher',
-        description: 'Give a workshop voucher',
-        isDivider: true,
+        href: '/shop',
       },
     ],
   },

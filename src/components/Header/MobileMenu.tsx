@@ -264,11 +264,11 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
               const label = item.label.toLowerCase()
               const isAbout = href === '/about' || label.includes('about')
               const isWorkshops = href === '/workshops' || href.startsWith('/workshops/')
-              const isOnlineCourses = href === '/courses' || href.startsWith('/courses/') || label === 'online courses'
+              const isOnlineCourses =
+                href === '/courses' || href.startsWith('/courses/') || label === 'online courses'
               const isDetailViewOpen = detailViewItem === item.id
-              const isChevronOpen = (isWorkshops || isOnlineCourses || isAbout)
-                ? isDetailViewOpen
-                : isExpanded
+              const isChevronOpen =
+                isWorkshops || isOnlineCourses || isAbout ? isDetailViewOpen : isExpanded
 
               return (
                 <div key={item.id} className="mb-2 sm:mb-3">
@@ -397,7 +397,9 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                       children.find(
                         (child) => child.href.toLowerCase() === '/workshops' && !child.isDivider,
                       ) || null
-                    const workshopItems = (headerItem?.children || []).filter((child) => !child.isDivider)
+                    const workshopItems = (headerItem?.children || []).filter(
+                      (child) => !child.isDivider,
+                    )
                     const additionalItems = children.filter((child) => {
                       const href = child.href.toLowerCase()
                       const label = child.label.toLowerCase()

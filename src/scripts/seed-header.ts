@@ -1,14 +1,14 @@
 /**
  * Seed the Header global in DE and EN using the same array IDs across locales.
- * Run: set -a && source .env && set +a && npx tsx src/scripts/seed-header.ts
+ * Simple flat dropdown structure (no nested submenus).
+ * Run: pnpm seed header
  */
+import type { Header } from '@/payload-types'
 import config from '@payload-config'
 import { getPayload } from 'payload'
-import type { Header } from '@/payload-types'
 
 type HeaderNavItem = NonNullable<Header['navItems']>[number]
 type HeaderDropdownItem = NonNullable<HeaderNavItem['dropdownItems']>[number]
-type HeaderSubmenuItem = NonNullable<HeaderDropdownItem['submenu']>[number]
 
 const ctx = { skipRevalidate: true, skipAutoTranslate: true }
 
@@ -23,23 +23,33 @@ const deNavItems = [
         label: 'Alle Workshops',
         href: '/workshops',
         description: 'Alle Präsenz-Workshops entdecken',
-        submenu: [
-          { label: 'Lakto Gemüse', href: '/workshops/lakto-gemuese' },
-          { label: 'Tempeh', href: '/workshops/tempeh' },
-          { label: 'Kombucha', href: '/workshops/kombucha' },
-        ],
+        isSmall: false,
+      },
+      {
+        label: 'Lakto Gemüse',
+        href: '/workshops/lakto-gemuese',
+        isSmall: true,
+      },
+      {
+        label: 'Tempeh',
+        href: '/workshops/tempeh',
+        isSmall: true,
+      },
+      {
+        label: 'Kombucha',
+        href: '/workshops/kombucha',
+        isSmall: true,
       },
       {
         label: 'Online Kurse',
         href: '/courses',
-        description: 'Digitale Lernangebote entdecken',
-        submenu: [{ label: 'Fermentation Basics', href: '/courses/basic-fermentation' }],
+        description: 'Demnächst verfügbar',
+        isSmall: false,
       },
       {
         label: 'Workshop Gutschein',
-        href: '/workshops/voucher',
-        description: 'Fermentationsfreude verschenken',
-        isDivider: true,
+        href: '/shop',
+        isSmall: false,
       },
     ],
   },
@@ -62,107 +72,64 @@ const deNavItems = [
   },
 ] satisfies Array<Partial<HeaderNavItem>>
 
-const enLabels = {
-  announcementText: 'We have digital workshops too, take a look',
-  navItems: ['Home', 'Workshops', 'Shop', 'For Chefs', 'About Us', 'Contact'],
-  workshops: {
-    all: { label: 'All Workshops', description: 'Browse all in-person workshops' },
-    lacto: 'Lacto Vegetables',
-    tempeh: 'Tempeh',
-    kombucha: 'Kombucha',
-    online: { label: 'Online Courses', description: 'Preview digital learning options' },
-    basics: 'Fermentation Basics',
-    voucher: { label: 'Gift Voucher', description: 'Give a workshop voucher' },
-  },
-  about: {
-    about: { label: 'About Us', description: 'Our Team & Mission' },
-    fermentation: { label: 'Fermentation', description: 'What is Fermentation?' },
-    contact: { label: 'Contact', description: 'Get in touch' },
-  },
-} as const
-
-function mergeSubmenuEN(
-  source: HeaderSubmenuItem[] | null | undefined,
-  labels: readonly string[],
-): HeaderSubmenuItem[] {
-  return (source || []).map((item, index) => ({
-    id: item.id,
-    href: item.href,
-    label: labels[index] || item.label,
-  }))
+const enDropdownRemap: Record<number, string[]> = {
+  1: [
+    'All Workshops',
+    'Lacto Vegetables',
+    'Tempeh',
+    'Kombucha',
+    'Online Courses',
+    'Gift Voucher',
+  ],
+  4: ['About Us', 'Fermentation', 'Contact'],
 }
 
-function mergeDropdownItemsEN(source: HeaderDropdownItem[] | null | undefined): HeaderDropdownItem[] {
-  const items = source || []
-
-  return items.map((item, index) => {
-    if (index === 0) {
-      return {
-        id: item.id,
-        isDivider: item.isDivider ?? false,
-        href: item.href,
-        label: enLabels.workshops.all.label,
-        description: enLabels.workshops.all.description,
-        submenu: mergeSubmenuEN(item.submenu, [
-          enLabels.workshops.lacto,
-          enLabels.workshops.tempeh,
-          enLabels.workshops.kombucha,
-        ]),
-      }
-    }
-
-    if (index === 1) {
-      return {
-        id: item.id,
-        isDivider: item.isDivider ?? false,
-        href: item.href,
-        label: enLabels.workshops.online.label,
-        description: enLabels.workshops.online.description,
-        submenu: mergeSubmenuEN(item.submenu, [enLabels.workshops.basics]),
-      }
-    }
-
-    return {
-      id: item.id,
-      isDivider: item.isDivider ?? false,
-      href: item.href,
-      label: enLabels.workshops.voucher.label,
-      description: enLabels.workshops.voucher.description,
-    }
-  })
+const enDescriptions: Record<number, Record<number, string>> = {
+  1: {
+    0: 'Browse all in-person workshops',
+    4: 'Coming soon',
+  },
+  4: {
+    0: 'Our Team & Mission',
+    1: 'What is Fermentation?',
+    2: 'Get in touch',
+  },
 }
 
 function buildEnglishNav(savedNavItems: HeaderNavItem[]): HeaderNavItem[] {
-  return savedNavItems.map((navItem, index) => {
+  return savedNavItems.map((navItem, navIndex) => {
     const base: HeaderNavItem = {
       id: navItem.id,
       link: {
         ...navItem.link,
-        label: enLabels.navItems[index] || navItem.link.label,
+        label:
+          navIndex === 1
+            ? 'Workshops'
+            : navIndex === 2
+              ? 'Shop'
+              : navIndex === 3
+                ? 'For Chefs'
+                : navIndex === 4
+                  ? 'About Us'
+                  : navIndex === 5
+                    ? 'Contact'
+                    : 'Home',
       },
     }
 
-    if (index === 1) {
-      base.dropdownItems = mergeDropdownItemsEN(navItem.dropdownItems)
-    }
+    // Remap dropdown items for Workshops and About
+    if (navIndex === 1 || navIndex === 4) {
+      const dropdownItems = navItem.dropdownItems || []
+      const enLabels = enDropdownRemap[navIndex] || []
 
-    if (index === 4) {
-      const aboutItems = navItem.dropdownItems || []
-      base.dropdownItems = aboutItems.map((item, aboutIndex) => {
-        const englishAbout = [
-          enLabels.about.about,
-          enLabels.about.fermentation,
-          enLabels.about.contact,
-        ][aboutIndex]
-
-        return {
-          id: item.id,
-          isDivider: item.isDivider ?? false,
-          href: item.href,
-          label: englishAbout?.label || item.label,
-          description: englishAbout?.description || item.description,
-        }
-      })
+      base.dropdownItems = dropdownItems.map((item, itemIndex) => ({
+        id: item.id,
+        label: enLabels[itemIndex] || item.label,
+        href: item.href,
+        description:
+          enDescriptions[navIndex]?.[itemIndex] || item.description || undefined,
+        isSmall: item.isSmall ?? false,
+      }))
     }
 
     return base
@@ -172,7 +139,7 @@ function buildEnglishNav(savedNavItems: HeaderNavItem[]): HeaderNavItem[] {
 async function seedHeader() {
   const payload = await getPayload({ config })
 
-  payload.logger.info('Seeding Header → DE...')
+  payload.logger.info('📝 Seeding Header → DE (German)...')
 
   await payload.updateGlobal({
     slug: 'header',
@@ -188,7 +155,7 @@ async function seedHeader() {
     },
   })
 
-  payload.logger.info('Reading back Header → DE IDs...')
+  payload.logger.info('✓ DE saved. Reading back IDs...')
 
   const freshHeader = (await payload.findGlobal({
     slug: 'header',
@@ -198,7 +165,7 @@ async function seedHeader() {
 
   const savedNavItems = freshHeader.navItems || []
 
-  payload.logger.info('Seeding Header → EN...')
+  payload.logger.info('📝 Seeding Header → EN (English) using same IDs...')
 
   await payload.updateGlobal({
     slug: 'header',
@@ -207,20 +174,26 @@ async function seedHeader() {
     data: {
       announcementBar: {
         enabled: true,
-        text: enLabels.announcementText,
+        text: 'We have digital workshops too, take a look',
         link: '/workshops',
       },
       navItems: buildEnglishNav(savedNavItems),
     },
   })
 
-  payload.logger.info('✓ Header seeded for DE + EN')
-  payload.logger.info('Editors can now manage both languages in /admin → Header.')
+  payload.logger.info('✓ EN saved.')
+  payload.logger.info('')
+  payload.logger.info('✅ Header seeded successfully!')
+  payload.logger.info('   • DE (German) - German labels & descriptions')
+  payload.logger.info('   • EN (English) - English labels & descriptions')
+  payload.logger.info('   • Both locales use the same structure')
+  payload.logger.info('')
+  payload.logger.info('🎯 Next: Edit at /admin → Header (toggle DE/EN in top-right)')
 
   process.exit(0)
 }
 
 seedHeader().catch((err) => {
-  console.error('Failed to seed header:', err)
+  console.error('❌ Failed to seed header:', err)
   process.exit(1)
 })

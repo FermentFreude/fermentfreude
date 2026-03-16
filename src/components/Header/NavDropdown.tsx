@@ -12,8 +12,7 @@ export interface DropdownItem {
   label: string
   href: string
   description?: string | null
-  isDivider?: boolean | null
-  submenu?: DropdownItem[] | null // Nested submenu items (can be null)
+  isSmall?: boolean | null
 }
 
 interface NavDropdownProps {
@@ -26,7 +25,6 @@ interface NavDropdownProps {
 /** Desktop hover dropdown with glassmorphism panel + GSAP animations */
 export function NavDropdown({ label, href, items }: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [expandedSubmenus, setExpandedSubmenus] = useState<Set<string>>(new Set())
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -45,16 +43,7 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
   const handleMouseLeave = useCallback(() => {
     timeoutRef.current = setTimeout(() => {
       setIsOpen(false)
-      setExpandedSubmenus(new Set())
     }, 180)
-  }, [])
-
-  const openSubmenu = useCallback((key: string) => {
-    setExpandedSubmenus((prev) => {
-      const next = new Set(prev)
-      next.add(key)
-      return next
-    })
   }, [])
 
   const animateOpen = useCallback(() => {
@@ -93,7 +82,6 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
   // Close on route change
   useEffect(() => {
     setIsOpen(false)
-    setExpandedSubmenus(new Set())
   }, [pathname])
 
   useEffect(() => {
@@ -131,14 +119,18 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
             {chevron}
           </Link>
         ) : (
-          <button type="button" onClick={() => setIsOpen((prev) => !prev)} className={sharedClassName}>
+          <button
+            type="button"
+            onClick={() => setIsOpen((prev) => !prev)}
+            className={sharedClassName}
+          >
             {label}
             {chevron}
           </button>
         )}
       </MagneticElement>
 
-      {/* Glassmorphism dropdown panel */}
+      {/* Glassmorphism dropdown panel — simple flat list of items */}
       <div
         ref={panelRef}
         className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50 cursor-normal-zone"
@@ -147,75 +139,34 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
         <div className="dropdown-glass w-60 rounded-2xl overflow-hidden">
           <div className="py-2">
             {items.map((item, i) => (
-              <div
+              <Link
                 key={item.href}
-                className="group/item"
-                onMouseEnter={() => {
-                  if (item.submenu && item.submenu.length > 0) {
-                    openSubmenu(item.href)
-                  }
+                ref={(el) => {
+                  itemRefs.current[i] = el
                 }}
-                onMouseLeave={() => {
-                  if (item.submenu && item.submenu.length > 0) {
-                    // Keep submenu visible while moving across sibling top-level items.
-                    // It will close when leaving the whole dropdown container.
-                  }
-                }}
+                href={item.href}
+                className={cn(
+                  'group block px-5 py-3 transition-colors duration-200',
+                  'hover:bg-ff-near-black dark:hover:bg-white',
+                  {
+                    'bg-white/50 dark:bg-white/8': pathname === item.href,
+                  },
+                )}
               >
-                <Link
-                  ref={(el) => {
-                    itemRefs.current[i] = el
-                  }}
-                  href={item.href}
+                <span
                   className={cn(
-                    'group block px-5 py-3 transition-colors duration-200',
-                    'hover:bg-ff-near-black dark:hover:bg-white',
-                    {
-                      'bg-white/50 dark:bg-white/8': pathname === item.href,
-                    },
+                    'block font-display text-ff-gray-15 dark:text-neutral-200 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors',
+                    item.isSmall ? 'font-normal text-xs' : 'font-bold text-sm',
                   )}
                 >
-                  <span className="block font-display font-bold text-sm text-ff-gray-15 dark:text-neutral-200 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                    {item.label}
+                  {item.label}
+                </span>
+                {item.description && !item.isSmall && (
+                  <span className="block text-xs text-ff-gray-text/80 dark:text-neutral-500 group-hover:text-white/70 dark:group-hover:text-ff-near-black/60 mt-0.5 transition-colors">
+                    {item.description}
                   </span>
-                  {item.description && (
-                    <span className="block text-xs text-ff-gray-text/80 dark:text-neutral-500 group-hover:text-white/70 dark:group-hover:text-ff-near-black/60 mt-0.5 transition-colors">
-                      {item.description}
-                    </span>
-                  )}
-                </Link>
-
-                {/* Nested submenu if present */}
-                {item.submenu && item.submenu.length > 0 && (
-                  <div
-                    className={cn(
-                      'pl-2 pr-3 border-l border-neutral-200 dark:border-neutral-700 ml-3 overflow-hidden transition-all duration-220 ease-out',
-                      expandedSubmenus.has(item.href)
-                        ? 'max-h-52 opacity-100 mt-1 py-1 pointer-events-auto'
-                        : 'max-h-0 opacity-0 mt-0 py-0 pointer-events-none',
-                    )}
-                  >
-                    <div className="rounded-lg p-1 bg-white/30 dark:bg-black/20">
-                      {item.submenu.map((subitem) => (
-                        <Link
-                          key={subitem.href}
-                          href={subitem.href}
-                          className={cn(
-                            'group block px-3 py-2 text-xs font-display font-bold text-ff-gray-15 dark:text-neutral-300 hover:bg-ff-near-black dark:hover:bg-white rounded transition-colors',
-                            {
-                              'bg-white/50 dark:bg-white/8': pathname === subitem.href,
-                            },
-                          )}
-                        >
-                          <span className="block group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                            {subitem.label}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
                 )}
-              </div>
+              </Link>
             ))}
           </div>
         </div>
