@@ -308,7 +308,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                         ))}
                       </span>
                       {isOnlineCourses && (
-                        <span className="text-xs font-medium text-ff-near-black/70 dark:text-neutral-300 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
+                        <span className="text-xs font-medium text-ff-gray-text dark:text-neutral-400 group-hover:text-white dark:group-hover:text-white transition-colors">
                           Coming Soon
                         </span>
                       )}

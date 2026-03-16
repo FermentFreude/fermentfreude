@@ -71,7 +71,7 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
           isOpen ? 'opacity-100 visible' : 'opacity-0 invisible',
         )}
       >
-        <div className="dropdown-glass w-60 rounded-2xl overflow-hidden shadow-lg">
+        <div className="w-60 rounded-2xl overflow-hidden shadow-lg bg-[#f5f2ed] dark:bg-[#f5f2ed]">
           <div className="py-2">
             {items.map((item) => (
               <Link
@@ -79,28 +79,17 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
                 href={item.href}
                 className={cn(
                   'block px-5 py-3 transition-colors duration-150 group',
-                  'hover:bg-ff-near-black dark:hover:bg-white',
-                  {
-                    'bg-white/50 dark:bg-white/8': pathname === item.href,
-                  },
+                  'text-ff-near-black hover:bg-ff-near-black hover:text-white',
                 )}
               >
-                <span
-                  className={cn(
-                    'block font-display font-bold transition-colors duration-150',
-                    'text-ff-gray-15 dark:text-neutral-200',
-                    'group-hover:text-white dark:group-hover:text-ff-near-black',
-                    item.isSmall ? 'text-xs' : 'text-sm',
-                  )}
-                >
+                <span className={cn(
+                  'block font-display font-bold transition-colors',
+                  item.isSmall ? 'text-xs' : 'text-sm',
+                )}>
                   {item.label}
                 </span>
                 {item.description && !item.isSmall && (
-                  <span className={cn(
-                    'block text-xs font-semibold mt-0.5 transition-colors duration-150',
-                    'text-ff-gray-text/80 dark:text-neutral-500',
-                    'group-hover:text-white dark:group-hover:text-ff-near-black/80',
-                  )}>
+                  <span className="block text-xs mt-0.5 transition-colors">
                     {item.description}
                   </span>
                 )}
