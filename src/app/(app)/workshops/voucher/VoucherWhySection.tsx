@@ -80,7 +80,6 @@ export function VoucherWhySection({
               <Media
                 resource={image}
                 fill
-                sizes="(max-width: 896px) 100vw, 56rem"
                 imgClassName="object-cover transition-transform duration-500 ease-out hover:scale-[1.02]"
                 priority
               />

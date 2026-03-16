@@ -54,13 +54,7 @@ export function VoucherAboutSection({
         </div>
         {hasImage && (
           <div className="relative aspect-[4/5] min-h-[240px] overflow-hidden rounded-xl bg-ff-warm-gray order-1 lg:order-2">
-            <Media
-              resource={image}
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              imgClassName="object-cover"
-              priority
-            />
+            <Media resource={image} fill imgClassName="object-cover" priority />
           </div>
         )}
       </div>
