@@ -9,9 +9,7 @@ export type LessonItem = {
   title?: string | null
   description?: string | null
   durationMinutes?: number | null
-  videoUrl?: string | null
   videoMediaId?: string | null
-  videoFilename?: string | null
 }
 
 export type ModuleItem = {
@@ -32,8 +30,6 @@ function CheckIcon({ className }: { className?: string }) {
 function LessonVideoPlayer({
   rowKey,
   videoMediaId,
-  videoUrl,
-  videoFilename,
   videoUrls,
   setVideoUrls,
   isLoggedIn,
@@ -44,8 +40,6 @@ function LessonVideoPlayer({
 }: {
   rowKey: string
   videoMediaId?: string | null
-  videoUrl?: string | null
-  videoFilename?: string | null
   videoUrls: Record<string, string>
   setVideoUrls: React.Dispatch<React.SetStateAction<Record<string, string>>>
   isLoggedIn: boolean
@@ -54,44 +48,88 @@ function LessonVideoPlayer({
   markDone: (id: string) => void
   locale: 'de' | 'en'
 }) {
-  const [origin, setOrigin] = useState('')
-  useEffect(() => {
-    setOrigin(typeof window !== 'undefined' ? window.location.origin : '')
-  }, [])
-  const fallbackUrl =
-    videoFilename && origin ? `${origin}/media/${videoFilename}` : videoFilename ? `/media/${videoFilename}` : undefined
-  const resolvedUrl = videoUrls[rowKey] ?? videoUrl ?? fallbackUrl ?? undefined
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const resolvedUrl = videoUrls[rowKey] ?? undefined
 
   useEffect(() => {
-    if (!videoMediaId || resolvedUrl) return
+    if (!videoMediaId || resolvedUrl || !lessonId) return
     let cancelled = false
-    fetch(`/api/media/${videoMediaId}/url`)
-      .then((r) => r.json())
+    setLoading(true)
+    setError(null)
+    fetch(
+      `/api/courses/basic-fermentation/lesson-video?lessonId=${encodeURIComponent(
+        lessonId,
+      )}&videoMediaId=${encodeURIComponent(videoMediaId)}`,
+      {
+        method: 'GET',
+        credentials: 'include',
+      },
+    )
+      .then(async (r) => {
+        if (!r.ok) {
+          const body = await r.json().catch(() => ({}))
+          const message =
+            (body && typeof body.error === 'string' && body.error) ||
+            (locale === 'de'
+              ? 'Video konnte nicht geladen werden.'
+              : 'Could not load video.')
+          throw new Error(message)
+        }
+        return r.json()
+      })
       .then((data: { url?: string }) => {
         if (cancelled || !data?.url) return
         setVideoUrls((prev) => ({ ...prev, [rowKey]: data.url! }))
       })
-      .catch(() => {})
+      .catch((err: unknown) => {
+        if (cancelled) return
+        if (err instanceof Error) {
+          setError(err.message)
+        } else {
+          setError(
+            locale === 'de'
+              ? 'Video konnte nicht geladen werden.'
+              : 'Could not load video.',
+          )
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
     return () => {
       cancelled = true
     }
-  }, [videoMediaId, rowKey, setVideoUrls, resolvedUrl])
+  }, [videoMediaId, rowKey, setVideoUrls, resolvedUrl, lessonId, locale])
 
   return (
     <div className="space-y-3">
-      <div className="w-full overflow-hidden rounded-2xl bg-black/5">
+      <div
+        className="w-full overflow-hidden rounded-2xl bg-black/5"
+        onContextMenu={(e) => e.preventDefault()}
+      >
         {resolvedUrl ? (
           <video
             key={resolvedUrl}
             src={resolvedUrl}
             controls
             playsInline
+            preload="metadata"
             className="h-auto w-full rounded-2xl bg-black"
+            controlsList="nodownload noplaybackrate"
+            disablePictureInPicture
             onEnded={() => isLoggedIn && lessonId && markDone(lessonId)}
           />
         ) : (
           <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-ff-warm-gray text-body text-ff-gray-text">
-            {locale === 'de' ? 'Video wird geladen…' : 'Loading video…'}
+            {loading
+              ? locale === 'de'
+                ? 'Video wird geladen…'
+                : 'Loading video…'
+              : error ??
+                (locale === 'de'
+                  ? 'Video konnte nicht geladen werden.'
+                  : 'Could not load video.')}
           </div>
         )}
       </div>
@@ -188,11 +226,10 @@ export function CurriculumWithProgress({
                 <ul className="mt-6 space-y-4 border-t border-ff-warm-gray pt-6">
                   {mod.lessons.map((lesson, lidx) => {
                     const completed = lesson.id ? set.has(lesson.id) : false
-                    const hasVideo = Boolean(lesson.videoMediaId ?? lesson.videoUrl ?? lesson.videoFilename)
+                    const hasVideo = Boolean(lesson.videoMediaId)
                     const rowKey = `${mod.id ?? idx}-${lesson.id ?? lidx}`
                     const isExpanded = expandedKey === rowKey
                     const onToggleVideo = () => setExpandedKey(isExpanded ? null : rowKey)
-                    const videoSrc = videoUrls[rowKey] ?? lesson.videoUrl ?? undefined
                     return (
                       <li key={lesson.id ?? lidx} className="flex flex-col gap-3">
                         <div className="flex flex-wrap items-center gap-3 gap-y-1 rounded-xl px-3 py-2 transition-colors hover:bg-ff-warm-gray/30">
@@ -255,8 +292,6 @@ export function CurriculumWithProgress({
                           <LessonVideoPlayer
                             rowKey={rowKey}
                             videoMediaId={lesson.videoMediaId}
-                            videoUrl={lesson.videoUrl}
-                            videoFilename={lesson.videoFilename}
                             videoUrls={videoUrls}
                             setVideoUrls={setVideoUrls}
                             isLoggedIn={isLoggedIn}

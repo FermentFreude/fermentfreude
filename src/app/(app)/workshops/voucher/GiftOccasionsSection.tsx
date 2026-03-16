@@ -13,10 +13,10 @@ interface GiftOccasionsSectionProps {
 
 export function GiftOccasionsSection({ heading, occasions }: GiftOccasionsSectionProps) {
   return (
-    <section className="w-full py-12 md:py-24 bg-[#1D1D1D]">
-      <div className="mx-auto max-w-[1400px] px-6">
+    <section className="w-full py-12 md:py-14 bg-ff-near-black">
+      <div className="mx-auto max-w-[var(--content-wide)] px-[var(--space-container-x)]">
         <div className="flex flex-col items-center gap-8 md:gap-12">
-          <h2 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold text-white text-center">
+          <h2 className="font-display text-[length:var(--text-heading)] font-bold text-white text-center tracking-tight">
             {heading}
           </h2>
 
@@ -24,17 +24,17 @@ export function GiftOccasionsSection({ heading, occasions }: GiftOccasionsSectio
             {occasions.map((occasion, idx) => (
               <div key={idx} className="flex flex-col gap-3 md:gap-4">
                 {occasion.image && (
-                  <div className="relative w-full aspect-square min-h-[150px] md:min-h-0 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="group/img relative w-full aspect-square min-h-[150px] md:min-h-0 overflow-hidden rounded-[var(--radius-xl)] shadow-lg transition-all duration-300 hover:shadow-xl after:pointer-events-none after:absolute after:inset-0 after:rounded-[var(--radius-xl)] after:bg-ff-gold-accent/0 after:transition-colors after:duration-300 hover:after:bg-ff-gold-accent/5">
                     <Media
                       resource={occasion.image}
                       fill
                       size="(max-width: 768px) 50vw, 25vw"
-                      imgClassName="object-cover hover:scale-105 transition-transform duration-300"
+                      imgClassName="object-cover transition-transform duration-300 group-hover/img:scale-105"
                       priority={idx < 2}
                     />
                   </div>
                 )}
-                <p className="font-display text-base md:text-lg font-bold text-white text-center">
+                <p className="font-display text-[length:var(--text-body-lg)] font-semibold text-white text-center">
                   {occasion.caption}
                 </p>
               </div>

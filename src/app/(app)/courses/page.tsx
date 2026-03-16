@@ -7,6 +7,8 @@ import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
 import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
 import { ContentSection } from '@/components/ui/ContentSection'
+import { NotifyMeDialog } from '@/components/courses/NotifyMeDialog'
+import type { Media as MediaType, Page as PageType, Product } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import {
@@ -24,10 +26,8 @@ import {
 } from 'lucide-react'
 import { unstable_noStore as noStore } from 'next/cache'
 import Link from 'next/link'
+import { headers as getHeaders } from 'next/headers.js'
 import { getPayload } from 'payload'
-
-import { NotifyMeDialog } from '@/components/courses/NotifyMeDialog'
-import type { Media as MediaType, Page as PageType, Product } from '@/payload-types'
 
 const LEARN_CARD_ICONS: LucideIcon[] = [
   Carrot, // Vegetable Fermentation
@@ -170,6 +170,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
     process.env.ONLINE_COURSES_USE_DEFAULTS === '1' ||
     process.env.ONLINE_COURSES_USE_DEFAULTS === 'true'
 
+  const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const result = forceDefaults
     ? { docs: [] as PageType[] }
@@ -206,6 +207,29 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
     style: 'currency',
     currency: 'EUR',
   }).format(basicCourseNormalizedPrice)
+
+  // Determine if the current user already has access to the Basic Fermentation course
+  const { user } = await payload.auth({ headers })
+  let hasBasicCourseAccess = false
+  if (user && basicCourseProduct?.id) {
+    try {
+      const orders = await payload.find({
+        collection: 'orders',
+        where: {
+          and: [
+            { customer: { equals: user.id } },
+            { status: { in: ['processing', 'completed'] } },
+            { 'items.product': { in: [basicCourseProduct.id] } },
+          ],
+        },
+        limit: 1,
+        user,
+      })
+      hasBasicCourseAccess = orders.docs.length > 0
+    } catch {
+      hasBasicCourseAccess = false
+    }
+  }
 
   // Resolve media by ID when Payload returns unpopulated relations (so images show locally)
   const mediaMap = new Map<string, MediaType>()
@@ -349,6 +373,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
     (locale === 'de' ? 'Alle Lektionen anzeigen' : 'See all lessons')
   const modulesButtonUrl =
     oc?.onlineCoursesModulesButtonUrl ?? '/products/basic-fermentation-course'
+  const modulesButtonHref = hasBasicCourseAccess ? '/courses/basic-fermentation' : modulesButtonUrl
 
   const exploreEyebrow =
     oc?.onlineCoursesExploreEyebrow ?? (locale === 'de' ? 'Entdecken' : 'Explore')
@@ -601,11 +626,11 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
               </FadeIn>
             ))}
           </div>
-          {modulesButtonLabel && modulesButtonUrl && (
+          {modulesButtonLabel && modulesButtonHref && (
             <FadeIn delay={300}>
               <div className="mt-10 flex justify-center">
                 <Link
-                  href={modulesButtonUrl}
+                  href={modulesButtonHref}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-ff-gold-accent px-8 py-3.5 font-display font-bold text-ff-near-black transition-all hover:bg-ff-gold-accent-dark"
                 >
                   {modulesButtonLabel}

@@ -4,6 +4,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
@@ -91,6 +92,41 @@ export default async function BasicFermentationCoursePage() {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+
+  // Gate this page behind a completed/processing order for the Basic Fermentation course
+  if (!user) {
+    redirect('/products/basic-fermentation-course')
+  }
+
+  const productResult = await payload.find({
+    collection: 'products',
+    where: { slug: { equals: 'basic-fermentation-course' } },
+    limit: 1,
+    user,
+  })
+  const product = productResult.docs[0] as { id?: string } | undefined
+  const productId = product && typeof product.id === 'string' ? product.id : null
+  if (!productId) {
+    redirect('/courses')
+  }
+
+  const orders = await payload.find({
+    collection: 'orders',
+    where: {
+      and: [
+        { customer: { equals: user.id } },
+        { status: { in: ['processing', 'completed'] } },
+        { 'items.product': { in: [productId] } },
+      ],
+    },
+    limit: 1,
+    user,
+  })
+
+  if (!orders.docs.length) {
+    redirect('/products/basic-fermentation-course')
+  }
+
   if (user) {
     const progress = await payload.find({
       collection: 'course-progress',
@@ -113,49 +149,6 @@ export default async function BasicFermentationCoursePage() {
   const curriculumHeading = data?.curriculumHeading ?? DEFAULT_CURRICULUM_HEADING
   const learnHeading = data?.learnHeading ?? DEFAULT_LEARN_HEADING
   const learnItems = (data?.learnItems ?? []).map((item) => item?.text ?? '').filter(Boolean)
-
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? ''
-  const videoIds = new Set<string>()
-  for (const mod of modules) {
-    for (const lesson of mod.lessons ?? []) {
-      const v = lesson.video
-      if (typeof v === 'string' && v) {
-        videoIds.add(v)
-      } else if (v && typeof v === 'object' && 'id' in v && (v as { id: unknown }).id) {
-        videoIds.add(String((v as { id: string }).id))
-      }
-    }
-  }
-  const mediaUrlById = new Map<string, string>()
-  const mediaFilenameById = new Map<string, string>()
-  const r2Base = (process.env.R2_PUBLIC_URL ?? '').replace(/\/$/, '')
-  const siteBase = baseUrl.replace(/\/$/, '')
-  for (const id of videoIds) {
-    try {
-      const doc = await payload.findByID({
-        collection: 'media',
-        id,
-        depth: 0,
-      })
-      const d = doc as MediaType & { filename?: string | null } | null
-      const filename = typeof d?.filename === 'string' ? d.filename : null
-      if (filename) {
-        mediaFilenameById.set(String(id), filename)
-      }
-      let url = typeof d?.url === 'string' ? d.url : null
-      if (!url && filename) {
-        url = r2Base ? `${r2Base}/media/${filename}` : `${siteBase}/media/${filename}`
-      }
-      if (typeof url === 'string' && url) {
-        if (!url.startsWith('http') && siteBase) {
-          url = siteBase + (url.startsWith('/') ? url : `/${url}`)
-        }
-        mediaUrlById.set(String(id), url)
-      }
-    } catch {
-      // skip
-    }
-  }
   const curriculumForClient = modules.map((mod) => ({
     id: mod.id,
     title: mod.title,
@@ -167,25 +160,12 @@ export default async function BasicFermentationCoursePage() {
       } else if (lesson.video && typeof lesson.video === 'object' && 'id' in lesson.video) {
         videoMediaId = String((lesson.video as { id: string }).id)
       }
-      let rawUrl: string | null = videoMediaId ? mediaUrlById.get(videoMediaId) ?? null : null
-      if (!rawUrl && lesson.video != null && isResolvedMedia(lesson.video)) {
-        rawUrl = (lesson.video as MediaType).url ?? null
-      }
-      const videoUrl =
-        typeof rawUrl === 'string' && rawUrl
-          ? rawUrl.startsWith('http')
-            ? rawUrl
-            : siteBase + (rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`)
-          : null
-      const videoFilename = videoMediaId ? mediaFilenameById.get(videoMediaId) ?? null : null
       return {
         id: lesson.id,
         title: lesson.title,
         description: lesson.description,
         durationMinutes: lesson.durationMinutes,
-        videoUrl,
         videoMediaId,
-        videoFilename,
       }
     }),
   }))
