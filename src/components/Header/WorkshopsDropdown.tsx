@@ -97,12 +97,8 @@ export function WorkshopsDropdown() {
                   { 'bg-white/50 dark:bg-white/8': pathname === item.href },
                 )}
               >
-                <span className="block font-display font-bold text-sm text-ff-gray-15 dark:text-neutral-200 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                  {item.label}
-                </span>
-                <span className="block text-xs text-ff-gray-text/80 dark:text-neutral-500 group-hover:text-white/70 dark:group-hover:text-ff-near-black/60 mt-0.5 transition-colors">
-                  {item.description}
-                </span>
+                <span className="block font-display font-bold text-sm text-ff-gray-15 dark:text-neutral-200 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">{item.label}</span>
+                <span className="block text-xs text-ff-gray-text/80 dark:text-neutral-500 group-hover:text-white/70 dark:group-hover:text-ff-near-black/60 mt-0.5 transition-colors">{item.description}</span>
               </Link>
             ))}
           </div>
@@ -126,10 +122,9 @@ export function WorkshopsDropdownMobile() {
           'flex w-full items-center justify-between py-2.5 text-base font-bold text-ff-gray-15 hover:text-ff-charcoal transition-colors',
           { 'text-ff-charcoal': isActive },
         )}
+        type="button"
       >
-        <Link href="/workshops" className="hover:underline">
-          Workshops
-        </Link>
+        Workshops
         <ChevronDown
           className={cn('w-4 h-4 transition-transform duration-200', {
             'rotate-180': isOpen,
@@ -144,6 +139,15 @@ export function WorkshopsDropdownMobile() {
         )}
       >
         <div className="pl-4 pb-2 flex flex-col gap-1">
+          <Link
+            href="/workshops"
+            className={cn(
+              'block py-2 text-sm text-ff-gray-15 hover:text-ff-charcoal transition-colors',
+              { 'font-bold text-ff-charcoal': pathname === '/workshops' },
+            )}
+          >
+            Workshops
+          </Link>
           {workshopItems.map((item) => (
             <Link
               key={item.href}

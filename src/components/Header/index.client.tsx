@@ -2,6 +2,7 @@
 
 import { Cart } from '@/components/Cart'
 import { CMSLink } from '@/components/Link'
+import { gsap } from 'gsap'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
@@ -14,9 +15,8 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
 import { usePathname } from 'next/navigation'
 import { CartIconButton } from './CartIconButton'
-import { LanguageToggle } from './LanguageToggle'
 import { MagneticElement } from './MagneticElement'
-import { NavDropdownDesktop } from './NavDropdown'
+import { NavDropdown } from './NavDropdown'
 import { UserMenu } from './UserMenu'
 import { defaultDropdowns, defaultNavItems, getDefaultDropdownKey } from './nav-defaults'
 
@@ -28,30 +28,8 @@ export function HeaderClient({ header }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
-  const { headerTheme, heroBackgroundColor } = useHeaderTheme()
+  const { headerTheme } = useHeaderTheme()
   const [mounted, setMounted] = useState(false)
-
-  // DEBUG: Log CMS nav items structure in browser console
-  useEffect(() => {
-    console.log('%c=== DEBUG: HeaderClient Received ===', 'color: blue; font-weight: bold')
-    console.log('CMS nav items:', cmsItems)
-    cmsItems.forEach((item, idx) => {
-      if (item.dropdownItems && item.dropdownItems.length > 0) {
-        console.log(`[${idx}] ${item.link?.label}:`, {
-          dropdownItems: item.dropdownItems,
-        })
-        item.dropdownItems.forEach((dd: any, ddIdx: number) => {
-          console.log(`  [${ddIdx}] ${dd.label}:`, {
-            href: dd.href,
-            submenu: dd.submenu,
-            hasSubmenu: !!dd.submenu && dd.submenu.length > 0,
-          })
-        })
-      }
-    })
-    console.log('%c===============================', 'color: blue; font-weight: bold')
-  }, [cmsItems])
-
   useEffect(() => setMounted(true), [])
 
   // Menu active state (shared between header bar + overlay)
@@ -62,7 +40,13 @@ export function HeaderClient({ header }: Props) {
   const [isAtTop, setIsAtTop] = useState(true)
   const lastScrollY = useRef(0)
 
+  // Track which nav link is hovered for blur effect
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const navLinksRef = useRef<HTMLUListElement>(null)
+
+  // Refs for Menu/Close label animation
+  const menuLabelRef = useRef<HTMLParagraphElement>(null)
+  const closeLabelRef = useRef<HTMLParagraphElement>(null)
 
   const handleScroll = useCallback(() => {
     const y = window.scrollY
@@ -84,8 +68,49 @@ export function HeaderClient({ header }: Props) {
 
   // Animate Menu/Close label crossfade
   useEffect(() => {
-    setIsAtTop(true)
-  }, [])
+    if (menuLabelRef.current && closeLabelRef.current) {
+      if (isMenuActive) {
+        gsap.to(menuLabelRef.current, { opacity: 0, duration: 0.35, ease: 'power2.out' })
+        gsap.to(closeLabelRef.current, { opacity: 1, duration: 0.35, ease: 'power2.out' })
+      } else {
+        gsap.to(menuLabelRef.current, { opacity: 1, duration: 0.35, ease: 'power2.out' })
+        gsap.to(closeLabelRef.current, { opacity: 0, duration: 0.35, ease: 'power2.out' })
+      }
+    }
+  }, [isMenuActive])
+
+  // Apply blur/focus effect to sibling nav items
+  useEffect(() => {
+    if (!navLinksRef.current) return
+    const items = navLinksRef.current.querySelectorAll<HTMLElement>('.nav-link-item')
+
+    if (hoveredIndex === null) {
+      gsap.to(items, {
+        filter: 'blur(0px)',
+        opacity: 1,
+        duration: 0.3,
+        ease: 'power2.out',
+      })
+    } else {
+      items.forEach((item, i) => {
+        if (i === hoveredIndex) {
+          gsap.to(item, {
+            filter: 'blur(0px)',
+            opacity: 1,
+            duration: 0.3,
+            ease: 'power2.out',
+          })
+        } else {
+          gsap.to(item, {
+            filter: 'blur(1px)',
+            opacity: 0.72,
+            duration: 0.3,
+            ease: 'power2.out',
+          })
+        }
+      })
+    }
+  }, [hoveredIndex])
 
   // Transparent header on home page when at top
   const isTransparent = isHomePage && isAtTop && !isMenuActive
@@ -95,15 +120,7 @@ export function HeaderClient({ header }: Props) {
   const renderedDropdowns = new Set<string>()
 
   // Build nav items array for consistent indexing
-  const navItems: Array<{
-    id: string | null | undefined
-    label: string
-    url: string | null | undefined
-    link: any
-    dropdownItems: any
-    defaultKey: string | null
-    dropdownImage: any
-  }> = hasRealCMSItems
+  const navItems = hasRealCMSItems
     ? cmsItems.map((item) => {
         const url = item.link.url
         const label = item.link.label
@@ -117,18 +134,7 @@ export function HeaderClient({ header }: Props) {
               ? defaultDropdowns[defaultKey]
               : null
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const dropdownImage = (item as any).dropdownImage
-
-        return {
-          id: item.id,
-          label,
-          url,
-          link: item.link,
-          dropdownItems,
-          defaultKey,
-          dropdownImage,
-        }
+        return { id: item.id, label, url, link: item.link, dropdownItems, defaultKey }
       })
     : defaultNavItems.map((item) => ({
         id: item.url,
@@ -137,7 +143,6 @@ export function HeaderClient({ header }: Props) {
         link: null,
         dropdownItems: item.dropdownItems || null,
         defaultKey: item.dropdownKey || null,
-        dropdownImage: null,
       }))
 
   return (
@@ -146,7 +151,7 @@ export function HeaderClient({ header }: Props) {
         className={cn(
           'z-50 w-full transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
           isHomePage ? 'fixed top-0' : 'sticky top-0',
-          (hidden && !isMenuActive) || isMenuActive ? '-translate-y-full' : '',
+          hidden && !isMenuActive && '-translate-y-full',
         )}
         data-transparent={isTransparent ? '' : undefined}
         data-header-theme={mounted && isTransparent && headerTheme === 'dark' ? 'dark' : undefined}
@@ -180,10 +185,14 @@ export function HeaderClient({ header }: Props) {
               </Link>
             </MagneticElement>
 
-            {/* Desktop Nav Links */}
-            <ul ref={navLinksRef} className="hidden lg:flex items-center gap-6 xl:gap-8">
-              {navItems.map((item, _index) => {
-                const { dropdownItems, defaultKey, label, url, dropdownImage } = item
+            {/* Desktop Nav Links with blur effect */}
+            <ul
+              ref={navLinksRef}
+              className="hidden lg:flex items-center gap-6 xl:gap-8"
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              {navItems.map((item, index) => {
+                const { dropdownItems, defaultKey, label, url } = item
 
                 if (dropdownItems && dropdownItems.length > 0) {
                   const key = defaultKey || label
@@ -191,8 +200,12 @@ export function HeaderClient({ header }: Props) {
                   renderedDropdowns.add(key)
 
                   return (
-                    <li key={item.id} className="nav-link-item">
-                      <NavDropdownDesktop label={label} items={dropdownItems} />
+                    <li
+                      key={item.id}
+                      className="nav-link-item"
+                      onMouseEnter={() => setHoveredIndex(index)}
+                    >
+                      <NavDropdown label={label} href={url || undefined} items={dropdownItems} />
                     </li>
                   )
                 }
@@ -206,7 +219,11 @@ export function HeaderClient({ header }: Props) {
                 )
 
                 return (
-                  <li key={item.id} className="nav-link-item">
+                  <li
+                    key={item.id}
+                    className="nav-link-item"
+                    onMouseEnter={() => setHoveredIndex(index)}
+                  >
                     <MagneticElement strength={0.3}>
                       {item.link ? (
                         <CMSLink {...item.link} className={linkClassName} appearance="inline" />
@@ -222,7 +239,7 @@ export function HeaderClient({ header }: Props) {
             </ul>
 
             {/* Right side */}
-            <div className="flex items-center gap-2 lg:gap-3 cursor-normal-zone">
+            <div className="flex items-center gap-1 cursor-normal-zone">
               {/* User icon with dropdown (desktop) */}
               <div className="hidden lg:block">
                 <UserMenu />
@@ -233,17 +250,28 @@ export function HeaderClient({ header }: Props) {
                 <Cart />
               </Suspense>
 
-              {/* Language toggle (desktop) - after cart */}
-              <div className="hidden lg:block">
-                <LanguageToggle />
-              </div>
-
-              {/* Menu / Close toggle icon - only on tablet & mobile */}
+              {/* Menu / Close toggle — portfolio style */}
               <button
                 onClick={() => setIsMenuActive(!isMenuActive)}
-                className="lg:hidden flex items-center justify-center h-10 px-1 text-ff-gray-15 dark:text-neutral-300 transition-colors hover:text-ff-near-black dark:hover:text-white"
+                className="flex items-center justify-center gap-3 h-10 px-1 text-ff-gray-15 dark:text-neutral-300 transition-colors hover:text-ff-near-black dark:hover:text-white"
                 aria-label={isMenuActive ? 'Close navigation menu' : 'Open navigation menu'}
               >
+                {/* Menu / Close label */}
+                <div className="relative flex items-center">
+                  <p
+                    ref={menuLabelRef}
+                    className="m-0 text-sm md:text-base font-display font-bold lowercase leading-none select-none"
+                  >
+                    Menu
+                  </p>
+                  <p
+                    ref={closeLabelRef}
+                    className="m-0 text-sm md:text-base font-display font-bold lowercase leading-none select-none absolute left-0 opacity-0"
+                  >
+                    Close
+                  </p>
+                </div>
+
                 {/* Burger bars → X */}
                 <div
                   className={cn(

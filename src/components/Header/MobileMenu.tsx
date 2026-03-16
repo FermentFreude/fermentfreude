@@ -260,9 +260,15 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
             {navItemsList.map((item, idx) => {
               const isExpanded = expandedItems.has(item.id)
               const hasChildren = item.children && item.children.length > 0
-              const isAbout = item.label.toLowerCase().includes('about') && item.href === '/about'
-              const isWorkshops = item.label.toLowerCase() === 'workshops'
-              const isOnlineCourses = item.label.toLowerCase() === 'online courses'
+              const href = item.href?.toLowerCase() || ''
+              const label = item.label.toLowerCase()
+              const isAbout = href === '/about' || label.includes('about')
+              const isWorkshops = href === '/workshops' || href.startsWith('/workshops/')
+              const isOnlineCourses = href === '/online-courses' || label === 'online courses'
+              const isDetailViewOpen = detailViewItem === item.id
+              const isChevronOpen = (isWorkshops || isOnlineCourses || isAbout)
+                ? isDetailViewOpen
+                : isExpanded
 
               return (
                 <div key={item.id} className="mb-2 sm:mb-3">
@@ -313,7 +319,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                       <ChevronDown
                         className={cn(
                           'w-4 h-4 sm:w-5 sm:h-5 shrink-0 transition-transform duration-300 group-hover:text-white dark:group-hover:text-ff-near-black',
-                          isExpanded && 'rotate-180',
+                          isChevronOpen && 'rotate-180',
                         )}
                       />
                     )}
