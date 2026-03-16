@@ -264,7 +264,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
               const label = item.label.toLowerCase()
               const isAbout = href === '/about' || label.includes('about')
               const isWorkshops = href === '/workshops' || href.startsWith('/workshops/')
-              const isOnlineCourses = href === '/online-courses' || label === 'online courses'
+              const isOnlineCourses = href === '/courses' || href.startsWith('/courses/') || label === 'online courses'
               const isDetailViewOpen = detailViewItem === item.id
               const isChevronOpen = (isWorkshops || isOnlineCourses || isAbout)
                 ? isDetailViewOpen
@@ -397,18 +397,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                       children.find(
                         (child) => child.href.toLowerCase() === '/workshops' && !child.isDivider,
                       ) || null
-                    const workshopItems = children
-                      .filter((child) => {
-                        if (child.isDivider) return false
-                        const href = child.href.toLowerCase()
-                        const label = child.label.toLowerCase()
-                        const isVoucher =
-                          href.includes('/workshops/voucher') ||
-                          label.includes('voucher') ||
-                          label.includes('gutschein')
-                        return href.startsWith('/workshops/') && !isVoucher
-                      })
-                      .slice(0, 3)
+                    const workshopItems = (headerItem?.children || []).filter((child) => !child.isDivider)
                     const additionalItems = children.filter((child) => {
                       const href = child.href.toLowerCase()
                       const label = child.label.toLowerCase()
@@ -432,7 +421,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                             className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
                           >
                             <div className="text-base sm:text-lg font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                              All Workshops
+                              {headerItem.label}
                             </div>
                           </Link>
                         )}
@@ -480,7 +469,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                                     className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
                                   >
                                     <div className="text-xs sm:text-sm font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                                      {isVoucher ? 'Workshop Vouchers' : 'Upcoming Online Courses'}
+                                      {child.label}
                                     </div>
                                   </Link>
                                 </div>
@@ -507,9 +496,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                             className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
                           >
                             <div className="text-sm sm:text-base font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                              {child.label.toLowerCase() === 'fermentation'
-                                ? 'About Fermentation'
-                                : child.label}
+                              {child.label}
                             </div>
                           </Link>
                         ))}
@@ -644,8 +631,14 @@ function buildNavItems(
             id: `${item.id}-${sub.href}`,
             label: sub.label,
             href: sub.href,
-            isDivider: (sub as any).isDivider || false,
-            description: (sub as any).description || null,
+            isDivider: sub.isDivider ?? false,
+            description: sub.description || null,
+            children:
+              sub.submenu?.map((submenuItem) => ({
+                id: `${item.id}-${sub.href}-${submenuItem.href}`,
+                label: submenuItem.label,
+                href: submenuItem.href,
+              })) || undefined,
           })
         }
       }
@@ -663,8 +656,14 @@ function buildNavItems(
             id: `${item.url}-${sub.href}`,
             label: sub.label,
             href: sub.href,
-            isDivider: sub.isDivider || false,
+            isDivider: sub.isDivider ?? false,
             description: sub.description || null,
+            children:
+              sub.submenu?.map((submenuItem) => ({
+                id: `${item.url}-${sub.href}-${submenuItem.href}`,
+                label: submenuItem.label,
+                href: submenuItem.href,
+              })) || undefined,
           })
         }
       }

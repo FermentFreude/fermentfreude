@@ -12,6 +12,7 @@ export interface DropdownItem {
   label: string
   href: string
   description?: string | null
+  isDivider?: boolean | null
   submenu?: DropdownItem[] | null // Nested submenu items (can be null)
 }
 

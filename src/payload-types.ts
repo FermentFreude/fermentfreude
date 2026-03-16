@@ -5049,7 +5049,7 @@ export interface Header {
                */
               description?: string | null;
               /**
-               * Optional nested items that appear to the side on hover (e.g., course list under "Online Courses"). Admin can add/remove items here.
+               * Optional nested items shown below a dropdown item in desktop navigation and grouped inside the mobile menu.
                */
               submenu?:
                 | {
@@ -5061,10 +5061,6 @@ export interface Header {
               id?: string | null;
             }[]
           | null;
-        /**
-         * Single image displayed on the right side of the dropdown modal (desktop only).
-         */
-        dropdownImage?: (string | null) | Media;
         id?: string | null;
       }[]
     | null;
@@ -5489,7 +5485,6 @@ export interface HeaderSelect<T extends boolean = true> {
                   };
               id?: T;
             };
-        dropdownImage?: T;
         id?: T;
       };
   updatedAt?: T;

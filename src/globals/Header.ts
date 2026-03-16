@@ -173,7 +173,7 @@ export const Header: GlobalConfig = {
               label: 'Nested Sub-Menu Items',
               admin: {
                 description:
-                  'Optional nested items that appear to the side on hover (e.g., course list under "Online Courses"). Admin can add/remove items here.',
+                  'Optional nested items shown below a dropdown item in desktop navigation and grouped inside the mobile menu.',
               },
               fields: [
                 {
@@ -192,16 +192,6 @@ export const Header: GlobalConfig = {
               ],
             },
           ],
-        },
-        {
-          name: 'dropdownImage',
-          type: 'upload',
-          relationTo: 'media',
-          label: 'Dropdown Image',
-          admin: {
-            description:
-              'Single image displayed on the right side of the dropdown modal (desktop only).',
-          },
         },
       ],
       maxRows: 6,
