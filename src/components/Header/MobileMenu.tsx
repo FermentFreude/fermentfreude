@@ -25,6 +25,7 @@ interface NavOverlayItem {
   href: string
   description?: string | null
   isSmall?: boolean
+  children?: NavOverlayItem[]
 }
 
 /**
@@ -328,24 +329,20 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                   {hasChildren && isExpanded && !isWorkshops && !isOnlineCourses && !isAbout && (
                     <div className="pl-3 sm:pl-4 border-l border-ff-warm-gray/20 dark:border-white/10 mt-2 ml-4 sm:ml-6">
                       {item.children?.map((child) => (
-                        <div key={child.id}>
-                          {child.isDivider && (
-                            <div className="my-2 border-t border-ff-warm-gray/20 dark:border-white/10" />
+                        <Link
+                          key={child.id}
+                          href={child.href}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handleClose(child.href)
+                          }}
+                          className="block py-2 sm:py-3 px-3 sm:px-4 rounded text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 hover:text-ff-near-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        >
+                          <div className="font-medium">{child.label}</div>
+                          {child.description && (
+                            <div className="text-xs mt-1 opacity-70">{child.description}</div>
                           )}
-                          <Link
-                            href={child.href}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              handleClose(child.href)
-                            }}
-                            className="block py-2 sm:py-3 px-3 sm:px-4 rounded text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 hover:text-ff-near-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                          >
-                            <div className="font-medium">{child.label}</div>
-                            {child.description && (
-                              <div className="text-xs mt-1 opacity-70">{child.description}</div>
-                            )}
-                          </Link>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -514,16 +511,13 @@ function buildNavItems(
       const parentItem: NavOverlayItem = { id: String(item.id), label, href: url }
 
       if (dropdownItems && dropdownItems.length > 0) {
-        parentItem.children = []
-        for (const sub of dropdownItems) {
-          parentItem.children.push({
-            id: `${item.id}-${sub.href}`,
-            label: sub.label,
-            href: sub.href,
-            description: sub.description || null,
-            isSmall: sub.isSmall ?? false,
-          })
-        }
+        parentItem.children = dropdownItems.map((sub) => ({
+          id: `${item.id}-${sub.href}`,
+          label: sub.label,
+          href: sub.href,
+          description: sub.description || null,
+          isSmall: sub.isSmall ?? false,
+        }))
       }
 
       items.push(parentItem)
@@ -533,16 +527,13 @@ function buildNavItems(
       const parentItem: NavOverlayItem = { id: item.url, label: item.label, href: item.url }
 
       if (item.dropdownItems && item.dropdownItems.length > 0) {
-        parentItem.children = []
-        for (const sub of item.dropdownItems) {
-          parentItem.children.push({
-            id: `${item.url}-${sub.href}`,
-            label: sub.label,
-            href: sub.href,
-            description: sub.description || null,
-            isSmall: sub.isSmall ?? false,
-          })
-        }
+        parentItem.children = item.dropdownItems.map((sub) => ({
+          id: `${item.url}-${sub.href}`,
+          label: sub.label,
+          href: sub.href,
+          description: sub.description || null,
+          isSmall: sub.isSmall ?? false,
+        }))
       }
 
       items.push(parentItem)
