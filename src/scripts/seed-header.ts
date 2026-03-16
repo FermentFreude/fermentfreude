@@ -186,7 +186,7 @@ async function seedHeader() {
     return result
   })
 
-  // ----- 3) Seed English locale (reusing IDs) -----
+  // ----- 3) Seed English locale (reusing top-level navItem IDs) -----
   payload.logger.info('Seeding Header → EN locale (with matching IDs)...')
 
   await payload.updateGlobal({

@@ -1,9 +1,12 @@
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import type { Header } from '@/payload-types'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const header = (await getCachedGlobal<Header>('header', 2, 'de')()) as Header
+    const { searchParams } = new URL(request.url)
+    const lang = (searchParams.get('lang') === 'en' ? 'en' : 'de') as 'de' | 'en'
+    
+    const header = (await getCachedGlobal<Header>('header', 3, lang)()) as Header
 
     // Check if submenus exist
     const workshopsDropdown = header.navItems
