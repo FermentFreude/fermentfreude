@@ -164,7 +164,8 @@ export const Header: GlobalConfig = {
               type: 'checkbox',
               label: 'Small Text',
               admin: {
-                description: 'Check to render this item with smaller font size (for workshop types).',
+                description:
+                  'Check to render this item with smaller font size (for workshop types).',
               },
             },
           ],

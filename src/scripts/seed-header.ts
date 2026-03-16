@@ -66,20 +66,10 @@ const deNavItems = [
       { label: 'Kontakt', href: '/contact', description: 'Schreib uns' },
     ],
   },
-  {
-    link: { type: 'custom', label: 'Kontakt', url: '/contact' },
-  },
 ] satisfies Array<Partial<HeaderNavItem>>
 
 const enDropdownRemap: Record<number, string[]> = {
-  1: [
-    'All Workshops',
-    'Lacto Vegetables',
-    'Tempeh',
-    'Kombucha',
-    'Online Courses',
-    'Gift Voucher',
-  ],
+  1: ['All Workshops', 'Lacto Vegetables', 'Tempeh', 'Kombucha', 'Online Courses', 'Gift Voucher'],
   4: ['About Us', 'Fermentation', 'Contact'],
 }
 
@@ -110,9 +100,7 @@ function buildEnglishNav(savedNavItems: HeaderNavItem[]): HeaderNavItem[] {
                 ? 'For Chefs'
                 : navIndex === 4
                   ? 'About Us'
-                  : navIndex === 5
-                    ? 'Contact'
-                    : 'Home',
+                  : 'Home',
       },
     }
 
@@ -125,8 +113,7 @@ function buildEnglishNav(savedNavItems: HeaderNavItem[]): HeaderNavItem[] {
         id: item.id,
         label: enLabels[itemIndex] || item.label,
         href: item.href,
-        description:
-          enDescriptions[navIndex]?.[itemIndex] || item.description || undefined,
+        description: enDescriptions[navIndex]?.[itemIndex] || item.description || undefined,
         isSmall: item.isSmall ?? false,
       }))
     }

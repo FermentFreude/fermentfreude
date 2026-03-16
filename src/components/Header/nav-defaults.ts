@@ -57,7 +57,6 @@ export const defaultNavItems: DefaultNavItem[] = [
       { label: 'Contact', href: '/contact', description: 'Get in touch' },
     ],
   },
-  { label: 'Contact', url: '/contact' },
 ]
 
 /** Default dropdown lookup keyed by identifier */
