@@ -35,18 +35,17 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
       onMouseLeave={() => setIsOpen(false)}
     >
       {/* Trigger button/link */}
-      <div className={cn(
-        'relative navLink inline-flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors cursor-pointer',
-        { active: isActive },
-      )}>
+      <div
+        className={cn(
+          'relative navLink inline-flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors cursor-pointer',
+          { active: isActive },
+        )}
+      >
         {href ? (
           <Link href={href} className="flex items-center gap-1">
             {label}
             <ChevronDown
-              className={cn(
-                'w-3 h-3 transition-transform duration-300',
-                { 'rotate-180': isOpen },
-              )}
+              className={cn('w-3 h-3 transition-transform duration-300', { 'rotate-180': isOpen })}
               aria-hidden="true"
             />
           </Link>
@@ -54,10 +53,7 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
           <>
             {label}
             <ChevronDown
-              className={cn(
-                'w-3 h-3 transition-transform duration-300',
-                { 'rotate-180': isOpen },
-              )}
+              className={cn('w-3 h-3 transition-transform duration-300', { 'rotate-180': isOpen })}
               aria-hidden="true"
             />
           </>
@@ -82,16 +78,16 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
                   'text-ff-near-black hover:bg-ff-near-black hover:text-white',
                 )}
               >
-                <span className={cn(
-                  'block font-display font-bold transition-colors',
-                  item.isSmall ? 'text-xs' : 'text-sm',
-                )}>
+                <span
+                  className={cn(
+                    'block font-display font-bold transition-colors',
+                    item.isSmall ? 'text-xs' : 'text-sm',
+                  )}
+                >
                   {item.label}
                 </span>
                 {item.description && !item.isSmall && (
-                  <span className="block text-xs mt-0.5 transition-colors">
-                    {item.description}
-                  </span>
+                  <span className="block text-xs mt-0.5 transition-colors">{item.description}</span>
                 )}
               </Link>
             ))}
