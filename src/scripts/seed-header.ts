@@ -105,7 +105,7 @@ async function seedHeader() {
               ],
             },
             {
-              label: 'Workshop Vouchers',
+              label: 'Workshop Gutschein',
               href: '/workshops/voucher',
             },
           ],
