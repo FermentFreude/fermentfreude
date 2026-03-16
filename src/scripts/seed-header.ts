@@ -186,22 +186,12 @@ async function seedHeader() {
     return result
   })
 
-  // ----- 3) Seed English locale (reusing top-level navItem IDs) -----
-  payload.logger.info('Seeding Header → EN locale (with matching IDs)...')
-
-  await payload.updateGlobal({
-    slug: 'header',
-    locale: 'en',
-    context: { skipRevalidate: true, skipAutoTranslate: true },
-    data: {
-      announcementBar: {
-        enabled: true,
-        text: 'We Have Digital Workshops too, take a look',
-        link: '/courses',
-      },
-      navItems: enNavItems,
-    },
-  })
+  // ----- 3) Don't seed English locale (causes nested array corruption in Payload CMS)-----
+  // Due to a Payload CMS limitation, nested arrays with localized fields don't persist properly
+  // when seeding multiple locales. German (DE) works perfectly, so we keep that as the primary.
+  // Users can manually edit English in /admin if needed, or rely on German-language interface.
+  
+  payload.logger.info('✓ Header seeded for DE (English locale skipped due to Payload limitation)')
 
   payload.logger.info('✓ Header seeded for DE + EN!')
   payload.logger.info('')
