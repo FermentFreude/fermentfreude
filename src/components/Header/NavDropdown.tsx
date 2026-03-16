@@ -2,7 +2,7 @@
 
 import { cn } from '@/utilities/cn'
 import { gsap } from 'gsap'
-import { ChevronDown, Plus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -22,13 +22,32 @@ interface NavDropdownProps {
   items: DropdownItem[]
 }
 
-/** Simple CSS hover-based dropdown with nested support */
+/** Modern hover-based dropdown with reliable nested submenu support */
 export function NavDropdownDesktop({ label, items }: NavDropdownProps) {
   const pathname = usePathname()
+  const [hoveredSubmenuIdx, setHoveredSubmenuIdx] = useState<number | null>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const submenuTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const isActive = items.some(
     (item) => pathname === item.href || pathname.startsWith(item.href + '/'),
   )
+
+  const handleMouseLeave = () => {
+    if (submenuTimeoutRef.current) {
+      clearTimeout(submenuTimeoutRef.current)
+    }
+    submenuTimeoutRef.current = setTimeout(() => {
+      setHoveredSubmenuIdx(null)
+    }, 100)
+  }
+
+  const handleMouseEnterSubmenu = (index: number) => {
+    if (submenuTimeoutRef.current) {
+      clearTimeout(submenuTimeoutRef.current)
+    }
+    setHoveredSubmenuIdx(index)
+  }
 
   const sharedClassName = cn(
     'relative navLink inline-flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors',
@@ -36,17 +55,21 @@ export function NavDropdownDesktop({ label, items }: NavDropdownProps) {
   )
 
   return (
-    <div className="relative group">
+    <div
+      className="relative group"
+      ref={dropdownRef}
+      onMouseLeave={handleMouseLeave}
+    >
       <MagneticElement strength={0.25}>
         <button className={sharedClassName}>
           {label}
-          {items.length > 0 && <Plus className="w-3 h-3 transition-transform" />}
+          {items.length > 0 && <Plus className="w-3 h-3 transition-transform group-hover:rotate-45" />}
         </button>
       </MagneticElement>
 
       {/* Dropdown Menu - appears on hover */}
       <ul
-        className="absolute top-full left-0 mt-1 min-w-max flex flex-col rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 shadow-lg"
+        className="absolute top-full left-0 mt-1 min-w-max flex flex-col rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 shadow-lg pointer-events-none group-hover:pointer-events-auto"
         style={{
           background: 'rgba(236, 229, 222, 0.95)',
           backdropFilter: 'blur(8px)',
@@ -54,41 +77,50 @@ export function NavDropdownDesktop({ label, items }: NavDropdownProps) {
         }}
       >
         {items.map((item, idx) => (
-          <li key={item.href} className="relative group/item">
+          <li
+            key={item.href || idx}
+            className="relative"
+            onMouseEnter={() => handleMouseEnterSubmenu(idx)}
+          >
             <Link
               href={item.href}
               className={cn(
-                'block px-4 py-3 text-sm font-display font-bold text-ff-near-black transition-colors whitespace-nowrap',
+                'flex items-center gap-2 px-4 py-3 text-sm font-display font-bold text-ff-near-black transition-colors whitespace-nowrap',
                 'hover:bg-ff-near-black hover:text-white dark:hover:bg-white dark:hover:text-ff-near-black',
                 idx === 0 && 'rounded-t-lg',
                 idx === items.length - 1 && 'rounded-b-lg',
                 pathname === item.href && 'bg-ff-near-black/8',
               )}
             >
-              <div className="flex items-center gap-2">
-                {item.label}
-                {item.submenu && item.submenu.length > 0 && (
-                  <Plus className="w-3 h-3 transition-transform" />
-                )}
-              </div>
+              {item.label}
+              {item.submenu && item.submenu.length > 0 && (
+                <ChevronRight className="w-3 h-3 ml-auto shrink-0" />
+              )}
             </Link>
 
             {/* Nested submenu */}
-            {item.submenu && (
+            {item.submenu && item.submenu.length > 0 && (
               <ul
-                className="absolute left-full top-0 ml-1 min-w-max flex flex-col rounded-lg opacity-0 invisible group-hover/item:opacity-100 group-hover/item:visible transition-all duration-300 shadow-lg"
+                className={cn(
+                  'absolute left-full top-0 ml-0 min-w-max flex flex-col rounded-lg shadow-lg transition-all duration-200 z-50',
+                  hoveredSubmenuIdx === idx
+                    ? 'opacity-100 visible pointer-events-auto'
+                    : 'opacity-0 invisible pointer-events-none',
+                )}
                 style={{
                   background: 'rgba(236, 229, 222, 0.95)',
                   backdropFilter: 'blur(8px)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                 }}
+                onMouseEnter={() => handleMouseEnterSubmenu(idx)}
+                onMouseLeave={handleMouseLeave}
               >
-                {item.submenu?.map((subitem, subIdx) => (
-                  <li key={subitem.href}>
+                {item.submenu.map((subitem, subIdx) => (
+                  <li key={subitem.href || subIdx}>
                     <Link
                       href={subitem.href}
                       className={cn(
-                        'block px-4 py-3 text-sm font-display font-bold text-ff-near-black transition-colors whitespace-nowrap',
+                        'block px-4 py-2.5 text-sm font-display font-bold text-ff-near-black transition-colors whitespace-nowrap',
                         'hover:bg-ff-near-black hover:text-white dark:hover:bg-white dark:hover:text-ff-near-black',
                         subIdx === 0 && 'rounded-t-lg',
                         subIdx === (item.submenu?.length ?? 0) - 1 && 'rounded-b-lg',
