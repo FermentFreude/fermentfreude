@@ -8,7 +8,6 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 
 type HeaderNavItem = NonNullable<Header['navItems']>[number]
-type HeaderDropdownItem = NonNullable<HeaderNavItem['dropdownItems']>[number]
 
 const ctx = { skipRevalidate: true, skipAutoTranslate: true }
 

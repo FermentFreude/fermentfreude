@@ -23,9 +23,8 @@ interface NavOverlayItem {
   id: string
   label: string
   href: string
-  isDivider?: boolean
   description?: string | null
-  children?: NavOverlayItem[]
+  isSmall?: boolean
 }
 
 /**
@@ -389,148 +388,36 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                 {(() => {
                   const currentItem = navItemsList.find((i) => i.id === detailViewItem)
                   const children = currentItem?.children || []
-                  const isAboutModal = currentItem?.label.toLowerCase().includes('about')
-                  const isWorkshopsModal = currentItem?.label.toLowerCase() === 'workshops'
 
-                  if (isWorkshopsModal) {
-                    const headerItem =
-                      children.find(
-                        (child) => child.href.toLowerCase() === '/workshops' && !child.isDivider,
-                      ) || null
-                    const workshopItems = (headerItem?.children || []).filter(
-                      (child) => !child.isDivider,
-                    )
-                    const additionalItems = children.filter((child) => {
-                      const href = child.href.toLowerCase()
-                      const label = child.label.toLowerCase()
-                      const isVoucher =
-                        href.includes('/workshops/voucher') ||
-                        label.includes('voucher') ||
-                        label.includes('gutschein')
-                      const isOnlineCourses = href.startsWith('/courses')
-                      return isOnlineCourses || isVoucher
-                    })
-                    return (
-                      <div className="flex flex-col gap-1">
-                        {headerItem && (
-                          <Link
-                            href="/workshops"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              closeDetailView()
-                              setTimeout(() => handleClose('/workshops'), 200)
-                            }}
-                            className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                          >
-                            <div className="text-base sm:text-lg font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                              {headerItem.label}
-                            </div>
-                          </Link>
-                        )}
-                        {workshopItems.length > 0 && (
-                          <div className="ml-4 pl-4 border-l border-ff-warm-gray/40 dark:border-white/15 flex flex-col gap-1.5">
-                            {workshopItems.map((child) => (
-                              <Link
-                                key={child.id}
-                                href={child.href}
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  closeDetailView()
-                                  setTimeout(() => handleClose(child.href), 200)
-                                }}
-                                className="block p-2 sm:p-2.5 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                              >
-                                <div className="text-xs sm:text-sm font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                                  {child.label}
-                                </div>
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                        {additionalItems.length > 0 && (
-                          <div className="flex flex-col gap-1">
-                            {additionalItems.map((child) => {
-                              const href = child.href.toLowerCase()
-                              const label = child.label.toLowerCase()
-                              const isVoucher =
-                                href.includes('/workshops/voucher') ||
-                                label.includes('voucher') ||
-                                label.includes('gutschein')
-                              return (
-                                <div key={child.id}>
-                                  {child.isDivider && (
-                                    <div className="my-3 border-t border-ff-warm-gray/40 dark:border-white/15" />
-                                  )}
-                                  <Link
-                                    href={child.href}
-                                    onClick={(e) => {
-                                      e.preventDefault()
-                                      closeDetailView()
-                                      setTimeout(() => handleClose(child.href), 200)
-                                    }}
-                                    className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                                  >
-                                    <div className="text-xs sm:text-sm font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                                      {child.label}
-                                    </div>
-                                  </Link>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  } else if (isAboutModal) {
-                    // About modal: all links same size (no parent distinction)
-                    const allAboutItems = children.filter((child) => !child.isDivider)
-                    return (
-                      <div className="flex flex-col gap-1">
-                        {allAboutItems.map((child) => (
-                          <Link
-                            key={child.id}
-                            href={child.href}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              closeDetailView()
-                              setTimeout(() => handleClose(child.href), 200)
-                            }}
-                            className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                          >
-                            <div className="text-sm sm:text-base font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                              {child.label}
-                            </div>
-                          </Link>
-                        ))}
-                        {children.some((c) => c.isDivider) && (
-                          <div className="my-3 border-t border-ff-warm-gray/40 dark:border-white/15" />
-                        )}
-                      </div>
-                    )
-                  }
                   return (
                     <div className="flex flex-col gap-1">
                       {children.map((child) => (
-                        <div key={child.id}>
-                          {child.isDivider && (
-                            <div className="my-3 border-t border-ff-warm-gray/40 dark:border-white/15" />
+                        <Link
+                          key={child.id}
+                          href={child.href}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            closeDetailView()
+                            setTimeout(() => handleClose(child.href), 200)
+                          }}
+                          className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
+                        >
+                          <div
+                            className={cn(
+                              'text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors',
+                              child.isSmall
+                                ? 'text-xs sm:text-sm font-normal'
+                                : 'text-sm sm:text-base font-bold',
+                            )}
+                          >
+                            {child.label}
+                          </div>
+                          {child.description && !child.isSmall && (
+                            <div className="text-xs text-ff-gray-text dark:text-neutral-400 mt-1">
+                              {child.description}
+                            </div>
                           )}
-                          {!child.isDivider && (
-                            <Link
-                              href={child.href}
-                              onClick={(e) => {
-                                e.preventDefault()
-                                closeDetailView()
-                                setTimeout(() => handleClose(child.href), 200)
-                              }}
-                              className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                            >
-                              <div className="text-sm font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                                {child.label}
-                              </div>
-                            </Link>
-                          )}
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   )
@@ -633,14 +520,8 @@ function buildNavItems(
             id: `${item.id}-${sub.href}`,
             label: sub.label,
             href: sub.href,
-            isDivider: sub.isDivider ?? false,
             description: sub.description || null,
-            children:
-              sub.submenu?.map((submenuItem) => ({
-                id: `${item.id}-${sub.href}-${submenuItem.href}`,
-                label: submenuItem.label,
-                href: submenuItem.href,
-              })) || undefined,
+            isSmall: sub.isSmall ?? false,
           })
         }
       }
@@ -658,14 +539,8 @@ function buildNavItems(
             id: `${item.url}-${sub.href}`,
             label: sub.label,
             href: sub.href,
-            isDivider: sub.isDivider ?? false,
             description: sub.description || null,
-            children:
-              sub.submenu?.map((submenuItem) => ({
-                id: `${item.url}-${sub.href}-${submenuItem.href}`,
-                label: submenuItem.label,
-                href: submenuItem.href,
-              })) || undefined,
+            isSmall: sub.isSmall ?? false,
           })
         }
       }
