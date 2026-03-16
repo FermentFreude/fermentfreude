@@ -24,6 +24,7 @@ export const LoginForm: React.FC = () => {
   const { login } = useAuth()
   const router = useRouter()
   const [error, setError] = React.useState<null | string>(null)
+  const [remember, setRemember] = React.useState(false)
 
   const {
     formState: { errors, isLoading },
@@ -47,43 +48,84 @@ export const LoginForm: React.FC = () => {
   return (
     <form className="" onSubmit={handleSubmit(onSubmit)}>
       <Message className="classes.message" error={error} />
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
         <FormItem>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            {...register('email', { required: 'Email is required.' })}
-          />
+          <Label className="sr-only" htmlFor="email">
+            Email
+          </Label>
+          <div className="flex h-12 items-center justify-between gap-3 rounded-[6px] bg-[rgba(250,242,222,0.16)] px-4">
+            <span className="text-sm text-[#FAF2DE] opacity-90">✉️</span>
+            <Input
+              id="email"
+              type="email"
+              placeholder="satomatsugawa@gmail.com"
+              className="h-full flex-1 border-none bg-transparent p-0 text-sm text-[#FAF2DE] placeholder:text-[#FAF2DE]/70 transition-colors hover:bg-[rgba(250,242,222,0.08)] focus-visible:outline-none"
+              {...register('email', { required: 'Email is required.' })}
+            />
+            <span className="text-sm text-[#FAF2DE] opacity-90">✓</span>
+          </div>
           {errors.email && <FormError message={errors.email.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            {...register('password', { required: 'Please provide a password.' })}
-          />
+          <Label className="sr-only" htmlFor="password">
+            Password
+          </Label>
+          <div className="flex h-12 items-center justify-between gap-3 rounded-[6px] bg-[rgba(250,242,222,0.16)] px-4">
+            <span className="text-sm text-[#FAF2DE] opacity-90">🔒</span>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Type your password here"
+              className="h-full flex-1 border-none bg-transparent p-0 text-sm text-[#FAF2DE] placeholder:text-[#FAF2DE]/70 transition-colors hover:bg-[rgba(250,242,222,0.08)] focus-visible:outline-none"
+              {...register('password', { required: 'Please provide a password.' })}
+            />
+            <span className="text-sm text-[#FAF2DE] opacity-90">✓</span>
+          </div>
           {errors.password && <FormError message={errors.password.message} />}
         </FormItem>
 
-        <div className="text-primary/70 mb-6 prose prose-a:hover:text-primary dark:prose-invert">
-          <p>
-            Forgot your password?{' '}
-            <Link href={`/recover-password${allParams}`}>Click here to reset it</Link>
-          </p>
+        <div className="flex items-center justify-between pt-0.5 text-[12px] text-[#E5DDCF]/85">
+          <Link
+            href={`/recover-password${allParams}`}
+            className="underline underline-offset-4 hover:text-white"
+          >
+            Forgot your password?
+          </Link>
+          <Link
+            href={`/create-account${allParams}`}
+            className="underline underline-offset-4 hover:text-white"
+          >
+            Create an account Now
+          </Link>
         </div>
       </div>
 
-      <div className="flex gap-4 justify-between">
-        <Button asChild variant="outline" size="lg">
-          <Link href={`/create-account${allParams}`} className="grow max-w-[50%]">
-            Create an account
-          </Link>
-        </Button>
-        <Button className="grow" disabled={isLoading} size="lg" type="submit" variant="default">
-          {isLoading ? 'Processing' : 'Continue'}
+      <div className="mt-8 flex items-center justify-between gap-6">
+        <label className="flex cursor-pointer items-center gap-3 text-[13px] text-[#FAF2DE]/90">
+          <input
+            id="remember-login"
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+            className="sr-only"
+          />
+          <span
+            aria-hidden="true"
+            className="flex size-10 items-center justify-center rounded-full border border-[#FAF2DE]/50 text-[#FAF2DE]/90"
+          >
+            {remember ? '✓' : ''}
+          </span>
+          <span>Remember my login</span>
+        </label>
+        <Button
+          className="h-12 rounded-full bg-gradient-to-b from-[#F8F4EB] to-[#EFE8DA] px-10 text-[13px] font-medium tracking-[0.18em] uppercase text-[#3D3933] shadow-[0_4px_10px_rgba(0,0,0,0.25)] border border-white/60 transition-colors focus-visible:ring-2 focus-visible:ring-[#F5F2EC]/60 hover:from-white hover:to-[#F3ECE0]"
+          disabled={isLoading}
+          size="lg"
+          type="submit"
+          variant="default"
+        >
+          {isLoading ? 'Processing' : 'Enter account'}
         </Button>
       </div>
     </form>
