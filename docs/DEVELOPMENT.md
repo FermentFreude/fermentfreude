@@ -475,54 +475,54 @@ ZIP: Any 5 digits
 
 ## 🌿 Git Workflow
 
-### Branch Strategy
+**Branch from `staging`.** Merge back via **Pull Request** so staging stays consistent (direct merges have caused missing assets; PRs allow review and safe conflict resolution).
 
-- `main` - Production-ready code
-- `develop` - Development branch (optional)
-- `feature/*` - New features
-- `fix/*` - Bug fixes
-- `docs/*` - Documentation updates
+### Branch strategy
 
-### Pull Request Process
+- `main` — production
+- `staging` — integration and testing (deploy preview)
+- Feature branches — created **from `staging`**, e.g. `retouchcontact`, `retouchhero`, `changes1`, `changes2`, or `feature/your-feature`
 
-1. **Create feature branch**
+### Step-by-step (create branch → rebase → PR)
+
+1. **Create branch from staging**
    ```bash
-   git checkout -b feature/workshop-booking
+   git checkout staging
+   git pull origin staging
+   git checkout -b retouchcontact   # or retouchhero, changes1, etc.
    ```
 
 2. **Make changes and commit**
    ```bash
    git add .
-   git commit -m "feat: add workshop booking system"
+   git commit -m "feat: describe your change"
    ```
 
-3. **Push to GitHub**
+3. **Rebase with staging (keep branch up to date)**
    ```bash
-   git push origin feature/workshop-booking
+   git fetch origin
+   git rebase origin/staging
    ```
 
-4. **Create Pull Request**
-   - Go to GitHub repository
-   - Click "New Pull Request"
-   - Select your branch
-   - Add description
-   - Request review from team member
+4. **Push and open Pull Request**
+   ```bash
+   git push origin retouchcontact
+   ```
+   - On GitHub: New Pull Request **into `staging`** (not main).
+   - Add description, then merge after review.
 
-5. **After approval, merge to main**
+5. **Before merging: check errors and test build**
+   - Run `pnpm lint` and `npx tsc --noEmit`.
+   - Confirm staging deploy/build succeeds after merge.
 
-### Syncing with Team
+### Syncing your branch with staging
 
 ```bash
-# Pull latest from main
-git checkout main
-git pull origin main
-
-# Update your feature branch
-git checkout feature/your-feature
-git merge main
-
-# Or rebase (cleaner history)
-git rebase main
+git checkout your-branch
+git fetch origin
+git rebase origin/staging
+# fix any conflicts, then:
+git push origin your-branch   # use --force-with-lease if you already pushed
 ```
 
 ---
