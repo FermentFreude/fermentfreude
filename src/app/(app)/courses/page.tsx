@@ -16,6 +16,7 @@ import {
   Clock,
   FlaskConical,
   Milk,
+  PlayCircle,
   User,
   Wheat,
   Wine,
@@ -579,7 +580,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
                           </div>
                           <span className="text-body text-ff-near-black">{lesson.title}</span>
                         </div>
-                        {lesson.locked && (
+                        {lesson.locked ? (
                           <svg
                             className="size-5 shrink-0 text-ff-gray-muted"
                             fill="none"
@@ -593,6 +594,8 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
                               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                             />
                           </svg>
+                        ) : (
+                          <PlayCircle className="size-5 shrink-0 text-ff-gold-accent" />
                         )}
                       </li>
                     ))}

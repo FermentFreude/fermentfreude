@@ -75,9 +75,9 @@ export default async function Login() {
             </section>
 
             <aside className="space-y-7 text-neutral-50">
-              <div className="mx-auto flex w-full max-w-[520px] flex-col gap-px">
+              <div className="mx-auto flex w-full max-w-130 flex-col gap-px">
                 <div
-                  className="h-[170px] w-full max-w-[520px] rounded-[120px]"
+                  className="h-42.5 w-full max-w-130 rounded-[120px]"
                   style={{
                     backgroundImage: `url(${loginHeroImageUrl})`,
                     backgroundSize: '520px 480px',
@@ -86,7 +86,7 @@ export default async function Login() {
                   }}
                 />
                 <div
-                  className="h-[170px] w-full max-w-[520px] rounded-[120px]"
+                  className="h-42.5 w-full max-w-130 rounded-[120px]"
                   style={{
                     backgroundImage: `url(${loginHeroImageUrl})`,
                     backgroundSize: '520px 480px',
@@ -95,7 +95,7 @@ export default async function Login() {
                   }}
                 />
                 <div
-                  className="h-[170px] w-full max-w-[520px] rounded-[120px]"
+                  className="h-42.5 w-full max-w-130 rounded-[120px]"
                   style={{
                     backgroundImage: `url(${loginHeroImageUrl})`,
                     backgroundSize: '520px 480px',

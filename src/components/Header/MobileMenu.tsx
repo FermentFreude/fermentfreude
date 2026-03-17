@@ -236,7 +236,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
       <div className="absolute inset-0 bg-[#ECE5DE]/95 dark:bg-ff-near-black/97 backdrop-blur-xl" />
 
       {/* Fixed Language Header */}
-      <div className="fixed top-0 left-0 right-0 z-40 shrink-0 border-b border-ff-warm-gray/20 dark:border-white/10 px-4 sm:px-6 md:px-8 py-2.5 sm:py-4 flex items-center justify-between bg-[#ECE5DE]/95 dark:bg-ff-near-black/97 backdrop-blur-xl hidden md:flex">
+      <div className="fixed top-0 left-0 right-0 z-40 shrink-0 border-b border-ff-warm-gray/20 dark:border-white/10 px-4 sm:px-6 md:px-8 py-2.5 sm:py-4 items-center justify-between bg-[#ECE5DE]/95 dark:bg-ff-near-black/97 backdrop-blur-xl hidden md:flex">
         <span className="text-xs text-ff-gray-text dark:text-neutral-400 uppercase tracking-wide">
           Language
         </span>
@@ -286,7 +286,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                   >
                     {/* Label with character animation and optional badge */}
                     <div className="flex flex-col gap-1 flex-1 min-w-0">
-                      <span className="flex overflow-hidden group-hover:text-white dark:group-hover:text-ff-near-black transition-colors text-base sm:text-lg break-words">
+                        <span className="flex overflow-hidden group-hover:text-white dark:group-hover:text-ff-near-black transition-colors text-base sm:text-lg wrap-break-word">
                         {item.label.split('').map((char, charIdx) => (
                           <span
                             key={`${idx}-${charIdx}`}
@@ -347,7 +347,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
         {detailViewItem && (
           <div
             ref={detailRef}
-            className="fixed inset-0 flex items-center justify-center z-[60] px-3 sm:px-6 pointer-events-none overflow-hidden"
+            className="fixed inset-0 flex items-center justify-center z-60 px-3 sm:px-6 pointer-events-none overflow-hidden"
           >
             {/* Backdrop */}
             <div

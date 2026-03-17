@@ -41,7 +41,7 @@ export const defaultNavItems: DefaultNavItem[] = [
       },
       {
         label: 'Gift Voucher',
-        href: '/shop',
+        href: '/workshops/voucher',
       },
     ],
   },
