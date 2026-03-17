@@ -29,12 +29,6 @@ export default async function RecoverPassword() {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-16 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-start">
             <section className="flex flex-col space-y-10">
-              <header>
-                <h1 className="font-display text-[2.4rem] tracking-[0.38em] uppercase text-[#F4F0E8] md:text-[2.8rem]">
-                  RECOVER PASSWORD
-                </h1>
-              </header>
-
               <div className="space-y-7">
                 <ForgotPasswordForm />
               </div>
