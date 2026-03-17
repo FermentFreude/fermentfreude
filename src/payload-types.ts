@@ -76,6 +76,7 @@ export interface Config {
     pages: Page;
     categories: Category;
     'course-progress': CourseProgress;
+    enrollments: Enrollment;
     media: Media;
     posts: Post;
     workshops: Workshop;
@@ -115,6 +116,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'course-progress': CourseProgressSelect<false> | CourseProgressSelect<true>;
+    enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     workshops: WorkshopsSelect<false> | WorkshopsSelect<true>;
@@ -323,6 +325,10 @@ export interface Product {
     description?: string | null;
   };
   categories?: (string | Category)[] | null;
+  /**
+   * If this product unlocks an online course, enter the course slug here (e.g. "basic-fermentation"). The buyer will be automatically enrolled.
+   */
+  courseSlug?: string | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -3072,6 +3078,33 @@ export interface CourseProgress {
   createdAt: string;
 }
 /**
+ * One enrollment per user per course. Auto-created on successful order payment.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enrollments".
+ */
+export interface Enrollment {
+  id: string;
+  /**
+   * The enrolled user.
+   */
+  user: string | User;
+  /**
+   * e.g. "basic-fermentation". Matches product courseSlug and CourseProgress.courseSlug.
+   */
+  courseSlug: string;
+  /**
+   * The Payload order ID that triggered this enrollment.
+   */
+  orderId?: string | null;
+  /**
+   * When the enrollment was created.
+   */
+  enrolledAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Define workshop metadata. Price and capacity apply to all dates and locations.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3281,6 +3314,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'course-progress';
         value: string | CourseProgress;
+      } | null)
+    | ({
+        relationTo: 'enrollments';
+        value: string | Enrollment;
       } | null)
     | ({
         relationTo: 'media';
@@ -4480,6 +4517,18 @@ export interface CourseProgressSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enrollments_select".
+ */
+export interface EnrollmentsSelect<T extends boolean = true> {
+  user?: T;
+  courseSlug?: T;
+  orderId?: T;
+  enrolledAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -4849,6 +4898,7 @@ export interface ProductsSelect<T extends boolean = true> {
         description?: T;
       };
   categories?: T;
+  courseSlug?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;

@@ -214,6 +214,16 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
       hasMany: true,
       relationTo: 'categories',
     },
+    {
+      name: 'courseSlug',
+      type: 'text',
+      required: false,
+      admin: {
+        position: 'sidebar',
+        description:
+          'If this product unlocks an online course, enter the course slug here (e.g. "basic-fermentation"). The buyer will be automatically enrolled.',
+      },
+    },
     slugField(),
   ],
 })

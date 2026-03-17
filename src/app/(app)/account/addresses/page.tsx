@@ -40,7 +40,7 @@ export default async function AddressesPage() {
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9] flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6be68] mb-3">
+          <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
             My Account
           </p>
           <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
@@ -64,7 +64,7 @@ export default async function AddressesPage() {
           {addresses.map((address: any) => (
             <div
               key={address.id}
-              className="bg-white border border-[#e8e4d9] rounded-xl p-6 flex flex-col"
+              className="bg-white border border-[#1a1a1a]/20 rounded-xl p-6 flex flex-col"
             >
               <div className="flex items-center gap-2 mb-4">
                 <MapPin className="w-3.5 h-3.5 text-[#c4bbb3] shrink-0" />
@@ -104,7 +104,7 @@ export default async function AddressesPage() {
           ))}
         </div>
       ) : (
-        <div className="bg-white border border-[#e8e4d9] rounded-xl p-16 text-center">
+        <div className="bg-white border border-[#1a1a1a]/20 rounded-xl p-16 text-center">
           <div className="w-10 h-10 rounded-xl bg-[#f5f3f0] flex items-center justify-center mx-auto mb-4">
             <MapPin className="w-5 h-5 text-[#c4bbb3]" />
           </div>

@@ -18,6 +18,7 @@ import { fileURLToPath } from 'url'
 
 import { Categories } from '@/collections/Categories'
 import { CourseProgress } from '@/collections/CourseProgress'
+import { Enrollments } from '@/collections/Enrollments'
 import { Media } from '@/collections/Media'
 import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
@@ -73,6 +74,7 @@ export default buildConfig({
     Pages,
     Categories,
     CourseProgress,
+    Enrollments,
     Media,
     Posts,
     Workshops,

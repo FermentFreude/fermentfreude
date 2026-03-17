@@ -1,6 +1,6 @@
 import { formatDate, formatPrice } from '@/utilities/form/formatters'
 import configPromise from '@payload-config'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, GraduationCap } from 'lucide-react'
 import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
 import { getPayload } from 'payload'
@@ -71,11 +71,20 @@ export default async function DashboardPage() {
   const stats = await getOrderStats(user.id)
   const firstName = user.name?.split(' ')[0] ?? 'there'
 
+  // Fetch enrollments for My Learning widget
+  const enrollmentResult = await payload.find({
+    collection: 'enrollments',
+    where: { user: { equals: user.id } },
+    limit: 10,
+    overrideAccess: true,
+  })
+  const enrolledCount = enrollmentResult.totalDocs
+
   return (
     <div className="max-w-4xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6be68] mb-3">
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
           My Account
         </p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
@@ -112,7 +121,7 @@ export default async function DashboardPage() {
             small: true,
           },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white border border-[#e8e4d9] rounded-xl p-5">
+          <div key={stat.label} className="bg-white border border-[#1a1a1a]/20 rounded-xl p-5">
             <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c4bbb3] mb-3">
               {stat.label}
             </p>
@@ -129,6 +138,38 @@ export default async function DashboardPage() {
         ))}
       </div>
 
+      {/* My Learning widget */}
+      {enrolledCount > 0 && (
+        <div>
+          <div className="flex items-baseline justify-between mb-4">
+            <h2 className="font-display font-bold text-[#1a1a1a] text-lg">My Learning</h2>
+            <Link
+              href="/account/learning"
+              className="inline-flex items-center gap-1 text-[12px] font-medium text-[#626160] hover:text-[#1a1a1a] transition-colors"
+            >
+              View all <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="bg-white border border-[#1a1a1a]/20 rounded-xl p-5 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-ff-gold-accent/15 flex items-center justify-center shrink-0">
+              <GraduationCap className="w-5 h-5 text-ff-gold-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[#1a1a1a]">
+                {enrolledCount === 1 ? '1 course enrolled' : `${enrolledCount} courses enrolled`}
+              </p>
+              <p className="text-[12px] text-[#626160] mt-0.5">Pick up where you left off</p>
+            </div>
+            <Link
+              href="/account/learning"
+              className="px-4 py-2 bg-[#1a1a1a] hover:bg-[#333333] text-white text-[13px] font-medium rounded-lg transition-colors shrink-0"
+            >
+              Continue
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Recent orders */}
       {stats.recent.length > 0 ? (
         <div>
@@ -141,7 +182,7 @@ export default async function DashboardPage() {
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="bg-white border border-[#e8e4d9] rounded-xl overflow-hidden">
+          <div className="bg-white border border-[#1a1a1a]/20 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#e8e4d9]">
@@ -192,7 +233,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-white border border-[#e8e4d9] rounded-xl p-16 text-center">
+        <div className="bg-white border border-[#1a1a1a]/20 rounded-xl p-16 text-center">
           <p className="text-[13px] text-[#626160] mb-6">No orders yet.</p>
           <Link
             href="/workshops"

@@ -63,7 +63,7 @@ export default async function OrdersPage() {
     <div className="max-w-4xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6be68] mb-3">
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
           My Account
         </p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
@@ -77,7 +77,7 @@ export default async function OrdersPage() {
       </div>
 
       {orders.length > 0 ? (
-        <div className="bg-white border border-[#e8e4d9] rounded-xl overflow-hidden">
+        <div className="bg-white border border-[#1a1a1a]/20 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#e8e4d9]">
@@ -132,7 +132,7 @@ export default async function OrdersPage() {
           </table>
         </div>
       ) : (
-        <div className="bg-white border border-[#e8e4d9] rounded-xl p-16 text-center">
+        <div className="bg-white border border-[#1a1a1a]/20 rounded-xl p-16 text-center">
           <p className="text-[13px] text-[#626160] mb-6">No orders yet.</p>
           <Link
             href="/workshops"

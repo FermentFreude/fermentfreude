@@ -1,12 +1,10 @@
 'use client'
 
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/providers/Auth'
-import { LayoutDashboard, LogOut, MapPin, Menu, ShoppingBag, Truck, User } from 'lucide-react'
+import { GraduationCap, LayoutDashboard, LogOut, MapPin, ShoppingBag, Truck, User } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
 
 const NAV_GROUPS = [
   {
@@ -14,6 +12,7 @@ const NAV_GROUPS = [
     items: [
       { label: 'Overview', href: '/account', exact: true, icon: LayoutDashboard },
       { label: 'Orders', href: '/account/orders', icon: ShoppingBag },
+      { label: 'My Learning', href: '/account/learning', icon: GraduationCap },
     ],
   },
   {
@@ -114,28 +113,47 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
-export default function AccountSidebar() {
-  const [mobileOpen, setMobileOpen] = useState(false)
+function MobileTabStrip() {
+  const pathname = usePathname()
+
+  const isActive = (href: string, exact?: boolean) =>
+    exact ? pathname === href : pathname.startsWith(href)
+
+  const allItems = NAV_GROUPS.flatMap((g) => g.items)
 
   return (
-    <>
-      {/* Mobile: Sheet drawer trigger */}
-      <div className="md:hidden mb-6">
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild>
-            <button
-              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#e8e4d9] bg-white text-[#4b4b4b] text-sm font-medium hover:bg-[#ece5de] transition-colors"
-              aria-label="Open account navigation"
+    <nav className="md:hidden w-full bg-white border-b border-[#e8e4d9]">
+      <div className="flex gap-1.5 px-4 py-2.5 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {allItems.map((item) => {
+          const active = isActive(item.href, item.exact)
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0',
+                active
+                  ? 'bg-[#1a1a1a] text-white'
+                  : 'text-[#4b4b4b] bg-[#f5f3f0] hover:bg-[#ece5de]',
+              )}
             >
-              <Menu className="w-4 h-4" />
-              <span>Menu</span>
-            </button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0 bg-white">
-            <SidebarContent onNavigate={() => setMobileOpen(false)} />
-          </SheetContent>
-        </Sheet>
+              <item.icon
+                className={cn('w-3 h-3 shrink-0', active ? 'text-white/70' : 'text-[#9e9189]')}
+              />
+              {item.label}
+            </Link>
+          )
+        })}
       </div>
+    </nav>
+  )
+}
+
+export default function AccountSidebar() {
+  return (
+    <>
+      {/* Mobile: horizontal scrollable tab strip */}
+      <MobileTabStrip />
 
       {/* Desktop: left sidebar rail */}
       <aside className="hidden md:flex flex-col bg-white border-r border-[#e8e4d9] w-52 shrink-0 self-stretch">

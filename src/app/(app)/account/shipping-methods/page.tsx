@@ -24,7 +24,7 @@ export default function ShippingMethodsPage() {
     <div className="max-w-2xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6be68] mb-3">
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
           Settings
         </p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
@@ -53,7 +53,7 @@ export default function ShippingMethodsPage() {
           {SHIPPING_METHODS.map((method) => (
             <div
               key={method.name}
-              className="bg-white border border-[#e8e4d9] rounded-xl p-5 flex items-start gap-4"
+              className="bg-white border border-[#1a1a1a]/20 rounded-xl p-5 flex items-start gap-4"
             >
               <span
                 className={`mt-0.5 w-3.5 h-3.5 rounded-full border-2 shrink-0 ${

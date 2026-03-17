@@ -17,7 +17,7 @@ export function FooterBrand() {
   const handleMouseLeave = useCallback(() => setIsHovered(false), [])
 
   return (
-    <div className="w-full py-8 flex items-end gap-4 flex-nowrap">
+    <div className="w-full py-8 grid grid-cols-[1fr_auto] items-center md:items-end gap-4">
       <Link
         href="/"
         aria-label="FermentFreude home"
@@ -61,14 +61,14 @@ export function FooterBrand() {
       <motion.button
         onClick={scrollToTop}
         aria-label="Back to top"
-        className="flex-shrink-0 aspect-square bg-[#1d1d1d] text-white rounded-full flex items-center justify-center cursor-pointer mb-1"
-        style={{ width: 'clamp(2.5rem, 5vw, 5.5rem)', height: 'clamp(2.5rem, 5vw, 5.5rem)' }}
+        className="flex-shrink-0 aspect-square bg-[#1d1d1d] text-white rounded-full flex items-center justify-center cursor-pointer md:mb-1"
+        style={{ width: 'clamp(1.8rem, 5vw, 5.5rem)', height: 'clamp(1.8rem, 5vw, 5.5rem)' }}
         whileHover={{ scale: 1.1, backgroundColor: '#e6be68' }}
         whileTap={{ scale: 0.95 }}
         transition={{ duration: 0.2 }}
       >
         <svg
-          className="w-5 h-5 md:w-7 md:h-7 lg:w-9 lg:h-9"
+          className="w-3.5 h-3.5 md:w-7 md:h-7 lg:w-9 lg:h-9"
           fill="none"
           stroke="currentColor"
           strokeWidth={2.5}

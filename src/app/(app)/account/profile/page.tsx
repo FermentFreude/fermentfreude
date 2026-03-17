@@ -86,7 +86,7 @@ export default function ProfilePage() {
     <div className="max-w-2xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6be68] mb-3">
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
           Settings
         </p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
@@ -150,7 +150,7 @@ export default function ProfilePage() {
         </p>
 
         {!showPasswordForm ? (
-          <div className="flex items-center justify-between py-4 px-5 bg-white border border-[#e8e4d9] rounded-xl">
+          <div className="flex items-center justify-between py-4 px-5 bg-white border border-[#1a1a1a]/20 rounded-xl">
             <div>
               <p className="text-sm font-semibold text-[#1a1a1a]">Password</p>
               <p className="text-[12px] text-[#c4bbb3] mt-0.5 tracking-widest">••••••••</p>
@@ -237,7 +237,7 @@ export default function ProfilePage() {
         <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c4bbb3] mb-5">
           Account Status
         </p>
-        <div className="flex items-center gap-3 py-4 px-5 bg-white border border-[#e8e4d9] rounded-xl">
+        <div className="flex items-center gap-3 py-4 px-5 bg-white border border-[#1a1a1a]/20 rounded-xl">
           <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
           <p className="text-sm text-[#4b4b4b]">Account is active and verified</p>
         </div>

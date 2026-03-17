@@ -17,11 +17,11 @@ export default async function AccountLayout({ children }: { children: ReactNode 
   }
 
   return (
-    <div className="bg-[#f5f3f0] min-h-screen">
+    <div className="bg-[#575651] min-h-screen">
       <RenderParams className="sr-only" />
-      <div className="flex min-h-screen">
+      <div className="flex flex-col md:flex-row min-h-screen">
         <AccountSidebar />
-        <main className="flex-1 min-w-0 py-10 px-6 md:px-10">{children}</main>
+        <main className="flex-1 min-w-0 bg-[#f5f3f0] py-8 px-5 md:py-10 md:px-10">{children}</main>
       </div>
     </div>
   )
