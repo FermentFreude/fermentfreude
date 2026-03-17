@@ -7,14 +7,13 @@ export const metadata = {
   description: 'Return request details',
 }
 
-interface ReturnRequestDetailPageProps {
-  params: {
-    id: string
-  }
-}
-
-export default async function ReturnRequestDetailPage({ params }: ReturnRequestDetailPageProps) {
-  const { id } = params
+export default async function ReturnRequestDetailPage({
+  params,
+}: {
+  params: Promise<{ [key: string]: string }>
+}) {
+  const resolvedParams = await params
+  const id = resolvedParams.id
 
   // Mock data - in real app, fetch from database
   const returnRequest = {

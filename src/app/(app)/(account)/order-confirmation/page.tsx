@@ -8,14 +8,13 @@ export const metadata = {
   description: 'Order confirmation',
 }
 
-interface OrderConfirmationPageProps {
-  searchParams: {
-    orderId?: string
-  }
-}
-
-export default async function OrderConfirmationPage({ searchParams }: OrderConfirmationPageProps) {
-  const { orderId } = searchParams
+export default async function OrderConfirmationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedSearchParams = await searchParams
+  const orderId = typeof resolvedSearchParams.orderId === 'string' ? resolvedSearchParams.orderId : undefined
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
