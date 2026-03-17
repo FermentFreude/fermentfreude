@@ -1,7 +1,6 @@
 'use client'
 
-import { useSearchParams, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,9 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 export function EditAddressModal() {
@@ -80,16 +80,13 @@ export function EditAddressModal() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(
-        addressId ? `/api/addresses/${addressId}` : '/api/addresses',
-        {
-          method: addressId ? 'PATCH' : 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-        }
-      )
+      const response = await fetch(addressId ? `/api/addresses/${addressId}` : '/api/addresses', {
+        method: addressId ? 'PATCH' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
 
       if (response.ok) {
         toast.success(addressId ? 'Address updated' : 'Address added')
@@ -308,7 +305,13 @@ export function EditAddressModal() {
               disabled={isLoading || isFetching}
               className="flex-1 bg-[#e6be68] text-white hover:bg-[#d4a85a]"
             >
-              {isFetching ? 'Loading...' : isLoading ? 'Saving...' : addressId ? 'Update Address' : 'Add Address'}
+              {isFetching
+                ? 'Loading...'
+                : isLoading
+                  ? 'Saving...'
+                  : addressId
+                    ? 'Update Address'
+                    : 'Add Address'}
             </Button>
             <Button
               type="button"

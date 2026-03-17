@@ -1877,6 +1877,17 @@ export const Pages: CollectionConfig = {
                           required: false,
                           label: 'Locked (Coming soon / preview only)',
                         },
+                        {
+                          name: 'videoUrl',
+                          type: 'text',
+                          required: false,
+                          label: 'Video URL',
+                          admin: {
+                            description:
+                              'YouTube, Vimeo, or direct MP4 link. Only shown to users on unlocked lessons.',
+                            condition: (_, siblingData) => !siblingData?.locked,
+                          },
+                        },
                       ],
                     },
                   ],

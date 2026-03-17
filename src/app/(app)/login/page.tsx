@@ -2,14 +2,12 @@ import type { Metadata } from 'next'
 
 import { RenderParams } from '@/components/RenderParams'
 import Link from 'next/link'
-import React from 'react'
 
-import { headers as getHeaders } from 'next/headers'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import { LoginForm } from '@/components/forms/LoginForm'
+import configPromise from '@payload-config'
+import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { Media } from '@/components/Media'
+import { getPayload } from 'payload'
 
 export default async function Login() {
   const headers = await getHeaders()
@@ -111,9 +109,9 @@ export default async function Login() {
                   <span className="block whitespace-nowrap">EXPRESSION</span>
                 </h2>
                 <p className="max-w-md text-sm leading-relaxed text-[#D1CAC0]">
-                  Cultures believes that fermentation is a powerful tool for self-expression. Its versatile
-                  collections are designed to empower individuals to showcase their personality and
-                  confidence through their style choices.
+                  Cultures believes that fermentation is a powerful tool for self-expression. Its
+                  versatile collections are designed to empower individuals to showcase their
+                  personality and confidence through their style choices.
                 </p>
               </div>
 
@@ -124,7 +122,6 @@ export default async function Login() {
               </div>
             </aside>
           </div>
-
         </div>
       </div>
     </div>

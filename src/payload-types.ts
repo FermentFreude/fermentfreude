@@ -1447,6 +1447,10 @@ export interface Page {
             | {
                 title: string;
                 locked?: boolean | null;
+                /**
+                 * YouTube, Vimeo, or direct MP4 link. Only shown to users on unlocked lessons.
+                 */
+                videoUrl?: string | null;
                 id?: string | null;
               }[]
             | null;
@@ -3854,6 +3858,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | {
                     title?: T;
                     locked?: T;
+                    videoUrl?: T;
                     id?: T;
                   };
               id?: T;

@@ -1,21 +1,13 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
+import { useAuth } from '@/providers/Auth'
+import { LayoutDashboard, LogOut, MapPin, Menu, ShoppingBag, Truck, User } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
-import { useAuth } from '@/providers/Auth'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import {
-  LayoutDashboard,
-  ShoppingBag,
-  User,
-  MapPin,
-  Truck,
-  LogOut,
-  Menu,
-} from 'lucide-react'
 
 const dashboardItems = [
   { label: 'Dashboard', href: '/account', exact: true, icon: LayoutDashboard },
@@ -81,7 +73,9 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             {initials}
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-[#4b4b4b] text-sm truncate">{user?.name || 'Customer'}</p>
+            <p className="font-semibold text-[#4b4b4b] text-sm truncate">
+              {user?.name || 'Customer'}
+            </p>
             <p className="text-xs text-[#4b4f4a] truncate">{user?.email}</p>
           </div>
         </div>

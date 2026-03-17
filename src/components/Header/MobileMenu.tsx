@@ -286,7 +286,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                   >
                     {/* Label with character animation and optional badge */}
                     <div className="flex flex-col gap-1 flex-1 min-w-0">
-                        <span className="flex overflow-hidden group-hover:text-white dark:group-hover:text-ff-near-black transition-colors text-base sm:text-lg wrap-break-word">
+                      <span className="flex overflow-hidden group-hover:text-white dark:group-hover:text-ff-near-black transition-colors text-base sm:text-lg wrap-break-word">
                         {item.label.split('').map((char, charIdx) => (
                           <span
                             key={`${idx}-${charIdx}`}
@@ -329,7 +329,9 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                           }}
                           className="flex flex-col p-3 sm:p-4 rounded-lg text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 hover:text-ff-near-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 overflow-hidden group"
                         >
-                          <div className="font-bold group-hover:translate-x-1 transition-transform duration-200">{child.label}</div>
+                          <div className="font-bold group-hover:translate-x-1 transition-transform duration-200">
+                            {child.label}
+                          </div>
                           {child.description && (
                             <div className="text-xs mt-1.5 opacity-70">{child.description}</div>
                           )}
@@ -360,7 +362,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
             {/* Modal Card - Constrained Width */}
             <div className="relative bg-[#f5f2ed] dark:bg-ff-near-black rounded-2xl sm:rounded-3xl shadow-2xl w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-md max-h-[80vh] sm:max-h-[85vh] pointer-events-auto overflow-hidden border border-ff-warm-gray/20 dark:border-white/10 mx-auto">
               {/* Header with Close */}
-            <div className="sticky top-0 bg-[#f5f2ed]/95 dark:bg-ff-near-black/95 backdrop-blur-sm border-b border-ff-warm-gray/20 dark:border-white/10 px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between gap-3 md:hidden">
+              <div className="sticky top-0 bg-[#f5f2ed]/95 dark:bg-ff-near-black/95 backdrop-blur-sm border-b border-ff-warm-gray/20 dark:border-white/10 px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between gap-3 md:hidden">
                 <h2 className="text-xl sm:text-3xl font-display font-bold text-ff-near-black dark:text-white flex-1 line-clamp-2">
                   {navItemsList.find((i) => i.id === detailViewItem)?.label}
                 </h2>

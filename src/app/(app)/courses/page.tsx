@@ -16,7 +16,6 @@ import {
   Clock,
   FlaskConical,
   Milk,
-  PlayCircle,
   User,
   Wheat,
   Wine,
@@ -27,6 +26,7 @@ import { unstable_noStore as noStore } from 'next/cache'
 import Link from 'next/link'
 import { getPayload } from 'payload'
 
+import { LessonList } from '@/components/courses/LessonList'
 import { NotifyMeDialog } from '@/components/courses/NotifyMeDialog'
 import type { Media as MediaType, Page as PageType, Product } from '@/payload-types'
 
@@ -88,13 +88,21 @@ const DEFAULT_LEARN_CARDS: Array<{ title: string; description: string }> = [
 
 const DEFAULT_MODULES: Array<{
   title: string
-  lessons: Array<{ title: string; locked: boolean }>
+  lessons: Array<{ title: string; locked: boolean; videoUrl?: string }>
 }> = [
   {
     title: 'Basic Fermentation Course',
     lessons: [
-      { title: 'Welcome and Overview', locked: false },
-      { title: 'What is Fermentation?', locked: false },
+      {
+        title: 'Welcome and Overview',
+        locked: false,
+        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      },
+      {
+        title: 'What is Fermentation?',
+        locked: false,
+        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      },
       { title: 'Essential Equipment', locked: true },
     ],
   },
@@ -339,12 +347,20 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   const modulesRaw = (oc?.onlineCoursesModules ?? []) as Array<{
     id?: string
     title?: string
-    lessons?: Array<{ id?: string; title?: string; locked?: boolean }>
+    lessons?: Array<{ id?: string; title?: string; locked?: boolean; videoUrl?: string | null }>
   }>
   const modules =
     modulesRaw.length > 0
       ? modulesRaw
-      : DEFAULT_MODULES.map((m) => ({ title: m.title, lessons: m.lessons }))
+      : DEFAULT_MODULES.map((m) => ({
+          title: m.title,
+          lessons: m.lessons as Array<{
+            id?: string
+            title?: string
+            locked?: boolean
+            videoUrl?: string | null
+          }>,
+        }))
   const modulesButtonLabel =
     oc?.onlineCoursesModulesButtonLabel ??
     (locale === 'de' ? 'Alle Lektionen anzeigen' : 'See all lessons')
@@ -557,52 +573,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             )}
           </div>
           <div className="mx-auto mt-8 max-w-2xl space-y-6">
-            {modules.map((mod, i) => (
-              <FadeIn
-                key={'id' in mod && mod.id ? mod.id : `mod-${i}`}
-                delay={120 + i * 80}
-                duration={0.6}
-                from="bottom"
-              >
-                <div className="text-center">
-                  <h3 className="font-display text-subheading font-bold text-ff-near-black">
-                    {mod.title}
-                  </h3>
-                  <ul className="mt-4 space-y-3">
-                    {(mod.lessons ?? []).map((lesson, j) => (
-                      <li
-                        key={'id' in lesson && lesson.id ? lesson.id : `lesson-${j}`}
-                        className="flex items-center justify-between gap-4 rounded-lg border border-ff-border-light bg-ff-cream/50 px-4 py-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-ff-gold-accent/20">
-                            <CheckIcon className="size-4 text-ff-olive" />
-                          </div>
-                          <span className="text-body text-ff-near-black">{lesson.title}</span>
-                        </div>
-                        {lesson.locked ? (
-                          <svg
-                            className="size-5 shrink-0 text-ff-gray-muted"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                            />
-                          </svg>
-                        ) : (
-                          <PlayCircle className="size-5 shrink-0 text-ff-gold-accent" />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </FadeIn>
-            ))}
+            <LessonList modules={modules} />
           </div>
           {modulesButtonLabel && modulesButtonUrl && (
             <FadeIn delay={300}>
