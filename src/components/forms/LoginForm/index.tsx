@@ -85,18 +85,18 @@ export const LoginForm: React.FC = () => {
           {errors.password && <FormError message={errors.password.message} />}
         </FormItem>
 
-        <div className="flex items-center justify-between pt-0.5 text-[12px] text-[#E5DDCF]/85">
+        <div className="flex items-center justify-between pt-0.5 text-sm md:text-[13px] text-[#E5DDCF]/90">
           <Link
             href={`/recover-password${allParams}`}
-            className="underline underline-offset-4 hover:text-white"
+            className="font-medium underline underline-offset-4 hover:text-white"
           >
             Forgot your password?
           </Link>
           <Link
             href={`/create-account${allParams}`}
-            className="underline underline-offset-4 hover:text-white"
+            className="font-medium underline underline-offset-4 hover:text-white"
           >
-            Create an account Now
+            Create an account now
           </Link>
         </div>
       </div>

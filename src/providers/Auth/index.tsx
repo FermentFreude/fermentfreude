@@ -103,14 +103,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method: 'POST',
       })
 
-      if (res.ok) {
-        setUser(null)
-        setStatus('loggedOut')
-      } else {
-        throw new Error('An error occurred while attempting to logout.')
+      if (!res.ok) {
+        // Log the server error but still clear local auth state so the user can continue
+        // eslint-disable-next-line no-console
+        console.error('Logout request failed', res.status, res.statusText)
       }
+
+      setUser(null)
+      setStatus('loggedOut')
     } catch (_e) {
-      throw new Error('An error occurred while attempting to logout.')
+      // Swallow logout errors but clear local state so UI does not break
+      setUser(null)
+      setStatus('loggedOut')
     }
   }, [])
 

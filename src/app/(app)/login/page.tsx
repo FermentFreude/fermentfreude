@@ -29,28 +29,31 @@ export default async function Login() {
 
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-16 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-start">
-            <section className="flex flex-col space-y-10">
-              <header>
+            <section className="flex flex-col space-y-9">
+              <header className="space-y-4">
                 <h1 className="font-display text-[2.4rem] tracking-[0.38em] uppercase text-[#F4F0E8] md:text-[2.8rem]">
                   WELCOME BACK
                 </h1>
+                <p className="text-sm leading-relaxed text-[#E6DFD3] md:whitespace-nowrap">
+                  Log in to manage your workshops, online courses, and orders in one cozy place.
+                </p>
               </header>
 
               <div className="space-y-7">
                 <LoginForm />
 
-                <div className="mt-7 flex items-center gap-4 text-[11px] uppercase tracking-[0.2em] text-neutral-300">
-                  <span className="h-px flex-1 bg-neutral-500/70" />
+                <div className="mt-8 flex items-center gap-4 text-[12px] uppercase tracking-[0.24em] text-[#FAF2DE]">
+                  <span className="h-px flex-1 bg-[#FAF2DE]/60" />
                   <span>or continue with</span>
-                  <span className="h-px flex-1 bg-neutral-500/70" />
+                  <span className="h-px flex-1 bg-[#FAF2DE]/60" />
                 </div>
 
-                <div className="flex flex-wrap gap-4 pt-1 text-[11px] tracking-[0.18em]">
+                <div className="flex flex-wrap gap-4 pt-1 text-[11px] tracking-[0.2em]">
                   <Link
-                    href="https://www.google.com/maps/search/?api=1&query=Ginery%2C+Grabenstraße+15%2C+8010+Graz"
+                    href="https://mail.google.com/"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 rounded-full border border-neutral-300/50 px-6 py-3 text-center uppercase text-neutral-100/90 transition hover:border-white hover:bg-white/5 hover:text-white"
+                    className="flex-1 rounded-full border border-[#FAF2DE]/70 px-6 py-3 text-center uppercase text-[#FAF2DE] transition hover:border-white hover:bg-white/10 hover:text-white"
                   >
                     Google
                   </Link>
@@ -58,17 +61,17 @@ export default async function Login() {
                     href="https://www.facebook.com/people/Ferment-Freude/100087329564765/"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 rounded-full border border-neutral-300/50 px-6 py-3 text-center uppercase text-neutral-100/90 transition hover:border-white hover:bg-white/5 hover:text-white"
+                    className="flex-1 rounded-full border border-[#FAF2DE]/70 px-6 py-3 text-center uppercase text-[#FAF2DE] transition hover:border-white hover:bg-white/10 hover:text-white"
                   >
                     Facebook
                   </Link>
                   <Link
-                    href="https://www.instagram.com/fermentfreude/"
+                    href="https://twitter.com/fermentfreude"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 rounded-full border border-neutral-300/50 px-6 py-3 text-center uppercase text-neutral-100/90 transition hover:border-white hover:bg-white/5 hover:text-white"
+                    className="flex-1 rounded-full border border-[#FAF2DE]/70 px-6 py-3 text-center uppercase text-[#FAF2DE] transition hover:border-white hover:bg-white/10 hover:text-white"
                   >
-                    Instagram
+                    Twitter
                   </Link>
                 </div>
               </div>
