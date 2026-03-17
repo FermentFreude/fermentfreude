@@ -2,7 +2,10 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Play } from 'lucide-react'
+import { Lock, Play } from 'lucide-react'
+
+/** First N lessons are always free to preview, even without enrollment. */
+const FREE_PREVIEW_COUNT = 2
 
 export type LessonItem = {
   id?: string | null
@@ -115,6 +118,8 @@ type Props = {
   locale: 'de' | 'en'
   curriculumHeading: string
   isLoggedIn?: boolean
+  /** False = first FREE_PREVIEW_COUNT lessons are playable, the rest are locked. */
+  isEnrolled?: boolean
 }
 
 export function CurriculumWithProgress({
@@ -124,11 +129,22 @@ export function CurriculumWithProgress({
   locale,
   curriculumHeading,
   isLoggedIn = false,
+  isEnrolled = true,
 }: Props) {
   const router = useRouter()
   const [expandedKey, setExpandedKey] = useState<string | null>(null)
   const [videoUrls, setVideoUrls] = useState<Record<string, string>>({})
   const set = new Set(completedLessonIds)
+
+  // Compute a global lesson index across all modules for the preview gate.
+  let globalLessonCounter = 0
+  const modulesWithIndex = modules.map((mod) => ({
+    ...mod,
+    lessons: (mod.lessons ?? []).map((lesson) => ({
+      ...lesson,
+      globalIndex: globalLessonCounter++,
+    })),
+  }))
 
   async function markDone(lessonId: string) {
     if (!isLoggedIn) return
@@ -156,7 +172,7 @@ export function CurriculumWithProgress({
         {curriculumHeading}
       </h2>
       <div className="mx-auto mt-10 max-w-4xl space-y-6">
-        {modules.map((mod, idx) => {
+        {modulesWithIndex.map((mod, idx) => {
           const lessonCount = mod.lessons?.length ?? 0
           return (
             <div
@@ -192,11 +208,18 @@ export function CurriculumWithProgress({
                     const rowKey = `${mod.id ?? idx}-${lesson.id ?? lidx}`
                     const isExpanded = expandedKey === rowKey
                     const onToggleVideo = () => setExpandedKey(isExpanded ? null : rowKey)
-                    const videoSrc = videoUrls[rowKey] ?? lesson.videoUrl ?? undefined
+                    const isLocked = !isEnrolled && lesson.globalIndex >= FREE_PREVIEW_COUNT
                     return (
                       <li key={lesson.id ?? lidx} className="flex flex-col gap-3">
-                        <div className="flex flex-wrap items-center gap-3 gap-y-1 rounded-xl px-3 py-2 transition-colors hover:bg-ff-warm-gray/30">
-                          {hasVideo ? (
+                        <div
+                          className={`flex flex-wrap items-center gap-3 gap-y-1 rounded-xl px-3 py-2 transition-colors ${isLocked ? 'opacity-60' : 'hover:bg-ff-warm-gray/30'}`}
+                        >
+                          {/* Icon slot */}
+                          {isLocked ? (
+                            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-ff-warm-gray/60 text-ff-gray-text">
+                              <Lock className="size-5" aria-hidden />
+                            </span>
+                          ) : hasVideo ? (
                             <button
                               type="button"
                               onClick={onToggleVideo}
@@ -215,6 +238,8 @@ export function CurriculumWithProgress({
                               <Play className="size-6" strokeWidth={2} aria-hidden />
                             </span>
                           )}
+
+                          {/* Title + description */}
                           <div className="min-w-0 flex-1">
                             <span className="font-bold text-ff-near-black">
                               {idx + 1}.{lidx + 1} {lesson.title}
@@ -225,12 +250,20 @@ export function CurriculumWithProgress({
                               </p>
                             )}
                           </div>
+
+                          {/* Duration */}
                           {lesson.durationMinutes != null && (
                             <span className="shrink-0 text-caption text-ff-gray-text">
                               {lesson.durationMinutes} min
                             </span>
                           )}
-                          {hasVideo && (
+
+                          {/* Action slot */}
+                          {isLocked ? (
+                            <span className="shrink-0 text-caption font-semibold text-ff-gray-text">
+                              {locale === 'de' ? 'Gesperrt' : 'Locked'}
+                            </span>
+                          ) : hasVideo ? (
                             <button
                               type="button"
                               onClick={onToggleVideo}
@@ -240,8 +273,7 @@ export function CurriculumWithProgress({
                                 ? (locale === 'de' ? 'Video schließen' : 'Close video')
                                 : (locale === 'de' ? 'Video ansehen' : 'Watch video')}
                             </button>
-                          )}
-                          {!hasVideo && isLoggedIn && lesson.id && !completed && (
+                          ) : !hasVideo && isLoggedIn && lesson.id && !completed ? (
                             <button
                               type="button"
                               onClick={() => markDone(lesson.id!)}
@@ -249,9 +281,11 @@ export function CurriculumWithProgress({
                             >
                               {locale === 'de' ? 'Als erledigt markieren' : 'Mark as done'}
                             </button>
-                          )}
+                          ) : null}
                         </div>
-                        {hasVideo && isExpanded && (
+
+                        {/* Video player — only rendered when not locked and expanded */}
+                        {hasVideo && isExpanded && !isLocked && (
                           <LessonVideoPlayer
                             rowKey={rowKey}
                             videoMediaId={lesson.videoMediaId}

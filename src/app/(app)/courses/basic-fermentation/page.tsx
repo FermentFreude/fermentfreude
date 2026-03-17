@@ -88,10 +88,25 @@ export default async function BasicFermentationCoursePage() {
   const totalLessons = modules.reduce((sum, mod) => sum + (mod.lessons?.length ?? 0), 0)
 
   let completedLessonIds: string[] = []
+  let isEnrolled = false
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
   if (user) {
+    // Check enrollment
+    const enrollment = await payload.find({
+      collection: 'enrollments',
+      where: {
+        and: [
+          { user: { equals: user.id } },
+          { courseSlug: { equals: 'basic-fermentation' } },
+        ],
+      },
+      limit: 1,
+      overrideAccess: true,
+    })
+    isEnrolled = enrollment.totalDocs > 0
+
     const progress = await payload.find({
       collection: 'course-progress',
       where: {
@@ -310,6 +325,35 @@ export default async function BasicFermentationCoursePage() {
         </div>
       </section>
 
+      {/* Enrollment CTA banner — free preview notice for non-enrolled visitors */}
+      {!isEnrolled && (
+        <section className="border-b border-ff-border-light bg-ff-near-black py-4">
+          <div className="container mx-auto container-padding flex flex-col items-center justify-between gap-3 sm:flex-row">
+            <p className="text-body-sm text-white/80 text-center sm:text-left">
+              {locale === 'de'
+                ? '🎬 Kostenlose Vorschau: Die ersten 2 Lektionen sind freigeschaltet. Kauf den Kurs, um alle Inhalte zu sehen.'
+                : '🎬 Free preview: First 2 lessons unlocked. Purchase the course to access all content.'}
+            </p>
+            <div className="flex shrink-0 gap-3">
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-2 rounded-full bg-ff-gold-accent px-5 py-2 text-body-sm font-bold text-ff-near-black transition hover:bg-ff-gold-accent-dark"
+              >
+                {locale === 'de' ? 'Kurs kaufen' : 'Get This Course'}
+              </Link>
+              {!user && (
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-2 text-body-sm font-semibold text-white transition hover:border-white/60"
+                >
+                  {locale === 'de' ? 'Einloggen' : 'Log In'}
+                </Link>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Course Curriculum */}
       <section id="curriculum">
         <ContentSection bg="white" padding="lg" className="pt-10 md:pt-14">
@@ -321,6 +365,7 @@ export default async function BasicFermentationCoursePage() {
               locale={locale}
               curriculumHeading={curriculumHeading}
               isLoggedIn={Boolean(user)}
+              isEnrolled={isEnrolled}
             />
           </FadeIn>
         </ContentSection>
