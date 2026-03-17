@@ -102,7 +102,7 @@ export function UserMenu() {
 
         <ul className="py-2">
           <MenuLink href="/account" label="Your account" onClick={() => setIsOpen(false)} />
-          <MenuLink href="/orders" label="Orders" onClick={() => setIsOpen(false)} />
+          <MenuLink href="/account/orders" label="Orders" onClick={() => setIsOpen(false)} />
           <MenuLink href="/account/addresses" label="Addresses" onClick={() => setIsOpen(false)} />
           <MenuLink href="/help" label="Help & FAQ" onClick={() => setIsOpen(false)} />
         </ul>

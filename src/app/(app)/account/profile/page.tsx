@@ -243,7 +243,7 @@ export default function ProfilePage() {
       {/* Account Status */}
       <Card className="p-6 border-0 shadow-sm bg-[#f9f0dc]">
         <div className="flex items-start gap-4">
-          <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+          <CheckCircle className="w-6 h-6 text-green-600 shrink-0 mt-1" />
           <div>
             <h3 className="font-semibold text-[#4b4b4b] mb-1">Account Status</h3>
             <p className="text-sm text-[#4b4f4a]">Your account is active and verified</p>

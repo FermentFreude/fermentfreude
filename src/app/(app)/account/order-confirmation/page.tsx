@@ -9,18 +9,18 @@ export const metadata = {
 }
 
 interface OrderConfirmationPageProps {
-  searchParams: {
+  searchParams: Promise<{
     orderId?: string
-  }
+  }>
 }
 
 export default async function OrderConfirmationPage({ searchParams }: OrderConfirmationPageProps) {
-  const { orderId } = searchParams
+  const { orderId } = await searchParams
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       {/* Success Banner */}
-      <Card className="p-8 border-0 shadow-sm bg-gradient-to-r from-green-50 to-[#f9f0dc]">
+      <Card className="p-8 border-0 shadow-sm bg-linear-to-r from-green-50 to-[#f9f0dc]">
         <div className="text-center">
           <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
           <h1 className="text-3xl font-display font-bold text-[#4b4b4b] mb-2">
@@ -56,7 +56,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         <h2 className="text-lg font-semibold text-[#4b4b4b] mb-6">What&apos;s Next</h2>
         <div className="space-y-6">
           <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-full bg-[#e6be68] flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-[#e6be68] flex items-center justify-center shrink-0">
               <CheckCircle className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -66,7 +66,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           </div>
 
           <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-full border-2 border-[#e6be68] flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-full border-2 border-[#e6be68] flex items-center justify-center shrink-0">
               <Package className="w-6 h-6 text-[#e6be68]" />
             </div>
             <div>
@@ -76,7 +76,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           </div>
 
           <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-full border-2 border-[#e6be68] flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-full border-2 border-[#e6be68] flex items-center justify-center shrink-0">
               <Truck className="w-6 h-6 text-[#e6be68]" />
             </div>
             <div>

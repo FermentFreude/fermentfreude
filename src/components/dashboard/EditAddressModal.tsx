@@ -22,6 +22,7 @@ export function EditAddressModal() {
   const modal = searchParams.get('modal')
   const addressId = searchParams.get('id')
 
+  const [isFetching, setIsFetching] = useState(false)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -38,6 +39,33 @@ export function EditAddressModal() {
   useEffect(() => {
     setIsOpen(modal === 'new-address' || modal === 'edit-address')
   }, [modal])
+
+  // When editing, fetch the existing address and pre-populate the form
+  useEffect(() => {
+    if (modal !== 'edit-address' || !addressId) return
+
+    setIsFetching(true)
+    fetch(`/api/addresses/${addressId}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          setFormData({
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+            company: data.company || '',
+            addressLine1: data.addressLine1 || '',
+            addressLine2: data.addressLine2 || '',
+            city: data.city || '',
+            postalCode: data.postalCode || '',
+            state: data.state || '',
+            country: data.country || 'DE',
+            phone: data.phone || '',
+          })
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsFetching(false))
+  }, [modal, addressId])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -93,12 +121,25 @@ export function EditAddressModal() {
     setIsOpen(open)
     if (!open) {
       router.back()
+      // Reset form so it's blank for the next open
+      setFormData({
+        firstName: '',
+        lastName: '',
+        company: '',
+        addressLine1: '',
+        addressLine2: '',
+        city: '',
+        postalCode: '',
+        state: '',
+        country: 'DE',
+        phone: '',
+      })
     }
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-[#4b4b4b]">
             {addressId ? 'Edit Address' : 'Add New Address'}
@@ -264,10 +305,10 @@ export function EditAddressModal() {
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isFetching}
               className="flex-1 bg-[#e6be68] text-white hover:bg-[#d4a85a]"
             >
-              {isLoading ? 'Saving...' : addressId ? 'Update Address' : 'Add Address'}
+              {isFetching ? 'Loading...' : isLoading ? 'Saving...' : addressId ? 'Update Address' : 'Add Address'}
             </Button>
             <Button
               type="button"

@@ -41,7 +41,7 @@ export default function ShippingMethodsPage() {
 
       {/* Info Box */}
       <Card className="p-4 border-0 shadow-sm bg-blue-50 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+        <AlertCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
         <div className="text-sm text-blue-900">
           <p className="font-medium">Shipping methods are selected during checkout</p>
           <p className=" mt-1">Rates and availability depend on your location and order details</p>
@@ -61,7 +61,7 @@ export default function ShippingMethodsPage() {
           >
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-4 flex-1">
-                <div className="w-5 h-5 rounded-full border-2 border-[#e6be68] mt-1 flex items-center justify-center flex-shrink-0">
+                <div className="w-5 h-5 rounded-full border-2 border-[#e6be68] mt-1 flex items-center justify-center shrink-0">
                   {method.isDefault && (
                     <div className="w-2.5 h-2.5 rounded-full bg-[#e6be68]" />
                   )}

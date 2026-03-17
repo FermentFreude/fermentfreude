@@ -23,15 +23,16 @@ interface OrderStats {
   recent: any[]
 }
 
-async function getOrderStats(_userId: string): Promise<OrderStats> {
+async function getOrderStats(userId: string): Promise<OrderStats> {
   try {
     const payload = await getPayload({ config: configPromise })
 
     const orders = await payload.find({
       collection: 'orders',
+      overrideAccess: false,
       where: {
-        stripeID: {
-          exists: true,
+        customer: {
+          equals: userId,
         },
       },
       limit: 5,
@@ -69,7 +70,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-[#f9f0dc] to-[#fffef9] rounded-lg border border-[#e6be68] p-6 md:p-8">
+      <div className="bg-linear-to-r from-[#f9f0dc] to-[#fffef9] rounded-lg border border-[#e6be68] p-6 md:p-8">
         <h1 className="text-2xl md:text-3xl font-display font-bold text-[#4b4b4b] mb-2">
           Welcome back, {user.name || 'Valued Customer'}!
         </h1>
