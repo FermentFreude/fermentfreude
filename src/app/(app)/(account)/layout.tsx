@@ -4,7 +4,6 @@ import { headers as getHeaders } from 'next/headers.js'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { RenderParams } from '@/components/RenderParams'
-import { AccountNav } from '@/components/AccountNav'
 import AccountSidebar from '@/components/dashboard/AccountSidebar'
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

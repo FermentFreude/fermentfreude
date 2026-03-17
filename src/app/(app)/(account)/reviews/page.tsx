@@ -14,7 +14,7 @@ export default function ReviewsPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-display font-bold text-[#4b4b4b] mb-2">Your Reviews</h1>
-        <p className="text-[#4b4f4a]">Share your feedback on products you've purchased</p>
+        <p className="text-[#4b4f4a]">Share your feedback on products you&apos;ve purchased</p>
       </div>
 
       {/* Reviews */}
@@ -49,7 +49,7 @@ export default function ReviewsPage() {
         <Card className="p-12 text-center border-0 shadow-sm">
           <Star className="w-12 h-12 text-[#e6be68] mx-auto mb-4 opacity-50" />
           <p className="text-[#4b4f4a] mb-4">No reviews yet</p>
-          <p className="text-sm text-[#4b4f4a] mb-6">Share your experience with products you've purchased</p>
+          <p className="text-sm text-[#4b4f4a] mb-6">Share your experience with products you&apos;ve purchased</p>
           <button className="inline-flex items-center gap-2 px-6 py-2 bg-[#e6be68] text-white rounded-lg hover:bg-[#d4a85a] transition-colors font-medium">
             <Plus className="w-5 h-5" />
             Write Your First Review

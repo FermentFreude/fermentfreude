@@ -43,7 +43,7 @@ export default function DownloadsPage() {
         <Card className="p-12 text-center border-0 shadow-sm">
           <Download className="w-12 h-12 text-[#e6be68] mx-auto mb-4 opacity-50" />
           <p className="text-[#4b4f4a] mb-4">No downloads available</p>
-          <p className="text-sm text-[#4b4f4a]">When you purchase digital products, they'll appear here</p>
+          <p className="text-sm text-[#4b4f4a]">When you purchase digital products, they&apos;ll appear here</p>
         </Card>
       )}
     </div>

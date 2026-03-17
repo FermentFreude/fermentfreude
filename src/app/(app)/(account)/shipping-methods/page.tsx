@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card'
-import { Truck, AlertCircle } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 
 export const metadata = {
   title: 'Shipping Methods - FermentFreude',

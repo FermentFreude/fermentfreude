@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card'
 import { CheckCircle, Package, Truck } from 'lucide-react'
 import Link from 'next/link'
-import { formatDate, formatPrice } from '@/utilities/form/formatters'
+import { formatDate } from '@/utilities/form/formatters'
 
 export const metadata = {
   title: 'Order Confirmation - FermentFreude',
@@ -27,7 +27,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             Thank You for Your Order!
           </h1>
           <p className="text-[#4b4f4a]">
-            Your order has been successfully placed and confirmed. We're excited to get it to you!
+            Your order has been successfully placed and confirmed. We&apos;re excited to get it to you!
           </p>
         </div>
       </Card>
@@ -53,7 +53,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
 
       {/* Timeline */}
       <Card className="p-6 border-0 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#4b4b4b] mb-6">What's Next</h2>
+        <h2 className="text-lg font-semibold text-[#4b4b4b] mb-6">What&apos;s Next</h2>
         <div className="space-y-6">
           <div className="flex gap-4">
             <div className="w-10 h-10 rounded-full bg-[#e6be68] flex items-center justify-center flex-shrink-0">
@@ -71,7 +71,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             </div>
             <div>
               <h3 className="font-semibold text-[#4b4b4b] mb-1">Processing & Shipping</h3>
-              <p className="text-sm text-[#4b4f4a]">We'll prepare your items and ship within 1-2 business days</p>
+              <p className="text-sm text-[#4b4f4a]">We&apos;ll prepare your items and ship within 1-2 business days</p>
             </div>
           </div>
 
@@ -81,7 +81,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             </div>
             <div>
               <h3 className="font-semibold text-[#4b4b4b] mb-1">On the Way</h3>
-              <p className="text-sm text-[#4b4f4a]">You'll receive tracking information via email</p>
+              <p className="text-sm text-[#4b4f4a]">You&apos;ll receive tracking information via email</p>
             </div>
           </div>
         </div>

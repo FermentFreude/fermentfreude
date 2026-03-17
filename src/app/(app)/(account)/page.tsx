@@ -23,7 +23,7 @@ interface OrderStats {
   recent: any[]
 }
 
-async function getOrderStats(userId: string): Promise<OrderStats> {
+async function getOrderStats(_userId: string): Promise<OrderStats> {
   try {
     const payload = await getPayload({ config: configPromise })
 

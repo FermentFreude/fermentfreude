@@ -113,7 +113,7 @@ export default async function ReturnRequestsPage() {
           </div>
           <div className="flex gap-3">
             <span className="font-bold text-[#e6be68]">2.</span>
-            <p>We'll approve your request and provide a prepaid return label</p>
+            <p>We&apos;ll approve your request and provide a prepaid return label</p>
           </div>
           <div className="flex gap-3">
             <span className="font-bold text-[#e6be68]">3.</span>
@@ -121,7 +121,7 @@ export default async function ReturnRequestsPage() {
           </div>
           <div className="flex gap-3">
             <span className="font-bold text-[#e6be68]">4.</span>
-            <p>Once received and inspected, we'll process your refund</p>
+            <p>Once received and inspected, we&apos;ll process your refund</p>
           </div>
         </div>
       </Card>

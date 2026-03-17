@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { AlertCircle, CheckCircle } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
@@ -255,7 +255,7 @@ export default function ProfilePage() {
       <Card className="p-6 border-0 shadow-sm border-t-4 border-t-red-500">
         <h2 className="text-xl font-semibold text-[#4b4b4b] mb-4">Session</h2>
         <p className="text-sm text-[#4b4f4a] mb-4">
-          Log out from your account. You'll need to log in again to access your dashboard.
+          Log out from your account. You&apos;ll need to log in again to access your dashboard.
         </p>
         <Button
           onClick={async () => {

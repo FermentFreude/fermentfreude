@@ -81,7 +81,7 @@ export default function CancellationsPage() {
           </div>
           <div className="flex gap-3">
             <span className="font-bold text-[#e6be68]">2.</span>
-            <p>Click the "Cancel Order" button (available only within 24 hours of purchase)</p>
+            <p>Click the &quot;Cancel Order&quot; button (available only within 24 hours of purchase)</p>
           </div>
           <div className="flex gap-3">
             <span className="font-bold text-[#e6be68]">3.</span>
