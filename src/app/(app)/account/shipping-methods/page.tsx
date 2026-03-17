@@ -1,99 +1,109 @@
-import { Card } from '@/components/ui/card'
-import { AlertCircle } from 'lucide-react'
+import { Info } from 'lucide-react'
 
-export const metadata = {
-  title: 'Shipping Methods - FermentFreude',
-  description: 'Available shipping methods',
-}
+const SHIPPING_METHODS = [
+  {
+    name: 'Standard Shipping',
+    description: 'Tracked delivery via DHL',
+    duration: '3–5 business days',
+    price: '€4.90',
+    free: '€50+',
+    isDefault: true,
+  },
+  {
+    name: 'Express Shipping',
+    description: 'Priority delivery via DHL',
+    duration: '1–2 business days',
+    price: '€9.90',
+    free: null,
+    isDefault: false,
+  },
+]
 
 export default function ShippingMethodsPage() {
-  const shippingMethods = [
-    {
-      id: 1,
-      name: 'Standard Shipping',
-      description: 'Delivery within 5-7 business days',
-      price: 0,
-      isDefault: true,
-    },
-    {
-      id: 2,
-      name: 'Express Shipping',
-      description: 'Delivery within 2-3 business days',
-      price: 9.99,
-      isDefault: false,
-    },
-    {
-      id: 3,
-      name: 'Overnight Shipping',
-      description: 'Next day delivery',
-      price: 24.99,
-      isDefault: false,
-    },
-  ]
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-display font-bold text-[#4b4b4b] mb-2">Shipping Methods</h1>
-        <p className="text-[#4b4f4a]">Choose your preferred shipping method at checkout</p>
+    <div className="max-w-2xl space-y-10">
+      {/* Page header */}
+      <div className="pb-8 border-b border-[#e8e4d9]">
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6be68] mb-3">
+          Settings
+        </p>
+        <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
+          Shipping Methods
+        </h1>
+        <p className="mt-2 text-sm text-[#626160]">
+          Available delivery options for your orders.
+        </p>
       </div>
 
-      {/* Info Box */}
-      <Card className="p-4 border-0 shadow-sm bg-blue-50 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-        <div className="text-sm text-blue-900">
-          <p className="font-medium">Shipping methods are selected during checkout</p>
-          <p className=" mt-1">Rates and availability depend on your location and order details</p>
-        </div>
-      </Card>
+      {/* Info banner */}
+      <div className="flex gap-3 p-4 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-700">
+        <Info className="w-4 h-4 shrink-0 mt-0.5" />
+        <p>
+          Shipping method is selected at checkout based on your location and preferences.
+          Options and pricing may vary for workshop materials versus online products.
+        </p>
+      </div>
 
-      {/* Shipping Methods */}
-      <div className="space-y-4">
-        {shippingMethods.map((method) => (
-          <Card
-            key={method.id}
-            className={`p-6 border-2 cursor-pointer transition-all ${
-              method.isDefault
-                ? 'border-[#e6be68] bg-[#f9f0dc]'
-                : 'border-[#e6be68]/20 hover:border-[#e6be68]'
-            }`}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-4 flex-1">
-                <div className="w-5 h-5 rounded-full border-2 border-[#e6be68] mt-1 flex items-center justify-center shrink-0">
-                  {method.isDefault && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#e6be68]" />
-                  )}
+      {/* Methods */}
+      <section>
+        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c4bbb3] mb-5">
+          Available Options
+        </p>
+        <div className="space-y-4">
+          {SHIPPING_METHODS.map((method) => (
+            <div
+              key={method.name}
+              className="bg-white border border-[#e8e4d9] rounded-xl p-5 flex items-start gap-4"
+            >
+              <span
+                className={`mt-0.5 w-3.5 h-3.5 rounded-full border-2 shrink-0 ${
+                  method.isDefault
+                    ? 'border-[#1a1a1a] bg-[#1a1a1a]'
+                    : 'border-[#c4bbb3] bg-white'
+                }`}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="text-sm font-semibold text-[#1a1a1a]">{method.name}</p>
+                  <p className="text-sm font-semibold text-[#1a1a1a] shrink-0">{method.price}</p>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-[#4b4b4b]">{method.name}</h3>
-                  <p className="text-sm text-[#4b4f4a] mt-1">{method.description}</p>
-                </div>
-              </div>
-              <div className="text-right ml-4">
-                <p className="font-semibold text-[#4b4b4b]">
-                  {method.price === 0 ? 'FREE' : `$${method.price.toFixed(2)}`}
-                </p>
-                {method.isDefault && (
-                  <span className="text-xs text-[#e6be68] font-medium">Recommended</span>
+                <p className="text-[12px] text-[#626160] mt-0.5">{method.description}</p>
+                <p className="text-[11px] text-[#9e9189] mt-1">{method.duration}</p>
+                {method.free && (
+                  <p className="text-[11px] text-green-600 mt-1.5">Free for orders over {method.free}</p>
                 )}
               </div>
             </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Additional Info */}
-      <Card className="p-6 border-0 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#4b4b4b] mb-4">Shipping Information</h2>
-        <div className="space-y-3 text-sm text-[#4b4f4a]">
-          <p>• Delivery estimates are based on business days, excluding weekends and holidays</p>
-          <p>• International shipping may have additional customs clearance time</p>
-          <p>• Tracking information will be provided via email after your order ships</p>
-          <p>• For time-sensitive orders, select Express or Overnight Shipping</p>
+          ))}
         </div>
-      </Card>
+      </section>
+
+      <div className="border-t border-[#e8e4d9]" />
+
+      {/* Notes */}
+      <section>
+        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c4bbb3] mb-4">
+          Notes
+        </p>
+        <ul className="space-y-2 text-[13px] text-[#626160]">
+          <li className="flex gap-2">
+            <span className="text-[#c4bbb3] mt-px">·</span>
+            Delivery times are estimates and may vary during peak periods.
+          </li>
+          <li className="flex gap-2">
+            <span className="text-[#c4bbb3] mt-px">·</span>
+            Workshop tickets are digital — no shipping required.
+          </li>
+          <li className="flex gap-2">
+            <span className="text-[#c4bbb3] mt-px">·</span>
+            Physical kits and books ship separately if ordered with tickets.
+          </li>
+          <li className="flex gap-2">
+            <span className="text-[#c4bbb3] mt-px">·</span>
+            Tracking information is emailed once your order ships.
+          </li>
+        </ul>
+      </section>
     </div>
   )
 }

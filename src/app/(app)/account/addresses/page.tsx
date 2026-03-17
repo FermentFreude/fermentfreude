@@ -1,17 +1,16 @@
-import { headers as getHeaders } from 'next/headers.js'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { Card } from '@/components/ui/card'
 import { EditAddressModal } from '@/components/dashboard/EditAddressModal'
-import { MapPin, Plus, Edit2 } from 'lucide-react'
 import { DeleteAddressButton } from '@/components/dashboard/DeleteAddressButton'
+import configPromise from '@payload-config'
+import { MapPin, Pencil, Plus } from 'lucide-react'
+import { headers as getHeaders } from 'next/headers.js'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 import type { Address } from '@/payload-types'
 
 export const metadata = {
-  title: 'Addresses - FermentFreude',
-  description: 'Manage your addresses',
+  title: 'Addresses — FermentFreude',
+  description: 'Manage your shipping and billing addresses',
 }
 
 export default async function AddressesPage() {
@@ -20,60 +19,63 @@ export default async function AddressesPage() {
   const { user } = await payload.auth({ headers })
 
   if (!user) {
-    redirect(`/login?warning=${encodeURIComponent('Please login to manage addresses.')}`)
+    redirect(`/login?warning=${encodeURIComponent('Please log in to manage your addresses.')}`)
   }
 
   let addresses: Address[] = []
 
   try {
-    const addressesData = await payload.find({
+    const result = await payload.find({
       collection: 'addresses',
-      where: {
-        customer: {
-          equals: user.id,
-        },
-      },
+      where: { customer: { equals: user.id } },
       limit: 100,
     })
-    addresses = addressesData.docs || []
+    addresses = result.docs || []
   } catch (error) {
     console.error('Error fetching addresses:', error)
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header with Add Button */}
-      <div className="flex items-center justify-between">
+    <div className="max-w-4xl space-y-10">
+      {/* Page header */}
+      <div className="pb-8 border-b border-[#e8e4d9] flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-[#4b4b4b] mb-2">Addresses</h1>
-          <p className="text-[#4b4f4a]">Manage your shipping and billing addresses</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6be68] mb-3">
+            My Account
+          </p>
+          <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
+            Addresses
+          </h1>
+          <p className="mt-2 text-sm text-[#626160]">
+            Manage your shipping and billing addresses.
+          </p>
         </div>
         <Link
           href="?modal=new-address"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#e6be68] text-white rounded-lg hover:bg-[#d4a85a] transition-colors font-medium"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors shrink-0 mt-2"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 h-4" />
           Add Address
         </Link>
       </div>
 
-      {/* Address Grid */}
       {addresses.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {addresses.map((address: any) => (
-            <Card key={address.id} className="p-6 border-0 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-[#e6be68]" />
-                  <h3 className="font-semibold text-[#4b4b4b]">
-                    {address.title || 'Address'}
-                  </h3>
-                </div>
+            <div
+              key={address.id}
+              className="bg-white border border-[#e8e4d9] rounded-xl p-6 flex flex-col"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <MapPin className="w-3.5 h-3.5 text-[#c4bbb3] shrink-0" />
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#c4bbb3]">
+                  {address.title || 'Address'}
+                </p>
               </div>
 
-              <div className="text-sm text-[#4b4f4a] space-y-1 mb-4">
+              <div className="flex-1 space-y-0.5 text-[13px] text-[#626160] mb-5">
                 {(address.firstName || address.lastName) && (
-                  <p className="font-medium text-[#4b4b4b]">
+                  <p className="font-semibold text-[#1a1a1a]">
                     {address.firstName} {address.lastName}
                   </p>
                 )}
@@ -88,34 +90,35 @@ export default async function AddressesPage() {
                 {address.phone && <p className="pt-2">{address.phone}</p>}
               </div>
 
-              <div className="flex gap-2 pt-4 border-t border-[#f0ede6]">
+              <div className="flex items-center gap-2 pt-4 border-t border-[#f5f3f0]">
                 <Link
                   href={`?modal=edit-address&id=${address.id}`}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-[#e6be68] hover:bg-[#f9f0dc] rounded transition-colors text-sm font-medium"
+                  className="flex-1 inline-flex items-center justify-center gap-2 py-2 text-[12px] font-medium text-[#626160] hover:text-[#1a1a1a] border border-[#e8e4d9] hover:border-[#1a1a1a] rounded-lg transition-colors"
                 >
-                  <Edit2 className="w-4 h-4" />
+                  <Pencil className="w-3 h-3" />
                   Edit
                 </Link>
                 <DeleteAddressButton id={address.id} />
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       ) : (
-        <Card className="p-12 text-center border-0 shadow-sm">
-          <MapPin className="w-12 h-12 text-[#e6be68] mx-auto mb-4 opacity-50" />
-          <p className="text-[#4b4f4a] mb-4">No addresses added yet</p>
+        <div className="bg-white border border-[#e8e4d9] rounded-xl p-16 text-center">
+          <div className="w-10 h-10 rounded-xl bg-[#f5f3f0] flex items-center justify-center mx-auto mb-4">
+            <MapPin className="w-5 h-5 text-[#c4bbb3]" />
+          </div>
+          <p className="text-[13px] text-[#626160] mb-6">No addresses saved yet.</p>
           <Link
             href="?modal=new-address"
-            className="inline-flex items-center gap-2 px-6 py-2 bg-[#e6be68] text-white rounded-lg hover:bg-[#d4a85a] transition-colors font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
             Add Your First Address
           </Link>
-        </Card>
+        </div>
       )}
 
-      {/* Edit Address Modal */}
       <EditAddressModal />
     </div>
   )

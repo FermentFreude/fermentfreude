@@ -1,18 +1,12 @@
-import { headers as getHeaders } from 'next/headers.js'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import Link from 'next/link'
 import { formatDate, formatPrice } from '@/utilities/form/formatters'
-import { Card } from '@/components/ui/card'
-import {
-  ShoppingBag,
-  Package,
-  Clock,
-  CheckCircle,
-} from 'lucide-react'
+import configPromise from '@payload-config'
+import { ArrowRight } from 'lucide-react'
+import { headers as getHeaders } from 'next/headers.js'
+import Link from 'next/link'
+import { getPayload } from 'payload'
 
 export const metadata = {
-  title: 'Dashboard - FermentFreude',
+  title: 'Dashboard — FermentFreude',
   description: 'Your account dashboard',
 }
 
@@ -26,34 +20,45 @@ interface OrderStats {
 async function getOrderStats(userId: string): Promise<OrderStats> {
   try {
     const payload = await getPayload({ config: configPromise })
-
     const orders = await payload.find({
       collection: 'orders',
       overrideAccess: false,
-      where: {
-        customer: {
-          equals: userId,
-        },
-      },
+      where: { customer: { equals: userId } },
       limit: 5,
       sort: '-createdAt',
     })
-
     return {
       total: orders.totalDocs || 0,
       pending: orders.docs?.filter((o: any) => o.stripeStatus === 'processing').length || 0,
       completed: orders.docs?.filter((o: any) => o.stripeStatus === 'succeeded').length || 0,
       recent: orders.docs || [],
     }
-  } catch (error) {
-    console.error('Error fetching order stats:', error)
-    return {
-      total: 0,
-      pending: 0,
-      completed: 0,
-      recent: [],
-    }
+  } catch {
+    return { total: 0, pending: 0, completed: 0, recent: [] }
   }
+}
+
+function StatusDot({ status }: { status: string }) {
+  if (status === 'succeeded')
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-green-700 font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+        Delivered
+      </span>
+    )
+  if (status === 'processing')
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-blue-700 font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+        Processing
+      </span>
+    )
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[12px] text-[#626160] font-medium">
+      <span className="w-1.5 h-1.5 rounded-full bg-[#c4bbb3] shrink-0" />
+      Pending
+    </span>
+  )
 }
 
 export default async function DashboardPage() {
@@ -61,147 +66,123 @@ export default async function DashboardPage() {
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
 
-  if (!user) {
-    return null
-  }
+  if (!user) return null
 
   const stats = await getOrderStats(user.id)
+  const firstName = user.name?.split(' ')[0] ?? 'there'
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="bg-linear-to-r from-[#f9f0dc] to-[#fffef9] rounded-lg border border-[#e6be68] p-6 md:p-8">
-        <h1 className="text-2xl md:text-3xl font-display font-bold text-[#4b4b4b] mb-2">
-          Welcome back, {user.name || 'Valued Customer'}!
-        </h1>
-        <p className="text-[#4b4f4a] text-sm md:text-base">
-          From your dashboard you can view your recent orders, manage your addresses, and edit your account details.
+    <div className="max-w-4xl space-y-10">
+      {/* Page header */}
+      <div className="pb-8 border-b border-[#e8e4d9]">
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6be68] mb-3">
+          My Account
         </p>
-        <div className="flex flex-wrap gap-3 mt-4">
+        <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
+          Welcome back, {firstName}.
+        </h1>
+        <p className="mt-2 text-sm text-[#626160] max-w-sm">
+          View your orders, manage your addresses, and update your account details.
+        </p>
+        <div className="flex gap-3 mt-5">
           <Link
             href="/account/orders"
-            className="inline-flex items-center px-4 py-2 bg-[#e6be68] text-white rounded-lg hover:bg-[#d4a85a] transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors"
           >
             View Orders
           </Link>
           <Link
             href="/account/profile"
-            className="inline-flex items-center px-4 py-2 border border-[#e6be68] text-[#4b4b4b] rounded-lg hover:bg-[#f9f0dc] transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 border border-[#e8e4d9] text-[#4b4b4b] hover:bg-[#ece5de] text-sm font-medium rounded-lg transition-colors"
           >
             Edit Profile
           </Link>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Orders */}
-        <Card className="p-6 border-0 shadow-sm bg-white hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-[#4b4f4a] mb-1">Total Orders</p>
-              <p className="text-3xl font-bold text-[#4b4b4b]">{stats.total}</p>
-            </div>
-            <div className="w-12 h-12 rounded-lg bg-[#f0ede6] flex items-center justify-center">
-              <ShoppingBag className="w-6 h-6 text-[#e6be68]" />
-            </div>
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Orders', value: stats.total },
+          { label: 'Processing', value: stats.pending },
+          { label: 'Delivered', value: stats.completed },
+          {
+            label: 'Member Since',
+            value: user.createdAt ? formatDate(user.createdAt) : '—',
+            small: true,
+          },
+        ].map((stat) => (
+          <div key={stat.label} className="bg-white border border-[#e8e4d9] rounded-xl p-5">
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c4bbb3] mb-3">
+              {stat.label}
+            </p>
+            <p
+              className={
+                stat.small
+                  ? 'font-display font-bold text-[#1a1a1a] text-base leading-tight'
+                  : 'font-display font-bold text-[#1a1a1a] text-4xl leading-none'
+              }
+            >
+              {stat.value}
+            </p>
           </div>
-        </Card>
-
-        {/* Pending Orders */}
-        <Card className="p-6 border-0 shadow-sm bg-white hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-[#4b4f4a] mb-1">Processing</p>
-              <p className="text-3xl font-bold text-[#4b4b4b]">{stats.pending}</p>
-            </div>
-            <div className="w-12 h-12 rounded-lg bg-[#f0ede6] flex items-center justify-center">
-              <Clock className="w-6 h-6 text-[#e6be68]" />
-            </div>
-          </div>
-        </Card>
-
-        {/* Completed Orders */}
-        <Card className="p-6 border-0 shadow-sm bg-white hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-[#4b4f4a] mb-1">Completed</p>
-              <p className="text-3xl font-bold text-[#4b4b4b]">{stats.completed}</p>
-            </div>
-            <div className="w-12 h-12 rounded-lg bg-[#f0ede6] flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-[#e6be68]" />
-            </div>
-          </div>
-        </Card>
-
-        {/* Account Status */}
-        <Card className="p-6 border-0 shadow-sm bg-white hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-[#4b4f4a] mb-1">Member Since</p>
-              <p className="text-sm font-bold text-[#4b4b4b]">
-                {user.createdAt ? formatDate(user.createdAt) : 'N/A'}
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-lg bg-[#f0ede6] flex items-center justify-center">
-              <Package className="w-6 h-6 text-[#e6be68]" />
-            </div>
-          </div>
-        </Card>
+        ))}
       </div>
 
-      {/* Recent Orders */}
-      {stats.recent.length > 0 && (
-        <Card className="p-6 border-0 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-display font-bold text-[#4b4b4b]">Recent Orders</h2>
-            <Link href="/account/orders" className="text-[#e6be68] hover:text-[#d4a85a] text-sm font-medium">
-              View All
+      {/* Recent orders */}
+      {stats.recent.length > 0 ? (
+        <div>
+          <div className="flex items-baseline justify-between mb-4">
+            <h2 className="font-display font-bold text-[#1a1a1a] text-lg">Recent Orders</h2>
+            <Link
+              href="/account/orders"
+              className="inline-flex items-center gap-1 text-[12px] font-medium text-[#626160] hover:text-[#1a1a1a] transition-colors"
+            >
+              View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-
-          <div className="overflow-x-auto">
+          <div className="bg-white border border-[#e8e4d9] rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#e6be68]">
-                  <th className="text-left py-3 px-4 font-semibold text-[#4b4f4a]">Order ID</th>
-                  <th className="text-left py-3 px-4 font-semibold text-[#4b4f4a]">Date</th>
-                  <th className="text-left py-3 px-4 font-semibold text-[#4b4f4a]">Status</th>
-                  <th className="text-right py-3 px-4 font-semibold text-[#4b4f4a]">Total</th>
-                  <th className="text-right py-3 px-4 font-semibold text-[#4b4f4a]">Action</th>
+                <tr className="border-b border-[#e8e4d9]">
+                  {['Order', 'Date', 'Status', 'Total', ''].map((h) => (
+                    <th
+                      key={h}
+                      className={`py-3.5 px-5 text-[9px] font-bold uppercase tracking-[0.14em] text-[#c4bbb3] ${
+                        h === 'Total' || h === '' ? 'text-right' : 'text-left'
+                      }`}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {stats.recent.map((order: any) => (
-                  <tr key={order.id} className="border-b border-[#f0ede6] hover:bg-[#fffef9] transition-colors">
-                    <td className="py-4 px-4 font-medium text-[#4b4b4b]">{order.id?.slice(0, 8).toUpperCase()}</td>
-                    <td className="py-4 px-4 text-[#4b4f4a]">{formatDate(order.createdAt)}</td>
-                    <td className="py-4 px-4">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                          order.stripeStatus === 'succeeded'
-                            ? 'bg-green-100 text-green-700'
-                            : order.stripeStatus === 'processing'
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {order.stripeStatus === 'succeeded'
-                          ? 'Completed'
-                          : order.stripeStatus === 'processing'
-                            ? 'Processing'
-                            : 'Pending'}
-                      </span>
+                {stats.recent.map((order: any, i: number) => (
+                  <tr
+                    key={order.id}
+                    className={`hover:bg-[#faf9f7] transition-colors ${
+                      i < stats.recent.length - 1 ? 'border-b border-[#f5f3f0]' : ''
+                    }`}
+                  >
+                    <td className="py-4 px-5 font-mono text-[11px] text-[#4b4b4b]">
+                      #{order.id?.slice(0, 8).toUpperCase()}
                     </td>
-                    <td className="py-4 px-4 text-right text-[#4b4b4b] font-semibold">
+                    <td className="py-4 px-5 text-[13px] text-[#626160]">
+                      {formatDate(order.createdAt)}
+                    </td>
+                    <td className="py-4 px-5">
+                      <StatusDot status={order.stripeStatus || 'pending'} />
+                    </td>
+                    <td className="py-4 px-5 text-right text-[13px] font-semibold text-[#1a1a1a]">
                       {formatPrice(order.total || 0)}
                     </td>
-                    <td className="py-4 px-4 text-right">
+                    <td className="py-4 px-5 text-right">
                       <Link
                         href={`/account/orders/${order.id}`}
-                        className="text-[#e6be68] hover:text-[#d4a85a] font-medium"
+                        className="inline-flex items-center gap-1 text-[12px] text-[#626160] hover:text-[#1a1a1a] font-medium transition-colors"
                       >
-                        View
+                        View <ArrowRight className="w-3 h-3" />
                       </Link>
                     </td>
                   </tr>
@@ -209,7 +190,17 @@ export default async function DashboardPage() {
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
+      ) : (
+        <div className="bg-white border border-[#e8e4d9] rounded-xl p-16 text-center">
+          <p className="text-[13px] text-[#626160] mb-6">No orders yet.</p>
+          <Link
+            href="/workshops"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            Explore Workshops
+          </Link>
+        </div>
       )}
     </div>
   )

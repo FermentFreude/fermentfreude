@@ -1,15 +1,38 @@
-import Link from 'next/link'
-import type { Order } from '@/payload-types'
-import { headers as getHeaders } from 'next/headers.js'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { redirect } from 'next/navigation'
 import { formatDate, formatPrice } from '@/utilities/form/formatters'
-import { Card } from '@/components/ui/card'
+import configPromise from '@payload-config'
+import { ArrowRight } from 'lucide-react'
+import { headers as getHeaders } from 'next/headers.js'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
+import type { Order } from '@/payload-types'
 
 export const metadata = {
-  title: 'Orders - FermentFreude',
-  description: 'View your orders',
+  title: 'Orders — FermentFreude',
+  description: 'Your order history',
+}
+
+function StatusDot({ status }: { status: string }) {
+  if (status === 'succeeded')
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-green-700 font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+        Delivered
+      </span>
+    )
+  if (status === 'processing')
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-blue-700 font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+        Processing
+      </span>
+    )
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[12px] text-[#626160] font-medium">
+      <span className="w-1.5 h-1.5 rounded-full bg-[#c4bbb3] shrink-0" />
+      Pending
+    </span>
+  )
 }
 
 export default async function OrdersPage() {
@@ -18,106 +41,106 @@ export default async function OrdersPage() {
   const { user } = await payload.auth({ headers })
 
   if (!user) {
-    redirect(`/login?warning=${encodeURIComponent('Please login to access your orders.')}`)
+    redirect(`/login?warning=${encodeURIComponent('Please log in to view your orders.')}`)
   }
 
   let orders: Order[] = []
 
   try {
-    const ordersResult = await payload.find({
+    const result = await payload.find({
       collection: 'orders',
       limit: 100,
       user,
       overrideAccess: false,
-      where: {
-        customer: {
-          equals: user?.id,
-        },
-      },
+      where: { customer: { equals: user.id } },
     })
-
-    orders = ordersResult?.docs || []
+    orders = result?.docs || []
   } catch (error) {
     console.error('Error fetching orders:', error)
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-display font-bold text-[#4b4b4b] mb-2">Your Orders</h1>
-        <p className="text-[#4b4f4a]">View and manage all your orders</p>
+    <div className="max-w-4xl space-y-10">
+      {/* Page header */}
+      <div className="pb-8 border-b border-[#e8e4d9]">
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6be68] mb-3">
+          My Account
+        </p>
+        <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
+          Orders
+        </h1>
+        <p className="mt-2 text-sm text-[#626160]">
+          {orders.length > 0
+            ? `${orders.length} order${orders.length !== 1 ? 's' : ''} in your history`
+            : 'Your order history will appear here.'}
+        </p>
       </div>
 
-      {/* Orders Table */}
-      {orders && orders.length > 0 ? (
-        <Card className="p-6 border-0 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#e6be68] bg-[#f9f0dc]">
-                  <th className="text-left py-4 px-4 font-semibold text-[#4b4b4b]">Order ID</th>
-                  <th className="text-left py-4 px-4 font-semibold text-[#4b4b4b]">Date</th>
-                  <th className="text-left py-4 px-4 font-semibold text-[#4b4b4b]">Status</th>
-                  <th className="text-left py-4 px-4 font-semibold text-[#4b4b4b]">Items</th>
-                  <th className="text-right py-4 px-4 font-semibold text-[#4b4b4b]">Total</th>
-                  <th className="text-right py-4 px-4 font-semibold text-[#4b4b4b]">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order: any) => (
-                  <tr key={order.id} className="border-b border-[#f0ede6] hover:bg-[#fffef9] transition-colors">
-                    <td className="py-4 px-4 font-medium text-[#e6be68]">
-                      {order.id?.slice(0, 8).toUpperCase()}
-                    </td>
-                    <td className="py-4 px-4 text-[#4b4f4a]">{formatDate(order.createdAt)}</td>
-                    <td className="py-4 px-4">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                          order.stripePaymentIntentStatus === 'succeeded'
-                            ? 'bg-green-100 text-green-800'
-                            : order.stripePaymentIntentStatus === 'processing'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {order.stripePaymentIntentStatus === 'succeeded'
-                          ? 'Completed'
-                          : order.stripePaymentIntentStatus === 'processing'
-                            ? 'Processing'
-                            : 'Pending'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-[#4b4f4a]">
-                      {Array.isArray(order.items) ? order.items.length : 0}
-                    </td>
-                    <td className="py-4 px-4 text-right font-semibold text-[#4b4b4b]">
-                      {formatPrice(order.total || 0)}
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <Link
-                        href={`/account/orders/${order.id}`}
-                        className="inline-flex items-center px-3 py-1 text-[#e6be68] hover:text-[#d4a85a] font-medium text-xs rounded hover:bg-[#f9f0dc] transition-colors"
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
+      {orders.length > 0 ? (
+        <div className="bg-white border border-[#e8e4d9] rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[#e8e4d9]">
+                {['Order', 'Date', 'Status', 'Items', 'Total', ''].map((h) => (
+                  <th
+                    key={h}
+                    className={`py-3.5 px-5 text-[9px] font-bold uppercase tracking-[0.14em] text-[#c4bbb3] ${
+                      h === 'Total' || h === '' ? 'text-right' : 'text-left'
+                    }`}
+                  >
+                    {h}
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order: any, i: number) => (
+                <tr
+                  key={order.id}
+                  className={`hover:bg-[#faf9f7] transition-colors ${
+                    i < orders.length - 1 ? 'border-b border-[#f5f3f0]' : ''
+                  }`}
+                >
+                  <td className="py-4 px-5 font-mono text-[11px] text-[#4b4b4b]">
+                    #{order.id?.slice(0, 8).toUpperCase()}
+                  </td>
+                  <td className="py-4 px-5 text-[13px] text-[#626160]">
+                    {formatDate(order.createdAt)}
+                  </td>
+                  <td className="py-4 px-5">
+                    <StatusDot
+                      status={order.stripePaymentIntentStatus || order.stripeStatus || 'pending'}
+                    />
+                  </td>
+                  <td className="py-4 px-5 text-[13px] text-[#626160]">
+                    {Array.isArray(order.items) ? order.items.length : 0}
+                  </td>
+                  <td className="py-4 px-5 text-right text-[13px] font-semibold text-[#1a1a1a]">
+                    {formatPrice(order.total || 0)}
+                  </td>
+                  <td className="py-4 px-5 text-right">
+                    <Link
+                      href={`/account/orders/${order.id}`}
+                      className="inline-flex items-center gap-1 text-[12px] text-[#626160] hover:text-[#1a1a1a] font-medium transition-colors"
+                    >
+                      View <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <Card className="p-12 text-center border-0 shadow-sm">
-          <p className="text-[#4b4f4a] mb-4">No orders found yet</p>
+        <div className="bg-white border border-[#e8e4d9] rounded-xl p-16 text-center">
+          <p className="text-[13px] text-[#626160] mb-6">No orders yet.</p>
           <Link
-            href="/shop"
-            className="inline-flex items-center px-6 py-2 bg-[#e6be68] text-white rounded-lg hover:bg-[#d4a85a] transition-colors font-medium"
+            href="/workshops"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors"
           >
-            Continue Shopping
+            Explore Workshops
           </Link>
-        </Card>
+        </div>
       )}
     </div>
   )
