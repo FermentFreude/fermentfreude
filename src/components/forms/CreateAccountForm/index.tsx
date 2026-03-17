@@ -13,9 +13,10 @@ import React, { useCallback, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 type FormData = {
+  firstName: string
+  lastName: string
   email: string
   password: string
-  passwordConfirm: string
 }
 
 export const CreateAccountForm: React.FC = () => {
@@ -30,16 +31,17 @@ export const CreateAccountForm: React.FC = () => {
     formState: { errors },
     handleSubmit,
     register,
-    watch,
   } = useForm<FormData>()
-
-  const password = useRef({})
-  password.current = watch('password', '')
 
   const onSubmit = useCallback(
     async (data: FormData) => {
+      const body = {
+        email: data.email,
+        password: data.password,
+        name: [data.firstName, data.lastName].filter(Boolean).join(' ').trim() || undefined,
+      }
       const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, {
-        body: JSON.stringify(data),
+        body: JSON.stringify(body),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -52,16 +54,16 @@ export const CreateAccountForm: React.FC = () => {
         return
       }
 
-      const redirect = searchParams.get('redirect')
+      const redirectTo = searchParams.get('redirect')
 
       const timer = setTimeout(() => {
         setLoading(true)
       }, 1000)
 
       try {
-        await login(data)
+        await login({ email: data.email, password: data.password })
         clearTimeout(timer)
-        if (redirect) router.push(redirect)
+        if (redirectTo) router.push(redirectTo)
         else router.push(`/account?success=${encodeURIComponent('Account created successfully')}`)
       } catch (_) {
         clearTimeout(timer)
@@ -71,66 +73,108 @@ export const CreateAccountForm: React.FC = () => {
     [login, router, searchParams],
   )
 
-  return (
-    <form className="max-w-lg py-4" onSubmit={handleSubmit(onSubmit)}>
-      <div className="prose dark:prose-invert mb-6">
-        <p>
-          {`This is where new customers can signup and create a new account. To manage all users, `}
-          <Link href="/admin/collections/users">login to the admin dashboard</Link>.
-        </p>
-      </div>
+  const inputWrap =
+    'flex h-12 items-center justify-between gap-3 rounded-xl bg-white/90 px-4 text-[#3D3933]'
 
+  return (
+    <form className="" onSubmit={handleSubmit(onSubmit)}>
       <Message error={error} />
 
-      <div className="flex flex-col gap-8 mb-8">
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <FormItem>
+            <Label className="sr-only" htmlFor="firstName">
+              First name
+            </Label>
+            <div className={inputWrap}>
+              <span className="text-[#3D3933]/70">👤</span>
+              <Input
+                id="firstName"
+                type="text"
+                placeholder="Sato"
+                className="h-full flex-1 border-none bg-transparent p-0 text-sm text-[#3D3933] placeholder:text-[#3D3933]/60 focus-visible:outline-none"
+                {...register('firstName', { required: 'First name is required.' })}
+              />
+              <span className="text-sm text-[#3D3933]/60">✓</span>
+            </div>
+            {errors.firstName && <FormError message={errors.firstName.message} />}
+          </FormItem>
+          <FormItem>
+            <Label className="sr-only" htmlFor="lastName">
+              Last name
+            </Label>
+            <div className={inputWrap}>
+              <span className="text-[#3D3933]/70">👤</span>
+              <Input
+                id="lastName"
+                type="text"
+                placeholder="Matsugawa"
+                className="h-full flex-1 border-none bg-transparent p-0 text-sm text-[#3D3933] placeholder:text-[#3D3933]/60 focus-visible:outline-none"
+                {...register('lastName', { required: 'Last name is required.' })}
+              />
+              <span className="text-sm text-[#3D3933]/60">✓</span>
+            </div>
+            {errors.lastName && <FormError message={errors.lastName.message} />}
+          </FormItem>
+        </div>
+
         <FormItem>
-          <Label htmlFor="email" className="mb-2">
-            Email Address
+          <Label className="sr-only" htmlFor="email">
+            Email
           </Label>
-          <Input
-            id="email"
-            {...register('email', { required: 'Email is required.' })}
-            type="email"
-          />
+          <div className={inputWrap}>
+            <span className="text-[#3D3933]/70">✉️</span>
+            <Input
+              id="email"
+              type="email"
+              placeholder="satomatsugawa@gmail.com"
+              className="h-full flex-1 border-none bg-transparent p-0 text-sm text-[#3D3933] placeholder:text-[#3D3933]/60 focus-visible:outline-none"
+              {...register('email', { required: 'Email is required.' })}
+            />
+            <span className="text-sm text-[#3D3933]/60">✓</span>
+          </div>
           {errors.email && <FormError message={errors.email.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="password" className="mb-2">
-            New password
+          <Label className="sr-only" htmlFor="password">
+            Password
           </Label>
-          <Input
-            id="password"
-            {...register('password', { required: 'Password is required.' })}
-            type="password"
-          />
+          <div className={inputWrap}>
+            <span className="text-[#3D3933]/70">🔒</span>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Type your password here"
+              className="h-full flex-1 border-none bg-transparent p-0 text-sm text-[#3D3933] placeholder:text-[#3D3933]/60 focus-visible:outline-none"
+              {...register('password', { required: 'Password is required.' })}
+            />
+            <span className="text-sm text-[#3D3933]/60">✓</span>
+          </div>
           {errors.password && <FormError message={errors.password.message} />}
         </FormItem>
 
-        <FormItem>
-          <Label htmlFor="passwordConfirm" className="mb-2">
-            Confirm Password
-          </Label>
-          <Input
-            id="passwordConfirm"
-            {...register('passwordConfirm', {
-              required: 'Please confirm your password.',
-              validate: (value) => value === password.current || 'The passwords do not match',
-            })}
-            type="password"
-          />
-          {errors.passwordConfirm && <FormError message={errors.passwordConfirm.message} />}
-        </FormItem>
+        <div className="flex items-center justify-between gap-4 pt-0.5 text-[12px] text-[#E5DDCF]">
+          <span>*Create a strong password</span>
+          <Link
+            href={`/login${allParams}`}
+            className="underline underline-offset-4 text-[#FAF2DE] hover:text-white"
+          >
+            Log in here
+          </Link>
+        </div>
       </div>
-      <Button disabled={loading} type="submit" variant="default">
-        {loading ? 'Processing' : 'Create Account'}
-      </Button>
 
-      <div className="prose dark:prose-invert mt-8">
-        <p>
-          {'Already have an account? '}
-          <Link href={`/login${allParams}`}>Login</Link>
-        </p>
+      <div className="mt-8 flex justify-center">
+        <Button
+          className="h-12 w-full max-w-sm rounded-xl bg-white px-10 text-[13px] font-semibold tracking-[0.12em] uppercase text-[#3D3933] shadow-md transition-colors hover:bg-[#FDF8F0] focus-visible:ring-2 focus-visible:ring-[#C46B5A]/50"
+          disabled={loading}
+          size="lg"
+          type="submit"
+          variant="default"
+        >
+          {loading ? 'Processing' : 'Register account'}
+        </Button>
       </div>
     </form>
   )
