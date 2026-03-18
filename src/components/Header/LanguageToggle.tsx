@@ -7,7 +7,7 @@ export function LanguageToggle() {
   const { locale, setLocale } = useLocale()
 
   return (
-    <div className="flex items-center rounded-full border border-ff-white-95 dark:border-neutral-700 overflow-hidden text-xs font-semibold">
+    <div className="flex items-center rounded-full border border-neutral-400 dark:border-neutral-700 overflow-hidden text-xs font-semibold">
       <button
         onClick={() => setLocale('de')}
         className={cn(

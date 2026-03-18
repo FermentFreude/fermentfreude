@@ -18,6 +18,13 @@ const config = {
     'bg-success/30',
     'border-warning',
     'bg-warning/30',
+    // Navbar dropdown group hover states
+    'group-hover:opacity-100',
+    'group-hover:visible',
+    'group-hover:rotate-45',
+    'group-hover/submenu:opacity-100',
+    'group-hover/submenu:visible',
+    'group-hover:pointer-events-auto',
   ],
   theme: {
     container: {

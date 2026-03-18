@@ -2,23 +2,25 @@
 
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
+import { Address } from '@/payload-types'
+import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
-import React, { useCallback, FormEvent } from 'react'
-import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
-import { Address } from '@/payload-types'
+import React, { FormEvent, useCallback } from 'react'
 
 type Props = {
   customerEmail?: string
   billingAddress?: Partial<Address>
   shippingAddress?: Partial<Address>
   setProcessingPayment: React.Dispatch<React.SetStateAction<boolean>>
+  isAllDigital?: boolean
 }
 
 export const CheckoutForm: React.FC<Props> = ({
   customerEmail,
   billingAddress,
   setProcessingPayment,
+  isAllDigital,
 }) => {
   const stripe = useStripe()
   const elements = useElements()
@@ -75,12 +77,18 @@ export const CheckoutForm: React.FC<Props> = ({
                 'orderID' in confirmResult &&
                 confirmResult.orderID
               ) {
-                const redirectUrl = `/orders/${confirmResult.orderID}${customerEmail ? `?email=${customerEmail}` : ''}`
-
                 // Clear the cart after successful payment
                 clearCart()
 
-                // Redirect to order confirmation page
+                // Redirect: course purchases → order confirmation with course flag,
+                // physical products → order detail page
+                const emailParam = customerEmail
+                  ? `&email=${encodeURIComponent(customerEmail)}`
+                  : ''
+                const redirectUrl = isAllDigital
+                  ? `/account/order-confirmation?orderId=${confirmResult.orderID}&type=course${emailParam}`
+                  : `/account/orders/${confirmResult.orderID}${customerEmail ? `?email=${encodeURIComponent(customerEmail)}` : ''}`
+
                 router.push(redirectUrl)
               }
             } catch (err) {
@@ -117,6 +125,7 @@ export const CheckoutForm: React.FC<Props> = ({
       confirmOrder,
       clearCart,
       router,
+      isAllDigital,
     ],
   )
 

@@ -13,6 +13,7 @@ import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 
 import { isAdmin } from '@/access/isAdmin'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
+import { autoEnrollOnPurchase } from '@/collections/Orders/autoEnrollOnPurchase'
 import { ProductsCollection } from '@/collections/Products'
 import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -127,6 +128,15 @@ export const plugins: Plugin[] = [
     },
     products: {
       productsCollectionOverride: ProductsCollection,
+    },
+    orders: {
+      ordersCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        hooks: {
+          ...defaultCollection?.hooks,
+          afterChange: [...(defaultCollection?.hooks?.afterChange ?? []), autoEnrollOnPurchase],
+        },
+      }),
     },
   }),
 ]

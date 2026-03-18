@@ -1,12 +1,10 @@
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import { NextRequest, NextResponse } from 'next/server'
+import { getPayload } from 'payload'
 
 const COURSE_SLUGS = ['basic-fermentation'] as const
 
-function toLessonIds(
-  raw: Array<{ lessonId?: string | null }> | null | undefined,
-): string[] {
+function toLessonIds(raw: Array<{ lessonId?: string | null }> | null | undefined): string[] {
   if (!Array.isArray(raw)) return []
   return raw
     .map((item) => (item && typeof item.lessonId === 'string' ? item.lessonId : null))
@@ -20,38 +18,25 @@ export async function POST(
   try {
     const { courseSlug } = await params
     if (!COURSE_SLUGS.includes(courseSlug as (typeof COURSE_SLUGS)[number])) {
-      return NextResponse.json(
-        { success: false, error: 'Unknown course' },
-        { status: 400 },
-      )
+      return NextResponse.json({ success: false, error: 'Unknown course' }, { status: 400 })
     }
 
     const payload = await getPayload({ config: configPromise })
     const { user } = await payload.auth({ headers: request.headers })
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Login required' },
-        { status: 401 },
-      )
+      return NextResponse.json({ success: false, error: 'Login required' }, { status: 401 })
     }
 
     const body = await request.json().catch(() => ({}))
-    const lessonId =
-      typeof body?.lessonId === 'string' ? body.lessonId.trim() : null
+    const lessonId = typeof body?.lessonId === 'string' ? body.lessonId.trim() : null
     if (!lessonId) {
-      return NextResponse.json(
-        { success: false, error: 'lessonId required' },
-        { status: 400 },
-      )
+      return NextResponse.json({ success: false, error: 'lessonId required' }, { status: 400 })
     }
 
     const existing = await payload.find({
       collection: 'course-progress',
       where: {
-        and: [
-          { user: { equals: user.id } },
-          { courseSlug: { equals: courseSlug } },
-        ],
+        and: [{ user: { equals: user.id } }, { courseSlug: { equals: courseSlug } }],
       },
       limit: 1,
       user,
@@ -60,14 +45,12 @@ export async function POST(
     const existingIds = toLessonIds(
       existing.docs[0]?.completedLessonIds as Array<{ lessonId?: string }> | undefined,
     )
-    if (existingIds.includes(lessonId)) {
-      return NextResponse.json({
-        success: true,
-        completedLessonIds: existingIds,
-      })
-    }
 
-    const newIds = [...existingIds, lessonId]
+    // Toggle: if already completed, remove it; otherwise add it.
+    const alreadyDone = existingIds.includes(lessonId)
+    const newIds = alreadyDone
+      ? existingIds.filter((id) => id !== lessonId)
+      : [...existingIds, lessonId]
     const newCompleted = newIds.map((id) => ({ lessonId: id }))
 
     if (existing.docs[0]) {
@@ -95,10 +78,7 @@ export async function POST(
     })
   } catch (err) {
     console.error('Course progress update error:', err)
-    return NextResponse.json(
-      { success: false, error: 'Server error' },
-      { status: 500 },
-    )
+    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 })
   }
 }
 
@@ -109,10 +89,7 @@ export async function GET(
   try {
     const { courseSlug } = await params
     if (!COURSE_SLUGS.includes(courseSlug as (typeof COURSE_SLUGS)[number])) {
-      return NextResponse.json(
-        { success: false, error: 'Unknown course' },
-        { status: 400 },
-      )
+      return NextResponse.json({ success: false, error: 'Unknown course' }, { status: 400 })
     }
 
     const payload = await getPayload({ config: configPromise })
@@ -127,10 +104,7 @@ export async function GET(
     const result = await payload.find({
       collection: 'course-progress',
       where: {
-        and: [
-          { user: { equals: user.id } },
-          { courseSlug: { equals: courseSlug } },
-        ],
+        and: [{ user: { equals: user.id } }, { courseSlug: { equals: courseSlug } }],
       },
       limit: 1,
       user,
@@ -145,9 +119,6 @@ export async function GET(
     })
   } catch (err) {
     console.error('Course progress fetch error:', err)
-    return NextResponse.json(
-      { success: false, error: 'Server error' },
-      { status: 500 },
-    )
+    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 })
   }
 }

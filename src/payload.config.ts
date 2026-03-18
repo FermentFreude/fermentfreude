@@ -18,7 +18,9 @@ import { fileURLToPath } from 'url'
 
 import { Categories } from '@/collections/Categories'
 import { CourseProgress } from '@/collections/CourseProgress'
+import { Enrollments } from '@/collections/Enrollments'
 import { Media } from '@/collections/Media'
+import { OnlineCourses } from '@/collections/OnlineCourses'
 import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
 import { Users } from '@/collections/Users'
@@ -26,7 +28,6 @@ import { Vouchers } from '@/collections/Vouchers'
 import { WorkshopAppointments } from '@/collections/WorkshopAppointments'
 import { WorkshopLocations } from '@/collections/WorkshopLocations'
 import { Workshops } from '@/collections/Workshops'
-import { BasicFermentationCourse } from '@/globals/BasicFermentationCourse'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { Shop } from '@/globals/Shop'
@@ -73,7 +74,9 @@ export default buildConfig({
     Pages,
     Categories,
     CourseProgress,
+    Enrollments,
     Media,
+    OnlineCourses,
     Posts,
     Workshops,
     WorkshopLocations,
@@ -119,7 +122,7 @@ export default buildConfig({
     },
   }),
   //email: nodemailerAdapter(),
-  globals: [Header, Footer, Shop, BasicFermentationCourse, TestimonialsGlobal],
+  globals: [Header, Footer, Shop, TestimonialsGlobal],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,

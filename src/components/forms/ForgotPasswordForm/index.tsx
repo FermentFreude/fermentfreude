@@ -50,31 +50,40 @@ export const ForgotPasswordForm: React.FC = () => {
     <Fragment>
       {!success && (
         <React.Fragment>
-          <h1 className="text-xl mb-4">Forgot Password</h1>
-          <div className="prose dark:prose-invert mb-8">
+          <h1 className="mb-4 font-display text-[1.6rem] tracking-[0.28em] uppercase text-[#F4F0E8]">
+            Forgot Password
+          </h1>
+          <div className="prose mb-8 text-sm text-[#E5DDCF] dark:prose-invert">
             <p>
-              {`Please enter your email below. You will receive an email message with instructions on
-              how to reset your password. To manage your all users, `}
-              <Link href="/admin/collections/users">login to the admin dashboard</Link>.
+              Please enter your email below. You will receive an email message with instructions on how to
+              reset your password.
             </p>
           </div>
-          <form className="max-w-lg" onSubmit={handleSubmit(onSubmit)}>
+          <form className="max-w-lg space-y-8" onSubmit={handleSubmit(onSubmit)}>
             <Message className="mb-8" error={error} />
 
-            <FormItem className="mb-8">
-              <Label htmlFor="email" className="mb-2">
+            <FormItem>
+              <Label htmlFor="email" className="mb-2 text-sm font-medium text-[#FAF2DE]">
                 Email address
               </Label>
-              <Input
-                id="email"
-                {...register('email', { required: 'Please provide your email.' })}
-                type="email"
-              />
+              <div className="flex h-12 items-center justify-between gap-3 rounded-[6px] bg-[rgba(250,242,222,0.16)] px-4">
+                <span className="text-sm text-[#FAF2DE] opacity-90">✉️</span>
+                <Input
+                  id="email"
+                  {...register('email', { required: 'Please provide your email.' })}
+                  type="email"
+                  className="h-full flex-1 border-none bg-transparent p-0 text-sm text-[#FAF2DE] placeholder:text-[#FAF2DE]/70 transition-colors hover:bg-[rgba(250,242,222,0.08)] focus-visible:outline-none"
+                />
+              </div>
               {errors.email && <FormError message={errors.email.message} />}
             </FormItem>
 
-            <Button type="submit" variant="default">
-              Forgot Password
+            <Button
+              type="submit"
+              variant="default"
+              className="h-12 rounded-full bg-gradient-to-b from-[#F8F4EB] to-[#EFE8DA] px-10 text-[13px] font-medium tracking-[0.18em] uppercase text-[#3D3933] shadow-[0_4px_10px_rgba(0,0,0,0.25)] border border-white/60 transition-colors focus-visible:ring-2 focus-visible:ring-[#F5F2EC]/60 hover:from-white hover:to-[#F3ECE0]"
+            >
+              Send reset link
             </Button>
           </form>
         </React.Fragment>

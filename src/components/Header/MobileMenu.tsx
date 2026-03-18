@@ -17,14 +17,15 @@ interface Props {
   menu: Header['navItems'] | null
   isActive: boolean
   setIsActive: (v: boolean) => void
+  headerHeight?: number
 }
 
 interface NavOverlayItem {
   id: string
   label: string
   href: string
-  isDivider?: boolean
   description?: string | null
+  isSmall?: boolean
   children?: NavOverlayItem[]
 }
 
@@ -35,7 +36,7 @@ interface NavOverlayItem {
  * - Per-character reveal animations
  * - Smooth transitions
  */
-export function MobileMenu({ menu, isActive, setIsActive }: Props) {
+export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Props) {
   const { user } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
@@ -165,8 +166,8 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
         tl.to(footerRef.current, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0)
       }
 
-      // Nav collapse
-      tl.to(navRef.current, { height: 0, duration: 0.8, ease: 'power4.inOut' }, 0.2)
+      // Nav fade out
+      tl.to(navRef.current, { opacity: 0, duration: 0.5, ease: 'power4.inOut' }, 0.2)
     },
     [setIsActive, router],
   )
@@ -181,11 +182,11 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
     const tl = gsap.timeline()
     animTimeline.current = tl
 
-    // Nav container expand
+    // Nav container fade in
     tl.fromTo(
       navRef.current,
-      { height: 0 },
-      { height: 'auto', duration: 1, ease: 'power4.inOut' },
+      { opacity: 0 },
+      { opacity: 1, duration: 0.6, ease: 'power4.inOut' },
       0,
     )
 
@@ -229,40 +230,34 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
   return (
     <div
       ref={navRef}
-      className="nav-overlay fixed left-0 top-0 w-full z-50 overflow-hidden"
-      style={{ height: 0, minHeight: '100dvh' }}
+      className="nav-overlay fixed left-0 right-0 bottom-0 z-55"
+      style={{ opacity: 0, top: headerHeight }}
     >
       {/* Background */}
       <div className="absolute inset-0 bg-[#ECE5DE]/95 dark:bg-ff-near-black/97 backdrop-blur-xl" />
 
-      {/* Content */}
-      <div className="relative min-h-dvh flex flex-col pt-24 sm:pt-28 md:pt-32">
-        {/* Header with Close Button and Language Toggle */}
-        <div className="shrink-0 border-b border-ff-warm-gray/20 dark:border-white/10 px-5 sm:px-6 md:px-8 py-3 sm:py-4 flex items-center justify-between">
-          <span className="text-xs text-ff-gray-text dark:text-neutral-400 uppercase tracking-wide">
-            Language
-          </span>
-          <div className="flex items-center gap-3">
-            <LanguageToggle />
-            <button
-              onClick={() => setIsActive(false)}
-              className="p-2 hover:bg-ff-near-black/10 dark:hover:bg-white/15 rounded-lg transition-colors shrink-0 flex items-center justify-center"
-              aria-label="Close menu"
-            >
-              <X className="w-6 h-6 text-ff-near-black dark:text-white" />
-            </button>
-          </div>
+      {/* Content — fills remaining viewport below header */}
+      <div className="relative h-full flex flex-col overflow-hidden">
+        {/* Language toggle — top-right */}
+        <div className="flex justify-end px-4 sm:px-6 md:px-8 pt-3 pb-1 shrink-0">
+          <LanguageToggle />
         </div>
 
         {/* Nav items list - scrollable */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 md:px-8">
-          <nav className="mt-6 sm:mt-8 md:mt-12 pb-8">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8">
+          <nav className="pb-6">
             {navItemsList.map((item, idx) => {
               const isExpanded = expandedItems.has(item.id)
               const hasChildren = item.children && item.children.length > 0
-              const isAbout = item.label.toLowerCase().includes('about') && item.href === '/about'
-              const isWorkshops = item.label.toLowerCase() === 'workshops'
-              const isOnlineCourses = item.label.toLowerCase() === 'online courses'
+              const href = item.href?.toLowerCase() || ''
+              const label = item.label.toLowerCase()
+              const isAbout = href === '/about' || label.includes('about')
+              const isWorkshops = href === '/workshops' || href.startsWith('/workshops/')
+              const isOnlineCourses =
+                href === '/courses' || href.startsWith('/courses/') || label === 'online courses'
+              const isDetailViewOpen = detailViewItem === item.id
+              const isChevronOpen =
+                isWorkshops || isOnlineCourses || isAbout ? isDetailViewOpen : isExpanded
 
               return (
                 <div key={item.id} className="mb-2 sm:mb-3">
@@ -283,13 +278,13 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                       }
                     }}
                     className={cn(
-                      'w-full flex items-center justify-between py-3 sm:py-4 px-3 sm:px-4 rounded-lg transition-colors text-left group cursor-pointer',
+                      'w-full flex items-center justify-between py-3 sm:py-4 px-3 sm:px-4 rounded-lg transition-colors text-left group cursor-pointer gap-2',
                       'hover:bg-ff-near-black dark:hover:bg-white',
                     )}
                   >
                     {/* Label with character animation and optional badge */}
-                    <div className="flex flex-col gap-1">
-                      <span className="flex overflow-hidden group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                      <span className="flex overflow-hidden group-hover:text-white dark:group-hover:text-ff-near-black transition-colors text-base sm:text-lg wrap-break-word">
                         {item.label.split('').map((char, charIdx) => (
                           <span
                             key={`${idx}-${charIdx}`}
@@ -302,7 +297,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                         ))}
                       </span>
                       {isOnlineCourses && (
-                        <span className="text-xs font-medium text-ff-near-black/70 dark:text-neutral-300 group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
+                        <span className="text-xs font-bold text-ff-gray-text dark:text-neutral-400 group-hover:text-white dark:group-hover:text-white transition-colors">
                           Coming Soon
                         </span>
                       )}
@@ -313,7 +308,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                       <ChevronDown
                         className={cn(
                           'w-4 h-4 sm:w-5 sm:h-5 shrink-0 transition-transform duration-300 group-hover:text-white dark:group-hover:text-ff-near-black',
-                          isExpanded && 'rotate-180',
+                          isChevronOpen && 'rotate-180',
                         )}
                       />
                     )}
@@ -321,26 +316,26 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
 
                   {/* Dropdown items - only show for regular items (not Workshops, About, or Online Courses - those use modals) */}
                   {hasChildren && isExpanded && !isWorkshops && !isOnlineCourses && !isAbout && (
-                    <div className="pl-3 sm:pl-4 border-l border-ff-warm-gray/20 dark:border-white/10 mt-2 ml-4 sm:ml-6">
+                    <div className="border-l-2 border-ff-warm-gray/30 dark:border-white/20 mt-3 ml-6 sm:ml-8 pl-4 sm:pl-5 space-y-2 sm:space-y-3 overflow-hidden">
                       {item.children?.map((child) => (
-                        <div key={child.id}>
-                          {child.isDivider && (
-                            <div className="my-2 border-t border-ff-warm-gray/20 dark:border-white/10" />
+                        <Link
+                          key={child.id}
+                          href={child.href}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handleClose(child.href)
+                          }}
+                          className="flex flex-col p-3 sm:p-4 rounded-lg text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 hover:text-ff-near-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 overflow-hidden group"
+                        >
+                          <div className="font-bold group-hover:translate-x-1 transition-transform duration-200">
+                            {child.label}
+                          </div>
+                          {child.description && (
+                            <div className="text-xs mt-1.5 opacity-70 group-hover:opacity-100 group-hover:text-white dark:group-hover:text-ff-near-black transition-all">
+                              {child.description}
+                            </div>
                           )}
-                          <Link
-                            href={child.href}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              handleClose(child.href)
-                            }}
-                            className="block py-2 sm:py-3 px-3 sm:px-4 rounded text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 hover:text-ff-near-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                          >
-                            <div className="font-medium">{child.label}</div>
-                            {child.description && (
-                              <div className="text-xs mt-1 opacity-70">{child.description}</div>
-                            )}
-                          </Link>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -354,188 +349,67 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
         {detailViewItem && (
           <div
             ref={detailRef}
-            className="fixed inset-0 flex items-center justify-center z-50 px-4 sm:px-6 pointer-events-none"
+            className="fixed inset-0 flex items-center justify-center z-70 px-3 sm:px-6 pointer-events-none overflow-hidden"
           >
             {/* Backdrop */}
             <div
-              className="absolute inset-0 bg-black/10 dark:bg-black/20 backdrop-blur-md"
+              className="absolute inset-0 bg-black/10 dark:bg-black/20 backdrop-blur-md cursor-pointer"
               onClick={closeDetailView}
+              role="button"
+              tabIndex={-1}
             />
 
-            {/* Modal Card */}
-            <div className="relative bg-[#f5f2ed] dark:bg-ff-near-black rounded-3xl shadow-2xl max-w-md w-full max-h-[85vh] pointer-events-auto overflow-hidden border border-ff-warm-gray/20 dark:border-white/10">
+            {/* Modal Card - Constrained Width */}
+            <div className="relative bg-[#f5f2ed] dark:bg-ff-near-black rounded-2xl sm:rounded-3xl shadow-2xl w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-md max-h-[80vh] sm:max-h-[85vh] pointer-events-auto overflow-hidden border border-ff-warm-gray/20 dark:border-white/10 mx-auto">
               {/* Header with Close */}
-              <div className="sticky top-0 bg-[#f5f2ed]/95 dark:bg-ff-near-black/95 backdrop-blur-sm border-b border-ff-warm-gray/20 dark:border-white/10 px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
-                <h2 className="text-2xl sm:text-3xl font-display font-bold text-ff-near-black dark:text-white flex-1">
+              <div className="sticky top-0 bg-[#f5f2ed]/95 dark:bg-ff-near-black/95 backdrop-blur-sm border-b border-ff-warm-gray/20 dark:border-white/10 px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between gap-3 md:hidden">
+                <h2 className="text-xl sm:text-3xl font-display font-bold text-ff-near-black dark:text-white flex-1 line-clamp-2">
                   {navItemsList.find((i) => i.id === detailViewItem)?.label}
                 </h2>
                 <button
                   onClick={closeDetailView}
-                  className="p-2 ml-4 hover:bg-ff-near-black/10 dark:hover:bg-white/15 rounded-lg transition-colors shrink-0 flex items-center justify-center"
+                  className="p-1.5 sm:p-2 hover:bg-ff-near-black/10 dark:hover:bg-white/15 rounded-lg transition-colors shrink-0 flex items-center justify-center"
                   aria-label="Close"
                 >
-                  <X className="w-6 h-6 text-ff-near-black dark:text-white" />
+                  <X className="w-5 h-5 sm:w-6 sm:h-6 text-ff-near-black dark:text-white" />
                 </button>
               </div>
 
               {/* Content */}
-              <div className="overflow-y-auto max-h-[calc(85vh-80px)] px-5 sm:px-6 py-6 sm:py-8">
+              <div className="overflow-y-auto max-h-[calc(80vh-65px)] sm:max-h-[calc(85vh-80px)] px-4 sm:px-6 py-5 sm:py-8">
                 {(() => {
                   const currentItem = navItemsList.find((i) => i.id === detailViewItem)
                   const children = currentItem?.children || []
-                  const isAboutModal = currentItem?.label.toLowerCase().includes('about')
-                  const isWorkshopsModal = currentItem?.label.toLowerCase() === 'workshops'
 
-                  if (isWorkshopsModal) {
-                    const headerItem =
-                      children.find(
-                        (child) => child.href.toLowerCase() === '/workshops' && !child.isDivider,
-                      ) || null
-                    const workshopItems = children
-                      .filter((child) => {
-                        if (child.isDivider) return false
-                        const href = child.href.toLowerCase()
-                        const label = child.label.toLowerCase()
-                        const isVoucher =
-                          href.includes('/workshops/voucher') ||
-                          label.includes('voucher') ||
-                          label.includes('gutschein')
-                        return href.startsWith('/workshops/') && !isVoucher
-                      })
-                      .slice(0, 3)
-                    const additionalItems = children.filter((child) => {
-                      const href = child.href.toLowerCase()
-                      const label = child.label.toLowerCase()
-                      const isVoucher =
-                        href.includes('/workshops/voucher') ||
-                        label.includes('voucher') ||
-                        label.includes('gutschein')
-                      const isOnlineCourses = href.startsWith('/courses')
-                      return isOnlineCourses || isVoucher
-                    })
-                    return (
-                      <div className="flex flex-col gap-1">
-                        {headerItem && (
-                          <Link
-                            href="/workshops"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              closeDetailView()
-                              setTimeout(() => handleClose('/workshops'), 200)
-                            }}
-                            className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                          >
-                            <div className="text-base sm:text-lg font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                              All Workshops
-                            </div>
-                          </Link>
-                        )}
-                        {workshopItems.length > 0 && (
-                          <div className="ml-4 pl-4 border-l border-ff-warm-gray/40 dark:border-white/15 flex flex-col gap-1.5">
-                            {workshopItems.map((child) => (
-                              <Link
-                                key={child.id}
-                                href={child.href}
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  closeDetailView()
-                                  setTimeout(() => handleClose(child.href), 200)
-                                }}
-                                className="block p-2 sm:p-2.5 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                              >
-                                <div className="text-xs sm:text-sm font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                                  {child.label}
-                                </div>
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                        {additionalItems.length > 0 && (
-                          <div className="flex flex-col gap-1">
-                            {additionalItems.map((child) => {
-                              const href = child.href.toLowerCase()
-                              const label = child.label.toLowerCase()
-                              const isVoucher =
-                                href.includes('/workshops/voucher') ||
-                                label.includes('voucher') ||
-                                label.includes('gutschein')
-                              return (
-                                <div key={child.id}>
-                                  {child.isDivider && (
-                                    <div className="my-3 border-t border-ff-warm-gray/40 dark:border-white/15" />
-                                  )}
-                                  <Link
-                                    href={child.href}
-                                    onClick={(e) => {
-                                      e.preventDefault()
-                                      closeDetailView()
-                                      setTimeout(() => handleClose(child.href), 200)
-                                    }}
-                                    className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                                  >
-                                    <div className="text-xs sm:text-sm font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                                      {isVoucher ? 'Workshop Vouchers' : 'Upcoming Online Courses'}
-                                    </div>
-                                  </Link>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  } else if (isAboutModal) {
-                    // About modal: all links same size (no parent distinction)
-                    const allAboutItems = children.filter((child) => !child.isDivider)
-                    return (
-                      <div className="flex flex-col gap-1">
-                        {allAboutItems.map((child) => (
-                          <Link
-                            key={child.id}
-                            href={child.href}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              closeDetailView()
-                              setTimeout(() => handleClose(child.href), 200)
-                            }}
-                            className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                          >
-                            <div className="text-sm sm:text-base font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                              {child.label.toLowerCase() === 'fermentation'
-                                ? 'About Fermentation'
-                                : child.label}
-                            </div>
-                          </Link>
-                        ))}
-                        {children.some((c) => c.isDivider) && (
-                          <div className="my-3 border-t border-ff-warm-gray/40 dark:border-white/15" />
-                        )}
-                      </div>
-                    )
-                  }
                   return (
                     <div className="flex flex-col gap-1">
                       {children.map((child) => (
-                        <div key={child.id}>
-                          {child.isDivider && (
-                            <div className="my-3 border-t border-ff-warm-gray/40 dark:border-white/15" />
+                        <Link
+                          key={child.id}
+                          href={child.href}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            closeDetailView()
+                            setTimeout(() => handleClose(child.href), 200)
+                          }}
+                          className="block p-2.5 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
+                        >
+                          <div
+                            className={cn(
+                              'text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors',
+                              child.isSmall
+                                ? 'text-xs sm:text-sm font-bold'
+                                : 'text-sm sm:text-base font-bold',
+                            )}
+                          >
+                            {child.label}
+                          </div>
+                          {child.description && !child.isSmall && (
+                            <div className="text-xs text-ff-gray-text dark:text-neutral-400 group-hover:text-white dark:group-hover:text-ff-near-black mt-1 transition-colors">
+                              {child.description}
+                            </div>
                           )}
-                          {!child.isDivider && (
-                            <Link
-                              href={child.href}
-                              onClick={(e) => {
-                                e.preventDefault()
-                                closeDetailView()
-                                setTimeout(() => handleClose(child.href), 200)
-                              }}
-                              className="block p-3 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                            >
-                              <div className="text-sm font-bold text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors">
-                                {child.label}
-                              </div>
-                            </Link>
-                          )}
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   )
@@ -548,7 +422,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
         {/* Footer */}
         <div
           ref={footerRef}
-          className="border-t border-ff-warm-gray/30 dark:border-neutral-800 px-5 sm:px-6 md:px-8 py-4 sm:py-6"
+          className="border-t border-ff-warm-gray/30 dark:border-neutral-800 px-4 sm:px-6 md:px-8 py-4 sm:py-6 mt-auto shrink-0 overflow-hidden"
           style={{ opacity: 0 }}
         >
           {/* Auth Links - Styled as Buttons */}
@@ -561,7 +435,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                     e.preventDefault()
                     handleClose('/account')
                   }}
-                  className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg bg-ff-near-black dark:bg-white text-white dark:text-ff-near-black font-medium text-sm sm:text-base transition-all hover:opacity-90 active:scale-95 text-center cursor-pointer"
+                  className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg bg-ff-near-black dark:bg-white text-white dark:text-ff-near-black font-bold text-sm sm:text-base transition-all hover:opacity-90 active:scale-95 text-center cursor-pointer"
                 >
                   My Account
                 </Link>
@@ -571,7 +445,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                     e.preventDefault()
                     handleClose('/logout')
                   }}
-                  className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg bg-ff-warm-gray/20 dark:bg-white/10 text-ff-near-black dark:text-white font-medium text-sm sm:text-base transition-all hover:bg-ff-warm-gray/30 dark:hover:bg-white/15 active:scale-95 text-center cursor-pointer"
+                  className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg bg-ff-warm-gray/20 dark:bg-white/10 text-ff-near-black dark:text-white font-bold text-sm sm:text-base transition-all hover:bg-ff-warm-gray/30 dark:hover:bg-white/15 active:scale-95 text-center cursor-pointer"
                 >
                   Log Out
                 </Link>
@@ -584,7 +458,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                     e.preventDefault()
                     handleClose('/login')
                   }}
-                  className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg bg-ff-near-black dark:bg-white text-white dark:text-ff-near-black font-medium text-sm sm:text-base transition-all hover:opacity-90 active:scale-95 text-center cursor-pointer"
+                  className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg bg-ff-near-black dark:bg-white text-white dark:text-ff-near-black font-bold text-sm sm:text-base transition-all hover:opacity-90 active:scale-95 text-center cursor-pointer"
                 >
                   Log In
                 </Link>
@@ -594,7 +468,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                     e.preventDefault()
                     handleClose('/create-account')
                   }}
-                  className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg bg-ff-warm-gray/20 dark:bg-white/10 text-ff-near-black dark:text-white font-medium text-sm sm:text-base transition-all hover:bg-ff-warm-gray/30 dark:hover:bg-white/15 active:scale-95 text-center cursor-pointer"
+                  className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg bg-ff-warm-gray/20 dark:bg-white/10 text-ff-near-black dark:text-white font-bold text-sm sm:text-base transition-all hover:bg-ff-warm-gray/30 dark:hover:bg-white/15 active:scale-95 text-center cursor-pointer"
                 >
                   Sign Up
                 </Link>
@@ -622,26 +496,22 @@ function buildNavItems(
       const cmsDropdownItems = item.dropdownItems
       const defaultKey = getDefaultDropdownKey(label, url)
 
-      const dropdownItems =
-        cmsDropdownItems && cmsDropdownItems.length > 0
+      const dropdownItems = defaultKey
+        ? defaultDropdowns[defaultKey]
+        : cmsDropdownItems && cmsDropdownItems.length > 0
           ? cmsDropdownItems
-          : defaultKey
-            ? defaultDropdowns[defaultKey]
-            : null
+          : null
 
       const parentItem: NavOverlayItem = { id: String(item.id), label, href: url }
 
       if (dropdownItems && dropdownItems.length > 0) {
-        parentItem.children = []
-        for (const sub of dropdownItems) {
-          parentItem.children.push({
-            id: `${item.id}-${sub.href}`,
-            label: sub.label,
-            href: sub.href,
-            isDivider: (sub as any).isDivider || false,
-            description: (sub as any).description || null,
-          })
-        }
+        parentItem.children = dropdownItems.map((sub) => ({
+          id: `${item.id}-${sub.href}`,
+          label: sub.label,
+          href: sub.href,
+          description: sub.description || null,
+          isSmall: sub.isSmall ?? false,
+        }))
       }
 
       items.push(parentItem)
@@ -651,16 +521,13 @@ function buildNavItems(
       const parentItem: NavOverlayItem = { id: item.url, label: item.label, href: item.url }
 
       if (item.dropdownItems && item.dropdownItems.length > 0) {
-        parentItem.children = []
-        for (const sub of item.dropdownItems) {
-          parentItem.children.push({
-            id: `${item.url}-${sub.href}`,
-            label: sub.label,
-            href: sub.href,
-            isDivider: sub.isDivider || false,
-            description: sub.description || null,
-          })
-        }
+        parentItem.children = item.dropdownItems.map((sub) => ({
+          id: `${item.url}-${sub.href}`,
+          label: sub.label,
+          href: sub.href,
+          description: sub.description || null,
+          isSmall: sub.isSmall ?? false,
+        }))
       }
 
       items.push(parentItem)

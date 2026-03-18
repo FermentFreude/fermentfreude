@@ -681,6 +681,187 @@ If you still get access denied errors:
 
 ---
 
-_Last Updated: February 20, 2026_
+## 17 — Online Course System: Architecture & User Flow
+
+### Overview
+
+FermentFreude has a full digital course system: purchase → auto-enroll → watch lessons → track progress. This section is the reference for that entire flow.
+
+### Collections & Globals Involved
+
+| Name | Type | Purpose |
+|------|------|---------|
+| `products` | Collection | Products with `courseSlug` field identify digital courses |
+| `orders` | Collection | Created by Stripe webhook on payment completion |
+| `enrollments` | Collection | Created automatically after order is paid |
+| `courseProgress` | Collection | One doc per lesson × user; tracks which lessons are done |
+| `BasicFermentationCourse` | Global | CMS content for the course (modules, lessons, hero copy, learn items) |
+| `users` | Collection | Auth. Has `role: 'admin' | 'customer'` |
+
+### Digital Product Detection
+
+A product is a **digital/course product** if `product.courseSlug` is non-null.
+
+**Cart populate caveat:** The ecommerce plugin's cart API does NOT include `courseSlug` in its populate fields. To detect digital products client-side (e.g., in `CheckoutPage.tsx`), use the product `slug` field (which IS populated):
+
+```typescript
+const isAllDigital = cart?.items?.every((item) => {
+  const p = item.product as { courseSlug?: string | null; slug?: string | null }
+  return Boolean(p.courseSlug) || (typeof p.slug === 'string' && p.slug.includes('course'))
+})
+```
+
+### Auto-Enrollment Hook
+
+**File:** `src/collections/Orders/autoEnrollOnPurchase.ts`  
+**Trigger:** `afterChange` hook on `orders` collection, `operation === 'create'` (Stripe creates the order after payment)
+
+**Logic:**
+1. Iterates `order.items` — skips if no items
+2. For each item, resolves the product (may be ID string or object)
+3. If `product.courseSlug` is set, checks if enrollment already exists for `{ user, courseSlug }`
+4. If not enrolled, creates an `enrollments` doc: `{ user: order.customer, courseSlug, orderId, enrolledAt }`
+5. Sequential writes (no `Promise.all`) — MongoDB Atlas M0 has no transactions
+
+**Important:** The hook fires on `operation === 'create'`, not `'update'`. Orders are created by Stripe after payment, never manually. An order in `status: 'processing'` is a valid paid order.
+
+### Enrollment Collection
+
+**File:** `src/collections/Enrollments.ts`
+
+```typescript
+{
+  slug: 'enrollments',
+  fields: [
+    { name: 'user',       type: 'relationship', relationTo: 'users',    required: true },
+    { name: 'courseSlug', type: 'text',         required: true },
+    { name: 'orderId',    type: 'text' },
+    { name: 'enrolledAt', type: 'date',         required: true },
+  ]
+}
+```
+
+Access: users can read their own; admins read/write all.
+
+### Course Progress Collection
+
+**File:** `src/collections/CourseProgress.ts` (or similar)
+
+One doc per `{ user, courseSlug, lessonId }`. Tracks lesson completion.  
+API: `GET/POST /api/courses/[courseSlug]/progress` — returns completed lesson IDs, marks lessons done.
+
+### User Flow (End-to-End)
+
+```
+1. DISCOVER
+   /courses (listing page)
+      └─ Shows course overview, previews first 2 lessons (free, no auth needed)
+      └─ "Buy Now" button → /products/basic-fermentation-course
+
+2. LEARN (free preview, no auth)
+   /courses/basic-fermentation
+      └─ First 2 lessons playable via LessonList video modal
+      └─ "Get This Course" → /products/basic-fermentation-course
+
+3. PURCHASE PAGE
+   /products/basic-fermentation-course  (CourseProductPage component)
+      └─ Renders when product.courseSlug is set (bypasses generic product layout)
+      └─ Shows: hero + price, what you'll learn, curriculum preview, testimonials
+      └─ "Add to Cart" button → cart popover opens
+      └─ "Preview before you buy" → /courses/basic-fermentation
+
+4. CHECKOUT
+   /checkout  (CheckoutPage component)
+      └─ isAllDigital = true (product slug contains 'course')
+      └─ Address section: shows "Digital product — no shipping address required"
+      └─ canGoToPayment = (user || email) — no address needed
+      └─ "Go to payment" → Stripe Elements form appears
+      └─ User completes card payment
+
+5. PAYMENT & ENROLLMENT
+   Stripe webhook → /api/[...slug]/stripe-webhook
+      └─ Creates Order doc in Payload (status: 'processing')
+      └─ afterChange hook: autoEnrollOnPurchase fires
+      └─ Creates Enrollment doc: { user, courseSlug: 'basic-fermentation', orderId }
+
+6. ACCESS COURSE
+   /account/learning
+      └─ Queries enrollments for current user
+      └─ Shows enrolled courses with progress bar
+      └─ "Continue" → /courses/basic-fermentation
+
+7. WATCH & TRACK
+   /courses/basic-fermentation
+      └─ Fetches enrollment (isEnrolled = true → all lessons unlocked)
+      └─ CurriculumWithProgress: click lesson → marks progress via API
+      └─ Progress stored in courseProgress collection
+      └─ Progress bar updates in real-time (client-side optimistic + server sync)
+```
+
+### Key Files
+
+| File | Role |
+|------|------|
+| `src/app/(app)/courses/page.tsx` | Course listing — first 2 lessons always unlocked for preview |
+| `src/app/(app)/courses/basic-fermentation/page.tsx` | Full course page — checks enrollment, renders CurriculumWithProgress |
+| `src/app/(app)/courses/basic-fermentation/CurriculumWithProgress.tsx` | Client component — lesson list, progress tracking, video modal |
+| `src/app/(app)/products/[slug]/page.tsx` | Product page — routes to `CourseProductPage` when `product.courseSlug` is set |
+| `src/components/product/CourseProductPage.tsx` | Beautiful course landing page with hero, curriculum, CTA |
+| `src/components/checkout/CheckoutPage.tsx` | Checkout — skips address for digital (isAllDigital check) |
+| `src/app/(app)/account/learning/page.tsx` | User's enrolled courses dashboard |
+| `src/collections/Enrollments.ts` | Enrollment records |
+| `src/collections/Orders/autoEnrollOnPurchase.ts` | Hook: creates enrollment after order |
+| `src/app/api/courses/[courseSlug]/progress/route.ts` | GET/POST lesson progress |
+| `src/scripts/seed-courses-page.ts` | Seeds `/courses` page CMS fields (hero text, modules list, button URL) |
+
+### Lesson Preview Logic (courses listing page)
+
+In `src/app/(app)/courses/page.tsx`, after assembling modules from CMS or defaults, the first 2 lessons across all modules are **always forced to be unlocked** with a fallback `videoUrl`. This allows visitors to preview without purchasing.
+
+```typescript
+let previewCount = 0
+const modules = rawModules.map((mod) => ({
+  ...mod,
+  lessons: mod.lessons.map((lesson) => {
+    if (previewCount < 2) {
+      previewCount++
+      return { ...lesson, locked: false, videoUrl: lesson.videoUrl ?? FALLBACK_URL }
+    }
+    return lesson
+  }),
+}))
+```
+
+### Adding Future Courses
+
+1. Create a new `Product` with `courseSlug: 'your-course-slug'` → `/products/[slug]` auto-renders `CourseProductPage`
+2. Create a new `Global` for the course content (copy `BasicFermentationCourse` pattern)
+3. Create `/courses/[your-slug]/page.tsx` using the same pattern as `basic-fermentation/page.tsx`
+4. Add `your-course-slug` to the `COURSE_SLUGS` allowlist in the progress API route
+5. The enrollment hook already handles any `courseSlug` — no changes needed there
+6. Seed the product with `courseSlug` set (never seed `courseSlug` as empty string)
+7. Update `src/scripts/seed-courses-page.ts` with the new course module list (or add a separate seed script)
+8. Run `pnpm seed courses-page --force` to refresh the CMS `onlineCoursesModules` and button URL
+
+### Courses Page CMS Fields & Seed
+
+The `/courses` page uses an `onlineCourses` group in the Pages collection (not layout blocks).
+Key field: `onlineCoursesModulesButtonUrl` — **must point to `/courses/basic-fermentation#curriculum`** (the course viewer).
+Visitors land on the curriculum, see locked lessons, and a banner with **"Get This Course"** linking to `/products/basic-fermentation-course` (the purchase page).
+
+Editors can manage all text content from `/admin → Pages → courses`.
+To pre-populate from code: `pnpm seed courses-page` (non-destructive) or `pnpm seed courses-page --force`.
+
+### OrderStatus Values
+
+`'processing' | 'completed' | 'cancelled' | 'refunded'`
+
+- Orders are created as `'processing'` immediately after Stripe payment
+- Enrollment fires on `operation === 'create'` — so `'processing'` is the normal paid state
+- Do NOT check for `'completed'` as a payment gate; it's only for admin-managed fulfillment states
+
+---
+
+_Last Updated: March 18, 2026_
 _Project: FermentFreude Digital Ecosystem_
 _Stack: Next.js 15 + Payload CMS 3.x + TailwindCSS 4 + shadcn/ui + Cloudflare R2 + Stripe_

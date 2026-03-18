@@ -1,14 +1,14 @@
 /**
  * Hardcoded fallback nav items + dropdown sub-items.
  * These render immediately and can be overridden by CMS editors.
+ * Flat structure — no nested submenus. Simple and reliable.
  */
 
 export interface DropdownItem {
   label: string
   href: string
   description?: string | null
-  isDivider?: boolean | null
-  submenu?: DropdownItem[]
+  isSmall?: boolean | null
 }
 
 export interface DefaultNavItem {
@@ -27,49 +27,36 @@ export const defaultNavItems: DefaultNavItem[] = [
     dropdownKey: 'workshops',
     dropdownItems: [
       {
-        label: 'View All Workshops',
+        label: 'All Workshops',
         href: '/workshops',
-        submenu: [
-          { label: 'Lacto Vegetables', href: '/workshops/lakto-gemuese' },
-          { label: 'Tempeh', href: '/workshops/tempeh' },
-          { label: 'Kombucha', href: '/workshops/kombucha' },
-        ],
+        description: 'Browse all in-person workshops',
       },
+      { label: 'Lacto Vegetables', href: '/workshops/lakto-gemuese', isSmall: true },
+      { label: 'Tempeh', href: '/workshops/tempeh', isSmall: true },
+      { label: 'Kombucha', href: '/workshops/kombucha', isSmall: true },
       {
-        label: 'Upcoming Online Courses',
+        label: 'Online Courses',
         href: '/courses',
-        submenu: [{ label: 'Fermentation Basics', href: '/courses' }],
+        description: 'Coming soon',
       },
       {
-        label: 'Workshop Vouchers',
+        label: 'Gift Voucher',
         href: '/workshops/voucher',
       },
     ],
   },
+  { label: 'Shop', url: '/shop' },
+  { label: 'For Chefs', url: '/gastronomy' },
   {
-    label: 'Online Courses',
-    url: '/courses',
-    dropdownKey: 'onlineCourses',
-    dropdownItems: [
-      {
-        label: 'Fermentation Basics',
-        href: '/courses',
-        description: 'Learn fermentation fundamentals online',
-      },
-    ],
-  },
-  { label: 'Produkte', url: '/shop' },
-  { label: 'B2B', url: '/gastronomy' },
-  {
-    label: 'Über uns',
+    label: 'About Us',
     url: '/about',
     dropdownKey: 'about',
     dropdownItems: [
-      { label: 'Über uns', href: '/about', description: 'Our Team & Mission' },
+      { label: 'About Us', href: '/about', description: 'Our Team & Mission' },
       { label: 'Fermentation', href: '/fermentation', description: 'What is Fermentation?' },
+      { label: 'Contact', href: '/contact', description: 'Get in touch' },
     ],
   },
-  { label: 'Kontakt', url: '/contact' },
 ]
 
 /** Default dropdown lookup keyed by identifier */
@@ -84,12 +71,9 @@ for (const item of defaultNavItems) {
 export function getDefaultDropdownKey(label?: string | null, url?: string | null): string | null {
   const l = label?.toLowerCase()
   if (l === 'workshops' || url === '/workshops') return 'workshops'
-  if (l === 'online courses' || (url === '/courses' && l?.includes('online')))
-    return 'onlineCourses'
   if (
     l === 'about us' ||
     l === 'about' ||
-    l === 'über uns' ||
     l === 'fermentation' ||
     url === '/about' ||
     url === '/fermentation'

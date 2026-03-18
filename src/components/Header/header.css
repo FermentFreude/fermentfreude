@@ -1,0 +1,28 @@
+/* Modern FermentFreude Navigation Bar */
+
+/* Dropdown hover support */
+.group:hover ~ * .group\/submenu,
+.group:hover .group\/submenu {
+  display: none;
+}
+
+.group:hover .group\/submenu {
+  display: block;
+}
+
+.group\/submenu:hover ~ * {
+  display: block;
+}
+
+.group\/submenu:hover {
+  display: block;
+}
+
+/* Ensure nested submenus work */
+.group\/submenu:hover .group\/submenu {
+  display: none;
+}
+
+.group\/submenu:hover .hidden {
+  display: block;
+}

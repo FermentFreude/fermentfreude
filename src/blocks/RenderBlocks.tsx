@@ -8,6 +8,7 @@ import { FeatureCardsBlock } from '@/blocks/FeatureCards/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
+import { OnlineCourseSliderBlock } from '@/blocks/OnlineCourseSlider/Component'
 import { OurStoryBlock } from '@/blocks/OurStory/Component'
 import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { ReadyToLearnCTABlock } from '@/blocks/ReadyToLearnCTA/Component'
@@ -44,6 +45,7 @@ const blockComponents = {
   threeItemGrid: ThreeItemGridBlock,
   productSlider: ProductSliderBlock,
   voucherCta: VoucherCtaBlock,
+  onlineCourseSlider: OnlineCourseSliderBlock,
   workshopSlider: WorkshopSliderBlock,
   workshopPhases: WorkshopPhasesComponent,
 }

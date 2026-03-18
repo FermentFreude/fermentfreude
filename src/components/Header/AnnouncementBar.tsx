@@ -6,7 +6,7 @@ import { useState } from 'react'
 
 /* ── Hardcoded English defaults ──────────────────────────────── */
 const DEFAULT_TEXT = 'We Have Digital Workshops too, take a look'
-const DEFAULT_LINK = '/courses'
+const DEFAULT_LINK = '/workshops'
 
 interface AnnouncementBarProps {
   enabled?: boolean | null
@@ -17,7 +17,7 @@ interface AnnouncementBarProps {
 export function AnnouncementBar({ enabled, text, link }: AnnouncementBarProps) {
   const [visible, setVisible] = useState(true)
 
-  const resolvedEnabled = enabled ?? false
+  const resolvedEnabled = enabled ?? true
   const resolvedText = text ?? DEFAULT_TEXT
   const resolvedLink = link ?? DEFAULT_LINK
 

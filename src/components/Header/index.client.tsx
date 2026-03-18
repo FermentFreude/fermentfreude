@@ -2,6 +2,7 @@
 
 import { Cart } from '@/components/Cart'
 import { CMSLink } from '@/components/Link'
+import { gsap } from 'gsap'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
@@ -16,7 +17,7 @@ import { usePathname } from 'next/navigation'
 import { CartIconButton } from './CartIconButton'
 import { LanguageToggle } from './LanguageToggle'
 import { MagneticElement } from './MagneticElement'
-import { NavDropdownDesktop } from './NavDropdown'
+import { NavDropdown } from './NavDropdown'
 import { UserMenu } from './UserMenu'
 import { defaultDropdowns, defaultNavItems, getDefaultDropdownKey } from './nav-defaults'
 
@@ -28,30 +29,8 @@ export function HeaderClient({ header }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
-  const { headerTheme, heroBackgroundColor } = useHeaderTheme()
+  const { headerTheme } = useHeaderTheme()
   const [mounted, setMounted] = useState(false)
-
-  // DEBUG: Log CMS nav items structure in browser console
-  useEffect(() => {
-    console.log('%c=== DEBUG: HeaderClient Received ===', 'color: blue; font-weight: bold')
-    console.log('CMS nav items:', cmsItems)
-    cmsItems.forEach((item, idx) => {
-      if (item.dropdownItems && item.dropdownItems.length > 0) {
-        console.log(`[${idx}] ${item.link?.label}:`, {
-          dropdownItems: item.dropdownItems,
-        })
-        item.dropdownItems.forEach((dd: any, ddIdx: number) => {
-          console.log(`  [${ddIdx}] ${dd.label}:`, {
-            href: dd.href,
-            submenu: dd.submenu,
-            hasSubmenu: !!dd.submenu && dd.submenu.length > 0,
-          })
-        })
-      }
-    })
-    console.log('%c===============================', 'color: blue; font-weight: bold')
-  }, [cmsItems])
-
   useEffect(() => setMounted(true), [])
 
   // Menu active state (shared between header bar + overlay)
@@ -62,7 +41,23 @@ export function HeaderClient({ header }: Props) {
   const [isAtTop, setIsAtTop] = useState(true)
   const lastScrollY = useRef(0)
 
+  // Header ref for measuring height
+  const headerRef = useRef<HTMLElement>(null)
+  const [headerHeight, setHeaderHeight] = useState(0)
+
+  // Track which nav link is hovered for blur effect
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const navLinksRef = useRef<HTMLUListElement>(null)
+
+  // Measure header height
+  useEffect(() => {
+    if (!headerRef.current) return
+    const measure = () => setHeaderHeight(headerRef.current?.offsetHeight ?? 0)
+    const observer = new ResizeObserver(measure)
+    observer.observe(headerRef.current)
+    measure()
+    return () => observer.disconnect()
+  }, [])
 
   const handleScroll = useCallback(() => {
     const y = window.scrollY
@@ -82,10 +77,38 @@ export function HeaderClient({ header }: Props) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [handleScroll])
 
-  // Animate Menu/Close label crossfade
+  // Apply blur/focus effect to sibling nav items
   useEffect(() => {
-    setIsAtTop(true)
-  }, [])
+    if (!navLinksRef.current) return
+    const items = navLinksRef.current.querySelectorAll<HTMLElement>('.nav-link-item')
+
+    if (hoveredIndex === null) {
+      gsap.to(items, {
+        filter: 'blur(0px)',
+        opacity: 1,
+        duration: 0.3,
+        ease: 'power2.out',
+      })
+    } else {
+      items.forEach((item, i) => {
+        if (i === hoveredIndex) {
+          gsap.to(item, {
+            filter: 'blur(0px)',
+            opacity: 1,
+            duration: 0.3,
+            ease: 'power2.out',
+          })
+        } else {
+          gsap.to(item, {
+            filter: 'blur(1px)',
+            opacity: 0.72,
+            duration: 0.3,
+            ease: 'power2.out',
+          })
+        }
+      })
+    }
+  }, [hoveredIndex])
 
   // Transparent header on home page when at top
   const isTransparent = isHomePage && isAtTop && !isMenuActive
@@ -95,40 +118,20 @@ export function HeaderClient({ header }: Props) {
   const renderedDropdowns = new Set<string>()
 
   // Build nav items array for consistent indexing
-  const navItems: Array<{
-    id: string | null | undefined
-    label: string
-    url: string | null | undefined
-    link: any
-    dropdownItems: any
-    defaultKey: string | null
-    dropdownImage: any
-  }> = hasRealCMSItems
+  const navItems = hasRealCMSItems
     ? cmsItems.map((item) => {
         const url = item.link.url
         const label = item.link.label
         const cmsDropdownItems = item.dropdownItems
         const defaultKey = getDefaultDropdownKey(label, url)
 
-        const dropdownItems =
-          cmsDropdownItems && cmsDropdownItems.length > 0
+        const dropdownItems = defaultKey
+          ? defaultDropdowns[defaultKey]
+          : cmsDropdownItems && cmsDropdownItems.length > 0
             ? cmsDropdownItems
-            : defaultKey
-              ? defaultDropdowns[defaultKey]
-              : null
+            : null
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const dropdownImage = (item as any).dropdownImage
-
-        return {
-          id: item.id,
-          label,
-          url,
-          link: item.link,
-          dropdownItems,
-          defaultKey,
-          dropdownImage,
-        }
+        return { id: item.id, label, url, link: item.link, dropdownItems, defaultKey }
       })
     : defaultNavItems.map((item) => ({
         id: item.url,
@@ -137,16 +140,16 @@ export function HeaderClient({ header }: Props) {
         link: null,
         dropdownItems: item.dropdownItems || null,
         defaultKey: item.dropdownKey || null,
-        dropdownImage: null,
       }))
 
   return (
     <>
       <header
+        ref={headerRef}
         className={cn(
-          'z-50 w-full transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
+          'z-60 w-full transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
           isHomePage ? 'fixed top-0' : 'sticky top-0',
-          (hidden && !isMenuActive) || isMenuActive ? '-translate-y-full' : '',
+          hidden && !isMenuActive && '-translate-y-full',
         )}
         data-transparent={isTransparent ? '' : undefined}
         data-header-theme={mounted && isTransparent && headerTheme === 'dark' ? 'dark' : undefined}
@@ -180,10 +183,14 @@ export function HeaderClient({ header }: Props) {
               </Link>
             </MagneticElement>
 
-            {/* Desktop Nav Links */}
-            <ul ref={navLinksRef} className="hidden lg:flex items-center gap-6 xl:gap-8">
-              {navItems.map((item, _index) => {
-                const { dropdownItems, defaultKey, label, url, dropdownImage } = item
+            {/* Desktop Nav Links with blur effect */}
+            <ul
+              ref={navLinksRef}
+              className="hidden lg:flex items-center gap-6 xl:gap-8"
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              {navItems.map((item, index) => {
+                const { dropdownItems, defaultKey, label, url } = item
 
                 if (dropdownItems && dropdownItems.length > 0) {
                   const key = defaultKey || label
@@ -191,8 +198,12 @@ export function HeaderClient({ header }: Props) {
                   renderedDropdowns.add(key)
 
                   return (
-                    <li key={item.id} className="nav-link-item">
-                      <NavDropdownDesktop label={label} items={dropdownItems} />
+                    <li
+                      key={item.id}
+                      className="nav-link-item"
+                      onMouseEnter={() => setHoveredIndex(index)}
+                    >
+                      <NavDropdown label={label} href={url || undefined} items={dropdownItems} />
                     </li>
                   )
                 }
@@ -206,7 +217,11 @@ export function HeaderClient({ header }: Props) {
                 )
 
                 return (
-                  <li key={item.id} className="nav-link-item">
+                  <li
+                    key={item.id}
+                    className="nav-link-item"
+                    onMouseEnter={() => setHoveredIndex(index)}
+                  >
                     <MagneticElement strength={0.3}>
                       {item.link ? (
                         <CMSLink {...item.link} className={linkClassName} appearance="inline" />
@@ -266,6 +281,7 @@ export function HeaderClient({ header }: Props) {
           menu={hasRealCMSItems ? cmsItems : null}
           isActive={isMenuActive}
           setIsActive={setIsMenuActive}
+          headerHeight={headerHeight}
         />
       </Suspense>
     </>

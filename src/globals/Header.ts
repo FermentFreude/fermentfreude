@@ -139,14 +139,6 @@ export const Header: GlobalConfig = {
           },
           fields: [
             {
-              name: 'isDivider',
-              type: 'checkbox',
-              label: 'Visual Separator',
-              admin: {
-                description: 'Check to add a visual divider line above this item (for grouping).',
-              },
-            },
-            {
               name: 'label',
               type: 'text',
               required: true,
@@ -161,47 +153,22 @@ export const Header: GlobalConfig = {
             {
               name: 'description',
               type: 'text',
-              label: 'Subtitle',
+              label: 'Subtitle (optional)',
               localized: true,
               admin: {
                 description: 'Short description shown below the label in the dropdown.',
               },
             },
             {
-              name: 'submenu',
-              type: 'array',
-              label: 'Nested Sub-Menu Items',
+              name: 'isSmall',
+              type: 'checkbox',
+              label: 'Small Text',
               admin: {
                 description:
-                  'Optional nested items that appear to the side on hover (e.g., course list under "Online Courses"). Admin can add/remove items here.',
+                  'Check to render this item with smaller font size (for workshop types).',
               },
-              fields: [
-                {
-                  name: 'label',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Item Label',
-                },
-                {
-                  name: 'href',
-                  type: 'text',
-                  required: true,
-                  label: 'URL',
-                },
-              ],
             },
           ],
-        },
-        {
-          name: 'dropdownImage',
-          type: 'upload',
-          relationTo: 'media',
-          label: 'Dropdown Image',
-          admin: {
-            description:
-              'Single image displayed on the right side of the dropdown modal (desktop only).',
-          },
         },
       ],
       maxRows: 6,
