@@ -86,9 +86,7 @@ export default function ProfilePage() {
     <div className="max-w-2xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
-          Settings
-        </p>
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">Settings</p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
           Account Details
         </h1>
@@ -186,9 +184,7 @@ export default function ProfilePage() {
                 id="newPassword"
                 type="password"
                 value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData((p) => ({ ...p, newPassword: e.target.value }))
-                }
+                onChange={(e) => setPasswordData((p) => ({ ...p, newPassword: e.target.value }))}
                 className={inputClass}
               />
               <p className="mt-1.5 text-[11px] text-[#9e9189]">Minimum 8 characters</p>

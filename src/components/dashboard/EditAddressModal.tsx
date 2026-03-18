@@ -13,7 +13,8 @@ import { toast } from 'sonner'
 
 const inputClass =
   'w-full px-3.5 py-2.5 bg-white border border-[#e8e4d9] rounded-lg text-sm text-[#1a1a1a] placeholder:text-[#c4bbb3] focus:outline-none focus:border-[#1a1a1a] transition-colors'
-const labelClass = 'block text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9e9189] mb-1.5'
+const labelClass =
+  'block text-[10px] font-semibold uppercase tracking-[0.1em] text-[#9e9189] mb-1.5'
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -277,4 +278,3 @@ export function EditAddressModal() {
     </Dialog>
   )
 }
-

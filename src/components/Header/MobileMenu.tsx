@@ -17,6 +17,7 @@ interface Props {
   menu: Header['navItems'] | null
   isActive: boolean
   setIsActive: (v: boolean) => void
+  headerHeight?: number
 }
 
 interface NavOverlayItem {
@@ -35,7 +36,7 @@ interface NavOverlayItem {
  * - Per-character reveal animations
  * - Smooth transitions
  */
-export function MobileMenu({ menu, isActive, setIsActive }: Props) {
+export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Props) {
   const { user } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
@@ -165,8 +166,8 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
         tl.to(footerRef.current, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0)
       }
 
-      // Nav collapse
-      tl.to(navRef.current, { height: 0, duration: 0.8, ease: 'power4.inOut' }, 0.2)
+      // Nav fade out
+      tl.to(navRef.current, { opacity: 0, duration: 0.5, ease: 'power4.inOut' }, 0.2)
     },
     [setIsActive, router],
   )
@@ -181,11 +182,11 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
     const tl = gsap.timeline()
     animTimeline.current = tl
 
-    // Nav container expand
+    // Nav container fade in
     tl.fromTo(
       navRef.current,
-      { height: 0 },
-      { height: 'auto', duration: 1, ease: 'power4.inOut' },
+      { opacity: 0 },
+      { opacity: 1, duration: 0.6, ease: 'power4.inOut' },
       0,
     )
 
@@ -229,25 +230,22 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
   return (
     <div
       ref={navRef}
-      className="nav-overlay fixed inset-0 z-50 overflow-hidden"
-      style={{ height: 0, minHeight: '100dvh' }}
+      className="nav-overlay fixed left-0 right-0 bottom-0 z-55"
+      style={{ opacity: 0, top: headerHeight }}
     >
       {/* Background */}
       <div className="absolute inset-0 bg-[#ECE5DE]/95 dark:bg-ff-near-black/97 backdrop-blur-xl" />
 
-      {/* Fixed Language Header */}
-      <div className="fixed top-0 left-0 right-0 z-40 shrink-0 border-b border-ff-warm-gray/20 dark:border-white/10 px-4 sm:px-6 md:px-8 py-2.5 sm:py-4 items-center justify-between bg-[#ECE5DE]/95 dark:bg-ff-near-black/97 backdrop-blur-xl hidden md:flex">
-        <span className="text-xs text-ff-gray-text dark:text-neutral-400 uppercase tracking-wide">
-          Language
-        </span>
-        <LanguageToggle />
-      </div>
+      {/* Content — fills remaining viewport below header */}
+      <div className="relative h-full flex flex-col overflow-hidden">
+        {/* Language toggle — top-right */}
+        <div className="flex justify-end px-4 sm:px-6 md:px-8 pt-3 pb-1 shrink-0">
+          <LanguageToggle />
+        </div>
 
-      {/* Content */}
-      <div className="relative min-h-dvh flex flex-col pt-20 sm:pt-24 md:pt-48 overflow-hidden">
         {/* Nav items list - scrollable */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8">
-          <nav className="mt-4 sm:mt-8 md:mt-12 pb-24 sm:pb-28">
+          <nav className="pb-6">
             {navItemsList.map((item, idx) => {
               const isExpanded = expandedItems.has(item.id)
               const hasChildren = item.children && item.children.length > 0
@@ -333,7 +331,9 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                             {child.label}
                           </div>
                           {child.description && (
-                            <div className="text-xs mt-1.5 opacity-70">{child.description}</div>
+                            <div className="text-xs mt-1.5 opacity-70 group-hover:opacity-100 group-hover:text-white dark:group-hover:text-ff-near-black transition-all">
+                              {child.description}
+                            </div>
                           )}
                         </Link>
                       ))}
@@ -349,7 +349,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
         {detailViewItem && (
           <div
             ref={detailRef}
-            className="fixed inset-0 flex items-center justify-center z-60 px-3 sm:px-6 pointer-events-none overflow-hidden"
+            className="fixed inset-0 flex items-center justify-center z-70 px-3 sm:px-6 pointer-events-none overflow-hidden"
           >
             {/* Backdrop */}
             <div
@@ -405,7 +405,7 @@ export function MobileMenu({ menu, isActive, setIsActive }: Props) {
                             {child.label}
                           </div>
                           {child.description && !child.isSmall && (
-                            <div className="text-xs text-ff-gray-text dark:text-neutral-400 mt-1">
+                            <div className="text-xs text-ff-gray-text dark:text-neutral-400 group-hover:text-white dark:group-hover:text-ff-near-black mt-1 transition-colors">
                               {child.description}
                             </div>
                           )}

@@ -11,16 +11,11 @@ import type { CollectionAfterChangeHook } from 'payload'
  *
  * MongoDB Atlas M0: no transactions — sequential writes only.
  */
-export const autoEnrollOnPurchase: CollectionAfterChangeHook = async ({
-  doc,
-  operation,
-  req,
-}) => {
+export const autoEnrollOnPurchase: CollectionAfterChangeHook = async ({ doc, operation, req }) => {
   // Orders are created exactly once, immediately after Stripe payment succeeds.
   if (operation !== 'create') return doc
 
-  const customerId =
-    typeof doc.customer === 'object' ? doc.customer?.id : doc.customer
+  const customerId = typeof doc.customer === 'object' ? doc.customer?.id : doc.customer
   if (!customerId) return doc
 
   const items: { product?: string | { id?: string; courseSlug?: string | null } | null }[] =
@@ -43,12 +38,13 @@ export const autoEnrollOnPurchase: CollectionAfterChangeHook = async ({
           depth: 0,
           overrideAccess: true,
         })
-        courseSlug = ((product as unknown) as Record<string, unknown>)?.courseSlug as string | null ?? null
+        courseSlug =
+          ((product as unknown as Record<string, unknown>)?.courseSlug as string | null) ?? null
       } catch {
         continue
       }
     } else if (typeof productRef === 'object') {
-      courseSlug = (productRef as Record<string, unknown>).courseSlug as string | null ?? null
+      courseSlug = ((productRef as Record<string, unknown>).courseSlug as string | null) ?? null
     }
 
     if (!courseSlug || typeof courseSlug !== 'string') continue
@@ -57,10 +53,7 @@ export const autoEnrollOnPurchase: CollectionAfterChangeHook = async ({
     const existing = await payload.find({
       collection: 'enrollments',
       where: {
-        and: [
-          { user: { equals: customerId } },
-          { courseSlug: { equals: courseSlug } },
-        ],
+        and: [{ user: { equals: customerId } }, { courseSlug: { equals: courseSlug } }],
       },
       limit: 1,
       overrideAccess: true,

@@ -1,12 +1,12 @@
-import { EditAddressModal } from '@/components/dashboard/EditAddressModal'
 import { DeleteAddressButton } from '@/components/dashboard/DeleteAddressButton'
+import { EditAddressModal } from '@/components/dashboard/EditAddressModal'
+import type { Address } from '@/payload-types'
 import configPromise from '@payload-config'
 import { MapPin, Pencil, Plus } from 'lucide-react'
 import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
-import type { Address } from '@/payload-types'
 
 export const metadata = {
   title: 'Addresses — FermentFreude',
@@ -40,15 +40,11 @@ export default async function AddressesPage() {
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9] flex items-start justify-between gap-4">
         <div>
-          <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
-            My Account
-          </p>
+          <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">My Account</p>
           <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
             Addresses
           </h1>
-          <p className="mt-2 text-sm text-[#626160]">
-            Manage your shipping and billing addresses.
-          </p>
+          <p className="mt-2 text-sm text-[#626160]">Manage your shipping and billing addresses.</p>
         </div>
         <Link
           href="?modal=new-address"
@@ -61,7 +57,7 @@ export default async function AddressesPage() {
 
       {addresses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {addresses.map((address: any) => (
+          {addresses.map((address: Address) => (
             <div
               key={address.id}
               className="bg-white border border-[#1a1a1a]/20 rounded-xl p-6 flex flex-col"

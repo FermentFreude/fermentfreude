@@ -1,8 +1,8 @@
 'use client'
 
-import Link from 'next/link'
-import { useState, useCallback } from 'react'
 import { motion } from 'motion/react'
+import Link from 'next/link'
+import { useCallback, useState } from 'react'
 
 const BRAND = 'FERMENTFREUDE'
 
@@ -61,7 +61,7 @@ export function FooterBrand() {
       <motion.button
         onClick={scrollToTop}
         aria-label="Back to top"
-        className="flex-shrink-0 aspect-square bg-[#1d1d1d] text-white rounded-full flex items-center justify-center cursor-pointer md:mb-1"
+        className="shrink-0 aspect-square bg-[#1d1d1d] text-white rounded-full flex items-center justify-center cursor-pointer md:mb-1"
         style={{ width: 'clamp(1.8rem, 5vw, 5.5rem)', height: 'clamp(1.8rem, 5vw, 5.5rem)' }}
         whileHover={{ scale: 1.1, backgroundColor: '#e6be68' }}
         whileTap={{ scale: 0.95 }}

@@ -32,7 +32,9 @@ export const ConfirmOrder: React.FC = () => {
           },
         }).then((result) => {
           if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
-            router.push(`/shop/order/${result.orderID}?email=${email}`)
+            router.push(
+              `/account/orders/${result.orderID}${email ? `?email=${encodeURIComponent(email)}` : ''}`,
+            )
           }
         })
       }

@@ -71,6 +71,14 @@ const scripts: Record<string, { name: string; file: string }> = {
     file: 'seed-kombucha-phases.ts',
   },
   'voucher-bg': { name: 'VoucherCta background image patch', file: 'seed-voucher-bg.ts' },
+  'online-courses': {
+    name: 'Online Courses (collection documents)',
+    file: 'seed-online-courses.ts',
+  },
+  'courses-page': {
+    name: 'Courses page (layout blocks: FeatureCards + OnlineCourseSlider)',
+    file: 'seed-courses-page.ts',
+  },
 }
 
 const allOrder = [
@@ -92,6 +100,8 @@ const allOrder = [
   'tempeh-detail',
   'kombucha-detail',
   'kombucha-phases',
+  'online-courses',
+  'courses-page',
 ]
 
 function runSeed(key: string): boolean {

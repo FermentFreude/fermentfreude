@@ -5,8 +5,7 @@ import Link from 'next/link'
 import { getPayload } from 'payload'
 
 import { Media } from '@/components/Media'
-import type { BasicFermentationCourse, Media as MediaType } from '@/payload-types'
-import { getCachedGlobal } from '@/utilities/getGlobals'
+import type { Media as MediaType } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
 
 export const dynamic = 'force-dynamic'
@@ -57,15 +56,17 @@ export default async function MyLearningPage() {
     user,
   })
 
-  // Fetch basic-fermentation global for metadata
-  const getCourse = getCachedGlobal<BasicFermentationCourse>(
-    'basic-fermentation-course',
-    1,
+  // Fetch course data from online-courses collection
+  const courseResult = await payload.find({
+    collection: 'online-courses',
+    where: { courseSlug: { equals: 'basic-fermentation' } },
     locale,
-  )
-  const courseData = await getCourse()
+    depth: 1,
+    limit: 1,
+  })
+  const courseData = courseResult.docs[0] ?? null
 
-  const heroTitle = courseData?.heroTitle ?? 'Basic Fermentation Course'
+  const heroTitle = courseData?.title ?? 'Basic Fermentation Course'
   const heroImage = isResolvedMedia(courseData?.heroImage) ? courseData.heroImage : null
   const totalLessons = (courseData?.modules ?? []).reduce(
     (acc, m) => acc + (m.lessons?.length ?? 0),
@@ -109,9 +110,7 @@ export default async function MyLearningPage() {
           <div className="w-12 h-12 rounded-full bg-[#f5f3f0] flex items-center justify-center mx-auto mb-4">
             <BookOpen className="w-5 h-5 text-[#9e9189]" />
           </div>
-          <p className="font-display font-semibold text-[#1a1a1a] text-base mb-1">
-            No courses yet
-          </p>
+          <p className="font-display font-semibold text-[#1a1a1a] text-base mb-1">No courses yet</p>
           <p className="text-sm text-[#626160] mb-6 max-w-xs mx-auto">
             Purchase an online course to access it here and track your progress.
           </p>

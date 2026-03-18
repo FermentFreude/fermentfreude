@@ -2,6 +2,7 @@ import type { Media, Product } from '@/payload-types'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { GridTileImage } from '@/components/Grid/tile'
+import { CourseProductPage } from '@/components/product/CourseProductPage'
 import { Gallery } from '@/components/product/Gallery'
 import { ProductDescription } from '@/components/product/ProductDescription'
 import { Button } from '@/components/ui/button'
@@ -111,6 +112,11 @@ export default async function ProductPage({ params }: Args) {
 
   const relatedProducts =
     product.relatedProducts?.filter((relatedProduct) => typeof relatedProduct === 'object') ?? []
+
+  // Course products get a dedicated landing page layout
+  if (product.courseSlug) {
+    return <CourseProductPage product={product} />
+  }
 
   return (
     <React.Fragment>

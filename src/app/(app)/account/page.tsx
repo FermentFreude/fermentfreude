@@ -1,3 +1,4 @@
+import type { Order } from '@/payload-types'
 import { formatDate, formatPrice } from '@/utilities/form/formatters'
 import configPromise from '@payload-config'
 import { ArrowRight, GraduationCap } from 'lucide-react'
@@ -14,7 +15,7 @@ interface OrderStats {
   total: number
   pending: number
   completed: number
-  recent: any[]
+  recent: Order[]
 }
 
 async function getOrderStats(userId: string): Promise<OrderStats> {
@@ -29,8 +30,8 @@ async function getOrderStats(userId: string): Promise<OrderStats> {
     })
     return {
       total: orders.totalDocs || 0,
-      pending: orders.docs?.filter((o: any) => o.stripeStatus === 'processing').length || 0,
-      completed: orders.docs?.filter((o: any) => o.stripeStatus === 'succeeded').length || 0,
+      pending: orders.docs?.filter((o: Order) => o.status === 'processing').length || 0,
+      completed: orders.docs?.filter((o: Order) => o.status === 'completed').length || 0,
       recent: orders.docs || [],
     }
   } catch {
@@ -84,9 +85,7 @@ export default async function DashboardPage() {
     <div className="max-w-4xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
-          My Account
-        </p>
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">My Account</p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
           Welcome back, {firstName}.
         </h1>
@@ -199,7 +198,7 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {stats.recent.map((order: any, i: number) => (
+                {stats.recent.map((order: Order, i: number) => (
                   <tr
                     key={order.id}
                     className={`hover:bg-[#faf9f7] transition-colors ${
@@ -213,10 +212,10 @@ export default async function DashboardPage() {
                       {formatDate(order.createdAt)}
                     </td>
                     <td className="py-4 px-5">
-                      <StatusDot status={order.stripeStatus || 'pending'} />
+                      <StatusDot status={order.status || 'processing'} />
                     </td>
                     <td className="py-4 px-5 text-right text-[13px] font-semibold text-[#1a1a1a]">
-                      {formatPrice(order.total || 0)}
+                      {formatPrice(order.amount || 0)}
                     </td>
                     <td className="py-4 px-5 text-right">
                       <Link

@@ -134,10 +134,7 @@ export const plugins: Plugin[] = [
         ...defaultCollection,
         hooks: {
           ...defaultCollection?.hooks,
-          afterChange: [
-            ...(defaultCollection?.hooks?.afterChange ?? []),
-            autoEnrollOnPurchase,
-          ],
+          afterChange: [...(defaultCollection?.hooks?.afterChange ?? []), autoEnrollOnPurchase],
         },
       }),
     },

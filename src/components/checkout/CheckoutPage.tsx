@@ -50,8 +50,22 @@ export const CheckoutPage: React.FC = () => {
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
+  // Digital products (courses) don't need a shipping address.
+  // courseSlug is not in cart populate, so we identify courses by slug containing 'course'.
+  const isAllDigital = Boolean(
+    cart?.items?.length &&
+    cart.items.every((item) => {
+      if (typeof item.product !== 'object' || item.product === null) return false
+      const p = item.product as { courseSlug?: string | null; slug?: string | null }
+      const hasCourseSlug = Boolean(p.courseSlug)
+      const slugIsCourse = typeof p.slug === 'string' && p.slug.toLowerCase().includes('course')
+      return hasCourseSlug || slugIsCourse
+    }),
+  )
+
   const canGoToPayment = Boolean(
-    (email || user) && billingAddress && (billingAddressSameAsShipping || shippingAddress),
+    (email || user) &&
+    (isAllDigital || (billingAddress && (billingAddressSameAsShipping || shippingAddress))),
   )
 
   // On initial load wait for addresses to be loaded and check to see if we can prefill a default one
@@ -189,51 +203,15 @@ export const CheckoutPage: React.FC = () => {
 
         <h2 className="font-medium text-3xl">Address</h2>
 
-        {billingAddress ? (
-          <div>
-            <AddressItem
-              actions={
-                <Button
-                  variant={'outline'}
-                  disabled={Boolean(paymentData)}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setBillingAddress(undefined)
-                  }}
-                >
-                  Remove
-                </Button>
-              }
-              address={billingAddress}
-            />
+        {isAllDigital ? (
+          <div className="bg-accent dark:bg-card rounded-lg p-4">
+            <p className="text-sm text-muted-foreground">
+              Digital product — no shipping address required.
+            </p>
           </div>
-        ) : user ? (
-          <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
         ) : (
-          <CreateAddressModal
-            disabled={!email || Boolean(emailEditable)}
-            callback={(address) => {
-              setBillingAddress(address)
-            }}
-            skipSubmission={true}
-          />
-        )}
-
-        <div className="flex gap-4 items-center">
-          <Checkbox
-            id="shippingTheSameAsBilling"
-            checked={billingAddressSameAsShipping}
-            disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
-            onCheckedChange={(state) => {
-              setBillingAddressSameAsShipping(state as boolean)
-            }}
-          />
-          <Label htmlFor="shippingTheSameAsBilling">Shipping is the same as billing</Label>
-        </div>
-
-        {!billingAddressSameAsShipping && (
           <>
-            {shippingAddress ? (
+            {billingAddress ? (
               <div>
                 <AddressItem
                   actions={
@@ -242,29 +220,75 @@ export const CheckoutPage: React.FC = () => {
                       disabled={Boolean(paymentData)}
                       onClick={(e) => {
                         e.preventDefault()
-                        setShippingAddress(undefined)
+                        setBillingAddress(undefined)
                       }}
                     >
                       Remove
                     </Button>
                   }
-                  address={shippingAddress}
+                  address={billingAddress}
                 />
               </div>
             ) : user ? (
-              <CheckoutAddresses
-                heading="Shipping address"
-                description="Please select a shipping address."
-                setAddress={setShippingAddress}
-              />
+              <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
             ) : (
               <CreateAddressModal
-                callback={(address) => {
-                  setShippingAddress(address)
-                }}
                 disabled={!email || Boolean(emailEditable)}
+                callback={(address) => {
+                  setBillingAddress(address)
+                }}
                 skipSubmission={true}
               />
+            )}
+
+            <div className="flex gap-4 items-center">
+              <Checkbox
+                id="shippingTheSameAsBilling"
+                checked={billingAddressSameAsShipping}
+                disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
+                onCheckedChange={(state) => {
+                  setBillingAddressSameAsShipping(state as boolean)
+                }}
+              />
+              <Label htmlFor="shippingTheSameAsBilling">Shipping is the same as billing</Label>
+            </div>
+
+            {!billingAddressSameAsShipping && (
+              <>
+                {shippingAddress ? (
+                  <div>
+                    <AddressItem
+                      actions={
+                        <Button
+                          variant={'outline'}
+                          disabled={Boolean(paymentData)}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setShippingAddress(undefined)
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      }
+                      address={shippingAddress}
+                    />
+                  </div>
+                ) : user ? (
+                  <CheckoutAddresses
+                    heading="Shipping address"
+                    description="Please select a shipping address."
+                    setAddress={setShippingAddress}
+                  />
+                ) : (
+                  <CreateAddressModal
+                    callback={(address) => {
+                      setShippingAddress(address)
+                    }}
+                    disabled={!email || Boolean(emailEditable)}
+                    skipSubmission={true}
+                  />
+                )}
+              </>
             )}
           </>
         )}
@@ -335,6 +359,7 @@ export const CheckoutPage: React.FC = () => {
                     customerEmail={email}
                     billingAddress={billingAddress}
                     setProcessingPayment={setProcessingPayment}
+                    isAllDigital={isAllDigital}
                   />
                   <Button
                     variant="ghost"

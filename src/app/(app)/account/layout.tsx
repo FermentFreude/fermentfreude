@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
 
-import { headers as getHeaders } from 'next/headers.js'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { redirect } from 'next/navigation'
 import { RenderParams } from '@/components/RenderParams'
 import AccountSidebar from '@/components/dashboard/AccountSidebar'
+import configPromise from '@payload-config'
+import { headers as getHeaders } from 'next/headers.js'
+import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 
 export default async function AccountLayout({ children }: { children: ReactNode }) {
   const headers = await getHeaders()

@@ -1,3 +1,4 @@
+import type { Order } from '@/payload-types'
 import { formatDate, formatPrice } from '@/utilities/form/formatters'
 import configPromise from '@payload-config'
 import { ArrowRight } from 'lucide-react'
@@ -5,7 +6,6 @@ import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
-import type { Order } from '@/payload-types'
 
 export const metadata = {
   title: 'Orders — FermentFreude',
@@ -13,7 +13,7 @@ export const metadata = {
 }
 
 function StatusDot({ status }: { status: string }) {
-  if (status === 'succeeded')
+  if (status === 'completed')
     return (
       <span className="inline-flex items-center gap-1.5 text-[12px] text-green-700 font-medium">
         <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
@@ -63,9 +63,7 @@ export default async function OrdersPage() {
     <div className="max-w-4xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">
-          My Account
-        </p>
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">My Account</p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
           Orders
         </h1>
@@ -94,7 +92,7 @@ export default async function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order: any, i: number) => (
+              {orders.map((order: Order, i: number) => (
                 <tr
                   key={order.id}
                   className={`hover:bg-[#faf9f7] transition-colors ${
@@ -108,15 +106,13 @@ export default async function OrdersPage() {
                     {formatDate(order.createdAt)}
                   </td>
                   <td className="py-4 px-5">
-                    <StatusDot
-                      status={order.stripePaymentIntentStatus || order.stripeStatus || 'pending'}
-                    />
+                    <StatusDot status={order.status || 'processing'} />
                   </td>
                   <td className="py-4 px-5 text-[13px] text-[#626160]">
                     {Array.isArray(order.items) ? order.items.length : 0}
                   </td>
                   <td className="py-4 px-5 text-right text-[13px] font-semibold text-[#1a1a1a]">
-                    {formatPrice(order.total || 0)}
+                    {formatPrice(order.amount || 0)}
                   </td>
                   <td className="py-4 px-5 text-right">
                     <Link

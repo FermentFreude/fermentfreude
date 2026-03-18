@@ -69,8 +69,18 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
   const { handleTouchStart, handleTouchEnd } = useSwipe({ goNext, goPrev })
 
   const slide = slides[activeIndex]
-  const isKombucha = slide.slideId === 'kombucha'
   const isFoundersOrLakto = slide.slideId === 'basics' || slide.slideId === 'lakto'
+
+  // Chevron bubble colors that contrast with each slide's background
+  const mobileChevronColors: Record<string, string> = {
+    basics: '#555954',
+    lakto: '#1a1a1a',
+    kombucha: '#D2DFD7',
+    tempeh: '#AEB1AE',
+  }
+  const chevronColor = mobileChevronColors[slide.slideId] ?? slide.panelColor
+  const chevronArrowColor =
+    slide.slideId === 'kombucha' || slide.slideId === 'tempeh' ? '#1a1a1a' : '#ffffff'
 
   useEffect(() => {
     setHeaderTheme('dark')
@@ -96,31 +106,31 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
       {/* ── Mobile split background ────────────────────────── */}
       <div className="sm:hidden absolute inset-0 pointer-events-none" aria-hidden="true">
         <div
-          className="h-[42%] transition-colors duration-700"
+          className="h-[40%] transition-colors duration-700"
           style={{ backgroundColor: slide.bgColor }}
         />
         <div
-          className="h-[58%] transition-colors duration-700"
+          className="h-[60%] transition-colors duration-700"
           style={{ backgroundColor: slide.panelColor }}
         />
       </div>
 
-      <div className="sm:hidden relative z-10 flex flex-col h-full pt-20">
+      <div className="sm:hidden relative z-10 flex flex-col h-full pt-16">
         {/* Mobile chevrons */}
         <button
           onClick={goPrev}
           aria-label="Previous slide"
-          className="absolute left-0 top-[20%] -translate-y-1/2 z-30 flex items-center justify-center w-10 h-24 group/arrow cursor-pointer"
+          className="absolute left-0 top-[40%] -translate-y-1/2 z-30 flex items-center justify-center w-8 h-20 group/arrow cursor-pointer"
         >
           <span
-            className="absolute rounded-full w-24 h-24 -left-12 group-hover/arrow:w-44 group-hover/arrow:h-44 group-hover/arrow:-left-22 transition-all duration-300 ease-out"
-            style={{ backgroundColor: slide.panelColor }}
+            className="absolute rounded-full w-20 h-20 -left-10 group-hover/arrow:w-36 group-hover/arrow:h-36 group-hover/arrow:-left-18 transition-all duration-300 ease-out"
+            style={{ backgroundColor: chevronColor }}
           />
           <svg
-            className="relative w-5 h-5 text-white ml-1 group-hover/arrow:translate-x-1 transition-transform duration-300"
+            className="relative w-4 h-4 ml-1 group-hover/arrow:translate-x-1 transition-transform duration-300"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="currentColor"
+            stroke={chevronArrowColor}
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -131,17 +141,17 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         <button
           onClick={goNext}
           aria-label="Next slide"
-          className="absolute right-0 top-[20%] -translate-y-1/2 z-30 flex items-center justify-center w-10 h-24 group/arrow cursor-pointer"
+          className="absolute right-0 top-[40%] -translate-y-1/2 z-30 flex items-center justify-center w-8 h-20 group/arrow cursor-pointer"
         >
           <span
-            className="absolute rounded-full w-24 h-24 -right-12 group-hover/arrow:w-44 group-hover/arrow:h-44 group-hover/arrow:-right-22 transition-all duration-300 ease-out"
-            style={{ backgroundColor: slide.panelColor }}
+            className="absolute rounded-full w-20 h-20 -right-10 group-hover/arrow:w-36 group-hover/arrow:h-36 group-hover/arrow:-right-18 transition-all duration-300 ease-out"
+            style={{ backgroundColor: chevronColor }}
           />
           <svg
-            className="relative w-5 h-5 text-white mr-1 group-hover/arrow:-translate-x-1 transition-transform duration-300"
+            className="relative w-4 h-4 mr-1 group-hover/arrow:-translate-x-1 transition-transform duration-300"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="currentColor"
+            stroke={chevronArrowColor}
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -150,8 +160,8 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </svg>
         </button>
 
-        {/* Images — subtle tilt and overlapping */}
-        <div className="absolute top-[12%] left-1/2 -translate-x-1/2 z-20 flex items-end">
+        {/* Images — centered, smaller on mobile */}
+        <div className="relative z-20 flex items-end justify-center h-[40%] pb-2">
           <div
             className={cn(
               'relative -rotate-6',
@@ -163,15 +173,20 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
               media={slide.leftImage}
               className={cn(
                 'object-contain drop-shadow-xl w-auto',
-                isKombucha ? 'h-[32vh]' : 'h-[38vh]',
+                slide.slideId === 'kombucha'
+                  ? 'h-[34vh]'
+                  : slide.slideId === 'tempeh'
+                    ? 'h-[32vh]'
+                    : 'h-[28vh]',
               )}
               priority={activeIndex === 0}
-              size="45vw"
+              size="40vw"
             />
           </div>
           <div
             className={cn(
-              'relative -ml-6 rotate-6',
+              'relative rotate-6',
+              slide.slideId === 'tempeh' ? '-ml-8' : '-ml-4',
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
@@ -180,18 +195,22 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
               media={slide.rightImage}
               className={cn(
                 'object-contain drop-shadow-xl w-auto',
-                isKombucha ? 'h-[32vh]' : 'h-[38vh]',
+                slide.slideId === 'kombucha'
+                  ? 'h-[34vh]'
+                  : slide.slideId === 'tempeh'
+                    ? 'h-[32vh]'
+                    : 'h-[28vh]',
               )}
-              size="45vw"
+              size="40vw"
             />
           </div>
         </div>
 
-        {/* Text content — bottom panel area */}
-        <div className="mt-auto h-[58%] flex flex-col items-center text-center justify-start px-6 pb-12 pt-4">
+        {/* Text content — bottom panel area, centered */}
+        <div className="flex-1 flex flex-col items-center text-center justify-center px-6 pb-14">
           <p
             className={cn(
-              'uppercase tracking-[0.2em] text-white text-[8px] font-display font-bold mb-0.5',
+              'uppercase tracking-[0.2em] text-white text-[9px] font-display font-bold mb-1',
               isEntering && 'hero-anim-eyebrow',
               isExiting && 'hero-exit-content',
             )}
@@ -200,7 +219,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </p>
           <h1
             className={cn(
-              'font-display font-black text-white text-base sm:text-xl leading-[1.15] tracking-[-0.02em] whitespace-pre-line mb-1',
+              'font-display font-black text-white text-lg leading-[1.15] tracking-[-0.02em] whitespace-pre-line mb-2',
               isEntering && 'hero-anim-title',
               isExiting && 'hero-exit-content',
             )}
@@ -209,7 +228,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </h1>
           <p
             className={cn(
-              'text-white text-[10px] sm:text-xs leading-tight max-w-[18rem] mb-1.5 font-sans font-medium',
+              'text-white text-xs leading-relaxed max-w-[20rem] mb-3 font-sans font-medium',
               isEntering && 'hero-anim-desc',
               isExiting && 'hero-exit-content',
             )}
@@ -218,26 +237,26 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </p>
           <div
             className={cn(
-              'w-full max-w-[18rem]',
+              'w-full max-w-[20rem]',
               isEntering && 'hero-anim-divider',
               isExiting && 'hero-exit-content',
             )}
           >
-            <div className="w-full h-px bg-white/20 mb-0.5" />
+            <div className="w-full h-px bg-white/20 mb-2" />
             <div
               className={cn(
-                'flex items-center justify-center flex-wrap gap-x-2 gap-y-0.5',
+                'flex items-center justify-center flex-wrap gap-x-3 gap-y-1',
                 isEntering && 'hero-anim-attrs',
                 isExiting && 'hero-exit-content',
               )}
             >
               {slide.attributes.map((attr, i) => (
                 <React.Fragment key={attr}>
-                  <span className="text-white text-[8px] font-display font-semibold tracking-wide">
+                  <span className="text-white text-[10px] font-display font-semibold tracking-wide">
                     {attr}
                   </span>
                   {i < slide.attributes.length - 1 && (
-                    <span className="w-px h-2 bg-white/30" aria-hidden="true" />
+                    <span className="w-px h-3 bg-white/30" aria-hidden="true" />
                   )}
                 </React.Fragment>
               ))}
@@ -245,20 +264,20 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </div>
           <div
             className={cn(
-              'mt-1.5 flex items-center justify-center gap-2',
+              'mt-4 flex items-center justify-center gap-3',
               isEntering && 'hero-anim-cta',
               isExiting && 'hero-exit-content',
             )}
           >
             <Link
               href={slide.ctaHref}
-              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-[9px] px-4 py-1.5 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 transition-all duration-300"
+              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-xs px-5 py-2 rounded-full bg-white text-[#1d1d1d] hover:bg-white/90 transition-all duration-300"
             >
               {slide.ctaLabel}
             </Link>
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-[9px] px-4 py-1.5 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] transition-all duration-300"
+              className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-xs px-5 py-2 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] transition-all duration-300"
             >
               Shop
             </Link>

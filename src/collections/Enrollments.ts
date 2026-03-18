@@ -40,7 +40,8 @@ export const Enrollments: CollectionConfig = {
       required: true,
       index: true,
       admin: {
-        description: 'e.g. "basic-fermentation". Matches product courseSlug and CourseProgress.courseSlug.',
+        description:
+          'e.g. "basic-fermentation". Matches product courseSlug and CourseProgress.courseSlug.',
       },
     },
     {
