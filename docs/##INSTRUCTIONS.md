@@ -90,6 +90,59 @@ R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
 4. Test on staging (local or preview deploy)
 5. When ready for production, merge `staging` → `main`
 
+### Staging → Production Full Sync
+
+When you need to copy **all data** (DB + images) from staging to production. This replaces everything on production with staging content.
+
+**Prerequisites:**
+- `mongodump` / `mongorestore` (MongoDB Database Tools — `brew install mongodb-database-tools`)
+- `rclone` (`brew install rclone`) — configured with remotes `r2-staging` and `r2-prod` in `~/.config/rclone/rclone.conf`
+
+**Step 1 — Dump staging database:**
+
+```bash
+export STAGING_URI="mongodb+srv://<user>:<pass>@<cluster>/fermentfreude-staging?retryWrites=true&w=majority"
+export PROD_URI="mongodb+srv://<user>:<pass>@<cluster>/fermentfreude?retryWrites=true&w=majority"
+
+rm -rf /tmp/ff-staging-dump
+mongodump --uri="$STAGING_URI" --out=/tmp/ff-staging-dump
+```
+
+**Step 2 — Copy R2 media (staging → production):**
+
+```bash
+# Copy all files (additive — does not delete production-only files)
+rclone copy r2-staging:fermentfreude-media-staging/ r2-prod:fermentfreude-media/ --progress
+```
+
+**Step 3 — Restore dump into production DB:**
+
+```bash
+mongorestore --uri="$PROD_URI" \
+  --nsFrom="fermentfreude-staging.*" --nsTo="fermentfreude.*" \
+  --drop \
+  /tmp/ff-staging-dump/fermentfreude-staging/
+```
+
+**Step 4 — Merge code (staging → main):**
+
+```bash
+git checkout main && git pull origin main
+git merge staging
+git push origin main
+# Vercel auto-deploys from main
+```
+
+**Step 5 — Cleanup:**
+
+```bash
+rm -rf /tmp/ff-staging-dump
+```
+
+> **DANGER:** `--drop` in Step 3 deletes each production collection before restoring. Only use this when you want a **full mirror**. For selective copies, see "Selective Image Copy" in `CLAUDE.md`.
+
+---
+
 ### Why Not Vercel Blob?
 
 The project migrated from Vercel Blob to Cloudflare R2 because:
