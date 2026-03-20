@@ -6,7 +6,6 @@ import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import Link from 'next/link'
 import React, { Fragment, useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -25,16 +24,13 @@ export const ForgotPasswordForm: React.FC = () => {
   } = useForm<FormData>()
 
   const onSubmit = useCallback(async (data: FormData) => {
-    const response = await fetch(
-      `/api/users/forgot-password`,
-      {
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
+    const response = await fetch(`/api/users/forgot-password`, {
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
       },
-    )
+      method: 'POST',
+    })
 
     if (response.ok) {
       setSuccess(true)
@@ -55,8 +51,8 @@ export const ForgotPasswordForm: React.FC = () => {
           </h1>
           <div className="prose mb-8 text-sm text-[#E5DDCF] dark:prose-invert">
             <p>
-              Please enter your email below. You will receive an email message with instructions on how to
-              reset your password.
+              Please enter your email below. You will receive an email message with instructions on
+              how to reset your password.
             </p>
           </div>
           <form className="max-w-lg space-y-8" onSubmit={handleSubmit(onSubmit)}>

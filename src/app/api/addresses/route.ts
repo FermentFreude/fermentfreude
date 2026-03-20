@@ -1,7 +1,7 @@
-import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { NextRequest, NextResponse } from 'next/server'
 import { headers as getHeaders } from 'next/headers.js'
+import { NextRequest, NextResponse } from 'next/server'
+import { getPayload } from 'payload'
 
 export async function GET() {
   try {
