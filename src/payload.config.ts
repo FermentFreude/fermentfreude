@@ -39,9 +39,13 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
-  cors: [process.env.NEXT_PUBLIC_SERVER_URL || '', 'http://localhost:3001'].filter(
-    Boolean,
-  ) as string[],
+  cors: [
+    process.env.NEXT_PUBLIC_SERVER_URL || '',
+    'https://www.fermentfreude.at',
+    'https://fermentfreude.at',
+    'http://localhost:3000',
+    'http://localhost:3001',
+  ].filter(Boolean) as string[],
   admin: {
     user: Users.slug,
     suppressHydrationWarning: true,
