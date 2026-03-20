@@ -12,9 +12,10 @@ export const CourseProgress: CollectionConfig = {
     update: ownCourseProgress,
   },
   admin: {
-    group: 'Users',
+    group: 'Workshops & Kurse',
     defaultColumns: ['user', 'courseSlug', 'updatedAt'],
-    description: 'Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.',
+    description:
+      'Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.',
     useAsTitle: 'courseSlug',
   },
   fields: [
@@ -38,7 +39,10 @@ export const CourseProgress: CollectionConfig = {
       type: 'array',
       required: false,
       label: 'Completed lesson IDs',
-      admin: { description: 'Payload array item IDs for completed lessons. Updated when user marks a lesson done.' },
+      admin: {
+        description:
+          'Payload array item IDs for completed lessons. Updated when user marks a lesson done.',
+      },
       fields: [
         {
           name: 'lessonId',

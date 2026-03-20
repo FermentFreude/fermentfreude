@@ -2,13 +2,12 @@ import type { Metadata } from 'next'
 
 import { RenderParams } from '@/components/RenderParams'
 import Link from 'next/link'
-import React from 'react'
 
-import { headers as getHeaders } from 'next/headers'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import { CreateAccountForm } from '@/components/forms/CreateAccountForm'
+import configPromise from '@payload-config'
+import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 
 export default async function CreateAccount() {
   const headers = await getHeaders()
@@ -31,7 +30,9 @@ export default async function CreateAccount() {
             <section className="flex flex-col space-y-6 md:space-y-8 px-2 md:px-0">
               <header className="text-center md:text-left">
                 <h1 className="font-display text-[1.1rem] sm:text-[1.3rem] md:text-[1.8rem] tracking-[0.3em] md:tracking-[0.38em] uppercase text-[#F4F0E8]">
-                  <span className="block">JOIN <span className="whitespace-nowrap">FERMENT FREUDE</span></span>
+                  <span className="block">
+                    JOIN <span className="whitespace-nowrap">FERMENT FREUDE</span>
+                  </span>
                   <span className="block">COMMUNITY!</span>
                 </h1>
               </header>
@@ -46,9 +47,15 @@ export default async function CreateAccount() {
               <div className="md:hidden mt-4 space-y-3">
                 <div className="border-t border-dashed border-neutral-400/50" />
                 <div className="flex items-center justify-between text-[11px] tracking-[0.12em] text-neutral-300">
-                  <Link href="/terms" className="underline underline-offset-4 hover:text-white">Terms &amp; Conditions</Link>
-                  <Link href="/privacy" className="underline underline-offset-4 hover:text-white">Privacy Policy</Link>
-                  <Link href="/" className="underline underline-offset-4 hover:text-white">Visit Website</Link>
+                  <Link href="/terms" className="underline underline-offset-4 hover:text-white">
+                    Terms &amp; Conditions
+                  </Link>
+                  <Link href="/privacy" className="underline underline-offset-4 hover:text-white">
+                    Privacy Policy
+                  </Link>
+                  <Link href="/" className="underline underline-offset-4 hover:text-white">
+                    Visit Website
+                  </Link>
                 </div>
               </div>
             </section>
@@ -90,8 +97,8 @@ export default async function CreateAccount() {
                   <span className="block whitespace-nowrap">FERMENT FREUDE</span>
                 </h2>
                 <p className="max-w-xs text-xs leading-relaxed text-[#D1CAC0]">
-                  Join our community of fermentation lovers, save your details for faster checkout, and keep
-                  track of your upcoming workshops.
+                  Join our community of fermentation lovers, save your details for faster checkout,
+                  and keep track of your upcoming workshops.
                 </p>
               </div>
             </aside>
@@ -102,14 +109,20 @@ export default async function CreateAccount() {
             <div className="space-y-3">
               <div className="border-t border-dashed border-neutral-400/50" />
               <div className="flex gap-8">
-                <Link href="/terms" className="underline underline-offset-4 hover:text-white">Terms &amp; Conditions</Link>
-                <Link href="/privacy" className="underline underline-offset-4 hover:text-white">Privacy Policy</Link>
+                <Link href="/terms" className="underline underline-offset-4 hover:text-white">
+                  Terms &amp; Conditions
+                </Link>
+                <Link href="/privacy" className="underline underline-offset-4 hover:text-white">
+                  Privacy Policy
+                </Link>
               </div>
             </div>
             <div className="space-y-3">
               <div className="border-t border-dashed border-neutral-400/50" />
               <div className="flex justify-end">
-                <Link href="/" className="underline underline-offset-4 hover:text-white">Visit Website</Link>
+                <Link href="/" className="underline underline-offset-4 hover:text-white">
+                  Visit Website
+                </Link>
               </div>
             </div>
           </div>

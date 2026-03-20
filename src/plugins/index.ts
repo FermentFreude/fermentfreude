@@ -15,6 +15,7 @@ import { isAdmin } from '@/access/isAdmin'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
 import { autoEnrollOnPurchase } from '@/collections/Orders/autoEnrollOnPurchase'
 import { ProductsCollection } from '@/collections/Products'
+import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 
@@ -68,12 +69,12 @@ export const plugins: Plugin[] = [
     },
     formSubmissionOverrides: {
       admin: {
-        group: 'Content',
+        group: 'Inhalt',
       },
     },
     formOverrides: {
       admin: {
-        group: 'Content',
+        group: 'Inhalt',
       },
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
@@ -132,9 +133,17 @@ export const plugins: Plugin[] = [
     orders: {
       ordersCollectionOverride: ({ defaultCollection }) => ({
         ...defaultCollection,
+        admin: {
+          ...defaultCollection?.admin,
+          group: 'Shop',
+        },
         hooks: {
           ...defaultCollection?.hooks,
-          afterChange: [...(defaultCollection?.hooks?.afterChange ?? []), autoEnrollOnPurchase],
+          afterChange: [
+            ...(defaultCollection?.hooks?.afterChange ?? []),
+            autoEnrollOnPurchase,
+            sendOrderConfirmationEmail,
+          ],
         },
       }),
     },

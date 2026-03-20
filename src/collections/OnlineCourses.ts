@@ -16,7 +16,7 @@ export const OnlineCourses: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'courseSlug', 'isActive', 'isComingSoon', 'sortOrder'],
-    group: 'Shop',
+    group: 'Workshops & Kurse',
     description:
       'Online courses — everything in one place: card info, hero, modules with lessons & videos, and "What You\'ll Learn".',
   },

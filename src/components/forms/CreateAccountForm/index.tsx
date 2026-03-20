@@ -9,7 +9,7 @@ import { useAuth } from '@/providers/Auth'
 import { Eye, EyeOff, Mail, User } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 type FormData = {
@@ -73,8 +73,7 @@ export const CreateAccountForm: React.FC = () => {
     [login, router, searchParams],
   )
 
-  const inputWrap =
-    'flex h-11 items-center gap-2 rounded-xl bg-white/90 px-3'
+  const inputWrap = 'flex h-11 items-center gap-2 rounded-xl bg-white/90 px-3'
   const [showPassword, setShowPassword] = useState(false)
 
   return (

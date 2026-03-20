@@ -1,3 +1,26 @@
+/* ── FermentFreude Admin Branding ── */
+
+:root {
+  /* Brand colors injected into Payload's theme system */
+  --theme-elevation-0: #faf8f5;
+  --theme-success-500: #555954;
+}
+
+[data-theme='dark'] {
+  --theme-elevation-0: #1a1a1a;
+}
+
+/* Login page */
+.login__form {
+  max-width: 420px;
+}
+
+/* Nav brand spacing */
+.nav__brand {
+  padding: 1rem 0;
+}
+
+/* Utility */
 .visually-hidden {
   position: absolute;
   width: 1px;

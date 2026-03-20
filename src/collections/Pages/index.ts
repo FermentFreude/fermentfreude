@@ -6,25 +6,30 @@ import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
+import { CollectionGrid } from '@/blocks/CollectionGrid/config'
 import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Content } from '@/blocks/Content/config'
 import { FeatureCards } from '@/blocks/FeatureCards/config'
 import { FormBlock } from '@/blocks/Form/config'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
+import { LaktoVoucherCtaBlock } from '@/blocks/LaktoVoucherCta/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { OnlineCourseSlider } from '@/blocks/OnlineCourseSlider/config'
 import { OurStory } from '@/blocks/OurStory/config'
 import { ProductSlider } from '@/blocks/ProductSlider/config'
 import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
+import { ShopHero } from '@/blocks/ShopHero/config'
+import { ShopProductGrid } from '@/blocks/ShopProductGrid/config'
+import { ShopProductList } from '@/blocks/ShopProductList/config'
 import { SponsorsBar } from '@/blocks/SponsorsBar/config'
 import { TeamCards } from '@/blocks/TeamCards/config'
 import { TeamPreview } from '@/blocks/TeamPreview/config'
+import { Testimonials } from '@/blocks/Testimonials/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { VoucherCta } from '@/blocks/VoucherCta/config'
 import { WorkshopPhases } from '@/blocks/WorkshopPhases/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
-import { shopPageFields } from '@/fields/shopPageFields'
 import { workshopDetailFields } from '@/fields/workshopDetailFields'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
@@ -47,7 +52,7 @@ export const Pages: CollectionConfig = {
     update: adminOnly,
   },
   admin: {
-    group: 'content',
+    group: 'Inhalt',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) =>
@@ -116,14 +121,20 @@ export const Pages: CollectionConfig = {
                 OurStory,
                 OnlineCourseSlider,
                 ProductSlider,
+                ShopHero,
+                ShopProductGrid,
+                ShopProductList,
+                CollectionGrid,
                 ReadyToLearnCTA,
                 SponsorsBar,
                 TeamCards,
                 TeamPreview,
+                Testimonials,
                 ThreeItemGrid,
                 Banner,
                 FormBlock,
                 VoucherCta,
+                LaktoVoucherCtaBlock,
                 WorkshopSlider,
                 WorkshopPhases,
               ],
@@ -1444,20 +1455,6 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
-          name: 'shop',
-          label: 'Shop Page',
-          admin: {
-            description:
-              'Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.',
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_SHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'shop'
-            },
-          },
-          fields: shopPageFields,
-        },
-        {
           name: 'workshops',
           label: 'Workshops Overview Page',
           admin: {
@@ -2268,20 +2265,6 @@ export const Pages: CollectionConfig = {
               ],
             },
           ],
-        },
-        {
-          name: 'shop',
-          label: 'Shop Page',
-          admin: {
-            description:
-              'Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.',
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_SHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'shop'
-            },
-          },
-          fields: shopPageFields,
         },
         {
           name: 'workshopDetail',

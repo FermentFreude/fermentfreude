@@ -1,4 +1,5 @@
 import { isAdmin } from '@/access/isAdmin'
+import { sendWorkshopBookingEmail } from '@/hooks/brevo/sendWorkshopBookingEmail'
 import { CollectionConfig } from 'payload'
 
 export const WorkshopBookings: CollectionConfig = {
@@ -7,8 +8,12 @@ export const WorkshopBookings: CollectionConfig = {
     singular: 'Workshop Booking',
     plural: 'Workshop Bookings',
   },
+  hooks: {
+    afterChange: [sendWorkshopBookingEmail],
+  },
   admin: {
     useAsTitle: 'workshopTitle',
+    group: 'Workshops & Kurse',
     defaultColumns: ['workshopTitle', 'date', 'guestCount', 'totalPrice', 'createdAt'],
   },
   access: {
@@ -78,6 +83,35 @@ export const WorkshopBookings: CollectionConfig = {
       type: 'text',
       label: 'Temporary Cart ID',
       admin: { description: 'For linking to cart items (temporary until checkout)' },
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Customer Email',
+      admin: { description: 'Email for booking confirmation' },
+    },
+    {
+      name: 'firstName',
+      type: 'text',
+      label: 'Customer First Name',
+      admin: { description: 'For personalizing the booking confirmation email' },
+    },
+    {
+      name: 'lastName',
+      type: 'text',
+      label: 'Customer Last Name',
+    },
+    {
+      name: 'phone',
+      type: 'text',
+      label: 'Phone Number',
+      admin: { description: 'Optional contact number' },
+    },
+    {
+      name: 'notes',
+      type: 'textarea',
+      label: 'Special Requests / Notes',
+      admin: { description: 'Any dietary restrictions, allergies, or special requests' },
     },
   ],
   timestamps: true,

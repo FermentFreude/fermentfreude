@@ -2,9 +2,10 @@ import type { CollectionConfig } from 'payload'
 
 import { adminOnly } from '@/access/adminOnly'
 import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
-import { publicAccess } from '@/access/publicAccess'
 import { adminOrSelf } from '@/access/adminOrSelf'
+import { publicAccess } from '@/access/publicAccess'
 import { checkRole } from '@/access/utilities'
+import { syncUserToBrevo } from '@/hooks/brevo/syncUserToBrevo'
 
 import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 
@@ -18,12 +19,15 @@ export const Users: CollectionConfig = {
     update: adminOrSelf,
   },
   admin: {
-    group: 'Users',
+    group: 'Nutzer',
     defaultColumns: ['name', 'email', 'roles'],
     useAsTitle: 'name',
   },
   auth: {
     tokenExpiration: 1209600,
+  },
+  hooks: {
+    afterChange: [syncUserToBrevo],
   },
   fields: [
     {

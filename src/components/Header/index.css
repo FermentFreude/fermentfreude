@@ -171,4 +171,10 @@ header[data-header-theme='dark'] .navLink::after {
   .cursor-can-hover * {
     cursor: none !important;
   }
+
+  /* Blob interactive zones — show default cursor so user sees interaction */
+  .blob-interactive,
+  .blob-interactive * {
+    cursor: default !important;
+  }
 }

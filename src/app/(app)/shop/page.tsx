@@ -1,106 +1,66 @@
-import { ShopBenefitsSection } from '@/components/shop/ShopBenefitsSection'
-import { ShopFeaturedSection } from '@/components/shop/ShopFeaturedSection'
-import { ShopGiftSection } from '@/components/shop/ShopGiftSection'
-import { ShopHero } from '@/components/shop/ShopHero'
-import { ShopHeroSlider } from '@/components/shop/ShopHeroSlider'
-import { ShopProductSection } from '@/components/shop/ShopProductSection'
-import { ShopWorkshopCta } from '@/components/shop/ShopWorkshopCta'
-import { getCachedGlobal } from '@/utilities/getGlobals'
+import { RenderBlocks } from '@/blocks/RenderBlocks'
+import { ShopHeroComponent } from '@/blocks/ShopHero/Component'
+import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
-import type { Shop } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-export const metadata = {
-  description: 'Discover unique handcrafted ferments. Shop Kombucha, fermented vegetables, and more.',
-  title: 'Shop | FermentFreude',
+import type { Page } from '@/payload-types'
+import type { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as 'de' | 'en'
+  const page = await queryShopPage(locale)
+  if (!page) {
+    return {
+      title: 'Shop | FermentFreude',
+      description:
+        'Discover unique handcrafted ferments. Shop Kombucha, fermented vegetables, and more.',
+    }
+  }
+  return generateMeta({ doc: page })
 }
 
-const PRODUCTS_PER_PAGE = 12
-
-/** Fetches shop content from Page (slug=shop) if it exists, else from Shop global. */
-async function getShopData(locale: 'de' | 'en'): Promise<Shop> {
+async function queryShopPage(locale: string): Promise<Page | null> {
   const payload = await getPayload({ config: configPromise })
-  const shopPage = await payload.find({
+  const result = await payload.find({
     collection: 'pages',
-    where: { slug: { equals: 'shop' }, _status: { equals: 'published' } },
-    locale,
+    where: { slug: { equals: 'shop' } },
+    locale: locale as 'de' | 'en',
     depth: 2,
     limit: 1,
-    overrideAccess: false,
+    overrideAccess: true,
   })
-  const page = shopPage.docs?.[0] as { shop?: Shop } | undefined
-  if (page?.shop) return page.shop
-  const getShop = getCachedGlobal<Shop>('shop', 2, locale)
-  return await getShop()
+  return (result.docs?.[0] as Page) ?? null
 }
 
-type Props = {
-  searchParams: Promise<{ page?: string }>
-}
-
-export default async function ShopPage({ searchParams }: Props) {
+export default async function ShopPage() {
   const locale = (await getLocale()) as 'de' | 'en'
-  const { page: pageParam } = await searchParams
-  const page = Math.max(1, parseInt(String(pageParam || '1'), 10))
+  const page = await queryShopPage(locale)
 
-  const shopData = await getShopData(locale)
-
-  const payload = await getPayload({ config: configPromise })
-
-  const { docs: products, totalDocs } = await payload.find({
-    collection: 'products',
-    draft: false,
-    locale,
-    overrideAccess: false,
-    depth: 2,
-    limit: PRODUCTS_PER_PAGE,
-    page,
-    sort: 'title',
-    where: {
-      _status: { equals: 'published' },
-    },
-  })
-
-  const hasMore = page * PRODUCTS_PER_PAGE < totalDocs
-
-  const heroSlides = (shopData?.heroSlides ?? []) as Array<{
-    id?: string
-    image?: { url: string; alt?: string } | string | null
-    productImage?: { url: string; alt?: string } | string | null
-    title?: string | null
-    description?: string | null
-    ctaLabel?: string | null
-    ctaUrl?: string | null
-  }>
-  const hasHeroSlides =
-    heroSlides.length > 0 &&
-    heroSlides.some(
-      (s) =>
-        s?.title &&
-        s?.image &&
-        typeof s.image === 'object' &&
-        'url' in s.image &&
-        (s.image as { url: string }).url,
+  // If the page exists in Pages collection (seeded), render its blocks
+  if (page) {
+    const { layout } = page
+    return (
+      <article>
+        {layout && layout.length > 0 && <RenderBlocks blocks={layout} slug="shop" />}
+      </article>
     )
+  }
 
+  // Fallback: render default blocks with English defaults (no CMS data yet)
   return (
-    <article className="pb-24">
-      {hasHeroSlides ? (
-        <ShopHeroSlider slides={heroSlides} />
-      ) : (
-        <ShopHero data={shopData} />
-      )}
-      <ShopProductSection
-        data={shopData}
-        products={products}
-        hasMore={hasMore}
-        nextPage={hasMore ? page + 1 : undefined}
+    <article>
+      <ShopHeroComponent
+        blockType="shopHero"
+        blockName="Shop Hero"
+        heroTitle="Our Handmade Products From Our Pick-Up Shop."
+        slides={undefined as never}
+        bottomTagline={null}
+        bottomSubtitle={null}
       />
-      <ShopBenefitsSection data={shopData} />
-      <ShopGiftSection data={shopData} />
-      <ShopFeaturedSection data={shopData} />
-      <ShopWorkshopCta data={shopData} />
     </article>
   )
 }

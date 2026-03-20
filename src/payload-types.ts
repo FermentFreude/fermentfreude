@@ -83,6 +83,7 @@ export interface Config {
     workshops: Workshop;
     'workshop-locations': WorkshopLocation;
     'workshop-appointments': WorkshopAppointment;
+    'workshop-bookings': WorkshopBooking;
     vouchers: Voucher;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -124,6 +125,7 @@ export interface Config {
     workshops: WorkshopsSelect<false> | WorkshopsSelect<true>;
     'workshop-locations': WorkshopLocationsSelect<false> | WorkshopLocationsSelect<true>;
     'workshop-appointments': WorkshopAppointmentsSelect<false> | WorkshopAppointmentsSelect<true>;
+    'workshop-bookings': WorkshopBookingsSelect<false> | WorkshopBookingsSelect<true>;
     vouchers: VouchersSelect<false> | VouchersSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -147,13 +149,11 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
-    shop: Shop;
     'testimonials-global': TestimonialsGlobal;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
-    shop: ShopSelect<false> | ShopSelect<true>;
     'testimonials-global': TestimonialsGlobalSelect<false> | TestimonialsGlobalSelect<true>;
   };
   locale: 'de' | 'en';
@@ -633,14 +633,20 @@ export interface Page {
         | OurStoryBlock
         | OnlineCourseSliderBlock
         | ProductSliderBlock
+        | ShopHeroBlock
+        | ShopProductGridBlock
+        | ShopProductListBlock
+        | CollectionGridBlock
         | ReadyToLearnCtaBlock
         | SponsorsBarBlock
         | TeamCardsBlock
         | TeamPreviewBlock
+        | TestimonialsBlock
         | ThreeItemGridBlock
         | BannerBlock
         | FormBlock
         | VoucherCtaBlock
+        | LaktoVoucherCtaBlock
         | WorkshopSliderBlock
         | WorkshopPhasesBlock
       )[]
@@ -1078,226 +1084,6 @@ export interface Page {
       answer: string;
       id?: string | null;
     }[];
-  };
-  /**
-   * Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.
-   */
-  shop?: {
-    /**
-     * Add slides for a hero slider. If empty, the single hero below is used.
-     */
-    heroSlides?:
-      | {
-          /**
-           * Full-bleed background (or poster when video is set).
-           */
-          image: string | Media;
-          /**
-           * Optional looping video (e.g. bubbling ingredients). Homemade Jam style.
-           */
-          backgroundVideo?: (string | null) | Media;
-          /**
-           * Optional center product/jar image (Homemade Jam style).
-           */
-          productImage?: (string | null) | Media;
-          /**
-           * e.g. "Discover UNIQUE Flavours".
-           */
-          title: string;
-          /**
-           * Short text below the title.
-           */
-          description?: string | null;
-          /**
-           * e.g. "Explore Now".
-           */
-          ctaLabel?: string | null;
-          /**
-           * e.g. "#products".
-           */
-          ctaUrl?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * First line (e.g. "Discover").
-     */
-    heroTitleLine1?: string | null;
-    /**
-     * Second line with highlighted word (e.g. "UNIQUE Flavours").
-     */
-    heroTitleLine2?: string | null;
-    /**
-     * Word to highlight in gold in line 2 (e.g. "UNIQUE").
-     */
-    heroTitleHighlight?: string | null;
-    /**
-     * Short welcoming text below the title.
-     */
-    heroDescription?: string | null;
-    /**
-     * Background image.
-     */
-    heroBackgroundImage?: (string | null) | Media;
-    /**
-     * e.g. "Explore Now".
-     */
-    heroCtaPrimaryLabel?: string | null;
-    /**
-     * e.g. "#products".
-     */
-    heroCtaPrimaryUrl?: string | null;
-    /**
-     * e.g. "Learn More".
-     */
-    heroCtaSecondaryLabel?: string | null;
-    heroCtaSecondaryUrl?: string | null;
-    /**
-     * e.g. "Discover UNIQUE."
-     */
-    productSectionHeading?: string | null;
-    /**
-     * e.g. "FLAVOURS" (smaller, lighter).
-     */
-    productSectionSubheading?: string | null;
-    /**
-     * Paragraph describing the product collection (handcrafted ferments, curated collection).
-     */
-    productSectionIntro?: string | null;
-    /**
-     * e.g. "View All Products".
-     */
-    viewAllButtonLabel?: string | null;
-    /**
-     * e.g. "/shop".
-     */
-    viewAllButtonUrl?: string | null;
-    /**
-     * e.g. "Load More".
-     */
-    loadMoreLabel?: string | null;
-    /**
-     * Label for the add-to-cart icon/button on product cards.
-     */
-    addToCartLabel?: string | null;
-    /**
-     * Decorative shape with organic cutout (bottom-right). Mask for card background.
-     */
-    productCardBackgroundImage?: (string | null) | Media;
-    /**
-     * Hex color for card shape (e.g. #F7F7F8).
-     */
-    productCardBackgroundColor?: string | null;
-    /**
-     * Hex color for product section (e.g. #FFFFFF).
-     */
-    productSectionBackgroundColor?: string | null;
-    /**
-     * Hex color for add-to-cart circle (e.g. #E5B765).
-     */
-    productCardAddToCartColor?: string | null;
-    /**
-     * Hex color on hover (e.g. #d9a854).
-     */
-    productCardAddToCartHoverColor?: string | null;
-    /**
-     * e.g. "Why fermented products?"
-     */
-    benefitsHeading?: string | null;
-    /**
-     * Exactly 3 benefits. Product-focused (gut health, nutrients, preservation).
-     */
-    benefitsItems?:
-      | {
-          title: string;
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Gift a special tasty experience."
-     */
-    giftHeading?: string | null;
-    /**
-     * Text encouraging users to buy gift vouchers.
-     */
-    giftDescription?: string | null;
-    /**
-     * e.g. "Find Out More".
-     */
-    giftButtonLabel?: string | null;
-    /**
-     * e.g. "/voucher".
-     */
-    giftButtonUrl?: string | null;
-    /**
-     * e.g. "Learn UNIQUE Flavours."
-     */
-    featuredHeading?: string | null;
-    /**
-     * Word to highlight in gold (e.g. "UNIQUE").
-     */
-    featuredHeadingHighlight?: string | null;
-    /**
-     * e.g. "See All Workshops".
-     */
-    featuredViewAllLabel?: string | null;
-    /**
-     * Link for View all.
-     */
-    featuredViewAllUrl?: string | null;
-    /**
-     * Workshop cards with image, date, seats, price, and booking button.
-     */
-    featuredItems?:
-      | {
-          image?: (string | null) | Media;
-          title: string;
-          description?: string | null;
-          /**
-           * e.g. "12. March 2026".
-           */
-          date?: string | null;
-          /**
-           * Available seats (e.g. 12).
-           */
-          seats?: number | null;
-          /**
-           * e.g. "€89".
-           */
-          price?: string | null;
-          /**
-           * e.g. "Info & Buchen".
-           */
-          buttonLabel?: string | null;
-          /**
-           * Used when buttonLabel is empty (e.g. "Read More").
-           */
-          readMoreLabel?: string | null;
-          url: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Learn Fermentation Anytime, Anywhere".
-     */
-    workshopCtaHeading?: string | null;
-    /**
-     * Text about online courses.
-     */
-    workshopCtaDescription?: string | null;
-    /**
-     * Dark industrial image (fermentation vats).
-     */
-    workshopCtaBackgroundImage?: (string | null) | Media;
-    /**
-     * e.g. "View All Workshops".
-     */
-    workshopCtaButtonLabel?: string | null;
-    /**
-     * e.g. "/workshops".
-     */
-    workshopCtaButtonUrl?: string | null;
   };
   /**
    * Content for the Workshops overview page (/workshops). Only applies when slug is "workshops".
@@ -2335,6 +2121,174 @@ export interface ProductSliderBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopHeroBlock".
+ */
+export interface ShopHeroBlock {
+  /**
+   * Single main headline for the hero section (e.g. "Unsere handgemachten Produkte aus unserem Pick-Up Shop").
+   */
+  heroTitle: string;
+  /**
+   * Price shown below the title (e.g. "ab €8,50"). Leave empty to hide.
+   */
+  heroPrice?: string | null;
+  /**
+   * e.g. "Jetzt bestellen"
+   */
+  ctaPrimaryLabel?: string | null;
+  /**
+   * e.g. "/shop#products"
+   */
+  ctaPrimaryUrl?: string | null;
+  /**
+   * e.g. "Mehr erfahren"
+   */
+  ctaSecondaryLabel?: string | null;
+  /**
+   * e.g. "/fermentation"
+   */
+  ctaSecondaryUrl?: string | null;
+  /**
+   * Product cards for the scrolling carousel. Each card has an image, category label, and link to product detail.
+   */
+  slides?:
+    | {
+        /**
+         * Product photo (portrait ratio, ~860×1044px).
+         */
+        image?: (string | null) | Media;
+        /**
+         * Label shown vertically on the card (e.g. "Tempeh", "Kimchi").
+         */
+        categoryLabel: string;
+        /**
+         * URL the arrow button links to (e.g. "/shop/tempeh").
+         */
+        detailUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Small bold text at the bottom (e.g. "Fermentierte Lebensmittel, mit Sorgfalt hergestellt.").
+   */
+  bottomTagline?: string | null;
+  /**
+   * Secondary line below the tagline (e.g. "Abholung in Berlin — jede Woche frisch.").
+   */
+  bottomSubtitle?: string | null;
+  /**
+   * Optional note about delivery plans (e.g. "Lieferung in Planung — für garantierte Frische.").
+   */
+  bottomDisclaimer?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'shopHero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopProductGridBlock".
+ */
+export interface ShopProductGridBlock {
+  /**
+   * Small label above the heading (e.g. "Unsere Produkte").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main heading (e.g. "Shop All Products").
+   */
+  heading: string;
+  /**
+   * Intro text below the heading (e.g. "All products available for pickup at our Berlin studio.").
+   */
+  description?: string | null;
+  /**
+   * Badge text for pickup-only (e.g. "Abholung in Berlin"). Leave empty to hide.
+   */
+  pickupNotice?: string | null;
+  /**
+   * Select specific products to feature. Leave empty to show all published products automatically.
+   */
+  products?: (string | Product)[] | null;
+  /**
+   * When checked and no products are selected above, all published products will be displayed.
+   */
+  showAllFallback?: boolean | null;
+  /**
+   * Maximum number of products to display (default 12).
+   */
+  maxProducts?: number | null;
+  /**
+   * Button text below the grid (e.g. "View All Products").
+   */
+  ctaLabel?: string | null;
+  /**
+   * Where the CTA links to (e.g. "/shop").
+   */
+  ctaUrl?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'shopProductGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopProductListBlock".
+ */
+export interface ShopProductListBlock {
+  /**
+   * Optionale Überschrift über dem Produkt-Raster. / Optional heading above the product grid.
+   */
+  heading?: string | null;
+  /**
+   * Wähle die Produkte aus, die in diesem Block angezeigt werden sollen. Wenn leer, werden alle veröffentlichten Produkte angezeigt. / Pick which products to display in this block. If empty, all published products are shown.
+   */
+  products?: (string | Product)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'shopProductList';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CollectionGridBlock".
+ */
+export interface CollectionGridBlock {
+  /**
+   * Small label above the heading (e.g. "Our Collections").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main heading (e.g. "Explore Our Products").
+   */
+  heading: string;
+  /**
+   * Product collections to display (e.g. Tempeh, Kimchi & Laktogemüse, Starterkulturen, Miso).
+   */
+  collections?:
+    | {
+        /**
+         * Square or portrait image representing this collection.
+         */
+        image?: (string | null) | Media;
+        /**
+         * e.g. "Tempeh"
+         */
+        title: string;
+        /**
+         * One-line description (e.g. "Handcrafted soy tempeh, rich in protein.").
+         */
+        description?: string | null;
+        /**
+         * Where this card links to (e.g. "/shop?category=tempeh").
+         */
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'collectionGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ReadyToLearnCtaBlock".
  */
 export interface ReadyToLearnCtaBlock {
@@ -2479,6 +2433,47 @@ export interface TeamPreviewBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock".
+ */
+export interface TestimonialsBlock {
+  /**
+   * Small text above the heading (e.g. "Testimonials").
+   */
+  eyebrow?: string | null;
+  /**
+   * Section heading (e.g. "What They Like About Our Fermentation Class").
+   */
+  heading: string;
+  /**
+   * Optional "View All" button text. Leave empty to hide.
+   */
+  buttonLabel?: string | null;
+  buttonLink?: string | null;
+  /**
+   * Individual testimonial entries displayed as a slider.
+   */
+  testimonials: {
+    /**
+     * The testimonial text.
+     */
+    quote: string;
+    authorName: string;
+    /**
+     * Optional role/title of the author (e.g. "Artist").
+     */
+    authorRole?: string | null;
+    /**
+     * Star rating from 1 to 5.
+     */
+    rating?: number | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonials';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ThreeItemGridBlock".
  */
 export interface ThreeItemGridBlock {
@@ -2575,6 +2570,56 @@ export interface VoucherCtaBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'voucherCta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LaktoVoucherCtaBlock".
+ */
+export interface LaktoVoucherCtaBlock {
+  /**
+   * Small text above the title (e.g. "GEMEINSAM FERMENTIEREN").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main heading (e.g. "Go with a friend.").
+   */
+  title?: string | null;
+  /**
+   * Short paragraph below the heading.
+   */
+  description?: string | null;
+  /**
+   * Optional background image. White text with dark overlay when set, cream background with dark text when empty.
+   */
+  backgroundImage?: (string | null) | Media;
+  /**
+   * e.g. "Gutschein kaufen" / "Buy Voucher"
+   */
+  primaryLabel?: string | null;
+  /**
+   * e.g. "/voucher"
+   */
+  primaryHref?: string | null;
+  /**
+   * e.g. "Zum Shop" / "To Shop"
+   */
+  secondaryLabel?: string | null;
+  /**
+   * e.g. "/shop"
+   */
+  secondaryHref?: string | null;
+  /**
+   * Small tags shown at the bottom (e.g. "Sofort einlösbar", "Für alle Workshops").
+   */
+  pills?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'laktoVoucherCta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3187,6 +3232,59 @@ export interface WorkshopAppointment {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-bookings".
+ */
+export interface WorkshopBooking {
+  id: string;
+  /**
+   * e.g. "kombucha", "lakto", "tempeh"
+   */
+  workshopSlug: string;
+  /**
+   * ID of the WorkshopAppointment
+   */
+  appointmentId: string;
+  /**
+   * e.g. "Kombucha Workshop"
+   */
+  workshopTitle: string;
+  /**
+   * Formatted date string
+   */
+  date: string;
+  /**
+   * Formatted time string
+   */
+  time: string;
+  guestCount: number;
+  pricePerPerson: number;
+  totalPrice: number;
+  /**
+   * For linking to cart items (temporary until checkout)
+   */
+  cartSlug?: string | null;
+  /**
+   * Email for booking confirmation
+   */
+  email?: string | null;
+  /**
+   * For personalizing the booking confirmation email
+   */
+  firstName?: string | null;
+  lastName?: string | null;
+  /**
+   * Optional contact number
+   */
+  phone?: string | null;
+  /**
+   * Any dietary restrictions, allergies, or special requests
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Gift vouchers that can be purchased as products and redeemed on the /redeem-voucher page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3309,6 +3407,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'workshop-appointments';
         value: string | WorkshopAppointment;
+      } | null)
+    | ({
+        relationTo: 'workshop-bookings';
+        value: string | WorkshopBooking;
       } | null)
     | ({
         relationTo: 'vouchers';
@@ -3496,14 +3598,20 @@ export interface PagesSelect<T extends boolean = true> {
         ourStory?: T | OurStoryBlockSelect<T>;
         onlineCourseSlider?: T | OnlineCourseSliderBlockSelect<T>;
         productSlider?: T | ProductSliderBlockSelect<T>;
+        shopHero?: T | ShopHeroBlockSelect<T>;
+        shopProductGrid?: T | ShopProductGridBlockSelect<T>;
+        shopProductList?: T | ShopProductListBlockSelect<T>;
+        collectionGrid?: T | CollectionGridBlockSelect<T>;
         readyToLearnCta?: T | ReadyToLearnCtaBlockSelect<T>;
         sponsorsBar?: T | SponsorsBarBlockSelect<T>;
         teamCards?: T | TeamCardsBlockSelect<T>;
         teamPreview?: T | TeamPreviewBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         voucherCta?: T | VoucherCtaBlockSelect<T>;
+        laktoVoucherCta?: T | LaktoVoucherCtaBlockSelect<T>;
         workshopSlider?: T | WorkshopSliderBlockSelect<T>;
         workshopPhases?: T | WorkshopPhasesBlockSelect<T>;
       };
@@ -3732,78 +3840,6 @@ export interface PagesSelect<T extends boolean = true> {
               answer?: T;
               id?: T;
             };
-      };
-  shop?:
-    | T
-    | {
-        heroSlides?:
-          | T
-          | {
-              image?: T;
-              backgroundVideo?: T;
-              productImage?: T;
-              title?: T;
-              description?: T;
-              ctaLabel?: T;
-              ctaUrl?: T;
-              id?: T;
-            };
-        heroTitleLine1?: T;
-        heroTitleLine2?: T;
-        heroTitleHighlight?: T;
-        heroDescription?: T;
-        heroBackgroundImage?: T;
-        heroCtaPrimaryLabel?: T;
-        heroCtaPrimaryUrl?: T;
-        heroCtaSecondaryLabel?: T;
-        heroCtaSecondaryUrl?: T;
-        productSectionHeading?: T;
-        productSectionSubheading?: T;
-        productSectionIntro?: T;
-        viewAllButtonLabel?: T;
-        viewAllButtonUrl?: T;
-        loadMoreLabel?: T;
-        addToCartLabel?: T;
-        productCardBackgroundImage?: T;
-        productCardBackgroundColor?: T;
-        productSectionBackgroundColor?: T;
-        productCardAddToCartColor?: T;
-        productCardAddToCartHoverColor?: T;
-        benefitsHeading?: T;
-        benefitsItems?:
-          | T
-          | {
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-        giftHeading?: T;
-        giftDescription?: T;
-        giftButtonLabel?: T;
-        giftButtonUrl?: T;
-        featuredHeading?: T;
-        featuredHeadingHighlight?: T;
-        featuredViewAllLabel?: T;
-        featuredViewAllUrl?: T;
-        featuredItems?:
-          | T
-          | {
-              image?: T;
-              title?: T;
-              description?: T;
-              date?: T;
-              seats?: T;
-              price?: T;
-              buttonLabel?: T;
-              readMoreLabel?: T;
-              url?: T;
-              id?: T;
-            };
-        workshopCtaHeading?: T;
-        workshopCtaDescription?: T;
-        workshopCtaBackgroundImage?: T;
-        workshopCtaButtonLabel?: T;
-        workshopCtaButtonUrl?: T;
       };
   workshops?:
     | T
@@ -4215,6 +4251,77 @@ export interface ProductSliderBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopHeroBlock_select".
+ */
+export interface ShopHeroBlockSelect<T extends boolean = true> {
+  heroTitle?: T;
+  heroPrice?: T;
+  ctaPrimaryLabel?: T;
+  ctaPrimaryUrl?: T;
+  ctaSecondaryLabel?: T;
+  ctaSecondaryUrl?: T;
+  slides?:
+    | T
+    | {
+        image?: T;
+        categoryLabel?: T;
+        detailUrl?: T;
+        id?: T;
+      };
+  bottomTagline?: T;
+  bottomSubtitle?: T;
+  bottomDisclaimer?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopProductGridBlock_select".
+ */
+export interface ShopProductGridBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  description?: T;
+  pickupNotice?: T;
+  products?: T;
+  showAllFallback?: T;
+  maxProducts?: T;
+  ctaLabel?: T;
+  ctaUrl?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopProductListBlock_select".
+ */
+export interface ShopProductListBlockSelect<T extends boolean = true> {
+  heading?: T;
+  products?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CollectionGridBlock_select".
+ */
+export interface CollectionGridBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  collections?:
+    | T
+    | {
+        image?: T;
+        title?: T;
+        description?: T;
+        url?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ReadyToLearnCtaBlock_select".
  */
 export interface ReadyToLearnCtaBlockSelect<T extends boolean = true> {
@@ -4294,6 +4401,27 @@ export interface TeamPreviewBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock_select".
+ */
+export interface TestimonialsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  testimonials?:
+    | T
+    | {
+        quote?: T;
+        authorName?: T;
+        authorRole?: T;
+        rating?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ThreeItemGridBlock_select".
  */
 export interface ThreeItemGridBlockSelect<T extends boolean = true> {
@@ -4338,6 +4466,28 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
         id?: T;
       };
   backgroundImage?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LaktoVoucherCtaBlock_select".
+ */
+export interface LaktoVoucherCtaBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  backgroundImage?: T;
+  primaryLabel?: T;
+  primaryHref?: T;
+  secondaryLabel?: T;
+  secondaryHref?: T;
+  pills?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -4589,6 +4739,28 @@ export interface WorkshopAppointmentsSelect<T extends boolean = true> {
   dateTime?: T;
   availableSpots?: T;
   isPublished?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-bookings_select".
+ */
+export interface WorkshopBookingsSelect<T extends boolean = true> {
+  workshopSlug?: T;
+  appointmentId?: T;
+  workshopTitle?: T;
+  date?: T;
+  time?: T;
+  guestCount?: T;
+  pricePerPerson?: T;
+  totalPrice?: T;
+  cartSlug?: T;
+  email?: T;
+  firstName?: T;
+  lastName?: T;
+  phone?: T;
   notes?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -5135,196 +5307,6 @@ export interface Footer {
   createdAt?: string | null;
 }
 /**
- * Content for the Shop page (/shop). Hero, product section, gift CTA, and workshop banner.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "shop".
- */
-export interface Shop {
-  id: string;
-  /**
-   * Add slides for a hero carousel. If empty, the single hero below is used.
-   */
-  heroSlides?:
-    | {
-        /**
-         * Full-bleed background.
-         */
-        image: string | Media;
-        /**
-         * Optional center product (Homemade Jam style).
-         */
-        productImage?: (string | null) | Media;
-        /**
-         * Optional looping video (e.g. bubbling ingredients). Homemade Jam style.
-         */
-        backgroundVideo?: (string | null) | Media;
-        /**
-         * e.g. "LAKTO FERMENTATION."
-         */
-        title: string;
-        /**
-         * Short text below the title.
-         */
-        description?: string | null;
-        /**
-         * e.g. "Shop Now".
-         */
-        ctaLabel?: string | null;
-        /**
-         * e.g. "#products".
-         */
-        ctaUrl?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * First line (e.g. "Discover").
-   */
-  heroTitleLine1: string;
-  /**
-   * Second line with highlighted word (e.g. "UNIQUE Flavours").
-   */
-  heroTitleLine2: string;
-  /**
-   * Word to highlight in gold in line 2 (e.g. "UNIQUE").
-   */
-  heroTitleHighlight?: string | null;
-  /**
-   * Short welcoming text below the title.
-   */
-  heroDescription?: string | null;
-  /**
-   * Blurred background image (fermented jars, products).
-   */
-  heroBackgroundImage?: (string | null) | Media;
-  /**
-   * e.g. "Explore Now".
-   */
-  heroCtaPrimaryLabel?: string | null;
-  /**
-   * e.g. "#products".
-   */
-  heroCtaPrimaryUrl?: string | null;
-  /**
-   * e.g. "Learn More".
-   */
-  heroCtaSecondaryLabel?: string | null;
-  heroCtaSecondaryUrl?: string | null;
-  /**
-   * e.g. "Discover UNIQUE."
-   */
-  productSectionHeading: string;
-  /**
-   * e.g. "FLAVOURS" (smaller, lighter).
-   */
-  productSectionSubheading?: string | null;
-  /**
-   * Paragraph describing the product collection (handcrafted ferments, curated collection).
-   */
-  productSectionIntro?: string | null;
-  /**
-   * e.g. "View All Products".
-   */
-  viewAllButtonLabel?: string | null;
-  /**
-   * e.g. "/shop".
-   */
-  viewAllButtonUrl?: string | null;
-  /**
-   * e.g. "Load More".
-   */
-  loadMoreLabel?: string | null;
-  /**
-   * Label for the add-to-cart icon/button on product cards.
-   */
-  addToCartLabel?: string | null;
-  /**
-   * e.g. "Why fermented products?"
-   */
-  benefitsHeading?: string | null;
-  /**
-   * Up to 3 cards with title and description.
-   */
-  benefitsItems?:
-    | {
-        title: string;
-        description: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * e.g. "Gift a special tasty experience."
-   */
-  giftHeading: string;
-  /**
-   * Text encouraging users to buy gift vouchers.
-   */
-  giftDescription?: string | null;
-  /**
-   * e.g. "Find Out More".
-   */
-  giftButtonLabel?: string | null;
-  /**
-   * e.g. "/voucher".
-   */
-  giftButtonUrl?: string | null;
-  /**
-   * e.g. "Learn UNIQUE Flavours."
-   */
-  featuredHeading: string;
-  /**
-   * Word to highlight in gold (e.g. "UNIQUE").
-   */
-  featuredHeadingHighlight?: string | null;
-  /**
-   * e.g. "View all".
-   */
-  featuredViewAllLabel?: string | null;
-  /**
-   * Link for View all.
-   */
-  featuredViewAllUrl?: string | null;
-  /**
-   * Cards with image, title, description, and "Read More" link.
-   */
-  featuredItems?:
-    | {
-        image?: (string | null) | Media;
-        title: string;
-        description?: string | null;
-        /**
-         * e.g. "Read More".
-         */
-        readMoreLabel?: string | null;
-        url: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * e.g. "Learn Fermentation Anytime, Anywhere".
-   */
-  workshopCtaHeading: string;
-  /**
-   * Text about online courses.
-   */
-  workshopCtaDescription?: string | null;
-  /**
-   * Dark industrial image (fermentation vats).
-   */
-  workshopCtaBackgroundImage?: (string | null) | Media;
-  /**
-   * e.g. "Start Learning".
-   */
-  workshopCtaButtonLabel?: string | null;
-  /**
-   * e.g. "/workshops".
-   */
-  workshopCtaButtonUrl?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
  * Global testimonials section used across Home, Courses, and Workshops pages. Edit once, appears everywhere.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5445,74 +5427,6 @@ export interface FooterSelect<T extends boolean = true> {
         instagram?: T;
         linkedin?: T;
       };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "shop_select".
- */
-export interface ShopSelect<T extends boolean = true> {
-  heroSlides?:
-    | T
-    | {
-        image?: T;
-        productImage?: T;
-        backgroundVideo?: T;
-        title?: T;
-        description?: T;
-        ctaLabel?: T;
-        ctaUrl?: T;
-        id?: T;
-      };
-  heroTitleLine1?: T;
-  heroTitleLine2?: T;
-  heroTitleHighlight?: T;
-  heroDescription?: T;
-  heroBackgroundImage?: T;
-  heroCtaPrimaryLabel?: T;
-  heroCtaPrimaryUrl?: T;
-  heroCtaSecondaryLabel?: T;
-  heroCtaSecondaryUrl?: T;
-  productSectionHeading?: T;
-  productSectionSubheading?: T;
-  productSectionIntro?: T;
-  viewAllButtonLabel?: T;
-  viewAllButtonUrl?: T;
-  loadMoreLabel?: T;
-  addToCartLabel?: T;
-  benefitsHeading?: T;
-  benefitsItems?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        id?: T;
-      };
-  giftHeading?: T;
-  giftDescription?: T;
-  giftButtonLabel?: T;
-  giftButtonUrl?: T;
-  featuredHeading?: T;
-  featuredHeadingHighlight?: T;
-  featuredViewAllLabel?: T;
-  featuredViewAllUrl?: T;
-  featuredItems?:
-    | T
-    | {
-        image?: T;
-        title?: T;
-        description?: T;
-        readMoreLabel?: T;
-        url?: T;
-        id?: T;
-      };
-  workshopCtaHeading?: T;
-  workshopCtaDescription?: T;
-  workshopCtaBackgroundImage?: T;
-  workshopCtaButtonLabel?: T;
-  workshopCtaButtonUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

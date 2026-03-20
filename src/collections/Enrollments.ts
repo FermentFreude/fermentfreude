@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { adminOnly } from '@/access/adminOnly'
 import { ownCourseProgress } from '@/access/ownCourseProgress'
+import { sendEnrollmentEmail } from '@/hooks/brevo/sendEnrollmentEmail'
 
 /**
  * Enrollments — one record per user per course.
@@ -13,6 +14,9 @@ import { ownCourseProgress } from '@/access/ownCourseProgress'
  */
 export const Enrollments: CollectionConfig = {
   slug: 'enrollments',
+  hooks: {
+    afterChange: [sendEnrollmentEmail],
+  },
   access: {
     create: ({ req: { user } }) => Boolean(user),
     delete: adminOnly,
@@ -20,7 +24,7 @@ export const Enrollments: CollectionConfig = {
     update: adminOnly,
   },
   admin: {
-    group: 'Users',
+    group: 'Workshops & Kurse',
     defaultColumns: ['user', 'courseSlug', 'createdAt'],
     description: 'One enrollment per user per course. Auto-created on successful order payment.',
     useAsTitle: 'courseSlug',

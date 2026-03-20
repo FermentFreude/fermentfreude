@@ -4,7 +4,7 @@ export const TestimonialsGlobal: GlobalConfig = {
   slug: 'testimonials-global',
   label: 'Testimonials',
   admin: {
-    group: 'global',
+    group: 'Website',
     description:
       'Global testimonials section used across Home, Courses, and Workshops pages. Edit once, appears everywhere.',
   },

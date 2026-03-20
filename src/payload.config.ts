@@ -26,11 +26,11 @@ import { Posts } from '@/collections/Posts'
 import { Users } from '@/collections/Users'
 import { Vouchers } from '@/collections/Vouchers'
 import { WorkshopAppointments } from '@/collections/WorkshopAppointments'
+import { WorkshopBookings } from '@/collections/WorkshopBookings'
 import { WorkshopLocations } from '@/collections/WorkshopLocations'
 import { Workshops } from '@/collections/Workshops'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
-import { Shop } from '@/globals/Shop'
 import { TestimonialsGlobal } from '@/globals/Testimonials'
 import { plugins } from './plugins'
 
@@ -48,7 +48,16 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
-    components: {},
+    meta: {
+      titleSuffix: ' — FermentFreude',
+      icons: [{ url: '/submark-dark.png' }],
+    },
+    components: {
+      graphics: {
+        Logo: '/components/admin/Logo#Logo',
+        Icon: '/components/admin/Icon#Icon',
+      },
+    },
     livePreview: {
       collections: ['pages'],
     },
@@ -81,6 +90,7 @@ export default buildConfig({
     Workshops,
     WorkshopLocations,
     WorkshopAppointments,
+    WorkshopBookings,
     Vouchers,
   ],
   db: mongooseAdapter({
@@ -122,7 +132,7 @@ export default buildConfig({
     },
   }),
   //email: nodemailerAdapter(),
-  globals: [Header, Footer, Shop, TestimonialsGlobal],
+  globals: [Header, Footer, TestimonialsGlobal],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,

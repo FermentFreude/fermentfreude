@@ -168,6 +168,10 @@ const config = {
           '20%': { opacity: 1 },
           '100% ': { opacity: 0.2 },
         },
+        'spin-slow': {
+          from: { transform: 'rotate(0deg)' },
+          to: { transform: 'rotate(360deg)' },
+        },
       },
       animation: {
         in: 'in 0.2s ease-out',
@@ -182,6 +186,7 @@ const config = {
         blink: 'blink 1.4s both infinite',
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'spin-slow': 'spin-slow 20s linear infinite',
       },
     },
   },

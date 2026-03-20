@@ -75,12 +75,17 @@ export default async function Login() {
               <div className="md:hidden mt-4 space-y-3">
                 <div className="border-t border-dashed border-neutral-400/50" />
                 <div className="flex items-center justify-between text-[11px] tracking-[0.12em] text-neutral-300">
-                  <Link href="/terms" className="underline underline-offset-4 hover:text-white">Terms &amp; Conditions</Link>
-                  <Link href="/privacy" className="underline underline-offset-4 hover:text-white">Privacy Policy</Link>
-                  <Link href="/" className="underline underline-offset-4 hover:text-white">Visit Website</Link>
+                  <Link href="/terms" className="underline underline-offset-4 hover:text-white">
+                    Terms &amp; Conditions
+                  </Link>
+                  <Link href="/privacy" className="underline underline-offset-4 hover:text-white">
+                    Privacy Policy
+                  </Link>
+                  <Link href="/" className="underline underline-offset-4 hover:text-white">
+                    Visit Website
+                  </Link>
                 </div>
               </div>
-
             </section>
 
             <aside className="hidden md:flex md:flex-col md:gap-5 text-neutral-50">
@@ -133,14 +138,20 @@ export default async function Login() {
             <div className="space-y-3">
               <div className="border-t border-dashed border-neutral-400/50" />
               <div className="flex gap-8">
-                <Link href="/terms" className="underline underline-offset-4 hover:text-white">Terms &amp; Conditions</Link>
-                <Link href="/privacy" className="underline underline-offset-4 hover:text-white">Privacy Policy</Link>
+                <Link href="/terms" className="underline underline-offset-4 hover:text-white">
+                  Terms &amp; Conditions
+                </Link>
+                <Link href="/privacy" className="underline underline-offset-4 hover:text-white">
+                  Privacy Policy
+                </Link>
               </div>
             </div>
             <div className="space-y-3">
               <div className="border-t border-dashed border-neutral-400/50" />
               <div className="flex justify-end">
-                <Link href="/" className="underline underline-offset-4 hover:text-white">Visit Website</Link>
+                <Link href="/" className="underline underline-offset-4 hover:text-white">
+                  Visit Website
+                </Link>
               </div>
             </div>
           </div>

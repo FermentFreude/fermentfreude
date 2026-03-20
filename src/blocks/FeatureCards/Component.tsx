@@ -215,7 +215,7 @@ export const FeatureCardsBlock: React.FC<Props> = ({
             <FadeIn key={index} delay={index * 120}>
               <div className="flex flex-col items-center text-center p-6 rounded-2xl border-2 border-ff-gold-accent hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 {/* Blob + Brand Character */}
-                <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center -mb-2">
+                <div className="blob-interactive relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center -mb-2">
                   <BlobCanvas
                     color={BLOB_COLOR}
                     radius={65}

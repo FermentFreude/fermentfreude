@@ -28,7 +28,7 @@ class BlobPoint {
   _speed = 0
   _radialEffect = 0
   _elasticity = 0.001
-  _friction = 0.0085
+  _friction = 0.012
   parentRef: { center: { x: number; y: number }; radius: number }
 
   constructor(azimuth: number, parentRef: { center: { x: number; y: number }; radius: number }) {
@@ -172,9 +172,9 @@ export const BlobCanvas: React.FC<BlobCanvasProps> = ({
         if (nearestPoint) {
           const sx = oldMouse.x - mx
           const sy = oldMouse.y - my
-          let strength = Math.sqrt(sx * sx + sy * sy) * 8
-          if (strength > 60) strength = 60
-          nearestPoint.acceleration = (strength / 100) * (hover ? -1.2 : 1.2)
+          let strength = Math.sqrt(sx * sx + sy * sy) * 6
+          if (strength > 40) strength = 40
+          nearestPoint.acceleration = (strength / 100) * (hover ? -0.8 : 0.8)
         }
       }
       oldMouse = { x: mx, y: my }
@@ -185,6 +185,7 @@ export const BlobCanvas: React.FC<BlobCanvasProps> = ({
     /* ── Animation loop ───────────────────────────────────── */
     const pts = blob.points
     const n = pts.length
+    const startTime = performance.now()
 
     const draw = () => {
       const rect = canvas.parentElement?.getBoundingClientRect()
@@ -194,6 +195,12 @@ export const BlobCanvas: React.FC<BlobCanvasProps> = ({
       }
       const w = rect.width
       const h = rect.height
+      const elapsed = (performance.now() - startTime) / 1000
+
+      /* Gentle whole-blob float — translate the center in a slow figure-8 */
+      const driftX = Math.sin(elapsed * 0.4) * 1.5
+      const driftY = Math.cos(elapsed * 0.3) * 1.2
+      blob.center = { x: w / 2 + driftX, y: h / 2 + driftY }
 
       ctx.clearRect(0, 0, w, h)
 

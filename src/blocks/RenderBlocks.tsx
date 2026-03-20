@@ -2,16 +2,21 @@ import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { CarouselBlock } from '@/blocks/Carousel/Component'
+import { CollectionGridComponent } from '@/blocks/CollectionGrid/Component'
 import { ContactBlockComponent } from '@/blocks/ContactBlock/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FeatureCardsBlock } from '@/blocks/FeatureCards/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
+import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { OnlineCourseSliderBlock } from '@/blocks/OnlineCourseSlider/Component'
 import { OurStoryBlock } from '@/blocks/OurStory/Component'
 import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { ReadyToLearnCTABlock } from '@/blocks/ReadyToLearnCTA/Component'
+import { ShopHeroComponent } from '@/blocks/ShopHero/Component'
+import { ShopProductGridComponent } from '@/blocks/ShopProductGrid/Component'
+import { ShopProductListComponent } from '@/blocks/ShopProductList/Component'
 import { SponsorsBarBlock } from '@/blocks/SponsorsBar/Component'
 import { TeamCardsBlock } from '@/blocks/TeamCards/Component'
 import { TeamPreviewBlock } from '@/blocks/TeamPreview/Component'
@@ -44,7 +49,12 @@ const blockComponents = {
   testimonials: TestimonialsBlock,
   threeItemGrid: ThreeItemGridBlock,
   productSlider: ProductSliderBlock,
+  shopHero: ShopHeroComponent,
+  shopProductGrid: ShopProductGridComponent,
+  shopProductList: ShopProductListComponent,
+  collectionGrid: CollectionGridComponent,
   voucherCta: VoucherCtaBlock,
+  laktoVoucherCta: LaktoVoucherCtaBlockComponent,
   onlineCourseSlider: OnlineCourseSliderBlock,
   workshopSlider: WorkshopSliderBlock,
   workshopPhases: WorkshopPhasesComponent,
@@ -57,9 +67,12 @@ export const RenderBlocks: React.FC<{
   const { blocks, slug } = props
   const blockList = blocks ?? []
   const isAbout = slug === 'about'
+  const isShop = slug === 'shop'
   const gapClass = isAbout
     ? 'mb-12 last:mb-0' // increased margin between sections on About
-    : 'my-[var(--space-section-md)] first:mt-0 last:mb-0'
+    : isShop
+      ? 'first:mt-0 last:mb-0' // shop: no extra margin between blocks (each block handles its own padding)
+      : 'my-[var(--space-section-md)] first:mt-0 last:mb-0'
 
   const hasBlocks = blockList.length > 0
 
