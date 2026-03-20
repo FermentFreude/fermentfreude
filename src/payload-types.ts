@@ -1030,6 +1030,10 @@ export interface Page {
      */
     deliveryDisclaimer?: string | null;
     /**
+     * Address shown when "Pick up from store" is selected (e.g. Grabenstraße 15, 8010 Graz).
+     */
+    pickupAddress?: string | null;
+    /**
      * Label for the optional greeting message field.
      */
     greetingLabel: string;
@@ -1041,6 +1045,82 @@ export interface Page {
      * Text for the main CTA button (e.g. "Add to cart").
      */
     addToCartButton: string;
+    /**
+     * Heading for the "Why a fermentation voucher" section (e.g. "Why a fermentation voucher is a great gift").
+     */
+    voucherWhyHeading: string;
+    /**
+     * Body text that explains why a fermentation workshop voucher is a good present.
+     */
+    voucherWhyBody: string;
+    /**
+     * Optional joyful image for the "Why" section (e.g. fermentation, gift, workshop). Shown beside the text. Leave empty to show text only.
+     */
+    voucherWhyImage?: (string | null) | Media;
+    /**
+     * Four benefit items shown in a 2×2 grid (e.g. Unforgettable Experience, Health & Pleasure). Leave empty to use default copy.
+     */
+    voucherWhyBenefits?:
+      | {
+          icon: 'sparkle' | 'heart' | 'graduation' | 'leaf';
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Heading above the audience tags (e.g. "Perfect for"). Shown at the end of the Why section. Leave empty to hide.
+     */
+    voucherWhyPerfectForHeading?: string | null;
+    /**
+     * Tags shown under the heading (e.g. Foodies, Health-conscious). Leave empty to hide.
+     */
+    voucherWhyPerfectForTags?:
+      | {
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Heading above the benefits list (e.g. "What's included in the voucher").
+     */
+    voucherBenefitsHeading: string;
+    /**
+     * Short line under the heading (e.g. "All at a glance").
+     */
+    voucherBenefitsSubtitle?: string | null;
+    /**
+     * List of benefits with optional subtext. Shown with green checkmarks in two columns.
+     */
+    voucherBenefits: {
+      /**
+       * Main benefit line (e.g. "Valid for all workshops").
+       */
+      text: string;
+      /**
+       * Optional detail below the title (e.g. "Kombucha, Lakto, Tempeh & seasonal").
+       */
+      subtext?: string | null;
+      id?: string | null;
+    }[];
+    /**
+     * Heading above the steps (e.g. "How it works").
+     */
+    voucherHowHeading: string;
+    /**
+     * Four steps with title and optional description (e.g. "Buy" / "Order online for €99").
+     */
+    voucherHowSteps: {
+      /**
+       * Step heading (e.g. "Buy", "Receive").
+       */
+      text: string;
+      /**
+       * Optional detail (e.g. "Order online for €99").
+       */
+      description?: string | null;
+      id?: string | null;
+    }[];
     /**
      * Heading for the "Combine with Starter Set" section.
      */
@@ -3817,9 +3897,45 @@ export interface PagesSelect<T extends boolean = true> {
         amountSectionLabel?: T;
         deliverySectionLabel?: T;
         deliveryDisclaimer?: T;
+        pickupAddress?: T;
         greetingLabel?: T;
         greetingPlaceholder?: T;
         addToCartButton?: T;
+        voucherWhyHeading?: T;
+        voucherWhyBody?: T;
+        voucherWhyImage?: T;
+        voucherWhyBenefits?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        voucherWhyPerfectForHeading?: T;
+        voucherWhyPerfectForTags?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+        voucherBenefitsHeading?: T;
+        voucherBenefitsSubtitle?: T;
+        voucherBenefits?:
+          | T
+          | {
+              text?: T;
+              subtext?: T;
+              id?: T;
+            };
+        voucherHowHeading?: T;
+        voucherHowSteps?:
+          | T
+          | {
+              text?: T;
+              description?: T;
+              id?: T;
+            };
         starterSetHeading?: T;
         starterSetDescription?: T;
         starterSetButton?: T;

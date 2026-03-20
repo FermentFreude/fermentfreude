@@ -7,8 +7,10 @@ import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 import { FAQSection } from './FAQSection'
 import { GiftOccasionsSection } from './GiftOccasionsSection'
-import { StarterSetSection } from './StarterSetSection'
+import { VoucherBenefitsSection } from './VoucherBenefitsSection'
 import { VoucherHero } from './VoucherHero'
+import { VoucherHowSection } from './VoucherHowSection'
+import { VoucherWhySection } from './VoucherWhySection'
 
 const configPromise = Promise.resolve(config)
 
@@ -44,7 +46,7 @@ export const metadata: Metadata = {
 const DEFAULTS = {
   heroHeading: 'Give the gift of fermentation',
   heroDescription:
-    'The perfect gift for foodies and the health-conscious. Choose an amount and optionally a greeting message for your voucher.',
+    'The perfect gift for foodies and the health-conscious.\nChoose an amount and optionally a greeting message for your voucher.',
   voucherAmounts: [{ amount: '99€' }],
   deliveryOptions: [
     { type: 'email', title: 'By email to print at home', icon: 'email' as const },
@@ -56,14 +58,32 @@ const DEFAULTS = {
   amountSectionLabel: 'VOUCHER VALUE',
   deliverySectionLabel: 'DELIVERY METHOD',
   deliveryDisclaimer: 'We cannot ship products by post to ensure freshness.',
+  pickupAddress: 'Grabenstraße 15\n8010 Graz',
   greetingLabel: 'Your greeting message',
   greetingPlaceholder: 'Max. 250 characters',
   addToCartButton: 'Add to cart',
-  starterSetHeading: 'Combine the voucher with a starter set',
-  starterSetDescription:
-    'Rent a jar, same as before! Email with the voucher, ready to print. 1 week, 2 weeks, per day.',
-  starterSetButton: 'View starter sets',
-  starterSetImage: null,
+  voucherWhyHeading: 'Why a fermentation voucher is a great gift',
+  voucherWhyBody:
+    "You're not giving \"just something\", but a workshop that inspires, brings joy, and has a lasting effect. A gift with added value.",
+  voucherBenefitsHeading: 'What’s included',
+  voucherBenefitsSubtitle: 'All at a glance',
+  voucherBenefits: [
+    { text: 'Valid for all workshops', subtext: 'Kombucha, Lacto-vegetables, Tempeh & seasonal' },
+    { text: 'No expiry date', subtext: 'Valid indefinitely' },
+    { text: 'Suitable for beginners & pros', subtext: 'All experience levels welcome' },
+    { text: 'Small groups', subtext: 'Maximum 8 people for intensive support' },
+    { text: 'Quickly available', subtext: 'Digital via email or pick-up at the store' },
+    { text: 'Starter kits & tastings included', subtext: 'Everything to continue at home' },
+    { text: 'Hands-on with ferments to take home', subtext: 'Your own creations and fermentation vessels' },
+    { text: 'Flexible date choice', subtext: 'Workshops available year-round' },
+  ],
+  voucherHowHeading: 'How it works',
+  voucherHowSteps: [
+    { title: 'Kaufen', description: 'Online für €99 bestellen' },
+    { title: 'Erhalten', description: 'Digital oder Abholung in Graz' },
+    { title: 'Wählen', description: 'Workshop & Termin aussuchen' },
+    { title: 'Genießen', description: 'Lernen & weiterfermentieren' },
+  ],
   giftOccasionsHeading: 'A gift for every occasion',
   giftOccasions: [
     { image: null, caption: 'Birthdays' },
@@ -126,14 +146,36 @@ export default async function VoucherPage() {
   const amountSectionLabel = resolve(v?.amountSectionLabel, DEFAULTS.amountSectionLabel)
   const deliverySectionLabel = resolve(v?.deliverySectionLabel, DEFAULTS.deliverySectionLabel)
   const deliveryDisclaimer = v?.deliveryDisclaimer ?? DEFAULTS.deliveryDisclaimer
+  const pickupAddress = v?.pickupAddress ?? DEFAULTS.pickupAddress
   const greetingLabel = resolve(v?.greetingLabel, DEFAULTS.greetingLabel)
   const greetingPlaceholder = resolve(v?.greetingPlaceholder, DEFAULTS.greetingPlaceholder)
   const addToCartButton = resolve(v?.addToCartButton, DEFAULTS.addToCartButton)
 
-  const starterSetHeading = resolve(v?.starterSetHeading, DEFAULTS.starterSetHeading)
-  const starterSetDescription = resolve(v?.starterSetDescription, DEFAULTS.starterSetDescription)
-  const starterSetButton = resolve(v?.starterSetButton, DEFAULTS.starterSetButton)
-  const starterSetImage = v?.starterSetImage ?? null
+  const voucherWhyHeading = resolve(v?.voucherWhyHeading, DEFAULTS.voucherWhyHeading)
+  const voucherWhyBody = resolve(v?.voucherWhyBody, DEFAULTS.voucherWhyBody)
+  const voucherWhyImage = v?.voucherWhyImage ?? null
+  const voucherWhyBenefits =
+    (v?.voucherWhyBenefits?.length ?? 0) >= 4
+      ? v!.voucherWhyBenefits!.map((b) => ({
+          icon: b.icon,
+          title: b.title,
+          description: b.description,
+        }))
+      : null
+  const voucherBenefitsHeading = resolve(
+    v?.voucherBenefitsHeading,
+    DEFAULTS.voucherBenefitsHeading,
+  )
+  const voucherBenefitsSubtitle = v?.voucherBenefitsSubtitle ?? DEFAULTS.voucherBenefitsSubtitle
+  const voucherBenefits =
+    (v?.voucherBenefits?.length ?? 0) > 0
+      ? v!.voucherBenefits.map((b) => ({ text: b.text, subtext: b.subtext ?? null })).filter((b) => b.text)
+      : DEFAULTS.voucherBenefits
+  const voucherHowHeading = resolve(v?.voucherHowHeading, DEFAULTS.voucherHowHeading)
+  const voucherHowSteps =
+    (v?.voucherHowSteps?.length ?? 0) > 0
+      ? v!.voucherHowSteps.map((s) => ({ title: s.text, description: s.description ?? null })).filter((s) => s.title)
+      : DEFAULTS.voucherHowSteps
 
   const giftOccasionsHeading = resolve(v?.giftOccasionsHeading, DEFAULTS.giftOccasionsHeading)
   const giftOccasions =
@@ -154,7 +196,7 @@ export default async function VoucherPage() {
       : DEFAULTS.faqs
 
   return (
-    <div className="min-h-screen bg-ff-cream">
+    <div className="min-h-screen bg-white">
       <VoucherHero
         heading={heroHeading}
         description={heroDescription}
@@ -167,17 +209,24 @@ export default async function VoucherPage() {
         amountSectionLabel={amountSectionLabel}
         deliverySectionLabel={deliverySectionLabel}
         deliveryDisclaimer={deliveryDisclaimer}
+        pickupAddress={pickupAddress}
         greetingLabel={greetingLabel}
         greetingPlaceholder={greetingPlaceholder}
         addToCartButton={addToCartButton}
       />
-      <StarterSetSection
-        heading={starterSetHeading}
-        description={starterSetDescription}
-        buttonText={starterSetButton}
-        image={starterSetImage}
+      <VoucherWhySection
+        heading={voucherWhyHeading}
+        body={voucherWhyBody}
+        image={voucherWhyImage}
+        benefits={voucherWhyBenefits}
       />
+      <VoucherHowSection heading={voucherHowHeading} steps={voucherHowSteps} />
       <GiftOccasionsSection heading={giftOccasionsHeading} occasions={giftOccasions} />
+      <VoucherBenefitsSection
+        heading={voucherBenefitsHeading}
+        subtitle={voucherBenefitsSubtitle}
+        benefits={voucherBenefits}
+      />
       <FAQSection heading={faqHeading} faqs={faqs} />
     </div>
   )
