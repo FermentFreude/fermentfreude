@@ -40,7 +40,7 @@ export const CreateAccountForm: React.FC = () => {
         password: data.password,
         name: [data.firstName, data.lastName].filter(Boolean).join(' ').trim() || undefined,
       }
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, {
+      const response = await fetch(`/api/users`, {
         body: JSON.stringify(body),
         headers: {
           'Content-Type': 'application/json',
