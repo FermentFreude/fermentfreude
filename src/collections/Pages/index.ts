@@ -1426,7 +1426,8 @@ export const Pages: CollectionConfig = {
               localized: true,
               label: '"Perfect for" heading',
               admin: {
-                description: 'Heading above the audience tags (e.g. "Perfect for"). Shown at the end of the Why section. Leave empty to hide.',
+                description:
+                  'Heading above the audience tags (e.g. "Perfect for"). Shown at the end of the Why section. Leave empty to hide.',
               },
             },
             {
@@ -1434,7 +1435,8 @@ export const Pages: CollectionConfig = {
               type: 'array',
               label: '"Perfect for" tags',
               admin: {
-                description: 'Tags shown under the heading (e.g. Foodies, Health-conscious). Leave empty to hide.',
+                description:
+                  'Tags shown under the heading (e.g. Foodies, Health-conscious). Leave empty to hide.',
               },
               fields: [
                 {
@@ -1453,7 +1455,8 @@ export const Pages: CollectionConfig = {
               localized: true,
               label: 'Voucher Benefits Section Heading',
               admin: {
-                description: 'Heading above the benefits list (e.g. "What\'s included in the voucher").',
+                description:
+                  'Heading above the benefits list (e.g. "What\'s included in the voucher").',
               },
             },
             {
@@ -1472,7 +1475,8 @@ export const Pages: CollectionConfig = {
               required: true,
               minRows: 1,
               admin: {
-                description: 'List of benefits with optional subtext. Shown with green checkmarks in two columns.',
+                description:
+                  'List of benefits with optional subtext. Shown with green checkmarks in two columns.',
               },
               fields: [
                 {
@@ -1488,7 +1492,10 @@ export const Pages: CollectionConfig = {
                   type: 'text',
                   localized: true,
                   label: 'Subtext',
-                  admin: { description: 'Optional detail below the title (e.g. "Kombucha, Lakto, Tempeh & seasonal").' },
+                  admin: {
+                    description:
+                      'Optional detail below the title (e.g. "Kombucha, Lakto, Tempeh & seasonal").',
+                  },
                 },
               ],
             },
@@ -1509,7 +1516,8 @@ export const Pages: CollectionConfig = {
               required: true,
               minRows: 1,
               admin: {
-                description: 'Four steps with title and optional description (e.g. "Buy" / "Order online for €99").',
+                description:
+                  'Four steps with title and optional description (e.g. "Buy" / "Order online for €99").',
               },
               fields: [
                 {
