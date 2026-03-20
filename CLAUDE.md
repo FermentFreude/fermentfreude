@@ -68,7 +68,7 @@ Run `pnpm seed`, then **immediately change them back** to staging values.
 
 ## Content & Image Management (Staging → Production)
 
-**Production admin is the source of truth for content.** After the initial bootstrap, never overwrite production data with a full sync.
+**Production admin is the source of truth for content.** After the initial bootstrap, prefer selective operations over full sync.
 
 ### Prerequisites (already installed)
 
@@ -83,6 +83,40 @@ Run `pnpm seed`, then **immediately change them back** to staging values.
 | New page with seed script                    | Point `.env` to prod, run `pnpm seed <page>`, switch back | Adds only              |
 | Final images for existing pages              | Upload directly in `fermentfreude.vercel.app/admin`       | Yes (safe)             |
 | Need specific staging images on production   | Selective copy (see below)                                | Adds/updates only      |
+| Full mirror (staging = production)           | Full sync (see below)                                     | **Replaces all**       |
+
+### Full sync (staging → production)
+
+Use this when you want production to be an **exact mirror** of staging (DB + media + code).
+
+```bash
+# 1. Set connection strings
+export STAGING_URI="mongodb+srv://<user>:<pass>@<cluster>/fermentfreude-staging?retryWrites=true&w=majority"
+export PROD_URI="mongodb+srv://<user>:<pass>@<cluster>/fermentfreude?retryWrites=true&w=majority"
+
+# 2. Dump staging DB
+rm -rf /tmp/ff-staging-dump
+mongodump --uri="$STAGING_URI" --out=/tmp/ff-staging-dump
+
+# 3. Copy all R2 media (additive — does not delete production-only files)
+rclone copy r2-staging:fermentfreude-media-staging/ r2-prod:fermentfreude-media/ --progress
+
+# 4. Restore dump into production (--drop replaces each collection)
+mongorestore --uri="$PROD_URI" \
+  --nsFrom="fermentfreude-staging.*" --nsTo="fermentfreude.*" \
+  --drop \
+  /tmp/ff-staging-dump/fermentfreude-staging/
+
+# 5. Merge code
+git checkout main && git pull origin main
+git merge staging
+git push origin main
+
+# 6. Cleanup
+rm -rf /tmp/ff-staging-dump
+```
+
+> **WARNING:** `--drop` in step 4 deletes each production collection before restoring. Only use for full mirror.
 
 ### Selective image copy (staging → production)
 
