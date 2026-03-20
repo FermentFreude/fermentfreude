@@ -28,7 +28,7 @@ export const Posts: CollectionConfig = {
   slug: 'posts',
   admin: {
     useAsTitle: 'title',
-    group: 'content',
+    group: 'Inhalt',
     description:
       'Educational how-to articles organized by workshop type (Lakto, Tempeh, Kombucha). Each article can be viewed at /tipps/[slug] and displayed on its workshop page.',
     defaultColumns: ['title', 'slug', 'workshopType', 'readTime', 'updatedAt'],

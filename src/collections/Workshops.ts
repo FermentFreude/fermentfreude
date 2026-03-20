@@ -11,6 +11,7 @@ export const Workshops: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
+    group: 'Workshops & Kurse',
     defaultColumns: ['title', 'basePrice', 'maxCapacityPerSlot', 'isActive'],
     description: 'Define workshop metadata. Price and capacity apply to all dates and locations.',
   },

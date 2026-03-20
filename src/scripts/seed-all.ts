@@ -48,7 +48,7 @@ const scripts: Record<string, { name: string; file: string }> = {
     file: 'seed-fermentation-reset.ts',
   },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
-  shop: { name: 'Shop page (global)', file: 'seed-shop.ts' },
+  shop: { name: 'Shop page (block-based)', file: 'seed-shop-new.ts' },
   'workshop-pages': {
     name: 'Workshop pages (tempeh, lakto-gemuese, kombucha)',
     file: 'seed-workshop-pages.ts',

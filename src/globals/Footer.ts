@@ -6,6 +6,9 @@ import { revalidateGlobal } from './hooks/revalidateGlobal'
 
 export const Footer: GlobalConfig = {
   slug: 'footer',
+  admin: {
+    group: 'Website',
+  },
   access: {
     read: () => true,
   },

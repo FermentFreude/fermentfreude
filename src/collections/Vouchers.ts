@@ -17,6 +17,7 @@ export const Vouchers: CollectionConfig = {
     delete: adminOnly,
   },
   admin: {
+    group: 'Shop',
     useAsTitle: 'code',
     defaultColumns: ['code', 'workshop', 'value', 'redeemed', 'redeemedOn'],
     description:

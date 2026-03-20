@@ -256,6 +256,55 @@ const PRODUCTS: Array<{
     descriptionDe: 'Bio-Kombucha mit Apfel und Karotte. Erfrischend und fruchtig.',
     descriptionEn: 'Organic Kombucha with apple and carrot. Refreshing and fruity.',
   },
+  // ── Fermentierte Produkte (real products) ─────────────────────────────────
+  {
+    titleDe: 'Fermentierte Rote Rüben',
+    titleEn: 'Fermented Red Beets',
+    slug: 'fermentierte-rote-rueben',
+    priceInEUR: 9.9,
+    imagePath: 'images/placeholder.png',
+    alt: 'Fermentierte Rote Rüben – 260g',
+    descriptionDe:
+      'Fermentierte Rote Rüben mit Apfel und Kren. Zutaten: Rote Rüben, Apfel, Kren, unjodiertes Salz. 260g.',
+    descriptionEn:
+      'Fermented red beets with apple and horseradish. Ingredients: Red beets, apple, horseradish, non-iodised salt. 260g.',
+  },
+  {
+    titleDe: 'Fermentierte Curryzwiebel',
+    titleEn: 'Fermented Curry Onion',
+    slug: 'fermentierte-curryzwiebel',
+    priceInEUR: 9.9,
+    imagePath: 'images/placeholder.png',
+    alt: 'Fermentierte Curryzwiebel – 260g',
+    descriptionDe:
+      'Fermentierte Curryzwiebel. Zutaten: Zwiebeln, Currypulver (Kurkuma, Koriander, Senfsaat, Ingwer, Zimt, Kreuzkümmel, Knoblauch), unjodiertes Salz, Limonenblätter. 260g.',
+    descriptionEn:
+      'Fermented curry onion. Ingredients: Onions, curry powder (turmeric, coriander, mustard seed, ginger, cinnamon, cumin, garlic), non-iodised salt, lime leaves. 260g.',
+  },
+  {
+    titleDe: 'Classic Kimchi',
+    titleEn: 'Classic Kimchi',
+    slug: 'classic-kimchi',
+    priceInEUR: 9.9,
+    imagePath: 'images/placeholder.png',
+    alt: 'Classic Kimchi – 260g',
+    descriptionDe:
+      'Classic Kimchi. Zutaten: Chinakohl, Karotten, Rettich, Apfel, Lauch, Reisstärke, Ingwer, Knoblauch, unjodiertes Salz, Gochugaru, Zucker, Miso (Wasser, Sojabohnen, Reis, Speisesalz). 260g.',
+    descriptionEn:
+      'Classic Kimchi. Ingredients: Napa cabbage, carrots, radish, apple, leek, rice starch, ginger, garlic, non-iodised salt, gochugaru, sugar, miso (water, soybeans, rice, salt). 260g.',
+  },
+  {
+    titleDe: 'Käferbohnen-Tempeh',
+    titleEn: 'Runner Bean Tempeh',
+    slug: 'kaeferbohnen-tempeh',
+    priceInEUR: 7.9,
+    imagePath: 'images/placeholder.png',
+    alt: 'Käferbohnen-Tempeh – 180g',
+    descriptionDe:
+      'Käferbohnen-Tempeh aus österreichischen Käferbohnen. Zutaten: Käferbohnen aus Österreich gekocht (97%), Apfelessig, Starterkultur (Rhizopus oligosporus). 180g.',
+    descriptionEn:
+      'Runner bean tempeh made from Austrian runner beans. Ingredients: Cooked Austrian runner beans (97%), apple cider vinegar, starter culture (Rhizopus oligosporus). 180g.',
+  },
 ]
 
 type PayloadInstance = Awaited<ReturnType<typeof getPayload>>
@@ -290,18 +339,16 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
     }
   }
 
-  // Fallback: use first existing media if no images were uploaded
+  // Fallback: use first existing media for any product whose image wasn't found
   let fallbackImageId: string | null = null
-  if (Object.keys(imageIdByPath).length === 0) {
-    const existing = await payload.find({
-      collection: 'media',
-      limit: 1,
-      depth: 0,
-    })
-    if (existing.docs.length > 0) {
-      fallbackImageId = String(existing.docs[0].id)
-      payload.logger.warn('No product images found. Using first media as fallback.')
-    }
+  const existing = await payload.find({
+    collection: 'media',
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+  })
+  if (existing.docs.length > 0) {
+    fallbackImageId = String(existing.docs[0].id)
   }
 
   const ctxWithLocale = { ...ctx, locale: 'de' as const }
@@ -320,6 +367,7 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
       where: { slug: { equals: product.slug } },
       limit: 1,
       depth: 0,
+      overrideAccess: true,
     })
 
     if (existing.docs.length > 0) {
@@ -340,20 +388,38 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
       continue
     }
 
-    const created = await payload.create({
-      collection: 'products',
-      context: ctxWithLocale,
-      data: {
-        title: product.titleDe,
-        slug: product.slug,
-        description: buildDescription(product.descriptionDe),
-        gallery: [{ image: imageId }],
-        priceInEUR: product.priceInEUR,
-        inventory: 50,
-        _status: 'published',
-      },
-    })
-    productIds.push(String(created.id))
+    try {
+      const created = await payload.create({
+        collection: 'products',
+        context: ctxWithLocale,
+        data: {
+          title: product.titleDe,
+          slug: product.slug,
+          description: buildDescription(product.descriptionDe),
+          gallery: [{ image: imageId }],
+          priceInEUR: product.priceInEUR,
+          inventory: 50,
+          _status: 'published',
+        },
+      })
+      productIds.push(String(created.id))
+    } catch (err) {
+      payload.logger.warn(
+        `Could not create product ${product.slug}: ${err instanceof Error ? err.message : String(err)}. Trying update…`,
+      )
+      // Slug may already exist — retry as update
+      const retry = await payload.find({
+        collection: 'products',
+        where: { slug: { equals: product.slug } },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+        locale: 'all',
+      })
+      if (retry.docs.length > 0 && retry.docs[0]) {
+        productIds.push(String(retry.docs[0].id))
+      }
+    }
   }
 
   // EN locale for each product (bilingual seeding)
@@ -363,6 +429,7 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
       where: { slug: { equals: product.slug } },
       limit: 1,
       depth: 0,
+      overrideAccess: true,
     })
 
     if (existing.docs.length > 0 && existing.docs[0]) {

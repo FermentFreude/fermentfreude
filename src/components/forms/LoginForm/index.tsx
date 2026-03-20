@@ -4,12 +4,12 @@ import { FormError } from '@/components/forms/FormError'
 import { FormItem } from '@/components/forms/FormItem'
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
+import { Eye, EyeOff, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 type FormData = {
@@ -25,6 +25,7 @@ export const LoginForm: React.FC = () => {
   const router = useRouter()
   const [error, setError] = React.useState<null | string>(null)
   const [remember, setRemember] = React.useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     formState: { errors, isLoading },
@@ -46,23 +47,36 @@ export const LoginForm: React.FC = () => {
   )
 
   return (
-    <form className="" onSubmit={handleSubmit(onSubmit)}>
+    <form className="font-sans" onSubmit={handleSubmit(onSubmit)}>
+      <style>{`
+        #email:-webkit-autofill,
+        #email:-webkit-autofill:hover,
+        #email:-webkit-autofill:focus,
+        #password:-webkit-autofill,
+        #password:-webkit-autofill:hover,
+        #password:-webkit-autofill:focus {
+          -webkit-box-shadow: 0 0 0 1000px rgba(255,255,255,0.9) inset !important;
+          -webkit-text-fill-color: #3D3933 !important;
+          background-color: rgba(255,255,255,0.9) !important;
+          transition: background-color 5000s ease-in-out 0s;
+          caret-color: #3D3933;
+        }
+      `}</style>
       <Message className="classes.message" error={error} />
       <div className="flex flex-col gap-4">
         <FormItem>
           <Label className="sr-only" htmlFor="email">
             Email
           </Label>
-          <div className="flex h-12 items-center justify-between gap-3 rounded-[6px] bg-[rgba(250,242,222,0.16)] px-4">
-            <span className="text-sm text-[#FAF2DE] opacity-90">✉️</span>
-            <Input
+          <div className="flex h-11 items-center gap-2 rounded-xl bg-white/90 px-3">
+            <Mail className="w-4 h-4 text-[#3D3933]/50 shrink-0" />
+            <input
               id="email"
               type="email"
-              placeholder="satomatsugawa@gmail.com"
-              className="h-full flex-1 border-none bg-transparent p-0 text-sm text-[#FAF2DE] placeholder:text-[#FAF2DE]/70 transition-colors hover:bg-[rgba(250,242,222,0.08)] focus-visible:outline-none"
+              placeholder="your@email.com"
+              className="h-full flex-1 border-none bg-transparent px-1 py-0 text-[13px] font-sans text-[#3D3933] placeholder:text-[#3D3933]/50 outline-none"
               {...register('email', { required: 'Email is required.' })}
             />
-            <span className="text-sm text-[#FAF2DE] opacity-90">✓</span>
           </div>
           {errors.email && <FormError message={errors.email.message} />}
         </FormItem>
@@ -71,21 +85,27 @@ export const LoginForm: React.FC = () => {
           <Label className="sr-only" htmlFor="password">
             Password
           </Label>
-          <div className="flex h-12 items-center justify-between gap-3 rounded-[6px] bg-[rgba(250,242,222,0.16)] px-4">
-            <span className="text-sm text-[#FAF2DE] opacity-90">🔒</span>
-            <Input
+          <div className="flex h-11 items-center gap-2 rounded-xl bg-white/90 px-3">
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="text-[#3D3933]/50 hover:text-[#3D3933] transition-colors cursor-pointer shrink-0"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+            <input
               id="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="Type your password here"
-              className="h-full flex-1 border-none bg-transparent p-0 text-sm text-[#FAF2DE] placeholder:text-[#FAF2DE]/70 transition-colors hover:bg-[rgba(250,242,222,0.08)] focus-visible:outline-none"
+              className="h-full flex-1 border-none bg-transparent px-1 py-0 text-[13px] font-sans text-[#3D3933] placeholder:text-[#3D3933]/50 outline-none"
               {...register('password', { required: 'Please provide a password.' })}
             />
-            <span className="text-sm text-[#FAF2DE] opacity-90">✓</span>
           </div>
           {errors.password && <FormError message={errors.password.message} />}
         </FormItem>
 
-        <div className="flex items-center justify-between pt-0.5 text-[12px] text-[#E5DDCF]/85">
+        <div className="flex flex-row items-center justify-between gap-2 pt-1 text-[12px] font-sans text-[#E5DDCF]/85">
           <Link
             href={`/recover-password${allParams}`}
             className="underline underline-offset-4 hover:text-white"
@@ -101,8 +121,8 @@ export const LoginForm: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-8 flex items-center justify-between gap-6">
-        <label className="flex cursor-pointer items-center gap-3 text-[13px] text-[#FAF2DE]/90">
+      <div className="mt-7 flex items-center justify-between gap-4">
+        <label className="flex cursor-pointer items-center gap-2.5 text-[12px] font-sans text-[#FAF2DE]/90">
           <input
             id="remember-login"
             type="checkbox"
@@ -112,16 +132,16 @@ export const LoginForm: React.FC = () => {
           />
           <span
             aria-hidden="true"
-            className="flex size-10 items-center justify-center rounded-full border border-[#FAF2DE]/50 text-[#FAF2DE]/90"
+            className="flex size-8 items-center justify-center rounded-full border border-[#FAF2DE]/50 text-[#FAF2DE]/90 text-xs"
           >
             {remember ? '✓' : ''}
           </span>
           <span>Remember my login</span>
         </label>
         <Button
-          className="h-12 rounded-full bg-linear-to-b from-[#F8F4EB] to-[#EFE8DA] px-10 text-[13px] font-medium tracking-[0.18em] uppercase text-[#3D3933] shadow-[0_4px_10px_rgba(0,0,0,0.25)] border border-white/60 transition-colors focus-visible:ring-2 focus-visible:ring-[#F5F2EC]/60 hover:from-white hover:to-[#F3ECE0]"
+          className="h-10 rounded-full bg-linear-to-b from-[#F8F4EB] to-[#EFE8DA] px-8 text-[11px] font-medium font-sans tracking-[0.18em] uppercase text-[#3D3933] shadow-[0_4px_10px_rgba(0,0,0,0.25)] border border-white/60 transition-colors focus-visible:ring-2 focus-visible:ring-[#F5F2EC]/60 hover:from-white hover:to-[#F3ECE0]"
           disabled={isLoading}
-          size="lg"
+          size="default"
           type="submit"
           variant="default"
         >

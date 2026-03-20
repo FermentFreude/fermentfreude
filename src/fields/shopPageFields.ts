@@ -39,7 +39,8 @@ export const shopPageFields: Field[] = [
             required: false,
             label: 'Background Video',
             admin: {
-              description: 'Optional looping video (e.g. bubbling ingredients). Homemade Jam style.',
+              description:
+                'Optional looping video (e.g. bubbling ingredients). Homemade Jam style.',
               condition: (_, siblingData) => !!siblingData?.productImage,
             },
           },
@@ -253,7 +254,8 @@ export const shopPageFields: Field[] = [
         relationTo: 'media',
         label: 'Product Card Background Shape',
         admin: {
-          description: 'Decorative shape with organic cutout (bottom-right). Mask for card background.',
+          description:
+            'Decorative shape with organic cutout (bottom-right). Mask for card background.',
         },
       },
       {
@@ -329,7 +331,7 @@ export const shopPageFields: Field[] = [
         name: 'benefitsItems',
         type: 'array',
         label: 'Benefits',
-        minRows: 3,
+        minRows: 0,
         maxRows: 3,
         admin: {
           description: 'Exactly 3 benefits. Product-focused (gut health, nutrients, preservation).',
@@ -351,8 +353,7 @@ export const shopPageFields: Field[] = [
     type: 'collapsible',
     label: 'Gift Experience Section',
     admin: {
-      description:
-        'CTA section for gift vouchers (e.g. "Gift a special tasty experience").',
+      description: 'CTA section for gift vouchers (e.g. "Gift a special tasty experience").',
       initCollapsed: false,
     },
     fields: [
@@ -401,11 +402,11 @@ export const shopPageFields: Field[] = [
       initCollapsed: false,
     },
     fields: [
-        {
-          name: 'featuredHeading',
-          type: 'text',
-          required: false,
-          localized: true,
+      {
+        name: 'featuredHeading',
+        type: 'text',
+        required: false,
+        localized: true,
         label: 'Section Heading',
         admin: { description: 'e.g. "Learn UNIQUE Flavours."' },
       },

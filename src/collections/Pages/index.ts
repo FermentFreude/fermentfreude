@@ -6,25 +6,30 @@ import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
+import { CollectionGrid } from '@/blocks/CollectionGrid/config'
 import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Content } from '@/blocks/Content/config'
 import { FeatureCards } from '@/blocks/FeatureCards/config'
 import { FormBlock } from '@/blocks/Form/config'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
+import { LaktoVoucherCtaBlock } from '@/blocks/LaktoVoucherCta/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { OnlineCourseSlider } from '@/blocks/OnlineCourseSlider/config'
 import { OurStory } from '@/blocks/OurStory/config'
 import { ProductSlider } from '@/blocks/ProductSlider/config'
 import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
+import { ShopHero } from '@/blocks/ShopHero/config'
+import { ShopProductGrid } from '@/blocks/ShopProductGrid/config'
+import { ShopProductList } from '@/blocks/ShopProductList/config'
 import { SponsorsBar } from '@/blocks/SponsorsBar/config'
 import { TeamCards } from '@/blocks/TeamCards/config'
 import { TeamPreview } from '@/blocks/TeamPreview/config'
+import { Testimonials } from '@/blocks/Testimonials/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { VoucherCta } from '@/blocks/VoucherCta/config'
 import { WorkshopPhases } from '@/blocks/WorkshopPhases/config'
 import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
-import { shopPageFields } from '@/fields/shopPageFields'
 import { workshopDetailFields } from '@/fields/workshopDetailFields'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
@@ -47,7 +52,7 @@ export const Pages: CollectionConfig = {
     update: adminOnly,
   },
   admin: {
-    group: 'content',
+    group: 'Inhalt',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) =>
@@ -116,14 +121,20 @@ export const Pages: CollectionConfig = {
                 OurStory,
                 OnlineCourseSlider,
                 ProductSlider,
+                ShopHero,
+                ShopProductGrid,
+                ShopProductList,
+                CollectionGrid,
                 ReadyToLearnCTA,
                 SponsorsBar,
                 TeamCards,
                 TeamPreview,
+                Testimonials,
                 ThreeItemGrid,
                 Banner,
                 FormBlock,
                 VoucherCta,
+                LaktoVoucherCtaBlock,
                 WorkshopSlider,
                 WorkshopPhases,
               ],
@@ -1298,6 +1309,16 @@ export const Pages: CollectionConfig = {
               },
             },
             {
+              name: 'pickupAddress',
+              type: 'textarea',
+              label: 'Pick-up store address',
+              localized: true,
+              admin: {
+                description:
+                  'Address shown when "Pick up from store" is selected (e.g. Grabenstraße 15, 8010 Graz).',
+              },
+            },
+            {
               name: 'greetingLabel',
               type: 'text',
               required: true,
@@ -1327,6 +1348,186 @@ export const Pages: CollectionConfig = {
               admin: {
                 description: 'Text for the main CTA button (e.g. "Add to cart").',
               },
+            },
+            {
+              name: 'voucherWhyHeading',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Why Voucher Section Heading',
+              admin: {
+                description:
+                  'Heading for the "Why a fermentation voucher" section (e.g. "Why a fermentation voucher is a great gift").',
+              },
+            },
+            {
+              name: 'voucherWhyBody',
+              type: 'textarea',
+              required: true,
+              localized: true,
+              label: 'Why Voucher Section Body',
+              admin: {
+                description:
+                  'Body text that explains why a fermentation workshop voucher is a good present.',
+              },
+            },
+            {
+              name: 'voucherWhyImage',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Why Section Image',
+              admin: {
+                description:
+                  'Optional joyful image for the "Why" section (e.g. fermentation, gift, workshop). Shown beside the text. Leave empty to show text only.',
+              },
+            },
+            {
+              name: 'voucherWhyBenefits',
+              type: 'array',
+              label: 'Why Section Benefit Items',
+              required: false,
+              maxRows: 4,
+              admin: {
+                description:
+                  'Four benefit items shown in a 2×2 grid (e.g. Unforgettable Experience, Health & Pleasure). Leave empty to use default copy.',
+              },
+              fields: [
+                {
+                  name: 'icon',
+                  type: 'select',
+                  required: true,
+                  label: 'Icon',
+                  options: [
+                    { label: 'Sparkle (experience)', value: 'sparkle' },
+                    { label: 'Heart (health)', value: 'heart' },
+                    { label: 'Graduation cap (knowledge)', value: 'graduation' },
+                    { label: 'Leaf (sustainability)', value: 'leaf' },
+                  ],
+                },
+                {
+                  name: 'title',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Title',
+                },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  required: true,
+                  localized: true,
+                  label: 'Description',
+                },
+              ],
+            },
+            {
+              name: 'voucherWhyPerfectForHeading',
+              type: 'text',
+              localized: true,
+              label: '"Perfect for" heading',
+              admin: {
+                description: 'Heading above the audience tags (e.g. "Perfect for"). Shown at the end of the Why section. Leave empty to hide.',
+              },
+            },
+            {
+              name: 'voucherWhyPerfectForTags',
+              type: 'array',
+              label: '"Perfect for" tags',
+              admin: {
+                description: 'Tags shown under the heading (e.g. Foodies, Health-conscious). Leave empty to hide.',
+              },
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Tag',
+                },
+              ],
+            },
+            {
+              name: 'voucherBenefitsHeading',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Voucher Benefits Section Heading',
+              admin: {
+                description: 'Heading above the benefits list (e.g. "What\'s included in the voucher").',
+              },
+            },
+            {
+              name: 'voucherBenefitsSubtitle',
+              type: 'text',
+              localized: true,
+              label: 'Voucher Benefits Subtitle',
+              admin: {
+                description: 'Short line under the heading (e.g. "All at a glance").',
+              },
+            },
+            {
+              name: 'voucherBenefits',
+              type: 'array',
+              label: 'Voucher Benefits',
+              required: true,
+              minRows: 1,
+              admin: {
+                description: 'List of benefits with optional subtext. Shown with green checkmarks in two columns.',
+              },
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Title',
+                  admin: { description: 'Main benefit line (e.g. "Valid for all workshops").' },
+                },
+                {
+                  name: 'subtext',
+                  type: 'text',
+                  localized: true,
+                  label: 'Subtext',
+                  admin: { description: 'Optional detail below the title (e.g. "Kombucha, Lakto, Tempeh & seasonal").' },
+                },
+              ],
+            },
+            {
+              name: 'voucherHowHeading',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'How It Works Section Heading',
+              admin: {
+                description: 'Heading above the steps (e.g. "How it works").',
+              },
+            },
+            {
+              name: 'voucherHowSteps',
+              type: 'array',
+              label: 'How It Works Steps',
+              required: true,
+              minRows: 1,
+              admin: {
+                description: 'Four steps with title and optional description (e.g. "Buy" / "Order online for €99").',
+              },
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Title',
+                  admin: { description: 'Step heading (e.g. "Buy", "Receive").' },
+                },
+                {
+                  name: 'description',
+                  type: 'text',
+                  localized: true,
+                  label: 'Description',
+                  admin: { description: 'Optional detail (e.g. "Order online for €99").' },
+                },
+              ],
             },
             {
               name: 'starterSetHeading',
@@ -1442,20 +1643,6 @@ export const Pages: CollectionConfig = {
               ],
             },
           ],
-        },
-        {
-          name: 'shop',
-          label: 'Shop Page',
-          admin: {
-            description:
-              'Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.',
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_SHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'shop'
-            },
-          },
-          fields: shopPageFields,
         },
         {
           name: 'workshops',
@@ -2268,20 +2455,6 @@ export const Pages: CollectionConfig = {
               ],
             },
           ],
-        },
-        {
-          name: 'shop',
-          label: 'Shop Page',
-          admin: {
-            description:
-              'Content for the Shop page (/shop). Only applies when slug is "shop". Editable from Collections → Pages.',
-            condition: (data, siblingData) => {
-              if (process.env.PAYLOAD_SKIP_SHOP_CONDITION === '1') return false
-              const slug = data?.slug ?? siblingData?.slug
-              return slug === 'shop'
-            },
-          },
-          fields: shopPageFields,
         },
         {
           name: 'workshopDetail',

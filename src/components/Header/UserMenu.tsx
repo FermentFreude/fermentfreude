@@ -98,17 +98,21 @@ export function UserMenu() {
           )}
         </div>
 
-        <hr className="border-neutral-100 dark:border-neutral-700" />
-
-        <ul className="py-2">
-          <MenuLink href="/account" label="Your account" onClick={() => setIsOpen(false)} />
-          <MenuLink href="/account/orders" label="Orders" onClick={() => setIsOpen(false)} />
-          <MenuLink href="/account/addresses" label="Addresses" onClick={() => setIsOpen(false)} />
-          <MenuLink href="/help" label="Help & FAQ" onClick={() => setIsOpen(false)} />
-        </ul>
-
         {user && (
           <>
+            <hr className="border-neutral-100 dark:border-neutral-700" />
+
+            <ul className="py-2">
+              <MenuLink href="/account" label="Your account" onClick={() => setIsOpen(false)} />
+              <MenuLink href="/account/orders" label="Orders" onClick={() => setIsOpen(false)} />
+              <MenuLink
+                href="/account/addresses"
+                label="Addresses"
+                onClick={() => setIsOpen(false)}
+              />
+              <MenuLink href="/help" label="Help & FAQ" onClick={() => setIsOpen(false)} />
+            </ul>
+
             <hr className="border-neutral-100 dark:border-neutral-700" />
             <div className="p-2">
               <Link
