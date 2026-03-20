@@ -3,19 +3,12 @@
 import { AddToCart } from '@/components/Cart/AddToCart'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
-import type { Media as MediaType, Product } from '@/payload-types'
+import type { Category, Media as MediaType, Product } from '@/payload-types'
 import { Eye, ShoppingCart } from 'lucide-react'
+import Link from 'next/link'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import { ProductQuickView } from './ProductQuickView'
-
-const CATEGORIES = [
-  { slug: 'tempeh', label: 'Tempeh' },
-  { slug: 'kimchi', label: 'Kimchi' },
-  { slug: 'laktogemuese', label: 'Laktogemüse' },
-  { slug: 'miso', label: 'Miso' },
-  { slug: 'starterkulturen', label: 'Starterkulturen' },
-] as const
 
 function isMediaObject(val: unknown): val is MediaType {
   return typeof val === 'object' && val !== null && 'url' in val
@@ -43,9 +36,10 @@ function productHasCategory(product: Product, categorySlug: string): boolean {
 type Props = {
   products: Product[]
   heading?: string | null
+  categories: Category[]
 }
 
-export const ShopProductListClient: React.FC<Props> = ({ products, heading }) => {
+export const ShopProductListClient: React.FC<Props> = ({ products, heading, categories }) => {
   const [activeCategories, setActiveCategories] = useState<string[]>([])
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
 
@@ -75,7 +69,7 @@ export const ShopProductListClient: React.FC<Props> = ({ products, heading }) =>
 
         {/* Category chips + result count */}
         <div className="flex flex-wrap items-center gap-3 mb-8 lg:mb-10">
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const isActive = activeCategories.includes(cat.slug)
             return (
               <button
@@ -90,7 +84,7 @@ export const ShopProductListClient: React.FC<Props> = ({ products, heading }) =>
                   }
                 `}
               >
-                {cat.label}
+                {cat.title}
                 {isActive && <span className="text-white/80 text-xs leading-none">✕</span>}
               </button>
             )
@@ -138,44 +132,58 @@ export const ShopProductListClient: React.FC<Props> = ({ products, heading }) =>
 function ProductCard({ product, onQuickView }: { product: Product; onQuickView: () => void }) {
   const image = getFirstImage(product)
   const price = product.priceInEUR
+  const stock = product.inventory ?? 0
+  const isOutOfStock = stock === 0
 
   return (
     <div className="group relative rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
       {/* Image */}
-      <div className="relative aspect-3/4 overflow-hidden bg-[#ECE5DE]">
-        {image ? (
-          <Media
-            resource={image}
-            imgClassName="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            className="w-full h-full"
-            fill
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-ff-charcoal/30 text-sm">No image</span>
-          </div>
-        )}
+      <Link href={`/products/${product.slug}`} className="block">
+        <div className="relative aspect-3/4 overflow-hidden bg-[#ECE5DE]">
+          {isOutOfStock && (
+            <div className="absolute top-3 left-3 z-10 rounded-full bg-ff-charcoal/80 text-white text-[11px] font-semibold uppercase tracking-wider px-3 py-1">
+              Out of stock
+            </div>
+          )}
+          {!isOutOfStock && stock > 0 && stock < 10 && (
+            <div className="absolute top-3 left-3 z-10 rounded-full bg-amber-600/90 text-white text-[11px] font-semibold uppercase tracking-wider px-3 py-1">
+              Only {stock} left
+            </div>
+          )}
+          {image ? (
+            <Media
+              resource={image}
+              imgClassName="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-full"
+              fill
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-ff-charcoal/30 text-sm">No image</span>
+            </div>
+          )}
 
-        {/* Quick View overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-end justify-center pb-4">
-          <button
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onQuickView()
-            }}
-            className="
-              translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100
-              transition-all duration-300
-              inline-flex items-center gap-2 rounded-full bg-ff-near-black text-white px-5 py-2.5 text-xs font-semibold uppercase tracking-wider
-              hover:bg-ff-charcoal-dark
-            "
-          >
-            <Eye className="w-4 h-4" />
-            Quick View
-          </button>
+          {/* Quick View overlay */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-end justify-center pb-4">
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onQuickView()
+              }}
+              className="
+                translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100
+                transition-all duration-300
+                inline-flex items-center gap-2 rounded-full bg-ff-near-black text-white px-5 py-2.5 text-xs font-semibold uppercase tracking-wider
+                hover:bg-ff-charcoal-dark
+              "
+            >
+              <Eye className="w-4 h-4" />
+              Quick View
+            </button>
+          </div>
         </div>
-      </div>
+      </Link>
 
       {/* Info: name + price + cart */}
       <div className="p-4 flex items-start justify-between gap-3">
