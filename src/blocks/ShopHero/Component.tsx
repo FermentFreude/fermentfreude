@@ -300,15 +300,21 @@ function ShopCard({ slide }: { slide: Slide }) {
 
   return (
     <div data-shop-card className="shrink-0 snap-start flex h-full">
-      {/* Label column — sits to the left of the card, inside the flow */}
+      {/* Label column — sits to the left of the card, height matches card */}
       {slide.categoryLabel && (
-        <div className="flex items-center justify-center select-none pointer-events-none w-10 md:w-14 shrink-0">
+        <div
+          className="flex items-center justify-center select-none pointer-events-none w-10 md:w-14 shrink-0 overflow-hidden"
+          style={{ height: 'clamp(240px, 50vh, 440px)' }}
+        >
           <span
-            className="leading-none uppercase font-bold tracking-wider text-[#1a1a1a]"
+            className="leading-none uppercase font-bold tracking-wider text-[#1a1a1a] truncate"
             style={{
               writingMode: 'vertical-rl',
               transform: 'rotate(180deg)',
-              fontSize: 'clamp(2.5rem, 5vw, 5rem)',
+              fontSize: slide.categoryLabel.length > 8
+                ? 'clamp(1.8rem, 3.5vw, 3.2rem)'
+                : 'clamp(2.5rem, 5vw, 5rem)',
+              maxHeight: '100%',
             }}
           >
             {slide.categoryLabel}
