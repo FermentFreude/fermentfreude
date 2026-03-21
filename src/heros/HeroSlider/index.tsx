@@ -174,10 +174,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
               className={cn(
                 'object-contain drop-shadow-xl w-auto',
                 slide.slideId === 'kombucha'
-                  ? 'h-[34vh]'
+                  ? 'h-[38vh]'
                   : slide.slideId === 'tempeh'
-                    ? 'h-[32vh]'
-                    : 'h-[28vh]',
+                    ? 'h-[36vh]'
+                    : 'h-[32vh]',
               )}
               priority={activeIndex === 0}
               size="40vw"
@@ -196,10 +196,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
               className={cn(
                 'object-contain drop-shadow-xl w-auto',
                 slide.slideId === 'kombucha'
-                  ? 'h-[34vh]'
+                  ? 'h-[38vh]'
                   : slide.slideId === 'tempeh'
-                    ? 'h-[32vh]'
-                    : 'h-[28vh]',
+                    ? 'h-[36vh]'
+                    : 'h-[32vh]',
               )}
               size="40vw"
             />
@@ -298,12 +298,12 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
         {/* ── LEFT IMAGE AREA ──────────────────────────────── */}
         <div
-          className="flex-1 flex items-center justify-center relative transition-colors duration-700 sm:overflow-visible lg:overflow-hidden"
+          className="flex-1 flex items-center justify-center relative transition-colors duration-700 overflow-visible"
           style={{ backgroundColor: slide.bgColor }}
         >
           <div
             className={cn(
-              'relative z-10 sm:z-30 lg:z-30 -rotate-3 group/img sm:translate-x-[14%] lg:translate-x-0',
+              'relative z-10 sm:z-30 lg:z-30 -rotate-3 group/img sm:translate-x-[14%] lg:translate-x-[8%]',
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
@@ -316,18 +316,18 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             <SlideImage
               media={slide.leftImage}
               className={cn(
-                'object-contain drop-shadow-2xl h-[36vh] md:h-[44vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2',
-                isFoundersOrLakto ? 'lg:h-[56vh] xl:h-[61vh]' : 'lg:h-[60vh] xl:h-[65vh]',
+                'object-contain drop-shadow-2xl h-[42vh] md:h-[52vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2',
+                isFoundersOrLakto ? 'lg:h-[70vh] xl:h-[78vh]' : 'lg:h-[74vh] xl:h-[82vh]',
               )}
               priority={activeIndex === 0}
-              size="(min-width: 1280px) 30vw, (min-width: 1024px) 26vw, (min-width: 768px) 24vw, 45vw"
+              size="(min-width: 1280px) 35vw, (min-width: 1024px) 30vw, (min-width: 768px) 28vw, 45vw"
             />
           </div>
         </div>
 
         {/* ── CENTER PANEL (full-height, fixed structure) ───── */}
         <div
-          className="w-[38%] md:w-[40%] lg:w-[42%] xl:w-[44%] h-full flex flex-col items-center transition-colors duration-700 relative z-10"
+          className="w-[38%] md:w-[40%] lg:w-[42%] xl:w-[44%] h-full flex flex-col items-center transition-colors duration-700 relative z-40"
           style={{ backgroundColor: slide.panelColor }}
         >
           {/* Content — vertically centered, padded for header + bottom nav */}
@@ -420,12 +420,12 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
         {/* ── RIGHT IMAGE AREA ──────────────────────────────── */}
         <div
-          className="flex-1 flex items-center justify-center relative transition-colors duration-700 sm:overflow-visible lg:overflow-hidden"
+          className="flex-1 flex items-center justify-center relative transition-colors duration-700 overflow-visible"
           style={{ backgroundColor: slide.bgColor }}
         >
           <div
             className={cn(
-              'relative z-10 sm:z-30 lg:z-30 rotate-3 group/img sm:-translate-x-[14%] lg:translate-x-0',
+              'relative z-10 sm:z-30 lg:z-30 rotate-3 group/img sm:-translate-x-[14%] lg:-translate-x-[8%]',
               isEntering && 'hero-anim-image',
               isExiting && 'hero-exit-image',
             )}
@@ -438,10 +438,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             <SlideImage
               media={slide.rightImage}
               className={cn(
-                'object-contain drop-shadow-2xl h-[36vh] md:h-[44vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2',
-                isFoundersOrLakto ? 'lg:h-[56vh] xl:h-[61vh]' : 'lg:h-[60vh] xl:h-[65vh]',
+                'object-contain drop-shadow-2xl h-[42vh] md:h-[52vh] w-auto transition-transform duration-700 ease-out group-hover/img:-translate-y-2',
+                isFoundersOrLakto ? 'lg:h-[70vh] xl:h-[78vh]' : 'lg:h-[74vh] xl:h-[82vh]',
               )}
-              size="(min-width: 1280px) 30vw, (min-width: 1024px) 26vw, (min-width: 768px) 24vw, 45vw"
+              size="(min-width: 1280px) 35vw, (min-width: 1024px) 30vw, (min-width: 768px) 28vw, 45vw"
             />
           </div>
         </div>
