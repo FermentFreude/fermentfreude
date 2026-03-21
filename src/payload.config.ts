@@ -61,6 +61,7 @@ export default buildConfig({
         Logo: '/components/admin/Logo#Logo',
         Icon: '/components/admin/Icon#Icon',
       },
+      afterNavLinks: ['/components/admin/AIAssistant#AIAssistant'],
     },
     livePreview: {
       collections: ['pages'],

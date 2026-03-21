@@ -24,6 +24,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
     "@aws-sdk/s3-request-presigner": "3.637.0",
     "@getbrevo/brevo": "^5.0.1",
     "@gsap/react": "^2.1.2",
