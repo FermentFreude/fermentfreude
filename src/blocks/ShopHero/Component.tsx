@@ -177,7 +177,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
 
       <div className="flex flex-col md:flex-row h-full">
         {/* ── Left: Text content ── */}
-        <div className="w-full md:w-[38%] flex flex-col justify-start px-4 sm:px-6 md:px-10 pt-20 sm:pt-24 md:pt-24 pb-4 md:pb-6 relative z-2 min-h-0 overflow-hidden">
+        <div className="w-full md:w-[38%] flex flex-col justify-between px-4 sm:px-6 md:px-10 pt-20 sm:pt-24 md:pt-24 pb-2 md:pb-3 relative z-2 min-h-0">
           <div>
             <h1
               className="font-display font-bold text-[#1a1a1a] mb-2 md:mb-4 max-w-[95%] md:max-w-[95%]"
@@ -201,6 +201,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
               </div>
             )}
 
+            {/* Buttons */}
             <div className="flex flex-row gap-2 mb-4 md:mb-0">
               {primaryLabel && primaryUrl && (
                 <Link
@@ -221,44 +222,44 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
             </div>
           </div>
 
-          {/* ── Bottom bar ── */}
-          <div className="flex items-start gap-2.5 mt-4 md:mt-5">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 76 76"
-              fill="none"
-              className="shrink-0 mt-0.5 hidden sm:block"
-              aria-hidden="true"
-            >
-              <path
-                d="M52.6617 37.6496L58.7381 40.0325L75.0609 49.0874L66.6016 63.7422L49.9214 54.6872L45.1557 50.7554L46.1088 57.1892V75.18H28.952V57.1892L30.0243 50.5171L24.9011 54.6872L8.45924 63.7422L0 49.0874L16.3228 39.7942L22.3991 37.6496L16.3228 35.1475L0 26.2117L8.45924 11.557L25.1394 20.4928L30.0243 24.6629L28.952 18.3482V0H46.1088V18.3482L45.1557 24.4246L49.9214 20.4928L66.6016 11.557L75.0609 26.2117L58.7381 35.3858L52.6617 37.6496Z"
-                fill="#1a1a1a"
-              />
-            </svg>
-            <div className="leading-tight">
-              <p className="text-[10px] md:text-[11px] font-bold text-[#1a1a1a] m-0">{tagline}</p>
-              <p className="text-[10px] md:text-[11px] font-medium text-[#1a1a1a] m-0 mt-0.5">
-                {subtitle}
-              </p>
-              {disclaimer && (
-                <p className="text-[9px] md:text-[10px] text-[#999] mt-0.5 m-0 italic">
-                  {disclaimer}
+          {/* ── Footer text ── */}
+          <div className="flex items-start gap-2.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 76 76"
+                fill="none"
+                className="shrink-0 mt-0.5 hidden sm:block"
+                aria-hidden="true"
+              >
+                <path
+                  d="M52.6617 37.6496L58.7381 40.0325L75.0609 49.0874L66.6016 63.7422L49.9214 54.6872L45.1557 50.7554L46.1088 57.1892V75.18H28.952V57.1892L30.0243 50.5171L24.9011 54.6872L8.45924 63.7422L0 49.0874L16.3228 39.7942L22.3991 37.6496L16.3228 35.1475L0 26.2117L8.45924 11.557L25.1394 20.4928L30.0243 24.6629L28.952 18.3482V0H46.1088V18.3482L45.1557 24.4246L49.9214 20.4928L66.6016 11.557L75.0609 26.2117L58.7381 35.3858L52.6617 37.6496Z"
+                  fill="#1a1a1a"
+                />
+              </svg>
+              <div className="leading-tight">
+                <p className="text-[10px] md:text-[11px] font-bold text-[#1a1a1a] m-0">{tagline}</p>
+                <p className="text-[10px] md:text-[11px] font-medium text-[#1a1a1a] m-0 mt-0.5">
+                  {subtitle}
                 </p>
-              )}
+                {disclaimer && (
+                  <p className="text-[9px] md:text-[10px] text-[#999] mt-0.5 m-0 italic">
+                    {disclaimer}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
         </div>
 
         {/* ── Right: Infinite card slider ── */}
-        <div className="w-full md:w-[62%] flex flex-col justify-center relative z-1 pb-2 md:pb-3 pt-2 md:pt-16 min-h-0 overflow-hidden">
+        <div className="w-full md:w-[62%] flex flex-col justify-end relative z-1 pb-2 md:pb-3 pt-2 md:pt-16 min-h-0 overflow-visible">
           {/* Scrollable cards */}
           <div
             ref={scrollRef}
             onScroll={handleScroll}
             data-shop-slider
-            className="flex gap-6 overflow-x-auto pb-2 snap-x snap-mandatory pl-4 md:pl-8 pr-4 md:pr-8 items-center"
+            className="flex gap-16 md:gap-20 overflow-x-auto pb-2 snap-x snap-mandatory pl-14 md:pl-24 pr-4 md:pr-8 items-center"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -268,7 +269,11 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
           >
             <style>{`[data-shop-slider]::-webkit-scrollbar { display: none; }`}</style>
             {loopSlides.map((slide, i) => (
-              <ShopCard key={`${slide.id || slide.categoryLabel}-${i}`} slide={slide} />
+              <ShopCard
+                key={`${slide.id || slide.categoryLabel}-${i}`}
+                slide={slide}
+                isFirstInRow={i === slides.length}
+              />
             ))}
           </div>
 
@@ -294,33 +299,71 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
  *  Shop Card — ProductSlider SVG frame with integrated button
  *  + vertical category label on the card
  * ═══════════════════════════════════════════════════════════════ */
-function ShopCard({ slide }: { slide: Slide }) {
+function ShopCard({
+  slide,
+  isFirstInRow = false,
+}: {
+  slide: Slide
+  isFirstInRow?: boolean
+}) {
   const [btnHovered, setBtnHovered] = useState(false)
   const hasImage = isMediaObject(slide.image)
+  const labelText = (slide.categoryLabel ?? '').trim()
+  const isTempeh = labelText.toLowerCase() === 'tempeh'
+
+  const labelWords = labelText.split(/\s+/).filter(Boolean)
+  const isLongLabel = labelText.length > 11
+
+  const labelLines = React.useMemo(() => {
+    if (!isLongLabel) return [labelText]
+    if (labelWords.length >= 2) {
+      const midpoint = Math.ceil(labelWords.length / 2)
+      return [labelWords.slice(0, midpoint).join(' '), labelWords.slice(midpoint).join(' ')]
+    }
+    const midpoint = Math.ceil(labelText.length / 2)
+    return [labelText.slice(0, midpoint), labelText.slice(midpoint)]
+  }, [isLongLabel, labelText, labelWords])
 
   return (
-    <div data-shop-card className="shrink-0 snap-start flex h-full">
-      {/* Label column — sits to the left of the card, inside the flow */}
-      {slide.categoryLabel && (
-        <div className="flex items-center justify-center select-none pointer-events-none w-10 md:w-14 shrink-0">
-          <span
-            className="leading-none uppercase font-bold tracking-wider text-[#1a1a1a]"
-            style={{
-              writingMode: 'vertical-rl',
-              transform: 'rotate(180deg)',
-              fontSize: 'clamp(2.5rem, 5vw, 5rem)',
-            }}
-          >
-            {slide.categoryLabel}
-          </span>
-        </div>
-      )}
-
+    <div
+      data-shop-card
+      className={`shrink-0 snap-start flex h-full relative ${isLongLabel ? 'mr-4 md:mr-6' : ''}`}
+    >
       {/* Card */}
       <div
         className="relative shrink-0"
         style={{ height: 'clamp(240px, 50vh, 440px)', aspectRatio: '328 / 440' }}
       >
+        {/* Label — overlaps left edge, half on card half outside, always on top */}
+        {slide.categoryLabel && (
+          <div
+            className="absolute z-50 select-none pointer-events-none"
+            style={{
+              left: isFirstInRow ? '-2.6rem' : '-1.5rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
+          >
+            <span
+              className="leading-none uppercase font-black tracking-wider text-[#1a1a1a]"
+              style={{
+                writingMode: 'vertical-rl',
+                transform: 'rotate(180deg)',
+                fontSize: isLongLabel ? 'clamp(1.5rem, 2.8vw, 2.4rem)' : 'clamp(2rem, 4vw, 3.5rem)',
+                display: 'block',
+                lineHeight: isLongLabel ? 0.9 : 1,
+              }}
+            >
+              {labelLines.map((line, index) => (
+                <React.Fragment key={`${line}-${index}`}>
+                  {line}
+                  {index < labelLines.length - 1 ? <br /> : null}
+                </React.Fragment>
+              ))}
+            </span>
+          </div>
+        )}
+
         <Link href={slide.detailUrl || '/shop'} className="group block h-full">
           <div className="relative h-full">
             <CardWithButton
@@ -331,22 +374,21 @@ function ShopCard({ slide }: { slide: Slide }) {
               ariaLabel={`View ${slide.categoryLabel || 'product'} details`}
             />
 
-            {/* Category image */}
+            {/* Product image — overflows the card frame */}
             <div
-              className="absolute overflow-hidden pointer-events-none flex items-center justify-center"
+              className="absolute pointer-events-none flex items-center justify-center"
               style={{
-                top: '5%',
-                left: '5%',
-                right: '5%',
-                bottom: '14%',
-                borderRadius: '12px',
+                top: isTempeh ? '-19%' : '-16%',
+                left: isTempeh ? '-12%' : '-10%',
+                right: isTempeh ? '-12%' : '-10%',
+                bottom: '1%',
               }}
             >
               {hasImage ? (
                 <Media
                   resource={slide.image as MediaType}
-                  className="w-[85%] h-[85%]"
-                  imgClassName="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-md"
+                  className="w-full h-full"
+                  imgClassName={`w-full h-full object-contain transition-transform duration-300 ${isTempeh ? 'scale-105 group-hover:scale-[1.14]' : 'group-hover:scale-110'} drop-shadow-2xl`}
                 />
               ) : (
                 <div className="w-full h-full bg-[#ECE5DE] rounded-lg" />

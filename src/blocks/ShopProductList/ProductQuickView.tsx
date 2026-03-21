@@ -5,6 +5,7 @@ import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import type { Media as MediaType, Product } from '@/payload-types'
 import { Minus, Plus, X } from 'lucide-react'
+import Link from 'next/link'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 function isMediaObject(val: unknown): val is MediaType {
@@ -63,6 +64,8 @@ export const ProductQuickView: React.FC<Props> = ({ product, onClose }) => {
   const activeImage = images[activeImageIndex] ?? null
   const { description, weight } = useMemo(() => parseProductInfo(product), [product])
   const price = product.priceInEUR
+  const stock = product.inventory ?? 0
+  const isOutOfStock = stock === 0
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -198,6 +201,7 @@ export const ProductQuickView: React.FC<Props> = ({ product, onClose }) => {
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors"
                     aria-label="Decrease quantity"
+                    disabled={isOutOfStock}
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
@@ -205,9 +209,10 @@ export const ProductQuickView: React.FC<Props> = ({ product, onClose }) => {
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity((q) => q + 1)}
+                    onClick={() => setQuantity((q) => (stock > 0 ? Math.min(stock, q + 1) : q + 1))}
                     className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors"
                     aria-label="Increase quantity"
+                    disabled={isOutOfStock || quantity >= stock}
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -215,13 +220,30 @@ export const ProductQuickView: React.FC<Props> = ({ product, onClose }) => {
               </div>
             </div>
 
+            {/* Stock indicator */}
+            {isOutOfStock && (
+              <p className="text-sm font-medium text-red-600 uppercase tracking-wider mb-3">Out of stock</p>
+            )}
+            {!isOutOfStock && stock > 0 && stock < 10 && (
+              <p className="text-sm font-medium text-amber-600 uppercase tracking-wider mb-3">Only {stock} left in stock</p>
+            )}
+
             {/* Add to Cart */}
             <AddToCart
               product={product}
-              className="w-full rounded-full bg-ff-near-black text-white font-display font-bold text-sm uppercase tracking-wider py-3.5 hover:bg-ff-charcoal-dark transition-colors"
+              className="w-full rounded-full bg-ff-near-black text-white font-display font-bold text-sm uppercase tracking-wider py-3.5 hover:bg-ff-charcoal-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Add to Cart
             </AddToCart>
+
+            {/* View Details link */}
+            <Link
+              href={`/products/${product.slug}`}
+              onClick={onClose}
+              className="block w-full text-center text-sm font-medium text-ff-charcoal underline underline-offset-2 hover:text-ff-near-black hover:no-underline mt-3 transition-colors"
+            >
+              View Details
+            </Link>
 
             {/* Categories */}
             {product.categories &&

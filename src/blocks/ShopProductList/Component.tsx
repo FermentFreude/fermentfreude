@@ -1,4 +1,4 @@
-import type { Product, ShopProductListBlock } from '@/payload-types'
+import type { Category, Product, ShopProductListBlock } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -47,5 +47,15 @@ export const ShopProductListComponent: React.FC<ShopProductListBlock> = async (p
 
   if (products.length === 0) return null
 
-  return <ShopProductListClient products={products} heading={heading} />
+  // Fetch all categories for filter chips
+  const categoriesResult = await payload.find({
+    collection: 'categories',
+    locale,
+    limit: 50,
+    sort: 'title',
+    overrideAccess: true,
+  })
+  const categories = categoriesResult.docs as Category[]
+
+  return <ShopProductListClient products={products} heading={heading} categories={categories} />
 }
