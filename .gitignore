@@ -52,3 +52,5 @@ public/media
 *.log
 *.backup
 .env*.local
+# Migration runner state (per-environment, not committed)
+src/scripts/migrations/.completed.json
