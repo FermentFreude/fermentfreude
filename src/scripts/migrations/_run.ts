@@ -29,12 +29,12 @@
 import { config as dotenvConfig } from 'dotenv'
 dotenvConfig()
 
+import config from '@payload-config'
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath, pathToFileURL } from 'url'
-import config from '@payload-config'
-import { getPayload } from 'payload'
 import type { Payload } from 'payload'
+import { getPayload } from 'payload'
+import { fileURLToPath, pathToFileURL } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -110,10 +110,12 @@ async function run() {
 
     try {
       const modulePath = pathToFileURL(path.join(__dirname, file)).href
-      const mod = await import(modulePath) as { migrate?: (p: Payload) => Promise<void> }
+      const mod = (await import(modulePath)) as { migrate?: (p: Payload) => Promise<void> }
 
       if (typeof mod.migrate !== 'function') {
-        throw new Error(`Migration file "${file}" must export: export async function migrate(payload)`)
+        throw new Error(
+          `Migration file "${file}" must export: export async function migrate(payload)`,
+        )
       }
 
       await mod.migrate(payload)

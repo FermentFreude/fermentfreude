@@ -22,19 +22,19 @@ import { appendBlockToPage, findProductBySlug } from './_helpers'
 // Product slugs for the 3 featured cards (column grid, left → right)
 const CARD_SLUGS = [
   'fermentierte-curryzwiebel', // Card 1 (left)
-  'classic-kimchi',            // Card 2 (middle)
-  'fermentierte-rote-rueben',  // Card 3 (right)
+  'classic-kimchi', // Card 2 (middle)
+  'fermentierte-rote-rueben', // Card 3 (right)
 ]
 // Product slug for the wide banner below the cards (e.g. Tempeh)
 const BANNER_SLUG = 'kaeferbohnen-tempeh'
 
 // Card accent colors (hex). Leave empty string to use defaults.
 const CARD_COLORS = [
-  '#4b4f4a',  // Card 1 — olive
-  '#403c39',  // Card 2 — charcoal
-  '#1a1a1a',  // Card 3 — near-black
+  '#4b4f4a', // Card 1 — olive
+  '#403c39', // Card 2 — charcoal
+  '#1a1a1a', // Card 3 — near-black
 ]
-const BANNER_COLOR = '#3a3e3a'  // muted olive
+const BANNER_COLOR = '#3a3e3a' // muted olive
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function migrate(payload: Payload): Promise<void> {
@@ -66,17 +66,9 @@ export async function migrate(payload: Payload): Promise<void> {
     ctaLabel: 'Order Now',
   }
 
-  const result = await appendBlockToPage(
-    payload,
-    'shop',
-    'featuredProductCards',
-    blockDE,
-    blockEN,
-  )
+  const result = await appendBlockToPage(payload, 'shop', 'featuredProductCards', blockDE, blockEN)
 
   if (result === 'skipped') {
-    payload.logger.info(
-      '  ↩ FeaturedProductCards already on shop page — nothing changed.',
-    )
+    payload.logger.info('  ↩ FeaturedProductCards already on shop page — nothing changed.')
   }
 }

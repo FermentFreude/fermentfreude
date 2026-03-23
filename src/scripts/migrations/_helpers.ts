@@ -74,10 +74,7 @@ export async function findMediaByFilename(
  *   - mongoimport installed: brew install mongodb-database-tools
  *   - STAGING_DATABASE_URL in your .env (see .env.example)
  */
-export async function requireMediaByFilename(
-  payload: Payload,
-  filename: string,
-): Promise<string> {
+export async function requireMediaByFilename(payload: Payload, filename: string): Promise<string> {
   const existingId = await findMediaByFilename(payload, filename)
   if (existingId) return existingId
 
@@ -214,7 +211,7 @@ export async function appendBlockToPage(
     overrideAccess: true,
   })
 
-  const layout = ((current.layout as BlockLike[]) ?? [])
+  const layout = (current.layout as BlockLike[]) ?? []
 
   // Check if block already exists
   const exists = layout.some((b) => b.blockType === blockType)
@@ -309,7 +306,7 @@ export async function patchBlockInPage(
     overrideAccess: true,
   })
 
-  const layout = ((current.layout as BlockLike[]) ?? [])
+  const layout = (current.layout as BlockLike[]) ?? []
   const blockIndex = layout.findIndex((b) => b.blockType === blockType)
 
   if (blockIndex === -1) {
@@ -317,9 +314,7 @@ export async function patchBlockInPage(
     return 'not-found'
   }
 
-  const updatedLayout = layout.map((b, i) =>
-    i === blockIndex ? { ...b, ...deFields } : b
-  )
+  const updatedLayout = layout.map((b, i) => (i === blockIndex ? { ...b, ...deFields } : b))
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (payload.update as any)({
@@ -339,10 +334,10 @@ export async function patchBlockInPage(
     depth: 0,
     overrideAccess: true,
   })
-  const layoutAfter = ((afterDE.layout as BlockLike[]) ?? [])
+  const layoutAfter = (afterDE.layout as BlockLike[]) ?? []
   const enPatch = enFields ?? deFields
   const updatedLayoutEN = layoutAfter.map((b) =>
-    b.blockType === blockType ? { ...b, ...enPatch } : b
+    b.blockType === blockType ? { ...b, ...enPatch } : b,
   )
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
