@@ -150,11 +150,21 @@ export interface Config {
     header: Header;
     footer: Footer;
     'testimonials-global': TestimonialsGlobal;
+    'sponsors-bar-global': SponsorsBarGlobal;
+    'voucher-cta-global': VoucherCtaGlobal;
+    'workshop-slider-global': WorkshopSliderGlobal;
+    'product-slider-global': ProductSliderGlobal;
+    'workshop-cards-global': WorkshopCardsGlobal;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'testimonials-global': TestimonialsGlobalSelect<false> | TestimonialsGlobalSelect<true>;
+    'sponsors-bar-global': SponsorsBarGlobalSelect<false> | SponsorsBarGlobalSelect<true>;
+    'voucher-cta-global': VoucherCtaGlobalSelect<false> | VoucherCtaGlobalSelect<true>;
+    'workshop-slider-global': WorkshopSliderGlobalSelect<false> | WorkshopSliderGlobalSelect<true>;
+    'product-slider-global': ProductSliderGlobalSelect<false> | ProductSliderGlobalSelect<true>;
+    'workshop-cards-global': WorkshopCardsGlobalSelect<false> | WorkshopCardsGlobalSelect<true>;
   };
   locale: 'de' | 'en';
   user: User;
@@ -5826,6 +5836,244 @@ export interface TestimonialsGlobal {
   createdAt?: string | null;
 }
 /**
+ * Global sponsors/partners bar shown across multiple pages. Edit once, appears everywhere.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsors-bar-global".
+ */
+export interface SponsorsBarGlobal {
+  id: string;
+  /**
+   * Text above the logos (e.g. "This project is supported by:").
+   */
+  heading: string;
+  /**
+   * Sponsor/partner logos displayed in a horizontal row.
+   */
+  sponsors?:
+    | {
+        /**
+         * Name used as alt text for the logo image.
+         */
+        name: string;
+        /**
+         * Sponsor logo. SVG or PNG recommended.
+         */
+        logo: string | Media;
+        /**
+         * Optional link to the sponsor website.
+         */
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Global voucher call-to-action section with bento gallery. Edit once, appears on Home, Shop, and other pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "voucher-cta-global".
+ */
+export interface VoucherCtaGlobal {
+  id: string;
+  /**
+   * Large heading text (e.g. "Gift a special tasty experience").
+   */
+  heading: string;
+  /**
+   * Short paragraph below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * Text on the CTA button (e.g. "Voucher").
+   */
+  buttonLabel: string;
+  /**
+   * URL the button links to (e.g. "/workshops/voucher").
+   */
+  buttonLink: string;
+  /**
+   * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
+   */
+  galleryImages?:
+    | {
+        /**
+         * One of the 8 bento gallery images. Use square or portrait orientation.
+         */
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Background image shown behind heading and button below the gallery. Uses a neutral fallback color if not set.
+   */
+  backgroundImage?: (string | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Global workshop slider section. Edit once, appears on Home, Shop, and other pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-slider-global".
+ */
+export interface WorkshopSliderGlobal {
+  id: string;
+  /**
+   * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
+   */
+  eyebrow?: string | null;
+  /**
+   * Add up to 6 workshop slides. Each slide has a title, description, features, image, and CTA.
+   */
+  workshops: {
+    /**
+     * Workshop name displayed as the main heading (e.g. "Lakto-Gemüse").
+     */
+    title: string;
+    /**
+     * Small label shown at the top of the info card (e.g. "For Chefs and Food Professionals").
+     */
+    audienceTag?: string | null;
+    /**
+     * Short description of the workshop (1–2 sentences).
+     */
+    description: string;
+    /**
+     * Visual theme for this slide. Light = ivory feature card with dark text. Dark = charcoal feature card with cream text.
+     */
+    theme?: ('light' | 'dark') | null;
+    /**
+     * Numbered feature list (e.g. "Duration: approx. 3 hours"). Shown with 01, 02, 03, … numbering.
+     */
+    features?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * First workshop photo — shown full height in the gallery with the title overlay.
+     */
+    image?: (string | null) | Media;
+    /**
+     * Optional second photo shown alongside the first. Falls back to the primary image when not set.
+     */
+    image2?: (string | null) | Media;
+    /**
+     * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
+     */
+    ctaLink?: string | null;
+    /**
+     * Label for the button linking to this workshop's detail page (e.g. "Workshop Details").
+     */
+    detailsButtonLabel?: string | null;
+    id?: string | null;
+  }[];
+  /**
+   * Label for the button linking to the main workshops page (e.g. "All Workshops").
+   */
+  allWorkshopsButtonLabel?: string | null;
+  /**
+   * URL the "All Workshops" button links to (default: "/workshops").
+   */
+  allWorkshopsLink?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Global product slider section. Edit once, appears on Home, Workshops, and other pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-slider-global".
+ */
+export interface ProductSliderGlobal {
+  id: string;
+  /**
+   * Large heading text (e.g. "Discover UNIQUE.").
+   */
+  heading: string;
+  /**
+   * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
+   */
+  headingAccent: string;
+  /**
+   * Short paragraph below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * Text on the CTA button (e.g. "View All Products").
+   */
+  buttonLabel: string;
+  /**
+   * URL the button links to (e.g. "/products").
+   */
+  buttonLink: string;
+  /**
+   * Select products to display in the slider. If empty, the latest products will be shown.
+   */
+  products?: (string | Product)[] | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Global workshop cards section used on Fermentation, Gastronomy, and other pages. Edit once, appears everywhere.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-cards-global".
+ */
+export interface WorkshopCardsGlobal {
+  id: string;
+  /**
+   * Heading for the workshop cards section.
+   */
+  title: string;
+  /**
+   * Optional text below the title.
+   */
+  subtitle?: string | null;
+  /**
+   * Optional clarification below subtitle (e.g. price disclaimer).
+   */
+  clarification?: string | null;
+  /**
+   * Label for the next appointment date (e.g. "Nächster Termin").
+   */
+  nextDateLabel?: string | null;
+  /**
+   * Label for the "View All" button (e.g. "Alle Workshops").
+   */
+  viewAllLabel?: string | null;
+  /**
+   * URL for the "View All" button (e.g. "/workshops").
+   */
+  viewAllUrl?: string | null;
+  /**
+   * Individual workshop cards to display.
+   */
+  cards: {
+    title: string;
+    description?: string | null;
+    image?: (string | null) | Media;
+    price: string;
+    /**
+     * Text after the price (e.g. "pro Person").
+     */
+    priceSuffix?: string | null;
+    buttonLabel?: string | null;
+    buttonUrl?: string | null;
+    /**
+     * e.g. "February 15, 2026"
+     */
+    nextDate?: string | null;
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -5926,6 +6174,118 @@ export interface TestimonialsGlobalSelect<T extends boolean = true> {
         authorName?: T;
         authorRole?: T;
         rating?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsors-bar-global_select".
+ */
+export interface SponsorsBarGlobalSelect<T extends boolean = true> {
+  heading?: T;
+  sponsors?:
+    | T
+    | {
+        name?: T;
+        logo?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "voucher-cta-global_select".
+ */
+export interface VoucherCtaGlobalSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  galleryImages?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  backgroundImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-slider-global_select".
+ */
+export interface WorkshopSliderGlobalSelect<T extends boolean = true> {
+  eyebrow?: T;
+  workshops?:
+    | T
+    | {
+        title?: T;
+        audienceTag?: T;
+        description?: T;
+        theme?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        image?: T;
+        image2?: T;
+        ctaLink?: T;
+        detailsButtonLabel?: T;
+        id?: T;
+      };
+  allWorkshopsButtonLabel?: T;
+  allWorkshopsLink?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-slider-global_select".
+ */
+export interface ProductSliderGlobalSelect<T extends boolean = true> {
+  heading?: T;
+  headingAccent?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  products?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-cards-global_select".
+ */
+export interface WorkshopCardsGlobalSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  clarification?: T;
+  nextDateLabel?: T;
+  viewAllLabel?: T;
+  viewAllUrl?: T;
+  cards?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        price?: T;
+        priceSuffix?: T;
+        buttonLabel?: T;
+        buttonUrl?: T;
+        nextDate?: T;
         id?: T;
       };
   updatedAt?: T;

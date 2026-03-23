@@ -70,7 +70,8 @@ export const OnlineCourseSlider: Block = {
       localized: true,
       label: 'Coming Soon Description',
       admin: {
-        description: 'Short description for the coming-soon section (e.g. "Stay tuned for new courses").',
+        description:
+          'Short description for the coming-soon section (e.g. "Stay tuned for new courses").',
         condition: (_, siblingData) => siblingData?.showComingSoon,
       },
     },

@@ -23,7 +23,14 @@ const DEFAULTS = {
 
 type Props = OurStoryBlockType & { id?: string }
 
-export const OurStoryBlock: React.FC<Props> = ({ visible, label, heading, subheading, paragraphs, id }) => {
+export const OurStoryBlock: React.FC<Props> = ({
+  visible,
+  label,
+  heading,
+  subheading,
+  paragraphs,
+  id,
+}) => {
   const resolvedLabel = label ?? DEFAULTS.label
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedSubheading = subheading ?? DEFAULTS.subheading

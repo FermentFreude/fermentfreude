@@ -32,16 +32,24 @@ export const ReadyToLearnCTABlock: React.FC<Props> = ({
   }
 
   return (
-    <section id={id ?? undefined} className="block-ready-to-learn relative section-padding-md bg-ff-charcoal overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} aria-hidden />
+    <section
+      id={id ?? undefined}
+      className="block-ready-to-learn relative section-padding-md bg-ff-charcoal overflow-hidden"
+    >
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+          backgroundSize: '32px 32px',
+        }}
+        aria-hidden
+      />
       <div className="container relative mx-auto container-padding">
         <div className="flex flex-col items-center gap-(--space-content-lg) content-narrow mx-auto text-center">
           <h2 className="text-section-heading font-display font-bold text-white">
             {resolvedHeading}
           </h2>
-          <p className="text-body-lg text-white/90 leading-relaxed">
-            {resolvedDescription}
-          </p>
+          <p className="text-body-lg text-white/90 leading-relaxed">{resolvedDescription}</p>
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <Link
               href={resolvedPrimary.href}

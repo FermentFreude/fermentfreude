@@ -101,7 +101,13 @@ type Props = {
   id?: string
 }
 
-export const TestimonialsBlock: React.FC<Props> = ({ visible, eyebrow, heading, testimonials, id }) => {
+export const TestimonialsBlock: React.FC<Props> = ({
+  visible,
+  eyebrow,
+  heading,
+  testimonials,
+  id,
+}) => {
   const resolvedEyebrow = eyebrow ?? DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedTestimonials =

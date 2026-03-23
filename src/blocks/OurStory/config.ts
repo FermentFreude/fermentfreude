@@ -65,7 +65,8 @@ export const OurStory: Block = {
           localized: true,
           label: 'Paragraph Text',
           admin: {
-            description: 'One paragraph of the story. Keep it concise — each paragraph is shown with alternating layout.',
+            description:
+              'One paragraph of the story. Keep it concise — each paragraph is shown with alternating layout.',
           },
         },
         {

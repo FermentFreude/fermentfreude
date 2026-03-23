@@ -51,7 +51,8 @@ export const Testimonials: Block = {
       localized: true,
       label: 'Button Link',
       admin: {
-        description: 'URL for the "View All" button (e.g. "/testimonials"). Leave empty to hide the button.',
+        description:
+          'URL for the "View All" button (e.g. "/testimonials"). Leave empty to hide the button.',
       },
     },
     {
