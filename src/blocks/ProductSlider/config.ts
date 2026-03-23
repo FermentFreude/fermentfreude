@@ -18,53 +18,68 @@ export const ProductSlider: Block = {
       },
     },
     {
+      name: 'useGlobalData',
+      type: 'checkbox',
+      label: 'Use global content',
+      defaultValue: true,
+      admin: {
+        description:
+          '✅ ON = Uses shared content from Website → Product Slider (edit once, applies everywhere).\n❌ OFF = Override with custom content just for this page.',
+      },
+    },
+    {
       name: 'heading',
       type: 'text',
-      required: true,
+      required: false,
       localized: true,
       label: 'Heading',
       admin: {
         description: 'Large heading text (e.g. "Discover UNIQUE.").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'headingAccent',
       type: 'text',
-      required: true,
+      required: false,
       localized: true,
       label: 'Heading Accent Text',
       admin: {
         description: 'Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'description',
       type: 'textarea',
-      required: true,
+      required: false,
       localized: true,
       label: 'Description',
       admin: {
         description: 'Short paragraph below the heading (1–2 sentences).',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'buttonLabel',
       type: 'text',
-      required: true,
+      required: false,
       localized: true,
       label: 'Button Label',
       admin: {
         description: 'Text on the CTA button (e.g. "View All Products").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'buttonLink',
       type: 'text',
-      required: true,
+      required: false,
       localized: true,
       label: 'Button Link',
       admin: {
         description: 'URL the button links to (e.g. "/products").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
@@ -76,6 +91,7 @@ export const ProductSlider: Block = {
       admin: {
         description:
           'Select products to display in the slider. If empty, the latest products will be shown.',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
   ],

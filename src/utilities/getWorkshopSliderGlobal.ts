@@ -2,7 +2,9 @@ import type { WorkshopSliderGlobal } from '@/payload-types'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
-export async function getWorkshopSliderGlobal(locale: string = 'de'): Promise<WorkshopSliderGlobal> {
+export async function getWorkshopSliderGlobal(
+  locale: string = 'de',
+): Promise<WorkshopSliderGlobal> {
   try {
     const payload = await getPayload({ config })
     return (await payload.findGlobal({

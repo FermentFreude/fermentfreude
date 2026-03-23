@@ -14,7 +14,10 @@ export async function getVoucherCtaGlobal(locale: string = 'de'): Promise<Vouche
   } catch (error) {
     console.warn('Failed to fetch voucher CTA global:', error)
     return {
-      heading: locale === 'en' ? 'Gift a special tasty experience' : 'Verschenke ein besonderes Geschmackserlebnis',
+      heading:
+        locale === 'en'
+          ? 'Gift a special tasty experience'
+          : 'Verschenke ein besonderes Geschmackserlebnis',
       description: '',
       buttonLabel: locale === 'en' ? 'Voucher' : 'Gutschein',
       buttonLink: '/workshops/voucher',

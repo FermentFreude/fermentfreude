@@ -14,7 +14,8 @@ export async function getSponsorsBarGlobal(locale: string = 'de'): Promise<Spons
   } catch (error) {
     console.warn('Failed to fetch sponsors bar global:', error)
     return {
-      heading: locale === 'en' ? 'This project is supported by:' : 'Dieses Projekt wird unterstützt von:',
+      heading:
+        locale === 'en' ? 'This project is supported by:' : 'Dieses Projekt wird unterstützt von:',
       sponsors: [],
       id: 'sponsors-bar-global',
     } as SponsorsBarGlobal

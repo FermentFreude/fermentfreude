@@ -18,6 +18,16 @@ export const WorkshopSlider: Block = {
       },
     },
     {
+      name: 'useGlobalData',
+      type: 'checkbox',
+      label: 'Use global content',
+      defaultValue: true,
+      admin: {
+        description:
+          '✅ ON = Uses shared content from Website → Workshop Slider (edit once, applies everywhere).\n❌ OFF = Override with custom content just for this page.',
+      },
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       localized: true,
@@ -25,18 +35,20 @@ export const WorkshopSlider: Block = {
       admin: {
         description:
           'Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'workshops',
       type: 'array',
       label: 'Workshops',
-      minRows: 1,
+      minRows: 0,
       maxRows: 6,
-      required: true,
+      required: false,
       admin: {
         description:
           'Add up to 6 workshop slides. Each slide has a title, description, features, image, and CTA.',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
       fields: [
         {
@@ -154,6 +166,7 @@ export const WorkshopSlider: Block = {
       admin: {
         description:
           'Label for the button linking to the main workshops page (e.g. "All Workshops").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
@@ -163,6 +176,7 @@ export const WorkshopSlider: Block = {
       label: 'All Workshops Link',
       admin: {
         description: 'URL the "All Workshops" button links to (default: "/workshops").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
   ],

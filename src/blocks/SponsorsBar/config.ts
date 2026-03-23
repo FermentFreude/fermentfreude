@@ -18,13 +18,24 @@ export const SponsorsBar: Block = {
       },
     },
     {
+      name: 'useGlobalData',
+      type: 'checkbox',
+      label: 'Use global content',
+      defaultValue: true,
+      admin: {
+        description:
+          '✅ ON = Uses shared content from Website → Sponsors Bar (edit once, applies everywhere).\n❌ OFF = Override with custom content just for this page.',
+      },
+    },
+    {
       name: 'heading',
       type: 'text',
-      required: true,
+      required: false,
       localized: true,
       label: 'Heading',
       admin: {
         description: 'Text above the logos (e.g. "This project is supported by:").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
@@ -36,6 +47,7 @@ export const SponsorsBar: Block = {
       required: false,
       admin: {
         description: 'Sponsor/partner logos displayed in a horizontal row.',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
       fields: [
         {

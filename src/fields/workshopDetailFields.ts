@@ -84,7 +84,8 @@ export const workshopDetailFields: Field[] = [
     label: '2. Booking Card',
     admin: {
       initCollapsed: true,
-      description: 'Complete booking experience: header, about, schedule, included items, why, experience cards, and dates.',
+      description:
+        'Complete booking experience: header, about, schedule, included items, why, experience cards, and dates.',
     },
     fields: [
       // ── Header ────────────────────────────────────────────
@@ -131,7 +132,9 @@ export const workshopDetailFields: Field[] = [
         type: 'array',
         label: 'Attribute Pills',
         maxRows: 6,
-        admin: { description: 'Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").' },
+        admin: {
+          description: 'Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").',
+        },
         fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
       },
       {

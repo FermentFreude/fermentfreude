@@ -18,54 +18,69 @@ export const VoucherCta: Block = {
       },
     },
     {
+      name: 'useGlobalData',
+      type: 'checkbox',
+      label: 'Use global content',
+      defaultValue: true,
+      admin: {
+        description:
+          '✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).\n❌ OFF = Override with custom content just for this page.',
+      },
+    },
+    {
       name: 'heading',
       type: 'text',
-      required: true,
+      required: false,
       localized: true,
       label: 'Heading',
       admin: {
         description: 'Large heading text (e.g. "Gift a special tasty experience").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'description',
       type: 'textarea',
-      required: true,
+      required: false,
       localized: true,
       label: 'Description',
       admin: {
         description: 'Short paragraph below the heading (1–2 sentences).',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'buttonLabel',
       type: 'text',
-      required: true,
+      required: false,
       localized: true,
       label: 'Button Label',
       admin: {
         description: 'Text on the CTA button (e.g. "Voucher").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'buttonLink',
       type: 'text',
-      required: true,
+      required: false,
       localized: true,
       label: 'Button Link',
       admin: {
         description: 'URL the button links to (e.g. "/voucher").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'galleryImages',
       type: 'array',
       label: 'Bento Gallery Images',
-      minRows: 1,
+      minRows: 0,
       maxRows: 8,
       admin: {
         description:
           'Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
       fields: [
         {
@@ -89,6 +104,7 @@ export const VoucherCta: Block = {
       admin: {
         description:
           'Background image shown behind heading and button below the gallery. Uses a neutral fallback color if not set.',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
   ],

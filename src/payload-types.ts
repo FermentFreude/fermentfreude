@@ -2341,25 +2341,30 @@ export interface ProductSliderBlock {
    */
   visible?: boolean | null;
   /**
+   * ✅ ON = Uses shared content from Website → Product Slider (edit once, applies everywhere).
+   * ❌ OFF = Override with custom content just for this page.
+   */
+  useGlobalData?: boolean | null;
+  /**
    * Large heading text (e.g. "Discover UNIQUE.").
    */
-  heading: string;
+  heading?: string | null;
   /**
    * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
    */
-  headingAccent: string;
+  headingAccent?: string | null;
   /**
    * Short paragraph below the heading (1–2 sentences).
    */
-  description: string;
+  description?: string | null;
   /**
    * Text on the CTA button (e.g. "View All Products").
    */
-  buttonLabel: string;
+  buttonLabel?: string | null;
   /**
    * URL the button links to (e.g. "/products").
    */
-  buttonLink: string;
+  buttonLink?: string | null;
   /**
    * Select products to display in the slider. If empty, the latest products will be shown.
    */
@@ -2658,9 +2663,14 @@ export interface SponsorsBarBlock {
    */
   visible?: boolean | null;
   /**
+   * ✅ ON = Uses shared content from Website → Sponsors Bar (edit once, applies everywhere).
+   * ❌ OFF = Override with custom content just for this page.
+   */
+  useGlobalData?: boolean | null;
+  /**
    * Text above the logos (e.g. "This project is supported by:").
    */
-  heading: string;
+  heading?: string | null;
   /**
    * Sponsor/partner logos displayed in a horizontal row.
    */
@@ -2894,21 +2904,26 @@ export interface VoucherCtaBlock {
    */
   visible?: boolean | null;
   /**
+   * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
+   * ❌ OFF = Override with custom content just for this page.
+   */
+  useGlobalData?: boolean | null;
+  /**
    * Large heading text (e.g. "Gift a special tasty experience").
    */
-  heading: string;
+  heading?: string | null;
   /**
    * Short paragraph below the heading (1–2 sentences).
    */
-  description: string;
+  description?: string | null;
   /**
    * Text on the CTA button (e.g. "Voucher").
    */
-  buttonLabel: string;
+  buttonLabel?: string | null;
   /**
    * URL the button links to (e.g. "/voucher").
    */
-  buttonLink: string;
+  buttonLink?: string | null;
   /**
    * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
    */
@@ -2993,56 +3008,63 @@ export interface WorkshopSliderBlock {
    */
   visible?: boolean | null;
   /**
+   * ✅ ON = Uses shared content from Website → Workshop Slider (edit once, applies everywhere).
+   * ❌ OFF = Override with custom content just for this page.
+   */
+  useGlobalData?: boolean | null;
+  /**
    * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
    */
   eyebrow?: string | null;
   /**
    * Add up to 6 workshop slides. Each slide has a title, description, features, image, and CTA.
    */
-  workshops: {
-    /**
-     * Workshop name displayed as the main heading (e.g. "Lakto-Gemüse").
-     */
-    title: string;
-    /**
-     * Small label shown at the top of the info card (e.g. "For Chefs and Food Professionals").
-     */
-    audienceTag?: string | null;
-    /**
-     * Short description of the workshop (1–2 sentences).
-     */
-    description: string;
-    /**
-     * Visual theme for this slide. Light = ivory feature card with dark text. Dark = charcoal feature card with cream text.
-     */
-    theme?: ('light' | 'dark') | null;
-    /**
-     * Numbered feature list (e.g. "Duration: approx. 3 hours"). Shown with 01, 02, 03, … numbering.
-     */
-    features?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * First workshop photo — shown full height in the gallery with the title overlay.
-     */
-    image?: (string | null) | Media;
-    /**
-     * Optional second photo shown alongside the first. Falls back to the primary image when not set.
-     */
-    image2?: (string | null) | Media;
-    /**
-     * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
-     */
-    ctaLink?: string | null;
-    /**
-     * Label for the button linking to this workshop's detail page (e.g. "Workshop Details").
-     */
-    detailsButtonLabel?: string | null;
-    id?: string | null;
-  }[];
+  workshops?:
+    | {
+        /**
+         * Workshop name displayed as the main heading (e.g. "Lakto-Gemüse").
+         */
+        title: string;
+        /**
+         * Small label shown at the top of the info card (e.g. "For Chefs and Food Professionals").
+         */
+        audienceTag?: string | null;
+        /**
+         * Short description of the workshop (1–2 sentences).
+         */
+        description: string;
+        /**
+         * Visual theme for this slide. Light = ivory feature card with dark text. Dark = charcoal feature card with cream text.
+         */
+        theme?: ('light' | 'dark') | null;
+        /**
+         * Numbered feature list (e.g. "Duration: approx. 3 hours"). Shown with 01, 02, 03, … numbering.
+         */
+        features?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * First workshop photo — shown full height in the gallery with the title overlay.
+         */
+        image?: (string | null) | Media;
+        /**
+         * Optional second photo shown alongside the first. Falls back to the primary image when not set.
+         */
+        image2?: (string | null) | Media;
+        /**
+         * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
+         */
+        ctaLink?: string | null;
+        /**
+         * Label for the button linking to this workshop's detail page (e.g. "Workshop Details").
+         */
+        detailsButtonLabel?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Label for the button linking to the main workshops page (e.g. "All Workshops").
    */
@@ -4644,6 +4666,7 @@ export interface OnlineCourseSliderBlockSelect<T extends boolean = true> {
  */
 export interface ProductSliderBlockSelect<T extends boolean = true> {
   visible?: T;
+  useGlobalData?: T;
   heading?: T;
   headingAccent?: T;
   description?: T;
@@ -4778,6 +4801,7 @@ export interface ReadyToLearnCtaBlockSelect<T extends boolean = true> {
  */
 export interface SponsorsBarBlockSelect<T extends boolean = true> {
   visible?: T;
+  useGlobalData?: T;
   heading?: T;
   sponsors?:
     | T
@@ -4889,6 +4913,7 @@ export interface FormBlockSelect<T extends boolean = true> {
  */
 export interface VoucherCtaBlockSelect<T extends boolean = true> {
   visible?: T;
+  useGlobalData?: T;
   heading?: T;
   description?: T;
   buttonLabel?: T;
@@ -4932,6 +4957,7 @@ export interface LaktoVoucherCtaBlockSelect<T extends boolean = true> {
  */
 export interface WorkshopSliderBlockSelect<T extends boolean = true> {
   visible?: T;
+  useGlobalData?: T;
   eyebrow?: T;
   workshops?:
     | T
