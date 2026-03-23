@@ -1547,23 +1547,6 @@ export interface Page {
      * e.g. "Nächste Workshops" / "Upcoming Workshops"
      */
     datesHeading?: string | null;
-    dates?:
-      | {
-          /**
-           * e.g. "15. Februar 2026"
-           */
-          date: string;
-          /**
-           * e.g. "14:00 – 17:00"
-           */
-          time: string;
-          /**
-           * Number of available spots for this date.
-           */
-          spotsLeft?: number | null;
-          id?: string | null;
-        }[]
-      | null;
     /**
      * e.g. "Reservierung bestätigen" / "Confirm Reservation"
      */
@@ -4359,14 +4342,6 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         datesHeading?: T;
-        dates?:
-          | T
-          | {
-              date?: T;
-              time?: T;
-              spotsLeft?: T;
-              id?: T;
-            };
         modalConfirmHeading?: T;
         modalConfirmSubheading?: T;
         modalWorkshopLabel?: T;

@@ -345,34 +345,8 @@ export const workshopDetailFields: Field[] = [
         label: 'Dates Heading',
         admin: { description: 'e.g. "Nächste Workshops" / "Upcoming Workshops"' },
       },
-      {
-        name: 'dates',
-        type: 'array',
-        label: 'Workshop Dates',
-        maxRows: 20,
-        fields: [
-          {
-            name: 'date',
-            type: 'text',
-            required: true,
-            label: 'Date',
-            admin: { description: 'e.g. "15. Februar 2026"' },
-          },
-          {
-            name: 'time',
-            type: 'text',
-            required: true,
-            label: 'Time',
-            admin: { description: 'e.g. "14:00 – 17:00"' },
-          },
-          {
-            name: 'spotsLeft',
-            type: 'number',
-            label: 'Spots Available',
-            admin: { description: 'Number of available spots for this date.' },
-          },
-        ],
-      },
+      // Dates are fetched automatically from Workshop Appointments collection.
+      // No manual date entry needed here — create appointments in Workshops → Workshop Appointments.
 
       // ── Booking Modal Labels ──────────────────────────────
       {
