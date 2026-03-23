@@ -8,6 +8,9 @@ const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
 // Pages with dedicated routes that differ from their slug
 const pageSlugRouteMap: Record<string, string> = {
   voucher: '/workshops/voucher',
+  tempeh: '/workshops/tempeh',
+  'lakto-gemuese': '/workshops/lakto-gemuese',
+  kombucha: '/workshops/kombucha',
 }
 
 type Props = {

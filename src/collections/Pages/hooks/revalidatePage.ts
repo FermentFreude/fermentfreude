@@ -11,7 +11,7 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
 }) => {
   if (context?.disableRevalidate) return doc
 
-  const workshopDetailSlugs = ['tempeh', 'lakto-gemuese', 'kombucha', 'basics']
+  const workshopDetailSlugs = ['tempeh', 'lakto-gemuese', 'kombucha']
 
   // Always revalidate if workshops page changes (draft or published)
   if (doc.slug === 'workshops') {
@@ -63,7 +63,7 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
 
 export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { context } }) => {
   if (!context.disableRevalidate) {
-    const workshopDetailSlugs = ['tempeh', 'lakto-gemuese', 'kombucha', 'basics']
+    const workshopDetailSlugs = ['tempeh', 'lakto-gemuese', 'kombucha']
     const path =
       doc?.slug === 'home'
         ? '/'
