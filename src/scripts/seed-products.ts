@@ -351,7 +351,7 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
     fallbackImageId = String(existing.docs[0].id)
   }
 
-  const ctxWithLocale = { ...ctx, locale: 'de' as const }
+  const ctxWithLocale = { ...ctx }
 
   for (const product of PRODUCTS) {
     const imageId = imageIdByPath[product.imagePath] ?? fallbackImageId
@@ -391,11 +391,12 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
     try {
       const created = await payload.create({
         collection: 'products',
+        locale: 'de',
+        draft: false,
         context: ctxWithLocale,
         data: {
           title: product.titleDe,
-          slug: product.slug,
-          description: buildDescription(product.descriptionDe),
+          slug: product.slug,          productType: 'jarred' as const,          description: buildDescription(product.descriptionDe),
           gallery: [{ image: imageId }],
           priceInEUR: product.priceInEUR,
           inventory: 50,

@@ -9,6 +9,15 @@ export const LaktoVoucherCtaBlock: Block = {
   },
   fields: [
     {
+      name: 'visible',
+      type: 'checkbox',
+      label: 'Show this section',
+      defaultValue: true,
+      admin: {
+        description: 'Toggle off to hide this section on the page without deleting it.',
+      },
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       localized: true,

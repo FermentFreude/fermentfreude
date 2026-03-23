@@ -224,32 +224,32 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
 
           {/* ── Footer text ── */}
           <div className="flex items-start gap-2.5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 76 76"
-                fill="none"
-                className="shrink-0 mt-0.5 hidden sm:block"
-                aria-hidden="true"
-              >
-                <path
-                  d="M52.6617 37.6496L58.7381 40.0325L75.0609 49.0874L66.6016 63.7422L49.9214 54.6872L45.1557 50.7554L46.1088 57.1892V75.18H28.952V57.1892L30.0243 50.5171L24.9011 54.6872L8.45924 63.7422L0 49.0874L16.3228 39.7942L22.3991 37.6496L16.3228 35.1475L0 26.2117L8.45924 11.557L25.1394 20.4928L30.0243 24.6629L28.952 18.3482V0H46.1088V18.3482L45.1557 24.4246L49.9214 20.4928L66.6016 11.557L75.0609 26.2117L58.7381 35.3858L52.6617 37.6496Z"
-                  fill="#1a1a1a"
-                />
-              </svg>
-              <div className="leading-tight">
-                <p className="text-[10px] md:text-[11px] font-bold text-[#1a1a1a] m-0">{tagline}</p>
-                <p className="text-[10px] md:text-[11px] font-medium text-[#1a1a1a] m-0 mt-0.5">
-                  {subtitle}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 76 76"
+              fill="none"
+              className="shrink-0 mt-0.5 hidden sm:block"
+              aria-hidden="true"
+            >
+              <path
+                d="M52.6617 37.6496L58.7381 40.0325L75.0609 49.0874L66.6016 63.7422L49.9214 54.6872L45.1557 50.7554L46.1088 57.1892V75.18H28.952V57.1892L30.0243 50.5171L24.9011 54.6872L8.45924 63.7422L0 49.0874L16.3228 39.7942L22.3991 37.6496L16.3228 35.1475L0 26.2117L8.45924 11.557L25.1394 20.4928L30.0243 24.6629L28.952 18.3482V0H46.1088V18.3482L45.1557 24.4246L49.9214 20.4928L66.6016 11.557L75.0609 26.2117L58.7381 35.3858L52.6617 37.6496Z"
+                fill="#1a1a1a"
+              />
+            </svg>
+            <div className="leading-tight">
+              <p className="text-[10px] md:text-[11px] font-bold text-[#1a1a1a] m-0">{tagline}</p>
+              <p className="text-[10px] md:text-[11px] font-medium text-[#1a1a1a] m-0 mt-0.5">
+                {subtitle}
+              </p>
+              {disclaimer && (
+                <p className="text-[9px] md:text-[10px] text-[#999] mt-0.5 m-0 italic">
+                  {disclaimer}
                 </p>
-                {disclaimer && (
-                  <p className="text-[9px] md:text-[10px] text-[#999] mt-0.5 m-0 italic">
-                    {disclaimer}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
+          </div>
         </div>
 
         {/* ── Right: Infinite card slider ── */}
@@ -259,7 +259,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
             ref={scrollRef}
             onScroll={handleScroll}
             data-shop-slider
-            className="flex gap-16 md:gap-20 overflow-x-auto pb-2 snap-x snap-mandatory pl-14 md:pl-24 pr-4 md:pr-8 items-center"
+            className="flex gap-6 md:gap-8 overflow-x-auto pb-2 snap-x snap-mandatory pl-6 md:pl-10 pr-4 md:pr-8 items-center"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -269,11 +269,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
           >
             <style>{`[data-shop-slider]::-webkit-scrollbar { display: none; }`}</style>
             {loopSlides.map((slide, i) => (
-              <ShopCard
-                key={`${slide.id || slide.categoryLabel}-${i}`}
-                slide={slide}
-                isFirstInRow={i === slides.length}
-              />
+              <ShopCard key={`${slide.id || slide.categoryLabel}-${i}`} slide={slide} />
             ))}
           </div>
 
@@ -299,71 +295,51 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
  *  Shop Card — ProductSlider SVG frame with integrated button
  *  + vertical category label on the card
  * ═══════════════════════════════════════════════════════════════ */
-function ShopCard({
-  slide,
-  isFirstInRow = false,
-}: {
-  slide: Slide
-  isFirstInRow?: boolean
-}) {
+function ShopCard({ slide }: { slide: Slide }) {
   const [btnHovered, setBtnHovered] = useState(false)
   const hasImage = isMediaObject(slide.image)
   const labelText = (slide.categoryLabel ?? '').trim()
   const isTempeh = labelText.toLowerCase() === 'tempeh'
 
   const labelWords = labelText.split(/\s+/).filter(Boolean)
-  const isLongLabel = labelText.length > 11
+  const isMultiWord = labelWords.length >= 2
 
   const labelLines = React.useMemo(() => {
-    if (!isLongLabel) return [labelText]
-    if (labelWords.length >= 2) {
-      const midpoint = Math.ceil(labelWords.length / 2)
-      return [labelWords.slice(0, midpoint).join(' '), labelWords.slice(midpoint).join(' ')]
-    }
-    const midpoint = Math.ceil(labelText.length / 2)
-    return [labelText.slice(0, midpoint), labelText.slice(midpoint)]
-  }, [isLongLabel, labelText, labelWords])
+    if (!isMultiWord) return [labelText]
+    const midpoint = Math.ceil(labelWords.length / 2)
+    return [labelWords.slice(0, midpoint).join(' '), labelWords.slice(midpoint).join(' ')]
+  }, [isMultiWord, labelText, labelWords])
 
   return (
-    <div
-      data-shop-card
-      className={`shrink-0 snap-start flex h-full relative ${isLongLabel ? 'mr-4 md:mr-6' : ''}`}
-    >
+    <div data-shop-card className="shrink-0 snap-start flex flex-row items-center">
+      {/* Label — normal flex child to the left of the card, never clipped */}
+      {slide.categoryLabel && (
+        <div className="shrink-0 flex items-center justify-center self-stretch px-2">
+          <span
+            className="leading-none uppercase font-black tracking-wider text-[#1a1a1a] select-none pointer-events-none"
+            style={{
+              writingMode: 'vertical-rl',
+              transform: 'rotate(180deg)',
+              fontSize: isMultiWord ? 'clamp(1.7rem, 3vw, 2.6rem)' : 'clamp(2rem, 3.5vw, 3rem)',
+              display: 'block',
+              lineHeight: 1,
+            }}
+          >
+            {labelLines.map((line, index) => (
+              <React.Fragment key={`${line}-${index}`}>
+                {line}
+                {index < labelLines.length - 1 ? <br /> : null}
+              </React.Fragment>
+            ))}
+          </span>
+        </div>
+      )}
+
       {/* Card */}
       <div
         className="relative shrink-0"
         style={{ height: 'clamp(240px, 50vh, 440px)', aspectRatio: '328 / 440' }}
       >
-        {/* Label — overlaps left edge, half on card half outside, always on top */}
-        {slide.categoryLabel && (
-          <div
-            className="absolute z-50 select-none pointer-events-none"
-            style={{
-              left: isFirstInRow ? '-2.6rem' : '-1.5rem',
-              top: '50%',
-              transform: 'translateY(-50%)',
-            }}
-          >
-            <span
-              className="leading-none uppercase font-black tracking-wider text-[#1a1a1a]"
-              style={{
-                writingMode: 'vertical-rl',
-                transform: 'rotate(180deg)',
-                fontSize: isLongLabel ? 'clamp(1.5rem, 2.8vw, 2.4rem)' : 'clamp(2rem, 4vw, 3.5rem)',
-                display: 'block',
-                lineHeight: isLongLabel ? 0.9 : 1,
-              }}
-            >
-              {labelLines.map((line, index) => (
-                <React.Fragment key={`${line}-${index}`}>
-                  {line}
-                  {index < labelLines.length - 1 ? <br /> : null}
-                </React.Fragment>
-              ))}
-            </span>
-          </div>
-        )}
-
         <Link href={slide.detailUrl || '/shop'} className="group block h-full">
           <div className="relative h-full">
             <CardWithButton

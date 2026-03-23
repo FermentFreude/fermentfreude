@@ -169,10 +169,12 @@ async function seedPlaceholderProducts() {
     const created = await payload.create({
       collection: 'products',
       locale: 'de',
+      draft: false,
       context: ctx,
       data: {
         title: product.titleDe,
         slug: product.slug,
+        productType: 'jarred' as const,
         description: buildDescription(product.descriptionDe),
         gallery: [{ image: placeholderImageId }],
         priceInEUR: product.priceInEUR,

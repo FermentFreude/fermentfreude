@@ -282,6 +282,25 @@ export interface Order {
 export interface Product {
   id: string;
   title: string;
+  /**
+   * Wähle den Produkttyp — je nach Auswahl erscheinen unterschiedliche Felder. / Select the product type — different fields appear depending on the selection.
+   */
+  productType: 'jarred' | 'fresh' | 'bottled' | 'workshop' | 'digital-course';
+  /**
+   * Ein kurzer Satz für die Produktseite unter dem Titel (max. 2–3 Zeilen). / A short sentence displayed below the title on the product page.
+   */
+  shortDescription?: string | null;
+  /**
+   * Markenname, z.B. "FermentFreude". Wird in der Produkt-Infotabelle angezeigt. / Brand name shown in the product specs table.
+   */
+  brand?: string | null;
+  /**
+   * Geschmacksrichtung, z.B. "Ingwer & Zitrone". Wird in der Produkt-Infotabelle angezeigt. / Flavour shown in the product specs table.
+   */
+  flavour?: string | null;
+  /**
+   * Wird im aufklappbaren "Über das Produkt" Bereich angezeigt.
+   */
   description?: {
     root: {
       type: string;
@@ -304,7 +323,141 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Vorteile werden als farbige Badges auf der Produktseite angezeigt (z.B. "Soothing + Purifying", "Reduces Redness").
+   */
+  benefits?:
+    | {
+        /**
+         * z.B. "Probiotisch", "Gut für die Darmflora"
+         */
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Badges werden als Icons auf der Produktseite angezeigt (z.B. Vegan, Handmade, Bio).
+   */
+  badges?:
+    | (
+        | 'vegan'
+        | 'vegetarian'
+        | 'handmade'
+        | 'organic'
+        | 'gluten-free'
+        | 'probiotic'
+        | 'fermented'
+        | 'no-additives'
+        | 'refrigerated'
+      )[]
+    | null;
   layout?: (CallToActionBlock | ContentBlock | MediaBlock)[] | null;
+  /**
+   * Aufklappbarer Bereich "Über das Produkt" — Geschichte, Herstellung, besondere Eigenschaften.
+   */
+  aboutProduct?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Aufklappbarer Bereich "Wie verwenden?" — Serviervorschläge, Rezeptideen.
+   */
+  howToUse?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Aufklappbarer Bereich "Hinweise vor dem Gebrauch" — Lagerung, Öffnungshinweise.
+   */
+  userInstructions?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * z.B. "350g", "200ml", "1 Stück"
+   */
+  unitSize?: string | null;
+  /**
+   * Zutatenliste für das Etikett und die Produktseite.
+   */
+  ingredients?: string | null;
+  /**
+   * z.B. "Enthält Soja" / "Contains soy"
+   */
+  allergens?: string | null;
+  /**
+   * z.B. "Kühl lagern, nach dem Öffnen innerhalb von 4 Wochen verbrauchen"
+   */
+  storageInstructions?: string | null;
+  /**
+   * z.B. "6 Monate ungeöffnet" / "6 months unopened"
+   */
+  shelfLife?: string | null;
+  isOrganic?: boolean | null;
+  isVegan?: boolean | null;
+  isGlutenFree?: boolean | null;
+  /**
+   * Flaschenvolumen in Milliliter
+   */
+  volumeML?: number | null;
+  /**
+   * z.B. "< 0.5%"
+   */
+  alcoholContent?: string | null;
+  /**
+   * Gewicht in Gramm
+   */
+  weightGrams?: number | null;
+  /**
+   * z.B. "3 Tage nach Kauf" / "3 days after purchase"
+   */
+  bestBefore?: string | null;
+  /**
+   * Verknüpfe dieses Produkt mit einem Workshop aus der Workshop-Sammlung. Termine und Buchungen werden dort verwaltet.
+   */
+  workshopRef?: (string | null) | Workshop;
+  /**
+   * Slug des Online-Kurses (z.B. "basic-fermentation"). Käufer werden automatisch eingeschrieben.
+   */
+  courseSlug?: string | null;
+  /**
+   * z.B. "4 Stunden" / "4 hours"
+   */
+  courseDuration?: string | null;
+  courseLevel?: ('beginner' | 'intermediate' | 'advanced') | null;
   inventory?: number | null;
   enableVariants?: boolean | null;
   variantTypes?: (string | VariantType)[] | null;
@@ -325,10 +478,6 @@ export interface Product {
     description?: string | null;
   };
   categories?: (string | Category)[] | null;
-  /**
-   * If this product unlocks an online course, enter the course slug here (e.g. "basic-fermentation"). The buyer will be automatically enrolled.
-   */
-  courseSlug?: string | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -633,6 +782,7 @@ export interface Page {
         | OurStoryBlock
         | OnlineCourseSliderBlock
         | ProductSliderBlock
+        | FeaturedProductCardsBlock
         | ShopHeroBlock
         | ShopProductGridBlock
         | ShopProductListBlock
@@ -2201,6 +2351,55 @@ export interface ProductSliderBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeaturedProductCardsBlock".
+ */
+export interface FeaturedProductCardsBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Main heading above the cards (e.g. "Unsere Bestseller" / "Our Bestsellers").
+   */
+  heading?: string | null;
+  /**
+   * Short intro text below the heading.
+   */
+  subheading?: string | null;
+  /**
+   * Select up to 3 products to display as large feature cards. These appear in a 3-column row.
+   */
+  products: (string | Product)[];
+  /**
+   * Optional accent colors for each card. Leave empty for defaults (olive-green, warm-gold, earthy-brown).
+   */
+  cardColors?:
+    | {
+        /**
+         * e.g. #4b6043, #b8860b, #8b4513
+         */
+        color?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * A single product shown as a wide banner card below the 3-column row (e.g. Tempeh).
+   */
+  bannerProduct?: (string | null) | Product;
+  /**
+   * Banner card accent color. Default: #555954 (muted olive).
+   */
+  bannerColor?: string | null;
+  /**
+   * Button text on each card (e.g. "Jetzt bestellen" / "Order Now").
+   */
+  ctaLabel?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featuredProductCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ShopHeroBlock".
  */
 export interface ShopHeroBlock {
@@ -2314,6 +2513,10 @@ export interface ShopProductGridBlock {
  * via the `definition` "ShopProductListBlock".
  */
 export interface ShopProductListBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Optionale Überschrift über dem Produkt-Raster. / Optional heading above the product grid.
    */
@@ -2657,6 +2860,10 @@ export interface VoucherCtaBlock {
  */
 export interface LaktoVoucherCtaBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small text above the title (e.g. "GEMEINSAM FERMENTIEREN").
    */
   eyebrow?: string | null;
@@ -2860,6 +3067,59 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Define workshop metadata. Price and capacity apply to all dates and locations.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshops".
+ */
+export interface Workshop {
+  id: string;
+  /**
+   * URL-friendly identifier (e.g., kombucha, lakto, tempeh, basics)
+   */
+  slug: string;
+  /**
+   * Workshop name (displayed on frontend)
+   */
+  title: string;
+  /**
+   * Detailed workshop description
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Price per person in EUR (default: €99)
+   */
+  basePrice: number;
+  /**
+   * Maximum number of people per workshop session (locked at 12 for quality control)
+   */
+  maxCapacityPerSlot: number;
+  /**
+   * Workshop hero image
+   */
+  image?: (string | null) | Media;
+  /**
+   * Hide workshop from frontend if unchecked
+   */
+  isActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3193,59 +3453,6 @@ export interface OnlineCourse {
         id?: string | null;
       }[]
     | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Define workshop metadata. Price and capacity apply to all dates and locations.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshops".
- */
-export interface Workshop {
-  id: string;
-  /**
-   * URL-friendly identifier (e.g., kombucha, lakto, tempeh, basics)
-   */
-  slug: string;
-  /**
-   * Workshop name (displayed on frontend)
-   */
-  title: string;
-  /**
-   * Detailed workshop description
-   */
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Price per person in EUR (default: €99)
-   */
-  basePrice: number;
-  /**
-   * Maximum number of people per workshop session (locked at 12 for quality control)
-   */
-  maxCapacityPerSlot: number;
-  /**
-   * Workshop hero image
-   */
-  image?: (string | null) | Media;
-  /**
-   * Hide workshop from frontend if unchecked
-   */
-  isActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3678,6 +3885,7 @@ export interface PagesSelect<T extends boolean = true> {
         ourStory?: T | OurStoryBlockSelect<T>;
         onlineCourseSlider?: T | OnlineCourseSliderBlockSelect<T>;
         productSlider?: T | ProductSliderBlockSelect<T>;
+        featuredProductCards?: T | FeaturedProductCardsBlockSelect<T>;
         shopHero?: T | ShopHeroBlockSelect<T>;
         shopProductGrid?: T | ShopProductGridBlockSelect<T>;
         shopProductList?: T | ShopProductListBlockSelect<T>;
@@ -4367,6 +4575,27 @@ export interface ProductSliderBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeaturedProductCardsBlock_select".
+ */
+export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
+  visible?: T;
+  heading?: T;
+  subheading?: T;
+  products?: T;
+  cardColors?:
+    | T
+    | {
+        color?: T;
+        id?: T;
+      };
+  bannerProduct?: T;
+  bannerColor?: T;
+  ctaLabel?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ShopHeroBlock_select".
  */
 export interface ShopHeroBlockSelect<T extends boolean = true> {
@@ -4412,6 +4641,7 @@ export interface ShopProductGridBlockSelect<T extends boolean = true> {
  * via the `definition` "ShopProductListBlock_select".
  */
 export interface ShopProductListBlockSelect<T extends boolean = true> {
+  visible?: T;
   heading?: T;
   products?: T;
   id?: T;
@@ -4590,6 +4820,7 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
  * via the `definition` "LaktoVoucherCtaBlock_select".
  */
 export interface LaktoVoucherCtaBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   title?: T;
   description?: T;
@@ -5112,6 +5343,10 @@ export interface VariantOptionsSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   title?: T;
+  productType?: T;
+  shortDescription?: T;
+  brand?: T;
+  flavour?: T;
   description?: T;
   gallery?:
     | T
@@ -5120,6 +5355,13 @@ export interface ProductsSelect<T extends boolean = true> {
         variantOption?: T;
         id?: T;
       };
+  benefits?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  badges?: T;
   layout?:
     | T
     | {
@@ -5127,6 +5369,25 @@ export interface ProductsSelect<T extends boolean = true> {
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
       };
+  aboutProduct?: T;
+  howToUse?: T;
+  userInstructions?: T;
+  unitSize?: T;
+  ingredients?: T;
+  allergens?: T;
+  storageInstructions?: T;
+  shelfLife?: T;
+  isOrganic?: T;
+  isVegan?: T;
+  isGlutenFree?: T;
+  volumeML?: T;
+  alcoholContent?: T;
+  weightGrams?: T;
+  bestBefore?: T;
+  workshopRef?: T;
+  courseSlug?: T;
+  courseDuration?: T;
+  courseLevel?: T;
   inventory?: T;
   enableVariants?: T;
   variantTypes?: T;
@@ -5142,7 +5403,6 @@ export interface ProductsSelect<T extends boolean = true> {
         description?: T;
       };
   categories?: T;
-  courseSlug?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;
