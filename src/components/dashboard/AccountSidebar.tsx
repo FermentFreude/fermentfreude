@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@/utilities/cn'
 import { useAuth } from '@/providers/Auth'
+import { cn } from '@/utilities/cn'
 import {
   GraduationCap,
   LayoutDashboard,

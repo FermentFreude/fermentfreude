@@ -58,7 +58,7 @@ export const SponsorsBarBlock: React.FC<Props> = ({ visible, heading, sponsors, 
           {resolvedHeading}
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-6 w-full max-w-(--content-wide) mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-6 w-full max-w-(--content-wide) ">
           {hasCmsLogos
             ? /* ── CMS logos ── */
               sponsors!.map((sponsor, index) => {
