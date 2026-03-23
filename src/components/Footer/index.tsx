@@ -38,6 +38,20 @@ export async function Footer() {
   const newsletterHeading = footer.newsletterHeading || DEFAULTS.newsletterHeading
   const social = footer.socialMedia
 
+  // Use CMS links when available, otherwise fall back to hardcoded defaults
+  const quickLinks =
+    footer.navItems && footer.navItems.length > 0
+      ? footer.navItems.map((item) => ({ label: item.link.label, href: item.link.url || '/' }))
+      : QUICK_LINKS
+
+  const workshopLinks =
+    footer.workshopLinks && footer.workshopLinks.length > 0
+      ? footer.workshopLinks.map((item) => ({
+          label: item.link.label,
+          href: item.link.url || '/',
+        }))
+      : WORKSHOP_LINKS
+
   const currentYear = new Date().getFullYear()
 
   return (
@@ -72,7 +86,7 @@ export async function Footer() {
                 Quick Links
               </h3>
               <nav className="flex flex-col gap-1.5">
-                {QUICK_LINKS.map((item) => (
+                {quickLinks.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -90,7 +104,7 @@ export async function Footer() {
                 Workshops
               </h3>
               <nav className="flex flex-col gap-1.5">
-                {WORKSHOP_LINKS.map((item) => (
+                {workshopLinks.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}

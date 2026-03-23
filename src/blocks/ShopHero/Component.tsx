@@ -93,6 +93,7 @@ function CardWithButton({
 
 export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
   const {
+    visible,
     heroTitle,
     heroPrice,
     ctaPrimaryLabel,
@@ -104,6 +105,8 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
     bottomSubtitle,
     bottomDisclaimer,
   } = props
+
+  if (visible === false) return null
 
   const title = heroTitle ?? 'Our Handmade Products From Our Pick-Up Shop.'
   const price = heroPrice ?? 'from €8.50'

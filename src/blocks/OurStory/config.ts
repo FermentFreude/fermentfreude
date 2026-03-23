@@ -9,6 +9,15 @@ export const OurStory: Block = {
   },
   fields: [
     {
+      name: 'visible',
+      type: 'checkbox',
+      label: 'Show this section',
+      defaultValue: true,
+      admin: {
+        description: 'Toggle off to hide this section on the page without deleting it.',
+      },
+    },
+    {
       name: 'label',
       type: 'text',
       required: true,
@@ -55,6 +64,9 @@ export const OurStory: Block = {
           required: true,
           localized: true,
           label: 'Paragraph Text',
+          admin: {
+            description: 'One paragraph of the story. Keep it concise — each paragraph is shown with alternating layout.',
+          },
         },
         {
           name: 'image',

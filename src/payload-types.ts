@@ -2089,6 +2089,10 @@ export interface ContentBlock {
  */
 export interface FeatureCardsBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small uppercase text above the heading (e.g. "FERMENTATION").
    */
   eyebrow?: string | null;
@@ -2135,6 +2139,10 @@ export interface FeatureCardsBlock {
  * via the `definition` "HeroBannerBlock".
  */
 export interface HeroBannerBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Large white heading over the background image (e.g. "For Chefs and Food Professionals").
    */
@@ -2260,6 +2268,10 @@ export interface CarouselBlock {
  */
 export interface OurStoryBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small accent text above the heading (e.g. "Our Story", "Unsere Geschichte").
    */
   label: string;
@@ -2275,6 +2287,9 @@ export interface OurStoryBlock {
    * Body text paragraphs describing the story.
    */
   paragraphs: {
+    /**
+     * One paragraph of the story. Keep it concise — each paragraph is shown with alternating layout.
+     */
     text: string;
     /**
      * Optional image for this paragraph. Shown in alternating layout.
@@ -2291,6 +2306,10 @@ export interface OurStoryBlock {
  * via the `definition` "OnlineCourseSliderBlock".
  */
 export interface OnlineCourseSliderBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Small label above the heading (e.g. "Course Overview").
    */
@@ -2311,6 +2330,9 @@ export interface OnlineCourseSliderBlock {
    * Heading for the coming-soon section (e.g. "More Courses on the Way").
    */
   comingSoonHeading?: string | null;
+  /**
+   * Short description for the coming-soon section (e.g. "Stay tuned for new courses").
+   */
   comingSoonDescription?: string | null;
   id?: string | null;
   blockName?: string | null;
@@ -2321,6 +2343,10 @@ export interface OnlineCourseSliderBlock {
  * via the `definition` "ProductSliderBlock".
  */
 export interface ProductSliderBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Large heading text (e.g. "Discover UNIQUE.").
    */
@@ -2404,6 +2430,10 @@ export interface FeaturedProductCardsBlock {
  */
 export interface ShopHeroBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Single main headline for the hero section (e.g. "Unsere handgemachten Produkte aus unserem Pick-Up Shop").
    */
   heroTitle: string;
@@ -2468,6 +2498,10 @@ export interface ShopHeroBlock {
  * via the `definition` "ShopProductGridBlock".
  */
 export interface ShopProductGridBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Small label above the heading (e.g. "Unsere Produkte").
    */
@@ -2535,6 +2569,10 @@ export interface ShopProductListBlock {
  */
 export interface CollectionGridBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small label above the heading (e.g. "Our Collections").
    */
   eyebrow?: string | null;
@@ -2576,6 +2614,10 @@ export interface CollectionGridBlock {
  */
 export interface ReadyToLearnCtaBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * CTA heading text (e.g. "Ready to learn?").
    */
   heading: string;
@@ -2583,14 +2625,26 @@ export interface ReadyToLearnCtaBlock {
    * Body text below the heading.
    */
   description: string;
+  /**
+   * Main call-to-action button (filled style).
+   */
   primaryButton: {
+    /**
+     * Text shown on the button (e.g. "Browse Workshops").
+     */
     label: string;
     /**
      * URL the button links to (e.g. "/workshops").
      */
     href: string;
   };
+  /**
+   * Secondary call-to-action button (outline style).
+   */
   secondaryButton: {
+    /**
+     * Text shown on the button (e.g. "Explore Courses").
+     */
     label: string;
     /**
      * URL the button links to (e.g. "/courses").
@@ -2606,6 +2660,10 @@ export interface ReadyToLearnCtaBlock {
  * via the `definition` "SponsorsBarBlock".
  */
 export interface SponsorsBarBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Text above the logos (e.g. "This project is supported by:").
    */
@@ -2676,6 +2734,10 @@ export interface TeamCardsBlock {
  */
 export interface TeamPreviewBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small uppercase text above the heading (e.g. "Our Team").
    */
   eyebrow?: string | null;
@@ -2699,6 +2761,9 @@ export interface TeamPreviewBlock {
    * Team members to display. Typically 2 members with large portrait photos.
    */
   members: {
+    /**
+     * Full name of the team member.
+     */
     name: string;
     /**
      * Role title (e.g. "Instructor").
@@ -2720,6 +2785,10 @@ export interface TeamPreviewBlock {
  */
 export interface TestimonialsBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small text above the heading (e.g. "Testimonials").
    */
   eyebrow?: string | null;
@@ -2731,6 +2800,9 @@ export interface TestimonialsBlock {
    * Optional "View All" button text. Leave empty to hide.
    */
   buttonLabel?: string | null;
+  /**
+   * URL for the "View All" button (e.g. "/testimonials"). Leave empty to hide the button.
+   */
   buttonLink?: string | null;
   /**
    * Individual testimonial entries displayed as a slider.
@@ -2740,6 +2812,9 @@ export interface TestimonialsBlock {
      * The testimonial text.
      */
     quote: string;
+    /**
+     * Full name of the person who gave this testimonial.
+     */
     authorName: string;
     /**
      * Optional role/title of the author (e.g. "Artist").
@@ -2822,6 +2897,10 @@ export interface FormBlock {
  */
 export interface VoucherCtaBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Large heading text (e.g. "Gift a special tasty experience").
    */
   heading: string;
@@ -2842,6 +2921,9 @@ export interface VoucherCtaBlock {
    */
   galleryImages?:
     | {
+        /**
+         * One of the 8 bento gallery images. Use square or portrait orientation.
+         */
         image: string | Media;
         id?: string | null;
       }[]
@@ -2914,6 +2996,10 @@ export interface LaktoVoucherCtaBlock {
  */
 export interface WorkshopSliderBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
    */
   eyebrow?: string | null;
@@ -2981,6 +3067,10 @@ export interface WorkshopSliderBlock {
  * via the `definition` "WorkshopPhasesBlock".
  */
 export interface WorkshopPhasesBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Small accent text above the heading (e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT").
    */
@@ -4459,6 +4549,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
  * via the `definition` "FeatureCardsBlock_select".
  */
 export interface FeatureCardsBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   description?: T;
@@ -4480,6 +4571,7 @@ export interface FeatureCardsBlockSelect<T extends boolean = true> {
  * via the `definition` "HeroBannerBlock_select".
  */
 export interface HeroBannerBlockSelect<T extends boolean = true> {
+  visible?: T;
   heading?: T;
   description?: T;
   buttonLabel?: T;
@@ -4532,6 +4624,7 @@ export interface CarouselBlockSelect<T extends boolean = true> {
  * via the `definition` "OurStoryBlock_select".
  */
 export interface OurStoryBlockSelect<T extends boolean = true> {
+  visible?: T;
   label?: T;
   heading?: T;
   subheading?: T;
@@ -4550,6 +4643,7 @@ export interface OurStoryBlockSelect<T extends boolean = true> {
  * via the `definition` "OnlineCourseSliderBlock_select".
  */
 export interface OnlineCourseSliderBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   showComingSoon?: T;
@@ -4564,6 +4658,7 @@ export interface OnlineCourseSliderBlockSelect<T extends boolean = true> {
  * via the `definition` "ProductSliderBlock_select".
  */
 export interface ProductSliderBlockSelect<T extends boolean = true> {
+  visible?: T;
   heading?: T;
   headingAccent?: T;
   description?: T;
@@ -4599,6 +4694,7 @@ export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
  * via the `definition` "ShopHeroBlock_select".
  */
 export interface ShopHeroBlockSelect<T extends boolean = true> {
+  visible?: T;
   heroTitle?: T;
   heroPrice?: T;
   ctaPrimaryLabel?: T;
@@ -4624,6 +4720,7 @@ export interface ShopHeroBlockSelect<T extends boolean = true> {
  * via the `definition` "ShopProductGridBlock_select".
  */
 export interface ShopProductGridBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   description?: T;
@@ -4652,6 +4749,7 @@ export interface ShopProductListBlockSelect<T extends boolean = true> {
  * via the `definition` "CollectionGridBlock_select".
  */
 export interface CollectionGridBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   collections?:
@@ -4671,6 +4769,7 @@ export interface CollectionGridBlockSelect<T extends boolean = true> {
  * via the `definition` "ReadyToLearnCtaBlock_select".
  */
 export interface ReadyToLearnCtaBlockSelect<T extends boolean = true> {
+  visible?: T;
   heading?: T;
   description?: T;
   primaryButton?:
@@ -4693,6 +4792,7 @@ export interface ReadyToLearnCtaBlockSelect<T extends boolean = true> {
  * via the `definition` "SponsorsBarBlock_select".
  */
 export interface SponsorsBarBlockSelect<T extends boolean = true> {
+  visible?: T;
   heading?: T;
   sponsors?:
     | T
@@ -4729,6 +4829,7 @@ export interface TeamCardsBlockSelect<T extends boolean = true> {
  * via the `definition` "TeamPreviewBlock_select".
  */
 export interface TeamPreviewBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   description?: T;
@@ -4750,6 +4851,7 @@ export interface TeamPreviewBlockSelect<T extends boolean = true> {
  * via the `definition` "TestimonialsBlock_select".
  */
 export interface TestimonialsBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   buttonLabel?: T;
@@ -4801,6 +4903,7 @@ export interface FormBlockSelect<T extends boolean = true> {
  * via the `definition` "VoucherCtaBlock_select".
  */
 export interface VoucherCtaBlockSelect<T extends boolean = true> {
+  visible?: T;
   heading?: T;
   description?: T;
   buttonLabel?: T;
@@ -4843,6 +4946,7 @@ export interface LaktoVoucherCtaBlockSelect<T extends boolean = true> {
  * via the `definition` "WorkshopSliderBlock_select".
  */
 export interface WorkshopSliderBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   workshops?:
     | T
@@ -4873,6 +4977,7 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
  * via the `definition` "WorkshopPhasesBlock_select".
  */
 export interface WorkshopPhasesBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   phases?:

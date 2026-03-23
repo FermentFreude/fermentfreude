@@ -14,6 +14,7 @@ const DEFAULTS = {
 type Props = HeroBannerBlockType & { id?: string }
 
 export const HeroBannerBlock: React.FC<Props> = ({
+  visible,
   heading,
   description,
   buttonLabel,
@@ -22,6 +23,7 @@ export const HeroBannerBlock: React.FC<Props> = ({
   backgroundVideoUrl,
   id,
 }) => {
+  if (visible === false) return null
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedDescription = description ?? DEFAULTS.description
   const resolvedButtonLabel = buttonLabel ?? DEFAULTS.buttonLabel

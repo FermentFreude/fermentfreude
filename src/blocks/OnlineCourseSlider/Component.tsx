@@ -12,6 +12,7 @@ import { getPayload } from 'payload'
 import type { Media as MediaType, OnlineCourse, Product } from '@/payload-types'
 
 type Props = {
+  visible?: boolean | null
   eyebrow?: string | null
   heading?: string | null
   showComingSoon?: boolean | null
@@ -29,6 +30,8 @@ function isResolvedProduct(v: unknown): v is Product {
 }
 
 export async function OnlineCourseSliderBlock(props: Props) {
+  if (props.visible === false) return null
+
   const {
     eyebrow,
     heading,

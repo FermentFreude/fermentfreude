@@ -26,6 +26,7 @@ function formatPrice(price: number | null | undefined): string {
 }
 
 export const ShopProductGridComponent: React.FC<ShopProductGridBlock> = async (props) => {
+  if (props.visible === false) return null
   const {
     eyebrow,
     heading,

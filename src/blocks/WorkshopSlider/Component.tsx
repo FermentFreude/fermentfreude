@@ -84,12 +84,15 @@ function resolveMedia(image: MediaType | string | number | null | undefined): Me
  * ═══════════════════════════════════════════════════════════════ */
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
+  visible,
   eyebrow,
   workshops,
   id,
   upcomingLabel,
   upcomingDatesByHref,
 }) => {
+  if (visible === false) return null
+
   /* ── refs ──────────────────────────────────────────────────── */
   const outerRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)

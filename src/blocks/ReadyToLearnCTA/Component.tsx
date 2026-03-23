@@ -12,12 +12,14 @@ const DEFAULTS = {
 type Props = ReadyToLearnCtaBlockType & { id?: string }
 
 export const ReadyToLearnCTABlock: React.FC<Props> = ({
+  visible,
   heading,
   description,
   primaryButton,
   secondaryButton,
   id,
 }) => {
+  if (visible === false) return null
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedDescription = description ?? DEFAULTS.description
   const resolvedPrimary = {

@@ -19,6 +19,7 @@ const DEFAULTS = {
 type Props = TeamPreviewBlockType & { id?: string }
 
 export const TeamPreviewBlock: React.FC<Props> = ({
+  visible,
   eyebrow,
   heading,
   description,
@@ -27,6 +28,7 @@ export const TeamPreviewBlock: React.FC<Props> = ({
   members,
   id,
 }) => {
+  if (visible === false) return null
   const resolvedEyebrow = eyebrow ?? DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedDescription = description ?? DEFAULTS.description

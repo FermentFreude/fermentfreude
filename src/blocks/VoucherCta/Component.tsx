@@ -25,6 +25,7 @@ type Props = VoucherCtaBlockType & {
 }
 
 export const VoucherCtaBlock: React.FC<Props> = ({
+  visible,
   heading,
   description,
   buttonLabel,
@@ -33,6 +34,8 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   backgroundImage,
   id,
 }) => {
+  if (visible === false) return null
+
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedDescription = description ?? DEFAULTS.description
   const resolvedButtonLabel = buttonLabel ?? DEFAULTS.buttonLabel

@@ -9,6 +9,15 @@ export const VoucherCta: Block = {
   },
   fields: [
     {
+      name: 'visible',
+      type: 'checkbox',
+      label: 'Show this section',
+      defaultValue: true,
+      admin: {
+        description: 'Toggle off to hide this section on the page without deleting it.',
+      },
+    },
+    {
       name: 'heading',
       type: 'text',
       required: true,
@@ -65,6 +74,9 @@ export const VoucherCta: Block = {
           relationTo: 'media',
           required: true,
           label: 'Gallery Image',
+          admin: {
+            description: 'One of the 8 bento gallery images. Use square or portrait orientation.',
+          },
         },
       ],
     },

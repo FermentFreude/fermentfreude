@@ -23,11 +23,12 @@ const DEFAULTS = {
 
 type Props = SponsorsBarBlockType & { id?: string }
 
-export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => {
+export const SponsorsBarBlock: React.FC<Props> = ({ visible, heading, sponsors, id }) => {
+  if (visible === false) return null
   const resolvedHeading = heading ?? DEFAULTS.heading
 
-  // Always use static images — same as Home page, guaranteed to load (no R2 dependency)
-  const hasCmsLogos = false
+  // Use CMS sponsor logos when available, otherwise fall back to static images
+  const hasCmsLogos = Array.isArray(sponsors) && sponsors.length > 0
 
   const sectionRef = useRef<HTMLElement>(null)
   const [isVisible, setIsVisible] = useState(false)

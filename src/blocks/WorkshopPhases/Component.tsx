@@ -19,6 +19,7 @@ function isResolvedMedia(img: unknown): img is MediaType {
 
 export type WorkshopPhasesBlock = {
   blockType: 'workshopPhases'
+  visible?: boolean | null
   eyebrow?: string | null
   heading?: string | null
   phases?: Array<{
@@ -39,7 +40,8 @@ export const WorkshopPhasesComponent: React.FC<
   }
 > = (props) => {
   const block = props as WorkshopPhasesBlock & { id?: string | number }
-  const { eyebrow, heading, phases, id } = block
+  const { visible, eyebrow, heading, phases, id } = block
+  if (visible === false) return null
 
   const [isVisible, setIsVisible] = useState(false)
 

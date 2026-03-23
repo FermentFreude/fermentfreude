@@ -63,6 +63,7 @@ const getIconSrc = (icon: unknown, index: number): string => {
 type Props = FeatureCardsBlockType & { id?: string }
 
 export const FeatureCardsBlock: React.FC<Props> = ({
+  visible,
   eyebrow,
   heading,
   description,
@@ -71,6 +72,7 @@ export const FeatureCardsBlock: React.FC<Props> = ({
   buttonLink,
   id,
 }) => {
+  if (visible === false) return null
   const resolvedEyebrow = eyebrow ?? DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedDescription = description ?? DEFAULTS.description

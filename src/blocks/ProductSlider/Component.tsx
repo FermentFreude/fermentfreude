@@ -82,6 +82,7 @@ function getVariantLabel(product: Product): string {
  * ═══════════════════════════════════════════════════════════════ */
 
 export const ProductSliderBlock: React.FC<Props> = ({
+  visible,
   heading,
   headingAccent,
   description,
@@ -90,6 +91,7 @@ export const ProductSliderBlock: React.FC<Props> = ({
   products: rawProducts,
   id,
 }) => {
+  if (visible === false) return null
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedAccent = headingAccent ?? DEFAULTS.headingAccent
   const resolvedDescription = description ?? DEFAULTS.description
