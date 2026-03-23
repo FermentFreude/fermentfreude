@@ -98,11 +98,11 @@ export const OurStoryBlock: React.FC<Props> = ({
                 </div>
               )
               const imageContent = item.image ? (
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
+                <div className="relative aspect-4/3 overflow-hidden rounded-xl">
                   <Media resource={item.image} fill imgClassName="object-cover" />
                 </div>
               ) : (
-                <div className="aspect-[4/3] rounded-xl bg-ff-warm-gray" />
+                <div className="aspect-4/3 rounded-xl bg-ff-warm-gray" />
               )
 
               return (
