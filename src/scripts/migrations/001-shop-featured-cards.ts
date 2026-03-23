@@ -21,12 +21,12 @@ import { appendBlockToPage, findProductBySlug } from './_helpers'
 // ── CONFIGURE THESE ───────────────────────────────────────────────────────────
 // Product slugs for the 3 featured cards (column grid, left → right)
 const CARD_SLUGS = [
-  'kombucha-classic',    // Card 1 (left)
-  'fermented-kimchi',    // Card 2 (middle)
-  'lakto-gemuese',       // Card 3 (right)
+  'fermentierte-curryzwiebel', // Card 1 (left)
+  'classic-kimchi',            // Card 2 (middle)
+  'fermentierte-rote-rueben',  // Card 3 (right)
 ]
 // Product slug for the wide banner below the cards (e.g. Tempeh)
-const BANNER_SLUG = 'tempeh-starter'
+const BANNER_SLUG = 'kaeferbohnen-tempeh'
 
 // Card accent colors (hex). Leave empty string to use defaults.
 const CARD_COLORS = [
