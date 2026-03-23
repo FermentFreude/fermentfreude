@@ -16,7 +16,7 @@ const DEFAULTS = {
   heading: 'Gift a special tasty experience',
   description: 'Share a tasty experience with someone special.',
   buttonLabel: 'Voucher',
-  buttonLink: '/voucher',
+  buttonLink: '/workshops/voucher',
 }
 
 type Props = VoucherCtaBlockType & {

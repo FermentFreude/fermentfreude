@@ -5,6 +5,11 @@ const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
   pages: '',
 }
 
+// Pages with dedicated routes that differ from their slug
+const pageSlugRouteMap: Record<string, string> = {
+  voucher: '/workshops/voucher',
+}
+
 type Props = {
   collection: keyof typeof collectionPrefixMap
   slug: string
@@ -17,10 +22,16 @@ export const generatePreviewPath = ({ collection, slug }: Props) => {
     return null
   }
 
+  // Use dedicated route path if this slug has one, otherwise use default prefix
+  const path =
+    collection === 'pages' && pageSlugRouteMap[slug]
+      ? pageSlugRouteMap[slug]
+      : `${collectionPrefixMap[collection]}/${slug}`
+
   const encodedParams = new URLSearchParams({
     slug,
     collection,
-    path: `${collectionPrefixMap[collection]}/${slug}`,
+    path,
     previewSecret: process.env.PREVIEW_SECRET || '',
   })
 

@@ -1,5 +1,11 @@
 const redirects = async () => {
-  return []
+  return [
+    {
+      source: '/voucher',
+      destination: '/workshops/voucher',
+      permanent: true,
+    },
+  ]
 }
 
 export default redirects
