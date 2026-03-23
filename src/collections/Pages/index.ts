@@ -10,6 +10,7 @@ import { CollectionGrid } from '@/blocks/CollectionGrid/config'
 import { ContactBlock } from '@/blocks/ContactBlock/config'
 import { Content } from '@/blocks/Content/config'
 import { FeatureCards } from '@/blocks/FeatureCards/config'
+import { FeaturedProductCards } from '@/blocks/FeaturedProductCards/config'
 import { FormBlock } from '@/blocks/Form/config'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { LaktoVoucherCtaBlock } from '@/blocks/LaktoVoucherCta/config'
@@ -121,6 +122,7 @@ export const Pages: CollectionConfig = {
                 OurStory,
                 OnlineCourseSlider,
                 ProductSlider,
+                FeaturedProductCards,
                 ShopHero,
                 ShopProductGrid,
                 ShopProductList,

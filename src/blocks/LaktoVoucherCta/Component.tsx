@@ -4,6 +4,7 @@ import React from 'react'
 
 export const LaktoVoucherCtaBlockComponent: React.FC<LaktoVoucherCtaBlockType> = (props) => {
   const {
+    visible,
     eyebrow,
     title,
     description,
@@ -14,6 +15,8 @@ export const LaktoVoucherCtaBlockComponent: React.FC<LaktoVoucherCtaBlockType> =
     secondaryHref,
     pills,
   } = props
+
+  if (visible === false) return null
 
   return (
     <LaktoVoucherCta

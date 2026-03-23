@@ -222,10 +222,14 @@ export const ProductQuickView: React.FC<Props> = ({ product, onClose }) => {
 
             {/* Stock indicator */}
             {isOutOfStock && (
-              <p className="text-sm font-medium text-red-600 uppercase tracking-wider mb-3">Out of stock</p>
+              <p className="text-sm font-medium text-red-600 uppercase tracking-wider mb-3">
+                Out of stock
+              </p>
             )}
             {!isOutOfStock && stock > 0 && stock < 10 && (
-              <p className="text-sm font-medium text-amber-600 uppercase tracking-wider mb-3">Only {stock} left in stock</p>
+              <p className="text-sm font-medium text-amber-600 uppercase tracking-wider mb-3">
+                Only {stock} left in stock
+              </p>
             )}
 
             {/* Add to Cart */}

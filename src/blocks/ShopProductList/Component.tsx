@@ -6,7 +6,8 @@ import { getPayload } from 'payload'
 import { ShopProductListClient } from './ShopProductListClient'
 
 export const ShopProductListComponent: React.FC<ShopProductListBlock> = async (props) => {
-  const { heading, products: selectedProducts } = props
+  const { visible, heading, products: selectedProducts } = props
+  if (visible === false) return null
   const locale = (await getLocale()) as 'de' | 'en'
   const payload = await getPayload({ config: configPromise })
 

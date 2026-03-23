@@ -9,7 +9,6 @@ import { cn } from '@/utilities/cn'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { LanguageToggle } from './LanguageToggle'
 import { CHAR_REVEAL } from './anim'
 import { defaultDropdowns, defaultNavItems, getDefaultDropdownKey } from './nav-defaults'
 
@@ -49,6 +48,16 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
   const [detailViewItem, setDetailViewItem] = useState<string | null>(null)
   const animTimeline = useRef<gsap.core.Timeline | null>(null)
   const detailRef = useRef<HTMLDivElement>(null)
+
+  // Measure where the header actually ends on screen (accounts for AdminBar above)
+  const [menuTop, setMenuTop] = useState(headerHeight)
+  useEffect(() => {
+    if (!isActive) return
+    const header = document.querySelector('header')
+    if (header) {
+      setMenuTop(Math.max(header.getBoundingClientRect().bottom, 0))
+    }
+  }, [isActive, headerHeight])
 
   const hasRealCMSItems = menu && menu.length > 0 && menu.some((i) => i.link?.label)
 
@@ -231,20 +240,15 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
     <div
       ref={navRef}
       className="nav-overlay fixed left-0 right-0 bottom-0 z-55"
-      style={{ opacity: 0, top: headerHeight }}
+      style={{ opacity: 0, top: menuTop }}
     >
       {/* Background */}
       <div className="absolute inset-0 bg-[#ECE5DE]/95 dark:bg-ff-near-black/97 backdrop-blur-xl" />
 
       {/* Content — fills remaining viewport below header */}
       <div className="relative h-full flex flex-col overflow-hidden">
-        {/* Language toggle — top-right */}
-        <div className="flex justify-end px-4 sm:px-6 md:px-8 pt-3 pb-1 shrink-0">
-          <LanguageToggle />
-        </div>
-
         {/* Nav items list - scrollable */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8 pt-4">
           <nav className="pb-6">
             {navItemsList.map((item, idx) => {
               const isExpanded = expandedItems.has(item.id)

@@ -52,7 +52,11 @@ export function HeaderClient({ header }: Props) {
   // Measure header height
   useEffect(() => {
     if (!headerRef.current) return
-    const measure = () => setHeaderHeight(headerRef.current?.offsetHeight ?? 0)
+    const measure = () => {
+      const h = headerRef.current?.offsetHeight ?? 0
+      setHeaderHeight(h)
+      document.documentElement.style.setProperty('--header-height', `${h}px`)
+    }
     const observer = new ResizeObserver(measure)
     observer.observe(headerRef.current)
     measure()
@@ -248,10 +252,8 @@ export function HeaderClient({ header }: Props) {
                 <Cart />
               </Suspense>
 
-              {/* Language toggle (desktop) - after cart */}
-              <div className="hidden lg:block">
-                <LanguageToggle />
-              </div>
+              {/* Language toggle - always visible */}
+              <LanguageToggle />
 
               {/* Menu / Close toggle icon - only on tablet & mobile */}
               <button

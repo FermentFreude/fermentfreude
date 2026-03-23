@@ -6,6 +6,7 @@ import { CollectionGridComponent } from '@/blocks/CollectionGrid/Component'
 import { ContactBlockComponent } from '@/blocks/ContactBlock/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FeatureCardsBlock } from '@/blocks/FeatureCards/Component'
+import { FeaturedProductCardsComponent } from '@/blocks/FeaturedProductCards/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
 import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Component'
@@ -49,6 +50,7 @@ const blockComponents = {
   testimonials: TestimonialsBlock,
   threeItemGrid: ThreeItemGridBlock,
   productSlider: ProductSliderBlock,
+  featuredProductCards: FeaturedProductCardsComponent,
   shopHero: ShopHeroComponent,
   shopProductGrid: ShopProductGridComponent,
   shopProductList: ShopProductListComponent,

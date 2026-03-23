@@ -163,9 +163,11 @@ async function seedWorkshopProducts() {
       const productDE = await payload.create({
         collection: 'products',
         locale: 'de',
+        draft: false,
         data: {
           title: workshop.titleDe,
           slug: workshop.slug,
+          productType: 'workshop' as const,
           priceInEUR: workshop.priceInEUR,
           priceInEUREnabled: true,
           inventory: 999,
