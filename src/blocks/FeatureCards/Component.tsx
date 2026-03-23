@@ -63,6 +63,7 @@ const getIconSrc = (icon: unknown, index: number): string => {
 type Props = FeatureCardsBlockType & { id?: string }
 
 export const FeatureCardsBlock: React.FC<Props> = ({
+  visible,
   eyebrow,
   heading,
   description,
@@ -141,6 +142,8 @@ export const FeatureCardsBlock: React.FC<Props> = ({
     })
     return () => ctx.revert()
   }, [resolvedCards])
+
+  if (visible === false) return null
 
   return (
     <section id={id ?? undefined} className="bg-white section-padding-md">

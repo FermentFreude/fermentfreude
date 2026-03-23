@@ -322,12 +322,6 @@ export default async function WorkshopDetailPage({ params }: Args) {
             id?: string
           }> | null
           datesHeading?: string | null
-          dates?: Array<{
-            date?: string | null
-            time?: string | null
-            spotsLeft?: number | null
-            id?: string
-          }> | null
           calendarEyebrow?: string | null
           calendarTitle?: string | null
           calendarDescription?: string | null

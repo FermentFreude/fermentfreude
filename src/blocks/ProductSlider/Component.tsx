@@ -82,6 +82,7 @@ function getVariantLabel(product: Product): string {
  * ═══════════════════════════════════════════════════════════════ */
 
 export const ProductSliderBlock: React.FC<Props> = ({
+  visible,
   heading,
   headingAccent,
   description,
@@ -126,6 +127,8 @@ export const ProductSliderBlock: React.FC<Props> = ({
     },
     [updateScrollState],
   )
+
+  if (visible === false) return null
 
   return (
     <section id={id} className="section-padding-md overflow-hidden">

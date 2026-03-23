@@ -84,6 +84,7 @@ function resolveMedia(image: MediaType | string | number | null | undefined): Me
  * ═══════════════════════════════════════════════════════════════ */
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
+  visible,
   eyebrow,
   workshops,
   id,
@@ -192,6 +193,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       window.removeEventListener('resize', updateDimensions)
     }
   }, [])
+
+  if (visible === false) return null
 
   /* ═══════════════════════════════════════════════════════════ */
   /*  RENDER                                                     */

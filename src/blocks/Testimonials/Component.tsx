@@ -88,6 +88,7 @@ function QuoteMark() {
 }
 
 type Props = {
+  visible?: boolean | null
   eyebrow?: string | null
   heading?: string | null
   testimonials?: Array<{
@@ -100,7 +101,13 @@ type Props = {
   id?: string
 }
 
-export const TestimonialsBlock: React.FC<Props> = ({ eyebrow, heading, testimonials, id }) => {
+export const TestimonialsBlock: React.FC<Props> = ({
+  visible,
+  eyebrow,
+  heading,
+  testimonials,
+  id,
+}) => {
   const resolvedEyebrow = eyebrow ?? DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedTestimonials =
@@ -203,6 +210,8 @@ export const TestimonialsBlock: React.FC<Props> = ({ eyebrow, heading, testimoni
       el.removeEventListener('pointercancel', onPointerCancel)
     }
   }, []) // stable — uses goRef
+
+  if (visible === false) return null
 
   const current = resolvedTestimonials[activeIndex]
 

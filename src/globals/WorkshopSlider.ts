@@ -1,32 +1,14 @@
-import type { Block } from 'payload'
+import type { GlobalConfig } from 'payload'
 
-export const WorkshopSlider: Block = {
-  slug: 'workshopSlider',
-  interfaceName: 'WorkshopSliderBlock',
-  labels: {
-    singular: 'Workshop Slider',
-    plural: 'Workshop Sliders',
+export const WorkshopSliderGlobal: GlobalConfig = {
+  slug: 'workshop-slider-global',
+  label: 'Workshop Slider',
+  admin: {
+    group: 'Website',
+    description:
+      'Global workshop slider section. Edit once, appears on Home, Shop, and other pages.',
   },
   fields: [
-    {
-      name: 'visible',
-      type: 'checkbox',
-      label: 'Show this section',
-      defaultValue: true,
-      admin: {
-        description: 'Toggle off to hide this section on the page without deleting it.',
-      },
-    },
-    {
-      name: 'useGlobalData',
-      type: 'checkbox',
-      label: 'Use global content',
-      defaultValue: true,
-      admin: {
-        description:
-          '✅ ON = Uses shared content from Website → Workshop Slider (edit once, applies everywhere).\n❌ OFF = Override with custom content just for this page.',
-      },
-    },
     {
       name: 'eyebrow',
       type: 'text',
@@ -35,20 +17,18 @@ export const WorkshopSlider: Block = {
       admin: {
         description:
           'Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").',
-        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       name: 'workshops',
       type: 'array',
       label: 'Workshops',
-      minRows: 0,
+      minRows: 1,
       maxRows: 6,
-      required: false,
+      required: true,
       admin: {
         description:
           'Add up to 6 workshop slides. Each slide has a title, description, features, image, and CTA.',
-        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
       fields: [
         {
@@ -166,7 +146,6 @@ export const WorkshopSlider: Block = {
       admin: {
         description:
           'Label for the button linking to the main workshops page (e.g. "All Workshops").',
-        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
@@ -176,7 +155,6 @@ export const WorkshopSlider: Block = {
       label: 'All Workshops Link',
       admin: {
         description: 'URL the "All Workshops" button links to (default: "/workshops").',
-        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
   ],

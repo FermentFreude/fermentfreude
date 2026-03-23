@@ -9,6 +9,15 @@ export const Testimonials: Block = {
   },
   fields: [
     {
+      name: 'visible',
+      type: 'checkbox',
+      label: 'Show this section',
+      defaultValue: true,
+      admin: {
+        description: 'Toggle off to hide this section on the page without deleting it.',
+      },
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       localized: true,
@@ -41,6 +50,10 @@ export const Testimonials: Block = {
       type: 'text',
       localized: true,
       label: 'Button Link',
+      admin: {
+        description:
+          'URL for the "View All" button (e.g. "/testimonials"). Leave empty to hide the button.',
+      },
     },
     {
       name: 'testimonials',
@@ -69,6 +82,9 @@ export const Testimonials: Block = {
           required: true,
           localized: true,
           label: 'Author Name',
+          admin: {
+            description: 'Full name of the person who gave this testimonial.',
+          },
         },
         {
           name: 'authorRole',

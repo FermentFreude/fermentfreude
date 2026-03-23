@@ -150,11 +150,21 @@ export interface Config {
     header: Header;
     footer: Footer;
     'testimonials-global': TestimonialsGlobal;
+    'sponsors-bar-global': SponsorsBarGlobal;
+    'voucher-cta-global': VoucherCtaGlobal;
+    'workshop-slider-global': WorkshopSliderGlobal;
+    'product-slider-global': ProductSliderGlobal;
+    'workshop-cards-global': WorkshopCardsGlobal;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'testimonials-global': TestimonialsGlobalSelect<false> | TestimonialsGlobalSelect<true>;
+    'sponsors-bar-global': SponsorsBarGlobalSelect<false> | SponsorsBarGlobalSelect<true>;
+    'voucher-cta-global': VoucherCtaGlobalSelect<false> | VoucherCtaGlobalSelect<true>;
+    'workshop-slider-global': WorkshopSliderGlobalSelect<false> | WorkshopSliderGlobalSelect<true>;
+    'product-slider-global': ProductSliderGlobalSelect<false> | ProductSliderGlobalSelect<true>;
+    'workshop-cards-global': WorkshopCardsGlobalSelect<false> | WorkshopCardsGlobalSelect<true>;
   };
   locale: 'de' | 'en';
   user: User;
@@ -1537,23 +1547,6 @@ export interface Page {
      * e.g. "Nächste Workshops" / "Upcoming Workshops"
      */
     datesHeading?: string | null;
-    dates?:
-      | {
-          /**
-           * e.g. "15. Februar 2026"
-           */
-          date: string;
-          /**
-           * e.g. "14:00 – 17:00"
-           */
-          time: string;
-          /**
-           * Number of available spots for this date.
-           */
-          spotsLeft?: number | null;
-          id?: string | null;
-        }[]
-      | null;
     /**
      * e.g. "Reservierung bestätigen" / "Confirm Reservation"
      */
@@ -2089,6 +2082,10 @@ export interface ContentBlock {
  */
 export interface FeatureCardsBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small uppercase text above the heading (e.g. "FERMENTATION").
    */
   eyebrow?: string | null;
@@ -2135,6 +2132,10 @@ export interface FeatureCardsBlock {
  * via the `definition` "HeroBannerBlock".
  */
 export interface HeroBannerBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Large white heading over the background image (e.g. "For Chefs and Food Professionals").
    */
@@ -2260,6 +2261,10 @@ export interface CarouselBlock {
  */
 export interface OurStoryBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small accent text above the heading (e.g. "Our Story", "Unsere Geschichte").
    */
   label: string;
@@ -2275,6 +2280,9 @@ export interface OurStoryBlock {
    * Body text paragraphs describing the story.
    */
   paragraphs: {
+    /**
+     * One paragraph of the story. Keep it concise — each paragraph is shown with alternating layout.
+     */
     text: string;
     /**
      * Optional image for this paragraph. Shown in alternating layout.
@@ -2291,6 +2299,10 @@ export interface OurStoryBlock {
  * via the `definition` "OnlineCourseSliderBlock".
  */
 export interface OnlineCourseSliderBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Small label above the heading (e.g. "Course Overview").
    */
@@ -2311,6 +2323,9 @@ export interface OnlineCourseSliderBlock {
    * Heading for the coming-soon section (e.g. "More Courses on the Way").
    */
   comingSoonHeading?: string | null;
+  /**
+   * Short description for the coming-soon section (e.g. "Stay tuned for new courses").
+   */
   comingSoonDescription?: string | null;
   id?: string | null;
   blockName?: string | null;
@@ -2322,25 +2337,34 @@ export interface OnlineCourseSliderBlock {
  */
 export interface ProductSliderBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * ✅ ON = Uses shared content from Website → Product Slider (edit once, applies everywhere).
+   * ❌ OFF = Override with custom content just for this page.
+   */
+  useGlobalData?: boolean | null;
+  /**
    * Large heading text (e.g. "Discover UNIQUE.").
    */
-  heading: string;
+  heading?: string | null;
   /**
    * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
    */
-  headingAccent: string;
+  headingAccent?: string | null;
   /**
    * Short paragraph below the heading (1–2 sentences).
    */
-  description: string;
+  description?: string | null;
   /**
    * Text on the CTA button (e.g. "View All Products").
    */
-  buttonLabel: string;
+  buttonLabel?: string | null;
   /**
    * URL the button links to (e.g. "/products").
    */
-  buttonLink: string;
+  buttonLink?: string | null;
   /**
    * Select products to display in the slider. If empty, the latest products will be shown.
    */
@@ -2403,6 +2427,10 @@ export interface FeaturedProductCardsBlock {
  * via the `definition` "ShopHeroBlock".
  */
 export interface ShopHeroBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Single main headline for the hero section (e.g. "Unsere handgemachten Produkte aus unserem Pick-Up Shop").
    */
@@ -2468,6 +2496,10 @@ export interface ShopHeroBlock {
  * via the `definition` "ShopProductGridBlock".
  */
 export interface ShopProductGridBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Small label above the heading (e.g. "Unsere Produkte").
    */
@@ -2535,6 +2567,10 @@ export interface ShopProductListBlock {
  */
 export interface CollectionGridBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small label above the heading (e.g. "Our Collections").
    */
   eyebrow?: string | null;
@@ -2576,6 +2612,10 @@ export interface CollectionGridBlock {
  */
 export interface ReadyToLearnCtaBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * CTA heading text (e.g. "Ready to learn?").
    */
   heading: string;
@@ -2583,14 +2623,26 @@ export interface ReadyToLearnCtaBlock {
    * Body text below the heading.
    */
   description: string;
+  /**
+   * Main call-to-action button (filled style).
+   */
   primaryButton: {
+    /**
+     * Text shown on the button (e.g. "Browse Workshops").
+     */
     label: string;
     /**
      * URL the button links to (e.g. "/workshops").
      */
     href: string;
   };
+  /**
+   * Secondary call-to-action button (outline style).
+   */
   secondaryButton: {
+    /**
+     * Text shown on the button (e.g. "Explore Courses").
+     */
     label: string;
     /**
      * URL the button links to (e.g. "/courses").
@@ -2607,9 +2659,18 @@ export interface ReadyToLearnCtaBlock {
  */
 export interface SponsorsBarBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * ✅ ON = Uses shared content from Website → Sponsors Bar (edit once, applies everywhere).
+   * ❌ OFF = Override with custom content just for this page.
+   */
+  useGlobalData?: boolean | null;
+  /**
    * Text above the logos (e.g. "This project is supported by:").
    */
-  heading: string;
+  heading?: string | null;
   /**
    * Sponsor/partner logos displayed in a horizontal row.
    */
@@ -2676,6 +2737,10 @@ export interface TeamCardsBlock {
  */
 export interface TeamPreviewBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small uppercase text above the heading (e.g. "Our Team").
    */
   eyebrow?: string | null;
@@ -2699,6 +2764,9 @@ export interface TeamPreviewBlock {
    * Team members to display. Typically 2 members with large portrait photos.
    */
   members: {
+    /**
+     * Full name of the team member.
+     */
     name: string;
     /**
      * Role title (e.g. "Instructor").
@@ -2720,6 +2788,10 @@ export interface TeamPreviewBlock {
  */
 export interface TestimonialsBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small text above the heading (e.g. "Testimonials").
    */
   eyebrow?: string | null;
@@ -2731,6 +2803,9 @@ export interface TestimonialsBlock {
    * Optional "View All" button text. Leave empty to hide.
    */
   buttonLabel?: string | null;
+  /**
+   * URL for the "View All" button (e.g. "/testimonials"). Leave empty to hide the button.
+   */
   buttonLink?: string | null;
   /**
    * Individual testimonial entries displayed as a slider.
@@ -2740,6 +2815,9 @@ export interface TestimonialsBlock {
      * The testimonial text.
      */
     quote: string;
+    /**
+     * Full name of the person who gave this testimonial.
+     */
     authorName: string;
     /**
      * Optional role/title of the author (e.g. "Artist").
@@ -2822,26 +2900,38 @@ export interface FormBlock {
  */
 export interface VoucherCtaBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
+   * ❌ OFF = Override with custom content just for this page.
+   */
+  useGlobalData?: boolean | null;
+  /**
    * Large heading text (e.g. "Gift a special tasty experience").
    */
-  heading: string;
+  heading?: string | null;
   /**
    * Short paragraph below the heading (1–2 sentences).
    */
-  description: string;
+  description?: string | null;
   /**
    * Text on the CTA button (e.g. "Voucher").
    */
-  buttonLabel: string;
+  buttonLabel?: string | null;
   /**
    * URL the button links to (e.g. "/voucher").
    */
-  buttonLink: string;
+  buttonLink?: string | null;
   /**
    * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
    */
   galleryImages?:
     | {
+        /**
+         * One of the 8 bento gallery images. Use square or portrait orientation.
+         */
         image: string | Media;
         id?: string | null;
       }[]
@@ -2914,56 +3004,67 @@ export interface LaktoVoucherCtaBlock {
  */
 export interface WorkshopSliderBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * ✅ ON = Uses shared content from Website → Workshop Slider (edit once, applies everywhere).
+   * ❌ OFF = Override with custom content just for this page.
+   */
+  useGlobalData?: boolean | null;
+  /**
    * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
    */
   eyebrow?: string | null;
   /**
    * Add up to 6 workshop slides. Each slide has a title, description, features, image, and CTA.
    */
-  workshops: {
-    /**
-     * Workshop name displayed as the main heading (e.g. "Lakto-Gemüse").
-     */
-    title: string;
-    /**
-     * Small label shown at the top of the info card (e.g. "For Chefs and Food Professionals").
-     */
-    audienceTag?: string | null;
-    /**
-     * Short description of the workshop (1–2 sentences).
-     */
-    description: string;
-    /**
-     * Visual theme for this slide. Light = ivory feature card with dark text. Dark = charcoal feature card with cream text.
-     */
-    theme?: ('light' | 'dark') | null;
-    /**
-     * Numbered feature list (e.g. "Duration: approx. 3 hours"). Shown with 01, 02, 03, … numbering.
-     */
-    features?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * First workshop photo — shown full height in the gallery with the title overlay.
-     */
-    image?: (string | null) | Media;
-    /**
-     * Optional second photo shown alongside the first. Falls back to the primary image when not set.
-     */
-    image2?: (string | null) | Media;
-    /**
-     * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
-     */
-    ctaLink?: string | null;
-    /**
-     * Label for the button linking to this workshop's detail page (e.g. "Workshop Details").
-     */
-    detailsButtonLabel?: string | null;
-    id?: string | null;
-  }[];
+  workshops?:
+    | {
+        /**
+         * Workshop name displayed as the main heading (e.g. "Lakto-Gemüse").
+         */
+        title: string;
+        /**
+         * Small label shown at the top of the info card (e.g. "For Chefs and Food Professionals").
+         */
+        audienceTag?: string | null;
+        /**
+         * Short description of the workshop (1–2 sentences).
+         */
+        description: string;
+        /**
+         * Visual theme for this slide. Light = ivory feature card with dark text. Dark = charcoal feature card with cream text.
+         */
+        theme?: ('light' | 'dark') | null;
+        /**
+         * Numbered feature list (e.g. "Duration: approx. 3 hours"). Shown with 01, 02, 03, … numbering.
+         */
+        features?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * First workshop photo — shown full height in the gallery with the title overlay.
+         */
+        image?: (string | null) | Media;
+        /**
+         * Optional second photo shown alongside the first. Falls back to the primary image when not set.
+         */
+        image2?: (string | null) | Media;
+        /**
+         * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
+         */
+        ctaLink?: string | null;
+        /**
+         * Label for the button linking to this workshop's detail page (e.g. "Workshop Details").
+         */
+        detailsButtonLabel?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Label for the button linking to the main workshops page (e.g. "All Workshops").
    */
@@ -2981,6 +3082,10 @@ export interface WorkshopSliderBlock {
  * via the `definition` "WorkshopPhasesBlock".
  */
 export interface WorkshopPhasesBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   /**
    * Small accent text above the heading (e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT").
    */
@@ -4259,14 +4364,6 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         datesHeading?: T;
-        dates?:
-          | T
-          | {
-              date?: T;
-              time?: T;
-              spotsLeft?: T;
-              id?: T;
-            };
         modalConfirmHeading?: T;
         modalConfirmSubheading?: T;
         modalWorkshopLabel?: T;
@@ -4459,6 +4556,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
  * via the `definition` "FeatureCardsBlock_select".
  */
 export interface FeatureCardsBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   description?: T;
@@ -4480,6 +4578,7 @@ export interface FeatureCardsBlockSelect<T extends boolean = true> {
  * via the `definition` "HeroBannerBlock_select".
  */
 export interface HeroBannerBlockSelect<T extends boolean = true> {
+  visible?: T;
   heading?: T;
   description?: T;
   buttonLabel?: T;
@@ -4532,6 +4631,7 @@ export interface CarouselBlockSelect<T extends boolean = true> {
  * via the `definition` "OurStoryBlock_select".
  */
 export interface OurStoryBlockSelect<T extends boolean = true> {
+  visible?: T;
   label?: T;
   heading?: T;
   subheading?: T;
@@ -4550,6 +4650,7 @@ export interface OurStoryBlockSelect<T extends boolean = true> {
  * via the `definition` "OnlineCourseSliderBlock_select".
  */
 export interface OnlineCourseSliderBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   showComingSoon?: T;
@@ -4564,6 +4665,8 @@ export interface OnlineCourseSliderBlockSelect<T extends boolean = true> {
  * via the `definition` "ProductSliderBlock_select".
  */
 export interface ProductSliderBlockSelect<T extends boolean = true> {
+  visible?: T;
+  useGlobalData?: T;
   heading?: T;
   headingAccent?: T;
   description?: T;
@@ -4599,6 +4702,7 @@ export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
  * via the `definition` "ShopHeroBlock_select".
  */
 export interface ShopHeroBlockSelect<T extends boolean = true> {
+  visible?: T;
   heroTitle?: T;
   heroPrice?: T;
   ctaPrimaryLabel?: T;
@@ -4624,6 +4728,7 @@ export interface ShopHeroBlockSelect<T extends boolean = true> {
  * via the `definition` "ShopProductGridBlock_select".
  */
 export interface ShopProductGridBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   description?: T;
@@ -4652,6 +4757,7 @@ export interface ShopProductListBlockSelect<T extends boolean = true> {
  * via the `definition` "CollectionGridBlock_select".
  */
 export interface CollectionGridBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   collections?:
@@ -4671,6 +4777,7 @@ export interface CollectionGridBlockSelect<T extends boolean = true> {
  * via the `definition` "ReadyToLearnCtaBlock_select".
  */
 export interface ReadyToLearnCtaBlockSelect<T extends boolean = true> {
+  visible?: T;
   heading?: T;
   description?: T;
   primaryButton?:
@@ -4693,6 +4800,8 @@ export interface ReadyToLearnCtaBlockSelect<T extends boolean = true> {
  * via the `definition` "SponsorsBarBlock_select".
  */
 export interface SponsorsBarBlockSelect<T extends boolean = true> {
+  visible?: T;
+  useGlobalData?: T;
   heading?: T;
   sponsors?:
     | T
@@ -4729,6 +4838,7 @@ export interface TeamCardsBlockSelect<T extends boolean = true> {
  * via the `definition` "TeamPreviewBlock_select".
  */
 export interface TeamPreviewBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   description?: T;
@@ -4750,6 +4860,7 @@ export interface TeamPreviewBlockSelect<T extends boolean = true> {
  * via the `definition` "TestimonialsBlock_select".
  */
 export interface TestimonialsBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   buttonLabel?: T;
@@ -4801,6 +4912,8 @@ export interface FormBlockSelect<T extends boolean = true> {
  * via the `definition` "VoucherCtaBlock_select".
  */
 export interface VoucherCtaBlockSelect<T extends boolean = true> {
+  visible?: T;
+  useGlobalData?: T;
   heading?: T;
   description?: T;
   buttonLabel?: T;
@@ -4843,6 +4956,8 @@ export interface LaktoVoucherCtaBlockSelect<T extends boolean = true> {
  * via the `definition` "WorkshopSliderBlock_select".
  */
 export interface WorkshopSliderBlockSelect<T extends boolean = true> {
+  visible?: T;
+  useGlobalData?: T;
   eyebrow?: T;
   workshops?:
     | T
@@ -4873,6 +4988,7 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
  * via the `definition` "WorkshopPhasesBlock_select".
  */
 export interface WorkshopPhasesBlockSelect<T extends boolean = true> {
+  visible?: T;
   eyebrow?: T;
   heading?: T;
   phases?:
@@ -5721,6 +5837,244 @@ export interface TestimonialsGlobal {
   createdAt?: string | null;
 }
 /**
+ * Global sponsors/partners bar shown across multiple pages. Edit once, appears everywhere.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsors-bar-global".
+ */
+export interface SponsorsBarGlobal {
+  id: string;
+  /**
+   * Text above the logos (e.g. "This project is supported by:").
+   */
+  heading: string;
+  /**
+   * Sponsor/partner logos displayed in a horizontal row.
+   */
+  sponsors?:
+    | {
+        /**
+         * Name used as alt text for the logo image.
+         */
+        name: string;
+        /**
+         * Sponsor logo. SVG or PNG recommended.
+         */
+        logo: string | Media;
+        /**
+         * Optional link to the sponsor website.
+         */
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Global voucher call-to-action section with bento gallery. Edit once, appears on Home, Shop, and other pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "voucher-cta-global".
+ */
+export interface VoucherCtaGlobal {
+  id: string;
+  /**
+   * Large heading text (e.g. "Gift a special tasty experience").
+   */
+  heading: string;
+  /**
+   * Short paragraph below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * Text on the CTA button (e.g. "Voucher").
+   */
+  buttonLabel: string;
+  /**
+   * URL the button links to (e.g. "/workshops/voucher").
+   */
+  buttonLink: string;
+  /**
+   * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
+   */
+  galleryImages?:
+    | {
+        /**
+         * One of the 8 bento gallery images. Use square or portrait orientation.
+         */
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Background image shown behind heading and button below the gallery. Uses a neutral fallback color if not set.
+   */
+  backgroundImage?: (string | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Global workshop slider section. Edit once, appears on Home, Shop, and other pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-slider-global".
+ */
+export interface WorkshopSliderGlobal {
+  id: string;
+  /**
+   * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
+   */
+  eyebrow?: string | null;
+  /**
+   * Add up to 6 workshop slides. Each slide has a title, description, features, image, and CTA.
+   */
+  workshops: {
+    /**
+     * Workshop name displayed as the main heading (e.g. "Lakto-Gemüse").
+     */
+    title: string;
+    /**
+     * Small label shown at the top of the info card (e.g. "For Chefs and Food Professionals").
+     */
+    audienceTag?: string | null;
+    /**
+     * Short description of the workshop (1–2 sentences).
+     */
+    description: string;
+    /**
+     * Visual theme for this slide. Light = ivory feature card with dark text. Dark = charcoal feature card with cream text.
+     */
+    theme?: ('light' | 'dark') | null;
+    /**
+     * Numbered feature list (e.g. "Duration: approx. 3 hours"). Shown with 01, 02, 03, … numbering.
+     */
+    features?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * First workshop photo — shown full height in the gallery with the title overlay.
+     */
+    image?: (string | null) | Media;
+    /**
+     * Optional second photo shown alongside the first. Falls back to the primary image when not set.
+     */
+    image2?: (string | null) | Media;
+    /**
+     * URL the "Workshop Details" button links to (e.g. "/workshops/lakto-gemuese").
+     */
+    ctaLink?: string | null;
+    /**
+     * Label for the button linking to this workshop's detail page (e.g. "Workshop Details").
+     */
+    detailsButtonLabel?: string | null;
+    id?: string | null;
+  }[];
+  /**
+   * Label for the button linking to the main workshops page (e.g. "All Workshops").
+   */
+  allWorkshopsButtonLabel?: string | null;
+  /**
+   * URL the "All Workshops" button links to (default: "/workshops").
+   */
+  allWorkshopsLink?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Global product slider section. Edit once, appears on Home, Workshops, and other pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-slider-global".
+ */
+export interface ProductSliderGlobal {
+  id: string;
+  /**
+   * Large heading text (e.g. "Discover UNIQUE.").
+   */
+  heading: string;
+  /**
+   * Accent word displayed next to the heading in brand color (e.g. "FLAVOURS").
+   */
+  headingAccent: string;
+  /**
+   * Short paragraph below the heading (1–2 sentences).
+   */
+  description: string;
+  /**
+   * Text on the CTA button (e.g. "View All Products").
+   */
+  buttonLabel: string;
+  /**
+   * URL the button links to (e.g. "/products").
+   */
+  buttonLink: string;
+  /**
+   * Select products to display in the slider. If empty, the latest products will be shown.
+   */
+  products?: (string | Product)[] | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Global workshop cards section used on Fermentation, Gastronomy, and other pages. Edit once, appears everywhere.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-cards-global".
+ */
+export interface WorkshopCardsGlobal {
+  id: string;
+  /**
+   * Heading for the workshop cards section.
+   */
+  title: string;
+  /**
+   * Optional text below the title.
+   */
+  subtitle?: string | null;
+  /**
+   * Optional clarification below subtitle (e.g. price disclaimer).
+   */
+  clarification?: string | null;
+  /**
+   * Label for the next appointment date (e.g. "Nächster Termin").
+   */
+  nextDateLabel?: string | null;
+  /**
+   * Label for the "View All" button (e.g. "Alle Workshops").
+   */
+  viewAllLabel?: string | null;
+  /**
+   * URL for the "View All" button (e.g. "/workshops").
+   */
+  viewAllUrl?: string | null;
+  /**
+   * Individual workshop cards to display.
+   */
+  cards: {
+    title: string;
+    description?: string | null;
+    image?: (string | null) | Media;
+    price: string;
+    /**
+     * Text after the price (e.g. "pro Person").
+     */
+    priceSuffix?: string | null;
+    buttonLabel?: string | null;
+    buttonUrl?: string | null;
+    /**
+     * e.g. "February 15, 2026"
+     */
+    nextDate?: string | null;
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -5821,6 +6175,118 @@ export interface TestimonialsGlobalSelect<T extends boolean = true> {
         authorName?: T;
         authorRole?: T;
         rating?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsors-bar-global_select".
+ */
+export interface SponsorsBarGlobalSelect<T extends boolean = true> {
+  heading?: T;
+  sponsors?:
+    | T
+    | {
+        name?: T;
+        logo?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "voucher-cta-global_select".
+ */
+export interface VoucherCtaGlobalSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  galleryImages?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  backgroundImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-slider-global_select".
+ */
+export interface WorkshopSliderGlobalSelect<T extends boolean = true> {
+  eyebrow?: T;
+  workshops?:
+    | T
+    | {
+        title?: T;
+        audienceTag?: T;
+        description?: T;
+        theme?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        image?: T;
+        image2?: T;
+        ctaLink?: T;
+        detailsButtonLabel?: T;
+        id?: T;
+      };
+  allWorkshopsButtonLabel?: T;
+  allWorkshopsLink?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-slider-global_select".
+ */
+export interface ProductSliderGlobalSelect<T extends boolean = true> {
+  heading?: T;
+  headingAccent?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  products?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshop-cards-global_select".
+ */
+export interface WorkshopCardsGlobalSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  clarification?: T;
+  nextDateLabel?: T;
+  viewAllLabel?: T;
+  viewAllUrl?: T;
+  cards?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        price?: T;
+        priceSuffix?: T;
+        buttonLabel?: T;
+        buttonUrl?: T;
+        nextDate?: T;
         id?: T;
       };
   updatedAt?: T;

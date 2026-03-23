@@ -23,7 +23,14 @@ const DEFAULTS = {
 
 type Props = OurStoryBlockType & { id?: string }
 
-export const OurStoryBlock: React.FC<Props> = ({ label, heading, subheading, paragraphs, id }) => {
+export const OurStoryBlock: React.FC<Props> = ({
+  visible,
+  label,
+  heading,
+  subheading,
+  paragraphs,
+  id,
+}) => {
   const resolvedLabel = label ?? DEFAULTS.label
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedSubheading = subheading ?? DEFAULTS.subheading
@@ -50,6 +57,8 @@ export const OurStoryBlock: React.FC<Props> = ({ label, heading, subheading, par
     obs.observe(el)
     return () => obs.disconnect()
   }, [])
+
+  if (visible === false) return null
 
   return (
     <section
@@ -89,11 +98,11 @@ export const OurStoryBlock: React.FC<Props> = ({ label, heading, subheading, par
                 </div>
               )
               const imageContent = item.image ? (
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
+                <div className="relative aspect-4/3 overflow-hidden rounded-xl">
                   <Media resource={item.image} fill imgClassName="object-cover" />
                 </div>
               ) : (
-                <div className="aspect-[4/3] rounded-xl bg-ff-warm-gray" />
+                <div className="aspect-4/3 rounded-xl bg-ff-warm-gray" />
               )
 
               return (

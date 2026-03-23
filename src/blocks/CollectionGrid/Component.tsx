@@ -38,6 +38,7 @@ function isMediaObject(val: unknown): val is MediaType {
 }
 
 export const CollectionGridComponent: React.FC<CollectionGridBlock> = (props) => {
+  if (props.visible === false) return null
   const { eyebrow, heading, collections: cmsCollections } = props
 
   const collections =

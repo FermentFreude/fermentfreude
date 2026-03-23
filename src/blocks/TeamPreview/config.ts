@@ -9,6 +9,15 @@ export const TeamPreview: Block = {
   },
   fields: [
     {
+      name: 'visible',
+      type: 'checkbox',
+      label: 'Show this section',
+      defaultValue: true,
+      admin: {
+        description: 'Toggle off to hide this section on the page without deleting it.',
+      },
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       localized: true,
@@ -72,6 +81,9 @@ export const TeamPreview: Block = {
           required: true,
           localized: true,
           label: 'Name',
+          admin: {
+            description: 'Full name of the team member.',
+          },
         },
         {
           name: 'role',

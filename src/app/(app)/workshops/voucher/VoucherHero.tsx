@@ -115,8 +115,8 @@ export function VoucherHero({
           {/* Right Column - Voucher Configuration */}
           <div className="order-1 lg:order-2">
             <div className="flex flex-col gap-6 md:gap-8">
-              <div className="pb-6 border-b border-ff-border-light min-w-[min(100%,38rem)] max-w-full">
-                <h1 className="font-display text-display font-bold text-ff-near-black leading-tight tracking-tight whitespace-nowrap">
+              <div className="pb-6 border-b border-ff-border-light min-w-0 max-w-full">
+                <h1 className="font-display text-display font-bold text-ff-near-black leading-tight tracking-tight max-w-full break-words hyphens-auto">
                   {heading}
                 </h1>
                 <p className="font-sans text-body-lg text-ff-gray-text leading-relaxed mt-3">

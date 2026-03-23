@@ -23,11 +23,11 @@ const DEFAULTS = {
 
 type Props = SponsorsBarBlockType & { id?: string }
 
-export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => {
+export const SponsorsBarBlock: React.FC<Props> = ({ visible, heading, sponsors, id }) => {
   const resolvedHeading = heading ?? DEFAULTS.heading
 
-  // Always use static images — same as Home page, guaranteed to load (no R2 dependency)
-  const hasCmsLogos = false
+  // Use CMS sponsor logos when available, otherwise fall back to static images
+  const hasCmsLogos = Array.isArray(sponsors) && sponsors.length > 0
 
   const sectionRef = useRef<HTMLElement>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -45,6 +45,8 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
     return () => obs.disconnect()
   }, [])
 
+  if (visible === false) return null
+
   return (
     <section
       ref={sectionRef}
@@ -56,7 +58,7 @@ export const SponsorsBarBlock: React.FC<Props> = ({ heading, sponsors, id }) => 
           {resolvedHeading}
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-6 w-full max-w-[var(--content-wide)] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-6 w-full max-w-(--content-wide) ">
           {hasCmsLogos
             ? /* ── CMS logos ── */
               sponsors!.map((sponsor, index) => {

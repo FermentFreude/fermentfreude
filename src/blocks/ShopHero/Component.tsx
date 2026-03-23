@@ -93,6 +93,7 @@ function CardWithButton({
 
 export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
   const {
+    visible,
     heroTitle,
     heroPrice,
     ctaPrimaryLabel,
@@ -152,6 +153,8 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
       isResetting.current = false
     }
   }, [])
+
+  if (visible === false) return null
 
   return (
     <section className="relative w-full overflow-hidden bg-white min-h-dvh md:h-dvh">

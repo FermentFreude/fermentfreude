@@ -19,6 +19,7 @@ function isResolvedMedia(img: unknown): img is MediaType {
 
 export type WorkshopPhasesBlock = {
   blockType: 'workshopPhases'
+  visible?: boolean | null
   eyebrow?: string | null
   heading?: string | null
   phases?: Array<{
@@ -39,7 +40,7 @@ export const WorkshopPhasesComponent: React.FC<
   }
 > = (props) => {
   const block = props as WorkshopPhasesBlock & { id?: string | number }
-  const { eyebrow, heading, phases, id } = block
+  const { visible, eyebrow, heading, phases, id } = block
 
   const [isVisible, setIsVisible] = useState(false)
 
@@ -47,6 +48,8 @@ export const WorkshopPhasesComponent: React.FC<
     const timer = setTimeout(() => setIsVisible(true), 100)
     return () => clearTimeout(timer)
   }, [])
+
+  if (visible === false) return null
 
   // Fallback defaults if CMS is empty
   const displayEyebrow = eyebrow ?? 'Workshop Phases'

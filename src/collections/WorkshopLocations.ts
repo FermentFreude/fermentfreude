@@ -11,7 +11,7 @@ export const WorkshopLocations: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'name',
-    group: 'Workshops & Kurse',
+    group: 'Workshops',
     defaultColumns: ['name', 'address', 'isActive'],
     description: 'Workshop locations. Used to organize appointments by geography.',
   },

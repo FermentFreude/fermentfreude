@@ -9,6 +9,15 @@ export const ReadyToLearnCTA: Block = {
   },
   fields: [
     {
+      name: 'visible',
+      type: 'checkbox',
+      label: 'Show this section',
+      defaultValue: true,
+      admin: {
+        description: 'Toggle off to hide this section on the page without deleting it.',
+      },
+    },
+    {
       name: 'heading',
       type: 'text',
       required: true,
@@ -32,6 +41,9 @@ export const ReadyToLearnCTA: Block = {
       name: 'primaryButton',
       type: 'group',
       label: 'Primary Button',
+      admin: {
+        description: 'Main call-to-action button (filled style).',
+      },
       fields: [
         {
           name: 'label',
@@ -39,6 +51,9 @@ export const ReadyToLearnCTA: Block = {
           required: true,
           localized: true,
           label: 'Button Label',
+          admin: {
+            description: 'Text shown on the button (e.g. "Browse Workshops").',
+          },
         },
         {
           name: 'href',
@@ -55,6 +70,9 @@ export const ReadyToLearnCTA: Block = {
       name: 'secondaryButton',
       type: 'group',
       label: 'Secondary Button',
+      admin: {
+        description: 'Secondary call-to-action button (outline style).',
+      },
       fields: [
         {
           name: 'label',
@@ -62,6 +80,9 @@ export const ReadyToLearnCTA: Block = {
           required: true,
           localized: true,
           label: 'Button Label',
+          admin: {
+            description: 'Text shown on the button (e.g. "Explore Courses").',
+          },
         },
         {
           name: 'href',

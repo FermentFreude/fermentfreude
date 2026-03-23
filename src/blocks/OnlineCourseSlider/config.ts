@@ -9,6 +9,15 @@ export const OnlineCourseSlider: Block = {
   },
   fields: [
     {
+      name: 'visible',
+      type: 'checkbox',
+      label: 'Show this section',
+      defaultValue: true,
+      admin: {
+        description: 'Toggle off to hide this section on the page without deleting it.',
+      },
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       localized: true,
@@ -61,6 +70,8 @@ export const OnlineCourseSlider: Block = {
       localized: true,
       label: 'Coming Soon Description',
       admin: {
+        description:
+          'Short description for the coming-soon section (e.g. "Stay tuned for new courses").',
         condition: (_, siblingData) => siblingData?.showComingSoon,
       },
     },

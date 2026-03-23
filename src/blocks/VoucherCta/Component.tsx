@@ -16,7 +16,7 @@ const DEFAULTS = {
   heading: 'Gift a special tasty experience',
   description: 'Share a tasty experience with someone special.',
   buttonLabel: 'Voucher',
-  buttonLink: '/voucher',
+  buttonLink: '/workshops/voucher',
 }
 
 type Props = VoucherCtaBlockType & {
@@ -25,6 +25,7 @@ type Props = VoucherCtaBlockType & {
 }
 
 export const VoucherCtaBlock: React.FC<Props> = ({
+  visible,
   heading,
   description,
   buttonLabel,
@@ -125,6 +126,8 @@ export const VoucherCtaBlock: React.FC<Props> = ({
     },
     { scope: sectionRef, dependencies: [galleryImages, createFlip] },
   )
+
+  if (visible === false) return null
 
   const images = galleryImages ?? []
 

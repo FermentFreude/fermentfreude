@@ -26,6 +26,10 @@ import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
 import { VoucherCtaBlock } from '@/blocks/VoucherCta/Component'
 import { WorkshopPhasesComponent } from '@/blocks/WorkshopPhases/Component'
 import { WorkshopSliderBlock } from '@/blocks/WorkshopSlider/Component'
+import { ProductSliderGlobalWrapper } from '@/components/ProductSliderGlobalWrapper'
+import { SponsorsBarGlobalWrapper } from '@/components/SponsorsBarGlobalWrapper'
+import { VoucherCtaGlobalWrapper } from '@/components/VoucherCtaGlobalWrapper'
+import { WorkshopSliderGlobalWrapper } from '@/components/WorkshopSliderGlobalWrapper'
 import { toKebabCase } from '@/utilities/toKebabCase'
 import React, { Fragment } from 'react'
 
@@ -62,6 +66,14 @@ const blockComponents = {
   workshopPhases: WorkshopPhasesComponent,
 }
 
+// Maps block types to their GlobalWrapper component (used when useGlobalData is true)
+const globalWrappers: Record<string, React.FC<{ id?: string }>> = {
+  sponsorsBar: SponsorsBarGlobalWrapper as unknown as React.FC<{ id?: string }>,
+  voucherCta: VoucherCtaGlobalWrapper as unknown as React.FC<{ id?: string }>,
+  workshopSlider: WorkshopSliderGlobalWrapper as unknown as React.FC<{ id?: string }>,
+  productSlider: ProductSliderGlobalWrapper as unknown as React.FC<{ id?: string }>,
+}
+
 export const RenderBlocks: React.FC<{
   blocks: NonNullable<Page['layout']>
   slug?: string
@@ -85,6 +97,21 @@ export const RenderBlocks: React.FC<{
       <Wrapper {...wrapperProps}>
         {blockList.map((block, index) => {
           const { blockName, blockType } = block
+          const blockId = blockName ? toKebabCase(blockName) : undefined
+
+          // When useGlobalData is true (or defaulted), render the GlobalWrapper
+          const blockData = block as unknown as Record<string, unknown>
+          const useGlobal = 'useGlobalData' in block && blockData.useGlobalData !== false
+          if (useGlobal && blockType && blockType in globalWrappers) {
+            // Respect the block-level visible toggle
+            if ('visible' in block && blockData.visible === false) return null
+            const GlobalWrapper = globalWrappers[blockType]
+            return (
+              <div className={gapClass} key={index}>
+                <GlobalWrapper id={blockId} />
+              </div>
+            )
+          }
 
           if (blockType && blockType in blockComponents) {
             const Block = blockComponents[blockType as keyof typeof blockComponents] as React.FC<
@@ -94,7 +121,7 @@ export const RenderBlocks: React.FC<{
             if (Block) {
               return (
                 <div className={gapClass} key={index}>
-                  <Block {...block} id={blockName ? toKebabCase(blockName) : undefined} />
+                  <Block {...block} id={blockId} />
                 </div>
               )
             }
