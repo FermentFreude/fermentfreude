@@ -12,7 +12,7 @@ export const CourseProgress: CollectionConfig = {
     update: ownCourseProgress,
   },
   admin: {
-    group: 'Workshops & Kurse',
+    group: 'Online Kurse',
     defaultColumns: ['user', 'courseSlug', 'updatedAt'],
     description:
       'Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.',

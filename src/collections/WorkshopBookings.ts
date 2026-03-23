@@ -13,7 +13,7 @@ export const WorkshopBookings: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'workshopTitle',
-    group: 'Workshops & Kurse',
+    group: 'Workshops',
     defaultColumns: ['workshopTitle', 'date', 'guestCount', 'totalPrice', 'createdAt'],
   },
   access: {

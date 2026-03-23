@@ -24,7 +24,7 @@ export const Enrollments: CollectionConfig = {
     update: adminOnly,
   },
   admin: {
-    group: 'Workshops & Kurse',
+    group: 'Online Kurse',
     defaultColumns: ['user', 'courseSlug', 'createdAt'],
     description: 'One enrollment per user per course. Auto-created on successful order payment.',
     useAsTitle: 'courseSlug',

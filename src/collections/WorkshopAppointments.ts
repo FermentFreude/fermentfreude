@@ -11,7 +11,7 @@ export const WorkshopAppointments: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'dateTime',
-    group: 'Workshops & Kurse',
+    group: 'Workshops',
     defaultColumns: ['workshop', 'location', 'dateTime', 'availableSpots', 'isPublished'],
     description:
       '⭐ Manage workshop availability. **This is where you control dates, times, and available spots.** Changes here instantly update the booking pages.',
