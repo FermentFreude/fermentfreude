@@ -15,9 +15,9 @@ const BlobCanvas = dynamic(
 type Slide = NonNullable<ShopHeroBlock['slides']>[number]
 
 const DEFAULT_SLIDES: Slide[] = [
-  { id: 'default-1', categoryLabel: 'Tempeh', detailUrl: '/shop/tempeh' },
-  { id: 'default-2', categoryLabel: 'Kimchi', detailUrl: '/shop/kimchi' },
-  { id: 'default-3', categoryLabel: 'Miso', detailUrl: '/shop/miso' },
+  { id: 'default-1', categoryLabel: 'Tempeh', detailUrl: '/products/kaeferbohnen-tempeh' },
+  { id: 'default-2', categoryLabel: 'Kimchi', detailUrl: '/products/classic-kimchi' },
+  { id: 'default-3', categoryLabel: 'Miso', detailUrl: '/products/fermentierte-rote-rueben' },
 ]
 
 function isMediaObject(val: unknown): val is MediaType {

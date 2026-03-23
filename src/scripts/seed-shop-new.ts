@@ -166,17 +166,17 @@ async function seedShopNew() {
     slides: [
       {
         categoryLabel: 'Tempeh',
-        detailUrl: '/shop/tempeh',
+        detailUrl: '/products/kaeferbohnen-tempeh',
         ...(existingSlideImages[0] ? { image: existingSlideImages[0] } : {}),
       },
       {
         categoryLabel: 'Kimchi',
-        detailUrl: '/shop/kimchi',
+        detailUrl: '/products/classic-kimchi',
         ...(existingSlideImages[1] ? { image: existingSlideImages[1] } : {}),
       },
       {
         categoryLabel: 'Miso',
-        detailUrl: '/shop/miso',
+        detailUrl: '/products/fermentierte-rote-rueben',
         ...(existingSlideImages[2] ? { image: existingSlideImages[2] } : {}),
       },
     ],
@@ -316,9 +316,9 @@ async function seedShopNew() {
       ctaSecondaryUrl: '/fermentation',
       slides: (shopHeroBlock.slides ?? []).map((slide, i) => {
         const enSlides = [
-          { categoryLabel: 'Tempeh', detailUrl: '/shop/tempeh' },
-          { categoryLabel: 'Kimchi', detailUrl: '/shop/kimchi' },
-          { categoryLabel: 'Miso', detailUrl: '/shop/miso' },
+          { categoryLabel: 'Tempeh', detailUrl: '/products/kaeferbohnen-tempeh' },
+          { categoryLabel: 'Kimchi', detailUrl: '/products/classic-kimchi' },
+          { categoryLabel: 'Miso', detailUrl: '/products/fermentierte-rote-rueben' },
         ]
         return { ...slide, ...(enSlides[i] ?? {}) }
       }),
