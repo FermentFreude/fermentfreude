@@ -24,7 +24,6 @@ const DEFAULTS = {
 type Props = SponsorsBarBlockType & { id?: string }
 
 export const SponsorsBarBlock: React.FC<Props> = ({ visible, heading, sponsors, id }) => {
-  if (visible === false) return null
   const resolvedHeading = heading ?? DEFAULTS.heading
 
   // Use CMS sponsor logos when available, otherwise fall back to static images
@@ -45,6 +44,8 @@ export const SponsorsBarBlock: React.FC<Props> = ({ visible, heading, sponsors, 
     obs.observe(el)
     return () => obs.disconnect()
   }, [])
+
+  if (visible === false) return null
 
   return (
     <section

@@ -72,7 +72,6 @@ export const FeatureCardsBlock: React.FC<Props> = ({
   buttonLink,
   id,
 }) => {
-  if (visible === false) return null
   const resolvedEyebrow = eyebrow ?? DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedDescription = description ?? DEFAULTS.description
@@ -143,6 +142,8 @@ export const FeatureCardsBlock: React.FC<Props> = ({
     })
     return () => ctx.revert()
   }, [resolvedCards])
+
+  if (visible === false) return null
 
   return (
     <section id={id ?? undefined} className="bg-white section-padding-md">

@@ -34,8 +34,6 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   backgroundImage,
   id,
 }) => {
-  if (visible === false) return null
-
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedDescription = description ?? DEFAULTS.description
   const resolvedButtonLabel = buttonLabel ?? DEFAULTS.buttonLabel
@@ -128,6 +126,8 @@ export const VoucherCtaBlock: React.FC<Props> = ({
     },
     { scope: sectionRef, dependencies: [galleryImages, createFlip] },
   )
+
+  if (visible === false) return null
 
   const images = galleryImages ?? []
 

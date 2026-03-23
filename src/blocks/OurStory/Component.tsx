@@ -24,7 +24,6 @@ const DEFAULTS = {
 type Props = OurStoryBlockType & { id?: string }
 
 export const OurStoryBlock: React.FC<Props> = ({ visible, label, heading, subheading, paragraphs, id }) => {
-  if (visible === false) return null
   const resolvedLabel = label ?? DEFAULTS.label
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedSubheading = subheading ?? DEFAULTS.subheading
@@ -51,6 +50,8 @@ export const OurStoryBlock: React.FC<Props> = ({ visible, label, heading, subhea
     obs.observe(el)
     return () => obs.disconnect()
   }, [])
+
+  if (visible === false) return null
 
   return (
     <section

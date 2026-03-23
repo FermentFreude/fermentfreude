@@ -102,7 +102,6 @@ type Props = {
 }
 
 export const TestimonialsBlock: React.FC<Props> = ({ visible, eyebrow, heading, testimonials, id }) => {
-  if (visible === false) return null
   const resolvedEyebrow = eyebrow ?? DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedTestimonials =
@@ -205,6 +204,8 @@ export const TestimonialsBlock: React.FC<Props> = ({ visible, eyebrow, heading, 
       el.removeEventListener('pointercancel', onPointerCancel)
     }
   }, []) // stable — uses goRef
+
+  if (visible === false) return null
 
   const current = resolvedTestimonials[activeIndex]
 

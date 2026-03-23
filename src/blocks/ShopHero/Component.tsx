@@ -106,8 +106,6 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
     bottomDisclaimer,
   } = props
 
-  if (visible === false) return null
-
   const title = heroTitle ?? 'Our Handmade Products From Our Pick-Up Shop.'
   const price = heroPrice ?? 'from €8.50'
   const primaryLabel = ctaPrimaryLabel ?? 'Order Now'
@@ -155,6 +153,8 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
       isResetting.current = false
     }
   }, [])
+
+  if (visible === false) return null
 
   return (
     <section className="relative w-full overflow-hidden bg-white min-h-dvh md:h-dvh">

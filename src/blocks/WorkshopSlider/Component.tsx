@@ -91,8 +91,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   upcomingLabel,
   upcomingDatesByHref,
 }) => {
-  if (visible === false) return null
-
   /* ── refs ──────────────────────────────────────────────────── */
   const outerRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -195,6 +193,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       window.removeEventListener('resize', updateDimensions)
     }
   }, [])
+
+  if (visible === false) return null
 
   /* ═══════════════════════════════════════════════════════════ */
   /*  RENDER                                                     */

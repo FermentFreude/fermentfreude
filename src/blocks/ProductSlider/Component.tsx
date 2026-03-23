@@ -91,7 +91,6 @@ export const ProductSliderBlock: React.FC<Props> = ({
   products: rawProducts,
   id,
 }) => {
-  if (visible === false) return null
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedAccent = headingAccent ?? DEFAULTS.headingAccent
   const resolvedDescription = description ?? DEFAULTS.description
@@ -128,6 +127,8 @@ export const ProductSliderBlock: React.FC<Props> = ({
     },
     [updateScrollState],
   )
+
+  if (visible === false) return null
 
   return (
     <section id={id} className="section-padding-md overflow-hidden">
