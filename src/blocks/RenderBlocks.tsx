@@ -99,9 +99,9 @@ export const RenderBlocks: React.FC<{
           const { blockName, blockType } = block
           const blockId = blockName ? toKebabCase(blockName) : undefined
 
-          // When useGlobalData is true (or defaulted), render the GlobalWrapper
+          // When useGlobalData is explicitly true, render the GlobalWrapper
           const blockData = block as unknown as Record<string, unknown>
-          const useGlobal = 'useGlobalData' in block && blockData.useGlobalData !== false
+          const useGlobal = blockData.useGlobalData === true
           if (useGlobal && blockType && blockType in globalWrappers) {
             // Respect the block-level visible toggle
             if ('visible' in block && blockData.visible === false) return null
