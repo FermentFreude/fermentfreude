@@ -21,10 +21,10 @@ export const SponsorsBar: Block = {
       name: 'useGlobalData',
       type: 'checkbox',
       label: 'Use global content',
-      defaultValue: true,
+      defaultValue: false,
       admin: {
         description:
-          '✅ ON = Uses shared content from Website → Sponsors Bar (edit once, applies everywhere).\n❌ OFF = Override with custom content just for this page.',
+          '✅ ON = Uses shared content from Website → Sponsors Bar (edit once, applies everywhere).\n❌ OFF = Use custom content just for this page (default).',
       },
     },
     {
