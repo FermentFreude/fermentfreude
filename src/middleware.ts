@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export function middleware(request: NextRequest) {
+  // Never gate local development routes.
+  if (process.env.NODE_ENV !== 'production') {
+    return NextResponse.next()
+  }
+
   const previewPassword = process.env.PREVIEW_PASSWORD
 
   // If no password is set, site is public — skip gate
