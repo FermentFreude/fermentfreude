@@ -412,7 +412,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
   const _faqContactUrl = f?.fermentationFaqContactUrl ?? DEFAULT_FAQ_CONTACT_URL
 
   return (
-    <article className="font-sans">
+    <article className="overflow-x-clip font-sans">
       {/* Hero — title + description, image, 4 boxes overlapping */}
       <section className="relative bg-white">
         <div className="content-full mx-auto px-6 pt-16 pb-8 md:px-12 lg:px-20">
@@ -440,8 +440,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
             {/* Image of two people — in front of the boxes */}
             <div className="relative z-20 flex justify-center md:justify-end">
               <div
-                className="relative aspect-4/3 w-full min-h-60 max-w-3xl overflow-hidden md:max-h-105"
-                style={{ top: -80 }}
+                className="relative -top-6 aspect-4/3 w-full min-h-60 max-w-3xl overflow-hidden md:-top-20 md:max-h-105"
               >
                 {isResolvedMedia(heroImage) ? (
                   <Media resource={heroImage} fill imgClassName="object-contain" priority />
@@ -457,8 +456,8 @@ export default async function FermentationPage({ searchParams }: FermentationPag
             </div>
 
             {/* 4 boxes — behind the image */}
-            <div className="relative z-0 -mt-32 pb-16 md:-mt-20 lg:-mt-28">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" style={{ position: 'inherit' }}>
+            <div className="relative z-0 -mt-12 pb-16 md:-mt-20 lg:-mt-28">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {heroBlocks.slice(0, 4).map((block, i) => {
                   const bgColor = HERO_BLOCK_COLORS[i] ?? HERO_BLOCK_COLORS[0]
                   const isDark = bgColor === '#4B4B4B'
