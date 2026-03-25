@@ -1129,38 +1129,54 @@ export interface Page {
    */
   voucher?: {
     /**
+     * Toggle off to hide the voucher hero section on the website.
+     */
+    voucherShowHero?: boolean | null;
+    /**
      * Main headline above the voucher form (e.g. "Give the gift of fermentation").
      */
-    heroHeading: string;
+    heroHeading?: string | null;
     /**
      * Short intro text below the heading explaining the voucher.
      */
-    heroDescription: string;
+    heroDescription?: string | null;
+    /**
+     * Toggle off to hide the voucher amount selection on the website.
+     */
+    voucherShowAmounts?: boolean | null;
     /**
      * List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.
      */
-    voucherAmounts: {
-      amount: string;
-      id?: string | null;
-    }[];
+    voucherAmounts?:
+      | {
+          amount: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Toggle off to hide delivery options on the website.
+     */
+    voucherShowDeliveryOptions?: boolean | null;
     /**
      * Email or pick up from store. Post/card removed for product freshness.
      */
-    deliveryOptions: {
-      /**
-       * Internal key, e.g. "email" or "post". Used for logic, not shown.
-       */
-      type: string;
-      /**
-       * Label shown to the user (e.g. "By email to print at home").
-       */
-      title: string;
-      /**
-       * Icon displayed next to this option. Use email or pickup only.
-       */
-      icon: 'email' | 'pickup' | 'card';
-      id?: string | null;
-    }[];
+    deliveryOptions?:
+      | {
+          /**
+           * Internal key, e.g. "email" or "post". Used for logic, not shown.
+           */
+          type: string;
+          /**
+           * Label shown to the user (e.g. "By email to print at home").
+           */
+          title: string;
+          /**
+           * Icon displayed next to this option. Use email or pickup only.
+           */
+          icon: 'email' | 'pickup' | 'card';
+          id?: string | null;
+        }[]
+      | null;
     /**
      * Logo displayed on the voucher preview card. Leave empty to use fallback.
      */
@@ -1168,23 +1184,23 @@ export interface Page {
     /**
      * Label on the voucher preview card (e.g. "GIFT VOUCHER").
      */
-    cardLabel: string;
+    cardLabel?: string | null;
     /**
      * Label above the amount on the card (e.g. "Voucher value").
      */
-    valueLabel: string;
+    valueLabel?: string | null;
     /**
      * Small text under the amount (e.g. "Redeemable in our shop").
      */
-    cardDisclaimer: string;
+    cardDisclaimer?: string | null;
     /**
      * Label above the amount buttons (e.g. "VOUCHER VALUE").
      */
-    amountSectionLabel: string;
+    amountSectionLabel?: string | null;
     /**
      * Label above delivery options (e.g. "DELIVERY METHOD").
      */
-    deliverySectionLabel: string;
+    deliverySectionLabel?: string | null;
     /**
      * Explains why products cannot be sent by post (e.g. freshness). Shown under the delivery option.
      */
@@ -1194,25 +1210,25 @@ export interface Page {
      */
     pickupAddress?: string | null;
     /**
-     * Label for the optional greeting message field.
+     * Toggle off to hide the add-to-cart button on the website.
      */
-    greetingLabel: string;
-    /**
-     * Placeholder text in the greeting textarea (e.g. "Max. 250 characters").
-     */
-    greetingPlaceholder: string;
+    voucherShowCTA?: boolean | null;
     /**
      * Text for the main CTA button (e.g. "Add to cart").
      */
-    addToCartButton: string;
+    addToCartButton?: string | null;
+    /**
+     * Toggle off to hide the voucher "Why" section on the website.
+     */
+    voucherShowWhy?: boolean | null;
     /**
      * Heading for the "Why a fermentation voucher" section (e.g. "Why a fermentation voucher is a great gift").
      */
-    voucherWhyHeading: string;
+    voucherWhyHeading?: string | null;
     /**
      * Body text that explains why a fermentation workshop voucher is a good present.
      */
-    voucherWhyBody: string;
+    voucherWhyBody?: string | null;
     /**
      * Optional joyful image for the "Why" section (e.g. fermentation, gift, workshop). Shown beside the text. Leave empty to show text only.
      */
@@ -1229,6 +1245,10 @@ export interface Page {
         }[]
       | null;
     /**
+     * Toggle off to hide the "Perfect for" section on the website without deleting the content.
+     */
+    voucherWhyPerfectForVisible?: boolean | null;
+    /**
      * Heading above the audience tags (e.g. "Perfect for"). Shown at the end of the Why section. Leave empty to hide.
      */
     voucherWhyPerfectForHeading?: string | null;
@@ -1242,9 +1262,78 @@ export interface Page {
         }[]
       | null;
     /**
+     * Heading above the steps (e.g. "How it works").
+     */
+    voucherHowHeading?: string | null;
+    /**
+     * Toggle off to hide the voucher "How it works" section on the website.
+     */
+    voucherShowHow?: boolean | null;
+    /**
+     * Four steps with title and optional description (e.g. "Buy" / "Order online for €99").
+     */
+    voucherHowSteps?:
+      | {
+          /**
+           * Step heading (e.g. "Buy", "Receive").
+           */
+          text: string;
+          /**
+           * Optional detail (e.g. "Order online for €99").
+           */
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Toggle off to hide the starter set section on the website.
+     */
+    voucherShowStarterSet?: boolean | null;
+    /**
+     * Heading for the "Combine with Starter Set" section.
+     */
+    starterSetHeading?: string | null;
+    /**
+     * Body text for the starter set section.
+     */
+    starterSetDescription?: string | null;
+    /**
+     * Button text (e.g. "View Starter Sets").
+     */
+    starterSetButton?: string | null;
+    /**
+     * Image shown in the starter set section. Leave empty to use fallback.
+     */
+    starterSetImage?: (string | null) | Media;
+    /**
+     * Toggle off to hide the voucher gift occasions section on the website.
+     */
+    voucherShowGiftOccasions?: boolean | null;
+    /**
+     * Heading for the "Gift for every occasion" section.
+     */
+    giftOccasionsHeading?: string | null;
+    /**
+     * Occasion cards with image and caption (e.g. Birthdays, Weddings).
+     */
+    giftOccasions?:
+      | {
+          /**
+           * Optional. Uses fallback if empty.
+           */
+          image?: (string | null) | Media;
+          caption: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
      * Heading above the benefits list (e.g. "What's included in the voucher").
      */
-    voucherBenefitsHeading: string;
+    voucherBenefitsHeading?: string | null;
+    /**
+     * Toggle off to hide the voucher benefits section on the website.
+     */
+    voucherShowBenefits?: boolean | null;
     /**
      * Short line under the heading (e.g. "All at a glance").
      */
@@ -1252,78 +1341,37 @@ export interface Page {
     /**
      * List of benefits with optional subtext. Shown with green checkmarks in two columns.
      */
-    voucherBenefits: {
-      /**
-       * Main benefit line (e.g. "Valid for all workshops").
-       */
-      text: string;
-      /**
-       * Optional detail below the title (e.g. "Kombucha, Lakto, Tempeh & seasonal").
-       */
-      subtext?: string | null;
-      id?: string | null;
-    }[];
+    voucherBenefits?:
+      | {
+          /**
+           * Main benefit line (e.g. "Valid for all workshops").
+           */
+          text: string;
+          /**
+           * Optional detail below the title (e.g. "Kombucha, Lakto, Tempeh & seasonal").
+           */
+          subtext?: string | null;
+          id?: string | null;
+        }[]
+      | null;
     /**
-     * Heading above the steps (e.g. "How it works").
+     * Toggle off to hide the voucher FAQ section on the website.
      */
-    voucherHowHeading: string;
-    /**
-     * Four steps with title and optional description (e.g. "Buy" / "Order online for €99").
-     */
-    voucherHowSteps: {
-      /**
-       * Step heading (e.g. "Buy", "Receive").
-       */
-      text: string;
-      /**
-       * Optional detail (e.g. "Order online for €99").
-       */
-      description?: string | null;
-      id?: string | null;
-    }[];
-    /**
-     * Heading for the "Combine with Starter Set" section.
-     */
-    starterSetHeading: string;
-    /**
-     * Body text for the starter set section.
-     */
-    starterSetDescription: string;
-    /**
-     * Button text (e.g. "View Starter Sets").
-     */
-    starterSetButton: string;
-    /**
-     * Image shown in the starter set section. Leave empty to use fallback.
-     */
-    starterSetImage?: (string | null) | Media;
-    /**
-     * Heading for the "Gift for every occasion" section.
-     */
-    giftOccasionsHeading: string;
-    /**
-     * Occasion cards with image and caption (e.g. Birthdays, Weddings).
-     */
-    giftOccasions: {
-      /**
-       * Optional. Uses fallback if empty.
-       */
-      image?: (string | null) | Media;
-      caption: string;
-      id?: string | null;
-    }[];
+    voucherShowFAQ?: boolean | null;
     /**
      * Heading above the voucher FAQ accordion.
      */
-    faqHeading: string;
+    faqHeading?: string | null;
     /**
      * Frequently asked questions about vouchers.
      */
-    faqs: {
-      question: string;
-      answer: string;
-      id?: string | null;
-    }[];
+    faqs?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
   };
   /**
    * Content for the Workshops overview page (/workshops). Only applies when slug is "workshops".
@@ -2342,7 +2390,7 @@ export interface ProductSliderBlock {
   visible?: boolean | null;
   /**
    * ✅ ON = Uses shared content from Website → Product Slider (edit once, applies everywhere).
-   * ❌ OFF = Override with custom content just for this page.
+   * ❌ OFF = Use custom content just for this page (default).
    */
   useGlobalData?: boolean | null;
   /**
@@ -2664,7 +2712,7 @@ export interface SponsorsBarBlock {
   visible?: boolean | null;
   /**
    * ✅ ON = Uses shared content from Website → Sponsors Bar (edit once, applies everywhere).
-   * ❌ OFF = Override with custom content just for this page.
+   * ❌ OFF = Use custom content just for this page (default).
    */
   useGlobalData?: boolean | null;
   /**
@@ -2905,7 +2953,7 @@ export interface VoucherCtaBlock {
   visible?: boolean | null;
   /**
    * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
-   * ❌ OFF = Override with custom content just for this page.
+   * ❌ OFF = Use custom content just for this page (default).
    */
   useGlobalData?: boolean | null;
   /**
@@ -3009,7 +3057,7 @@ export interface WorkshopSliderBlock {
   visible?: boolean | null;
   /**
    * ✅ ON = Uses shared content from Website → Workshop Slider (edit once, applies everywhere).
-   * ❌ OFF = Override with custom content just for this page.
+   * ❌ OFF = Use custom content just for this page (default).
    */
   useGlobalData?: boolean | null;
   /**
@@ -4187,14 +4235,17 @@ export interface PagesSelect<T extends boolean = true> {
   voucher?:
     | T
     | {
+        voucherShowHero?: T;
         heroHeading?: T;
         heroDescription?: T;
+        voucherShowAmounts?: T;
         voucherAmounts?:
           | T
           | {
               amount?: T;
               id?: T;
             };
+        voucherShowDeliveryOptions?: T;
         deliveryOptions?:
           | T
           | {
@@ -4211,9 +4262,9 @@ export interface PagesSelect<T extends boolean = true> {
         deliverySectionLabel?: T;
         deliveryDisclaimer?: T;
         pickupAddress?: T;
-        greetingLabel?: T;
-        greetingPlaceholder?: T;
+        voucherShowCTA?: T;
         addToCartButton?: T;
+        voucherShowWhy?: T;
         voucherWhyHeading?: T;
         voucherWhyBody?: T;
         voucherWhyImage?: T;
@@ -4225,6 +4276,7 @@ export interface PagesSelect<T extends boolean = true> {
               description?: T;
               id?: T;
             };
+        voucherWhyPerfectForVisible?: T;
         voucherWhyPerfectForHeading?: T;
         voucherWhyPerfectForTags?:
           | T
@@ -4232,16 +4284,8 @@ export interface PagesSelect<T extends boolean = true> {
               label?: T;
               id?: T;
             };
-        voucherBenefitsHeading?: T;
-        voucherBenefitsSubtitle?: T;
-        voucherBenefits?:
-          | T
-          | {
-              text?: T;
-              subtext?: T;
-              id?: T;
-            };
         voucherHowHeading?: T;
+        voucherShowHow?: T;
         voucherHowSteps?:
           | T
           | {
@@ -4249,10 +4293,12 @@ export interface PagesSelect<T extends boolean = true> {
               description?: T;
               id?: T;
             };
+        voucherShowStarterSet?: T;
         starterSetHeading?: T;
         starterSetDescription?: T;
         starterSetButton?: T;
         starterSetImage?: T;
+        voucherShowGiftOccasions?: T;
         giftOccasionsHeading?: T;
         giftOccasions?:
           | T
@@ -4261,6 +4307,17 @@ export interface PagesSelect<T extends boolean = true> {
               caption?: T;
               id?: T;
             };
+        voucherBenefitsHeading?: T;
+        voucherShowBenefits?: T;
+        voucherBenefitsSubtitle?: T;
+        voucherBenefits?:
+          | T
+          | {
+              text?: T;
+              subtext?: T;
+              id?: T;
+            };
+        voucherShowFAQ?: T;
         faqHeading?: T;
         faqs?:
           | T

@@ -17,9 +17,10 @@ interface VoucherHeroProps {
   cardDisclaimer: string
   amountSectionLabel: string
   deliverySectionLabel: string
-  greetingLabel: string
-  greetingPlaceholder: string
   addToCartButton: string
+  showAmounts?: boolean
+  showDeliveryOptions?: boolean
+  showCTA?: boolean
 }
 
 export function VoucherHero({
@@ -35,9 +36,10 @@ export function VoucherHero({
   cardDisclaimer,
   amountSectionLabel,
   deliverySectionLabel,
-  greetingLabel,
-  greetingPlaceholder,
   addToCartButton,
+  showAmounts = true,
+  showDeliveryOptions = true,
+  showCTA = true,
 }: VoucherHeroProps) {
   // Show email and pickup only — post/card removed for freshness
   const visibleDeliveryOptions = deliveryOptions.filter(
@@ -143,136 +145,129 @@ export function VoucherHero({
               </div>
 
               {/* Amount Selection */}
-              <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                <label className="font-display text-body-sm font-bold uppercase tracking-[0.1em] text-ff-near-black block mb-3">
-                  {amountSectionLabel}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {amounts.map((amount) => (
-                    <button
-                      key={amount}
-                      onClick={() => setSelectedAmount(amount)}
-                      className={`px-5 py-2.5 rounded-full font-display text-body font-semibold transition-all duration-200 ${
-                        selectedAmount === amount
-                          ? 'bg-ff-gold-accent text-ff-near-black shadow-sm'
-                          : 'bg-white border border-ff-border-light text-ff-near-black hover:border-ff-gold-accent/50 hover:bg-ff-ivory-mist/50'
-                      }`}
-                    >
-                      {amount}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Delivery Options */}
-              <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                <label className="font-display text-body-sm font-bold uppercase tracking-[0.12em] text-ff-near-black block mb-4">
-                  {deliverySectionLabel}
-                </label>
-                <div className="flex flex-col gap-3">
-                  {visibleDeliveryOptions.map((option) => (
-                    <button
-                      key={option.type}
-                      onClick={() => setSelectedDelivery(option.type)}
-                      className={`flex items-start gap-4 w-full text-left rounded-xl px-5 py-4 transition-all duration-200 border-2 ${
-                        selectedDelivery === option.type
-                          ? 'bg-ff-ivory-mist border-ff-gold-accent shadow-sm'
-                          : 'bg-white border-ff-border-light hover:bg-ff-ivory-mist/40 hover:border-ff-border-light'
-                      }`}
-                    >
-                      <div
-                        className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-200 ${
-                          selectedDelivery === option.type
-                            ? 'bg-ff-gold-accent'
-                            : 'bg-ff-warm-gray'
+              {showAmounts && (
+                <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
+                  <label className="font-display text-body-sm font-bold uppercase tracking-[0.1em] text-ff-near-black block mb-3">
+                    {amountSectionLabel}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {amounts.map((amount) => (
+                      <button
+                        key={amount}
+                        onClick={() => setSelectedAmount(amount)}
+                        className={`px-5 py-2.5 rounded-full font-display text-body font-semibold transition-all duration-200 ${
+                          selectedAmount === amount
+                            ? 'bg-ff-gold-accent text-ff-near-black shadow-sm'
+                            : 'bg-white border border-ff-border-light text-ff-near-black hover:border-ff-gold-accent/50 hover:bg-ff-ivory-mist/50'
                         }`}
                       >
-                        {option.icon === 'email' ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                            <path
-                              d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
-                              fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
-                            />
-                          </svg>
-                        ) : option.icon === 'pickup' ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                            <path
-                              d="M19 7V4H5V7H2V20H8V14H16V20H22V7H19ZM6 18H4V9H6V18ZM20 18H18V14H20V18ZM18 12V9H16V12H18Z"
-                              fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
-                            />
-                          </svg>
-                        ) : (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                            <path
-                              d="M20 2H4C2.9 2 2 2.9 2 4V20C2 21.1 2.9 22 4 22H20C21.1 22 22 21.1 22 20V4C22 2.9 21.1 2 20 2ZM20 20H4V4H20V20Z"
-                              fill={iconColor(option) ?? '#6b6b6b'}
-                            />
-                            <path
-                              d="M6 6H18V8H6V6ZM6 10H18V12H6V10ZM6 14H16V16H6V14Z"
-                              fill={iconColor(option) ?? '#6b6b6b'}
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <span className="flex flex-1 min-w-0 flex-col items-start gap-1 pt-0.5">
-                        <span
-                          className={`font-sans text-body font-medium ${
-                            selectedDelivery === option.type ? 'text-ff-near-black' : 'text-ff-gray-text'
+                        {amount}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Delivery Options */}
+              {showDeliveryOptions && (
+                <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
+                  <label className="font-display text-body-sm font-bold uppercase tracking-[0.12em] text-ff-near-black block mb-4">
+                    {deliverySectionLabel}
+                  </label>
+                  <div className="flex flex-col gap-3">
+                    {visibleDeliveryOptions.map((option) => (
+                      <button
+                        key={option.type}
+                        onClick={() => setSelectedDelivery(option.type)}
+                        className={`flex items-start gap-4 w-full text-left rounded-xl px-5 py-4 transition-all duration-200 border-2 ${
+                          selectedDelivery === option.type
+                            ? 'bg-ff-ivory-mist border-ff-gold-accent shadow-sm'
+                            : 'bg-white border-ff-border-light hover:bg-ff-ivory-mist/40 hover:border-ff-border-light'
+                        }`}
+                      >
+                        <div
+                          className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-200 ${
+                            selectedDelivery === option.type
+                              ? 'bg-ff-gold-accent'
+                              : 'bg-ff-warm-gray'
                           }`}
                         >
-                          {option.title}
-                        </span>
-                        {option.icon === 'pickup' && pickupAddress?.trim() && (
-                          <span className="flex items-start gap-2 font-sans text-body-sm text-ff-gray-text leading-snug">
-                            <svg
-                              className="mt-0.5 shrink-0 text-ff-gray-text/80"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden
-                            >
-                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                              <circle cx="12" cy="10" r="3" />
+                          {option.icon === 'email' ? (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                              <path
+                                d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
+                                fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
+                              />
                             </svg>
-                            <span>{pickupAddress.trim().replace(/\s*\n\s*/g, ', ')}</span>
+                          ) : option.icon === 'pickup' ? (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                              <path
+                                d="M19 7V4H5V7H2V20H8V14H16V20H22V7H19ZM6 18H4V9H6V18ZM20 18H18V14H20V18ZM18 12V9H16V12H18Z"
+                                fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
+                              />
+                            </svg>
+                          ) : (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                              <path
+                                d="M20 2H4C2.9 2 2 2.9 2 4V20C2 21.1 2.9 22 4 22H20C21.1 22 22 21.1 22 20V4C22 2.9 21.1 2 20 2ZM20 20H4V4H20V20Z"
+                                fill={iconColor(option) ?? '#6b6b6b'}
+                              />
+                              <path
+                                d="M6 6H18V8H6V6ZM6 10H18V12H6V10ZM6 14H16V16H6V14Z"
+                                fill={iconColor(option) ?? '#6b6b6b'}
+                              />
+                            </svg>
+                          )}
+                        </div>
+                        <span className="flex flex-1 min-w-0 flex-col items-start gap-1 pt-0.5">
+                          <span
+                            className={`font-sans text-body font-medium ${
+                              selectedDelivery === option.type ? 'text-ff-near-black' : 'text-ff-gray-text'
+                            }`}
+                          >
+                            {option.title}
                           </span>
-                        )}
-                      </span>
-                    </button>
-                  ))}
+                          {option.icon === 'pickup' && pickupAddress?.trim() && (
+                            <span className="flex items-start gap-2 font-sans text-body-sm text-ff-gray-text leading-snug">
+                              <svg
+                                className="mt-0.5 shrink-0 text-ff-gray-text/80"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden
+                              >
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                              </svg>
+                              <span>{pickupAddress.trim().replace(/\s*\n\s*/g, ', ')}</span>
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {deliveryDisclaimer && (
+                    <p className="mt-4 pl-1 font-sans text-body-sm font-bold leading-relaxed text-ff-charcoal">
+                      {deliveryDisclaimer}
+                    </p>
+                  )}
                 </div>
-                {deliveryDisclaimer && (
-                  <p className="mt-4 pl-1 font-sans text-body-sm font-bold leading-relaxed text-ff-charcoal">
-                    {deliveryDisclaimer}
-                  </p>
-                )}
-              </div>
-
-              {/* Greeting Message */}
-              <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                <label className="font-display text-body font-bold text-ff-near-black block mb-3">
-                  {greetingLabel}
-                </label>
-                <textarea
-                  placeholder={greetingPlaceholder}
-                  rows={4}
-                  maxLength={250}
-                  className="w-full rounded-xl border border-ff-border-light bg-white px-5 py-4 font-sans text-body text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-gold-accent focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/20 resize-none transition-colors"
-                />
-              </div>
+              )}
 
               {/* Add to Cart Button */}
-              <button
-                type="button"
-                className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
-              >
-                {addToCartButton}
-              </button>
+              {showCTA && (
+                <button
+                  type="button"
+                  className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {addToCartButton}
+                </button>
+              )}
             </div>
           </div>
         </div>

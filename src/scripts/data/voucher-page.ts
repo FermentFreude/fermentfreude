@@ -37,7 +37,9 @@ export function voucherPageDataDE({
     voucher: {
       heroHeading: 'Verschenke Fermentation',
       heroDescription:
-        'Das perfekte Geschenk für Foodies und Gesundheitsbewusste.\nWähle einen Betrag und optional eine Grußnachricht für deinen Gutschein.',
+        'Das perfekte Geschenk für Foodies und Gesundheitsbewusste.\nWähle einen Betrag und erhalte deinen Gutschein.',
+      voucherShowHero: true,
+      voucherShowWhy: true,
       voucherAmounts: [{ amount: '99€' }],
       deliveryOptions: [
         { type: 'email', title: 'Per E-Mail zum selber drucken', icon: 'email' },
@@ -51,9 +53,10 @@ export function voucherPageDataDE({
       deliveryDisclaimer:
         'Wir versenden keine Produkte per Post, damit alles frisch bleibt.',
       pickupAddress: 'Grabenstraße 15\n8010 Graz',
-      greetingLabel: 'Deine Grußnachricht',
-      greetingPlaceholder: 'Max. 250 Zeichen',
       addToCartButton: 'In den Warenkorb',
+      voucherShowAmounts: true,
+      voucherShowDeliveryOptions: true,
+      voucherShowCTA: true,
       voucherWhyHeading: 'Warum ein Fermentations-Workshop:',
       voucherWhyBody:
         'Du schenkst nicht „irgendetwas“, sondern einen Workshop, der inspiriert, Freude macht und nachhaltig wirkt. Ein Geschenk mit Mehrwert.',
@@ -95,15 +98,11 @@ export function voucherPageDataDE({
         { text: 'Praxis mit Fermente für zuhause', subtext: 'Eigene Kreationen und Gärgefäße mitnehmen' },
         { text: 'Flexible Terminwahl', subtext: 'Ganzjährig verfügbare Workshops' },
       ],
-      voucherWhyPerfectForHeading: 'Perfekt für',
-      voucherWhyPerfectForTags: [
-        { label: 'Foodies' },
-        { label: 'Gesundheitsbewusste' },
-        { label: 'Hobby-Köche' },
-        { label: 'Profi-Köche' },
-        { label: 'Neugierige' },
-        { label: 'Geschenk-Suchende' },
-      ],
+      voucherShowBenefits: true,
+      voucherWhyPerfectForVisible: false,
+      voucherWhyPerfectForHeading: null,
+      voucherWhyPerfectForTags: [],
+      voucherShowHow: true,
       voucherHowHeading: 'So funktioniert\'s',
       voucherHowSteps: [
         { text: 'Kaufen', description: 'Online für €99 bestellen' },
@@ -111,7 +110,9 @@ export function voucherPageDataDE({
         { text: 'Wählen', description: 'Workshop & Termin aussuchen' },
         { text: 'Genießen', description: 'Lernen & weiterfermentieren' },
       ],
+      voucherShowGiftOccasions: true,
       starterSetHeading: 'Kombiniere den Gutschein mit einem Starter-Set',
+      voucherShowStarterSet: false,
       starterSetDescription:
         'Miete Mi, wie vorher! E-Mail mit dem Gutschein, fertig im Druck. 1 wochig, 2 wochig, pro Tag.',
       starterSetButton: 'Zu den Starter-Sets',
@@ -124,6 +125,7 @@ export function voucherPageDataDE({
           caption,
         }),
       ),
+      voucherShowFAQ: true,
       faqHeading: 'Häufige Fragen zu Gutscheinen',
       faqs: [
         {
@@ -175,7 +177,9 @@ export function voucherPageDataEN(
     voucher: {
       heroHeading: 'Give the gift of fermentation',
       heroDescription:
-        'The perfect gift for foodies and the health-conscious.\nChoose an amount and optionally a greeting message for your voucher.',
+        'The perfect gift for foodies and the health-conscious.\nChoose an amount and receive your voucher.',
+      voucherShowHero: true,
+      voucherShowWhy: true,
       voucherAmounts: (v.voucherAmounts ?? []).map((item, i) => ({
         id: item.id ?? undefined,
         amount: ['99€'][i] ?? item.amount,
@@ -193,9 +197,10 @@ export function voucherPageDataEN(
       deliverySectionLabel: 'DELIVERY METHOD',
       deliveryDisclaimer: 'We cannot ship products by post to ensure freshness.',
       pickupAddress: 'Grabenstraße 15\n8010 Graz',
-      greetingLabel: 'Your greeting message',
-      greetingPlaceholder: 'Max. 250 characters',
       addToCartButton: 'Add to cart',
+      voucherShowAmounts: true,
+      voucherShowDeliveryOptions: true,
+      voucherShowCTA: true,
       voucherWhyHeading: 'Why a fermentation voucher is a great gift',
       voucherWhyBody:
         "You're not giving \"just something\", but a workshop that inspires, brings joy, and has a lasting effect. A gift with added value.",
@@ -215,11 +220,9 @@ export function voucherPageDataEN(
           'Connect with natural food processes and sustainable practices.',
         ][i] ?? item.description,
       })),
-      voucherWhyPerfectForHeading: 'Perfect for',
-      voucherWhyPerfectForTags: (v.voucherWhyPerfectForTags ?? []).map((item, i) => ({
-        id: item.id ?? undefined,
-        label: ['Foodies', 'Health-conscious', 'Hobby cooks', 'Professional cooks', 'Curious people', 'Gift seekers'][i] ?? item.label,
-      })),
+      voucherWhyPerfectForVisible: false,
+      voucherWhyPerfectForHeading: null,
+      voucherWhyPerfectForTags: [],
       voucherBenefitsHeading: "What's included in the voucher",
       voucherBenefitsSubtitle: 'All at a glance',
       voucherBenefits: (v.voucherBenefits ?? []).map((item, i) => ({
@@ -245,6 +248,8 @@ export function voucherPageDataEN(
           'Workshops available year-round',
         ][i] ?? item.subtext ?? null,
       })),
+      voucherShowBenefits: true,
+      voucherShowHow: true,
       voucherHowHeading: 'How it works',
       voucherHowSteps: (v.voucherHowSteps ?? []).map((item, i) => ({
         id: item.id ?? undefined,
@@ -257,11 +262,13 @@ export function voucherPageDataEN(
         ][i] ?? item.description ?? null,
       })),
       starterSetHeading: 'Combine the voucher with a starter set',
+      voucherShowStarterSet: false,
       starterSetDescription:
         'Rent a jar, same as before! Email with the voucher, ready to print. 1 week, 2 weeks, per day.',
       starterSetButton: 'View starter sets',
       cardLogo: cardLogo?.id ?? null,
       starterSetImage: starterSetImage?.id ?? null,
+      voucherShowGiftOccasions: true,
       giftOccasionsHeading: 'A gift for every occasion',
       giftOccasions: (v.giftOccasions ?? []).map((item, i) => {
         const occasionImage = giftOccasionImages[i]
@@ -273,6 +280,7 @@ export function voucherPageDataEN(
           caption: ['Birthdays', 'Weddings', 'Team events', 'Christmas'][i] ?? item.caption,
         }
       }),
+      voucherShowFAQ: true,
       faqHeading: 'Frequently asked questions about vouchers',
       faqs: (v.faqs ?? []).map((item, i) => ({
         id: item.id ?? undefined,

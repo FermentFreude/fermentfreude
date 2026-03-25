@@ -14,7 +14,88 @@ import { getPayload } from 'payload'
 
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 
+type PayloadInstance = Awaited<ReturnType<typeof getPayload>>
+
 const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
+
+/**
+ * Existing DB rows may have broken or self-referencing relatedProducts; Payload
+ * validates relationships on update and would abort the whole seed.
+ */
+async function sanitizeRelatedProductsForSeed(
+  payload: PayloadInstance,
+  productId: string | number,
+  related: unknown,
+): Promise<string[]> {
+  if (!related || !Array.isArray(related)) return []
+  const self = String(productId)
+  const candidateIds: string[] = []
+  for (const r of related) {
+    if (r == null) continue
+    const id =
+      typeof r === 'object' && r !== null && 'id' in r
+        ? String((r as { id: unknown }).id)
+        : String(r)
+    if (!id || id === 'undefined' || id === self) continue
+    candidateIds.push(id)
+  }
+  const valid: string[] = []
+  for (const id of candidateIds) {
+    try {
+      await payload.findByID({
+        collection: 'products',
+        id,
+        depth: 0,
+        overrideAccess: true,
+      })
+      valid.push(id)
+    } catch {
+      // product missing — drop stale relation
+    }
+  }
+  return valid
+}
+
+type BenefitRow = { id?: string | null; label?: string | null }
+
+async function mergeBenefitsForSeedUpdate(
+  payload: PayloadInstance,
+  productId: string | number,
+  locale: 'de' | 'en',
+  fallback: string,
+): Promise<Array<{ id?: string; label: string }> | undefined> {
+  const deDoc = await payload.findByID({
+    collection: 'products',
+    id: productId,
+    locale: 'de',
+    depth: 0,
+    overrideAccess: true,
+  })
+  const enDoc = await payload.findByID({
+    collection: 'products',
+    id: productId,
+    locale: 'en',
+    depth: 0,
+    overrideAccess: true,
+  })
+  const deRows = Array.isArray(deDoc.benefits) ? (deDoc.benefits as BenefitRow[]) : []
+  if (deRows.length === 0) return undefined
+  const enRows = Array.isArray(enDoc.benefits) ? (enDoc.benefits as BenefitRow[]) : []
+  const enById = new Map(enRows.filter((r) => r.id).map((r) => [String(r.id), r]))
+
+  const pick = (r: BenefitRow | undefined) =>
+    r?.label != null && String(r.label).trim() !== '' ? String(r.label).trim() : ''
+
+  return deRows.map((row) => {
+    const id = row.id != null ? String(row.id) : undefined
+    const enRow = id ? enById.get(id) : undefined
+    const label =
+      locale === 'de'
+        ? pick(row) || pick(enRow) || fallback
+        : pick(enRow) || pick(row) || fallback
+    return id ? { id, label } : { label }
+  })
+}
 
 function buildDescription(text: string) {
   return {
@@ -307,8 +388,6 @@ const PRODUCTS: Array<{
   },
 ]
 
-type PayloadInstance = Awaited<ReturnType<typeof getPayload>>
-
 export async function seedProducts(payloadInstance?: PayloadInstance): Promise<string[]> {
   const payload = payloadInstance ?? (await getPayload({ config }))
   const seedAssets = path.resolve(process.cwd(), 'seed-assets')
@@ -374,6 +453,23 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
       const doc = existing.docs[0]
       if (doc) {
         productIds.push(String(doc.id))
+        const fresh = await payload.findByID({
+          collection: 'products',
+          id: doc.id,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const relatedProducts = await sanitizeRelatedProductsForSeed(
+          payload,
+          doc.id,
+          fresh.relatedProducts,
+        )
+        const benefits = await mergeBenefitsForSeedUpdate(
+          payload,
+          doc.id,
+          'de',
+          product.titleDe,
+        )
         await payload.update({
           collection: 'products',
           id: doc.id,
@@ -381,6 +477,8 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
           data: {
             title: product.titleDe,
             description: buildDescription(product.descriptionDe),
+            relatedProducts,
+            ...(benefits ? { benefits } : {}),
           },
           context: ctx,
         })
@@ -396,7 +494,9 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
         context: ctxWithLocale,
         data: {
           title: product.titleDe,
-          slug: product.slug,          productType: 'jarred' as const,          description: buildDescription(product.descriptionDe),
+          slug: product.slug,
+          productType: 'jarred' as const,
+          description: buildDescription(product.descriptionDe),
           gallery: [{ image: imageId }],
           priceInEUR: product.priceInEUR,
           inventory: 50,
@@ -435,6 +535,23 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
 
     if (existing.docs.length > 0 && existing.docs[0]) {
       const doc = existing.docs[0]
+      const fresh = await payload.findByID({
+        collection: 'products',
+        id: doc.id,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const relatedProducts = await sanitizeRelatedProductsForSeed(
+        payload,
+        doc.id,
+        fresh.relatedProducts,
+      )
+      const benefits = await mergeBenefitsForSeedUpdate(
+        payload,
+        doc.id,
+        'en',
+        product.titleEn,
+      )
       await payload.update({
         collection: 'products',
         id: doc.id,
@@ -442,6 +559,8 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
         data: {
           title: product.titleEn,
           description: buildDescription(product.descriptionEn),
+          relatedProducts,
+          ...(benefits ? { benefits } : {}),
         },
         context: ctx,
       })
