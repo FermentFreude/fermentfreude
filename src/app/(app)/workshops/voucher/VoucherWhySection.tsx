@@ -10,6 +10,11 @@ export type VoucherWhyBenefitItem = {
   description: string
 }
 
+export type VoucherWhyPerfectForTag = {
+  label: string
+  id?: string | null
+}
+
 const DEFAULT_BENEFITS: VoucherWhyBenefitItem[] = [
   {
     icon: 'sparkle',
@@ -56,6 +61,9 @@ interface VoucherWhySectionProps {
   body: string
   image?: MediaType | string | null
   benefits?: VoucherWhyBenefitItem[] | null
+  perfectForHeading?: string | null
+  perfectForTags?: VoucherWhyPerfectForTag[] | null
+  perfectForVisible?: boolean | null
 }
 
 export function VoucherWhySection({
@@ -63,10 +71,19 @@ export function VoucherWhySection({
   body,
   image,
   benefits,
+  perfectForHeading,
+  perfectForTags,
+  perfectForVisible,
 }: VoucherWhySectionProps) {
   const hasImage = image && typeof image === 'object' && image !== null && 'url' in image
   const paragraphs = body.split(/\n\n+/).filter(Boolean)
   const items = (benefits?.length ?? 0) >= 4 ? benefits! : DEFAULT_BENEFITS
+  const cleanedHeading = perfectForHeading?.trim() ?? ''
+  const cleanedTags = (perfectForTags ?? []).filter((t) => t.label?.trim())
+  // Only render when the admin checkbox is explicitly enabled.
+  // This avoids showing old seeded values for existing documents where the field may be missing.
+  const hasPerfectFor =
+    perfectForVisible === true && Boolean(cleanedHeading) && cleanedTags.length > 0
 
   return (
     <section className="w-full overflow-hidden bg-white py-12 md:py-14">
@@ -174,6 +191,35 @@ export function VoucherWhySection({
             )
           })}
         </div>
+        {hasPerfectFor && (
+          <div
+            className="mt-14 text-center animate-fade-in-up"
+            style={{
+              animationDelay: '620ms',
+              animationFillMode: 'both',
+            }}
+          >
+            <h3
+              className="font-display text-[length:var(--text-subheading)] font-bold tracking-tight text-ff-near-black"
+              style={{
+                lineHeight: 'var(--leading-subheading)',
+              }}
+            >
+              {cleanedHeading}
+            </h3>
+            <div className="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-3">
+              {cleanedTags.map((tag, i) => (
+                <span
+                  key={tag.id ?? i}
+                  className="inline-block rounded-full border border-ff-charcoal/30 px-5 py-2 text-sm font-medium tracking-wide text-ff-near-black"
+                  role="listitem"
+                >
+                  {tag.label.trim()}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )

@@ -1,17 +1,20 @@
 import { adminOnly } from '@/access/adminOnly'
 import type { CollectionConfig } from 'payload'
+import crypto from 'crypto'
 
-// Generate unique voucher code
-function generateVoucherCode(workshopTitle: string): string {
-  const prefix = workshopTitle.toUpperCase().replace(/\s+/g, '-')
-  const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase()
-  return `${prefix}-GIFT-${randomPart}`
+/**
+ * Generate a cryptographically-strong voucher code.
+ * Format: FF-GIFT-{RANDOM_8}  e.g. FF-GIFT-A7K3M2X9
+ */
+function generateVoucherCode(): string {
+  const randomPart = crypto.randomBytes(4).toString('hex').toUpperCase()
+  return `FF-GIFT-${randomPart}`
 }
 
 export const Vouchers: CollectionConfig = {
   slug: 'vouchers',
   access: {
-    read: adminOnly, // Only admins can view vouchers
+    read: adminOnly,
     create: adminOnly,
     update: adminOnly,
     delete: adminOnly,
@@ -19,28 +22,36 @@ export const Vouchers: CollectionConfig = {
   admin: {
     group: 'Shop',
     useAsTitle: 'code',
-    defaultColumns: ['code', 'workshop', 'value', 'redeemed', 'redeemedOn'],
+    defaultColumns: ['code', 'value', 'status', 'purchaserEmail', 'createdAt'],
     description:
-      'Gift vouchers that can be purchased as products and redeemed on the /redeem-voucher page.',
+      'Geschenkgutscheine — generische €99 Workshop-Erlebnis Gutscheine. Käufer wählt keinen Workshop; Empfänger löst den Gutschein beim Checkout für einen beliebigen Workshop ein.',
   },
   fields: [
+    /* ── Voucher Identity ── */
     {
       name: 'code',
       type: 'text',
       required: true,
       unique: true,
+      index: true,
       admin: {
         readOnly: true,
-        description: 'Auto-generated unique voucher code',
+        description: 'Auto-generated unique voucher code (e.g. FF-GIFT-A7K3M2X9)',
       },
     },
     {
-      name: 'workshop',
-      type: 'relationship',
-      relationTo: 'workshops',
+      name: 'status',
+      type: 'select',
       required: true,
+      defaultValue: 'active',
+      options: [
+        { label: 'Aktiv / Active', value: 'active' },
+        { label: 'Eingelöst / Redeemed', value: 'redeemed' },
+        { label: 'Abgelaufen / Expired', value: 'expired' },
+      ],
       admin: {
-        description: 'Workshop this voucher is valid for',
+        position: 'sidebar',
+        description: 'Voucher lifecycle status',
       },
     },
     {
@@ -48,10 +59,54 @@ export const Vouchers: CollectionConfig = {
       type: 'number',
       required: true,
       defaultValue: 99,
+      min: 1,
       admin: {
-        description: 'Voucher value in EUR (should match workshop price)',
+        description: 'Voucher value in EUR (default €99 for workshop experience)',
       },
     },
+
+    /* ── Purchaser Details ── */
+    {
+      name: 'purchaserEmail',
+      type: 'email',
+      required: true,
+      admin: { description: 'Email of the buyer (receives purchase confirmation)' },
+    },
+
+    /* ── Recipient Details ── */
+    {
+      name: 'recipientEmail',
+      type: 'email',
+      admin: {
+        description: 'Email of the recipient (receives voucher code if email delivery)',
+      },
+    },
+
+    /* ── Delivery ── */
+    {
+      name: 'deliveryMethod',
+      type: 'select',
+      required: true,
+      defaultValue: 'email',
+      options: [
+        { label: 'E-Mail', value: 'email' },
+        { label: 'Abholung / Pickup', value: 'pickup' },
+      ],
+      admin: { description: 'How the voucher is delivered to the recipient' },
+    },
+
+    /* ── Payment Reference ── */
+    {
+      name: 'stripeSessionId',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Stripe Checkout Session ID for payment verification',
+      },
+    },
+
+    /* ── Redemption Tracking ── */
     {
       name: 'redeemed',
       type: 'checkbox',
@@ -69,6 +124,14 @@ export const Vouchers: CollectionConfig = {
         readOnly: true,
         position: 'sidebar',
         description: 'Date when voucher was redeemed',
+      },
+    },
+    {
+      name: 'redeemedForWorkshop',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        description: 'Workshop name when voucher was redeemed at checkout',
       },
     },
     {
@@ -91,28 +154,9 @@ export const Vouchers: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      async ({ data, operation, req }) => {
-        // Auto-generate voucher code on create
+      async ({ data, operation }) => {
         if (operation === 'create' && !data?.code) {
-          // Fetch workshop title to generate code
-          let workshopTitle = 'WORKSHOP'
-          if (data?.workshop && req?.payload) {
-            try {
-              const workshop = await req.payload.findByID({
-                collection: 'workshops',
-                id: data.workshop,
-              })
-              if (workshop?.title) {
-                workshopTitle =
-                  typeof workshop.title === 'string'
-                    ? workshop.title
-                    : (workshop.title as { de?: string; en?: string })?.de || 'WORKSHOP'
-              }
-            } catch (_err) {
-              // Fallback to generic code if workshop fetch fails
-            }
-          }
-          data.code = generateVoucherCode(workshopTitle)
+          data.code = generateVoucherCode()
         }
         return data
       },

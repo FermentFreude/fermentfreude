@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
 
-interface VoucherHeroProps {
+export interface VoucherHeroProps {
   heading: string
   description: string
   amounts: string[]
@@ -17,9 +17,10 @@ interface VoucherHeroProps {
   cardDisclaimer: string
   amountSectionLabel: string
   deliverySectionLabel: string
-  greetingLabel: string
-  greetingPlaceholder: string
   addToCartButton: string
+  showAmounts: boolean
+  showDeliveryOptions: boolean
+  showCTA: boolean
 }
 
 export function VoucherHero({
@@ -35,32 +36,78 @@ export function VoucherHero({
   cardDisclaimer,
   amountSectionLabel,
   deliverySectionLabel,
-  greetingLabel,
-  greetingPlaceholder,
   addToCartButton,
+  showAmounts,
+  showDeliveryOptions,
+  showCTA,
 }: VoucherHeroProps) {
-  // Show email and pickup only — post/card removed for freshness
   const visibleDeliveryOptions = deliveryOptions.filter(
     (o) => o.type === 'email' || o.type === 'pickup',
   )
-  const [selectedAmount, setSelectedAmount] = useState(amounts[0] ?? '50€')
+
+  // ─── Form State ──────────────────────────────────────────────
+  const [selectedAmount, setSelectedAmount] = useState(amounts[0] ?? '99\u20ac')
   const [selectedDelivery, setSelectedDelivery] = useState(
     visibleDeliveryOptions[0]?.type ?? 'email',
   )
+  const [purchaserEmail, setPurchaserEmail] = useState('')
+  const [recipientEmail, setRecipientEmail] = useState('')
 
-  // Format amount for display (e.g., "50€" -> "€50,00")
+  // ─── UI State ────────────────────────────────────────────────
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Parse amount number from string like "99€"
+  const parseAmount = (amount: string) => {
+    const num = parseInt(amount.replace(/[^0-9]/g, ''), 10)
+    return isNaN(num) ? 99 : num
+  }
+
+  // Format amount for display
   const formatAmount = (amount: string) => {
     const num = amount.replace('€', '')
     return `€${num},00`
   }
 
-  const iconColor = (opt: (typeof visibleDeliveryOptions)[0]) =>
-    selectedDelivery === opt.type ? '#FFFFFF' : undefined
+  // ─── Checkout Handler ────────────────────────────────────────
+  const handleCheckout = useCallback(async () => {
+    setError(null)
+    if (!purchaserEmail.trim()) {
+      setError('Bitte gib deine E-Mail-Adresse ein.')
+      return
+    }
+    if (selectedDelivery === 'email' && !recipientEmail.trim()) {
+      setError('Bitte gib die E-Mail-Adresse des Empf\u00e4ngers ein.')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const res = await fetch('/api/voucher/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: parseAmount(selectedAmount),
+          deliveryMethod: selectedDelivery,
+          purchaserEmail: purchaserEmail.trim(),
+          recipientEmail: selectedDelivery === 'email' ? recipientEmail.trim() : undefined,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Ein Fehler ist aufgetreten.')
+        return
+      }
+      window.location.href = data.sessionUrl
+    } catch (_err) {
+      setError('Verbindungsfehler. Bitte versuche es erneut.')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedAmount, selectedDelivery, purchaserEmail, recipientEmail])
 
   return (
-    <section
-      className="w-full bg-white py-12 md:py-14"
-    >
+    <section className="w-full bg-white py-12 md:py-14">
       <div className="mx-auto max-w-[var(--content-full)] px-[var(--space-container-x)]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           {/* Left Column - Voucher Preview Card */}
@@ -106,6 +153,10 @@ export function VoucherHero({
                 </p>
               </div>
 
+              <p className="font-display text-body font-semibold text-ff-gold-accent text-center mt-3">
+                Workshop-Erlebnis
+              </p>
+
               <p className="font-sans text-body-sm text-ff-gray-text/90 text-center mt-5 leading-relaxed">
                 {cardDisclaimer}
               </p>
@@ -143,136 +194,166 @@ export function VoucherHero({
               </div>
 
               {/* Amount Selection */}
-              <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                <label className="font-display text-body-sm font-bold uppercase tracking-[0.1em] text-ff-near-black block mb-3">
-                  {amountSectionLabel}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {amounts.map((amount) => (
-                    <button
-                      key={amount}
-                      onClick={() => setSelectedAmount(amount)}
-                      className={`px-5 py-2.5 rounded-full font-display text-body font-semibold transition-all duration-200 ${
-                        selectedAmount === amount
-                          ? 'bg-ff-gold-accent text-ff-near-black shadow-sm'
-                          : 'bg-white border border-ff-border-light text-ff-near-black hover:border-ff-gold-accent/50 hover:bg-ff-ivory-mist/50'
-                      }`}
-                    >
-                      {amount}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Delivery Options */}
-              <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                <label className="font-display text-body-sm font-bold uppercase tracking-[0.12em] text-ff-near-black block mb-4">
-                  {deliverySectionLabel}
-                </label>
-                <div className="flex flex-col gap-3">
-                  {visibleDeliveryOptions.map((option) => (
-                    <button
-                      key={option.type}
-                      onClick={() => setSelectedDelivery(option.type)}
-                      className={`flex items-start gap-4 w-full text-left rounded-xl px-5 py-4 transition-all duration-200 border-2 ${
-                        selectedDelivery === option.type
-                          ? 'bg-ff-ivory-mist border-ff-gold-accent shadow-sm'
-                          : 'bg-white border-ff-border-light hover:bg-ff-ivory-mist/40 hover:border-ff-border-light'
-                      }`}
-                    >
-                      <div
-                        className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-200 ${
-                          selectedDelivery === option.type
-                            ? 'bg-ff-gold-accent'
-                            : 'bg-ff-warm-gray'
+              {showAmounts && (
+                <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
+                  <label className="font-display text-body-sm font-bold uppercase tracking-[0.1em] text-ff-near-black block mb-3">
+                    {amountSectionLabel}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {amounts.map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        onClick={() => setSelectedAmount(amount)}
+                        className={`px-5 py-2.5 rounded-full font-display text-body font-semibold transition-all duration-200 ${
+                          selectedAmount === amount
+                            ? 'bg-ff-gold-accent text-ff-near-black shadow-sm'
+                            : 'bg-white border border-ff-border-light text-ff-near-black hover:border-ff-gold-accent/50 hover:bg-ff-ivory-mist/50'
                         }`}
                       >
-                        {option.icon === 'email' ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                            <path
-                              d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
-                              fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
-                            />
-                          </svg>
-                        ) : option.icon === 'pickup' ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                            <path
-                              d="M19 7V4H5V7H2V20H8V14H16V20H22V7H19ZM6 18H4V9H6V18ZM20 18H18V14H20V18ZM18 12V9H16V12H18Z"
-                              fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
-                            />
-                          </svg>
-                        ) : (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                            <path
-                              d="M20 2H4C2.9 2 2 2.9 2 4V20C2 21.1 2.9 22 4 22H20C21.1 22 22 21.1 22 20V4C22 2.9 21.1 2 20 2ZM20 20H4V4H20V20Z"
-                              fill={iconColor(option) ?? '#6b6b6b'}
-                            />
-                            <path
-                              d="M6 6H18V8H6V6ZM6 10H18V12H6V10ZM6 14H16V16H6V14Z"
-                              fill={iconColor(option) ?? '#6b6b6b'}
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <span className="flex flex-1 min-w-0 flex-col items-start gap-1 pt-0.5">
-                        <span
-                          className={`font-sans text-body font-medium ${
-                            selectedDelivery === option.type ? 'text-ff-near-black' : 'text-ff-gray-text'
+                        {amount}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Delivery Options */}
+              {showDeliveryOptions && (
+                <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
+                  <label className="font-display text-body-sm font-bold uppercase tracking-[0.12em] text-ff-near-black block mb-4">
+                    {deliverySectionLabel}
+                  </label>
+                  <div className="flex flex-col gap-3">
+                    {visibleDeliveryOptions.map((option) => (
+                      <button
+                        key={option.type}
+                        type="button"
+                        onClick={() => setSelectedDelivery(option.type)}
+                        className={`flex items-start gap-4 w-full text-left rounded-xl px-5 py-4 transition-all duration-200 border-2 ${
+                          selectedDelivery === option.type
+                            ? 'bg-ff-ivory-mist border-ff-gold-accent shadow-sm'
+                            : 'bg-white border-ff-border-light hover:bg-ff-ivory-mist/40 hover:border-ff-border-light'
+                        }`}
+                      >
+                        <div
+                          className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-200 ${
+                            selectedDelivery === option.type
+                              ? 'bg-ff-gold-accent'
+                              : 'bg-ff-warm-gray'
                           }`}
                         >
-                          {option.title}
-                        </span>
-                        {option.icon === 'pickup' && pickupAddress?.trim() && (
-                          <span className="flex items-start gap-2 font-sans text-body-sm text-ff-gray-text leading-snug">
-                            <svg
-                              className="mt-0.5 shrink-0 text-ff-gray-text/80"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden
-                            >
-                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                              <circle cx="12" cy="10" r="3" />
+                          {option.icon === 'email' ? (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                              <path
+                                d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
+                                fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
+                              />
                             </svg>
-                            <span>{pickupAddress.trim().replace(/\s*\n\s*/g, ', ')}</span>
+                          ) : (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                              <path
+                                d="M19 7V4H5V7H2V20H8V14H16V20H22V7H19ZM6 18H4V9H6V18ZM20 18H18V14H20V18ZM18 12V9H16V12H18Z"
+                                fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
+                              />
+                            </svg>
+                          )}
+                        </div>
+                        <span className="flex flex-1 min-w-0 flex-col items-start gap-1 pt-0.5">
+                          <span
+                            className={`font-sans text-body font-medium ${
+                              selectedDelivery === option.type ? 'text-ff-near-black' : 'text-ff-gray-text'
+                            }`}
+                          >
+                            {option.title}
                           </span>
-                        )}
-                      </span>
-                    </button>
-                  ))}
+                          {option.icon === 'pickup' && pickupAddress?.trim() && (
+                            <span className="flex items-start gap-2 font-sans text-body-sm text-ff-gray-text leading-snug">
+                              <svg
+                                className="mt-0.5 shrink-0 text-ff-gray-text/80"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden
+                              >
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                              </svg>
+                              <span>{pickupAddress.trim().replace(/\s*\n\s*/g, ', ')}</span>
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {deliveryDisclaimer && (
+                    <p className="mt-4 pl-1 font-sans text-body-sm font-bold leading-relaxed text-ff-charcoal">
+                      {deliveryDisclaimer}
+                    </p>
+                  )}
                 </div>
-                {deliveryDisclaimer && (
-                  <p className="mt-4 pl-1 font-sans text-body-sm font-bold leading-relaxed text-ff-charcoal">
-                    {deliveryDisclaimer}
-                  </p>
-                )}
-              </div>
+              )}
 
-              {/* Greeting Message */}
-              <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                <label className="font-display text-body font-bold text-ff-near-black block mb-3">
-                  {greetingLabel}
-                </label>
-                <textarea
-                  placeholder={greetingPlaceholder}
-                  rows={4}
-                  maxLength={250}
-                  className="w-full rounded-xl border border-ff-border-light bg-white px-5 py-4 font-sans text-body text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-gold-accent focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/20 resize-none transition-colors"
-                />
-              </div>
+              {/* Contact — Email fields + CTA */}
+              {showCTA && (
+                <>
+                  <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
+                    <label className="font-display text-body font-bold text-ff-near-black block mb-4">
+                      Kontakt
+                    </label>
+                    <div className="flex flex-col gap-3">
+                      <input
+                        type="email"
+                        placeholder="Deine E-Mail-Adresse *"
+                        value={purchaserEmail}
+                        onChange={(e) => setPurchaserEmail(e.target.value)}
+                        required
+                        className="w-full rounded-xl border border-ff-border-light bg-white px-5 py-3.5 font-sans text-body text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-gold-accent focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/20 transition-colors"
+                      />
+                      {selectedDelivery === 'email' && (
+                        <input
+                          type="email"
+                          placeholder="E-Mail des Empf&#228;ngers *"
+                          value={recipientEmail}
+                          onChange={(e) => setRecipientEmail(e.target.value)}
+                          required
+                          className="w-full rounded-xl border border-ff-border-light bg-white px-5 py-3.5 font-sans text-body text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-gold-accent focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/20 transition-colors"
+                        />
+                      )}
+                    </div>
+                  </div>
 
-              {/* Add to Cart Button */}
-              <button
-                type="button"
-                className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
-              >
-                {addToCartButton}
-              </button>
+                  {error && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-3">
+                      <p className="font-sans text-body-sm text-red-700">{error}</p>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleCheckout}
+                    disabled={isLoading}
+                    className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden>
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Weiterleitung&hellip;
+                      </span>
+                    ) : (
+                      addToCartButton
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

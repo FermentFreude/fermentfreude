@@ -51,8 +51,6 @@ export function voucherPageDataDE({
       deliveryDisclaimer:
         'Wir versenden keine Produkte per Post, damit alles frisch bleibt.',
       pickupAddress: 'Grabenstraße 15\n8010 Graz',
-      greetingLabel: 'Deine Grußnachricht',
-      greetingPlaceholder: 'Max. 250 Zeichen',
       addToCartButton: 'In den Warenkorb',
       voucherWhyHeading: 'Warum ein Fermentations-Workshop:',
       voucherWhyBody:
@@ -193,8 +191,6 @@ export function voucherPageDataEN(
       deliverySectionLabel: 'DELIVERY METHOD',
       deliveryDisclaimer: 'We cannot ship products by post to ensure freshness.',
       pickupAddress: 'Grabenstraße 15\n8010 Graz',
-      greetingLabel: 'Your greeting message',
-      greetingPlaceholder: 'Max. 250 characters',
       addToCartButton: 'Add to cart',
       voucherWhyHeading: 'Why a fermentation voucher is a great gift',
       voucherWhyBody:
