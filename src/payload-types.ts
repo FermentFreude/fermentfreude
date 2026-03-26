@@ -704,6 +704,14 @@ export interface Page {
            */
           ctaHref?: string | null;
           /**
+           * e.g., "Shop"
+           */
+          secondaryCtaLabel?: string | null;
+          /**
+           * e.g., "/shop"
+           */
+          secondaryCtaHref?: string | null;
+          /**
            * Center card: #555954
            */
           panelColor?: string | null;
@@ -4144,6 +4152,8 @@ export interface PagesSelect<T extends boolean = true> {
                   };
               ctaLabel?: T;
               ctaHref?: T;
+              secondaryCtaLabel?: T;
+              secondaryCtaHref?: T;
               panelColor?: T;
               bgColor?: T;
               leftImage?: T;

@@ -44,6 +44,8 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           : (fallback?.attributes ?? []),
         ctaLabel: cs.ctaLabel ?? fallback?.ctaLabel ?? 'Learn More',
         ctaHref: cs.ctaHref ?? fallback?.ctaHref ?? '#',
+        secondaryCtaLabel: cs.secondaryCtaLabel ?? fallback?.secondaryCtaLabel ?? 'Shop',
+        secondaryCtaHref: cs.secondaryCtaHref ?? fallback?.secondaryCtaHref ?? '/shop',
         panelColor: cs.panelColor ?? fallback?.panelColor ?? '#555954',
         bgColor: cs.bgColor ?? fallback?.bgColor ?? '#D2DFD7',
         leftImage: isResolvedMedia(cs.leftImage) ? cs.leftImage : (fallback?.leftImage ?? null),
@@ -106,11 +108,11 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
       {/* ── Mobile split background ────────────────────────── */}
       <div className="sm:hidden absolute inset-0 pointer-events-none" aria-hidden="true">
         <div
-          className="h-[40%] transition-colors duration-700"
+          className="h-[48%] transition-colors duration-700"
           style={{ backgroundColor: slide.bgColor }}
         />
         <div
-          className="h-[60%] transition-colors duration-700"
+          className="h-[52%] transition-colors duration-700"
           style={{ backgroundColor: slide.panelColor }}
         />
       </div>
@@ -161,7 +163,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         </button>
 
         {/* Images — centered, smaller on mobile */}
-        <div className="relative z-20 flex items-end justify-center h-[40%] pb-2">
+        <div className="relative z-20 flex items-end justify-center h-[48%] pb-2">
           <div
             className={cn(
               'relative -rotate-6',
@@ -207,7 +209,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         </div>
 
         {/* Text content — bottom panel area, centered */}
-        <div className="flex-1 flex flex-col items-center text-center justify-center px-6 pb-10">
+        <div className="flex-1 flex flex-col items-center text-center justify-center px-6 pb-8">
           <p
             className={cn(
               'uppercase tracking-[0.2em] text-white text-[9px] font-display font-bold mb-1',
@@ -264,7 +266,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </div>
           <div
             className={cn(
-              'mt-4 flex items-center justify-center gap-3',
+              'mt-3 flex items-center justify-center gap-3',
               isEntering && 'hero-anim-cta',
               isExiting && 'hero-exit-content',
             )}
@@ -276,10 +278,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
               {slide.ctaLabel}
             </Link>
             <Link
-              href="/shop"
+              href={slide.secondaryCtaHref}
               className="inline-flex items-center justify-center whitespace-nowrap font-display font-bold text-xs px-5 py-2 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] transition-all duration-300"
             >
-              Shop
+              {slide.secondaryCtaLabel}
             </Link>
           </div>
         </div>
@@ -331,7 +333,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           style={{ backgroundColor: slide.panelColor }}
         >
           {/* Content — vertically centered, padded for header + bottom nav */}
-          <div className="relative z-40 flex-1 flex flex-col items-center justify-center text-center px-6 sm:px-8 lg:px-10 xl:px-12 pt-20 pb-16">
+          <div className="relative z-40 flex-1 flex flex-col items-center justify-center text-center px-6 sm:px-8 lg:px-10 xl:px-12 pt-16 pb-12">
             {/* Eyebrow */}
             <p
               className={cn(
@@ -409,10 +411,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
                 {slide.ctaLabel}
               </Link>
               <Link
-                href="/shop"
+                href={slide.secondaryCtaHref}
                 className="inline-flex items-center justify-center whitespace-nowrap w-full sm:w-auto font-display font-bold text-xs lg:text-sm px-6 lg:px-8 py-2.5 lg:py-3 rounded-full border-2 border-white text-white hover:bg-white hover:text-[#1d1d1d] hover:scale-[1.03] transition-all duration-300"
               >
-                Shop
+                {slide.secondaryCtaLabel}
               </Link>
             </div>
           </div>
