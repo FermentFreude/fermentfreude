@@ -13,6 +13,8 @@ export interface ResolvedSlide {
   attributes: string[]
   ctaLabel: string
   ctaHref: string
+  secondaryCtaLabel: string
+  secondaryCtaHref: string
   panelColor: string
   bgColor: string
   leftImage: MediaType | null
@@ -38,6 +40,8 @@ export const DEFAULT_SLIDES: ResolvedSlide[] = [
     attributes: ['Beginner-friendly', 'Science-based', 'Practical'],
     ctaLabel: 'Learn More',
     ctaHref: '/fermentation',
+    secondaryCtaLabel: 'Shop',
+    secondaryCtaHref: '/shop',
     panelColor: '#555954',
     bgColor: '#D2DFD7',
     leftImage: null,
@@ -54,6 +58,8 @@ export const DEFAULT_SLIDES: ResolvedSlide[] = [
     attributes: ['All-natural', 'Probiotic-rich', 'Made with Love'],
     ctaLabel: 'Learn More',
     ctaHref: '/workshops/lakto-gemuese',
+    secondaryCtaLabel: 'Shop',
+    secondaryCtaHref: '/shop',
     panelColor: '#555954',
     bgColor: '#F6F0E8',
     leftImage: null,
@@ -70,6 +76,8 @@ export const DEFAULT_SLIDES: ResolvedSlide[] = [
     attributes: ['Live cultures', 'Naturally fizzy', 'Handcrafted'],
     ctaLabel: 'Learn More',
     ctaHref: '/workshops/kombucha',
+    secondaryCtaLabel: 'Shop',
+    secondaryCtaHref: '/shop',
     panelColor: '#000000',
     bgColor: '#AEB1AE',
     leftImage: null,
@@ -84,6 +92,8 @@ export const DEFAULT_SLIDES: ResolvedSlide[] = [
     attributes: ['High protein', 'Traditional', 'Plant-based'],
     ctaLabel: 'Learn More',
     ctaHref: '/workshops/tempeh',
+    secondaryCtaLabel: 'Shop',
+    secondaryCtaHref: '/shop',
     panelColor: '#737672',
     bgColor: '#F6F3F0',
     leftImage: null,
