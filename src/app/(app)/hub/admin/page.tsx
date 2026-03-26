@@ -57,7 +57,7 @@ export default function AdminHubPage() {
             },
             {
               title: t('Dashboard erkunden', 'Explore the Dashboard'),
-              desc: t('Du siehst nun die Übersicht mit allen Sammlungen (Collections) auf der linken Seite.', 'You will see the overview with all collections on the left sidebar.'),
+              desc: t('Du siehst nun die Übersicht mit allen Bereichen in der linken Seitenleiste.', 'You will see the overview with all sections in the left sidebar.'),
             },
           ]}
         />
@@ -67,18 +67,42 @@ export default function AdminHubPage() {
         </h3>
         <p>
           {t(
-            'Das Admin-Dashboard ist in Sammlungen (Collections) und Globals aufgeteilt:',
-            'The admin dashboard is divided into Collections and Globals:',
+            'Das Dashboard ist in übersichtliche Bereiche aufgeteilt:',
+            'The dashboard is organized into clear sections:',
           )}
         </p>
-        <ul className="ml-4 list-disc space-y-1 text-sm" style={{ color: '#626160' }}>
-          <li><strong>{t('Sammlungen', 'Collections')}</strong> — {t('Seiten, Produkte, Workshops, Medien, Benutzer, etc. Jede davon enthält eine Liste von Einträgen.', 'Pages, Products, Workshops, Media, Users, etc. Each contains a list of entries.')}</li>
-          <li><strong>Globals</strong> — {t('Einstellungen, die auf der ganzen Website gelten: Header, Footer, Testimonials, etc.', 'Settings that apply across the entire website: Header, Footer, Testimonials, etc.')}</li>
-        </ul>
-
-        <InfoCard variant="tip" title={t('Schneller Zugriff', 'Quick Access')}>
-          <p>{t('Wenn du auf der Live-Website eingeloggt bist, siehst du oben eine Admin-Leiste mit einem „Bearbeiten"-Button. Damit springst du direkt zum jeweiligen Eintrag im Dashboard.', 'When you\'re logged in on the live website, you\'ll see an admin bar at the top with an "Edit" button. This takes you directly to the entry in the dashboard.')}</p>
-        </InfoCard>
+        <div className="mt-3 overflow-x-auto rounded-xl border" style={{ borderColor: '#E8E4D9' }}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ background: '#F5F3EF' }}>
+                <th className="px-4 py-2.5 text-left font-semibold" style={{ color: '#1a1a1a' }}>{t('Bereich', 'Section')}</th>
+                <th className="px-4 py-2.5 text-left font-semibold" style={{ color: '#1a1a1a' }}>{t('Enthält', 'Contains')}</th>
+              </tr>
+            </thead>
+            <tbody style={{ color: '#626160' }}>
+              {[
+                [t('Nutzer', 'Users'), 'Users'],
+                [t('Inhalt', 'Content'), 'Pages, Categories, Media, Posts, Forms, Form Submissions'],
+                ['Online Kurse', 'Course Progresses, Enrollments, Online Courses'],
+                ['Workshops', 'Workshops, Workshop Locations, Workshop Appointments, Workshop Bookings'],
+                ['Shop', 'Vouchers, Products, Orders'],
+                ['Ecommerce', 'Carts, Transactions'],
+                ['Website', t('Header, Footer, Testimonials, Sponsors Bar, Gutschein CTA, Workshop Slider, Produkt Slider, Workshop Cards', 'Header, Footer, Testimonials, Sponsors Bar, Voucher CTA, Workshop Slider, Product Slider, Workshop Cards')],
+              ].map(([section, contains], i) => (
+                <tr key={i} className="border-t" style={{ borderColor: '#E8E4D9' }}>
+                  <td className="px-4 py-2.5 font-medium" style={{ color: '#555954' }}>{section}</td>
+                  <td className="px-4 py-2.5">{contains}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-sm" style={{ color: '#626160' }}>
+          {t(
+            'Der Bereich „Website" in der Seitenleiste enthält globale Einstellungen, die auf der gesamten Seite gelten (z. B. Navigation, Footer-Inhalte, Testimonials).',
+            'The "Website" section in the sidebar contains global settings that apply across the entire site (e.g. navigation, footer content, testimonials).',
+          )}
+        </p>
       </HubSection>
 
       {/* ── PAGES ── */}
