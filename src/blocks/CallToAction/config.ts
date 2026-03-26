@@ -9,10 +9,13 @@ import {
 
 import { linkGroup } from '../../fields/linkGroup'
 
+import { blockVisible } from '@/fields/blockVisible'
+
 export const CallToAction: Block = {
   slug: 'cta',
   interfaceName: 'CallToActionBlock',
   fields: [
+    blockVisible,
     {
       name: 'richText',
       type: 'richText',

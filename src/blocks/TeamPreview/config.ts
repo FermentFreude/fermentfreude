@@ -43,7 +43,8 @@ export const TeamPreview: Block = {
       localized: true,
       label: 'Description',
       admin: {
-        description: 'Body text describing the team.',
+        description:
+          'Body text describing the team. Line breaks (Enter) are shown on the site; you do not need to type \\n.',
       },
     },
     {

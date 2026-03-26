@@ -598,6 +598,10 @@ export interface VariantType {
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   richText?: {
     root: {
       type: string;
@@ -1714,6 +1718,10 @@ export interface Page {
  */
 export interface ContactBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * When checked, the "For Chefs and Food Professionals" banner below the contact form is hidden.
    */
   hideCtaBanner?: boolean | null;
@@ -2036,6 +2044,10 @@ export interface Form {
  * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
@@ -2169,6 +2181,10 @@ export interface HeroBannerBlock {
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   media: string | Media;
   id?: string | null;
   blockName?: string | null;
@@ -2179,6 +2195,10 @@ export interface MediaBlock {
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   introContent?: {
     root: {
       type: string;
@@ -2228,6 +2248,10 @@ export interface Category {
  * via the `definition` "CarouselBlock".
  */
 export interface CarouselBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   populateBy?: ('collection' | 'selection') | null;
   relationTo?: 'products' | null;
   categories?: (string | Category)[] | null;
@@ -2701,6 +2725,10 @@ export interface SponsorsBarBlock {
  */
 export interface TeamCardsBlock {
   /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
    * Small accent text above the heading (e.g. "Our Team").
    */
   label: string;
@@ -2722,7 +2750,7 @@ export interface TeamCardsBlock {
      */
     role: string;
     /**
-     * Short biography or description of the team member.
+     * Short biography. Line breaks (Enter) are shown on the site; you do not need to type \n.
      */
     description: string;
     id?: string | null;
@@ -2749,7 +2777,7 @@ export interface TeamPreviewBlock {
    */
   heading: string;
   /**
-   * Body text describing the team.
+   * Body text describing the team. Line breaks (Enter) are shown on the site; you do not need to type \n.
    */
   description: string;
   /**
@@ -2838,6 +2866,10 @@ export interface TestimonialsBlock {
  * via the `definition` "ThreeItemGridBlock".
  */
 export interface ThreeItemGridBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   products?: (string | Product)[] | null;
   id?: string | null;
   blockName?: string | null;
@@ -2848,6 +2880,10 @@ export interface ThreeItemGridBlock {
  * via the `definition` "BannerBlock".
  */
 export interface BannerBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   style: 'info' | 'warning' | 'error' | 'success';
   content: {
     root: {
@@ -2873,6 +2909,10 @@ export interface BannerBlock {
  * via the `definition` "FormBlock".
  */
 export interface FormBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
   form: string | Form;
   enableIntro?: boolean | null;
   introContent?: {
@@ -4439,6 +4479,7 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "ContactBlock_select".
  */
 export interface ContactBlockSelect<T extends boolean = true> {
+  visible?: T;
   hideCtaBanner?: T;
   hideMap?: T;
   hideHeroSection?: T;
@@ -4506,6 +4547,7 @@ export interface ContactBlockSelect<T extends boolean = true> {
  * via the `definition` "CallToActionBlock_select".
  */
 export interface CallToActionBlockSelect<T extends boolean = true> {
+  visible?: T;
   richText?: T;
   links?:
     | T
@@ -4530,6 +4572,7 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
  * via the `definition` "ContentBlock_select".
  */
 export interface ContentBlockSelect<T extends boolean = true> {
+  visible?: T;
   columns?:
     | T
     | {
@@ -4593,6 +4636,7 @@ export interface HeroBannerBlockSelect<T extends boolean = true> {
  * via the `definition` "MediaBlock_select".
  */
 export interface MediaBlockSelect<T extends boolean = true> {
+  visible?: T;
   media?: T;
   id?: T;
   blockName?: T;
@@ -4602,6 +4646,7 @@ export interface MediaBlockSelect<T extends boolean = true> {
  * via the `definition` "ArchiveBlock_select".
  */
 export interface ArchiveBlockSelect<T extends boolean = true> {
+  visible?: T;
   introContent?: T;
   populateBy?: T;
   relationTo?: T;
@@ -4616,6 +4661,7 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
  * via the `definition` "CarouselBlock_select".
  */
 export interface CarouselBlockSelect<T extends boolean = true> {
+  visible?: T;
   populateBy?: T;
   relationTo?: T;
   categories?: T;
@@ -4819,6 +4865,7 @@ export interface SponsorsBarBlockSelect<T extends boolean = true> {
  * via the `definition` "TeamCardsBlock_select".
  */
 export interface TeamCardsBlockSelect<T extends boolean = true> {
+  visible?: T;
   label?: T;
   heading?: T;
   members?:
@@ -4882,6 +4929,7 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
  * via the `definition` "ThreeItemGridBlock_select".
  */
 export interface ThreeItemGridBlockSelect<T extends boolean = true> {
+  visible?: T;
   products?: T;
   id?: T;
   blockName?: T;
@@ -4891,6 +4939,7 @@ export interface ThreeItemGridBlockSelect<T extends boolean = true> {
  * via the `definition` "BannerBlock_select".
  */
 export interface BannerBlockSelect<T extends boolean = true> {
+  visible?: T;
   style?: T;
   content?: T;
   id?: T;
@@ -4901,6 +4950,7 @@ export interface BannerBlockSelect<T extends boolean = true> {
  * via the `definition` "FormBlock_select".
  */
 export interface FormBlockSelect<T extends boolean = true> {
+  visible?: T;
   form?: T;
   enableIntro?: T;
   introContent?: T;

@@ -94,7 +94,9 @@ export const OurStoryBlock: React.FC<Props> = ({
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                   </div>
-                  <p className="mt-4 text-body-lg leading-[1.8] text-ff-gray-15">{item.text}</p>
+                  <p className="mt-4 text-body-lg leading-[1.8] text-ff-gray-15 whitespace-pre-line">
+                    {item.text}
+                  </p>
                 </div>
               )
               const imageContent = item.image ? (

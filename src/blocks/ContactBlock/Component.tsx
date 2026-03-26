@@ -198,7 +198,7 @@ export const ContactBlockComponent: React.FC<
                     <h2 className="text-section-heading font-bold tracking-tight text-ff-charcoal">
                       {contact.heading}
                     </h2>
-                    <p className="mt-1.5 text-body leading-relaxed text-ff-gray-text-light">
+                    <p className="mt-1.5 text-body leading-relaxed text-ff-gray-text-light whitespace-pre-line">
                       {contact.description}
                     </p>
                   </div>
@@ -362,7 +362,7 @@ export const ContactBlockComponent: React.FC<
             <h2 className="text-section-heading font-bold text-ff-gold-accent">
               {ctaBanner.heading}
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl text-body-lg leading-relaxed text-white/90">
+            <p className="mx-auto mt-2 max-w-2xl text-body-lg leading-relaxed text-white/90 whitespace-pre-line">
               {ctaBanner.description}
             </p>
             <a

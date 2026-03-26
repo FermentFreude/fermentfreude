@@ -98,7 +98,7 @@ export const CollectionGridComponent: React.FC<CollectionGridBlock> = (props) =>
                       {item.title}
                     </h3>
                     {item.description && (
-                      <p className="text-white/80 text-sm leading-relaxed m-0 max-w-[80%]">
+                      <p className="text-white/80 text-sm leading-relaxed m-0 max-w-[80%] whitespace-pre-line">
                         {item.description}
                       </p>
                     )}

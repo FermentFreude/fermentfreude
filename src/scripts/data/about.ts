@@ -108,14 +108,14 @@ export const teamCardsEN = (args: AboutSeedArgs = {}) => ({
       name: 'Marcel Rauminger',
       role: 'Fermentation Specialist & Chef',
       description:
-        'With over 17 years as a passionate chef and certificate in vegan cooking enriched by months in a Thai monastery, Marcel discovered the keys to fermentation and has become a specialist in creative fermented cuisine. His desire to expertise through workshops, sharing new discoveries and passion for fine flavor.',
+        'With over 17 years as a passionate chef and a certificate in vegan cooking, enriched by months in a Thai monastery, Marcel discovered the keys to fermentation and became a specialist in creative fermented cuisine. Through workshops he shares new discoveries and a passion for fine flavor.',
     },
     {
       image: args.davidImage?.id ?? undefined,
       name: 'David Heider',
       role: 'Nutrition Specialist & Food Developer',
       description:
-        'With a background in food science and economics, David is passionate about making complex scientific concepts digestible for everyone. He develops open-sourced fermentation techniques based fermented foods that taste amazing and support wellbeing, creating the perfect bridge between science and art of FermentFreude.',
+        'With a background in food science and economics, David is passionate about making complex scientific concepts digestible for everyone. He develops open-source fermentation techniques based on fermented foods that taste amazing and support wellbeing, creating the perfect bridge between science and the art of FermentFreude.',
     },
   ],
 })

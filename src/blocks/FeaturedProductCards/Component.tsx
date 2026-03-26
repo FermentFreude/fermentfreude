@@ -195,7 +195,7 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
 
                     {/* Short description */}
                     {product.shortDescription && (
-                      <p className="text-caption font-medium text-white leading-relaxed mb-4 line-clamp-2">
+                      <p className="text-caption font-medium text-white leading-relaxed mb-4 line-clamp-2 whitespace-pre-line">
                         {product.shortDescription}
                       </p>
                     )}

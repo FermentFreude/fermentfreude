@@ -180,7 +180,10 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           <h2 data-anim="heading" className="text-white">
             {resolvedHeading}
           </h2>
-          <p data-anim="desc" className="text-body-lg max-w-lg leading-relaxed text-white/85">
+          <p
+            data-anim="desc"
+            className="text-body-lg max-w-lg leading-relaxed text-white/85 whitespace-pre-line"
+          >
             {resolvedDescription}
           </p>
           <Link

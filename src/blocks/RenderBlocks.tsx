@@ -98,13 +98,13 @@ export const RenderBlocks: React.FC<{
         {blockList.map((block, index) => {
           const { blockName, blockType } = block
           const blockId = blockName ? toKebabCase(blockName) : undefined
+          const blockData = block as unknown as Record<string, unknown>
+
+          if (blockData.visible === false) return null
 
           // When useGlobalData is explicitly true, render the GlobalWrapper
-          const blockData = block as unknown as Record<string, unknown>
           const useGlobal = blockData.useGlobalData === true
           if (useGlobal && blockType && blockType in globalWrappers) {
-            // Respect the block-level visible toggle
-            if ('visible' in block && blockData.visible === false) return null
             const GlobalWrapper = globalWrappers[blockType]
             return (
               <div className={gapClass} key={index}>

@@ -1,5 +1,7 @@
 import type { Block } from 'payload'
 
+import { blockVisible } from '@/fields/blockVisible'
+
 export const TeamCards: Block = {
   slug: 'teamCards',
   interfaceName: 'TeamCardsBlock',
@@ -8,6 +10,7 @@ export const TeamCards: Block = {
     plural: 'Team Cards Blocks',
   },
   fields: [
+    blockVisible,
     {
       name: 'label',
       type: 'text',
@@ -72,7 +75,8 @@ export const TeamCards: Block = {
           localized: true,
           label: 'Biography',
           admin: {
-            description: 'Short biography or description of the team member.',
+            description:
+              'Short biography. Line breaks (Enter) are shown on the site; you do not need to type \\n.',
           },
         },
       ],

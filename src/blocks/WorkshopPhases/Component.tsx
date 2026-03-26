@@ -132,7 +132,7 @@ export const WorkshopPhasesComponent: React.FC<
                   )}
 
                   {phase.description && (
-                    <p className="text-body-sm leading-relaxed text-ff-gray-text">
+                    <p className="text-body-sm leading-relaxed text-ff-gray-text whitespace-pre-line">
                       {phase.description}
                     </p>
                   )}
