@@ -1,5 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { autoTranslateGlobal } from '@/hooks/autoTranslateGlobal'
+import { revalidateGlobal } from './hooks/revalidateGlobal'
+
 export const SponsorsBarGlobal: GlobalConfig = {
   slug: 'sponsors-bar-global',
   label: 'Sponsors Bar',
@@ -7,6 +10,12 @@ export const SponsorsBarGlobal: GlobalConfig = {
     group: 'Website',
     description:
       'Global sponsors/partners bar shown across multiple pages. Edit once, appears everywhere.',
+  },
+  access: {
+    read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateGlobal, autoTranslateGlobal],
   },
   fields: [
     {

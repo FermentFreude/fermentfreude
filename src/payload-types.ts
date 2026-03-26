@@ -1374,7 +1374,7 @@ export interface Page {
       | null;
   };
   /**
-   * Content for the Workshops overview page (/workshops). Only applies when slug is "workshops".
+   * Content for the Workshops overview page (/workshops). Only applies when slug is "workshops". Each shared section defaults to its Website global — toggle "Customize" to override for this page only.
    */
   workshops?: {
     /**
@@ -1421,7 +1421,7 @@ export interface Page {
            */
           cardImage?: (string | null) | Media;
           /**
-           * e.g., "20. Mär" / "Mar 20"
+           * ⚠️ Auto-filled from Workshop Appointments. Only used as fallback when no appointments exist.
            */
           nextDate?: string | null;
           /**
@@ -1432,6 +1432,116 @@ export interface Page {
            * e.g., "Buchen" / "Book Now"
            */
           buttonLabel?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Off = uses content from Website → Voucher CTA global. On = uses the fields below.
+     */
+    workshopsVoucherCustom?: boolean | null;
+    /**
+     * e.g., "Gift a special tasty experience"
+     */
+    workshopsVoucherHeading?: string | null;
+    /**
+     * Short paragraph below heading.
+     */
+    workshopsVoucherDescription?: string | null;
+    /**
+     * e.g., "Voucher"
+     */
+    workshopsVoucherButtonLabel?: string | null;
+    /**
+     * e.g., "/workshops/voucher"
+     */
+    workshopsVoucherButtonLink?: string | null;
+    /**
+     * Up to 8 images for the bento gallery.
+     */
+    workshopsVoucherGalleryImages?:
+      | {
+          image: string | Media;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional background image.
+     */
+    workshopsVoucherBackgroundImage?: (string | null) | Media;
+    /**
+     * Off = uses content from Website → Product Slider global. On = uses the fields below.
+     */
+    workshopsProductSliderCustom?: boolean | null;
+    /**
+     * e.g., "Discover UNIQUE."
+     */
+    workshopsProductSliderHeading?: string | null;
+    /**
+     * Accent word displayed next to heading (e.g., "FLAVOURS").
+     */
+    workshopsProductSliderHeadingAccent?: string | null;
+    /**
+     * Short paragraph (1–2 sentences).
+     */
+    workshopsProductSliderDescription?: string | null;
+    /**
+     * e.g., "View All Products"
+     */
+    workshopsProductSliderButtonLabel?: string | null;
+    /**
+     * e.g., "/products"
+     */
+    workshopsProductSliderButtonLink?: string | null;
+    /**
+     * Select products to display in the slider.
+     */
+    workshopsProductSliderProducts?: (string | Product)[] | null;
+    /**
+     * Off = uses content from Website → Sponsors Bar global. On = uses the fields below.
+     */
+    workshopsSponsorsCustom?: boolean | null;
+    /**
+     * e.g., "This project is supported by:"
+     */
+    workshopsSponsorsHeading?: string | null;
+    /**
+     * Sponsor logos and links.
+     */
+    workshopsSponsorsList?:
+      | {
+          name: string;
+          logo: string | Media;
+          /**
+           * Optional link to sponsor website.
+           */
+          url?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Off = uses content from Website → Testimonials global. On = uses the fields below.
+     */
+    workshopsTestimonialsCustom?: boolean | null;
+    /**
+     * Small text above heading (e.g., "Testimonials").
+     */
+    workshopsTestimonialsEyebrow?: string | null;
+    /**
+     * e.g., "What Our Community Says"
+     */
+    workshopsTestimonialsHeading?: string | null;
+    /**
+     * Customer quotes and ratings.
+     */
+    workshopsTestimonialsList?:
+      | {
+          quote: string;
+          authorName: string;
+          /**
+           * e.g., "Workshop Participant"
+           */
+          authorRole?: string | null;
+          rating?: number | null;
           id?: string | null;
         }[]
       | null;
@@ -1664,6 +1774,11 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
+     * ❌ OFF = Use custom content just for this workshop page.
+     */
+    useGlobalVoucherData?: boolean | null;
     /**
      * e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"
      */
@@ -2711,8 +2826,8 @@ export interface SponsorsBarBlock {
    */
   visible?: boolean | null;
   /**
-   * ✅ ON = Uses shared content from Website → Sponsors Bar (edit once, applies everywhere).
-   * ❌ OFF = Use custom content just for this page (default).
+   * ✅ ON = Uses shared content from Website → Sponsors Bar (edit once, applies everywhere). This is the default.
+   * ❌ OFF = Use custom content just for this page.
    */
   useGlobalData?: boolean | null;
   /**
@@ -2952,11 +3067,6 @@ export interface VoucherCtaBlock {
    */
   visible?: boolean | null;
   /**
-   * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
-   * ❌ OFF = Use custom content just for this page (default).
-   */
-  useGlobalData?: boolean | null;
-  /**
    * Large heading text (e.g. "Gift a special tasty experience").
    */
   heading?: string | null;
@@ -3001,6 +3111,11 @@ export interface LaktoVoucherCtaBlock {
    * Toggle off to hide this section on the page without deleting it.
    */
   visible?: boolean | null;
+  /**
+   * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
+   * ❌ OFF = Use custom content just for this page.
+   */
+  useGlobalData?: boolean | null;
   /**
    * Small text above the title (e.g. "GEMEINSAM FERMENTIEREN").
    */
@@ -4372,6 +4487,47 @@ export interface PagesSelect<T extends boolean = true> {
               buttonLabel?: T;
               id?: T;
             };
+        workshopsVoucherCustom?: T;
+        workshopsVoucherHeading?: T;
+        workshopsVoucherDescription?: T;
+        workshopsVoucherButtonLabel?: T;
+        workshopsVoucherButtonLink?: T;
+        workshopsVoucherGalleryImages?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
+        workshopsVoucherBackgroundImage?: T;
+        workshopsProductSliderCustom?: T;
+        workshopsProductSliderHeading?: T;
+        workshopsProductSliderHeadingAccent?: T;
+        workshopsProductSliderDescription?: T;
+        workshopsProductSliderButtonLabel?: T;
+        workshopsProductSliderButtonLink?: T;
+        workshopsProductSliderProducts?: T;
+        workshopsSponsorsCustom?: T;
+        workshopsSponsorsHeading?: T;
+        workshopsSponsorsList?:
+          | T
+          | {
+              name?: T;
+              logo?: T;
+              url?: T;
+              id?: T;
+            };
+        workshopsTestimonialsCustom?: T;
+        workshopsTestimonialsEyebrow?: T;
+        workshopsTestimonialsHeading?: T;
+        workshopsTestimonialsList?:
+          | T
+          | {
+              quote?: T;
+              authorName?: T;
+              authorRole?: T;
+              rating?: T;
+              id?: T;
+            };
       };
   workshopDetail?:
     | T
@@ -4468,6 +4624,7 @@ export interface PagesSelect<T extends boolean = true> {
                   };
               id?: T;
             };
+        useGlobalVoucherData?: T;
         voucherEyebrow?: T;
         voucherTitle?: T;
         voucherDescription?: T;
@@ -4990,7 +5147,6 @@ export interface FormBlockSelect<T extends boolean = true> {
  */
 export interface VoucherCtaBlockSelect<T extends boolean = true> {
   visible?: T;
-  useGlobalData?: T;
   heading?: T;
   description?: T;
   buttonLabel?: T;
@@ -5011,6 +5167,7 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
  */
 export interface LaktoVoucherCtaBlockSelect<T extends boolean = true> {
   visible?: T;
+  useGlobalData?: T;
   eyebrow?: T;
   title?: T;
   description?: T;
@@ -5815,11 +5972,45 @@ export interface Header {
   createdAt?: string | null;
 }
 /**
+ * Footer content: newsletter CTA, navigation columns, social links, and section headings.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "footer".
  */
 export interface Footer {
   id: string;
+  /**
+   * Heading for the newsletter section (DE: "Werde Teil der FermentFreude Bewegung").
+   */
+  newsletterHeading?: string | null;
+  /**
+   * Short text above the newsletter subscribe form.
+   */
+  newsletterDescription?: string | null;
+  /**
+   * Badge text next to the newsletter (DE: "Kostenlose Workshop-Rezepte").
+   */
+  freeRecipesLabel?: string | null;
+  /**
+   * Heading above the quick links column (DE: "Schnellzugriff", EN: "Quick Links").
+   */
+  quickLinksHeading?: string | null;
+  /**
+   * Heading above the workshops column (DE: "Workshops").
+   */
+  workshopsHeading?: string | null;
+  /**
+   * Heading above the legal links column (DE: "Rechtliches", EN: "Legal Info").
+   */
+  legalHeading?: string | null;
+  /**
+   * Heading above social media links (DE: "Folge uns", EN: "Follow Us").
+   */
+  followUsHeading?: string | null;
+  /**
+   * Copyright line at the bottom. The year is added automatically (e.g. "FermentFreude — All Rights Reserved").
+   */
+  copyrightText?: string | null;
   /**
    * Links shown in the "Quick Links" column.
    */
@@ -5857,6 +6048,24 @@ export interface Footer {
       }[]
     | null;
   /**
+   * Links shown in the "Legal" column (e.g. Datenschutz, AGB, Impressum).
+   */
+  legalLinks?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?: {
+            relationTo: 'pages';
+            value: string | Page;
+          } | null;
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Address displayed in the footer (e.g. "Grabenstraße 15, 8010 Graz, Austria").
    */
   location?: string | null;
@@ -5864,14 +6073,6 @@ export interface Footer {
    * Contact phone number.
    */
   phone?: string | null;
-  /**
-   * Heading for the newsletter section (e.g. "Subscribe Newsletter").
-   */
-  newsletterHeading?: string | null;
-  /**
-   * Short text above the newsletter subscribe form.
-   */
-  newsletterDescription?: string | null;
   socialMedia?: {
     facebook?: string | null;
     instagram?: string | null;
@@ -5954,7 +6155,7 @@ export interface SponsorsBarGlobal {
   createdAt?: string | null;
 }
 /**
- * Global voucher call-to-action section with bento gallery. Edit once, appears on Home, Shop, and other pages.
+ * Global "Go with a friend" voucher CTA section. Edit once, appears on Shop, workshop detail pages, and any page with a Voucher CTA block set to "Use global content".
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "voucher-cta-global".
@@ -5962,37 +6163,46 @@ export interface SponsorsBarGlobal {
 export interface VoucherCtaGlobal {
   id: string;
   /**
-   * Large heading text (e.g. "Gift a special tasty experience").
+   * Small uppercase text above the title (e.g. "GEMEINSAM FERMENTIEREN").
    */
-  heading: string;
+  eyebrow?: string | null;
+  /**
+   * Main heading (e.g. "Go with a friend.").
+   */
+  title?: string | null;
   /**
    * Short paragraph below the heading (1–2 sentences).
    */
-  description: string;
+  description?: string | null;
   /**
-   * Text on the CTA button (e.g. "Voucher").
+   * Optional background image. White text with dark overlay when set, cream background with dark text when empty.
    */
-  buttonLabel: string;
+  backgroundImage?: (string | null) | Media;
   /**
-   * URL the button links to (e.g. "/workshops/voucher").
+   * e.g. "Gutschein kaufen" / "Buy Voucher"
    */
-  buttonLink: string;
+  primaryLabel?: string | null;
   /**
-   * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
+   * e.g. "/voucher"
    */
-  galleryImages?:
+  primaryHref?: string | null;
+  /**
+   * e.g. "Zum Shop" / "To Shop"
+   */
+  secondaryLabel?: string | null;
+  /**
+   * e.g. "/shop"
+   */
+  secondaryHref?: string | null;
+  /**
+   * Small tags at the bottom (e.g. "Sofort einlösbar", "Für alle Workshops", "Digital oder gedruckt").
+   */
+  pills?:
     | {
-        /**
-         * One of the 8 bento gallery images. Use square or portrait orientation.
-         */
-        image: string | Media;
+        text: string;
         id?: string | null;
       }[]
     | null;
-  /**
-   * Background image shown behind heading and button below the gallery. Uses a neutral fallback color if not set.
-   */
-  backgroundImage?: (string | null) | Media;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -6148,7 +6358,7 @@ export interface WorkshopCardsGlobal {
     buttonLabel?: string | null;
     buttonUrl?: string | null;
     /**
-     * e.g. "February 15, 2026"
+     * Dates are auto-populated from Workshop Appointments. Only used as fallback if no upcoming appointment exists.
      */
     nextDate?: string | null;
     id?: string | null;
@@ -6200,6 +6410,14 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
+  newsletterHeading?: T;
+  newsletterDescription?: T;
+  freeRecipesLabel?: T;
+  quickLinksHeading?: T;
+  workshopsHeading?: T;
+  legalHeading?: T;
+  followUsHeading?: T;
+  copyrightText?: T;
   navItems?:
     | T
     | {
@@ -6228,10 +6446,22 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  legalLinks?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
   location?: T;
   phone?: T;
-  newsletterHeading?: T;
-  newsletterDescription?: T;
   socialMedia?:
     | T
     | {
@@ -6286,17 +6516,20 @@ export interface SponsorsBarGlobalSelect<T extends boolean = true> {
  * via the `definition` "voucher-cta-global_select".
  */
 export interface VoucherCtaGlobalSelect<T extends boolean = true> {
-  heading?: T;
+  eyebrow?: T;
+  title?: T;
   description?: T;
-  buttonLabel?: T;
-  buttonLink?: T;
-  galleryImages?:
+  backgroundImage?: T;
+  primaryLabel?: T;
+  primaryHref?: T;
+  secondaryLabel?: T;
+  secondaryHref?: T;
+  pills?:
     | T
     | {
-        image?: T;
+        text?: T;
         id?: T;
       };
-  backgroundImage?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

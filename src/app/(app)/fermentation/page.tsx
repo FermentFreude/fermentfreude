@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
 
-import { EditPageLink } from '@/components/EditPageLink'
-import { FadeIn } from '@/components/FadeIn'
-import { Media } from '@/components/Media'
-import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import { DangerAccordion } from '@/app/(app)/fermentation/DangerAccordion'
 import { FaqAccordion } from '@/app/(app)/fermentation/FaqAccordion'
 import { PracticeAccordion } from '@/app/(app)/fermentation/PracticeAccordion'
 import { WhySection } from '@/app/(app)/fermentation/WhySection'
+import { EditPageLink } from '@/components/EditPageLink'
+import { FadeIn } from '@/components/FadeIn'
+import { Media } from '@/components/Media'
+import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import { getLocale } from '@/utilities/getLocale'
+import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import configPromise from '@payload-config'
 import Link from 'next/link'
 import { getPayload } from 'payload'
@@ -16,7 +17,13 @@ import { Fragment } from 'react'
 
 import type { Media as MediaType, Page as PageType } from '@/payload-types'
 
-type HeroBlock = { id?: string; title: string; description?: string; icon?: string | MediaType | null; url?: string }
+type HeroBlock = {
+  id?: string
+  title: string
+  description?: string
+  icon?: string | MediaType | null
+  url?: string
+}
 const HERO_BLOCK_COLORS = ['#FAF2E0', '#E6BE68', '#4B4B4B', '#EDD195'] as const
 const HERO_BLOCK_ICONS = [
   '/assets/images/fermentation/icon-probiotics.svg',
@@ -25,10 +32,26 @@ const HERO_BLOCK_ICONS = [
   '/assets/images/fermentation/icon-preservation.svg',
 ] as const
 const DEFAULT_HERO_BLOCKS: HeroBlock[] = [
-  { title: 'RAW MILK', description: 'Learn more about dairy fermentation.', url: '/workshops/basics' },
-  { title: 'KOMBUCHA', description: 'Discover fermented tea and its benefits.', url: '/workshops/kombucha' },
-  { title: 'FERMENTS', description: 'Explore lacto-fermentation and vegetables.', url: '/workshops/lakto-gemuese' },
-  { title: 'TEMPEH', description: 'Master plant-based protein fermentation.', url: '/workshops/tempeh' },
+  {
+    title: 'RAW MILK',
+    description: 'Learn more about dairy fermentation.',
+    url: '/workshops/basics',
+  },
+  {
+    title: 'KOMBUCHA',
+    description: 'Discover fermented tea and its benefits.',
+    url: '/workshops/kombucha',
+  },
+  {
+    title: 'FERMENTS',
+    description: 'Explore lacto-fermentation and vegetables.',
+    url: '/workshops/lakto-gemuese',
+  },
+  {
+    title: 'TEMPEH',
+    description: 'Master plant-based protein fermentation.',
+    url: '/workshops/tempeh',
+  },
 ]
 
 const DEFAULT_HERO_TITLE = 'Innovation meets Tradition'
@@ -115,8 +138,7 @@ const DEFAULT_CTA_SECONDARY = 'Browse online courses'
 const DEFAULT_CTA_SECONDARY_URL = '/workshops'
 const DEFAULT_WORKSHOP_TITLE = 'Learn UNIQUE.'
 const DEFAULT_WORKSHOP_TITLE_SUFFIX = 'FLAVOURS'
-const DEFAULT_WORKSHOP_SUBTITLE =
-  'Explore our different courses and discover what you can create.'
+const DEFAULT_WORKSHOP_SUBTITLE = 'Explore our different courses and discover what you can create.'
 const DEFAULT_WORKSHOP_VIEW_ALL = 'View All'
 const DEFAULT_WORKSHOP_VIEW_ALL_URL = '/workshops'
 const DEFAULT_WORKSHOP_NEXT_DATE_LABEL = 'Next Date:'
@@ -319,7 +341,13 @@ export default async function FermentationPage({ searchParams }: FermentationPag
   const whatLinks = f?.fermentationWhatLinks ?? []
   const whatListItems =
     whatLinks.length > 0
-      ? whatLinks.map((l) => (typeof l === 'object' && l !== null && 'label' in l ? String((l as { label?: string }).label) : '')).filter(Boolean)
+      ? whatLinks
+          .map((l) =>
+            typeof l === 'object' && l !== null && 'label' in l
+              ? String((l as { label?: string }).label)
+              : '',
+          )
+          .filter(Boolean)
       : DEFAULT_WHAT_LIST_ITEMS
   const whatImage = f?.fermentationWhatImage
 
@@ -366,12 +394,12 @@ export default async function FermentationPage({ searchParams }: FermentationPag
   }
   const ctaVideoUrlFromText = f?.fermentationCtaVideoUrl
   const ctaVideoUrl =
-    (typeof ctaVideoMedia === 'object' &&
+    typeof ctaVideoMedia === 'object' &&
     ctaVideoMedia !== null &&
     'url' in ctaVideoMedia &&
-    typeof (ctaVideoMedia as { url?: string; mimeType?: string }).url === 'string')
+    typeof (ctaVideoMedia as { url?: string; mimeType?: string }).url === 'string'
       ? (ctaVideoMedia as { url: string }).url
-      : ctaVideoUrlFromText ?? DEFAULT_CTA_VIDEO
+      : (ctaVideoUrlFromText ?? DEFAULT_CTA_VIDEO)
   const ctaVideoMimeType =
     typeof ctaVideoMedia === 'object' &&
     ctaVideoMedia !== null &&
@@ -393,13 +421,21 @@ export default async function FermentationPage({ searchParams }: FermentationPag
     f?.fermentationWorkshopNextDateLabel ??
     (forceDefaults ? undefined : g?.gastronomyWorkshopNextDateLabel) ??
     DEFAULT_WORKSHOP_NEXT_DATE_LABEL
-  const workshopCards = forceDefaults
+  const workshopCardsRaw = forceDefaults
     ? DEFAULT_WORKSHOP_CARDS
     : (f?.fermentationWorkshopCards?.length ?? 0) > 0
       ? (f?.fermentationWorkshopCards ?? [])
       : (g?.gastronomyWorkshopCards?.length ?? 0) > 0
         ? (g?.gastronomyWorkshopCards ?? [])
         : DEFAULT_WORKSHOP_CARDS
+  const nextDates = await getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de')
+  const workshopCards = workshopCardsRaw.map((c) => {
+    const card = c as { buttonUrl?: string; nextDate?: string }
+    return {
+      ...c,
+      nextDate: (card.buttonUrl && nextDates[card.buttonUrl]) || card.nextDate || undefined,
+    }
+  })
 
   const faqTitle = f?.fermentationFaqTitle ?? DEFAULT_FAQ_TITLE
   const faqSubtitle = f?.fermentationFaqSubtitle ?? DEFAULT_FAQ_SUBTITLE
@@ -439,9 +475,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
           <div className="mt-6 pt-8 md:mt-12 md:pt-30">
             {/* Image of two people — in front of the boxes */}
             <div className="relative z-20 flex justify-center md:justify-end">
-              <div
-                className="relative -top-6 aspect-4/3 w-full min-h-60 max-w-3xl overflow-hidden md:-top-20 md:max-h-105"
-              >
+              <div className="relative -top-6 aspect-4/3 w-full min-h-60 max-w-3xl overflow-hidden md:-top-20 md:max-h-105">
                 {isResolvedMedia(heroImage) ? (
                   <Media resource={heroImage} fill imgClassName="object-contain" priority />
                 ) : (
@@ -582,12 +616,16 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                     <blockquote className="mt-8 sm:mt-10 md:mt-12">
                       <p className="font-display text-lg font-bold leading-relaxed text-ff-black sm:text-xl md:text-2xl">
                         <span className="text-[#E6BE68]">&quot;</span>
-                        {whatMotto.split('. ').filter(Boolean).map((phrase, i, arr) => (
-                          <span key={i}>
-                            {phrase}{phrase.endsWith('.') ? '' : '.'}
-                            {i < arr.length - 1 && <br />}
-                          </span>
-                        ))}
+                        {whatMotto
+                          .split('. ')
+                          .filter(Boolean)
+                          .map((phrase, i, arr) => (
+                            <span key={i}>
+                              {phrase}
+                              {phrase.endsWith('.') ? '' : '.'}
+                              {i < arr.length - 1 && <br />}
+                            </span>
+                          ))}
                         <span className="text-[#E6BE68]">&quot;</span>
                       </p>
                     </blockquote>
@@ -674,10 +712,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                   <div className="absolute inset-0 bg-[#333333]/80" aria-hidden />
                 </>
               ) : (
-                <div
-                  className="pointer-events-none absolute inset-0 bg-[#555954]"
-                  aria-hidden
-                />
+                <div className="pointer-events-none absolute inset-0 bg-[#555954]" aria-hidden />
               )}
               <div className="relative z-10">
                 <h2 className="font-display text-section-heading font-bold text-white drop-shadow-md">
@@ -748,53 +783,51 @@ export default async function FermentationPage({ searchParams }: FermentationPag
       {/* Workshop cards — shared with gastronomy, uses gastronomy data */}
       <FadeIn delay={400}>
         <WorkshopCardsSection
-        title={
-          workshopTitleSuffix ? `${workshopTitle} ${workshopTitleSuffix}` : workshopTitle
-        }
-        subtitle={workshopSubtitle}
-        nextDateLabel={workshopNextDateLabel}
-        viewAllLabel={workshopViewAllLabel}
-        viewAllUrl={workshopViewAllUrl}
-        cards={workshopCards.map((c, idx) => {
-          const card = c as {
-            id?: string
-            title: string
-            description: string
-            image?: unknown
-            price?: string
-            priceSuffix?: string
-            buttonLabel?: string
-            buttonUrl?: string
-            nextDate?: string
-          }
-          const fallbacksByUrl: Record<string, string> = {
-            '/workshops/lakto-gemuese': '/assets/images/fermentation/workshop-lakto.png',
-            '/workshops/kombucha': '/assets/images/fermentation/workshop-kombucha.png',
-            '/workshops/tempeh': '/assets/images/fermentation/workshop-tempeh.png',
-          }
-          const fallbacksByIndex = [
-            '/assets/images/fermentation/workshop-lakto.png',
-            '/assets/images/fermentation/workshop-kombucha.png',
-            '/assets/images/fermentation/workshop-tempeh.png',
-          ]
-          const fallback =
-            (card.buttonUrl && fallbacksByUrl[card.buttonUrl]) ?? fallbacksByIndex[idx]
-          const image = fallback ? { url: fallback } : card.image
-          return {
-            id: card.id,
-            title: card.title,
-            description: card.description,
-            image,
-            price: card.price,
-            priceSuffix: card.priceSuffix,
-            buttonLabel: card.buttonLabel,
-            buttonUrl: card.buttonUrl,
-            nextDate: card.nextDate,
-          }
-        })}
-        cardBg="#ffffff"
-        layout="inline"
-      />
+          title={workshopTitleSuffix ? `${workshopTitle} ${workshopTitleSuffix}` : workshopTitle}
+          subtitle={workshopSubtitle}
+          nextDateLabel={workshopNextDateLabel}
+          viewAllLabel={workshopViewAllLabel}
+          viewAllUrl={workshopViewAllUrl}
+          cards={workshopCards.map((c, idx) => {
+            const card = c as {
+              id?: string
+              title: string
+              description: string
+              image?: unknown
+              price?: string
+              priceSuffix?: string
+              buttonLabel?: string
+              buttonUrl?: string
+              nextDate?: string
+            }
+            const fallbacksByUrl: Record<string, string> = {
+              '/workshops/lakto-gemuese': '/assets/images/fermentation/workshop-lakto.png',
+              '/workshops/kombucha': '/assets/images/fermentation/workshop-kombucha.png',
+              '/workshops/tempeh': '/assets/images/fermentation/workshop-tempeh.png',
+            }
+            const fallbacksByIndex = [
+              '/assets/images/fermentation/workshop-lakto.png',
+              '/assets/images/fermentation/workshop-kombucha.png',
+              '/assets/images/fermentation/workshop-tempeh.png',
+            ]
+            const fallback =
+              (card.buttonUrl && fallbacksByUrl[card.buttonUrl]) ?? fallbacksByIndex[idx]
+            const image = fallback ? { url: fallback } : card.image
+            return {
+              id: card.id,
+              title: card.title,
+              description: card.description,
+              image,
+              price: card.price,
+              priceSuffix: card.priceSuffix,
+              buttonLabel: card.buttonLabel,
+              buttonUrl: card.buttonUrl,
+              nextDate: card.nextDate,
+            }
+          })}
+          cardBg="#ffffff"
+          layout="inline"
+        />
       </FadeIn>
 
       {page?.id && (

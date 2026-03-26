@@ -79,6 +79,10 @@ const scripts: Record<string, { name: string; file: string }> = {
     name: 'Courses page (layout blocks: FeatureCards + OnlineCourseSlider)',
     file: 'seed-courses-page.ts',
   },
+  globals: {
+    name: 'All Globals (Footer, Testimonials, Sponsors, VoucherCTA, WorkshopSlider, ProductSlider, WorkshopCards)',
+    file: 'seed-globals.ts',
+  },
 }
 
 const allOrder = [
@@ -102,6 +106,7 @@ const allOrder = [
   'kombucha-phases',
   'online-courses',
   'courses-page',
+  'globals',
 ]
 
 function runSeed(key: string): boolean {
@@ -117,6 +122,7 @@ function runSeed(key: string): boolean {
 
   const args = process.argv.slice(2).filter((a) => a !== target)
   const seedEnv = { ...process.env }
+  seedEnv.PAYLOAD_SEED = 'true'
   if (key === 'gastronomy') {
     seedEnv.PAYLOAD_SKIP_GASTRONOMY_CONDITION = '1'
   }

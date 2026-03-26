@@ -531,24 +531,43 @@ export const workshopDetailFields: Field[] = [
     },
     fields: [
       {
+        name: 'useGlobalVoucherData',
+        type: 'checkbox',
+        label: 'Use global Voucher CTA content',
+        defaultValue: true,
+        admin: {
+          description:
+            '✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).\n❌ OFF = Use custom content just for this workshop page.',
+        },
+      },
+      {
         name: 'voucherEyebrow',
         type: 'text',
         localized: true,
         label: 'Eyebrow',
-        admin: { description: 'e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"' },
+        admin: {
+          description: 'e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"',
+          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+        },
       },
       {
         name: 'voucherTitle',
         type: 'text',
         localized: true,
         label: 'Title',
-        admin: { description: 'e.g. "Go with a friend."' },
+        admin: {
+          description: 'e.g. "Go with a friend."',
+          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+        },
       },
       {
         name: 'voucherDescription',
         type: 'textarea',
         localized: true,
         label: 'Description',
+        admin: {
+          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+        },
       },
       {
         name: 'voucherBackgroundImage',
@@ -558,10 +577,14 @@ export const workshopDetailFields: Field[] = [
         admin: {
           description:
             'Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.',
+          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
         },
       },
       {
         type: 'row',
+        admin: {
+          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+        },
         fields: [
           {
             name: 'voucherPrimaryLabel',
@@ -580,6 +603,9 @@ export const workshopDetailFields: Field[] = [
       },
       {
         type: 'row',
+        admin: {
+          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+        },
         fields: [
           {
             name: 'voucherSecondaryLabel',
@@ -603,6 +629,7 @@ export const workshopDetailFields: Field[] = [
         maxRows: 6,
         admin: {
           description: 'Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").',
+          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
         },
         fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
       },

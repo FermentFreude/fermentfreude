@@ -6,11 +6,33 @@ import Link from 'next/link'
 import { FooterBrand } from './FooterBrand'
 import { NewsletterForm } from './NewsletterForm'
 
-const DEFAULTS = {
-  newsletterHeading: 'Join the FermentFreude Movement',
+const DEFAULTS_DE = {
+  newsletterHeading: 'Werde Teil der FermentFreude Bewegung',
+  quickLinksHeading: 'Schnellzugriff',
+  workshopsHeading: 'Workshops',
+  legalHeading: 'Rechtliches',
+  followUsHeading: 'Folge uns',
+  freeRecipesLabel: 'Kostenlose Workshop-Rezepte',
 }
 
-const QUICK_LINKS = [
+const DEFAULTS_EN = {
+  newsletterHeading: 'Join the FermentFreude Movement',
+  quickLinksHeading: 'Quick Links',
+  workshopsHeading: 'Workshops',
+  legalHeading: 'Legal Info',
+  followUsHeading: 'Follow Us',
+  freeRecipesLabel: 'Free Workshop Recipes',
+}
+
+const QUICK_LINKS_DE = [
+  { label: 'Startseite', href: '/' },
+  { label: 'Shop', href: '/shop' },
+  { label: 'Für Gastronomen', href: '/gastronomy' },
+  { label: 'Über uns', href: '/about' },
+  { label: 'Kontakt', href: '/contact' },
+]
+
+const QUICK_LINKS_EN = [
   { label: 'Home', href: '/' },
   { label: 'Shop', href: '/shop' },
   { label: 'For Chefs', href: '/gastronomy' },
@@ -24,7 +46,14 @@ const LEGAL_LINKS = [
   { label: 'Impressum', href: '/impressum' },
 ]
 
-const WORKSHOP_LINKS = [
+const WORKSHOP_LINKS_DE = [
+  { label: 'Lakto-Gemüse', href: '/workshops/lakto-gemuese' },
+  { label: 'Tempeh', href: '/workshops/tempeh' },
+  { label: 'Kombucha', href: '/workshops/kombucha' },
+  { label: 'Gutschein', href: '/workshops/voucher' },
+]
+
+const WORKSHOP_LINKS_EN = [
   { label: 'Lacto Vegetables', href: '/workshops/lakto-gemuese' },
   { label: 'Tempeh', href: '/workshops/tempeh' },
   { label: 'Kombucha', href: '/workshops/kombucha' },
@@ -35,14 +64,24 @@ export async function Footer() {
   const locale = await getLocale()
   const footer = (await getCachedGlobal<Footer>('footer', 1, locale)()) as Footer
 
-  const newsletterHeading = footer.newsletterHeading || DEFAULTS.newsletterHeading
+  const isDe = locale === 'de'
+  const d = isDe ? DEFAULTS_DE : DEFAULTS_EN
+  const newsletterHeading = footer.newsletterHeading || d.newsletterHeading
+  const freeRecipesLabel = footer.freeRecipesLabel || d.freeRecipesLabel
+  const quickLinksHeading = footer.quickLinksHeading || d.quickLinksHeading
+  const workshopsHeading = footer.workshopsHeading || d.workshopsHeading
+  const legalHeading = footer.legalHeading || d.legalHeading
+  const followUsHeading = footer.followUsHeading || d.followUsHeading
+  const copyrightText = footer.copyrightText || 'FermentFreude — All Rights Reserved'
   const social = footer.socialMedia
 
-  // Use CMS links when available, otherwise fall back to hardcoded defaults
+  // Use CMS links when available, otherwise fall back to locale-aware defaults
   const quickLinks =
     footer.navItems && footer.navItems.length > 0
       ? footer.navItems.map((item) => ({ label: item.link.label, href: item.link.url || '/' }))
-      : QUICK_LINKS
+      : isDe
+        ? QUICK_LINKS_DE
+        : QUICK_LINKS_EN
 
   const workshopLinks =
     footer.workshopLinks && footer.workshopLinks.length > 0
@@ -50,7 +89,14 @@ export async function Footer() {
           label: item.link.label,
           href: item.link.url || '/',
         }))
-      : WORKSHOP_LINKS
+      : isDe
+        ? WORKSHOP_LINKS_DE
+        : WORKSHOP_LINKS_EN
+
+  const legalLinks =
+    footer.legalLinks && footer.legalLinks.length > 0
+      ? footer.legalLinks.map((item) => ({ label: item.link.label, href: item.link.url || '/' }))
+      : LEGAL_LINKS
 
   const currentYear = new Date().getFullYear()
 
@@ -73,7 +119,7 @@ export async function Footer() {
             <div className="mt-3 flex items-center gap-2">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#e6be68]" />
               <span className="font-sans text-[10px] uppercase tracking-widest font-semibold bg-[#e6be68] px-1.5 py-0.5">
-                Free Workshop Recipes
+                {freeRecipesLabel}
               </span>
             </div>
           </div>
@@ -83,7 +129,7 @@ export async function Footer() {
             {/* Quick Links */}
             <div>
               <h3 className="font-display font-bold text-sm uppercase tracking-widest mb-3 text-[#1d1d1d]">
-                Quick Links
+                {quickLinksHeading}
               </h3>
               <nav className="flex flex-col gap-1.5">
                 {quickLinks.map((item) => (
@@ -101,7 +147,7 @@ export async function Footer() {
             {/* Workshops */}
             <div>
               <h3 className="font-display font-bold text-sm uppercase tracking-widest mb-3 text-[#1d1d1d]">
-                Workshops
+                {workshopsHeading}
               </h3>
               <nav className="flex flex-col gap-1.5">
                 {workshopLinks.map((item) => (
@@ -119,10 +165,10 @@ export async function Footer() {
             {/* Legal */}
             <div>
               <h3 className="font-display font-bold text-sm uppercase tracking-widest mb-3 text-[#1d1d1d]">
-                Legal Info
+                {legalHeading}
               </h3>
               <nav className="flex flex-col gap-1.5">
-                {LEGAL_LINKS.map((item) => (
+                {legalLinks.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -137,7 +183,7 @@ export async function Footer() {
             {/* Follow Us */}
             <div>
               <h3 className="font-display font-bold text-sm uppercase tracking-widest mb-3 text-[#1d1d1d]">
-                Follow Us
+                {followUsHeading}
               </h3>
               <nav className="flex flex-col gap-1.5">
                 <a
@@ -217,7 +263,9 @@ export async function Footer() {
 
           {/* Right: copyright + Stripe */}
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-4 gap-y-1 text-[11px] text-[#1d1d1d]">
-            <span>&copy; {currentYear} FermentFreude — All Rights Reserved</span>
+            <span>
+              &copy; {currentYear} {copyrightText}
+            </span>
             <span className="font-medium">Powered by Stripe</span>
           </div>
         </div>

@@ -18,25 +18,44 @@ export const LaktoVoucherCtaBlock: Block = {
       },
     },
     {
+      name: 'useGlobalData',
+      type: 'checkbox',
+      label: 'Use global content',
+      defaultValue: true,
+      admin: {
+        description:
+          '✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).\n❌ OFF = Use custom content just for this page.',
+      },
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       localized: true,
       label: 'Eyebrow',
-      admin: { description: 'Small text above the title (e.g. "GEMEINSAM FERMENTIEREN").' },
+      admin: {
+        description: 'Small text above the title (e.g. "GEMEINSAM FERMENTIEREN").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
+      },
     },
     {
       name: 'title',
       type: 'text',
       localized: true,
       label: 'Title',
-      admin: { description: 'Main heading (e.g. "Go with a friend.").' },
+      admin: {
+        description: 'Main heading (e.g. "Go with a friend.").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
+      },
     },
     {
       name: 'description',
       type: 'textarea',
       localized: true,
       label: 'Description',
-      admin: { description: 'Short paragraph below the heading.' },
+      admin: {
+        description: 'Short paragraph below the heading.',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
+      },
     },
     {
       name: 'backgroundImage',
@@ -46,10 +65,14 @@ export const LaktoVoucherCtaBlock: Block = {
       admin: {
         description:
           'Optional background image. White text with dark overlay when set, cream background with dark text when empty.',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
     },
     {
       type: 'row',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
+      },
       fields: [
         {
           name: 'primaryLabel',
@@ -68,6 +91,9 @@ export const LaktoVoucherCtaBlock: Block = {
     },
     {
       type: 'row',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
+      },
       fields: [
         {
           name: 'secondaryLabel',
@@ -92,6 +118,7 @@ export const LaktoVoucherCtaBlock: Block = {
       admin: {
         description:
           'Small tags shown at the bottom (e.g. "Sofort einlösbar", "Für alle Workshops").',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
       },
       fields: [
         {

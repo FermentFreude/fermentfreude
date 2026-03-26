@@ -1,5 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { autoTranslateGlobal } from '@/hooks/autoTranslateGlobal'
+import { revalidateGlobal } from './hooks/revalidateGlobal'
+
 export const WorkshopCardsGlobal: GlobalConfig = {
   slug: 'workshop-cards-global',
   label: 'Workshop Cards',
@@ -7,6 +10,12 @@ export const WorkshopCardsGlobal: GlobalConfig = {
     group: 'Website',
     description:
       'Global workshop cards section used on Fermentation, Gastronomy, and other pages. Edit once, appears everywhere.',
+  },
+  access: {
+    read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateGlobal, autoTranslateGlobal],
   },
   fields: [
     {
@@ -123,9 +132,10 @@ export const WorkshopCardsGlobal: GlobalConfig = {
           name: 'nextDate',
           type: 'text',
           localized: true,
-          label: 'Next Appointment',
+          label: 'Next Appointment (fallback)',
           admin: {
-            description: 'e.g. "February 15, 2026"',
+            description:
+              'Dates are auto-populated from Workshop Appointments. Only used as fallback if no upcoming appointment exists.',
           },
         },
       ],

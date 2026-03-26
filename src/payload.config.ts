@@ -69,6 +69,23 @@ export default buildConfig({
     },
     livePreview: {
       collections: ['pages'],
+      globals: [
+        'footer',
+        'testimonials-global',
+        'sponsors-bar-global',
+        'voucher-cta-global',
+        'workshop-slider-global',
+        'product-slider-global',
+        'workshop-cards-global',
+      ],
+      url: ({ globalConfig }) => {
+        // Globals: preview on the page where they appear most prominently
+        if (globalConfig?.slug === 'workshop-cards-global') return '/workshops'
+        // Most globals show on the home page
+        if (globalConfig) return '/'
+        // Collections handled by their own livePreview config
+        return '/'
+      },
     },
   },
   localization: {

@@ -115,6 +115,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           image: resolveMedia(w.image as MediaType | string | number | null | undefined),
           image2: resolveMedia(w.image2 as MediaType | string | number | null | undefined),
           ctaLink: w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || '#',
+          detailsButtonLabel:
+            (w as { detailsButtonLabel?: string }).detailsButtonLabel || 'Entdecken',
           nextDate:
             upcomingDatesByHref?.[w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''] || undefined,
         }))
@@ -123,6 +125,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           audienceTag: w.audienceTag,
           image: null as MediaType | null,
           image2: null as MediaType | null,
+          detailsButtonLabel: 'Entdecken',
           nextDate: upcomingDatesByHref?.[w.ctaLink],
         }))
 
@@ -353,10 +356,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                       <Link
                         href={workshop.ctaLink}
                         className="flex items-center justify-end sm:justify-between group/cta"
-                        aria-label={`Workshop Seite: ${workshop.title}`}
+                        aria-label={`${workshop.detailsButtonLabel}: ${workshop.title}`}
                       >
                         <span className="hidden sm:block text-[11px] font-display font-bold tracking-widest uppercase text-black/40 group-hover/cta:text-black transition-colors duration-200">
-                          Entdecken
+                          {workshop.detailsButtonLabel}
                         </span>
                         <span className="size-9 rounded-full border border-black/25 flex items-center justify-center text-base leading-none text-black/35 transition-all duration-200 group-hover/cta:border-black group-hover/cta:text-black group-hover/cta:scale-110">
                           +

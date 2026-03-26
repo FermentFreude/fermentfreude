@@ -67,11 +67,27 @@ const blockComponents = {
 }
 
 // Maps block types to their GlobalWrapper component (used when useGlobalData is true)
-const globalWrappers: Record<string, React.FC<{ id?: string }>> = {
-  sponsorsBar: SponsorsBarGlobalWrapper as unknown as React.FC<{ id?: string }>,
-  voucherCta: VoucherCtaGlobalWrapper as unknown as React.FC<{ id?: string }>,
-  workshopSlider: WorkshopSliderGlobalWrapper as unknown as React.FC<{ id?: string }>,
-  productSlider: ProductSliderGlobalWrapper as unknown as React.FC<{ id?: string }>,
+// Each wrapper accepts optional fallback props from the block-level data
+const globalWrappers: Record<
+  string,
+  React.FC<{ id?: string; fallbackData?: Record<string, unknown> }>
+> = {
+  sponsorsBar: SponsorsBarGlobalWrapper as unknown as React.FC<{
+    id?: string
+    fallbackData?: Record<string, unknown>
+  }>,
+  laktoVoucherCta: VoucherCtaGlobalWrapper as unknown as React.FC<{
+    id?: string
+    fallbackData?: Record<string, unknown>
+  }>,
+  workshopSlider: WorkshopSliderGlobalWrapper as unknown as React.FC<{
+    id?: string
+    fallbackData?: Record<string, unknown>
+  }>,
+  productSlider: ProductSliderGlobalWrapper as unknown as React.FC<{
+    id?: string
+    fallbackData?: Record<string, unknown>
+  }>,
 }
 
 export const RenderBlocks: React.FC<{
@@ -100,6 +116,7 @@ export const RenderBlocks: React.FC<{
           const blockId = blockName ? toKebabCase(blockName) : undefined
 
           // When useGlobalData is explicitly true, render the GlobalWrapper
+          // Block-level data is passed as fallback (used when global is empty)
           const blockData = block as unknown as Record<string, unknown>
           const useGlobal = blockData.useGlobalData === true
           if (useGlobal && blockType && blockType in globalWrappers) {
@@ -108,7 +125,7 @@ export const RenderBlocks: React.FC<{
             const GlobalWrapper = globalWrappers[blockType]
             return (
               <div className={gapClass} key={index}>
-                <GlobalWrapper id={blockId} />
+                <GlobalWrapper id={blockId} fallbackData={blockData} />
               </div>
             )
           }

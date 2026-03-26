@@ -1,8 +1,15 @@
 import { RenderBlocks } from '@/blocks/RenderBlocks'
+import { SponsorsBarBlock } from '@/blocks/SponsorsBar/Component'
+import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
+import { VoucherCtaBlock } from '@/blocks/VoucherCta/Component'
+import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
+import { VoucherCtaGlobalWrapper } from '@/components/VoucherCtaGlobalWrapper'
+import { ProductSliderGlobalWrapper } from '@/components/ProductSliderGlobalWrapper'
+import { SponsorsBarGlobalWrapper } from '@/components/SponsorsBarGlobalWrapper'
 import { AllWorkshopsHero } from '@/components/workshops/AllWorkshopsHero'
 import { WorkshopCalendar } from '@/components/workshops/WorkshopCalendar'
-import type { Page } from '@/payload-types'
+import type { Media, Page, Product } from '@/payload-types'
 import { getAllWorkshopAppointments } from '@/utilities/getAllWorkshopAppointments'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
@@ -31,66 +38,49 @@ export default async function WorkshopsPage() {
   // Fetch all upcoming workshop appointments from database
   const upcomingAppointments = await getAllWorkshopAppointments()
 
-  // Get workshops page data (all sections editable from admin)
+  // Get workshops page data (hero + calendar sections editable from admin)
   const workshopsPageData = await queryPageBySlug({
     slug: 'workshops',
     locale,
     draft,
   })
 
-  // Get home page to extract blocks
-  const homeData = await queryPageBySlug({
-    slug: 'home',
-    locale,
-    draft,
-  })
-
-  // Get lakto page to extract voucher block (has background image)
-  const laktoData = await queryPageBySlug({
-    slug: 'lakto',
-    locale,
-    draft,
-  })
-
-  // Extract blocks from home and lakto
-  const homeBlocks = homeData?.layout ?? []
-  const laktoBlocks = laktoData?.layout ?? []
-
-  // Get voucher block FROM LAKTO (has the background image)
-  const voucherBlock = laktoBlocks.find((block) => block?.blockType === 'voucherCta')
-
-  const productSliderBlock = homeBlocks.find((block) => block?.blockType === 'productSlider')
-  const sponsorsBlock = homeBlocks.find((block) => block?.blockType === 'sponsorsBar')
-  const gastroBlock = homeBlocks.find((block) => block?.blockType === 'heroBanner')
-
   // Get CMS data for section titles/descriptions
   const workshopsData = workshopsPageData as Page | undefined
+  const ws = workshopsData?.workshops
+
+  // Any extra blocks added in the Content tab (e.g., Gastronomy Banner)
+  const extraBlocks = workshopsData?.layout ?? []
 
   // Enhance workshop cards with real next dates from database
-  const enhancedCards = workshopsData?.workshops?.workshopsCalendarCards?.map((card) => {
-    // Find the next (soonest) appointment for this workshop type
+  const enhancedCards = ws?.workshopsCalendarCards?.map((card) => {
     const nextAppointment = upcomingAppointments.find(
       (apt) => apt.workshopType === card.workshopType,
     )
-
     return {
       ...card,
-      nextDate: nextAppointment?.date || card.nextDate, // Use DB date or fallback to CMS
+      nextDate: nextAppointment?.date || card.nextDate,
     }
   })
 
+  // Check which sections use page-level overrides vs globals
+  const useCustomVoucher = ws?.workshopsVoucherCustom === true
+  const useCustomProductSlider = ws?.workshopsProductSliderCustom === true
+  const useCustomSponsors = ws?.workshopsSponsorsCustom === true
+  const useCustomTestimonials = ws?.workshopsTestimonialsCustom === true
+
   return (
     <article className="pb-24">
-      {/* 1. Hero Section - CMS editable */}
+      {/* 1. Hero Section */}
       <AllWorkshopsHero
         cms={
-          workshopsData?.workshops
+          ws
             ? {
-                eyebrow: workshopsData.workshops.workshopsHeroEyebrow,
-                title: workshopsData.workshops.workshopsHeroTitle,
-                description: workshopsData.workshops.workshopsHeroDescription,
-                attributes: workshopsData.workshops.workshopsHeroAttributes,
-                image: workshopsData.workshops.workshopsHeroImage,
+                eyebrow: ws.workshopsHeroEyebrow,
+                title: ws.workshopsHeroTitle,
+                description: ws.workshopsHeroDescription,
+                attributes: ws.workshopsHeroAttributes,
+                image: ws.workshopsHeroImage,
               }
             : undefined
         }
@@ -99,25 +89,72 @@ export default async function WorkshopsPage() {
       {/* 2. Workshop Calendar Section */}
       <WorkshopCalendar
         cards={enhancedCards}
-        title={workshopsData?.workshops?.workshopsCalendarTitle}
-        description={workshopsData?.workshops?.workshopsCalendarDescription}
+        title={ws?.workshopsCalendarTitle}
+        description={ws?.workshopsCalendarDescription}
         appointments={upcomingAppointments}
       />
 
-      {/* 3. Voucher Block (from Lakto — with background image) */}
-      {voucherBlock && <RenderBlocks blocks={[voucherBlock]} />}
+      {/* 3. Voucher CTA — page override or global */}
+      {useCustomVoucher ? (
+        <VoucherCtaBlock
+          blockType="voucherCta"
+          heading={ws?.workshopsVoucherHeading ?? undefined}
+          description={ws?.workshopsVoucherDescription ?? undefined}
+          buttonLabel={ws?.workshopsVoucherButtonLabel ?? undefined}
+          buttonLink={ws?.workshopsVoucherButtonLink ?? undefined}
+          galleryImages={(ws?.workshopsVoucherGalleryImages as Array<{ image: string | Media }>) ?? []}
+          backgroundImage={ws?.workshopsVoucherBackgroundImage ?? null}
+        />
+      ) : (
+        <VoucherCtaGlobalWrapper />
+      )}
 
-      {/* 4. Product Slider (from Home) */}
-      {productSliderBlock && <RenderBlocks blocks={[productSliderBlock]} />}
+      {/* 4. Product Slider — page override or global */}
+      {useCustomProductSlider ? (
+        <ProductSliderBlock
+          blockType="productSlider"
+          heading={ws?.workshopsProductSliderHeading ?? undefined}
+          headingAccent={ws?.workshopsProductSliderHeadingAccent ?? undefined}
+          description={ws?.workshopsProductSliderDescription ?? undefined}
+          buttonLabel={ws?.workshopsProductSliderButtonLabel ?? undefined}
+          buttonLink={ws?.workshopsProductSliderButtonLink ?? undefined}
+          products={(ws?.workshopsProductSliderProducts as Array<string | Product>) ?? []}
+        />
+      ) : (
+        <ProductSliderGlobalWrapper />
+      )}
 
-      {/* 5. Sponsors Bar (from Home) */}
-      {sponsorsBlock && <RenderBlocks blocks={[sponsorsBlock]} />}
+      {/* 5. Sponsors Bar — page override or global */}
+      {useCustomSponsors ? (
+        <SponsorsBarBlock
+          blockType="sponsorsBar"
+          heading={ws?.workshopsSponsorsHeading ?? undefined}
+          sponsors={(ws?.workshopsSponsorsList as Array<{ name: string; logo: string | Media; url?: string | null }>) ?? []}
+        />
+      ) : (
+        <SponsorsBarGlobalWrapper />
+      )}
 
-      {/* 6. Gastronomy Banner (from Home) */}
-      {gastroBlock && <RenderBlocks blocks={[gastroBlock]} />}
+      {/* 6. Extra blocks from Content tab */}
+      {extraBlocks.length > 0 && <RenderBlocks blocks={extraBlocks} />}
 
-      {/* 7. Testimonials (from Global) */}
-      <TestimonialsGlobalWrapper />
+      {/* 7. Testimonials — page override or global */}
+      {useCustomTestimonials ? (
+        <TestimonialsBlock
+          eyebrow={ws?.workshopsTestimonialsEyebrow ?? undefined}
+          heading={ws?.workshopsTestimonialsHeading ?? undefined}
+          testimonials={
+            (ws?.workshopsTestimonialsList as Array<{
+              quote: string
+              authorName: string
+              authorRole?: string
+              rating?: number
+            }>) ?? []
+          }
+        />
+      ) : (
+        <TestimonialsGlobalWrapper />
+      )}
     </article>
   )
 }

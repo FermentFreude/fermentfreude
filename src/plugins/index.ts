@@ -34,12 +34,18 @@ const r2Enabled =
   !!process.env.R2_ENDPOINT &&
   !process.env.R2_ENDPOINT.includes('<account-id>')
 
+// Seed scripts set PAYLOAD_SEED=true so that files are uploaded server-side
+// (clientUploads relies on a browser to do the actual S3 PUT, which doesn't
+// exist when running via the Local API in seed / CLI scripts).
+const useClientUploads = r2Enabled && process.env.PAYLOAD_SEED !== 'true'
+
 export const plugins: Plugin[] = [
   s3Storage({
     enabled: r2Enabled,
     // Upload directly from browser to R2 via presigned URLs.
     // Bypasses Vercel's 4.5 MB serverless function body limit.
-    clientUploads: true,
+    // Disabled during seed scripts (PAYLOAD_SEED=true) so the Local API uploads work.
+    clientUploads: useClientUploads,
     collections: {
       media: {
         disablePayloadAccessControl: true,

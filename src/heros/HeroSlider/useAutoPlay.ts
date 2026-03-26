@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-export const AUTO_PLAY_INTERVAL = 6000
+export const AUTO_PLAY_INTERVAL = 8000
 
 /**
  * useAutoPlay — Manages slide transitions, auto-play timer, and animation state

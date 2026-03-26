@@ -1,5 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { autoTranslateGlobal } from '@/hooks/autoTranslateGlobal'
+import { revalidateGlobal } from './hooks/revalidateGlobal'
+
 export const TestimonialsGlobal: GlobalConfig = {
   slug: 'testimonials-global',
   label: 'Testimonials',
@@ -7,6 +10,12 @@ export const TestimonialsGlobal: GlobalConfig = {
     group: 'Website',
     description:
       'Global testimonials section used across Home, Courses, and Workshops pages. Edit once, appears everywhere.',
+  },
+  access: {
+    read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateGlobal, autoTranslateGlobal],
   },
   fields: [
     {
