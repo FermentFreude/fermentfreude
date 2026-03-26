@@ -22,6 +22,20 @@ export function useT() {
   return (de: string, en: string) => (locale === 'de' ? de : en)
 }
 
+/* ── Layout-level provider (wraps ALL hub pages) ── */
+
+export function HubLocaleProvider({ children }: { children: ReactNode }) {
+  const [locale, setLocale] = useState<HubLocale>('en')
+
+  return (
+    <HubLocaleCtx.Provider value={{ locale, setLocale }}>
+      <div className="hub-shell">
+        {children}
+      </div>
+    </HubLocaleCtx.Provider>
+  )
+}
+
 /* ── Types ── */
 
 export interface TocSection {
@@ -43,7 +57,7 @@ interface HubShellProps {
 export function HubShell({ title, subtitle, accentColor, sections, children }: HubShellProps) {
   const [activeId, setActiveId] = useState(sections[0]?.id ?? '')
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [locale, setLocale] = useState<HubLocale>('en')
+  const { locale, setLocale } = useHubLocale()
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -64,7 +78,6 @@ export function HubShell({ title, subtitle, accentColor, sections, children }: H
   }, [sections])
 
   return (
-    <HubLocaleCtx.Provider value={{ locale, setLocale }}>
       <div className="flex min-h-screen flex-col" style={{ background: '#FAF8F5' }}>
         {/* Top bar */}
         <div
@@ -190,7 +203,6 @@ export function HubShell({ title, subtitle, accentColor, sections, children }: H
         {/* Hub footer */}
         <HubFooter />
       </div>
-    </HubLocaleCtx.Provider>
   )
 }
 
@@ -248,10 +260,9 @@ function HubFooter() {
 /* ── Hub landing page wrapper (with locale + footer but no sidebar) ── */
 
 export function HubLandingShell({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<HubLocale>('en')
+  const { locale, setLocale } = useHubLocale()
 
   return (
-    <HubLocaleCtx.Provider value={{ locale, setLocale }}>
       <div className="flex min-h-screen flex-col" style={{ background: '#FAF8F5' }}>
         {/* Lang toggle — top right */}
         <div className="fixed top-4 right-6 z-50">
@@ -260,7 +271,6 @@ export function HubLandingShell({ children }: { children: ReactNode }) {
         <div className="flex-1">{children}</div>
         <HubFooter />
       </div>
-    </HubLocaleCtx.Provider>
   )
 }
 

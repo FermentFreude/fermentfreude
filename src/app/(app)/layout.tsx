@@ -23,9 +23,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body suppressHydrationWarning={true}>
         <Providers>
-          <ElasticCursor />
-          <SplashScreen />
-          <AdminBar />
+          <div id="site-cursor" style={{ display: 'contents' }}><ElasticCursor /></div>
+          <div id="site-splash" style={{ display: 'contents' }}><SplashScreen /></div>
+          <div id="site-admin-bar" style={{ display: 'contents' }}><AdminBar /></div>
           <LivePreviewListener />
 
           {/* Skip-to-main-content link for keyboard / screen-reader users */}
@@ -36,9 +36,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             Skip to main content
           </a>
 
-          <Header />
+          <div id="site-header" style={{ display: 'contents' }}><Header /></div>
           <main id="main-content">{children}</main>
-          <Footer />
+          <div id="site-footer" style={{ display: 'contents' }}><Footer /></div>
         </Providers>
       </body>
     </html>
