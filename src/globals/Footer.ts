@@ -8,6 +8,8 @@ export const Footer: GlobalConfig = {
   slug: 'footer',
   admin: {
     group: 'Website',
+    description:
+      'Footer content: newsletter CTA, navigation columns, social links, and section headings.',
   },
   access: {
     read: () => true,
@@ -16,6 +18,84 @@ export const Footer: GlobalConfig = {
     afterChange: [revalidateGlobal, autoTranslateGlobal],
   },
   fields: [
+    // ── Newsletter Section ──
+    {
+      name: 'newsletterHeading',
+      type: 'text',
+      localized: true,
+      label: 'Newsletter Heading',
+      admin: {
+        description:
+          'Heading for the newsletter section (DE: "Werde Teil der FermentFreude Bewegung").',
+      },
+    },
+    {
+      name: 'newsletterDescription',
+      type: 'textarea',
+      localized: true,
+      label: 'Newsletter Description',
+      admin: {
+        description: 'Short text above the newsletter subscribe form.',
+      },
+    },
+    {
+      name: 'freeRecipesLabel',
+      type: 'text',
+      localized: true,
+      label: 'Free Recipes Label',
+      admin: {
+        description: 'Badge text next to the newsletter (DE: "Kostenlose Workshop-Rezepte").',
+      },
+    },
+    // ── Section Headings ──
+    {
+      name: 'quickLinksHeading',
+      type: 'text',
+      localized: true,
+      label: 'Quick Links Column Heading',
+      admin: {
+        description:
+          'Heading above the quick links column (DE: "Schnellzugriff", EN: "Quick Links").',
+      },
+    },
+    {
+      name: 'workshopsHeading',
+      type: 'text',
+      localized: true,
+      label: 'Workshops Column Heading',
+      admin: {
+        description: 'Heading above the workshops column (DE: "Workshops").',
+      },
+    },
+    {
+      name: 'legalHeading',
+      type: 'text',
+      localized: true,
+      label: 'Legal Column Heading',
+      admin: {
+        description: 'Heading above the legal links column (DE: "Rechtliches", EN: "Legal Info").',
+      },
+    },
+    {
+      name: 'followUsHeading',
+      type: 'text',
+      localized: true,
+      label: 'Follow Us Column Heading',
+      admin: {
+        description: 'Heading above social media links (DE: "Folge uns", EN: "Follow Us").',
+      },
+    },
+    {
+      name: 'copyrightText',
+      type: 'text',
+      localized: true,
+      label: 'Copyright Text',
+      admin: {
+        description:
+          'Copyright line at the bottom. The year is added automatically (e.g. "FermentFreude — All Rights Reserved").',
+      },
+    },
+    // ── Navigation Columns ──
     {
       name: 'navItems',
       type: 'array',
@@ -45,6 +125,21 @@ export const Footer: GlobalConfig = {
       maxRows: 6,
     },
     {
+      name: 'legalLinks',
+      type: 'array',
+      label: 'Legal Links',
+      admin: {
+        description: 'Links shown in the "Legal" column (e.g. Datenschutz, AGB, Impressum).',
+      },
+      fields: [
+        link({
+          appearances: false,
+        }),
+      ],
+      maxRows: 6,
+    },
+    // ── Contact & Social ──
+    {
       name: 'location',
       type: 'textarea',
       localized: true,
@@ -60,24 +155,6 @@ export const Footer: GlobalConfig = {
       label: 'Phone Number',
       admin: {
         description: 'Contact phone number.',
-      },
-    },
-    {
-      name: 'newsletterHeading',
-      type: 'text',
-      localized: true,
-      label: 'Newsletter Heading',
-      admin: {
-        description: 'Heading for the newsletter section (e.g. "Subscribe Newsletter").',
-      },
-    },
-    {
-      name: 'newsletterDescription',
-      type: 'textarea',
-      localized: true,
-      label: 'Newsletter Description',
-      admin: {
-        description: 'Short text above the newsletter subscribe form.',
       },
     },
     {

@@ -1,5 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { autoTranslateGlobal } from '@/hooks/autoTranslateGlobal'
+import { revalidateGlobal } from './hooks/revalidateGlobal'
+
 export const ProductSliderGlobal: GlobalConfig = {
   slug: 'product-slider-global',
   label: 'Product Slider',
@@ -7,6 +10,12 @@ export const ProductSliderGlobal: GlobalConfig = {
     group: 'Website',
     description:
       'Global product slider section. Edit once, appears on Home, Workshops, and other pages.',
+  },
+  access: {
+    read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateGlobal, autoTranslateGlobal],
   },
   fields: [
     {

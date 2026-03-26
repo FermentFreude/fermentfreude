@@ -94,7 +94,9 @@ export default async function Page({ params }: Args) {
     <article className={isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'}>
       <RenderHero {...hero} />
       <RenderBlocks blocks={enrichedLayout} slug={slug} />
-      {slug === 'home' && <TestimonialsGlobalWrapper id="testimonials" />}
+      {slug === 'home' && !enrichedLayout.some((b) => b?.blockType === 'testimonials') && (
+        <TestimonialsGlobalWrapper id="testimonials" />
+      )}
     </article>
   )
 }

@@ -207,7 +207,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         </div>
 
         {/* Text content — bottom panel area, centered */}
-        <div className="flex-1 flex flex-col items-center text-center justify-center px-6 pb-14">
+        <div className="flex-1 flex flex-col items-center text-center justify-center px-6 pb-10">
           <p
             className={cn(
               'uppercase tracking-[0.2em] text-white text-[9px] font-display font-bold mb-1',
@@ -327,7 +327,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
 
         {/* ── CENTER PANEL (full-height, fixed structure) ───── */}
         <div
-          className="w-[38%] md:w-[40%] lg:w-[42%] xl:w-[44%] h-full flex flex-col items-center transition-colors duration-700 relative z-40"
+          className="w-[34%] md:w-[36%] lg:w-[38%] xl:w-[40%] h-full flex flex-col items-center transition-colors duration-700 relative z-40"
           style={{ backgroundColor: slide.panelColor }}
         >
           {/* Content — vertically centered, padded for header + bottom nav */}

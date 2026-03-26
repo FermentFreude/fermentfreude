@@ -1,5 +1,6 @@
 import type { Order } from '@/payload-types'
 import { formatDate, formatPrice } from '@/utilities/form/formatters'
+import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { ArrowRight, GraduationCap } from 'lucide-react'
 import { headers as getHeaders } from 'next/headers.js'
@@ -39,25 +40,83 @@ async function getOrderStats(userId: string): Promise<OrderStats> {
   }
 }
 
-function StatusDot({ status }: { status: string }) {
+const i18n = {
+  de: {
+    myAccount: 'Mein Konto',
+    welcomeBack: (name: string) => `Willkommen zurück, ${name}.`,
+    subtitle: 'Bestellungen ansehen, Adressen verwalten und Kontodaten bearbeiten.',
+    viewOrders: 'Bestellungen',
+    editProfile: 'Profil bearbeiten',
+    totalOrders: 'Bestellungen',
+    processing: 'In Bearbeitung',
+    delivered: 'Geliefert',
+    memberSince: 'Mitglied seit',
+    myLearning: 'Meine Kurse',
+    viewAll: 'Alle ansehen',
+    courseEnrolled: (n: number) =>
+      n === 1 ? '1 Kurs eingeschrieben' : `${n} Kurse eingeschrieben`,
+    pickUp: 'Dort weitermachen, wo du aufgehört hast',
+    continue: 'Weiter',
+    recentOrders: 'Letzte Bestellungen',
+    order: 'Bestellung',
+    date: 'Datum',
+    status: 'Status',
+    total: 'Gesamt',
+    view: 'Ansehen',
+    noOrders: 'Noch keine Bestellungen.',
+    exploreWorkshops: 'Workshops entdecken',
+    statusDelivered: 'Geliefert',
+    statusProcessing: 'In Bearbeitung',
+    statusPending: 'Ausstehend',
+  },
+  en: {
+    myAccount: 'My Account',
+    welcomeBack: (name: string) => `Welcome back, ${name}.`,
+    subtitle: 'View your orders, manage your addresses, and update your account details.',
+    viewOrders: 'View Orders',
+    editProfile: 'Edit Profile',
+    totalOrders: 'Total Orders',
+    processing: 'Processing',
+    delivered: 'Delivered',
+    memberSince: 'Member Since',
+    myLearning: 'My Learning',
+    viewAll: 'View all',
+    courseEnrolled: (n: number) => (n === 1 ? '1 course enrolled' : `${n} courses enrolled`),
+    pickUp: 'Pick up where you left off',
+    continue: 'Continue',
+    recentOrders: 'Recent Orders',
+    order: 'Order',
+    date: 'Date',
+    status: 'Status',
+    total: 'Total',
+    view: 'View',
+    noOrders: 'No orders yet.',
+    exploreWorkshops: 'Explore Workshops',
+    statusDelivered: 'Delivered',
+    statusProcessing: 'Processing',
+    statusPending: 'Pending',
+  },
+} as const
+
+function StatusDot({ status, t }: { status: string; t: typeof i18n.en | typeof i18n.de }) {
   if (status === 'succeeded')
     return (
       <span className="inline-flex items-center gap-1.5 text-[12px] text-green-700 font-medium">
         <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
-        Delivered
+        {t.statusDelivered}
       </span>
     )
   if (status === 'processing')
     return (
       <span className="inline-flex items-center gap-1.5 text-[12px] text-blue-700 font-medium">
         <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
-        Processing
+        {t.statusProcessing}
       </span>
     )
   return (
     <span className="inline-flex items-center gap-1.5 text-[12px] text-[#626160] font-medium">
       <span className="w-1.5 h-1.5 rounded-full bg-[#c4bbb3] shrink-0" />
-      Pending
+      {t.statusPending}
     </span>
   )
 }
@@ -66,6 +125,8 @@ export default async function DashboardPage() {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+  const locale = await getLocale()
+  const t = locale === 'de' ? i18n.de : i18n.en
 
   if (!user) return null
 
@@ -85,25 +146,23 @@ export default async function DashboardPage() {
     <div className="max-w-4xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">My Account</p>
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">{t.myAccount}</p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
-          Welcome back, {firstName}.
+          {t.welcomeBack(firstName)}
         </h1>
-        <p className="mt-2 text-sm text-[#626160] max-w-sm">
-          View your orders, manage your addresses, and update your account details.
-        </p>
+        <p className="mt-2 text-sm text-[#626160] max-w-sm">{t.subtitle}</p>
         <div className="flex gap-3 mt-5">
           <Link
             href="/account/orders"
             className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors"
           >
-            View Orders
+            {t.viewOrders}
           </Link>
           <Link
             href="/account/profile"
             className="inline-flex items-center gap-2 px-4 py-2 border border-[#e8e4d9] text-[#4b4b4b] hover:bg-[#ece5de] text-sm font-medium rounded-lg transition-colors"
           >
-            Edit Profile
+            {t.editProfile}
           </Link>
         </div>
       </div>
@@ -111,11 +170,11 @@ export default async function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Orders', value: stats.total },
-          { label: 'Processing', value: stats.pending },
-          { label: 'Delivered', value: stats.completed },
+          { label: t.totalOrders, value: stats.total },
+          { label: t.processing, value: stats.pending },
+          { label: t.delivered, value: stats.completed },
           {
-            label: 'Member Since',
+            label: t.memberSince,
             value: user.createdAt ? formatDate(user.createdAt) : '—',
             small: true,
           },
@@ -141,12 +200,12 @@ export default async function DashboardPage() {
       {enrolledCount > 0 && (
         <div>
           <div className="flex items-baseline justify-between mb-4">
-            <h2 className="font-display font-bold text-[#1a1a1a] text-lg">My Learning</h2>
+            <h2 className="font-display font-bold text-[#1a1a1a] text-lg">{t.myLearning}</h2>
             <Link
               href="/account/learning"
               className="inline-flex items-center gap-1 text-[12px] font-medium text-[#626160] hover:text-[#1a1a1a] transition-colors"
             >
-              View all <ArrowRight className="w-3 h-3" />
+              {t.viewAll} <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           <div className="bg-white border border-[#1a1a1a]/20 rounded-xl p-5 flex items-center gap-4">
@@ -155,15 +214,15 @@ export default async function DashboardPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-[#1a1a1a]">
-                {enrolledCount === 1 ? '1 course enrolled' : `${enrolledCount} courses enrolled`}
+                {t.courseEnrolled(enrolledCount)}
               </p>
-              <p className="text-[12px] text-[#626160] mt-0.5">Pick up where you left off</p>
+              <p className="text-[12px] text-[#626160] mt-0.5">{t.pickUp}</p>
             </div>
             <Link
               href="/account/learning"
               className="px-4 py-2 bg-[#1a1a1a] hover:bg-[#333333] text-white text-[13px] font-medium rounded-lg transition-colors shrink-0"
             >
-              Continue
+              {t.continue}
             </Link>
           </div>
         </div>
@@ -173,23 +232,23 @@ export default async function DashboardPage() {
       {stats.recent.length > 0 ? (
         <div>
           <div className="flex items-baseline justify-between mb-4">
-            <h2 className="font-display font-bold text-[#1a1a1a] text-lg">Recent Orders</h2>
+            <h2 className="font-display font-bold text-[#1a1a1a] text-lg">{t.recentOrders}</h2>
             <Link
               href="/account/orders"
               className="inline-flex items-center gap-1 text-[12px] font-medium text-[#626160] hover:text-[#1a1a1a] transition-colors"
             >
-              View all <ArrowRight className="w-3 h-3" />
+              {t.viewAll} <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           <div className="bg-white border border-[#1a1a1a]/20 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#e8e4d9]">
-                  {['Order', 'Date', 'Status', 'Total', ''].map((h) => (
+                  {[t.order, t.date, t.status, t.total, ''].map((h) => (
                     <th
                       key={h}
                       className={`py-3.5 px-5 text-[9px] font-bold uppercase tracking-[0.14em] text-[#c4bbb3] ${
-                        h === 'Total' || h === '' ? 'text-right' : 'text-left'
+                        h === t.total || h === '' ? 'text-right' : 'text-left'
                       }`}
                     >
                       {h}
@@ -212,7 +271,7 @@ export default async function DashboardPage() {
                       {formatDate(order.createdAt)}
                     </td>
                     <td className="py-4 px-5">
-                      <StatusDot status={order.status || 'processing'} />
+                      <StatusDot status={order.status || 'processing'} t={t} />
                     </td>
                     <td className="py-4 px-5 text-right text-[13px] font-semibold text-[#1a1a1a]">
                       {formatPrice(order.amount || 0)}
@@ -222,7 +281,7 @@ export default async function DashboardPage() {
                         href={`/account/orders/${order.id}`}
                         className="inline-flex items-center gap-1 text-[12px] text-[#626160] hover:text-[#1a1a1a] font-medium transition-colors"
                       >
-                        View <ArrowRight className="w-3 h-3" />
+                        {t.view} <ArrowRight className="w-3 h-3" />
                       </Link>
                     </td>
                   </tr>
@@ -233,12 +292,12 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div className="bg-white border border-[#1a1a1a]/20 rounded-xl p-16 text-center">
-          <p className="text-[13px] text-[#626160] mb-6">No orders yet.</p>
+          <p className="text-[13px] text-[#626160] mb-6">{t.noOrders}</p>
           <Link
             href="/workshops"
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors"
           >
-            Explore Workshops
+            {t.exploreWorkshops}
           </Link>
         </div>
       )}

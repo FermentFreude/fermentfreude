@@ -16,9 +16,11 @@ import { WhyOnlineSection } from '@/components/workshops/WhyOnlineSection'
 import { WorkshopBookingSection } from '@/components/workshops/WorkshopBookingSection'
 import { WorkshopTermineSection } from '@/components/workshops/WorkshopTermineSection'
 import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
+import { getVoucherCtaGlobal } from '@/utilities/getVoucherCtaGlobal'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 import { findWorkshopBySlug, getAllWorkshops } from '@/utilities/getWorkshops'
 import { getWorkshopTermine } from '@/utilities/getWorkshopTermine'
+import { draftMode } from 'next/headers'
 import { getWorkshopAppointments } from './get-workshop-appointments'
 import { KombuchaBookingCard } from './KombuchaBookingCard'
 import { KombuchaFAQ } from './KombuchaFAQ'
@@ -248,6 +250,7 @@ function getSlugFromCtaLink(ctaLink: string | null | undefined): string | null {
 export default async function WorkshopDetailPage({ params }: Args) {
   const { slug } = await params
   const locale = await getLocale()
+  const { isEnabled: draft } = await draftMode()
   const WORKSHOP_PAGE_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
 
   // Fetch workshop appointments from database
@@ -270,154 +273,54 @@ export default async function WorkshopDetailPage({ params }: Args) {
         ? getPayload({ config: configPromise }).then((p) =>
             p.find({
               collection: 'pages',
-              where: { slug: { equals: slug }, _status: { equals: 'published' } },
+              draft,
+              where: {
+                slug: { equals: slug },
+                ...(draft ? {} : { _status: { equals: 'published' } }),
+              },
               limit: 1,
-              depth: 20,
+              depth: 10,
               locale,
+              overrideAccess: true,
             }),
           )
         : Promise.resolve({ docs: [] }),
     ],
   )
 
-  const workshopPage = workshopPageResult.docs[0] as
-    | {
-        workshopDetail?: {
-          heroEyebrow?: string | null
-          heroTitle?: string | null
-          heroDescription?: string | null
-          heroImage?: import('@/payload-types').Media | string | null
-          heroAttributes?: Array<{ text?: string | null; id?: string }> | null
-          bookingEyebrow?: string | null
-          bookingPrice?: number | null
-          bookingPriceSuffix?: string | null
-          bookingCurrency?: string | null
-          bookingImage?: unknown
-          bookingAttributes?: Array<{ text?: string | null; id?: string }> | null
-          bookingViewDatesLabel?: string | null
-          bookingHideDatesLabel?: string | null
-          bookingMoreDetailsLabel?: string | null
-          bookingBookLabel?: string | null
-          bookingSpotsLabel?: string | null
-          aboutHeading?: string | null
-          aboutText?: string | null
-          scheduleHeading?: string | null
-          schedule?: Array<{
-            duration?: string | null
-            title?: string | null
-            description?: string | null
-            id?: string
-          }> | null
-          includedHeading?: string | null
-          includedItems?: Array<{ text?: string | null; id?: string }> | null
-          whyHeading?: string | null
-          whyPoints?: Array<{ bold?: string | null; rest?: string | null; id?: string }> | null
-          experienceEyebrow?: string | null
-          experienceTitle?: string | null
-          experienceCards?: Array<{
-            image?: unknown
-            eyebrow?: string | null
-            title?: string | null
-            description?: string | null
-            id?: string
-          }> | null
-          datesHeading?: string | null
-          calendarEyebrow?: string | null
-          calendarTitle?: string | null
-          calendarDescription?: string | null
-          calendarMonths?: Array<{
-            month?: string | null
-            monthShort?: string | null
-            monthNumber?: string | null
-            season?: string | null
-            accent?: string | null
-            recipes?: Array<{ name?: string | null; id?: string }> | null
-            id?: string
-          }> | null
-          voucherEyebrow?: string | null
-          voucherTitle?: string | null
-          voucherDescription?: string | null
-          voucherBackgroundImage?: import('@/payload-types').Media | string | null
-          voucherPrimaryLabel?: string | null
-          voucherPrimaryHref?: string | null
-          voucherSecondaryLabel?: string | null
-          voucherSecondaryHref?: string | null
-          voucherPills?: Array<{ text?: string | null; id?: string }> | null
-          faqEyebrow?: string | null
-          faqTitle?: string | null
-          faqDescription?: string | null
-          faqItems?: Array<{ question?: string | null; answer?: string | null; id?: string }> | null
-          faqContactEmail?: string | null
-          modalConfirmHeading?: string | null
-          modalConfirmSubheading?: string | null
-          modalWorkshopLabel?: string | null
-          modalDateLabel?: string | null
-          modalTimeLabel?: string | null
-          modalTotalLabel?: string | null
-          modalCancelLabel?: string | null
-          modalConfirmLabel?: string | null
-          howToEyebrow?: string | null
-          howToTitle?: string | null
-          howToDescription?: string | null
-          /** Relationship to Posts collection — resolved at depth 2 */
-          howToArticles?: Array<
-            | string
-            | {
-                id: string
-                slug?: string | null
-                title?: string | null
-                summary?: string | null
-                readTime?: string | null
-                heroImage?: import('@/payload-types').Media | string | null
-              }
-          > | null
-        }
-        workshopGiftOnline?: {
-          giftTitle?: string
-          giftDescription?: string
-          giftBuyNowLabel?: string
-          giftBuyVoucherLabel?: string
-          giftBuyNowHref?: string
-          giftBuyVoucherHref?: string
-          onlineTitle?: string
-          onlineDescription?: string
-          onlineBullets?: Array<{ text?: string }>
-          onlineButtonLabel?: string
-          onlineButtonHref?: string
-        }
-        workshopLearnOnline?: {
-          learnOnlineHeading?: string
-          learnOnlineDescription?: string
-          learnOnlineButtonLabel?: string
-          learnOnlineButtonHref?: string
-        }
-        workshopFaq?: {
-          faqHeading?: string
-          faqSubtitle?: string
-          faqItems?: Array<{ question?: string; answer?: string }>
-        }
-        workshopWhyOnline?: {
-          whyOnlineHeading?: string
-          whyOnlineFeatures?: Array<{ icon?: string; title?: string; description?: string }>
-        }
-        workshopTeamBuilding?: {
-          teamEyebrow?: string
-          teamHeading?: string
-          teamDescription?: string
-          teamBullets?: Array<{ text?: string }>
-          teamCtaLabel?: string
-          teamCtaHref?: string
-          teamImage?: unknown
-        }
-      }
-    | undefined
+  const workshopPage = workshopPageResult.docs[0] as PageType | undefined
 
   const detail = workshopPage?.workshopDetail
-  const gift = workshopPage?.workshopGiftOnline
-  const learn = workshopPage?.workshopLearnOnline
-  const faq = workshopPage?.workshopFaq
-  const why = workshopPage?.workshopWhyOnline
-  const team = workshopPage?.workshopTeamBuilding
+
+  // Voucher CTA: use global data when toggled on, otherwise use inline detail fields
+  const useGlobalVoucher = detail?.useGlobalVoucherData !== false
+  const voucherGlobal = useGlobalVoucher ? await getVoucherCtaGlobal(locale) : null
+  const voucherCms =
+    voucherGlobal && (voucherGlobal.eyebrow || voucherGlobal.title)
+      ? {
+          eyebrow: voucherGlobal.eyebrow,
+          title: voucherGlobal.title,
+          description: voucherGlobal.description,
+          primaryLabel: voucherGlobal.primaryLabel,
+          primaryHref: voucherGlobal.primaryHref,
+          secondaryLabel: voucherGlobal.secondaryLabel,
+          secondaryHref: voucherGlobal.secondaryHref,
+          pills: voucherGlobal.pills as Array<{ text?: string | null }> | null,
+          backgroundImage: voucherGlobal.backgroundImage as MediaType | string | null,
+        }
+      : detail
+        ? {
+            eyebrow: detail.voucherEyebrow,
+            title: detail.voucherTitle,
+            description: detail.voucherDescription,
+            primaryLabel: detail.voucherPrimaryLabel,
+            primaryHref: detail.voucherPrimaryHref,
+            secondaryLabel: detail.voucherSecondaryLabel,
+            secondaryHref: detail.voucherSecondaryHref,
+            pills: detail.voucherPills,
+            backgroundImage: detail.voucherBackgroundImage,
+          }
+        : undefined
 
   const gastronomyPage = gastronomyResult.docs[0] as PageType | undefined
   const offerCards = (gastronomyPage?.gastronomy?.gastronomyOfferCards ?? []) as Array<{
@@ -432,11 +335,64 @@ export default async function WorkshopDetailPage({ params }: Args) {
   )
   const gastronomyTeamImage =
     corporateCard?.image && isResolvedMedia(corporateCard.image) ? corporateCard.image : null
-  const teamBuildingImage =
-    team?.teamImage && isResolvedMedia(team.teamImage) ? team.teamImage : gastronomyTeamImage
+  const teamBuildingImage = gastronomyTeamImage
 
   // Get hardcoded workshop data for lakto-gemuese (booking card + details)
   const workshopDetailData = slug === 'lakto-gemuese' ? getWorkshopBySlug(slug) : null
+
+  // Generic-layout section data — these sections only appear in the non-dedicated fallback.
+  // Dedicated layouts (lakto/tempeh/kombucha) read from `detail` directly.
+  const gift = undefined as
+    | {
+        giftTitle?: string | null
+        giftDescription?: string | null
+        giftBuyNowLabel?: string | null
+        giftBuyVoucherLabel?: string | null
+        giftBuyNowHref?: string | null
+        giftBuyVoucherHref?: string | null
+        onlineTitle?: string | null
+        onlineDescription?: string | null
+        onlineButtonLabel?: string | null
+        onlineButtonHref?: string | null
+        onlineBullets?: Array<{ text?: string | null }> | null
+      }
+    | undefined
+  const faq = undefined as
+    | {
+        faqHeading?: string | null
+        faqSubtitle?: string | null
+        faqItems?: Array<{ question?: string | null; answer?: string | null }> | null
+      }
+    | undefined
+  const team = undefined as
+    | {
+        teamEyebrow?: string | null
+        teamHeading?: string | null
+        teamDescription?: string | null
+        teamBullets?: Array<{ text?: string | null }> | null
+        teamCtaLabel?: string | null
+        teamCtaHref?: string | null
+        teamImage?: unknown
+      }
+    | undefined
+  const learn = undefined as
+    | {
+        learnOnlineHeading?: string | null
+        learnOnlineDescription?: string | null
+        learnOnlineButtonLabel?: string | null
+        learnOnlineButtonHref?: string | null
+      }
+    | undefined
+  const why = undefined as
+    | {
+        whyOnlineHeading?: string | null
+        whyOnlineFeatures?: Array<{
+          icon?: string | null
+          title?: string | null
+          description?: string | null
+        }> | null
+      }
+    | undefined
 
   if (!workshop) return notFound()
 
@@ -563,22 +519,61 @@ export default async function WorkshopDetailPage({ params }: Args) {
    *  LAKTO-GEMÜSE — Dedicated standalone layout
    *  Hero → Booking → Calendar → HowTos → Workshop Slider → Voucher → FAQ
    * ══════════════════════════════════════════════════════════════ */
-  if (slug === 'lakto-gemuese' && workshopDetailData) {
+  if (slug === 'lakto-gemuese') {
     return (
       <article>
         {/* 1. Dedicated Lakto Hero */}
-        <LaktoHero cms={{ image: detail?.heroImage }} />
+        <LaktoHero
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.heroEyebrow,
+                  title: detail.heroTitle,
+                  description: detail.heroDescription,
+                  attributes: detail.heroAttributes,
+                  image: detail.heroImage,
+                }
+              : undefined
+          }
+        />
 
         {/* 2. Modern Booking Card */}
         <LaktoBookingCard
-          workshop={workshopDetailData}
+          workshop={workshopDetailData!}
           cms={{
             ...(detail
               ? {
+                  bookingEyebrow: detail.bookingEyebrow,
+                  bookingPrice: detail.bookingPrice,
+                  bookingPriceSuffix: detail.bookingPriceSuffix,
+                  bookingCurrency: detail.bookingCurrency,
                   bookingImage: detail.bookingImage,
+                  bookingAttributes: detail.bookingAttributes,
+                  bookingViewDatesLabel: detail.bookingViewDatesLabel,
+                  bookingHideDatesLabel: detail.bookingHideDatesLabel,
+                  bookingMoreDetailsLabel: detail.bookingMoreDetailsLabel,
+                  bookingBookLabel: detail.bookingBookLabel,
+                  bookingSpotsLabel: detail.bookingSpotsLabel,
+                  aboutHeading: detail.aboutHeading,
+                  aboutText: detail.aboutText,
+                  scheduleHeading: detail.scheduleHeading,
+                  schedule: detail.schedule,
+                  includedHeading: detail.includedHeading,
+                  includedItems: detail.includedItems,
+                  whyHeading: detail.whyHeading,
+                  whyPoints: detail.whyPoints,
                   experienceEyebrow: detail.experienceEyebrow,
                   experienceTitle: detail.experienceTitle,
                   experienceCards: detail.experienceCards,
+                  datesHeading: detail.datesHeading,
+                  modalConfirmHeading: detail.modalConfirmHeading,
+                  modalConfirmSubheading: detail.modalConfirmSubheading,
+                  modalWorkshopLabel: detail.modalWorkshopLabel,
+                  modalDateLabel: detail.modalDateLabel,
+                  modalTimeLabel: detail.modalTimeLabel,
+                  modalTotalLabel: detail.modalTotalLabel,
+                  modalCancelLabel: detail.modalCancelLabel,
+                  modalConfirmLabel: detail.modalConfirmLabel,
                 }
               : {}),
             dates: workshopAppointments,
@@ -586,7 +581,18 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 3. Seasonal Fermentation Calendar */}
-        <LaktoCalendar />
+        <LaktoCalendar
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.calendarEyebrow,
+                  title: detail.calendarTitle,
+                  description: detail.calendarDescription,
+                  months: detail.calendarMonths,
+                }
+              : undefined
+          }
+        />
 
         {/* 4. Fermented Vegetables How-Tos */}
         <FermentedVegHowTos
@@ -594,6 +600,9 @@ export default async function WorkshopDetailPage({ params }: Args) {
           cms={
             detail
               ? {
+                  eyebrow: detail.howToEyebrow,
+                  title: detail.howToTitle,
+                  description: detail.howToDescription,
                   howToArticles: detail.howToArticles,
                 }
               : undefined
@@ -601,7 +610,18 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 5. Booking FAQ */}
-        <LaktoFAQ />
+        <LaktoFAQ
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.faqEyebrow,
+                  title: detail.faqTitle,
+                  description: detail.faqDescription,
+                  items: detail.faqItems,
+                }
+              : undefined
+          }
+        />
 
         {/* 6. Other Workshops (slider — excludes lakto-gemuese) */}
         <WorkshopTypesSlider
@@ -614,9 +634,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 7. Voucher CTA */}
-        <LaktoVoucherCta
-          cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined}
-        />
+        <LaktoVoucherCta cms={voucherCms} />
       </article>
     )
   }
@@ -629,7 +647,19 @@ export default async function WorkshopDetailPage({ params }: Args) {
     return (
       <article>
         {/* 1. Dedicated Tempeh Hero */}
-        <TempehHero cms={{ image: detail?.heroImage }} />
+        <TempehHero
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.heroEyebrow,
+                  title: detail.heroTitle,
+                  description: detail.heroDescription,
+                  attributes: detail.heroAttributes,
+                  image: detail.heroImage,
+                }
+              : undefined
+          }
+        />
 
         {/* 2. Modern Booking Card */}
         <TempehBookingCard
@@ -637,10 +667,37 @@ export default async function WorkshopDetailPage({ params }: Args) {
           cms={{
             ...(detail
               ? {
+                  bookingEyebrow: detail.bookingEyebrow,
+                  bookingPrice: detail.bookingPrice,
+                  bookingPriceSuffix: detail.bookingPriceSuffix,
+                  bookingCurrency: detail.bookingCurrency,
                   bookingImage: detail.bookingImage,
+                  bookingAttributes: detail.bookingAttributes,
+                  bookingViewDatesLabel: detail.bookingViewDatesLabel,
+                  bookingHideDatesLabel: detail.bookingHideDatesLabel,
+                  bookingMoreDetailsLabel: detail.bookingMoreDetailsLabel,
+                  bookingBookLabel: detail.bookingBookLabel,
+                  bookingSpotsLabel: detail.bookingSpotsLabel,
+                  aboutHeading: detail.aboutHeading,
+                  aboutText: detail.aboutText,
+                  scheduleHeading: detail.scheduleHeading,
+                  schedule: detail.schedule,
+                  includedHeading: detail.includedHeading,
+                  includedItems: detail.includedItems,
+                  whyHeading: detail.whyHeading,
+                  whyPoints: detail.whyPoints,
                   experienceEyebrow: detail.experienceEyebrow,
                   experienceTitle: detail.experienceTitle,
                   experienceCards: detail.experienceCards,
+                  datesHeading: detail.datesHeading,
+                  modalConfirmHeading: detail.modalConfirmHeading,
+                  modalConfirmSubheading: detail.modalConfirmSubheading,
+                  modalWorkshopLabel: detail.modalWorkshopLabel,
+                  modalDateLabel: detail.modalDateLabel,
+                  modalTimeLabel: detail.modalTimeLabel,
+                  modalTotalLabel: detail.modalTotalLabel,
+                  modalCancelLabel: detail.modalCancelLabel,
+                  modalConfirmLabel: detail.modalConfirmLabel,
                 }
               : {}),
             dates: workshopAppointments,
@@ -658,9 +715,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 4. Voucher CTA */}
-        <TempehVoucherCta
-          cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined}
-        />
+        <TempehVoucherCta cms={voucherCms} />
 
         {/* 5. How-To Articles */}
         <FermentedVegHowTos
@@ -668,6 +723,9 @@ export default async function WorkshopDetailPage({ params }: Args) {
           cms={
             detail
               ? {
+                  eyebrow: detail.howToEyebrow,
+                  title: detail.howToTitle,
+                  description: detail.howToDescription,
                   howToArticles: detail.howToArticles,
                 }
               : undefined
@@ -675,7 +733,18 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 6. FAQ */}
-        <TempehFAQ />
+        <TempehFAQ
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.faqEyebrow,
+                  title: detail.faqTitle,
+                  description: detail.faqDescription,
+                  items: detail.faqItems,
+                }
+              : undefined
+          }
+        />
       </article>
     )
   }
@@ -688,7 +757,19 @@ export default async function WorkshopDetailPage({ params }: Args) {
     return (
       <article>
         {/* 1. Dedicated Kombucha Hero */}
-        <KombuchaHero cms={{ image: detail?.heroImage }} />
+        <KombuchaHero
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.heroEyebrow,
+                  title: detail.heroTitle,
+                  description: detail.heroDescription,
+                  attributes: detail.heroAttributes,
+                  image: detail.heroImage,
+                }
+              : undefined
+          }
+        />
 
         {/* 2. Modern Booking Card */}
         <KombuchaBookingCard
@@ -696,10 +777,37 @@ export default async function WorkshopDetailPage({ params }: Args) {
           cms={{
             ...(detail
               ? {
+                  bookingEyebrow: detail.bookingEyebrow,
+                  bookingPrice: detail.bookingPrice,
+                  bookingPriceSuffix: detail.bookingPriceSuffix,
+                  bookingCurrency: detail.bookingCurrency,
                   bookingImage: detail.bookingImage,
+                  bookingAttributes: detail.bookingAttributes,
+                  bookingViewDatesLabel: detail.bookingViewDatesLabel,
+                  bookingHideDatesLabel: detail.bookingHideDatesLabel,
+                  bookingMoreDetailsLabel: detail.bookingMoreDetailsLabel,
+                  bookingBookLabel: detail.bookingBookLabel,
+                  bookingSpotsLabel: detail.bookingSpotsLabel,
+                  aboutHeading: detail.aboutHeading,
+                  aboutText: detail.aboutText,
+                  scheduleHeading: detail.scheduleHeading,
+                  schedule: detail.schedule,
+                  includedHeading: detail.includedHeading,
+                  includedItems: detail.includedItems,
+                  whyHeading: detail.whyHeading,
+                  whyPoints: detail.whyPoints,
                   experienceEyebrow: detail.experienceEyebrow,
                   experienceTitle: detail.experienceTitle,
                   experienceCards: detail.experienceCards,
+                  datesHeading: detail.datesHeading,
+                  modalConfirmHeading: detail.modalConfirmHeading,
+                  modalConfirmSubheading: detail.modalConfirmSubheading,
+                  modalWorkshopLabel: detail.modalWorkshopLabel,
+                  modalDateLabel: detail.modalDateLabel,
+                  modalTimeLabel: detail.modalTimeLabel,
+                  modalTotalLabel: detail.modalTotalLabel,
+                  modalCancelLabel: detail.modalCancelLabel,
+                  modalConfirmLabel: detail.modalConfirmLabel,
                 }
               : {}),
             dates: workshopAppointments,
@@ -717,9 +825,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 4. Voucher CTA */}
-        <KombuchaVoucherCta
-          cms={detail ? { backgroundImage: detail.voucherBackgroundImage } : undefined}
-        />
+        <KombuchaVoucherCta cms={voucherCms} />
 
         {/* 5. How-To Articles */}
         <FermentedVegHowTos
@@ -727,6 +833,9 @@ export default async function WorkshopDetailPage({ params }: Args) {
           cms={
             detail
               ? {
+                  eyebrow: detail.howToEyebrow,
+                  title: detail.howToTitle,
+                  description: detail.howToDescription,
                   howToArticles: detail.howToArticles,
                 }
               : undefined
@@ -734,7 +843,19 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         {/* 6. FAQ */}
-        <KombuchaFAQ />
+        <KombuchaFAQ
+          cms={
+            detail
+              ? {
+                  faqEyebrow: detail.faqEyebrow,
+                  faqTitle: detail.faqTitle,
+                  faqDescription: detail.faqDescription,
+                  faqItems: detail.faqItems,
+                  faqContactEmail: detail.faqContactEmail,
+                }
+              : undefined
+          }
+        />
       </article>
     )
   }

@@ -7,6 +7,7 @@ import { GastronomyOfferCards } from '@/components/gastronomy/GastronomyOfferCar
 import { GastronomyProductSlider } from '@/components/gastronomy/GastronomyProductSlider'
 import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import { getLocale } from '@/utilities/getLocale'
+import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import configPromise from '@payload-config'
 import Link from 'next/link'
 import { getPayload } from 'payload'
@@ -51,8 +52,8 @@ export default async function GastronomyPage() {
   const quoteText = g?.gastronomyQuoteText ?? DEFAULT_QUOTE
   const quoteSubtext = g?.gastronomyQuoteSubtext ?? DEFAULT_QUOTE_SUBTEXT
   const quoteButtonLabel =
-    (g as unknown as { gastronomyQuoteButtonLabel?: string } | undefined)?.gastronomyQuoteButtonLabel ??
-    (locale === 'de' ? 'Anfrage senden' : 'Send Inquiry')
+    (g as unknown as { gastronomyQuoteButtonLabel?: string } | undefined)
+      ?.gastronomyQuoteButtonLabel ?? (locale === 'de' ? 'Anfrage senden' : 'Send Inquiry')
   const quoteButtonUrl =
     (g as unknown as { gastronomyQuoteButtonUrl?: string } | undefined)?.gastronomyQuoteButtonUrl ??
     '#contact'
@@ -61,7 +62,11 @@ export default async function GastronomyPage() {
   const workshopClarification = g?.gastronomyWorkshopClarification ?? null
   const workshopNextDateLabel =
     g?.gastronomyWorkshopNextDateLabel ?? DEFAULT_WORKSHOP_NEXT_DATE_LABEL
-  const workshopCards = g?.gastronomyWorkshopCards ?? []
+  const nextDates = await getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de')
+  const workshopCards = (g?.gastronomyWorkshopCards ?? []).map((c) => ({
+    ...c,
+    nextDate: (c.buttonUrl && nextDates[c.buttonUrl]) || c.nextDate || undefined,
+  }))
   const offerDetails = g?.gastronomyOfferDetails ?? []
   const trustedByLabel = locale === 'de' ? 'Vertraut von' : TRUSTED_BY_DEFAULT
   const trustBadges =
@@ -69,21 +74,38 @@ export default async function GastronomyPage() {
       ? ['Restaurants', 'Hotels', 'Catering', 'Feinkost', 'Food Concept Stores']
       : ['Restaurants', 'Hotels', 'Catering', 'Delis', 'Food Concept Stores']
   const outcomeLabel = locale === 'de' ? 'Ergebnisse' : 'Outcomes'
-  const outcomeTitle = locale === 'de' ? 'Vorher / Nachher in der Küche' : 'Before / After In The Kitchen'
+  const outcomeTitle =
+    locale === 'de' ? 'Vorher / Nachher in der Küche' : 'Before / After In The Kitchen'
   const outcomes =
     locale === 'de'
       ? [
-          { before: 'Kein klares Ferment-Angebot', after: 'Signature-Komponenten mit Wiedererkennungswert' },
+          {
+            before: 'Kein klares Ferment-Angebot',
+            after: 'Signature-Komponenten mit Wiedererkennungswert',
+          },
           { before: 'Unsichere Team-Abläufe', after: 'Klare Standards für Produktion und Service' },
-          { before: 'Standard-Menüs ohne Differenzierung', after: 'Markante Aromen mit eigener Handschrift' },
+          {
+            before: 'Standard-Menüs ohne Differenzierung',
+            after: 'Markante Aromen mit eigener Handschrift',
+          },
         ]
       : [
-          { before: 'No clear fermentation offer', after: 'Signature components with strong identity' },
-          { before: 'Inconsistent team workflows', after: 'Clear standards for production and service' },
-          { before: 'Standard menus with little differentiation', after: 'Distinctive flavors with a unique point of view' },
+          {
+            before: 'No clear fermentation offer',
+            after: 'Signature components with strong identity',
+          },
+          {
+            before: 'Inconsistent team workflows',
+            after: 'Clear standards for production and service',
+          },
+          {
+            before: 'Standard menus with little differentiation',
+            after: 'Distinctive flavors with a unique point of view',
+          },
         ]
   const processLabel = locale === 'de' ? 'Ablauf' : 'Process'
-  const processTitle = locale === 'de' ? 'So arbeiten wir mit Ihrem Team' : 'How We Work With Your Team'
+  const processTitle =
+    locale === 'de' ? 'So arbeiten wir mit Ihrem Team' : 'How We Work With Your Team'
   const processSteps =
     locale === 'de'
       ? [
@@ -330,7 +352,9 @@ export default async function GastronomyPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#4a6b58]">
                   {locale === 'de' ? 'Nachher' : 'After'}
                 </p>
-                <p className="mt-2 text-sm leading-relaxed font-semibold text-ff-black">{item.after}</p>
+                <p className="mt-2 text-sm leading-relaxed font-semibold text-ff-black">
+                  {item.after}
+                </p>
               </div>
             ))}
           </div>

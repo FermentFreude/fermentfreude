@@ -1,5 +1,6 @@
 import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import { getLocale } from '@/utilities/getLocale'
+import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import { getWorkshopCardsGlobal } from '@/utilities/getWorkshopCardsGlobal'
 
 interface WorkshopCardsGlobalWrapperProps {
@@ -9,6 +10,7 @@ interface WorkshopCardsGlobalWrapperProps {
 
 /**
  * Server component that fetches global workshop cards data and renders it.
+ * Automatically overlays next appointment dates from the workshop-appointments collection.
  * Edit once in /admin → Website → Workshop Cards, appears everywhere.
  */
 export async function WorkshopCardsGlobalWrapper({
@@ -16,7 +18,16 @@ export async function WorkshopCardsGlobalWrapper({
   layout = 'inline',
 }: WorkshopCardsGlobalWrapperProps) {
   const locale = await getLocale()
-  const data = await getWorkshopCardsGlobal(locale)
+  const [data, nextDates] = await Promise.all([
+    getWorkshopCardsGlobal(locale),
+    getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de'),
+  ])
+
+  // Overlay dynamic dates from workshop-appointments onto each card
+  const cards = (data.cards ?? []).map((card) => ({
+    ...card,
+    nextDate: (card.buttonUrl && nextDates[card.buttonUrl]) || card.nextDate || null,
+  }))
 
   return (
     <WorkshopCardsSection
@@ -26,7 +37,7 @@ export async function WorkshopCardsGlobalWrapper({
       nextDateLabel={data.nextDateLabel ?? null}
       viewAllLabel={data.viewAllLabel ?? null}
       viewAllUrl={data.viewAllUrl ?? null}
-      cards={data.cards ?? []}
+      cards={cards}
       layout={layout}
     />
   )

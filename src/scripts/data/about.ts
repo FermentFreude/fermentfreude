@@ -136,6 +136,7 @@ const SPONSOR_NAMES_EN = [
 
 export const sponsorsBarDE = (args: AboutSeedArgs = {}) => ({
   blockType: 'sponsorsBar' as const,
+  useGlobalData: true,
   heading: 'Dieses Projekt wird unterstützt von:',
   sponsors: args.sponsorLogos
     ? args.sponsorLogos.map((logo, idx) => ({
@@ -147,6 +148,7 @@ export const sponsorsBarDE = (args: AboutSeedArgs = {}) => ({
 
 export const sponsorsBarEN = (args: AboutSeedArgs = {}) => ({
   blockType: 'sponsorsBar' as const,
+  useGlobalData: true,
   heading: 'This project is supported by:',
   sponsors: args.sponsorLogos
     ? args.sponsorLogos.map((logo, idx) => ({

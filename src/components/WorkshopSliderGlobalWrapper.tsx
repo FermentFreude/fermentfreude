@@ -4,24 +4,44 @@ import { getWorkshopSliderGlobal } from '@/utilities/getWorkshopSliderGlobal'
 
 interface WorkshopSliderGlobalWrapperProps {
   id?: string
+  fallbackData?: Record<string, unknown>
 }
 
 /**
  * Server component that fetches global workshop slider data and renders it.
- * Edit once in /admin → Website → Workshop Slider, appears everywhere.
+ * Falls back to block-level data when the global is empty.
  */
-export async function WorkshopSliderGlobalWrapper({ id }: WorkshopSliderGlobalWrapperProps) {
+export async function WorkshopSliderGlobalWrapper({
+  id,
+  fallbackData,
+}: WorkshopSliderGlobalWrapperProps) {
   const locale = await getLocale()
   const data = await getWorkshopSliderGlobal(locale)
+
+  // Use global data if it has workshops, otherwise fall back to block-level data
+  const hasGlobalContent = (data.workshops?.length ?? 0) > 0
+  const fb = fallbackData ?? {}
 
   return (
     <WorkshopSliderBlock
       id={id}
       blockType="workshopSlider"
-      eyebrow={data.eyebrow ?? undefined}
-      workshops={data.workshops ?? []}
-      allWorkshopsButtonLabel={data.allWorkshopsButtonLabel ?? undefined}
-      allWorkshopsLink={data.allWorkshopsLink ?? undefined}
+      eyebrow={
+        hasGlobalContent ? (data.eyebrow ?? undefined) : ((fb.eyebrow as string) ?? undefined)
+      }
+      workshops={
+        hasGlobalContent ? (data.workshops ?? []) : ((fb.workshops as [] | undefined) ?? [])
+      }
+      allWorkshopsButtonLabel={
+        hasGlobalContent
+          ? (data.allWorkshopsButtonLabel ?? undefined)
+          : ((fb.allWorkshopsButtonLabel as string) ?? undefined)
+      }
+      allWorkshopsLink={
+        hasGlobalContent
+          ? (data.allWorkshopsLink ?? undefined)
+          : ((fb.allWorkshopsLink as string) ?? undefined)
+      }
     />
   )
 }

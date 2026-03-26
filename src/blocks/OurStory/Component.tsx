@@ -80,7 +80,7 @@ export const OurStoryBlock: React.FC<Props> = ({
             </blockquote>
           </div>
 
-          <div className="mt-20 flex flex-col gap-16">
+          <div className="mt-12 flex flex-col gap-12">
             {resolvedParagraphs.map((item, idx) => {
               const isEven = idx % 2 === 0
               const textContent = (
@@ -94,7 +94,9 @@ export const OurStoryBlock: React.FC<Props> = ({
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                   </div>
-                  <p className="mt-4 text-body-lg leading-[1.8] text-ff-gray-15">{item.text}</p>
+                  <p className="mt-4 text-body-lg leading-[1.8] text-ff-gray-15 whitespace-pre-line">
+                    {item.text}
+                  </p>
                 </div>
               )
               const imageContent = item.image ? (

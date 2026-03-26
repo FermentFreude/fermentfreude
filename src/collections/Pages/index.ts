@@ -1796,10 +1796,10 @@ export const Pages: CollectionConfig = {
         },
         {
           name: 'workshops',
-          label: 'Workshops Overview Page',
+          label: 'Workshop Overview',
           admin: {
             description:
-              'Content for the Workshops overview page (/workshops). Only applies when slug is "workshops".',
+              'Content for the Workshops overview page (/workshops). Only applies when slug is "workshops". Each shared section defaults to its Website global — toggle "Customize" to override for this page only.',
             condition: (data, siblingData) => {
               const slug = data?.slug ?? siblingData?.slug
               return slug === 'workshops'
@@ -1932,8 +1932,12 @@ export const Pages: CollectionConfig = {
                       type: 'text',
                       required: false,
                       localized: true,
-                      label: 'Next Date',
-                      admin: { description: 'e.g., "20. Mär" / "Mar 20"' },
+                      label: 'Next Date (Fallback)',
+                      admin: {
+                        description:
+                          '⚠️ Auto-filled from Workshop Appointments. Only used as fallback when no appointments exist.',
+                        readOnly: true,
+                      },
                     },
                     {
                       name: 'duration',
@@ -1950,6 +1954,312 @@ export const Pages: CollectionConfig = {
                       localized: true,
                       label: 'Button Label',
                       admin: { description: 'e.g., "Buchen" / "Book Now"' },
+                    },
+                  ],
+                },
+              ],
+            },
+            // ── Voucher CTA Section ──────────────────────────────────
+            {
+              type: 'collapsible',
+              label: '🎁 Voucher CTA Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'workshopsVoucherCustom',
+                  type: 'checkbox',
+                  label: 'Customize for this page',
+                  defaultValue: false,
+                  admin: {
+                    description:
+                      'Off = uses content from Website → Voucher CTA global. On = uses the fields below.',
+                  },
+                },
+                {
+                  name: 'workshopsVoucherHeading',
+                  type: 'text',
+                  localized: true,
+                  label: 'Heading',
+                  admin: {
+                    description: 'e.g., "Gift a special tasty experience"',
+                    condition: (data) => data?.workshops?.workshopsVoucherCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsVoucherDescription',
+                  type: 'textarea',
+                  localized: true,
+                  label: 'Description',
+                  admin: {
+                    description: 'Short paragraph below heading.',
+                    condition: (data) => data?.workshops?.workshopsVoucherCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsVoucherButtonLabel',
+                  type: 'text',
+                  localized: true,
+                  label: 'Button Label',
+                  admin: {
+                    description: 'e.g., "Voucher"',
+                    condition: (data) => data?.workshops?.workshopsVoucherCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsVoucherButtonLink',
+                  type: 'text',
+                  localized: true,
+                  label: 'Button Link',
+                  admin: {
+                    description: 'e.g., "/workshops/voucher"',
+                    condition: (data) => data?.workshops?.workshopsVoucherCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsVoucherGalleryImages',
+                  type: 'array',
+                  maxRows: 8,
+                  label: 'Gallery Images',
+                  admin: {
+                    description: 'Up to 8 images for the bento gallery.',
+                    condition: (data) => data?.workshops?.workshopsVoucherCustom === true,
+                  },
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: true,
+                      label: 'Image',
+                    },
+                  ],
+                },
+                {
+                  name: 'workshopsVoucherBackgroundImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Background Image',
+                  admin: {
+                    description: 'Optional background image.',
+                    condition: (data) => data?.workshops?.workshopsVoucherCustom === true,
+                  },
+                },
+              ],
+            },
+            // ── Product Slider Section ───────────────────────────────
+            {
+              type: 'collapsible',
+              label: '🛒 Product Slider Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'workshopsProductSliderCustom',
+                  type: 'checkbox',
+                  label: 'Customize for this page',
+                  defaultValue: false,
+                  admin: {
+                    description:
+                      'Off = uses content from Website → Product Slider global. On = uses the fields below.',
+                  },
+                },
+                {
+                  name: 'workshopsProductSliderHeading',
+                  type: 'text',
+                  localized: true,
+                  label: 'Heading',
+                  admin: {
+                    description: 'e.g., "Discover UNIQUE."',
+                    condition: (data) => data?.workshops?.workshopsProductSliderCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsProductSliderHeadingAccent',
+                  type: 'text',
+                  localized: true,
+                  label: 'Heading Accent Word',
+                  admin: {
+                    description: 'Accent word displayed next to heading (e.g., "FLAVOURS").',
+                    condition: (data) => data?.workshops?.workshopsProductSliderCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsProductSliderDescription',
+                  type: 'textarea',
+                  localized: true,
+                  label: 'Description',
+                  admin: {
+                    description: 'Short paragraph (1–2 sentences).',
+                    condition: (data) => data?.workshops?.workshopsProductSliderCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsProductSliderButtonLabel',
+                  type: 'text',
+                  localized: true,
+                  label: 'Button Label',
+                  admin: {
+                    description: 'e.g., "View All Products"',
+                    condition: (data) => data?.workshops?.workshopsProductSliderCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsProductSliderButtonLink',
+                  type: 'text',
+                  localized: true,
+                  label: 'Button Link',
+                  admin: {
+                    description: 'e.g., "/products"',
+                    condition: (data) => data?.workshops?.workshopsProductSliderCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsProductSliderProducts',
+                  type: 'relationship',
+                  relationTo: 'products',
+                  hasMany: true,
+                  label: 'Products',
+                  admin: {
+                    description: 'Select products to display in the slider.',
+                    condition: (data) => data?.workshops?.workshopsProductSliderCustom === true,
+                  },
+                },
+              ],
+            },
+            // ── Sponsors Bar Section ─────────────────────────────────
+            {
+              type: 'collapsible',
+              label: '🤝 Sponsors Bar Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'workshopsSponsorsCustom',
+                  type: 'checkbox',
+                  label: 'Customize for this page',
+                  defaultValue: false,
+                  admin: {
+                    description:
+                      'Off = uses content from Website → Sponsors Bar global. On = uses the fields below.',
+                  },
+                },
+                {
+                  name: 'workshopsSponsorsHeading',
+                  type: 'text',
+                  localized: true,
+                  label: 'Heading',
+                  admin: {
+                    description: 'e.g., "This project is supported by:"',
+                    condition: (data) => data?.workshops?.workshopsSponsorsCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsSponsorsList',
+                  type: 'array',
+                  maxRows: 10,
+                  label: 'Sponsors',
+                  admin: {
+                    description: 'Sponsor logos and links.',
+                    condition: (data) => data?.workshops?.workshopsSponsorsCustom === true,
+                  },
+                  fields: [
+                    {
+                      name: 'name',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Sponsor Name',
+                    },
+                    {
+                      name: 'logo',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: true,
+                      label: 'Logo',
+                    },
+                    {
+                      name: 'url',
+                      type: 'text',
+                      label: 'Website URL',
+                      admin: { description: 'Optional link to sponsor website.' },
+                    },
+                  ],
+                },
+              ],
+            },
+            // ── Testimonials Section ─────────────────────────────────
+            {
+              type: 'collapsible',
+              label: '💬 Testimonials Section',
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'workshopsTestimonialsCustom',
+                  type: 'checkbox',
+                  label: 'Customize for this page',
+                  defaultValue: false,
+                  admin: {
+                    description:
+                      'Off = uses content from Website → Testimonials global. On = uses the fields below.',
+                  },
+                },
+                {
+                  name: 'workshopsTestimonialsEyebrow',
+                  type: 'text',
+                  localized: true,
+                  label: 'Eyebrow',
+                  admin: {
+                    description: 'Small text above heading (e.g., "Testimonials").',
+                    condition: (data) => data?.workshops?.workshopsTestimonialsCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsTestimonialsHeading',
+                  type: 'text',
+                  localized: true,
+                  label: 'Heading',
+                  admin: {
+                    description: 'e.g., "What Our Community Says"',
+                    condition: (data) => data?.workshops?.workshopsTestimonialsCustom === true,
+                  },
+                },
+                {
+                  name: 'workshopsTestimonialsList',
+                  type: 'array',
+                  minRows: 1,
+                  maxRows: 10,
+                  label: 'Testimonials',
+                  admin: {
+                    description: 'Customer quotes and ratings.',
+                    condition: (data) => data?.workshops?.workshopsTestimonialsCustom === true,
+                  },
+                  fields: [
+                    {
+                      name: 'quote',
+                      type: 'textarea',
+                      required: true,
+                      localized: true,
+                      label: 'Quote',
+                    },
+                    {
+                      name: 'authorName',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Author Name',
+                    },
+                    {
+                      name: 'authorRole',
+                      type: 'text',
+                      localized: true,
+                      label: 'Author Role',
+                      admin: { description: 'e.g., "Workshop Participant"' },
+                    },
+                    {
+                      name: 'rating',
+                      type: 'number',
+                      min: 1,
+                      max: 5,
+                      defaultValue: 5,
+                      label: 'Rating (1–5)',
                     },
                   ],
                 },
