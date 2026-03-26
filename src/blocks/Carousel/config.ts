@@ -1,8 +1,11 @@
 import type { Block } from 'payload'
 
+import { blockVisible } from '@/fields/blockVisible'
+
 export const Carousel: Block = {
   slug: 'carousel',
   fields: [
+    blockVisible,
     {
       name: 'populateBy',
       type: 'select',

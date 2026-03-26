@@ -1,8 +1,11 @@
 import type { Block } from 'payload'
 
+import { blockVisible } from '@/fields/blockVisible'
+
 export const ThreeItemGrid: Block = {
   slug: 'threeItemGrid',
   fields: [
+    blockVisible,
     {
       name: 'products',
       type: 'relationship',

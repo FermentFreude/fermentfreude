@@ -31,7 +31,8 @@ const DEFAULTS = {
 
 type Props = TeamCardsBlockType & { id?: string }
 
-export const TeamCardsBlock: React.FC<Props> = ({ label, heading, members, id }) => {
+export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, members, id }) => {
+  if (visible === false) return null
   const resolvedLabel = label ?? DEFAULTS.label
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedMembers =
@@ -73,14 +74,14 @@ export const TeamCardsBlock: React.FC<Props> = ({ label, heading, members, id })
           </h2>
           <div className="grid w-full gap-2 md:gap-4 lg:grid-cols-2 content-wide mx-auto items-stretch">
             {resolvedMembers.map((member, idx) => {
-              const staticSrc = member.name
-                ? STATIC_TEAM_IMAGES[(member.name as string).toLowerCase()]
-                : undefined
               const hasCmsImage =
-                !staticSrc &&
                 member.image &&
                 typeof member.image === 'object' &&
                 'url' in member.image
+              const staticSrc =
+                !hasCmsImage && member.name
+                  ? STATIC_TEAM_IMAGES[(member.name as string).toLowerCase()]
+                  : undefined
 
               return (
                 <div
@@ -94,18 +95,18 @@ export const TeamCardsBlock: React.FC<Props> = ({ label, heading, members, id })
                 >
                 <article className="group flex flex-col h-full w-full overflow-hidden rounded-(--radius-xl) border-2 border-ff-border-light bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:border-ff-charcoal/20 hover:-translate-y-1">
                   <div className="relative aspect-[4/5] w-full shrink-0 overflow-hidden bg-ff-warm-gray">
-                    {staticSrc ? (
+                    {hasCmsImage ? (
+                      <Media
+                        resource={member.image as MediaType}
+                        fill
+                        imgClassName="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : staticSrc ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={staticSrc}
                         alt={member.name || 'Team member'}
                         className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : hasCmsImage ? (
-                      <Media
-                        resource={member.image as MediaType}
-                        fill
-                        imgClassName="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
                       <div className="absolute inset-0 size-full bg-ff-warm-gray" />
@@ -119,7 +120,7 @@ export const TeamCardsBlock: React.FC<Props> = ({ label, heading, members, id })
                     <p className="font-sans text-body font-semibold text-ff-gray-text shrink-0">
                       {member.role}
                     </p>
-                    <p className="font-sans text-body leading-relaxed text-ff-gray-15 line-clamp-5">
+                    <p className="font-sans text-body leading-relaxed text-ff-gray-15 line-clamp-5 whitespace-pre-line">
                       {member.description}
                     </p>
                   </div>

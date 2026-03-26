@@ -88,7 +88,7 @@ export const ShopProductGridComponent: React.FC<ShopProductGridBlock> = async (p
           </span>
           <h2 className="text-ff-near-black mb-4">{resolvedHeading}</h2>
           {description && (
-            <p className="text-ff-charcoal text-body-lg leading-relaxed m-0">{description}</p>
+            <p className="text-ff-charcoal text-body-lg leading-relaxed m-0 whitespace-pre-line">{description}</p>
           )}
 
           {/* Pickup badge */}

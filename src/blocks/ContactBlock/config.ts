@@ -1,5 +1,7 @@
 import type { Block } from 'payload'
 
+import { blockVisible } from '@/fields/blockVisible'
+
 export const ContactBlock: Block = {
   slug: 'contactBlock',
   interfaceName: 'ContactBlock',
@@ -8,6 +10,7 @@ export const ContactBlock: Block = {
     plural: 'Contact Pages',
   },
   fields: [
+    blockVisible,
     {
       name: 'hideCtaBanner',
       type: 'checkbox',
