@@ -41,6 +41,7 @@ const LOGO_SCALE = 2
 
 export function SplashScreen() {
   const [phase, setPhase] = useState<'idle' | 'wave' | 'filled' | 'close' | 'done'>('idle')
+  const [useSimpleFallback, setUseSimpleFallback] = useState(false)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
@@ -54,6 +55,19 @@ export function SplashScreen() {
       sessionStorage.setItem('ff-splash-seen', '1')
       setPhase('done')
       return
+    }
+
+    // Mobile browsers (notably iOS Safari) often don't support CSS `d: path(...)` morphing.
+    // Detect support and fall back to a transform-based splash animation when needed.
+    try {
+      const supportsPathMorph =
+        typeof window !== 'undefined' &&
+        typeof (window as any).CSS !== 'undefined' &&
+        typeof (window as any).CSS.supports === 'function' &&
+        (window as any).CSS.supports('d: path("M0,0 L1,1")')
+      if (!supportsPathMorph) setUseSimpleFallback(true)
+    } catch {
+      setUseSimpleFallback(true)
     }
 
     document.body.style.overflow = 'hidden'
@@ -90,6 +104,38 @@ export function SplashScreen() {
 
   const waveStarted = phase !== 'idle'
   const isClosing = phase === 'close'
+
+  if (useSimpleFallback) {
+    const started = phase !== 'idle'
+    const closing = phase === 'close'
+    return (
+      <div
+        className={[
+          'splash-overlay splash-simple fixed inset-0 z-9999',
+          started ? 'splash-simple--started' : '',
+          closing ? 'splash-simple--closing' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        aria-hidden="true"
+      >
+        <div className="splash-simple__ivory" />
+        <div className="splash-simple__charcoal">
+          <svg
+            className="splash-simple__logo"
+            viewBox="0 0 53 51"
+            width="106"
+            height="102"
+            aria-hidden="true"
+          >
+            <path d={LOGO.bg} fill="var(--ff-ivory)" />
+            <path d={LOGO.ff} fill="var(--ff-charcoal-dark)" />
+            <path d={LOGO.cutout} fill="var(--ff-ivory)" />
+          </svg>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="splash-overlay fixed inset-0 z-9999" aria-hidden="true">
