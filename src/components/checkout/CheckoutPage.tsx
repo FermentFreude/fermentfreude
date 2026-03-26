@@ -32,7 +32,7 @@ const stripe = loadStripe(apiKey)
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
   const router = useRouter()
-  const { cart } = useCart()
+  const { cart, clearCart } = useCart()
   const [error, setError] = useState<null | string>(null)
   const { theme } = useTheme()
   /**
@@ -47,6 +47,15 @@ export const CheckoutPage: React.FC = () => {
   const [billingAddress, setBillingAddress] = useState<Partial<Address>>()
   const [billingAddressSameAsShipping, setBillingAddressSameAsShipping] = useState(true)
   const [isProcessingPayment, setProcessingPayment] = useState(false)
+
+  /* ── Voucher Code State ── */
+  const [voucherCode, setVoucherCode] = useState('')
+  const [voucherApplied, setVoucherApplied] = useState<{
+    code: string
+    value: number
+  } | null>(null)
+  const [voucherError, setVoucherError] = useState<string | null>(null)
+  const [voucherLoading, setVoucherLoading] = useState(false)
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
@@ -89,6 +98,81 @@ export const CheckoutPage: React.FC = () => {
       setEmailEditable(true)
     }
   }, [])
+
+  /* ── Voucher Handlers ── */
+  const handleApplyVoucher = useCallback(async () => {
+    setVoucherError(null)
+    const trimmed = voucherCode.trim()
+    if (!trimmed) {
+      setVoucherError('Bitte gib einen Gutschein-Code ein.')
+      return
+    }
+    setVoucherLoading(true)
+    try {
+      const res = await fetch('/api/voucher/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: trimmed }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setVoucherError(data.error || 'Ung\u00FCltiger Gutschein-Code.')
+        return
+      }
+      setVoucherApplied({ code: data.voucher.code, value: data.voucher.value })
+      toast.success(`Gutschein \u20AC${data.voucher.value} angewendet!`)
+    } catch (_err) {
+      setVoucherError('Verbindungsfehler. Bitte versuche es erneut.')
+    } finally {
+      setVoucherLoading(false)
+    }
+  }, [voucherCode])
+
+  const handleRemoveVoucher = useCallback(() => {
+    setVoucherApplied(null)
+    setVoucherCode('')
+    setVoucherError(null)
+  }, [])
+
+  /* ── Computed: voucher covers the full amount? ── */
+  const discountedTotal = Math.max(0, (cart?.subtotal || 0) - (voucherApplied?.value || 0))
+  const voucherCoversAll = Boolean(voucherApplied && discountedTotal === 0)
+
+  /* ── Place order paid entirely by voucher (no Stripe) ── */
+  const handleVoucherOrder = useCallback(async () => {
+    if (!voucherApplied) return
+    setProcessingPayment(true)
+    setError(null)
+
+    try {
+      const res = await fetch('/api/voucher/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          voucherCode: voucherApplied.code,
+          customerEmail: email || user?.email,
+          userId: user?.id,
+        }),
+      })
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Bestellung fehlgeschlagen.')
+        toast.error(data.error || 'Bestellung fehlgeschlagen.')
+        setProcessingPayment(false)
+        return
+      }
+
+      // Clear cart client-side
+      clearCart()
+
+      const emailParam = email ? `?email=${encodeURIComponent(email)}` : ''
+      router.push(`/account/orders/${data.orderID}${emailParam}`)
+    } catch (_err) {
+      setError('Verbindungsfehler. Bitte versuche es erneut.')
+      setProcessingPayment(false)
+    }
+  }, [voucherApplied, email, user, clearCart, router])
 
   const initiatePaymentIntent = useCallback(
     async (paymentID: string) => {
@@ -293,7 +377,18 @@ export const CheckoutPage: React.FC = () => {
           </>
         )}
 
-        {!paymentData && (
+        {!paymentData && voucherCoversAll ? (
+          <Button
+            className="self-start"
+            disabled={!canGoToPayment || isProcessingPayment}
+            onClick={(e) => {
+              e.preventDefault()
+              void handleVoucherOrder()
+            }}
+          >
+            {isProcessingPayment ? 'Bestellung wird bearbeitet…' : 'Jetzt mit Gutschein bestellen'}
+          </Button>
+        ) : !paymentData ? (
           <Button
             className="self-start"
             disabled={!canGoToPayment}
@@ -304,7 +399,7 @@ export const CheckoutPage: React.FC = () => {
           >
             Go to payment
           </Button>
-        )}
+        ) : null}
 
         {!paymentData?.['clientSecret'] && error && (
           <div className="my-8">
@@ -323,7 +418,7 @@ export const CheckoutPage: React.FC = () => {
         )}
 
         <Suspense fallback={<React.Fragment />}>
-          {paymentData && typeof paymentData['clientSecret'] === 'string' && (
+          {!voucherCoversAll && paymentData && typeof paymentData['clientSecret'] === 'string' && (
             <div className="pb-16">
               <h2 className="font-medium text-3xl">Payment</h2>
               {error && <p>{`Error: ${error}`}</p>}
@@ -461,9 +556,70 @@ export const CheckoutPage: React.FC = () => {
             return null
           })}
           <hr />
+
+          {/* Voucher Code Section */}
+          <div className="flex flex-col gap-3">
+            <h3 className="font-medium text-sm uppercase tracking-wide">Gutschein-Code</h3>
+            {voucherApplied ? (
+              <div className="flex items-center justify-between bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+                <div>
+                  <p className="font-mono text-sm font-semibold tracking-wide">{voucherApplied.code}</p>
+                  <p className="text-xs text-green-700 dark:text-green-400">
+                    {`-\u20AC${voucherApplied.value.toFixed(2)}`}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemoveVoucher}
+                  className="text-xs"
+                >
+                  Entfernen
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value)}
+                  placeholder="FF-GIFT-XXXXXXXX"
+                  className="font-mono text-sm uppercase"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleApplyVoucher()
+                    }
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleApplyVoucher}
+                  disabled={voucherLoading || !voucherCode.trim()}
+                >
+                  {voucherLoading ? '...' : 'Einl\u00F6sen'}
+                </Button>
+              </div>
+            )}
+            {voucherError && (
+              <p className="text-xs text-destructive">{voucherError}</p>
+            )}
+          </div>
+
+          <hr />
           <div className="flex justify-between items-center gap-2">
             <span className="uppercase">Total</span>{' '}
-            <Price className="text-3xl font-medium" amount={cart.subtotal || 0} />
+            <div className="text-right">
+              {voucherApplied && (
+                <p className="text-sm text-green-600 dark:text-green-400 line-through">
+                  <Price amount={cart.subtotal || 0} />
+                </p>
+              )}
+              <Price
+                className="text-3xl font-medium"
+                amount={Math.max(0, (cart.subtotal || 0) - (voucherApplied?.value || 0))}
+              />
+            </div>
           </div>
         </div>
       )}

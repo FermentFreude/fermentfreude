@@ -1155,6 +1155,16 @@ export const Pages: CollectionConfig = {
           },
           fields: [
             {
+              name: 'voucherShowHero',
+              type: 'checkbox',
+              label: 'Show this section',
+              defaultValue: true,
+              localized: true,
+              admin: {
+                description: 'Toggle off to hide the voucher hero section on the website.',
+              },
+            },
+            {
               name: 'heroHeading',
               type: 'text',
               required: true,
@@ -1163,6 +1173,7 @@ export const Pages: CollectionConfig = {
               admin: {
                 description:
                   'Main headline above the voucher form (e.g. "Give the gift of fermentation").',
+                condition: (data) => data?.voucherShowHero !== false,
               },
             },
             {
@@ -1173,6 +1184,18 @@ export const Pages: CollectionConfig = {
               label: 'Hero Description',
               admin: {
                 description: 'Short intro text below the heading explaining the voucher.',
+                condition: (data) => data?.voucherShowHero !== false,
+              },
+            },
+            {
+              name: 'voucherShowAmounts',
+              type: 'checkbox',
+              label: 'Show this section',
+              defaultValue: true,
+              localized: true,
+              admin: {
+                description: 'Toggle off to hide the voucher amount selection on the website.',
+                condition: (data) => data?.voucherShowHero !== false,
               },
             },
             {
@@ -1184,6 +1207,7 @@ export const Pages: CollectionConfig = {
               admin: {
                 description:
                   'List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.',
+                condition: (data) => data?.voucherShowHero !== false && data?.voucherShowAmounts !== false,
               },
               fields: [
                 {
@@ -1195,6 +1219,17 @@ export const Pages: CollectionConfig = {
               ],
             },
             {
+              name: 'voucherShowDeliveryOptions',
+              type: 'checkbox',
+              label: 'Show this section',
+              defaultValue: true,
+              localized: true,
+              admin: {
+                description: 'Toggle off to hide delivery options on the website.',
+                condition: (data) => data?.voucherShowHero !== false,
+              },
+            },
+            {
               name: 'deliveryOptions',
               type: 'array',
               label: 'Delivery Options',
@@ -1203,6 +1238,8 @@ export const Pages: CollectionConfig = {
               admin: {
                 description:
                   'Email or pick up from store. Post/card removed for product freshness.',
+                condition: (data) =>
+                  data?.voucherShowHero !== false && data?.voucherShowDeliveryOptions !== false,
               },
               fields: [
                 {
@@ -1248,6 +1285,7 @@ export const Pages: CollectionConfig = {
               admin: {
                 description:
                   'Logo displayed on the voucher preview card. Leave empty to use fallback.',
+                condition: (data) => data?.voucherShowHero !== false,
               },
             },
             {
@@ -1258,6 +1296,7 @@ export const Pages: CollectionConfig = {
               label: 'Card Label',
               admin: {
                 description: 'Label on the voucher preview card (e.g. "GIFT VOUCHER").',
+                condition: (data) => data?.voucherShowHero !== false,
               },
             },
             {
@@ -1268,6 +1307,7 @@ export const Pages: CollectionConfig = {
               label: 'Value Label',
               admin: {
                 description: 'Label above the amount on the card (e.g. "Voucher value").',
+                condition: (data) => data?.voucherShowHero !== false,
               },
             },
             {
@@ -1278,6 +1318,7 @@ export const Pages: CollectionConfig = {
               label: 'Card Disclaimer',
               admin: {
                 description: 'Small text under the amount (e.g. "Redeemable in our shop").',
+                condition: (data) => data?.voucherShowHero !== false,
               },
             },
             {
@@ -1288,6 +1329,8 @@ export const Pages: CollectionConfig = {
               label: 'Amount Section Label',
               admin: {
                 description: 'Label above the amount buttons (e.g. "VOUCHER VALUE").',
+                condition: (data) =>
+                  data?.voucherShowHero !== false && data?.voucherShowAmounts !== false,
               },
             },
             {
@@ -1298,6 +1341,8 @@ export const Pages: CollectionConfig = {
               label: 'Delivery Section Label',
               admin: {
                 description: 'Label above delivery options (e.g. "DELIVERY METHOD").',
+                condition: (data) =>
+                  data?.voucherShowHero !== false && data?.voucherShowDeliveryOptions !== false,
               },
             },
             {
@@ -1308,6 +1353,8 @@ export const Pages: CollectionConfig = {
               admin: {
                 description:
                   'Explains why products cannot be sent by post (e.g. freshness). Shown under the delivery option.',
+                condition: (data) =>
+                  data?.voucherShowHero !== false && data?.voucherShowDeliveryOptions !== false,
               },
             },
             {
@@ -1318,27 +1365,19 @@ export const Pages: CollectionConfig = {
               admin: {
                 description:
                   'Address shown when "Pick up from store" is selected (e.g. Grabenstraße 15, 8010 Graz).',
+                condition: (data) =>
+                  data?.voucherShowHero !== false && data?.voucherShowDeliveryOptions !== false,
               },
             },
             {
-              name: 'greetingLabel',
-              type: 'text',
-              required: true,
+              name: 'voucherShowCTA',
+              type: 'checkbox',
+              label: 'Show this section',
+              defaultValue: true,
               localized: true,
-              label: 'Greeting Message Label',
               admin: {
-                description: 'Label for the optional greeting message field.',
-              },
-            },
-            {
-              name: 'greetingPlaceholder',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Greeting Placeholder',
-              admin: {
-                description:
-                  'Placeholder text in the greeting textarea (e.g. "Max. 250 characters").',
+                description: 'Toggle off to hide the add-to-cart button on the website.',
+                condition: (data) => data?.voucherShowHero !== false,
               },
             },
             {
@@ -1349,104 +1388,295 @@ export const Pages: CollectionConfig = {
               label: 'Add to Cart Button',
               admin: {
                 description: 'Text for the main CTA button (e.g. "Add to cart").',
+                condition: (data) => data?.voucherShowHero !== false && data?.voucherShowCTA !== false,
               },
             },
             {
-              name: 'voucherWhyHeading',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Why Voucher Section Heading',
-              admin: {
-                description:
-                  'Heading for the "Why a fermentation voucher" section (e.g. "Why a fermentation voucher is a great gift").',
-              },
-            },
-            {
-              name: 'voucherWhyBody',
-              type: 'textarea',
-              required: true,
-              localized: true,
-              label: 'Why Voucher Section Body',
-              admin: {
-                description:
-                  'Body text that explains why a fermentation workshop voucher is a good present.',
-              },
-            },
-            {
-              name: 'voucherWhyImage',
-              type: 'upload',
-              relationTo: 'media',
-              label: 'Why Section Image',
-              admin: {
-                description:
-                  'Optional joyful image for the "Why" section (e.g. fermentation, gift, workshop). Shown beside the text. Leave empty to show text only.',
-              },
-            },
-            {
-              name: 'voucherWhyBenefits',
-              type: 'array',
-              label: 'Why Section Benefit Items',
-              required: false,
-              maxRows: 4,
-              admin: {
-                description:
-                  'Four benefit items shown in a 2×2 grid (e.g. Unforgettable Experience, Health & Pleasure). Leave empty to use default copy.',
-              },
+              type: 'collapsible',
+              label: 'Why Section',
+              admin: { initCollapsed: false },
               fields: [
                 {
-                  name: 'icon',
-                  type: 'select',
-                  required: true,
-                  label: 'Icon',
-                  options: [
-                    { label: 'Sparkle (experience)', value: 'sparkle' },
-                    { label: 'Heart (health)', value: 'heart' },
-                    { label: 'Graduation cap (knowledge)', value: 'graduation' },
-                    { label: 'Leaf (sustainability)', value: 'leaf' },
-                  ],
+                  name: 'voucherShowWhy',
+                  type: 'checkbox',
+                  label: 'Show this section',
+                  defaultValue: true,
+                  localized: true,
+                  admin: {
+                    description: 'Toggle off to hide the voucher "Why" section on the website.',
+                  },
                 },
                 {
-                  name: 'title',
+                  name: 'voucherWhyHeading',
                   type: 'text',
                   required: true,
                   localized: true,
-                  label: 'Title',
+                  label: 'Why Voucher Section Heading',
+                  admin: {
+                    description:
+                      'Heading for the "Why a fermentation voucher" section (e.g. "Why a fermentation voucher is a great gift").',
+                    condition: (data) => data?.voucherShowWhy !== false,
+                  },
                 },
                 {
-                  name: 'description',
+                  name: 'voucherWhyBody',
                   type: 'textarea',
                   required: true,
                   localized: true,
-                  label: 'Description',
+                  label: 'Why Voucher Section Body',
+                  admin: {
+                    description:
+                      'Body text that explains why a fermentation workshop voucher is a good present.',
+                    condition: (data) => data?.voucherShowWhy !== false,
+                  },
+                },
+                {
+                  name: 'voucherWhyImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Why Section Image',
+                  admin: {
+                    description:
+                      'Optional joyful image for the "Why" section (e.g. fermentation, gift, workshop). Shown beside the text. Leave empty to show text only.',
+                    condition: (data) => data?.voucherShowWhy !== false,
+                  },
+                },
+                {
+                  name: 'voucherWhyBenefits',
+                  type: 'array',
+                  label: 'Why Section Benefit Items',
+                  required: false,
+                  maxRows: 4,
+                  admin: {
+                    description:
+                      'Four benefit items shown in a 2×2 grid (e.g. Unforgettable Experience, Health & Pleasure). Leave empty to use default copy.',
+                    condition: (data) => data?.voucherShowWhy !== false,
+                  },
+                  fields: [
+                    {
+                      name: 'icon',
+                      type: 'select',
+                      required: true,
+                      label: 'Icon',
+                      options: [
+                        { label: 'Sparkle (experience)', value: 'sparkle' },
+                        { label: 'Heart (health)', value: 'heart' },
+                        { label: 'Graduation cap (knowledge)', value: 'graduation' },
+                        { label: 'Leaf (sustainability)', value: 'leaf' },
+                      ],
+                    },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: true,
+                      localized: true,
+                      label: 'Description',
+                    },
+                  ],
+                },
+                {
+                  name: 'voucherWhyPerfectForVisible',
+                  type: 'checkbox',
+                  label: 'Show this section',
+                  defaultValue: false,
+                  localized: true,
+                  admin: {
+                    description:
+                      'Toggle off to hide the "Perfect for" section on the website without deleting the content.',
+                    condition: (data) => data?.voucherShowWhy !== false,
+                  },
+                },
+                {
+                  name: 'voucherWhyPerfectForHeading',
+                  type: 'text',
+                  localized: true,
+                  label: '"Perfect for" heading',
+                  admin: {
+                    description:
+                      'Heading above the audience tags (e.g. "Perfect for"). Shown at the end of the Why section. Leave empty to hide.',
+                    condition: (data) =>
+                      data?.voucherShowWhy !== false && data?.voucherWhyPerfectForVisible === true,
+                  },
+                },
+                {
+                  name: 'voucherWhyPerfectForTags',
+                  type: 'array',
+                  label: '"Perfect for" tags',
+                  admin: {
+                    description:
+                      'Tags shown under the heading (e.g. Foodies, Health-conscious). Leave empty to hide.',
+                    condition: (data) =>
+                      data?.voucherShowWhy !== false && data?.voucherWhyPerfectForVisible === true,
+                  },
+                  fields: [
+                    {
+                      name: 'label',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Tag',
+                    },
+                  ],
                 },
               ],
             },
             {
-              name: 'voucherWhyPerfectForHeading',
+              name: 'voucherHowHeading',
               type: 'text',
+              required: true,
               localized: true,
-              label: '"Perfect for" heading',
+              label: 'How It Works Section Heading',
               admin: {
-                description:
-                  'Heading above the audience tags (e.g. "Perfect for"). Shown at the end of the Why section. Leave empty to hide.',
+                description: 'Heading above the steps (e.g. "How it works").',
+                condition: (data) => data?.voucherShowHow !== false,
               },
             },
             {
-              name: 'voucherWhyPerfectForTags',
+              name: 'voucherShowHow',
+              type: 'checkbox',
+              label: 'Show this section',
+              defaultValue: true,
+              localized: true,
+              admin: {
+                description: 'Toggle off to hide the voucher "How it works" section on the website.',
+              },
+            },
+            {
+              name: 'voucherHowSteps',
               type: 'array',
-              label: '"Perfect for" tags',
+              label: 'How It Works Steps',
+              required: true,
+              minRows: 1,
               admin: {
                 description:
-                  'Tags shown under the heading (e.g. Foodies, Health-conscious). Leave empty to hide.',
+                  'Four steps with title and optional description (e.g. "Buy" / "Order online for €99").',
+                condition: (data) => data?.voucherShowHow !== false,
               },
               fields: [
                 {
-                  name: 'label',
+                  name: 'text',
                   type: 'text',
                   required: true,
                   localized: true,
-                  label: 'Tag',
+                  label: 'Title',
+                  admin: { description: 'Step heading (e.g. "Buy", "Receive").' },
+                },
+                {
+                  name: 'description',
+                  type: 'text',
+                  localized: true,
+                  label: 'Description',
+                  admin: { description: 'Optional detail (e.g. "Order online for €99").' },
+                },
+              ],
+            },
+            {
+              name: 'voucherShowStarterSet',
+              type: 'checkbox',
+              label: 'Show this section',
+              defaultValue: false,
+              localized: true,
+              admin: {
+                description: 'Toggle off to hide the starter set section on the website.',
+              },
+            },
+            {
+              name: 'starterSetHeading',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Starter Set Section Heading',
+              admin: {
+                description: 'Heading for the "Combine with Starter Set" section.',
+                condition: (data) => data?.voucherShowStarterSet === true,
+              },
+            },
+            {
+              name: 'starterSetDescription',
+              type: 'textarea',
+              required: true,
+              localized: true,
+              label: 'Starter Set Description',
+              admin: {
+                description: 'Body text for the starter set section.',
+                condition: (data) => data?.voucherShowStarterSet === true,
+              },
+            },
+            {
+              name: 'starterSetButton',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Starter Set Button',
+              admin: {
+                description: 'Button text (e.g. "View Starter Sets").',
+                condition: (data) => data?.voucherShowStarterSet === true,
+              },
+            },
+            {
+              name: 'starterSetImage',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Starter Set Image',
+              admin: {
+                description: 'Image shown in the starter set section. Leave empty to use fallback.',
+                condition: (data) => data?.voucherShowStarterSet === true,
+              },
+            },
+            {
+              name: 'voucherShowGiftOccasions',
+              type: 'checkbox',
+              label: 'Show this section',
+              defaultValue: true,
+              localized: true,
+              admin: {
+                description: 'Toggle off to hide the voucher gift occasions section on the website.',
+              },
+            },
+            {
+              name: 'giftOccasionsHeading',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Gift Occasions Heading',
+              admin: {
+                description: 'Heading for the "Gift for every occasion" section.',
+                condition: (data) => data?.voucherShowGiftOccasions !== false,
+              },
+            },
+            {
+              name: 'giftOccasions',
+              type: 'array',
+              label: 'Gift Occasions',
+              required: true,
+              minRows: 1,
+              maxRows: 4,
+              admin: {
+                description: 'Occasion cards with image and caption (e.g. Birthdays, Weddings).',
+                condition: (data) => data?.voucherShowGiftOccasions !== false,
+              },
+              fields: [
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Image',
+                  admin: { description: 'Optional. Uses fallback if empty.' },
+                },
+                {
+                  name: 'caption',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Caption',
                 },
               ],
             },
@@ -1459,6 +1689,17 @@ export const Pages: CollectionConfig = {
               admin: {
                 description:
                   'Heading above the benefits list (e.g. "What\'s included in the voucher").',
+                condition: (data) => data?.voucherShowBenefits !== false,
+              },
+            },
+            {
+              name: 'voucherShowBenefits',
+              type: 'checkbox',
+              label: 'Show this section',
+              defaultValue: true,
+              localized: true,
+              admin: {
+                description: 'Toggle off to hide the voucher benefits section on the website.',
               },
             },
             {
@@ -1468,6 +1709,7 @@ export const Pages: CollectionConfig = {
               label: 'Voucher Benefits Subtitle',
               admin: {
                 description: 'Short line under the heading (e.g. "All at a glance").',
+                condition: (data) => data?.voucherShowBenefits !== false,
               },
             },
             {
@@ -1479,6 +1721,7 @@ export const Pages: CollectionConfig = {
               admin: {
                 description:
                   'List of benefits with optional subtext. Shown with green checkmarks in two columns.',
+                condition: (data) => data?.voucherShowBenefits !== false,
               },
               fields: [
                 {
@@ -1502,119 +1745,14 @@ export const Pages: CollectionConfig = {
               ],
             },
             {
-              name: 'voucherHowHeading',
-              type: 'text',
-              required: true,
+              name: 'voucherShowFAQ',
+              type: 'checkbox',
+              label: 'Show this section',
+              defaultValue: true,
               localized: true,
-              label: 'How It Works Section Heading',
               admin: {
-                description: 'Heading above the steps (e.g. "How it works").',
+                description: 'Toggle off to hide the voucher FAQ section on the website.',
               },
-            },
-            {
-              name: 'voucherHowSteps',
-              type: 'array',
-              label: 'How It Works Steps',
-              required: true,
-              minRows: 1,
-              admin: {
-                description:
-                  'Four steps with title and optional description (e.g. "Buy" / "Order online for €99").',
-              },
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Title',
-                  admin: { description: 'Step heading (e.g. "Buy", "Receive").' },
-                },
-                {
-                  name: 'description',
-                  type: 'text',
-                  localized: true,
-                  label: 'Description',
-                  admin: { description: 'Optional detail (e.g. "Order online for €99").' },
-                },
-              ],
-            },
-            {
-              name: 'starterSetHeading',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Starter Set Section Heading',
-              admin: {
-                description: 'Heading for the "Combine with Starter Set" section.',
-              },
-            },
-            {
-              name: 'starterSetDescription',
-              type: 'textarea',
-              required: true,
-              localized: true,
-              label: 'Starter Set Description',
-              admin: {
-                description: 'Body text for the starter set section.',
-              },
-            },
-            {
-              name: 'starterSetButton',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Starter Set Button',
-              admin: {
-                description: 'Button text (e.g. "View Starter Sets").',
-              },
-            },
-            {
-              name: 'starterSetImage',
-              type: 'upload',
-              relationTo: 'media',
-              label: 'Starter Set Image',
-              admin: {
-                description: 'Image shown in the starter set section. Leave empty to use fallback.',
-              },
-            },
-            {
-              name: 'giftOccasionsHeading',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Gift Occasions Heading',
-              admin: {
-                description: 'Heading for the "Gift for every occasion" section.',
-              },
-            },
-            {
-              name: 'giftOccasions',
-              type: 'array',
-              label: 'Gift Occasions',
-              required: true,
-              minRows: 1,
-              maxRows: 4,
-              admin: {
-                description: 'Occasion cards with image and caption (e.g. Birthdays, Weddings).',
-              },
-              fields: [
-                {
-                  name: 'image',
-                  type: 'upload',
-                  relationTo: 'media',
-                  required: false,
-                  label: 'Image',
-                  admin: { description: 'Optional. Uses fallback if empty.' },
-                },
-                {
-                  name: 'caption',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Caption',
-                },
-              ],
             },
             {
               name: 'faqHeading',
@@ -1624,6 +1762,7 @@ export const Pages: CollectionConfig = {
               label: 'FAQ Heading',
               admin: {
                 description: 'Heading above the voucher FAQ accordion.',
+                condition: (data) => data?.voucherShowFAQ !== false,
               },
             },
             {
@@ -1634,6 +1773,7 @@ export const Pages: CollectionConfig = {
               minRows: 1,
               admin: {
                 description: 'Frequently asked questions about vouchers.',
+                condition: (data) => data?.voucherShowFAQ !== false,
               },
               fields: [
                 {
