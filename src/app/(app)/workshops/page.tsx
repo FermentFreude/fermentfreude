@@ -92,6 +92,7 @@ export default async function WorkshopsPage() {
         title={ws?.workshopsCalendarTitle}
         description={ws?.workshopsCalendarDescription}
         appointments={upcomingAppointments}
+        nextDateLabel={ws?.workshopsCalendarNextDateLabel}
       />
 
       {/* 3. Voucher CTA — page override or global */}

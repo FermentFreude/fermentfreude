@@ -1895,6 +1895,17 @@ export const Pages: CollectionConfig = {
                   admin: { description: 'Intro text above the calendar.' },
                 },
                 {
+                  name: 'workshopsCalendarNextDateLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Next Date Label',
+                  admin: {
+                    description:
+                      'Label above each next date (e.g. "Nächster Termin" / "Next Date").',
+                  },
+                },
+                {
                   name: 'workshopsCalendarCards',
                   type: 'array',
                   required: false,

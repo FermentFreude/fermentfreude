@@ -180,32 +180,7 @@ const lakto: WorkshopDetailData = {
   ],
 
   datesHeading: 'Next Workshops',
-  dates: [
-    {
-      id: 'lakto-1',
-      date: 'February 15, 2026',
-      time: '2:00 PM – 5:00 PM',
-      spotsLeft: 5,
-    },
-    {
-      id: 'lakto-2',
-      date: 'February 22, 2026',
-      time: '10:00 AM – 1:00 PM',
-      spotsLeft: 3,
-    },
-    {
-      id: 'lakto-3',
-      date: 'March 8, 2026',
-      time: '2:00 PM – 5:00 PM',
-      spotsLeft: 8,
-    },
-    {
-      id: 'lakto-4',
-      date: 'March 15, 2026',
-      time: '10:00 AM – 1:00 PM',
-      spotsLeft: 12,
-    },
-  ],
+  dates: [],
 
   // UI labels (English defaults)
   viewDatesLabel: 'View Dates & Book',

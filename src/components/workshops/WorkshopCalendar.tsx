@@ -68,10 +68,12 @@ function WorkshopCard({
   workshop,
   cardImage,
   onBookingClick,
+  nextDateLabel,
 }: {
   workshop: WorkshopCalendarCard
   cardImage: MediaType | null
   onBookingClick?: (workshop: WorkshopCalendarCard) => void
+  nextDateLabel?: string | null
 }) {
   return (
     <div className="bg-white border border-[#e8e4d9] rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300 h-full flex flex-col">
@@ -104,7 +106,7 @@ function WorkshopCard({
         {workshop.nextDate && (
           <div className="mb-4">
             <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide">
-              Nächster Termin
+              {nextDateLabel || 'Nächster Termin'}
             </p>
             <p className="font-display text-base sm:text-lg font-bold text-[#1a1a1a]">
               {workshop.nextDate}
@@ -158,11 +160,13 @@ export function WorkshopCalendar({
   title,
   description,
   appointments,
+  nextDateLabel,
 }: {
   cards?: WorkshopCalendarCard[] | null
   title?: string | null
   description?: string | null
   appointments?: WorkshopDate[]
+  nextDateLabel?: string | null
 } = {}) {
   // Default workshop card types (fallback when no CMS data)
   const defaultWorkshopCards: WorkshopCalendarCard[] = [
@@ -336,6 +340,7 @@ export function WorkshopCalendar({
                     workshop={workshop}
                     cardImage={cardImage}
                     onBookingClick={() => handleCardBookingClick(workshop)}
+                    nextDateLabel={nextDateLabel}
                   />
                 )
               })}
