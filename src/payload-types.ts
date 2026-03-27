@@ -1416,6 +1416,10 @@ export interface Page {
      */
     workshopsCalendarDescription?: string | null;
     /**
+     * Label above each next date (e.g. "Nächster Termin" / "Next Date").
+     */
+    workshopsCalendarNextDateLabel?: string | null;
+    /**
      * Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).
      */
     workshopsCalendarCards?:
@@ -4491,6 +4495,7 @@ export interface PagesSelect<T extends boolean = true> {
         workshopsHeroImage?: T;
         workshopsCalendarTitle?: T;
         workshopsCalendarDescription?: T;
+        workshopsCalendarNextDateLabel?: T;
         workshopsCalendarCards?:
           | T
           | {

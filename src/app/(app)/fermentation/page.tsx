@@ -151,7 +151,6 @@ const DEFAULT_WORKSHOP_CARDS = [
     priceSuffix: '',
     buttonLabel: 'BOOK NOW',
     buttonUrl: '/workshops/lakto-gemuese',
-    nextDate: 'Starts May 4, 2026',
   },
   {
     title: 'Kombucha',
@@ -161,7 +160,6 @@ const DEFAULT_WORKSHOP_CARDS = [
     priceSuffix: '',
     buttonLabel: 'BOOK NOW',
     buttonUrl: '/workshops/kombucha',
-    nextDate: 'Starts May 4, 2026',
   },
   {
     title: 'Tempeh',
@@ -171,7 +169,6 @@ const DEFAULT_WORKSHOP_CARDS = [
     priceSuffix: '',
     buttonLabel: 'BOOK NOW',
     buttonUrl: '/workshops/tempeh',
-    nextDate: 'Starts May 4, 2026',
   },
 ]
 const DEFAULT_FAQ_TITLE = 'Frequently Asked Questions'

@@ -94,32 +94,7 @@ export const tempehDefaults: WorkshopDetailData = {
   ],
 
   datesHeading: 'Next Workshops',
-  dates: [
-    {
-      id: 'tempeh-1',
-      date: 'February 20, 2026',
-      time: '2:00 PM – 5:00 PM',
-      spotsLeft: 6,
-    },
-    {
-      id: 'tempeh-2',
-      date: 'February 27, 2026',
-      time: '10:00 AM – 1:00 PM',
-      spotsLeft: 4,
-    },
-    {
-      id: 'tempeh-3',
-      date: 'March 10, 2026',
-      time: '2:00 PM – 5:00 PM',
-      spotsLeft: 9,
-    },
-    {
-      id: 'tempeh-4',
-      date: 'March 20, 2026',
-      time: '10:00 AM – 1:00 PM',
-      spotsLeft: 10,
-    },
-  ],
+  dates: [],
 
   // UI labels (English defaults)
   viewDatesLabel: 'View Dates & Book',
