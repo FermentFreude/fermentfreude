@@ -1,6 +1,8 @@
 'use client'
 
+import { accountI18n } from '@/app/(app)/account/i18n'
 import { useAuth } from '@/providers/Auth'
+import { useLocale } from '@/providers/Locale'
 import { CheckCircle2 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { useState } from 'react'
@@ -13,6 +15,8 @@ const labelClass =
 
 export default function ProfilePage() {
   const { user } = useAuth()
+  const { locale } = useLocale()
+  const t = locale === 'de' ? accountI18n.de : accountI18n.en
   const [isProfileLoading, setIsProfileLoading] = useState(false)
   const [isPasswordLoading, setIsPasswordLoading] = useState(false)
   const [showPasswordForm, setShowPasswordForm] = useState(false)
@@ -39,10 +43,10 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: profileData.name, email: profileData.email }),
       })
-      if (res.ok) toast.success('Profile updated')
-      else toast.error('Failed to update profile')
+      if (res.ok) toast.success(t.profileUpdated)
+      else toast.error(t.profileUpdateFailed)
     } catch {
-      toast.error('Something went wrong')
+      toast.error(t.somethingWrong)
     } finally {
       setIsProfileLoading(false)
     }
@@ -51,11 +55,11 @@ export default function ProfilePage() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault()
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Passwords do not match')
+      toast.error(t.passwordsNoMatch)
       return
     }
     if (passwordData.newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters')
+      toast.error(t.passwordTooShort)
       return
     }
     setIsPasswordLoading(true)
@@ -69,14 +73,14 @@ export default function ProfilePage() {
         }),
       })
       if (res.ok) {
-        toast.success('Password updated')
+        toast.success(t.passwordUpdated)
         setShowPasswordForm(false)
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
       } else {
-        toast.error('Failed to update password')
+        toast.error(t.passwordUpdateFailed)
       }
     } catch {
-      toast.error('Something went wrong')
+      toast.error(t.somethingWrong)
     } finally {
       setIsPasswordLoading(false)
     }
@@ -86,25 +90,25 @@ export default function ProfilePage() {
     <div className="max-w-2xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">Settings</p>
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">{t.settings}</p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
-          Account Details
+          {t.accountDetails}
         </h1>
         <p className="mt-2 text-sm text-[#626160]">
-          Manage your personal information and security settings.
+          {t.profileSubtitle}
         </p>
       </div>
 
       {/* Profile */}
       <section>
         <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c4bbb3] mb-5">
-          Profile
+          {t.profile}
         </p>
         <form onSubmit={handleProfileUpdate} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label htmlFor="name" className={labelClass}>
-                Full Name
+                {t.fullName}
               </label>
               <input
                 id="name"
@@ -112,12 +116,12 @@ export default function ProfilePage() {
                 value={profileData.name}
                 onChange={(e) => setProfileData((p) => ({ ...p, name: e.target.value }))}
                 className={inputClass}
-                placeholder="Your full name"
+                placeholder={t.yourFullName}
               />
             </div>
             <div>
               <label htmlFor="email" className={labelClass}>
-                Email Address
+                {t.emailAddress}
               </label>
               <input
                 id="email"
@@ -134,7 +138,7 @@ export default function ProfilePage() {
             disabled={isProfileLoading}
             className="px-5 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProfileLoading ? 'Saving…' : 'Save Changes'}
+            {isProfileLoading ? t.saving : t.saveChanges}
           </button>
         </form>
       </section>
@@ -144,27 +148,27 @@ export default function ProfilePage() {
       {/* Security */}
       <section>
         <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c4bbb3] mb-5">
-          Security
+          {t.security}
         </p>
 
         {!showPasswordForm ? (
           <div className="flex items-center justify-between py-4 px-5 bg-white border border-[#1a1a1a]/20 rounded-xl">
             <div>
-              <p className="text-sm font-semibold text-[#1a1a1a]">Password</p>
+              <p className="text-sm font-semibold text-[#1a1a1a]">{t.password}</p>
               <p className="text-[12px] text-[#c4bbb3] mt-0.5 tracking-widest">••••••••</p>
             </div>
             <button
               onClick={() => setShowPasswordForm(true)}
               className="text-[12px] font-medium text-[#626160] hover:text-[#1a1a1a] transition-colors"
             >
-              Change
+              {t.change}
             </button>
           </div>
         ) : (
           <form onSubmit={handlePasswordChange} className="space-y-5">
             <div>
               <label htmlFor="currentPassword" className={labelClass}>
-                Current Password
+                {t.currentPassword}
               </label>
               <input
                 id="currentPassword"
@@ -178,7 +182,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <label htmlFor="newPassword" className={labelClass}>
-                New Password
+                {t.newPassword}
               </label>
               <input
                 id="newPassword"
@@ -187,11 +191,11 @@ export default function ProfilePage() {
                 onChange={(e) => setPasswordData((p) => ({ ...p, newPassword: e.target.value }))}
                 className={inputClass}
               />
-              <p className="mt-1.5 text-[11px] text-[#9e9189]">Minimum 8 characters</p>
+              <p className="mt-1.5 text-[11px] text-[#9e9189]">{t.minChars}</p>
             </div>
             <div>
               <label htmlFor="confirmPassword" className={labelClass}>
-                Confirm Password
+                {t.confirmPassword}
               </label>
               <input
                 id="confirmPassword"
@@ -209,7 +213,7 @@ export default function ProfilePage() {
                 disabled={isPasswordLoading}
                 className="px-5 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isPasswordLoading ? 'Updating…' : 'Update Password'}
+                {isPasswordLoading ? t.updating : t.updatePassword}
               </button>
               <button
                 type="button"
@@ -219,7 +223,7 @@ export default function ProfilePage() {
                 }}
                 className="px-5 py-2.5 border border-[#e8e4d9] text-[#4b4b4b] hover:bg-[#ece5de] text-sm font-medium rounded-lg transition-colors"
               >
-                Cancel
+                {t.cancel}
               </button>
             </div>
           </form>
@@ -231,11 +235,11 @@ export default function ProfilePage() {
       {/* Account status */}
       <section>
         <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#c4bbb3] mb-5">
-          Account Status
+          {t.accountStatus}
         </p>
         <div className="flex items-center gap-3 py-4 px-5 bg-white border border-[#1a1a1a]/20 rounded-xl">
           <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-          <p className="text-sm text-[#4b4b4b]">Account is active and verified</p>
+          <p className="text-sm text-[#4b4b4b]">{t.accountActive}</p>
         </div>
       </section>
     </div>

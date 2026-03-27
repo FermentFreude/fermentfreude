@@ -1,6 +1,8 @@
+import { accountI18n } from '@/app/(app)/account/i18n'
 import { DeleteAddressButton } from '@/components/dashboard/DeleteAddressButton'
 import { EditAddressModal } from '@/components/dashboard/EditAddressModal'
 import type { Address } from '@/payload-types'
+import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { MapPin, Pencil, Plus } from 'lucide-react'
 import { headers as getHeaders } from 'next/headers.js'
@@ -17,9 +19,11 @@ export default async function AddressesPage() {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+  const locale = await getLocale()
+  const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
   if (!user) {
-    redirect(`/login?warning=${encodeURIComponent('Please log in to manage your addresses.')}`)
+    redirect(`/login?warning=${encodeURIComponent(t.loginRequiredAddresses)}`)
   }
 
   let addresses: Address[] = []
@@ -40,18 +44,18 @@ export default async function AddressesPage() {
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9] flex items-start justify-between gap-4">
         <div>
-          <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">My Account</p>
+          <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">{t.myAccount}</p>
           <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
-            Addresses
+            {t.addresses}
           </h1>
-          <p className="mt-2 text-sm text-[#626160]">Manage your shipping and billing addresses.</p>
+          <p className="mt-2 text-sm text-[#626160]">{t.manageAddresses}</p>
         </div>
         <Link
           href="?modal=new-address"
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors shrink-0 mt-2"
         >
           <Plus className="w-4 h-4" />
-          Add Address
+          {t.addAddress}
         </Link>
       </div>
 
@@ -65,7 +69,7 @@ export default async function AddressesPage() {
               <div className="flex items-center gap-2 mb-4">
                 <MapPin className="w-3.5 h-3.5 text-[#c4bbb3] shrink-0" />
                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#c4bbb3]">
-                  {address.title || 'Address'}
+                  {address.title || t.addresses}
                 </p>
               </div>
 
@@ -92,7 +96,7 @@ export default async function AddressesPage() {
                   className="flex-1 inline-flex items-center justify-center gap-2 py-2 text-[12px] font-medium text-[#626160] hover:text-[#1a1a1a] border border-[#e8e4d9] hover:border-[#1a1a1a] rounded-lg transition-colors"
                 >
                   <Pencil className="w-3 h-3" />
-                  Edit
+                  {t.edit}
                 </Link>
                 <DeleteAddressButton id={address.id} />
               </div>
@@ -104,13 +108,13 @@ export default async function AddressesPage() {
           <div className="w-10 h-10 rounded-xl bg-[#f5f3f0] flex items-center justify-center mx-auto mb-4">
             <MapPin className="w-5 h-5 text-[#c4bbb3]" />
           </div>
-          <p className="text-[13px] text-[#626160] mb-6">No addresses saved yet.</p>
+          <p className="text-[13px] text-[#626160] mb-6">{t.noAddresses}</p>
           <Link
             href="?modal=new-address"
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Add Your First Address
+            {t.addFirstAddress}
           </Link>
         </div>
       )}

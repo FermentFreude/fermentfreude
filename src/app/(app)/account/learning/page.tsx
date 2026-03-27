@@ -1,3 +1,4 @@
+import { accountI18n } from '@/app/(app)/account/i18n'
 import configPromise from '@payload-config'
 import { BookOpen, CheckCircle2, Play } from 'lucide-react'
 import { headers as getHeaders } from 'next/headers.js'
@@ -35,6 +36,7 @@ export default async function MyLearningPage() {
   if (!user) return null
 
   const locale = (await getLocale()) as 'de' | 'en'
+  const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
   // Fetch all enrollment records for this user
   const enrollmentResult = await payload.find({
@@ -95,12 +97,12 @@ export default async function MyLearningPage() {
     <div className="max-w-3xl space-y-10">
       {/* Header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">My Account</p>
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">{t.myAccount}</p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
-          My Learning
+          {t.myLearning}
         </h1>
         <p className="mt-2 text-sm text-[#626160]">
-          Your online courses and progress. Pick up where you left off.
+          {t.learningSubtitle}
         </p>
       </div>
 
@@ -110,15 +112,15 @@ export default async function MyLearningPage() {
           <div className="w-12 h-12 rounded-full bg-[#f5f3f0] flex items-center justify-center mx-auto mb-4">
             <BookOpen className="w-5 h-5 text-[#9e9189]" />
           </div>
-          <p className="font-display font-semibold text-[#1a1a1a] text-base mb-1">No courses yet</p>
+          <p className="font-display font-semibold text-[#1a1a1a] text-base mb-1">{t.noCourses}</p>
           <p className="text-sm text-[#626160] mb-6 max-w-xs mx-auto">
-            Purchase an online course to access it here and track your progress.
+            {t.noCoursesDesc}
           </p>
           <Link
             href="/courses"
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors"
           >
-            Browse Courses
+            {t.browseCourses}
           </Link>
         </div>
       ) : (
@@ -147,7 +149,7 @@ export default async function MyLearningPage() {
                 {/* Content */}
                 <div className="flex-1 p-6 flex flex-col gap-4 min-w-0">
                   <div>
-                    <p className="text-eyebrow text-[#9e9189] mb-1.5">Online Course</p>
+                    <p className="text-eyebrow text-[#9e9189] mb-1.5">{t.onlineCourse}</p>
                     <h2 className="font-display font-bold text-[1.15rem] text-[#1a1a1a] leading-snug">
                       {course.title}
                     </h2>
@@ -160,7 +162,7 @@ export default async function MyLearningPage() {
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-[12px]">
                       <span className="text-[#4b4b4b] font-medium">
-                        {course.completed} / {course.total} lessons completed
+                        {t.lessonsCompleted(course.completed, course.total)}
                       </span>
                       <span
                         className={
@@ -169,7 +171,7 @@ export default async function MyLearningPage() {
                             : 'text-[#9e9189] font-medium'
                         }
                       >
-                        {course.pct === 100 ? '✓ Complete' : `${course.pct}%`}
+                        {course.pct === 100 ? `✓ ${t.complete}` : `${course.pct}%`}
                       </span>
                     </div>
                     <div className="h-1.5 bg-[#f0ece5] rounded-full overflow-hidden">
@@ -188,17 +190,17 @@ export default async function MyLearningPage() {
                     {course.pct === 0 ? (
                       <>
                         <Play className="w-3.5 h-3.5" />
-                        Start Course
+                        {t.startCourse}
                       </>
                     ) : course.pct === 100 ? (
                       <>
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Review Course
+                        {t.reviewCourse}
                       </>
                     ) : (
                       <>
                         <Play className="w-3.5 h-3.5" />
-                        Continue Learning
+                        {t.continueCourse}
                       </>
                     )}
                   </Link>
@@ -215,7 +217,7 @@ export default async function MyLearningPage() {
             href="/courses"
             className="text-[13px] font-medium text-[#4b4b4b] hover:text-[#1a1a1a] transition-colors"
           >
-            Browse more courses →
+            {t.browseMoreCourses} →
           </Link>
         </div>
       )}

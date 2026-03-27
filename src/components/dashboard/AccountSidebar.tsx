@@ -1,6 +1,8 @@
 'use client'
 
+import { accountI18n, type AccountTranslations } from '@/app/(app)/account/i18n'
 import { useAuth } from '@/providers/Auth'
+import { useLocale } from '@/providers/Locale'
 import { cn } from '@/utilities/cn'
 import {
   GraduationCap,
@@ -14,21 +16,23 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const NAV_GROUPS = [
+type NavItem = { key: keyof AccountTranslations; href: string; exact?: boolean; icon: typeof LayoutDashboard }
+
+const NAV_GROUPS: { key: keyof AccountTranslations; items: NavItem[] }[] = [
   {
-    label: 'My Account',
+    key: 'myAccount',
     items: [
-      { label: 'Overview', href: '/account', exact: true, icon: LayoutDashboard },
-      { label: 'Orders', href: '/account/orders', icon: ShoppingBag },
-      { label: 'My Learning', href: '/account/learning', icon: GraduationCap },
+      { key: 'overview', href: '/account', exact: true, icon: LayoutDashboard },
+      { key: 'orders', href: '/account/orders', icon: ShoppingBag },
+      { key: 'myLearning', href: '/account/learning', icon: GraduationCap },
     ],
   },
   {
-    label: 'Settings',
+    key: 'settings',
     items: [
-      { label: 'Profile', href: '/account/profile', icon: User },
-      { label: 'Addresses', href: '/account/addresses', icon: MapPin },
-      { label: 'Shipping', href: '/account/shipping-methods', icon: Truck },
+      { key: 'profile', href: '/account/profile', icon: User },
+      { key: 'addresses', href: '/account/addresses', icon: MapPin },
+      { key: 'shipping', href: '/account/shipping-methods', icon: Truck },
     ],
   },
 ]
@@ -36,6 +40,8 @@ const NAV_GROUPS = [
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const { locale } = useLocale()
+  const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href)
@@ -73,9 +79,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5 min-h-0">
         {NAV_GROUPS.map((group) => (
-          <div key={group.label}>
+          <div key={group.key}>
             <p className="px-3 mb-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-[#c4bbb3]">
-              {group.label}
+              {t[group.key] as string}
             </p>
             <div className="space-y-0.5">
               {group.items.map((item) => {
@@ -98,7 +104,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                         active ? 'text-white/70' : 'text-[#9e9189]',
                       )}
                     />
-                    {item.label}
+                    {t[item.key] as string}
                   </Link>
                 )
               })}
@@ -114,7 +120,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium text-[#626160] hover:bg-red-50 hover:text-red-600 transition-colors duration-150"
         >
           <LogOut className="w-3.5 h-3.5 shrink-0" />
-          Sign out
+          {t.signOut}
         </button>
       </div>
     </div>
@@ -123,6 +129,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 function MobileTabStrip() {
   const pathname = usePathname()
+  const { locale } = useLocale()
+  const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href)
@@ -148,7 +156,7 @@ function MobileTabStrip() {
               <item.icon
                 className={cn('w-3 h-3 shrink-0', active ? 'text-white/70' : 'text-[#9e9189]')}
               />
-              {item.label}
+              {t[item.key] as string}
             </Link>
           )
         })}

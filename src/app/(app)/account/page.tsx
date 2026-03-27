@@ -7,6 +7,8 @@ import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
 import { getPayload } from 'payload'
 
+import { accountI18n, type AccountTranslations } from '@/app/(app)/account/i18n'
+
 export const metadata = {
   title: 'Dashboard — FermentFreude',
   description: 'Your account dashboard',
@@ -40,65 +42,7 @@ async function getOrderStats(userId: string): Promise<OrderStats> {
   }
 }
 
-const i18n = {
-  de: {
-    myAccount: 'Mein Konto',
-    welcomeBack: (name: string) => `Willkommen zurück, ${name}.`,
-    subtitle: 'Bestellungen ansehen, Adressen verwalten und Kontodaten bearbeiten.',
-    viewOrders: 'Bestellungen',
-    editProfile: 'Profil bearbeiten',
-    totalOrders: 'Bestellungen',
-    processing: 'In Bearbeitung',
-    delivered: 'Geliefert',
-    memberSince: 'Mitglied seit',
-    myLearning: 'Meine Kurse',
-    viewAll: 'Alle ansehen',
-    courseEnrolled: (n: number) =>
-      n === 1 ? '1 Kurs eingeschrieben' : `${n} Kurse eingeschrieben`,
-    pickUp: 'Dort weitermachen, wo du aufgehört hast',
-    continue: 'Weiter',
-    recentOrders: 'Letzte Bestellungen',
-    order: 'Bestellung',
-    date: 'Datum',
-    status: 'Status',
-    total: 'Gesamt',
-    view: 'Ansehen',
-    noOrders: 'Noch keine Bestellungen.',
-    exploreWorkshops: 'Workshops entdecken',
-    statusDelivered: 'Geliefert',
-    statusProcessing: 'In Bearbeitung',
-    statusPending: 'Ausstehend',
-  },
-  en: {
-    myAccount: 'My Account',
-    welcomeBack: (name: string) => `Welcome back, ${name}.`,
-    subtitle: 'View your orders, manage your addresses, and update your account details.',
-    viewOrders: 'View Orders',
-    editProfile: 'Edit Profile',
-    totalOrders: 'Total Orders',
-    processing: 'Processing',
-    delivered: 'Delivered',
-    memberSince: 'Member Since',
-    myLearning: 'My Learning',
-    viewAll: 'View all',
-    courseEnrolled: (n: number) => (n === 1 ? '1 course enrolled' : `${n} courses enrolled`),
-    pickUp: 'Pick up where you left off',
-    continue: 'Continue',
-    recentOrders: 'Recent Orders',
-    order: 'Order',
-    date: 'Date',
-    status: 'Status',
-    total: 'Total',
-    view: 'View',
-    noOrders: 'No orders yet.',
-    exploreWorkshops: 'Explore Workshops',
-    statusDelivered: 'Delivered',
-    statusProcessing: 'Processing',
-    statusPending: 'Pending',
-  },
-} as const
-
-function StatusDot({ status, t }: { status: string; t: typeof i18n.en | typeof i18n.de }) {
+function StatusDot({ status, t }: { status: string; t: AccountTranslations }) {
   if (status === 'succeeded')
     return (
       <span className="inline-flex items-center gap-1.5 text-[12px] text-green-700 font-medium">
@@ -126,7 +70,7 @@ export default async function DashboardPage() {
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
   const locale = await getLocale()
-  const t = locale === 'de' ? i18n.de : i18n.en
+  const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
   if (!user) return null
 
@@ -150,7 +94,7 @@ export default async function DashboardPage() {
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
           {t.welcomeBack(firstName)}
         </h1>
-        <p className="mt-2 text-sm text-[#626160] max-w-sm">{t.subtitle}</p>
+        <p className="mt-2 text-sm text-[#626160] max-w-sm">{t.dashboardSubtitle}</p>
         <div className="flex gap-3 mt-5">
           <Link
             href="/account/orders"

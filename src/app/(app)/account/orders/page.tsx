@@ -1,5 +1,7 @@
+import { accountI18n, type AccountTranslations } from '@/app/(app)/account/i18n'
 import type { Order } from '@/payload-types'
 import { formatDate, formatPrice } from '@/utilities/form/formatters'
+import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { ArrowRight } from 'lucide-react'
 import { headers as getHeaders } from 'next/headers.js'
@@ -12,25 +14,25 @@ export const metadata = {
   description: 'Your order history',
 }
 
-function StatusDot({ status }: { status: string }) {
+function StatusDot({ status, t }: { status: string; t: AccountTranslations }) {
   if (status === 'completed')
     return (
       <span className="inline-flex items-center gap-1.5 text-[12px] text-green-700 font-medium">
         <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
-        Delivered
+        {t.statusDelivered}
       </span>
     )
   if (status === 'processing')
     return (
       <span className="inline-flex items-center gap-1.5 text-[12px] text-blue-700 font-medium">
         <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
-        Processing
+        {t.statusProcessing}
       </span>
     )
   return (
     <span className="inline-flex items-center gap-1.5 text-[12px] text-[#626160] font-medium">
       <span className="w-1.5 h-1.5 rounded-full bg-[#c4bbb3] shrink-0" />
-      Pending
+      {t.statusPending}
     </span>
   )
 }
@@ -39,9 +41,11 @@ export default async function OrdersPage() {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+  const locale = await getLocale()
+  const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
   if (!user) {
-    redirect(`/login?warning=${encodeURIComponent('Please log in to view your orders.')}`)
+    redirect(`/login?warning=${encodeURIComponent(t.loginRequiredOrders)}`)
   }
 
   let orders: Order[] = []
@@ -63,14 +67,12 @@ export default async function OrdersPage() {
     <div className="max-w-4xl space-y-10">
       {/* Page header */}
       <div className="pb-8 border-b border-[#e8e4d9]">
-        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">My Account</p>
+        <p className="text-eyebrow font-bold text-ff-gold-accent mb-3">{t.myAccount}</p>
         <h1 className="font-display text-[2rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
-          Orders
+          {t.orders}
         </h1>
         <p className="mt-2 text-sm text-[#626160]">
-          {orders.length > 0
-            ? `${orders.length} order${orders.length !== 1 ? 's' : ''} in your history`
-            : 'Your order history will appear here.'}
+          {t.ordersSubtitle(orders.length)}
         </p>
       </div>
 
@@ -79,11 +81,11 @@ export default async function OrdersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#e8e4d9]">
-                {['Order', 'Date', 'Status', 'Items', 'Total', ''].map((h) => (
+                {[t.order, t.date, t.status, t.items, t.total, ''].map((h) => (
                   <th
                     key={h}
                     className={`py-3.5 px-5 text-[9px] font-bold uppercase tracking-[0.14em] text-[#c4bbb3] ${
-                      h === 'Total' || h === '' ? 'text-right' : 'text-left'
+                      h === t.total || h === '' ? 'text-right' : 'text-left'
                     }`}
                   >
                     {h}
@@ -106,7 +108,7 @@ export default async function OrdersPage() {
                     {formatDate(order.createdAt)}
                   </td>
                   <td className="py-4 px-5">
-                    <StatusDot status={order.status || 'processing'} />
+                    <StatusDot status={order.status || 'processing'} t={t} />
                   </td>
                   <td className="py-4 px-5 text-[13px] text-[#626160]">
                     {Array.isArray(order.items) ? order.items.length : 0}
@@ -119,7 +121,7 @@ export default async function OrdersPage() {
                       href={`/account/orders/${order.id}`}
                       className="inline-flex items-center gap-1 text-[12px] text-[#626160] hover:text-[#1a1a1a] font-medium transition-colors"
                     >
-                      View <ArrowRight className="w-3 h-3" />
+                      {t.view} <ArrowRight className="w-3 h-3" />
                     </Link>
                   </td>
                 </tr>
@@ -129,12 +131,12 @@ export default async function OrdersPage() {
         </div>
       ) : (
         <div className="bg-white border border-[#1a1a1a]/20 rounded-xl p-16 text-center">
-          <p className="text-[13px] text-[#626160] mb-6">No orders yet.</p>
+          <p className="text-[13px] text-[#626160] mb-6">{t.noOrders}</p>
           <Link
             href="/workshops"
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#333333] text-white text-sm font-medium rounded-lg transition-colors"
           >
-            Explore Workshops
+            {t.exploreWorkshops}
           </Link>
         </div>
       )}

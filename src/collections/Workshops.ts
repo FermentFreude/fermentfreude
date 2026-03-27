@@ -1,4 +1,5 @@
 import { adminOnly } from '@/access/adminOnly'
+import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import type { CollectionConfig } from 'payload'
 
 export const Workshops: CollectionConfig = {
@@ -8,6 +9,9 @@ export const Workshops: CollectionConfig = {
     create: adminOnly,
     update: adminOnly,
     delete: adminOnly,
+  },
+  hooks: {
+    afterChange: [autoTranslateCollection],
   },
   admin: {
     useAsTitle: 'title',

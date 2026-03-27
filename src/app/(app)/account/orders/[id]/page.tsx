@@ -1,12 +1,14 @@
 import type { Order } from '@/payload-types'
 import type { Metadata } from 'next'
 
+import { accountI18n } from '@/app/(app)/account/i18n'
 import { OrderStatus } from '@/components/OrderStatus'
 import { Price } from '@/components/Price'
 import { ProductItem } from '@/components/ProductItem'
 import { AddressItem } from '@/components/addresses/AddressItem'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/utilities/formatDateTime'
+import { getLocale } from '@/utilities/getLocale'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import configPromise from '@payload-config'
 import { ChevronLeftIcon } from 'lucide-react'
@@ -26,6 +28,8 @@ export default async function Order({ params, searchParams }: PageProps) {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+  const locale = await getLocale()
+  const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
   const { id } = await params
   const { email = '' } = await searchParams
@@ -113,7 +117,7 @@ export default async function Order({ params, searchParams }: PageProps) {
             <Button asChild variant="ghost">
               <Link href="/orders">
                 <ChevronLeftIcon />
-                All orders
+                {t.allOrders}
               </Link>
             </Button>
           </div>
@@ -129,7 +133,7 @@ export default async function Order({ params, searchParams }: PageProps) {
       <div className="bg-card border rounded-lg px-6 py-4 flex flex-col gap-12">
         <div className="flex flex-col gap-6 lg:flex-row lg:justify-between">
           <div className="">
-            <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Order Date</p>
+            <p className="font-mono uppercase text-primary/50 mb-1 text-sm">{t.orderDate}</p>
             <p className="text-lg">
               <time dateTime={order.createdAt}>
                 {formatDateTime({ date: order.createdAt, format: 'MMMM dd, yyyy' })}
@@ -138,13 +142,13 @@ export default async function Order({ params, searchParams }: PageProps) {
           </div>
 
           <div className="">
-            <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Total</p>
+            <p className="font-mono uppercase text-primary/50 mb-1 text-sm">{t.total}</p>
             {order.amount && <Price className="text-lg" amount={order.amount} />}
           </div>
 
           {order.status && (
             <div className="grow max-w-1/3">
-              <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Status</p>
+              <p className="font-mono uppercase text-primary/50 mb-1 text-sm">{t.status}</p>
               <OrderStatus className="text-sm" status={order.status} />
             </div>
           )}
@@ -152,7 +156,7 @@ export default async function Order({ params, searchParams }: PageProps) {
 
         {order.items && (
           <div>
-            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Items</h2>
+            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">{t.items}</h2>
             <ul className="flex flex-col gap-6">
               {order.items?.map((item, index) => {
                 if (typeof item.product === 'string') {
@@ -160,7 +164,7 @@ export default async function Order({ params, searchParams }: PageProps) {
                 }
 
                 if (!item.product || typeof item.product !== 'object') {
-                  return <div key={index}>This item is no longer available.</div>
+                  return <div key={index}>{t.itemUnavailable}</div>
                 }
 
                 const variant =
@@ -182,7 +186,7 @@ export default async function Order({ params, searchParams }: PageProps) {
 
         {order.shippingAddress && (
           <div>
-            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Shipping Address</h2>
+            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">{t.shippingAddress}</h2>
 
             <AddressItem
               address={{
