@@ -161,12 +161,30 @@ export function WorkshopCalendar({
   description,
   appointments,
   nextDateLabel,
+  allDatesHeading,
+  allFilterLabel,
+  typeColumnLabel,
+  dateColumnLabel,
+  spotsColumnLabel,
+  spotsLabel,
+  soldOutLabel,
+  bookLabel,
+  emptyMessage,
 }: {
   cards?: WorkshopCalendarCard[] | null
   title?: string | null
   description?: string | null
   appointments?: WorkshopDate[]
   nextDateLabel?: string | null
+  allDatesHeading?: string | null
+  allFilterLabel?: string | null
+  typeColumnLabel?: string | null
+  dateColumnLabel?: string | null
+  spotsColumnLabel?: string | null
+  spotsLabel?: string | null
+  soldOutLabel?: string | null
+  bookLabel?: string | null
+  emptyMessage?: string | null
 } = {}) {
   // Default workshop card types (fallback when no CMS data)
   const defaultWorkshopCards: WorkshopCalendarCard[] = [
@@ -350,7 +368,7 @@ export function WorkshopCalendar({
           {/* Filter & Dates Calendar Section */}
           <div className="border-t border-[#e8e4d9] pt-8 sm:pt-12">
             <h3 className="font-bold text-xl sm:text-2xl text-[#1a1a1a] mb-4 sm:mb-6">
-              Alle verfügbaren Termine
+              {allDatesHeading || 'Alle verfügbaren Termine'}
             </h3>
 
             {/* Filter Buttons */}
@@ -363,7 +381,7 @@ export function WorkshopCalendar({
                     : 'bg-[#f5f1e8] text-[#555954] hover:bg-[#e8e4d9]'
                 }`}
               >
-                Alle
+                {allFilterLabel || 'Alle'}
               </button>
               {['lakto', 'kombucha', 'tempeh'].map((type) => (
                 <button
@@ -391,7 +409,7 @@ export function WorkshopCalendar({
                     {/* Workshop Type */}
                     <div>
                       <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                        Workshop-Art
+                        {typeColumnLabel || 'Workshop-Art'}
                       </p>
                       <p className="font-display font-bold text-base text-[#1a1a1a]">
                         {getWorkshopTypeLabel(date.workshopType)}
@@ -401,7 +419,7 @@ export function WorkshopCalendar({
                     {/* Date & Time */}
                     <div>
                       <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                        Datum & Zeit
+                        {dateColumnLabel || 'Datum & Zeit'}
                       </p>
                       <div className="space-y-1">
                         <p className="font-display font-bold text-base text-[#1a1a1a]">
@@ -429,10 +447,10 @@ export function WorkshopCalendar({
                     {/* Availability */}
                     <div>
                       <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                        Plätze frei
+                        {spotsColumnLabel || 'Plätze frei'}
                       </p>
                       <p className="font-display font-bold text-base text-[#1a1a1a]">
-                        {date.availableSpots > 0 ? `${date.availableSpots} Plätze` : 'Ausgebucht'}
+                        {date.availableSpots > 0 ? `${date.availableSpots} ${spotsLabel || 'Plätze'}` : (soldOutLabel || 'Ausgebucht')}
                       </p>
                     </div>
 
@@ -449,7 +467,7 @@ export function WorkshopCalendar({
                         }}
                         className="inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954] transition-all duration-300"
                       >
-                        → Buchen
+                        {bookLabel || '→ Buchen'}
                       </button>
                     </div>
                   </div>
@@ -460,7 +478,7 @@ export function WorkshopCalendar({
             {filteredDates.length === 0 && (
               <div className="py-8 sm:py-12 text-center">
                 <p className="text-[#9a9a9a] text-sm sm:text-body">
-                  Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.
+                  {emptyMessage || 'Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.'}
                 </p>
               </div>
             )}
