@@ -262,6 +262,79 @@ const workshopDetailDE = {
   sliderPillLabel: 'WORKSHOP-ART',
   sliderBuyLabel: 'Jetzt buchen',
   sliderMoreInfoLabel: 'Mehr erfahren',
+
+  // ── 12. All Dates Section ──────────────────────────────
+  allDatesHeading: 'Alle Termine',
+  allDatesSubtitle: 'Finde den perfekten Workshop-Termin für dich.',
+  allDatesSlotsLabel: 'Plätze frei',
+  allDatesFilterAllLabel: 'Alle Workshops',
+
+  // ── 13. Generic Booking Labels ─────────────────────────
+  genericDateLabel: 'Datum',
+  genericQuantityLabel: 'Anzahl',
+  genericDetailsLabel: 'Workshop Details',
+  genericReserveLabel: 'Platz reservieren',
+  genericTimeLabel: 'Startet um 11:00 Uhr',
+
+  // ── 14. Gift & Online Section ──────────────────────────
+  giftTitle: 'Verschenke ein besonderes Geschmackserlebnis',
+  giftDescription:
+    'Unsere Gutscheine sind das perfekte Geschenk für Feinschmecker, gesundheitsbewusste Freunde und Hobbyköche. Einlösbar für jeden Workshop vor Ort oder online.',
+  giftBuyNowLabel: 'Jetzt kaufen',
+  giftBuyNowHref: '/shop',
+  giftBuyVoucherLabel: 'Gutschein kaufen',
+  giftBuyVoucherHref: '/workshops/voucher',
+  onlineTitle: 'Fermentation jederzeit und überall lernen',
+  onlineDescription:
+    'Keine Zeit für Berlin? Unsere digitalen Workshops bringen die Expertise in deine Küche – mit hochwertigen Video-Tutorials und herunterladbaren Anleitungen.',
+  onlineButtonLabel: 'Online-Kurse entdecken',
+  onlineButtonHref: '/workshops',
+  onlineBullets: [
+    { text: 'Lebenslanger Zugang zu allen Inhalten' },
+    { text: 'Herunterladbare Rezeptbücher' },
+    { text: 'Direkte Unterstützung im Schülerforum' },
+  ],
+
+  // ── 15. Generic FAQ Section ────────────────────────────
+  genericFaqHeading: 'Du hast Fragen zu Fermentieren?',
+  genericFaqSubtitle: 'Klicke, um alle Antworten zu sehen!',
+  genericFaqItems: [
+    { question: 'Wie lange dauert ein Workshop?', answer: 'Unsere Workshops dauern in der Regel 2,5 bis 3 Stunden.' },
+    { question: 'Muss ich Vorkenntnisse mitbringen?', answer: 'Nein, alle Workshops sind für Einsteiger konzipiert.' },
+    { question: 'Kann ich den Workshop verschenken?', answer: 'Ja, wir bieten Gutscheine für alle Workshops an.' },
+    { question: 'Wo finden die Workshops statt?', answer: 'In Berlin-Neukölln. Die genaue Adresse erhältst du nach der Buchung.' },
+    { question: 'Was passiert bei Absage?', answer: 'Du kannst bis 48 Stunden vorher kostenlos stornieren.' },
+    { question: 'Gibt es Online-Alternativen?', answer: 'Ja, wir bieten auch digitale Workshops und Kurse an.' },
+  ],
+
+  // ── 16. Team Building Section ──────────────────────────
+  teamEyebrow: 'Firmenveranstaltungen',
+  teamHeading: 'Fermentation als Teambuilding',
+  teamDescription:
+    'Auf der Suche nach einem einzigartigen Team-Erlebnis? Unsere B2B-Workshops fördern die Zusammenarbeit durch den meditativen und bereichernden Prozess des gemeinsamen Fermentierens. Bei uns im Studio oder bei Ihnen im Büro.',
+  teamBullets: [
+    { text: 'Maßgeschneiderte Workshop-Themen' },
+    { text: 'Catering inklusive' },
+    { text: 'Mitnahme-Gläser für jeden Teilnehmer' },
+  ],
+  teamCtaLabel: 'Anfrage senden',
+  teamCtaHref: '/contact',
+
+  // ── 17. Learn Online Section ───────────────────────────
+  learnOnlineHeading: 'Lerne Fermentation\nJederzeit, überall',
+  learnOnlineDescription:
+    'Sofortiger Zugang zu allen Online-Video-Workshops. Kein Warten, keine festen Termine. Starte jetzt und lerne in deinem eigenen Tempo.',
+  learnOnlineButtonLabel: 'Online-Kurse entdecken',
+  learnOnlineButtonHref: '/workshops',
+
+  // ── 18. Why Online Section ─────────────────────────────
+  whyOnlineHeading: 'Warum unsere Online-Workshops?',
+  whyOnlineFeatures: [
+    { icon: 'lightning' as const, title: 'Sofortiger Zugang', description: 'Direkter Zugang nach dem Kauf – keine Wartezeit' },
+    { icon: 'clock' as const, title: 'Dein Tempo', description: 'Pausieren, wiederholen, wann immer du möchtest' },
+    { icon: 'home' as const, title: 'Von Zuhause', description: 'Lerne bequem in deiner eigenen Küche' },
+    { icon: 'book' as const, title: 'Rezepte & PDFs', description: 'Alle Rezepte zum Download verfügbar' },
+  ],
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -506,6 +579,79 @@ const workshopDetailEN = {
   sliderPillLabel: 'WORKSHOP TYPE',
   sliderBuyLabel: 'Book now',
   sliderMoreInfoLabel: 'Learn more',
+
+  // ── 12. All Dates Section ──────────────────────────────
+  allDatesHeading: 'All Appointments',
+  allDatesSubtitle: 'Find the perfect workshop appointment for you.',
+  allDatesSlotsLabel: 'spots available',
+  allDatesFilterAllLabel: 'All workshops',
+
+  // ── 13. Generic Booking Labels ─────────────────────────
+  genericDateLabel: 'Date',
+  genericQuantityLabel: 'Quantity',
+  genericDetailsLabel: 'Workshop Details',
+  genericReserveLabel: 'Reserve Your Spot',
+  genericTimeLabel: 'Starts at 11:00 AM',
+
+  // ── 14. Gift & Online Section ──────────────────────────
+  giftTitle: 'Gift a special tasty experience',
+  giftDescription:
+    'Our vouchers are the perfect gift for foodies, health-conscious friends, and hobby chefs. Redeemable for any on-site or online workshop.',
+  giftBuyNowLabel: 'Buy Now',
+  giftBuyNowHref: '/shop',
+  giftBuyVoucherLabel: 'Buy Voucher',
+  giftBuyVoucherHref: '/workshops/voucher',
+  onlineTitle: 'Learn Fermentation Anytime, Anywhere',
+  onlineDescription:
+    "Can't make it to Berlin? Our digital workshops bring the expertise to your kitchen with high-quality video tutorials and downloadable guides.",
+  onlineButtonLabel: 'Explore Online Courses',
+  onlineButtonHref: '/workshops',
+  onlineBullets: [
+    { text: 'Lifetime access to all content' },
+    { text: 'Downloadable recipe books' },
+    { text: 'Direct support in the student forum' },
+  ],
+
+  // ── 15. Generic FAQ Section ────────────────────────────
+  genericFaqHeading: 'Do you have questions about Fermentation?',
+  genericFaqSubtitle: 'Click to view all the answers!',
+  genericFaqItems: [
+    { question: 'How long does a workshop last?', answer: 'Our workshops typically last 2.5 to 3 hours.' },
+    { question: 'Do I need prior experience?', answer: 'No, all workshops are designed for beginners.' },
+    { question: 'Can I gift a workshop?', answer: 'Yes, we offer vouchers for all workshops.' },
+    { question: 'Where do the workshops take place?', answer: "In Berlin-Neukölln. You'll receive the exact address after booking." },
+    { question: 'What happens if I cancel?', answer: 'You can cancel free of charge up to 48 hours before.' },
+    { question: 'Are there online alternatives?', answer: 'Yes, we also offer digital workshops and courses.' },
+  ],
+
+  // ── 16. Team Building Section ──────────────────────────
+  teamEyebrow: 'Corporate Events',
+  teamHeading: 'Fermentation as Team Building',
+  teamDescription:
+    'Looking for a unique team experience? Our B2B workshops are designed to foster collaboration through the meditative and rewarding process of fermenting together. Available at our studio or your office.',
+  teamBullets: [
+    { text: 'Customized workshop themes' },
+    { text: 'Catering included' },
+    { text: 'Take-home jars for every participant' },
+  ],
+  teamCtaLabel: 'Request Quote',
+  teamCtaHref: '/contact',
+
+  // ── 17. Learn Online Section ───────────────────────────
+  learnOnlineHeading: 'Learn Fermentation\nAnytime, Anywhere',
+  learnOnlineDescription:
+    'Instant access to all online video workshops. No waiting, no scheduled appointments. Start now and learn at your own pace.',
+  learnOnlineButtonLabel: 'Explore Online Courses',
+  learnOnlineButtonHref: '/workshops',
+
+  // ── 18. Why Online Section ─────────────────────────────
+  whyOnlineHeading: 'Why Our Online Workshops?',
+  whyOnlineFeatures: [
+    { icon: 'lightning' as const, title: 'Instant Access', description: 'Direct access after purchase – no waiting time' },
+    { icon: 'clock' as const, title: 'Your Pace', description: 'Pause, repeat, whenever you want' },
+    { icon: 'home' as const, title: 'From Home', description: 'Learn comfortably in your own kitchen' },
+    { icon: 'book' as const, title: 'Recipes & PDFs', description: 'All recipes available for download' },
+  ],
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -593,6 +739,10 @@ async function seedLaktoDetail() {
     'calendarMonths',
     'voucherPills',
     'faqItems',
+    'onlineBullets',
+    'genericFaqItems',
+    'teamBullets',
+    'whyOnlineFeatures',
     // howToArticles is a relationship to Posts — linked manually in admin
   ] as const
 

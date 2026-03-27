@@ -340,59 +340,55 @@ export default async function WorkshopDetailPage({ params }: Args) {
   // Get hardcoded workshop data for lakto-gemuese (booking card + details)
   const workshopDetailData = slug === 'lakto-gemuese' ? getWorkshopBySlug(slug) : null
 
-  // Generic-layout section data — these sections only appear in the non-dedicated fallback.
-  // Dedicated layouts (lakto/tempeh/kombucha) read from `detail` directly.
-  const gift = undefined as
-    | {
-        giftTitle?: string | null
-        giftDescription?: string | null
-        giftBuyNowLabel?: string | null
-        giftBuyVoucherLabel?: string | null
-        giftBuyNowHref?: string | null
-        giftBuyVoucherHref?: string | null
-        onlineTitle?: string | null
-        onlineDescription?: string | null
-        onlineButtonLabel?: string | null
-        onlineButtonHref?: string | null
-        onlineBullets?: Array<{ text?: string | null }> | null
+  // Generic-layout section data — read from CMS workshopDetail fields when available.
+  // Dedicated layouts (lakto/tempeh/kombucha) have their own section components.
+  const gift = detail
+    ? {
+        giftTitle: detail.giftTitle,
+        giftDescription: detail.giftDescription,
+        giftBuyNowLabel: detail.giftBuyNowLabel,
+        giftBuyVoucherLabel: detail.giftBuyVoucherLabel,
+        giftBuyNowHref: detail.giftBuyNowHref,
+        giftBuyVoucherHref: detail.giftBuyVoucherHref,
+        onlineTitle: detail.onlineTitle,
+        onlineDescription: detail.onlineDescription,
+        onlineButtonLabel: detail.onlineButtonLabel,
+        onlineButtonHref: detail.onlineButtonHref,
+        onlineBullets: detail.onlineBullets,
       }
-    | undefined
-  const faq = undefined as
-    | {
-        faqHeading?: string | null
-        faqSubtitle?: string | null
-        faqItems?: Array<{ question?: string | null; answer?: string | null }> | null
+    : undefined
+  const faq = detail
+    ? {
+        faqHeading: detail.genericFaqHeading,
+        faqSubtitle: detail.genericFaqSubtitle,
+        faqItems: detail.genericFaqItems,
       }
-    | undefined
-  const team = undefined as
-    | {
-        teamEyebrow?: string | null
-        teamHeading?: string | null
-        teamDescription?: string | null
-        teamBullets?: Array<{ text?: string | null }> | null
-        teamCtaLabel?: string | null
-        teamCtaHref?: string | null
-        teamImage?: unknown
+    : undefined
+  const team = detail
+    ? {
+        teamEyebrow: detail.teamEyebrow,
+        teamHeading: detail.teamHeading,
+        teamDescription: detail.teamDescription,
+        teamBullets: detail.teamBullets,
+        teamCtaLabel: detail.teamCtaLabel,
+        teamCtaHref: detail.teamCtaHref,
+        teamImage: undefined as unknown,
       }
-    | undefined
-  const learn = undefined as
-    | {
-        learnOnlineHeading?: string | null
-        learnOnlineDescription?: string | null
-        learnOnlineButtonLabel?: string | null
-        learnOnlineButtonHref?: string | null
+    : undefined
+  const learn = detail
+    ? {
+        learnOnlineHeading: detail.learnOnlineHeading,
+        learnOnlineDescription: detail.learnOnlineDescription,
+        learnOnlineButtonLabel: detail.learnOnlineButtonLabel,
+        learnOnlineButtonHref: detail.learnOnlineButtonHref,
       }
-    | undefined
-  const why = undefined as
-    | {
-        whyOnlineHeading?: string | null
-        whyOnlineFeatures?: Array<{
-          icon?: string | null
-          title?: string | null
-          description?: string | null
-        }> | null
+    : undefined
+  const why = detail
+    ? {
+        whyOnlineHeading: detail.whyOnlineHeading,
+        whyOnlineFeatures: detail.whyOnlineFeatures,
       }
-    | undefined
+    : undefined
 
   if (!workshop) return notFound()
 
@@ -412,15 +408,24 @@ export default async function WorkshopDetailPage({ params }: Args) {
   const workshopTypePill =
     detail?.sliderPillLabel ??
     (isDe ? DEFAULT_WORKSHOP_TYPE_PILL_DE : DEFAULT_WORKSHOP_TYPE_PILL_EN)
-  const alleTermineHeading = isDe ? DEFAULT_ALLE_TERMINE_DE : DEFAULT_ALLE_TERMINE_EN
-  const alleTermineSub = isDe ? DEFAULT_ALLE_TERMINE_SUB_DE : DEFAULT_ALLE_TERMINE_SUB_EN
-  const slotsFreeLabel = isDe ? DEFAULT_SLOTS_FREE_DE : DEFAULT_SLOTS_FREE_EN
-  const filterAllLabel = isDe ? DEFAULT_FILTER_ALL_DE : DEFAULT_FILTER_ALL_EN
-  const dateLabel = isDe ? DEFAULT_DATE_LABEL_DE : DEFAULT_DATE_LABEL_EN
-  const quantityLabel = isDe ? DEFAULT_QUANTITY_LABEL_DE : DEFAULT_QUANTITY_LABEL_EN
-  const detailsLabel = isDe ? DEFAULT_DETAILS_LABEL_DE : DEFAULT_DETAILS_LABEL_EN
-  const reserveLabel = isDe ? DEFAULT_RESERVE_LABEL_DE : DEFAULT_RESERVE_LABEL_EN
-  const timeStartsLabel = isDe ? DEFAULT_TIME_STARTS_DE : DEFAULT_TIME_STARTS_EN
+  const alleTermineHeading =
+    detail?.allDatesHeading ?? (isDe ? DEFAULT_ALLE_TERMINE_DE : DEFAULT_ALLE_TERMINE_EN)
+  const alleTermineSub =
+    detail?.allDatesSubtitle ?? (isDe ? DEFAULT_ALLE_TERMINE_SUB_DE : DEFAULT_ALLE_TERMINE_SUB_EN)
+  const slotsFreeLabel =
+    detail?.allDatesSlotsLabel ?? (isDe ? DEFAULT_SLOTS_FREE_DE : DEFAULT_SLOTS_FREE_EN)
+  const filterAllLabel =
+    detail?.allDatesFilterAllLabel ?? (isDe ? DEFAULT_FILTER_ALL_DE : DEFAULT_FILTER_ALL_EN)
+  const dateLabel =
+    detail?.genericDateLabel ?? (isDe ? DEFAULT_DATE_LABEL_DE : DEFAULT_DATE_LABEL_EN)
+  const quantityLabel =
+    detail?.genericQuantityLabel ?? (isDe ? DEFAULT_QUANTITY_LABEL_DE : DEFAULT_QUANTITY_LABEL_EN)
+  const detailsLabel =
+    detail?.genericDetailsLabel ?? (isDe ? DEFAULT_DETAILS_LABEL_DE : DEFAULT_DETAILS_LABEL_EN)
+  const reserveLabel =
+    detail?.genericReserveLabel ?? (isDe ? DEFAULT_RESERVE_LABEL_DE : DEFAULT_RESERVE_LABEL_EN)
+  const timeStartsLabel =
+    detail?.genericTimeLabel ?? (isDe ? DEFAULT_TIME_STARTS_DE : DEFAULT_TIME_STARTS_EN)
   const giftTitle = gift?.giftTitle ?? (isDe ? DEFAULT_GIFT_TITLE_DE : DEFAULT_GIFT_TITLE_EN)
   const giftDesc = gift?.giftDescription ?? (isDe ? DEFAULT_GIFT_DESC_DE : DEFAULT_GIFT_DESC_EN)
   const giftBuyNowLabel =

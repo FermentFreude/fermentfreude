@@ -789,4 +789,430 @@ export const workshopDetailFields: Field[] = [
       },
     ],
   },
+
+  // ── 8. All Dates Section ─────────────────────────────────
+  {
+    type: 'collapsible',
+    label: '8. All Dates Section',
+    admin: {
+      initCollapsed: true,
+      description:
+        'Heading and labels for the "Alle Termine" schedule table on the generic detail layout.',
+    },
+    fields: [
+      {
+        name: 'allDatesHeading',
+        type: 'text',
+        localized: true,
+        label: 'Heading',
+        admin: { description: 'e.g. "Alle Termine" / "All Appointments"' },
+      },
+      {
+        name: 'allDatesSubtitle',
+        type: 'text',
+        localized: true,
+        label: 'Subtitle',
+        admin: {
+          description:
+            'e.g. "Finde den perfekten Workshop-Termin für dich." / "Find the perfect workshop appointment for you."',
+        },
+      },
+      {
+        name: 'allDatesSlotsLabel',
+        type: 'text',
+        localized: true,
+        label: 'Spots Available Label',
+        admin: { description: 'e.g. "Plätze frei" / "spots available"' },
+      },
+      {
+        name: 'allDatesFilterAllLabel',
+        type: 'text',
+        localized: true,
+        label: 'Filter All Label',
+        admin: { description: 'e.g. "Alle Workshops" / "All workshops"' },
+      },
+    ],
+  },
+
+  // ── 9. Generic Booking Labels ────────────────────────────
+  {
+    type: 'collapsible',
+    label: '9. Generic Booking Labels',
+    admin: {
+      initCollapsed: true,
+      description:
+        'Labels for the booking panel on the generic detail layout (date picker, quantity, reserve button).',
+    },
+    fields: [
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'genericDateLabel',
+            type: 'text',
+            localized: true,
+            label: 'Date Label',
+            admin: { description: 'e.g. "Datum" / "Date"' },
+          },
+          {
+            name: 'genericQuantityLabel',
+            type: 'text',
+            localized: true,
+            label: 'Quantity Label',
+            admin: { description: 'e.g. "Anzahl" / "Quantity"' },
+          },
+        ],
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'genericDetailsLabel',
+            type: 'text',
+            localized: true,
+            label: 'Details Label',
+            admin: { description: 'e.g. "Workshop Details"' },
+          },
+          {
+            name: 'genericReserveLabel',
+            type: 'text',
+            localized: true,
+            label: 'Reserve Button Label',
+            admin: { description: 'e.g. "Platz reservieren" / "Reserve Your Spot"' },
+          },
+        ],
+      },
+      {
+        name: 'genericTimeLabel',
+        type: 'text',
+        localized: true,
+        label: 'Time Starts Label',
+        admin: { description: 'e.g. "Startet um 11:00 Uhr" / "Starts at 11:00 AM"' },
+      },
+    ],
+  },
+
+  // ── 10. Gift & Online Section ────────────────────────────
+  {
+    type: 'collapsible',
+    label: '10. Gift & Online Section',
+    admin: {
+      initCollapsed: true,
+      description:
+        'Two side-by-side cards: gift voucher CTA and online workshop CTA on the generic detail layout.',
+    },
+    fields: [
+      {
+        name: 'giftTitle',
+        type: 'text',
+        localized: true,
+        label: 'Gift Card Title',
+        admin: {
+          description:
+            'e.g. "Verschenke ein besonderes Geschmackserlebnis" / "Gift a special tasty experience"',
+        },
+      },
+      {
+        name: 'giftDescription',
+        type: 'textarea',
+        localized: true,
+        label: 'Gift Card Description',
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'giftBuyNowLabel',
+            type: 'text',
+            localized: true,
+            label: 'Buy Now Button',
+            admin: { description: 'e.g. "Jetzt kaufen" / "Buy Now"' },
+          },
+          {
+            name: 'giftBuyNowHref',
+            type: 'text',
+            label: 'Buy Now URL',
+            admin: { description: 'e.g. "/shop"' },
+          },
+        ],
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'giftBuyVoucherLabel',
+            type: 'text',
+            localized: true,
+            label: 'Buy Voucher Button',
+            admin: { description: 'e.g. "Gutschein kaufen" / "Buy Voucher"' },
+          },
+          {
+            name: 'giftBuyVoucherHref',
+            type: 'text',
+            label: 'Buy Voucher URL',
+            admin: { description: 'e.g. "/workshops/voucher"' },
+          },
+        ],
+      },
+      {
+        name: 'onlineTitle',
+        type: 'text',
+        localized: true,
+        label: 'Online Card Title',
+        admin: {
+          description:
+            'e.g. "Fermentation jederzeit und überall lernen" / "Learn Fermentation Anytime, Anywhere"',
+        },
+      },
+      {
+        name: 'onlineDescription',
+        type: 'textarea',
+        localized: true,
+        label: 'Online Card Description',
+      },
+      {
+        name: 'onlineButtonLabel',
+        type: 'text',
+        localized: true,
+        label: 'Online Button Label',
+        admin: { description: 'e.g. "Online-Kurse entdecken" / "Explore Online Courses"' },
+      },
+      {
+        name: 'onlineButtonHref',
+        type: 'text',
+        label: 'Online Button URL',
+        admin: { description: 'e.g. "/workshops"' },
+      },
+      {
+        name: 'onlineBullets',
+        type: 'array',
+        label: 'Online Features List',
+        maxRows: 6,
+        admin: {
+          description:
+            'Bullet points for the online card (e.g. "Lebenslanger Zugang" / "Lifetime access").',
+        },
+        fields: [
+          { name: 'text', type: 'text', required: true, localized: true, label: 'Text' },
+        ],
+      },
+    ],
+  },
+
+  // ── 11. Generic FAQ Section ──────────────────────────────
+  {
+    type: 'collapsible',
+    label: '11. Generic FAQ Section',
+    admin: {
+      initCollapsed: true,
+      description:
+        'FAQ slider on the generic detail layout. Different from section 5 (booking FAQ on dedicated layouts).',
+    },
+    fields: [
+      {
+        name: 'genericFaqHeading',
+        type: 'text',
+        localized: true,
+        label: 'Heading',
+        admin: {
+          description:
+            'e.g. "Du hast Fragen zu Fermentieren?" / "Do you have questions about Fermentation?"',
+        },
+      },
+      {
+        name: 'genericFaqSubtitle',
+        type: 'text',
+        localized: true,
+        label: 'Subtitle',
+        admin: {
+          description:
+            'e.g. "Klicke, um alle Antworten zu sehen!" / "Click to view all the answers!"',
+        },
+      },
+      {
+        name: 'genericFaqItems',
+        type: 'array',
+        label: 'FAQ Items',
+        maxRows: 12,
+        fields: [
+          {
+            name: 'question',
+            type: 'text',
+            required: true,
+            localized: true,
+            label: 'Question',
+          },
+          {
+            name: 'answer',
+            type: 'textarea',
+            required: true,
+            localized: true,
+            label: 'Answer',
+          },
+        ],
+      },
+    ],
+  },
+
+  // ── 12. Team Building Section ────────────────────────────
+  {
+    type: 'collapsible',
+    label: '12. Team Building Section',
+    admin: {
+      initCollapsed: true,
+      description:
+        'Corporate events / team building CTA section on the generic detail layout.',
+    },
+    fields: [
+      {
+        name: 'teamEyebrow',
+        type: 'text',
+        localized: true,
+        label: 'Eyebrow',
+        admin: { description: 'e.g. "Firmenveranstaltungen" / "Corporate Events"' },
+      },
+      {
+        name: 'teamHeading',
+        type: 'text',
+        localized: true,
+        label: 'Heading',
+        admin: {
+          description:
+            'e.g. "Fermentation als Teambuilding" / "Fermentation as Team Building"',
+        },
+      },
+      {
+        name: 'teamDescription',
+        type: 'textarea',
+        localized: true,
+        label: 'Description',
+      },
+      {
+        name: 'teamBullets',
+        type: 'array',
+        label: 'Bullet Points',
+        maxRows: 6,
+        fields: [
+          { name: 'text', type: 'text', required: true, localized: true, label: 'Text' },
+        ],
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'teamCtaLabel',
+            type: 'text',
+            localized: true,
+            label: 'CTA Button Label',
+            admin: { description: 'e.g. "Anfrage senden" / "Request Quote"' },
+          },
+          {
+            name: 'teamCtaHref',
+            type: 'text',
+            label: 'CTA Button URL',
+            admin: { description: 'e.g. "/contact"' },
+          },
+        ],
+      },
+    ],
+  },
+
+  // ── 13. Learn Online Section ─────────────────────────────
+  {
+    type: 'collapsible',
+    label: '13. Learn Online Section',
+    admin: {
+      initCollapsed: true,
+      description:
+        '"Learn Fermentation Anytime, Anywhere" dark card on the generic detail layout.',
+    },
+    fields: [
+      {
+        name: 'learnOnlineHeading',
+        type: 'textarea',
+        localized: true,
+        label: 'Heading',
+        admin: {
+          description:
+            'Use \\n for line break. e.g. "Lerne Fermentation\\nJederzeit, überall" / "Learn Fermentation\\nAnytime, Anywhere"',
+        },
+      },
+      {
+        name: 'learnOnlineDescription',
+        type: 'textarea',
+        localized: true,
+        label: 'Description',
+      },
+      {
+        name: 'learnOnlineButtonLabel',
+        type: 'text',
+        localized: true,
+        label: 'Button Label',
+        admin: { description: 'e.g. "Online-Kurse entdecken" / "Explore Online Courses"' },
+      },
+      {
+        name: 'learnOnlineButtonHref',
+        type: 'text',
+        label: 'Button URL',
+        admin: { description: 'e.g. "/workshops"' },
+      },
+    ],
+  },
+
+  // ── 14. Why Online Section ───────────────────────────────
+  {
+    type: 'collapsible',
+    label: '14. Why Online Section',
+    admin: {
+      initCollapsed: true,
+      description:
+        '"Why Our Online Workshops?" feature grid on the generic detail layout.',
+    },
+    fields: [
+      {
+        name: 'whyOnlineHeading',
+        type: 'text',
+        localized: true,
+        label: 'Heading',
+        admin: {
+          description:
+            'e.g. "Warum unsere Online-Workshops?" / "Why Our Online Workshops?"',
+        },
+      },
+      {
+        name: 'whyOnlineFeatures',
+        type: 'array',
+        label: 'Features',
+        maxRows: 8,
+        fields: [
+          {
+            name: 'icon',
+            type: 'select',
+            label: 'Icon',
+            options: [
+              { label: '⚡ Lightning', value: 'lightning' },
+              { label: '🕐 Clock', value: 'clock' },
+              { label: '🏠 Home', value: 'home' },
+              { label: '📖 Book', value: 'book' },
+            ],
+            admin: { description: 'Icon shown next to this feature.' },
+          },
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+            localized: true,
+            label: 'Title',
+          },
+          {
+            name: 'description',
+            type: 'textarea',
+            required: true,
+            localized: true,
+            label: 'Description',
+          },
+        ],
+      },
+    ],
+  },
 ]

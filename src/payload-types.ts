@@ -1337,6 +1337,151 @@ export interface Page {
      * e.g. "Mehr erfahren" / "Learn More".
      */
     sliderMoreInfoLabel?: string | null;
+    /**
+     * e.g. "Alle Termine" / "All Appointments"
+     */
+    allDatesHeading?: string | null;
+    /**
+     * e.g. "Finde den perfekten Workshop-Termin für dich." / "Find the perfect workshop appointment for you."
+     */
+    allDatesSubtitle?: string | null;
+    /**
+     * e.g. "Plätze frei" / "spots available"
+     */
+    allDatesSlotsLabel?: string | null;
+    /**
+     * e.g. "Alle Workshops" / "All workshops"
+     */
+    allDatesFilterAllLabel?: string | null;
+    /**
+     * e.g. "Datum" / "Date"
+     */
+    genericDateLabel?: string | null;
+    /**
+     * e.g. "Anzahl" / "Quantity"
+     */
+    genericQuantityLabel?: string | null;
+    /**
+     * e.g. "Workshop Details"
+     */
+    genericDetailsLabel?: string | null;
+    /**
+     * e.g. "Platz reservieren" / "Reserve Your Spot"
+     */
+    genericReserveLabel?: string | null;
+    /**
+     * e.g. "Startet um 11:00 Uhr" / "Starts at 11:00 AM"
+     */
+    genericTimeLabel?: string | null;
+    /**
+     * e.g. "Verschenke ein besonderes Geschmackserlebnis" / "Gift a special tasty experience"
+     */
+    giftTitle?: string | null;
+    giftDescription?: string | null;
+    /**
+     * e.g. "Jetzt kaufen" / "Buy Now"
+     */
+    giftBuyNowLabel?: string | null;
+    /**
+     * e.g. "/shop"
+     */
+    giftBuyNowHref?: string | null;
+    /**
+     * e.g. "Gutschein kaufen" / "Buy Voucher"
+     */
+    giftBuyVoucherLabel?: string | null;
+    /**
+     * e.g. "/workshops/voucher"
+     */
+    giftBuyVoucherHref?: string | null;
+    /**
+     * e.g. "Fermentation jederzeit und überall lernen" / "Learn Fermentation Anytime, Anywhere"
+     */
+    onlineTitle?: string | null;
+    onlineDescription?: string | null;
+    /**
+     * e.g. "Online-Kurse entdecken" / "Explore Online Courses"
+     */
+    onlineButtonLabel?: string | null;
+    /**
+     * e.g. "/workshops"
+     */
+    onlineButtonHref?: string | null;
+    /**
+     * Bullet points for the online card (e.g. "Lebenslanger Zugang" / "Lifetime access").
+     */
+    onlineBullets?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Du hast Fragen zu Fermentieren?" / "Do you have questions about Fermentation?"
+     */
+    genericFaqHeading?: string | null;
+    /**
+     * e.g. "Klicke, um alle Antworten zu sehen!" / "Click to view all the answers!"
+     */
+    genericFaqSubtitle?: string | null;
+    genericFaqItems?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Firmenveranstaltungen" / "Corporate Events"
+     */
+    teamEyebrow?: string | null;
+    /**
+     * e.g. "Fermentation als Teambuilding" / "Fermentation as Team Building"
+     */
+    teamHeading?: string | null;
+    teamDescription?: string | null;
+    teamBullets?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Anfrage senden" / "Request Quote"
+     */
+    teamCtaLabel?: string | null;
+    /**
+     * e.g. "/contact"
+     */
+    teamCtaHref?: string | null;
+    /**
+     * Use \n for line break. e.g. "Lerne Fermentation\nJederzeit, überall" / "Learn Fermentation\nAnytime, Anywhere"
+     */
+    learnOnlineHeading?: string | null;
+    learnOnlineDescription?: string | null;
+    /**
+     * e.g. "Online-Kurse entdecken" / "Explore Online Courses"
+     */
+    learnOnlineButtonLabel?: string | null;
+    /**
+     * e.g. "/workshops"
+     */
+    learnOnlineButtonHref?: string | null;
+    /**
+     * e.g. "Warum unsere Online-Workshops?" / "Why Our Online Workshops?"
+     */
+    whyOnlineHeading?: string | null;
+    whyOnlineFeatures?:
+      | {
+          /**
+           * Icon shown next to this feature.
+           */
+          icon?: ('lightning' | 'clock' | 'home' | 'book') | null;
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
   };
   /**
    * Content blocks. Leave empty for Voucher, Gastronomy, and Fermentation pages (they use dedicated tabs).
@@ -4491,6 +4636,64 @@ export interface PagesSelect<T extends boolean = true> {
         sliderPillLabel?: T;
         sliderBuyLabel?: T;
         sliderMoreInfoLabel?: T;
+        allDatesHeading?: T;
+        allDatesSubtitle?: T;
+        allDatesSlotsLabel?: T;
+        allDatesFilterAllLabel?: T;
+        genericDateLabel?: T;
+        genericQuantityLabel?: T;
+        genericDetailsLabel?: T;
+        genericReserveLabel?: T;
+        genericTimeLabel?: T;
+        giftTitle?: T;
+        giftDescription?: T;
+        giftBuyNowLabel?: T;
+        giftBuyNowHref?: T;
+        giftBuyVoucherLabel?: T;
+        giftBuyVoucherHref?: T;
+        onlineTitle?: T;
+        onlineDescription?: T;
+        onlineButtonLabel?: T;
+        onlineButtonHref?: T;
+        onlineBullets?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        genericFaqHeading?: T;
+        genericFaqSubtitle?: T;
+        genericFaqItems?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        teamEyebrow?: T;
+        teamHeading?: T;
+        teamDescription?: T;
+        teamBullets?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        teamCtaLabel?: T;
+        teamCtaHref?: T;
+        learnOnlineHeading?: T;
+        learnOnlineDescription?: T;
+        learnOnlineButtonLabel?: T;
+        learnOnlineButtonHref?: T;
+        whyOnlineHeading?: T;
+        whyOnlineFeatures?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
       };
   layout?:
     | T
