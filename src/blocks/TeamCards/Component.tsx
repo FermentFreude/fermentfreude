@@ -32,14 +32,6 @@ const DEFAULTS = {
 type Props = TeamCardsBlockType & { id?: string }
 
 export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, members, id }) => {
-  if (visible === false) return null
-  const resolvedLabel = label ?? DEFAULTS.label
-  const resolvedHeading = heading ?? DEFAULTS.heading
-  const resolvedMembers =
-    members && members.length > 0
-      ? members
-      : DEFAULTS.members.map((m) => ({ ...m, image: null, id: null }))
-
   const sectionRef = useRef<HTMLElement>(null)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -55,6 +47,15 @@ export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, membe
     obs.observe(el)
     return () => obs.disconnect()
   }, [])
+
+  if (visible === false) return null
+
+  const resolvedLabel = label ?? DEFAULTS.label
+  const resolvedHeading = heading ?? DEFAULTS.heading
+  const resolvedMembers =
+    members && members.length > 0
+      ? members
+      : DEFAULTS.members.map((m) => ({ ...m, image: null, id: null }))
 
   return (
     <section

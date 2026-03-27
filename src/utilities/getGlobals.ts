@@ -9,11 +9,13 @@ async function getGlobal(slug: string, depth = 0, locale?: SupportedLocale) {
 
   const global = await payload.findGlobal({
     // Payload expects a known global slug; we trust callers to pass a valid one.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     slug: slug as any,
     depth,
     ...(locale ? { locale } : {}),
   })
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return global as any
 }
 

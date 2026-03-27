@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 'use client'
 
 import { FieldTable, HubSection, HubShell, InfoCard, StepList, type TocSection, useT } from '../HubShell'

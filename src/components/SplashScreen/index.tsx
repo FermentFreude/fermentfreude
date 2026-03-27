@@ -60,11 +60,10 @@ export function SplashScreen() {
     // Mobile browsers (notably iOS Safari) often don't support CSS `d: path(...)` morphing.
     // Detect support and fall back to a transform-based splash animation when needed.
     try {
-      const supportsPathMorph =
-        typeof window !== 'undefined' &&
-        typeof (window as any).CSS !== 'undefined' &&
-        typeof (window as any).CSS.supports === 'function' &&
-        (window as any).CSS.supports('d: path("M0,0 L1,1")')
+      const cssObj = typeof window !== 'undefined'
+        ? (window as unknown as { CSS?: { supports?: (prop: string) => boolean } }).CSS
+        : undefined
+      const supportsPathMorph = !!cssObj?.supports?.('d: path("M0,0 L1,1")')
       if (!supportsPathMorph) setUseSimpleFallback(true)
     } catch {
       setUseSimpleFallback(true)

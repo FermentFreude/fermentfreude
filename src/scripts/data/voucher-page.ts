@@ -174,11 +174,11 @@ export function voucherPageDataEN(
       heroHeading: 'Give the gift of fermentation',
       heroDescription:
         'The perfect gift for foodies and the health-conscious.\nChoose an amount and optionally a greeting message for your voucher.',
-      voucherAmounts: (v.voucherAmounts ?? []).map((item, i) => ({
+      voucherAmounts: (v.voucherAmounts ?? []).map((item, _i) => ({
         id: item.id ?? undefined,
-        amount: ['99€'][i] ?? item.amount,
+        amount: ['99€'][_i] ?? item.amount,
       })),
-      deliveryOptions: (v.deliveryOptions ?? []).map((item, i) => ({
+      deliveryOptions: (v.deliveryOptions ?? []).map((item, _i) => ({
         id: item.id ?? undefined,
         type: item.type,
         title: item.type === 'pickup' ? 'Pick up from store' : 'By email to print at home',

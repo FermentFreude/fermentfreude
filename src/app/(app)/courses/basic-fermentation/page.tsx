@@ -168,22 +168,22 @@ export default async function BasicFermentationCoursePage() {
     }),
   }))
 
-  const coursesLabel = locale === 'de' ? 'Kurse' : 'Courses'
+  const _coursesLabel = locale === 'de' ? 'Kurse' : 'Courses'
   const curriculumCtaLabel = locale === 'de' ? 'Zum Lehrplan' : 'View curriculum'
   const loginToSaveLabel =
     locale === 'de'
       ? 'Einloggen, um deinen Fortschritt zu speichern'
       : 'Log in to save your progress'
   const loginLabel = locale === 'de' ? 'Einloggen' : 'Log in'
-  const ctaHeading =
+  const _ctaHeading =
     locale === 'de'
       ? 'Los geht’s — dein Fermentations-Abenteuer wartet!'
       : "Let's go — your fermentation adventure awaits!"
-  const ctaDescription =
+  const _ctaDescription =
     locale === 'de'
       ? 'Starte mit Modul 1, lerne in deinem Tempo und hab Spaß beim Fermentieren.'
       : 'Start with Module 1, learn at your own pace, and have fun fermenting.'
-  const ctaContactLabel = locale === 'de' ? 'Fragen? Schreib uns' : 'Questions? Get in touch'
+  const _ctaContactLabel = locale === 'de' ? 'Fragen? Schreib uns' : 'Questions? Get in touch'
 
   return (
     <>

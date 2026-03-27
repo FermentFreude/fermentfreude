@@ -137,7 +137,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
       <div ref={galleryWrapRef} className="bento-gallery-wrap">
         <div ref={galleryRef} className="bento-gallery bento-gallery--bento">
           {images.slice(0, 8).map((item, i) => {
-            const img = typeof item.image === 'object' ? (item.image as MediaType) : null
+            const _img = typeof item.image === 'object' ? (item.image as MediaType) : null
             return (
               <div key={item.id ?? i} className="bento-gallery__item" data-flip-id={`bento-${i}`}>
                 {item.image ? (

@@ -507,6 +507,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                             imgClassName={`size-12 object-contain ${isDark ? 'brightness-0 invert' : ''}`}
                           />
                         ) : (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={HERO_BLOCK_ICONS[i] ?? HERO_BLOCK_ICONS[0]}
                             alt=""

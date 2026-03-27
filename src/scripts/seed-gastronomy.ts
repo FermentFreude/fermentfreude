@@ -460,7 +460,7 @@ async function seedGastronomy() {
 
   if (existing.docs.length > 0) {
     const pageId = existing.docs[0].id
-    const forceRecreate = process.argv.includes('--force')
+    const _forceRecreate = process.argv.includes('--force')
 
     // Always update existing page (whether forceRecreate or not)
     // Images are preserved by updating instead of deleting

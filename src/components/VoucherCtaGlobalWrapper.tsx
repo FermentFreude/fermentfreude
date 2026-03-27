@@ -12,7 +12,7 @@ interface VoucherCtaGlobalWrapperProps {
  * Server component that fetches global voucher CTA data and renders LaktoVoucherCta.
  * Falls back to block-level data when the global is empty.
  */
-export async function VoucherCtaGlobalWrapper({ id, fallbackData }: VoucherCtaGlobalWrapperProps) {
+export async function VoucherCtaGlobalWrapper({ id: _id, fallbackData }: VoucherCtaGlobalWrapperProps) {
   const locale = await getLocale()
   const data = await getVoucherCtaGlobal(locale)
 

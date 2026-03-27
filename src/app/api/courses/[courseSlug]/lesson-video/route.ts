@@ -113,11 +113,15 @@ export async function GET(
     })
 
     const filename =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       typeof (mediaDoc as any)?.filename === 'string'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? (mediaDoc as any).filename
         : null
     let url =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       typeof (mediaDoc as any)?.url === 'string'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? (mediaDoc as any).url
         : null
 
@@ -140,6 +144,7 @@ export async function GET(
       })
 
       // Cast to any to avoid AWS Smithy v3/v4 type incompatibilities while keeping runtime behavior
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       url = await getSignedUrl(s3Client as any, command as any, { expiresIn: ttl })
     }
 

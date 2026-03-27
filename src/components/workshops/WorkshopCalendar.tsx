@@ -7,7 +7,7 @@ import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import Link from 'next/link'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 export type WorkshopCalendarCard = {
@@ -187,7 +187,7 @@ export function WorkshopCalendar({
   const { addItem } = useCart()
 
   // Use real appointments from database, or empty array if none
-  const upcomingDates = appointments || []
+  const upcomingDates = useMemo(() => appointments || [], [appointments])
 
   // Helper: Get next available appointment for a workshop type
   const getNextAppointment = useCallback(
