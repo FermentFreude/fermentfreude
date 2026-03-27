@@ -1948,6 +1948,14 @@ export const Pages: CollectionConfig = {
                       admin: { description: 'e.g., "3h 30m" / "3.5 Stunden"' },
                     },
                     {
+                      name: 'detailsLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Details Button Label',
+                      admin: { description: 'e.g., "Details" / "More Info"' },
+                    },
+                    {
                       name: 'buttonLabel',
                       type: 'text',
                       required: false,
