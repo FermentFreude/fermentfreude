@@ -170,6 +170,30 @@ export const hero: Field = {
                 },
               ],
             },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'secondaryCtaLabel',
+                  type: 'text',
+                  label: 'Secondary Button Text',
+                  localized: true,
+                  admin: {
+                    width: '50%',
+                    description: 'e.g., "Shop"',
+                  },
+                },
+                {
+                  name: 'secondaryCtaHref',
+                  type: 'text',
+                  label: 'Secondary Button Link',
+                  admin: {
+                    width: '50%',
+                    description: 'e.g., "/shop"',
+                  },
+                },
+              ],
+            },
             // Colors Row
             {
               type: 'row',

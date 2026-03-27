@@ -7,10 +7,13 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
+import { blockVisible } from '@/fields/blockVisible'
+
 export const FormBlock: Block = {
   slug: 'formBlock',
   interfaceName: 'FormBlock',
   fields: [
+    blockVisible,
     {
       name: 'form',
       type: 'relationship',

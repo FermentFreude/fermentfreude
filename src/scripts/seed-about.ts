@@ -345,7 +345,7 @@ async function seedAbout() {
   console.log(`  ✅ Updated About page ${aboutPage.id} (EN)`)
   console.log('🎉 About page seeded successfully!')
   console.log(
-    '   Blocks: hero → OurStory → TeamCards → SponsorsBar → Testimonials → ReadyToLearnCTA → ContactBlock',
+    '   Blocks: hero → TeamCards → OurStory → SponsorsBar → ReadyToLearnCTA → ContactBlock',
   )
   console.log('   All images stored in Payload Media (Cloudflare R2) — editable from /admin')
 

@@ -14,6 +14,7 @@ import React, { useEffect, useRef } from 'react'
  * ═══════════════════════════════════════════════════════════════ */
 
 const DEFAULT_EYEBROW = 'Workshop Experience'
+const DEFAULT_DETAILS_CTA_LABEL = 'Explore'
 
 const DEFAULT_WORKSHOPS = [
   {
@@ -116,7 +117,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           image2: resolveMedia(w.image2 as MediaType | string | number | null | undefined),
           ctaLink: w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || '#',
           detailsButtonLabel:
-            (w as { detailsButtonLabel?: string }).detailsButtonLabel || 'Entdecken',
+            (w as { detailsButtonLabel?: string | null }).detailsButtonLabel ||
+            DEFAULT_DETAILS_CTA_LABEL,
           nextDate:
             upcomingDatesByHref?.[w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''] || undefined,
         }))
@@ -125,7 +127,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           audienceTag: w.audienceTag,
           image: null as MediaType | null,
           image2: null as MediaType | null,
-          detailsButtonLabel: 'Entdecken',
+          detailsButtonLabel: DEFAULT_DETAILS_CTA_LABEL,
           nextDate: upcomingDatesByHref?.[w.ctaLink],
         }))
 
@@ -253,7 +255,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                         <h2 className="text-ff-black mb-3 md:mb-4 text-[1.9rem] sm:text-[2.2rem] md:text-[2.5rem] lg:text-inherit leading-[0.95]">
                           {workshop.title}
                         </h2>
-                        <p className="text-body-sm text-ff-olive text-[13px] sm:text-sm md:text-[15px] leading-relaxed">
+                        <p className="text-body-sm text-ff-olive text-[13px] sm:text-sm md:text-[15px] leading-relaxed whitespace-pre-line">
                           {(() => {
                             const match = workshop.description.match(/^(.+?[.!?])\s*(.*)$/s)
                             return match?.[1] ?? workshop.description
@@ -355,10 +357,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                     <div className="mt-6 pt-4 border-t border-black/10">
                       <Link
                         href={workshop.ctaLink}
-                        className="flex items-center justify-end sm:justify-between group/cta"
-                        aria-label={`${workshop.detailsButtonLabel}: ${workshop.title}`}
+                        className="flex items-center justify-end gap-3 sm:justify-between group/cta"
+                        aria-label={`Workshop Seite: ${workshop.title}`}
                       >
-                        <span className="hidden sm:block text-[11px] font-display font-bold tracking-widest uppercase text-black/40 group-hover/cta:text-black transition-colors duration-200">
+                        <span className="text-[11px] font-display font-bold tracking-widest uppercase text-black/40 group-hover/cta:text-black transition-colors duration-200">
                           {workshop.detailsButtonLabel}
                         </span>
                         <span className="size-9 rounded-full border border-black/25 flex items-center justify-center text-base leading-none text-black/35 transition-all duration-200 group-hover/cta:border-black group-hover/cta:text-black group-hover/cta:scale-110">

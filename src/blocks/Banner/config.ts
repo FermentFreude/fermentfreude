@@ -6,9 +6,12 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
+import { blockVisible } from '@/fields/blockVisible'
+
 export const Banner: Block = {
   slug: 'banner',
   fields: [
+    blockVisible,
     {
       name: 'style',
       type: 'select',
