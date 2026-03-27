@@ -75,10 +75,23 @@ export async function Footer() {
   const copyrightText = footer.copyrightText || 'FermentFreude — All Rights Reserved'
   const social = footer.socialMedia
 
+  // Resolve a CMS link field (reference or custom URL) to an href string
+  const resolveHref = (link: { type?: string | null; url?: string | null; reference?: { relationTo: string; value: string | { slug?: string | null } } | null }) => {
+    if (link.type === 'reference' && link.reference) {
+      const ref = link.reference
+      const slug = typeof ref.value === 'object' ? ref.value?.slug : null
+      if (!slug) return '/'
+      if (ref.relationTo === 'pages') return `/${slug}`
+      if (ref.relationTo === 'online-courses') return `/courses/${slug}`
+      return `/${ref.relationTo}/${slug}`
+    }
+    return link.url || '/'
+  }
+
   // Use CMS links when available, otherwise fall back to locale-aware defaults
   const quickLinks =
     footer.navItems && footer.navItems.length > 0
-      ? footer.navItems.map((item) => ({ label: item.link.label, href: item.link.url || '/' }))
+      ? footer.navItems.map((item) => ({ label: item.link.label, href: resolveHref(item.link) }))
       : isDe
         ? QUICK_LINKS_DE
         : QUICK_LINKS_EN
@@ -87,7 +100,7 @@ export async function Footer() {
     footer.workshopLinks && footer.workshopLinks.length > 0
       ? footer.workshopLinks.map((item) => ({
           label: item.link.label,
-          href: item.link.url || '/',
+          href: resolveHref(item.link),
         }))
       : isDe
         ? WORKSHOP_LINKS_DE
@@ -95,7 +108,7 @@ export async function Footer() {
 
   const legalLinks =
     footer.legalLinks && footer.legalLinks.length > 0
-      ? footer.legalLinks.map((item) => ({ label: item.link.label, href: item.link.url || '/' }))
+      ? footer.legalLinks.map((item) => ({ label: item.link.label, href: resolveHref(item.link) }))
       : LEGAL_LINKS
 
   const currentYear = new Date().getFullYear()

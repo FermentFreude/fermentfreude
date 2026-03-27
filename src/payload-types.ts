@@ -618,10 +618,15 @@ export interface CallToActionBlock {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'online-courses';
+                value: string | OnlineCourse;
+              } | null);
           url?: string | null;
           label: string;
           /**
@@ -2221,10 +2226,15 @@ export interface ContentBlock {
         link?: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'online-courses';
+                value: string | OnlineCourse;
+              } | null);
           url?: string | null;
           label: string;
           /**
@@ -2238,6 +2248,138 @@ export interface ContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
+}
+/**
+ * Online courses — everything in one place: card info, hero, modules with lessons & videos, and "What You'll Learn".
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "online-courses".
+ */
+export interface OnlineCourse {
+  id: string;
+  /**
+   * URL-friendly identifier (e.g. "basic-fermentation-course").
+   */
+  slug: string;
+  /**
+   * Main title on the card AND the course viewer hero.
+   */
+  title: string;
+  /**
+   * Brief text shown on the course card on /courses.
+   */
+  description?: string | null;
+  /**
+   * Image on the course card (listing page & coming-soon cards).
+   */
+  cardImage?: (string | null) | Media;
+  /**
+   * Product for price display and checkout. Leave empty for coming-soon courses.
+   */
+  product?: (string | null) | Product;
+  /**
+   * Matches the product courseSlug and the viewer URL segment (e.g. "basic-fermentation").
+   */
+  courseSlug?: string | null;
+  /**
+   * e.g. "/courses/basic-fermentation#curriculum". CTA link on the card.
+   */
+  courseViewerUrl?: string | null;
+  /**
+   * Show on /courses.
+   */
+  isActive?: boolean | null;
+  /**
+   * Shows "Notify Me" instead of "Buy".
+   */
+  isComingSoon?: boolean | null;
+  /**
+   * Lower = first.
+   */
+  sortOrder?: number | null;
+  /**
+   * e.g. "Summer 2026".
+   */
+  comingSoonBadge?: string | null;
+  /**
+   * e.g. "David Heider & Marcel Rauminger".
+   */
+  instructor?: string | null;
+  /**
+   * e.g. "10 hours of content".
+   */
+  durationText?: string | null;
+  /**
+   * e.g. "Beginner Level".
+   */
+  levelText?: string | null;
+  /**
+   * e.g. "Course" / "Kurs".
+   */
+  heroEyebrow?: string | null;
+  heroSubtitle?: string | null;
+  /**
+   * Longer text under the title on the viewer page.
+   */
+  heroDescription?: string | null;
+  /**
+   * Large image on the viewer page hero.
+   */
+  heroImage?: (string | null) | Media;
+  /**
+   * e.g. "5h 15m".
+   */
+  heroDuration?: string | null;
+  /**
+   * e.g. "48 Lessons".
+   */
+  heroLessonsCount?: string | null;
+  /**
+   * e.g. "Your Progress" / "Dein Fortschritt".
+   */
+  heroProgressHeading?: string | null;
+  /**
+   * e.g. "Course Curriculum" / "Kurs Lehrplan".
+   */
+  curriculumHeading?: string | null;
+  modules?:
+    | {
+        title: string;
+        description?: string | null;
+        lessons?:
+          | {
+              title: string;
+              description?: string | null;
+              /**
+               * e.g. 5
+               */
+              durationMinutes?: number | null;
+              /**
+               * Upload MP4/WebM here. Displayed in the course viewer.
+               */
+              video?: (string | null) | Media;
+              /**
+               * Locked lessons show a lock icon on the /courses listing card.
+               */
+              locked?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. "What You'll Learn".
+   */
+  learnHeading?: string | null;
+  learnItems?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3589,138 +3731,6 @@ export interface Enrollment {
    * When the enrollment was created.
    */
   enrolledAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Online courses — everything in one place: card info, hero, modules with lessons & videos, and "What You'll Learn".
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "online-courses".
- */
-export interface OnlineCourse {
-  id: string;
-  /**
-   * URL-friendly identifier (e.g. "basic-fermentation-course").
-   */
-  slug: string;
-  /**
-   * Main title on the card AND the course viewer hero.
-   */
-  title: string;
-  /**
-   * Brief text shown on the course card on /courses.
-   */
-  description?: string | null;
-  /**
-   * Image on the course card (listing page & coming-soon cards).
-   */
-  cardImage?: (string | null) | Media;
-  /**
-   * Product for price display and checkout. Leave empty for coming-soon courses.
-   */
-  product?: (string | null) | Product;
-  /**
-   * Matches the product courseSlug and the viewer URL segment (e.g. "basic-fermentation").
-   */
-  courseSlug?: string | null;
-  /**
-   * e.g. "/courses/basic-fermentation#curriculum". CTA link on the card.
-   */
-  courseViewerUrl?: string | null;
-  /**
-   * Show on /courses.
-   */
-  isActive?: boolean | null;
-  /**
-   * Shows "Notify Me" instead of "Buy".
-   */
-  isComingSoon?: boolean | null;
-  /**
-   * Lower = first.
-   */
-  sortOrder?: number | null;
-  /**
-   * e.g. "Summer 2026".
-   */
-  comingSoonBadge?: string | null;
-  /**
-   * e.g. "David Heider & Marcel Rauminger".
-   */
-  instructor?: string | null;
-  /**
-   * e.g. "10 hours of content".
-   */
-  durationText?: string | null;
-  /**
-   * e.g. "Beginner Level".
-   */
-  levelText?: string | null;
-  /**
-   * e.g. "Course" / "Kurs".
-   */
-  heroEyebrow?: string | null;
-  heroSubtitle?: string | null;
-  /**
-   * Longer text under the title on the viewer page.
-   */
-  heroDescription?: string | null;
-  /**
-   * Large image on the viewer page hero.
-   */
-  heroImage?: (string | null) | Media;
-  /**
-   * e.g. "5h 15m".
-   */
-  heroDuration?: string | null;
-  /**
-   * e.g. "48 Lessons".
-   */
-  heroLessonsCount?: string | null;
-  /**
-   * e.g. "Your Progress" / "Dein Fortschritt".
-   */
-  heroProgressHeading?: string | null;
-  /**
-   * e.g. "Course Curriculum" / "Kurs Lehrplan".
-   */
-  curriculumHeading?: string | null;
-  modules?:
-    | {
-        title: string;
-        description?: string | null;
-        lessons?:
-          | {
-              title: string;
-              description?: string | null;
-              /**
-               * e.g. 5
-               */
-              durationMinutes?: number | null;
-              /**
-               * Upload MP4/WebM here. Displayed in the course viewer.
-               */
-              video?: (string | null) | Media;
-              /**
-               * Locked lessons show a lock icon on the /courses listing card.
-               */
-              locked?: boolean | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * e.g. "What You'll Learn".
-   */
-  learnHeading?: string | null;
-  learnItems?:
-    | {
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -6019,10 +6029,15 @@ export interface Footer {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'online-courses';
+                value: string | OnlineCourse;
+              } | null);
           url?: string | null;
           label: string;
         };
@@ -6037,10 +6052,15 @@ export interface Footer {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'online-courses';
+                value: string | OnlineCourse;
+              } | null);
           url?: string | null;
           label: string;
         };
@@ -6055,10 +6075,15 @@ export interface Footer {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'online-courses';
+                value: string | OnlineCourse;
+              } | null);
           url?: string | null;
           label: string;
         };
