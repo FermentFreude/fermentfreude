@@ -254,6 +254,14 @@ const workshopDetailDE = {
   modalTotalLabel: 'Gesamt',
   modalCancelLabel: 'Abbrechen',
   modalConfirmLabel: 'Buchung bestätigen',
+
+  // ── 11. Other Workshops Slider ──────────────────────────
+  sliderHeading: 'Entdecke weitere Workshops',
+  sliderSubtitle:
+    'Wähle deinen Weg in die Welt der Mikroorganismen. Jeder Workshop ist für Einsteiger und Enthusiasten konzipiert.',
+  sliderPillLabel: 'WORKSHOP-ART',
+  sliderBuyLabel: 'Jetzt buchen',
+  sliderMoreInfoLabel: 'Mehr erfahren',
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -490,6 +498,14 @@ const workshopDetailEN = {
   modalTotalLabel: 'Total',
   modalCancelLabel: 'Cancel',
   modalConfirmLabel: 'Confirm Booking',
+
+  // ── 11. Other Workshops Slider ──────────────────────────
+  sliderHeading: 'Discover Other Workshops',
+  sliderSubtitle:
+    'Choose your path into the world of microorganisms. Each workshop is designed for beginners and enthusiasts alike.',
+  sliderPillLabel: 'WORKSHOP TYPE',
+  sliderBuyLabel: 'Book now',
+  sliderMoreInfoLabel: 'Learn more',
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -93,15 +93,6 @@ export default async function WorkshopsPage() {
         description={ws?.workshopsCalendarDescription}
         appointments={upcomingAppointments}
         nextDateLabel={ws?.workshopsCalendarNextDateLabel}
-        allDatesHeading={ws?.workshopsCalendarAllDatesHeading}
-        allFilterLabel={ws?.workshopsCalendarAllFilterLabel}
-        typeColumnLabel={ws?.workshopsCalendarTypeColumnLabel}
-        dateColumnLabel={ws?.workshopsCalendarDateColumnLabel}
-        spotsColumnLabel={ws?.workshopsCalendarSpotsColumnLabel}
-        spotsLabel={ws?.workshopsCalendarSpotsLabel}
-        soldOutLabel={ws?.workshopsCalendarSoldOutLabel}
-        bookLabel={ws?.workshopsCalendarBookLabel}
-        emptyMessage={ws?.workshopsCalendarEmptyMessage}
       />
 
       {/* 3. Voucher CTA — page override or global */}

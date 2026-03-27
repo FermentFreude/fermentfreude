@@ -402,11 +402,11 @@ export default async function WorkshopDetailPage({ params }: Args) {
   })
 
   const isDe = locale === 'de'
-  const bookLabel = isDe ? DEFAULT_BOOK_LABEL : DEFAULT_BOOK_LABEL_EN
-  const learnMoreLabel = isDe ? DEFAULT_LEARN_MORE_LABEL : DEFAULT_LEARN_MORE_LABEL_EN
-  const workshopTypesHeading = isDe ? DEFAULT_WORKSHOP_TYPES_DE : DEFAULT_WORKSHOP_TYPES_EN
-  const workshopTypesSub = isDe ? DEFAULT_WORKSHOP_TYPES_SUB_DE : DEFAULT_WORKSHOP_TYPES_SUB_EN
-  const workshopTypePill = isDe ? DEFAULT_WORKSHOP_TYPE_PILL_DE : DEFAULT_WORKSHOP_TYPE_PILL_EN
+  const bookLabel = detail?.sliderBuyLabel ?? (isDe ? DEFAULT_BOOK_LABEL : DEFAULT_BOOK_LABEL_EN)
+  const learnMoreLabel = detail?.sliderMoreInfoLabel ?? (isDe ? DEFAULT_LEARN_MORE_LABEL : DEFAULT_LEARN_MORE_LABEL_EN)
+  const workshopTypesHeading = detail?.sliderHeading ?? (isDe ? DEFAULT_WORKSHOP_TYPES_DE : DEFAULT_WORKSHOP_TYPES_EN)
+  const workshopTypesSub = detail?.sliderSubtitle ?? (isDe ? DEFAULT_WORKSHOP_TYPES_SUB_DE : DEFAULT_WORKSHOP_TYPES_SUB_EN)
+  const workshopTypePill = detail?.sliderPillLabel ?? (isDe ? DEFAULT_WORKSHOP_TYPE_PILL_DE : DEFAULT_WORKSHOP_TYPE_PILL_EN)
   const alleTermineHeading = isDe ? DEFAULT_ALLE_TERMINE_DE : DEFAULT_ALLE_TERMINE_EN
   const alleTermineSub = isDe ? DEFAULT_ALLE_TERMINE_SUB_DE : DEFAULT_ALLE_TERMINE_SUB_EN
   const slotsFreeLabel = isDe ? DEFAULT_SLOTS_FREE_DE : DEFAULT_SLOTS_FREE_EN

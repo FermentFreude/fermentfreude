@@ -794,6 +794,515 @@ export interface Page {
       | null;
   };
   /**
+   * Content for the Workshops overview page (/workshops). Only applies when slug is "workshops". Each shared section defaults to its Website global — toggle "Customize" to override for this page only.
+   */
+  workshops?: {
+    /**
+     * Small text above the title (e.g., "Fermentation Workshops").
+     */
+    workshopsHeroEyebrow?: string | null;
+    /**
+     * Main heading. Use \n for line breaks (e.g., "Discover the Art\nof Fermentation").
+     */
+    workshopsHeroTitle?: string | null;
+    /**
+     * Short intro text describing the workshops.
+     */
+    workshopsHeroDescription?: string | null;
+    /**
+     * Small text items (e.g., "3 Hours", "Hands-on", "Experience").
+     */
+    workshopsHeroAttributes?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional background image for the hero. If empty, jar silhouettes are shown.
+     */
+    workshopsHeroImage?: (string | null) | Media;
+    /**
+     * e.g., "Unsere Termine" / "Our Dates"
+     */
+    workshopsCalendarTitle?: string | null;
+    /**
+     * Intro text above the calendar.
+     */
+    workshopsCalendarDescription?: string | null;
+    /**
+     * Label above each next date (e.g. "Nächster Termin" / "Next Date").
+     */
+    workshopsCalendarNextDateLabel?: string | null;
+    /**
+     * Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).
+     */
+    workshopsCalendarCards?:
+      | {
+          workshopType: 'basics' | 'lakto' | 'kombucha' | 'tempeh';
+          /**
+           * Card background image for this workshop type.
+           */
+          cardImage?: (string | null) | Media;
+          /**
+           * ⚠️ Auto-filled from Workshop Appointments. Only used as fallback when no appointments exist.
+           */
+          nextDate?: string | null;
+          /**
+           * e.g., "3h 30m" / "3.5 Stunden"
+           */
+          duration?: string | null;
+          /**
+           * e.g., "Details" / "More Info"
+           */
+          detailsLabel?: string | null;
+          /**
+           * e.g., "Buchen" / "Book Now"
+           */
+          buttonLabel?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Off = uses content from Website → Voucher CTA global. On = uses the fields below.
+     */
+    workshopsVoucherCustom?: boolean | null;
+    /**
+     * e.g., "Gift a special tasty experience"
+     */
+    workshopsVoucherHeading?: string | null;
+    /**
+     * Short paragraph below heading.
+     */
+    workshopsVoucherDescription?: string | null;
+    /**
+     * e.g., "Voucher"
+     */
+    workshopsVoucherButtonLabel?: string | null;
+    /**
+     * e.g., "/workshops/voucher"
+     */
+    workshopsVoucherButtonLink?: string | null;
+    /**
+     * Up to 8 images for the bento gallery.
+     */
+    workshopsVoucherGalleryImages?:
+      | {
+          image: string | Media;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional background image.
+     */
+    workshopsVoucherBackgroundImage?: (string | null) | Media;
+    /**
+     * Off = uses content from Website → Product Slider global. On = uses the fields below.
+     */
+    workshopsProductSliderCustom?: boolean | null;
+    /**
+     * e.g., "Discover UNIQUE."
+     */
+    workshopsProductSliderHeading?: string | null;
+    /**
+     * Accent word displayed next to heading (e.g., "FLAVOURS").
+     */
+    workshopsProductSliderHeadingAccent?: string | null;
+    /**
+     * Short paragraph (1–2 sentences).
+     */
+    workshopsProductSliderDescription?: string | null;
+    /**
+     * e.g., "View All Products"
+     */
+    workshopsProductSliderButtonLabel?: string | null;
+    /**
+     * e.g., "/products"
+     */
+    workshopsProductSliderButtonLink?: string | null;
+    /**
+     * Select products to display in the slider.
+     */
+    workshopsProductSliderProducts?: (string | Product)[] | null;
+    /**
+     * Off = uses content from Website → Sponsors Bar global. On = uses the fields below.
+     */
+    workshopsSponsorsCustom?: boolean | null;
+    /**
+     * e.g., "This project is supported by:"
+     */
+    workshopsSponsorsHeading?: string | null;
+    /**
+     * Sponsor logos and links.
+     */
+    workshopsSponsorsList?:
+      | {
+          name: string;
+          logo: string | Media;
+          /**
+           * Optional link to sponsor website.
+           */
+          url?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Off = uses content from Website → Testimonials global. On = uses the fields below.
+     */
+    workshopsTestimonialsCustom?: boolean | null;
+    /**
+     * Small text above heading (e.g., "Testimonials").
+     */
+    workshopsTestimonialsEyebrow?: string | null;
+    /**
+     * e.g., "What Our Community Says"
+     */
+    workshopsTestimonialsHeading?: string | null;
+    /**
+     * Customer quotes and ratings.
+     */
+    workshopsTestimonialsList?:
+      | {
+          quote: string;
+          authorName: string;
+          /**
+           * e.g., "Workshop Participant"
+           */
+          authorRole?: string | null;
+          rating?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * All editable content for the workshop detail page (Hero, Booking, Calendar, Voucher, FAQ, How-To Articles, Other Workshops slider). Available for lakto-gemuese, tempeh, and kombucha.
+   */
+  workshopDetail?: {
+    /**
+     * Enable this to show the seasonal calendar section on this workshop page. Disable to hide all calendar fields from the admin.
+     */
+    showSeasonalCalendar?: boolean | null;
+    /**
+     * Small text above the title (e.g. "Workshop Experience").
+     */
+    heroEyebrow?: string | null;
+    /**
+     * Main heading. Use a line break for two lines (e.g. "Die Kunst der\nLakto-Fermentation").
+     */
+    heroTitle?: string | null;
+    /**
+     * Short paragraph below the title.
+     */
+    heroDescription?: string | null;
+    /**
+     * Image shown on the left side of the hero (portrait or square, min 800px tall). When empty, decorative jar illustrations are shown instead.
+     */
+    heroImage?: (string | null) | Media;
+    /**
+     * Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").
+     */
+    heroAttributes?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"
+     */
+    bookingEyebrow?: string | null;
+    /**
+     * e.g. "99"
+     */
+    bookingPrice?: number | null;
+    /**
+     * e.g. "pro Person" / "per person"
+     */
+    bookingPriceSuffix?: string | null;
+    /**
+     * e.g. "€"
+     */
+    bookingCurrency?: string | null;
+    /**
+     * Optional background image for the booking card header.
+     */
+    bookingImage?: (string | null) | Media;
+    /**
+     * Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").
+     */
+    bookingAttributes?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Termine & Buchen" / "View Dates & Book"
+     */
+    bookingViewDatesLabel?: string | null;
+    /**
+     * e.g. "Termine ausblenden" / "Hide Dates"
+     */
+    bookingHideDatesLabel?: string | null;
+    /**
+     * e.g. "Mehr Informationen" / "Learn More"
+     */
+    bookingMoreDetailsLabel?: string | null;
+    /**
+     * e.g. "Buchen" / "Book"
+     */
+    bookingBookLabel?: string | null;
+    /**
+     * e.g. "Plätze frei" / "spots available"
+     */
+    bookingSpotsLabel?: string | null;
+    /**
+     * e.g. "Über den Workshop" / "About this Workshop"
+     */
+    aboutHeading?: string | null;
+    /**
+     * Long prose description of what the workshop is about.
+     */
+    aboutText?: string | null;
+    /**
+     * e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"
+     */
+    scheduleHeading?: string | null;
+    schedule?:
+      | {
+          /**
+           * e.g. "45 Min" / "45 minutes"
+           */
+          duration: string;
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Im Preis enthalten (€99)" / "Included in the Price (€99)"
+     */
+    includedHeading?: string | null;
+    /**
+     * List of items/benefits included in the workshop.
+     */
+    includedItems?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Warum dieser Workshop?" / "Why This Workshop?"
+     */
+    whyHeading?: string | null;
+    whyPoints?:
+      | {
+          /**
+           * The bolded title of this point (e.g. "Darmgesundheit:")
+           */
+          bold: string;
+          /**
+           * The explanatory text that follows the bold title.
+           */
+          rest: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"
+     */
+    experienceEyebrow?: string | null;
+    /**
+     * Main heading for the experience section.
+     */
+    experienceTitle?: string | null;
+    experienceCards?:
+      | {
+          /**
+           * e.g. "THEORIE" / "THEORY"
+           */
+          eyebrow: string;
+          title: string;
+          description: string;
+          image?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "Nächste Workshops" / "Upcoming Workshops"
+     */
+    datesHeading?: string | null;
+    /**
+     * e.g. "Reservierung bestätigen" / "Confirm Reservation"
+     */
+    modalConfirmHeading?: string | null;
+    modalConfirmSubheading?: string | null;
+    /**
+     * e.g. "Workshop"
+     */
+    modalWorkshopLabel?: string | null;
+    /**
+     * e.g. "Datum"
+     */
+    modalDateLabel?: string | null;
+    /**
+     * e.g. "Uhrzeit"
+     */
+    modalTimeLabel?: string | null;
+    /**
+     * e.g. "Gesamtbetrag"
+     */
+    modalTotalLabel?: string | null;
+    /**
+     * e.g. "Abbrechen" / "Cancel"
+     */
+    modalCancelLabel?: string | null;
+    /**
+     * e.g. "Bestätigen" / "Confirm"
+     */
+    modalConfirmLabel?: string | null;
+    /**
+     * e.g. "SAISONALE REZEPTE" / "SEASONAL RECIPES"
+     */
+    calendarEyebrow?: string | null;
+    /**
+     * e.g. "Fermentkalender" / "Fermentation Calendar"
+     */
+    calendarTitle?: string | null;
+    calendarDescription?: string | null;
+    calendarMonths?:
+      | {
+          /**
+           * e.g. "März" / "March"
+           */
+          month: string;
+          /**
+           * 3-letter code (e.g. "MÄR" / "MAR").
+           */
+          monthShort: string;
+          /**
+           * Two-digit month number (e.g. "03").
+           */
+          monthNumber: string;
+          /**
+           * e.g. "FRÜHLING" / "SPRING"
+           */
+          season: string;
+          /**
+           * Hex color for month badge and accent lines (e.g. "#e6be68"). Leave empty for default.
+           */
+          accent?: string | null;
+          recipes?:
+            | {
+                name: string;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
+     * ❌ OFF = Use custom content just for this workshop page.
+     */
+    useGlobalVoucherData?: boolean | null;
+    /**
+     * e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"
+     */
+    voucherEyebrow?: string | null;
+    /**
+     * e.g. "Go with a friend."
+     */
+    voucherTitle?: string | null;
+    voucherDescription?: string | null;
+    /**
+     * Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.
+     */
+    voucherBackgroundImage?: (string | null) | Media;
+    /**
+     * e.g. "Gutschein kaufen" / "Buy Voucher"
+     */
+    voucherPrimaryLabel?: string | null;
+    /**
+     * e.g. "/voucher"
+     */
+    voucherPrimaryHref?: string | null;
+    /**
+     * e.g. "Zum Shop" / "Visit Shop"
+     */
+    voucherSecondaryLabel?: string | null;
+    /**
+     * e.g. "/shop"
+     */
+    voucherSecondaryHref?: string | null;
+    /**
+     * Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").
+     */
+    voucherPills?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "HÄUFIGE FRAGEN" / "FAQ"
+     */
+    faqEyebrow?: string | null;
+    /**
+     * e.g. "Gut zu wissen" / "Good to Know"
+     */
+    faqTitle?: string | null;
+    faqDescription?: string | null;
+    faqItems?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Email shown at bottom (e.g. "info@fermentfreude.de").
+     */
+    faqContactEmail?: string | null;
+    /**
+     * Small label above the heading (e.g. "TIPPS & GUIDES").
+     */
+    howToEyebrow?: string | null;
+    /**
+     * Main heading (e.g. "Lerne fermentieren.").
+     */
+    howToTitle?: string | null;
+    /**
+     * Short paragraph below the heading.
+     */
+    howToDescription?: string | null;
+    /**
+     * Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article's title, image and content is edited directly inside the Posts collection.
+     */
+    howToArticles?: (string | Post)[] | null;
+    /**
+     * e.g. "Entdecke weitere Workshops" / "Discover Other Workshops".
+     */
+    sliderHeading?: string | null;
+    /**
+     * Short paragraph below the heading.
+     */
+    sliderSubtitle?: string | null;
+    /**
+     * Small pill/badge text (e.g. "Workshop" / "Workshop").
+     */
+    sliderPillLabel?: string | null;
+    /**
+     * e.g. "Buchen" / "Book Now".
+     */
+    sliderBuyLabel?: string | null;
+    /**
+     * e.g. "Mehr erfahren" / "Learn More".
+     */
+    sliderMoreInfoLabel?: string | null;
+  };
+  /**
    * Content blocks. Leave empty for Voucher, Gastronomy, and Fermentation pages (they use dedicated tabs).
    */
   layout?:
@@ -1390,531 +1899,6 @@ export interface Page {
         }[]
       | null;
   };
-  /**
-   * Content for the Workshops overview page (/workshops). Only applies when slug is "workshops". Each shared section defaults to its Website global — toggle "Customize" to override for this page only.
-   */
-  workshops?: {
-    /**
-     * Small text above the title (e.g., "Fermentation Workshops").
-     */
-    workshopsHeroEyebrow?: string | null;
-    /**
-     * Main heading. Use \n for line breaks (e.g., "Discover the Art\nof Fermentation").
-     */
-    workshopsHeroTitle?: string | null;
-    /**
-     * Short intro text describing the workshops.
-     */
-    workshopsHeroDescription?: string | null;
-    /**
-     * Small text items (e.g., "3 Hours", "Hands-on", "Experience").
-     */
-    workshopsHeroAttributes?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Optional background image for the hero. If empty, jar silhouettes are shown.
-     */
-    workshopsHeroImage?: (string | null) | Media;
-    /**
-     * e.g., "Unsere Termine" / "Our Dates"
-     */
-    workshopsCalendarTitle?: string | null;
-    /**
-     * Intro text above the calendar.
-     */
-    workshopsCalendarDescription?: string | null;
-    /**
-     * Label above each next date (e.g. "Nächster Termin" / "Next Date").
-     */
-    workshopsCalendarNextDateLabel?: string | null;
-    /**
-     * Heading above the dates list (e.g. "Alle verfügbaren Termine" / "All available dates").
-     */
-    workshopsCalendarAllDatesHeading?: string | null;
-    /**
-     * Label for the "show all" filter button (e.g. "Alle" / "All").
-     */
-    workshopsCalendarAllFilterLabel?: string | null;
-    /**
-     * Column header for workshop type (e.g. "Workshop-Art" / "Workshop Type").
-     */
-    workshopsCalendarTypeColumnLabel?: string | null;
-    /**
-     * Column header for date & time (e.g. "Datum & Zeit" / "Date & Time").
-     */
-    workshopsCalendarDateColumnLabel?: string | null;
-    /**
-     * Column header for availability (e.g. "Plätze frei" / "Spots available").
-     */
-    workshopsCalendarSpotsColumnLabel?: string | null;
-    /**
-     * Label after the count of spots (e.g. "Plätze" / "Spots").
-     */
-    workshopsCalendarSpotsLabel?: string | null;
-    /**
-     * Label when no spots available (e.g. "Ausgebucht" / "Sold Out").
-     */
-    workshopsCalendarSoldOutLabel?: string | null;
-    /**
-     * Label for the booking button in each date row (e.g. "Buchen" / "Book").
-     */
-    workshopsCalendarBookLabel?: string | null;
-    /**
-     * Message when no dates match the filter (e.g. "Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.").
-     */
-    workshopsCalendarEmptyMessage?: string | null;
-    /**
-     * Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).
-     */
-    workshopsCalendarCards?:
-      | {
-          workshopType: 'basics' | 'lakto' | 'kombucha' | 'tempeh';
-          /**
-           * Card background image for this workshop type.
-           */
-          cardImage?: (string | null) | Media;
-          /**
-           * ⚠️ Auto-filled from Workshop Appointments. Only used as fallback when no appointments exist.
-           */
-          nextDate?: string | null;
-          /**
-           * e.g., "3h 30m" / "3.5 Stunden"
-           */
-          duration?: string | null;
-          /**
-           * e.g., "Details" / "More Info"
-           */
-          detailsLabel?: string | null;
-          /**
-           * e.g., "Buchen" / "Book Now"
-           */
-          buttonLabel?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Off = uses content from Website → Voucher CTA global. On = uses the fields below.
-     */
-    workshopsVoucherCustom?: boolean | null;
-    /**
-     * e.g., "Gift a special tasty experience"
-     */
-    workshopsVoucherHeading?: string | null;
-    /**
-     * Short paragraph below heading.
-     */
-    workshopsVoucherDescription?: string | null;
-    /**
-     * e.g., "Voucher"
-     */
-    workshopsVoucherButtonLabel?: string | null;
-    /**
-     * e.g., "/workshops/voucher"
-     */
-    workshopsVoucherButtonLink?: string | null;
-    /**
-     * Up to 8 images for the bento gallery.
-     */
-    workshopsVoucherGalleryImages?:
-      | {
-          image: string | Media;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Optional background image.
-     */
-    workshopsVoucherBackgroundImage?: (string | null) | Media;
-    /**
-     * Off = uses content from Website → Product Slider global. On = uses the fields below.
-     */
-    workshopsProductSliderCustom?: boolean | null;
-    /**
-     * e.g., "Discover UNIQUE."
-     */
-    workshopsProductSliderHeading?: string | null;
-    /**
-     * Accent word displayed next to heading (e.g., "FLAVOURS").
-     */
-    workshopsProductSliderHeadingAccent?: string | null;
-    /**
-     * Short paragraph (1–2 sentences).
-     */
-    workshopsProductSliderDescription?: string | null;
-    /**
-     * e.g., "View All Products"
-     */
-    workshopsProductSliderButtonLabel?: string | null;
-    /**
-     * e.g., "/products"
-     */
-    workshopsProductSliderButtonLink?: string | null;
-    /**
-     * Select products to display in the slider.
-     */
-    workshopsProductSliderProducts?: (string | Product)[] | null;
-    /**
-     * Off = uses content from Website → Sponsors Bar global. On = uses the fields below.
-     */
-    workshopsSponsorsCustom?: boolean | null;
-    /**
-     * e.g., "This project is supported by:"
-     */
-    workshopsSponsorsHeading?: string | null;
-    /**
-     * Sponsor logos and links.
-     */
-    workshopsSponsorsList?:
-      | {
-          name: string;
-          logo: string | Media;
-          /**
-           * Optional link to sponsor website.
-           */
-          url?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Off = uses content from Website → Testimonials global. On = uses the fields below.
-     */
-    workshopsTestimonialsCustom?: boolean | null;
-    /**
-     * Small text above heading (e.g., "Testimonials").
-     */
-    workshopsTestimonialsEyebrow?: string | null;
-    /**
-     * e.g., "What Our Community Says"
-     */
-    workshopsTestimonialsHeading?: string | null;
-    /**
-     * Customer quotes and ratings.
-     */
-    workshopsTestimonialsList?:
-      | {
-          quote: string;
-          authorName: string;
-          /**
-           * e.g., "Workshop Participant"
-           */
-          authorRole?: string | null;
-          rating?: number | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  /**
-   * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.
-   */
-  workshopDetail?: {
-    /**
-     * Enable this to show the seasonal calendar section on this workshop page. Disable to hide all calendar fields from the admin.
-     */
-    showSeasonalCalendar?: boolean | null;
-    /**
-     * Small text above the title (e.g. "Workshop Experience").
-     */
-    heroEyebrow?: string | null;
-    /**
-     * Main heading. Use a line break for two lines (e.g. "Die Kunst der\nLakto-Fermentation").
-     */
-    heroTitle?: string | null;
-    /**
-     * Short paragraph below the title.
-     */
-    heroDescription?: string | null;
-    /**
-     * Image shown on the left side of the hero (portrait or square, min 800px tall). When empty, decorative jar illustrations are shown instead.
-     */
-    heroImage?: (string | null) | Media;
-    /**
-     * Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").
-     */
-    heroAttributes?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"
-     */
-    bookingEyebrow?: string | null;
-    /**
-     * e.g. "99"
-     */
-    bookingPrice?: number | null;
-    /**
-     * e.g. "pro Person" / "per person"
-     */
-    bookingPriceSuffix?: string | null;
-    /**
-     * e.g. "€"
-     */
-    bookingCurrency?: string | null;
-    /**
-     * Optional background image for the booking card header.
-     */
-    bookingImage?: (string | null) | Media;
-    /**
-     * Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").
-     */
-    bookingAttributes?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Termine & Buchen" / "View Dates & Book"
-     */
-    bookingViewDatesLabel?: string | null;
-    /**
-     * e.g. "Termine ausblenden" / "Hide Dates"
-     */
-    bookingHideDatesLabel?: string | null;
-    /**
-     * e.g. "Mehr Informationen" / "Learn More"
-     */
-    bookingMoreDetailsLabel?: string | null;
-    /**
-     * e.g. "Buchen" / "Book"
-     */
-    bookingBookLabel?: string | null;
-    /**
-     * e.g. "Plätze frei" / "spots available"
-     */
-    bookingSpotsLabel?: string | null;
-    /**
-     * e.g. "Über den Workshop" / "About this Workshop"
-     */
-    aboutHeading?: string | null;
-    /**
-     * Long prose description of what the workshop is about.
-     */
-    aboutText?: string | null;
-    /**
-     * e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"
-     */
-    scheduleHeading?: string | null;
-    schedule?:
-      | {
-          /**
-           * e.g. "45 Min" / "45 minutes"
-           */
-          duration: string;
-          title: string;
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Im Preis enthalten (€99)" / "Included in the Price (€99)"
-     */
-    includedHeading?: string | null;
-    /**
-     * List of items/benefits included in the workshop.
-     */
-    includedItems?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Warum dieser Workshop?" / "Why This Workshop?"
-     */
-    whyHeading?: string | null;
-    whyPoints?:
-      | {
-          /**
-           * The bolded title of this point (e.g. "Darmgesundheit:")
-           */
-          bold: string;
-          /**
-           * The explanatory text that follows the bold title.
-           */
-          rest: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"
-     */
-    experienceEyebrow?: string | null;
-    /**
-     * Main heading for the experience section.
-     */
-    experienceTitle?: string | null;
-    experienceCards?:
-      | {
-          /**
-           * e.g. "THEORIE" / "THEORY"
-           */
-          eyebrow: string;
-          title: string;
-          description: string;
-          image?: (string | null) | Media;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Nächste Workshops" / "Upcoming Workshops"
-     */
-    datesHeading?: string | null;
-    /**
-     * e.g. "Reservierung bestätigen" / "Confirm Reservation"
-     */
-    modalConfirmHeading?: string | null;
-    modalConfirmSubheading?: string | null;
-    /**
-     * e.g. "Workshop"
-     */
-    modalWorkshopLabel?: string | null;
-    /**
-     * e.g. "Datum"
-     */
-    modalDateLabel?: string | null;
-    /**
-     * e.g. "Uhrzeit"
-     */
-    modalTimeLabel?: string | null;
-    /**
-     * e.g. "Gesamtbetrag"
-     */
-    modalTotalLabel?: string | null;
-    /**
-     * e.g. "Abbrechen" / "Cancel"
-     */
-    modalCancelLabel?: string | null;
-    /**
-     * e.g. "Bestätigen" / "Confirm"
-     */
-    modalConfirmLabel?: string | null;
-    /**
-     * e.g. "SAISONALE REZEPTE" / "SEASONAL RECIPES"
-     */
-    calendarEyebrow?: string | null;
-    /**
-     * e.g. "Fermentkalender" / "Fermentation Calendar"
-     */
-    calendarTitle?: string | null;
-    calendarDescription?: string | null;
-    calendarMonths?:
-      | {
-          /**
-           * e.g. "März" / "March"
-           */
-          month: string;
-          /**
-           * 3-letter code (e.g. "MÄR" / "MAR").
-           */
-          monthShort: string;
-          /**
-           * Two-digit month number (e.g. "03").
-           */
-          monthNumber: string;
-          /**
-           * e.g. "FRÜHLING" / "SPRING"
-           */
-          season: string;
-          /**
-           * Hex color for month badge and accent lines (e.g. "#e6be68"). Leave empty for default.
-           */
-          accent?: string | null;
-          recipes?:
-            | {
-                name: string;
-                id?: string | null;
-              }[]
-            | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
-     * ❌ OFF = Use custom content just for this workshop page.
-     */
-    useGlobalVoucherData?: boolean | null;
-    /**
-     * e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"
-     */
-    voucherEyebrow?: string | null;
-    /**
-     * e.g. "Go with a friend."
-     */
-    voucherTitle?: string | null;
-    voucherDescription?: string | null;
-    /**
-     * Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.
-     */
-    voucherBackgroundImage?: (string | null) | Media;
-    /**
-     * e.g. "Gutschein kaufen" / "Buy Voucher"
-     */
-    voucherPrimaryLabel?: string | null;
-    /**
-     * e.g. "/voucher"
-     */
-    voucherPrimaryHref?: string | null;
-    /**
-     * e.g. "Zum Shop" / "Visit Shop"
-     */
-    voucherSecondaryLabel?: string | null;
-    /**
-     * e.g. "/shop"
-     */
-    voucherSecondaryHref?: string | null;
-    /**
-     * Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").
-     */
-    voucherPills?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "HÄUFIGE FRAGEN" / "FAQ"
-     */
-    faqEyebrow?: string | null;
-    /**
-     * e.g. "Gut zu wissen" / "Good to Know"
-     */
-    faqTitle?: string | null;
-    faqDescription?: string | null;
-    faqItems?:
-      | {
-          question: string;
-          answer: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Email shown at bottom (e.g. "info@fermentfreude.de").
-     */
-    faqContactEmail?: string | null;
-    /**
-     * Small label above the heading (e.g. "TIPPS & GUIDES").
-     */
-    howToEyebrow?: string | null;
-    /**
-     * Main heading (e.g. "Lerne fermentieren.").
-     */
-    howToTitle?: string | null;
-    /**
-     * Short paragraph below the heading.
-     */
-    howToDescription?: string | null;
-    /**
-     * Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article's title, image and content is edited directly inside the Posts collection.
-     */
-    howToArticles?: (string | Post)[] | null;
-  };
   meta?: {
     title?: string | null;
     /**
@@ -1931,6 +1915,59 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Educational how-to articles organized by workshop type (Lakto, Tempeh, Kombucha). Each article can be viewed at /tipps/[slug] and displayed on its workshop page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  /**
+   * Article category. Determines which workshop page this article appears on and how it is filtered. Required.
+   */
+  workshopType: 'lakto' | 'tempeh' | 'kombucha';
+  /**
+   * URL path used in /tipps/[slug]. Use lowercase with hyphens only (e.g. "salz-und-lake"). Do not change after publishing — it will break existing links.
+   */
+  slug: string;
+  /**
+   * Main heading used on both the card and the article page (e.g. "Tempeh selbst machen").
+   */
+  title: string;
+  /**
+   * Short 1–2 sentence description shown on the card. Keep it under 150 characters.
+   */
+  summary?: string | null;
+  /**
+   * Displayed at the bottom of the card (e.g. "9 Min.").
+   */
+  readTime?: string | null;
+  /**
+   * Image shown at the top of the card AND as the article hero. Use 16:9 ratio (e.g. 1200×675 px). Upload a WebP for best performance.
+   */
+  heroImage?: (string | null) | Media;
+  /**
+   * Full article text. Use H2 for section titles. Each paragraph is a separate block. Supports bold, italic, unordered and ordered lists, and links.
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3520,59 +3557,6 @@ export interface WorkshopPhasesBlock {
   blockType: 'workshopPhases';
 }
 /**
- * Educational how-to articles organized by workshop type (Lakto, Tempeh, Kombucha). Each article can be viewed at /tipps/[slug] and displayed on its workshop page.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  /**
-   * Article category. Determines which workshop page this article appears on and how it is filtered. Required.
-   */
-  workshopType: 'lakto' | 'tempeh' | 'kombucha';
-  /**
-   * URL path used in /tipps/[slug]. Use lowercase with hyphens only (e.g. "salz-und-lake"). Do not change after publishing — it will break existing links.
-   */
-  slug: string;
-  /**
-   * Main heading used on both the card and the article page (e.g. "Tempeh selbst machen").
-   */
-  title: string;
-  /**
-   * Short 1–2 sentence description shown on the card. Keep it under 150 characters.
-   */
-  summary?: string | null;
-  /**
-   * Displayed at the bottom of the card (e.g. "9 Min.").
-   */
-  readTime?: string | null;
-  /**
-   * Image shown at the top of the card AND as the article hero. Use 16:9 ratio (e.g. 1200×675 px). Upload a WebP for best performance.
-   */
-  heroImage?: (string | null) | Media;
-  /**
-   * Full article text. Use H2 for section titles. Each paragraph is a separate block. Supports bold, italic, unordered and ordered lists, and links.
-   */
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Define workshop metadata. Price and capacity apply to all dates and locations.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4263,6 +4247,206 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  workshops?:
+    | T
+    | {
+        workshopsHeroEyebrow?: T;
+        workshopsHeroTitle?: T;
+        workshopsHeroDescription?: T;
+        workshopsHeroAttributes?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        workshopsHeroImage?: T;
+        workshopsCalendarTitle?: T;
+        workshopsCalendarDescription?: T;
+        workshopsCalendarNextDateLabel?: T;
+        workshopsCalendarCards?:
+          | T
+          | {
+              workshopType?: T;
+              cardImage?: T;
+              nextDate?: T;
+              duration?: T;
+              detailsLabel?: T;
+              buttonLabel?: T;
+              id?: T;
+            };
+        workshopsVoucherCustom?: T;
+        workshopsVoucherHeading?: T;
+        workshopsVoucherDescription?: T;
+        workshopsVoucherButtonLabel?: T;
+        workshopsVoucherButtonLink?: T;
+        workshopsVoucherGalleryImages?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
+        workshopsVoucherBackgroundImage?: T;
+        workshopsProductSliderCustom?: T;
+        workshopsProductSliderHeading?: T;
+        workshopsProductSliderHeadingAccent?: T;
+        workshopsProductSliderDescription?: T;
+        workshopsProductSliderButtonLabel?: T;
+        workshopsProductSliderButtonLink?: T;
+        workshopsProductSliderProducts?: T;
+        workshopsSponsorsCustom?: T;
+        workshopsSponsorsHeading?: T;
+        workshopsSponsorsList?:
+          | T
+          | {
+              name?: T;
+              logo?: T;
+              url?: T;
+              id?: T;
+            };
+        workshopsTestimonialsCustom?: T;
+        workshopsTestimonialsEyebrow?: T;
+        workshopsTestimonialsHeading?: T;
+        workshopsTestimonialsList?:
+          | T
+          | {
+              quote?: T;
+              authorName?: T;
+              authorRole?: T;
+              rating?: T;
+              id?: T;
+            };
+      };
+  workshopDetail?:
+    | T
+    | {
+        showSeasonalCalendar?: T;
+        heroEyebrow?: T;
+        heroTitle?: T;
+        heroDescription?: T;
+        heroImage?: T;
+        heroAttributes?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        bookingEyebrow?: T;
+        bookingPrice?: T;
+        bookingPriceSuffix?: T;
+        bookingCurrency?: T;
+        bookingImage?: T;
+        bookingAttributes?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        bookingViewDatesLabel?: T;
+        bookingHideDatesLabel?: T;
+        bookingMoreDetailsLabel?: T;
+        bookingBookLabel?: T;
+        bookingSpotsLabel?: T;
+        aboutHeading?: T;
+        aboutText?: T;
+        scheduleHeading?: T;
+        schedule?:
+          | T
+          | {
+              duration?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        includedHeading?: T;
+        includedItems?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        whyHeading?: T;
+        whyPoints?:
+          | T
+          | {
+              bold?: T;
+              rest?: T;
+              id?: T;
+            };
+        experienceEyebrow?: T;
+        experienceTitle?: T;
+        experienceCards?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              description?: T;
+              image?: T;
+              id?: T;
+            };
+        datesHeading?: T;
+        modalConfirmHeading?: T;
+        modalConfirmSubheading?: T;
+        modalWorkshopLabel?: T;
+        modalDateLabel?: T;
+        modalTimeLabel?: T;
+        modalTotalLabel?: T;
+        modalCancelLabel?: T;
+        modalConfirmLabel?: T;
+        calendarEyebrow?: T;
+        calendarTitle?: T;
+        calendarDescription?: T;
+        calendarMonths?:
+          | T
+          | {
+              month?: T;
+              monthShort?: T;
+              monthNumber?: T;
+              season?: T;
+              accent?: T;
+              recipes?:
+                | T
+                | {
+                    name?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        useGlobalVoucherData?: T;
+        voucherEyebrow?: T;
+        voucherTitle?: T;
+        voucherDescription?: T;
+        voucherBackgroundImage?: T;
+        voucherPrimaryLabel?: T;
+        voucherPrimaryHref?: T;
+        voucherSecondaryLabel?: T;
+        voucherSecondaryHref?: T;
+        voucherPills?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        faqEyebrow?: T;
+        faqTitle?: T;
+        faqDescription?: T;
+        faqItems?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        faqContactEmail?: T;
+        howToEyebrow?: T;
+        howToTitle?: T;
+        howToDescription?: T;
+        howToArticles?: T;
+        sliderHeading?: T;
+        sliderSubtitle?: T;
+        sliderPillLabel?: T;
+        sliderBuyLabel?: T;
+        sliderMoreInfoLabel?: T;
+      };
   layout?:
     | T
     | {
@@ -4565,210 +4749,6 @@ export interface PagesSelect<T extends boolean = true> {
               answer?: T;
               id?: T;
             };
-      };
-  workshops?:
-    | T
-    | {
-        workshopsHeroEyebrow?: T;
-        workshopsHeroTitle?: T;
-        workshopsHeroDescription?: T;
-        workshopsHeroAttributes?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        workshopsHeroImage?: T;
-        workshopsCalendarTitle?: T;
-        workshopsCalendarDescription?: T;
-        workshopsCalendarNextDateLabel?: T;
-        workshopsCalendarAllDatesHeading?: T;
-        workshopsCalendarAllFilterLabel?: T;
-        workshopsCalendarTypeColumnLabel?: T;
-        workshopsCalendarDateColumnLabel?: T;
-        workshopsCalendarSpotsColumnLabel?: T;
-        workshopsCalendarSpotsLabel?: T;
-        workshopsCalendarSoldOutLabel?: T;
-        workshopsCalendarBookLabel?: T;
-        workshopsCalendarEmptyMessage?: T;
-        workshopsCalendarCards?:
-          | T
-          | {
-              workshopType?: T;
-              cardImage?: T;
-              nextDate?: T;
-              duration?: T;
-              detailsLabel?: T;
-              buttonLabel?: T;
-              id?: T;
-            };
-        workshopsVoucherCustom?: T;
-        workshopsVoucherHeading?: T;
-        workshopsVoucherDescription?: T;
-        workshopsVoucherButtonLabel?: T;
-        workshopsVoucherButtonLink?: T;
-        workshopsVoucherGalleryImages?:
-          | T
-          | {
-              image?: T;
-              id?: T;
-            };
-        workshopsVoucherBackgroundImage?: T;
-        workshopsProductSliderCustom?: T;
-        workshopsProductSliderHeading?: T;
-        workshopsProductSliderHeadingAccent?: T;
-        workshopsProductSliderDescription?: T;
-        workshopsProductSliderButtonLabel?: T;
-        workshopsProductSliderButtonLink?: T;
-        workshopsProductSliderProducts?: T;
-        workshopsSponsorsCustom?: T;
-        workshopsSponsorsHeading?: T;
-        workshopsSponsorsList?:
-          | T
-          | {
-              name?: T;
-              logo?: T;
-              url?: T;
-              id?: T;
-            };
-        workshopsTestimonialsCustom?: T;
-        workshopsTestimonialsEyebrow?: T;
-        workshopsTestimonialsHeading?: T;
-        workshopsTestimonialsList?:
-          | T
-          | {
-              quote?: T;
-              authorName?: T;
-              authorRole?: T;
-              rating?: T;
-              id?: T;
-            };
-      };
-  workshopDetail?:
-    | T
-    | {
-        showSeasonalCalendar?: T;
-        heroEyebrow?: T;
-        heroTitle?: T;
-        heroDescription?: T;
-        heroImage?: T;
-        heroAttributes?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        bookingEyebrow?: T;
-        bookingPrice?: T;
-        bookingPriceSuffix?: T;
-        bookingCurrency?: T;
-        bookingImage?: T;
-        bookingAttributes?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        bookingViewDatesLabel?: T;
-        bookingHideDatesLabel?: T;
-        bookingMoreDetailsLabel?: T;
-        bookingBookLabel?: T;
-        bookingSpotsLabel?: T;
-        aboutHeading?: T;
-        aboutText?: T;
-        scheduleHeading?: T;
-        schedule?:
-          | T
-          | {
-              duration?: T;
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-        includedHeading?: T;
-        includedItems?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        whyHeading?: T;
-        whyPoints?:
-          | T
-          | {
-              bold?: T;
-              rest?: T;
-              id?: T;
-            };
-        experienceEyebrow?: T;
-        experienceTitle?: T;
-        experienceCards?:
-          | T
-          | {
-              eyebrow?: T;
-              title?: T;
-              description?: T;
-              image?: T;
-              id?: T;
-            };
-        datesHeading?: T;
-        modalConfirmHeading?: T;
-        modalConfirmSubheading?: T;
-        modalWorkshopLabel?: T;
-        modalDateLabel?: T;
-        modalTimeLabel?: T;
-        modalTotalLabel?: T;
-        modalCancelLabel?: T;
-        modalConfirmLabel?: T;
-        calendarEyebrow?: T;
-        calendarTitle?: T;
-        calendarDescription?: T;
-        calendarMonths?:
-          | T
-          | {
-              month?: T;
-              monthShort?: T;
-              monthNumber?: T;
-              season?: T;
-              accent?: T;
-              recipes?:
-                | T
-                | {
-                    name?: T;
-                    id?: T;
-                  };
-              id?: T;
-            };
-        useGlobalVoucherData?: T;
-        voucherEyebrow?: T;
-        voucherTitle?: T;
-        voucherDescription?: T;
-        voucherBackgroundImage?: T;
-        voucherPrimaryLabel?: T;
-        voucherPrimaryHref?: T;
-        voucherSecondaryLabel?: T;
-        voucherSecondaryHref?: T;
-        voucherPills?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        faqEyebrow?: T;
-        faqTitle?: T;
-        faqDescription?: T;
-        faqItems?:
-          | T
-          | {
-              question?: T;
-              answer?: T;
-              id?: T;
-            };
-        faqContactEmail?: T;
-        howToEyebrow?: T;
-        howToTitle?: T;
-        howToDescription?: T;
-        howToArticles?: T;
       };
   meta?:
     | T
