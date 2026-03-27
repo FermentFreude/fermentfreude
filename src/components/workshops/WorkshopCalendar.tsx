@@ -17,6 +17,7 @@ export type WorkshopCalendarCard = {
   cardImageId?: string | null
   nextDate?: string | null
   duration?: string | null
+  detailsLabel?: string | null
   buttonLabel?: string | null
   productId?: string | null
 }
@@ -136,7 +137,7 @@ function WorkshopCard({
             href={getWorkshopSlug(workshop.workshopType)}
             className="inline-flex items-center justify-center px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide rounded-md bg-[#f5f1e8] text-[#555954] hover:bg-[#555954] hover:text-white transition-all duration-300"
           >
-            Details
+            {workshop.detailsLabel || 'Details'}
           </Link>
 
           {/* Booking Button */}
@@ -144,7 +145,7 @@ function WorkshopCard({
             onClick={() => onBookingClick?.(workshop)}
             className="inline-flex items-center justify-center px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide rounded-md bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954] transition-all duration-300"
           >
-            Buchen
+            {workshop.buttonLabel || 'Buchen'}
           </button>
         </div>
       </div>

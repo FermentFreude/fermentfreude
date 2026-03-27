@@ -1434,6 +1434,10 @@ export interface Page {
            */
           duration?: string | null;
           /**
+           * e.g., "Details" / "More Info"
+           */
+          detailsLabel?: string | null;
+          /**
            * e.g., "Buchen" / "Book Now"
            */
           buttonLabel?: string | null;
@@ -4494,6 +4498,7 @@ export interface PagesSelect<T extends boolean = true> {
               cardImage?: T;
               nextDate?: T;
               duration?: T;
+              detailsLabel?: T;
               buttonLabel?: T;
               id?: T;
             };
