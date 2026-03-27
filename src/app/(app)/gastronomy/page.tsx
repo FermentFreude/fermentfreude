@@ -342,7 +342,7 @@ export default async function GastronomyPage() {
             {outcomes.map((item, i) => (
               <div
                 key={i}
-                className="rounded-2xl border border-[#E6BE68]/28 bg-gradient-to-b from-white to-[#FBF8F2] p-6 text-center shadow-[0_10px_24px_rgba(0,0,0,0.05)]"
+                className="rounded-2xl border border-[#E6BE68]/28 bg-linear-to-b from-white to-[#FBF8F2] p-6 text-center shadow-[0_10px_24px_rgba(0,0,0,0.05)]"
               >
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#9a7f47]">
                   {locale === 'de' ? 'Vorher' : 'Before'}
@@ -400,7 +400,7 @@ export default async function GastronomyPage() {
             {testimonials.map((item, index) => (
               <div
                 key={index}
-                className="rounded-2xl border border-[#E6BE68]/25 bg-gradient-to-b from-white to-[#FBF8F2] p-6 text-center shadow-[0_10px_24px_rgba(0,0,0,0.05)]"
+                className="rounded-2xl border border-[#E6BE68]/25 bg-linear-to-b from-white to-[#FBF8F2] p-6 text-center shadow-[0_10px_24px_rgba(0,0,0,0.05)]"
               >
                 <p className="text-sm leading-relaxed text-ff-gray-text md:text-base">
                   &ldquo;{item.quote}&rdquo;
@@ -414,7 +414,7 @@ export default async function GastronomyPage() {
 
       {/* B2B FAQ mini block */}
       <section className="px-6 py-8 md:px-12 lg:px-20">
-        <div className="mx-auto max-w-6xl rounded-2xl border border-[#E6BE68]/28 bg-gradient-to-b from-white to-[#FAF7F1] p-6 md:p-8">
+        <div className="mx-auto max-w-6xl rounded-2xl border border-[#E6BE68]/28 bg-linear-to-b from-white to-[#FAF7F1] p-6 md:p-8">
           <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-[#737672]">
             {faqMiniLabel}
           </p>

@@ -242,6 +242,14 @@ const workshopDetailDE = {
         'Derzeit bieten wir den Tempeh-Workshop nur vor Ort an. Aber wir arbeiten an digitalen Ressourcen für Online-Lerner!',
     },
   ],
+
+  // ── 7. Other Workshops Slider ──────────────────────────
+  sliderHeading: 'Entdecke weitere Workshops',
+  sliderSubtitle:
+    'Wähle deinen Weg in die Welt der Mikroorganismen. Jeder Workshop ist für Einsteiger und Enthusiasten konzipiert.',
+  sliderPillLabel: 'WORKSHOP-ART',
+  sliderBuyLabel: 'Jetzt buchen',
+  sliderMoreInfoLabel: 'Mehr erfahren',
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -456,6 +464,14 @@ const workshopDetailEN = {
         "Currently we only offer the Tempeh workshop on-site. But we're working on digital resources for online learners!",
     },
   ],
+
+  // ── 7. Other Workshops Slider ──────────────────────────
+  sliderHeading: 'Discover Other Workshops',
+  sliderSubtitle:
+    'Choose your path into the world of microorganisms. Each workshop is designed for beginners and enthusiasts alike.',
+  sliderPillLabel: 'WORKSHOP TYPE',
+  sliderBuyLabel: 'Book now',
+  sliderMoreInfoLabel: 'Learn more',
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -34,6 +34,17 @@ const workshopsCalendarDE = {
   workshopsCalendarTitle: 'Unsere nächsten Termine',
   workshopsCalendarDescription:
     'Buche deinen Workshop für Lakto-Gemüse, Kombucha oder Tempeh. Verfügbare Plätze sind begrenzt.',
+  workshopsCalendarNextDateLabel: 'Nächster Termin',
+  workshopsCalendarAllDatesHeading: 'Alle verfügbaren Termine',
+  workshopsCalendarAllFilterLabel: 'Alle',
+  workshopsCalendarTypeColumnLabel: 'Workshop-Art',
+  workshopsCalendarDateColumnLabel: 'Datum & Zeit',
+  workshopsCalendarSpotsColumnLabel: 'Plätze frei',
+  workshopsCalendarSpotsLabel: 'Plätze',
+  workshopsCalendarSoldOutLabel: 'Ausgebucht',
+  workshopsCalendarBookLabel: '→ Buchen',
+  workshopsCalendarEmptyMessage:
+    'Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.',
   workshopsCalendarCards: [
     {
       workshopType: 'lakto' as const,
@@ -81,6 +92,16 @@ const workshopsCalendarEN = {
   workshopsCalendarTitle: 'Our Upcoming Dates',
   workshopsCalendarDescription:
     'Book your workshop for Lacto-vegetables, Kombucha, or Tempeh. Available spots are limited.',
+  workshopsCalendarNextDateLabel: 'Next Date',
+  workshopsCalendarAllDatesHeading: 'All Available Dates',
+  workshopsCalendarAllFilterLabel: 'All',
+  workshopsCalendarTypeColumnLabel: 'Workshop Type',
+  workshopsCalendarDateColumnLabel: 'Date & Time',
+  workshopsCalendarSpotsColumnLabel: 'Spots Available',
+  workshopsCalendarSpotsLabel: 'spots',
+  workshopsCalendarSoldOutLabel: 'Sold Out',
+  workshopsCalendarBookLabel: '→ Book',
+  workshopsCalendarEmptyMessage: 'No available dates for this workshop type at the moment.',
   workshopsCalendarCards: [
     {
       workshopType: 'lakto' as const,

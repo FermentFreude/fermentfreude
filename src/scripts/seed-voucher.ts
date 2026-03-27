@@ -131,6 +131,7 @@ async function seedVoucher() {
   // ── 4. Create or update the Voucher page in DE (default locale) ────────
   console.log('  📄 Creating/updating voucher page (DE)...')
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let voucherPageDE: any
   const pageId = existing.docs.length > 0 ? existing.docs[0]!.id : undefined
 

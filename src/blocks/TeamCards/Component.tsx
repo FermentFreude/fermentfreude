@@ -32,14 +32,6 @@ const DEFAULTS = {
 type Props = TeamCardsBlockType & { id?: string }
 
 export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, members, id }) => {
-  if (visible === false) return null
-  const resolvedLabel = label ?? DEFAULTS.label
-  const resolvedHeading = heading ?? DEFAULTS.heading
-  const resolvedMembers =
-    members && members.length > 0
-      ? members
-      : DEFAULTS.members.map((m) => ({ ...m, image: null, id: null }))
-
   const sectionRef = useRef<HTMLElement>(null)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -56,6 +48,15 @@ export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, membe
     return () => obs.disconnect()
   }, [])
 
+  if (visible === false) return null
+
+  const resolvedLabel = label ?? DEFAULTS.label
+  const resolvedHeading = heading ?? DEFAULTS.heading
+  const resolvedMembers =
+    members && members.length > 0
+      ? members
+      : DEFAULTS.members.map((m) => ({ ...m, image: null, id: null }))
+
   return (
     <section
       ref={sectionRef}
@@ -69,15 +70,13 @@ export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, membe
           <span className="text-eyebrow text-ff-gold-accent font-display font-semibold tracking-[0.2em]">
             {resolvedLabel}
           </span>
-          <h2 className="mt-1 mb-[70px] text-section-heading font-display font-bold tracking-tight text-ff-near-black text-center">
+          <h2 className="mt-1 mb-17.5 text-section-heading font-display font-bold tracking-tight text-ff-near-black text-center">
             {resolvedHeading}
           </h2>
           <div className="grid w-full gap-2 md:gap-4 lg:grid-cols-2 content-wide mx-auto items-stretch">
             {resolvedMembers.map((member, idx) => {
               const hasCmsImage =
-                member.image &&
-                typeof member.image === 'object' &&
-                'url' in member.image
+                member.image && typeof member.image === 'object' && 'url' in member.image
               const staticSrc =
                 !hasCmsImage && member.name
                   ? STATIC_TEAM_IMAGES[(member.name as string).toLowerCase()]
@@ -93,38 +92,41 @@ export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, membe
                     transitionDelay: `${idx * 150}ms`,
                   }}
                 >
-                <article className="group flex flex-col h-full w-full overflow-hidden rounded-(--radius-xl) border-2 border-ff-border-light bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:border-ff-charcoal/20 hover:-translate-y-1">
-                  <div className="relative aspect-[4/5] w-full shrink-0 overflow-hidden bg-ff-warm-gray">
-                    {hasCmsImage ? (
-                      <Media
-                        resource={member.image as MediaType}
-                        fill
-                        imgClassName="object-cover transition-transform duration-500 group-hover:scale-105"
+                  <article className="group flex flex-col h-full w-full overflow-hidden rounded-(--radius-xl) border-2 border-ff-border-light bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:border-ff-charcoal/20 hover:-translate-y-1">
+                    <div className="relative aspect-4/5 w-full shrink-0 overflow-hidden bg-ff-warm-gray">
+                      {hasCmsImage ? (
+                        <Media
+                          resource={member.image as MediaType}
+                          fill
+                          imgClassName="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : staticSrc ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={staticSrc}
+                          alt={member.name || 'Team member'}
+                          className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 size-full bg-ff-warm-gray" />
+                      )}
+                    </div>
+                    <div className="flex flex-1 flex-col gap-1 px-4 pb-3 pt-3 min-h-36">
+                      <h3 className="font-display text-subheading font-bold text-ff-near-black">
+                        {member.name}
+                      </h3>
+                      <div
+                        className="w-12 h-0.5 bg-ff-gold-accent/60 rounded-full shrink-0"
+                        aria-hidden
                       />
-                    ) : staticSrc ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={staticSrc}
-                        alt={member.name || 'Team member'}
-                        className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 size-full bg-ff-warm-gray" />
-                    )}
-                  </div>
-                  <div className="flex flex-1 flex-col gap-1 px-4 pb-3 pt-3 min-h-[9rem]">
-                    <h3 className="font-display text-subheading font-bold text-ff-near-black">
-                      {member.name}
-                    </h3>
-                    <div className="w-12 h-0.5 bg-ff-gold-accent/60 rounded-full shrink-0" aria-hidden />
-                    <p className="font-sans text-body font-semibold text-ff-gray-text shrink-0">
-                      {member.role}
-                    </p>
-                    <p className="font-sans text-body leading-relaxed text-ff-gray-15 line-clamp-5 whitespace-pre-line">
-                      {member.description}
-                    </p>
-                  </div>
-                </article>
+                      <p className="font-sans text-body font-semibold text-ff-gray-text shrink-0">
+                        {member.role}
+                      </p>
+                      <p className="font-sans text-body leading-relaxed text-ff-gray-15 line-clamp-5 whitespace-pre-line">
+                        {member.description}
+                      </p>
+                    </div>
+                  </article>
                 </div>
               )
             })}

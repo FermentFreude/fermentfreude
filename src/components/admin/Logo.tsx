@@ -16,6 +16,7 @@ export const Logo: React.FC = () => {
         padding: '2rem 0',
       }}
     >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={theme === 'dark' ? '/submark-dark.png' : '/submark-light.png'}
         alt="FermentFreude"

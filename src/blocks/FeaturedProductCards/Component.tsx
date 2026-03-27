@@ -137,7 +137,7 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
             {products.map((product, i) => {
               const image = getFirstImage(product)
               const price = product.priceInEUR
-              const badge = getPrimaryBadge(product)
+              const _badge = getPrimaryBadge(product)
               const cardColor = cardColors?.[i]?.color || DEFAULT_COLORS[i % DEFAULT_COLORS.length]
               const isTempeh =
                 product.slug?.toLowerCase().includes('tempeh') ||

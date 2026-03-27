@@ -76,7 +76,11 @@ export async function Footer() {
   const social = footer.socialMedia
 
   // Resolve a CMS link field (reference or custom URL) to an href string
-  const resolveHref = (link: { type?: string | null; url?: string | null; reference?: { relationTo: string; value: string | { slug?: string | null } } | null }) => {
+  const resolveHref = (link: {
+    type?: string | null
+    url?: string | null
+    reference?: { relationTo: string; value: string | { slug?: string | null } } | null
+  }) => {
     if (link.type === 'reference' && link.reference) {
       const ref = link.reference
       const slug = typeof ref.value === 'object' ? ref.value?.slug : null

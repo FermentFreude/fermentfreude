@@ -39,7 +39,7 @@ import { fileURLToPath, pathToFileURL } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-async function getCompletedMigrations(payload: Payload): Promise<Set<string>> {
+async function getCompletedMigrations(_payload: Payload): Promise<Set<string>> {
   try {
     // Store completion state in a simple JSON file next to the migrations
     const stateFile = path.join(__dirname, '.completed.json')

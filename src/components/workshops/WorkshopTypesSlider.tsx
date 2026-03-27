@@ -43,7 +43,7 @@ export function WorkshopTypesSlider({
   workshops,
   heading,
   subtitle,
-  pillLabel,
+  pillLabel: _pillLabel,
   buyLabel,
   moreInfoLabel,
 }: Props) {

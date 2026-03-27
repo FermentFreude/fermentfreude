@@ -51,7 +51,10 @@ export function SplashScreen() {
     }
 
     // Skip splash animation for users who prefer reduced motion
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
       sessionStorage.setItem('ff-splash-seen', '1')
       setPhase('done')
       return
@@ -60,11 +63,11 @@ export function SplashScreen() {
     // Mobile browsers (notably iOS Safari) often don't support CSS `d: path(...)` morphing.
     // Detect support and fall back to a transform-based splash animation when needed.
     try {
-      const supportsPathMorph =
-        typeof window !== 'undefined' &&
-        typeof (window as any).CSS !== 'undefined' &&
-        typeof (window as any).CSS.supports === 'function' &&
-        (window as any).CSS.supports('d: path("M0,0 L1,1")')
+      const cssObj =
+        typeof window !== 'undefined'
+          ? (window as unknown as { CSS?: { supports?: (prop: string) => boolean } }).CSS
+          : undefined
+      const supportsPathMorph = !!cssObj?.supports?.('d: path("M0,0 L1,1")')
       if (!supportsPathMorph) setUseSimpleFallback(true)
     } catch {
       setUseSimpleFallback(true)

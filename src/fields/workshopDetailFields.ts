@@ -741,4 +741,52 @@ export const workshopDetailFields: Field[] = [
       },
     ],
   },
+
+  // ── 7. Other Workshops Slider ──────────────────────────
+  {
+    type: 'collapsible',
+    label: '7. Other Workshops Slider',
+    admin: {
+      initCollapsed: true,
+      description:
+        'Labels for the "Discover other workshops" slider that appears at the bottom of every detail page.',
+    },
+    fields: [
+      {
+        name: 'sliderHeading',
+        type: 'text',
+        localized: true,
+        label: 'Heading',
+        admin: { description: 'e.g. "Entdecke weitere Workshops" / "Discover Other Workshops".' },
+      },
+      {
+        name: 'sliderSubtitle',
+        type: 'textarea',
+        localized: true,
+        label: 'Subtitle',
+        admin: { description: 'Short paragraph below the heading.' },
+      },
+      {
+        name: 'sliderPillLabel',
+        type: 'text',
+        localized: true,
+        label: 'Pill Label',
+        admin: { description: 'Small pill/badge text (e.g. "Workshop" / "Workshop").' },
+      },
+      {
+        name: 'sliderBuyLabel',
+        type: 'text',
+        localized: true,
+        label: 'Buy Button Label',
+        admin: { description: 'e.g. "Buchen" / "Book Now".' },
+      },
+      {
+        name: 'sliderMoreInfoLabel',
+        type: 'text',
+        localized: true,
+        label: 'More Info Label',
+        admin: { description: 'e.g. "Mehr erfahren" / "Learn More".' },
+      },
+    ],
+  },
 ]
