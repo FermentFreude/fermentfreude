@@ -76,8 +76,11 @@ export const workshopOverviewFields: Field[] = [
   },
   {
     type: 'collapsible',
-    label: '📅 Workshop Calendar Section',
-    admin: { initCollapsed: true },
+    label: '📅 Workshop Calendar — Section Header',
+    admin: {
+      initCollapsed: true,
+      description: 'The main title and description that appear above the workshop cards.',
+    },
     fields: [
       {
         name: 'workshopsCalendarTitle',
@@ -93,8 +96,19 @@ export const workshopOverviewFields: Field[] = [
         required: false,
         localized: true,
         label: 'Section Description',
-        admin: { description: 'Intro text above the calendar.' },
+        admin: { description: 'Intro text below the title.' },
       },
+    ],
+  },
+  {
+    type: 'collapsible',
+    label: '🃏 Workshop Cards (Lakto, Kombucha, Tempeh)',
+    admin: {
+      initCollapsed: true,
+      description:
+        'The 3 clickable cards at the top of the calendar — each shows a workshop type with image, next date and a booking button.',
+    },
+    fields: [
       {
         name: 'workshopsCalendarNextDateLabel',
         type: 'text',
@@ -103,71 +117,8 @@ export const workshopOverviewFields: Field[] = [
         label: 'Next Date Label',
         admin: {
           description:
-            'Label above each next date (e.g. "Nächster Termin" / "Next Date").',
+            'Small label above the next date on each card (e.g. "Nächster Termin" / "Next Date").',
         },
-      },
-      {
-        name: 'workshopsCalendarAllDatesHeading',
-        type: 'text',
-        localized: true,
-        label: 'All Dates Heading',
-        admin: { description: 'e.g. "Alle verfügbaren Termine" / "All Available Dates".' },
-      },
-      {
-        name: 'workshopsCalendarAllFilterLabel',
-        type: 'text',
-        localized: true,
-        label: '"All" Filter Label',
-        admin: { description: 'Text for the filter button that shows all types (e.g. "Alle" / "All").' },
-      },
-      {
-        name: 'workshopsCalendarTypeColumnLabel',
-        type: 'text',
-        localized: true,
-        label: 'Type Column Label',
-        admin: { description: 'Column header for workshop type (e.g. "Workshop-Art" / "Workshop Type").' },
-      },
-      {
-        name: 'workshopsCalendarDateColumnLabel',
-        type: 'text',
-        localized: true,
-        label: 'Date Column Label',
-        admin: { description: 'Column header for date (e.g. "Datum & Zeit" / "Date & Time").' },
-      },
-      {
-        name: 'workshopsCalendarSpotsColumnLabel',
-        type: 'text',
-        localized: true,
-        label: 'Spots Column Label',
-        admin: { description: 'Column header for availability (e.g. "Plätze frei" / "Spots Available").' },
-      },
-      {
-        name: 'workshopsCalendarSpotsLabel',
-        type: 'text',
-        localized: true,
-        label: 'Spots Unit Label',
-        admin: { description: 'Unit word after the number (e.g. "Plätze" / "spots").' },
-      },
-      {
-        name: 'workshopsCalendarSoldOutLabel',
-        type: 'text',
-        localized: true,
-        label: 'Sold Out Label',
-        admin: { description: 'Text when fully booked (e.g. "Ausgebucht" / "Sold Out").' },
-      },
-      {
-        name: 'workshopsCalendarBookLabel',
-        type: 'text',
-        localized: true,
-        label: 'Book Button Label',
-        admin: { description: 'Text on the booking button (e.g. "→ Buchen" / "→ Book").' },
-      },
-      {
-        name: 'workshopsCalendarEmptyMessage',
-        type: 'text',
-        localized: true,
-        label: 'No Dates Message',
-        admin: { description: 'Shown when no appointments match the filter.' },
       },
       {
         name: 'workshopsCalendarCards',
@@ -178,7 +129,7 @@ export const workshopOverviewFields: Field[] = [
         label: 'Workshop Cards',
         admin: {
           description:
-            'Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).',
+            'Each card represents one workshop type. Configure the image, duration and button labels.',
         },
         fields: [
           {
@@ -239,6 +190,80 @@ export const workshopOverviewFields: Field[] = [
             admin: { description: 'e.g., "Buchen" / "Book Now"' },
           },
         ],
+      },
+    ],
+  },
+  {
+    type: 'collapsible',
+    label: '📋 All Dates List (Alle verfügbaren Termine)',
+    admin: {
+      initCollapsed: true,
+      description:
+        'The filterable list below the cards that shows every upcoming appointment with type, date, spots and a book button.',
+    },
+    fields: [
+      {
+        name: 'workshopsCalendarAllDatesHeading',
+        type: 'text',
+        localized: true,
+        label: 'Heading',
+        admin: { description: 'e.g. "Alle verfügbaren Termine" / "All Available Dates".' },
+      },
+      {
+        name: 'workshopsCalendarAllFilterLabel',
+        type: 'text',
+        localized: true,
+        label: '"All" Filter Button',
+        admin: { description: 'Text on the filter button that shows all types (e.g. "Alle" / "All").' },
+      },
+      {
+        name: 'workshopsCalendarTypeColumnLabel',
+        type: 'text',
+        localized: true,
+        label: 'Type Column Label',
+        admin: { description: 'e.g. "Workshop-Art" / "Workshop Type".' },
+      },
+      {
+        name: 'workshopsCalendarDateColumnLabel',
+        type: 'text',
+        localized: true,
+        label: 'Date Column Label',
+        admin: { description: 'e.g. "Datum & Zeit" / "Date & Time".' },
+      },
+      {
+        name: 'workshopsCalendarSpotsColumnLabel',
+        type: 'text',
+        localized: true,
+        label: 'Spots Column Label',
+        admin: { description: 'e.g. "Plätze frei" / "Spots Available".' },
+      },
+      {
+        name: 'workshopsCalendarSpotsLabel',
+        type: 'text',
+        localized: true,
+        label: 'Spots Unit Label',
+        admin: { description: 'Word after the number (e.g. "Plätze" / "spots").' },
+      },
+      {
+        name: 'workshopsCalendarSoldOutLabel',
+        type: 'text',
+        localized: true,
+        label: 'Sold Out Label',
+        admin: { description: 'Shown when all spots are taken (e.g. "Ausgebucht" / "Sold Out").' },
+      },
+      {
+        name: 'workshopsCalendarBookLabel',
+        type: 'text',
+        localized: true,
+        label: 'Book Button Label',
+        admin: { description: 'Text on the booking button (e.g. "→ Buchen" / "→ Book").' },
+      },
+      {
+        name: 'workshopsCalendarEmptyMessage',
+        type: 'text',
+        localized: true,
+        label: 'No Dates Message',
+        admin: { description: 'Shown when no appointments match the selected filter.' },
       },
     ],
   },

@@ -827,51 +827,15 @@ export interface Page {
      */
     workshopsCalendarTitle?: string | null;
     /**
-     * Intro text above the calendar.
+     * Intro text below the title.
      */
     workshopsCalendarDescription?: string | null;
     /**
-     * Label above each next date (e.g. "Nächster Termin" / "Next Date").
+     * Small label above the next date on each card (e.g. "Nächster Termin" / "Next Date").
      */
     workshopsCalendarNextDateLabel?: string | null;
     /**
-     * e.g. "Alle verfügbaren Termine" / "All Available Dates".
-     */
-    workshopsCalendarAllDatesHeading?: string | null;
-    /**
-     * Text for the filter button that shows all types (e.g. "Alle" / "All").
-     */
-    workshopsCalendarAllFilterLabel?: string | null;
-    /**
-     * Column header for workshop type (e.g. "Workshop-Art" / "Workshop Type").
-     */
-    workshopsCalendarTypeColumnLabel?: string | null;
-    /**
-     * Column header for date (e.g. "Datum & Zeit" / "Date & Time").
-     */
-    workshopsCalendarDateColumnLabel?: string | null;
-    /**
-     * Column header for availability (e.g. "Plätze frei" / "Spots Available").
-     */
-    workshopsCalendarSpotsColumnLabel?: string | null;
-    /**
-     * Unit word after the number (e.g. "Plätze" / "spots").
-     */
-    workshopsCalendarSpotsLabel?: string | null;
-    /**
-     * Text when fully booked (e.g. "Ausgebucht" / "Sold Out").
-     */
-    workshopsCalendarSoldOutLabel?: string | null;
-    /**
-     * Text on the booking button (e.g. "→ Buchen" / "→ Book").
-     */
-    workshopsCalendarBookLabel?: string | null;
-    /**
-     * Shown when no appointments match the filter.
-     */
-    workshopsCalendarEmptyMessage?: string | null;
-    /**
-     * Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).
+     * Each card represents one workshop type. Configure the image, duration and button labels.
      */
     workshopsCalendarCards?:
       | {
@@ -899,6 +863,42 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * e.g. "Alle verfügbaren Termine" / "All Available Dates".
+     */
+    workshopsCalendarAllDatesHeading?: string | null;
+    /**
+     * Text on the filter button that shows all types (e.g. "Alle" / "All").
+     */
+    workshopsCalendarAllFilterLabel?: string | null;
+    /**
+     * e.g. "Workshop-Art" / "Workshop Type".
+     */
+    workshopsCalendarTypeColumnLabel?: string | null;
+    /**
+     * e.g. "Datum & Zeit" / "Date & Time".
+     */
+    workshopsCalendarDateColumnLabel?: string | null;
+    /**
+     * e.g. "Plätze frei" / "Spots Available".
+     */
+    workshopsCalendarSpotsColumnLabel?: string | null;
+    /**
+     * Word after the number (e.g. "Plätze" / "spots").
+     */
+    workshopsCalendarSpotsLabel?: string | null;
+    /**
+     * Shown when all spots are taken (e.g. "Ausgebucht" / "Sold Out").
+     */
+    workshopsCalendarSoldOutLabel?: string | null;
+    /**
+     * Text on the booking button (e.g. "→ Buchen" / "→ Book").
+     */
+    workshopsCalendarBookLabel?: string | null;
+    /**
+     * Shown when no appointments match the selected filter.
+     */
+    workshopsCalendarEmptyMessage?: string | null;
     /**
      * Off = uses content from Website → Voucher CTA global. On = uses the fields below.
      */
@@ -4299,15 +4299,6 @@ export interface PagesSelect<T extends boolean = true> {
         workshopsCalendarTitle?: T;
         workshopsCalendarDescription?: T;
         workshopsCalendarNextDateLabel?: T;
-        workshopsCalendarAllDatesHeading?: T;
-        workshopsCalendarAllFilterLabel?: T;
-        workshopsCalendarTypeColumnLabel?: T;
-        workshopsCalendarDateColumnLabel?: T;
-        workshopsCalendarSpotsColumnLabel?: T;
-        workshopsCalendarSpotsLabel?: T;
-        workshopsCalendarSoldOutLabel?: T;
-        workshopsCalendarBookLabel?: T;
-        workshopsCalendarEmptyMessage?: T;
         workshopsCalendarCards?:
           | T
           | {
@@ -4319,6 +4310,15 @@ export interface PagesSelect<T extends boolean = true> {
               buttonLabel?: T;
               id?: T;
             };
+        workshopsCalendarAllDatesHeading?: T;
+        workshopsCalendarAllFilterLabel?: T;
+        workshopsCalendarTypeColumnLabel?: T;
+        workshopsCalendarDateColumnLabel?: T;
+        workshopsCalendarSpotsColumnLabel?: T;
+        workshopsCalendarSpotsLabel?: T;
+        workshopsCalendarSoldOutLabel?: T;
+        workshopsCalendarBookLabel?: T;
+        workshopsCalendarEmptyMessage?: T;
         workshopsVoucherCustom?: T;
         workshopsVoucherHeading?: T;
         workshopsVoucherDescription?: T;
