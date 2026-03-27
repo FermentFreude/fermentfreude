@@ -249,6 +249,14 @@ const workshopDetailDE = {
         'Ja! Kombucha ist vollständig pflanzlich und besteht aus schwarzem oder grünem Tee, Zucker und einer SCOBY. Im Workshop zeigen wir auch wie du verschiedene Tee- und Geschmacksvariationen nutzt. Die Verkostung bietet rein vegane Optionen.',
     },
   ],
+
+  // ── 7. Other Workshops Slider ──────────────────────────
+  sliderHeading: 'Entdecke weitere Workshops',
+  sliderSubtitle:
+    'Wähle deinen Weg in die Welt der Mikroorganismen. Jeder Workshop ist für Einsteiger und Enthusiasten konzipiert.',
+  sliderPillLabel: 'WORKSHOP-ART',
+  sliderBuyLabel: 'Jetzt buchen',
+  sliderMoreInfoLabel: 'Mehr erfahren',
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -468,6 +476,14 @@ const workshopDetailEN = {
         'Yes, kombucha is completely plant-based — made from black or green tea, sugar, and a SCOBY. In the workshop, we also show you how to use different tea and flavor variations. The tasting offers purely vegan options.',
     },
   ],
+
+  // ── 7. Other Workshops Slider ──────────────────────────
+  sliderHeading: 'Discover Other Workshops',
+  sliderSubtitle:
+    'Choose your path into the world of microorganisms. Each workshop is designed for beginners and enthusiasts alike.',
+  sliderPillLabel: 'WORKSHOP TYPE',
+  sliderBuyLabel: 'Book now',
+  sliderMoreInfoLabel: 'Learn more',
 }
 
 // ═══════════════════════════════════════════════════════════════
