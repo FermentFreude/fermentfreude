@@ -1432,6 +1432,42 @@ export interface Page {
      */
     workshopsCalendarNextDateLabel?: string | null;
     /**
+     * Heading above the dates list (e.g. "Alle verfügbaren Termine" / "All available dates").
+     */
+    workshopsCalendarAllDatesHeading?: string | null;
+    /**
+     * Label for the "show all" filter button (e.g. "Alle" / "All").
+     */
+    workshopsCalendarAllFilterLabel?: string | null;
+    /**
+     * Column header for workshop type (e.g. "Workshop-Art" / "Workshop Type").
+     */
+    workshopsCalendarTypeColumnLabel?: string | null;
+    /**
+     * Column header for date & time (e.g. "Datum & Zeit" / "Date & Time").
+     */
+    workshopsCalendarDateColumnLabel?: string | null;
+    /**
+     * Column header for availability (e.g. "Plätze frei" / "Spots available").
+     */
+    workshopsCalendarSpotsColumnLabel?: string | null;
+    /**
+     * Label after the count of spots (e.g. "Plätze" / "Spots").
+     */
+    workshopsCalendarSpotsLabel?: string | null;
+    /**
+     * Label when no spots available (e.g. "Ausgebucht" / "Sold Out").
+     */
+    workshopsCalendarSoldOutLabel?: string | null;
+    /**
+     * Label for the booking button in each date row (e.g. "Buchen" / "Book").
+     */
+    workshopsCalendarBookLabel?: string | null;
+    /**
+     * Message when no dates match the filter (e.g. "Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.").
+     */
+    workshopsCalendarEmptyMessage?: string | null;
+    /**
      * Add workshop-specific calendar cards (Basics, Lakto, Kombucha, Tempeh).
      */
     workshopsCalendarCards?:
@@ -4546,6 +4582,15 @@ export interface PagesSelect<T extends boolean = true> {
         workshopsCalendarTitle?: T;
         workshopsCalendarDescription?: T;
         workshopsCalendarNextDateLabel?: T;
+        workshopsCalendarAllDatesHeading?: T;
+        workshopsCalendarAllFilterLabel?: T;
+        workshopsCalendarTypeColumnLabel?: T;
+        workshopsCalendarDateColumnLabel?: T;
+        workshopsCalendarSpotsColumnLabel?: T;
+        workshopsCalendarSpotsLabel?: T;
+        workshopsCalendarSoldOutLabel?: T;
+        workshopsCalendarBookLabel?: T;
+        workshopsCalendarEmptyMessage?: T;
         workshopsCalendarCards?:
           | T
           | {

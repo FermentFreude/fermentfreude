@@ -1906,6 +1906,105 @@ export const Pages: CollectionConfig = {
                   },
                 },
                 {
+                  name: 'workshopsCalendarAllDatesHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'All Dates Heading',
+                  admin: {
+                    description:
+                      'Heading above the dates list (e.g. "Alle verfügbaren Termine" / "All available dates").',
+                  },
+                },
+                {
+                  name: 'workshopsCalendarAllFilterLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'All Filter Label',
+                  admin: {
+                    description:
+                      'Label for the "show all" filter button (e.g. "Alle" / "All").',
+                  },
+                },
+                {
+                  name: 'workshopsCalendarTypeColumnLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Type Column Label',
+                  admin: {
+                    description:
+                      'Column header for workshop type (e.g. "Workshop-Art" / "Workshop Type").',
+                  },
+                },
+                {
+                  name: 'workshopsCalendarDateColumnLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Date Column Label',
+                  admin: {
+                    description:
+                      'Column header for date & time (e.g. "Datum & Zeit" / "Date & Time").',
+                  },
+                },
+                {
+                  name: 'workshopsCalendarSpotsColumnLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Spots Column Label',
+                  admin: {
+                    description:
+                      'Column header for availability (e.g. "Plätze frei" / "Spots available").',
+                  },
+                },
+                {
+                  name: 'workshopsCalendarSpotsLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Spots Label',
+                  admin: {
+                    description:
+                      'Label after the count of spots (e.g. "Plätze" / "Spots").',
+                  },
+                },
+                {
+                  name: 'workshopsCalendarSoldOutLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Sold Out Label',
+                  admin: {
+                    description:
+                      'Label when no spots available (e.g. "Ausgebucht" / "Sold Out").',
+                  },
+                },
+                {
+                  name: 'workshopsCalendarBookLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Book Button Label',
+                  admin: {
+                    description:
+                      'Label for the booking button in each date row (e.g. "Buchen" / "Book").',
+                  },
+                },
+                {
+                  name: 'workshopsCalendarEmptyMessage',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Empty State Message',
+                  admin: {
+                    description:
+                      'Message when no dates match the filter (e.g. "Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.").',
+                  },
+                },
+                {
                   name: 'workshopsCalendarCards',
                   type: 'array',
                   required: false,
