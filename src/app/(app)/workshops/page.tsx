@@ -1,12 +1,12 @@
+import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { SponsorsBarBlock } from '@/blocks/SponsorsBar/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { VoucherCtaBlock } from '@/blocks/VoucherCta/Component'
-import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
-import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
-import { VoucherCtaGlobalWrapper } from '@/components/VoucherCtaGlobalWrapper'
 import { ProductSliderGlobalWrapper } from '@/components/ProductSliderGlobalWrapper'
 import { SponsorsBarGlobalWrapper } from '@/components/SponsorsBarGlobalWrapper'
+import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
+import { VoucherCtaGlobalWrapper } from '@/components/VoucherCtaGlobalWrapper'
 import { AllWorkshopsHero } from '@/components/workshops/AllWorkshopsHero'
 import { WorkshopCalendar } from '@/components/workshops/WorkshopCalendar'
 import type { Media, Page, Product } from '@/payload-types'
@@ -112,7 +112,9 @@ export default async function WorkshopsPage() {
           description={ws?.workshopsVoucherDescription ?? undefined}
           buttonLabel={ws?.workshopsVoucherButtonLabel ?? undefined}
           buttonLink={ws?.workshopsVoucherButtonLink ?? undefined}
-          galleryImages={(ws?.workshopsVoucherGalleryImages as Array<{ image: string | Media }>) ?? []}
+          galleryImages={
+            (ws?.workshopsVoucherGalleryImages as Array<{ image: string | Media }>) ?? []
+          }
           backgroundImage={ws?.workshopsVoucherBackgroundImage ?? null}
         />
       ) : (
@@ -139,7 +141,13 @@ export default async function WorkshopsPage() {
         <SponsorsBarBlock
           blockType="sponsorsBar"
           heading={ws?.workshopsSponsorsHeading ?? undefined}
-          sponsors={(ws?.workshopsSponsorsList as Array<{ name: string; logo: string | Media; url?: string | null }>) ?? []}
+          sponsors={
+            (ws?.workshopsSponsorsList as Array<{
+              name: string
+              logo: string | Media
+              url?: string | null
+            }>) ?? []
+          }
         />
       ) : (
         <SponsorsBarGlobalWrapper />

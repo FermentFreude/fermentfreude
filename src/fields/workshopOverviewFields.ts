@@ -214,7 +214,9 @@ export const workshopOverviewFields: Field[] = [
         type: 'text',
         localized: true,
         label: '"All" Filter Button',
-        admin: { description: 'Text on the filter button that shows all types (e.g. "Alle" / "All").' },
+        admin: {
+          description: 'Text on the filter button that shows all types (e.g. "Alle" / "All").',
+        },
       },
       {
         name: 'workshopsCalendarTypeColumnLabel',

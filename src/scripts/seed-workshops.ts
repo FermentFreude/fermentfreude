@@ -43,7 +43,8 @@ const workshopsCalendarDE = {
   workshopsCalendarSpotsLabel: 'Plätze',
   workshopsCalendarSoldOutLabel: 'Ausgebucht',
   workshopsCalendarBookLabel: '→ Buchen',
-  workshopsCalendarEmptyMessage: 'Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.',
+  workshopsCalendarEmptyMessage:
+    'Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.',
   workshopsCalendarCards: [
     {
       workshopType: 'lakto' as const,

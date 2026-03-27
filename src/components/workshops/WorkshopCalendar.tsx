@@ -450,7 +450,9 @@ export function WorkshopCalendar({
                         {spotsColumnLabel || 'Plätze frei'}
                       </p>
                       <p className="font-display font-bold text-base text-[#1a1a1a]">
-                        {date.availableSpots > 0 ? `${date.availableSpots} ${spotsLabel || 'Plätze'}` : (soldOutLabel || 'Ausgebucht')}
+                        {date.availableSpots > 0
+                          ? `${date.availableSpots} ${spotsLabel || 'Plätze'}`
+                          : soldOutLabel || 'Ausgebucht'}
                       </p>
                     </div>
 
@@ -478,7 +480,8 @@ export function WorkshopCalendar({
             {filteredDates.length === 0 && (
               <div className="py-8 sm:py-12 text-center">
                 <p className="text-[#9a9a9a] text-sm sm:text-body">
-                  {emptyMessage || 'Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.'}
+                  {emptyMessage ||
+                    'Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.'}
                 </p>
               </div>
             )}

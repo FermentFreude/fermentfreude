@@ -153,7 +153,10 @@ async function seedWorkshopProducts() {
       })
       console.log(`  ✓ Image uploaded`)
     } catch (error) {
-      console.warn(`  ⚠️  Image upload failed (continuing without image):`, (error as Error & { code?: string }).code)
+      console.warn(
+        `  ⚠️  Image upload failed (continuing without image):`,
+        (error as Error & { code?: string }).code,
+      )
       // Don't fail - just proceed without image
     }
 

@@ -1237,7 +1237,8 @@ export const Pages: CollectionConfig = {
               admin: {
                 description:
                   'List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.',
-                condition: (data) => data?.voucherShowHero !== false && data?.voucherShowAmounts !== false,
+                condition: (data) =>
+                  data?.voucherShowHero !== false && data?.voucherShowAmounts !== false,
               },
               fields: [
                 {
@@ -1418,7 +1419,8 @@ export const Pages: CollectionConfig = {
               label: 'Add to Cart Button',
               admin: {
                 description: 'Text for the main CTA button (e.g. "Add to cart").',
-                condition: (data) => data?.voucherShowHero !== false && data?.voucherShowCTA !== false,
+                condition: (data) =>
+                  data?.voucherShowHero !== false && data?.voucherShowCTA !== false,
               },
             },
             {
@@ -1575,7 +1577,8 @@ export const Pages: CollectionConfig = {
               defaultValue: true,
               localized: true,
               admin: {
-                description: 'Toggle off to hide the voucher "How it works" section on the website.',
+                description:
+                  'Toggle off to hide the voucher "How it works" section on the website.',
               },
             },
             {
@@ -1667,7 +1670,8 @@ export const Pages: CollectionConfig = {
               defaultValue: true,
               localized: true,
               admin: {
-                description: 'Toggle off to hide the voucher gift occasions section on the website.',
+                description:
+                  'Toggle off to hide the voucher gift occasions section on the website.',
               },
             },
             {
