@@ -340,8 +340,9 @@ export default async function WorkshopDetailPage({ params }: Args) {
   // Get hardcoded workshop data for lakto-gemuese (booking card + details)
   const workshopDetailData = slug === 'lakto-gemuese' ? getWorkshopBySlug(slug) : null
 
-  // Generic-layout section data — these sections only appear in the non-dedicated fallback.
-  // Dedicated layouts (lakto/tempeh/kombucha) read from `detail` directly.
+  // Generic-layout section data — these sections are seeded via seed-workshop-pages.ts
+  // and stored as top-level page fields (workshopGiftOnline, workshopFaq, etc.).
+  // Dedicated layouts (lakto/tempeh/kombucha) have their own section components.
   const gift = undefined as
     | {
         giftTitle?: string | null
