@@ -16,7 +16,7 @@
  *  Scoped to #main-content so header/footer/nav are unaffected.
  *  Override with `whitespace-normal` on any element that should not wrap.
  * ════════════════════════════════════════════════════════════════ */
-#main-content :is(p, h1, h2, h3, h4, h5, h6, span) {
+#main-content * {
   white-space: pre-line;
 }
 
