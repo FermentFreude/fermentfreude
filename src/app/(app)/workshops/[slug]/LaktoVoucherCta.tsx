@@ -58,7 +58,7 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
                 <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-white">
                   {title}
                 </h2>
-                <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white/90 whitespace-pre-line">
+                <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white/90">
                   {description}
                 </p>
 
@@ -103,7 +103,7 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
             <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-ff-near-black">
               {title}
             </h2>
-            <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-ff-gray-text whitespace-pre-line">
+            <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-ff-gray-text">
               {description}
             </p>
 

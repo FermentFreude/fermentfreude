@@ -1,6 +1,5 @@
 'use client'
 
-import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
 import {
   Select,
@@ -9,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import type { Media as MediaType } from '@/payload-types'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -80,7 +80,9 @@ export function WorkshopBookingSection({
                     type="button"
                     onClick={() => setSelectedImageIndex(i)}
                     className={`relative aspect-square overflow-hidden rounded-lg bg-[#ECE5DE] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#555954] focus-visible:ring-offset-2 ${
-                      selectedImageIndex === i ? 'ring-2 ring-[#555954] ring-offset-2' : 'opacity-80 hover:opacity-100'
+                      selectedImageIndex === i
+                        ? 'ring-2 ring-[#555954] ring-offset-2'
+                        : 'opacity-80 hover:opacity-100'
                     }`}
                   >
                     {img && isResolvedMedia(img) ? (
@@ -162,7 +164,9 @@ export function WorkshopBookingSection({
                 </div>
               )}
               {description && (
-                <p className="mt-4 text-body-lg leading-relaxed text-[#333]">{description}</p>
+                <p className="mt-4 text-body-lg leading-relaxed text-[#333]">
+                  {description}
+                </p>
               )}
               <div className="my-6 border-t border-[#1a1a1a]/10" />
 

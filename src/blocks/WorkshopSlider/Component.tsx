@@ -255,7 +255,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                         <h2 className="text-ff-black mb-3 md:mb-4 text-[1.9rem] sm:text-[2.2rem] md:text-[2.5rem] lg:text-inherit leading-[0.95]">
                           {workshop.title}
                         </h2>
-                        <p className="text-body-sm text-ff-olive text-[13px] sm:text-sm md:text-[15px] leading-relaxed whitespace-pre-line">
+                        <p className="text-body-sm text-ff-olive text-[13px] sm:text-sm md:text-[15px] leading-relaxed">
                           {(() => {
                             const match = workshop.description.match(/^(.+?[.!?])\s*(.*)$/s)
                             return match?.[1] ?? workshop.description

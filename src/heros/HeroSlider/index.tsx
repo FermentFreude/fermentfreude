@@ -221,7 +221,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
           </p>
           <h1
             className={cn(
-              'font-display font-black text-white text-lg leading-[1.15] tracking-[-0.02em] whitespace-pre-line mb-2',
+              'font-display font-black text-white text-lg leading-[1.15] tracking-[-0.02em] mb-2',
               isEntering && 'hero-anim-title',
               isExiting && 'hero-exit-content',
             )}
@@ -348,7 +348,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
             {/* Title */}
             <h1
               className={cn(
-                'font-display font-black text-white text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-[2.25rem] leading-[1.1] tracking-[-0.02em] whitespace-pre-line mb-3 lg:mb-5',
+                'font-display font-black text-white text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-[2.25rem] leading-[1.1] tracking-[-0.02em] mb-3 lg:mb-5',
                 isEntering && 'hero-anim-title',
                 isExiting && 'hero-exit-content',
               )}

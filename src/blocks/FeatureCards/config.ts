@@ -28,7 +28,7 @@ export const FeatureCards: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       required: true,
       localized: true,
       label: 'Heading',
@@ -67,7 +67,7 @@ export const FeatureCards: Block = {
         },
         {
           name: 'title',
-          type: 'text',
+          type: 'textarea',
           required: true,
           localized: true,
           label: 'Card Title',

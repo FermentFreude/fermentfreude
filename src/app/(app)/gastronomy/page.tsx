@@ -305,8 +305,12 @@ export default async function GastronomyPage() {
       <section className="px-6 py-8 md:px-12 lg:px-20">
         <div className="mx-auto max-w-6xl">
           <div className="rounded-2xl bg-[#333333] px-8 py-16 md:px-16">
-            <p className="text-center text-xl font-medium text-white md:text-2xl">{quoteText}</p>
-            <p className="mt-4 text-center text-base text-[#E6BE68]">{quoteSubtext}</p>
+            <p className="text-center text-xl font-medium text-white md:text-2xl">
+              {quoteText}
+            </p>
+            <p className="mt-4 text-center text-base text-[#E6BE68]">
+              {quoteSubtext}
+            </p>
             <div className="mt-8 flex justify-center">
               <Link
                 href={quoteButtonUrl}
@@ -347,7 +351,9 @@ export default async function GastronomyPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#9a7f47]">
                   {locale === 'de' ? 'Vorher' : 'Before'}
                 </p>
-                <p className="mt-2 text-sm leading-relaxed text-ff-gray-text">{item.before}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ff-gray-text">
+                  {item.before}
+                </p>
                 <div className="my-3 h-px bg-black/10" />
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#4a6b58]">
                   {locale === 'de' ? 'Nachher' : 'After'}
@@ -380,7 +386,9 @@ export default async function GastronomyPage() {
                   {String(i + 1).padStart(2, '0')}
                 </p>
                 <h3 className="mt-2 font-display text-xl font-bold text-white">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/85">{step.description}</p>
+                <p className="mt-2 text-sm leading-relaxed text-white/85">
+                  {step.description}
+                </p>
               </div>
             ))}
           </div>
@@ -428,7 +436,9 @@ export default async function GastronomyPage() {
                 className="rounded-xl border border-black/8 bg-white p-5 text-center shadow-[0_8px_18px_rgba(0,0,0,0.04)]"
               >
                 <h3 className="font-display text-base font-bold text-ff-black">{item.q}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ff-gray-text">{item.a}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ff-gray-text">
+                  {item.a}
+                </p>
               </div>
             ))}
           </div>

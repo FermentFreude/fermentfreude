@@ -29,7 +29,7 @@ export const OurStory: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       required: true,
       localized: true,
       label: 'Main Heading',
@@ -39,7 +39,7 @@ export const OurStory: Block = {
     },
     {
       name: 'subheading',
-      type: 'text',
+      type: 'textarea',
       required: true,
       localized: true,
       label: 'Subheading',

@@ -213,7 +213,9 @@ export default async function BasicFermentationCoursePage() {
                   </p>
                 )}
                 {heroDescription && (
-                  <p className="mt-4 text-body-lg text-ff-gray-text">{heroDescription}</p>
+                  <p className="mt-4 text-body-lg text-ff-gray-text">
+                    {heroDescription}
+                  </p>
                 )}
                 {isEnrolled && (
                   <div className="mt-6 rounded-2xl bg-white/80 p-4 shadow-sm">

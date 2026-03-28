@@ -23,12 +23,12 @@ export const TeamCards: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       required: true,
       localized: true,
       label: 'Heading',
       admin: {
-        description: 'Main heading for the team section.',
+        description: 'Main heading for the team section. Press Enter to add line breaks.',
       },
     },
     {

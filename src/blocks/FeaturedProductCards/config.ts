@@ -19,7 +19,7 @@ export const FeaturedProductCards: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       localized: true,
       label: 'Section Heading',
       admin: {

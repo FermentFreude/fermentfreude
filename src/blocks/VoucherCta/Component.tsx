@@ -182,7 +182,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           </h2>
           <p
             data-anim="desc"
-            className="text-body-lg max-w-lg leading-relaxed text-white/85 whitespace-pre-line"
+            className="text-body-lg max-w-lg leading-relaxed text-white/85"
           >
             {resolvedDescription}
           </p>

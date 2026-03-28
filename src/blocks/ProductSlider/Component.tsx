@@ -158,7 +158,7 @@ export const ProductSliderBlock: React.FC<Props> = ({
               </span>
             </div>
             <p
-              className="font-display font-bold mt-6 lg:mt-8 whitespace-pre-line"
+              className="font-display font-bold mt-6 lg:mt-8"
               style={{
                 fontSize: 'clamp(0.9rem, 1.4vw, 1.25rem)',
                 lineHeight: 1.6,

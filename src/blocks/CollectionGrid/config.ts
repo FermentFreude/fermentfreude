@@ -29,7 +29,7 @@ export const CollectionGrid: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       required: true,
       localized: true,
       label: 'Section Heading',
@@ -61,7 +61,7 @@ export const CollectionGrid: Block = {
         },
         {
           name: 'title',
-          type: 'text',
+          type: 'textarea',
           required: true,
           localized: true,
           label: 'Collection Title',

@@ -53,7 +53,7 @@ export const WorkshopSlider: Block = {
       fields: [
         {
           name: 'title',
-          type: 'text',
+          type: 'textarea',
           localized: true,
           required: true,
           label: 'Workshop Title',

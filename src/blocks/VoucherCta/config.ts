@@ -19,7 +19,7 @@ export const VoucherCta: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       required: false,
       localized: true,
       label: 'Heading',

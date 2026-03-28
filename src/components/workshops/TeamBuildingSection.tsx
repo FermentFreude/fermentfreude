@@ -1,5 +1,5 @@
-import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
+import type { Media as MediaType } from '@/payload-types'
 import Link from 'next/link'
 
 function isResolvedMedia(img: unknown): img is MediaType {

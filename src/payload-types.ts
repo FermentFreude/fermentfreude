@@ -3163,7 +3163,7 @@ export interface TeamCardsBlock {
    */
   label: string;
   /**
-   * Main heading for the team section.
+   * Main heading for the team section. Press Enter to add line breaks.
    */
   heading: string;
   /**

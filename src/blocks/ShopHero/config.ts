@@ -19,7 +19,7 @@ export const ShopHero: Block = {
     },
     {
       name: 'heroTitle',
-      type: 'text',
+      type: 'textarea',
       required: true,
       localized: true,
       label: 'Hero Title',
@@ -129,7 +129,7 @@ export const ShopHero: Block = {
     },
     {
       name: 'bottomSubtitle',
-      type: 'text',
+      type: 'textarea',
       required: false,
       localized: true,
       label: 'Bottom Subtitle',

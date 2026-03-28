@@ -106,7 +106,9 @@ function FAQAccordion({
         className={`overflow-hidden transition-all duration-300 ${open ? 'max-h-96' : 'max-h-0'}`}
       >
         <div className="px-8 pb-6 sm:px-10">
-          <p className="text-body leading-relaxed text-ff-gray-text">{answer}</p>
+          <p className="text-body leading-relaxed text-ff-gray-text">
+            {answer}
+          </p>
         </div>
       </div>
     </div>
