@@ -4,6 +4,8 @@
  * Layout blocks:
  *   1. FeatureCards — "What You'll Learn" (6 cards)
  *   2. OnlineCourseSlider — fetches from OnlineCourses collection
+ *   3. CourseWaitlistCta — email waitlist below course modules (+ optional image from
+ *      public/assets/images/courses/course-waitlist-ingredients.png → Media / R2)
  *
  * The courses page hero is baked into the page template (3 rotated image cards).
  * The OnlineCourseSlider block handles both active and coming-soon courses.
@@ -14,10 +16,66 @@
  * Run: pnpm seed courses-page
  */
 
+import type { Media } from '@/payload-types'
 import config from '@payload-config'
+import fs from 'fs'
+import path from 'path'
 import { getPayload } from 'payload'
 
+import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
+
 const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
+
+/** Committed asset → Payload Media (R2). Same file for DE/EN block locale fields. */
+const COURSE_WAITLIST_IMAGE_PATH = path.resolve(
+  process.cwd(),
+  'public/assets/images/courses/course-waitlist-ingredients.png',
+)
+
+async function ensureCourseWaitlistSeedImage(payload: Awaited<ReturnType<typeof getPayload>>) {
+  if (!fs.existsSync(COURSE_WAITLIST_IMAGE_PATH)) {
+    payload.logger.warn(
+      'Course waitlist image not found at %s — block will have no image until you add the file or upload in admin.',
+      COURSE_WAITLIST_IMAGE_PATH,
+    )
+    return undefined
+  }
+
+  const existing = await payload.find({
+    collection: 'media',
+    where: { filename: { contains: 'course-waitlist-ingredients' } },
+    limit: 1,
+    depth: 0,
+  })
+
+  if (existing.docs.length > 0) {
+    payload.logger.info('📸 Reusing Media for course waitlist: %s', existing.docs[0].id)
+    return String(existing.docs[0].id)
+  }
+
+  const created = (await payload.create({
+    collection: 'media',
+    locale: 'de',
+    data: {
+      alt: 'Kleine Schüsseln mit fermentiertem Gemüse, Kimchi, Karotten und Kräutern von oben',
+    },
+    file: await optimizedFile(COURSE_WAITLIST_IMAGE_PATH, IMAGE_PRESETS.card),
+    context: ctx,
+  })) as Media
+
+  await payload.update({
+    collection: 'media',
+    id: created.id,
+    locale: 'en',
+    data: {
+      alt: 'Overhead view of small bowls with fermented vegetables, kimchi, carrots, and herbs',
+    },
+    context: ctx,
+  })
+
+  payload.logger.info('📸 Uploaded course waitlist image → Media %s', created.id)
+  return String(created.id)
+}
 
 // ── DE block data ────────────────────────────────────────────────────────────
 
@@ -68,6 +126,17 @@ const onlineCourseSliderDe = {
     'Wir arbeiten an spannenden neuen Kursen. Melde dich an, um benachrichtigt zu werden!',
 }
 
+const courseWaitlistCtaDe = {
+  blockType: 'courseWaitlistCta' as const,
+  heading: 'Lerne Fermentation ohne Unsicherheit',
+  description:
+    'Trag dich auf die Warteliste ein und erfahre als Erste:r, wenn der Kurs startet.\n\nDu bekommst außerdem die Möglichkeit auf einen vergünstigten Einstieg und exklusive Einblicke vorab.',
+  emailPlaceholder: 'Deine E-Mail-Adresse',
+  submitLabel: 'Auf Warteliste setzen',
+  successMessage:
+    'Danke! Wenn sich dein E-Mail-Programm geöffnet hat, sende die Nachricht ab. Sonst schreibe an hello@fermentfreude.com.',
+}
+
 // ── EN block data ────────────────────────────────────────────────────────────
 
 const featureCardsEn = {
@@ -114,6 +183,17 @@ const onlineCourseSliderEn = {
   comingSoonHeading: 'More Courses on the Way',
   comingSoonDescription:
     "We're working on exciting new courses. Sign up to be notified when they launch!",
+}
+
+const courseWaitlistCtaEn = {
+  blockType: 'courseWaitlistCta' as const,
+  heading: 'Learn fermentation without uncertainty',
+  description:
+    'Join the waitlist and be the first to know when the course launches.\n\nYou will also get access to a discounted entry and exclusive previews.',
+  emailPlaceholder: 'Your email address',
+  submitLabel: 'Join the waitlist',
+  successMessage:
+    'Thanks! If your email app opened, send the message to join the waitlist. Otherwise email hello@fermentfreude.com.',
 }
 
 // ── Seed function ────────────────────────────────────────────────────────────
@@ -166,6 +246,13 @@ async function seedCoursesPage() {
     pageId = String(created.id)
   }
 
+  const waitlistImageId = await ensureCourseWaitlistSeedImage(payload)
+
+  const waitlistDe = {
+    ...courseWaitlistCtaDe,
+    ...(waitlistImageId ? { image: waitlistImageId } : {}),
+  }
+
   // 1. Save DE layout
   payload.logger.info('📄 Saving courses page layout (DE)...')
   await payload.update({
@@ -174,7 +261,7 @@ async function seedCoursesPage() {
     locale: 'de',
     data: {
       title: 'Online Kurse',
-      layout: [featureCardsDe, onlineCourseSliderDe],
+      layout: [featureCardsDe, onlineCourseSliderDe, waitlistDe],
     },
     context: ctx,
   })
@@ -196,6 +283,7 @@ async function seedCoursesPage() {
   // 3. Build EN with same IDs
   const featureCardsBlock = freshLayout.find((b) => b.blockType === 'featureCards')
   const sliderBlock = freshLayout.find((b) => b.blockType === 'onlineCourseSlider')
+  const waitlistBlock = freshLayout.find((b) => b.blockType === 'courseWaitlistCta')
 
   const enLayout = [
     {
@@ -209,6 +297,11 @@ async function seedCoursesPage() {
     {
       ...onlineCourseSliderEn,
       id: sliderBlock?.id,
+    },
+    {
+      ...courseWaitlistCtaEn,
+      id: waitlistBlock?.id,
+      ...(waitlistImageId ? { image: waitlistImageId } : {}),
     },
   ]
 

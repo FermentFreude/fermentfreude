@@ -1353,6 +1353,7 @@ export interface Page {
         | CarouselBlock
         | OurStoryBlock
         | OnlineCourseSliderBlock
+        | CourseWaitlistCtaBlock
         | ProductSliderBlock
         | FeaturedProductCardsBlock
         | ShopHeroBlock
@@ -2784,6 +2785,43 @@ export interface OnlineCourseSliderBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'onlineCourseSlider';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CourseWaitlistCtaBlock".
+ */
+export interface CourseWaitlistCtaBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Main headline for the waitlist section.
+   */
+  heading: string;
+  /**
+   * Supporting text (use a blank line between paragraphs).
+   */
+  description: string;
+  /**
+   * Optional. Landscape photo (~5×3) works best: left column on desktop, below headline on mobile. Alt text is edited on the Media entry.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Placeholder inside the email input.
+   */
+  emailPlaceholder: string;
+  /**
+   * Label on the primary button (e.g. “Join the waitlist”).
+   */
+  submitLabel: string;
+  /**
+   * Shown after the visitor’s email app opens (mailto to hello@fermentfreude.com). Explain that they should send the pre-filled message — no server/API.
+   */
+  successMessage: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'courseWaitlistCta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4505,6 +4543,7 @@ export interface PagesSelect<T extends boolean = true> {
         carousel?: T | CarouselBlockSelect<T>;
         ourStory?: T | OurStoryBlockSelect<T>;
         onlineCourseSlider?: T | OnlineCourseSliderBlockSelect<T>;
+        courseWaitlistCta?: T | CourseWaitlistCtaBlockSelect<T>;
         productSlider?: T | ProductSliderBlockSelect<T>;
         featuredProductCards?: T | FeaturedProductCardsBlockSelect<T>;
         shopHero?: T | ShopHeroBlockSelect<T>;
@@ -5037,6 +5076,21 @@ export interface OnlineCourseSliderBlockSelect<T extends boolean = true> {
   comingSoonEyebrow?: T;
   comingSoonHeading?: T;
   comingSoonDescription?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CourseWaitlistCtaBlock_select".
+ */
+export interface CourseWaitlistCtaBlockSelect<T extends boolean = true> {
+  visible?: T;
+  heading?: T;
+  description?: T;
+  image?: T;
+  emailPlaceholder?: T;
+  submitLabel?: T;
+  successMessage?: T;
   id?: T;
   blockName?: T;
 }

@@ -8,6 +8,7 @@ import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
 import { CollectionGrid } from '@/blocks/CollectionGrid/config'
 import { ContactBlock } from '@/blocks/ContactBlock/config'
+import { CourseWaitlistCta } from '@/blocks/CourseWaitlistCta/config'
 import { Content } from '@/blocks/Content/config'
 import { FeatureCards } from '@/blocks/FeatureCards/config'
 import { FeaturedProductCards } from '@/blocks/FeaturedProductCards/config'
@@ -151,6 +152,7 @@ export const Pages: CollectionConfig = {
                 Carousel,
                 OurStory,
                 OnlineCourseSlider,
+                CourseWaitlistCta,
                 ProductSlider,
                 FeaturedProductCards,
                 ShopHero,

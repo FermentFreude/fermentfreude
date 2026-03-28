@@ -1,3 +1,4 @@
+import { CourseWaitlistCtaBlock } from '@/blocks/CourseWaitlistCta/Component'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { FadeIn } from '@/components/FadeIn'
 import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
@@ -55,7 +56,8 @@ export default async function CoursesPage() {
       ...(draft ? {} : { _status: { equals: 'published' } }),
     },
     limit: 1,
-    depth: 2,
+    /** Layout block uploads (e.g. course waitlist image) need deeper population than 2 */
+    depth: 5,
     draft,
     locale,
     overrideAccess: true,
@@ -69,6 +71,7 @@ export default async function CoursesPage() {
     | undefined
   // All non-featureCards blocks are rendered via RenderBlocks (OnlineCourseSlider, etc.)
   const otherBlocks = blocks.filter((b) => b.blockType !== 'featureCards')
+  const hasCourseWaitlistBlock = otherBlocks.some((b) => b.blockType === 'courseWaitlistCta')
 
   const learnEyebrow = featureCardsBlock?.eyebrow ?? 'Overview'
   const learnHeading = featureCardsBlock?.heading ?? "What You'll Learn"
@@ -193,6 +196,9 @@ export default async function CoursesPage() {
 
       {/* Course blocks from CMS (OnlineCourseSlider, etc.) */}
       <RenderBlocks blocks={otherBlocks as NonNullable<PageType['layout']>} />
+
+      {/* Waitlist CTA: show with locale defaults if the layout was never seeded with this block */}
+      {!hasCourseWaitlistBlock && <CourseWaitlistCtaBlock />}
 
       {/* Testimonials from global */}
       <TestimonialsGlobalWrapper />

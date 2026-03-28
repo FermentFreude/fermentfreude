@@ -9,13 +9,77 @@
  * Setup in Brevo dashboard (https://app.brevo.com):
  * 1. Create templates with the IDs listed in BREVO_TEMPLATES
  * 2. Use {{ params.VARIABLE_NAME }} in templates for dynamic content
- * 3. Add your API key to .env as BREVO_API_KEY
+ * 3. Add your API key to .env as BREVO_API_KEY (legacy: SENDINBLUE_API_KEY also works)
  *
- * Required env: BREVO_API_KEY
+ * Required env: BREVO_API_KEY (or SENDINBLUE_API_KEY)
  * Optional env: BREVO_SENDER_EMAIL, BREVO_SENDER_NAME
  */
 
+import { existsSync, readFileSync } from 'node:fs'
+import path from 'node:path'
+
 const BREVO_API_URL = 'https://api.brevo.com/v3'
+
+/**
+ * Project root for reading `.env` — `process.cwd()` only (no `import.meta.url`).
+ * Using `import.meta.url` here breaks some Next server bundles (ESM + `require is not defined` in `_document` chunks).
+ */
+function getNextProjectRoot(): string {
+  return process.cwd()
+}
+
+function parseEnvFileValue(content: string, key: string): string | undefined {
+  for (const line of content.split(/\r?\n/)) {
+    const t = line.trim()
+    if (!t || t.startsWith('#')) continue
+    const re = new RegExp(`^${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*=\\s*(.*)$`)
+    const m = t.match(re)
+    if (!m) continue
+    let val = m[1].trim()
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
+      val = val.slice(1, -1)
+    }
+    return val || undefined
+  }
+  return undefined
+}
+
+/**
+ * Read Brevo keys straight from `.env.local` / `.env` at the project root.
+ * Next’s own env merge can skip vars for some API bundles; this path does not depend on that.
+ */
+let brevoEnvFilesRead = false
+function hydrateBrevoKeysFromEnvFiles(): void {
+  if (brevoEnvFilesRead || typeof window !== 'undefined') return
+  brevoEnvFilesRead = true
+  if (process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY) return
+
+  const root = getNextProjectRoot()
+  let brevo: string | undefined
+  let legacy: string | undefined
+  // `.env.local` last so it overrides `.env` (same as Next.js).
+  for (const name of ['.env', '.env.local'] as const) {
+    const full = path.join(root, name)
+    if (!existsSync(full)) continue
+    let raw = readFileSync(full, 'utf8')
+    if (raw.charCodeAt(0) === 0xfeff) raw = raw.slice(1)
+    const b = parseEnvFileValue(raw, 'BREVO_API_KEY')
+    const l = parseEnvFileValue(raw, 'SENDINBLUE_API_KEY')
+    if (b !== undefined) brevo = b
+    if (l !== undefined) legacy = l
+  }
+  if (brevo) process.env.BREVO_API_KEY = brevo
+  if (legacy) process.env.SENDINBLUE_API_KEY = legacy
+}
+
+/** Brevo accepts either env name; use the same key as in the Brevo dashboard (SMTP & API). */
+export function getBrevoApiKey(): string | undefined {
+  hydrateBrevoKeysFromEnvFiles()
+  return process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY
+}
 
 // Default sender — override with env vars
 const DEFAULT_SENDER = {
@@ -72,9 +136,9 @@ export async function sendTemplateEmail({
   params,
   subject,
 }: SendTemplateEmailParams): Promise<{ success: boolean; messageId?: string }> {
-  const apiKey = process.env.BREVO_API_KEY
+  const apiKey = getBrevoApiKey()
   if (!apiKey) {
-    console.warn('[Brevo] BREVO_API_KEY not set — skipping email send')
+    console.warn('[Brevo] BREVO_API_KEY (or SENDINBLUE_API_KEY) not set — skipping email send')
     return { success: false }
   }
 
@@ -121,9 +185,9 @@ export async function sendTransactionalEmail({
   subject,
   htmlContent,
 }: SendTransactionalEmailParams): Promise<{ success: boolean; messageId?: string }> {
-  const apiKey = process.env.BREVO_API_KEY
+  const apiKey = getBrevoApiKey()
   if (!apiKey) {
-    console.warn('[Brevo] BREVO_API_KEY not set — skipping email send')
+    console.warn('[Brevo] BREVO_API_KEY (or SENDINBLUE_API_KEY) not set — skipping email send')
     return { success: false }
   }
 
@@ -182,9 +246,11 @@ export async function upsertContact({
   listIds,
   attributes,
 }: BrevoContact): Promise<{ success: boolean }> {
-  const apiKey = process.env.BREVO_API_KEY
+  const apiKey = getBrevoApiKey()
   if (!apiKey) {
-    console.warn('[Brevo] BREVO_API_KEY not set — skipping contact sync')
+    console.warn(
+      '[Brevo] BREVO_API_KEY (or SENDINBLUE_API_KEY) not set — contact sync skipped. Add the key to .env locally and to Vercel → Project → Environment Variables for production.',
+    )
     return { success: false }
   }
 
@@ -215,7 +281,7 @@ export async function upsertContact({
 
     if (!response.ok) {
       const error = await response.text()
-      console.error('[Brevo] Contact upsert failed:', error)
+      console.error(`[Brevo] Contact upsert failed (HTTP ${response.status}) for ${email}:`, error)
       return { success: false }
     }
 
@@ -226,3 +292,4 @@ export async function upsertContact({
     return { success: false }
   }
 }
+
