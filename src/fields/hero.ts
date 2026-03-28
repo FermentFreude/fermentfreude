@@ -107,7 +107,7 @@ export const hero: Field = {
             // Title
             {
               name: 'title',
-              type: 'text',
+              type: 'textarea',
               label: 'Slide Title',
               localized: true,
               required: true,
@@ -469,7 +469,7 @@ export const hero: Field = {
               fields: [
                 {
                   name: 'title',
-                  type: 'text',
+                  type: 'textarea',
                   label: 'Title',
                   required: true,
                   localized: true,

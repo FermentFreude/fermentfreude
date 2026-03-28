@@ -60,7 +60,7 @@ export const ContactBlock: Block = {
         },
         {
           name: 'heading',
-          type: 'text',
+          type: 'textarea',
           required: true,
           localized: true,
           label: 'Hero Heading',
@@ -116,7 +116,7 @@ export const ContactBlock: Block = {
       fields: [
         {
           name: 'heading',
-          type: 'text',
+          type: 'textarea',
           required: true,
           localized: true,
           label: 'Contact Detail Heading',
@@ -181,7 +181,7 @@ export const ContactBlock: Block = {
         },
         {
           name: 'formHeading',
-          type: 'text',
+          type: 'textarea',
           required: false,
           localized: true,
           label: 'Form Heading',
@@ -311,7 +311,7 @@ export const ContactBlock: Block = {
       fields: [
         {
           name: 'heading',
-          type: 'text',
+          type: 'textarea',
           required: true,
           localized: true,
           label: 'Banner Heading',

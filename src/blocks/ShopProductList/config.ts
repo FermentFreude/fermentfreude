@@ -19,7 +19,7 @@ export const ShopProductList: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       required: false,
       localized: true,
       label: 'Überschrift / Heading',

@@ -28,7 +28,7 @@ export const OnlineCourseSlider: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       localized: true,
       label: 'Heading',
       admin: {
@@ -56,7 +56,7 @@ export const OnlineCourseSlider: Block = {
     },
     {
       name: 'comingSoonHeading',
-      type: 'text',
+      type: 'textarea',
       localized: true,
       label: 'Coming Soon Heading',
       admin: {

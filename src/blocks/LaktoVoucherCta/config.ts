@@ -39,7 +39,7 @@ export const LaktoVoucherCtaBlock: Block = {
     },
     {
       name: 'title',
-      type: 'text',
+      type: 'textarea',
       localized: true,
       label: 'Title',
       admin: {

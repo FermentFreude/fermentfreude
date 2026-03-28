@@ -29,7 +29,7 @@ export const WorkshopPhases: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       localized: true,
       label: 'Heading',
       admin: {
@@ -61,7 +61,7 @@ export const WorkshopPhases: Block = {
         },
         {
           name: 'title',
-          type: 'text',
+          type: 'textarea',
           required: true,
           localized: true,
           label: 'Phase Title',

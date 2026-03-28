@@ -223,7 +223,7 @@ export const workshopDetailFields: Field[] = [
           },
           {
             name: 'title',
-            type: 'text',
+            type: 'textarea',
             required: true,
             localized: true,
             label: 'Title',
@@ -319,7 +319,7 @@ export const workshopDetailFields: Field[] = [
           },
           {
             name: 'title',
-            type: 'text',
+            type: 'textarea',
             required: true,
             localized: true,
             label: 'Card Title',

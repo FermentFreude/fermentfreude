@@ -29,7 +29,7 @@ export const ProductSlider: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       required: false,
       localized: true,
       label: 'Heading',
@@ -40,7 +40,7 @@ export const ProductSlider: Block = {
     },
     {
       name: 'headingAccent',
-      type: 'text',
+      type: 'textarea',
       required: false,
       localized: true,
       label: 'Heading Accent Text',

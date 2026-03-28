@@ -19,7 +19,7 @@ export const ReadyToLearnCTA: Block = {
     },
     {
       name: 'heading',
-      type: 'text',
+      type: 'textarea',
       required: true,
       localized: true,
       label: 'Heading',
