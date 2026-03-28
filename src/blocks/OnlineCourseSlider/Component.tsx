@@ -241,7 +241,7 @@ export async function OnlineCourseSliderBlock(props: Props) {
                             {course.title}
                           </h3>
                           {course.description && (
-                            <p className="mt-2 text-[0.875rem] leading-relaxed text-ff-gray-text whitespace-pre-line">
+                            <p className="mt-2 text-[0.875rem] leading-relaxed text-ff-gray-text">
                               {course.description}
                             </p>
                           )}

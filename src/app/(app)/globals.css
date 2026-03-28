@@ -11,6 +11,16 @@
 @custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));
 
 /* ════════════════════════════════════════════════════════════════
+ *  CMS LINE BREAKS
+ *  All text inside main content respects newlines from CMS textarea fields.
+ *  Scoped to #main-content so header/footer/nav are unaffected.
+ *  Override with `whitespace-normal` on any element that should not wrap.
+ * ════════════════════════════════════════════════════════════════ */
+#main-content :is(p, h1, h2, h3, h4, h5, h6, span) {
+  white-space: pre-line;
+}
+
+/* ════════════════════════════════════════════════════════════════
  *  DESIGN SYSTEM TOKENS
  *  Single source of truth for typography, spacing, sizing, and
  *  border-radius across the entire website.

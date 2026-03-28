@@ -246,7 +246,9 @@ export const FeatureCardsBlock: React.FC<Props> = ({
                 >
                   {card.title}
                 </h3>
-                <p className="text-body-sm text-ff-black mt-2 whitespace-pre-line">{card.description}</p>
+                <p className="text-body-sm text-ff-black mt-2">
+                  {card.description}
+                </p>
               </div>
             </FadeIn>
           ))}

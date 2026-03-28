@@ -120,7 +120,9 @@ function AccordionItem({
         style={{ maxHeight: height }}
       >
         <div ref={contentRef} className="pb-6 pr-16">
-          <p className="text-body leading-relaxed text-ff-gray-text">{item.answer}</p>
+          <p className="text-body leading-relaxed text-ff-gray-text">
+            {item.answer}
+          </p>
         </div>
       </div>
     </div>

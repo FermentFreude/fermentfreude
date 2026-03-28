@@ -315,7 +315,7 @@ export const TestimonialsBlock: React.FC<Props> = ({
               <div className="flex flex-col gap-5">
                 <QuoteMark />
                 <blockquote
-                  className="font-sans whitespace-pre-line"
+                  className="font-sans"
                   style={{
                     fontSize: 'clamp(1rem, 1.6vw, 1.35rem)',
                     lineHeight: 1.7,

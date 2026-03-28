@@ -12,7 +12,7 @@ export function LearnOnlineSection({ heading, description, buttonLabel, buttonHr
     <section className="section-padding-md container-padding">
       <div className="mx-auto max-w-7xl">
         <div className="rounded-2xl bg-[#1a1a1a] px-8 py-16 text-center md:px-16 md:py-20">
-          <h2 className="whitespace-pre-line font-display text-3xl font-bold text-[#F5F4F2] md:text-4xl">
+          <h2 className="font-display text-3xl font-bold text-[#F5F4F2] md:text-4xl">
             {heading}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-body-lg text-[#F5F4F2]/90">

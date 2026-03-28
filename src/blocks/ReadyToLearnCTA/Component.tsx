@@ -49,7 +49,7 @@ export const ReadyToLearnCTABlock: React.FC<Props> = ({
           <h2 className="text-section-heading font-display font-bold text-white">
             {resolvedHeading}
           </h2>
-          <p className="text-body-lg text-white/90 leading-relaxed whitespace-pre-line">
+          <p className="text-body-lg text-white/90 leading-relaxed">
             {resolvedDescription}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">

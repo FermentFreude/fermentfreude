@@ -51,7 +51,7 @@ export const TeamPreviewBlock: React.FC<Props> = ({
               <span className="text-eyebrow font-bold text-ff-gold-accent">{resolvedEyebrow}</span>
             )}
             <h2 className="text-ff-black">{resolvedHeading}</h2>
-            <p className="text-body-sm text-ff-olive mt-1 whitespace-pre-line">{resolvedDescription}</p>
+            <p className="text-body-sm text-ff-olive mt-1">{resolvedDescription}</p>
             {resolvedButtonLabel && (
               <Link
                 href={resolvedButtonLink}

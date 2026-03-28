@@ -65,7 +65,7 @@ export const HeroBannerBlock: React.FC<Props> = ({
       {/* Content */}
       <FadeIn className="relative z-10 container mx-auto px-6 section-padding-md flex flex-col items-center text-center gap-(--space-content-lg) content-medium">
         <h2 className="text-white drop-shadow-md">{resolvedHeading}</h2>
-        <p className="text-body-lg text-white/90 content-narrow whitespace-pre-line">
+        <p className="text-body-lg text-white/90 content-narrow">
           {resolvedDescription}
         </p>
         <Link

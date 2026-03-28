@@ -122,7 +122,7 @@ export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, membe
                       <p className="font-sans text-body font-semibold text-ff-gray-text shrink-0">
                         {member.role}
                       </p>
-                      <p className="font-sans text-body leading-relaxed text-ff-gray-15 line-clamp-5 whitespace-pre-line">
+                      <p className="font-sans text-body leading-relaxed text-ff-gray-15 line-clamp-5">
                         {member.description}
                       </p>
                     </div>
