@@ -1,12 +1,16 @@
 /**
  * Seed the Gastronomy page in the Pages collection with all sections.
  * Seeds both DE and EN locales. Content is under Pages → Gastronomy page.
- * Uploads images to Payload Media (Vercel Blob) for offer cards, workshop cards, collaborate, and contact.
+ * Uploads images to Payload Media (R2) for offer cards, workshop cards, and contact section when seed-assets exist.
  *
  * Run: pnpm seed gastronomy
  */
+// @ts-expect-error — dotenv types not resolved via package.json exports
+import { config as loadEnv } from 'dotenv'
 import type { Media } from '@/payload-types'
 import config from '@payload-config'
+
+loadEnv()
 import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
@@ -67,11 +71,9 @@ function gastronomyDataDE(media: {
   workshop1?: Media
   workshop2?: Media
   workshop3?: Media
-  collaborate?: Media
   contact?: Media
 }) {
   return {
-    gastronomyHeroTitle: 'Heben Sie Ihr Gastronomie-Geschäft auf ein neues Level',
     gastronomyHeroCtaLabel: 'Entdecken',
     gastronomyHeroCtaUrl: '#offer',
     gastronomyOfferSectionTitle: 'Was wir anbieten',
@@ -95,9 +97,24 @@ function gastronomyDataDE(media: {
           'Wir unterstützen Sie bei der Integration fermentierter Produkte in Ihre Speisekarte.',
       },
     ],
-    gastronomyQuoteText:
-      'Verwandeln Sie Tradition in Innovation. Fermentation ist nicht nur Konservierung — sie ist die Zukunft der Gastronomie.',
-    gastronomyQuoteSubtext: 'Partner mit uns, um Ihr Geschäft zu differenzieren.',
+    gastronomyHeroSliderPrevLabel: 'ZURÜCK',
+    gastronomyHeroSliderNextLabel: 'WEITER',
+    gastronomyHeroSliderAutoplayMs: 12000,
+    gastronomyTrustedByHeading: 'Vertraut von',
+    gastronomyTrustedByBadges: [
+      { label: 'Restaurants' },
+      { label: 'Hotels' },
+      { label: 'Catering' },
+      { label: 'Feinkost' },
+      { label: 'Food Concept Stores' },
+    ],
+    gastronomyCtaBanner: {
+      heading:
+        'Verwandeln Sie Tradition in Innovation. Fermentation ist nicht nur Konservierung — sie ist die Zukunft der Gastronomie.',
+      description: 'Partner mit uns, um Ihr Geschäft zu differenzieren.',
+      buttonLabel: 'Anfrage senden',
+      buttonHref: '#contact',
+    },
     gastronomyWorkshopSectionTitle: 'Nächster Workshop',
     gastronomyWorkshopSectionSubtitle: 'Exklusiv zu fermentierten Zubereitungen',
     gastronomyWorkshopClarification:
@@ -148,37 +165,90 @@ function gastronomyDataDE(media: {
           'Wir kommen zu Ihnen — maßgeschneiderte Workshops für Ihr Küchenteam in Ihrem Betrieb.',
       },
       {
-        title: 'Marketing-Events',
+        title: 'Masterclasses',
         description:
-          'Fermentations-Events für Ihre Gäste — von Verkostungen bis zu interaktiven Abenden.',
+          'Vertiefende Formate für Ihr Team, um Fermentation sicher und effizient in den Alltag zu bringen.',
       },
       {
         title: 'Beratungsleistungen',
         description: 'Strategische Beratung zur Integration fermentierter Produkte in Ihr Konzept.',
       },
+    ],
+    gastronomyOutcomesEyebrow: 'ERGEBNISSE',
+    gastronomyOutcomesTitle: 'Vorher / Nachher in der Küche',
+    gastronomyOutcomesBeforeLabel: 'VORHER',
+    gastronomyOutcomesAfterLabel: 'NACHHER',
+    gastronomyOutcomesItems: [
       {
-        title: 'Tempeh in der Küche',
-        description:
-          'Viele Köche wissen nicht, wie sie Tempeh einsetzen können. Wir zeigen Ihnen Anwendungen: Marinieren, Braten, Frittieren und kreative Gerichte für Ihre Speisekarte.',
+        before: 'Kein klares Ferment-Angebot',
+        after: 'Signature-Komponenten mit Wiedererkennungswert',
       },
       {
-        title: 'Private Verkostungen',
-        description: 'Exklusive Verkostungen unserer Produkte für Sie und Ihr Team.',
+        before: 'Unsichere Team-Abläufe',
+        after: 'Klare Standards für Produktion und Service',
       },
       {
-        title: 'Produktentwicklung',
-        description:
-          'Gemeinsam entwickeln wir maßgeschneiderte fermentierte Produkte für Ihre Küche.',
-      },
-      {
-        title: 'Langfristige Partnerschaften',
-        description: 'Aufbau von dauerhaften Lieferbeziehungen und kontinuierlicher Unterstützung.',
+        before: 'Standard-Menüs ohne Differenzierung',
+        after: 'Markante Aromen mit eigener Handschrift',
       },
     ],
-    gastronomyCollaborateImage: media.collaborate?.id ?? null,
-    gastronomyCollaborateTitle: 'Bereit zur Zusammenarbeit?',
-    gastronomyCollaborateSubtitle:
-      'Wir helfen Ihnen, unvergessliche kulinarische Erlebnisse zu schaffen.',
+    gastronomyProcessEyebrow: 'ABLAUF',
+    gastronomyProcessTitle: 'So arbeiten wir mit Ihrem Team',
+    gastronomyProcessSteps: [
+      {
+        title: 'Analyse',
+        description:
+          'Wir prüfen Ihr Konzept, Ihre Küche und Ihr Team-Setup, um die beste Ferment-Strategie zu definieren.',
+      },
+      {
+        title: 'Team Workshop',
+        description:
+          'Praxisnahes Training vor Ort oder hybrid, mit sofort einsetzbaren Techniken für Ihren Alltag.',
+      },
+      {
+        title: 'Menu Integration',
+        description:
+          'Wir begleiten die Umsetzung in Ihre Karte, inklusive Prozesse, Qualität und geschmacklicher Linie.',
+      },
+    ],
+    gastronomyTestimonialsEyebrow: 'REFERENZEN',
+    gastronomyTestimonialsTitle: 'Was Gastronomie-Profis sagen',
+    gastronomyTestimonialsItems: [
+      {
+        quote:
+          'Die Zusammenarbeit hat unsere Speisekarte klar aufgewertet. Die Fermentfreude-Ideen waren sofort umsetzbar.',
+        author: 'Küchenleitung, Boutique-Hotel',
+      },
+      {
+        quote:
+          'Das Teamtraining war strukturiert, praxisnah und inspirierend. Genau das, was wir für unsere Küche gebraucht haben.',
+        author: 'Head Chef, Fine Dining Restaurant',
+      },
+      {
+        quote:
+          'Unsere Gäste reagieren begeistert auf die neuen Ferment-Komponenten. Geschmacklich ein echter Unterschied.',
+        author: 'Operations Lead, Catering Company',
+      },
+    ],
+    gastronomyFaqEyebrow: 'B2B FAQ',
+    gastronomyFaqTitle: 'Häufige Fragen von Gastronomiebetrieben',
+    gastronomyFaqItems: [
+      {
+        question: 'Für welche Teamgröße ist das geeignet?',
+        answer:
+          'Unsere Formate funktionieren für kleine Küchen-Teams ebenso wie für größere Hotel- oder Catering-Strukturen.',
+      },
+      {
+        question: 'Wie schnell können wir starten?',
+        answer:
+          'Je nach Verfügbarkeit meist innerhalb weniger Wochen, inklusive klarer Vorbereitungsschritte.',
+      },
+      {
+        question: 'Geht das auch bei uns vor Ort?',
+        answer:
+          'Ja, wir bieten On-Site Workshops und begleiten die Implementierung direkt in Ihrer Küche.',
+      },
+    ],
     gastronomyContactImage: media.contact?.id ?? null,
     gastronomyContactTitle: 'Kontakt',
     gastronomyContactDescription:
@@ -199,15 +269,6 @@ function gastronomyDataDE(media: {
       ],
     },
     gastronomySubmitButtonLabel: 'Nachricht senden',
-    gastronomyCtaBanner: {
-      heading: 'Für Köche und Lebensmittelprofis',
-      description:
-        'Fermentierte, pflanzliche Optionen für professionelle Küchen? Wir liefern Produkte und Wissen für moderne Speisekarten.',
-      buttonLabel: 'Mehr erfahren',
-      buttonHref: '/contact',
-    },
-    gastronomyMapEmbedUrl:
-      'https://maps.google.com/maps?q=Grabenstra%C3%9Fe+15,+8010+Graz,+Austria&t=&z=17&ie=UTF8&iwloc=&output=embed',
   }
 }
 
@@ -218,11 +279,9 @@ function gastronomyDataEN(media: {
   workshop1?: Media
   workshop2?: Media
   workshop3?: Media
-  collaborate?: Media
   contact?: Media
 }) {
   return {
-    gastronomyHeroTitle: 'Elevate Your Gastronomy Business',
     gastronomyHeroCtaLabel: 'Take a look',
     gastronomyHeroCtaUrl: '#offer',
     gastronomyOfferSectionTitle: 'What we offer',
@@ -243,9 +302,24 @@ function gastronomyDataEN(media: {
         description: 'We support you in integrating fermented products into your menu.',
       },
     ],
-    gastronomyQuoteText:
-      "Transform tradition into innovation. Fermentation is not just preservation it's the future of gastronomy.",
-    gastronomyQuoteSubtext: 'Partner with us to differentiate your business.',
+    gastronomyHeroSliderPrevLabel: 'PREV',
+    gastronomyHeroSliderNextLabel: 'NEXT',
+    gastronomyHeroSliderAutoplayMs: 12000,
+    gastronomyTrustedByHeading: 'Trusted by',
+    gastronomyTrustedByBadges: [
+      { label: 'Restaurants' },
+      { label: 'Hotels' },
+      { label: 'Catering' },
+      { label: 'Delis' },
+      { label: 'Food Concept Stores' },
+    ],
+    gastronomyCtaBanner: {
+      heading:
+        "Transform tradition into innovation. Fermentation is not just preservation it's the future of gastronomy.",
+      description: 'Partner with us to differentiate your business.',
+      buttonLabel: 'Send Inquiry',
+      buttonHref: '#contact',
+    },
     gastronomyWorkshopSectionTitle: 'Next Workshop',
     gastronomyWorkshopSectionSubtitle: 'Exclusively on Fermented Preparations',
     gastronomyWorkshopClarification:
@@ -291,38 +365,96 @@ function gastronomyDataEN(media: {
     gastronomyOfferDetailsTitle: 'What We Offer',
     gastronomyOfferDetails: [
       {
-        title: 'On-Site Workshops',
-        description: 'We come to you — tailored workshops for your kitchen team at your premises.',
-      },
-      {
-        title: 'Marketing Events',
-        description: 'Fermentation events for your guests — from tastings to interactive evenings.',
-      },
-      {
-        title: 'Consultation Services',
-        description: 'Strategic advice on integrating fermented products into your concept.',
-      },
-      {
-        title: 'Tempeh in Your Kitchen',
+        title: 'On-Site Fermentation',
         description:
-          "Many chefs don't know what to do with tempeh. We show you how to use it: marinating, frying, and creative applications for your menu.",
+          'We come to you with tailored fermentation workshops built around your kitchen’s workflow.',
       },
       {
-        title: 'Private Tastings',
-        description: 'Exclusive tastings of our products for you and your team.',
+        title: 'Masterclasses',
+        description:
+          'Focused sessions that help your team level up techniques and repeat them with confidence.',
       },
       {
-        title: 'Product Development',
-        description: 'Together we develop custom fermented products for your kitchen.',
-      },
-      {
-        title: 'Long-Term Partnerships',
-        description: 'Building lasting supply relationships and ongoing support.',
+        title: 'Consultancy Services',
+        description:
+          'Strategic guidance to integrate fermented components into your menu and operations.',
       },
     ],
-    gastronomyCollaborateImage: media.collaborate?.id ?? null,
-    gastronomyCollaborateTitle: 'Ready to collaborate?',
-    gastronomyCollaborateSubtitle: 'Let us help you create unforgettable culinary experiences.',
+    gastronomyOutcomesEyebrow: 'OUTCOMES',
+    gastronomyOutcomesTitle: 'Before / After In The Kitchen',
+    gastronomyOutcomesBeforeLabel: 'BEFORE',
+    gastronomyOutcomesAfterLabel: 'AFTER',
+    gastronomyOutcomesItems: [
+      {
+        before: 'No clear fermentation offer',
+        after: 'Signature components with strong identity',
+      },
+      {
+        before: 'Inconsistent team workflows',
+        after: 'Clear standards for production and service',
+      },
+      {
+        before: 'Standard menus with little differentiation',
+        after: 'Distinctive flavors with a unique point of view',
+      },
+    ],
+    gastronomyProcessEyebrow: 'PROCESS',
+    gastronomyProcessTitle: 'How We Work With Your Team',
+    gastronomyProcessSteps: [
+      {
+        title: 'Assessment',
+        description:
+          'We review your concept, kitchen setup, and team workflow to define the right fermentation strategy.',
+      },
+      {
+        title: 'Team Workshop',
+        description:
+          'Hands-on training on-site or hybrid, with techniques your team can use immediately.',
+      },
+      {
+        title: 'Menu Integration',
+        description:
+          'We support implementation into your menu, including process, quality, and flavor direction.',
+      },
+    ],
+    gastronomyTestimonialsEyebrow: 'TESTIMONIALS',
+    gastronomyTestimonialsTitle: 'What Culinary Teams Say',
+    gastronomyTestimonialsItems: [
+      {
+        quote:
+          'The collaboration elevated our menu immediately. Fermentfreude delivered practical ideas we could execute fast.',
+        author: 'Kitchen Lead, Boutique Hotel',
+      },
+      {
+        quote:
+          'The team workshop was clear, hands-on, and inspiring. Exactly what we needed for our kitchen operations.',
+        author: 'Head Chef, Fine Dining Restaurant',
+      },
+      {
+        quote:
+          'Our guests love the new fermented elements. It made a visible difference in flavor and identity.',
+        author: 'Operations Lead, Catering Company',
+      },
+    ],
+    gastronomyFaqEyebrow: 'B2B FAQ',
+    gastronomyFaqTitle: 'Common Questions From Hospitality Teams',
+    gastronomyFaqItems: [
+      {
+        question: 'What team size is this suitable for?',
+        answer:
+          'Our formats work for small kitchen teams as well as larger hotel and catering operations.',
+      },
+      {
+        question: 'How quickly can we start?',
+        answer:
+          'Depending on availability, usually within a few weeks including clear preparation steps.',
+      },
+      {
+        question: 'Can this be delivered on-site?',
+        answer:
+          'Yes. We offer on-site workshops and support implementation directly in your kitchen.',
+      },
+    ],
     gastronomyContactImage: media.contact?.id ?? null,
     gastronomyContactTitle: 'Contact',
     gastronomyContactDescription:
@@ -343,15 +475,6 @@ function gastronomyDataEN(media: {
       ],
     },
     gastronomySubmitButtonLabel: 'Send Message',
-    gastronomyCtaBanner: {
-      heading: 'For Chefs and Food Professionals',
-      description:
-        'Looking for fermented, plant-based options that work in professional kitchens? We supply products and knowledge for modern menus.',
-      buttonLabel: 'Learn more',
-      buttonHref: '/contact',
-    },
-    gastronomyMapEmbedUrl:
-      'https://maps.google.com/maps?q=Grabenstra%C3%9Fe+15,+8010+Graz,+Austria&t=&z=17&ie=UTF8&iwloc=&output=embed',
   }
 }
 
@@ -369,7 +492,6 @@ async function seedGastronomy() {
     workshop1?: Media
     workshop2?: Media
     workshop3?: Media
-    collaborate?: Media
     contact?: Media
   } = {}
 
@@ -420,18 +542,6 @@ async function seedGastronomy() {
       } else {
         payload.logger.warn(`Workshop image not found: ${p}`)
       }
-    }
-    const collaboratePath = path.join(imagesDir, 'gastronomy-cutting-board-fermentation.png')
-    if (fs.existsSync(collaboratePath)) {
-      const created = await payload.create({
-        collection: 'media',
-        data: { alt: 'Ready to collaborate – gastronomy banner' },
-        file: readLocalFile(collaboratePath),
-        context: { skipAutoTranslate: true },
-      })
-      media.collaborate = created as Media
-    } else {
-      payload.logger.warn(`Collaborate image not found: ${collaboratePath}`)
     }
     const contactPath = path.join(imagesDir, 'gastronomy-slide-01-cutting-board.png')
     if (fs.existsSync(contactPath)) {
@@ -494,28 +604,58 @@ async function seedGastronomy() {
     const offerCardsDE = (gastronomyDE.gastronomyOfferCards as Array<{ id?: string }>) ?? []
     const workshopCardsDE = (gastronomyDE.gastronomyWorkshopCards as Array<{ id?: string }>) ?? []
     const offerDetailsDE = (gastronomyDE.gastronomyOfferDetails as Array<{ id?: string }>) ?? []
+    const outcomesItemsDE =
+      (gastronomyDE.gastronomyOutcomesItems as Array<{ id?: string }>) ?? []
+    const processStepsDE =
+      (gastronomyDE.gastronomyProcessSteps as Array<{ id?: string }>) ?? []
+    const testimonialsItemsDE =
+      (gastronomyDE.gastronomyTestimonialsItems as Array<{ id?: string }>) ?? []
+    const faqItemsDE = (gastronomyDE.gastronomyFaqItems as Array<{ id?: string }>) ?? []
     const subjectOpts = gastronomyDE.gastronomySubjectOptions as {
       options?: Array<{ id?: string }>
     }
     const subjectItemsDE = subjectOpts?.options ?? []
+    const trustedByBadgesDE =
+      (gastronomyDE.gastronomyTrustedByBadges as Array<{ id?: string }>) ?? []
 
+    const enGastronomy = gastronomyDataEN(media)
     const dataENWithIds = {
-      ...gastronomyDataEN(media),
-      gastronomyOfferCards: gastronomyDataEN(media).gastronomyOfferCards.map((c, i) => ({
+      ...enGastronomy,
+      gastronomyOfferCards: enGastronomy.gastronomyOfferCards.map((c, i) => ({
         ...c,
         id: offerCardsDE[i]?.id,
       })),
-      gastronomyWorkshopCards: gastronomyDataEN(media).gastronomyWorkshopCards.map((c, i) => ({
+      gastronomyWorkshopCards: enGastronomy.gastronomyWorkshopCards.map((c, i) => ({
         ...c,
         id: workshopCardsDE[i]?.id,
       })),
-      gastronomyOfferDetails: gastronomyDataEN(media).gastronomyOfferDetails.map((item, i) => ({
+      gastronomyOfferDetails: enGastronomy.gastronomyOfferDetails.map((item, i) => ({
         ...item,
         id: offerDetailsDE[i]?.id,
       })),
+      gastronomyOutcomesItems: enGastronomy.gastronomyOutcomesItems.map((item, i) => ({
+        ...item,
+        id: outcomesItemsDE[i]?.id,
+      })),
+      gastronomyProcessSteps: enGastronomy.gastronomyProcessSteps.map((item, i) => ({
+        ...item,
+        id: processStepsDE[i]?.id,
+      })),
+      gastronomyTestimonialsItems: enGastronomy.gastronomyTestimonialsItems.map((item, i) => ({
+        ...item,
+        id: testimonialsItemsDE[i]?.id,
+      })),
+      gastronomyFaqItems: enGastronomy.gastronomyFaqItems.map((item, i) => ({
+        ...item,
+        id: faqItemsDE[i]?.id,
+      })),
+      gastronomyTrustedByBadges: enGastronomy.gastronomyTrustedByBadges.map((b, i) => ({
+        ...b,
+        id: trustedByBadgesDE[i]?.id,
+      })),
       gastronomySubjectOptions: {
-        ...gastronomyDataEN(media).gastronomySubjectOptions,
-        options: gastronomyDataEN(media).gastronomySubjectOptions.options.map((o, i) => ({
+        ...enGastronomy.gastronomySubjectOptions,
+        options: enGastronomy.gastronomySubjectOptions.options.map((o, i) => ({
           ...o,
           id: subjectItemsDE[i]?.id,
         })),
@@ -580,26 +720,55 @@ async function seedGastronomy() {
   const offerCardsDE = (gastronomyDE.gastronomyOfferCards as Array<{ id?: string }>) ?? []
   const workshopCardsDE = (gastronomyDE.gastronomyWorkshopCards as Array<{ id?: string }>) ?? []
   const offerDetailsDE = (gastronomyDE.gastronomyOfferDetails as Array<{ id?: string }>) ?? []
+  const outcomesItemsDE =
+    (gastronomyDE.gastronomyOutcomesItems as Array<{ id?: string }>) ?? []
+  const processStepsDE = (gastronomyDE.gastronomyProcessSteps as Array<{ id?: string }>) ?? []
+  const testimonialsItemsDE =
+    (gastronomyDE.gastronomyTestimonialsItems as Array<{ id?: string }>) ?? []
+  const faqItemsDE = (gastronomyDE.gastronomyFaqItems as Array<{ id?: string }>) ?? []
   const subjectOpts = gastronomyDE.gastronomySubjectOptions as { options?: Array<{ id?: string }> }
   const subjectItemsDE = subjectOpts?.options ?? []
+  const trustedByBadgesDE =
+    (gastronomyDE.gastronomyTrustedByBadges as Array<{ id?: string }>) ?? []
 
+  const enGastronomy = gastronomyDataEN(media)
   const dataENWithIds = {
-    ...gastronomyDataEN(media),
-    gastronomyOfferCards: gastronomyDataEN(media).gastronomyOfferCards.map((c, i) => ({
+    ...enGastronomy,
+    gastronomyOfferCards: enGastronomy.gastronomyOfferCards.map((c, i) => ({
       ...c,
       id: offerCardsDE[i]?.id,
     })),
-    gastronomyWorkshopCards: gastronomyDataEN(media).gastronomyWorkshopCards.map((c, i) => ({
+    gastronomyWorkshopCards: enGastronomy.gastronomyWorkshopCards.map((c, i) => ({
       ...c,
       id: workshopCardsDE[i]?.id,
     })),
-    gastronomyOfferDetails: gastronomyDataEN(media).gastronomyOfferDetails.map((item, i) => ({
+    gastronomyOfferDetails: enGastronomy.gastronomyOfferDetails.map((item, i) => ({
       ...item,
       id: offerDetailsDE[i]?.id,
     })),
+    gastronomyOutcomesItems: enGastronomy.gastronomyOutcomesItems.map((item, i) => ({
+      ...item,
+      id: outcomesItemsDE[i]?.id,
+    })),
+    gastronomyProcessSteps: enGastronomy.gastronomyProcessSteps.map((item, i) => ({
+      ...item,
+      id: processStepsDE[i]?.id,
+    })),
+    gastronomyTestimonialsItems: enGastronomy.gastronomyTestimonialsItems.map((item, i) => ({
+      ...item,
+      id: testimonialsItemsDE[i]?.id,
+    })),
+    gastronomyFaqItems: enGastronomy.gastronomyFaqItems.map((item, i) => ({
+      ...item,
+      id: faqItemsDE[i]?.id,
+    })),
+    gastronomyTrustedByBadges: enGastronomy.gastronomyTrustedByBadges.map((b, i) => ({
+      ...b,
+      id: trustedByBadgesDE[i]?.id,
+    })),
     gastronomySubjectOptions: {
-      ...gastronomyDataEN(media).gastronomySubjectOptions,
-      options: gastronomyDataEN(media).gastronomySubjectOptions.options.map((o, i) => ({
+      ...enGastronomy.gastronomySubjectOptions,
+      options: enGastronomy.gastronomySubjectOptions.options.map((o, i) => ({
         ...o,
         id: subjectItemsDE[i]?.id,
       })),

@@ -520,7 +520,6 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -646,6 +645,8 @@ export interface CallToActionBlock {
   blockType: 'cta';
 }
 /**
+ * Website-Seiten. B2B Gastronomie: Seite mit Slug „gastronomy“ öffnen — Slug steht oben vor den Tabs; Tab „Gastronomy Page“ erscheint danach. EN: open page slug gastronomy; slug field is above the tabs.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -653,6 +654,11 @@ export interface Page {
   id: string;
   title: string;
   publishedOn?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
   /**
    * The large banner at the top of the page.
    */
@@ -1374,27 +1380,31 @@ export interface Page {
       )[]
     | null;
   /**
-   * Content for the Gastronomy page (/gastronomy). Only applies when slug is "gastronomy".
+   * B2B /gastronomy. Slug oben setzen. Felder folgen der Seitenreihenfolge: Hero → Trusted by → CTA → What we offer → … → Kontakt → Next workshop. / Fields follow on-page order from top to bottom.
    */
   gastronomy?: {
     /**
-     * Main heading (e.g., "Elevate Your Gastronomy Business").
-     */
-    gastronomyHeroTitle?: string | null;
-    /**
-     * Button text (e.g., "Take a look").
+     * Primary button on the hero slider (e.g. “Take a look”).
      */
     gastronomyHeroCtaLabel: string;
     /**
-     * Where the button links (e.g., "#offer").
+     * Hero button target (e.g. #offer).
      */
     gastronomyHeroCtaUrl?: string | null;
     /**
-     * Heading above the offer cards (e.g., "What we offer").
+     * Text on the previous-slide control (e.g. PREV, ZURÜCK).
      */
-    gastronomyOfferSectionTitle?: string | null;
+    gastronomyHeroSliderPrevLabel?: string | null;
     /**
-     * Three service cards.
+     * Text on the next-slide control (e.g. NEXT, WEITER).
+     */
+    gastronomyHeroSliderNextLabel?: string | null;
+    /**
+     * Milliseconds between automatic slide changes. Leave empty for default (12000). Min 2000, max 120000.
+     */
+    gastronomyHeroSliderAutoplayMs?: number | null;
+    /**
+     * Images + text for the large hero carousel (same order as on the page, before Trusted by).
      */
     gastronomyOfferCards?:
       | {
@@ -1404,18 +1414,132 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
-    gastronomyQuoteText?: string | null;
-    gastronomyQuoteSubtext?: string | null;
+    /**
+     * Lead label for the pill row under the hero (e.g. TRUSTED BY / VERTRAUT VON).
+     */
+    gastronomyTrustedByHeading?: string | null;
+    /**
+     * Category pills in one row (Restaurants, Hotels, Catering, …). Second section on the page.
+     */
+    gastronomyTrustedByBadges?:
+      | {
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Dark rounded block after Trusted by, before “What we offer”. Headline, subline, button.
+     */
+    gastronomyCtaBanner?: {
+      heading?: string | null;
+      description?: string | null;
+      buttonLabel?: string | null;
+      /**
+       * e.g. #contact or /contact
+       */
+      buttonHref?: string | null;
+    };
+    /**
+     * Main heading above the icon cards. If empty, “Offer section title (fallback)” below is used.
+     */
+    gastronomyOfferDetailsTitle?: string | null;
+    /**
+     * Used only if “What we offer — section title” is empty (legacy / short heading).
+     */
+    gastronomyOfferSectionTitle?: string | null;
+    /**
+     * Cards under “What we offer”. Optional icon image per row; if empty, a default icon is used.
+     */
+    gastronomyOfferDetails?:
+      | {
+          /**
+           * Small square icon (SVG/PNG/WebP). If empty, a built-in icon is used.
+           */
+          icon?: (string | null) | Media;
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    gastronomyOutcomesEyebrow?: string | null;
+    gastronomyOutcomesTitle?: string | null;
+    /**
+     * e.g. VORHER / BEFORE
+     */
+    gastronomyOutcomesBeforeLabel?: string | null;
+    /**
+     * e.g. NACHHER / AFTER
+     */
+    gastronomyOutcomesAfterLabel?: string | null;
+    gastronomyOutcomesItems?:
+      | {
+          before: string;
+          after: string;
+          id?: string | null;
+        }[]
+      | null;
+    gastronomyProcessEyebrow?: string | null;
+    gastronomyProcessTitle?: string | null;
+    gastronomyProcessSteps?:
+      | {
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    gastronomyTestimonialsEyebrow?: string | null;
+    gastronomyTestimonialsTitle?: string | null;
+    gastronomyTestimonialsItems?:
+      | {
+          quote: string;
+          author: string;
+          id?: string | null;
+        }[]
+      | null;
+    gastronomyFaqEyebrow?: string | null;
+    gastronomyFaqTitle?: string | null;
+    gastronomyFaqItems?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    gastronomyContactImage?: (string | null) | Media;
+    gastronomyContactTitle: string;
+    gastronomyContactDescription?: string | null;
+    gastronomyFormPlaceholders?: {
+      firstName?: string | null;
+      lastName?: string | null;
+      email?: string | null;
+      message?: string | null;
+    };
+    gastronomySubjectOptions?: {
+      default?: string | null;
+      options?:
+        | {
+            label?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    gastronomySubmitButtonLabel?: string | null;
+    /**
+     * Heading for the workshop cards at the bottom of the page.
+     */
     gastronomyWorkshopSectionTitle: string;
     gastronomyWorkshopSectionSubtitle?: string | null;
     /**
-     * Optional text below workshop subtitle explaining who can attend (e.g. chefs welcome, custom workshops available).
+     * Optional note below the subtitle (e.g. chefs welcome, custom workshops).
      */
     gastronomyWorkshopClarification?: string | null;
     /**
-     * e.g. "Nächster Termin:" / "Next Appointment:"
+     * e.g. “Nächster Termin:” / “Next Appointment:”
      */
     gastronomyWorkshopNextDateLabel?: string | null;
+    /**
+     * Up to three cards; last section on /gastronomy.
+     */
     gastronomyWorkshopCards?:
       | {
           image?: (string | null) | Media;
@@ -1436,43 +1560,6 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
-    gastronomyOfferDetailsTitle?: string | null;
-    gastronomyOfferDetails?:
-      | {
-          title: string;
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-    gastronomyCollaborateImage?: (string | null) | Media;
-    gastronomyCollaborateTitle: string;
-    gastronomyCollaborateSubtitle?: string | null;
-    gastronomyContactImage?: (string | null) | Media;
-    gastronomyContactTitle: string;
-    gastronomyContactDescription?: string | null;
-    gastronomyFormPlaceholders?: {
-      firstName?: string | null;
-      lastName?: string | null;
-      email?: string | null;
-      message?: string | null;
-    };
-    gastronomySubjectOptions?: {
-      default?: string | null;
-      options?:
-        | {
-            label?: string | null;
-            id?: string | null;
-          }[]
-        | null;
-    };
-    gastronomySubmitButtonLabel?: string | null;
-    gastronomyCtaBanner?: {
-      heading?: string | null;
-      description?: string | null;
-      buttonLabel?: string | null;
-      buttonHref?: string | null;
-    };
-    gastronomyMapEmbedUrl?: string | null;
   };
   /**
    * Content for the Fermentation page (/fermentation). Only applies when slug is "fermentation".
@@ -1943,11 +2030,6 @@ export interface Page {
     image?: (string | null) | Media;
     description?: string | null;
   };
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -4229,6 +4311,8 @@ export interface UsersSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   publishedOn?: T;
+  generateSlug?: T;
+  slug?: T;
   hero?:
     | T
     | {
@@ -4527,10 +4611,11 @@ export interface PagesSelect<T extends boolean = true> {
   gastronomy?:
     | T
     | {
-        gastronomyHeroTitle?: T;
         gastronomyHeroCtaLabel?: T;
         gastronomyHeroCtaUrl?: T;
-        gastronomyOfferSectionTitle?: T;
+        gastronomyHeroSliderPrevLabel?: T;
+        gastronomyHeroSliderNextLabel?: T;
+        gastronomyHeroSliderAutoplayMs?: T;
         gastronomyOfferCards?:
           | T
           | {
@@ -4539,37 +4624,69 @@ export interface PagesSelect<T extends boolean = true> {
               description?: T;
               id?: T;
             };
-        gastronomyQuoteText?: T;
-        gastronomyQuoteSubtext?: T;
-        gastronomyWorkshopSectionTitle?: T;
-        gastronomyWorkshopSectionSubtitle?: T;
-        gastronomyWorkshopClarification?: T;
-        gastronomyWorkshopNextDateLabel?: T;
-        gastronomyWorkshopCards?:
+        gastronomyTrustedByHeading?: T;
+        gastronomyTrustedByBadges?:
           | T
           | {
-              image?: T;
-              title?: T;
-              description?: T;
-              price?: T;
-              priceSuffix?: T;
-              buttonLabel?: T;
-              buttonUrl?: T;
-              duration?: T;
-              nextDate?: T;
+              label?: T;
               id?: T;
             };
+        gastronomyCtaBanner?:
+          | T
+          | {
+              heading?: T;
+              description?: T;
+              buttonLabel?: T;
+              buttonHref?: T;
+            };
         gastronomyOfferDetailsTitle?: T;
+        gastronomyOfferSectionTitle?: T;
         gastronomyOfferDetails?:
           | T
           | {
+              icon?: T;
               title?: T;
               description?: T;
               id?: T;
             };
-        gastronomyCollaborateImage?: T;
-        gastronomyCollaborateTitle?: T;
-        gastronomyCollaborateSubtitle?: T;
+        gastronomyOutcomesEyebrow?: T;
+        gastronomyOutcomesTitle?: T;
+        gastronomyOutcomesBeforeLabel?: T;
+        gastronomyOutcomesAfterLabel?: T;
+        gastronomyOutcomesItems?:
+          | T
+          | {
+              before?: T;
+              after?: T;
+              id?: T;
+            };
+        gastronomyProcessEyebrow?: T;
+        gastronomyProcessTitle?: T;
+        gastronomyProcessSteps?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        gastronomyTestimonialsEyebrow?: T;
+        gastronomyTestimonialsTitle?: T;
+        gastronomyTestimonialsItems?:
+          | T
+          | {
+              quote?: T;
+              author?: T;
+              id?: T;
+            };
+        gastronomyFaqEyebrow?: T;
+        gastronomyFaqTitle?: T;
+        gastronomyFaqItems?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
         gastronomyContactImage?: T;
         gastronomyContactTitle?: T;
         gastronomyContactDescription?: T;
@@ -4593,15 +4710,24 @@ export interface PagesSelect<T extends boolean = true> {
                   };
             };
         gastronomySubmitButtonLabel?: T;
-        gastronomyCtaBanner?:
+        gastronomyWorkshopSectionTitle?: T;
+        gastronomyWorkshopSectionSubtitle?: T;
+        gastronomyWorkshopClarification?: T;
+        gastronomyWorkshopNextDateLabel?: T;
+        gastronomyWorkshopCards?:
           | T
           | {
-              heading?: T;
+              image?: T;
+              title?: T;
               description?: T;
+              price?: T;
+              priceSuffix?: T;
               buttonLabel?: T;
-              buttonHref?: T;
+              buttonUrl?: T;
+              duration?: T;
+              nextDate?: T;
+              id?: T;
             };
-        gastronomyMapEmbedUrl?: T;
       };
   fermentation?:
     | T
@@ -4802,8 +4928,6 @@ export interface PagesSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
-  generateSlug?: T;
-  slug?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -5433,7 +5557,6 @@ export interface EnrollmentsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

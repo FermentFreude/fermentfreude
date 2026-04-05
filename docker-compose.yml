@@ -1,0 +1,17 @@
+# Local MongoDB for development (optional).
+# Requires Docker Desktop: https://docs.docker.com/desktop/
+#
+#   docker compose up -d
+#
+# Then keep DATABASE_URL=mongodb://127.0.0.1:27017/fermentfreude in .env
+
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - '27017:27017'
+    volumes:
+      - fermentfreude-mongo-data:/data/db
+
+volumes:
+  fermentfreude-mongo-data:
