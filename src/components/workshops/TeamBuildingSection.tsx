@@ -55,7 +55,7 @@ export function TeamBuildingSection({
           </Link>
         </div>
         {/* Right: image */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl lg:aspect-auto lg:min-h-[24rem]">
+        <div className="relative aspect-4/3 overflow-hidden rounded-2xl lg:aspect-auto lg:min-h-96">
           {isResolvedMedia(image) ? (
             <Media resource={image} fill imgClassName="object-cover" />
           ) : (

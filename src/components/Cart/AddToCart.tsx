@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { gtmAddToCart } from '@/lib/gtm'
 import type { Product, Variant } from '@/payload-types'
 
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
@@ -48,6 +49,13 @@ export function AddToCart({ product, className, ariaLabel, children }: Props) {
         variant: selectedVariant?.id ?? undefined,
       }).then(() => {
         toast.success('Item added to cart.')
+        gtmAddToCart({
+          item_id: String(product.id),
+          item_name: product.title ?? '',
+          item_category: product.productType ?? undefined,
+          price: (product as unknown as Record<string, unknown>).priceInEUR as number | undefined,
+          quantity: 1,
+        })
       })
     },
     [addItem, product, selectedVariant],

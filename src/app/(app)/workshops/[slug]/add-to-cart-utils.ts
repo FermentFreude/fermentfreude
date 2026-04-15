@@ -1,5 +1,6 @@
 'use client'
 
+import { gtmAddToCart } from '@/lib/gtm'
 import { toast } from 'sonner'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -51,6 +52,7 @@ export async function addWorkshopToCart({
     //  so we store appointment details separately for retrieval when showing cart)
     const bookingMetadata = {
       appointmentId,
+      bookingId: (data.bookingId as string | null) ?? null,
       workshopSlug,
       workshopTitle,
       guestCount,
@@ -76,6 +78,14 @@ export async function addWorkshopToCart({
     toast.success(
       `${guestCount} ${guestCount === 1 ? 'Platz' : 'Plätze'} für ${workshopTitle} hinzugefügt!`,
     )
+
+    gtmAddToCart({
+      item_id: data.cartItem.productId,
+      item_name: workshopTitle,
+      item_category: 'Workshop',
+      price: data.cartItem.metadata.pricePerPerson,
+      quantity: guestCount,
+    })
   } catch (error) {
     console.error('Error adding workshop to cart:', error)
     if (!(error instanceof Error && error.message.includes('Failed to add to cart'))) {

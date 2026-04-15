@@ -62,7 +62,8 @@ PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY=true
 # Brevo (optional for development)
 BREVO_API_KEY=your_brevo_api_key
 
-# Google Analytics (optional for development)
+# Google Analytics 4 + GTM (optional for development, required for production)
+NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
 NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 ```
 

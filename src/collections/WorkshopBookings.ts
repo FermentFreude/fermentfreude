@@ -24,6 +24,24 @@ export const WorkshopBookings: CollectionConfig = {
   },
   fields: [
     {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'pending',
+      label: 'Status',
+      options: [
+        { label: 'Pending (awaiting payment)', value: 'pending' },
+        { label: 'Confirmed (payment received)', value: 'confirmed' },
+        { label: 'Cancelled', value: 'cancelled' },
+        { label: 'Refunded', value: 'refunded' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description:
+          'Auto-set to pending on cart add. Transitions to confirmed after Stripe payment succeeds.',
+      },
+    },
+    {
       name: 'workshopSlug',
       type: 'text',
       required: true,

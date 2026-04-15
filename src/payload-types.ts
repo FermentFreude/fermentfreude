@@ -3915,6 +3915,10 @@ export interface WorkshopAppointment {
 export interface WorkshopBooking {
   id: string;
   /**
+   * Auto-set to pending on cart add. Transitions to confirmed after Stripe payment succeeds.
+   */
+  status: 'pending' | 'confirmed' | 'cancelled' | 'refunded';
+  /**
    * e.g. "kombucha", "lakto", "tempeh"
    */
   workshopSlug: string;
@@ -5595,6 +5599,7 @@ export interface WorkshopAppointmentsSelect<T extends boolean = true> {
  * via the `definition` "workshop-bookings_select".
  */
 export interface WorkshopBookingsSelect<T extends boolean = true> {
+  status?: T;
   workshopSlug?: T;
   appointmentId?: T;
   workshopTitle?: T;

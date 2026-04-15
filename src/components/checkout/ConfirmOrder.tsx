@@ -1,6 +1,7 @@
 'use client'
 
 import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { gtmPurchase } from '@/lib/gtm'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
@@ -32,6 +33,24 @@ export const ConfirmOrder: React.FC = () => {
           },
         }).then((result) => {
           if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
+            // GA4 + Meta Pixel: purchase event
+            if (cart?.items?.length) {
+              const items = cart.items.map((item) => {
+                const product = typeof item.product === 'object' && item.product !== null ? item.product : null
+                return {
+                  item_id: String(typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product),
+                  item_name: (product as Record<string, unknown> | null)?.title as string ?? '',
+                  quantity: item.quantity ?? 1,
+                  price: (product as Record<string, unknown> | null)?.priceInEUR as number | undefined,
+                }
+              })
+              gtmPurchase({
+                transaction_id: String(result.orderID),
+                value: cart.subtotal ?? 0,
+                items,
+              })
+            }
+
             router.push(
               `/account/orders/${result.orderID}${email ? `?email=${encodeURIComponent(email)}` : ''}`,
             )

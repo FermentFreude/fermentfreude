@@ -221,14 +221,49 @@ export async function POST(request: NextRequest) {
 
     const actualProductId = foundProduct.id
 
-    // The ecommerce plugin expects a product ID and stores metadata
-    // Since workshops aren't in the Products collection yet, we use
-    // the cart's metadata field to store booking details.
+    // ─── Decrement Available Spots ──────────────────────────────
+    // Spots are reserved immediately to prevent overbooking.
+    // Restored via POST /api/cart/release-spots if payment fails or cart is abandoned.
+    await payload.update({
+      collection: 'workshop-appointments',
+      id: appointmentId,
+      data: {
+        availableSpots: appointment.availableSpots - guestCount,
+      },
+      overrideAccess: true,
+    })
+
+    // ─── Create Pending Booking Record ──────────────────────────
+    // pending → confirmed via Stripe webhook, or cancelled via release-spots.
+    let bookingId: string | null = null
+    try {
+      const booking = await payload.create({
+        collection: 'workshop-bookings',
+        data: {
+          status: 'pending',
+          workshopSlug,
+          appointmentId,
+          workshopTitle: String(workshop.title ?? 'Workshop'),
+          date: dateDisplay,
+          time: timeDisplay,
+          guestCount,
+          pricePerPerson,
+          totalPrice,
+        },
+        overrideAccess: true,
+      })
+      bookingId = String(booking.id)
+    } catch (err) {
+      // Non-fatal: spots are still decremented, cart add proceeds.
+      // Stripe webhook will not find a booking to confirm — investigate in logs.
+      console.error('[add-workshop] Failed to create WorkshopBooking record:', err)
+    }
 
     return NextResponse.json(
       {
         success: true,
         message: `${guestCount} spot${guestCount === 1 ? '' : 's'} validated for ${workshop.title}`,
+        bookingId,
         cartItem: {
           productId: actualProductId, // ✅ Real database ID
           metadata: {
@@ -246,7 +281,7 @@ export async function POST(request: NextRequest) {
         appointment: {
           id: appointment.id,
           dateTime: appointment.dateTime,
-          availableSpots: appointment.availableSpots,
+          availableSpots: appointment.availableSpots - guestCount,
         },
         workshop: {
           id: workshop.id,

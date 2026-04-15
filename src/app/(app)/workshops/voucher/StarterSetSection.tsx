@@ -21,7 +21,7 @@ export function StarterSetSection({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left - Image */}
           <div className="order-2 lg:order-1">
-            <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden bg-[#FAF2E0]">
+            <div className="relative w-full aspect-4/3 rounded-3xl overflow-hidden bg-[#FAF2E0]">
               {image ? (
                 <Media
                   resource={image}

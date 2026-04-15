@@ -92,7 +92,7 @@ export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, membe
                     transitionDelay: `${idx * 150}ms`,
                   }}
                 >
-                  <article className="group flex flex-col h-full w-full overflow-hidden rounded-(--radius-xl) border-2 border-ff-border-light bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:border-ff-charcoal/20 hover:-translate-y-1">
+                  <article className="group flex flex-col h-full w-full overflow-hidden rounded-xl border-2 border-ff-border-light bg-white shadow-md transition-all duration-300 hover:shadow-xl hover:border-ff-charcoal/20 hover:-translate-y-1">
                     <div className="relative aspect-4/5 w-full shrink-0 overflow-hidden bg-ff-warm-gray">
                       {hasCmsImage ? (
                         <Media

@@ -1,6 +1,7 @@
 'use client'
 
 import type { CartItem } from '@/components/Cart'
+import { gtmRemoveFromCart } from '@/lib/gtm'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
 import { XIcon } from 'lucide-react'
@@ -23,7 +24,16 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
         disabled={!itemId || isLoading}
         onClick={(e: React.FormEvent<HTMLButtonElement>) => {
           e.preventDefault()
-          if (itemId) removeItem(itemId)
+          if (itemId) {
+            const product = typeof item.product === 'object' && item.product !== null ? item.product : null
+            gtmRemoveFromCart({
+              item_id: String(typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product),
+              item_name: (product as Record<string, unknown> | null)?.title as string ?? '',
+              quantity: item.quantity ?? 1,
+              price: (product as Record<string, unknown> | null)?.priceInEUR as number | undefined,
+            })
+            removeItem(itemId)
+          }
         }}
         type="button"
       >
