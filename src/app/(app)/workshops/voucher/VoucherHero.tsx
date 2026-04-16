@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
 
-export interface VoucherHeroProps {
+interface VoucherHeroProps {
   heading: string
   description: string
   amounts: string[]
@@ -18,9 +18,9 @@ export interface VoucherHeroProps {
   amountSectionLabel: string
   deliverySectionLabel: string
   addToCartButton: string
-  showAmounts: boolean
-  showDeliveryOptions: boolean
-  showCTA: boolean
+  showAmounts?: boolean
+  showDeliveryOptions?: boolean
+  showCTA?: boolean
 }
 
 export function VoucherHero({
@@ -37,77 +37,32 @@ export function VoucherHero({
   amountSectionLabel,
   deliverySectionLabel,
   addToCartButton,
-  showAmounts,
-  showDeliveryOptions,
-  showCTA,
+  showAmounts = true,
+  showDeliveryOptions = true,
+  showCTA = true,
 }: VoucherHeroProps) {
+  // Show email and pickup only — post/card removed for freshness
   const visibleDeliveryOptions = deliveryOptions.filter(
     (o) => o.type === 'email' || o.type === 'pickup',
   )
-
-  // ─── Form State ──────────────────────────────────────────────
-  const [selectedAmount, setSelectedAmount] = useState(amounts[0] ?? '99\u20ac')
+  const [selectedAmount, setSelectedAmount] = useState(amounts[0] ?? '50€')
   const [selectedDelivery, setSelectedDelivery] = useState(
     visibleDeliveryOptions[0]?.type ?? 'email',
   )
-  const [purchaserEmail, setPurchaserEmail] = useState('')
-  const [recipientEmail, setRecipientEmail] = useState('')
 
-  // ─── UI State ────────────────────────────────────────────────
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  // Parse amount number from string like "99€"
-  const parseAmount = (amount: string) => {
-    const num = parseInt(amount.replace(/[^0-9]/g, ''), 10)
-    return isNaN(num) ? 99 : num
-  }
-
-  // Format amount for display
+  // Format amount for display (e.g., "50€" -> "€50,00")
   const formatAmount = (amount: string) => {
     const num = amount.replace('€', '')
     return `€${num},00`
   }
 
-  // ─── Checkout Handler ────────────────────────────────────────
-  const handleCheckout = useCallback(async () => {
-    setError(null)
-    if (!purchaserEmail.trim()) {
-      setError('Bitte gib deine E-Mail-Adresse ein.')
-      return
-    }
-    if (selectedDelivery === 'email' && !recipientEmail.trim()) {
-      setError('Bitte gib die E-Mail-Adresse des Empf\u00e4ngers ein.')
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const res = await fetch('/api/voucher/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: parseAmount(selectedAmount),
-          deliveryMethod: selectedDelivery,
-          purchaserEmail: purchaserEmail.trim(),
-          recipientEmail: selectedDelivery === 'email' ? recipientEmail.trim() : undefined,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.success) {
-        setError(data.error || 'Ein Fehler ist aufgetreten.')
-        return
-      }
-      window.location.href = data.sessionUrl
-    } catch (_err) {
-      setError('Verbindungsfehler. Bitte versuche es erneut.')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [selectedAmount, selectedDelivery, purchaserEmail, recipientEmail])
+  const iconColor = (opt: (typeof visibleDeliveryOptions)[0]) =>
+    selectedDelivery === opt.type ? '#FFFFFF' : undefined
 
   return (
-    <section className="w-full bg-white py-12 md:py-14">
+    <section
+      className="w-full bg-white py-12 md:py-14"
+    >
       <div className="mx-auto max-w-[var(--content-full)] px-[var(--space-container-x)]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           {/* Left Column - Voucher Preview Card */}
@@ -152,10 +107,6 @@ export function VoucherHero({
                   {formatAmount(selectedAmount)}
                 </p>
               </div>
-
-              <p className="font-display text-body font-semibold text-ff-gold-accent text-center mt-3">
-                Workshop-Erlebnis
-              </p>
 
               <p className="font-sans text-body-sm text-ff-gray-text/90 text-center mt-5 leading-relaxed">
                 {cardDisclaimer}
@@ -203,7 +154,6 @@ export function VoucherHero({
                     {amounts.map((amount) => (
                       <button
                         key={amount}
-                        type="button"
                         onClick={() => setSelectedAmount(amount)}
                         className={`px-5 py-2.5 rounded-full font-display text-body font-semibold transition-all duration-200 ${
                           selectedAmount === amount
@@ -228,7 +178,6 @@ export function VoucherHero({
                     {visibleDeliveryOptions.map((option) => (
                       <button
                         key={option.type}
-                        type="button"
                         onClick={() => setSelectedDelivery(option.type)}
                         className={`flex items-start gap-4 w-full text-left rounded-xl px-5 py-4 transition-all duration-200 border-2 ${
                           selectedDelivery === option.type
@@ -250,11 +199,22 @@ export function VoucherHero({
                                 fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
                               />
                             </svg>
-                          ) : (
+                          ) : option.icon === 'pickup' ? (
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
                               <path
                                 d="M19 7V4H5V7H2V20H8V14H16V20H22V7H19ZM6 18H4V9H6V18ZM20 18H18V14H20V18ZM18 12V9H16V12H18Z"
                                 fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
+                              />
+                            </svg>
+                          ) : (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                              <path
+                                d="M20 2H4C2.9 2 2 2.9 2 4V20C2 21.1 2.9 22 4 22H20C21.1 22 22 21.1 22 20V4C22 2.9 21.1 2 20 2ZM20 20H4V4H20V20Z"
+                                fill={iconColor(option) ?? '#6b6b6b'}
+                              />
+                              <path
+                                d="M6 6H18V8H6V6ZM6 10H18V12H6V10ZM6 14H16V16H6V14Z"
+                                fill={iconColor(option) ?? '#6b6b6b'}
                               />
                             </svg>
                           )}
@@ -299,60 +259,14 @@ export function VoucherHero({
                 </div>
               )}
 
-              {/* Contact — Email fields + CTA */}
+              {/* Add to Cart Button */}
               {showCTA && (
-                <>
-                  <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                    <label className="font-display text-body font-bold text-ff-near-black block mb-4">
-                      Kontakt
-                    </label>
-                    <div className="flex flex-col gap-3">
-                      <input
-                        type="email"
-                        placeholder="Deine E-Mail-Adresse *"
-                        value={purchaserEmail}
-                        onChange={(e) => setPurchaserEmail(e.target.value)}
-                        required
-                        className="w-full rounded-xl border border-ff-border-light bg-white px-5 py-3.5 font-sans text-body text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-gold-accent focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/20 transition-colors"
-                      />
-                      {selectedDelivery === 'email' && (
-                        <input
-                          type="email"
-                          placeholder="E-Mail des Empf&#228;ngers *"
-                          value={recipientEmail}
-                          onChange={(e) => setRecipientEmail(e.target.value)}
-                          required
-                          className="w-full rounded-xl border border-ff-border-light bg-white px-5 py-3.5 font-sans text-body text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-gold-accent focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/20 transition-colors"
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {error && (
-                    <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-3">
-                      <p className="font-sans text-body-sm text-red-700">{error}</p>
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleCheckout}
-                    disabled={isLoading}
-                    className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden>
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        Weiterleitung&hellip;
-                      </span>
-                    ) : (
-                      addToCartButton
-                    )}
-                  </button>
-                </>
+                <button
+                  type="button"
+                  className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {addToCartButton}
+                </button>
               )}
             </div>
           </div>

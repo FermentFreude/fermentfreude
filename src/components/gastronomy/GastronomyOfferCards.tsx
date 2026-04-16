@@ -1,13 +1,20 @@
 'use client'
 
+import { Media } from '@/components/Media'
+import type { Media as MediaType } from '@/payload-types'
 import { Heart, Leaf, Shield, Sparkles, UtensilsCrossed } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
+
+function isPopulatedMedia(r: unknown): r is MediaType {
+  return typeof r === 'object' && r !== null && 'url' in r && Boolean((r as MediaType).url)
+}
 
 type Card = {
   id?: string | null
   title?: string | null
   description?: string | null
-  image?: unknown
+  /** CMS upload (populated at depth) or Lucide fallback by index */
+  icon?: string | number | MediaType | null
 }
 
 type Props = {
@@ -38,7 +45,7 @@ export function GastronomyOfferCards({ title, cards }: Props) {
     <section
       ref={sectionRef}
       id="offer"
-      className={`bg-white px-6 py-16 md:px-12 lg:px-20 ${inView ? 'offer-cards-in-view' : ''}`}
+      className={`scroll-mt-24 bg-white px-6 py-16 md:px-12 lg:px-20 ${inView ? 'offer-cards-in-view' : ''}`}
     >
       <div className="mx-auto max-w-6xl">
         <h2 className="mb-10 text-center font-display text-3xl font-bold text-ff-black md:text-4xl">
@@ -60,8 +67,18 @@ export function GastronomyOfferCards({ title, cards }: Props) {
                       'linear-gradient(90deg, rgba(230,190,104,0.95) 0%, rgba(250,242,224,0.9) 50%, rgba(230,190,104,0.95) 100%)',
                   }}
                 />
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#E6BE68]/18 text-[#E6BE68] ring-1 ring-[#E6BE68]/25 transition-transform duration-300 group-hover:scale-105">
-                  <Icon className="h-6 w-6" strokeWidth={2} aria-hidden />
+                <div className="mx-auto flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-[#E6BE68]/18 text-[#E6BE68] ring-1 ring-[#E6BE68]/25 transition-transform duration-300 group-hover:scale-105">
+                  {isPopulatedMedia(card.icon) ? (
+                    <Media
+                      resource={card.icon}
+                      className="relative flex size-full items-center justify-center"
+                      imgClassName="max-h-7 max-w-7 object-contain"
+                      width={48}
+                      height={48}
+                    />
+                  ) : (
+                    <Icon className="h-6 w-6" strokeWidth={2} aria-hidden />
+                  )}
                 </div>
                 <h3 className="mt-5 font-display text-xl font-bold text-ff-black">{card.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-ff-gray-text md:text-base">

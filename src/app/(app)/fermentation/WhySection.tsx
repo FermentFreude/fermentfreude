@@ -40,9 +40,10 @@ interface WhySectionProps {
   title: string
   items: WhyItem[]
   image?: unknown
+  eyebrow?: string
 }
 
-export function WhySection({ title, items, image }: WhySectionProps) {
+export function WhySection({ title, items, image, eyebrow = 'Benefits' }: WhySectionProps) {
   return (
     <div className="relative content-wide mx-auto px-4 sm:px-6">
       {/* Decorative blobs */}
@@ -69,7 +70,7 @@ export function WhySection({ title, items, image }: WhySectionProps) {
 
       <div className="mb-4 text-center">
         <span className="font-display text-caption font-bold uppercase tracking-[0.25em] text-[#E6BE68]">
-          Benefits
+          {eyebrow}
         </span>
       </div>
       <h2 className="font-display text-section-heading font-bold tracking-tight text-ff-black text-center mb-8 md:mb-10">

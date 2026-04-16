@@ -14,7 +14,6 @@ import {
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
-import { fileURLToPath } from 'url'
 
 import { Categories } from '@/collections/Categories'
 import { CourseProgress } from '@/collections/CourseProgress'
@@ -39,8 +38,8 @@ import { WorkshopCardsGlobal } from '@/globals/WorkshopCards'
 import { WorkshopSliderGlobal } from '@/globals/WorkshopSlider'
 import { plugins } from './plugins'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+/** Same as the folder containing `payload.config.ts`, without `import.meta.url` (Webpack + ESM breaks on that in some chunks). */
+const srcDir = path.resolve(process.cwd(), 'src')
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
@@ -55,7 +54,7 @@ export default buildConfig({
     user: Users.slug,
     suppressHydrationWarning: true,
     importMap: {
-      baseDir: path.resolve(dirname),
+      baseDir: srcDir,
     },
     meta: {
       titleSuffix: ' — FermentFreude',
@@ -172,6 +171,6 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,
   typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+    outputFile: path.resolve(srcDir, 'payload-types.ts'),
   },
 })

@@ -52,9 +52,20 @@ async function seedVoucher() {
   if (existing.docs.length > 0 && !forceRecreate) {
     const doc = existing.docs[0]
     const layout = Array.isArray(doc.layout) ? doc.layout : []
-    if (layout.length > 0) {
+    const hasVoucherTab = Boolean(
+      doc &&
+        typeof doc === 'object' &&
+        'voucher' in doc &&
+        doc.voucher != null &&
+        typeof doc.voucher === 'object' &&
+        Object.keys(doc.voucher as object).length > 0,
+    )
+    // Voucher page uses the `voucher` tab, not layout blocks — don’t skip just because layout is empty
+    if (layout.length > 0 || hasVoucherTab) {
       console.log(
-        `⏭️  Voucher page already has content (${layout.length} blocks). Skipping seed to protect admin changes.`,
+        layout.length > 0
+          ? `⏭️  Voucher page already has content (${layout.length} layout blocks). Skipping seed to protect admin changes.`
+          : `⏭️  Voucher page already has voucher tab content. Skipping seed to protect admin changes.`,
       )
       console.log('   To overwrite, run: pnpm seed voucher --force')
       process.exit(0)
@@ -135,32 +146,31 @@ async function seedVoucher() {
   let voucherPageDE: any
   const pageId = existing.docs.length > 0 ? existing.docs[0]!.id : undefined
 
-  if (pageId && forceRecreate) {
-    // Update existing page
+  const deData = voucherPageDataDE({
+    cardLogo,
+    starterSetImage,
+    giftOccasionImages,
+  })
+
+  if (pageId) {
+    // Always update when the page already exists (avoids duplicate slug validation on create)
     voucherPageDE = await payload.update({
       collection: 'pages',
       id: pageId,
       locale: 'de',
       depth: 0,
-      data: voucherPageDataDE({
-        cardLogo,
-        starterSetImage,
-        giftOccasionImages,
-      }),
+      draft: false,
+      data: deData,
       context: voucherSeedContext,
     })
     console.log(`  ✅ Updated voucher page ${pageId} (DE)`)
   } else {
-    // Create new page
     voucherPageDE = await payload.create({
       collection: 'pages',
       locale: 'de',
       depth: 0,
-      data: voucherPageDataDE({
-        cardLogo,
-        starterSetImage,
-        giftOccasionImages,
-      }),
+      draft: false,
+      data: deData,
       context: voucherSeedContext,
     })
     console.log(`  ✅ Created voucher page ${voucherPageDE.id} (DE)`)

@@ -6,13 +6,9 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
-import { fileURLToPath } from 'url'
 
 import { isAdmin } from '@/access/isAdmin'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   admin: {
@@ -47,7 +43,7 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    staticDir: path.resolve(dirname, '../../public/media'),
+    staticDir: path.resolve(process.cwd(), 'public/media'),
     // Allow focal point selection in admin for better cropping
     focalPoint: true,
     mimeTypes: [
