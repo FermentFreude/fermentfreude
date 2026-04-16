@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
+import { useAuth } from '@/providers/Auth'
 
 interface VoucherHeroProps {
   heading: string
@@ -18,6 +19,10 @@ interface VoucherHeroProps {
   amountSectionLabel: string
   deliverySectionLabel: string
   addToCartButton: string
+  contactSectionHeading: string
+  purchaserEmailPlaceholder: string
+  recipientEmailPlaceholder: string
+  stripeConfigErrorMessage: string
   showAmounts?: boolean
   showDeliveryOptions?: boolean
   showCTA?: boolean
@@ -37,10 +42,15 @@ export function VoucherHero({
   amountSectionLabel,
   deliverySectionLabel,
   addToCartButton,
+  contactSectionHeading,
+  purchaserEmailPlaceholder,
+  recipientEmailPlaceholder,
+  stripeConfigErrorMessage,
   showAmounts = true,
   showDeliveryOptions = true,
   showCTA = true,
 }: VoucherHeroProps) {
+  const { user } = useAuth()
   // Show email and pickup only — post/card removed for freshness
   const visibleDeliveryOptions = deliveryOptions.filter(
     (o) => o.type === 'email' || o.type === 'pickup',
@@ -49,6 +59,26 @@ export function VoucherHero({
   const [selectedDelivery, setSelectedDelivery] = useState(
     visibleDeliveryOptions[0]?.type ?? 'email',
   )
+  const [purchaserEmail, setPurchaserEmail] = useState('')
+  const [recipientEmail, setRecipientEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [stripeError, setStripeError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!purchaserEmail && user?.email) setPurchaserEmail(user.email)
+  }, [user?.email, purchaserEmail])
+
+  const amountNumber = useMemo(() => {
+    const numeric = selectedAmount.replace(/[^\d]/g, '')
+    const n = Number.parseInt(numeric || '0', 10)
+    return Number.isFinite(n) ? n : 0
+  }, [selectedAmount])
+
+  const emailRegex = useMemo(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/, [])
+  const needsRecipientEmail = selectedDelivery === 'email'
+  const purchaserEmailValid = Boolean(purchaserEmail.trim()) && emailRegex.test(purchaserEmail.trim())
+  const recipientEmailValid =
+    !needsRecipientEmail || (Boolean(recipientEmail.trim()) && emailRegex.test(recipientEmail.trim()))
 
   // Format amount for display (e.g., "50€" -> "€50,00")
   const formatAmount = (amount: string) => {
@@ -259,13 +289,100 @@ export function VoucherHero({
                 </div>
               )}
 
+              {/* Contact (after VERSANDART) */}
+              <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
+                <h2 className="font-display text-body font-bold text-ff-near-black mb-4">
+                  {contactSectionHeading}
+                </h2>
+
+                <div className="flex flex-col gap-3">
+                  {user?.email ? (
+                    <div className="w-full rounded-xl border border-ff-border-light bg-blue-50/60 px-5 py-4 font-sans text-body text-ff-near-black">
+                      {user.email}
+                    </div>
+                  ) : (
+                    <input
+                      type="email"
+                      value={purchaserEmail}
+                      onChange={(e) => setPurchaserEmail(e.target.value)}
+                      placeholder={purchaserEmailPlaceholder}
+                      className="w-full rounded-xl border border-ff-border-light bg-white px-5 py-4 font-sans text-body text-ff-near-black focus:border-ff-gold-accent focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/20 transition-colors"
+                    />
+                  )}
+
+                  {needsRecipientEmail && (
+                    <input
+                      type="email"
+                      value={recipientEmail}
+                      onChange={(e) => setRecipientEmail(e.target.value)}
+                      placeholder={recipientEmailPlaceholder}
+                      className="w-full rounded-xl border-2 border-ff-border-light bg-white px-5 py-4 font-sans text-body text-ff-near-black focus:border-ff-gold-accent focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/20 transition-colors"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Stripe error banner (matches screenshot style) */}
+              {stripeError && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-4">
+                  <p className="font-sans text-body-sm text-red-700">{stripeError}</p>
+                </div>
+              )}
+
               {/* Add to Cart Button */}
               {showCTA && (
                 <button
                   type="button"
+                  disabled={isSubmitting || !purchaserEmailValid || !recipientEmailValid || amountNumber < 1}
+                  onClick={async () => {
+                    setStripeError(null)
+
+                    if (!purchaserEmailValid) {
+                      setStripeError(stripeConfigErrorMessage)
+                      return
+                    }
+                    if (!recipientEmailValid) {
+                      setStripeError(stripeConfigErrorMessage)
+                      return
+                    }
+
+                    setIsSubmitting(true)
+                    try {
+                      const res = await fetch('/api/voucher/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          amount: amountNumber,
+                          deliveryMethod: selectedDelivery === 'pickup' ? 'pickup' : 'email',
+                          purchaserEmail: purchaserEmail.trim(),
+                          ...(needsRecipientEmail && recipientEmail.trim()
+                            ? { recipientEmail: recipientEmail.trim() }
+                            : {}),
+                        }),
+                      })
+                      const data = (await res.json()) as
+                        | { success: true; sessionUrl: string }
+                        | { success: false; error?: string }
+
+                      if (!res.ok || !('success' in data) || data.success !== true) {
+                        const message =
+                          'error' in data && typeof data.error === 'string' && data.error.trim()
+                            ? data.error
+                            : stripeConfigErrorMessage
+                        setStripeError(message)
+                        return
+                      }
+
+                      window.location.href = data.sessionUrl
+                    } catch (_err) {
+                      setStripeError(stripeConfigErrorMessage)
+                    } finally {
+                      setIsSubmitting(false)
+                    }
+                  }}
                   className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  {addToCartButton}
+                  {isSubmitting ? '…' : addToCartButton}
                 </button>
               )}
             </div>

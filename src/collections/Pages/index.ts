@@ -1412,6 +1412,71 @@ export const Pages: CollectionConfig = {
           },
           fields: [
             {
+              type: 'collapsible',
+              label: 'Checkout / Contact',
+              admin: {
+                initCollapsed: false,
+                description:
+                  'Fields used in the voucher hero purchase form (contact emails + Stripe error banner).',
+              },
+              fields: [
+                {
+                  name: 'contactSectionHeading',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Contact — section heading',
+                  admin: {
+                    description: 'Heading above the email fields (e.g. "Kontakt" / "Contact").',
+                    condition: (data) => data?.voucherShowHero !== false,
+                  },
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'purchaserEmailPlaceholder',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Purchaser email — placeholder',
+                      admin: {
+                        width: '50%',
+                        description:
+                          'Placeholder for the purchaser email input (only shown if user is not logged in).',
+                        condition: (data) => data?.voucherShowHero !== false,
+                      },
+                    },
+                    {
+                      name: 'recipientEmailPlaceholder',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Recipient email — placeholder',
+                      admin: {
+                        width: '50%',
+                        description:
+                          'Placeholder for the recipient email input (shown when delivery method is email).',
+                        condition: (data) => data?.voucherShowHero !== false,
+                      },
+                    },
+                  ],
+                },
+                {
+                  name: 'stripeConfigErrorMessage',
+                  type: 'textarea',
+                  required: true,
+                  localized: true,
+                  label: 'Stripe config error message',
+                  admin: {
+                    description:
+                      'Shown when Stripe is missing/misconfigured (fallback when API returns a generic error).',
+                    condition: (data) => data?.voucherShowHero !== false,
+                  },
+                },
+              ],
+            },
+            {
               name: 'voucherShowHero',
               type: 'checkbox',
               label: 'Show this section',

@@ -35,6 +35,11 @@ export function voucherPageDataDE({
     },
     layout: [],
     voucher: {
+      contactSectionHeading: 'Kontakt',
+      purchaserEmailPlaceholder: 'Deine E-Mail',
+      recipientEmailPlaceholder: 'E-Mail des Empfängers',
+      stripeConfigErrorMessage:
+        'Stripe ist nicht korrekt konfiguriert (ungültiger/fehlender STRIPE_SECRET_KEY). Bitte kontaktiere den Support.',
       heroHeading: 'Verschenke Fermentation',
       heroDescription:
         'Das perfekte Geschenk für Foodies und Gesundheitsbewusste.\nWähle einen Betrag und erhalte deinen Gutschein.',
@@ -175,6 +180,11 @@ export function voucherPageDataEN(
     },
     layout: [],
     voucher: {
+      contactSectionHeading: 'Contact',
+      purchaserEmailPlaceholder: 'Your email',
+      recipientEmailPlaceholder: "Recipient's email",
+      stripeConfigErrorMessage:
+        'Stripe is not configured correctly (invalid/missing STRIPE_SECRET_KEY). Please contact site support.',
       heroHeading: 'Give the gift of fermentation',
       heroDescription:
         'The perfect gift for foodies and the health-conscious.\nChoose an amount and receive your voucher.',
