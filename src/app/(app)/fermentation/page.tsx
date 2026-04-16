@@ -232,6 +232,163 @@ const DEFAULT_FAQ_ITEMS: Array<{ id?: string; question: string; answer: string }
   },
 ]
 
+const RETOUCH_DE = {
+  heroTitle: 'Innovation trifft Tradition',
+  heroDescription:
+    'Fermentation ist weit mehr als Sauerkraut oder Joghurt.\nSie steckt in vielen Lebensmitteln, die wir täglich essen: Brot, Käse, Salami, Oliven, Vanille, Miso, Essig und vieles mehr.',
+  heroBenefitsTitle: 'Warum Fermentieren?',
+  heroBlocks: [
+    {
+      title: 'PROBIOTIKA',
+      description:
+        'Lebende Mikroorganismen unterstützen ein gesundes Gleichgewicht im Darm und können sich positiv auf Immunsystem und Wohlbefinden auswirken.',
+    },
+    {
+      title: 'ENZYME',
+      description:
+        'Während des Prozesses entstehen Enzyme, die Lebensmittel leichter verdaulich machen und komplexe Strukturen aufbrechen.',
+    },
+    {
+      title: 'GESCHMACK',
+      description:
+        'Fermentation schafft völlig neue Aromen, von mild und rund bis intensiv und komplex, und macht aus einfachen Zutaten einzigartige Lebensmittel.',
+    },
+    {
+      title: 'HALTBARKEIT',
+      description:
+        'Fermentation ist eine natürliche Methode, Lebensmittel haltbar zu machen, ganz ohne künstliche Zusatzstoffe.',
+    },
+  ] as HeroBlock[],
+  guideTitle: 'Ein kompletter Leitfaden zur Fermentation',
+  guideBody: 'Fermentation ist kein Rezept, sondern ein Prozess.\nEin Prozess, den man versteht und bewusst erlebt.',
+  whatTitle: 'Was ist Fermentation?',
+  whatBody:
+    'Fermentation ist die kontrollierte Umwandlung von Lebensmitteln mithilfe von Mikroorganismen wie Bakterien, Hefen und Schimmelpilzen.\nEin natürlicher Prozess, der aus einfachen Zutaten neue Aromen, mehr Tiefe und längere Haltbarkeit entstehen lässt.',
+  whatMotto: 'Gute Zutaten, Zeit und Verständnis für den Prozess, mehr braucht es nicht.',
+  whatListItems: [] as string[],
+  whyEyebrow: 'GRUNDLAGEN',
+  whyTitle: 'Fermentation verstehen',
+  whyItems: [
+    {
+      title: 'Es gibt nicht die eine Technik',
+      description:
+        'Fermentation umfasst verschiedene Techniken, von Milchsäuregärung über Hefegärung und Essigsäuregärung bis hin zu Symbiosen wie Kombucha und Kefir sowie Edelschimmel, je nach Mikroorganismen und Ausgangsprodukt.',
+    },
+    {
+      title: 'Woher kommen die Mikroorganismen?',
+      description:
+        'Fermentation kann spontan durch natürlich vorkommende Mikroorganismen entstehen oder gezielt durch Starterkulturen gesteuert werden, um mehr Kontrolle und gleichbleibende Ergebnisse zu erreichen.',
+    },
+    {
+      title: 'Die richtigen Bedingungen sind entscheidend',
+      description:
+        'Damit Fermentation funktioniert, müssen die Rahmenbedingungen stimmen, je nach Technik z. B. Salzgehalt, Temperatur, Sauerstoff, pH-Wert und Hygiene.',
+    },
+    {
+      title: 'Zeit ist ein zentraler Faktor',
+      description:
+        'Fermentation braucht Zeit, von wenigen Tagen bis zu mehreren Monaten. Der Geschmack entwickelt sich dabei kontinuierlich weiter.',
+    },
+    {
+      title: 'Haltbarkeit und Ressourcennutzung',
+      description:
+        'Fermentation verlängert die Haltbarkeit von Lebensmitteln und ermöglicht es, saisonale Überschüsse sinnvoll zu nutzen.',
+    },
+    {
+      title: 'Erfahrung macht den Unterschied',
+      description:
+        'Mit Erfahrung lernt man, Prozesse zu verstehen, gezielt zu steuern und sicher anzuwenden, und so verlässlich gute Ergebnisse zu erzielen.',
+    },
+  ],
+  dangerTitle: 'Ist Fermentation gefährlich?',
+  dangerIntro:
+    'Fermentation ist eine der sichersten Methoden, Lebensmittel haltbar zu machen, vorausgesetzt, sie wird richtig durchgeführt.',
+  dangerConcernsHeading: 'Worauf es ankommt:',
+  dangerConcerns: [
+    {
+      title: 'Sauberes Arbeiten',
+      description:
+        'Hygiene, frische Zutaten und passende Bedingungen sind die Grundlage für eine sichere Fermentation.',
+    },
+    { title: 'Schimmel', description: 'Wenn ein Ferment schimmelt, sollte es grundsätzlich entsorgt werden.' },
+    {
+      title: 'Geruch und Aussehen',
+      description:
+        'Je nach Fermentation unterscheiden sich Geruch und Erscheinungsbild, entscheidend ist, Veränderungen richtig einordnen zu können.',
+    },
+    {
+      title: 'Erfahrung und Verständnis',
+      description:
+        'Mit zunehmender Erfahrung lernt man, Prozesse besser zu beurteilen und sicher anzuwenden.',
+    },
+  ],
+  dangerClosing:
+    'Fazit: Wer die Grundlagen versteht und sauber arbeitet, kann Fermentation zuverlässig und sicher im Alltag einsetzen.',
+  practiceTitle: 'Eine Praxis, kein Trend',
+  practiceParagraphs: [
+    'Fermentation wird seit Jahrtausenden in vielen Kulturen genutzt, von koreanischem Kimchi über europäisches Sauerkraut bis zu japanischem Miso und indonesischem Tempeh.',
+    'Sie ist kein schneller Prozess, sondern entwickelt sich über Zeit, Erfahrung und Verständnis.',
+    'Jede Fermentation verläuft etwas anders. Entscheidend ist, die Grundlagen zu kennen und den Prozess beobachten und steuern zu können.',
+    'Fermentation bedeutet, mit Lebensmitteln zu arbeiten statt sie nur zu verarbeiten, und so Geschmack, Haltbarkeit und Qualität bewusst zu gestalten.',
+  ],
+  ctaTitle: 'Bereit zu lernen?',
+  ctaDescription:
+    'In unseren Workshops lernst du, wie Fermentation wirklich funktioniert.\nVerständlich erklärt und direkt anwendbar.',
+  faqTitle: 'Häufig gestellte Fragen',
+  faqSubtitle: 'Häufige Fragen zur Fermentation wie sie in unseren Workshops gestellt werden',
+  faqItems: [
+    {
+      question: 'Tötet Fermentation Bakterien ab?',
+      answer:
+        'Nein. Fermentation nutzt gezielt Mikroorganismen, die gewünschte Prozesse auslösen und gleichzeitig das Wachstum unerwünschter Keime hemmen.',
+    },
+    {
+      question: 'Ist Fermentation dasselbe wie Einlegen?',
+      answer:
+        'Nein. Fermentation ist ein mikrobieller Prozess, bei dem Mikroorganismen Lebensmittel umwandeln. Einlegen hingegen nutzt meist Essig oder andere Säuren zur Konservierung und ist kein Fermentationsprozess.',
+    },
+    {
+      question: 'Sind fermentierte Produkte aus dem Supermarkt auch gesund?',
+      answer:
+        'Teilweise.\nViele industriell hergestellte Produkte sind pasteurisiert und enthalten keine lebenden Mikroorganismen mehr.\nDadurch geht ein Teil der probiotischen Eigenschaften verloren.',
+    },
+    {
+      question: 'Kann ich täglich fermentierte Lebensmittel essen?',
+      answer:
+        'Ja.\nFermentierte Lebensmittel können täglich konsumiert werden und sind ein sinnvoller Bestandteil der Ernährung.\nWenn du sie noch nicht gewohnt bist, starte mit kleinen Mengen.',
+    },
+    {
+      question: 'Wie lagere ich fertige fermentierte Lebensmittel?',
+      answer:
+        'Fertige Fermente sollten gekühlt gelagert werden, da die Mikroorganismen weiterhin aktiv sind und sich Geschmack und Reife sonst weiter verändern.',
+    },
+    {
+      question: 'Können fermentierte Lebensmittel verderben?',
+      answer:
+        'Ja.\nFermente können kippen oder überreif werden, wenn Bedingungen nicht stimmen.\nIm Zweifel sollte das Produkt nicht mehr verwendet werden.',
+    },
+  ],
+  faqCtaTitle: 'Bereit zum Fermentieren?',
+  faqCtaBody:
+    'Starte mit einfachen Anwendungen und achte auf sauberes Arbeiten sowie die richtigen Bedingungen.\nMit der Zeit entwickelst du ein sicheres Gefühl für den Prozess.',
+}
+
+const RETOUCH_EN = {
+  ...RETOUCH_DE,
+  heroTitle: 'Innovation meets Tradition',
+  heroBenefitsTitle: 'Why Ferment?',
+  guideTitle: 'A complete guide to fermentation',
+  whatTitle: 'What is fermentation?',
+  whyEyebrow: 'FUNDAMENTALS',
+  whyTitle: 'Understanding fermentation',
+  dangerTitle: 'Is fermentation dangerous?',
+  practiceTitle: 'A practice, not a trend',
+  ctaTitle: 'Ready to learn?',
+  faqTitle: 'Frequently Asked Questions',
+  faqSubtitle: 'Common fermentation questions as asked in our workshops',
+  faqCtaTitle: 'Ready to ferment?',
+}
+
 function isResolvedMedia(img: unknown): img is MediaType {
   return typeof img === 'object' && img !== null && 'url' in img
 }
@@ -252,6 +409,7 @@ type FermentationPageProps = {
 
 export default async function FermentationPage({ searchParams }: FermentationPageProps) {
   const locale = await getLocale()
+  const retouch = locale === 'en' ? RETOUCH_EN : RETOUCH_DE
   const params = await searchParams
   // Use code defaults when ?defaults=1 or FERMENTATION_USE_DEFAULTS=1. Set in .env to always see design.
   const forceDefaults =
@@ -297,13 +455,15 @@ export default async function FermentationPage({ searchParams }: FermentationPag
     }
   }
 
-  const heroTitle = f?.fermentationHeroTitle ?? DEFAULT_HERO_TITLE
-  const heroDescription = f?.fermentationHeroDescription ?? DEFAULT_HERO_DESCRIPTION
-  const heroBenefitsTitle = f?.fermentationHeroBenefitsTitle ?? 'WHY FERMENTATION?'
+  const heroTitle = retouch.heroTitle ?? f?.fermentationHeroTitle ?? DEFAULT_HERO_TITLE
+  const heroDescription = retouch.heroDescription ?? f?.fermentationHeroDescription ?? DEFAULT_HERO_DESCRIPTION
+  const heroBenefitsTitle = retouch.heroBenefitsTitle ?? f?.fermentationHeroBenefitsTitle ?? 'WHY FERMENTATION?'
   let heroBlocks =
-    (f?.fermentationHeroBlocks?.length ?? 0) > 0
-      ? (f?.fermentationHeroBlocks ?? [])
-      : DEFAULT_HERO_BLOCKS
+    retouch.heroBlocks?.length > 0
+      ? retouch.heroBlocks
+      : (f?.fermentationHeroBlocks?.length ?? 0) > 0
+        ? (f?.fermentationHeroBlocks ?? [])
+        : DEFAULT_HERO_BLOCKS
 
   // Resolve hero block icons if they're just IDs
   if (heroBlocks.length > 0) {
@@ -328,16 +488,17 @@ export default async function FermentationPage({ searchParams }: FermentationPag
   }
 
   const _guideTag = f?.fermentationGuideTag ?? DEFAULT_GUIDE_TAG
-  const guideTitle = f?.fermentationGuideTitle ?? DEFAULT_GUIDE_TITLE
-  const guideBody = f?.fermentationGuideBody ?? DEFAULT_GUIDE_BODY
+  const guideTitle = retouch.guideTitle ?? f?.fermentationGuideTitle ?? DEFAULT_GUIDE_TITLE
+  const guideBody = retouch.guideBody ?? f?.fermentationGuideBody ?? DEFAULT_GUIDE_BODY
   const guideImage = f?.fermentationGuideImage
 
-  const whatTitle = f?.fermentationWhatTitle ?? DEFAULT_WHAT_TITLE
-  const whatBody = f?.fermentationWhatBody ?? DEFAULT_WHAT_BODY
-  const whatMotto = f?.fermentationWhatMotto ?? DEFAULT_WHAT_MOTTO
+  const whatTitle = retouch.whatTitle ?? f?.fermentationWhatTitle ?? DEFAULT_WHAT_TITLE
+  const whatBody = retouch.whatBody ?? f?.fermentationWhatBody ?? DEFAULT_WHAT_BODY
+  const whatMotto = retouch.whatMotto ?? f?.fermentationWhatMotto ?? DEFAULT_WHAT_MOTTO
   const whatLinks = f?.fermentationWhatLinks ?? []
   const whatListItems =
-    whatLinks.length > 0
+    retouch.whatListItems ??
+    (whatLinks.length > 0
       ? whatLinks
           .map((l) =>
             typeof l === 'object' && l !== null && 'label' in l
@@ -345,33 +506,41 @@ export default async function FermentationPage({ searchParams }: FermentationPag
               : '',
           )
           .filter(Boolean)
-      : DEFAULT_WHAT_LIST_ITEMS
+      : DEFAULT_WHAT_LIST_ITEMS)
   const whatImage = f?.fermentationWhatImage
 
-  const whyTitle = f?.fermentationWhyTitle ?? DEFAULT_WHY_TITLE
+  const whyTitle = retouch.whyTitle ?? f?.fermentationWhyTitle ?? DEFAULT_WHY_TITLE
   const whyItems =
-    (f?.fermentationWhyItems?.length ?? 0) > 0 ? (f?.fermentationWhyItems ?? []) : DEFAULT_WHY_ITEMS
+    retouch.whyItems?.length > 0
+      ? retouch.whyItems
+      : (f?.fermentationWhyItems?.length ?? 0) > 0
+        ? (f?.fermentationWhyItems ?? [])
+        : DEFAULT_WHY_ITEMS
   const whyImage = f?.fermentationWhyImage
 
-  const dangerTitle = f?.fermentationDangerTitle ?? DEFAULT_DANGER_TITLE
-  const dangerIntro = f?.fermentationDangerIntro ?? DEFAULT_DANGER_INTRO
+  const dangerTitle = retouch.dangerTitle ?? f?.fermentationDangerTitle ?? DEFAULT_DANGER_TITLE
+  const dangerIntro = retouch.dangerIntro ?? f?.fermentationDangerIntro ?? DEFAULT_DANGER_INTRO
   const dangerConcernsHeading =
-    f?.fermentationDangerConcernsHeading ?? DEFAULT_DANGER_CONCERNS_HEADING
+    retouch.dangerConcernsHeading ??
+    f?.fermentationDangerConcernsHeading ??
+    DEFAULT_DANGER_CONCERNS_HEADING
   const dangerConcerns =
-    (f?.fermentationDangerConcerns?.length ?? 0) > 0
-      ? (f?.fermentationDangerConcerns ?? [])
-      : DEFAULT_DANGER_CONCERNS
-  const dangerClosing = f?.fermentationDangerClosing ?? DEFAULT_DANGER_CLOSING
+    retouch.dangerConcerns?.length > 0
+      ? retouch.dangerConcerns
+      : (f?.fermentationDangerConcerns?.length ?? 0) > 0
+        ? (f?.fermentationDangerConcerns ?? [])
+        : DEFAULT_DANGER_CONCERNS
+  const dangerClosing = retouch.dangerClosing ?? f?.fermentationDangerClosing ?? DEFAULT_DANGER_CLOSING
 
-  const practiceTitle = f?.fermentationPracticeTitle ?? DEFAULT_PRACTICE_TITLE
+  const practiceTitle = retouch.practiceTitle ?? f?.fermentationPracticeTitle ?? DEFAULT_PRACTICE_TITLE
   const practiceBody = f?.fermentationPracticeBody
   const practiceImage = f?.fermentationPracticeImage
-  const practiceParagraphs = practiceBody
-    ? practiceBody.split(/\n\n+/).filter(Boolean)
-    : DEFAULT_PRACTICE_PARAGRAPHS
+  const practiceParagraphs =
+    retouch.practiceParagraphs ??
+    (practiceBody ? practiceBody.split(/\n\n+/).filter(Boolean) : DEFAULT_PRACTICE_PARAGRAPHS)
 
-  const ctaTitle = f?.fermentationCtaTitle ?? DEFAULT_CTA_TITLE
-  const ctaDescription = f?.fermentationCtaDescription ?? DEFAULT_CTA_DESCRIPTION
+  const ctaTitle = retouch.ctaTitle ?? f?.fermentationCtaTitle ?? DEFAULT_CTA_TITLE
+  const ctaDescription = retouch.ctaDescription ?? f?.fermentationCtaDescription ?? DEFAULT_CTA_DESCRIPTION
   const ctaPrimaryLabel = f?.fermentationCtaPrimaryLabel ?? DEFAULT_CTA_PRIMARY
   const ctaPrimaryUrl = f?.fermentationCtaPrimaryUrl ?? DEFAULT_CTA_PRIMARY_URL
   const ctaSecondaryLabel = f?.fermentationCtaSecondaryLabel ?? DEFAULT_CTA_SECONDARY
@@ -434,12 +603,16 @@ export default async function FermentationPage({ searchParams }: FermentationPag
     }
   })
 
-  const faqTitle = f?.fermentationFaqTitle ?? DEFAULT_FAQ_TITLE
-  const faqSubtitle = f?.fermentationFaqSubtitle ?? DEFAULT_FAQ_SUBTITLE
+  const faqTitle = retouch.faqTitle ?? f?.fermentationFaqTitle ?? DEFAULT_FAQ_TITLE
+  const faqSubtitle = retouch.faqSubtitle ?? f?.fermentationFaqSubtitle ?? DEFAULT_FAQ_SUBTITLE
   const faqItems =
-    (f?.fermentationFaqItems?.length ?? 0) > 0 ? (f?.fermentationFaqItems ?? []) : DEFAULT_FAQ_ITEMS
-  const faqCtaTitle = f?.fermentationFaqCtaTitle ?? DEFAULT_FAQ_CTA_TITLE
-  const faqCtaBody = f?.fermentationFaqCtaBody ?? DEFAULT_FAQ_CTA_BODY
+    retouch.faqItems?.length > 0
+      ? retouch.faqItems
+      : (f?.fermentationFaqItems?.length ?? 0) > 0
+        ? (f?.fermentationFaqItems ?? [])
+        : DEFAULT_FAQ_ITEMS
+  const faqCtaTitle = retouch.faqCtaTitle ?? f?.fermentationFaqCtaTitle ?? DEFAULT_FAQ_CTA_TITLE
+  const faqCtaBody = retouch.faqCtaBody ?? f?.fermentationFaqCtaBody ?? DEFAULT_FAQ_CTA_BODY
   const _faqMoreText = f?.fermentationFaqMoreText ?? DEFAULT_FAQ_MORE
   const _faqContactLabel = f?.fermentationFaqContactLabel ?? DEFAULT_FAQ_CONTACT
   const _faqContactUrl = f?.fermentationFaqContactUrl ?? DEFAULT_FAQ_CONTACT_URL
@@ -611,22 +784,13 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                     </ul>
                   )}
                   {whatMotto && (
-                    <blockquote className="mt-8 sm:mt-10 md:mt-12">
+                    <div className="mt-8 sm:mt-10 md:mt-12">
                       <p className="font-display text-lg font-bold leading-relaxed text-ff-black sm:text-xl md:text-2xl">
                         <span className="text-[#E6BE68]">&quot;</span>
-                        {whatMotto
-                          .split('. ')
-                          .filter(Boolean)
-                          .map((phrase, i, arr) => (
-                            <span key={i}>
-                              {phrase}
-                              {phrase.endsWith('.') ? '' : '.'}
-                              {i < arr.length - 1 && <br />}
-                            </span>
-                          ))}
+                        {whatMotto}
                         <span className="text-[#E6BE68]">&quot;</span>
                       </p>
-                    </blockquote>
+                    </div>
                   )}
                 </div>
                 <div className="aspect-4/3 w-full overflow-hidden rounded-2xl shadow-md">
@@ -652,7 +816,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
       {/* Why is it so special? — BENEFITS label, 2x3 cards with numbers & icons */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={150}>
-          <WhySection title={whyTitle} items={whyItems} image={whyImage} />
+          <WhySection title={whyTitle} eyebrow={retouch.whyEyebrow} items={whyItems} image={whyImage} />
         </FadeIn>
       </section>
 

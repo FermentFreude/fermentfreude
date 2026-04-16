@@ -81,7 +81,7 @@ export function WorkshopTermineSection({
             <p className="mt-3 max-w-xl text-body-lg text-[#333]">{subtitle}</p>
           </div>
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[200px] rounded-2xl border-2 border-[#555954]/30 bg-white font-sans text-sm text-[#1a1a1a] hover:bg-[#FAFAF9]">
+            <SelectTrigger className="w-50 rounded-2xl border-2 border-[#555954]/30 bg-white font-sans text-sm text-[#1a1a1a] hover:bg-[#FAFAF9]">
               <SelectValue placeholder={filterAllLabel} />
             </SelectTrigger>
             <SelectContent>

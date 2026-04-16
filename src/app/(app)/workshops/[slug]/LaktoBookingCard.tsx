@@ -196,7 +196,7 @@ export function LaktoBookingCard({
           appointmentId: (d as { appointmentId?: string }).appointmentId ?? d.id ?? `cms-${i}`,
           availableSpots: d.spotsLeft ?? 0,
         }))
-      : workshop.dates
+      : []
 
   // Build merged workshop for BookingModal
   const mergedWorkshop: WorkshopDetailData = {
@@ -388,7 +388,11 @@ export function LaktoBookingCard({
                 </button>
               </div>
               <div className="space-y-3 sm:space-y-4">
-                {cmsDates.map((d) => (
+                {cmsDates.length === 0 ? (
+                  <p className="py-8 text-center font-display text-sm text-[#9a9a9a]">
+                    Aktuell keine Termine geplant — schau bald wieder vorbei.
+                  </p>
+                ) : cmsDates.map((d) => (
                   <div
                     key={d.id}
                     className="bg-[#f9f7f3] border border-[#e8e4d9] rounded-lg p-4 sm:p-5 hover:border-[#555954] transition-all duration-300"

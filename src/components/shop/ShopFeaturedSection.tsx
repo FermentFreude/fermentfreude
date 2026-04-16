@@ -109,7 +109,7 @@ export const ShopFeaturedSection: React.FC<Props> = ({ data }) => {
                 href={item.url ?? '#'}
                 className={`group flex flex-col overflow-hidden rounded-2xl border border-ff-charcoal/10 bg-[#FBF9F6] shadow-sm transition-shadow hover:shadow-md sm:flex-row animate-fade-in-up ${delayClass}`}
               >
-                <div className="relative aspect-[4/3] w-full shrink-0 sm:aspect-square sm:w-2/5 sm:min-w-[200px]">
+                <div className="relative aspect-4/3 w-full shrink-0 sm:aspect-square sm:w-2/5 sm:min-w-50">
                   {img ? (
                     <Media
                       resource={img as MediaType}

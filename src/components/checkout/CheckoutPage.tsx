@@ -22,6 +22,7 @@ import { FormItem } from '@/components/forms/FormItem'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { Checkbox } from '@/components/ui/checkbox'
 import { cssVariables } from '@/cssVariables'
+import { gtmBeginCheckout } from '@/lib/gtm'
 import { Address } from '@/payload-types'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { toast } from 'sonner'
@@ -98,6 +99,22 @@ export const CheckoutPage: React.FC = () => {
       setEmailEditable(true)
     }
   }, [])
+
+  // GA4: begin_checkout — fire once when cart is loaded and non-empty
+  useEffect(() => {
+    if (!cart?.items?.length) return
+    const items = cart.items.map((item) => {
+      const product = typeof item.product === 'object' && item.product !== null ? item.product : null
+      return {
+        item_id: String(typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product),
+        item_name: (product as Record<string, unknown> | null)?.title as string ?? '',
+        quantity: item.quantity ?? 1,
+        price: (product as Record<string, unknown> | null)?.priceInEUR as number | undefined,
+      }
+    })
+    gtmBeginCheckout(items, cart.subtotal ?? 0)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])  // intentionally empty — fire only on mount
 
   /* ── Voucher Handlers ── */
   const handleApplyVoucher = useCallback(async () => {

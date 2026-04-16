@@ -24,7 +24,8 @@ import {
   WheatOffIcon,
 } from 'lucide-react'
 import Link from 'next/link'
-import React, { Suspense, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
+import { gtmViewItem } from '@/lib/gtm'
 import { StockIndicator } from './StockIndicator'
 import { VariantSelector } from './VariantSelector'
 
@@ -108,6 +109,17 @@ export function ProductDetailPage({ product }: { product: Product }) {
   } else if (typeof product[priceField] === 'number') {
     amount = product[priceField]
   }
+
+  // GA4: view_item — fires once when product detail page renders
+  useEffect(() => {
+    gtmViewItem({
+      item_id: String(product.id),
+      item_name: product.title ?? '',
+      item_category: product.productType ?? undefined,
+      price: amount || lowestAmount || undefined,
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])  // intentionally empty — fire only on mount
 
   const isFood = ['jarred', 'fresh', 'bottled'].includes(product.productType || '')
 

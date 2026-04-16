@@ -28,10 +28,18 @@ type Slide = {
   image?: unknown
 }
 
+const DEFAULT_AUTOPLAY_MS = 12_000
+
 type Props = {
   slides: Slide[]
   ctaLabel: string
   ctaUrl: string
+  /** CMS — falls back to PREV */
+  prevLabel?: string | null
+  /** CMS — falls back to NEXT */
+  nextLabel?: string | null
+  /** CMS — ms between auto-advances; default 12000 */
+  autoplayIntervalMs?: number | null
 }
 
 const DEFAULT_SLIDES: Slide[] = [
@@ -49,9 +57,24 @@ const DEFAULT_SLIDES: Slide[] = [
   },
 ]
 
-export function GastronomyProductSlider({ slides, ctaLabel, ctaUrl }: Props) {
+export function GastronomyProductSlider({
+  slides,
+  ctaLabel,
+  ctaUrl,
+  prevLabel,
+  nextLabel,
+  autoplayIntervalMs,
+}: Props) {
   const { setHeaderTheme } = useHeaderTheme()
   const resolvedSlides = slides?.length > 0 ? slides : DEFAULT_SLIDES
+  const resolvedPrev = prevLabel?.trim() || 'PREV'
+  const resolvedNext = nextLabel?.trim() || 'NEXT'
+  const intervalMs =
+    typeof autoplayIntervalMs === 'number' &&
+    Number.isFinite(autoplayIntervalMs) &&
+    autoplayIntervalMs >= 2000
+      ? autoplayIntervalMs
+      : DEFAULT_AUTOPLAY_MS
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -80,9 +103,9 @@ export function GastronomyProductSlider({ slides, ctaLabel, ctaUrl }: Props) {
 
   useEffect(() => {
     if (!emblaApi || resolvedSlides.length <= 1) return
-    const interval = setInterval(() => emblaApi.scrollNext(), 6000)
+    const interval = setInterval(() => emblaApi.scrollNext(), intervalMs)
     return () => clearInterval(interval)
-  }, [emblaApi, resolvedSlides.length])
+  }, [emblaApi, resolvedSlides.length, intervalMs])
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -152,20 +175,20 @@ export function GastronomyProductSlider({ slides, ctaLabel, ctaUrl }: Props) {
                       </span>
                       <button
                         type="button"
-                        aria-label="Previous slide"
+                        aria-label={resolvedPrev}
                         onClick={scrollPrev}
                         className="shrink-0 font-display text-lg font-extrabold uppercase tracking-[1px] leading-[45px] text-[#1b1b1b]/65 transition-colors hover:text-[#1b1b1b]"
                       >
-                        PREV
+                        {resolvedPrev}
                       </button>
                       <span className="mx-6 h-[45px] shrink-0 w-px bg-[#1b1b1b]/50" aria-hidden />
                       <button
                         type="button"
-                        aria-label="Next slide"
+                        aria-label={resolvedNext}
                         onClick={scrollNext}
                         className="shrink-0 font-display text-lg font-extrabold uppercase tracking-[1px] leading-[45px] text-[#1b1b1b]/65 transition-colors hover:text-[#1b1b1b]"
                       >
-                        NEXT
+                        {resolvedNext}
                       </button>
                     </div>
                   )}

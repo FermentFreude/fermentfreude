@@ -4,6 +4,7 @@ import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { CarouselBlock } from '@/blocks/Carousel/Component'
 import { CollectionGridComponent } from '@/blocks/CollectionGrid/Component'
 import { ContactBlockComponent } from '@/blocks/ContactBlock/Component'
+import { CourseWaitlistCtaBlock } from '@/blocks/CourseWaitlistCta/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FeatureCardsBlock } from '@/blocks/FeatureCards/Component'
 import { FeaturedProductCardsComponent } from '@/blocks/FeaturedProductCards/Component'
@@ -62,6 +63,7 @@ const blockComponents = {
   voucherCta: VoucherCtaBlock,
   laktoVoucherCta: LaktoVoucherCtaBlockComponent,
   onlineCourseSlider: OnlineCourseSliderBlock,
+  courseWaitlistCta: CourseWaitlistCtaBlock,
   workshopSlider: WorkshopSliderBlock,
   workshopPhases: WorkshopPhasesComponent,
 }

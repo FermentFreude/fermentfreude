@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { gtmRemoveFromCart, gtmViewCart } from '@/lib/gtm'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
@@ -68,17 +69,21 @@ export function CartModal() {
   const isCartEmpty =
     (!cart || cart?.items?.length === 0) && Object.keys(bookingMetadata).length === 0
 
-  // Debug logging
+  // GA4: view_cart — fires when cart drawer opens
   useEffect(() => {
-    if (isOpen) {
-      console.log('📊 Cart Debug:', {
-        payloadCart: cart,
-        payloadItems: cart?.items?.length || 0,
-        bookingMetadata: Object.keys(bookingMetadata).length,
-        isCartEmpty,
+    if (isOpen && cart?.items?.length) {
+      const items = cart.items.map((item) => {
+        const product = typeof item.product === 'object' && item.product !== null ? item.product : null
+        return {
+          item_id: String(typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product),
+          item_name: (product as Record<string, unknown> | null)?.title as string ?? '',
+          quantity: item.quantity ?? 1,
+          price: (product as Record<string, unknown> | null)?.priceInEUR as number | undefined,
+        }
       })
+      gtmViewCart(items, cart.subtotal ?? 0)
     }
-  }, [isOpen, cart, bookingMetadata, isCartEmpty])
+  }, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>

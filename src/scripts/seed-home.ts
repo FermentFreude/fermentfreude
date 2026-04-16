@@ -16,7 +16,9 @@
  */
 
 import config from '@payload-config'
+import fs from 'fs'
 import path from 'path'
+import type { Payload } from 'payload'
 import { getPayload } from 'payload'
 
 import type { Page } from '@/payload-types'
@@ -44,6 +46,158 @@ interface BlockItem extends WithId {
   testimonials?: WithId[]
   sponsors?: WithId[]
   galleryImages?: WithId[]
+}
+
+/** Lexical hero when seed-assets/ is missing (gitignored) — avoids ENOENT and fixes / 404. */
+function minimalHomeHeroLexical(headingText: string, paragraphText: string) {
+  return {
+    root: {
+      type: 'root' as const,
+      format: '' as const,
+      indent: 0,
+      version: 1 as const,
+      direction: 'ltr' as const,
+      children: [
+        {
+          type: 'heading' as const,
+          tag: 'h1' as const,
+          format: '' as const,
+          indent: 0,
+          version: 1,
+          direction: 'ltr' as const,
+          children: [
+            {
+              type: 'text' as const,
+              text: headingText,
+              format: 0,
+              style: '',
+              mode: 'normal' as const,
+              detail: 0,
+              version: 1,
+            },
+          ],
+        },
+        {
+          type: 'paragraph' as const,
+          format: '' as const,
+          indent: 0,
+          version: 1,
+          direction: 'ltr' as const,
+          textFormat: 0,
+          textStyle: '',
+          children: [
+            {
+              type: 'text' as const,
+              text: paragraphText,
+              format: 0,
+              style: '',
+              mode: 'normal' as const,
+              detail: 0,
+              version: 1,
+            },
+          ],
+        },
+      ],
+    },
+  }
+}
+
+async function seedHomeMinimal(
+  payload: Payload,
+  args: { pageId?: string | number },
+) {
+  const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
+  const heroDE = minimalHomeHeroLexical(
+    'Willkommen bei Fermentfreude',
+    'Lokale Entwicklung ohne seed-assets: Platzhalter-Startseite. Vollständige Bilder und Blöcke erhältst du mit dem seed-assets-Ordner vom Team oder über /admin.',
+  )
+  const heroEN = minimalHomeHeroLexical(
+    'Welcome to Fermentfreude',
+    'Local dev without seed-assets: placeholder home. Add the seed-assets folder from your team or use /admin for full layout and images.',
+  )
+
+  if (args.pageId !== undefined && args.pageId !== '') {
+    await payload.update({
+      collection: 'pages',
+      id: args.pageId,
+      locale: 'de',
+      context: ctx,
+      data: {
+        title: 'Startseite',
+        slug: 'home',
+        _status: 'published',
+        hero: { type: 'lowImpact' as const, richTextLowImpact: heroDE },
+        layout: [],
+        meta: {
+          title: 'Fermentfreude',
+          description:
+            'Fermentierte Lebensmittel, Workshops und mehr. Platzhalter — Inhalt in /admin ergänzen.',
+        },
+      },
+    })
+    await payload.update({
+      collection: 'pages',
+      id: args.pageId,
+      locale: 'en',
+      context: ctx,
+      data: {
+        title: 'Home',
+        slug: 'home',
+        _status: 'published',
+        hero: { type: 'lowImpact' as const, richTextLowImpact: heroEN },
+        layout: [],
+        meta: {
+          title: 'Fermentfreude',
+          description:
+            'Fermented foods, workshops and more. Placeholder — add content in /admin.',
+        },
+      },
+    })
+    payload.logger.info(
+      '✅ Minimal home page saved (DE + EN). Run full `pnpm seed home` when seed-assets/ is available.',
+    )
+    return
+  }
+
+  const page = await payload.create({
+    collection: 'pages',
+    locale: 'de',
+    context: ctx,
+    data: {
+      title: 'Startseite',
+      slug: 'home',
+      _status: 'published',
+      hero: { type: 'lowImpact' as const, richTextLowImpact: heroDE },
+      layout: [],
+      meta: {
+        title: 'Fermentfreude',
+        description:
+          'Fermentierte Lebensmittel, Workshops und mehr. Platzhalter — Inhalt in /admin ergänzen.',
+      },
+    },
+  })
+
+  await payload.update({
+    collection: 'pages',
+    id: page.id,
+    locale: 'en',
+    context: ctx,
+    data: {
+      title: 'Home',
+      slug: 'home',
+      _status: 'published',
+      hero: { type: 'lowImpact' as const, richTextLowImpact: heroEN },
+      layout: [],
+      meta: {
+        title: 'Fermentfreude',
+        description:
+          'Fermented foods, workshops and more. Placeholder — add content in /admin.',
+      },
+    },
+  })
+  payload.logger.info(
+    '✅ Minimal home page created (DE + EN). Run full `pnpm seed home` when seed-assets/ is available.',
+  )
 }
 
 async function seedHome() {
@@ -87,6 +241,17 @@ async function seedHome() {
   const imagesDir = path.resolve(process.cwd(), 'seed-assets/images')
   const galleryDir = path.resolve(process.cwd(), 'seed-assets/images/gallery')
   const iconsDir = path.resolve(process.cwd(), 'seed-assets/images/icons')
+
+  const seedAssetsMarker = path.join(workshopsDir, 'lakto.png')
+  if (!fs.existsSync(seedAssetsMarker)) {
+    payload.logger.warn(
+      '⚠️  seed-assets/ is missing (e.g. gitignored). Seeding a minimal published home page so / does not 404.',
+    )
+    await seedHomeMinimal(payload, {
+      pageId: existingCheck.docs[0]?.id,
+    })
+    process.exit(0)
+  }
 
   // Extract existing image IDs from current page if it exists
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

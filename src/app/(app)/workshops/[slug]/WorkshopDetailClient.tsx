@@ -2,8 +2,9 @@
 
 import { FermentKalender } from '@/components/fermentation/FermentKalender'
 import { FermentedVegHowTos } from '@/components/fermentation/FermentedVegHowTos'
+import { gtmViewItem } from '@/lib/gtm'
 import Image from 'next/image'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BookingModal } from './BookingModal'
 import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
 
@@ -122,6 +123,17 @@ export function WorkshopDetailClient({ workshop }: { workshop: WorkshopDetailDat
   const [bookingDate, setBookingDate] = useState<WorkshopDate | null>(null)
   const infoRef = useRef<HTMLDivElement>(null)
   const datesRef = useRef<HTMLDivElement>(null)
+
+  // GA4: view_item — fires once when workshop detail page renders
+  useEffect(() => {
+    gtmViewItem({
+      item_id: workshop.slug,
+      item_name: workshop.title,
+      item_category: 'Workshop',
+      price: workshop.price,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // intentionally empty — fire only on mount
 
   const formattedPrice = `${workshop.currency}${workshop.price}`
 
