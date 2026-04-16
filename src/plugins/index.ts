@@ -14,6 +14,7 @@ import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 import { isAdmin } from '@/access/isAdmin'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
 import { autoEnrollOnPurchase } from '@/collections/Orders/autoEnrollOnPurchase'
+import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBookings'
 import { ProductsCollection } from '@/collections/Products'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
@@ -148,6 +149,7 @@ export const plugins: Plugin[] = [
           afterChange: [
             ...(defaultCollection?.hooks?.afterChange ?? []),
             autoEnrollOnPurchase,
+            confirmWorkshopBookings,
             sendOrderConfirmationEmail,
           ],
         },
