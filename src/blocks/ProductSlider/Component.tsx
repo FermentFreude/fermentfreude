@@ -1,13 +1,16 @@
 'use client'
 
 import { Media } from '@/components/Media'
+import { gtmAddToCart } from '@/lib/gtm'
 import type {
   Media as MediaType,
   Product,
   ProductSliderBlock as ProductSliderBlockType,
 } from '@/payload-types'
+import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import Link from 'next/link'
 import React, { useCallback, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 /* ═══════════════════════════════════════════════════════════════
  *  DEFAULTS (English — CMS data always wins)
@@ -348,9 +351,33 @@ function CardWithButton({
 
 function ProductCard({ product }: { product: Product }) {
   const [cartHovered, setCartHovered] = useState(false)
+  const { addItem } = useCart()
   const image = getProductImage(product)
   const price = getProductPrice(product)
   const variantLabel = getVariantLabel(product)
+  const unitSize = product.unitSize ?? ''
+
+  const handleAddToCart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      addItem({ product: product.id }).then(() => {
+        toast.success('Item added to cart.')
+        gtmAddToCart({
+          item_id: String(product.id),
+          item_name: product.title ?? '',
+          item_category: product.productType ?? undefined,
+          price: price ?? undefined,
+          quantity: 1,
+        })
+      })
+    },
+    [addItem, product, price],
+  )
+
+  // Format price: value is in cents, convert to euros
+  const formattedPrice =
+    typeof price === 'number' ? `€${(price / 100).toFixed(2).replace('.', ',')}` : null
 
   return (
     <div
@@ -368,10 +395,7 @@ function ProductCard({ product }: { product: Product }) {
               cartHovered={cartHovered}
               onCartEnter={() => setCartHovered(true)}
               onCartLeave={() => setCartHovered(false)}
-              onCartClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-              }}
+              onCartClick={handleAddToCart}
               ariaLabel={`Add ${product.title} to cart`}
             />
 
@@ -409,18 +433,20 @@ function ProductCard({ product }: { product: Product }) {
               {variantLabel}
             </p>
           )}
-          <p
-            className="font-bold mb-0"
-            style={{ fontSize: '0.775rem', lineHeight: 1.5, color: '#4B4F4A', opacity: 0.7 }}
-          >
-            250ML
-          </p>
-          {typeof price === 'number' && (
+          {unitSize && (
+            <p
+              className="font-bold mb-0"
+              style={{ fontSize: '0.775rem', lineHeight: 1.5, color: '#4B4F4A', opacity: 0.7 }}
+            >
+              {unitSize}
+            </p>
+          )}
+          {formattedPrice && (
             <p
               className="font-bold mb-0"
               style={{ fontSize: '0.95rem', lineHeight: 1.5, color: '#4B4F4A' }}
             >
-              €{price.toFixed(2).replace('.', ',')}
+              {formattedPrice}
             </p>
           )}
         </div>
