@@ -1,6 +1,7 @@
 import { adminOnly } from '@/access/adminOnly'
 import type { CollectionConfig } from 'payload'
 import crypto from 'crypto'
+import { sendVoucherPurchaseEmail } from '@/hooks/brevo/sendVoucherPurchaseEmail'
 
 /**
  * Generate a cryptographically-strong voucher code.
@@ -161,5 +162,6 @@ export const Vouchers: CollectionConfig = {
         return data
       },
     ],
+    afterChange: [sendVoucherPurchaseEmail],
   },
 }
