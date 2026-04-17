@@ -6,7 +6,7 @@ type Props = {
   locale?: string
 }
 
-export function NewsletterForm({ locale = 'de' }: Props) {
+export default function NewsletterForm({ locale = 'de' }: Props) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')

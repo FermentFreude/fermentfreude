@@ -22,15 +22,32 @@ const DEFAULTS = {
 }
 
 type Props = SponsorsBarBlockType & { id?: string }
+type CmsSponsor = NonNullable<SponsorsBarBlockType['sponsors']>[number]
+type StaticSponsor = (typeof STATIC_SPONSORS)[number]
+type LogoItem = ({ kind: 'cms' } & CmsSponsor) | ({ kind: 'static' } & StaticSponsor)
 
-export const SponsorsBarBlock: React.FC<Props> = ({ visible, heading, sponsors, id }) => {
+export const SponsorsBarBlock: React.FC<Props> = ({
+  visible,
+  heading,
+  sponsors,
+  autoScroll,
+  logoSize,
+  id,
+}) => {
   const resolvedHeading = heading ?? DEFAULTS.heading
+  const resolvedLogoSize = logoSize ?? 'medium'
+  const shouldAutoScroll = autoScroll !== false
 
   // Use CMS sponsor logos when available, otherwise fall back to static images
   const hasCmsLogos = Array.isArray(sponsors) && sponsors.length > 0
+  const logoItems: LogoItem[] = hasCmsLogos
+    ? sponsors!.map((sponsor) => ({ kind: 'cms', ...sponsor }))
+    : STATIC_SPONSORS.map((sponsor) => ({ kind: 'static', ...sponsor }))
+  const hasEnoughItemsToScroll = logoItems.length > 1
+  const useMarquee = shouldAutoScroll && hasEnoughItemsToScroll
 
   const sectionRef = useRef<HTMLElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
     const el = sectionRef.current
@@ -47,6 +64,76 @@ export const SponsorsBarBlock: React.FC<Props> = ({ visible, heading, sponsors, 
 
   if (visible === false) return null
 
+  const logoFrameClassBySize: Record<string, string> = {
+    small: 'h-10 md:h-12 lg:h-14',
+    medium: 'h-12 md:h-14 lg:h-16',
+    large: 'h-14 md:h-16 lg:h-20',
+  }
+  const logoFrameClass = logoFrameClassBySize[resolvedLogoSize] ?? logoFrameClassBySize.medium
+
+  const renderLogoItem = (item: LogoItem, index: number) => {
+    const name = item.name
+    const url = item.kind === 'cms' ? item.url : undefined
+
+    const content = (
+      <div
+        className="group flex shrink-0 items-center justify-center px-4 md:px-5"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
+          transitionDelay: `${120 + (index % logoItems.length) * 80}ms`,
+          transitionProperty: 'opacity, transform',
+          transitionDuration: '500ms',
+          transitionTimingFunction: 'ease-out',
+        }}
+      >
+        <div className={`relative w-28 sm:w-32 md:w-36 lg:w-40 ${logoFrameClass}`}>
+          {item.kind === 'cms' && item.logo && typeof item.logo === 'object' ? (
+            <Media
+              resource={item.logo as MediaType}
+              imgClassName="object-contain w-full h-full"
+              className="absolute inset-0"
+            />
+          ) : item.kind === 'static' ? (
+            <Image
+              src={item.src}
+              alt={name || 'Sponsor'}
+              fill
+              unoptimized
+              className="object-contain"
+              style={item.scale !== 1 ? { transform: `scale(${item.scale})` } : undefined}
+            />
+          ) : (
+            <div className="h-full w-full rounded-lg bg-black/10" />
+          )}
+        </div>
+      </div>
+    )
+
+    if (url) {
+      return (
+        <a
+          key={`${name}-${index}`}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={name || 'Sponsor'}
+          className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black/40 rounded-sm"
+        >
+          {content}
+        </a>
+      )
+    }
+
+    return (
+      <div key={`${name}-${index}`} aria-label={name || 'Sponsor'}>
+        {content}
+      </div>
+    )
+  }
+
+  const marqueeItems = useMarquee ? [...logoItems, ...logoItems] : logoItems
+
   return (
     <section
       ref={sectionRef}
@@ -58,81 +145,41 @@ export const SponsorsBarBlock: React.FC<Props> = ({ visible, heading, sponsors, 
           {resolvedHeading}
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-6 w-full max-w-(--content-wide) ">
-          {hasCmsLogos
-            ? /* ── CMS logos ── */
-              sponsors!.map((sponsor, index) => {
-                const logo = sponsor.logo
-                const logoContent = (
-                  <div
-                    key={index}
-                    className="flex items-center justify-center px-4 py-3 transition-all duration-500 ease-out"
-                    style={{
-                      opacity: isVisible ? 1 : 0,
-                      transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
-                      transitionDelay: `${200 + index * 120}ms`,
-                    }}
-                  >
-                    <div className="relative h-14 md:h-16 lg:h-20 w-full">
-                      {logo && typeof logo === 'object' ? (
-                        <Media
-                          resource={logo as MediaType}
-                          imgClassName="object-contain w-full h-full"
-                          className="absolute inset-0"
-                        />
-                      ) : (
-                        <div
-                          className="h-full w-28 rounded-lg"
-                          style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                )
-                if (sponsor.url) {
-                  return (
-                    <a
-                      key={index}
-                      href={sponsor.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={sponsor.name || 'Sponsor'}
-                    >
-                      {logoContent}
-                    </a>
-                  )
-                }
-                return logoContent
-              })
-            : /* ── Static fallback logos ── */
-              STATIC_SPONSORS.map((sponsor, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-center px-6 py-6 transition-all duration-500 ease-out"
-                  style={{
-                    opacity: isVisible ? 1 : 0,
-                    transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
-                    transitionDelay: `${200 + index * 120}ms`,
-                  }}
-                >
-                  <div
-                    className="relative h-20 md:h-28 lg:h-32 w-full"
-                    style={
-                      sponsor.scale !== 1 ? { transform: `scale(${sponsor.scale})` } : undefined
-                    }
-                  >
-                    <Image
-                      src={sponsor.src}
-                      alt={sponsor.name}
-                      fill
-                      unoptimized
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              ))}
+        <div className="w-full max-w-(--content-wide) mx-auto overflow-hidden">
+          <div
+            className={`flex items-center ${useMarquee ? 'sponsors-marquee-track' : 'justify-center flex-wrap gap-y-4'}`}
+          >
+            {marqueeItems.map((item, index) => renderLogoItem(item, index))}
+          </div>
         </div>
       </div>
+      <style jsx>{`
+        .sponsors-marquee-track {
+          width: max-content;
+          animation: sponsors-marquee 28s linear infinite;
+        }
+
+        @keyframes sponsors-marquee {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
+        }
+
+        @media (max-width: 767px) {
+          .sponsors-marquee-track {
+            animation-duration: 22s;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .sponsors-marquee-track {
+            animation: none;
+          }
+        }
+      `}</style>
     </section>
   )
 }

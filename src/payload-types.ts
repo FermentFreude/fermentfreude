@@ -3157,6 +3157,14 @@ export interface SponsorsBarBlock {
    */
   heading?: string | null;
   /**
+   * When enabled, sponsor logos move continuously from right to left on desktop and mobile.
+   */
+  autoScroll?: boolean | null;
+  /**
+   * Controls the visual size of all sponsor logos in this section.
+   */
+  logoSize?: ('small' | 'medium' | 'large') | null;
+  /**
    * Sponsor/partner logos displayed in a horizontal row.
    */
   sponsors?:
@@ -5363,6 +5371,8 @@ export interface SponsorsBarBlockSelect<T extends boolean = true> {
   visible?: T;
   useGlobalData?: T;
   heading?: T;
+  autoScroll?: T;
+  logoSize?: T;
   sponsors?:
     | T
     | {
@@ -6496,6 +6506,14 @@ export interface SponsorsBarGlobal {
    */
   heading: string;
   /**
+   * When enabled, sponsor logos move continuously from right to left on desktop and mobile.
+   */
+  autoScroll?: boolean | null;
+  /**
+   * Controls the visual size of all sponsor logos in this section.
+   */
+  logoSize?: ('small' | 'medium' | 'large') | null;
+  /**
    * Sponsor/partner logos displayed in a horizontal row.
    */
   sponsors?:
@@ -6863,6 +6881,8 @@ export interface TestimonialsGlobalSelect<T extends boolean = true> {
  */
 export interface SponsorsBarGlobalSelect<T extends boolean = true> {
   heading?: T;
+  autoScroll?: T;
+  logoSize?: T;
   sponsors?:
     | T
     | {
