@@ -38,37 +38,40 @@ const VB_CY = VB_H / 2
 const LOGO_CX = 52.9597 / 2
 const LOGO_CY = 50.292 / 2
 const LOGO_SCALE = 2
-
 export function SplashScreen() {
   const [phase, setPhase] = useState<'idle' | 'wave' | 'filled' | 'close' | 'done'>('idle')
   const [useSimpleFallback, setUseSimpleFallback] = useState(false)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && sessionStorage.getItem('ff-splash-seen')) {
-      setPhase('done')
-      return
-    }
-
     // Skip splash animation for users who prefer reduced motion
     if (
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
-      sessionStorage.setItem('ff-splash-seen', '1')
       setPhase('done')
       return
     }
 
-    // Mobile browsers (notably iOS Safari) often don't support CSS `d: path(...)` morphing.
-    // Detect support and fall back to a transform-based splash animation when needed.
+    // Mobile/touch browsers (notably iOS Safari) are inconsistent with CSS `d: path(...)`
+    // morphing support. Force the transform fallback on touch/small viewports so the intro
+    // reliably plays on phones, and keep path-morph only for desktop-class browsers.
     try {
+      const prefersSimpleSplash =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(max-width: 63.99rem), (hover: none), (pointer: coarse)').matches
+      if (prefersSimpleSplash) {
+        setUseSimpleFallback(true)
+      }
+
       const cssObj =
         typeof window !== 'undefined'
           ? (window as unknown as { CSS?: { supports?: (prop: string) => boolean } }).CSS
           : undefined
       const supportsPathMorph = !!cssObj?.supports?.('d: path("M0,0 L1,1")')
-      if (!supportsPathMorph) setUseSimpleFallback(true)
+      if (!supportsPathMorph) {
+        setUseSimpleFallback(true)
+      }
     } catch {
       setUseSimpleFallback(true)
     }
@@ -92,7 +95,6 @@ export function SplashScreen() {
     t(() => setPhase('close'), 3800)
     t(() => {
       setPhase('done')
-      sessionStorage.setItem('ff-splash-seen', '1')
       document.body.style.overflow = ''
     }, 5300)
 
@@ -114,12 +116,13 @@ export function SplashScreen() {
     return (
       <div
         className={[
-          'splash-overlay splash-simple fixed inset-0 z-9999',
+          'splash-overlay splash-simple fixed inset-0',
           started ? 'splash-simple--started' : '',
           closing ? 'splash-simple--closing' : '',
         ]
           .filter(Boolean)
           .join(' ')}
+        style={{ zIndex: 9999 }}
         aria-hidden="true"
       >
         <div className="splash-simple__ivory" />
@@ -141,7 +144,7 @@ export function SplashScreen() {
   }
 
   return (
-    <div className="splash-overlay fixed inset-0 z-9999" aria-hidden="true">
+    <div className="splash-overlay fixed inset-0" style={{ zIndex: 9999 }} aria-hidden="true">
       <svg
         className="absolute inset-0 h-full w-full"
         viewBox={`0 0 ${VB_W} ${VB_H}`}
