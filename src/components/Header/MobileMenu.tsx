@@ -500,11 +500,12 @@ function buildNavItems(
       const cmsDropdownItems = item.dropdownItems
       const defaultKey = getDefaultDropdownKey(label, url)
 
-      const dropdownItems = defaultKey
-        ? defaultDropdowns[defaultKey]
-        : cmsDropdownItems && cmsDropdownItems.length > 0
+      const dropdownItems =
+        cmsDropdownItems && cmsDropdownItems.length > 0
           ? cmsDropdownItems
-          : null
+          : defaultKey
+            ? defaultDropdowns[defaultKey]
+            : null
 
       const parentItem: NavOverlayItem = { id: String(item.id), label, href: url }
 
