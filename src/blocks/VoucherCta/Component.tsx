@@ -32,12 +32,22 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   buttonLink,
   galleryImages,
   backgroundImage,
+  backgroundTheme,
+  customBackgroundColor,
+  overlayOpacity,
   id,
 }) => {
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedDescription = description ?? DEFAULTS.description
   const resolvedButtonLabel = buttonLabel ?? DEFAULTS.buttonLabel
   const resolvedButtonLink = buttonLink ?? DEFAULTS.buttonLink
+  const resolvedTheme = backgroundTheme === 'dark' || backgroundTheme === 'custom' ? backgroundTheme : 'light'
+  const resolvedOverlay = Math.min(Math.max(overlayOpacity ?? 20, 0), 90)
+  const hasBackgroundImage = Boolean(backgroundImage)
+  const safeCustomColor =
+    typeof customBackgroundColor === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(customBackgroundColor.trim())
+      ? customBackgroundColor.trim()
+      : null
 
   const sectionRef = useRef<HTMLElement>(null)
   const galleryWrapRef = useRef<HTMLDivElement>(null)
@@ -130,6 +140,20 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   if (visible === false) return null
 
   const images = galleryImages ?? []
+  const isDarkPresentation = resolvedTheme === 'dark' || hasBackgroundImage
+  const textClassName = isDarkPresentation ? 'text-white' : 'text-[#2A2520]'
+  const descClassName =
+    isDarkPresentation ? 'text-white/85' : 'text-[#2A2520]/80'
+  const fallbackBackground =
+    resolvedTheme === 'custom' && safeCustomColor
+      ? safeCustomColor
+      : resolvedTheme === 'dark'
+        ? '#2A2520'
+        : '#ECE5DE'
+  const buttonClassName =
+    isDarkPresentation
+      ? 'shadow-[inset_0_0_0_2px_rgba(255,255,255,0.7)] text-white hover:bg-white hover:text-[#2A2520]'
+      : 'shadow-[inset_0_0_0_2px_rgba(42,37,32,0.5)] text-[#2A2520] hover:bg-[#2A2520] hover:text-white'
 
   return (
     <section ref={sectionRef} id={id ?? undefined} className="w-full">
@@ -161,35 +185,37 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         data-anim="content"
         className="relative flex flex-col items-center overflow-hidden text-center section-padding-md container-padding"
       >
-        {/* Background image with dark overlay */}
+        {/* Background image + configurable overlay */}
         <>
-          {backgroundImage ? (
+          {hasBackgroundImage ? (
             <Media
-              resource={backgroundImage}
+              resource={backgroundImage ?? undefined}
               fill
-              imgClassName="object-cover blur-[2px] scale-105"
+              imgClassName="object-cover"
               className="absolute inset-0"
             />
           ) : (
-            <div className="absolute inset-0 bg-[#2A2520]" aria-hidden="true" />
+            <div className="absolute inset-0" style={{ backgroundColor: fallbackBackground }} aria-hidden="true" />
           )}
-          <div className="absolute inset-0 bg-[#1A1510]/60" />
+          {hasBackgroundImage && (
+            <div
+              className="absolute inset-0"
+              style={{ backgroundColor: `rgba(26, 21, 16, ${resolvedOverlay / 100})` }}
+            />
+          )}
         </>
 
         <div className="relative z-10 max-w-2xl flex flex-col items-center gap-3 sm:gap-5">
-          <h2 data-anim="heading" className="text-white">
+          <h2 data-anim="heading" className={textClassName}>
             {resolvedHeading}
           </h2>
-          <p
-            data-anim="desc"
-            className="text-body-lg max-w-lg leading-relaxed text-white/85"
-          >
+          <p data-anim="desc" className={`text-body-lg max-w-lg leading-relaxed ${descClassName}`}>
             {resolvedDescription}
           </p>
           <Link
             data-anim="cta"
             href={resolvedButtonLink}
-            className="shadow-[inset_0_0_0_2px_rgba(255,255,255,0.7)] text-white px-6 py-2.5 rounded-full tracking-widest uppercase font-display font-bold bg-transparent hover:bg-white hover:text-[#2A2520] hover:scale-[1.03] active:scale-[0.97] transition-all text-base"
+            className={`${buttonClassName} px-6 py-2.5 rounded-full tracking-widest uppercase font-display font-bold bg-transparent hover:scale-[1.03] active:scale-[0.97] transition-all text-base`}
           >
             {resolvedButtonLabel}
           </Link>

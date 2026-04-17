@@ -86,23 +86,23 @@ export const FeatureCardsBlock: React.FC<Props> = ({
       /* ── Eyebrow "FERMENTATION" entrance ── */
       if (eyebrowRef.current) {
         const el = eyebrowRef.current
-        const text = el.textContent ?? ''
-        el.innerHTML = text
-          .split('')
-          .map((ch) =>
-            ch === ' ' ? ' ' : `<span class="inline-block" style="opacity:0">${ch}</span>`,
-          )
-          .join('')
-        const chars = el.querySelectorAll('span')
+        const words = (el.textContent ?? '')
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean)
+        el.innerHTML = words
+          .map((word) => `<span class="inline-block whitespace-nowrap opacity-0">${word}</span>`)
+          .join(' <span aria-hidden="true">&nbsp;</span>')
+        const wordEls = el.querySelectorAll('span.inline-block')
         gsap.fromTo(
-          chars,
+          wordEls,
           { opacity: 0, y: -60, rotateX: 90 },
           {
             opacity: 1,
             y: 0,
             rotateX: 0,
             duration: 0.6,
-            stagger: 0.04,
+            stagger: 0.08,
             ease: 'power4.out',
             scrollTrigger: {
               trigger: el,
@@ -116,20 +116,22 @@ export const FeatureCardsBlock: React.FC<Props> = ({
       /* ── Card titles letter animation ── */
       titlesRef.current.forEach((el) => {
         if (!el) return
-        const text = el.textContent ?? ''
-        el.innerHTML = text
-          .split('')
-          .map((ch) => (ch === ' ' ? ' ' : `<span class="inline-block">${ch}</span>`))
-          .join('')
-        const chars = el.querySelectorAll('span')
+        const words = (el.textContent ?? '')
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean)
+        el.innerHTML = words
+          .map((word) => `<span class="inline-block whitespace-nowrap">${word}</span>`)
+          .join(' <span aria-hidden="true">&nbsp;</span>')
+        const wordEls = el.querySelectorAll('span.inline-block')
         gsap.fromTo(
-          chars,
+          wordEls,
           { opacity: 0, y: 20 },
           {
             opacity: 1,
             y: 0,
             duration: 0.4,
-            stagger: 0.04,
+            stagger: 0.1,
             ease: 'back.out(1.7)',
             scrollTrigger: {
               trigger: el,
@@ -242,7 +244,7 @@ export const FeatureCardsBlock: React.FC<Props> = ({
                   ref={(el) => {
                     titlesRef.current[index] = el
                   }}
-                  className="font-display font-bold text-lg text-ff-black uppercase tracking-wide"
+                  className="font-display font-bold text-lg text-ff-black uppercase tracking-wide text-balance"
                 >
                   {card.title}
                 </h3>

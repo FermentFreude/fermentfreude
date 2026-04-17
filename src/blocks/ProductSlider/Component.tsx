@@ -7,6 +7,7 @@ import type {
   Product,
   ProductSliderBlock as ProductSliderBlockType,
 } from '@/payload-types'
+import { formatPrice } from '@/utilities/form/formatters'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import Link from 'next/link'
 import React, { useCallback, useRef, useState } from 'react'
@@ -43,6 +44,14 @@ function getProductImage(product: Product): MediaType | null {
 }
 
 function getProductPrice(product: Product): number | null {
+  if (typeof product.priceInEUR === 'number') {
+    return product.priceInEUR
+  }
+
+  if (!product.enableVariants) {
+    return null
+  }
+
   const variants = product.variants?.docs
   if (variants && variants.length > 0) {
     const variant = variants[0]
@@ -55,10 +64,14 @@ function getProductPrice(product: Product): number | null {
       return variant.priceInEUR
     }
   }
-  return typeof product.priceInEUR === 'number' ? product.priceInEUR : null
+  return null
 }
 
 function getVariantLabel(product: Product): string {
+  if (!product.enableVariants) {
+    return ''
+  }
+
   // 1. Try ecommerce variant titles first
   const variants = product.variants?.docs
   if (variants && variants.length > 0) {
@@ -78,6 +91,13 @@ function getVariantLabel(product: Product): string {
     if (parts) return parts
   }
   return ''
+}
+
+function getObjectPosition(image: MediaType | null): string | undefined {
+  if (!image || typeof image.focalX !== 'number' || typeof image.focalY !== 'number') return undefined
+  const x = Math.max(0, Math.min(100, image.focalX))
+  const y = Math.max(0, Math.min(100, image.focalY))
+  return `${x}% ${y}%`
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -140,8 +160,9 @@ export const ProductSliderBlock: React.FC<Props> = ({
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-16 mb-8 lg:mb-10">
           {/* Left: Heading + Description */}
           <div className="flex-1 max-w-264">
-            {/* Heading row: "Discover UNIQUE." + eyebrow aligned top-right */}
-            <div className="flex items-start gap-3">
+            {/* Eyebrow above heading, matching other sections */}
+            <div className="flex flex-col items-start gap-2">
+              <span className="text-eyebrow font-bold text-ff-gold-accent shrink-0">{resolvedAccent}</span>
               <h2
                 className="font-display font-black"
                 style={{
@@ -153,12 +174,6 @@ export const ProductSliderBlock: React.FC<Props> = ({
               >
                 {resolvedHeading}
               </h2>
-              <span
-                className="text-eyebrow font-bold text-ff-gold-accent shrink-0"
-                style={{ marginTop: '0.35em' }}
-              >
-                {resolvedAccent}
-              </span>
             </div>
             <p
               className="font-display font-bold mt-6 lg:mt-8"
@@ -353,6 +368,7 @@ function ProductCard({ product }: { product: Product }) {
   const [cartHovered, setCartHovered] = useState(false)
   const { addItem } = useCart()
   const image = getProductImage(product)
+  const imageObjectPosition = getObjectPosition(image)
   const price = getProductPrice(product)
   const variantLabel = getVariantLabel(product)
   const unitSize = product.unitSize ?? ''
@@ -375,9 +391,7 @@ function ProductCard({ product }: { product: Product }) {
     [addItem, product, price],
   )
 
-  // Format price: value is in cents, convert to euros
-  const formattedPrice =
-    typeof price === 'number' ? `€${(price / 100).toFixed(2).replace('.', ',')}` : null
+  const formattedPrice = typeof price === 'number' ? formatPrice(price) : null
 
   return (
     <div
@@ -409,6 +423,7 @@ function ProductCard({ product }: { product: Product }) {
                   resource={image}
                   className="relative w-[55%] h-[85%]"
                   imgClassName="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-lg"
+                  imgStyle={imageObjectPosition ? { objectPosition: imageObjectPosition } : undefined}
                 />
               ) : (
                 <div className="w-[55%] h-[70%] bg-[#ECE5DE] rounded-lg" />

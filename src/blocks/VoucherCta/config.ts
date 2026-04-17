@@ -91,5 +91,46 @@ export const VoucherCta: Block = {
           'Background image shown behind heading and button below the gallery. Uses a neutral fallback color if not set.',
       },
     },
+    {
+      name: 'backgroundTheme',
+      type: 'select',
+      required: false,
+      defaultValue: 'light',
+      label: 'Background Theme',
+      options: [
+        { label: 'Light (soft beige)', value: 'light' },
+        { label: 'Dark (charcoal)', value: 'dark' },
+        { label: 'Custom color', value: 'custom' },
+      ],
+      admin: {
+        description:
+          'Controls fallback background color (when no image is set) and text/button contrast.',
+      },
+    },
+    {
+      name: 'customBackgroundColor',
+      type: 'text',
+      required: false,
+      label: 'Custom Background Color (HEX)',
+      admin: {
+        description:
+          'Used when "Background Theme" is set to "Custom color". Example: #ECE5DE',
+        condition: (_, siblingData) => siblingData?.backgroundTheme === 'custom',
+      },
+    },
+    {
+      name: 'overlayOpacity',
+      type: 'number',
+      required: false,
+      defaultValue: 20,
+      min: 0,
+      max: 90,
+      label: 'Image Overlay Opacity (%)',
+      admin: {
+        description:
+          'Dark overlay strength on top of the background image. Lower values keep images brighter.',
+        condition: (_, siblingData) => Boolean(siblingData?.backgroundImage),
+      },
+    },
   ],
 }

@@ -3436,6 +3436,18 @@ export interface VoucherCtaBlock {
    * Background image shown behind heading and button below the gallery. Uses a neutral fallback color if not set.
    */
   backgroundImage?: (string | null) | Media;
+  /**
+   * Controls fallback background color (when no image is set) and text/button contrast.
+   */
+  backgroundTheme?: ('light' | 'dark' | 'custom') | null;
+  /**
+   * Used when "Background Theme" is set to "Custom color". Example: #ECE5DE
+   */
+  customBackgroundColor?: string | null;
+  /**
+   * Dark overlay strength on top of the background image. Lower values keep images brighter.
+   */
+  overlayOpacity?: number | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'voucherCta';
@@ -5476,6 +5488,9 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
         id?: T;
       };
   backgroundImage?: T;
+  backgroundTheme?: T;
+  customBackgroundColor?: T;
+  overlayOpacity?: T;
   id?: T;
   blockName?: T;
 }
