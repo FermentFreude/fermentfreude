@@ -90,8 +90,17 @@ async function seedFooter(payload: Awaited<ReturnType<typeof getPayload>>) {
   const hasWorkshopLinks = (existing.workshopLinks ?? []).length > 0
   const hasLegalLinks = (existing.legalLinks ?? []).length > 0
   const hasCopyright = Boolean(existing.copyrightText)
+  const hasAccentColor = Boolean(existing.accentColor)
 
-  if (!force && hasNewsletter && hasNavItems && hasWorkshopLinks && hasLegalLinks && hasCopyright) {
+  if (
+    !force &&
+    hasNewsletter &&
+    hasNavItems &&
+    hasWorkshopLinks &&
+    hasLegalLinks &&
+    hasCopyright &&
+    hasAccentColor
+  ) {
     console.log('  ⏭ Footer already has data — skipping (use --force to overwrite)')
     return
   }
@@ -102,12 +111,8 @@ async function seedFooter(payload: Awaited<ReturnType<typeof getPayload>>) {
 
   if (force || !hasNewsletter) {
     deData.newsletterHeading = 'Werde Teil der FermentFreude Bewegung'
-    deData.newsletterDescription =
-      'Erhalte exklusive Rezepte, Tipps zur Fermentation und als Erster Zugang zu neuen Workshops. Kein Spam — nur gute Bakterien.'
     deData.freeRecipesLabel = 'Kostenlose Workshop-Rezepte'
     enData.newsletterHeading = 'Join the FermentFreude Movement'
-    enData.newsletterDescription =
-      'Get exclusive recipes, fermentation tips, and first access to new workshops. No spam — just good bacteria.'
     enData.freeRecipesLabel = 'Free Workshop Recipes'
     console.log('  + Newsletter fields')
   }
@@ -128,6 +133,11 @@ async function seedFooter(payload: Awaited<ReturnType<typeof getPayload>>) {
     deData.copyrightText = 'FermentFreude — Alle Rechte vorbehalten'
     enData.copyrightText = 'FermentFreude — All Rights Reserved'
     console.log('  + Copyright text')
+  }
+
+  if (force || !hasAccentColor) {
+    deData.accentColor = '#e6be68'
+    console.log('  + Accent color')
   }
 
   if (force || !hasNavItems) {

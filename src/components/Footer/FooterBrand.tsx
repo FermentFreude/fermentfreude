@@ -63,7 +63,7 @@ export function FooterBrand() {
         aria-label="Back to top"
         className="shrink-0 aspect-square bg-[#1d1d1d] text-white rounded-full flex items-center justify-center cursor-pointer md:mb-1"
         style={{ width: 'clamp(1.8rem, 5vw, 5.5rem)', height: 'clamp(1.8rem, 5vw, 5.5rem)' }}
-        whileHover={{ scale: 1.1, backgroundColor: '#e6be68' }}
+        whileHover={{ scale: 1.1, backgroundColor: 'var(--footer-accent)' }}
         whileTap={{ scale: 0.95 }}
         transition={{ duration: 0.2 }}
       >
