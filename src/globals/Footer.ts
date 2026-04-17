@@ -30,21 +30,22 @@ export const Footer: GlobalConfig = {
       },
     },
     {
-      name: 'newsletterDescription',
-      type: 'textarea',
-      localized: true,
-      label: 'Newsletter Description',
-      admin: {
-        description: 'Short text above the newsletter subscribe form.',
-      },
-    },
-    {
       name: 'freeRecipesLabel',
       type: 'text',
       localized: true,
       label: 'Free Recipes Label',
       admin: {
         description: 'Badge text next to the newsletter (DE: "Kostenlose Workshop-Rezepte").',
+      },
+    },
+    {
+      name: 'accentColor',
+      type: 'text',
+      label: 'Accent Color',
+      admin: {
+        description:
+          'Custom footer accent color for the badge and hover states (e.g. #e6be68, #d4a017, rgb(230,190,104)).',
+        placeholder: '#e6be68',
       },
     },
     // ── Section Headings ──

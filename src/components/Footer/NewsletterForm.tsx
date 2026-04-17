@@ -69,7 +69,7 @@ export function NewsletterForm({ locale = 'de' }: Props) {
       <button
         type="submit"
         disabled={status === 'loading'}
-        className="font-sans text-sm font-semibold tracking-wider hover:text-[#e6be68] transition-colors py-2 pl-4 disabled:opacity-50"
+        className="font-sans text-sm font-semibold tracking-wider hover:text-[var(--footer-accent)] transition-colors py-2 pl-4 disabled:opacity-50"
       >
         {status === 'loading' ? '...' : 'OK'}
       </button>

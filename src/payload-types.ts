@@ -6333,13 +6333,13 @@ export interface Footer {
    */
   newsletterHeading?: string | null;
   /**
-   * Short text above the newsletter subscribe form.
-   */
-  newsletterDescription?: string | null;
-  /**
    * Badge text next to the newsletter (DE: "Kostenlose Workshop-Rezepte").
    */
   freeRecipesLabel?: string | null;
+  /**
+   * Custom footer accent color for the badge and hover states (e.g. #e6be68, #d4a017, rgb(230,190,104)).
+   */
+  accentColor?: string | null;
   /**
    * Heading above the quick links column (DE: "Schnellzugriff", EN: "Quick Links").
    */
@@ -6775,8 +6775,8 @@ export interface HeaderSelect<T extends boolean = true> {
  */
 export interface FooterSelect<T extends boolean = true> {
   newsletterHeading?: T;
-  newsletterDescription?: T;
   freeRecipesLabel?: T;
+  accentColor?: T;
   quickLinksHeading?: T;
   workshopsHeading?: T;
   legalHeading?: T;
