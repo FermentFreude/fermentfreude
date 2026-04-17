@@ -1277,9 +1277,13 @@ export interface Page {
            */
           title: string;
           /**
+           * Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.
+           */
+          iconSource?: ('preset' | 'custom') | null;
+          /**
            * Icon displayed next to this option. Use email or pickup only.
            */
-          icon: 'email' | 'pickup' | 'card';
+          icon?: ('email' | 'pickup' | 'card') | null;
           id?: string | null;
         }[]
       | null;
@@ -1344,7 +1348,15 @@ export interface Page {
      */
     voucherWhyBenefits?:
       | {
-          icon: 'sparkle' | 'heart' | 'graduation' | 'leaf';
+          /**
+           * Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.
+           */
+          iconSource?: ('preset' | 'custom') | null;
+          icon?: ('sparkle' | 'heart' | 'graduation' | 'leaf') | null;
+          /**
+           * Optional uploaded icon from Media. Recommended: square icon with transparent background.
+           */
+          customIcon?: (string | null) | Media;
           title: string;
           description: string;
           id?: string | null;
@@ -1445,7 +1457,7 @@ export interface Page {
      */
     voucherBenefitsSubtitle?: string | null;
     /**
-     * List of benefits with optional subtext. Shown with green checkmarks in two columns.
+     * List of benefit cards with editable icon, title, and optional subtext.
      */
     voucherBenefits?:
       | {
@@ -1453,6 +1465,18 @@ export interface Page {
            * Main benefit line (e.g. "Valid for all workshops").
            */
           text: string;
+          /**
+           * Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.
+           */
+          iconSource?: ('preset' | 'custom') | null;
+          /**
+           * Card icon shown above this benefit title. Leave empty to use the default sequence.
+           */
+          icon?: ('calendar' | 'shield' | 'users' | 'usersRound' | 'zap' | 'package') | null;
+          /**
+           * Optional uploaded icon from Media. Recommended: square icon with transparent background.
+           */
+          customIcon?: (string | null) | Media;
           /**
            * Optional detail below the title (e.g. "Kombucha, Lakto, Tempeh & seasonal").
            */
@@ -4680,6 +4704,7 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               type?: T;
               title?: T;
+              iconSource?: T;
               icon?: T;
               id?: T;
             };
@@ -4700,7 +4725,9 @@ export interface PagesSelect<T extends boolean = true> {
         voucherWhyBenefits?:
           | T
           | {
+              iconSource?: T;
               icon?: T;
+              customIcon?: T;
               title?: T;
               description?: T;
               id?: T;
@@ -4743,6 +4770,9 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              iconSource?: T;
+              icon?: T;
+              customIcon?: T;
               subtext?: T;
               id?: T;
             };

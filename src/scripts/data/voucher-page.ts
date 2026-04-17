@@ -62,24 +62,28 @@ export function voucherPageDataDE({
         'Du schenkst nicht „irgendetwas“, sondern einen Workshop, der inspiriert, Freude macht und nachhaltig wirkt. Ein Geschenk mit Mehrwert.',
       voucherWhyBenefits: [
         {
+          iconSource: 'preset',
           icon: 'sparkle',
           title: 'Unvergessliches Erlebnis',
           description:
             'Mehr als ein Geschenk – eine Erfahrung, die begeistert und lange in Erinnerung bleibt.',
         },
         {
+          iconSource: 'preset',
           icon: 'heart',
           title: 'Gesundheit & Genuss',
           description:
             'Entdecke probiotikreiche Lebensmittel, die Darmgesundheit und Wohlbefinden fördern.',
         },
         {
+          iconSource: 'preset',
           icon: 'graduation',
           title: 'Wissen fürs Leben',
           description:
             'Lerne traditionelle Techniken, die du immer wieder anwenden kannst – zuhause und kreativ.',
         },
         {
+          iconSource: 'preset',
           icon: 'leaf',
           title: 'Nachhaltig & natürlich',
           description:
@@ -89,14 +93,44 @@ export function voucherPageDataDE({
       voucherBenefitsHeading: 'Was im Gutschein enthalten ist',
       voucherBenefitsSubtitle: 'Alles auf einen Blick',
       voucherBenefits: [
-        { text: 'Für alle Workshops gültig', subtext: 'Kombucha, Lakto-Gemüse, Tempeh & Saisonales' },
-        { text: 'Ohne Ablaufdatum', subtext: 'Zeitlich unbegrenzt gültig' },
-        { text: 'Für Einsteiger & Profis geeignet', subtext: 'Alle Erfahrungsstufen willkommen' },
-        { text: 'Kleine Gruppen', subtext: 'Maximal 8 Personen für intensive Betreuung' },
-        { text: 'Schnell verfügbar', subtext: 'Digital per E-Mail oder Abholung im Geschäftslokal' },
-        { text: 'Starterkits & Verkostungen inklusive', subtext: 'Alles, um zuhause weiterzumachen' },
-        { text: 'Praxis mit Fermente für zuhause', subtext: 'Eigene Kreationen und Gärgefäße mitnehmen' },
-        { text: 'Flexible Terminwahl', subtext: 'Ganzjährig verfügbare Workshops' },
+        {
+          text: 'Für alle Workshops gültig',
+          subtext: 'Kombucha, Lakto-Gemüse, Tempeh & Saisonales',
+          icon: 'calendar',
+          iconSource: 'preset',
+        },
+        { text: 'Ohne Ablaufdatum', subtext: 'Zeitlich unbegrenzt gültig', icon: 'shield', iconSource: 'preset' },
+        {
+          text: 'Für Einsteiger & Profis geeignet',
+          subtext: 'Alle Erfahrungsstufen willkommen',
+          icon: 'users',
+          iconSource: 'preset',
+        },
+        {
+          text: 'Kleine Gruppen',
+          subtext: 'Maximal 8 Personen für intensive Betreuung',
+          icon: 'usersRound',
+          iconSource: 'preset',
+        },
+        {
+          text: 'Schnell verfügbar',
+          subtext: 'Digital per E-Mail oder Abholung im Geschäftslokal',
+          icon: 'zap',
+          iconSource: 'preset',
+        },
+        {
+          text: 'Starterkits & Verkostungen inklusive',
+          subtext: 'Alles, um zuhause weiterzumachen',
+          icon: 'package',
+          iconSource: 'preset',
+        },
+        {
+          text: 'Praxis mit Fermente für zuhause',
+          subtext: 'Eigene Kreationen und Gärgefäße mitnehmen',
+          icon: 'calendar',
+          iconSource: 'preset',
+        },
+        { text: 'Flexible Terminwahl', subtext: 'Ganzjährig verfügbare Workshops', icon: 'shield', iconSource: 'preset' },
       ],
       voucherShowBenefits: true,
       voucherWhyPerfectForVisible: false,
@@ -206,7 +240,12 @@ export function voucherPageDataEN(
         "You're not giving \"just something\", but a workshop that inspires, brings joy, and has a lasting effect. A gift with added value.",
       voucherWhyBenefits: (v.voucherWhyBenefits ?? []).map((item, i) => ({
         id: item.id ?? undefined,
+        iconSource: item.iconSource ?? 'preset',
         icon: item.icon,
+        customIcon:
+          typeof item.customIcon === 'string' || item.customIcon === null
+            ? item.customIcon
+            : item.customIcon?.id,
         title: [
           'Unforgettable experience',
           'Health & pleasure',
@@ -227,6 +266,12 @@ export function voucherPageDataEN(
       voucherBenefitsSubtitle: 'All at a glance',
       voucherBenefits: (v.voucherBenefits ?? []).map((item, i) => ({
         id: item.id ?? undefined,
+        iconSource: item.iconSource ?? 'preset',
+        icon: item.icon,
+        customIcon:
+          typeof item.customIcon === 'string' || item.customIcon === null
+            ? item.customIcon
+            : item.customIcon?.id,
         text: [
           'Valid for all workshops',
           'No expiry date',

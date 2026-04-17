@@ -1527,9 +1527,23 @@ export const Pages: CollectionConfig = {
                   },
                 },
                 {
+                  name: 'iconSource',
+                  type: 'select',
+                  label: 'Icon Type',
+                  defaultValue: 'preset',
+                  options: [
+                    { label: 'Built-in icon', value: 'preset' },
+                    { label: 'Custom upload (Media)', value: 'custom' },
+                  ],
+                  admin: {
+                    description:
+                      'Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.',
+                  },
+                },
+                {
                   name: 'icon',
                   type: 'select',
-                  required: true,
+                  required: false,
                   label: 'Icon',
                   options: [
                     { label: 'Email', value: 'email' },
@@ -1720,9 +1734,23 @@ export const Pages: CollectionConfig = {
                   },
                   fields: [
                     {
+                      name: 'iconSource',
+                      type: 'select',
+                      label: 'Icon Type',
+                      defaultValue: 'preset',
+                      options: [
+                        { label: 'Built-in icon', value: 'preset' },
+                        { label: 'Custom upload (Media)', value: 'custom' },
+                      ],
+                      admin: {
+                        description:
+                          'Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.',
+                      },
+                    },
+                    {
                       name: 'icon',
                       type: 'select',
-                      required: true,
+                      required: false,
                       label: 'Icon',
                       options: [
                         { label: 'Sparkle (experience)', value: 'sparkle' },
@@ -1730,6 +1758,20 @@ export const Pages: CollectionConfig = {
                         { label: 'Graduation cap (knowledge)', value: 'graduation' },
                         { label: 'Leaf (sustainability)', value: 'leaf' },
                       ],
+                      admin: {
+                        condition: (_, siblingData) => siblingData?.iconSource !== 'custom',
+                      },
+                    },
+                    {
+                      name: 'customIcon',
+                      type: 'upload',
+                      relationTo: 'media',
+                      label: 'Custom Icon',
+                      admin: {
+                        description:
+                          'Optional uploaded icon from Media. Recommended: square icon with transparent background.',
+                        condition: (_, siblingData) => siblingData?.iconSource === 'custom',
+                      },
                     },
                     {
                       name: 'title',
@@ -1988,7 +2030,7 @@ export const Pages: CollectionConfig = {
               minRows: 1,
               admin: {
                 description:
-                  'List of benefits with optional subtext. Shown with green checkmarks in two columns.',
+                  'List of benefit cards with editable icon, title, and optional subtext.',
                 condition: (data) => data?.voucherShowBenefits !== false,
               },
               fields: [
@@ -1999,6 +2041,49 @@ export const Pages: CollectionConfig = {
                   localized: true,
                   label: 'Title',
                   admin: { description: 'Main benefit line (e.g. "Valid for all workshops").' },
+                },
+                {
+                  name: 'iconSource',
+                  type: 'select',
+                  label: 'Icon Type',
+                  defaultValue: 'preset',
+                  options: [
+                    { label: 'Built-in icon', value: 'preset' },
+                    { label: 'Custom upload (Media)', value: 'custom' },
+                  ],
+                  admin: {
+                    description:
+                      'Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.',
+                  },
+                },
+                {
+                  name: 'icon',
+                  type: 'select',
+                  label: 'Icon',
+                  options: [
+                    { label: 'Calendar', value: 'calendar' },
+                    { label: 'Shield', value: 'shield' },
+                    { label: 'Users', value: 'users' },
+                    { label: 'Users Round', value: 'usersRound' },
+                    { label: 'Zap', value: 'zap' },
+                    { label: 'Package', value: 'package' },
+                  ],
+                  admin: {
+                    description:
+                      'Card icon shown above this benefit title. Leave empty to use the default sequence.',
+                    condition: (_, siblingData) => siblingData?.iconSource !== 'custom',
+                  },
+                },
+                {
+                  name: 'customIcon',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Custom Icon',
+                  admin: {
+                    description:
+                      'Optional uploaded icon from Media. Recommended: square icon with transparent background.',
+                    condition: (_, siblingData) => siblingData?.iconSource === 'custom',
+                  },
                 },
                 {
                   name: 'subtext',
