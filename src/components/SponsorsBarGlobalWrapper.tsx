@@ -26,7 +26,11 @@ export async function SponsorsBarGlobalWrapper({
     <SponsorsBarBlock
       id={id}
       blockType="sponsorsBar"
-      heading={hasGlobalContent ? data.heading : ((fb.heading as string) ?? undefined)}
+      heading={((fb.heading as string) ?? data.heading) ?? undefined}
+      autoScroll={((fb.autoScroll as boolean) ?? data.autoScroll) ?? undefined}
+      logoSize={
+        ((fb.logoSize as 'small' | 'medium' | 'large' | undefined) ?? data.logoSize) ?? undefined
+      }
       sponsors={hasGlobalContent ? (data.sponsors ?? []) : ((fb.sponsors as [] | undefined) ?? [])}
     />
   )

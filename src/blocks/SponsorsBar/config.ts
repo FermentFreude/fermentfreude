@@ -39,6 +39,32 @@ export const SponsorsBar: Block = {
       },
     },
     {
+      name: 'autoScroll',
+      type: 'checkbox',
+      label: 'Auto-scroll logos',
+      defaultValue: true,
+      admin: {
+        description:
+          'When enabled, sponsor logos move continuously from right to left on desktop and mobile.',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
+      },
+    },
+    {
+      name: 'logoSize',
+      type: 'select',
+      label: 'Logo size',
+      defaultValue: 'medium',
+      admin: {
+        description: 'Controls the visual size of all sponsor logos in this section.',
+        condition: (_data, siblingData) => siblingData?.useGlobalData === false,
+      },
+      options: [
+        { label: 'Small', value: 'small' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Large', value: 'large' },
+      ],
+    },
+    {
       name: 'sponsors',
       type: 'array',
       label: 'Sponsors',
