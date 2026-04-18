@@ -13,8 +13,11 @@ import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 
 import { isAdmin } from '@/access/isAdmin'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
+import { autoCompleteDigitalOrders } from '@/collections/Orders/autoCompleteDigitalOrders'
 import { autoEnrollOnPurchase } from '@/collections/Orders/autoEnrollOnPurchase'
 import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBookings'
+import { decrementInventory } from '@/collections/Orders/decrementInventory'
+import { handleChargeRefunded, handlePaymentFailed } from '@/collections/Orders/stripeWebhooks'
 import { ProductsCollection } from '@/collections/Products'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
@@ -131,6 +134,10 @@ export const plugins: Plugin[] = [
           secretKey: process.env.STRIPE_SECRET_KEY!,
           publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
           webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET!,
+          webhooks: {
+            'payment_intent.payment_failed': handlePaymentFailed,
+            'charge.refunded': handleChargeRefunded,
+          },
         }),
       ],
     },
@@ -148,9 +155,11 @@ export const plugins: Plugin[] = [
           ...defaultCollection?.hooks,
           afterChange: [
             ...(defaultCollection?.hooks?.afterChange ?? []),
+            decrementInventory,
             autoEnrollOnPurchase,
             confirmWorkshopBookings,
             sendOrderConfirmationEmail,
+            autoCompleteDigitalOrders,
           ],
         },
       }),

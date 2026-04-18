@@ -1,5 +1,7 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
+import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+
 /**
  * confirmWorkshopBookings — Orders afterChange hook.
  *
@@ -9,6 +11,11 @@ import type { CollectionAfterChangeHook } from 'payload'
  *
  * Workshop items are identified by their product having a slug
  * starting with "workshop-".
+ *
+ * Matching strategy (in priority order):
+ *  1. workshopSlug + guestCount + customer email → exact match
+ *  2. workshopSlug + guestCount → fallback (guest without email on booking)
+ *  3. workshopSlug only → last resort
  *
  * MongoDB Atlas M0: sequential writes only — no Promise.all.
  */
@@ -24,12 +31,11 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
   const items: {
     product?: string | { id?: string; slug?: string } | null
     quantity?: number
-    metadata?: Record<string, unknown>
   }[] = doc.items ?? []
 
-  // Get customer email from order for updating the booking
+  // Resolve customer email — from user record or guest checkout field
   const customerId = typeof doc.customer === 'object' ? doc.customer?.id : doc.customer
-  let customerEmail: string | undefined
+  let customerEmail: string | undefined = doc.customerEmail || undefined
   let customerName: string | undefined
 
   if (customerId) {
@@ -40,7 +46,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         depth: 0,
         overrideAccess: true,
       })
-      customerEmail = user?.email || undefined
+      if (!customerEmail) customerEmail = user?.email || undefined
       customerName = user?.name || undefined
     } catch {
       // Non-fatal: booking still gets confirmed
@@ -72,21 +78,69 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     // Only process workshop products
     if (!productSlug || !productSlug.startsWith('workshop-')) continue
 
-    // Find pending bookings for this workshop
     const workshopSlug = productSlug.replace('workshop-', '')
-    const pendingBookings = await payload.find({
-      collection: 'workshop-bookings',
-      where: {
-        and: [{ workshopSlug: { equals: workshopSlug } }, { status: { equals: 'pending' } }],
-      },
-      sort: '-createdAt',
-      limit: 1,
-      overrideAccess: true,
-    })
+    const guestCount = item.quantity ?? 1
 
-    if (pendingBookings.totalDocs === 0) continue
+    // ── Strategy 1: match by workshopSlug + guestCount + email ──
+    let booking = null
 
-    const booking = pendingBookings.docs[0]
+    if (customerEmail) {
+      const byEmail = await payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [
+            { workshopSlug: { equals: workshopSlug } },
+            { status: { equals: 'pending' } },
+            { guestCount: { equals: guestCount } },
+            { email: { equals: customerEmail } },
+          ],
+        },
+        sort: '-createdAt',
+        limit: 1,
+        overrideAccess: true,
+      })
+      if (byEmail.totalDocs > 0) booking = byEmail.docs[0]
+    }
+
+    // ── Strategy 2: match by workshopSlug + guestCount (no email on booking) ──
+    if (!booking) {
+      const byCount = await payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [
+            { workshopSlug: { equals: workshopSlug } },
+            { status: { equals: 'pending' } },
+            { guestCount: { equals: guestCount } },
+            { email: { exists: false } },
+          ],
+        },
+        sort: '-createdAt',
+        limit: 1,
+        overrideAccess: true,
+      })
+      if (byCount.totalDocs > 0) booking = byCount.docs[0]
+    }
+
+    // ── Strategy 3: last resort — any pending booking for this workshop ──
+    if (!booking) {
+      const bySlug = await payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [{ workshopSlug: { equals: workshopSlug } }, { status: { equals: 'pending' } }],
+        },
+        sort: '-createdAt',
+        limit: 1,
+        overrideAccess: true,
+      })
+      if (bySlug.totalDocs > 0) booking = bySlug.docs[0]
+    }
+
+    if (!booking) {
+      payload.logger.warn(
+        `[confirmWorkshopBookings] No pending booking found for workshop "${workshopSlug}" (order ${doc.id})`,
+      )
+      continue
+    }
 
     // Confirm the booking and attach customer info
     const updateData: Record<string, unknown> = {
@@ -100,16 +154,56 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       updateData.firstName = customerName
     }
 
-    await payload.update({
-      collection: 'workshop-bookings',
-      id: booking.id,
-      data: updateData,
-      overrideAccess: true,
-    })
+    try {
+      await payload.update({
+        collection: 'workshop-bookings',
+        id: booking.id,
+        data: updateData,
+        overrideAccess: true,
+      })
 
-    payload.logger.info(
-      `[confirmWorkshopBookings] Confirmed booking ${booking.id} for workshop "${workshopSlug}" via order ${doc.id}`,
-    )
+      payload.logger.info(
+        `[confirmWorkshopBookings] Confirmed booking ${booking.id} for workshop "${workshopSlug}" via order ${doc.id}`,
+      )
+    } catch (error) {
+      payload.logger.error(
+        `[confirmWorkshopBookings] Failed to confirm booking ${booking.id}: ${error instanceof Error ? error.message : String(error)}`,
+      )
+      continue
+    }
+
+    // Send workshop booking confirmation email now that customer info is available
+    const bookingEmail = (updateData.email as string) || booking.email
+    if (bookingEmail) {
+      try {
+        await sendTemplateEmail({
+          to: [
+            {
+              email: bookingEmail,
+              name: ((updateData.firstName as string) || booking.firstName) ?? undefined,
+            },
+          ],
+          templateId: BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION,
+          params: {
+            WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
+            WORKSHOP_DATE: String(booking.date ?? ''),
+            GUEST_COUNT: String(booking.guestCount ?? 1),
+            TOTAL_PRICE: String(booking.totalPrice ?? ''),
+            CUSTOMER_NAME: String(
+              (updateData.firstName as string) || booking.firstName || bookingEmail,
+            ),
+            BOOKING_ID: String(booking.id),
+          },
+        })
+        payload.logger.info(
+          `[confirmWorkshopBookings] Sent booking confirmation email to ${bookingEmail} for booking ${booking.id}`,
+        )
+      } catch (error) {
+        payload.logger.error(
+          `[confirmWorkshopBookings] Failed to send booking email for ${booking.id}: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
+    }
   }
 
   return doc

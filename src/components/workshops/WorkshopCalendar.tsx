@@ -7,6 +7,7 @@ import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -203,6 +204,7 @@ export function WorkshopCalendar({
   const [cardBookingDate, setCardBookingDate] = useState<WorkshopDate | null>(null)
   const [cardBookingWorkshop, setCardBookingWorkshop] = useState<WorkshopCalendarCard | null>(null)
   const { addItem } = useCart()
+  const router = useRouter()
 
   // Use real appointments from database, or empty array if none
   const upcomingDates = useMemo(() => appointments || [], [appointments])
@@ -283,7 +285,7 @@ export function WorkshopCalendar({
       }
 
       await addWorkshopToCart({
-        addItem,
+        addItemAction: addItem,
         appointmentId,
         workshopSlug: cardBookingWorkshop.workshopType,
         workshopTitle: getWorkshopTypeLabel(cardBookingWorkshop.workshopType),
@@ -293,8 +295,9 @@ export function WorkshopCalendar({
       // Clear card booking states
       setCardBookingDate(null)
       setCardBookingWorkshop(null)
+      router.refresh()
     },
-    [cardBookingDate, cardBookingWorkshop, addItem],
+    [cardBookingDate, cardBookingWorkshop, addItem, router],
   )
   const filteredDates = selectedType
     ? upcomingDates.filter((d) => d.workshopType === selectedType)
@@ -312,7 +315,7 @@ export function WorkshopCalendar({
       }
 
       await addWorkshopToCart({
-        addItem,
+        addItemAction: addItem,
         appointmentId,
         workshopSlug: bookingWorkshop.workshopType,
         workshopTitle: getWorkshopTypeLabel(bookingWorkshop.workshopType),
@@ -322,8 +325,9 @@ export function WorkshopCalendar({
       // Clear date list booking states
       setBookingDate(null)
       setBookingWorkshop(null)
+      router.refresh()
     },
-    [bookingDate, bookingWorkshop, addItem],
+    [bookingDate, bookingWorkshop, addItem, router],
   )
 
   return (

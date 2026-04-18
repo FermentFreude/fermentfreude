@@ -8,7 +8,6 @@
  *   pnpm seed home         # Seeds only the home page
  *   pnpm seed about        # Seeds only the about page
  *   pnpm seed contact      # Seeds only the contact page
- *   pnpm seed gastronomy         # Seeds only the gastronomy page (Pages collection)
  *
  * Order (when seeding all):
  *   1. Header (global — nav items)
@@ -31,83 +30,13 @@ const __dirname = path.dirname(__filename)
 
 const scripts: Record<string, { name: string; file: string }> = {
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
-  products: { name: 'Products (kombucha bottles)', file: 'seed-products.ts' },
-  'workshop-products': {
-    name: 'Workshop Products (bookable workshops)',
-    file: 'seed-workshop-products.ts',
-  },
-  placeholders: { name: 'Placeholder products (reset)', file: 'seed-placeholder-products.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
-  workshops: { name: 'Workshops overview page (hero)', file: 'seed-workshops.ts' },
-  gastronomy: { name: 'Gastronomy page', file: 'seed-gastronomy.ts' },
-  fermentation: { name: 'Fermentation page (with images)', file: 'seed-fermentation.ts' },
-  'fermentation-reset': {
-    name: 'Fermentation reset (clear CMS data so code defaults show)',
-    file: 'seed-fermentation-reset.ts',
-  },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
-  shop: { name: 'Shop page (block-based)', file: 'seed-shop-new.ts' },
-  'workshop-pages': {
-    name: 'Workshop pages (tempeh, lakto-gemuese, kombucha)',
-    file: 'seed-workshop-pages.ts',
-  },
-  'workshop-collections': {
-    name: 'Workshop Collections (Workshops, Locations, Appointments)',
-    file: 'seed-workshop-collections.ts',
-  },
-  posts: { name: 'How-To Articles (Posts collection)', file: 'seed-posts.ts' },
-  'tempeh-posts': { name: 'Tempeh How-To Articles', file: 'seed-tempeh-posts.ts' },
-  'lakto-detail': { name: 'Lakto Detail (workshopDetail tab)', file: 'seed-lakto-detail.ts' },
-  'tempeh-detail': { name: 'Tempeh Detail (workshopDetail tab)', file: 'seed-tempeh-detail.ts' },
-  'kombucha-detail': {
-    name: 'Kombucha Detail (workshopDetail tab)',
-    file: 'seed-kombucha-detail.ts',
-  },
-  kombucha: { name: 'Kombucha Workshop Detail (workshopDetail)', file: 'seed-kombucha.ts' },
-  'kombucha-phases': {
-    name: 'Kombucha Workshop Phases block',
-    file: 'seed-kombucha-phases.ts',
-  },
-  'voucher-bg': { name: 'VoucherCta background image patch', file: 'seed-voucher-bg.ts' },
-  'online-courses': {
-    name: 'Online Courses (collection documents)',
-    file: 'seed-online-courses.ts',
-  },
-  'courses-page': {
-    name: 'Courses page (layout blocks: FeatureCards + OnlineCourseSlider)',
-    file: 'seed-courses-page.ts',
-  },
-  globals: {
-    name: 'All Globals (Footer, Testimonials, Sponsors, VoucherCTA, WorkshopSlider, ProductSlider, WorkshopCards)',
-    file: 'seed-globals.ts',
-  },
 }
 
-const allOrder = [
-  'header',
-  'products',
-  'workshop-products',
-  'home',
-  'about',
-  'contact',
-  'workshops',
-  'gastronomy',
-  'fermentation',
-  'voucher',
-  'shop',
-  'workshop-pages',
-  'posts',
-  'tempeh-posts',
-  'lakto-detail',
-  'tempeh-detail',
-  'kombucha-detail',
-  'kombucha-phases',
-  'online-courses',
-  'courses-page',
-  'globals',
-]
+const allOrder = ['header', 'home', 'about', 'contact', 'voucher']
 
 function runSeed(key: string): boolean {
   const script = scripts[key]
@@ -120,29 +49,9 @@ function runSeed(key: string): boolean {
   const scriptPath = path.resolve(__dirname, script.file)
   console.log(`\n── ${script.name} ──`)
 
-  const args = process.argv.slice(2).filter((a) => a !== target)
-  const seedEnv = { ...process.env }
-  seedEnv.PAYLOAD_SEED = 'true'
-  if (key === 'gastronomy') {
-    seedEnv.PAYLOAD_SKIP_GASTRONOMY_CONDITION = '1'
-  }
-  if (key === 'fermentation') {
-    seedEnv.PAYLOAD_SKIP_FERMENTATION_CONDITION = '1'
-  }
-  if (key === 'shop') {
-    seedEnv.PAYLOAD_SKIP_SHOP_CONDITION = '1'
-  }
-  if (
-    key === 'workshop-pages' ||
-    key === 'lakto-detail' ||
-    key === 'tempeh-detail' ||
-    key === 'kombucha-detail'
-  ) {
-    seedEnv.PAYLOAD_SKIP_WORKSHOP_CONDITION = '1'
-  }
-  const result = spawnSync('npx', ['tsx', scriptPath, ...args], {
+  const result = spawnSync('npx', ['tsx', scriptPath], {
     stdio: 'inherit',
-    env: seedEnv,
+    env: process.env,
     cwd: process.cwd(),
     shell: true,
   })

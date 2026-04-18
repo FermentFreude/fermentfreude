@@ -54,8 +54,7 @@ export default async function OrdersPage() {
     const result = await payload.find({
       collection: 'orders',
       limit: 100,
-      user,
-      overrideAccess: false,
+      overrideAccess: true,
       where: { customer: { equals: user.id } },
     })
     orders = result?.docs || []

@@ -3,6 +3,7 @@
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { BookingModal } from './BookingModal'
 import { addWorkshopToCart } from './add-to-cart-utils'
@@ -320,6 +321,7 @@ export function KombuchaBookingCard({
   const datesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
   const { addItem } = useCart()
+  const router = useRouter()
 
   useEffect(() => {
     const el = sectionRef.current
@@ -490,65 +492,69 @@ export function KombuchaBookingCard({
                   <p className="py-8 text-center font-display text-sm text-[#9a9a9a]">
                     Aktuell keine Termine geplant — schau bald wieder vorbei.
                   </p>
-                ) : cmsDates.map((d) => (
-                  <div
-                    key={d.id}
-                    className="bg-[#f9f7f3] border border-[#e8e4d9] rounded-lg p-4 sm:p-5 hover:border-[#555954] transition-all duration-300"
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-start sm:items-center">
-                      {/* Date */}
-                      <div>
-                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                          Datum
-                        </p>
-                        <p className="font-display font-bold text-base text-[#1a1a1a]">{d.date}</p>
-                      </div>
+                ) : (
+                  cmsDates.map((d) => (
+                    <div
+                      key={d.id}
+                      className="bg-[#f9f7f3] border border-[#e8e4d9] rounded-lg p-4 sm:p-5 hover:border-[#555954] transition-all duration-300"
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-start sm:items-center">
+                        {/* Date */}
+                        <div>
+                          <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                            Datum
+                          </p>
+                          <p className="font-display font-bold text-base text-[#1a1a1a]">
+                            {d.date}
+                          </p>
+                        </div>
 
-                      {/* Time */}
-                      <div>
-                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                          Zeit
-                        </p>
-                        <div className="flex items-center gap-2 text-sm text-[#555954]">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                        {/* Time */}
+                        <div>
+                          <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                            Zeit
+                          </p>
+                          <div className="flex items-center gap-2 text-sm text-[#555954]">
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            <span>{d.time}</span>
+                          </div>
+                        </div>
+
+                        {/* Availability */}
+                        <div>
+                          <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                            Plätze frei
+                          </p>
+                          <p className="font-display font-bold text-base text-[#1a1a1a]">
+                            {d.spotsLeft > 0 ? `${d.spotsLeft} Plätze` : 'Ausgebucht'}
+                          </p>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="pt-2 sm:pt-0">
+                          <button
+                            onClick={() => setBookingDate(d)}
+                            className="inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954] transition-all duration-300"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                          <span>{d.time}</span>
+                            → Buchen
+                          </button>
                         </div>
                       </div>
-
-                      {/* Availability */}
-                      <div>
-                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                          Plätze frei
-                        </p>
-                        <p className="font-display font-bold text-base text-[#1a1a1a]">
-                          {d.spotsLeft > 0 ? `${d.spotsLeft} Plätze` : 'Ausgebucht'}
-                        </p>
-                      </div>
-
-                      {/* Action Button */}
-                      <div className="pt-2 sm:pt-0">
-                        <button
-                          onClick={() => setBookingDate(d)}
-                          className="inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954] transition-all duration-300"
-                        >
-                          → Buchen
-                        </button>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -760,13 +766,14 @@ export function KombuchaBookingCard({
           onConfirm={async (guestCount) => {
             try {
               await addWorkshopToCart({
-                addItem,
+                addItemAction: addItem,
                 appointmentId: bookingDate.appointmentId ?? bookingDate.id,
                 workshopSlug: 'kombucha',
                 workshopTitle: 'Kombucha Workshop',
                 guestCount,
               })
               setBookingDate(null)
+              router.refresh()
             } catch (error) {
               // Error already handled by addWorkshopToCart with toast
               console.error('Booking failed:', error)
