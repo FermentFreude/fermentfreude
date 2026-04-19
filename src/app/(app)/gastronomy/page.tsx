@@ -14,6 +14,8 @@ import { getPayload } from 'payload'
 
 import type { Page as PageType } from '@/payload-types'
 
+export const dynamic = 'force-dynamic'
+
 const DEFAULT_HERO_CTA = 'Take A Look'
 const DEFAULT_OFFER_TITLE = 'What we offer'
 const DEFAULT_CTA_HEADING =

@@ -18,8 +18,6 @@ export const revalidate = 3600 // Revalidate every hour
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getServerSideURL()
 
-  const payload = await getPayload({ config: configPromise })
-
   // ─── Static pages ──────────────────────────────────────────
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
@@ -39,6 +37,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   // ─── CMS pages ─────────────────────────────────────────────
+  let payload
+  try {
+    payload = await getPayload({ config: configPromise })
+  } catch {
+    return staticPages
+  }
+
   let cmsPages: MetadataRoute.Sitemap = []
   try {
     const pagesResult = await payload.find({

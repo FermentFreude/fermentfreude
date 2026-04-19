@@ -5,6 +5,8 @@ import { getPayload } from 'payload'
 
 import { ArticleDetailClient } from './ArticleDetailClient'
 
+export const dynamic = 'force-dynamic'
+
 /* ═══════════════════════════════════════════════════════════════
  *  /tipps/[slug] — Server Component
  *
