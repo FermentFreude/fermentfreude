@@ -183,6 +183,37 @@ export const accountI18n = {
     loginRequired: 'Bitte melde dich an, um auf dein Konto zuzugreifen.',
     loginRequiredOrders: 'Bitte melde dich an, um deine Bestellungen zu sehen.',
     loginRequiredAddresses: 'Bitte melde dich an, um deine Adressen zu verwalten.',
+
+    // Downloads
+    downloads: 'Downloads',
+    downloadsSubtitle: 'Deine herunterladbaren Dateien und digitalen Produkte.',
+    noDownloads: 'Noch keine Downloads verfügbar.',
+    loginRequiredDownloads: 'Bitte melde dich an, um deine Downloads zu sehen.',
+
+    // Purchases / Reviews
+    purchases: 'Einkäufe',
+    reviews: 'Bewertungen',
+    reviewsSubtitle: 'Deine Produktbewertungen und Feedback.',
+    noReviews: 'Noch keine Bewertungen abgegeben.',
+    loginRequiredReviews: 'Bitte melde dich an, um deine Bewertungen zu sehen.',
+
+    // Return Requests
+    returnRequests: 'Rücksendungen',
+    returnRequestsSubtitle: 'Rücksendeanträge und deren Status.',
+    noReturnRequests: 'Keine Rücksendeanträge vorhanden.',
+    loginRequiredReturnRequests: 'Bitte melde dich an, um deine Rücksendeanträge zu sehen.',
+
+    // Cancellations
+    cancellations: 'Stornierungen',
+    cancellationsSubtitle: 'Stornierungsanträge und Erstattungen.',
+    noCancellations: 'Keine Stornierungsanträge vorhanden.',
+    loginRequiredCancellations: 'Bitte melde dich an, um deine Stornierungen zu sehen.',
+
+    // Payment Methods
+    paymentMethods: 'Zahlungsmethoden',
+    paymentMethodsSubtitle: 'Gespeicherte Zahlungsmethoden verwalten.',
+    noPaymentMethods: 'Keine Zahlungsmethoden gespeichert.',
+    loginRequiredPaymentMethods: 'Bitte melde dich an, um deine Zahlungsmethoden zu sehen.',
   },
   en: {
     // Sidebar / shared
@@ -360,6 +391,37 @@ export const accountI18n = {
     loginRequired: 'Please log in to access your account.',
     loginRequiredOrders: 'Please log in to view your orders.',
     loginRequiredAddresses: 'Please log in to manage your addresses.',
+
+    // Downloads
+    downloads: 'Downloads',
+    downloadsSubtitle: 'Your downloadable files and digital products.',
+    noDownloads: 'No downloads available yet.',
+    loginRequiredDownloads: 'Please sign in to view your downloads.',
+
+    // Purchases / Reviews
+    purchases: 'Purchases',
+    reviews: 'Reviews',
+    reviewsSubtitle: 'Your product reviews and feedback.',
+    noReviews: 'No reviews submitted yet.',
+    loginRequiredReviews: 'Please sign in to view your reviews.',
+
+    // Return Requests
+    returnRequests: 'Returns',
+    returnRequestsSubtitle: 'Return requests and their status.',
+    noReturnRequests: 'No return requests found.',
+    loginRequiredReturnRequests: 'Please sign in to view your return requests.',
+
+    // Cancellations
+    cancellations: 'Cancellations',
+    cancellationsSubtitle: 'Cancellation requests and refunds.',
+    noCancellations: 'No cancellation requests found.',
+    loginRequiredCancellations: 'Please sign in to view your cancellations.',
+
+    // Payment Methods
+    paymentMethods: 'Payment Methods',
+    paymentMethodsSubtitle: 'Manage your saved payment methods.',
+    noPaymentMethods: 'No payment methods saved.',
+    loginRequiredPaymentMethods: 'Please sign in to view your payment methods.',
   },
 } as const
 
