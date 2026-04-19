@@ -17,11 +17,11 @@
  */
 import config from '@payload-config'
 // @ts-expect-error — dotenv types not resolved via package.json exports
+import type { Media } from '@/payload-types'
 import { config as loadEnv } from 'dotenv'
 import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
-import type { Media } from '@/payload-types'
 
 // Load .env file
 loadEnv()
