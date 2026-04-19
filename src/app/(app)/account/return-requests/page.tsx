@@ -3,7 +3,7 @@ import type { Order, ReturnRequest } from '@/payload-types'
 import { formatDate } from '@/utilities/form/formatters'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
-import { getHeaders } from 'next/headers.js'
+import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 

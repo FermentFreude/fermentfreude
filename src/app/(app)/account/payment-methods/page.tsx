@@ -3,7 +3,7 @@ import { stripe } from '@/lib/stripe'
 import type { User } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
-import { getHeaders } from 'next/headers.js'
+import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 
