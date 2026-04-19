@@ -88,5 +88,10 @@ export const Users: CollectionConfig = {
         defaultColumns: ['id'],
       },
     },
+    {
+      name: 'stripeCustomerId',
+      type: 'text',
+      admin: { readOnly: true },
+    },
   ],
 }
