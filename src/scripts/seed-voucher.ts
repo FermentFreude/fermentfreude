@@ -21,6 +21,7 @@ import { config as loadEnv } from 'dotenv'
 import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
+import type { Media } from '@/payload-types'
 
 // Load .env file
 loadEnv()
@@ -71,7 +72,7 @@ async function seedVoucher() {
 
   // Upload card logo
   const cardLogoPath = path.join(imagesDir, 'submark.svg')
-  let cardLogo: any = null
+  let cardLogo: Media | null = null
   if (fs.existsSync(cardLogoPath)) {
     cardLogo = await payload.create({
       collection: 'media',
@@ -86,7 +87,7 @@ async function seedVoucher() {
 
   // Upload starter set image (use a placeholder if not available)
   const starterSetImagePath = path.join(imagesDir, 'Image (Gift Set).png')
-  let starterSetImage: any = null
+  let starterSetImage: Media | null = null
   if (fs.existsSync(starterSetImagePath)) {
     starterSetImage = await payload.create({
       collection: 'media',
@@ -107,7 +108,7 @@ async function seedVoucher() {
     { file: 'Weihnachten.png', alt: 'voucher-occasion-christmas – Christmas gift occasion' },
   ]
 
-  const giftOccasionImages: any[] = []
+  const giftOccasionImages: (Media | null)[] = []
   for (const occasion of giftOccasionFiles) {
     const filePath = path.join(imagesDir, occasion.file)
     if (fs.existsSync(filePath)) {

@@ -129,35 +129,6 @@ const EXPERIENCE_CARDS = [
   },
 ]
 
-// ─── Default Workshop Dates ─────────────────────────────────
-
-const DEFAULT_DATES: WorkshopDate[] = [
-  {
-    id: 'kombucha-1',
-    date: '7. März 2026',
-    time: '14:00 – 17:00',
-    spotsLeft: 8,
-  },
-  {
-    id: 'kombucha-2',
-    date: '21. März 2026',
-    time: '10:00 – 13:00',
-    spotsLeft: 6,
-  },
-  {
-    id: 'kombucha-3',
-    date: '4. April 2026',
-    time: '14:00 – 17:00',
-    spotsLeft: 10,
-  },
-  {
-    id: 'kombucha-4',
-    date: '18. April 2026',
-    time: '10:00 – 13:00',
-    spotsLeft: 7,
-  },
-]
-
 // ─── Main Component ─────────────────────────────────────────
 
 export function KombuchaBookingCard({
