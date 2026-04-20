@@ -1248,6 +1248,22 @@ export interface Page {
    */
   voucher?: {
     /**
+     * Heading above the email fields (e.g. "Kontakt" / "Contact").
+     */
+    contactSectionHeading?: string | null;
+    /**
+     * Placeholder for the purchaser email input (only shown if user is not logged in).
+     */
+    purchaserEmailPlaceholder?: string | null;
+    /**
+     * Placeholder for the recipient email input (shown when delivery method is email).
+     */
+    recipientEmailPlaceholder?: string | null;
+    /**
+     * Shown when Stripe is missing/misconfigured (fallback when API returns a generic error).
+     */
+    stripeConfigErrorMessage?: string | null;
+    /**
      * Toggle off to hide the voucher hero section on the website.
      */
     voucherShowHero?: boolean | null;
@@ -4790,6 +4806,10 @@ export interface PagesSelect<T extends boolean = true> {
   voucher?:
     | T
     | {
+        contactSectionHeading?: T;
+        purchaserEmailPlaceholder?: T;
+        recipientEmailPlaceholder?: T;
+        stripeConfigErrorMessage?: T;
         voucherShowHero?: T;
         heroHeading?: T;
         heroDescription?: T;

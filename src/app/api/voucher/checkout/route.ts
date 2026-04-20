@@ -66,33 +66,49 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = getServerSideURL()
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      customer_email: body.purchaserEmail,
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: 'FermentFreude Geschenkgutschein',
-              description: `Workshop-Erlebnis Gutschein \u00FCber \u20AC${body.amount} \u2014 einl\u00F6sbar f\u00FCr jeden Workshop`,
+    let session
+
+    try {
+      session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        customer_email: body.purchaserEmail,
+        line_items: [
+          {
+            price_data: {
+              currency: 'eur',
+              product_data: {
+                name: 'FermentFreude Geschenkgutschein',
+                description: `Workshop-Erlebnis Gutschein \u00FCber \u20AC${body.amount} \u2014 einl\u00F6sbar f\u00FCr jeden Workshop`,
+              },
+              unit_amount: body.amount * 100,
             },
-            unit_amount: body.amount * 100,
+            quantity: 1,
           },
-          quantity: 1,
+        ],
+        metadata: {
+          type: 'voucher_purchase',
+          amount: String(body.amount),
+          deliveryMethod: body.deliveryMethod,
+          purchaserEmail: body.purchaserEmail,
+          recipientEmail: body.recipientEmail || '',
         },
-      ],
-      metadata: {
-        type: 'voucher_purchase',
-        amount: String(body.amount),
-        deliveryMethod: body.deliveryMethod,
-        purchaserEmail: body.purchaserEmail,
-        recipientEmail: body.recipientEmail || '',
-      },
-      success_url: `${baseUrl}/voucher/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/workshops/voucher`,
-    })
+        success_url: `${baseUrl}/voucher/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/workshops/voucher`,
+      })
+    } catch (stripeError: unknown) {
+      // Surface a clear, non-technical error when Stripe is misconfigured.
+      console.error('[voucher/checkout] Stripe error:', stripeError)
+
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Stripe is not configured correctly. Please check STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY in your .env file.',
+        },
+        { status: 500 },
+      )
+    }
 
     if (!session.url) {
       return NextResponse.json(

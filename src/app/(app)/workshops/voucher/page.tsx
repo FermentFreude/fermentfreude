@@ -47,6 +47,11 @@ const DEFAULTS = {
   heroHeading: 'Give the gift of fermentation',
   heroDescription:
     'The perfect gift for foodies and the health-conscious.\nChoose an amount and receive your voucher.',
+  contactSectionHeading: 'Contact',
+  purchaserEmailPlaceholder: 'Your email',
+  recipientEmailPlaceholder: "Recipient's email (optional)",
+  stripeConfigErrorMessage:
+    'Stripe is not configured correctly (invalid/missing STRIPE_SECRET_KEY). Please contact site support.',
   voucherAmounts: [{ amount: '99€' }],
   deliveryOptions: [
     { type: 'email', title: 'By email to print at home', icon: 'email' as const },
@@ -160,6 +165,19 @@ export default async function VoucherPage() {
   const deliveryDisclaimer = v?.deliveryDisclaimer ?? DEFAULTS.deliveryDisclaimer
   const pickupAddress = v?.pickupAddress ?? DEFAULTS.pickupAddress
   const addToCartButton = resolve(v?.addToCartButton, DEFAULTS.addToCartButton)
+  const contactSectionHeading = resolve(v?.contactSectionHeading, DEFAULTS.contactSectionHeading)
+  const purchaserEmailPlaceholder = resolve(
+    v?.purchaserEmailPlaceholder,
+    DEFAULTS.purchaserEmailPlaceholder,
+  )
+  const recipientEmailPlaceholder = resolve(
+    v?.recipientEmailPlaceholder,
+    DEFAULTS.recipientEmailPlaceholder,
+  )
+  const stripeConfigErrorMessage = resolve(
+    v?.stripeConfigErrorMessage,
+    DEFAULTS.stripeConfigErrorMessage,
+  )
 
   const voucherWhyHeading = resolve(v?.voucherWhyHeading, DEFAULTS.voucherWhyHeading)
   const voucherWhyBody = resolve(v?.voucherWhyBody, DEFAULTS.voucherWhyBody)
@@ -239,6 +257,10 @@ export default async function VoucherPage() {
           deliveryDisclaimer={deliveryDisclaimer}
           pickupAddress={pickupAddress}
           addToCartButton={addToCartButton}
+          contactSectionHeading={contactSectionHeading}
+          purchaserEmailPlaceholder={purchaserEmailPlaceholder}
+          recipientEmailPlaceholder={recipientEmailPlaceholder}
+          stripeConfigErrorMessage={stripeConfigErrorMessage}
           showAmounts={showAmounts}
           showDeliveryOptions={showDeliveryOptions}
           showCTA={showCTA}
