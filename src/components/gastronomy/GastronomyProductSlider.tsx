@@ -119,7 +119,7 @@ export function GastronomyProductSlider({
               key={slide.id ?? i}
               className="relative flex min-w-0 flex-[0_0_100%] min-h-svh flex-col md:flex-row"
             >
-              {/* Left: product image (~2/3) — diagonal edge, dark overlay */}
+              {/* Left: product image (~2/3) — diagonal edge */}
               <div
                 className="relative min-h-[40vh] overflow-hidden md:min-h-0 md:w-[58%] lg:w-[65%]"
                 style={{
@@ -146,7 +146,6 @@ export function GastronomyProductSlider({
                 ) : (
                   <div className="absolute inset-0 bg-[#333333]" aria-hidden />
                 )}
-                <div className="absolute inset-0 bg-black/50" aria-hidden />
               </div>
 
               {/* Right: light off-white/beige panel — same structure & spacing as Kitchen Knives */}
@@ -166,13 +165,14 @@ export function GastronomyProductSlider({
                   >
                     {ctaLabel}
                   </Link>
-                  {/* PREV | NEXT — left-aligned, generous spacing above */}
+                  {/* PREV | NEXT — keep mobile counter separate to prevent overlap */}
                   {resolvedSlides.length > 1 && (
-                    <div className="mt-12 flex items-center gap-0 md:mt-16">
-                      <span className="font-sans text-sm font-extrabold tracking-tight text-[#1b1b1b]/70 md:hidden md:text-base">
+                    <div className="mt-12 md:mt-16">
+                      <span className="mb-3 block font-sans text-sm font-extrabold tracking-tight text-[#1b1b1b]/70 md:hidden">
                         {String(selectedIndex + 1).padStart(2, '0')} /{' '}
                         {String(resolvedSlides.length).padStart(2, '0')}{' '}
                       </span>
+                      <div className="flex items-center gap-0">
                       <button
                         type="button"
                         aria-label={resolvedPrev}
@@ -190,6 +190,7 @@ export function GastronomyProductSlider({
                       >
                         {resolvedNext}
                       </button>
+                      </div>
                     </div>
                   )}
                 </div>

@@ -29,6 +29,7 @@ export const autoTranslateCollection: CollectionAfterChangeHook = async ({
       id: doc.id,
       locale: 'en',
       depth: 0,
+      req,
     })
 
     // Collect texts that need translation by walking schema + documents together
@@ -58,12 +59,19 @@ export const autoTranslateCollection: CollectionAfterChangeHook = async ({
       setNestedValue(updateData, op.path, translated[i])
     })
 
+    // Merge with existing EN document to avoid failing required sibling fields
+    // in arrays/blocks when only a subset of localized fields is translated.
+    const mergedData = deepMergeForUpdate(enDoc as unknown as Record<string, unknown>, updateData)
+
     await payload.update({
       collection: collection.slug,
       id: doc.id,
       locale: 'en',
-      data: updateData,
+      fallbackLocale: 'de',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data: mergedData as any,
       context: { skipAutoTranslate: true, skipRevalidate: true },
+      req,
     })
 
     payload.logger.info(
@@ -199,4 +207,59 @@ function setNestedValue(obj: Record<string, unknown>, path: string, value: unkno
       ;(current as Record<string, unknown>)[lastKey] = value
     }
   }
+}
+
+/** Deep merge source into target, only overriding with non-undefined values from source */
+function deepMergeForUpdate(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>,
+): Record<string, unknown> {
+  const result = { ...target }
+  for (const key of Object.keys(source)) {
+    if (Array.isArray(source[key]) && Array.isArray(target[key])) {
+      const sourceArray = source[key] as unknown[]
+      const targetArray = target[key] as unknown[]
+      const maxLen = Math.max(targetArray.length, sourceArray.length)
+
+      result[key] = Array.from({ length: maxLen }, (_, idx) => {
+        const sourceItem = sourceArray[idx]
+        const targetItem = targetArray[idx]
+
+        if (sourceItem === undefined) return targetItem
+        if (
+          sourceItem &&
+          typeof sourceItem === 'object' &&
+          !Array.isArray(sourceItem) &&
+          targetItem &&
+          typeof targetItem === 'object' &&
+          !Array.isArray(targetItem)
+        ) {
+          return deepMergeForUpdate(
+            targetItem as Record<string, unknown>,
+            sourceItem as Record<string, unknown>,
+          )
+        }
+
+        return sourceItem
+      })
+      continue
+    }
+
+    if (
+      source[key] &&
+      typeof source[key] === 'object' &&
+      !Array.isArray(source[key]) &&
+      target[key] &&
+      typeof target[key] === 'object' &&
+      !Array.isArray(target[key])
+    ) {
+      result[key] = deepMergeForUpdate(
+        target[key] as Record<string, unknown>,
+        source[key] as Record<string, unknown>,
+      )
+    } else if (source[key] !== undefined) {
+      result[key] = source[key]
+    }
+  }
+  return result
 }
