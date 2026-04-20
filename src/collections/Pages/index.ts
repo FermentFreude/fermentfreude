@@ -269,10 +269,10 @@ export const Pages: CollectionConfig = {
               type: 'text',
               required: false,
               localized: true,
-              label: 'Trusted by — heading',
+              label: 'Partner section — heading (editable)',
               admin: {
                 description:
-                  'Lead label for the pill row under the hero (e.g. TRUSTED BY / VERTRAUT VON).',
+                  'Editable heading above the partner tags. Example DE: "Für Profiküchen". Example EN: "For professional kitchens".',
               },
             },
             {
@@ -281,10 +281,10 @@ export const Pages: CollectionConfig = {
               required: false,
               minRows: 0,
               maxRows: 12,
-              label: 'Trusted by — tags',
+              label: 'Partner section — tags (editable)',
               admin: {
                 description:
-                  'Category pills in one row (Restaurants, Hotels, Catering, …). Second section on the page.',
+                  'Editable chips shown next to the heading (e.g. Restaurants, Hotels, Catering).',
               },
               fields: [
                 {
@@ -292,7 +292,7 @@ export const Pages: CollectionConfig = {
                   type: 'text',
                   required: true,
                   localized: true,
-                  label: 'Tag text',
+                  label: 'Chip text',
                 },
               ],
             },
@@ -602,6 +602,47 @@ export const Pages: CollectionConfig = {
               required: false,
               localized: true,
               label: 'Contact Form Description',
+            },
+            {
+              name: 'gastronomyContactFormHeading',
+              type: 'text',
+              required: false,
+              localized: true,
+              label: 'Contact Form — right column heading',
+              admin: {
+                description:
+                  'Heading above the form fields (e.g. "Frag uns alles" / "Ask About Anything").',
+              },
+            },
+            {
+              name: 'gastronomyContactAddress',
+              type: 'textarea',
+              required: false,
+              localized: true,
+              label: 'Contact Details — Address',
+              admin: {
+                description: 'Address shown in the left contact details panel.',
+              },
+            },
+            {
+              name: 'gastronomyContactPhone',
+              type: 'text',
+              required: false,
+              localized: true,
+              label: 'Contact Details — Phone',
+              admin: {
+                description: 'Phone number shown in the left contact details panel.',
+              },
+            },
+            {
+              name: 'gastronomyContactEmail',
+              type: 'text',
+              required: false,
+              localized: true,
+              label: 'Contact Details — Email',
+              admin: {
+                description: 'Email address shown in the left contact details panel.',
+              },
             },
             {
               name: 'gastronomyFormPlaceholders',

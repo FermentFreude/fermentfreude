@@ -24,6 +24,7 @@ export const autoTranslateGlobal: GlobalAfterChangeHook = async ({ doc, global, 
     const enDoc = await payload.findGlobal({
       slug: global.slug,
       locale: 'en',
+      req,
     })
 
     // Collect texts that need translation by walking the schema
@@ -59,9 +60,11 @@ export const autoTranslateGlobal: GlobalAfterChangeHook = async ({ doc, global, 
     await payload.updateGlobal({
       slug: global.slug,
       locale: 'en',
+      fallbackLocale: 'de',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: mergedData as any,
       context: { skipAutoTranslate: true, skipRevalidate: true },
+      req,
     })
 
     payload.logger.info(
@@ -204,6 +207,35 @@ function deepMergeForUpdate(
 ): Record<string, unknown> {
   const result = { ...target }
   for (const key of Object.keys(source)) {
+    if (Array.isArray(source[key]) && Array.isArray(target[key])) {
+      const sourceArray = source[key] as unknown[]
+      const targetArray = target[key] as unknown[]
+      const maxLen = Math.max(targetArray.length, sourceArray.length)
+
+      result[key] = Array.from({ length: maxLen }, (_, idx) => {
+        const sourceItem = sourceArray[idx]
+        const targetItem = targetArray[idx]
+
+        if (sourceItem === undefined) return targetItem
+        if (
+          sourceItem &&
+          typeof sourceItem === 'object' &&
+          !Array.isArray(sourceItem) &&
+          targetItem &&
+          typeof targetItem === 'object' &&
+          !Array.isArray(targetItem)
+        ) {
+          return deepMergeForUpdate(
+            targetItem as Record<string, unknown>,
+            sourceItem as Record<string, unknown>,
+          )
+        }
+
+        return sourceItem
+      })
+      continue
+    }
+
     if (
       source[key] &&
       typeof source[key] === 'object' &&
