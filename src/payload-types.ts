@@ -885,11 +885,11 @@ export interface Page {
         }[]
       | null;
     /**
-     * Lead label for the pill row under the hero (e.g. TRUSTED BY / VERTRAUT VON).
+     * Editable heading above the partner tags. Example DE: "Für Profiküchen". Example EN: "For professional kitchens".
      */
     gastronomyTrustedByHeading?: string | null;
     /**
-     * Category pills in one row (Restaurants, Hotels, Catering, …). Second section on the page.
+     * Editable chips shown next to the heading (e.g. Restaurants, Hotels, Catering).
      */
     gastronomyTrustedByBadges?:
       | {
@@ -978,6 +978,22 @@ export interface Page {
     gastronomyContactImage?: (string | null) | Media;
     gastronomyContactTitle: string;
     gastronomyContactDescription?: string | null;
+    /**
+     * Heading above the form fields (e.g. "Frag uns alles" / "Ask About Anything").
+     */
+    gastronomyContactFormHeading?: string | null;
+    /**
+     * Address shown in the left contact details panel.
+     */
+    gastronomyContactAddress?: string | null;
+    /**
+     * Phone number shown in the left contact details panel.
+     */
+    gastronomyContactPhone?: string | null;
+    /**
+     * Email address shown in the left contact details panel.
+     */
+    gastronomyContactEmail?: string | null;
     gastronomyFormPlaceholders?: {
       firstName?: string | null;
       lastName?: string | null;
@@ -4659,6 +4675,10 @@ export interface PagesSelect<T extends boolean = true> {
         gastronomyContactImage?: T;
         gastronomyContactTitle?: T;
         gastronomyContactDescription?: T;
+        gastronomyContactFormHeading?: T;
+        gastronomyContactAddress?: T;
+        gastronomyContactPhone?: T;
+        gastronomyContactEmail?: T;
         gastronomyFormPlaceholders?:
           | T
           | {
