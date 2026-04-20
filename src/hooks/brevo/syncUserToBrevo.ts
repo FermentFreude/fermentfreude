@@ -29,7 +29,7 @@ export const syncUserToBrevo: CollectionAfterChangeHook = async ({ doc, operatio
     // Send welcome email
     await sendTemplateEmail({
       to: [{ email, name: doc.name || undefined }],
-      templateId: BREVO_TEMPLATES.WELCOME,
+      templateId: BREVO_TEMPLATES.NEWSLETTER_WELCOME,
       params: {
         CUSTOMER_NAME: doc.name || email,
       },

@@ -321,9 +321,6 @@ async function setupTemplates() {
       items.forEach((item) => console.log(item))
     })
   }
-      console.log(`   • ${r.name} (Brevo ID: ${r.brevoId})`)
-    })
-  }
 
   if (failed.length > 0) {
     console.log()

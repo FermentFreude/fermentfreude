@@ -5,7 +5,26 @@ import { getPayload } from 'payload'
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as { bookingId?: string; cartId?: string }
+    const rawBody = await req.text()
+
+    if (!rawBody.trim()) {
+      return NextResponse.json(
+        { success: false, error: 'Request body is required.' },
+        { status: 400 },
+      )
+    }
+
+    let body: { bookingId?: string; cartId?: string }
+
+    try {
+      body = JSON.parse(rawBody) as { bookingId?: string; cartId?: string }
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'Request body must be valid JSON.' },
+        { status: 400 },
+      )
+    }
+
     const bookingId = typeof body.bookingId === 'string' ? body.bookingId.trim() : ''
     const cartId = typeof body.cartId === 'string' ? body.cartId.trim() : ''
 

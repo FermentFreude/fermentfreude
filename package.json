@@ -22,6 +22,7 @@
     "promote:dry": "bash scripts/promote-to-prod.sh --dry-run",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "brevo-setup-templates": "node scripts/brevo-setup-templates.mjs",
     "stripe-webhooks": "stripe listen --api-key $STRIPE_SECRET_KEY --forward-to localhost:3000/api/payments/stripe/webhooks",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
