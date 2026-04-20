@@ -1168,7 +1168,7 @@ export interface Page {
     fermentationCtaSecondaryLabel?: string | null;
     fermentationCtaSecondaryUrl?: string | null;
     /**
-     * Upload a video (MP4) as background. Or use the URL field below.
+     * Upload a video (MP4) as background. Or use the URL field below for videos in public/assets/videos/.
      */
     fermentationCtaVideo?: (string | null) | Media;
     /**
@@ -1235,9 +1235,6 @@ export interface Page {
           priceSuffix?: string | null;
           buttonLabel: string;
           buttonUrl: string;
-          /**
-           * e.g. "February 15, 2026"
-           */
           nextDate?: string | null;
           id?: string | null;
         }[]
