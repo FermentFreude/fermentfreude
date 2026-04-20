@@ -16,15 +16,11 @@
  * Run: npx tsx src/scripts/seed-voucher.ts
  */
 import config from '@payload-config'
-// @ts-expect-error — dotenv types not resolved via package.json exports
 import type { Media } from '@/payload-types'
-import { config as loadEnv } from 'dotenv'
+import 'dotenv/config'
 import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
-
-// Load .env file
-loadEnv()
 
 import {
   voucherPageDataDE,

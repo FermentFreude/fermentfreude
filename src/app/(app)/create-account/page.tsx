@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 import { CreateAccountForm } from '@/components/forms/CreateAccountForm'
 import configPromise from '@payload-config'
-import { headers as getHeaders } from 'next/headers'
+import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 

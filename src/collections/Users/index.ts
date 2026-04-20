@@ -35,6 +35,15 @@ export const Users: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'marketingConsent',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Marketing consent',
+      admin: {
+        description: 'Whether the customer opted in to marketing emails during account creation.',
+      },
+    },
+    {
       name: 'roles',
       type: 'select',
       access: {

@@ -21,6 +21,9 @@ export const syncUserToBrevo: CollectionAfterChangeHook = async ({ doc, operatio
       email,
       firstName: doc.name?.split(' ')[0],
       lastName: doc.name?.split(' ').slice(1).join(' '),
+      attributes: {
+        MARKETING_CONSENT: Boolean(doc.marketingConsent),
+      },
     })
 
     // Send welcome email

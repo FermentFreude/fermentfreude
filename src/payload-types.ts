@@ -222,6 +222,10 @@ export interface UserAuthOperations {
 export interface User {
   id: string;
   name?: string | null;
+  /**
+   * Whether the customer opted in to marketing emails during account creation.
+   */
+  marketingConsent?: boolean | null;
   roles?: ('admin' | 'customer')[] | null;
   orders?: {
     docs?: (string | Order)[];
@@ -4446,6 +4450,7 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  marketingConsent?: T;
   roles?: T;
   orders?: T;
   cart?: T;

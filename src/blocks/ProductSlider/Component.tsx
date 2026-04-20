@@ -140,8 +140,14 @@ export const ProductSliderBlock: React.FC<Props> = ({
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-16 mb-8 lg:mb-10">
           {/* Left: Heading + Description */}
           <div className="flex-1 max-w-264">
-            {/* Heading row: "Discover UNIQUE." + eyebrow aligned top-right */}
-            <div className="flex items-start gap-3">
+            {/* Tablet/mobile: eyebrow above title. Desktop: eyebrow beside title. */}
+            <div className="flex flex-col items-start gap-2 lg:flex-row lg:items-start lg:gap-3">
+              <span
+                className="text-eyebrow font-bold text-ff-gold-accent shrink-0"
+                style={{ marginTop: '0', marginBottom: '0.1em' }}
+              >
+                {resolvedAccent}
+              </span>
               <h2
                 className="font-display font-black"
                 style={{
@@ -153,12 +159,6 @@ export const ProductSliderBlock: React.FC<Props> = ({
               >
                 {resolvedHeading}
               </h2>
-              <span
-                className="text-eyebrow font-bold text-ff-gold-accent shrink-0"
-                style={{ marginTop: '0.35em' }}
-              >
-                {resolvedAccent}
-              </span>
             </div>
             <p
               className="font-display font-bold mt-6 lg:mt-8"

@@ -152,7 +152,16 @@ export const FeatureCardsBlock: React.FC<Props> = ({
         <div className="flex flex-col gap-(--space-content-sm) w-full">
           {/* Top row: heading+eyebrow left, button right — vertically centered */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-16 w-full">
-            <FadeIn className="flex items-start gap-3 flex-1">
+            <FadeIn className="flex flex-col items-start gap-2 flex-1">
+              {resolvedEyebrow && (
+                <span
+                  ref={eyebrowRef}
+                  className="text-eyebrow font-bold text-ff-gold-accent shrink-0 lg:hidden"
+                  style={{ perspective: '600px' }}
+                >
+                  {resolvedEyebrow}
+                </span>
+              )}
               <h2
                 className="font-display font-black"
                 style={{
@@ -164,15 +173,6 @@ export const FeatureCardsBlock: React.FC<Props> = ({
               >
                 {resolvedHeading}
               </h2>
-              {resolvedEyebrow && (
-                <span
-                  ref={eyebrowRef}
-                  className="text-eyebrow font-bold text-ff-gold-accent shrink-0"
-                  style={{ marginTop: '0.35em', perspective: '600px' }}
-                >
-                  {resolvedEyebrow}
-                </span>
-              )}
             </FadeIn>
 
             {/* CTA button — centered with the heading */}
