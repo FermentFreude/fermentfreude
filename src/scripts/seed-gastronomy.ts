@@ -100,7 +100,7 @@ function gastronomyDataDE(media: {
     gastronomyHeroSliderPrevLabel: 'ZURÜCK',
     gastronomyHeroSliderNextLabel: 'WEITER',
     gastronomyHeroSliderAutoplayMs: 12000,
-    gastronomyTrustedByHeading: 'Vertraut von',
+    gastronomyTrustedByHeading: 'Für Profiküchen',
     gastronomyTrustedByBadges: [
       { label: 'Restaurants' },
       { label: 'Hotels' },
@@ -253,6 +253,10 @@ function gastronomyDataDE(media: {
     gastronomyContactTitle: 'Kontakt',
     gastronomyContactDescription:
       'Du möchtest einen Workshop buchen oder hast Fragen zu Fermentation, Produkten oder B2B-Angeboten? Melde dich gerne bei uns.',
+    gastronomyContactFormHeading: 'Frag uns alles',
+    gastronomyContactAddress: 'Grabenstraße 15, 8010 Graz, Österreich',
+    gastronomyContactPhone: '+43 660 4943577',
+    gastronomyContactEmail: 'fermentfreude@gmail.com',
     gastronomyFormPlaceholders: {
       firstName: 'Vorname',
       lastName: 'Nachname',
@@ -459,6 +463,10 @@ function gastronomyDataEN(media: {
     gastronomyContactTitle: 'Contact',
     gastronomyContactDescription:
       'Would you like to book a workshop or have questions about fermentation, products or B2B offers? We look forward to hearing from you.',
+    gastronomyContactFormHeading: 'Ask About Anything',
+    gastronomyContactAddress: 'Grabenstraße 15, 8010 Graz, Austria',
+    gastronomyContactPhone: '+43 660 4943577',
+    gastronomyContactEmail: 'fermentfreude@gmail.com',
     gastronomyFormPlaceholders: {
       firstName: 'First Name',
       lastName: 'Last Name',
