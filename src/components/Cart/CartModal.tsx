@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { gtmRemoveFromCart, gtmViewCart } from '@/lib/gtm'
+import { gtmViewCart } from '@/lib/gtm'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
@@ -73,10 +73,13 @@ export function CartModal() {
   useEffect(() => {
     if (isOpen && cart?.items?.length) {
       const items = cart.items.map((item) => {
-        const product = typeof item.product === 'object' && item.product !== null ? item.product : null
+        const product =
+          typeof item.product === 'object' && item.product !== null ? item.product : null
         return {
-          item_id: String(typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product),
-          item_name: (product as Record<string, unknown> | null)?.title as string ?? '',
+          item_id: String(
+            typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product,
+          ),
+          item_name: ((product as Record<string, unknown> | null)?.title as string) ?? '',
           quantity: item.quantity ?? 1,
           price: (product as Record<string, unknown> | null)?.priceInEUR as number | undefined,
         }

@@ -236,7 +236,9 @@ export const TestimonialsBlock: React.FC<Props> = ({
         {/* ── Header ── */}
         <div className="flex flex-col items-start gap-2 mb-(--space-content-xl) text-left">
           {resolvedEyebrow && (
-            <span className="text-eyebrow font-bold text-ff-gold-accent">{resolvedEyebrow}</span>
+            <span className="text-eyebrow font-bold text-ff-gold-accent lg:hidden">
+              {resolvedEyebrow}
+            </span>
           )}
           <h2
             className="font-display font-black"

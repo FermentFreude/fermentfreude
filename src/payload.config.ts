@@ -15,13 +15,17 @@ import {
 import path from 'path'
 import { buildConfig } from 'payload'
 
+import { CancellationRequests } from '@/collections/CancellationRequests'
 import { Categories } from '@/collections/Categories'
 import { CourseProgress } from '@/collections/CourseProgress'
+import { Downloads } from '@/collections/Downloads'
 import { Enrollments } from '@/collections/Enrollments'
 import { Media } from '@/collections/Media'
 import { OnlineCourses } from '@/collections/OnlineCourses'
 import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
+import { ReturnRequests } from '@/collections/ReturnRequests'
+import { Reviews } from '@/collections/Reviews'
 import { Users } from '@/collections/Users'
 import { Vouchers } from '@/collections/Vouchers'
 import { WorkshopAppointments } from '@/collections/WorkshopAppointments'
@@ -117,6 +121,10 @@ export default buildConfig({
     WorkshopAppointments,
     WorkshopBookings,
     Vouchers,
+    Downloads,
+    Reviews,
+    ReturnRequests,
+    CancellationRequests,
   ],
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',

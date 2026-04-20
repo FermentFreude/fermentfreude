@@ -85,6 +85,10 @@ export interface Config {
     'workshop-appointments': WorkshopAppointment;
     'workshop-bookings': WorkshopBooking;
     vouchers: Voucher;
+    downloads: Download;
+    reviews: Review;
+    'return-requests': ReturnRequest;
+    'cancellation-requests': CancellationRequest;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -127,6 +131,10 @@ export interface Config {
     'workshop-appointments': WorkshopAppointmentsSelect<false> | WorkshopAppointmentsSelect<true>;
     'workshop-bookings': WorkshopBookingsSelect<false> | WorkshopBookingsSelect<true>;
     vouchers: VouchersSelect<false> | VouchersSelect<true>;
+    downloads: DownloadsSelect<false> | DownloadsSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    'return-requests': ReturnRequestsSelect<false> | ReturnRequestsSelect<true>;
+    'cancellation-requests': CancellationRequestsSelect<false> | CancellationRequestsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -214,6 +222,10 @@ export interface UserAuthOperations {
 export interface User {
   id: string;
   name?: string | null;
+  /**
+   * Whether the customer opted in to marketing emails during account creation.
+   */
+  marketingConsent?: boolean | null;
   roles?: ('admin' | 'customer')[] | null;
   orders?: {
     docs?: (string | Order)[];
@@ -230,6 +242,7 @@ export interface User {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  stripeCustomerId?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -4146,6 +4159,101 @@ export interface Voucher {
   createdAt: string;
 }
 /**
+ * Digitale Downloads für Kunden nach dem Kauf
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "downloads".
+ */
+export interface Download {
+  id: string;
+  user: string | User;
+  order?: (string | null) | Order;
+  product?: (string | null) | Product;
+  file?: (string | null) | Media;
+  downloadCount?: number | null;
+  /**
+   * Maximale Anzahl erlaubter Downloads
+   */
+  downloadLimit?: number | null;
+  /**
+   * Datum nach dem der Download nicht mehr verfügbar ist
+   */
+  expiresAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Kundenbewertungen für Produkte
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: string;
+  user: string | User;
+  product?: (string | null) | Product;
+  rating: number;
+  title?: string | null;
+  body?: string | null;
+  /**
+   * Bewertungen müssen manuell freigegeben werden
+   */
+  status?: ('pending' | 'approved' | 'rejected') | null;
+  /**
+   * Wird automatisch gesetzt wenn eine Bestellung gefunden wird
+   */
+  verifiedPurchase?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Rückgabeanfragen von Kunden
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "return-requests".
+ */
+export interface ReturnRequest {
+  id: string;
+  user: string | User;
+  order?: (string | null) | Order;
+  reason?: string | null;
+  status?: ('pending' | 'approved' | 'rejected' | 'completed') | null;
+  /**
+   * Nur für Admins sichtbar
+   */
+  adminNotes?: string | null;
+  items?:
+    | {
+        productId?: string | null;
+        quantity?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Stornierungsanfragen von Kunden
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cancellation-requests".
+ */
+export interface CancellationRequest {
+  id: string;
+  user: string | User;
+  order?: (string | null) | Order;
+  reason?: string | null;
+  status?: ('pending' | 'approved' | 'rejected' | 'completed') | null;
+  stripeRefundId?: string | null;
+  /**
+   * Betrag in Cent, z.B. 2500 = 25,00 €
+   */
+  refundAmount?: number | null;
+  processedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
@@ -4239,6 +4347,22 @@ export interface PayloadLockedDocument {
         value: string | Voucher;
       } | null)
     | ({
+        relationTo: 'downloads';
+        value: string | Download;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: string | Review;
+      } | null)
+    | ({
+        relationTo: 'return-requests';
+        value: string | ReturnRequest;
+      } | null)
+    | ({
+        relationTo: 'cancellation-requests';
+        value: string | CancellationRequest;
+      } | null)
+    | ({
         relationTo: 'forms';
         value: string | Form;
       } | null)
@@ -4326,10 +4450,12 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  marketingConsent?: T;
   roles?: T;
   orders?: T;
   cart?: T;
   addresses?: T;
+  stripeCustomerId?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -5813,6 +5939,71 @@ export interface VouchersSelect<T extends boolean = true> {
   redeemedForWorkshop?: T;
   redeemedBy?: T;
   notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "downloads_select".
+ */
+export interface DownloadsSelect<T extends boolean = true> {
+  user?: T;
+  order?: T;
+  product?: T;
+  file?: T;
+  downloadCount?: T;
+  downloadLimit?: T;
+  expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  user?: T;
+  product?: T;
+  rating?: T;
+  title?: T;
+  body?: T;
+  status?: T;
+  verifiedPurchase?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "return-requests_select".
+ */
+export interface ReturnRequestsSelect<T extends boolean = true> {
+  user?: T;
+  order?: T;
+  reason?: T;
+  status?: T;
+  adminNotes?: T;
+  items?:
+    | T
+    | {
+        productId?: T;
+        quantity?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cancellation-requests_select".
+ */
+export interface CancellationRequestsSelect<T extends boolean = true> {
+  user?: T;
+  order?: T;
+  reason?: T;
+  status?: T;
+  stripeRefundId?: T;
+  refundAmount?: T;
+  processedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

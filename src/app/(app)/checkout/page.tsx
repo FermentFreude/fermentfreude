@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import React, { Fragment } from 'react'
+import { Fragment } from 'react'
 
 import { CheckoutPage } from '@/components/checkout/CheckoutPage'
 
 export default function Checkout() {
   return (
-    <div className="container min-h-[90vh] flex">
+    <div className="min-h-[90vh] bg-ff-cream">
       {!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY && (
         <div>
           <Fragment>
@@ -34,7 +34,9 @@ export default function Checkout() {
 
       <h1 className="sr-only">Checkout</h1>
 
-      <CheckoutPage />
+      <div className="container mx-auto container-padding section-padding-md">
+        <CheckoutPage />
+      </div>
     </div>
   )
 }

@@ -5,6 +5,8 @@ import { getPayload } from 'payload'
 
 import { ArticleDetailClient } from './ArticleDetailClient'
 
+export const dynamic = 'force-dynamic'
+
 /* ═══════════════════════════════════════════════════════════════
  *  /tipps/[slug] — Server Component
  *
@@ -15,32 +17,40 @@ import { ArticleDetailClient } from './ArticleDetailClient'
 type Params = Promise<{ slug: string }>
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const posts = await payload.find({
-    collection: 'posts',
-    limit: 1000,
-    depth: 0,
-  })
-  return posts.docs.map((p) => ({ slug: p.slug }))
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const posts = await payload.find({
+      collection: 'posts',
+      limit: 1000,
+      depth: 0,
+    })
+    return posts.docs.map((p) => ({ slug: p.slug }))
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({ params }: { params: Params }) {
-  const { slug } = await params
-  const locale = await getLocale()
-  const payload = await getPayload({ config: configPromise })
-  const result = await payload.find({
-    collection: 'posts',
-    where: { slug: { equals: slug } },
-    limit: 1,
-    depth: 0,
-    locale,
-  })
-  const post = result.docs[0]
-  if (!post) return {}
+  try {
+    const { slug } = await params
+    const locale = await getLocale()
+    const payload = await getPayload({ config: configPromise })
+    const result = await payload.find({
+      collection: 'posts',
+      where: { slug: { equals: slug } },
+      limit: 1,
+      depth: 0,
+      locale,
+    })
+    const post = result.docs[0]
+    if (!post) return {}
 
-  return {
-    title: `${post.title} — FermentFreude`,
-    description: post.summary ?? undefined,
+    return {
+      title: `${post.title} — FermentFreude`,
+      description: post.summary ?? undefined,
+    }
+  } catch {
+    return {}
   }
 }
 

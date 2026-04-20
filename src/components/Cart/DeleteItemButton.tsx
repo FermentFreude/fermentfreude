@@ -16,7 +16,7 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
       <button
         aria-label="Remove cart item"
         className={clsx(
-          'ease hover:cursor-pointer flex h-[17px] w-[17px] items-center justify-center rounded-full bg-neutral-500 transition-all duration-200',
+          'ease hover:cursor-pointer flex h-4.25 w-4.25 items-center justify-center rounded-full bg-neutral-500 transition-all duration-200',
           {
             'cursor-not-allowed px-0': !itemId || isLoading,
           },
@@ -25,10 +25,15 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
         onClick={(e: React.FormEvent<HTMLButtonElement>) => {
           e.preventDefault()
           if (itemId) {
-            const product = typeof item.product === 'object' && item.product !== null ? item.product : null
+            const product =
+              typeof item.product === 'object' && item.product !== null ? item.product : null
             gtmRemoveFromCart({
-              item_id: String(typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product),
-              item_name: (product as Record<string, unknown> | null)?.title as string ?? '',
+              item_id: String(
+                typeof item.product === 'object'
+                  ? (item.product as { id?: string })?.id
+                  : item.product,
+              ),
+              item_name: ((product as Record<string, unknown> | null)?.title as string) ?? '',
               quantity: item.quantity ?? 1,
               price: (product as Record<string, unknown> | null)?.priceInEUR as number | undefined,
             })

@@ -106,8 +106,10 @@ export function EditAddressModal() {
       })
       if (res.ok) {
         toast.success(addressId ? 'Address updated' : 'Address added')
-        router.back()
         resetForm()
+        setIsOpen(false)
+        router.push('/account/addresses')
+        router.refresh()
       } else {
         toast.error('Failed to save address')
       }
@@ -121,8 +123,8 @@ export function EditAddressModal() {
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
     if (!open) {
-      router.back()
       resetForm()
+      router.push('/account/addresses')
     }
   }
 

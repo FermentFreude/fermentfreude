@@ -1,9 +1,23 @@
 {
-	"servers": {
-		"Figma": {
-			"url": "https://mcp.figma.com/mcp",
-			"type": "http"
-		}
-	},
-	"inputs": []
+  "servers": {
+    "Figma": {
+      "url": "https://mcp.figma.com/mcp",
+      "type": "http"
+    },
+    "Brevo": {
+      "url": "https://mcp.brevo.com/v1/brevo/mcp",
+      "type": "http",
+      "headers": {
+        "Authorization": "Bearer ${input:brevo_mcp_token}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "brevo_mcp_token",
+      "description": "Brevo MCP API token (from SMTP & API > API Keys)",
+      "type": "promptString",
+      "password": true
+    }
+  ]
 }

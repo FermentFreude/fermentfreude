@@ -15,17 +15,25 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
   if (operation !== 'create') return doc
 
   const customerId = typeof doc.customer === 'object' ? doc.customer?.id : doc.customer
-  if (!customerId) return doc
 
   try {
-    const user = await req.payload.findByID({
-      collection: 'users',
-      id: customerId,
-      depth: 0,
-      overrideAccess: true,
-    })
+    let recipientEmail: string | undefined
+    let recipientName: string | undefined
 
-    if (!user?.email) return doc
+    if (customerId) {
+      const user = await req.payload.findByID({
+        collection: 'users',
+        id: customerId,
+        depth: 0,
+        overrideAccess: true,
+      })
+      recipientEmail = user?.email
+      recipientName = user?.name || undefined
+    } else if (doc.customerEmail) {
+      recipientEmail = doc.customerEmail
+    }
+
+    if (!recipientEmail) return doc
 
     const items: { product?: string | { title?: string } | null; quantity?: number }[] =
       doc.items ?? []
@@ -39,13 +47,13 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       .join(', ')
 
     await sendTemplateEmail({
-      to: [{ email: user.email, name: user.name || undefined }],
+      to: [{ email: recipientEmail, name: recipientName }],
       templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION,
       params: {
         ORDER_ID: String(doc.id),
         ORDER_TOTAL: String(doc.total ?? ''),
         ORDER_ITEMS: itemSummary,
-        CUSTOMER_NAME: user.name || user.email,
+        CUSTOMER_NAME: recipientName || recipientEmail,
         ORDER_DATE: new Date().toLocaleDateString('de-DE'),
       },
     })

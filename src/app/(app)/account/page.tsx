@@ -26,7 +26,7 @@ async function getOrderStats(userId: string): Promise<OrderStats> {
     const payload = await getPayload({ config: configPromise })
     const orders = await payload.find({
       collection: 'orders',
-      overrideAccess: false,
+      overrideAccess: true,
       where: { customer: { equals: userId } },
       limit: 5,
       sort: '-createdAt',

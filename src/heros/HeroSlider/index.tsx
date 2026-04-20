@@ -106,7 +106,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
        * ═══════════════════════════════════════════════════════ */}
 
       {/* ── Mobile split background ────────────────────────── */}
-      <div className="sm:hidden absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div className="md:hidden absolute inset-0 pointer-events-none" aria-hidden="true">
         <div
           className="h-[48%] transition-colors duration-700"
           style={{ backgroundColor: slide.bgColor }}
@@ -117,7 +117,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         />
       </div>
 
-      <div className="sm:hidden relative z-10 flex flex-col h-full pt-16">
+      <div className="md:hidden relative z-10 flex flex-col h-full pt-16">
         {/* Mobile chevrons */}
         <button
           onClick={goPrev}
@@ -293,7 +293,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
        *  Panel is FIXED on screen, content animates within it.
        *  Center panel width matches navbar container for alignment.
        * ═══════════════════════════════════════════════════════ */}
-      <div className="hidden sm:flex relative z-10 h-full w-full">
+      <div className="hidden md:flex relative z-10 h-full w-full">
         {/* Nav arrows at screen edges */}
         <NavArrow direction="left" onClick={goPrev} panelColor={slide.panelColor} />
         <NavArrow direction="right" onClick={goNext} panelColor={slide.panelColor} />

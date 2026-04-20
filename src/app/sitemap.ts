@@ -18,27 +18,87 @@ export const revalidate = 3600 // Revalidate every hour
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getServerSideURL()
 
-  const payload = await getPayload({ config: configPromise })
-
   // ─── Static pages ──────────────────────────────────────────
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
-    { url: `${baseUrl}/workshops`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/workshops/lakto-gemuese`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/workshops/kombucha`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/workshops/tempeh`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/workshops/voucher`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    {
+      url: `${baseUrl}/workshops`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/workshops/lakto-gemuese`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/workshops/kombucha`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/workshops/tempeh`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/workshops/voucher`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
     { url: `${baseUrl}/shop`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/courses`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/gastronomy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/fermentation`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/tipps`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/impressum`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${baseUrl}/datenschutz`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
+    {
+      url: `${baseUrl}/courses`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/gastronomy`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/fermentation`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/tipps`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/impressum`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.2,
+    },
+    {
+      url: `${baseUrl}/datenschutz`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.2,
+    },
     { url: `${baseUrl}/agb`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
   ]
 
   // ─── CMS pages ─────────────────────────────────────────────
+  let payload
+  try {
+    payload = await getPayload({ config: configPromise })
+  } catch {
+    return staticPages
+  }
+
   let cmsPages: MetadataRoute.Sitemap = []
   try {
     const pagesResult = await payload.find({

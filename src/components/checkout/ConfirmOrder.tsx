@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react'
 
 export const ConfirmOrder: React.FC = () => {
   const { confirmOrder } = usePayments()
-  const { cart } = useCart()
+  const { cart, clearCart } = useCart()
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -36,12 +36,19 @@ export const ConfirmOrder: React.FC = () => {
             // GA4 + Meta Pixel: purchase event
             if (cart?.items?.length) {
               const items = cart.items.map((item) => {
-                const product = typeof item.product === 'object' && item.product !== null ? item.product : null
+                const product =
+                  typeof item.product === 'object' && item.product !== null ? item.product : null
                 return {
-                  item_id: String(typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product),
-                  item_name: (product as Record<string, unknown> | null)?.title as string ?? '',
+                  item_id: String(
+                    typeof item.product === 'object'
+                      ? (item.product as { id?: string })?.id
+                      : item.product,
+                  ),
+                  item_name: ((product as Record<string, unknown> | null)?.title as string) ?? '',
                   quantity: item.quantity ?? 1,
-                  price: (product as Record<string, unknown> | null)?.priceInEUR as number | undefined,
+                  price: (product as Record<string, unknown> | null)?.priceInEUR as
+                    | number
+                    | undefined,
                 }
               })
               gtmPurchase({
@@ -51,8 +58,31 @@ export const ConfirmOrder: React.FC = () => {
               })
             }
 
+            // Clear cart after successful order confirmation
+            clearCart()
+
+            // Determine order type for the success page
+            const hasWorkshop = cart.items?.some((item) => {
+              if (typeof item.product !== 'object' || item.product === null) return false
+              const p = item.product as { productType?: string; slug?: string }
+              return (
+                p.productType === 'workshop' ||
+                (typeof p.slug === 'string' && p.slug.startsWith('workshop-'))
+              )
+            })
+            const hasCourse = cart.items?.some((item) => {
+              if (typeof item.product !== 'object' || item.product === null) return false
+              const p = item.product as { courseSlug?: string; slug?: string }
+              return (
+                Boolean(p.courseSlug) ||
+                (typeof p.slug === 'string' && p.slug.toLowerCase().includes('course'))
+              )
+            })
+
+            const type = hasCourse ? 'course' : hasWorkshop ? 'workshop' : 'order'
+            const emailParam = email ? `&email=${encodeURIComponent(email)}` : ''
             router.push(
-              `/account/orders/${result.orderID}${email ? `?email=${encodeURIComponent(email)}` : ''}`,
+              `/account/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
             )
           }
         })
@@ -61,11 +91,11 @@ export const ConfirmOrder: React.FC = () => {
       // If no payment intent ID is found, redirect to the home
       router.push('/')
     }
-  }, [cart, searchParams, confirmOrder, router])
+  }, [cart, searchParams, confirmOrder, router, clearCart])
 
   return (
     <div className="text-center w-full flex flex-col items-center justify-start gap-4">
-      <h1 className="text-2xl">Confirming Order</h1>
+      <h1 className="text-2xl font-display">Confirming Order</h1>
 
       <LoadingSpinner className="w-12 h-6" />
     </div>

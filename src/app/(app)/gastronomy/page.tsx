@@ -14,6 +14,8 @@ import { getPayload } from 'payload'
 
 import type { Page as PageType } from '@/payload-types'
 
+export const dynamic = 'force-dynamic'
+
 const DEFAULT_HERO_CTA = 'Take A Look'
 const DEFAULT_OFFER_TITLE = 'What we offer'
 const DEFAULT_CTA_HEADING =
@@ -42,20 +44,22 @@ const FALLBACK_TRUST_BADGES_EN = [
 ] as const
 
 export async function generateMetadata(): Promise<Metadata> {
-  const payload = await getPayload({ config: configPromise })
-  const locale = await getLocale()
-  const result = await payload.find({
-    collection: 'pages',
-    where: { slug: { equals: 'gastronomy' } },
-    limit: 1,
-    depth: 0,
-    locale,
-  })
-  const doc = result.docs[0] as PageType | undefined
-  if (!doc) {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const locale = await getLocale()
+    const result = await payload.find({
+      collection: 'pages',
+      where: { slug: { equals: 'gastronomy' } },
+      limit: 1,
+      depth: 0,
+      locale,
+    })
+    const doc = result.docs[0] as PageType | undefined
+    if (!doc) return { title: 'Gastronomie | Fermentfreude' }
+    return generateMeta({ doc })
+  } catch {
     return { title: 'Gastronomie | Fermentfreude' }
   }
-  return generateMeta({ doc })
 }
 
 export default async function GastronomyPage() {
@@ -100,8 +104,7 @@ export default async function GastronomyPage() {
   const offerDetails = g?.gastronomyOfferDetails ?? []
 
   const trustedByHeading =
-    g?.gastronomyTrustedByHeading?.trim() ||
-    (locale === 'de' ? 'Vertraut von' : TRUSTED_BY_DEFAULT)
+    g?.gastronomyTrustedByHeading?.trim() || (locale === 'de' ? 'Vertraut von' : TRUSTED_BY_DEFAULT)
   const trustBadgesFromCms = (g?.gastronomyTrustedByBadges ?? [])
     .map((b) => b?.label?.trim())
     .filter((x): x is string => Boolean(x))

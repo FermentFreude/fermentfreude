@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
-import { useTheme } from '@/providers/Theme'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Link from 'next/link'
@@ -35,7 +34,6 @@ export const CheckoutPage: React.FC = () => {
   const router = useRouter()
   const { cart, clearCart } = useCart()
   const [error, setError] = useState<null | string>(null)
-  const { theme } = useTheme()
   /**
    * State to manage the email input for guest checkout.
    */
@@ -60,16 +58,33 @@ export const CheckoutPage: React.FC = () => {
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
-  // Digital products (courses) don't need a shipping address.
-  // courseSlug is not in cart populate, so we identify courses by slug containing 'course'.
+  // Digital products (courses) and workshops don't need a shipping address.
   const isAllDigital = Boolean(
     cart?.items?.length &&
     cart.items.every((item) => {
       if (typeof item.product !== 'object' || item.product === null) return false
-      const p = item.product as { courseSlug?: string | null; slug?: string | null }
+      const p = item.product as {
+        courseSlug?: string | null
+        slug?: string | null
+        productType?: string | null
+      }
       const hasCourseSlug = Boolean(p.courseSlug)
       const slugIsCourse = typeof p.slug === 'string' && p.slug.toLowerCase().includes('course')
-      return hasCourseSlug || slugIsCourse
+      const isWorkshop =
+        p.productType === 'workshop' ||
+        (typeof p.slug === 'string' && p.slug.startsWith('workshop-'))
+      return hasCourseSlug || slugIsCourse || isWorkshop
+    }),
+  )
+
+  const hasWorkshop = Boolean(
+    cart?.items?.some((item) => {
+      if (typeof item.product !== 'object' || item.product === null) return false
+      const p = item.product as { productType?: string | null; slug?: string | null }
+      return (
+        p.productType === 'workshop' ||
+        (typeof p.slug === 'string' && p.slug.startsWith('workshop-'))
+      )
     }),
   )
 
@@ -104,17 +119,20 @@ export const CheckoutPage: React.FC = () => {
   useEffect(() => {
     if (!cart?.items?.length) return
     const items = cart.items.map((item) => {
-      const product = typeof item.product === 'object' && item.product !== null ? item.product : null
+      const product =
+        typeof item.product === 'object' && item.product !== null ? item.product : null
       return {
-        item_id: String(typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product),
-        item_name: (product as Record<string, unknown> | null)?.title as string ?? '',
+        item_id: String(
+          typeof item.product === 'object' ? (item.product as { id?: string })?.id : item.product,
+        ),
+        item_name: ((product as Record<string, unknown> | null)?.title as string) ?? '',
         quantity: item.quantity ?? 1,
         price: (product as Record<string, unknown> | null)?.priceInEUR as number | undefined,
       }
     })
     gtmBeginCheckout(items, cart.subtotal ?? 0)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])  // intentionally empty — fire only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // intentionally empty — fire only on mount
 
   /* ── Voucher Handlers ── */
   const handleApplyVoucher = useCallback(async () => {
@@ -183,13 +201,14 @@ export const CheckoutPage: React.FC = () => {
       // Clear cart client-side
       clearCart()
 
-      const emailParam = email ? `?email=${encodeURIComponent(email)}` : ''
-      router.push(`/account/orders/${data.orderID}${emailParam}`)
+      const type = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
+      const emailParam = email ? `&email=${encodeURIComponent(email)}` : ''
+      router.push(`/account/order-confirmation?orderId=${data.orderID}&type=${type}${emailParam}`)
     } catch (_err) {
       setError('Verbindungsfehler. Bitte versuche es erneut.')
       setProcessingPayment(false)
     }
-  }, [voucherApplied, email, user, clearCart, router])
+  }, [voucherApplied, email, user, clearCart, router, hasWorkshop, isAllDigital])
 
   const initiatePaymentIntent = useCallback(
     async (paymentID: string) => {
@@ -243,41 +262,66 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-stretch justify-stretch my-8 md:flex-row grow gap-10 md:gap-6 lg:gap-8">
-      <div className="basis-full lg:basis-2/3 flex flex-col gap-8 justify-stretch">
-        <h2 className="font-medium text-3xl">Contact</h2>
-        {!user && (
-          <div className=" bg-accent dark:bg-black rounded-lg p-4 w-full flex items-center">
-            <div className="prose dark:prose-invert">
-              <Button asChild className="no-underline text-inherit" variant="outline">
+    <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
+      {/* ── Left Column: Contact, Address, Payment ── */}
+      <div className="min-w-0 flex-1 flex flex-col gap-8">
+        {/* ── Contact Section ── */}
+        <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+          <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
+            Contact
+          </h2>
+          {!user && (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg bg-[#f5f1e8] p-4">
+              <Button asChild variant="outline" className="font-display font-bold">
                 <Link href="/login">Log in</Link>
               </Button>
-              <p className="mt-0">
-                <span className="mx-2">or</span>
-                <Link href="/create-account">create an account</Link>
-              </p>
+              <span className="text-body-sm text-ff-gray-text-light">or</span>
+              <Link
+                href="/create-account"
+                className="font-display text-body-sm font-bold text-ff-near-black underline underline-offset-2 hover:text-ff-gold-accent"
+              >
+                create an account
+              </Link>
             </div>
-          </div>
-        )}
-        {user ? (
-          <div className="bg-accent dark:bg-card rounded-lg p-4 ">
-            <div>
-              <p>{user.email}</p>{' '}
-              <p>
-                Not you?{' '}
-                <Link className="underline" href="/logout">
-                  Log out
-                </Link>
-              </p>
+          )}
+          {user ? (
+            <div className="flex items-center justify-between rounded-lg bg-[#f5f1e8] px-5 py-4">
+              <div>
+                <p className="font-display text-body font-bold text-ff-near-black">{user.email}</p>
+                <p className="mt-0.5 text-body-sm text-ff-gray-text-light">
+                  Not you?{' '}
+                  <Link
+                    className="font-bold underline underline-offset-2 hover:text-ff-near-black"
+                    href="/logout"
+                  >
+                    Log out
+                  </Link>
+                </p>
+              </div>
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ff-near-black">
+                <svg
+                  className="size-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="bg-accent dark:bg-black rounded-lg p-4 ">
-            <div>
-              <p className="mb-4">Enter your email to checkout as a guest.</p>
-
-              <FormItem className="mb-6">
-                <Label htmlFor="email">Email Address</Label>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-body-sm text-ff-gray-text-light">
+                Enter your email to checkout as a guest.
+              </p>
+              <FormItem>
+                <Label
+                  htmlFor="email"
+                  className="font-display text-body-sm font-bold text-ff-near-black"
+                >
+                  Email Address
+                </Label>
                 <Input
                   disabled={!emailEditable}
                   id="email"
@@ -285,149 +329,175 @@ export const CheckoutPage: React.FC = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   type="email"
+                  className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
                 />
               </FormItem>
-
               <Button
                 disabled={!email || !emailEditable}
                 onClick={(e) => {
                   e.preventDefault()
                   setEmailEditable(false)
                 }}
-                variant="default"
+                className="rounded-full bg-ff-near-black px-6 font-display font-bold text-white hover:bg-ff-near-black/80"
               >
                 Continue as guest
               </Button>
             </div>
-          </div>
-        )}
+          )}
+        </section>
 
-        <h2 className="font-medium text-3xl">Address</h2>
+        {/* ── Address Section ── */}
+        <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+          <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
+            Address
+          </h2>
 
-        {isAllDigital ? (
-          <div className="bg-accent dark:bg-card rounded-lg p-4">
-            <p className="text-sm text-muted-foreground">
-              Digital product — no shipping address required.
-            </p>
-          </div>
-        ) : (
-          <>
-            {billingAddress ? (
-              <div>
-                <AddressItem
-                  actions={
-                    <Button
-                      variant={'outline'}
-                      disabled={Boolean(paymentData)}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setBillingAddress(undefined)
-                      }}
-                    >
-                      Remove
-                    </Button>
-                  }
-                  address={billingAddress}
+          {isAllDigital ? (
+            <div className="flex flex-row items-center gap-3 rounded-lg bg-[#f5f1e8] px-5 py-4">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                className="shrink-0 text-[#555954]"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
-              </div>
-            ) : user ? (
-              <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
-            ) : (
-              <CreateAddressModal
-                disabled={!email || Boolean(emailEditable)}
-                callback={(address) => {
-                  setBillingAddress(address)
-                }}
-                skipSubmission={true}
-              />
-            )}
-
-            <div className="flex gap-4 items-center">
-              <Checkbox
-                id="shippingTheSameAsBilling"
-                checked={billingAddressSameAsShipping}
-                disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
-                onCheckedChange={(state) => {
-                  setBillingAddressSameAsShipping(state as boolean)
-                }}
-              />
-              <Label htmlFor="shippingTheSameAsBilling">Shipping is the same as billing</Label>
+              </svg>
+              <span className="text-body-sm font-medium text-[#555954]">
+                Workshop / digital product — no shipping address required.
+              </span>
             </div>
+          ) : (
+            <>
+              {billingAddress ? (
+                <div>
+                  <AddressItem
+                    actions={
+                      <Button
+                        variant={'outline'}
+                        disabled={Boolean(paymentData)}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setBillingAddress(undefined)
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    }
+                    address={billingAddress}
+                  />
+                </div>
+              ) : user ? (
+                <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
+              ) : (
+                <CreateAddressModal
+                  disabled={!email || Boolean(emailEditable)}
+                  callback={(address) => {
+                    setBillingAddress(address)
+                  }}
+                  skipSubmission={true}
+                />
+              )}
 
-            {!billingAddressSameAsShipping && (
-              <>
-                {shippingAddress ? (
-                  <div>
-                    <AddressItem
-                      actions={
-                        <Button
-                          variant={'outline'}
-                          disabled={Boolean(paymentData)}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            setShippingAddress(undefined)
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      }
-                      address={shippingAddress}
+              <div className="flex items-center gap-3 pt-2">
+                <Checkbox
+                  id="shippingTheSameAsBilling"
+                  checked={billingAddressSameAsShipping}
+                  disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
+                  onCheckedChange={(state) => {
+                    setBillingAddressSameAsShipping(state as boolean)
+                  }}
+                />
+                <Label
+                  htmlFor="shippingTheSameAsBilling"
+                  className="text-body-sm text-ff-gray-text-light"
+                >
+                  Shipping is the same as billing
+                </Label>
+              </div>
+
+              {!billingAddressSameAsShipping && (
+                <>
+                  {shippingAddress ? (
+                    <div>
+                      <AddressItem
+                        actions={
+                          <Button
+                            variant={'outline'}
+                            disabled={Boolean(paymentData)}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              setShippingAddress(undefined)
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        }
+                        address={shippingAddress}
+                      />
+                    </div>
+                  ) : user ? (
+                    <CheckoutAddresses
+                      heading="Shipping address"
+                      description="Please select a shipping address."
+                      setAddress={setShippingAddress}
                     />
-                  </div>
-                ) : user ? (
-                  <CheckoutAddresses
-                    heading="Shipping address"
-                    description="Please select a shipping address."
-                    setAddress={setShippingAddress}
-                  />
-                ) : (
-                  <CreateAddressModal
-                    callback={(address) => {
-                      setShippingAddress(address)
-                    }}
-                    disabled={!email || Boolean(emailEditable)}
-                    skipSubmission={true}
-                  />
-                )}
-              </>
-            )}
-          </>
-        )}
+                  ) : (
+                    <CreateAddressModal
+                      callback={(address) => {
+                        setShippingAddress(address)
+                      }}
+                      disabled={!email || Boolean(emailEditable)}
+                      skipSubmission={true}
+                    />
+                  )}
+                </>
+              )}
+            </>
+          )}
 
-        {!paymentData && voucherCoversAll ? (
-          <Button
-            className="self-start"
-            disabled={!canGoToPayment || isProcessingPayment}
-            onClick={(e) => {
-              e.preventDefault()
-              void handleVoucherOrder()
-            }}
-          >
-            {isProcessingPayment ? 'Bestellung wird bearbeitet…' : 'Jetzt mit Gutschein bestellen'}
-          </Button>
-        ) : !paymentData ? (
-          <Button
-            className="self-start"
-            disabled={!canGoToPayment}
-            onClick={(e) => {
-              e.preventDefault()
-              void initiatePaymentIntent('stripe')
-            }}
-          >
-            Go to payment
-          </Button>
-        ) : null}
+          {!paymentData && voucherCoversAll ? (
+            <Button
+              className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
+              disabled={!canGoToPayment || isProcessingPayment}
+              onClick={(e) => {
+                e.preventDefault()
+                void handleVoucherOrder()
+              }}
+            >
+              {isProcessingPayment
+                ? 'Bestellung wird bearbeitet…'
+                : 'Jetzt mit Gutschein bestellen'}
+            </Button>
+          ) : !paymentData ? (
+            <Button
+              className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
+              disabled={!canGoToPayment}
+              onClick={(e) => {
+                e.preventDefault()
+                void initiatePaymentIntent('stripe')
+              }}
+            >
+              Go to payment
+            </Button>
+          ) : null}
+        </section>
 
         {!paymentData?.['clientSecret'] && error && (
-          <div className="my-8">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-6">
             <Message error={error} />
-
             <Button
               onClick={(e) => {
                 e.preventDefault()
                 router.refresh()
               }}
-              variant="default"
+              className="mt-4 rounded-full bg-ff-near-black px-6 font-display font-bold text-white hover:bg-ff-near-black/80"
             >
               Try again
             </Button>
@@ -436,26 +506,27 @@ export const CheckoutPage: React.FC = () => {
 
         <Suspense fallback={<React.Fragment />}>
           {!voucherCoversAll && paymentData && typeof paymentData['clientSecret'] === 'string' && (
-            <div className="pb-16">
-              <h2 className="font-medium text-3xl">Payment</h2>
-              {error && <p>{`Error: ${error}`}</p>}
+            <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+              <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
+                Payment
+              </h2>
+              {error && <p className="mb-4 text-body-sm text-red-600">{`Error: ${error}`}</p>}
               <Elements
                 options={{
                   appearance: {
                     theme: 'stripe',
                     variables: {
-                      borderRadius: '6px',
-                      colorPrimary: '#858585',
+                      borderRadius: '0.625rem',
+                      colorPrimary: '#1a1a1a',
                       gridColumnSpacing: '20px',
                       gridRowSpacing: '20px',
-                      colorBackground: theme === 'dark' ? '#0a0a0a' : cssVariables.colors.base0,
+                      colorBackground: '#f9f7f3',
                       colorDanger: cssVariables.colors.error500,
                       colorDangerText: cssVariables.colors.error500,
-                      colorIcon:
-                        theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
-                      colorText: theme === 'dark' ? '#858585' : cssVariables.colors.base1000,
-                      colorTextPlaceholder: '#858585',
-                      fontFamily: 'Geist, sans-serif',
+                      colorIcon: '#1a1a1a',
+                      colorText: '#1a1a1a',
+                      colorTextPlaceholder: '#9a9a9a',
+                      fontFamily: '"Neue Haas Grotesk Text", sans-serif',
                       fontSizeBase: '16px',
                       fontWeightBold: '600',
                       fontWeightNormal: '500',
@@ -466,179 +537,200 @@ export const CheckoutPage: React.FC = () => {
                 }}
                 stripe={stripe}
               >
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-6">
                   <CheckoutForm
                     customerEmail={email}
                     billingAddress={billingAddress}
                     setProcessingPayment={setProcessingPayment}
                     isAllDigital={isAllDigital}
+                    hasWorkshop={hasWorkshop}
                   />
-                  <Button
-                    variant="ghost"
-                    className="self-start"
+                  <button
+                    className="self-start font-display text-body-sm font-bold text-ff-gray-text-light underline underline-offset-2 transition-colors hover:text-ff-near-black"
                     onClick={() => setPaymentData(null)}
                   >
                     Cancel payment
-                  </Button>
+                  </button>
                 </div>
               </Elements>
-            </div>
+            </section>
           )}
         </Suspense>
       </div>
 
       {!cartIsEmpty && (
-        <div className="basis-full lg:basis-1/3 lg:pl-8 p-8 border-none bg-primary/5 flex flex-col gap-8 rounded-lg">
-          <h2 className="text-3xl font-medium">Your cart</h2>
-          {cart?.items?.map((item, index) => {
-            if (typeof item.product === 'object' && item.product) {
-              const {
-                product,
-                product: { meta, title, gallery },
-                quantity,
-                variant,
-              } = item
+        <aside className="order-first w-full lg:order-last lg:w-95 lg:shrink-0">
+          <div className="sticky top-8 rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+            <h2 className="font-display text-subheading font-bold tracking-tight text-ff-near-black">
+              Your cart
+            </h2>
 
-              if (!quantity) return null
+            <div className="mt-6 flex flex-col gap-5">
+              {cart?.items?.map((item, index) => {
+                if (typeof item.product === 'object' && item.product) {
+                  const {
+                    product,
+                    product: { meta, title, gallery },
+                    quantity,
+                    variant,
+                  } = item
 
-              let image = gallery?.[0]?.image || meta?.image
-              let price = product?.priceInEUR
+                  if (!quantity) return null
 
-              const isVariant = Boolean(variant) && typeof variant === 'object'
+                  let image = gallery?.[0]?.image || meta?.image
+                  let price = product?.priceInEUR
 
-              if (isVariant) {
-                price = variant?.priceInEUR
+                  const isVariant = Boolean(variant) && typeof variant === 'object'
 
-                const imageVariant = product.gallery?.find(
-                  (item: {
-                    image: string | import('@/payload-types').Media
-                    variantOption?: (string | null) | import('@/payload-types').VariantOption
-                    id?: string | null
-                  }) => {
-                    if (!item.variantOption) return false
-                    const variantOptionID =
-                      typeof item.variantOption === 'object'
-                        ? item.variantOption.id
-                        : item.variantOption
+                  if (isVariant) {
+                    price = variant?.priceInEUR
 
-                    const hasMatch = variant?.options?.some(
-                      (option: string | import('@/payload-types').VariantOption) => {
-                        if (typeof option === 'object') return option.id === variantOptionID
-                        else return option === variantOptionID
+                    const imageVariant = product.gallery?.find(
+                      (item: {
+                        image: string | import('@/payload-types').Media
+                        variantOption?: (string | null) | import('@/payload-types').VariantOption
+                        id?: string | null
+                      }) => {
+                        if (!item.variantOption) return false
+                        const variantOptionID =
+                          typeof item.variantOption === 'object'
+                            ? item.variantOption.id
+                            : item.variantOption
+
+                        const hasMatch = variant?.options?.some(
+                          (option: string | import('@/payload-types').VariantOption) => {
+                            if (typeof option === 'object') return option.id === variantOptionID
+                            else return option === variantOptionID
+                          },
+                        )
+
+                        return hasMatch
                       },
                     )
 
-                    return hasMatch
-                  },
-                )
+                    if (imageVariant && typeof imageVariant.image !== 'string') {
+                      image = imageVariant.image
+                    }
+                  }
 
-                if (imageVariant && typeof imageVariant.image !== 'string') {
-                  image = imageVariant.image
-                }
-              }
+                  return (
+                    <div className="flex items-start gap-4" key={index}>
+                      <div className="flex h-18 w-18 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ff-border-light bg-[#f9f7f3]">
+                        <div className="relative h-full w-full">
+                          {image && typeof image !== 'string' && (
+                            <Media fill imgClassName="rounded-lg object-cover" resource={image} />
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex grow items-center justify-between gap-2">
+                        <div className="flex flex-col gap-0.5">
+                          <p className="font-display text-body-sm font-bold leading-snug text-ff-near-black">
+                            {title}
+                          </p>
+                          {variant && typeof variant === 'object' && (
+                            <p className="text-caption text-ff-gray-text-light">
+                              {variant.options
+                                ?.map(
+                                  (option: string | import('@/payload-types').VariantOption) => {
+                                    if (typeof option === 'object') return option.label
+                                    return null
+                                  },
+                                )
+                                .join(', ')}
+                            </p>
+                          )}
+                          <p className="text-caption text-ff-gray-text-light">
+                            {'×\u2009'}
+                            {quantity}
+                          </p>
+                        </div>
 
-              return (
-                <div className="flex items-start gap-4" key={index}>
-                  <div className="flex items-stretch justify-stretch h-20 w-20 p-2 rounded-lg border">
-                    <div className="relative w-full h-full">
-                      {image && typeof image !== 'string' && (
-                        <Media className="" fill imgClassName="rounded-lg" resource={image} />
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex grow justify-between items-center">
-                    <div className="flex flex-col gap-1">
-                      <p className="font-medium text-lg">{title}</p>
-                      {variant && typeof variant === 'object' && (
-                        <p className="text-sm font-mono text-primary/50 tracking-widest">
-                          {variant.options
-                            ?.map((option: string | import('@/payload-types').VariantOption) => {
-                              if (typeof option === 'object') return option.label
-                              return null
-                            })
-                            .join(', ')}
-                        </p>
-                      )}
-                      <div>
-                        {'x'}
-                        {quantity}
+                        {typeof price === 'number' && (
+                          <Price
+                            className="font-display text-body-sm font-bold text-ff-near-black"
+                            amount={price}
+                          />
+                        )}
                       </div>
                     </div>
+                  )
+                }
+                return null
+              })}
+            </div>
 
-                    {typeof price === 'number' && <Price amount={price} />}
+            <div className="my-6 h-px bg-ff-border-light" />
+
+            {/* Voucher Code Section */}
+            <div className="flex flex-col gap-3">
+              <h3 className="font-display text-body-sm font-bold uppercase tracking-wider text-ff-near-black">
+                Gutschein-Code
+              </h3>
+              {voucherApplied ? (
+                <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3">
+                  <div>
+                    <p className="font-mono text-body-sm font-semibold tracking-wide">
+                      {voucherApplied.code}
+                    </p>
+                    <p className="text-caption font-semibold text-green-700">
+                      {`-\u20AC${voucherApplied.value.toFixed(2)}`}
+                    </p>
                   </div>
+                  <button
+                    onClick={handleRemoveVoucher}
+                    className="text-caption font-display font-bold text-ff-gray-text-light underline underline-offset-2 transition-colors hover:text-ff-near-black"
+                  >
+                    Entfernen
+                  </button>
                 </div>
-              )
-            }
-            return null
-          })}
-          <hr />
-
-          {/* Voucher Code Section */}
-          <div className="flex flex-col gap-3">
-            <h3 className="font-medium text-sm uppercase tracking-wide">Gutschein-Code</h3>
-            {voucherApplied ? (
-              <div className="flex items-center justify-between bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
-                <div>
-                  <p className="font-mono text-sm font-semibold tracking-wide">{voucherApplied.code}</p>
-                  <p className="text-xs text-green-700 dark:text-green-400">
-                    {`-\u20AC${voucherApplied.value.toFixed(2)}`}
-                  </p>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    value={voucherCode}
+                    onChange={(e) => setVoucherCode(e.target.value)}
+                    placeholder="FF-GIFT-XXXXXXXX"
+                    className="rounded-lg border-ff-border-light font-mono text-body-sm uppercase focus-visible:ring-ff-gold"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleApplyVoucher()
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={handleApplyVoucher}
+                    disabled={voucherLoading || !voucherCode.trim()}
+                    className="shrink-0 rounded-lg border border-ff-near-black bg-ff-near-black px-4 py-2 font-display text-body-sm font-bold text-white transition-colors hover:bg-ff-near-black/90 disabled:opacity-40"
+                  >
+                    {voucherLoading ? '...' : 'Einl\u00F6sen'}
+                  </button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRemoveVoucher}
-                  className="text-xs"
-                >
-                  Entfernen
-                </Button>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <Input
-                  value={voucherCode}
-                  onChange={(e) => setVoucherCode(e.target.value)}
-                  placeholder="FF-GIFT-XXXXXXXX"
-                  className="font-mono text-sm uppercase"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      handleApplyVoucher()
-                    }
-                  }}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleApplyVoucher}
-                  disabled={voucherLoading || !voucherCode.trim()}
-                >
-                  {voucherLoading ? '...' : 'Einl\u00F6sen'}
-                </Button>
-              </div>
-            )}
-            {voucherError && (
-              <p className="text-xs text-destructive">{voucherError}</p>
-            )}
-          </div>
-
-          <hr />
-          <div className="flex justify-between items-center gap-2">
-            <span className="uppercase">Total</span>{' '}
-            <div className="text-right">
-              {voucherApplied && (
-                <p className="text-sm text-green-600 dark:text-green-400 line-through">
-                  <Price amount={cart.subtotal || 0} />
-                </p>
               )}
-              <Price
-                className="text-3xl font-medium"
-                amount={Math.max(0, (cart.subtotal || 0) - (voucherApplied?.value || 0))}
-              />
+              {voucherError && (
+                <p className="text-caption font-medium text-red-600">{voucherError}</p>
+              )}
+            </div>
+
+            <div className="my-6 h-px bg-ff-border-light" />
+
+            <div className="flex items-center justify-between gap-4">
+              <span className="font-display text-body font-bold uppercase tracking-wider text-ff-near-black">
+                Total
+              </span>
+              <div className="text-right">
+                {voucherApplied && (
+                  <p className="text-body-sm text-ff-gray-text-light line-through">
+                    <Price amount={cart.subtotal || 0} />
+                  </p>
+                )}
+                <Price
+                  className="font-display text-section-heading font-bold text-ff-near-black"
+                  amount={Math.max(0, (cart.subtotal || 0) - (voucherApplied?.value || 0))}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </aside>
       )}
     </div>
   )

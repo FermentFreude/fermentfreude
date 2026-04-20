@@ -18,6 +18,7 @@ export const Providers: React.FC<{
           <HeaderThemeProvider>
             <SonnerProvider>
               <EcommerceProvider
+                debug={true}
                 enableVariants={true}
                 currenciesConfig={{
                   defaultCurrency: 'EUR',
@@ -40,6 +41,7 @@ export const Providers: React.FC<{
                         gallery: true,
                         inventory: true,
                         priceInEUR: true,
+                        productType: true,
                       },
                       variants: {
                         title: true,

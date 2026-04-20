@@ -17,6 +17,7 @@ type FormData = {
   lastName: string
   email: string
   password: string
+  marketingConsent: boolean
 }
 
 export const CreateAccountForm: React.FC = () => {
@@ -39,6 +40,7 @@ export const CreateAccountForm: React.FC = () => {
         email: data.email,
         password: data.password,
         name: [data.firstName, data.lastName].filter(Boolean).join(' ').trim() || undefined,
+        marketingConsent: data.marketingConsent ?? false,
       }
       const response = await fetch(`/api/users`, {
         body: JSON.stringify(body),
@@ -177,6 +179,24 @@ export const CreateAccountForm: React.FC = () => {
           >
             Log in here
           </Link>
+        </div>
+
+        <div className="flex items-start gap-3 pt-1 text-[#E5DDCF]">
+          <input
+            id="marketingConsent"
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 cursor-pointer rounded accent-[#e6be68]"
+            {...register('marketingConsent')}
+          />
+          <Label
+            htmlFor="marketingConsent"
+            className="cursor-pointer text-[12px] leading-relaxed font-sans"
+          >
+            I agree to receive news, offers, and updates by email.{' '}
+            <Link href="/privacy" className="underline underline-offset-4 hover:text-white">
+              Privacy Policy
+            </Link>
+          </Label>
         </div>
       </div>
 

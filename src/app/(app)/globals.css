@@ -15,8 +15,31 @@
  *  All text inside main content respects newlines from CMS textarea fields.
  *  Scoped to #main-content so header/footer/nav are unaffected.
  *  Override with `whitespace-normal` on any element that should not wrap.
+ *  NOTE: `div` is excluded — pre-line on flex/grid containers breaks layouts
+ *  (e.g. checkout page). CMS text lives in p/h/span/label elements, not bare divs.
  * ════════════════════════════════════════════════════════════════ */
-#main-content :is(p, h1, h2, h3, h4, h5, h6, span, div, li, a, label, td, th, dt, dd, figcaption, blockquote, button, summary) {
+#main-content
+  :is(
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    span,
+    li,
+    a,
+    label,
+    td,
+    th,
+    dt,
+    dd,
+    figcaption,
+    blockquote,
+    button,
+    summary
+  ) {
   white-space: pre-line;
 }
 

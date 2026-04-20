@@ -14,6 +14,7 @@ type Props = {
   shippingAddress?: Partial<Address>
   setProcessingPayment: React.Dispatch<React.SetStateAction<boolean>>
   isAllDigital?: boolean
+  hasWorkshop?: boolean
 }
 
 export const CheckoutForm: React.FC<Props> = ({
@@ -21,6 +22,7 @@ export const CheckoutForm: React.FC<Props> = ({
   billingAddress,
   setProcessingPayment,
   isAllDigital,
+  hasWorkshop,
 }) => {
   const stripe = useStripe()
   const elements = useElements()
@@ -77,30 +79,27 @@ export const CheckoutForm: React.FC<Props> = ({
                 'orderID' in confirmResult &&
                 confirmResult.orderID
               ) {
-                // Clear the cart after successful payment
                 clearCart()
 
-                // Redirect: course purchases → order confirmation with course flag,
-                // physical products → order detail page
                 const emailParam = customerEmail
                   ? `&email=${encodeURIComponent(customerEmail)}`
                   : ''
-                const redirectUrl = isAllDigital
-                  ? `/account/order-confirmation?orderId=${confirmResult.orderID}&type=course${emailParam}`
-                  : `/account/orders/${confirmResult.orderID}${customerEmail ? `?email=${encodeURIComponent(customerEmail)}` : ''}`
-
-                router.push(redirectUrl)
+                const type = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
+                router.push(
+                  `/account/order-confirmation?orderId=${confirmResult.orderID}&type=${type}${emailParam}`,
+                )
               }
             } catch (err) {
-              console.log({ err })
               const msg = err instanceof Error ? err.message : 'Something went wrong.'
               setError(`Error while confirming order: ${msg}`)
               setIsLoading(false)
+              setProcessingPayment(false)
             }
           }
           if (stripeError?.message) {
             setError(stripeError.message)
             setIsLoading(false)
+            setProcessingPayment(false)
           }
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Something went wrong.'
@@ -126,6 +125,7 @@ export const CheckoutForm: React.FC<Props> = ({
       clearCart,
       router,
       isAllDigital,
+      hasWorkshop,
     ],
   )
 

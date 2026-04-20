@@ -131,7 +131,7 @@ export async function Footer() {
               {newsletterHeading}
             </h2>
             <div className="mt-4">
-              <NewsletterForm />
+              <NewsletterForm locale={locale} />
             </div>
             <div className="mt-3 flex items-center gap-2">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#e6be68]" />

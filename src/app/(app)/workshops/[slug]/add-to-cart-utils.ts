@@ -12,7 +12,7 @@ import { toast } from 'sonner'
  * ═══════════════════════════════════════════════════════════════ */
 
 type AddWorkshopToCartParams = {
-  addItem: (item: { product: string; variant?: string }, quantity?: number) => Promise<void>
+  addItemAction: (item: { product: string; variant?: string }, quantity?: number) => Promise<void>
   appointmentId: string
   workshopSlug: string
   workshopTitle: string
@@ -20,7 +20,7 @@ type AddWorkshopToCartParams = {
 }
 
 export async function addWorkshopToCart({
-  addItem,
+  addItemAction,
   appointmentId,
   workshopSlug,
   workshopTitle,
@@ -68,13 +68,39 @@ export async function addWorkshopToCart({
 
     // Step 4: Add to cart with correct quantity (guestCount)
     // This ensures Payload cart calculates: basePrice × quantity = totalPrice
-    // NOTE: addItem signature is addItem(item, quantity) - quantity is SECOND parameter
-    await addItem(
+    // NOTE: addItem from the ecommerce plugin silently swallows errors —
+    // it never throws, so we verify success by checking localStorage after a delay.
+    const cartBefore = localStorage.getItem('cart')
+    console.log('[addWorkshopToCart] Before addItem — cartID in localStorage:', cartBefore)
+
+    await addItemAction(
       { product: data.cartItem.productId },
       guestCount, // Pass quantity as second argument, not inside item object
     )
 
-    // Step 4: Success feedback
+    // Wait for React state to commit to localStorage via useEffect
+    await new Promise((resolve) => setTimeout(resolve, 200))
+
+    const cartAfter = localStorage.getItem('cart')
+    console.log('[addWorkshopToCart] After addItem — cartID in localStorage:', cartAfter)
+
+    if (!cartAfter) {
+      // addItem failed silently — cart was not created/updated
+      console.error(
+        '[addWorkshopToCart] addItem failed silently — no cart in localStorage after 200ms',
+      )
+      // Clean up the booking metadata we just stored
+      const bookings = JSON.parse(localStorage.getItem('workshopBookings') || '{}')
+      delete bookings[appointmentId]
+      localStorage.setItem('workshopBookings', JSON.stringify(bookings))
+
+      toast.error(
+        'Fehler beim Hinzufügen zum Warenkorb. Bitte lade die Seite neu und versuche es erneut.',
+      )
+      throw new Error('addItem failed silently — cart not created')
+    }
+
+    // Step 5: Success feedback
     toast.success(
       `${guestCount} ${guestCount === 1 ? 'Platz' : 'Plätze'} für ${workshopTitle} hinzugefügt!`,
     )
@@ -88,7 +114,13 @@ export async function addWorkshopToCart({
     })
   } catch (error) {
     console.error('Error adding workshop to cart:', error)
-    if (!(error instanceof Error && error.message.includes('Failed to add to cart'))) {
+    if (
+      !(
+        error instanceof Error &&
+        (error.message.includes('Failed to add to cart') ||
+          error.message.includes('addItem failed silently'))
+      )
+    ) {
       // Only show generic error if we haven't already shown a specific one
       toast.error('Fehler beim Hinzufügen zum Warenkorb')
     }

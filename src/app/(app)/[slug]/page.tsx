@@ -14,36 +14,6 @@ export const dynamic = 'force-dynamic'
 
 import { notFound } from 'next/navigation'
 
-export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const pages = await payload.find({
-    collection: 'pages',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-    pagination: false,
-    select: {
-      slug: true,
-    },
-  })
-
-  const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
-  const params = pages.docs
-    ?.filter((doc) => {
-      return (
-        doc.slug !== 'home' &&
-        doc.slug !== 'gastronomy' &&
-        doc.slug !== 'fermentation' &&
-        !WORKSHOP_SLUGS.includes(doc.slug ?? '')
-      )
-    })
-    .map(({ slug }) => {
-      return { slug }
-    })
-
-  return params
-}
-
 type Args = {
   params: Promise<{
     slug?: string

@@ -247,7 +247,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                     <div className="shrink-0 pb-4 md:pb-5 w-full">
                       <FadeIn>
                         <p
-                          className="text-eyebrow font-bold mb-2 md:mb-3 text-[10px] md:text-inherit tracking-[0.18em] uppercase"
+                          className="text-eyebrow font-bold mb-2 text-[10px] tracking-[0.18em] uppercase md:hidden"
                           style={{ color: 'var(--ff-gold)' }}
                         >
                           {resolvedEyebrow}

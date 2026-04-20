@@ -5,13 +5,18 @@ import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { cn } from '@/utilities/cn'
 import {
+  CreditCard,
+  Download,
   GraduationCap,
   LayoutDashboard,
   LogOut,
   MapPin,
+  RotateCcw,
   ShoppingBag,
+  Star,
   Truck,
   User,
+  XCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -25,6 +30,15 @@ const NAV_GROUPS: { key: keyof AccountTranslations; items: NavItem[] }[] = [
       { key: 'overview', href: '/account', exact: true, icon: LayoutDashboard },
       { key: 'orders', href: '/account/orders', icon: ShoppingBag },
       { key: 'myLearning', href: '/account/learning', icon: GraduationCap },
+      { key: 'downloads', href: '/account/downloads', icon: Download },
+    ],
+  },
+  {
+    key: 'purchases',
+    items: [
+      { key: 'reviews', href: '/account/reviews', icon: Star },
+      { key: 'returnRequests', href: '/account/return-requests', icon: RotateCcw },
+      { key: 'cancellations', href: '/account/cancellations', icon: XCircle },
     ],
   },
   {
@@ -33,6 +47,7 @@ const NAV_GROUPS: { key: keyof AccountTranslations; items: NavItem[] }[] = [
       { key: 'profile', href: '/account/profile', icon: User },
       { key: 'addresses', href: '/account/addresses', icon: MapPin },
       { key: 'shipping', href: '/account/shipping-methods', icon: Truck },
+      { key: 'paymentMethods', href: '/account/payment-methods', icon: CreditCard },
     ],
   },
 ]
