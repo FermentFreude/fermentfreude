@@ -100,6 +100,19 @@ export async function addWorkshopToCart({
       throw new Error('addItem failed silently — cart not created')
     }
 
+    if (bookingMetadata.bookingId) {
+      await fetch('/api/cart/link-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: bookingMetadata.bookingId,
+          cartId: cartAfter,
+        }),
+      }).catch((error) => {
+        console.error('[addWorkshopToCart] Failed to link booking to cart:', error)
+      })
+    }
+
     // Step 5: Success feedback
     toast.success(
       `${guestCount} ${guestCount === 1 ? 'Platz' : 'Plätze'} für ${workshopTitle} hinzugefügt!`,

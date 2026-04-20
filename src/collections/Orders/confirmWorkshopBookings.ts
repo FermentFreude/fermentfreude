@@ -27,6 +27,26 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
   if (operation !== 'create') return doc
 
   const { payload } = req
+  const transactionRef = Array.isArray(doc.transactions) ? doc.transactions[0] : undefined
+  const transactionId =
+    transactionRef && typeof transactionRef === 'object' ? transactionRef.id : transactionRef
+  let cartId: string | undefined
+
+  if (transactionId) {
+    try {
+      const transaction = await payload.findByID({
+        collection: 'transactions',
+        id: transactionId,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      cartId =
+        typeof transaction.cart === 'object' ? transaction.cart?.id || undefined : transaction.cart || undefined
+    } catch {
+      // Non-fatal: fall back to legacy matching below.
+    }
+  }
 
   const items: {
     product?: string | { id?: string; slug?: string } | null
@@ -81,8 +101,28 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     const workshopSlug = productSlug.replace('workshop-', '')
     const guestCount = item.quantity ?? 1
 
-    // ── Strategy 1: match by workshopSlug + guestCount + email ──
+    // ── Strategy 1: match by cart ID + workshop + guest count ──
     let booking = null
+
+    if (cartId) {
+      const byCart = await payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [
+            { cartSlug: { equals: cartId } },
+            { workshopSlug: { equals: workshopSlug } },
+            { status: { equals: 'pending' } },
+            { guestCount: { equals: guestCount } },
+          ],
+        },
+        sort: '-createdAt',
+        limit: 1,
+        overrideAccess: true,
+      })
+      if (byCart.totalDocs > 0) booking = byCart.docs[0]
+    }
+
+    // ── Strategy 2: match by workshopSlug + guestCount + email ──
 
     if (customerEmail) {
       const byEmail = await payload.find({
@@ -102,7 +142,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       if (byEmail.totalDocs > 0) booking = byEmail.docs[0]
     }
 
-    // ── Strategy 2: match by workshopSlug + guestCount (no email on booking) ──
+    // ── Strategy 3: match by workshopSlug + guestCount (no email on booking) ──
     if (!booking) {
       const byCount = await payload.find({
         collection: 'workshop-bookings',
@@ -121,7 +161,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       if (byCount.totalDocs > 0) booking = byCount.docs[0]
     }
 
-    // ── Strategy 3: last resort — any pending booking for this workshop ──
+    // ── Strategy 4: last resort — any pending booking for this workshop ──
     if (!booking) {
       const bySlug = await payload.find({
         collection: 'workshop-bookings',
