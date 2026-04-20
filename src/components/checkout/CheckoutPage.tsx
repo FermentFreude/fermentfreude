@@ -55,6 +55,7 @@ export const CheckoutPage: React.FC = () => {
   } | null>(null)
   const [voucherError, setVoucherError] = useState<string | null>(null)
   const [voucherLoading, setVoucherLoading] = useState(false)
+  const checkoutEmail = email || user?.email || ''
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
@@ -89,7 +90,7 @@ export const CheckoutPage: React.FC = () => {
   )
 
   const canGoToPayment = Boolean(
-    (email || user) &&
+    checkoutEmail &&
     (isAllDigital || (billingAddress && (billingAddressSameAsShipping || shippingAddress))),
   )
 
@@ -215,7 +216,7 @@ export const CheckoutPage: React.FC = () => {
       try {
         const paymentData = (await initiatePayment(paymentID, {
           additionalData: {
-            ...(email ? { customerEmail: email } : {}),
+            ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
             billingAddress,
             shippingAddress: billingAddressSameAsShipping ? billingAddress : shippingAddress,
           },
@@ -236,7 +237,7 @@ export const CheckoutPage: React.FC = () => {
         toast.error(errorMessage)
       }
     },
-    [billingAddress, billingAddressSameAsShipping, shippingAddress, email, initiatePayment],
+    [billingAddress, billingAddressSameAsShipping, shippingAddress, checkoutEmail, initiatePayment],
   )
 
   if (!stripe) return null
@@ -539,7 +540,7 @@ export const CheckoutPage: React.FC = () => {
               >
                 <div className="flex flex-col gap-6">
                   <CheckoutForm
-                    customerEmail={email}
+                    customerEmail={checkoutEmail}
                     billingAddress={billingAddress}
                     setProcessingPayment={setProcessingPayment}
                     isAllDigital={isAllDigital}
