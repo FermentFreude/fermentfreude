@@ -88,23 +88,39 @@ const DEFAULT_SENDER = {
 }
 
 /**
- * Template IDs — create these in Brevo's dashboard.
- * Start with ID 1 and increment. Update these numbers
- * after creating the templates in Brevo.
+ * Template IDs — created via `pnpm brevo-setup-templates`
+ * These IDs are auto-assigned by Brevo in order. Update if you rerun template setup.
+ * All 19 templates across 4 categories: Transactional, Workshop, E-commerce, Marketing
  */
 export const BREVO_TEMPLATES = {
-  /** Sent after successful Stripe payment for any order */
-  ORDER_CONFIRMATION: 1,
-  /** Sent when a workshop booking is confirmed */
-  WORKSHOP_BOOKING_CONFIRMATION: 2,
-  /** Sent when a user is enrolled in an online course */
-  COURSE_ENROLLMENT: 3,
-  /** Sent when a gift voucher is purchased */
-  VOUCHER_PURCHASED: 4,
-  /** Welcome email for new user registration */
-  WELCOME: 5,
-  /** Password reset email */
-  PASSWORD_RESET: 6,
+  // Transactional (4)
+  ACCOUNT_CREATION: 1,
+  EMAIL_VERIFICATION: 2,
+  PASSWORD_RESET: 3,
+  LOGIN_NOTIFICATION: 4,
+
+  // Workshop (5)
+  WORKSHOP_BOOKING_CONFIRMATION: 5,
+  WORKSHOP_7DAY_REMINDER: 6,
+  WORKSHOP_1DAY_REMINDER: 7,
+  POST_WORKSHOP_FOLLOWUP: 8,
+  FEEDBACK_REQUEST: 9,
+
+  // E-commerce (4)
+  ORDER_CONFIRMATION: 10,
+  SHIPPING_NOTIFICATION: 11,
+  REVIEW_REQUEST: 12,
+  ABANDONED_CART: 13,
+
+  // Marketing (5)
+  NEWSLETTER_WELCOME: 14,
+  COURSE_ENROLLMENT: 15,
+  B2B_INQUIRY: 16,
+  RE_ENGAGEMENT: 17,
+  REFERRAL_PROGRAM: 18,
+
+  // Custom
+  VOUCHER_PURCHASED: 19,
 } as const
 
 type BrevoRecipient = {
