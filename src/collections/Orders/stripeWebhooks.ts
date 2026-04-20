@@ -31,18 +31,32 @@ export async function handlePaymentFailed({
     `[stripe:payment_failed] PaymentIntent ${paymentIntent.id} failed — releasing workshop spots`,
   )
 
-  // The payment intent metadata may contain cart info.
-  // However, the most reliable approach is to find pending bookings
-  // created around the same time and cancel them.
-  // We look for pending bookings created in the last 2 hours
-  // that haven't been confirmed yet.
+  const transactionResults = await payload.find({
+    collection: 'transactions',
+    where: {
+      'stripe.paymentIntentID': { equals: paymentIntent.id },
+    },
+    limit: 1,
+    overrideAccess: true,
+  })
 
-  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+  const transaction = transactionResults.docs[0]
+  const cartId =
+    transaction && typeof transaction.cart === 'object'
+      ? transaction.cart?.id
+      : transaction?.cart
+
+  if (!cartId) {
+    payload.logger.warn(
+      `[stripe:payment_failed] No transaction/cart found for paymentIntent ${paymentIntent.id}`,
+    )
+    return
+  }
 
   const pendingBookings = await payload.find({
     collection: 'workshop-bookings',
     where: {
-      and: [{ status: { equals: 'pending' } }, { createdAt: { greater_than: twoHoursAgo } }],
+      and: [{ status: { equals: 'pending' } }, { cartSlug: { equals: cartId } }],
     },
     limit: 50,
     overrideAccess: true,
@@ -163,91 +177,79 @@ export async function handleChargeRefunded({
     overrideAccess: true,
   })
 
-  // Also cancel any confirmed workshop bookings for this order
-  const items: {
-    product?: string | { id?: string; slug?: string } | null
-  }[] = order.items ?? []
+  const transactionRef = Array.isArray(order.transactions) ? order.transactions[0] : undefined
+  const transactionId =
+    transactionRef && typeof transactionRef === 'object' ? transactionRef.id : transactionRef
+  let cartId: string | undefined
 
-  for (const item of items) {
-    const productRef = item?.product
-    if (!productRef) continue
-
-    let productSlug: string | null = null
-
-    if (typeof productRef === 'string') {
-      try {
-        const product = await payload.findByID({
-          collection: 'products',
-          id: productRef,
-          depth: 0,
-          overrideAccess: true,
-        })
-        productSlug = (product as unknown as Record<string, unknown>)?.slug as string | null
-      } catch {
-        continue
-      }
-    } else if (typeof productRef === 'object') {
-      productSlug = (productRef as Record<string, unknown>).slug as string | null
+  if (transactionId) {
+    try {
+      const transaction = await payload.findByID({
+        collection: 'transactions',
+        id: transactionId,
+        depth: 0,
+        overrideAccess: true,
+      })
+      cartId = typeof transaction.cart === 'object' ? transaction.cart?.id || undefined : transaction.cart || undefined
+    } catch {
+      // ignore; handled below
     }
+  }
 
-    if (!productSlug || !productSlug.startsWith('workshop-')) continue
+  if (!cartId) {
+    payload.logger.warn(`[stripe:charge_refunded] No cart found for order ${order.id}`)
+    return
+  }
 
-    const workshopSlug = productSlug.replace('workshop-', '')
+  const confirmedBookings = await payload.find({
+    collection: 'workshop-bookings',
+    where: {
+      and: [{ cartSlug: { equals: cartId } }, { status: { equals: 'confirmed' } }],
+    },
+    sort: '-createdAt',
+    limit: 50,
+    overrideAccess: true,
+  })
 
-    // Find confirmed bookings for this workshop and set to refunded
-    const confirmedBookings = await payload.find({
+  for (const booking of confirmedBookings.docs) {
+    await payload.update({
       collection: 'workshop-bookings',
-      where: {
-        and: [{ workshopSlug: { equals: workshopSlug } }, { status: { equals: 'confirmed' } }],
-      },
-      sort: '-createdAt',
-      limit: 1,
+      id: booking.id,
+      data: { status: 'refunded' },
       overrideAccess: true,
     })
 
-    if (confirmedBookings.totalDocs > 0) {
-      const booking = confirmedBookings.docs[0]
+    if (booking.appointmentId) {
+      try {
+        const appointment = await payload.findByID({
+          collection: 'workshop-appointments',
+          id: booking.appointmentId,
+          depth: 1,
+          overrideAccess: true,
+        })
 
-      await payload.update({
-        collection: 'workshop-bookings',
-        id: booking.id,
-        data: { status: 'refunded' },
-        overrideAccess: true,
-      })
+        const maxCapacity =
+          typeof appointment.workshop === 'object'
+            ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
+            : 12
 
-      // Restore spots on the appointment
-      if (booking.appointmentId) {
-        try {
-          const appointment = await payload.findByID({
-            collection: 'workshop-appointments',
-            id: booking.appointmentId,
-            depth: 1,
-            overrideAccess: true,
-          })
+        const restoredSpots = Math.min(
+          appointment.availableSpots + (booking.guestCount ?? 1),
+          maxCapacity,
+        )
 
-          const maxCapacity =
-            typeof appointment.workshop === 'object'
-              ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
-              : 12
+        await payload.update({
+          collection: 'workshop-appointments',
+          id: booking.appointmentId,
+          data: { availableSpots: restoredSpots },
+          overrideAccess: true,
+        })
 
-          const restoredSpots = Math.min(
-            appointment.availableSpots + (booking.guestCount ?? 1),
-            maxCapacity,
-          )
-
-          await payload.update({
-            collection: 'workshop-appointments',
-            id: booking.appointmentId,
-            data: { availableSpots: restoredSpots },
-            overrideAccess: true,
-          })
-
-          payload.logger.info(
-            `[stripe:charge_refunded] Restored ${booking.guestCount} spot(s) for refunded booking ${booking.id}`,
-          )
-        } catch (err) {
-          payload.logger.error(`[stripe:charge_refunded] Failed to restore spots: ${err}`)
-        }
+        payload.logger.info(
+          `[stripe:charge_refunded] Restored ${booking.guestCount} spot(s) for refunded booking ${booking.id}`,
+        )
+      } catch (err) {
+        payload.logger.error(`[stripe:charge_refunded] Failed to restore spots: ${err}`)
       }
     }
   }

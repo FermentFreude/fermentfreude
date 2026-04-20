@@ -2,11 +2,13 @@
 
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { gtmPurchase } from '@/lib/gtm'
+import { useAuth } from '@/providers/Auth'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
 export const ConfirmOrder: React.FC = () => {
+  const { user } = useAuth()
   const { confirmOrder } = usePayments()
   const { cart, clearCart } = useCart()
 
@@ -22,6 +24,7 @@ export const ConfirmOrder: React.FC = () => {
 
     const paymentIntentID = searchParams.get('payment_intent')
     const email = searchParams.get('email')
+    const checkoutEmail = email || user?.email
 
     if (paymentIntentID) {
       if (!isConfirming.current) {
@@ -30,6 +33,7 @@ export const ConfirmOrder: React.FC = () => {
         confirmOrder('stripe', {
           additionalData: {
             paymentIntentID,
+            ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
           },
         }).then((result) => {
           if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
@@ -80,7 +84,7 @@ export const ConfirmOrder: React.FC = () => {
             })
 
             const type = hasCourse ? 'course' : hasWorkshop ? 'workshop' : 'order'
-            const emailParam = email ? `&email=${encodeURIComponent(email)}` : ''
+            const emailParam = checkoutEmail ? `&email=${encodeURIComponent(checkoutEmail)}` : ''
             router.push(
               `/account/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
             )
@@ -91,7 +95,7 @@ export const ConfirmOrder: React.FC = () => {
       // If no payment intent ID is found, redirect to the home
       router.push('/')
     }
-  }, [cart, searchParams, confirmOrder, router, clearCart])
+  }, [cart, searchParams, confirmOrder, router, clearCart, user])
 
   return (
     <div className="text-center w-full flex flex-col items-center justify-start gap-4">
