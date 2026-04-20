@@ -73,6 +73,42 @@ Complete documentation for the Fermentfreude digital ecosystem project.
 
 ---
 
+### 7. **[BREVO_IMPLEMENTATION.md](./BREVO_IMPLEMENTATION.md)**  
+   Transactional email setup & integration:
+   - Brevo API configuration
+   - Template management
+   - Email hooks & workflows
+   - Sender authentication
+   - Testing & monitoring
+
+---
+
+## 👥 For Clients & Non-Technical Users
+
+1. **[CLIENT_HANDOFF_BREVO.md](./CLIENT_HANDOFF_BREVO.md)**  
+   Project handoff guide for client-managed Brevo account:
+   - Overview of what client controls vs. developer manages
+   - Three-step setup summary
+   - Files client will receive
+
+2. **[CLIENT_BREVO_SETUP.md](./CLIENT_BREVO_SETUP.md)** ⭐ **Give to Client First**  
+   Step-by-step initial setup guide:
+   - Create Brevo account
+   - Authenticate email domain (DNS)
+   - Generate API key
+   - Run setup script
+   - Test with first order
+
+3. **[CLIENT_BREVO_OPERATIONS.md](./CLIENT_BREVO_OPERATIONS.md)** ⭐ **Give to Client for Reference**  
+   Ongoing management & troubleshooting:
+   - Weekly monitoring
+   - Common issues & fixes
+   - Maintenance tasks
+   - Emergency response procedures
+   - FAQ & support contacts
+
+---
+
 ## 🤖 For AI Assistants
 
 **[AGENTS.md](../AGENTS.md)** (in root)  
@@ -116,12 +152,22 @@ FermentFreude/
 ├── AGENTS.md                           # AI assistant / Payload CMS rules
 └── docs/                               # Detailed documentation
     ├── README.md                       # This file (index)
+    ├── ##INSTRUCTIONS.md               # Canonical project rules
+    │
+    ├── 👨‍💻 DEVELOPER GUIDES
     ├── SETUP.md                        # Full technical reference
     ├── DEVELOPMENT.md                  # Development workflow
     ├── TRANSLATION.md                  # Localization & auto-translate
     ├── SECURITY.md                     # Security best practices
     ├── ACCESSIBILITY.md                # Accessibility standards
-    └── PERFORMANCE.md                  # Performance optimization
+    ├── PERFORMANCE.md                  # Performance optimization
+    ├── AGENTS.md                       # Payload CMS patterns
+    ├── BREVO_IMPLEMENTATION.md         # Transactional email setup
+    │
+    ├── 👥 CLIENT GUIDES (Non-Technical)
+    ├── CLIENT_HANDOFF_BREVO.md         # Handoff overview
+    ├── CLIENT_BREVO_SETUP.md           # Initial setup (GIVE TO CLIENT)
+    └── CLIENT_BREVO_OPERATIONS.md      # Ongoing management (GIVE TO CLIENT)
 ```
 
 ---

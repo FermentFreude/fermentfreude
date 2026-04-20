@@ -183,6 +183,33 @@ By default the template ships with support only for USD however you can change t
 
 By default we ship with the Stripe adapter configured, so you'll need to setup the `secretKey`, `publishableKey` and `webhookSecret` from your Stripe dashboard. Follow [Stripe's guide](https://docs.stripe.com/get-started/api-request?locale=en-GB) on how to set this up.
 
+## Brevo (Transactional Email)
+
+This project uses [Brevo](https://www.brevo.com/) to send automated transactional emails (order confirmations, workshop bookings, password resets, etc.).
+
+### Setup
+
+The client manages the Brevo account. Developers only need to know:
+
+1. **Template setup:** Run `pnpm brevo-setup-templates` (creates 6 email templates in Brevo via API)
+2. **API key:** Set `BREVO_API_KEY` in environment variables
+3. **Template IDs:** Stored in `src/lib/brevo.ts` (currently IDs 2-7, auto-assigned by Brevo)
+
+### Key Files
+
+- **`src/lib/brevo.ts`** — Core email service with template IDs and send functions
+- **`scripts/brevo-setup-templates.mjs`** — Automated template creation script
+- **`docs/CLIENT_BREVO_SETUP.md`** — Client-facing setup guide
+- **`docs/CLIENT_BREVO_OPERATIONS.md`** — Client troubleshooting & maintenance
+
+### For Developers
+
+- **Email hooks:** Triggered after order/booking creation in Payload CMS (see `src/collections/Orders/`)
+- **Template variables:** Dynamic content (order ID, customer name, etc.) passed via `params.*` in Brevo
+- **Testing:** Use test card `4242 4242 4242 4242` to trigger order emails in dev
+
+For more details, see [BREVO_IMPLEMENTATION.md](docs/BREVO_IMPLEMENTATION.md).
+
 ## Tests
 
 We provide automated tests out of the box for both E2E and Int tests along with this template. They are being run in our CI to ensure the stability of this template over time. You can integrate them into your CI or run them locally as well via:
