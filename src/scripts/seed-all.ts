@@ -33,10 +33,11 @@ const scripts: Record<string, { name: string; file: string }> = {
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
+  legal: { name: 'Legal pages (datenschutz, agb, impressum)', file: 'seed-legal-pages.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
 }
 
-const allOrder = ['header', 'home', 'about', 'contact', 'voucher']
+const allOrder = ['header', 'home', 'about', 'contact', 'legal', 'voucher']
 
 function runSeed(key: string): boolean {
   const script = scripts[key]
