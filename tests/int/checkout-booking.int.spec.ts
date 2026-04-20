@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/lib/brevo', () => ({
   BREVO_TEMPLATES: {
-    WORKSHOP_BOOKING_CONFIRMATION: 12,
+    WORKSHOP_BOOKING_CONFIRMATION: 31,
   },
   sendTemplateEmail: vi.fn(),
 }))
