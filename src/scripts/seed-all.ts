@@ -8,6 +8,7 @@
  *   pnpm seed home         # Seeds only the home page
  *   pnpm seed about        # Seeds only the about page
  *   pnpm seed contact      # Seeds only the contact page
+ *   pnpm seed legal --force # Passes flags through to target seed script
  *
  * Order (when seeding all):
  *   1. Header (global — nav items)
@@ -33,12 +34,13 @@ const scripts: Record<string, { name: string; file: string }> = {
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
+  legal: { name: 'Legal pages (datenschutz, agb, impressum)', file: 'seed-legal-pages.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
 }
 
-const allOrder = ['header', 'home', 'about', 'contact', 'voucher']
+const allOrder = ['header', 'home', 'about', 'contact', 'legal', 'voucher']
 
-function runSeed(key: string): boolean {
+function runSeed(key: string, extraArgs: string[] = []): boolean {
   const script = scripts[key]
   if (!script) {
     console.error(`❌ Unknown seed target: "${key}"`)
@@ -49,7 +51,7 @@ function runSeed(key: string): boolean {
   const scriptPath = path.resolve(__dirname, script.file)
   console.log(`\n── ${script.name} ──`)
 
-  const result = spawnSync('npx', ['tsx', scriptPath], {
+  const result = spawnSync('npx', ['tsx', scriptPath, ...extraArgs], {
     stdio: 'inherit',
     env: process.env,
     cwd: process.cwd(),
@@ -66,10 +68,11 @@ function runSeed(key: string): boolean {
 }
 
 const target = process.argv[2]?.toLowerCase()
+const extraArgs = process.argv.slice(3)
 
 if (target) {
   console.log(`🌱 Seeding: ${target}`)
-  const ok = runSeed(target)
+  const ok = runSeed(target, extraArgs)
   process.exit(ok ? 0 : 1)
 } else {
   console.log('🌱 Seeding everything...')
