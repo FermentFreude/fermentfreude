@@ -121,8 +121,10 @@ describe('checkout booking integration', () => {
           CUSTOMER_NAME: 'Buyer Example',
           GUEST_COUNT: '2',
           WORKSHOP_TITLE: 'Kombucha Workshop',
+          WORKSHOP_DATE: expect.any(String),
+          TOTAL_PRICE: expect.any(String),
         }),
-        templateId: 2,
+        templateId: 31,
         to: [{ email: 'buyer@example.com', name: 'Buyer Example' }],
       }),
     )
