@@ -175,6 +175,198 @@
 /* ── Design System Utility Classes ───────────────────────────── */
 
 @layer components {
+  /* Legal pages (AGB / Datenschutz / Impressum): premium document styling */
+  .page-legal {
+    background:
+      radial-gradient(1200px 500px at 10% -10%, #f8f2e9 0%, transparent 60%),
+      radial-gradient(1200px 500px at 100% 0%, #f1e8dc 0%, transparent 58%),
+      #f2ebe2;
+  }
+
+  .legal-content-block {
+    max-width: 76rem;
+    margin-inline: auto;
+  }
+
+  .legal-content-block .legal-richtext {
+    max-width: 64rem;
+    margin-inline: auto;
+    background: #fffdfb;
+    color: #262626;
+    border: 1px solid #e8dfd3;
+    border-radius: 1.5rem;
+    position: relative;
+    box-shadow:
+      0 24px 46px rgb(0 0 0 / 7%),
+      0 3px 10px rgb(0 0 0 / 4%);
+    padding: clamp(1.6rem, 3.2vw, 3.2rem);
+  }
+
+  @media (width >= 64rem) {
+    .legal-content-block .legal-richtext::after {
+      content: '';
+      position: absolute;
+      top: 1.6rem;
+      right: 1.6rem;
+      width: 4.2rem;
+      height: 4rem;
+      background: url('/icon-logo.svg') center/contain no-repeat;
+      opacity: 0.9;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 4px rgb(0 0 0 / 12%));
+    }
+
+    .legal-content-block .legal-richtext > p:nth-of-type(n + 2):nth-of-type(-n + 8) {
+      max-width: calc(100% - 6.2rem);
+    }
+  }
+
+  .legal-content-block .legal-richtext h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.12rem, 1.55vw, 1.38rem);
+    line-height: 1.28;
+    letter-spacing: -0.012em;
+    margin: 2.05rem 0 0.72rem;
+    padding-top: 1.28rem;
+    border-top: 1px solid #efe7db;
+    color: #141414;
+  }
+
+  .legal-content-block .legal-richtext h2:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    font-size: clamp(1.62rem, 2.55vw, 2.12rem);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    color: #121212;
+  }
+
+  .legal-content-block .legal-richtext p {
+    margin: 0 0 0.76rem;
+    font-size: 1.01rem;
+    line-height: 1.74;
+    color: #2d2d2d;
+  }
+
+  .legal-content-block .legal-richtext p:last-child {
+    margin-bottom: 0;
+  }
+
+  .legal-content-block .legal-richtext a {
+    color: #1a3f8a;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    font-weight: 600;
+  }
+
+  .legal-content-block .legal-richtext a:hover {
+    color: #102f6d;
+  }
+
+  /* First section (company details): clean legal header */
+  .legal-content-block .legal-richtext > p:first-of-type {
+    display: none;
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(n + 2):nth-of-type(-n + 8) {
+    width: auto;
+    max-width: 100%;
+    margin-bottom: 0.46rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+    font-size: 0.98rem;
+    line-height: 1.58;
+    color: #2f2f2f;
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(2) {
+    font-weight: 700;
+    font-size: 1.09rem;
+    letter-spacing: -0.013em;
+    color: #181818;
+    margin-bottom: 0.36rem;
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(3) a {
+    color: #1c1c1c;
+    text-decoration: none;
+    border-bottom: 1px solid #d8c8b6;
+    padding-bottom: 0.03rem;
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(4) {
+    margin-top: 1.1rem;
+    margin-bottom: 0.22rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #7a6651;
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(5) {
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: #191919;
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(6),
+  .legal-content-block .legal-richtext > p:nth-of-type(7),
+  .legal-content-block .legal-richtext > p:nth-of-type(8) {
+    display: flex;
+    align-items: baseline;
+    gap: 0.38rem;
+    margin-bottom: 0.42rem;
+    padding: 0.15rem 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font-size: 0.95rem;
+    line-height: 1.48;
+    color: #2c2c2c;
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(6) {
+    margin-top: 0.48rem;
+    padding-top: 0.68rem;
+    border-top: 1px solid #e8dccb;
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(6)::before,
+  .legal-content-block .legal-richtext > p:nth-of-type(7)::before,
+  .legal-content-block .legal-richtext > p:nth-of-type(8)::before {
+    display: inline-block;
+    width: 1rem;
+    flex: 0 0 1rem;
+    color: #7a6753;
+    font-size: 0.82rem;
+    line-height: 1;
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(6)::before {
+    content: '☎';
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(7)::before {
+    content: '✉';
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(8)::before {
+    content: '⌂';
+  }
+
+  .legal-content-block .legal-richtext > p:nth-of-type(7) a,
+  .legal-content-block .legal-richtext > p:nth-of-type(8) a {
+    text-decoration: none;
+    border-bottom: 1px solid #d2c0ac;
+    padding-bottom: 0.01rem;
+    font-weight: 500;
+    color: #1c1c1c;
+  }
+
   /* === Shop Product Card — add-to-cart circle (57.16px, burgundy) === */
   .add-to-cart-custom .add-to-cart-custom-btn {
     width: 57.16px;
