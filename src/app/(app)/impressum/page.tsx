@@ -44,11 +44,7 @@ export default function ImpressumPage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Grabenstraße 15
-                <br />
-                8010 Graz
-                <br />
-                Österreich
+                Grabenstraße 15, 8010 Graz, Österreich
               </a>
             </p>
             <p className="mt-3">
@@ -122,9 +118,7 @@ export default function ImpressumPage() {
             <p>
               Fermentfreude OG
               <br />
-              Grabenstraße 15
-              <br />
-              8010 Graz
+              Grabenstraße 15, 8010 Graz
             </p>
           </section>
 
