@@ -136,39 +136,160 @@ const LEGAL_PAGES: LegalPageSeed[] = [
     enDescription: 'Privacy policy of FermentFreude.',
     deSections: [
       {
-        heading: 'Erklaerung zur Informationspflicht',
+        heading: '1. Verantwortlicher',
         body: [
-          'In folgender Datenschutzerklaerung informieren wir Sie ueber die wichtigsten Aspekte der Datenverarbeitung im Rahmen unserer Webseite.',
-          'Wir erheben und verarbeiten personenbezogene Daten nur auf Grundlage der gesetzlichen Bestimmungen (DSGVO, TKG 2003).',
+          'Verantwortlich für die Datenverarbeitung auf dieser Website ist:',
+          'Fermentfreude OG',
+          'Grabenstraße 15',
+          '8010 Graz',
+          'Österreich',
+          'E-Mail: kontakt@fermentfreude.at',
+          'Telefon: +43 (0) 660 49 43 577',
         ],
       },
       {
-        heading: 'Kontakt mit uns',
+        heading: '2. Allgemeines zur Datenverarbeitung',
         body: [
-          'Wenn Sie uns per Kontaktformular oder E-Mail kontaktieren, werden Ihre Daten zur Bearbeitung der Anfrage und fuer Anschlussfragen gespeichert.',
-          'Diese Daten geben wir ohne Ihre Einwilligung nicht weiter.',
+          'Wir verarbeiten personenbezogene Daten ausschließlich im Einklang mit den geltenden Datenschutzbestimmungen, insbesondere der Datenschutz-Grundverordnung.',
+          'Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können (z. B. Name, E-Mail-Adresse, Telefonnummer).',
         ],
       },
       {
-        heading: 'Datenspeicherung',
+        heading: '3. Zugriffsdaten (Server-Logfiles)',
         body: [
-          'Zum Zweck der Vertragsabwicklung speichern wir unter anderem Name, Telefonnummer, E-Mail-Adresse und Zahlungsinformationen.',
-          'Die von Ihnen bereitgestellten Daten sind zur Vertragserfuellung bzw. fuer vorvertragliche Massnahmen erforderlich.',
-          'Die Daten werden gemaess gesetzlicher Aufbewahrungsfristen gespeichert.',
+          'Beim Besuch dieser Website werden automatisch folgende Daten erfasst:',
+          '• IP-Adresse',
+          '• Datum und Uhrzeit der Anfrage',
+          '• Browsertyp und Version',
+          '• Betriebssystem',
+          '• Referrer URL',
+          'Diese Daten dienen der technischen Bereitstellung und Sicherheit der Website.',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an sicherem Betrieb der Website)',
         ],
       },
       {
-        heading: 'Cookies',
+        heading: '4. Hosting & Infrastruktur',
         body: [
-          'Unsere Website verwendet Cookies, um unser Angebot nutzerfreundlich zu gestalten.',
-          'Sie koennen Ihren Browser so einrichten, dass Sie ueber das Setzen von Cookies informiert werden und dies nur im Einzelfall erlauben.',
+          'Unsere Website wird betrieben über:',
+          '• Vercel (Hosting)',
+          '• Cloudflare (Content Delivery & Performance)',
+          'Diese Anbieter verarbeiten technische Daten (z. B. IP-Adresse), um eine stabile und sichere Bereitstellung der Website zu gewährleisten.',
+          'Eine Verarbeitung kann auch außerhalb der EU erfolgen. In diesen Fällen erfolgt die Datenübermittlung auf Grundlage geeigneter Garantien (z. B. Standardvertragsklauseln).',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO',
         ],
       },
       {
-        heading: 'Ihre Rechte',
+        heading: '5. Kontaktformular',
         body: [
-          'Ihnen stehen grundsaetzlich die Rechte auf Auskunft, Berichtigung, Loeschung, Einschraenkung, Datenuebertragbarkeit sowie Widerruf und Widerspruch zu.',
-          'Wenn Sie glauben, dass die Verarbeitung Ihrer Daten gegen Datenschutzrecht verstoesst, kontaktieren Sie uns unter fermentfreude@gmail.com.',
+          'Wenn Sie uns über das Kontaktformular kontaktieren, werden folgende Daten verarbeitet:',
+          '• Name',
+          '• E-Mail-Adresse',
+          '• Telefonnummer (optional)',
+          'Die Daten werden zur Bearbeitung Ihrer Anfrage verwendet und in unserem CRM-System gespeichert.',
+          'Rechtsgrundlage:',
+          '• Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen)',
+          '• Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Bearbeitung von Anfragen)',
+        ],
+      },
+      {
+        heading: '6. Buchungen & Bestellungen',
+        body: [
+          'Wenn Sie über unsere Website Workshops, Online-Kurse oder zukünftig Produkte buchen bzw. kaufen, verarbeiten wir:',
+          '• Name',
+          '• E-Mail-Adresse',
+          '• Telefonnummer',
+          'Diese Daten sind erforderlich zur Durchführung und Abwicklung des Vertrags.',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)',
+        ],
+      },
+      {
+        heading: '7. Zahlungsabwicklung',
+        body: [
+          'Die Zahlungsabwicklung erfolgt über:',
+          '• Stripe',
+          'Bei der Zahlung werden Ihre Zahlungsdaten direkt an Stripe übermittelt. Wir speichern keine vollständigen Zahlungsinformationen.',
+          'Stripe kann Daten in Drittländer (z. B. USA) übertragen. Die Übermittlung erfolgt auf Basis geeigneter Garantien (z. B. Standardvertragsklauseln).',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO',
+        ],
+      },
+      {
+        heading: '8. Newsletter & E-Mail-Kommunikation',
+        body: [
+          'Für den Versand von Newslettern und automatisierten E-Mails nutzen wir:',
+          '• Brevo',
+          'Dabei werden folgende Daten verarbeitet:',
+          '• E-Mail-Adresse',
+          '• ggf. Name',
+          'Die Anmeldung erfolgt über ein Double-Opt-in-Verfahren. Das bedeutet, dass Sie Ihre Anmeldung über eine Bestätigungs-E-Mail verifizieren müssen.',
+          'Sie können den Newsletter jederzeit über den Abmeldelink kündigen.',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung)',
+        ],
+      },
+      {
+        heading: '9. Tracking & Analyse',
+        body: [
+          'Wir nutzen folgende Tools:',
+          '• Google Analytics',
+          '• Meta Pixel',
+          'Diese Tools helfen uns, das Nutzerverhalten auf unserer Website zu analysieren und unser Angebot zu verbessern.',
+          'Die Nutzung dieser Tools erfolgt ausschließlich nach Ihrer Einwilligung über das Cookie-Banner.',
+          'Eine Verarbeitung kann auch in Drittländern (z. B. USA) stattfinden. In diesen Fällen erfolgt die Datenübertragung auf Grundlage geeigneter Garantien.',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO',
+        ],
+      },
+      {
+        heading: '10. Cookies',
+        body: [
+          'Unsere Website verwendet Cookies.',
+          'Cookies sind kleine Textdateien, die auf Ihrem Endgerät gespeichert werden.',
+          'Wir unterscheiden zwischen:',
+          '• technisch notwendigen Cookies',
+          '• Analyse- und Marketing-Cookies',
+          'Analyse- und Marketing-Cookies werden nur nach Ihrer ausdrücklichen Einwilligung gesetzt.',
+          'Sie können Ihre Cookie-Einstellungen jederzeit über das Cookie-Banner anpassen.',
+          'Rechtsgrundlage:',
+          '• Art. 6 Abs. 1 lit. f DSGVO (notwendige Cookies)',
+          '• Art. 6 Abs. 1 lit. a DSGVO (alle anderen Cookies)',
+        ],
+      },
+      {
+        heading: '11. Externe Inhalte & Links',
+        body: [
+          'Auf unserer Website befinden sich Links zu:',
+          '• Instagram',
+          '• Facebook',
+          '• LinkedIn',
+          'Beim Anklicken dieser Links verlassen Sie unsere Website. Für die Datenverarbeitung durch diese Plattformen sind die jeweiligen Anbieter verantwortlich.',
+          'Google Maps',
+          'Zur Darstellung von Standorten nutzen wir:',
+          '• Google Maps',
+          'Dabei kann es zur Übertragung von Daten an Google kommen (z. B. IP-Adresse).',
+          'Die Nutzung erfolgt nur nach Ihrer Einwilligung.',
+          'Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO',
+        ],
+      },
+      {
+        heading: '12. Speicherdauer',
+        body: [
+          'Personenbezogene Daten werden nur so lange gespeichert, wie dies für den jeweiligen Zweck erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen.',
+        ],
+      },
+      {
+        heading: '13. Ihre Rechte',
+        body: [
+          'Sie haben jederzeit das Recht auf:',
+          '• Auskunft über Ihre gespeicherten Daten',
+          '• Berichtigung unrichtiger Daten',
+          '• Löschung Ihrer Daten',
+          '• Einschränkung der Verarbeitung',
+          '• Datenübertragbarkeit',
+          'Außerdem haben Sie das Recht, eine erteilte Einwilligung jederzeit zu widerrufen.',
+        ],
+      },
+      {
+        heading: '14. Beschwerderecht',
+        body: [
+          'Wenn Sie der Ansicht sind, dass die Verarbeitung Ihrer Daten gegen geltendes Recht verstößt, können Sie sich bei der zuständigen Datenschutzbehörde beschweren.',
         ],
       },
     ],
@@ -265,9 +386,7 @@ const LEGAL_PAGES: LegalPageSeed[] = [
       },
       {
         heading: '4. Workshops und Veranstaltungen',
-        body: [
-          'Für Workshops und Veranstaltungen gelten zusätzlich die folgenden Bestimmungen:',
-        ],
+        body: [],
       },
       {
         heading: '4.1 Buchung',
@@ -572,37 +691,79 @@ const LEGAL_PAGES: LegalPageSeed[] = [
     enDescription: 'Legal notice with company and contact information.',
     deSections: [
       {
-        heading: 'Firmenangaben',
+        heading: 'Angaben gemäß § 5 ECG, § 25 MedienG, § 63 GewO und § 14 UGB',
+        body: [],
+      },
+      {
+        heading: 'Unternehmen',
         body: [
           'Fermentfreude OG',
-          'Grabenstrasse 15, 8010 Graz',
-          'FN 659072 z, Firmenbuchgericht Graz',
-          'UID: ATU82444712',
+          'Grabenstraße 15',
+          '8010 Graz',
+          'Österreich',
+          'Firmenbuchnummer: FN 659072 z',
+          'Firmenbuchgericht: Graz',
         ],
       },
       {
-        heading: 'Kontaktdaten',
+        heading: 'Vertretungsberechtigte Gesellschafter',
+        body: ['Marcel Raunnigger', 'David Haider'],
+      },
+      {
+        heading: 'Kontakt',
         body: [
           'Telefon: +43 660 4943577',
-          'E-Mail: fermentfreude@gmail.com',
+          'E-Mail: kontakt@fermentfreude.at',
         ],
       },
       {
         heading: 'Unternehmensgegenstand',
-        body: ['Fermentier-Workshops und E-Commerce.'],
+        body: [
+          'Durchführung von Workshops und Veranstaltungen im Bereich Fermentation sowie Handel mit Waren (E-Commerce)',
+        ],
+      },
+      {
+        heading: 'Umsatzsteuer',
+        body: [
+          'UID-Nummer: ATU82444712',
+          'Kleinunternehmer im Sinne des § 6 Abs. 1 Z 27 UStG',
+          'Es wird keine Umsatzsteuer ausgewiesen.',
+        ],
+      },
+      {
+        heading: 'Medieninhaber und Herausgeber',
+        body: ['Fermentfreude OG', 'Grabenstraße 15', '8010 Graz'],
+      },
+      {
+        heading: 'Blattlinie',
+        body: [
+          'Diese Website dient der Information über die Angebote und Tätigkeiten von Fermentfreude OG im Bereich Fermentation, Workshops und Produkte.',
+        ],
       },
       {
         heading: 'Online-Streitbeilegung',
         body: [
-          'Plattform der EU-Kommission zur Online-Streitbeilegung: https://ec.europa.eu/consumers/odr',
-          'Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren teilzunehmen.',
+          'Verbraucher haben die Möglichkeit, Beschwerden an die Online-Streitbeilegungsplattform der Europäischen Kommission zu richten:',
+          'https://ec.europa.eu/consumers/odr',
         ],
       },
       {
-        heading: 'Haftung und Urheberrecht',
+        heading: 'Haftung für Inhalte',
         body: [
-          'Trotz sorgfaeltiger inhaltlicher Kontrolle uebernehmen wir keine Haftung fuer externe Links.',
-          'Die Inhalte dieser Website unterliegen dem Urheberrecht und duerfen nur mit Zustimmung verwendet werden.',
+          'Die Inhalte unserer Website wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.',
+        ],
+      },
+      {
+        heading: 'Haftung für Links',
+        body: [
+          'Unsere Website enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Für diese Inhalte ist stets der jeweilige Anbieter verantwortlich.',
+        ],
+      },
+      {
+        heading: 'Urheberrecht',
+        body: [
+          'Die Inhalte und Werke auf dieser Website unterliegen dem Urheberrecht. Beiträge Dritter sind als solche gekennzeichnet.',
+          'Die Vervielfältigung, Bearbeitung und Verbreitung außerhalb der Grenzen des Urheberrechts bedürfen der schriftlichen Zustimmung des jeweiligen Autors.',
         ],
       },
     ],
