@@ -9,7 +9,7 @@ export interface DropdownItem {
   href: string
   description?: string | null
   isSmall?: boolean | null
-  isDisabled?: boolean | null
+  disabled?: boolean | null
 }
 
 export interface DefaultNavItem {
@@ -39,7 +39,7 @@ export const defaultNavItems: DefaultNavItem[] = [
         label: 'Online Courses',
         href: '/courses',
         description: 'Coming soon',
-        isDisabled: true,
+        disabled: true,
       },
       {
         label: 'Gift Voucher',
@@ -68,6 +68,49 @@ for (const item of defaultNavItems) {
   if (item.dropdownKey && item.dropdownItems) {
     defaultDropdowns[item.dropdownKey] = item.dropdownItems
   }
+}
+
+/** Hrefs marked `disabled` in default nav — applied when CMS omits `disabled`. */
+const defaultInactiveHrefs = new Set<string>()
+for (const item of defaultNavItems) {
+  if (!item.dropdownItems) continue
+  for (const d of item.dropdownItems) {
+    if (d.disabled) {
+      defaultInactiveHrefs.add(normalizeNavHref(d.href))
+    }
+  }
+}
+
+function normalizeNavHref(href: string): string {
+  const t = href.trim()
+  if (!t) return '/'
+  if (t.includes('://')) {
+    try {
+      const pathname = new URL(t).pathname
+      return normalizeNavHref(pathname)
+    } catch {
+      /* ignore invalid absolute URLs */
+    }
+  }
+  const noTrailing = t.replace(/\/+$/, '') || '/'
+  return noTrailing
+}
+
+/**
+ * Whether a dropdown row should render as non-navigable.
+ * - `disabled: true` forces inactive.
+ * - Hrefs listed as inactive in default nav (e.g. /courses “coming soon”) stay non-clickable
+ *   even if CMS has “Inactive” unchecked, so the menu cannot accidentally link there early.
+ * - `disabled: false` still makes other rows explicitly clickable.
+ */
+export function dropdownItemIsInactive(item: {
+  href: string
+  disabled?: boolean | null
+}): boolean {
+  if (item.disabled === true) return true
+  if (defaultInactiveHrefs.has(normalizeNavHref(item.href))) return true
+  if (item.disabled === false) return false
+  return false
 }
 
 /** Match a CMS nav item to its default dropdown key */

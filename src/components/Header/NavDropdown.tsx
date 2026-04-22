@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/utilities/cn'
+import { dropdownItemIsInactive } from '@/components/Header/nav-defaults'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -11,7 +12,7 @@ export interface DropdownItem {
   href: string
   description?: string | null
   isSmall?: boolean | null
-  isDisabled?: boolean | null
+  disabled?: boolean | null
 }
 
 interface NavDropdownProps {
@@ -26,7 +27,9 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const isActive = items.some(
-    (item) => pathname === item.href || pathname.startsWith(item.href + '/'),
+    (item) =>
+      !dropdownItemIsInactive(item) &&
+      (pathname === item.href || pathname.startsWith(item.href + '/')),
   )
 
   return (
@@ -70,45 +73,29 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
       >
         <div className="w-60 rounded-2xl overflow-hidden shadow-lg bg-[#f5f2ed] dark:bg-[#f5f2ed]">
           <div className="py-2">
-            {items.map((item) => {
-              // Redirect voucher links to correct path
-              const href =
-                item.label.toLowerCase().includes('voucher') ||
-                item.label.toLowerCase().includes('gutschein')
-                  ? '/workshops/voucher'
-                  : item.href
-
-              // Render disabled items as non-clickable divs
-              if (item.isDisabled) {
-                return (
-                  <div
-                    key={item.href}
+            {items.map((item, idx) =>
+              dropdownItemIsInactive(item) ? (
+                <div
+                  key={`${item.href}-${idx}`}
+                  className="block px-5 py-3 cursor-default select-none text-ff-gray-text opacity-70"
+                  aria-disabled="true"
+                >
+                  <span
                     className={cn(
-                      'block px-5 py-3 transition-colors duration-150 group',
-                      'text-ff-near-black opacity-50 cursor-not-allowed',
+                      'block font-display font-bold',
+                      item.isSmall ? 'text-xs' : 'text-sm',
                     )}
                   >
-                    <span
-                      className={cn(
-                        'block font-display font-bold transition-colors',
-                        item.isSmall ? 'text-xs' : 'text-sm',
-                      )}
-                    >
-                      {item.label}
-                    </span>
-                    {item.description && !item.isSmall && (
-                      <span className="block text-xs mt-0.5 transition-colors">
-                        {item.description}
-                      </span>
-                    )}
-                  </div>
-                )
-              }
-
-              return (
+                    {item.label}
+                  </span>
+                  {item.description && !item.isSmall && (
+                    <span className="block text-xs mt-0.5">{item.description}</span>
+                  )}
+                </div>
+              ) : (
                 <Link
-                  key={item.href}
-                  href={href}
+                  key={`${item.href}-${idx}`}
+                  href={item.href}
                   className={cn(
                     'block px-5 py-3 transition-colors duration-150 group',
                     'text-ff-near-black hover:bg-ff-near-black hover:text-white',
@@ -123,13 +110,11 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
                     {item.label}
                   </span>
                   {item.description && !item.isSmall && (
-                    <span className="block text-xs mt-0.5 transition-colors">
-                      {item.description}
-                    </span>
+                    <span className="block text-xs mt-0.5 transition-colors">{item.description}</span>
                   )}
                 </Link>
-              )
-            })}
+              ),
+            )}
           </div>
         </div>
       </div>

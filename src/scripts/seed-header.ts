@@ -44,6 +44,7 @@ const deNavItems = [
         href: '/courses',
         description: 'Demnächst verfügbar',
         isSmall: false,
+        disabled: true,
       },
       {
         label: 'Workshop Gutschein',
@@ -115,6 +116,7 @@ function buildEnglishNav(savedNavItems: HeaderNavItem[]): HeaderNavItem[] {
         href: item.href,
         description: enDescriptions[navIndex]?.[itemIndex] || item.description || undefined,
         isSmall: item.isSmall ?? false,
+        disabled: item.disabled ?? false,
       }))
     }
 

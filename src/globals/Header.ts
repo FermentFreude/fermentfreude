@@ -172,12 +172,13 @@ export const Header: GlobalConfig = {
               },
             },
             {
-              name: 'isDisabled',
+              name: 'disabled',
               type: 'checkbox',
-              label: 'Disabled (non-clickable)',
+              label: 'Inactive (not clickable)',
+              defaultValue: false,
               admin: {
                 description:
-                  'Check to make this item non-clickable with a "Coming soon" appearance.',
+                  'Show the label in the menu but prevent navigation — e.g. "coming soon" items.',
               },
             },
           ],
