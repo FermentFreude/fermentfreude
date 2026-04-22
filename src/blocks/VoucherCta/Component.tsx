@@ -13,6 +13,7 @@ import React, { useCallback, useRef } from 'react'
 gsap.registerPlugin(ScrollTrigger, Flip, EasePack)
 
 const DEFAULTS = {
+  eyebrow: '',
   heading: 'Gift a special tasty experience',
   description: 'Share a tasty experience with someone special.',
   buttonLabel: 'Voucher',
@@ -26,6 +27,7 @@ type Props = VoucherCtaBlockType & {
 
 export const VoucherCtaBlock: React.FC<Props> = ({
   visible,
+  eyebrow,
   heading,
   description,
   buttonLabel,
@@ -34,6 +36,8 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   backgroundImage,
   id,
 }) => {
+  const resolvedEyebrow =
+    eyebrow != null && String(eyebrow).trim() !== '' ? String(eyebrow).trim() : DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
   const resolvedDescription = description ?? DEFAULTS.description
   const resolvedButtonLabel = buttonLabel ?? DEFAULTS.buttonLabel
@@ -97,11 +101,13 @@ export const VoucherCtaBlock: React.FC<Props> = ({
       const section = sectionRef.current
       if (!section) return
 
+      const eyebrowEl = section.querySelector('[data-anim="eyebrow"]')
       const headingEl = section.querySelector('[data-anim="heading"]')
       const descEl = section.querySelector('[data-anim="desc"]')
       const ctaEl = section.querySelector('[data-anim="cta"]')
       const contentEl = section.querySelector('[data-anim="content"]')
 
+      if (eyebrowEl) gsap.set(eyebrowEl, { y: 28, opacity: 0 })
       gsap.set(headingEl, { y: 50, opacity: 0 })
       gsap.set(descEl, { y: 35, opacity: 0 })
       gsap.set(ctaEl, { y: 25, opacity: 0, scale: 0.92 })
@@ -114,8 +120,11 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         },
       })
 
+      if (eyebrowEl) {
+        textTl.to(eyebrowEl, { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out' })
+      }
       textTl
-        .to(headingEl, { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' })
+        .to(headingEl, { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' }, eyebrowEl ? '-=0.35' : 0)
         .to(descEl, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, '-=0.5')
         .to(ctaEl, { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: 'back.out(1.7)' }, '-=0.4')
 
@@ -124,7 +133,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         flipCtxRef.current?.revert()
       }
     },
-    { scope: sectionRef, dependencies: [galleryImages, createFlip] },
+    { scope: sectionRef, dependencies: [galleryImages, createFlip, eyebrow] },
   )
 
   if (visible === false) return null
@@ -156,40 +165,48 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* ── Text + Button below gallery ── */}
+      {/* ── Text + Button below gallery (soft beige panel) ── */}
       <div
         data-anim="content"
-        className="relative flex flex-col items-center overflow-hidden text-center section-padding-md container-padding"
+        className="relative flex flex-col items-center overflow-hidden text-center section-padding-md container-padding bg-ff-ivory-mist"
       >
-        {/* Background image with dark overlay */}
-        <>
-          {backgroundImage ? (
+        {backgroundImage ? (
+          <>
             <Media
               resource={backgroundImage}
               fill
               imgClassName="object-cover blur-[2px] scale-105"
               className="absolute inset-0"
             />
-          ) : (
-            <div className="absolute inset-0 bg-[#2A2520]" aria-hidden="true" />
-          )}
-          <div className="absolute inset-0 bg-[#1A1510]/60" />
-        </>
+            <div className="absolute inset-0 bg-ff-ivory-mist/88" aria-hidden />
+          </>
+        ) : null}
 
         <div className="relative z-10 max-w-2xl flex flex-col items-center gap-3 sm:gap-5">
-          <h2 data-anim="heading" className="text-white">
+          {resolvedEyebrow ? (
+            <p
+              data-anim="eyebrow"
+              className="text-eyebrow font-bold uppercase tracking-[0.2em] text-ff-gold-accent"
+            >
+              {resolvedEyebrow}
+            </p>
+          ) : null}
+          <h2
+            data-anim="heading"
+            className="font-display font-bold tracking-tight text-ff-near-black text-balance"
+          >
             {resolvedHeading}
           </h2>
           <p
             data-anim="desc"
-            className="text-body-lg max-w-lg leading-relaxed text-white/85"
+            className="text-body-lg max-w-lg leading-relaxed text-ff-gray-text"
           >
             {resolvedDescription}
           </p>
           <Link
             data-anim="cta"
             href={resolvedButtonLink}
-            className="shadow-[inset_0_0_0_2px_rgba(255,255,255,0.7)] text-white px-6 py-2.5 rounded-full tracking-widest uppercase font-display font-bold bg-transparent hover:bg-white hover:text-[#2A2520] hover:scale-[1.03] active:scale-[0.97] transition-all text-base"
+            className="inline-flex items-center justify-center rounded-full border-2 border-ff-charcoal/35 bg-transparent px-6 py-2.5 font-display text-base font-bold uppercase tracking-widest text-ff-near-black transition-all hover:border-ff-charcoal hover:bg-ff-charcoal hover:text-white hover:scale-[1.03] active:scale-[0.97]"
           >
             {resolvedButtonLabel}
           </Link>

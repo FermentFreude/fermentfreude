@@ -3439,6 +3439,10 @@ export interface VoucherCtaBlock {
    */
   visible?: boolean | null;
   /**
+   * Small uppercase line above the main heading, in brand gold (e.g. "WORKSHOPS & GUTSCHEINE"). Leave empty to hide.
+   */
+  eyebrow?: string | null;
+  /**
    * Large heading text (e.g. "Gift a special tasty experience").
    */
   heading?: string | null;
@@ -5618,6 +5622,7 @@ export interface FormBlockSelect<T extends boolean = true> {
  */
 export interface VoucherCtaBlockSelect<T extends boolean = true> {
   visible?: T;
+  eyebrow?: T;
   heading?: T;
   description?: T;
   buttonLabel?: T;

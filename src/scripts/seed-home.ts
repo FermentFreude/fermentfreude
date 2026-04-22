@@ -726,23 +726,25 @@ async function seedHome() {
   // ── VoucherCta (DE) ──
   const voucherCtaDE = {
     blockType: 'voucherCta' as const,
-    heading: 'Verschenke ein besonderes Geschmacks-Erlebnis',
+    eyebrow: 'Workshops · Gutscheine · Genuss',
+    heading: 'Verschenke Fermentation als Erlebnis',
     description:
-      'Unsere Gutscheine sind das perfekte Geschenk für alle, die gutes Essen, Gesundheit und einzigartige Erlebnisse lieben. Wähle zwischen Workshop-Gutscheinen und Produktsets.',
-    buttonLabel: 'Gutschein',
+      'Ob zum Geburtstag, als Überraschung oder einfach so – mit einem GUTSCHEIN verschenkst du Genuss und ein Erlebnis, das in Erinnerung bleibt.',
+    buttonLabel: 'Mehr erfahren',
     buttonLink: '/voucher',
-    image: voucherImage.id,
+    backgroundImage: voucherImage.id,
   }
 
   // ── VoucherCta (EN) ──
   const voucherCtaEN = {
     blockType: 'voucherCta' as const,
-    heading: 'Gift a special tasty experience',
+    eyebrow: 'Workshops · Vouchers · Flavour',
+    heading: 'Give fermentation as an experience',
     description:
-      'Our vouchers are the perfect gift for anyone who loves good food, health, and unique experiences. Choose between workshop vouchers and product sets.',
-    buttonLabel: 'Voucher',
+      'For a birthday, a surprise, or just because — with a GIFT VOUCHER you share great taste and a memory that lasts.',
+    buttonLabel: 'Learn more',
     buttonLink: '/voucher',
-    image: voucherImage.id,
+    backgroundImage: voucherImage.id,
   }
 
   // ── HeroBanner (DE) ──
