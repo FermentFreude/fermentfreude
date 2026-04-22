@@ -46,16 +46,112 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       })
       .join(', ')
 
+    // ─── Extract Workshop Details ───────────────────────────────
+    // Look for workshop-bookings that match this order by checking the cart/transaction
+    // For now, extract from items if any are workshop products
+    let workshopDate = ''
+    let workshopTime = ''
+    let workshopLocation = ''
+    let guestCount = 0
+    let workshopPrice = ''
+
+    // Try to find workshop bookings associated with this order
+    try {
+      // Get transaction for this order to find cart ID
+      const transactions = await req.payload.find({
+        collection: 'transactions',
+        where: {
+          order: {
+            equals: doc.id,
+          },
+        },
+        limit: 1,
+        overrideAccess: true,
+      })
+
+      if (transactions.totalDocs > 0) {
+        const transaction = transactions.docs[0]
+        const cartId = typeof transaction.cart === 'object' ? transaction.cart?.id : transaction.cart
+
+        if (cartId) {
+          // Find workshop bookings with this cart ID
+          const bookings = await req.payload.find({
+            collection: 'workshop-bookings',
+            where: {
+              cartSlug: {
+                equals: cartId,
+              },
+            },
+            limit: 50,
+            overrideAccess: true,
+          })
+
+          if (bookings.totalDocs > 0) {
+            const booking = bookings.docs[0]
+            workshopDate = booking.date || ''
+            workshopTime = booking.time || ''
+            guestCount = booking.guestCount || 0
+            workshopPrice = booking.totalPrice
+              ? `€${(booking.totalPrice).toFixed(2)}`
+              : ''
+
+            // Get location from appointment
+            if (booking.appointmentId) {
+              try {
+                const appointment = await req.payload.findByID({
+                  collection: 'workshop-appointments',
+                  id: booking.appointmentId,
+                  depth: 1,
+                  overrideAccess: true,
+                })
+
+                if (appointment && appointment.location) {
+                  workshopLocation = typeof appointment.location === 'object' 
+                    ? (appointment.location?.name || '')
+                    : appointment.location
+                }
+              } catch {
+                // Ignore if appointment not found
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      req.payload.logger.warn(
+        `[Brevo] Could not fetch workshop details for order ${doc.id}: ${err instanceof Error ? err.message : String(err)}`,
+      )
+    }
+
+    const emailParams: Record<string, string> = {
+      ORDER_ID: String(doc.id),
+      ORDER_TOTAL: String(doc.total ?? ''),
+      ORDER_ITEMS: itemSummary,
+      CUSTOMER_NAME: recipientName || recipientEmail,
+      ORDER_DATE: new Date().toLocaleDateString('de-DE'),
+    }
+
+    // Add workshop details if found
+    if (workshopDate) {
+      emailParams.WORKSHOP_DATE = workshopDate
+    }
+    if (workshopTime) {
+      emailParams.WORKSHOP_TIME = workshopTime
+    }
+    if (workshopLocation) {
+      emailParams.WORKSHOP_LOCATION = workshopLocation
+    }
+    if (guestCount > 0) {
+      emailParams.GUEST_COUNT = String(guestCount)
+    }
+    if (workshopPrice) {
+      emailParams.TOTAL_PRICE = workshopPrice
+    }
+
     await sendTemplateEmail({
       to: [{ email: recipientEmail, name: recipientName }],
       templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION,
-      params: {
-        ORDER_ID: String(doc.id),
-        ORDER_TOTAL: String(doc.total ?? ''),
-        ORDER_ITEMS: itemSummary,
-        CUSTOMER_NAME: recipientName || recipientEmail,
-        ORDER_DATE: new Date().toLocaleDateString('de-DE'),
-      },
+      params: emailParams,
     })
   } catch (error) {
     req.payload.logger.error(
