@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
 
@@ -41,6 +43,8 @@ export function VoucherHero({
   showDeliveryOptions = true,
   showCTA = true,
 }: VoucherHeroProps) {
+  const router = useRouter()
+  
   // Show email and pickup only — post/card removed for freshness
   const visibleDeliveryOptions = deliveryOptions.filter(
     (o) => o.type === 'email' || o.type === 'pickup',
@@ -49,12 +53,72 @@ export function VoucherHero({
   const [selectedDelivery, setSelectedDelivery] = useState(
     visibleDeliveryOptions[0]?.type ?? 'email',
   )
+  const [purchaserEmail, setPurchaserEmail] = useState('')
+  const [recipientEmail, setRecipientEmail] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   // Format amount for display (e.g., "50€" -> "€50,00")
   const formatAmount = (amount: string) => {
     const num = amount.replace('€', '')
     return `€${num},00`
   }
+
+  // Parse amount from string (e.g., "99€" -> 99)
+  const parseAmount = (amountStr: string): number => {
+    const num = parseInt(amountStr.replace('€', ''))
+    return isNaN(num) ? 0 : num
+  }
+
+  // Handle checkout
+  const handleCheckout = useCallback(async () => {
+    // Validate emails
+    if (!purchaserEmail.trim()) {
+      toast.error('Bitte gib deine E-Mail-Adresse ein.')
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(purchaserEmail)) {
+      toast.error('Ungültiges E-Mail-Format.')
+      return
+    }
+
+    if (selectedDelivery === 'email' && recipientEmail && !emailRegex.test(recipientEmail)) {
+      toast.error('Ungültiges E-Mail-Format für Empfänger.')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const response = await fetch('/api/voucher/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: parseAmount(selectedAmount),
+          deliveryMethod: selectedDelivery,
+          purchaserEmail: purchaserEmail.trim(),
+          recipientEmail: selectedDelivery === 'email' && recipientEmail ? recipientEmail.trim() : undefined,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        toast.error(data.error || 'Fehler beim Checkout.')
+        return
+      }
+
+      if (data.url) {
+        router.push(data.url)
+      }
+    } catch (err) {
+      console.error('Checkout error:', err)
+      toast.error('Fehler beim Checkout. Bitte versuche es später.')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [purchaserEmail, recipientEmail, selectedAmount, selectedDelivery, router])
 
   const iconColor = (opt: (typeof visibleDeliveryOptions)[0]) =>
     selectedDelivery === opt.type ? '#FFFFFF' : undefined
@@ -259,13 +323,53 @@ export function VoucherHero({
                 </div>
               )}
 
+              {/* Email Inputs */}
+              {showCTA && (
+                <div className="flex flex-col gap-4 rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
+                  <div>
+                    <label className="font-sans text-body-sm font-bold text-ff-near-black block mb-2">
+                      Deine E-Mail-Adresse *
+                    </label>
+                    <input
+                      type="email"
+                      value={purchaserEmail}
+                      onChange={(e) => setPurchaserEmail(e.target.value)}
+                      placeholder="deine@email.de"
+                      className="w-full rounded-xl border border-ff-border-light bg-white px-4 py-3 font-sans text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  {selectedDelivery === 'email' && (
+                    <div>
+                      <label className="font-sans text-body-sm font-bold text-ff-near-black block mb-2">
+                        E-Mail des Empfängers (optional)
+                      </label>
+                      <input
+                        type="email"
+                        value={recipientEmail}
+                        onChange={(e) => setRecipientEmail(e.target.value)}
+                        placeholder="empfänger@email.de"
+                        className="w-full rounded-xl border border-ff-border-light bg-white px-4 py-3 font-sans text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
+                        disabled={isLoading}
+                      />
+                      <p className="mt-2 font-sans text-body-sm text-ff-gray-text">
+                        Wenn leer, wird der Gutschein an deine Adresse gesendet.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Add to Cart Button */}
               {showCTA && (
                 <button
                   type="button"
-                  className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={handleCheckout}
+                  disabled={isLoading}
+                  className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {addToCartButton}
+                  {isLoading ? 'Wird bearbeitet...' : addToCartButton}
                 </button>
               )}
             </div>

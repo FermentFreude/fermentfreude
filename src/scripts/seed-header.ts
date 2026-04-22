@@ -47,7 +47,7 @@ const deNavItems = [
       },
       {
         label: 'Workshop Gutschein',
-        href: '/shop',
+        href: '/workshops/voucher',
         isSmall: false,
       },
     ],
