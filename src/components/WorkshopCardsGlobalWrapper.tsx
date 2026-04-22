@@ -24,10 +24,14 @@ export async function WorkshopCardsGlobalWrapper({
   ])
 
   // Overlay dynamic dates from workshop-appointments onto each card
-  const cards = (data.cards ?? []).map((card) => ({
-    ...card,
-    nextDate: (card.buttonUrl && nextDates[card.buttonUrl]) || card.nextDate || null,
-  }))
+  const cards = (data.cards ?? []).map((card) => {
+    const nextDateData = card.buttonUrl ? nextDates[card.buttonUrl] : undefined
+    return {
+      ...card,
+      nextDate: nextDateData?.date || card.nextDate || null,
+      availableSpots: nextDateData?.availableSpots,
+    }
+  })
 
   return (
     <WorkshopCardsSection
@@ -39,6 +43,7 @@ export async function WorkshopCardsGlobalWrapper({
       viewAllUrl={data.viewAllUrl ?? null}
       cards={cards}
       layout={layout}
+      locale={locale as 'de' | 'en'}
     />
   )
 }

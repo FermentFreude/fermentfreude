@@ -260,7 +260,8 @@ const RETOUCH_DE = {
     },
   ] as HeroBlock[],
   guideTitle: 'Ein kompletter Leitfaden zur Fermentation',
-  guideBody: 'Fermentation ist kein Rezept, sondern ein Prozess.\nEin Prozess, den man versteht und bewusst erlebt.',
+  guideBody:
+    'Fermentation ist kein Rezept, sondern ein Prozess.\nEin Prozess, den man versteht und bewusst erlebt.',
   whatTitle: 'Was ist Fermentation?',
   whatBody:
     'Fermentation ist die kontrollierte Umwandlung von Lebensmitteln mithilfe von Mikroorganismen wie Bakterien, Hefen und Schimmelpilzen.\nEin natürlicher Prozess, der aus einfachen Zutaten neue Aromen, mehr Tiefe und längere Haltbarkeit entstehen lässt.',
@@ -310,7 +311,10 @@ const RETOUCH_DE = {
       description:
         'Hygiene, frische Zutaten und passende Bedingungen sind die Grundlage für eine sichere Fermentation.',
     },
-    { title: 'Schimmel', description: 'Wenn ein Ferment schimmelt, sollte es grundsätzlich entsorgt werden.' },
+    {
+      title: 'Schimmel',
+      description: 'Wenn ein Ferment schimmelt, sollte es grundsätzlich entsorgt werden.',
+    },
     {
       title: 'Geruch und Aussehen',
       description:
@@ -456,8 +460,10 @@ export default async function FermentationPage({ searchParams }: FermentationPag
   }
 
   const heroTitle = retouch.heroTitle ?? f?.fermentationHeroTitle ?? DEFAULT_HERO_TITLE
-  const heroDescription = retouch.heroDescription ?? f?.fermentationHeroDescription ?? DEFAULT_HERO_DESCRIPTION
-  const heroBenefitsTitle = retouch.heroBenefitsTitle ?? f?.fermentationHeroBenefitsTitle ?? 'WHY FERMENTATION?'
+  const heroDescription =
+    retouch.heroDescription ?? f?.fermentationHeroDescription ?? DEFAULT_HERO_DESCRIPTION
+  const heroBenefitsTitle =
+    retouch.heroBenefitsTitle ?? f?.fermentationHeroBenefitsTitle ?? 'WHY FERMENTATION?'
   let heroBlocks =
     retouch.heroBlocks?.length > 0
       ? retouch.heroBlocks
@@ -530,9 +536,11 @@ export default async function FermentationPage({ searchParams }: FermentationPag
       : (f?.fermentationDangerConcerns?.length ?? 0) > 0
         ? (f?.fermentationDangerConcerns ?? [])
         : DEFAULT_DANGER_CONCERNS
-  const dangerClosing = retouch.dangerClosing ?? f?.fermentationDangerClosing ?? DEFAULT_DANGER_CLOSING
+  const dangerClosing =
+    retouch.dangerClosing ?? f?.fermentationDangerClosing ?? DEFAULT_DANGER_CLOSING
 
-  const practiceTitle = retouch.practiceTitle ?? f?.fermentationPracticeTitle ?? DEFAULT_PRACTICE_TITLE
+  const practiceTitle =
+    retouch.practiceTitle ?? f?.fermentationPracticeTitle ?? DEFAULT_PRACTICE_TITLE
   const practiceBody = f?.fermentationPracticeBody
   const practiceImage = f?.fermentationPracticeImage
   const practiceParagraphs =
@@ -540,7 +548,8 @@ export default async function FermentationPage({ searchParams }: FermentationPag
     (practiceBody ? practiceBody.split(/\n\n+/).filter(Boolean) : DEFAULT_PRACTICE_PARAGRAPHS)
 
   const ctaTitle = retouch.ctaTitle ?? f?.fermentationCtaTitle ?? DEFAULT_CTA_TITLE
-  const ctaDescription = retouch.ctaDescription ?? f?.fermentationCtaDescription ?? DEFAULT_CTA_DESCRIPTION
+  const ctaDescription =
+    retouch.ctaDescription ?? f?.fermentationCtaDescription ?? DEFAULT_CTA_DESCRIPTION
   const ctaPrimaryLabel = f?.fermentationCtaPrimaryLabel ?? DEFAULT_CTA_PRIMARY
   const ctaPrimaryUrl = f?.fermentationCtaPrimaryUrl ?? DEFAULT_CTA_PRIMARY_URL
   const ctaSecondaryLabel = f?.fermentationCtaSecondaryLabel ?? DEFAULT_CTA_SECONDARY
@@ -597,9 +606,11 @@ export default async function FermentationPage({ searchParams }: FermentationPag
   const nextDates = await getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de')
   const workshopCards = workshopCardsRaw.map((c) => {
     const card = c as { buttonUrl?: string; nextDate?: string }
+    const nextDateData = card.buttonUrl ? nextDates[card.buttonUrl] : undefined
     return {
       ...c,
-      nextDate: (card.buttonUrl && nextDates[card.buttonUrl]) || card.nextDate || undefined,
+      nextDate: nextDateData?.date || card.nextDate || undefined,
+      availableSpots: nextDateData?.availableSpots,
     }
   })
 
@@ -816,7 +827,12 @@ export default async function FermentationPage({ searchParams }: FermentationPag
       {/* Why is it so special? — BENEFITS label, 2x3 cards with numbers & icons */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={150}>
-          <WhySection title={whyTitle} eyebrow={retouch.whyEyebrow} items={whyItems} image={whyImage} />
+          <WhySection
+            title={whyTitle}
+            eyebrow={retouch.whyEyebrow}
+            items={whyItems}
+            image={whyImage}
+          />
         </FadeIn>
       </section>
 
@@ -961,6 +977,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
               buttonLabel?: string
               buttonUrl?: string
               nextDate?: string
+              availableSpots?: number
             }
             const fallbacksByUrl: Record<string, string> = {
               '/workshops/lakto-gemuese': '/assets/images/fermentation/workshop-lakto.png',
@@ -985,10 +1002,12 @@ export default async function FermentationPage({ searchParams }: FermentationPag
               buttonLabel: card.buttonLabel,
               buttonUrl: card.buttonUrl,
               nextDate: card.nextDate,
+              availableSpots: card.availableSpots,
             }
           })}
           cardBg="#ffffff"
           layout="inline"
+          locale={locale as 'de' | 'en'}
         />
       </FadeIn>
 

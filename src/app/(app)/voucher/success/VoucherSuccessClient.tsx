@@ -46,7 +46,9 @@ export function VoucherSuccessClient() {
 
     setPdfLoading(true)
     try {
-      const response = await fetch(`/api/voucher/generate-pdf?code=${encodeURIComponent(voucher.code)}`)
+      const response = await fetch(
+        `/api/voucher/generate-pdf?code=${encodeURIComponent(voucher.code)}`,
+      )
       if (!response.ok) {
         toast.error('PDF konnte nicht heruntergeladen werden.')
         return
@@ -113,9 +115,7 @@ export function VoucherSuccessClient() {
               />
             </svg>
           </div>
-          <h1 className="font-display text-h2 font-bold text-ff-near-black mb-3">
-            Fehler
-          </h1>
+          <h1 className="font-display text-h2 font-bold text-ff-near-black mb-3">Fehler</h1>
           <p className="font-sans text-body text-ff-gray-text mb-6">{error}</p>
           <Link
             href="/workshops/voucher"
@@ -176,7 +176,13 @@ export function VoucherSuccessClient() {
         <div className="rounded-xl bg-ff-cream border border-ff-border-light p-5 mb-8 text-left">
           {voucher.deliveryMethod === 'email' ? (
             <div className="flex items-start gap-3">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-ff-gold-accent mt-0.5 shrink-0">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="text-ff-gold-accent mt-0.5 shrink-0"
+              >
                 <path
                   d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
                   fill="currentColor"
@@ -198,7 +204,13 @@ export function VoucherSuccessClient() {
             </div>
           ) : (
             <div className="flex items-start gap-3">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-ff-gold-accent mt-0.5 shrink-0">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="text-ff-gold-accent mt-0.5 shrink-0"
+              >
                 <path
                   d="M19 7V4H5V7H2V20H8V14H16V20H22V7H19ZM6 18H4V9H6V18ZM20 18H18V14H20V18ZM18 12V9H16V12H18Z"
                   fill="currentColor"
@@ -274,10 +286,7 @@ export function VoucherSuccessClient() {
           ) : (
             <>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="inline-block">
-                <path
-                  d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
-                  fill="currentColor"
-                />
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="currentColor" />
               </svg>
               Gutschein als PDF herunterladen
             </>

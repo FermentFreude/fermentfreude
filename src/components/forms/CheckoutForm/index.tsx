@@ -15,6 +15,8 @@ type Props = {
   setProcessingPayment: React.Dispatch<React.SetStateAction<boolean>>
   isAllDigital?: boolean
   hasWorkshop?: boolean
+  pickupDate?: string
+  pickupTime?: string
 }
 
 export const CheckoutForm: React.FC<Props> = ({
@@ -23,6 +25,8 @@ export const CheckoutForm: React.FC<Props> = ({
   setProcessingPayment,
   isAllDigital,
   hasWorkshop,
+  pickupDate,
+  pickupTime,
 }) => {
   const stripe = useStripe()
   const elements = useElements()
@@ -70,6 +74,8 @@ export const CheckoutForm: React.FC<Props> = ({
                 additionalData: {
                   paymentIntentID: paymentIntent.id,
                   ...(customerEmail ? { customerEmail } : {}),
+                  ...(pickupDate ? { pickupDate } : {}),
+                  ...(pickupTime ? { pickupTime } : {}),
                 },
               })
 

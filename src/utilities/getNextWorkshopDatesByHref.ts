@@ -24,7 +24,7 @@ function formatUpcomingDate(dateValue: string, locale: SupportedLocale): string 
 
 export async function getNextWorkshopDatesByHref(
   locale: SupportedLocale,
-): Promise<Record<string, string>> {
+): Promise<Record<string, { date: string; availableSpots?: number }>> {
   try {
     const payload = await getPayload({ config: configPromise })
 
@@ -41,7 +41,7 @@ export async function getNextWorkshopDatesByHref(
       depth: 2,
     })
 
-    const nextByHref: Record<string, string> = {}
+    const nextByHref: Record<string, { date: string; availableSpots?: number }> = {}
 
     for (const appointment of result.docs) {
       const workshop = appointment.workshop as Workshop | null
@@ -51,7 +51,11 @@ export async function getNextWorkshopDatesByHref(
       const href = WORKSHOP_SLUG_TO_HREF[workshopSlug]
       if (!href || nextByHref[href]) continue
 
-      nextByHref[href] = formatUpcomingDate(appointment.dateTime, locale)
+      nextByHref[href] = {
+        date: formatUpcomingDate(appointment.dateTime, locale),
+        availableSpots:
+          typeof appointment.availableSpots === 'number' ? appointment.availableSpots : undefined,
+      }
     }
 
     return nextByHref

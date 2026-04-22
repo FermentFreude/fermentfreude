@@ -133,6 +133,52 @@ export const CheckoutPage: React.FC = () => {
       : billingAddress && (billingAddressSameAsShipping || shippingAddress)),
   )
 
+  // Get available pickup time slots (only times 3+ hours from now)
+  const getAvailableTimeSlots = useCallback(() => {
+    const allTimeSlots = [
+      { value: '09:00', label: '9:00 AM' },
+      { value: '10:00', label: '10:00 AM' },
+      { value: '11:00', label: '11:00 AM' },
+      { value: '12:00', label: '12:00 PM' },
+      { value: '14:00', label: '2:00 PM' },
+      { value: '15:00', label: '3:00 PM' },
+      { value: '16:00', label: '4:00 PM' },
+      { value: '17:00', label: '5:00 PM' },
+    ]
+
+    // If no date selected, return all slots
+    if (!pickupDate) return allTimeSlots
+
+    const now = new Date()
+    const selectedDate = new Date(pickupDate)
+    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+    // If selected date is in the future, allow all times
+    if (selectedDate > todayDate) {
+      return allTimeSlots
+    }
+
+    // If selected date is today, filter out times less than 3 hours away
+    if (selectedDate.getTime() === todayDate.getTime()) {
+      const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000)
+      return allTimeSlots.filter((slot) => {
+        const [hours, minutes] = slot.value.split(':').map(Number)
+        const slotTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
+        return slotTime >= threeHoursLater
+      })
+    }
+
+    return allTimeSlots
+  }, [pickupDate])
+
+  // On date change, clear pickup time if it becomes unavailable
+  useEffect(() => {
+    const availableSlots = getAvailableTimeSlots()
+    if (pickupTime && !availableSlots.some((slot) => slot.value === pickupTime)) {
+      setPickupTime('')
+    }
+  }, [pickupDate, pickupTime, getAvailableTimeSlots])
+
   // On initial load wait for addresses to be loaded and check to see if we can prefill a default one
   useEffect(() => {
     if (!shippingAddress) {
@@ -491,18 +537,15 @@ export const CheckoutPage: React.FC = () => {
                 name="pickupTime"
                 value={pickupTime}
                 onChange={(e) => setPickupTime(e.target.value)}
-                disabled={Boolean(paymentData)}
-                className="w-full rounded-md border border-ff-border-light bg-white px-4 py-2 text-body-sm focus:border-ff-near-black focus:ring-ff-near-black"
+                disabled={Boolean(paymentData) || !pickupDate}
+                className="w-full rounded-md border border-ff-border-light bg-white px-4 py-2 text-body-sm focus:border-ff-near-black focus:ring-ff-near-black disabled:opacity-50"
               >
                 <option value="">Select a time</option>
-                <option value="09:00">9:00 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="11:00">11:00 AM</option>
-                <option value="12:00">12:00 PM</option>
-                <option value="14:00">2:00 PM</option>
-                <option value="15:00">3:00 PM</option>
-                <option value="16:00">4:00 PM</option>
-                <option value="17:00">5:00 PM</option>
+                {getAvailableTimeSlots().map((slot) => (
+                  <option key={slot.value} value={slot.value}>
+                    {slot.label}
+                  </option>
+                ))}
               </select>
             </FormItem>
           </section>
@@ -678,6 +721,8 @@ export const CheckoutPage: React.FC = () => {
                     setProcessingPayment={setProcessingPayment}
                     isAllDigital={isAllDigital}
                     hasWorkshop={hasWorkshop}
+                    pickupDate={pickupDate}
+                    pickupTime={pickupTime}
                   />
                   <button
                     className="self-start font-display text-body-sm font-bold text-ff-gray-text-light underline underline-offset-2 transition-colors hover:text-ff-near-black"
@@ -693,8 +738,8 @@ export const CheckoutPage: React.FC = () => {
       </div>
 
       {!cartIsEmpty && (
-        <aside className="order-first w-full lg:order-last lg:w-95 lg:shrink-0">
-          <div className="sticky top-8 rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+        <aside className="order-first w-full lg:order-last lg:w-95 lg:shrink-0 lg:sticky lg:top-8 lg:max-h-[calc(100vh-9rem)]">
+          <div className="rounded-xl border border-ff-border-light bg-white overflow-y-auto max-h-[calc(100vh-6rem)] md:max-h-[calc(100vh-8rem)] lg:max-h-none p-6 sm:p-8">
             <h2 className="font-display text-subheading font-bold tracking-tight text-ff-near-black">
               Your cart
             </h2>

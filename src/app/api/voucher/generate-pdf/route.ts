@@ -171,10 +171,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('[voucher/generate-pdf] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to generate PDF.' },
-      { status: 500 },
-    )
+    return NextResponse.json({ success: false, error: 'Failed to generate PDF.' }, { status: 500 })
   }
 }
 
@@ -341,9 +338,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('[voucher/generate-pdf POST] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to generate PDF.' },
-      { status: 500 },
-    )
+    return NextResponse.json({ success: false, error: 'Failed to generate PDF.' }, { status: 500 })
   }
 }

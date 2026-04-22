@@ -356,11 +356,14 @@ function ProductCard({ product }: { product: Product }) {
   const price = getProductPrice(product)
   const variantLabel = getVariantLabel(product)
   const unitSize = product.unitSize ?? ''
+  const inventory = product.inventory ?? 0
+  const isOutOfStock = inventory === 0
 
   const handleAddToCart = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
+      if (isOutOfStock) return
       addItem({ product: product.id }).then(() => {
         toast.success('Item added to cart.')
         gtmAddToCart({
@@ -372,7 +375,7 @@ function ProductCard({ product }: { product: Product }) {
         })
       })
     },
-    [addItem, product, price],
+    [addItem, product, price, isOutOfStock],
   )
 
   // Format price: value is in cents, convert to euros
@@ -392,11 +395,11 @@ function ProductCard({ product }: { product: Product }) {
             {/* Single SVG: card background + cart button always aligned */}
             <CardWithButton
               className="absolute inset-0 w-full h-full"
-              cartHovered={cartHovered}
-              onCartEnter={() => setCartHovered(true)}
+              cartHovered={cartHovered && !isOutOfStock}
+              onCartEnter={() => !isOutOfStock && setCartHovered(true)}
               onCartLeave={() => setCartHovered(false)}
               onCartClick={handleAddToCart}
-              ariaLabel={`Add ${product.title} to cart`}
+              ariaLabel={isOutOfStock ? 'Sold Out' : `Add ${product.title} to cart`}
             />
 
             {/* Product bottle — positioned over the SVG card, overflows bottom */}
@@ -407,13 +410,22 @@ function ProductCard({ product }: { product: Product }) {
               {image ? (
                 <Media
                   resource={image}
-                  className="relative w-[55%] h-[85%]"
+                  className={`relative w-[55%] h-[85%] ${isOutOfStock ? 'opacity-50' : ''}`}
                   imgClassName="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-lg"
                 />
               ) : (
                 <div className="w-[55%] h-[70%] bg-[#ECE5DE] rounded-lg" />
               )}
             </div>
+
+            {/* Sold Out Badge */}
+            {isOutOfStock && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-2xl pointer-events-none">
+                <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-xs font-bold px-3 py-1.5 rounded-full">
+                  Sold Out
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

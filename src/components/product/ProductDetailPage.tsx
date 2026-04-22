@@ -74,6 +74,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
   const { currency } = useCurrency()
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [activeTab, setActiveTab] = useState<'description' | 'about'>('description')
+  const [quantity, setQuantity] = useState(1)
 
   /* ── Gallery ── */
   const gallery =
@@ -377,14 +378,20 @@ export function ProductDetailPage({ product }: { product: Product }) {
                 <div className="flex items-center shrink-0">
                   <div className="relative w-16 h-15 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center">
                     <span className="text-2xl font-display font-bold text-black select-none">
-                      1
+                      {quantity}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1 ml-1">
-                    <button className="w-7 h-7 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center text-lg font-display font-bold text-black hover:bg-[#f7f7f8] transition-colors">
+                    <button
+                      onClick={() => setQuantity((q) => q + 1)}
+                      className="w-7 h-7 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center text-lg font-display font-bold text-black hover:bg-[#f7f7f8] transition-colors"
+                    >
                       +
                     </button>
-                    <button className="w-7 h-7 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center text-lg font-display font-bold text-black hover:bg-[#f7f7f8] transition-colors">
+                    <button
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="w-7 h-7 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center text-lg font-display font-bold text-black hover:bg-[#f7f7f8] transition-colors"
+                    >
                       -
                     </button>
                   </div>
@@ -392,6 +399,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                 <Suspense fallback={null}>
                   <AddToCart
                     product={product}
+                    quantity={quantity}
                     className="flex-1 h-15 rounded-full text-lg font-display font-bold bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] hover:text-white"
                   />
                 </Suspense>

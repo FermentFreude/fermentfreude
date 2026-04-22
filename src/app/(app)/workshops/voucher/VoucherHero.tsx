@@ -1,10 +1,10 @@
 'use client'
 
-import { useCallback, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
-import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
+import type { Media as MediaType } from '@/payload-types'
+import { useRouter } from 'next/navigation'
+import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 interface VoucherHeroProps {
   heading: string
@@ -44,7 +44,7 @@ export function VoucherHero({
   showCTA = true,
 }: VoucherHeroProps) {
   const router = useRouter()
-  
+
   // Show email and pickup only — post/card removed for freshness
   const visibleDeliveryOptions = deliveryOptions.filter(
     (o) => o.type === 'email' || o.type === 'pickup',
@@ -98,7 +98,8 @@ export function VoucherHero({
           amount: parseAmount(selectedAmount),
           deliveryMethod: selectedDelivery,
           purchaserEmail: purchaserEmail.trim(),
-          recipientEmail: selectedDelivery === 'email' && recipientEmail ? recipientEmail.trim() : undefined,
+          recipientEmail:
+            selectedDelivery === 'email' && recipientEmail ? recipientEmail.trim() : undefined,
         }),
       })
 
@@ -124,9 +125,7 @@ export function VoucherHero({
     selectedDelivery === opt.type ? '#FFFFFF' : undefined
 
   return (
-    <section
-      className="w-full bg-white py-6 md:py-8"
-    >
+    <section className="w-full bg-white py-6 md:py-8">
       <div className="mx-auto max-w-(--content-full) px-(--space-container-x)">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-start">
           {/* Left Column - Voucher Preview Card */}
@@ -135,7 +134,14 @@ export function VoucherHero({
               {/* Gift Icon */}
               <div className="absolute top-7 right-7">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ff-gold-accent/12 shadow-[0_6px_18px_rgba(229,183,101,0.35)] backdrop-blur-[2px]">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ff-gold-accent">
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                    className="text-ff-gold-accent"
+                  >
                     <path
                       d="M20 6H17.82C17.93 5.69 18 5.35 18 5C18 3.34 16.66 2 15 2C13.95 2 13.04 2.54 12.5 3.35L12 4.02L11.5 3.34C10.96 2.54 10.05 2 9 2C7.34 2 6 3.34 6 5C6 5.35 6.07 5.69 6.18 6H4C2.89 6 2.01 6.89 2.01 8L2 19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V8C22 6.89 21.11 6 20 6ZM15 4C15.55 4 16 4.45 16 5C16 5.55 15.55 6 15 6C14.45 6 14 5.55 14 5C14 4.45 14.45 4 15 4ZM9 4C9.55 4 10 4.45 10 5C10 5.55 9.55 6 9 6C8.45 6 8 5.55 8 5C8 4.45 8.45 4 9 4ZM20 19H4V17H20V19ZM20 15H4V8H7.08C7.03 8.16 7 8.33 7 8.5C7 9.33 7.67 10 8.5 10C9.33 10 10 9.33 10 8.5C10 8.33 9.97 8.16 9.92 8H14.08C14.03 8.16 14 8.33 14 8.5C14 9.33 14.67 10 15.5 10C16.33 10 17 9.33 17 8.5C17 8.33 16.97 8.16 16.92 8H20V15Z"
                       fill="currentColor"
@@ -286,7 +292,9 @@ export function VoucherHero({
                         <span className="flex flex-1 min-w-0 flex-col items-start gap-1 pt-0.5">
                           <span
                             className={`font-sans text-body font-medium ${
-                              selectedDelivery === option.type ? 'text-ff-near-black' : 'text-ff-gray-text'
+                              selectedDelivery === option.type
+                                ? 'text-ff-near-black'
+                                : 'text-ff-gray-text'
                             }`}
                           >
                             {option.title}

@@ -32,7 +32,10 @@ export const ShopProductCard: React.FC<Props> = ({
   const bgColor = cardBackgroundColor?.trim() || CARD_DEFAULTS.cardBackgroundColor
   const btnColor = addToCartColor?.trim() || CARD_DEFAULTS.addToCartColor
   const btnHoverColor = addToCartHoverColor?.trim() || CARD_DEFAULTS.addToCartHoverColor
-  const { gallery, priceInEUR, title, slug } = product
+  const { gallery, priceInEUR, title, slug, inventory } = product
+
+  // Check if product is out of stock
+  const isOutOfStock = !inventory || inventory === 0
 
   let price = priceInEUR
   let variantTitle: string | null = null
@@ -88,6 +91,14 @@ export const ShopProductCard: React.FC<Props> = ({
             ) : (
               <div className="h-55 w-32 shrink-0 rounded-2xl bg-ff-ivory-mist/50" />
             )}
+            {/* Sold Out Badge */}
+            {isOutOfStock && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/50 backdrop-blur-sm">
+                <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-sm font-bold px-4 py-2.5 rounded-full">
+                  Sold Out
+                </span>
+              </div>
+            )}
           </div>
           {/* Product info */}
           <div className="flex w-full flex-col items-start gap-1.5 self-stretch px-4 pb-4">
@@ -116,24 +127,29 @@ export const ShopProductCard: React.FC<Props> = ({
 
         {/* Add to cart: bottom-right gold circle */}
         <div
-          className="add-to-cart-custom pointer-events-auto absolute bottom-4 right-4 z-100 rounded-full"
+          className={`add-to-cart-custom pointer-events-auto absolute bottom-4 right-4 z-100 rounded-full transition-all ${
+            isOutOfStock ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           style={
             {
               width: 57.16,
               height: 57.16,
               minWidth: 57.16,
               minHeight: 57.16,
-              '--add-to-cart-bg': btnColor,
-              '--add-to-cart-hover-bg': btnHoverColor,
+              '--add-to-cart-bg': isOutOfStock ? '#d0ccc6' : btnColor,
+              '--add-to-cart-hover-bg': isOutOfStock ? '#d0ccc6' : btnHoverColor,
             } as React.CSSProperties
           }
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            if (isOutOfStock) e.preventDefault()
+          }}
           onMouseDown={(e) => e.stopPropagation()}
         >
           <AddToCart
             product={product}
             className="add-to-cart-custom-btn size-full rounded-full border-0 shadow-md [&_svg]:text-white"
-            ariaLabel={label}
+            ariaLabel={isOutOfStock ? 'Sold Out' : label}
           >
             <ShoppingCart className="size-5" aria-hidden />
           </AddToCart>

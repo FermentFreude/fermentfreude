@@ -173,23 +173,23 @@ export function GastronomyProductSlider({
                         {String(resolvedSlides.length).padStart(2, '0')}{' '}
                       </span>
                       <div className="flex items-center gap-0">
-                      <button
-                        type="button"
-                        aria-label={resolvedPrev}
-                        onClick={scrollPrev}
-                        className="shrink-0 font-display text-lg font-extrabold uppercase tracking-[1px] leading-[45px] text-[#1b1b1b]/65 transition-colors hover:text-[#1b1b1b]"
-                      >
-                        {resolvedPrev}
-                      </button>
-                      <span className="mx-6 h-[45px] shrink-0 w-px bg-[#1b1b1b]/50" aria-hidden />
-                      <button
-                        type="button"
-                        aria-label={resolvedNext}
-                        onClick={scrollNext}
-                        className="shrink-0 font-display text-lg font-extrabold uppercase tracking-[1px] leading-[45px] text-[#1b1b1b]/65 transition-colors hover:text-[#1b1b1b]"
-                      >
-                        {resolvedNext}
-                      </button>
+                        <button
+                          type="button"
+                          aria-label={resolvedPrev}
+                          onClick={scrollPrev}
+                          className="shrink-0 font-display text-lg font-extrabold uppercase tracking-[1px] leading-11.25 text-[#1b1b1b]/65 transition-colors hover:text-[#1b1b1b]"
+                        >
+                          {resolvedPrev}
+                        </button>
+                        <span className="mx-6 h-11.25 shrink-0 w-px bg-[#1b1b1b]/50" aria-hidden />
+                        <button
+                          type="button"
+                          aria-label={resolvedNext}
+                          onClick={scrollNext}
+                          className="shrink-0 font-display text-lg font-extrabold uppercase tracking-[1px] leading-11.25 text-[#1b1b1b]/65 transition-colors hover:text-[#1b1b1b]"
+                        >
+                          {resolvedNext}
+                        </button>
                       </div>
                     </div>
                   )}

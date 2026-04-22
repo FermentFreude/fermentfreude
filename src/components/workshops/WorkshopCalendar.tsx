@@ -453,16 +453,24 @@ export function WorkshopCalendar({
                       <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
                         {spotsColumnLabel || 'Plätze frei'}
                       </p>
-                      <p className="font-display font-bold text-base text-[#1a1a1a]">
-                        {date.availableSpots > 0
-                          ? `${date.availableSpots} ${spotsLabel || 'Plätze'}`
-                          : soldOutLabel || 'Ausgebucht'}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-display font-bold text-base text-[#1a1a1a]">
+                          {date.availableSpots > 0
+                            ? `${date.availableSpots} ${spotsLabel || 'Plätze'}`
+                            : soldOutLabel || 'Ausgebucht'}
+                        </p>
+                        {date.availableSpots === 0 && (
+                          <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                            {soldOutLabel || 'Ausgebucht'}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Action Button */}
                     <div className="pt-2 sm:pt-0">
                       <button
+                        disabled={date.availableSpots === 0}
                         onClick={() => {
                           setBookingDate(date)
                           // Find the workshop for this date
@@ -471,9 +479,13 @@ export function WorkshopCalendar({
                           )
                           if (workshop) setBookingWorkshop(workshop)
                         }}
-                        className="inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954] transition-all duration-300"
+                        className={`inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
+                          date.availableSpots === 0
+                            ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
+                            : 'bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954]'
+                        }`}
                       >
-                        {bookLabel || '→ Buchen'}
+                        {date.availableSpots === 0 ? 'Ausgebucht' : bookLabel || '→ Buchen'}
                       </button>
                     </div>
                   </div>

@@ -71,32 +71,36 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
           <div className="py-2">
             {items.map((item) => {
               // Redirect voucher links to correct path
-              const href = item.label.toLowerCase().includes('voucher') || item.label.toLowerCase().includes('gutschein') 
-                ? '/workshops/voucher' 
-                : item.href
-              
+              const href =
+                item.label.toLowerCase().includes('voucher') ||
+                item.label.toLowerCase().includes('gutschein')
+                  ? '/workshops/voucher'
+                  : item.href
+
               return (
-              <Link
-                key={item.href}
-                href={href}
-                className={cn(
-                  'block px-5 py-3 transition-colors duration-150 group',
-                  'text-ff-near-black hover:bg-ff-near-black hover:text-white',
-                )}
-              >
-                <span
+                <Link
+                  key={item.href}
+                  href={href}
                   className={cn(
-                    'block font-display font-bold transition-colors',
-                    item.isSmall ? 'text-xs' : 'text-sm',
+                    'block px-5 py-3 transition-colors duration-150 group',
+                    'text-ff-near-black hover:bg-ff-near-black hover:text-white',
                   )}
                 >
-                  {item.label}
-                </span>
-                {item.description && !item.isSmall && (
-                  <span className="block text-xs mt-0.5 transition-colors">{item.description}</span>
-                )}
-              </Link>
-            )
+                  <span
+                    className={cn(
+                      'block font-display font-bold transition-colors',
+                      item.isSmall ? 'text-xs' : 'text-sm',
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                  {item.description && !item.isSmall && (
+                    <span className="block text-xs mt-0.5 transition-colors">
+                      {item.description}
+                    </span>
+                  )}
+                </Link>
+              )
             })}
           </div>
         </div>

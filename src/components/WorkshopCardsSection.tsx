@@ -1,4 +1,5 @@
 import { Media } from '@/components/Media'
+import { WorkshopCardButton } from '@/components/WorkshopCardButton'
 import Link from 'next/link'
 
 import type { Media as MediaType } from '@/payload-types'
@@ -17,6 +18,7 @@ export type WorkshopCard = {
   buttonLabel?: string | null
   buttonUrl?: string | null
   nextDate?: string | null
+  availableSpots?: number | null
 }
 
 export type WorkshopCardsSectionProps = {
@@ -31,6 +33,8 @@ export type WorkshopCardsSectionProps = {
   cardBg?: string
   /** Layout: 'centered' (gastronomy) or 'inline' (fermentation with View All button) */
   layout?: 'centered' | 'inline'
+  /** Locale for displaying sold out text. Default: 'de' */
+  locale?: 'de' | 'en'
 }
 
 export function WorkshopCardsSection({
@@ -43,6 +47,7 @@ export function WorkshopCardsSection({
   cards,
   cardBg = '#FAF2E0',
   layout = 'inline',
+  locale = 'de',
 }: WorkshopCardsSectionProps) {
   if (cards.length === 0) return null
 
@@ -95,17 +100,9 @@ export function WorkshopCardsSection({
                     const url = res?.url
                     return url?.startsWith('/assets/') ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={url}
-                        alt=""
-                        className="absolute inset-0 size-full object-cover"
-                      />
+                      <img src={url} alt="" className="absolute inset-0 size-full object-cover" />
                     ) : (
-                      <Media
-                        resource={res as MediaType}
-                        fill
-                        imgClassName="object-cover"
-                      />
+                      <Media resource={res as MediaType} fill imgClassName="object-cover" />
                     )
                   })()
                 ) : (
@@ -126,17 +123,25 @@ export function WorkshopCardsSection({
                   </p>
                 )}
                 {card.buttonUrl && card.buttonLabel && (
-                  <Link
+                  <WorkshopCardButton
                     href={card.buttonUrl}
-                    className="mt-4 inline-flex items-center rounded-lg bg-[#333333] px-5 py-2.5 font-display text-sm font-bold text-white transition-colors hover:bg-[#1a1a1a]"
-                  >
-                    {String(card.buttonLabel).replace(/\s+>\s*$/, '')}
-                  </Link>
+                    label={card.buttonLabel}
+                    isOutOfStock={card.availableSpots === 0}
+                    locale={locale}
+                  />
                 )}
                 {card.nextDate && (
-                  <p className="mt-4 text-body-sm text-ff-black/70">
-                    {nextDateLabel ? `${nextDateLabel} ` : ''}{card.nextDate}
-                  </p>
+                  <div className="mt-4 flex items-center gap-2">
+                    <p className="text-body-sm text-ff-black/70">
+                      {nextDateLabel ? `${nextDateLabel} ` : ''}
+                      {card.nextDate}
+                    </p>
+                    {card.availableSpots === 0 && (
+                      <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                        {locale === 'en' ? 'Sold Out' : 'Ausgebucht'}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

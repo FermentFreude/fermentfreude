@@ -14,9 +14,10 @@ type Props = {
   className?: string
   ariaLabel?: string
   children?: React.ReactNode
+  quantity?: number
 }
 
-export function AddToCart({ product, className, ariaLabel, children }: Props) {
+export function AddToCart({ product, className, ariaLabel, children, quantity = 1 }: Props) {
   const { addItem, cart, isLoading } = useCart()
   const searchParams = useSearchParams()
 
@@ -47,6 +48,7 @@ export function AddToCart({ product, className, ariaLabel, children }: Props) {
       addItem({
         product: product.id,
         variant: selectedVariant?.id ?? undefined,
+        quantity,
       })
         .then(() => {
           toast.success('Item added to cart.')
@@ -55,7 +57,7 @@ export function AddToCart({ product, className, ariaLabel, children }: Props) {
             item_name: product.title ?? '',
             item_category: product.productType ?? undefined,
             price: (product as unknown as Record<string, unknown>).priceInEUR as number | undefined,
-            quantity: 1,
+            quantity,
           })
         })
         .catch((error) => {
@@ -66,7 +68,7 @@ export function AddToCart({ product, className, ariaLabel, children }: Props) {
           )
         })
     },
-    [addItem, product, selectedVariant],
+    [addItem, product, selectedVariant, quantity],
   )
 
   const disabled = useMemo<boolean>(() => {

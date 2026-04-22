@@ -98,10 +98,14 @@ export default async function GastronomyPage() {
   const workshopNextDateLabel =
     g?.gastronomyWorkshopNextDateLabel ?? DEFAULT_WORKSHOP_NEXT_DATE_LABEL
   const nextDates = await getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de')
-  const workshopCards = (g?.gastronomyWorkshopCards ?? []).map((c) => ({
-    ...c,
-    nextDate: (c.buttonUrl && nextDates[c.buttonUrl]) || c.nextDate || undefined,
-  }))
+  const workshopCards = (g?.gastronomyWorkshopCards ?? []).map((c) => {
+    const nextDateData = c.buttonUrl ? nextDates[c.buttonUrl] : undefined
+    return {
+      ...c,
+      nextDate: nextDateData?.date || c.nextDate || undefined,
+      availableSpots: nextDateData?.availableSpots,
+    }
+  })
   const offerDetails = g?.gastronomyOfferDetails ?? []
 
   const trustedByHeadingRaw = g?.gastronomyTrustedByHeading?.trim()
@@ -333,8 +337,7 @@ export default async function GastronomyPage() {
     | { default?: string; options?: Array<{ label?: string }> }
     | undefined
   const contactFormHeading =
-    g?.gastronomyContactFormHeading ??
-    (locale === 'de' ? 'Frag uns alles' : 'Ask About Anything')
+    g?.gastronomyContactFormHeading ?? (locale === 'de' ? 'Frag uns alles' : 'Ask About Anything')
 
   const contactBlockProps = {
     blockType: 'contactBlock' as const,
@@ -572,9 +575,11 @@ export default async function GastronomyPage() {
           buttonLabel: c.buttonLabel,
           buttonUrl: c.buttonUrl,
           nextDate: (c as { nextDate?: string }).nextDate,
+          availableSpots: (c as { availableSpots?: number }).availableSpots,
         }))}
         cardBg="#ffffff"
         layout="centered"
+        locale={locale as 'de' | 'en'}
       />
 
       {page?.id && (
