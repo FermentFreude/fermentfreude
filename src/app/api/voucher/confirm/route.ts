@@ -1,8 +1,7 @@
-import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 import { stripe } from '@/lib/stripe'
-import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
+import config from '@/payload.config'
 
 /* ═══════════════════════════════════════════════════════════════
  *  GET /api/voucher/confirm?session_id=cs_xxx
@@ -54,7 +53,6 @@ export async function GET(request: NextRequest) {
 
     // ─── Idempotency: Check if voucher already exists ────────────
 
-    const config = await configPromise
     const payload = await getPayload({ config })
 
     const existing = await payload.find({
@@ -101,42 +99,7 @@ export async function GET(request: NextRequest) {
       `[voucher/confirm] Created voucher ${voucher.code} for session ${sessionId}`,
     )
 
-    // ─── Send Email Notification ─────────────────────────────────
-
-    try {
-      await sendTemplateEmail({
-        to: [{ email: meta.purchaserEmail }],
-        templateId: BREVO_TEMPLATES.VOUCHER_PURCHASED,
-        params: {
-          VOUCHER_CODE: voucher.code,
-          VOUCHER_VALUE: `\u20AC${meta.amount}`,
-          PURCHASER_NAME: meta.purchaserEmail,
-          DELIVERY_METHOD: meta.deliveryMethod === 'email' ? 'E-Mail' : 'Abholung',
-        },
-      })
-
-      // If email delivery and recipient email exists, also email recipient
-      if (
-        meta.deliveryMethod === 'email' &&
-        meta.recipientEmail &&
-        meta.recipientEmail !== meta.purchaserEmail
-      ) {
-        await sendTemplateEmail({
-          to: [{ email: meta.recipientEmail }],
-          templateId: BREVO_TEMPLATES.VOUCHER_PURCHASED,
-          params: {
-            VOUCHER_CODE: voucher.code,
-            VOUCHER_VALUE: `\u20AC${meta.amount}`,
-            PURCHASER_NAME: 'Jemand Besonderes',
-            DELIVERY_METHOD: 'E-Mail',
-          },
-        })
-      }
-    } catch (emailErr) {
-      payload.logger.error(
-        `[voucher/confirm] Email failed for voucher ${voucher.code}: ${emailErr instanceof Error ? emailErr.message : String(emailErr)}`,
-      )
-    }
+    // ─── Email will be sent automatically via afterChange hook ─────
 
     return NextResponse.json({
       success: true,
