@@ -305,19 +305,6 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     </div>
                   )}
 
-                  {/* Benefits — horizontal checklist style */}
-                  {product.benefits && product.benefits.length > 0 && (
-                    <div className="space-y-2">
-                      {product.benefits.map((benefit, i) => (
-                        <div key={benefit.id || i} className="flex items-center gap-2.5">
-                          <div className="w-5 h-5 rounded-md bg-[#4b4f4a] flex items-center justify-center shrink-0">
-                            <CheckIcon className="w-3.5 h-3.5 text-white" />
-                          </div>
-                          <span className="text-sm text-[#555] font-bold">{benefit.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -326,9 +313,9 @@ export function ProductDetailPage({ product }: { product: Product }) {
           {/* ═══════════════════════════════════════════
            *  SECTION 1.5 — Pickup Selection & Add to Cart
            * ═══════════════════════════════════════════ */}
-          <div className="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8">
-            {/* ── LEFT: Pickup Details ── */}
-            <div className="w-full lg:w-1/2 lg:order-1">
+          <div className="mt-8 flex flex-col gap-6">
+            {/* ── Pickup Details ── */}
+            <div className="w-full">
               <div className="rounded-2xl border-2 border-[#e9e9e9] bg-[#fafafa] p-6 lg:p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-8 h-8 rounded-full bg-[#4b4f4a] flex items-center justify-center">
@@ -405,11 +392,11 @@ export function ProductDetailPage({ product }: { product: Product }) {
             </div>
 
             {/* ── RIGHT: Qty + Cart ── */}
-            <div className="w-full lg:w-1/2 lg:order-2 flex flex-col justify-between">
+            <div className="w-full flex flex-col gap-6">
               {/* Size/Weight */}
               {hasVariants && (
-                <div className="mb-6 lg:mb-0 flex items-center gap-4 pb-6 border-b-2 border-[#e9e9e9] lg:border-0">
-                  <p className="text-base lg:text-lg font-display font-bold text-[#2b2b2d] whitespace-nowrap">Size/Weight:</p>
+                <div className="flex items-center gap-4">
+                  <p className="text-base font-display font-bold text-[#2b2b2d] whitespace-nowrap">Size/Weight:</p>
                   <Suspense fallback={null}>
                     <VariantSelector product={product} />
                   </Suspense>
@@ -446,7 +433,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     product={product}
                     quantity={quantity}
                     disabled={!pickupDate || !pickupTime}
-                    className={`w-full h-16 rounded-full text-base lg:text-lg font-display font-bold transition-all ${
+                    className={`w-full h-16 rounded-full text-base font-display font-bold transition-all ${
                       pickupDate && pickupTime
                         ? 'bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] shadow-lg'
                         : 'bg-[#d5d5d5] text-[#888] border-[#d5d5d5] cursor-not-allowed'
@@ -457,7 +444,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                 {/* Help text */}
                 {(!pickupDate || !pickupTime) && (
                   <p className="text-xs text-[#999] text-center font-display font-medium">
-                    👆 Select date and time above to proceed
+                    Select date and time above to proceed
                   </p>
                 )}
               </div>
