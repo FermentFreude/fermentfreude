@@ -42,6 +42,7 @@ export const defaultNavItems: DefaultNavItem[] = [
       {
         label: 'Gift Voucher',
         href: '/workshops/voucher',
+        description: 'Workshop experience vouchers',
       },
     ],
   },

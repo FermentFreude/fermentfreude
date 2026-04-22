@@ -131,7 +131,7 @@ export function VoucherHero({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           {/* Left Column - Voucher Preview Card */}
           <div className="order-2 lg:order-1">
-            <div className="relative sticky top-8 rounded-[32px] border border-ff-border-light/80 bg-[radial-gradient(circle_at_top,_#F8F2E6,_#FFFFFF)] p-[1.9rem] shadow-[0_18px_45px_rgba(0,0,0,0.07)] transition-shadow duration-300 hover:shadow-[0_30px_80px_rgba(229,183,101,0.22)] md:p-10">
+            <div className="sticky top-8 rounded-2xl border border-ff-border-light/80 bg-[radial-gradient(circle_at_top,#F8F2E6,#FFFFFF)] p-[1.9rem] shadow-[0_18px_45px_rgba(0,0,0,0.07)] transition-shadow duration-300 hover:shadow-[0_30px_80px_rgba(229,183,101,0.22)] md:p-10">
               {/* Gift Icon */}
               <div className="absolute top-7 right-7">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ff-gold-accent/12 shadow-[0_6px_18px_rgba(229,183,101,0.35)] backdrop-blur-[2px]">
@@ -149,7 +149,7 @@ export function VoucherHero({
               </p>
 
               <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center p-[10px] bg-[radial-gradient(circle_at_top,_#3B342A,_#121212)] shadow-[0_16px_40px_rgba(0,0,0,0.45)] ring-1 ring-ff-gold-accent/55">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center p-2.5 bg-[radial-gradient(circle_at_top,#3B342A,#121212)] shadow-[0_16px_40px_rgba(0,0,0,0.45)] ring-1 ring-ff-gold-accent/55">
                   {cardLogo ? (
                     <Media
                       resource={cardLogo}
@@ -211,7 +211,7 @@ export function VoucherHero({
               {/* Amount Selection */}
               {showAmounts && (
                 <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                  <label className="font-display text-body-sm font-bold uppercase tracking-[0.1em] text-ff-near-black block mb-3">
+                  <label className="font-display text-body-sm font-bold uppercase tracking-widest text-ff-near-black block mb-3">
                     {amountSectionLabel}
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -250,7 +250,7 @@ export function VoucherHero({
                         }`}
                       >
                         <div
-                          className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-200 ${
+                          className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-200 ${
                             selectedDelivery === option.type
                               ? 'bg-ff-gold-accent'
                               : 'bg-ff-warm-gray'
