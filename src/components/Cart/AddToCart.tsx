@@ -46,15 +46,42 @@ export function AddToCart({ product, className, ariaLabel, children, quantity = 
       e.preventDefault()
 
       try {
-        const result = await addItem({
+        await addItem({
           product: product.id,
           variant: selectedVariant?.id ?? undefined,
         } as any)
 
-        // If quantity > 1, increment the item after adding it
-        if (quantity > 1 && result?.id) {
-          for (let i = 1; i < quantity; i++) {
-            await incrementItem(result.id)
+        // If quantity > 1, wait for cart to update and then increment
+        if (quantity > 1) {
+          // Give the UI time to update
+          await new Promise((resolve) => setTimeout(resolve, 100))
+
+          // Find the newly added item and increment it the required times
+          const findNewItem = () => {
+            return cart?.items?.find((item: any) => {
+              const productID = typeof item.product === 'object' ? item.product?.id : item.product
+              const variantID = item.variant
+                ? typeof item.variant === 'object'
+                  ? item.variant?.id
+                  : item.variant
+                : undefined
+
+              if (productID === product.id) {
+                if (product.enableVariants) {
+                  return variantID === selectedVariant?.id
+                }
+                return true
+              }
+              return false
+            })
+          }
+
+          // Increment the item
+          const newItem = findNewItem()
+          if (newItem?.id) {
+            for (let i = 1; i < quantity; i++) {
+              await incrementItem(newItem.id as any)
+            }
           }
         }
 
@@ -74,7 +101,7 @@ export function AddToCart({ product, className, ariaLabel, children, quantity = 
         )
       }
     },
-    [addItem, product, selectedVariant, quantity, incrementItem],
+    [addItem, product, selectedVariant, quantity, incrementItem, cart?.items],
   )
 
   const disabled = useMemo<boolean>(() => {
