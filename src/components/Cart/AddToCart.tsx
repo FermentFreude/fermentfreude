@@ -18,7 +18,7 @@ type Props = {
 }
 
 export function AddToCart({ product, className, ariaLabel, children, quantity = 1 }: Props) {
-  const { addItem, cart, isLoading } = useCart()
+  const { addItem, cart, isLoading, incrementItem } = useCart()
   const searchParams = useSearchParams()
 
   const selectedVariant = useMemo<Variant | undefined>(() => {
@@ -42,33 +42,39 @@ export function AddToCart({ product, className, ariaLabel, children, quantity = 
   }, [product.enableVariants, product.variants?.docs, searchParams])
 
   const addToCart = useCallback(
-    (e: React.FormEvent<HTMLButtonElement>) => {
+    async (e: React.FormEvent<HTMLButtonElement>) => {
       e.preventDefault()
 
-      addItem({
-        product: product.id,
-        variant: selectedVariant?.id ?? undefined,
-        quantity,
-      })
-        .then(() => {
-          toast.success('Item added to cart.')
-          gtmAddToCart({
-            item_id: String(product.id),
-            item_name: product.title ?? '',
-            item_category: product.productType ?? undefined,
-            price: (product as unknown as Record<string, unknown>).priceInEUR as number | undefined,
-            quantity,
-          })
+      try {
+        const result = await addItem({
+          product: product.id,
+          variant: selectedVariant?.id ?? undefined,
+        } as any)
+
+        // If quantity > 1, increment the item after adding it
+        if (quantity > 1 && result?.id) {
+          for (let i = 1; i < quantity; i++) {
+            await incrementItem(result.id)
+          }
+        }
+
+        toast.success('Item added to cart.')
+        gtmAddToCart({
+          item_id: String(product.id),
+          item_name: product.title ?? '',
+          item_category: product.productType ?? undefined,
+          price: (product as unknown as Record<string, unknown>).priceInEUR as number | undefined,
+          quantity,
         })
-        .catch((error) => {
-          console.error('Failed to add to cart:', error)
-          toast.error(
-            error?.message ||
-              'Failed to add item to cart. Please check the browser console for details.',
-          )
-        })
+      } catch (error) {
+        console.error('Failed to add to cart:', error)
+        toast.error(
+          (error as any)?.message ||
+            'Failed to add item to cart. Please check the browser console for details.',
+        )
+      }
     },
-    [addItem, product, selectedVariant, quantity],
+    [addItem, product, selectedVariant, quantity, incrementItem],
   )
 
   const disabled = useMemo<boolean>(() => {
