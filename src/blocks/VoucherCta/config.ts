@@ -18,6 +18,17 @@ export const VoucherCta: Block = {
       },
     },
     {
+      name: 'eyebrow',
+      type: 'text',
+      required: false,
+      localized: true,
+      label: 'Eyebrow (gold line above heading)',
+      admin: {
+        description:
+          'Small uppercase line above the main heading, in brand gold (e.g. "WORKSHOPS & GUTSCHEINE"). Leave empty to hide.',
+      },
+    },
+    {
       name: 'heading',
       type: 'textarea',
       required: false,

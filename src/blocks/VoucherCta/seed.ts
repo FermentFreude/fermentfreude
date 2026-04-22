@@ -12,9 +12,11 @@ export function buildVoucherCta(imgs: VoucherCtaImages) {
 
   const de = {
     blockType: 'voucherCta' as const,
-    heading: 'Verschenke ein besonderes Geschmacks-Erlebnis',
-    description: 'Teile ein leckeres Erlebnis mit jemandem Besonderem.',
-    buttonLabel: 'Gutschein',
+    eyebrow: 'Workshops · Gutscheine · Genuss',
+    heading: 'Verschenke Fermentation als Erlebnis',
+    description:
+      'Ob zum Geburtstag, als Überraschung oder einfach so – mit einem GUTSCHEIN verschenkst du Genuss und ein Erlebnis, das in Erinnerung bleibt.',
+    buttonLabel: 'Mehr erfahren',
     buttonLink: '/voucher',
     ...(imgs.backgroundImageId ? { backgroundImage: imgs.backgroundImageId } : {}),
     galleryImages,
@@ -22,9 +24,11 @@ export function buildVoucherCta(imgs: VoucherCtaImages) {
 
   const en = {
     blockType: 'voucherCta' as const,
-    heading: 'Gift a special tasty experience',
-    description: 'Share a tasty experience with someone special.',
-    buttonLabel: 'Voucher',
+    eyebrow: 'Workshops · Vouchers · Flavour',
+    heading: 'Give fermentation as an experience',
+    description:
+      'For a birthday, a surprise, or just because — with a GIFT VOUCHER you share great taste and a memory that lasts.',
+    buttonLabel: 'Learn more',
     buttonLink: '/voucher',
     ...(imgs.backgroundImageId ? { backgroundImage: imgs.backgroundImageId } : {}),
     galleryImages,
