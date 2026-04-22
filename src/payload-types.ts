@@ -6514,6 +6514,10 @@ export interface Header {
                * Check to render this item with smaller font size (for workshop types).
                */
               isSmall?: boolean | null;
+              /**
+               * Show the label in the menu but prevent navigation — e.g. “coming soon” items.
+               */
+              disabled?: boolean | null;
               id?: string | null;
             }[]
           | null;
@@ -6972,6 +6976,7 @@ export interface HeaderSelect<T extends boolean = true> {
               href?: T;
               description?: T;
               isSmall?: T;
+              disabled?: T;
               id?: T;
             };
         id?: T;

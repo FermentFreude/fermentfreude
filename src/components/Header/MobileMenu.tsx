@@ -10,7 +10,12 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CHAR_REVEAL } from './anim'
-import { defaultDropdowns, defaultNavItems, getDefaultDropdownKey } from './nav-defaults'
+import {
+  defaultDropdowns,
+  defaultNavItems,
+  dropdownItemIsInactive,
+  getDefaultDropdownKey,
+} from './nav-defaults'
 
 interface Props {
   menu: Header['navItems'] | null
@@ -25,6 +30,7 @@ interface NavOverlayItem {
   href: string
   description?: string | null
   isSmall?: boolean
+  disabled?: boolean
   children?: NavOverlayItem[]
 }
 
@@ -321,26 +327,39 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
                   {/* Dropdown items - only show for regular items (not Workshops, About, or Online Courses - those use modals) */}
                   {hasChildren && isExpanded && !isWorkshops && !isOnlineCourses && !isAbout && (
                     <div className="border-l-2 border-ff-warm-gray/30 dark:border-white/20 mt-3 ml-6 sm:ml-8 pl-4 sm:pl-5 space-y-2 sm:space-y-3 overflow-hidden">
-                      {item.children?.map((child) => (
-                        <Link
-                          key={child.id}
-                          href={child.href}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handleClose(child.href)
-                          }}
-                          className="flex flex-col p-3 sm:p-4 rounded-lg text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 hover:text-ff-near-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 overflow-hidden group"
-                        >
-                          <div className="font-bold group-hover:translate-x-1 transition-transform duration-200">
-                            {child.label}
+                      {item.children?.map((child) =>
+                        dropdownItemIsInactive(child) ? (
+                          <div
+                            key={child.id}
+                            className="flex flex-col p-3 sm:p-4 rounded-lg text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 opacity-70 cursor-default select-none"
+                            aria-disabled="true"
+                          >
+                            <div className="font-bold">{child.label}</div>
+                            {child.description && (
+                              <div className="text-xs mt-1.5 opacity-90">{child.description}</div>
+                            )}
                           </div>
-                          {child.description && (
-                            <div className="text-xs mt-1.5 opacity-70 group-hover:opacity-100 group-hover:text-white dark:group-hover:text-ff-near-black transition-all">
-                              {child.description}
+                        ) : (
+                          <Link
+                            key={child.id}
+                            href={child.href}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              handleClose(child.href)
+                            }}
+                            className="flex flex-col p-3 sm:p-4 rounded-lg text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 hover:text-ff-near-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 overflow-hidden group"
+                          >
+                            <div className="font-bold group-hover:translate-x-1 transition-transform duration-200">
+                              {child.label}
                             </div>
-                          )}
-                        </Link>
-                      ))}
+                            {child.description && (
+                              <div className="text-xs mt-1.5 opacity-70 group-hover:opacity-100 group-hover:text-white dark:group-hover:text-ff-near-black transition-all">
+                                {child.description}
+                              </div>
+                            )}
+                          </Link>
+                        ),
+                      )}
                     </div>
                   )}
                 </div>
@@ -387,34 +406,58 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
 
                   return (
                     <div className="flex flex-col gap-1">
-                      {children.map((child) => (
-                        <Link
-                          key={child.id}
-                          href={child.href}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            closeDetailView()
-                            setTimeout(() => handleClose(child.href), 200)
-                          }}
-                          className="block p-2.5 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
-                        >
+                      {children.map((child) =>
+                        dropdownItemIsInactive(child) ? (
                           <div
-                            className={cn(
-                              'text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors',
-                              child.isSmall
-                                ? 'text-xs sm:text-sm font-bold'
-                                : 'text-sm sm:text-base font-bold',
-                            )}
+                            key={child.id}
+                            className="block p-2.5 sm:p-4 rounded-lg cursor-default select-none opacity-70"
+                            aria-disabled="true"
                           >
-                            {child.label}
-                          </div>
-                          {child.description && !child.isSmall && (
-                            <div className="text-xs text-ff-gray-text dark:text-neutral-400 group-hover:text-white dark:group-hover:text-ff-near-black mt-1 transition-colors">
-                              {child.description}
+                            <div
+                              className={cn(
+                                'text-ff-near-black dark:text-white',
+                                child.isSmall
+                                  ? 'text-xs sm:text-sm font-bold'
+                                  : 'text-sm sm:text-base font-bold',
+                              )}
+                            >
+                              {child.label}
                             </div>
-                          )}
-                        </Link>
-                      ))}
+                            {child.description && !child.isSmall && (
+                              <div className="text-xs text-ff-gray-text dark:text-neutral-400 mt-1">
+                                {child.description}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <Link
+                            key={child.id}
+                            href={child.href}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              closeDetailView()
+                              setTimeout(() => handleClose(child.href), 200)
+                            }}
+                            className="block p-2.5 sm:p-4 rounded-lg hover:bg-ff-near-black dark:hover:bg-white transition-colors group"
+                          >
+                            <div
+                              className={cn(
+                                'text-ff-near-black dark:text-white group-hover:text-white dark:group-hover:text-ff-near-black transition-colors',
+                                child.isSmall
+                                  ? 'text-xs sm:text-sm font-bold'
+                                  : 'text-sm sm:text-base font-bold',
+                              )}
+                            >
+                              {child.label}
+                            </div>
+                            {child.description && !child.isSmall && (
+                              <div className="text-xs text-ff-gray-text dark:text-neutral-400 group-hover:text-white dark:group-hover:text-ff-near-black mt-1 transition-colors">
+                                {child.description}
+                              </div>
+                            )}
+                          </Link>
+                        ),
+                      )}
                     </div>
                   )
                 })()}
@@ -516,6 +559,7 @@ function buildNavItems(
           href: sub.href,
           description: sub.description || null,
           isSmall: sub.isSmall ?? false,
+          disabled: dropdownItemIsInactive(sub),
         }))
       }
 
@@ -532,6 +576,7 @@ function buildNavItems(
           href: sub.href,
           description: sub.description || null,
           isSmall: sub.isSmall ?? false,
+          disabled: dropdownItemIsInactive(sub),
         }))
       }
 
