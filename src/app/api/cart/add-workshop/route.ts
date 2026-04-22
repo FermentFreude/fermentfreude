@@ -16,7 +16,15 @@ import { getPayload } from 'payload'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { appointmentId, workshopSlug, guestCount } = body
+    const { appointmentId, workshopSlug, guestCount: rawGuestCount } = body
+
+    // Debug logging
+    console.log('[add-workshop] Request received:', {
+      appointmentId,
+      workshopSlug,
+      rawGuestCount,
+      guestCountType: typeof rawGuestCount,
+    })
 
     // ─── Input Validation ───────────────────────────────────────
 
@@ -42,12 +50,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (typeof guestCount !== 'number' || guestCount < 1 || guestCount > 12) {
+    // Parse guestCount as number (handle string or number from request)
+    const guestCount = typeof rawGuestCount === 'string' ? parseInt(rawGuestCount, 10) : rawGuestCount
+
+    if (typeof guestCount !== 'number' || isNaN(guestCount) || guestCount < 1 || guestCount > 12) {
       return NextResponse.json(
         {
           success: false,
           error: 'Invalid guest count',
-          message: 'Guest count must be between 1 and 12.',
+          message: 'Guest count must be a number between 1 and 12.',
         },
         { status: 400 },
       )
