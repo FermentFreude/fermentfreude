@@ -17,7 +17,11 @@ import { autoCompleteDigitalOrders } from '@/collections/Orders/autoCompleteDigi
 import { autoEnrollOnPurchase } from '@/collections/Orders/autoEnrollOnPurchase'
 import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBookings'
 import { decrementInventory } from '@/collections/Orders/decrementInventory'
-import { handleChargeRefunded, handlePaymentFailed } from '@/collections/Orders/stripeWebhooks'
+import {
+  handleChargeRefunded,
+  handleChargeSucceeded,
+  handlePaymentFailed,
+} from '@/collections/Orders/stripeWebhooks'
 import { ProductsCollection } from '@/collections/Products'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
@@ -137,6 +141,8 @@ export const plugins: Plugin[] = [
           webhooks: {
             'payment_intent.payment_failed': handlePaymentFailed,
             'charge.refunded': handleChargeRefunded,
+            'charge.succeeded': handleChargeSucceeded,
+            'payment_intent.succeeded': handleChargeSucceeded,
           },
         }),
       ],
