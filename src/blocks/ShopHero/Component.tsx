@@ -121,7 +121,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
   const title = heroTitle ?? 'Our Handmade Products From Our Pick-Up Shop.'
   const price = heroPrice ?? 'from €8.50'
   const primaryLabel = ctaPrimaryLabel ?? 'Order Now'
-  const primaryUrl = ctaPrimaryUrl ?? '/shop#products'
+  const primaryUrl = ctaPrimaryUrl ?? '/shop#bestsellers'
   const secondaryLabel = ctaSecondaryLabel ?? 'Learn More'
   const secondaryUrl = ctaSecondaryUrl ?? '/fermentation'
   const tagline = bottomTagline ?? 'Fermented foods, crafted with care.'
