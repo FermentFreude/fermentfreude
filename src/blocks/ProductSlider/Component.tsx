@@ -140,11 +140,11 @@ export const ProductSliderBlock: React.FC<Props> = ({
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-16 mb-8 lg:mb-10">
           {/* Left: Heading + Description */}
           <div className="flex-1 max-w-264">
-            {/* Tablet/mobile: eyebrow above title. Desktop: eyebrow beside title. */}
-            <div className="flex flex-col items-start gap-2 lg:flex-row lg:items-start lg:gap-3">
+            {/* Eyebrow beside title — responsive */}
+            <div className="flex flex-row items-start gap-3 sm:gap-4">
               <span
-                className="text-eyebrow font-bold text-ff-gold-accent shrink-0"
-                style={{ marginTop: '0', marginBottom: '0.1em' }}
+                className="text-eyebrow font-bold text-ff-gold-accent shrink-0 pt-1"
+                style={{ marginTop: '0', marginBottom: '0' }}
               >
                 {resolvedAccent}
               </span>
