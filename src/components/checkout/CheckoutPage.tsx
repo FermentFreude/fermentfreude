@@ -600,19 +600,18 @@ export const CheckoutPage: React.FC = () => {
               ? 'Bestellung wird bearbeitet…'
               : 'Jetzt mit Gutschein bestellen'}
           </Button>
-          ) : !paymentData ? (
-            <Button
-              className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
-              disabled={!canGoToPayment}
-              onClick={(e) => {
-                e.preventDefault()
-                void initiatePaymentIntent('stripe')
-              }}
-            >
-              Go to payment
-            </Button>
-          ) : null}
-        </section>
+        ) : !paymentData ? (
+          <Button
+            className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
+            disabled={!canGoToPayment}
+            onClick={(e) => {
+              e.preventDefault()
+              void initiatePaymentIntent('stripe')
+            }}
+          >
+            Go to payment
+          </Button>
+        ) : null}
 
         {!paymentData?.['clientSecret'] && error && (
           <div className="rounded-xl border border-red-200 bg-red-50 p-6">
