@@ -203,6 +203,14 @@ export function ProductDetailPage({ product }: { product: Product }) {
                 ) : (
                   <div className="w-full h-full bg-[#f7f7f8]" />
                 )}
+                {/* Sold Out Badge */}
+                {(!product.inventory || product.inventory === 0) && (
+                  <div className="absolute top-3 right-3 z-10">
+                    <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                      Sold Out
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Thumbnail strip */}
@@ -273,9 +281,9 @@ export function ProductDetailPage({ product }: { product: Product }) {
               {/* Badges + Benefits — combined visual section */}
               {(product.badges?.length || (product.benefits && product.benefits.length > 0)) && (
                 <div className="py-5 border-t border-[#e9e9e9]">
-                  {/* Badge icons — circular with color accent */}
+                  {/* Badge icons — single line, responsive */}
                   {product.badges && product.badges.length > 0 && (
-                    <div className="flex flex-wrap gap-3 mb-4">
+                    <div className="flex flex-row gap-3 mb-4 overflow-x-auto pb-2 -mx-1 px-1">
                       {product.badges.map((badge) => {
                         const config = BADGE_CONFIG[badge]
                         if (!config) return null
@@ -283,7 +291,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                         return (
                           <div
                             key={badge}
-                            className="group flex flex-col items-center gap-1.5 w-16 transition-transform duration-200 hover:scale-105"
+                            className="group flex flex-col items-center gap-1.5 shrink-0 transition-transform duration-200 hover:scale-105"
                           >
                             <div
                               className="w-11 h-11 rounded-full flex items-center justify-center shadow-sm transition-shadow duration-200 group-hover:shadow-md"
@@ -296,7 +304,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                                 <Icon className="w-5 h-5" />
                               </span>
                             </div>
-                            <span className="text-[10px] font-semibold text-[#555] text-center leading-tight">
+                            <span className="text-[10px] font-semibold text-[#555] text-center leading-tight whitespace-nowrap">
                               {config.label}
                             </span>
                           </div>
