@@ -32,6 +32,8 @@ import { WorkshopAppointments } from '@/collections/WorkshopAppointments'
 import { WorkshopBookings } from '@/collections/WorkshopBookings'
 import { WorkshopLocations } from '@/collections/WorkshopLocations'
 import { Workshops } from '@/collections/Workshops'
+import { BrevoEmailTemplates } from '@/collections/BrevoEmailTemplates'
+import { BrevoTemplates } from '@/collections/BrevoTemplates'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { ProductSliderGlobal } from '@/globals/ProductSlider'
@@ -125,6 +127,8 @@ export default buildConfig({
     Reviews,
     ReturnRequests,
     CancellationRequests,
+    BrevoEmailTemplates,
+    BrevoTemplates,
   ],
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',

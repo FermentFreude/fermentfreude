@@ -89,6 +89,8 @@ export interface Config {
     reviews: Review;
     'return-requests': ReturnRequest;
     'cancellation-requests': CancellationRequest;
+    'brevo-email-templates': BrevoEmailTemplate;
+    'brevo-templates': BrevoTemplate;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -135,6 +137,8 @@ export interface Config {
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'return-requests': ReturnRequestsSelect<false> | ReturnRequestsSelect<true>;
     'cancellation-requests': CancellationRequestsSelect<false> | CancellationRequestsSelect<true>;
+    'brevo-email-templates': BrevoEmailTemplatesSelect<false> | BrevoEmailTemplatesSelect<true>;
+    'brevo-templates': BrevoTemplatesSelect<false> | BrevoTemplatesSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -4275,6 +4279,79 @@ export interface CancellationRequest {
   createdAt: string;
 }
 /**
+ * 19 pre-built email templates from /public/email-templates — edit HTML content directly
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brevo-email-templates".
+ */
+export interface BrevoEmailTemplate {
+  id: string;
+  /**
+   * Brevo API template ID (from Brevo platform)
+   */
+  brevoTemplateId: number;
+  /**
+   * Friendly name for this email template (e.g., "Welcome Email")
+   */
+  templateName: string;
+  /**
+   * Complete HTML email content — edit exactly as needed. This is the full source.
+   */
+  htmlContent: string;
+  /**
+   * Status of last sync to Brevo API
+   */
+  syncStatus?: ('never-synced' | 'synced' | 'error') | null;
+  /**
+   * When this template was last synced to Brevo
+   */
+  lastSyncedAt?: string | null;
+  /**
+   * If sync failed, the error message appears here
+   */
+  syncError?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Brevo email templates. Edit content and it syncs to Brevo API.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brevo-templates".
+ */
+export interface BrevoTemplate {
+  id: string;
+  brevoTemplateId: number;
+  templateName: string;
+  /**
+   * When is this email sent?
+   */
+  triggerDescription?: string | null;
+  subject: string;
+  /**
+   * Emoji for hero section
+   */
+  heroIcon?: string | null;
+  heroHeading?: string | null;
+  heroSubheading?: string | null;
+  greeting?: string | null;
+  bodySection1?: string | null;
+  bodySection2?: string | null;
+  bodySection3?: string | null;
+  bodySection4?: string | null;
+  ctaHeading?: string | null;
+  ctaText?: string | null;
+  ctaUrl?: string | null;
+  ctaDescription?: string | null;
+  footerContent?: string | null;
+  isActive?: boolean | null;
+  syncStatus?: ('pending' | 'synced' | 'error') | null;
+  lastSyncedAt?: string | null;
+  syncError?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
@@ -4382,6 +4459,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'cancellation-requests';
         value: string | CancellationRequest;
+      } | null)
+    | ({
+        relationTo: 'brevo-email-templates';
+        value: string | BrevoEmailTemplate;
+      } | null)
+    | ({
+        relationTo: 'brevo-templates';
+        value: string | BrevoTemplate;
       } | null)
     | ({
         relationTo: 'forms';
@@ -6031,6 +6116,49 @@ export interface CancellationRequestsSelect<T extends boolean = true> {
   stripeRefundId?: T;
   refundAmount?: T;
   processedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brevo-email-templates_select".
+ */
+export interface BrevoEmailTemplatesSelect<T extends boolean = true> {
+  brevoTemplateId?: T;
+  templateName?: T;
+  htmlContent?: T;
+  syncStatus?: T;
+  lastSyncedAt?: T;
+  syncError?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brevo-templates_select".
+ */
+export interface BrevoTemplatesSelect<T extends boolean = true> {
+  brevoTemplateId?: T;
+  templateName?: T;
+  triggerDescription?: T;
+  subject?: T;
+  heroIcon?: T;
+  heroHeading?: T;
+  heroSubheading?: T;
+  greeting?: T;
+  bodySection1?: T;
+  bodySection2?: T;
+  bodySection3?: T;
+  bodySection4?: T;
+  ctaHeading?: T;
+  ctaText?: T;
+  ctaUrl?: T;
+  ctaDescription?: T;
+  footerContent?: T;
+  isActive?: T;
+  syncStatus?: T;
+  lastSyncedAt?: T;
+  syncError?: T;
   updatedAt?: T;
   createdAt?: T;
 }
