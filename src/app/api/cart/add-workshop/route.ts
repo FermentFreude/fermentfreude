@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse guestCount as number (handle string or number from request)
-    const guestCount = typeof rawGuestCount === 'string' ? parseInt(rawGuestCount, 10) : rawGuestCount
+    const guestCount =
+      typeof rawGuestCount === 'string' ? parseInt(rawGuestCount, 10) : rawGuestCount
 
     if (typeof guestCount !== 'number' || isNaN(guestCount) || guestCount < 1 || guestCount > 12) {
       return NextResponse.json(

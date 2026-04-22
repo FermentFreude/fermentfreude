@@ -46,48 +46,6 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       })
       .join(', ')
 
-    // ─── Extract Pickup Details (Physical Products) ─────────────────
-    // Check if this order contains pickup information
-    let pickupDate = ''
-    let pickupTime = ''
-    let pickupLocation = ''
-    let pickupAddress = ''
-
-    try {
-      // Get transaction for this order to find additional data
-      const transactions = await req.payload.find({
-        collection: 'transactions',
-        where: {
-          order: {
-            equals: doc.id,
-          },
-        },
-        limit: 1,
-        depth: 1,
-        overrideAccess: true,
-      })
-
-      if (transactions.totalDocs > 0) {
-        const transaction = transactions.docs[0]
-        
-        // Extract pickup info from transaction data if available
-        if (transaction.data) {
-          const transactionData = typeof transaction.data === 'string' 
-            ? JSON.parse(transaction.data) 
-            : transaction.data
-          
-          pickupDate = transactionData?.pickupDate || ''
-          pickupTime = transactionData?.pickupTime || ''
-          pickupLocation = transactionData?.pickupLocation || ''
-          pickupAddress = transactionData?.pickupAddress || ''
-        }
-      }
-    } catch (err) {
-      req.payload.logger.warn(
-        `[Brevo] Could not fetch pickup details for order ${doc.id}: ${err instanceof Error ? err.message : String(err)}`,
-      )
-    }
-
     // ─── Extract Workshop Details ───────────────────────────────
     // Look for workshop-bookings that match this order by checking the cart/transaction
     // For now, extract from items if any are workshop products
@@ -113,7 +71,8 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
       if (transactions.totalDocs > 0) {
         const transaction = transactions.docs[0]
-        const cartId = typeof transaction.cart === 'object' ? transaction.cart?.id : transaction.cart
+        const cartId =
+          typeof transaction.cart === 'object' ? transaction.cart?.id : transaction.cart
 
         if (cartId) {
           // Find workshop bookings with this cart ID
@@ -133,9 +92,7 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
             workshopDate = booking.date || ''
             workshopTime = booking.time || ''
             guestCount = booking.guestCount || 0
-            workshopPrice = booking.totalPrice
-              ? `€${(booking.totalPrice).toFixed(2)}`
-              : ''
+            workshopPrice = booking.totalPrice ? `€${booking.totalPrice.toFixed(2)}` : ''
 
             // Get location from appointment
             if (booking.appointmentId) {
@@ -148,9 +105,10 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
                 })
 
                 if (appointment && appointment.location) {
-                  workshopLocation = typeof appointment.location === 'object' 
-                    ? (appointment.location?.name || '')
-                    : appointment.location
+                  workshopLocation =
+                    typeof appointment.location === 'object'
+                      ? appointment.location?.name || ''
+                      : appointment.location
                 }
               } catch {
                 // Ignore if appointment not found
@@ -171,20 +129,6 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       ORDER_ITEMS: itemSummary,
       CUSTOMER_NAME: recipientName || recipientEmail,
       ORDER_DATE: new Date().toLocaleDateString('de-DE'),
-    }
-
-    // Add pickup details if found (physical products)
-    if (pickupDate) {
-      emailParams.PICKUP_DATE = pickupDate
-    }
-    if (pickupTime) {
-      emailParams.PICKUP_TIME = pickupTime
-    }
-    if (pickupLocation) {
-      emailParams.PICKUP_LOCATION = pickupLocation
-    }
-    if (pickupAddress) {
-      emailParams.PICKUP_ADDRESS = pickupAddress
     }
 
     // Add workshop details if found

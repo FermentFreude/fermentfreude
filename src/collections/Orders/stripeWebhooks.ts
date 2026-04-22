@@ -42,9 +42,7 @@ export async function handlePaymentFailed({
 
   const transaction = transactionResults.docs[0]
   const cartId =
-    transaction && typeof transaction.cart === 'object'
-      ? transaction.cart?.id
-      : transaction?.cart
+    transaction && typeof transaction.cart === 'object' ? transaction.cart?.id : transaction?.cart
 
   if (!cartId) {
     payload.logger.warn(
@@ -190,7 +188,10 @@ export async function handleChargeRefunded({
         depth: 0,
         overrideAccess: true,
       })
-      cartId = typeof transaction.cart === 'object' ? transaction.cart?.id || undefined : transaction.cart || undefined
+      cartId =
+        typeof transaction.cart === 'object'
+          ? transaction.cart?.id || undefined
+          : transaction.cart || undefined
     } catch {
       // ignore; handled below
     }
@@ -329,7 +330,10 @@ export async function handleChargeSucceeded({
         depth: 0,
         overrideAccess: true,
       })
-      cartId = typeof transaction.cart === 'object' ? transaction.cart?.id || undefined : transaction.cart || undefined
+      cartId =
+        typeof transaction.cart === 'object'
+          ? transaction.cart?.id || undefined
+          : transaction.cart || undefined
     } catch {
       // ignore
     }

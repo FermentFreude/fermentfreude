@@ -128,8 +128,9 @@ export const CheckoutPage: React.FC = () => {
 
   const canGoToPayment = Boolean(
     checkoutEmail &&
-    (isAllDigital ||
-      isAllPhysicalPickup ? (pickupDate && pickupTime) : billingAddress && (billingAddressSameAsShipping || shippingAddress)),
+    (isAllDigital || isAllPhysicalPickup
+      ? pickupDate && pickupTime
+      : billingAddress && (billingAddressSameAsShipping || shippingAddress)),
   )
 
   // On initial load wait for addresses to be loaded and check to see if we can prefill a default one
@@ -265,7 +266,9 @@ export const CheckoutPage: React.FC = () => {
         } else {
           // For shipped orders, include addresses
           additionalData.billingAddress = billingAddress
-          additionalData.shippingAddress = billingAddressSameAsShipping ? billingAddress : shippingAddress
+          additionalData.shippingAddress = billingAddressSameAsShipping
+            ? billingAddress
+            : shippingAddress
         }
 
         const paymentData = (await initiatePayment(paymentID, {
@@ -287,7 +290,16 @@ export const CheckoutPage: React.FC = () => {
         toast.error(errorMessage)
       }
     },
-    [billingAddress, billingAddressSameAsShipping, shippingAddress, checkoutEmail, initiatePayment, isAllPhysicalPickup, pickupDate, pickupTime],
+    [
+      billingAddress,
+      billingAddressSameAsShipping,
+      shippingAddress,
+      checkoutEmail,
+      initiatePayment,
+      isAllPhysicalPickup,
+      pickupDate,
+      pickupTime,
+    ],
   )
 
   if (!stripe) return null
@@ -596,9 +608,7 @@ export const CheckoutPage: React.FC = () => {
               void handleVoucherOrder()
             }}
           >
-            {isProcessingPayment
-              ? 'Bestellung wird bearbeitet…'
-              : 'Jetzt mit Gutschein bestellen'}
+            {isProcessingPayment ? 'Bestellung wird bearbeitet…' : 'Jetzt mit Gutschein bestellen'}
           </Button>
         ) : !paymentData ? (
           <Button
