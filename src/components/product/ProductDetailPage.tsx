@@ -463,42 +463,45 @@ export function ProductDetailPage({ product }: { product: Product }) {
               )}
 
               {/* Quantity + Add to Cart */}
-              <div className="space-y-4">
-                {/* Quantity Selector */}
-                <div className="bg-white rounded-xl border-2 border-[#e9e9e9] p-4 inline-flex items-center gap-4">
-                  <span className="text-xs font-display font-bold text-[#999]">QTY:</span>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
-                    >
-                      −
-                    </button>
-                    <span className="w-8 text-center font-display font-bold text-lg text-[#2b2b2d]">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() => setQuantity((q) => q + 1)}
-                      className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
-                    >
-                      +
-                    </button>
+              <div className="flex flex-col gap-4">
+                {/* Row: Quantity Selector + Button */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  {/* Quantity Selector */}
+                  <div className="bg-white rounded-xl border-2 border-[#e9e9e9] p-4 inline-flex items-center gap-4 shrink-0">
+                    <span className="text-xs font-display font-bold text-[#999]">QTY:</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
+                      >
+                        −
+                      </button>
+                      <span className="w-8 text-center font-display font-bold text-lg text-[#2b2b2d]">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() => setQuantity((q) => q + 1)}
+                        className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Add to Cart Button */}
-                <Suspense fallback={null}>
-                  <AddToCart
-                    product={product}
-                    quantity={quantity}
-                    disabled={!pickupDate || !pickupTime}
-                    className={`w-full h-16 rounded-full text-base font-display font-bold transition-all ${
-                      pickupDate && pickupTime
-                        ? 'bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] shadow-lg'
-                        : 'bg-[#d5d5d5] text-[#888] border-[#d5d5d5] cursor-not-allowed'
-                    }`}
-                  />
-                </Suspense>
+                  {/* Add to Cart Button */}
+                  <Suspense fallback={null}>
+                    <AddToCart
+                      product={product}
+                      quantity={quantity}
+                      disabled={!pickupDate || !pickupTime}
+                      className={`flex-1 h-16 rounded-full text-base font-display font-bold transition-all ${
+                        pickupDate && pickupTime
+                          ? 'bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] shadow-lg'
+                          : 'bg-[#d5d5d5] text-[#888] border-[#d5d5d5] cursor-not-allowed'
+                      }`}
+                    />
+                  </Suspense>
+                </div>
 
                 {/* Help text */}
                 {(!pickupDate || !pickupTime) && (
