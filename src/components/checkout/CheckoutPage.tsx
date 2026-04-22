@@ -29,6 +29,23 @@ import { toast } from 'sonner'
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
 
+// Store pickup location (currently only The Ginery)
+const PICKUP_LOCATION = {
+  id: 'the-ginery',
+  name: 'The Ginery',
+  address: 'Grabenstraße 15, 8010 Graz, Austria',
+  mapLink: 'https://www.google.com/maps/search/The+Ginery+Grabenstra%C3%9Fe+15+Graz/',
+  openingHours: {
+    monday: { open: '09:00', close: '18:00' },
+    tuesday: { open: '09:00', close: '18:00' },
+    wednesday: { open: '09:00', close: '18:00' },
+    thursday: { open: '09:00', close: '18:00' },
+    friday: { open: '09:00', close: '18:00' },
+    saturday: { open: '10:00', close: '16:00' },
+    sunday: { open: 'closed', close: 'closed' },
+  },
+}
+
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
   const router = useRouter()
@@ -46,6 +63,10 @@ export const CheckoutPage: React.FC = () => {
   const [billingAddress, setBillingAddress] = useState<Partial<Address>>()
   const [billingAddressSameAsShipping, setBillingAddressSameAsShipping] = useState(true)
   const [isProcessingPayment, setProcessingPayment] = useState(false)
+
+  /* ── Pickup State ── */
+  const [pickupDate, setPickupDate] = useState<string>('')
+  const [pickupTime, setPickupTime] = useState<string>('')
 
   /* ── Voucher Code State ── */
   const [voucherCode, setVoucherCode] = useState('')
@@ -78,6 +99,22 @@ export const CheckoutPage: React.FC = () => {
     }),
   )
 
+  // Physical products (jarred, fresh, bottled) require store pickup
+  const isAllPhysicalPickup = Boolean(
+    cart?.items?.length &&
+    cart.items.every((item) => {
+      if (typeof item.product !== 'object' || item.product === null) return false
+      const p = item.product as {
+        productType?: string | null
+        courseSlug?: string | null
+        slug?: string | null
+      }
+      const isPhysical = ['jarred', 'fresh', 'bottled'].includes(p.productType || '')
+      const notDigital = !p.courseSlug && !(p.slug && p.slug.includes('course'))
+      return isPhysical && notDigital
+    }),
+  )
+
   const hasWorkshop = Boolean(
     cart?.items?.some((item) => {
       if (typeof item.product !== 'object' || item.product === null) return false
@@ -91,7 +128,8 @@ export const CheckoutPage: React.FC = () => {
 
   const canGoToPayment = Boolean(
     checkoutEmail &&
-    (isAllDigital || (billingAddress && (billingAddressSameAsShipping || shippingAddress))),
+    (isAllDigital ||
+      isAllPhysicalPickup ? (pickupDate && pickupTime) : billingAddress && (billingAddressSameAsShipping || shippingAddress)),
   )
 
   // On initial load wait for addresses to be loaded and check to see if we can prefill a default one
@@ -214,12 +252,24 @@ export const CheckoutPage: React.FC = () => {
   const initiatePaymentIntent = useCallback(
     async (paymentID: string) => {
       try {
+        const additionalData: Record<string, unknown> = {
+          ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
+        }
+
+        // For pickup orders, pass pickup info instead of addresses
+        if (isAllPhysicalPickup) {
+          additionalData.pickupLocation = PICKUP_LOCATION.name
+          additionalData.pickupDate = pickupDate
+          additionalData.pickupTime = pickupTime
+          additionalData.pickupAddress = PICKUP_LOCATION.address
+        } else {
+          // For shipped orders, include addresses
+          additionalData.billingAddress = billingAddress
+          additionalData.shippingAddress = billingAddressSameAsShipping ? billingAddress : shippingAddress
+        }
+
         const paymentData = (await initiatePayment(paymentID, {
-          additionalData: {
-            ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
-            billingAddress,
-            shippingAddress: billingAddressSameAsShipping ? billingAddress : shippingAddress,
-          },
+          additionalData,
         })) as Record<string, unknown>
 
         if (paymentData) {
@@ -237,7 +287,7 @@ export const CheckoutPage: React.FC = () => {
         toast.error(errorMessage)
       }
     },
-    [billingAddress, billingAddressSameAsShipping, shippingAddress, checkoutEmail, initiatePayment],
+    [billingAddress, billingAddressSameAsShipping, shippingAddress, checkoutEmail, initiatePayment, isAllPhysicalPickup, pickupDate, pickupTime],
   )
 
   if (!stripe) return null
@@ -347,13 +397,12 @@ export const CheckoutPage: React.FC = () => {
           )}
         </section>
 
-        {/* ── Address Section ── */}
-        <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
-          <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
-            Address
-          </h2>
-
-          {isAllDigital ? (
+        {/* ── Address/Pickup Section ── */}
+        {isAllDigital ? (
+          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+            <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
+              Address
+            </h2>
             <div className="flex flex-row items-center gap-3 rounded-lg bg-[#f5f1e8] px-5 py-4">
               <svg
                 width="20"
@@ -374,108 +423,183 @@ export const CheckoutPage: React.FC = () => {
                 Workshop / digital product — no shipping address required.
               </span>
             </div>
-          ) : (
-            <>
-              {billingAddress ? (
-                <div>
-                  <AddressItem
-                    actions={
-                      <Button
-                        variant={'outline'}
-                        disabled={Boolean(paymentData)}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setBillingAddress(undefined)
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    }
-                    address={billingAddress}
-                  />
-                </div>
-              ) : user ? (
-                <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
-              ) : (
-                <CreateAddressModal
-                  disabled={!email || Boolean(emailEditable)}
-                  callback={(address) => {
-                    setBillingAddress(address)
-                  }}
-                  skipSubmission={true}
-                />
-              )}
+          </section>
+        ) : isAllPhysicalPickup ? (
+          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+            <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
+              Store Pickup
+            </h2>
 
-              <div className="flex items-center gap-3 pt-2">
-                <Checkbox
-                  id="shippingTheSameAsBilling"
-                  checked={billingAddressSameAsShipping}
-                  disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
-                  onCheckedChange={(state) => {
-                    setBillingAddressSameAsShipping(state as boolean)
-                  }}
-                />
-                <Label
-                  htmlFor="shippingTheSameAsBilling"
-                  className="text-body-sm text-ff-gray-text-light"
-                >
-                  Shipping is the same as billing
-                </Label>
-              </div>
+            {/* Pickup Location */}
+            <div className="mb-6 rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
+              <h3 className="mb-3 font-display font-semibold text-ff-near-black">
+                {PICKUP_LOCATION.name}
+              </h3>
+              <p className="mb-3 text-body-sm text-ff-gray-text-light">{PICKUP_LOCATION.address}</p>
+              <a
+                href={PICKUP_LOCATION.mapLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-body-sm text-ff-gold-accent underline hover:text-ff-near-black"
+              >
+                View on Google Maps
+              </a>
+            </div>
 
-              {!billingAddressSameAsShipping && (
-                <>
-                  {shippingAddress ? (
-                    <div>
-                      <AddressItem
-                        actions={
-                          <Button
-                            variant={'outline'}
-                            disabled={Boolean(paymentData)}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              setShippingAddress(undefined)
-                            }}
-                          >
-                            Remove
-                          </Button>
-                        }
-                        address={shippingAddress}
-                      />
-                    </div>
-                  ) : user ? (
-                    <CheckoutAddresses
-                      heading="Shipping address"
-                      description="Please select a shipping address."
-                      setAddress={setShippingAddress}
-                    />
-                  ) : (
-                    <CreateAddressModal
-                      callback={(address) => {
-                        setShippingAddress(address)
+            {/* Pickup Date */}
+            <FormItem className="mb-6">
+              <Label
+                htmlFor="pickupDate"
+                className="font-display text-body-sm font-bold text-ff-near-black"
+              >
+                Pickup Date
+              </Label>
+              <Input
+                id="pickupDate"
+                name="pickupDate"
+                type="date"
+                value={pickupDate}
+                onChange={(e) => setPickupDate(e.target.value)}
+                disabled={Boolean(paymentData)}
+                min={new Date().toISOString().split('T')[0]}
+                className="rounded-md border-ff-border-light bg-white focus:border-ff-near-black focus:ring-ff-near-black"
+              />
+            </FormItem>
+
+            {/* Pickup Time */}
+            <FormItem>
+              <Label
+                htmlFor="pickupTime"
+                className="font-display text-body-sm font-bold text-ff-near-black"
+              >
+                Pickup Time
+              </Label>
+              <select
+                id="pickupTime"
+                name="pickupTime"
+                value={pickupTime}
+                onChange={(e) => setPickupTime(e.target.value)}
+                disabled={Boolean(paymentData)}
+                className="w-full rounded-md border border-ff-border-light bg-white px-4 py-2 text-body-sm focus:border-ff-near-black focus:ring-ff-near-black"
+              >
+                <option value="">Select a time</option>
+                <option value="09:00">9:00 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="17:00">5:00 PM</option>
+              </select>
+            </FormItem>
+          </section>
+        ) : (
+          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+            <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
+              Address
+            </h2>
+
+            {billingAddress ? (
+              <div>
+                <AddressItem
+                  actions={
+                    <Button
+                      variant={'outline'}
+                      disabled={Boolean(paymentData)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setBillingAddress(undefined)
                       }}
-                      disabled={!email || Boolean(emailEditable)}
-                      skipSubmission={true}
-                    />
-                  )}
-                </>
-              )}
-            </>
-          )}
+                    >
+                      Remove
+                    </Button>
+                  }
+                  address={billingAddress}
+                />
+              </div>
+            ) : user ? (
+              <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
+            ) : (
+              <CreateAddressModal
+                disabled={!email || Boolean(emailEditable)}
+                callback={(address) => {
+                  setBillingAddress(address)
+                }}
+                skipSubmission={true}
+              />
+            )}
 
-          {!paymentData && voucherCoversAll ? (
-            <Button
-              className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
-              disabled={!canGoToPayment || isProcessingPayment}
-              onClick={(e) => {
-                e.preventDefault()
-                void handleVoucherOrder()
-              }}
-            >
-              {isProcessingPayment
-                ? 'Bestellung wird bearbeitet…'
-                : 'Jetzt mit Gutschein bestellen'}
-            </Button>
+            <div className="flex items-center gap-3 pt-2">
+              <Checkbox
+                id="shippingTheSameAsBilling"
+                checked={billingAddressSameAsShipping}
+                disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
+                onCheckedChange={(state) => {
+                  setBillingAddressSameAsShipping(state as boolean)
+                }}
+              />
+              <Label
+                htmlFor="shippingTheSameAsBilling"
+                className="text-body-sm text-ff-gray-text-light"
+              >
+                Shipping is the same as billing
+              </Label>
+            </div>
+
+            {!billingAddressSameAsShipping && (
+              <>
+                {shippingAddress ? (
+                  <div>
+                    <AddressItem
+                      actions={
+                        <Button
+                          variant={'outline'}
+                          disabled={Boolean(paymentData)}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setShippingAddress(undefined)
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      }
+                      address={shippingAddress}
+                    />
+                  </div>
+                ) : user ? (
+                  <CheckoutAddresses
+                    heading="Shipping address"
+                    description="Please select a shipping address."
+                    setAddress={setShippingAddress}
+                  />
+                ) : (
+                  <CreateAddressModal
+                    callback={(address) => {
+                      setShippingAddress(address)
+                    }}
+                    disabled={!email || Boolean(emailEditable)}
+                    skipSubmission={true}
+                  />
+                )}
+              </>
+            )}
+          </section>
+        )}
+
+        {!paymentData && voucherCoversAll ? (
+          <Button
+            className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
+            disabled={!canGoToPayment || isProcessingPayment}
+            onClick={(e) => {
+              e.preventDefault()
+              void handleVoucherOrder()
+            }}
+          >
+            {isProcessingPayment
+              ? 'Bestellung wird bearbeitet…'
+              : 'Jetzt mit Gutschein bestellen'}
+          </Button>
           ) : !paymentData ? (
             <Button
               className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
