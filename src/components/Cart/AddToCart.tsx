@@ -15,9 +15,10 @@ type Props = {
   ariaLabel?: string
   children?: React.ReactNode
   quantity?: number
+  disabled?: boolean
 }
 
-export function AddToCart({ product, className, ariaLabel, children, quantity = 1 }: Props) {
+export function AddToCart({ product, className, ariaLabel, children, quantity = 1, disabled: externalDisabled = false }: Props) {
   const { addItem, cart, isLoading, incrementItem } = useCart()
   const searchParams = useSearchParams()
 
@@ -157,7 +158,7 @@ export function AddToCart({ product, className, ariaLabel, children, quantity = 
         },
         className,
       )}
-      disabled={disabled || isLoading}
+      disabled={disabled || isLoading || externalDisabled}
       onClick={addToCart}
       type="button"
     >

@@ -171,6 +171,15 @@ export const Header: GlobalConfig = {
                   'Check to render this item with smaller font size (for workshop types).',
               },
             },
+            {
+              name: 'isDisabled',
+              type: 'checkbox',
+              label: 'Disabled (non-clickable)',
+              admin: {
+                description:
+                  'Check to make this item non-clickable with a "Coming soon" appearance.',
+              },
+            },
           ],
         },
       ],

@@ -75,6 +75,8 @@ export function ProductDetailPage({ product }: { product: Product }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [activeTab, setActiveTab] = useState<'description' | 'about'>('description')
   const [quantity, setQuantity] = useState(1)
+  const [pickupDate, setPickupDate] = useState<string>('')
+  const [pickupTime, setPickupTime] = useState<string>('')
 
   /* ── Gallery ── */
   const gallery =
@@ -327,38 +329,52 @@ export function ProductDetailPage({ product }: { product: Product }) {
            *  SECTION 1.5 — Action bar: two-column aligned with above
            * ═══════════════════════════════════════════ */}
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mt-8 lg:items-end">
-            {/* ── LEFT (under image): Delivery Method ── */}
+            {/* ── LEFT (under image): Pickup Time Selection ── */}
             <div className="w-full lg:w-1/2">
               <p className="text-base font-display font-bold text-[#2b2b2d] mb-3">
-                Delivery Method:
+                Local Pickup
               </p>
-              <div className="flex gap-3">
-                {/* Local Pick up — selected by default */}
-                <div className="flex-1 min-h-15 rounded-[14px] border-[1.5px] border-[#4b4f4a] bg-[#f7f7f8] px-4 py-2.5 flex items-center">
-                  <div className="flex items-center gap-3 w-full">
-                    <div className="w-9 h-9 rounded-[10px] bg-[#4b4f4a] flex items-center justify-center shrink-0">
-                      <StoreIcon className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-display font-bold text-[#2b2b2d]">Local Pick up</p>
-                      <p className="text-xs text-[#777]">Free · Ready in 2 hours</p>
-                    </div>
-                    <div className="w-4 h-4 rounded-full border-4 border-[#4b4f4a] shrink-0" />
-                  </div>
+              <div className="space-y-3">
+                {/* Pickup Date */}
+                <div>
+                  <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2">
+                    Pickup Date
+                  </label>
+                  <input
+                    type="date"
+                    value={pickupDate}
+                    onChange={(e) => setPickupDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full px-4 py-2.5 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white text-[#2b2b2d] font-display font-bold focus:outline-none focus:border-[#4b4f4a]"
+                  />
                 </div>
-                {/* Shipping — disabled/closed */}
-                <div className="flex-1 min-h-15 rounded-[14px] border-[1.5px] border-[#e9e9e9] bg-white px-4 py-2.5 flex items-center opacity-50 cursor-not-allowed">
-                  <div className="flex items-center gap-3 w-full">
-                    <div className="w-9 h-9 rounded-[10px] bg-[#f7f7f8] flex items-center justify-center shrink-0">
-                      <TruckIcon className="w-5 h-5 text-[#aaa]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-display font-bold text-[#2b2b2d]">Shipping</p>
-                      <p className="text-xs text-[#aaa]">Not available yet</p>
-                    </div>
-                    <div className="w-4 h-4 rounded-full border-2 border-[#ccc] shrink-0" />
-                  </div>
+
+                {/* Pickup Time */}
+                <div>
+                  <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2">
+                    Pickup Time
+                  </label>
+                  <select
+                    value={pickupTime}
+                    onChange={(e) => setPickupTime(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white text-[#2b2b2d] font-display font-bold focus:outline-none focus:border-[#4b4f4a]"
+                  >
+                    <option value="">Select a time</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="13:00">1:00 PM</option>
+                    <option value="14:00">2:00 PM</option>
+                    <option value="15:00">3:00 PM</option>
+                    <option value="16:00">4:00 PM</option>
+                    <option value="17:00">5:00 PM</option>
+                  </select>
                 </div>
+
+                <p className="text-xs text-[#999] mt-2 flex items-start gap-1.5">
+                  <PackageIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                  Ready for pickup within 2 hours of your selected time
+                </p>
               </div>
             </div>
 
@@ -400,7 +416,8 @@ export function ProductDetailPage({ product }: { product: Product }) {
                   <AddToCart
                     product={product}
                     quantity={quantity}
-                    className="flex-1 h-15 rounded-full text-lg font-display font-bold bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] hover:text-white"
+                    disabled={!pickupDate || !pickupTime}
+                    className="flex-1 h-15 rounded-full text-lg font-display font-bold bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </Suspense>
                 <button className="w-15 h-15 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center shrink-0 hover:border-[#4b4f4a] transition-colors">

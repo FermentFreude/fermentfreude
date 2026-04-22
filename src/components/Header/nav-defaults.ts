@@ -9,6 +9,7 @@ export interface DropdownItem {
   href: string
   description?: string | null
   isSmall?: boolean | null
+  isDisabled?: boolean | null
 }
 
 export interface DefaultNavItem {
