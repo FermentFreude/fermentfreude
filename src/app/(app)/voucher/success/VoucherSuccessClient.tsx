@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 type VoucherResult = {
   code: string
@@ -18,6 +19,8 @@ export function VoucherSuccessClient() {
   const [voucher, setVoucher] = useState<VoucherResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [pdfLoading, setPdfLoading] = useState(false)
+  const [codeCopied, setCodeCopied] = useState(false)
   const confirming = useRef(false)
 
   const confirmVoucher = useCallback(async (sid: string) => {
@@ -37,6 +40,42 @@ export function VoucherSuccessClient() {
       setLoading(false)
     }
   }, [])
+
+  const handleDownloadPDF = useCallback(async () => {
+    if (!voucher?.code) return
+
+    setPdfLoading(true)
+    try {
+      const response = await fetch(`/api/voucher/generate-pdf?code=${encodeURIComponent(voucher.code)}`)
+      if (!response.ok) {
+        toast.error('PDF konnte nicht heruntergeladen werden.')
+        return
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `gutschein-${voucher.code}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success('PDF heruntergeladen!')
+    } catch (_err) {
+      toast.error('Fehler beim Download.')
+    } finally {
+      setPdfLoading(false)
+    }
+  }, [voucher?.code])
+
+  const handleCopyCode = useCallback(() => {
+    if (!voucher?.code) return
+    navigator.clipboard.writeText(voucher.code)
+    setCodeCopied(true)
+    toast.success('Code kopiert!')
+    setTimeout(() => setCodeCopied(false), 2000)
+  }, [voucher?.code])
 
   useEffect(() => {
     if (!sessionId) {
@@ -112,15 +151,21 @@ export function VoucherSuccessClient() {
           erstellt.
         </p>
 
-        {/* Voucher Code Card */}
+        {/* Voucher Code Card with Copy */}
         <div className="rounded-2xl border-2 border-ff-gold-accent bg-[radial-gradient(circle_at_top,_#F8F2E6,_#FFFFFF)] p-8 mb-8 shadow-md">
           <p className="font-sans text-body-sm font-medium text-ff-gray-text uppercase tracking-wider mb-2">
             Gutschein-Code
           </p>
-          <p className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ff-near-black tracking-widest select-all">
+          <p className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ff-near-black tracking-widest select-all mb-4">
             {voucher.code}
           </p>
-          <div className="mt-4 pt-4 border-t border-ff-border-light">
+          <button
+            onClick={handleCopyCode}
+            className="mx-auto block rounded-lg bg-ff-gold-accent/10 hover:bg-ff-gold-accent/20 px-4 py-2 font-sans text-body-sm font-medium text-ff-gold-accent transition-colors mb-4"
+          >
+            {codeCopied ? '✓ Kopiert!' : 'Code kopieren'}
+          </button>
+          <div className="pt-4 border-t border-ff-border-light">
             <p className="font-sans text-body text-ff-gray-text">
               <strong>Workshop-Erlebnis Gutschein</strong> — €{voucher.value},00
             </p>
@@ -173,6 +218,71 @@ export function VoucherSuccessClient() {
             </div>
           )}
         </div>
+
+        {/* Redemption Instructions */}
+        <div className="rounded-xl bg-ff-ivory-mist border border-ff-border-light/50 p-6 mb-8 text-left">
+          <h3 className="font-display text-body font-bold text-ff-near-black mb-4">
+            So nutzt du deinen Gutschein:
+          </h3>
+          <ol className="space-y-3">
+            <li className="flex gap-3">
+              <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
+                1
+              </span>
+              <span className="font-sans text-body text-ff-gray-text pt-0.5">
+                Besuche <strong>fermentfreude.at/redeem-voucher</strong>
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
+                2
+              </span>
+              <span className="font-sans text-body text-ff-gray-text pt-0.5">
+                Gib deinen Gutschein-Code ein
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
+                3
+              </span>
+              <span className="font-sans text-body text-ff-gray-text pt-0.5">
+                Wähle einen Workshop und lege ihn in deinen Warenkorb
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
+                4
+              </span>
+              <span className="font-sans text-body text-ff-gray-text pt-0.5">
+                Beim Checkout: Gib deinen Code ein – die Gebühr wird direkt abgezogen
+              </span>
+            </li>
+          </ol>
+        </div>
+
+        {/* PDF Download */}
+        <button
+          onClick={handleDownloadPDF}
+          disabled={pdfLoading}
+          className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed mb-3 flex items-center justify-center gap-2"
+        >
+          {pdfLoading ? (
+            <>
+              <span className="animate-spin h-4 w-4 border-2 border-ff-near-black border-t-transparent rounded-full" />
+              Wird heruntergeladen...
+            </>
+          ) : (
+            <>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="inline-block">
+                <path
+                  d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
+                  fill="currentColor"
+                />
+              </svg>
+              Gutschein als PDF herunterladen
+            </>
+          )}
+        </button>
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">

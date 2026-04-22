@@ -5,6 +5,7 @@ import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 /**
  * Send voucher purchase confirmation email via Brevo after a new voucher is created.
  * Sends to the purchaser, and optionally to the recipient if email delivery is selected.
+ * Includes PDF download link in email.
  */
 export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
   doc,
@@ -17,6 +18,10 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
   if (!purchaserEmail) return doc
 
   try {
+    // Build PDF download URL (can be clicked in email to download)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://fermentfreude.at'
+    const pdfUrl = `${baseUrl}/api/voucher/generate-pdf?code=${encodeURIComponent(String(doc.code ?? ''))}`
+
     // Send purchase confirmation to buyer
     await sendTemplateEmail({
       to: [{ email: purchaserEmail }],
@@ -26,6 +31,7 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
         VOUCHER_VALUE: String(doc.value ?? 99),
         DELIVERY_METHOD: doc.deliveryMethod === 'email' ? 'E-Mail' : 'Abholung',
         RECIPIENT_EMAIL: doc.recipientEmail || '',
+        PDF_DOWNLOAD_URL: pdfUrl,
       },
     })
 
@@ -43,6 +49,7 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
           VOUCHER_VALUE: String(doc.value ?? 99),
           DELIVERY_METHOD: 'E-Mail',
           RECIPIENT_EMAIL: doc.recipientEmail,
+          PDF_DOWNLOAD_URL: pdfUrl,
         },
       })
     }
