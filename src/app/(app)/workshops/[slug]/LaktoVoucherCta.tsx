@@ -39,7 +39,7 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
   const hasBackgroundImage = isResolvedMedia(cms?.backgroundImage)
 
   return (
-    <section className="section-padding-lg">
+    <section className="section-padding-lg bg-ff-ivory-mist">
       {/* ── With Background Image ── */}
       {hasBackgroundImage ? (
         <div className="overflow-hidden rounded-lg">
@@ -49,29 +49,29 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
               fill
               imgClassName="object-cover blur-[2px]"
             />
-            <div className="absolute inset-0 bg-black/45" />
+            <div className="absolute inset-0 bg-ff-ivory-mist/88" aria-hidden />
             <div className="absolute inset-0 flex items-center justify-center px-6 py-12">
               <div className="mx-auto max-w-3xl text-center">
-                <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-white/80">
+                <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-[#555954]/60">
                   {eyebrow}
                 </p>
-                <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-white">
+                <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-ff-near-black">
                   {title}
                 </h2>
-                <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white/90">
+                <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-ff-gray-text">
                   {description}
                 </p>
 
                 <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Link
                     href={primaryHref}
-                    className="inline-flex items-center justify-center rounded-full bg-white px-10 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-[#1A1510] transition-all hover:bg-white/90"
+                    className="inline-flex items-center justify-center rounded-full bg-[#555954] px-10 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-[#3c3c3c]"
                   >
                     {primaryLabel}
                   </Link>
                   <Link
                     href={secondaryHref}
-                    className="inline-flex items-center justify-center rounded-full border-2 border-white/30 px-10 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-white transition-all hover:border-white"
+                    className="inline-flex items-center justify-center rounded-full border-2 border-[#555954]/30 px-10 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-[#555954] transition-all hover:border-[#555954]"
                   >
                     {secondaryLabel}
                   </Link>
@@ -80,11 +80,11 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
                 <div className="mt-10 flex items-center justify-center px-2">
                   {pills.map((tag, i) => (
                     <React.Fragment key={tag}>
-                      <span className="text-white text-[9px] sm:text-[10px] lg:text-xs font-display font-semibold tracking-wide">
+                      <span className="text-[#555954] text-[9px] sm:text-[10px] lg:text-xs font-display font-semibold tracking-wide">
                         {tag}
                       </span>
                       {i < pills.length - 1 && (
-                        <span className="w-px h-4 bg-white/25 mx-2 sm:mx-3" aria-hidden="true" />
+                        <span className="w-px h-4 bg-[#555954]/20 mx-2 sm:mx-3" aria-hidden="true" />
                       )}
                     </React.Fragment>
                   ))}
@@ -95,7 +95,7 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
         </div>
       ) : (
         /* ── Without Background Image (Fallback) ── */
-        <div className="rounded-lg px-6 py-12 md:py-16" style={{ backgroundColor: '#F6F0E8' }}>
+        <div className="rounded-lg px-6 py-12 md:py-16">
           <div className="mx-auto max-w-3xl text-center">
             <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-[#555954]/60">
               {eyebrow}
