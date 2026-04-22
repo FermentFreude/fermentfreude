@@ -2,7 +2,56 @@
 
 import { Media } from '@/components/Media'
 import type { Media as MediaType, TeamCardsBlock as TeamCardsBlockType } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 import { useEffect, useRef, useState } from 'react'
+
+function TeamMemberDescription({ text }: { text: string }) {
+  const { locale } = useLocale()
+  const pRef = useRef<HTMLParagraphElement>(null)
+  const [expanded, setExpanded] = useState(false)
+  const [isOverflowing, setIsOverflowing] = useState(false)
+
+  useEffect(() => {
+    const el = pRef.current
+    if (!el || expanded) return
+
+    const measure = () => {
+      setIsOverflowing(el.scrollHeight > el.clientHeight + 2)
+    }
+
+    const id = requestAnimationFrame(() => measure())
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => {
+      cancelAnimationFrame(id)
+      ro.disconnect()
+    }
+  }, [text, expanded])
+
+  const expandLabel = locale === 'de' ? 'Mehr' : 'Read more'
+  const collapseLabel = locale === 'de' ? 'Weniger anzeigen' : 'Show less'
+
+  return (
+    <div className="min-w-0">
+      <p
+        ref={pRef}
+        className={`font-sans text-body leading-relaxed text-ff-gray-15 ${expanded ? '' : 'line-clamp-5'}`}
+      >
+        {text}
+      </p>
+      {isOverflowing ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          className="mt-1 font-sans text-sm font-semibold text-ff-gold-accent hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ff-gold-accent/40"
+        >
+          {expanded ? collapseLabel : `… ${expandLabel}`}
+        </button>
+      ) : null}
+    </div>
+  )
+}
 
 /* ── Static fallback images — same as Home/About, no R2 dependency ── */
 const STATIC_TEAM_IMAGES: Record<string, string> = {
@@ -122,9 +171,7 @@ export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, membe
                       <p className="font-sans text-body font-semibold text-ff-gray-text shrink-0">
                         {member.role}
                       </p>
-                      <p className="font-sans text-body leading-relaxed text-ff-gray-15 line-clamp-5">
-                        {member.description}
-                      </p>
+                      <TeamMemberDescription text={member.description ?? ''} />
                     </div>
                   </article>
                 </div>
