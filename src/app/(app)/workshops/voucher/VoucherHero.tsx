@@ -109,8 +109,8 @@ export function VoucherHero({
         return
       }
 
-      if (data.url) {
-        router.push(data.url)
+      if (data.sessionUrl) {
+        router.push(data.sessionUrl)
       }
     } catch (err) {
       console.error('Checkout error:', err)
