@@ -10,9 +10,7 @@ import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
 import {
   CheckIcon,
   ChevronLeftIcon,
-  EyeIcon,
   FlameIcon,
-  HeartIcon,
   LeafIcon,
   PackageIcon,
   ShieldCheckIcon,
@@ -50,7 +48,7 @@ const BADGE_CONFIG: Record<
 > = {
   vegan: { label: 'Vegan', icon: SproutIcon, color: '#5a8a3c' },
   vegetarian: { label: 'Vegetarian', icon: LeafIcon, color: '#6b9e4a' },
-  handmade: { label: 'Handmade', icon: HeartIcon, color: '#c47a5a' },
+  handmade: { label: 'Handmade', icon: CheckIcon, color: '#c47a5a' },
   organic: { label: 'Organic', icon: SparklesIcon, color: '#7bab5e' },
   'gluten-free': { label: 'Gluten-Free', icon: WheatOffIcon, color: '#b08d57' },
   probiotic: { label: 'Probiotic', icon: ShieldCheckIcon, color: '#5a8a8a' },
@@ -326,115 +324,151 @@ export function ProductDetailPage({ product }: { product: Product }) {
           </div>
 
           {/* ═══════════════════════════════════════════
-           *  SECTION 1.5 — Action bar: two-column aligned with above
+           *  SECTION 1.5 — Pickup Selection & Add to Cart
            * ═══════════════════════════════════════════ */}
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mt-8 lg:items-end">
-            {/* ── LEFT (under image): Pickup Time Selection ── */}
-            <div className="w-full lg:w-1/2">
-              <p className="text-base font-display font-bold text-[#2b2b2d] mb-3">
-                Local Pickup
-              </p>
-              <div className="space-y-3">
-                {/* Pickup Date */}
-                <div>
-                  <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2">
-                    Pickup Date
-                  </label>
-                  <input
-                    type="date"
-                    value={pickupDate}
-                    onChange={(e) => setPickupDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-2.5 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white text-[#2b2b2d] font-display font-bold focus:outline-none focus:border-[#4b4f4a]"
-                  />
+          <div className="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8">
+            {/* ── LEFT: Pickup Details ── */}
+            <div className="w-full lg:w-1/2 lg:order-1">
+              <div className="rounded-2xl border-2 border-[#e9e9e9] bg-[#fafafa] p-6 lg:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 rounded-full bg-[#4b4f4a] flex items-center justify-center">
+                    <StoreIcon className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-xl lg:text-2xl font-display font-bold text-[#2b2b2d]">
+                    Local Pickup
+                  </h3>
                 </div>
 
-                {/* Pickup Time */}
-                <div>
-                  <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2">
-                    Pickup Time
-                  </label>
-                  <select
-                    value={pickupTime}
-                    onChange={(e) => setPickupTime(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white text-[#2b2b2d] font-display font-bold focus:outline-none focus:border-[#4b4f4a]"
-                  >
-                    <option value="">Select a time</option>
-                    <option value="10:00">10:00 AM</option>
-                    <option value="11:00">11:00 AM</option>
-                    <option value="12:00">12:00 PM</option>
-                    <option value="13:00">1:00 PM</option>
-                    <option value="14:00">2:00 PM</option>
-                    <option value="15:00">3:00 PM</option>
-                    <option value="16:00">4:00 PM</option>
-                    <option value="17:00">5:00 PM</option>
-                  </select>
-                </div>
+                <div className="space-y-5">
+                  {/* Pickup Date */}
+                  <div>
+                    <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2.5">
+                      Select Pickup Date
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={pickupDate}
+                        onChange={(e) => setPickupDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full px-4 py-3.5 rounded-xl border-2 border-[#d5d5d5] bg-white text-[#2b2b2d] font-display font-bold text-base focus:outline-none focus:border-[#4b4f4a] focus:ring-2 focus:ring-[#4b4f4a] focus:ring-opacity-20 transition-all"
+                      />
+                    </div>
+                    {pickupDate && (
+                      <p className="mt-2 text-xs font-display font-bold text-[#4b4f4a]">
+                        ✓ Date selected: {new Date(pickupDate + 'T00:00:00').toLocaleDateString('de-DE', { weekday: 'long', month: 'short', day: 'numeric' })}
+                      </p>
+                    )}
+                  </div>
 
-                <p className="text-xs text-[#999] mt-2 flex items-start gap-1.5">
-                  <PackageIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                  Ready for pickup within 2 hours of your selected time
-                </p>
+                  {/* Pickup Time */}
+                  <div>
+                    <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2.5">
+                      Select Pickup Time
+                    </label>
+                    <select
+                      value={pickupTime}
+                      onChange={(e) => setPickupTime(e.target.value)}
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-[#d5d5d5] bg-white text-[#2b2b2d] font-display font-bold text-base focus:outline-none focus:border-[#4b4f4a] focus:ring-2 focus:ring-[#4b4f4a] focus:ring-opacity-20 transition-all appearance-none bg-no-repeat"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232b2b2d' d='M1 1l5 5 5-5'/%3E%3C/svg%3E")`,
+                        backgroundPosition: 'right 1rem center',
+                        paddingRight: '2.5rem',
+                      }}
+                    >
+                      <option value="">Choose a time slot</option>
+                      <option value="10:00">10:00 AM</option>
+                      <option value="11:00">11:00 AM</option>
+                      <option value="12:00">12:00 PM</option>
+                      <option value="13:00">1:00 PM</option>
+                      <option value="14:00">2:00 PM</option>
+                      <option value="15:00">3:00 PM</option>
+                      <option value="16:00">4:00 PM</option>
+                      <option value="17:00">5:00 PM</option>
+                    </select>
+                    {pickupTime && (
+                      <p className="mt-2 text-xs font-display font-bold text-[#4b4f4a]">
+                        ✓ Time selected: {pickupTime}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Info message */}
+                  <div className="rounded-xl bg-white p-3.5 border-l-4 border-[#4b4f4a] mt-6">
+                    <p className="text-xs text-[#666] leading-relaxed flex gap-2">
+                      <PackageIcon className="w-4 h-4 mt-0.5 shrink-0 text-[#4b4f4a]" />
+                      <span>Ready for pickup within 2 hours of your selected time at <strong>The Ginery, Grabenstrasse 15, 8010 Graz</strong></span>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* ── RIGHT (under description): Size + Qty + Cart + Icons ── */}
-            <div className="w-full lg:w-1/2">
+            {/* ── RIGHT: Qty + Cart ── */}
+            <div className="w-full lg:w-1/2 lg:order-2 flex flex-col justify-between">
               {/* Size/Weight */}
               {hasVariants && (
-                <div className="flex items-center gap-4 mb-4">
-                  <p className="text-xl font-display font-bold text-[#2b2b2d]">Size/Weight :</p>
+                <div className="mb-6 lg:mb-0 flex items-center gap-4 pb-6 border-b-2 border-[#e9e9e9] lg:border-0">
+                  <p className="text-base lg:text-lg font-display font-bold text-[#2b2b2d] whitespace-nowrap">Size/Weight:</p>
                   <Suspense fallback={null}>
                     <VariantSelector product={product} />
                   </Suspense>
                 </div>
               )}
-              {/* Qty + Add to Cart + Icons — same line as delivery cards */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center shrink-0">
-                  <div className="relative w-16 h-15 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center">
-                    <span className="text-2xl font-display font-bold text-black select-none">
+
+              {/* Quantity + Add to Cart */}
+              <div className="space-y-4">
+                {/* Quantity Selector */}
+                <div className="bg-white rounded-xl border-2 border-[#e9e9e9] p-4 inline-flex items-center gap-4">
+                  <span className="text-xs font-display font-bold text-[#999]">QTY:</span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
+                    >
+                      −
+                    </button>
+                    <span className="w-8 text-center font-display font-bold text-lg text-[#2b2b2d]">
                       {quantity}
                     </span>
-                  </div>
-                  <div className="flex flex-col gap-1 ml-1">
                     <button
                       onClick={() => setQuantity((q) => q + 1)}
-                      className="w-7 h-7 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center text-lg font-display font-bold text-black hover:bg-[#f7f7f8] transition-colors"
+                      className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
                     >
                       +
                     </button>
-                    <button
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="w-7 h-7 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center text-lg font-display font-bold text-black hover:bg-[#f7f7f8] transition-colors"
-                    >
-                      -
-                    </button>
                   </div>
                 </div>
+
+                {/* Add to Cart Button */}
                 <Suspense fallback={null}>
                   <AddToCart
                     product={product}
                     quantity={quantity}
                     disabled={!pickupDate || !pickupTime}
-                    className="flex-1 h-15 rounded-full text-lg font-display font-bold bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`w-full h-16 rounded-full text-base lg:text-lg font-display font-bold transition-all ${
+                      pickupDate && pickupTime
+                        ? 'bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] shadow-lg'
+                        : 'bg-[#d5d5d5] text-[#888] border-[#d5d5d5] cursor-not-allowed'
+                    }`}
                   />
                 </Suspense>
-                <button className="w-15 h-15 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center shrink-0 hover:border-[#4b4f4a] transition-colors">
-                  <HeartIcon className="w-7 h-7 text-[#2b2b2d]" />
-                </button>
-                <button className="w-15 h-15 rounded-lg border-[1.5px] border-[#e9e9e9] bg-white flex items-center justify-center shrink-0 hover:border-[#4b4f4a] transition-colors">
-                  <EyeIcon className="w-7 h-7 text-[#2b2b2d]" />
-                </button>
+
+                {/* Help text */}
+                {(!pickupDate || !pickupTime) && (
+                  <p className="text-xs text-[#999] text-center font-display font-medium">
+                    👆 Select date and time above to proceed
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
           {/* Delivery disclaimer */}
-          <p className="mt-3 text-xs text-[#999] leading-relaxed flex items-start gap-1.5">
-            <PackageIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+          <p className="mt-6 text-xs text-[#999] leading-relaxed flex items-start gap-2 bg-[#fafafa] rounded-lg p-3">
+            <PackageIcon className="w-4 h-4 mt-0.5 shrink-0" />
             Delivery is not available at the moment. We are working to ensure the best delivery of
-            our fresh products. Only local pick up is possible for now.
+            our fresh products. Only local pickup is possible for now.
           </p>
 
           {/* ═══════════════════════════════════════════
