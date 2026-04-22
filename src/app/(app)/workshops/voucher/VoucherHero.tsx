@@ -125,13 +125,13 @@ export function VoucherHero({
 
   return (
     <section
-      className="w-full bg-white py-12 md:py-14"
+      className="w-full bg-white py-6 md:py-8"
     >
       <div className="mx-auto max-w-(--content-full) px-(--space-container-x)">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-start">
           {/* Left Column - Voucher Preview Card */}
           <div className="order-2 lg:order-1">
-            <div className="sticky top-8 rounded-2xl border border-ff-border-light/80 bg-[radial-gradient(circle_at_top,#F8F2E6,#FFFFFF)] p-[1.9rem] shadow-[0_18px_45px_rgba(0,0,0,0.07)] transition-shadow duration-300 hover:shadow-[0_30px_80px_rgba(229,183,101,0.22)] md:p-10">
+            <div className="sticky top-4 rounded-2xl border border-ff-border-light/80 bg-[radial-gradient(circle_at_top,#F8F2E6,#FFFFFF)] p-5 md:p-7 shadow-[0_18px_45px_rgba(0,0,0,0.07)] transition-shadow duration-300 hover:shadow-[0_30px_80px_rgba(229,183,101,0.22)]">
               {/* Gift Icon */}
               <div className="absolute top-7 right-7">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ff-gold-accent/12 shadow-[0_6px_18px_rgba(229,183,101,0.35)] backdrop-blur-[2px]">
@@ -180,12 +180,12 @@ export function VoucherHero({
 
           {/* Right Column - Voucher Configuration */}
           <div className="order-1 lg:order-2">
-            <div className="flex flex-col gap-6 md:gap-8">
-              <div className="pb-6 border-b border-ff-border-light min-w-0 max-w-full">
-                <h1 className="font-display text-display font-bold text-ff-near-black leading-tight tracking-tight max-w-full wrap-break-word hyphens-auto">
+            <div className="flex flex-col gap-4 md:gap-5">
+              <div className="pb-4 md:pb-6 border-b border-ff-border-light min-w-0 max-w-full">
+                <h1 className="font-display text-[clamp(1.75rem,5vw,2.25rem)] font-bold text-ff-near-black leading-tight tracking-tight max-w-full wrap-break-word hyphens-auto">
                   {heading}
                 </h1>
-                <p className="font-sans text-body-lg text-ff-gray-text leading-relaxed mt-3">
+                <p className="font-sans text-body-sm md:text-body-lg text-ff-gray-text leading-relaxed mt-2 md:mt-3">
                   {description.includes('\n')
                     ? description.split('\n').map((line, i) => (
                         <span key={i}>
@@ -210,8 +210,8 @@ export function VoucherHero({
 
               {/* Amount Selection */}
               {showAmounts && (
-                <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                  <label className="font-display text-body-sm font-bold uppercase tracking-widest text-ff-near-black block mb-3">
+                <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-4 md:p-5">
+                  <label className="font-display text-caption font-bold uppercase tracking-widest text-ff-near-black block mb-3">
                     {amountSectionLabel}
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -234,8 +234,8 @@ export function VoucherHero({
 
               {/* Delivery Options */}
               {showDeliveryOptions && (
-                <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
-                  <label className="font-display text-body-sm font-bold uppercase tracking-[0.12em] text-ff-near-black block mb-4">
+                <div className="rounded-2xl border border-ff-border-light bg-ff-cream p-4 md:p-5">
+                  <label className="font-display text-caption font-bold uppercase tracking-widest text-ff-near-black block mb-3">
                     {deliverySectionLabel}
                   </label>
                   <div className="flex flex-col gap-3">
@@ -325,9 +325,9 @@ export function VoucherHero({
 
               {/* Email Inputs */}
               {showCTA && (
-                <div className="flex flex-col gap-4 rounded-2xl border border-ff-border-light bg-ff-cream p-6 md:p-7">
+                <div className="flex flex-col gap-3 md:gap-4 rounded-2xl border border-ff-border-light bg-ff-cream p-4 md:p-5">
                   <div>
-                    <label className="font-sans text-body-sm font-bold text-ff-near-black block mb-2">
+                    <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
                       Deine E-Mail-Adresse *
                     </label>
                     <input
@@ -335,14 +335,14 @@ export function VoucherHero({
                       value={purchaserEmail}
                       onChange={(e) => setPurchaserEmail(e.target.value)}
                       placeholder="deine@email.de"
-                      className="w-full rounded-xl border border-ff-border-light bg-white px-4 py-3 font-sans text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
+                      className="w-full rounded-lg border border-ff-border-light bg-white px-3 py-2 md:py-3 font-sans text-sm md:text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
                       disabled={isLoading}
                     />
                   </div>
 
                   {selectedDelivery === 'email' && (
                     <div>
-                      <label className="font-sans text-body-sm font-bold text-ff-near-black block mb-2">
+                      <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
                         E-Mail des Empfängers (optional)
                       </label>
                       <input
@@ -350,10 +350,10 @@ export function VoucherHero({
                         value={recipientEmail}
                         onChange={(e) => setRecipientEmail(e.target.value)}
                         placeholder="empfänger@email.de"
-                        className="w-full rounded-xl border border-ff-border-light bg-white px-4 py-3 font-sans text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
+                        className="w-full rounded-lg border border-ff-border-light bg-white px-3 py-2 md:py-3 font-sans text-sm md:text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
                         disabled={isLoading}
                       />
-                      <p className="mt-2 font-sans text-body-sm text-ff-gray-text">
+                      <p className="mt-1.5 font-sans text-caption text-ff-gray-text">
                         Wenn leer, wird der Gutschein an deine Adresse gesendet.
                       </p>
                     </div>
@@ -367,7 +367,7 @@ export function VoucherHero({
                   type="button"
                   onClick={handleCheckout}
                   disabled={isLoading}
-                  className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-full bg-ff-gold-accent px-6 py-3 md:py-4 font-display text-base md:text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Wird bearbeitet...' : addToCartButton}
                 </button>
