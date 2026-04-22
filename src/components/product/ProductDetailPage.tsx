@@ -6,6 +6,7 @@ import { AddToCart } from '@/components/Cart/AddToCart'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import { RichText } from '@/components/RichText'
+import { useLocale } from '@/providers/Locale'
 import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
 import {
   CheckIcon,
@@ -57,6 +58,40 @@ const BADGE_CONFIG: Record<
   refrigerated: { label: 'Refrigerated', icon: SnowflakeIcon, color: '#6a9ec2' },
 }
 
+/* Translations */
+const TRANSLATIONS: Record<string, Record<string, string>> = {
+  de: {
+    'All products': 'Alle Produkte',
+    'Local Pickup': 'Lokale Abholung',
+    'Select Pickup Date': 'Abholungsdatum wählen',
+    'Select Pickup Time': 'Abholungszeit wählen',
+    'Choose a time slot': 'Zeitfenster wählen',
+    'Date selected': 'Datum ausgewählt:',
+    'Time selected': 'Zeit ausgewählt:',
+    'Ready for pickup': 'Bereit zur Abholung innerhalb von 2 Stunden zu Ihrer ausgewählten Zeit im',
+    'Description': 'Beschreibung',
+    'Health Benefits': 'Gesundheitliche Vorteile',
+    'Size/Weight': 'Größe/Gewicht',
+  },
+  en: {
+    'All products': 'All products',
+    'Local Pickup': 'Local Pickup',
+    'Select Pickup Date': 'Select Pickup Date',
+    'Select Pickup Time': 'Select Pickup Time',
+    'Choose a time slot': 'Choose a time slot',
+    'Date selected': 'Date selected:',
+    'Time selected': 'Time selected:',
+    'Ready for pickup': 'Ready for pickup within 2 hours of your selected time at',
+    'Description': 'Description',
+    'Health Benefits': 'Health Benefits',
+    'Size/Weight': 'Size/Weight',
+  },
+}
+
+function t(key: string, locale: string): string {
+  return TRANSLATIONS[locale]?.[key] ?? TRANSLATIONS['en']?.[key] ?? key
+}
+
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   jarred: 'Jarred',
   fresh: 'Fresh',
@@ -70,6 +105,7 @@ const PRODUCT_TYPE_LABELS: Record<string, string> = {
  * ═══════════════════════════════════════════════════════════ */
 export function ProductDetailPage({ product }: { product: Product }) {
   const { currency } = useCurrency()
+  const { locale } = useLocale()
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [activeTab, setActiveTab] = useState<'description' | 'about'>('description')
   const [quantity, setQuantity] = useState(1)
@@ -158,8 +194,8 @@ export function ProductDetailPage({ product }: { product: Product }) {
 
   // Build tabs array — always at least one
   const tabs: { key: 'description' | 'about'; label: string }[] = []
-  if (hasDescription) tabs.push({ key: 'description', label: 'Description' })
-  if (hasAbout) tabs.push({ key: 'about', label: 'Health Benefits' })
+  if (hasDescription) tabs.push({ key: 'description', label: t('Description', locale) })
+  if (hasAbout) tabs.push({ key: 'about', label: t('Health Benefits', locale) })
 
   // Fallback active tab to first available
   const validActiveTab = tabs.find((t) => t.key === activeTab) ? activeTab : tabs[0]?.key
@@ -176,7 +212,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
           className="inline-flex items-center gap-1.5 text-sm font-medium text-[#7a7a7a] hover:text-[#2b2b2d] transition-colors"
         >
           <ChevronLeftIcon className="w-4 h-4" />
-          All products
+          {t('All products', locale)}
         </Link>
       </div>
 
@@ -330,7 +366,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     <StoreIcon className="w-4 h-4 text-white" />
                   </div>
                   <h3 className="text-xl lg:text-2xl font-display font-bold text-[#2b2b2d]">
-                    Local Pickup
+                    {t('Local Pickup', locale)}
                   </h3>
                 </div>
 
@@ -338,7 +374,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                   {/* Pickup Date */}
                   <div>
                     <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2.5">
-                      Select Pickup Date
+                      {t('Select Pickup Date', locale)}
                     </label>
                     <div className="relative">
                       <input
@@ -351,7 +387,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     </div>
                     {pickupDate && (
                       <p className="mt-2 text-xs font-display font-bold text-[#4b4f4a]">
-                        ✓ Date selected: {new Date(pickupDate + 'T00:00:00').toLocaleDateString('de-DE', { weekday: 'long', month: 'short', day: 'numeric' })}
+                        ✓ {t('Date selected', locale)} {new Date(pickupDate + 'T00:00:00').toLocaleDateString(locale === 'de' ? 'de-DE' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                       </p>
                     )}
                   </div>
@@ -359,7 +395,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                   {/* Pickup Time */}
                   <div>
                     <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2.5">
-                      Select Pickup Time
+                      {t('Select Pickup Time', locale)}
                     </label>
                     <select
                       value={pickupTime}
@@ -371,19 +407,34 @@ export function ProductDetailPage({ product }: { product: Product }) {
                         paddingRight: '2.5rem',
                       }}
                     >
-                      <option value="">Choose a time slot</option>
-                      <option value="10:00">10:00 AM</option>
-                      <option value="11:00">11:00 AM</option>
-                      <option value="12:00">12:00 PM</option>
-                      <option value="13:00">1:00 PM</option>
-                      <option value="14:00">2:00 PM</option>
-                      <option value="15:00">3:00 PM</option>
-                      <option value="16:00">4:00 PM</option>
-                      <option value="17:00">5:00 PM</option>
+                      <option value="">{t('Choose a time slot', locale)}</option>
+                      {locale === 'de' ? (
+                        <>
+                          <option value="10:00">10:00</option>
+                          <option value="11:00">11:00</option>
+                          <option value="12:00">12:00</option>
+                          <option value="13:00">13:00</option>
+                          <option value="14:00">14:00</option>
+                          <option value="15:00">15:00</option>
+                          <option value="16:00">16:00</option>
+                          <option value="17:00">17:00</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="10:00">10:00 AM</option>
+                          <option value="11:00">11:00 AM</option>
+                          <option value="12:00">12:00 PM</option>
+                          <option value="13:00">1:00 PM</option>
+                          <option value="14:00">2:00 PM</option>
+                          <option value="15:00">3:00 PM</option>
+                          <option value="16:00">4:00 PM</option>
+                          <option value="17:00">5:00 PM</option>
+                        </>
+                      )}
                     </select>
                     {pickupTime && (
                       <p className="mt-2 text-xs font-display font-bold text-[#4b4f4a]">
-                        ✓ Time selected: {pickupTime}
+                        ✓ {t('Time selected', locale)} {pickupTime}
                       </p>
                     )}
                   </div>
@@ -392,7 +443,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                   <div className="rounded-xl bg-white p-3.5 border-l-4 border-[#4b4f4a] mt-6">
                     <p className="text-xs text-[#666] leading-relaxed flex gap-2">
                       <PackageIcon className="w-4 h-4 mt-0.5 shrink-0 text-[#4b4f4a]" />
-                      <span>Ready for pickup within 2 hours of your selected time at <strong>The Ginery, Grabenstrasse 15, 8010 Graz</strong></span>
+                      <span>{t('Ready for pickup', locale)} <strong>The Ginery, Grabenstrasse 15, 8010 Graz</strong></span>
                     </p>
                   </div>
                 </div>
@@ -404,7 +455,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
               {/* Size/Weight */}
               {hasVariants && (
                 <div className="flex items-center gap-4">
-                  <p className="text-base font-display font-bold text-[#2b2b2d] whitespace-nowrap">Size/Weight:</p>
+                  <p className="text-base font-display font-bold text-[#2b2b2d] whitespace-nowrap">{t('Size/Weight', locale)}:</p>
                   <Suspense fallback={null}>
                     <VariantSelector product={product} />
                   </Suspense>
