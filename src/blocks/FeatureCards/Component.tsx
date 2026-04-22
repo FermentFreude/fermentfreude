@@ -83,26 +83,27 @@ export const FeatureCardsBlock: React.FC<Props> = ({
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      /* ── Eyebrow "FERMENTATION" entrance ── */
+      /* ── Eyebrow entrance (whole words — avoids mid-word wraps) ── */
       if (eyebrowRef.current) {
         const el = eyebrowRef.current
-        const text = el.textContent ?? ''
-        el.innerHTML = text
-          .split('')
-          .map((ch) =>
-            ch === ' ' ? ' ' : `<span class="inline-block" style="opacity:0">${ch}</span>`,
+        const text = (el.textContent ?? '').trim()
+        const words = text.split(/\s+/).filter(Boolean)
+        el.innerHTML = words
+          .map(
+            (word) =>
+              `<span class="inline-block whitespace-nowrap" style="opacity:0">${word}</span>`,
           )
-          .join('')
-        const chars = el.querySelectorAll('span')
+          .join(' ')
+        const wordSpans = el.querySelectorAll(':scope > span')
         gsap.fromTo(
-          chars,
-          { opacity: 0, y: -60, rotateX: 90 },
+          wordSpans,
+          { opacity: 0, y: -24, rotateX: 45 },
           {
             opacity: 1,
             y: 0,
             rotateX: 0,
-            duration: 0.6,
-            stagger: 0.04,
+            duration: 0.55,
+            stagger: 0.08,
             ease: 'power4.out',
             scrollTrigger: {
               trigger: el,
@@ -113,23 +114,23 @@ export const FeatureCardsBlock: React.FC<Props> = ({
         )
       }
 
-      /* ── Card titles letter animation ── */
+      /* ── Card titles: animate by word so line breaks never split a word ── */
       titlesRef.current.forEach((el) => {
         if (!el) return
-        const text = el.textContent ?? ''
-        el.innerHTML = text
-          .split('')
-          .map((ch) => (ch === ' ' ? ' ' : `<span class="inline-block">${ch}</span>`))
-          .join('')
-        const chars = el.querySelectorAll('span')
+        const text = (el.textContent ?? '').trim()
+        const words = text.split(/\s+/).filter(Boolean)
+        el.innerHTML = words
+          .map((word) => `<span class="inline-block whitespace-nowrap" style="opacity:0">${word}</span>`)
+          .join(' ')
+        const wordSpans = el.querySelectorAll(':scope > span')
         gsap.fromTo(
-          chars,
+          wordSpans,
           { opacity: 0, y: 20 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.4,
-            stagger: 0.04,
+            duration: 0.45,
+            stagger: 0.07,
             ease: 'back.out(1.7)',
             scrollTrigger: {
               trigger: el,
@@ -141,23 +142,23 @@ export const FeatureCardsBlock: React.FC<Props> = ({
       })
     })
     return () => ctx.revert()
-  }, [resolvedCards])
+  }, [resolvedCards, resolvedEyebrow])
 
   if (visible === false) return null
 
   return (
     <section id={id ?? undefined} className="bg-white section-padding-md">
       <div className="container mx-auto px-6 flex flex-col items-start gap-(--space-content-xl)">
-        {/* Header: heading row (title + eyebrow + button) then description */}
+        {/* Header: gold eyebrow on top, then heading row + description */}
         <div className="flex flex-col gap-(--space-content-sm) w-full">
-          {/* Top row: heading+eyebrow left, button right — vertically centered */}
+          {/* Top row: heading block left, button right — vertically centered */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-16 w-full">
             <FadeIn className="flex flex-col items-start gap-2 flex-1">
               {resolvedEyebrow && (
                 <span
                   ref={eyebrowRef}
-                  className="text-eyebrow font-bold text-ff-gold-accent shrink-0 lg:hidden"
-                  style={{ perspective: '600px' }}
+                  className="text-eyebrow font-bold uppercase tracking-[0.15em] text-ff-gold-accent shrink-0"
+                  style={{ perspective: '600px', color: 'var(--ff-gold-accent)' }}
                 >
                   {resolvedEyebrow}
                 </span>
