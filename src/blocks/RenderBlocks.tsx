@@ -123,7 +123,17 @@ export const RenderBlocks: React.FC<{
 
           // When useGlobalData is explicitly true, render the GlobalWrapper
           const useGlobal = blockData.useGlobalData === true
-          if (useGlobal && blockType && blockType in globalWrappers) {
+          const sponsorRows = Array.isArray(blockData.sponsors)
+            ? (blockData.sponsors as Array<Record<string, unknown>>)
+            : []
+          const hasMissingSponsorMedia =
+            sponsorRows.length > 0 &&
+            sponsorRows.some((row) => !row || typeof row.logo !== 'object' || row.logo === null)
+          const shouldFallbackToGlobalForSponsors =
+            blockType === 'sponsorsBar' &&
+            (sponsorRows.length === 0 || hasMissingSponsorMedia)
+
+          if ((useGlobal || shouldFallbackToGlobalForSponsors) && blockType && blockType in globalWrappers) {
             const GlobalWrapper = globalWrappers[blockType]
             return (
               <div className={gapClass} key={index}>

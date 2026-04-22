@@ -45,17 +45,19 @@ describe('checkout booking integration', () => {
   it('confirms a pending workshop booking using the cart-linked transaction and sends the booking email', async () => {
     const payload = createPayloadMock()
 
-    payload.findByID.mockImplementation(async ({ collection, id }: { collection: string; id: string }) => {
-      if (collection === 'transactions' && id === 'txn_1') {
-        return { cart: 'cart_1', id: 'txn_1' }
-      }
+    payload.findByID.mockImplementation(
+      async ({ collection, id }: { collection: string; id: string }) => {
+        if (collection === 'transactions' && id === 'txn_1') {
+          return { cart: 'cart_1', id: 'txn_1' }
+        }
 
-      if (collection === 'users' && id === 'user_1') {
-        return { email: 'buyer@example.com', id: 'user_1', name: 'Buyer Example' }
-      }
+        if (collection === 'users' && id === 'user_1') {
+          return { email: 'buyer@example.com', id: 'user_1', name: 'Buyer Example' }
+        }
 
-      throw new Error(`Unexpected findByID call for ${collection}:${id}`)
-    })
+        throw new Error(`Unexpected findByID call for ${collection}:${id}`)
+      },
+    )
 
     payload.find.mockImplementation(async ({ collection }: { collection: string }) => {
       if (collection === 'workshop-bookings') {
@@ -159,17 +161,19 @@ describe('checkout booking integration', () => {
       throw new Error(`Unexpected find call for ${collection}`)
     })
 
-    payload.findByID.mockImplementation(async ({ collection, id }: { collection: string; id: string }) => {
-      if (collection === 'workshop-appointments' && id === 'appointment_1') {
-        return {
-          availableSpots: 6,
-          id: 'appointment_1',
-          workshop: { maxCapacityPerSlot: 12 },
+    payload.findByID.mockImplementation(
+      async ({ collection, id }: { collection: string; id: string }) => {
+        if (collection === 'workshop-appointments' && id === 'appointment_1') {
+          return {
+            availableSpots: 6,
+            id: 'appointment_1',
+            workshop: { maxCapacityPerSlot: 12 },
+          }
         }
-      }
 
-      throw new Error(`Unexpected findByID call for ${collection}:${id}`)
-    })
+        throw new Error(`Unexpected findByID call for ${collection}:${id}`)
+      },
+    )
 
     payload.update.mockResolvedValue({})
 
@@ -235,21 +239,23 @@ describe('checkout booking integration', () => {
       throw new Error(`Unexpected find call for ${collection}`)
     })
 
-    payload.findByID.mockImplementation(async ({ collection, id }: { collection: string; id: string }) => {
-      if (collection === 'transactions' && id === 'txn_1') {
-        return { cart: 'cart_1', id: 'txn_1' }
-      }
-
-      if (collection === 'workshop-appointments' && id === 'appointment_1') {
-        return {
-          availableSpots: 7,
-          id: 'appointment_1',
-          workshop: { maxCapacityPerSlot: 12 },
+    payload.findByID.mockImplementation(
+      async ({ collection, id }: { collection: string; id: string }) => {
+        if (collection === 'transactions' && id === 'txn_1') {
+          return { cart: 'cart_1', id: 'txn_1' }
         }
-      }
 
-      throw new Error(`Unexpected findByID call for ${collection}:${id}`)
-    })
+        if (collection === 'workshop-appointments' && id === 'appointment_1') {
+          return {
+            availableSpots: 7,
+            id: 'appointment_1',
+            workshop: { maxCapacityPerSlot: 12 },
+          }
+        }
+
+        throw new Error(`Unexpected findByID call for ${collection}:${id}`)
+      },
+    )
 
     payload.update.mockResolvedValue({})
 

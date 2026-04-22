@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@aws-sdk/s3-request-presigner": "^3.1033.0",
+    "@getbrevo/brevo": "^5.0.1",
     "@gsap/react": "^2.1.2",
     "@payloadcms/admin-bar": "3.76.1",
     "@payloadcms/db-mongodb": "3.76.1",

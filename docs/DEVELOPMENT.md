@@ -526,6 +526,18 @@ git rebase origin/staging
 git push origin your-branch   # use --force-with-lease if you already pushed
 ```
 
+### PR Merge-Ready Checklist
+
+Before merging any feature branch into `staging`:
+
+- [ ] Branch was created from latest `staging`
+- [ ] Branch rebased with `origin/staging` before final push
+- [ ] No unresolved conflicts, especially in media/image-related files
+- [ ] `pnpm lint` and `npx tsc --noEmit` pass locally
+- [ ] `pnpm build` passes locally (or in CI)
+- [ ] Pull Request targets `staging` (never direct merge to `main`)
+- [ ] Staging preview checked after merge (images, content blocks, and key pages)
+
 ---
 
 ## 🔍 Troubleshooting
@@ -617,4 +629,4 @@ stripe listen --forward-to localhost:3000/api/stripe/webhooks
 
 ---
 
-**Last Updated:** February 12, 2026
+**Last Updated:** April 17, 2026

@@ -47,16 +47,24 @@ export function AddToCart({ product, className, ariaLabel, children }: Props) {
       addItem({
         product: product.id,
         variant: selectedVariant?.id ?? undefined,
-      }).then(() => {
-        toast.success('Item added to cart.')
-        gtmAddToCart({
-          item_id: String(product.id),
-          item_name: product.title ?? '',
-          item_category: product.productType ?? undefined,
-          price: (product as unknown as Record<string, unknown>).priceInEUR as number | undefined,
-          quantity: 1,
-        })
       })
+        .then(() => {
+          toast.success('Item added to cart.')
+          gtmAddToCart({
+            item_id: String(product.id),
+            item_name: product.title ?? '',
+            item_category: product.productType ?? undefined,
+            price: (product as unknown as Record<string, unknown>).priceInEUR as number | undefined,
+            quantity: 1,
+          })
+        })
+        .catch((error) => {
+          console.error('Failed to add to cart:', error)
+          toast.error(
+            error?.message ||
+              'Failed to add item to cart. Please check the browser console for details.',
+          )
+        })
     },
     [addItem, product, selectedVariant],
   )

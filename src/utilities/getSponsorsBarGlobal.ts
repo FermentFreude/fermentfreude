@@ -16,6 +16,8 @@ export async function getSponsorsBarGlobal(locale: string = 'de'): Promise<Spons
     return {
       heading:
         locale === 'en' ? 'This project is supported by:' : 'Dieses Projekt wird unterstützt von:',
+      autoScroll: true,
+      logoSize: 'medium',
       sponsors: [],
       id: 'sponsors-bar-global',
     } as SponsorsBarGlobal

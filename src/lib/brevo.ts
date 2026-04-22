@@ -36,10 +36,7 @@ function parseEnvFileValue(content: string, key: string): string | undefined {
     const m = t.match(re)
     if (!m) continue
     let val = m[1].trim()
-    if (
-      (val.startsWith('"') && val.endsWith('"')) ||
-      (val.startsWith("'") && val.endsWith("'"))
-    ) {
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
       val = val.slice(1, -1)
     }
     return val || undefined
@@ -308,4 +305,3 @@ export async function upsertContact({
     return { success: false }
   }
 }
-

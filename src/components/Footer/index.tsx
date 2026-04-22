@@ -4,7 +4,7 @@ import { getCachedGlobal } from '@/utilities/getGlobals'
 import { getLocale } from '@/utilities/getLocale'
 import Link from 'next/link'
 import { FooterBrand } from './FooterBrand'
-import { NewsletterForm } from './NewsletterForm'
+import NewsletterForm from './NewsletterForm'
 
 const DEFAULTS_DE = {
   newsletterHeading: 'Werde Teil der FermentFreude Bewegung',

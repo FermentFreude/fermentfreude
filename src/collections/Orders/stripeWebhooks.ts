@@ -256,3 +256,112 @@ export async function handleChargeRefunded({
 
   payload.logger.info(`[stripe:charge_refunded] Order ${order.id} status set to refunded`)
 }
+
+/**
+ * charge.succeeded OR payment_intent.succeeded
+ *
+ * When a payment succeeds, update order status from 'processing' to 'completed'
+ * and confirm any pending workshop bookings.
+ */
+export async function handleChargeSucceeded({
+  event,
+  req,
+}: {
+  event: Stripe.Event
+  req: PayloadRequest
+  stripe: Stripe
+}): Promise<void> {
+  const charge = event.data.object as Stripe.Charge
+  const { payload } = req
+
+  const paymentIntentId =
+    typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id
+
+  if (!paymentIntentId) {
+    payload.logger.warn('[stripe:charge_succeeded] No payment_intent on charge — skipping')
+    return
+  }
+
+  payload.logger.info(
+    `[stripe:charge_succeeded] Charge ${charge.id} succeeded (PI: ${paymentIntentId})`,
+  )
+
+  // Find the order by payment intent ID
+  const orders = await payload.find({
+    collection: 'orders',
+    where: {
+      'transactions.stripePaymentIntentID': { equals: paymentIntentId },
+    },
+    limit: 1,
+    overrideAccess: true,
+  })
+
+  if (orders.totalDocs === 0) {
+    payload.logger.warn(
+      `[stripe:charge_succeeded] No order found for paymentIntent ${paymentIntentId}`,
+    )
+    return
+  }
+
+  const order = orders.docs[0]
+
+  // Update order status to 'completed'
+  await payload.update({
+    collection: 'orders',
+    id: order.id,
+    data: { status: 'completed' as const },
+    overrideAccess: true,
+  })
+
+  payload.logger.info(`[stripe:charge_succeeded] Order ${order.id} status set to completed`)
+
+  // Confirm any pending workshop bookings
+  const transactionRef = Array.isArray(order.transactions) ? order.transactions[0] : undefined
+  const transactionId =
+    transactionRef && typeof transactionRef === 'object' ? transactionRef.id : transactionRef
+  let cartId: string | undefined
+
+  if (transactionId) {
+    try {
+      const transaction = await payload.findByID({
+        collection: 'transactions',
+        id: transactionId,
+        depth: 0,
+        overrideAccess: true,
+      })
+      cartId = typeof transaction.cart === 'object' ? transaction.cart?.id || undefined : transaction.cart || undefined
+    } catch {
+      // ignore
+    }
+  }
+
+  if (!cartId) {
+    payload.logger.info(`[stripe:charge_succeeded] No cart found for order ${order.id}`)
+    return
+  }
+
+  const pendingBookings = await payload.find({
+    collection: 'workshop-bookings',
+    where: {
+      and: [{ cartSlug: { equals: cartId } }, { status: { equals: 'pending' } }],
+    },
+    limit: 50,
+    overrideAccess: true,
+  })
+
+  // Confirm each pending booking — sequentially (M0)
+  for (const booking of pendingBookings.docs) {
+    await payload.update({
+      collection: 'workshop-bookings',
+      id: booking.id,
+      data: { status: 'confirmed' },
+      overrideAccess: true,
+    })
+
+    payload.logger.info(`[stripe:charge_succeeded] Confirmed booking ${booking.id}`)
+  }
+
+  payload.logger.info(
+    `[stripe:charge_succeeded] Confirmed ${pendingBookings.totalDocs} booking(s) for order ${order.id}`,
+  )
+}
