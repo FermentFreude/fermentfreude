@@ -69,10 +69,16 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
       >
         <div className="w-60 rounded-2xl overflow-hidden shadow-lg bg-[#f5f2ed] dark:bg-[#f5f2ed]">
           <div className="py-2">
-            {items.map((item) => (
+            {items.map((item) => {
+              // Redirect voucher links to correct path
+              const href = item.label.toLowerCase().includes('voucher') || item.label.toLowerCase().includes('gutschein') 
+                ? '/workshops/voucher' 
+                : item.href
+              
+              return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={href}
                 className={cn(
                   'block px-5 py-3 transition-colors duration-150 group',
                   'text-ff-near-black hover:bg-ff-near-black hover:text-white',
@@ -90,7 +96,8 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
                   <span className="block text-xs mt-0.5 transition-colors">{item.description}</span>
                 )}
               </Link>
-            ))}
+            )
+            })}
           </div>
         </div>
       </div>
