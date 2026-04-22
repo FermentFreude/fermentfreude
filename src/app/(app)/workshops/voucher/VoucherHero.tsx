@@ -127,7 +127,7 @@ export function VoucherHero({
     <section
       className="w-full bg-white py-12 md:py-14"
     >
-      <div className="mx-auto max-w-[var(--content-full)] px-[var(--space-container-x)]">
+      <div className="mx-auto max-w-(--content-full) px-(--space-container-x)">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           {/* Left Column - Voucher Preview Card */}
           <div className="order-2 lg:order-1">
@@ -182,7 +182,7 @@ export function VoucherHero({
           <div className="order-1 lg:order-2">
             <div className="flex flex-col gap-6 md:gap-8">
               <div className="pb-6 border-b border-ff-border-light min-w-0 max-w-full">
-                <h1 className="font-display text-display font-bold text-ff-near-black leading-tight tracking-tight max-w-full break-words hyphens-auto">
+                <h1 className="font-display text-display font-bold text-ff-near-black leading-tight tracking-tight max-w-full wrap-break-word hyphens-auto">
                   {heading}
                 </h1>
                 <p className="font-sans text-body-lg text-ff-gray-text leading-relaxed mt-3">

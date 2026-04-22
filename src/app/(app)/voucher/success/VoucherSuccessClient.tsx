@@ -152,7 +152,7 @@ export function VoucherSuccessClient() {
         </p>
 
         {/* Voucher Code Card with Copy */}
-        <div className="rounded-2xl border-2 border-ff-gold-accent bg-[radial-gradient(circle_at_top,_#F8F2E6,_#FFFFFF)] p-8 mb-8 shadow-md">
+        <div className="rounded-2xl border-2 border-ff-gold-accent bg-[radial-gradient(circle_at_top,#F8F2E6,#FFFFFF)] p-8 mb-8 shadow-md">
           <p className="font-sans text-body-sm font-medium text-ff-gray-text uppercase tracking-wider mb-2">
             Gutschein-Code
           </p>
