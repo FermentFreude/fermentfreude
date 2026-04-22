@@ -1,6 +1,7 @@
 'use client'
 
 import { Media } from '@/components/Media'
+import { useLocale } from '@/providers/Locale'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -13,6 +14,15 @@ const BlobCanvas = dynamic(
 )
 
 type Slide = NonNullable<ShopHeroBlock['slides']>[number]
+
+/* ── Translations ──────────────────────────────────────────────── */
+const TRANSLATIONS: Record<string, Record<'de' | 'en', string>> = {
+  scroll: { de: 'Scrollen', en: 'scroll' },
+}
+
+function t(key: string, locale: 'de' | 'en'): string {
+  return TRANSLATIONS[key]?.[locale] || key
+}
 
 const DEFAULT_SLIDES: Slide[] = [
   { id: 'default-1', categoryLabel: 'Tempeh', detailUrl: '/products/kaeferbohnen-tempeh' },
@@ -92,6 +102,8 @@ function CardWithButton({
 }
 
 export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
+  const { locale: currentLocale } = useLocale()
+  const locale = (currentLocale || 'de') as 'de' | 'en'
   const {
     visible,
     heroTitle,
@@ -192,17 +204,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
               {title}
             </h1>
 
-            {price && (
-              <div className="flex items-baseline gap-2 mb-2 md:mb-3">
-                <span className="text-[10px] md:text-xs font-semibold text-[#1a1a1a]">Price</span>
-                <span
-                  className="font-display font-semibold text-[#1a1a1a]"
-                  style={{ fontSize: 'clamp(1rem, 1.6vw, 1.4rem)' }}
-                >
-                  {price}
-                </span>
-              </div>
-            )}
+            {/* Price removed per user request */}
 
             {/* Buttons */}
             <div className="flex flex-row gap-2 mb-4 md:mb-0">
@@ -282,7 +284,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
               className="font-display uppercase tracking-[0.25em] text-[#999] select-none"
               style={{ fontSize: '0.75rem' }}
             >
-              scroll{' '}
+              {t('scroll', locale)}{' '}
               <span className="inline-block ml-1" aria-hidden="true">
                 &rarr;
               </span>

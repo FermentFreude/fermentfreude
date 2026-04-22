@@ -47,6 +47,14 @@ function getPrimaryBadge(product: Product): { label: string; icon: string } | nu
   return null
 }
 
+/* ── Localization helper ──────────────────────────────────────── */
+function t(key: string, locale: 'de' | 'en'): string {
+  const translations: Record<string, Record<'de' | 'en', string>> = {
+    'Sold Out': { de: 'Ausverkauft', en: 'Sold Out' },
+  }
+  return translations[key]?.[locale] || key
+}
+
 /* ── Brand-tone card colors ─────────────────────────────── */
 const DEFAULT_COLORS = [
   'var(--ff-olive, #4b4f4a)',
@@ -107,7 +115,7 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
   if (products.length === 0 && !banner) return null
 
   return (
-    <section className="section-padding-md" style={{ backgroundColor: 'var(--ff-cream, #fffef9)' }}>
+    <section id="bestsellers" className="section-padding-md" style={{ backgroundColor: 'var(--ff-cream, #fffef9)' }}>
       <div className="container mx-auto container-padding">
         {/* Section header */}
         {(heading || subheading) && (
@@ -149,6 +157,15 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
                   href={`/products/${product.slug}`}
                   className="group relative flex flex-col no-underline transition-transform duration-300 hover:-translate-y-1"
                 >
+                  {/* Sold Out Badge */}
+                  {(!product.inventory || product.inventory === 0) && (
+                    <div className="absolute top-3 right-3 z-20">
+                      <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                        {t('Sold Out', locale)}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Floating image — half above the card */}
                   <div className="relative z-10 flex justify-center -mb-28 md:-mb-32">
                     {image ? (

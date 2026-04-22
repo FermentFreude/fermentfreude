@@ -158,9 +158,8 @@ async function seedShopNew() {
     blockType: 'shopHero' as const,
     blockName: 'Shop Hero',
     heroTitle: 'Unsere handgemachten Produkte aus unserem Pick-Up Shop.',
-    heroPrice: 'ab \u20ac8,50',
     ctaPrimaryLabel: 'Jetzt bestellen',
-    ctaPrimaryUrl: '/shop#products',
+    ctaPrimaryUrl: '/shop#bestsellers',
     ctaSecondaryLabel: 'Mehr erfahren',
     ctaSecondaryUrl: '/fermentation',
     slides: [
@@ -309,9 +308,8 @@ async function seedShopNew() {
     {
       ...shopHeroBlock,
       heroTitle: 'Our Handmade Products From Our Pick-Up Shop.',
-      heroPrice: 'from \u20ac8.50',
       ctaPrimaryLabel: 'Order Now',
-      ctaPrimaryUrl: '/shop#products',
+      ctaPrimaryUrl: '/shop#bestsellers',
       ctaSecondaryLabel: 'Learn More',
       ctaSecondaryUrl: '/fermentation',
       slides: (shopHeroBlock.slides ?? []).map((slide, i) => {
