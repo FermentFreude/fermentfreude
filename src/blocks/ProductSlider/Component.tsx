@@ -420,8 +420,8 @@ function ProductCard({ product }: { product: Product }) {
 
             {/* Sold Out Badge */}
             {isOutOfStock && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-2xl pointer-events-none">
-                <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-xs font-bold px-3 py-1.5 rounded-full">
+              <div className="absolute top-3 right-3 z-10 pointer-events-none">
+                <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
                   Sold Out
                 </span>
               </div>

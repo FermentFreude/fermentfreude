@@ -93,8 +93,8 @@ export const ShopProductCard: React.FC<Props> = ({
             )}
             {/* Sold Out Badge */}
             {isOutOfStock && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/50 backdrop-blur-sm">
-                <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-sm font-bold px-4 py-2.5 rounded-full">
+              <div className="absolute top-3 right-3 z-10">
+                <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
                   Sold Out
                 </span>
               </div>
