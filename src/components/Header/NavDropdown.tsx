@@ -11,6 +11,7 @@ export interface DropdownItem {
   href: string
   description?: string | null
   isSmall?: boolean | null
+  isDisabled?: boolean | null
 }
 
 interface NavDropdownProps {
@@ -76,6 +77,33 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
                 item.label.toLowerCase().includes('gutschein')
                   ? '/workshops/voucher'
                   : item.href
+
+              // Render disabled items as non-clickable divs
+              if (item.isDisabled) {
+                return (
+                  <div
+                    key={item.href}
+                    className={cn(
+                      'block px-5 py-3 transition-colors duration-150 group',
+                      'text-ff-near-black opacity-50 cursor-not-allowed',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'block font-display font-bold transition-colors',
+                        item.isSmall ? 'text-xs' : 'text-sm',
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                    {item.description && !item.isSmall && (
+                      <span className="block text-xs mt-0.5 transition-colors">
+                        {item.description}
+                      </span>
+                    )}
+                  </div>
+                )
+              }
 
               return (
                 <Link

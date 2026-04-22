@@ -25,6 +25,7 @@ interface NavOverlayItem {
   href: string
   description?: string | null
   isSmall?: boolean
+  isDisabled?: boolean
   children?: NavOverlayItem[]
 }
 
@@ -321,26 +322,47 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
                   {/* Dropdown items - only show for regular items (not Workshops, About, or Online Courses - those use modals) */}
                   {hasChildren && isExpanded && !isWorkshops && !isOnlineCourses && !isAbout && (
                     <div className="border-l-2 border-ff-warm-gray/30 dark:border-white/20 mt-3 ml-6 sm:ml-8 pl-4 sm:pl-5 space-y-2 sm:space-y-3 overflow-hidden">
-                      {item.children?.map((child) => (
-                        <Link
-                          key={child.id}
-                          href={child.href}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handleClose(child.href)
-                          }}
-                          className="flex flex-col p-3 sm:p-4 rounded-lg text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 hover:text-ff-near-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 overflow-hidden group"
-                        >
-                          <div className="font-bold group-hover:translate-x-1 transition-transform duration-200">
-                            {child.label}
-                          </div>
-                          {child.description && (
-                            <div className="text-xs mt-1.5 opacity-70 group-hover:opacity-100 group-hover:text-white dark:group-hover:text-ff-near-black transition-all">
-                              {child.description}
+                      {item.children?.map((child) => {
+                        // If disabled, render as non-clickable div
+                        if (child.isDisabled) {
+                          return (
+                            <div
+                              key={child.id}
+                              className="flex flex-col p-3 sm:p-4 rounded-lg text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 opacity-50 cursor-not-allowed"
+                            >
+                              <div className="font-bold">
+                                {child.label}
+                              </div>
+                              {child.description && (
+                                <div className="text-xs mt-1.5 opacity-70">
+                                  {child.description}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </Link>
-                      ))}
+                          )
+                        }
+
+                        return (
+                          <Link
+                            key={child.id}
+                            href={child.href}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              handleClose(child.href)
+                            }}
+                            className="flex flex-col p-3 sm:p-4 rounded-lg text-sm sm:text-base text-ff-gray-text dark:text-neutral-400 hover:text-ff-near-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 overflow-hidden group"
+                          >
+                            <div className="font-bold group-hover:translate-x-1 transition-transform duration-200">
+                              {child.label}
+                            </div>
+                            {child.description && (
+                              <div className="text-xs mt-1.5 opacity-70 group-hover:opacity-100 group-hover:text-white dark:group-hover:text-ff-near-black transition-all">
+                                {child.description}
+                              </div>
+                            )}
+                          </Link>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -516,6 +538,7 @@ function buildNavItems(
           href: sub.href,
           description: sub.description || null,
           isSmall: sub.isSmall ?? false,
+          isDisabled: sub.isDisabled ?? false,
         }))
       }
 
@@ -532,6 +555,7 @@ function buildNavItems(
           href: sub.href,
           description: sub.description || null,
           isSmall: sub.isSmall ?? false,
+          isDisabled: sub.isDisabled ?? false,
         }))
       }
 

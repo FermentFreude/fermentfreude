@@ -38,6 +38,7 @@ export const defaultNavItems: DefaultNavItem[] = [
         label: 'Online Courses',
         href: '/courses',
         description: 'Coming soon',
+        isDisabled: true,
       },
       {
         label: 'Gift Voucher',
