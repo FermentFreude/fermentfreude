@@ -95,7 +95,10 @@ export const ProductSliderBlock: React.FC<Props> = ({
   id,
 }) => {
   const resolvedHeading = heading ?? DEFAULTS.heading
-  const resolvedAccent = headingAccent ?? DEFAULTS.headingAccent
+  const resolvedAccent =
+    headingAccent != null && String(headingAccent).trim() !== ''
+      ? String(headingAccent).trim()
+      : DEFAULTS.headingAccent
   const resolvedDescription = description ?? DEFAULTS.description
   const resolvedButtonLabel = buttonLabel ?? DEFAULTS.buttonLabel
   const resolvedButtonLink = buttonLink ?? DEFAULTS.buttonLink
@@ -140,11 +143,11 @@ export const ProductSliderBlock: React.FC<Props> = ({
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-16 mb-8 lg:mb-10">
           {/* Left: Heading + Description */}
           <div className="flex-1 max-w-264">
-            {/* Eyebrow beside title — responsive */}
-            <div className="flex flex-row items-start gap-3 sm:gap-4">
+            {/* Gold accent line always above the main heading (all breakpoints) */}
+            <div className="flex flex-col items-start gap-2">
               <span
-                className="text-eyebrow font-bold text-ff-gold-accent shrink-0 pt-1"
-                style={{ marginTop: '0', marginBottom: '0' }}
+                className="text-eyebrow font-bold uppercase tracking-[0.15em] text-ff-gold-accent shrink-0"
+                style={{ color: 'var(--ff-gold-accent)' }}
               >
                 {resolvedAccent}
               </span>
@@ -356,14 +359,11 @@ function ProductCard({ product }: { product: Product }) {
   const price = getProductPrice(product)
   const variantLabel = getVariantLabel(product)
   const unitSize = product.unitSize ?? ''
-  const inventory = product.inventory ?? 0
-  const isOutOfStock = inventory === 0
 
   const handleAddToCart = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (isOutOfStock) return
       addItem({ product: product.id }).then(() => {
         toast.success('Item added to cart.')
         gtmAddToCart({
@@ -375,7 +375,7 @@ function ProductCard({ product }: { product: Product }) {
         })
       })
     },
-    [addItem, product, price, isOutOfStock],
+    [addItem, product, price],
   )
 
   // Format price: value is in cents, convert to euros
@@ -395,11 +395,11 @@ function ProductCard({ product }: { product: Product }) {
             {/* Single SVG: card background + cart button always aligned */}
             <CardWithButton
               className="absolute inset-0 w-full h-full"
-              cartHovered={cartHovered && !isOutOfStock}
-              onCartEnter={() => !isOutOfStock && setCartHovered(true)}
+              cartHovered={cartHovered}
+              onCartEnter={() => setCartHovered(true)}
               onCartLeave={() => setCartHovered(false)}
               onCartClick={handleAddToCart}
-              ariaLabel={isOutOfStock ? 'Sold Out' : `Add ${product.title} to cart`}
+              ariaLabel={`Add ${product.title} to cart`}
             />
 
             {/* Product bottle — positioned over the SVG card, overflows bottom */}
@@ -410,22 +410,13 @@ function ProductCard({ product }: { product: Product }) {
               {image ? (
                 <Media
                   resource={image}
-                  className={`relative w-[55%] h-[85%] ${isOutOfStock ? 'opacity-50' : ''}`}
+                  className="relative w-[55%] h-[85%]"
                   imgClassName="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-lg"
                 />
               ) : (
                 <div className="w-[55%] h-[70%] bg-[#ECE5DE] rounded-lg" />
               )}
             </div>
-
-            {/* Sold Out Badge */}
-            {isOutOfStock && (
-              <div className="absolute top-3 right-3 z-10 pointer-events-none">
-                <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
-                  Sold Out
-                </span>
-              </div>
-            )}
           </div>
         </div>
 

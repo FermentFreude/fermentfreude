@@ -22,14 +22,21 @@ export async function ProductSliderGlobalWrapper({
   const hasGlobalContent = Boolean(data.heading)
   const fb = fallbackData ?? {}
 
+  const accentFromGlobal =
+    typeof data.headingAccent === 'string' && data.headingAccent.trim() !== ''
+      ? data.headingAccent.trim()
+      : undefined
+  const accentFromFallback =
+    typeof fb.headingAccent === 'string' && fb.headingAccent.trim() !== ''
+      ? fb.headingAccent.trim()
+      : undefined
+
   return (
     <ProductSliderBlock
       id={id}
       blockType="productSlider"
       heading={hasGlobalContent ? data.heading : ((fb.heading as string) ?? undefined)}
-      headingAccent={
-        hasGlobalContent ? data.headingAccent : ((fb.headingAccent as string) ?? undefined)
-      }
+      headingAccent={hasGlobalContent ? accentFromGlobal : accentFromFallback}
       description={hasGlobalContent ? data.description : ((fb.description as string) ?? undefined)}
       buttonLabel={hasGlobalContent ? data.buttonLabel : ((fb.buttonLabel as string) ?? undefined)}
       buttonLink={hasGlobalContent ? data.buttonLink : ((fb.buttonLink as string) ?? undefined)}
