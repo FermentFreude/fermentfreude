@@ -5,6 +5,7 @@ import { ElasticCursor } from '@/components/ElasticCursor'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { OpeningPopups } from '@/components/OpeningPopups'
 import { SplashScreen } from '@/components/SplashScreen'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
@@ -73,6 +74,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </a>
 
           <div id="site-header" style={{ display: 'contents' }}><Header /></div>
+          <OpeningPopups locale={locale} />
           <main id="main-content">{children}</main>
           <div id="site-footer" style={{ display: 'contents' }}><Footer /></div>
         </Providers>

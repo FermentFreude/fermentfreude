@@ -1,10 +1,21 @@
-import { upsertContact } from '@/lib/brevo'
+import { getBrevoApiKey, upsertContact } from '@/lib/brevo'
 import { NextRequest, NextResponse } from 'next/server'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(request: NextRequest) {
   try {
+    if (!getBrevoApiKey()) {
+      return NextResponse.json(
+        {
+          error:
+            'Newsletter service is not configured yet. Please add BREVO_API_KEY (or SENDINBLUE_API_KEY).',
+          code: 'NEWSLETTER_NOT_CONFIGURED',
+        },
+        { status: 503 },
+      )
+    }
+
     const body = await request.json()
     const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
 
@@ -23,7 +34,10 @@ export async function POST(request: NextRequest) {
     })
 
     if (!result.success) {
-      return NextResponse.json({ error: 'Could not subscribe. Please try again.' }, { status: 502 })
+      return NextResponse.json(
+        { error: 'Could not subscribe. Please try again.', code: 'NEWSLETTER_PROVIDER_ERROR' },
+        { status: 502 },
+      )
     }
 
     return NextResponse.json({ success: true })
