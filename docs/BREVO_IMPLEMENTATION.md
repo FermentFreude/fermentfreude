@@ -90,9 +90,11 @@ Add to `.env` (and Vercel for staging/production):
 
 ```
 BREVO_API_KEY=xkeysib-your-api-key-here
-BREVO_SENDER_EMAIL=hello@fermentfreude.com
-BREVO_SENDER_NAME=FermentFreude
+BREVO_SENDER_EMAIL=kontakt@fermentfreude.at
+BREVO_SENDER_NAME=Fermentfreude
 ```
+
+**Status:** ✅ Already configured in `.env` with `kontakt@fermentfreude.at` from authenticated domain `fermentfreude.at`
 
 Get API key from: **Brevo Dashboard → Settings → SMTP & API → API Keys**
 

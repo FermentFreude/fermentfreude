@@ -70,12 +70,6 @@ const PLACEHOLDERS: Array<{ file: string; width: number; height: number; color?:
   { file: 'images/gastronomy-slide-professional-training.png', width: 800, height: 600 },
   { file: 'images/gastronomy-slide-menu-development.png', width: 800, height: 600 },
   { file: 'images/gastronomy-slide-corporate-events.png', width: 800, height: 600 },
-  // Fermentation (reuses gastronomy images)
-  { file: 'images/gastronomy/gastronomy-cutting-board-fermentation.png', width: 800, height: 600 },
-  { file: 'images/gastronomy/gastronomy-slide-fermentation-jars.png', width: 800, height: 600 },
-  { file: 'images/gastronomy/gastronomy-slide-flatlay-fermentation.png', width: 800, height: 600 },
-  { file: 'images/gastronomy/gastronomy-slide-01-cutting-board.png', width: 800, height: 600 },
-  { file: 'images/gastronomy/gastronomy-slide-professional-training.png', width: 800, height: 600 },
   // Voucher
   { file: 'images/Image (Gift Set).png', width: 800, height: 600 },
   { file: 'images/Geburtstage.png', width: 400, height: 400 },
@@ -90,23 +84,13 @@ const COPY_MAP: Array<{ from: string; to: string }> = [
   { from: 'assets/images/feature-probiotics.svg', to: 'images/icons/probiotics.svg' },
   { from: 'assets/images/feature-nutrients.svg', to: 'images/icons/nutrients.svg' },
   { from: 'assets/images/feature-taste.svg', to: 'images/icons/taste.svg' },
-  // Fermentation hero block icons
-  { from: 'assets/images/fermentation/icon-probiotics.svg', to: 'images/icons/icon-probiotics.svg' },
-  { from: 'assets/images/fermentation/icon-enzymes.svg', to: 'images/icons/icon-enzymes.svg' },
-  { from: 'assets/images/fermentation/icon-nutrition.svg', to: 'images/icons/icon-nutrition.svg' },
-  { from: 'assets/images/fermentation/icon-preservation.svg', to: 'images/icons/icon-preservation.svg' },
-  // Gastronomy images are in seed-assets/ (not public/) — copy from there
-];
-
-/** Copy from seed-assets if exists */
-const SEED_COPY_MAP: Array<{ from: string; to: string }> = [
-  { from: 'images/gastronomy/gastronomy-slide-01-cutting-board.png', to: 'images/gastronomy-slide-01-cutting-board.png' },
-  { from: 'images/gastronomy/gastronomy-slide-fermentation-jars.png', to: 'images/gastronomy-slide-fermentation-jars.png' },
-  { from: 'images/gastronomy/gastronomy-slide-flatlay-fermentation.png', to: 'images/gastronomy-slide-flatlay-fermentation.png' },
-  { from: 'images/gastronomy/gastronomy-cutting-board-fermentation.png', to: 'images/gastronomy-cutting-board-fermentation.png' },
-  { from: 'images/gastronomy/gastronomy-slide-professional-training.png', to: 'images/gastronomy-slide-professional-training.png' },
-  { from: 'images/gastronomy/gastronomy-slide-menu-development.png', to: 'images/gastronomy-slide-menu-development.png' },
-  { from: 'images/gastronomy/gastronomy-slide-corporate-events.png', to: 'images/gastronomy-slide-corporate-events.png' },
+  { from: 'assets/images/gastronomy/gastronomy-slide-01-cutting-board.png', to: 'images/gastronomy-slide-01-cutting-board.png' },
+  { from: 'assets/images/gastronomy/gastronomy-slide-fermentation-jars.png', to: 'images/gastronomy-slide-fermentation-jars.png' },
+  { from: 'assets/images/gastronomy/gastronomy-slide-flatlay-fermentation.png', to: 'images/gastronomy-slide-flatlay-fermentation.png' },
+  { from: 'assets/images/gastronomy/gastronomy-cutting-board-fermentation.png', to: 'images/gastronomy-cutting-board-fermentation.png' },
+  { from: 'assets/images/gastronomy/gastronomy-slide-professional-training.png', to: 'images/gastronomy-slide-professional-training.png' },
+  { from: 'assets/images/gastronomy/gastronomy-slide-menu-development.png', to: 'images/gastronomy-slide-menu-development.png' },
+  { from: 'assets/images/gastronomy/gastronomy-slide-corporate-events.png', to: 'images/gastronomy-slide-corporate-events.png' },
 ]
 
 async function ensureDir(dir: string) {
@@ -156,17 +140,6 @@ async function main() {
       await ensureDir(path.dirname(dest))
       fs.copyFileSync(src, dest)
       console.log(`  📋 ${to} (from public)`)
-    }
-  }
-
-  // Copy from seed-assets (gastronomy images moved out of public/)
-  for (const { from, to } of SEED_COPY_MAP) {
-    const src = path.join(SEED_ASSETS, from)
-    const dest = path.join(SEED_ASSETS, to)
-    if (fs.existsSync(src)) {
-      await ensureDir(path.dirname(dest))
-      fs.copyFileSync(src, dest)
-      console.log(`  📋 ${to} (from seed-assets)`)
     }
   }
 

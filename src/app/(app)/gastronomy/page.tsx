@@ -28,6 +28,7 @@ const DEFAULT_WORKSHOP_NEXT_DATE_LABEL = 'Next Appointment:'
 const DEFAULT_SLIDER_PREV = 'PREV'
 const DEFAULT_SLIDER_NEXT = 'NEXT'
 const TRUSTED_BY_DEFAULT = 'Trusted by'
+const TRUSTED_BY_DEFAULT_DE = 'Für Profiküchen'
 const FALLBACK_TRUST_BADGES_DE = [
   'Restaurants',
   'Hotels',
@@ -103,8 +104,11 @@ export default async function GastronomyPage() {
   }))
   const offerDetails = g?.gastronomyOfferDetails ?? []
 
+  const trustedByHeadingRaw = g?.gastronomyTrustedByHeading?.trim()
   const trustedByHeading =
-    g?.gastronomyTrustedByHeading?.trim() || (locale === 'de' ? 'Vertraut von' : TRUSTED_BY_DEFAULT)
+    locale === 'de' && trustedByHeadingRaw?.toLocaleLowerCase('de-DE') === 'vertraut von'
+      ? TRUSTED_BY_DEFAULT_DE
+      : trustedByHeadingRaw || (locale === 'de' ? TRUSTED_BY_DEFAULT_DE : TRUSTED_BY_DEFAULT)
   const trustBadgesFromCms = (g?.gastronomyTrustedByBadges ?? [])
     .map((b) => b?.label?.trim())
     .filter((x): x is string => Boolean(x))
@@ -328,6 +332,9 @@ export default async function GastronomyPage() {
   const subjectOptions = g?.gastronomySubjectOptions as
     | { default?: string; options?: Array<{ label?: string }> }
     | undefined
+  const contactFormHeading =
+    g?.gastronomyContactFormHeading ??
+    (locale === 'de' ? 'Frag uns alles' : 'Ask About Anything')
 
   const contactBlockProps = {
     blockType: 'contactBlock' as const,
@@ -345,8 +352,12 @@ export default async function GastronomyPage() {
       description:
         g?.gastronomyContactDescription ??
         'Would you like to book a workshop or have questions? We look forward to hearing from you.',
+      address: g?.gastronomyContactAddress ?? undefined,
+      phone: g?.gastronomyContactPhone ?? undefined,
+      email: g?.gastronomyContactEmail ?? undefined,
     },
     contactForm: {
+      formHeading: contactFormHeading,
       placeholders: {
         firstName: formPlaceholders?.firstName ?? 'First Name',
         lastName: formPlaceholders?.lastName ?? 'Last Name',

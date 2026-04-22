@@ -885,11 +885,11 @@ export interface Page {
         }[]
       | null;
     /**
-     * Lead label for the pill row under the hero (e.g. TRUSTED BY / VERTRAUT VON).
+     * Editable heading above the partner tags. Example DE: "Für Profiküchen". Example EN: "For professional kitchens".
      */
     gastronomyTrustedByHeading?: string | null;
     /**
-     * Category pills in one row (Restaurants, Hotels, Catering, …). Second section on the page.
+     * Editable chips shown next to the heading (e.g. Restaurants, Hotels, Catering).
      */
     gastronomyTrustedByBadges?:
       | {
@@ -978,6 +978,22 @@ export interface Page {
     gastronomyContactImage?: (string | null) | Media;
     gastronomyContactTitle: string;
     gastronomyContactDescription?: string | null;
+    /**
+     * Heading above the form fields (e.g. "Frag uns alles" / "Ask About Anything").
+     */
+    gastronomyContactFormHeading?: string | null;
+    /**
+     * Address shown in the left contact details panel.
+     */
+    gastronomyContactAddress?: string | null;
+    /**
+     * Phone number shown in the left contact details panel.
+     */
+    gastronomyContactPhone?: string | null;
+    /**
+     * Email address shown in the left contact details panel.
+     */
+    gastronomyContactEmail?: string | null;
     gastronomyFormPlaceholders?: {
       firstName?: string | null;
       lastName?: string | null;
@@ -1168,7 +1184,7 @@ export interface Page {
     fermentationCtaSecondaryLabel?: string | null;
     fermentationCtaSecondaryUrl?: string | null;
     /**
-     * Upload a video (MP4) as background. Or use the URL field below.
+     * Upload a video (MP4) as background. Or use the URL field below for videos in public/assets/videos/.
      */
     fermentationCtaVideo?: (string | null) | Media;
     /**
@@ -1235,9 +1251,6 @@ export interface Page {
           priceSuffix?: string | null;
           buttonLabel: string;
           buttonUrl: string;
-          /**
-           * e.g. "February 15, 2026"
-           */
           nextDate?: string | null;
           id?: string | null;
         }[]
@@ -3170,6 +3183,14 @@ export interface SponsorsBarBlock {
    */
   heading?: string | null;
   /**
+   * When enabled, sponsor logos move continuously from right to left on desktop and mobile.
+   */
+  autoScroll?: boolean | null;
+  /**
+   * Controls the visual size of all sponsor logos in this section.
+   */
+  logoSize?: ('small' | 'medium' | 'large') | null;
+  /**
    * Sponsor/partner logos displayed in a horizontal row.
    */
   sponsors?:
@@ -4651,6 +4672,10 @@ export interface PagesSelect<T extends boolean = true> {
         gastronomyContactImage?: T;
         gastronomyContactTitle?: T;
         gastronomyContactDescription?: T;
+        gastronomyContactFormHeading?: T;
+        gastronomyContactAddress?: T;
+        gastronomyContactPhone?: T;
+        gastronomyContactEmail?: T;
         gastronomyFormPlaceholders?:
           | T
           | {
@@ -5477,6 +5502,8 @@ export interface SponsorsBarBlockSelect<T extends boolean = true> {
   visible?: T;
   useGlobalData?: T;
   heading?: T;
+  autoScroll?: T;
+  logoSize?: T;
   sponsors?:
     | T
     | {
@@ -6672,6 +6699,14 @@ export interface SponsorsBarGlobal {
    */
   heading: string;
   /**
+   * When enabled, sponsor logos move continuously from right to left on desktop and mobile.
+   */
+  autoScroll?: boolean | null;
+  /**
+   * Controls the visual size of all sponsor logos in this section.
+   */
+  logoSize?: ('small' | 'medium' | 'large') | null;
+  /**
    * Sponsor/partner logos displayed in a horizontal row.
    */
   sponsors?:
@@ -7039,6 +7074,8 @@ export interface TestimonialsGlobalSelect<T extends boolean = true> {
  */
 export interface SponsorsBarGlobalSelect<T extends boolean = true> {
   heading?: T;
+  autoScroll?: T;
+  logoSize?: T;
   sponsors?:
     | T
     | {

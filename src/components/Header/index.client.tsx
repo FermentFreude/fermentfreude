@@ -129,11 +129,12 @@ export function HeaderClient({ header }: Props) {
         const cmsDropdownItems = item.dropdownItems
         const defaultKey = getDefaultDropdownKey(label, url)
 
-        const dropdownItems = defaultKey
-          ? defaultDropdowns[defaultKey]
-          : cmsDropdownItems && cmsDropdownItems.length > 0
+        const dropdownItems =
+          cmsDropdownItems && cmsDropdownItems.length > 0
             ? cmsDropdownItems
-            : null
+            : defaultKey
+              ? defaultDropdowns[defaultKey]
+              : null
 
         return { id: item.id, label, url, link: item.link, dropdownItems, defaultKey }
       })

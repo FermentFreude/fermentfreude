@@ -1,18 +1,40 @@
 import type { Metadata } from 'next'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
-import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
+
+export const dynamic = 'force-dynamic'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
-import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 
-export const dynamic = 'force-dynamic'
-
 import { notFound } from 'next/navigation'
+
+export async function generateStaticParams() {
+  const payload = await getPayload({ config: configPromise })
+  const pages = await payload.find({
+    collection: 'pages',
+    draft: false,
+    limit: 1000,
+    overrideAccess: false,
+    pagination: false,
+    select: {
+      slug: true,
+    },
+  })
+
+  const params = pages.docs
+    ?.filter((doc) => {
+      return doc.slug !== 'home'
+    })
+    .map(({ slug }) => {
+      return { slug }
+    })
+
+  return params
+}
 
 type Args = {
   params: Promise<{
@@ -20,15 +42,9 @@ type Args = {
   }>
 }
 
-const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
-
 export default async function Page({ params }: Args) {
   const { slug = 'home' } = await params
   const locale = await getLocale()
-
-  if (WORKSHOP_SLUGS.includes(slug)) {
-    return notFound()
-  }
 
   const page = await queryPageBySlug({
     slug,
@@ -40,33 +56,17 @@ export default async function Page({ params }: Args) {
   }
 
   const { hero, layout } = page
-  const nextWorkshopDatesByHref = await getNextWorkshopDatesByHref(locale)
-
-  const enrichedLayout = (layout ?? []).map((block) => {
-    if (block?.blockType !== 'workshopSlider') return block
-
-    return {
-      ...block,
-      upcomingLabel: locale === 'de' ? 'Nächster Termin' : 'Upcoming',
-      upcomingDatesByHref: nextWorkshopDatesByHref,
-    }
-  })
 
   const isFullBleedHero =
     hero.type === 'heroSlider' ||
     hero.type === 'heroCarousel' ||
-    hero.type === 'heroGrid' ||
-    hero.type === 'heroSplit' ||
     hero.type === 'foodPresentationSlider' ||
     hero.type === 'highImpact'
 
   return (
     <article className={isFullBleedHero ? 'pb-24' : 'pt-16 pb-24'}>
       <RenderHero {...hero} />
-      <RenderBlocks blocks={enrichedLayout} slug={slug} />
-      {slug === 'home' && !enrichedLayout.some((b) => b?.blockType === 'testimonials') && (
-        <TestimonialsGlobalWrapper id="testimonials" />
-      )}
+      <RenderBlocks blocks={layout ?? []} />
     </article>
   )
 }
