@@ -42,9 +42,9 @@ const deNavItems = [
       {
         label: 'Online Kurse',
         href: '/courses',
-        description: 'Demnächst verfügbar',
+        description: 'Lerne in deinem eigenen Tempo',
         isSmall: false,
-        disabled: true,
+        disabled: false,
       },
       {
         label: 'Workshop Gutschein',
