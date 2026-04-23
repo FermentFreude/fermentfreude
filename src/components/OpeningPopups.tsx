@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const COOKIE_CONSENT_KEY = 'ff-cookie-consent-v1'
@@ -116,12 +117,12 @@ export function OpeningPopups({ locale }: Props) {
             </DialogDescription>
           </DialogHeader>
 
-          <a
+          <Link
             href="/datenschutz"
             className="mt-4 inline-flex w-fit font-sans text-base font-medium text-[#1d1d1d] underline underline-offset-4 transition hover:text-[#3a3e39]"
           >
             {isDe ? 'Mehr erfahren' : 'Learn more'}
-          </a>
+          </Link>
 
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
             <button
@@ -141,12 +142,12 @@ export function OpeningPopups({ locale }: Props) {
           </div>
 
           <div className="mt-6 text-center">
-            <a
+            <Link
               href="/datenschutz#cookies"
               className="font-sans text-base font-semibold text-[#1d1d1d] underline underline-offset-4 transition hover:text-[#3a3e39]"
             >
               {isDe ? 'Cookie-Einstellungen' : 'Cookie settings'}
-            </a>
+            </Link>
           </div>
         </DialogContent>
       </Dialog>
