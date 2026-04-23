@@ -1,6 +1,7 @@
 {
   "name": "fermentfreude",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.29.3",
   "description": "Fermentfreude — Austrian fermentation food-tech e-commerce",
   "license": "MIT",
   "type": "module",
