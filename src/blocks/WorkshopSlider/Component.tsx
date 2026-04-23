@@ -334,7 +334,9 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                           {upcomingLabel || 'Upcoming'}
                         </p>
                         <p className="text-sm md:text-base font-display font-bold text-black/85">
-                          {workshop.nextDate}
+                          {typeof workshop.nextDate === 'object' && workshop.nextDate !== null 
+                            ? (workshop as any).nextDate.date 
+                            : String(workshop.nextDate)}
                         </p>
                       </div>
                     ) : null}
