@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useEffect, useState } from 'react'
 
-const COOKIE_CONSENT_KEY = 'ff-cookie-consent-v1'
 const NEWSLETTER_SUBSCRIBED_KEY = 'ff-newsletter-popup-subscribed-v1'
 
 type Props = {
@@ -13,7 +11,6 @@ type Props = {
 
 export function OpeningPopups({ locale }: Props) {
   const isDe = locale === 'de'
-  const [cookieOpen, setCookieOpen] = useState(false)
   const [newsletterOpen, setNewsletterOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
@@ -24,11 +21,6 @@ export function OpeningPopups({ locale }: Props) {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    // Only show cookie banner if the user hasn't consented yet.
-    const hasConsent = !!localStorage.getItem(COOKIE_CONSENT_KEY) ||
-      (typeof document !== 'undefined' && document.cookie.includes('ff-cookie-consent='))
-
-    setCookieOpen(!hasConsent)
     setInitialized(true)
 
     // Show newsletter after 15s if the user hasn't subscribed yet.
@@ -40,16 +32,6 @@ export function OpeningPopups({ locale }: Props) {
 
     return () => clearTimeout(newsletterTimer)
   }, [])
-
-  const saveCookieConsent = (value: 'accepted' | 'essential') => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, value)
-    document.cookie = `ff-cookie-consent=${value};path=/;max-age=31536000;SameSite=Lax`
-    setCookieOpen(false)
-
-    if (!localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY)) {
-      setNewsletterOpen(true)
-    }
-  }
 
   const closeNewsletter = () => {
     // Keep this popup recurring on future visits unless the user subscribes.
@@ -114,49 +96,6 @@ export function OpeningPopups({ locale }: Props) {
 
   return (
     <>
-      {cookieOpen ? (
-        <div
-          role="region"
-          aria-label={isDe ? 'Cookie Hinweis' : 'Cookie notice'}
-          className="fixed bottom-4 left-4 right-4 z-50 rounded-lg border border-[#1d1d1d]/10 bg-[#F6F3EF] p-3 sm:p-4 shadow-lg sm:left-6 sm:right-6 md:left-8 md:right-auto md:max-w-md"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="sm:flex-1">
-              <p className="font-display text-sm font-bold text-[#1d1d1d]">
-                {isDe ? 'Informationen zu Cookies' : 'About cookies on this site'}
-              </p>
-              <p className="mt-1 font-sans text-xs text-[#3b3b3b]">
-                {isDe
-                  ? 'Wir verwenden Cookies, um Inhalte zu personalisieren, Zugriffe zu analysieren und unsere Website kontinuierlich zu verbessern.'
-                  : 'We use cookies to personalize content, analyze traffic, and improve your experience.'}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Link href="/datenschutz" className="font-sans text-xs text-[#1d1d1d] underline underline-offset-2 mr-2">
-                {isDe ? 'Mehr erfahren' : 'Learn more'}
-              </Link>
-
-              <button
-                type="button"
-                onClick={() => saveCookieConsent('essential')}
-                className="rounded-md border border-[#cda25a] bg-[#E5B765] px-3 py-2 text-xs font-bold text-[#1d1d1d] hover:bg-[#D4A654]"
-              >
-                {isDe ? 'Nur notwendige' : 'Essential only'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => saveCookieConsent('accepted')}
-                className="rounded-md border border-[#cda25a] bg-[#CDA25A] px-3 py-2 text-xs font-bold text-[#1d1d1d] hover:bg-[#B48C3E]"
-              >
-                {isDe ? 'Alle akzeptieren' : 'Allow all'}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
       <Dialog
         open={newsletterOpen}
         onOpenChange={(open) => {

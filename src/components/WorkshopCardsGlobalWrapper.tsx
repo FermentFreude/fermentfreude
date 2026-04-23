@@ -3,6 +3,17 @@ import { getLocale } from '@/utilities/getLocale'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import { getWorkshopCardsGlobal } from '@/utilities/getWorkshopCardsGlobal'
 
+function coerceNextDate(value: unknown): string | null {
+  if (typeof value === 'string') return value
+
+  if (value && typeof value === 'object' && 'date' in value) {
+    const date = (value as { date?: unknown }).date
+    return typeof date === 'string' ? date : null
+  }
+
+  return null
+}
+
 interface WorkshopCardsGlobalWrapperProps {
   id?: string
   layout?: 'centered' | 'inline'
@@ -28,7 +39,7 @@ export async function WorkshopCardsGlobalWrapper({
     const nextDateData = card.buttonUrl ? nextDates[card.buttonUrl] : undefined
     return {
       ...card,
-      nextDate: nextDateData?.date || card.nextDate || null,
+      nextDate: nextDateData?.date || coerceNextDate(card.nextDate) || null,
       availableSpots: nextDateData?.availableSpots,
     }
   })

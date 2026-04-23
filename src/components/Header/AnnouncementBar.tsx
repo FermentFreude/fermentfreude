@@ -5,8 +5,22 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 /* ── Hardcoded English defaults ──────────────────────────────── */
-const DEFAULT_TEXT = 'We Have Digital Workshops too, take a look'
-const DEFAULT_LINK = '/workshops'
+const DEFAULT_TEXT = 'Explore our online courses'
+const DEFAULT_LINK = '/courses'
+
+function normalizeAnnouncement(text: string): string {
+  const trimmed = text.trim()
+
+  if (trimmed === 'Wir haben in Zukunft auch digitale Online-Kurse!') {
+    return 'Unsere Online-Kurse sind da. Jetzt entdecken'
+  }
+
+  if (trimmed === 'We have digital workshops too, take a look') {
+    return DEFAULT_TEXT
+  }
+
+  return trimmed
+}
 
 interface AnnouncementBarProps {
   enabled?: boolean | null
@@ -18,7 +32,7 @@ export function AnnouncementBar({ enabled, text, link }: AnnouncementBarProps) {
   const [visible, setVisible] = useState(true)
 
   const resolvedEnabled = enabled ?? true
-  const resolvedText = text ?? DEFAULT_TEXT
+  const resolvedText = normalizeAnnouncement(text ?? DEFAULT_TEXT)
   const resolvedLink = link ?? DEFAULT_LINK
 
   if (!visible || !resolvedEnabled) return null

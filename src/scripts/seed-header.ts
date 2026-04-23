@@ -136,8 +136,8 @@ async function seedHeader() {
     data: {
       announcementBar: {
         enabled: true,
-        text: 'Wir haben auch digitale Workshops, schau mal rein',
-        link: '/workshops',
+        text: 'Unsere Online-Kurse sind da. Jetzt entdecken',
+        link: '/courses',
       },
       navItems: deNavItems,
     },
@@ -162,8 +162,8 @@ async function seedHeader() {
     data: {
       announcementBar: {
         enabled: true,
-        text: 'We have digital workshops too, take a look',
-        link: '/workshops',
+        text: 'Explore our online courses',
+        link: '/courses',
       },
       navItems: buildEnglishNav(savedNavItems),
     },
