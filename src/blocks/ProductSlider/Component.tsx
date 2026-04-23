@@ -295,6 +295,7 @@ function CardWithButton({
   onCartLeave,
   onCartClick,
   ariaLabel,
+  disabled,
   opacity,
 }: {
   className?: string
@@ -303,9 +304,10 @@ function CardWithButton({
   onCartLeave?: () => void
   onCartClick?: (e: React.MouseEvent) => void
   ariaLabel?: string
+  disabled?: boolean
   opacity?: number
 }) {
-  const btnColor = cartHovered ? '#4B4B4B' : '#E5B765'
+  const btnColor = disabled ? '#d0ccc6' : cartHovered ? '#4B4B4B' : '#E5B765'
   return (
     <svg
       className={className}
@@ -325,7 +327,8 @@ function CardWithButton({
       <g
         role="button"
         aria-label={ariaLabel}
-        style={{ cursor: 'pointer', opacity: opacity ?? 1 }}
+        aria-disabled={disabled}
+        style={{ cursor: disabled ? 'not-allowed' : 'pointer', opacity: opacity ?? 1 }}
         onMouseEnter={onCartEnter}
         onMouseLeave={onCartLeave}
         onClick={onCartClick}
@@ -359,11 +362,14 @@ function ProductCard({ product }: { product: Product }) {
   const price = getProductPrice(product)
   const variantLabel = getVariantLabel(product)
   const unitSize = product.unitSize ?? ''
+  const isOutOfStock = !product.inventory || product.inventory === 0
 
   const handleAddToCart = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
+      if (isOutOfStock) return
+
       addItem({ product: product.id }).then(() => {
         toast.success('Item added to cart.')
         gtmAddToCart({
@@ -375,7 +381,7 @@ function ProductCard({ product }: { product: Product }) {
         })
       })
     },
-    [addItem, product, price],
+    [addItem, isOutOfStock, product, price],
   )
 
   // Format price: value is in cents, convert to euros
@@ -392,14 +398,23 @@ function ProductCard({ product }: { product: Product }) {
         {/* ── Card with combined SVG (background + button) + overflowing bottle ── */}
         <div className="relative mb-2">
           <div className="relative" style={{ aspectRatio: '328 / 350' }}>
+            {isOutOfStock && (
+              <div className="absolute top-3 right-3 z-10">
+                <span className="inline-block rounded-full bg-black px-3 py-1.5 text-xs font-bold text-white">
+                  Sold Out
+                </span>
+              </div>
+            )}
+
             {/* Single SVG: card background + cart button always aligned */}
             <CardWithButton
               className="absolute inset-0 w-full h-full"
               cartHovered={cartHovered}
-              onCartEnter={() => setCartHovered(true)}
-              onCartLeave={() => setCartHovered(false)}
+              onCartEnter={isOutOfStock ? undefined : () => setCartHovered(true)}
+              onCartLeave={isOutOfStock ? undefined : () => setCartHovered(false)}
               onCartClick={handleAddToCart}
-              ariaLabel={`Add ${product.title} to cart`}
+              ariaLabel={isOutOfStock ? 'Sold Out' : `Add ${product.title} to cart`}
+              disabled={isOutOfStock}
             />
 
             {/* Product bottle — positioned over the SVG card, overflows bottom */}
