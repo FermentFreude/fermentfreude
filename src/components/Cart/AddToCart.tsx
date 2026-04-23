@@ -18,7 +18,14 @@ type Props = {
   disabled?: boolean
 }
 
-export function AddToCart({ product, className, ariaLabel, children, quantity = 1, disabled: externalDisabled = false }: Props) {
+export function AddToCart({
+  product,
+  className,
+  ariaLabel,
+  children,
+  quantity = 1,
+  disabled: externalDisabled = false,
+}: Props) {
   const { addItem, cart, isLoading, incrementItem } = useCart()
   const searchParams = useSearchParams()
 

@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@/utilities/cn'
 import { dropdownItemIsInactive } from '@/components/Header/nav-defaults'
+import { cn } from '@/utilities/cn'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -110,7 +110,9 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
                     {item.label}
                   </span>
                   {item.description && !item.isSmall && (
-                    <span className="block text-xs mt-0.5 transition-colors">{item.description}</span>
+                    <span className="block text-xs mt-0.5 transition-colors">
+                      {item.description}
+                    </span>
                   )}
                 </Link>
               ),

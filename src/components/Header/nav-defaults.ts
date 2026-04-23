@@ -103,10 +103,7 @@ function normalizeNavHref(href: string): string {
  *   even if CMS has “Inactive” unchecked, so the menu cannot accidentally link there early.
  * - `disabled: false` still makes other rows explicitly clickable.
  */
-export function dropdownItemIsInactive(item: {
-  href: string
-  disabled?: boolean | null
-}): boolean {
+export function dropdownItemIsInactive(item: { href: string; disabled?: boolean | null }): boolean {
   if (item.disabled === true) return true
   if (defaultInactiveHrefs.has(normalizeNavHref(item.href))) return true
   if (item.disabled === false) return false

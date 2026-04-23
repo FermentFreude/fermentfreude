@@ -6,6 +6,7 @@ import { AddToCart } from '@/components/Cart/AddToCart'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import { RichText } from '@/components/RichText'
+import { gtmViewItem } from '@/lib/gtm'
 import { useLocale } from '@/providers/Locale'
 import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
 import {
@@ -19,12 +20,10 @@ import {
   SparklesIcon,
   SproutIcon,
   StoreIcon,
-  TruckIcon,
   WheatOffIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import React, { Suspense, useEffect, useState } from 'react'
-import { gtmViewItem } from '@/lib/gtm'
 import { StockIndicator } from './StockIndicator'
 import { VariantSelector } from './VariantSelector'
 
@@ -69,7 +68,7 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     'Date selected': 'Datum ausgewählt:',
     'Time selected': 'Zeit ausgewählt:',
     'Ready for pickup': 'Bereit zur Abholung innerhalb von 2 Stunden zu Ihrer ausgewählten Zeit im',
-    'Description': 'Beschreibung',
+    Description: 'Beschreibung',
     'Health Benefits': 'Gesundheitliche Vorteile',
     'Size/Weight': 'Größe/Gewicht',
   },
@@ -82,7 +81,7 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     'Date selected': 'Date selected:',
     'Time selected': 'Time selected:',
     'Ready for pickup': 'Ready for pickup within 2 hours of your selected time at',
-    'Description': 'Description',
+    Description: 'Description',
     'Health Benefits': 'Health Benefits',
     'Size/Weight': 'Size/Weight',
   },
@@ -155,8 +154,8 @@ export function ProductDetailPage({ product }: { product: Product }) {
       item_category: product.productType ?? undefined,
       price: amount || lowestAmount || undefined,
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])  // intentionally empty — fire only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // intentionally empty — fire only on mount
 
   const isFood = ['jarred', 'fresh', 'bottled'].includes(product.productType || '')
 
@@ -348,7 +347,6 @@ export function ProductDetailPage({ product }: { product: Product }) {
                       })}
                     </div>
                   )}
-
                 </div>
               )}
             </div>
@@ -387,7 +385,11 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     </div>
                     {pickupDate && (
                       <p className="mt-2 text-xs font-display font-bold text-[#4b4f4a]">
-                        ✓ {t('Date selected', locale)} {new Date(pickupDate + 'T00:00:00').toLocaleDateString(locale === 'de' ? 'de-DE' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                        ✓ {t('Date selected', locale)}{' '}
+                        {new Date(pickupDate + 'T00:00:00').toLocaleDateString(
+                          locale === 'de' ? 'de-DE' : 'en-US',
+                          { weekday: 'long', month: 'short', day: 'numeric' },
+                        )}
                       </p>
                     )}
                   </div>
@@ -443,7 +445,10 @@ export function ProductDetailPage({ product }: { product: Product }) {
                   <div className="rounded-xl bg-white p-3.5 border-l-4 border-[#4b4f4a] mt-6">
                     <p className="text-xs text-[#666] leading-relaxed flex gap-2">
                       <PackageIcon className="w-4 h-4 mt-0.5 shrink-0 text-[#4b4f4a]" />
-                      <span>{t('Ready for pickup', locale)} <strong>The Ginery, Grabenstrasse 15, 8010 Graz</strong></span>
+                      <span>
+                        {t('Ready for pickup', locale)}{' '}
+                        <strong>The Ginery, Grabenstrasse 15, 8010 Graz</strong>
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -455,7 +460,9 @@ export function ProductDetailPage({ product }: { product: Product }) {
               {/* Size/Weight */}
               {hasVariants && (
                 <div className="flex items-center gap-4">
-                  <p className="text-base font-display font-bold text-[#2b2b2d] whitespace-nowrap">{t('Size/Weight', locale)}:</p>
+                  <p className="text-base font-display font-bold text-[#2b2b2d] whitespace-nowrap">
+                    {t('Size/Weight', locale)}:
+                  </p>
                   <Suspense fallback={null}>
                     <VariantSelector product={product} />
                   </Suspense>

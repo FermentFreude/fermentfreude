@@ -115,7 +115,11 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
   if (products.length === 0 && !banner) return null
 
   return (
-    <section id="bestsellers" className="section-padding-md" style={{ backgroundColor: 'var(--ff-cream, #fffef9)' }}>
+    <section
+      id="bestsellers"
+      className="section-padding-md"
+      style={{ backgroundColor: 'var(--ff-cream, #fffef9)' }}
+    >
       <div className="container mx-auto container-padding">
         {/* Section header */}
         {(heading || subheading) && (
