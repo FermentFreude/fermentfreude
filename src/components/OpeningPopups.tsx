@@ -23,9 +23,22 @@ export function OpeningPopups({ locale }: Props) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    // Product request: always show cookie popup on site open, then newsletter.
-    setCookieOpen(true)
+
+    // Only show cookie banner if the user hasn't consented yet.
+    const hasConsent = !!localStorage.getItem(COOKIE_CONSENT_KEY) ||
+      (typeof document !== 'undefined' && document.cookie.includes('ff-cookie-consent='))
+
+    setCookieOpen(!hasConsent)
     setInitialized(true)
+
+    // Show newsletter after 15s if the user hasn't subscribed yet.
+    const newsletterTimer = setTimeout(() => {
+      if (!localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY)) {
+        setNewsletterOpen(true)
+      }
+    }, 15000)
+
+    return () => clearTimeout(newsletterTimer)
   }, [])
 
   const saveCookieConsent = (value: 'accepted' | 'essential') => {
@@ -101,56 +114,48 @@ export function OpeningPopups({ locale }: Props) {
 
   return (
     <>
-      <Dialog open={cookieOpen} onOpenChange={setCookieOpen}>
-        <DialogContent
-          className="max-w-sm sm:max-w-md border-[#1d1d1d]/10 bg-[#F6F3EF] p-4 sm:p-6 shadow-2xl"
-          showCloseButton={false}
+      {cookieOpen ? (
+        <div
+          role="region"
+          aria-label={isDe ? 'Cookie Hinweis' : 'Cookie notice'}
+          className="fixed bottom-4 left-4 right-4 z-50 rounded-lg border border-[#1d1d1d]/10 bg-[#F6F3EF] p-3 sm:p-4 shadow-lg sm:left-6 sm:right-6 md:left-8 md:right-auto md:max-w-md"
         >
-          <DialogHeader>
-            <DialogTitle className="font-display text-xl sm:text-2xl font-bold text-[#1d1d1d]">
-              {isDe ? 'Informationen zu Cookies' : 'About cookies on this site'}
-            </DialogTitle>
-            <DialogDescription className="mt-2 font-sans text-xs sm:text-sm leading-relaxed text-[#3b3b3b]">
-              {isDe
-                ? 'Wir verwenden Cookies, um Inhalte zu personalisieren, Zugriffe zu analysieren und unsere Website kontinuierlich zu verbessern. Mit deiner Auswahl entscheidest du, welche Cookies wir setzen duerfen.'
-                : 'We use cookies to personalize content, analyze traffic, and continuously improve your website experience. With your selection, you decide which cookies we are allowed to set.'}
-            </DialogDescription>
-          </DialogHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="sm:flex-1">
+              <p className="font-display text-sm font-bold text-[#1d1d1d]">
+                {isDe ? 'Informationen zu Cookies' : 'About cookies on this site'}
+              </p>
+              <p className="mt-1 font-sans text-xs text-[#3b3b3b]">
+                {isDe
+                  ? 'Wir verwenden Cookies, um Inhalte zu personalisieren, Zugriffe zu analysieren und unsere Website kontinuierlich zu verbessern.'
+                  : 'We use cookies to personalize content, analyze traffic, and improve your experience.'}
+              </p>
+            </div>
 
-          <Link
-            href="/datenschutz"
-            className="mt-4 inline-flex w-fit font-sans text-base font-medium text-[#1d1d1d] underline underline-offset-4 transition hover:text-[#3a3e39]"
-          >
-            {isDe ? 'Mehr erfahren' : 'Learn more'}
-          </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/datenschutz" className="font-sans text-xs text-[#1d1d1d] underline underline-offset-2 mr-2">
+                {isDe ? 'Mehr erfahren' : 'Learn more'}
+              </Link>
 
-          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={() => saveCookieConsent('essential')}
-              className="w-full whitespace-nowrap rounded-lg border border-[#cda25a] bg-[#E5B765] px-4 sm:px-6 py-2 sm:py-2.5 font-display text-xs sm:text-sm font-bold uppercase tracking-[0.04em] text-[#1d1d1d] shadow-[0_2px_6px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#D4A654] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d1d1d]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F3EF] active:translate-y-0"
-            >
-              {isDe ? 'Nur notwendige' : 'Essential only'}
-            </button>
-            <button
-              type="button"
-              onClick={() => saveCookieConsent('accepted')}
-              className="w-full whitespace-nowrap rounded-lg border border-[#cda25a] bg-[#E5B765] px-4 sm:px-6 py-2 sm:py-2.5 font-display text-xs sm:text-sm font-bold uppercase tracking-[0.04em] text-[#1d1d1d] shadow-[0_2px_6px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#D4A654] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d1d1d]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F3EF] active:translate-y-0"
-            >
-              {isDe ? 'Alle akzeptieren' : 'Allow all'}
-            </button>
+              <button
+                type="button"
+                onClick={() => saveCookieConsent('essential')}
+                className="rounded-md border border-[#cda25a] bg-[#E5B765] px-3 py-2 text-xs font-bold text-[#1d1d1d] hover:bg-[#D4A654]"
+              >
+                {isDe ? 'Nur notwendige' : 'Essential only'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => saveCookieConsent('accepted')}
+                className="rounded-md border border-[#cda25a] bg-[#CDA25A] px-3 py-2 text-xs font-bold text-[#1d1d1d] hover:bg-[#B48C3E]"
+              >
+                {isDe ? 'Alle akzeptieren' : 'Allow all'}
+              </button>
+            </div>
           </div>
-
-          <div className="mt-4 text-center">
-            <Link
-              href="/datenschutz#cookies"
-              className="font-sans text-xs sm:text-sm font-semibold text-[#1d1d1d] underline underline-offset-2 transition hover:text-[#3a3e39]"
-            >
-              {isDe ? 'Cookie-Einstellungen' : 'Cookie settings'}
-            </Link>
-          </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      ) : null}
 
       <Dialog
         open={newsletterOpen}
