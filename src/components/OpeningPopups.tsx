@@ -1,8 +1,16 @@
 'use client'
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+const COOKIE_BANNER_KEY = 'ff-cookie-banner-dismissed-v1'
 const NEWSLETTER_SUBSCRIBED_KEY = 'ff-newsletter-popup-subscribed-v1'
 
 type Props = {
@@ -11,6 +19,7 @@ type Props = {
 
 export function OpeningPopups({ locale }: Props) {
   const isDe = locale === 'de'
+  const [cookieBannerOpen, setCookieBannerOpen] = useState(false)
   const [newsletterOpen, setNewsletterOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
@@ -22,6 +31,10 @@ export function OpeningPopups({ locale }: Props) {
     if (typeof window === 'undefined') return
 
     setInitialized(true)
+
+    if (!localStorage.getItem(COOKIE_BANNER_KEY)) {
+      setCookieBannerOpen(true)
+    }
 
     // Show newsletter after 15s if the user hasn't subscribed yet.
     const newsletterTimer = setTimeout(() => {
@@ -36,6 +49,11 @@ export function OpeningPopups({ locale }: Props) {
   const closeNewsletter = () => {
     // Keep this popup recurring on future visits unless the user subscribes.
     setNewsletterOpen(false)
+  }
+
+  const acceptCookies = () => {
+    localStorage.setItem(COOKIE_BANNER_KEY, '1')
+    setCookieBannerOpen(false)
   }
 
   const submitNewsletter = async (event: React.FormEvent) => {
@@ -54,9 +72,10 @@ export function OpeningPopups({ locale }: Props) {
       })
 
       if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as
-          | { error?: string; code?: string }
-          | null
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string
+          code?: string
+        } | null
         const code = payload?.code || null
         setErrorCode(code)
 
@@ -96,6 +115,36 @@ export function OpeningPopups({ locale }: Props) {
 
   return (
     <>
+      {cookieBannerOpen ? (
+        <div className="fixed inset-x-4 bottom-4 z-90 sm:left-6 sm:right-6 sm:bottom-6 lg:left-auto lg:right-8 lg:max-w-md">
+          <div className="rounded-2xl border border-[#1d1d1d]/12 bg-[#fdfbf8]/95 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)] backdrop-blur">
+            <p className="font-display text-sm font-bold text-[#1d1d1d] sm:text-base">
+              {isDe ? 'Cookies' : 'Cookies'}
+            </p>
+            <p className="mt-2 font-sans text-xs leading-relaxed text-[#1d1d1d]/75 sm:text-sm">
+              {isDe
+                ? 'Wir verwenden notwendige Cookies, damit die Website funktioniert. Mehr dazu findest du in unserer Datenschutzerklaerung.'
+                : 'We use essential cookies to keep the website working. You can find more details in our privacy policy.'}
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={acceptCookies}
+                className="rounded-full bg-[#4B4F4A] px-4 py-2 font-display text-xs font-bold text-white transition-colors hover:bg-[#3A3E39] sm:text-sm"
+              >
+                {isDe ? 'Verstanden' : 'Got it'}
+              </button>
+              <Link
+                href={isDe ? '/datenschutz' : '/datenschutz'}
+                className="rounded-full border border-[#1d1d1d]/15 px-4 py-2 font-display text-xs font-bold text-[#1d1d1d] transition-colors hover:bg-[#1d1d1d]/5 sm:text-sm"
+              >
+                {isDe ? 'Datenschutz' : 'Privacy Policy'}
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <Dialog
         open={newsletterOpen}
         onOpenChange={(open) => {
