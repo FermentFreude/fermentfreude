@@ -133,10 +133,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
   /* ── Sticky scroll + parallax engine (all breakpoints) ─────── */
   useEffect(() => {
-    // Disabled for reliability: the sticky/parallax scene can leave large blank
-    // areas on some viewports. Keep a simple native horizontal scroll instead.
-    return
-
     const outer = outerRef.current
     const container = containerRef.current
     if (!outer || !container) return
@@ -215,22 +211,91 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   /* ═══════════════════════════════════════════════════════════ */
 
   return (
-    /* Standard flow section — no pinned/sticky scene */
-    <div
-      ref={outerRef}
-      id={id ?? undefined}
-      className="relative w-full bg-white min-h-0"
-    >
-      <section className="w-full bg-white overflow-visible">
-        {/* ══════════════════════════════════════════════════════
-         *  RESPONSIVE TRACK — same composition across sizes
-         * ══════════════════════════════════════════════════════ */}
-        <div className="relative overflow-x-auto select-none py-4">
-          <div
-            ref={containerRef}
-            className="flex items-start min-h-0 will-change-transform"
-            style={{ gap: 'clamp(0.75rem, 2vw, 1.5rem)', paddingLeft: '5vw', paddingRight: '5vw' }}
+    <div id={id ?? undefined} className="w-full bg-white">
+      {/* Mobile/tablet: snap carousel with subtle motion (no sticky trap) */}
+      <section className="lg:hidden py-6">
+        <div className="px-4 mb-3 flex items-center justify-between">
+          <p
+            className="text-eyebrow font-bold text-[10px] tracking-[0.18em] uppercase"
+            style={{ color: 'var(--ff-gold)' }}
           >
+            {resolvedEyebrow}
+          </p>
+          <span className="text-[10px] font-display tracking-[0.14em] uppercase text-black/35">Swipe</span>
+        </div>
+
+        <div
+          className="flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          <style>{`.mobile-workshop-track::-webkit-scrollbar{display:none}`}</style>
+          {resolvedWorkshops.map((workshop, wIdx) => (
+            <article
+              key={wIdx}
+              className="mobile-workshop-track snap-center shrink-0 w-[88vw] rounded-2xl border border-black/10 bg-white p-4 transition-transform duration-300 active:scale-[0.985]"
+            >
+              <h2 className="text-ff-black mb-3 text-[1.55rem] leading-[1.05]">{workshop.title}</h2>
+              <p className="text-body-sm text-ff-olive text-sm leading-relaxed mb-3">{workshop.description}</p>
+
+              <div className="relative overflow-hidden rounded-xl aspect-[4/3] mb-3">
+                {workshop.image ? (
+                  <Media
+                    resource={workshop.image}
+                    fill
+                    imgClassName="object-cover transition-transform duration-500 active:scale-[1.02]"
+                    className="absolute inset-0"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#141414]" />
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {workshop.features.map((feature, fIdx) => (
+                  <p
+                    key={fIdx}
+                    className="text-black/70 font-display font-bold text-[11px] leading-relaxed flex gap-3"
+                  >
+                    <span className="tabular-nums shrink-0 font-bold">
+                      {String(fIdx + 1).padStart(2, '0')}
+                    </span>
+                    {(feature as { text?: string }).text}
+                  </p>
+                ))}
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-black/10">
+                <Link
+                  href={workshop.ctaLink}
+                  className="flex items-center justify-between gap-3 group/cta"
+                  aria-label={`Workshop Seite: ${workshop.title}`}
+                >
+                  <span className="text-[11px] font-display font-bold tracking-widest uppercase text-black/40 group-hover/cta:text-black transition-colors duration-200">
+                    {workshop.detailsButtonLabel}
+                  </span>
+                  <span className="size-9 rounded-full border border-black/25 flex items-center justify-center text-base leading-none text-black/35 transition-all duration-200 group-hover/cta:border-black group-hover/cta:text-black group-hover/cta:scale-110">
+                    +
+                  </span>
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* Desktop: keep horizontal moving workshop section */}
+      <div ref={outerRef} className="relative hidden lg:block bg-white min-h-[100svh]">
+        <section className="sticky top-0 w-full h-[100svh] bg-white overflow-hidden">
+          <p className="absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
+            scroll →
+          </p>
+
+          <div className="absolute inset-0 overflow-hidden select-none">
+            <div
+              ref={containerRef}
+              className="flex items-center h-full will-change-transform"
+              style={{ gap: 'clamp(0.75rem, 2vw, 1.5rem)', paddingLeft: '5vw', paddingRight: '5vw' }}
+            >
             {resolvedWorkshops.map((workshop, wIdx) => {
               const imgAIdx = wIdx * 2
               const imgBIdx = wIdx * 2 + 1
@@ -239,7 +304,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               return (
                 <React.Fragment key={wIdx}>
                   {/* ── LEFT COLUMN — title on top, small image below ── */}
-                  <div className="shrink-0 flex flex-col self-start w-[72vw] sm:w-[20rem] md:w-88 lg:w-85 h-auto lg:h-[clamp(24rem,42vw,36rem)]">
+                  <div
+                    className="shrink-0 flex flex-col self-center w-[72vw] sm:w-[20rem] md:w-88 lg:w-85"
+                    style={{ height: 'clamp(62svh, 74svh, 78vh)' }}
+                  >
                     <div className="shrink-0 pb-4 md:pb-5 w-full">
                       <FadeIn>
                         <p
@@ -288,8 +356,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
                   {/* ── BIG IMAGE ───────────────────────────────────── */}
                   <div
-                    className="relative shrink-0 overflow-hidden self-start hidden sm:block rounded-2xl"
-                    style={{ aspectRatio: '3 / 4', height: 'clamp(20rem, 34vw, 30rem)' }}
+                    className="relative shrink-0 overflow-hidden self-center hidden sm:block rounded-2xl"
+                    style={{ aspectRatio: '3 / 4', height: 'clamp(52svh, 62svh, 68vh)' }}
                   >
                     <div
                       ref={(el) => {
@@ -313,7 +381,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
                   {/* ── DETAILS CARD ────────────────────────────────── */}
                   <div
-                    className="shrink-0 relative flex flex-col justify-between self-start rounded-2xl"
+                    className="shrink-0 relative flex flex-col justify-between self-center rounded-2xl"
                     style={{
                       width: 'clamp(220px, 24vw, 280px)',
                       padding: 'clamp(1.25rem, 2.2vw, 2rem)',
@@ -375,9 +443,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                 </React.Fragment>
               )
             })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   )
 }
