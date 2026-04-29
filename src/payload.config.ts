@@ -47,14 +47,41 @@ import { plugins } from './plugins'
 /** Same as the folder containing `payload.config.ts`, without `import.meta.url` (Webpack + ESM breaks on that in some chunks). */
 const srcDir = path.resolve(process.cwd(), 'src')
 
+// Vercel exposes the canonical project URL at VERCEL_PROJECT_PRODUCTION_URL
+// and the per-deployment URL at VERCEL_URL. Both are needed because Vercel
+// will serve the same deployment under multiple aliases (e.g. "-env-staging-",
+// "-git-staging-") and CORS must accept all of them.
+const vercelOrigins = [
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
+  process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : '',
+  process.env.VERCEL_BRANCH_URL ? `https://${process.env.VERCEL_BRANCH_URL}` : '',
+].filter(Boolean) as string[]
+
+// On any Vercel deployment, accept the full *.vercel.app preview surface so
+// Vercel's per-branch / per-env aliases never break CORS.
+const corsOrigins: string[] | '*' = process.env.VERCEL
+  ? '*'
+  : ([
+      process.env.NEXT_PUBLIC_SERVER_URL || '',
+      'https://www.fermentfreude.at',
+      'https://fermentfreude.at',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      ...vercelOrigins,
+    ].filter(Boolean) as string[])
+
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
-  cors: [
+  cors: corsOrigins,
+  csrf: [
     process.env.NEXT_PUBLIC_SERVER_URL || '',
     'https://www.fermentfreude.at',
     'https://fermentfreude.at',
     'http://localhost:3000',
     'http://localhost:3001',
+    ...vercelOrigins,
   ].filter(Boolean) as string[],
   admin: {
     user: Users.slug,

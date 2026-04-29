@@ -42,7 +42,9 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       })
 
       cartId =
-        typeof transaction.cart === 'object' ? transaction.cart?.id || undefined : transaction.cart || undefined
+        typeof transaction.cart === 'object'
+          ? transaction.cart?.id || undefined
+          : transaction.cart || undefined
     } catch {
       // Non-fatal: fall back to legacy matching below.
     }

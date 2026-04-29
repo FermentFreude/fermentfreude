@@ -20,7 +20,12 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-type NavItem = { key: keyof AccountTranslations; href: string; exact?: boolean; icon: typeof LayoutDashboard }
+type NavItem = {
+  key: keyof AccountTranslations
+  href: string
+  exact?: boolean
+  icon: typeof LayoutDashboard
+}
 
 const NAV_GROUPS: { key: keyof AccountTranslations; items: NavItem[] }[] = [
   {

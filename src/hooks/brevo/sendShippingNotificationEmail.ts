@@ -56,10 +56,7 @@ export const sendShippingNotificationEmail: CollectionAfterChangeHook = async ({
     const items =
       (doc.items as
         | Array<{
-            product?:
-              | string
-              | { productType?: string | null; slug?: string | null }
-              | null
+            product?: string | { productType?: string | null; slug?: string | null } | null
           }>
         | undefined) || []
     const hasWorkshops = items.some((item) => {

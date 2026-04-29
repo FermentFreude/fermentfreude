@@ -284,21 +284,15 @@ export async function handleChargeSucceeded({
   } else {
     const charge = obj as Stripe.Charge
     paymentIntentId =
-      typeof charge.payment_intent === 'string'
-        ? charge.payment_intent
-        : charge.payment_intent?.id
+      typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id
   }
 
   if (!paymentIntentId) {
-    payload.logger.warn(
-      `[stripe:${event.type}] No payment_intent could be resolved — skipping`,
-    )
+    payload.logger.warn(`[stripe:${event.type}] No payment_intent could be resolved — skipping`)
     return
   }
 
-  payload.logger.info(
-    `[stripe:${event.type}] ${obj.id} succeeded (PI: ${paymentIntentId})`,
-  )
+  payload.logger.info(`[stripe:${event.type}] ${obj.id} succeeded (PI: ${paymentIntentId})`)
 
   // Find the order by payment intent ID
   const orders = await payload.find({
