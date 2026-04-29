@@ -21,7 +21,7 @@ export async function getVoucherCtaGlobal(locale: string = 'de'): Promise<Vouche
           ? 'Gift someone a special experience — our vouchers are the perfect gift for foodies and curious minds.'
           : 'Schenke jemandem ein besonderes Erlebnis — unsere Gutscheine sind das perfekte Geschenk für Feinschmecker und neugierige Köpfe.',
       primaryLabel: locale === 'en' ? 'Buy Voucher' : 'Gutschein kaufen',
-      primaryHref: '/voucher',
+      primaryHref: '/workshops/voucher',
       secondaryLabel: locale === 'en' ? 'Visit Shop' : 'Zum Shop',
       secondaryHref: '/shop',
       pills: [],

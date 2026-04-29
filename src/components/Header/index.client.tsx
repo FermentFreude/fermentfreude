@@ -121,17 +121,30 @@ export function HeaderClient({ header }: Props) {
   const hasRealCMSItems = cmsItems.length > 0 && cmsItems.some((i) => i.link?.label)
   const renderedDropdowns = new Set<string>()
 
+  const normalizeHeaderUrl = (url?: string | null): string => {
+    if (!url) return '/'
+    return url === '/voucher' ? '/workshops/voucher' : url
+  }
+
+  const normalizeDropdownHref = (href?: string | null): string => {
+    if (!href) return '/'
+    return href === '/voucher' ? '/workshops/voucher' : href
+  }
+
   // Build nav items array for consistent indexing
   const navItems = hasRealCMSItems
     ? cmsItems.map((item) => {
-        const url = item.link.url
+        const url = normalizeHeaderUrl(item.link.url)
         const label = item.link.label
         const cmsDropdownItems = item.dropdownItems
         const defaultKey = getDefaultDropdownKey(label, url)
 
         const dropdownItems =
           cmsDropdownItems && cmsDropdownItems.length > 0
-            ? cmsDropdownItems
+            ? cmsDropdownItems.map((dropdownItem) => ({
+                ...dropdownItem,
+                href: normalizeDropdownHref(dropdownItem.href),
+              }))
             : defaultKey
               ? defaultDropdowns[defaultKey]
               : null

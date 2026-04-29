@@ -28,7 +28,10 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
     cms?.description ??
     'Schenke jemandem ein besonderes Erlebnis — unsere Gutscheine sind das perfekte Geschenk für Feinschmecker und neugierige Köpfe.'
   const primaryLabel = cms?.primaryLabel ?? 'Gutschein kaufen'
-  const primaryHref = cms?.primaryHref ?? '/voucher'
+  const primaryHref =
+    cms?.primaryHref === '/voucher'
+      ? '/workshops/voucher'
+      : (cms?.primaryHref ?? '/workshops/voucher')
   const secondaryLabel = cms?.secondaryLabel ?? 'Zum Shop'
   const secondaryHref = cms?.secondaryHref ?? '/shop'
   const pills =
@@ -84,7 +87,10 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
                         {tag}
                       </span>
                       {i < pills.length - 1 && (
-                        <span className="w-px h-4 bg-[#555954]/20 mx-2 sm:mx-3" aria-hidden="true" />
+                        <span
+                          className="w-px h-4 bg-[#555954]/20 mx-2 sm:mx-3"
+                          aria-hidden="true"
+                        />
                       )}
                     </React.Fragment>
                   ))}

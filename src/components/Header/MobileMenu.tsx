@@ -536,16 +536,29 @@ function buildNavItems(
 ): NavOverlayItem[] {
   const items: NavOverlayItem[] = []
 
+  const normalizeHeaderUrl = (url?: string | null): string => {
+    if (!url) return '/'
+    return url === '/voucher' ? '/workshops/voucher' : url
+  }
+
+  const normalizeDropdownHref = (href?: string | null): string => {
+    if (!href) return '/'
+    return href === '/voucher' ? '/workshops/voucher' : href
+  }
+
   if (hasRealCMSItems && menu) {
     for (const item of menu) {
-      const url = item.link.url || '/'
+      const url = normalizeHeaderUrl(item.link.url)
       const label = item.link.label || ''
       const cmsDropdownItems = item.dropdownItems
       const defaultKey = getDefaultDropdownKey(label, url)
 
       const dropdownItems =
         cmsDropdownItems && cmsDropdownItems.length > 0
-          ? cmsDropdownItems
+          ? cmsDropdownItems.map((dropdownItem) => ({
+              ...dropdownItem,
+              href: normalizeDropdownHref(dropdownItem.href),
+            }))
           : defaultKey
             ? defaultDropdowns[defaultKey]
             : null

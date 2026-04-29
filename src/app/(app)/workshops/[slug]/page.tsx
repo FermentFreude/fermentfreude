@@ -247,6 +247,10 @@ function getSlugFromCtaLink(ctaLink: string | null | undefined): string | null {
   return match ? match[1] : null
 }
 
+function normalizeVoucherHref(href: string | null | undefined): string | null | undefined {
+  return href === '/voucher' ? '/workshops/voucher' : href
+}
+
 export default async function WorkshopDetailPage({ params }: Args) {
   const { slug } = await params
   const locale = await getLocale()
@@ -428,8 +432,8 @@ export default async function WorkshopDetailPage({ params }: Args) {
     gift?.giftBuyNowLabel ?? (isDe ? DEFAULT_GIFT_BUY_NOW_DE : DEFAULT_GIFT_BUY_NOW_EN)
   const giftBuyVoucherLabel =
     gift?.giftBuyVoucherLabel ?? (isDe ? DEFAULT_GIFT_BUY_VOUCHER_DE : DEFAULT_GIFT_BUY_VOUCHER_EN)
-  const giftBuyNowHref = gift?.giftBuyNowHref ?? '/shop'
-  const giftBuyVoucherHref = gift?.giftBuyVoucherHref ?? '/workshops/voucher'
+  const giftBuyNowHref = normalizeVoucherHref(gift?.giftBuyNowHref) ?? '/shop'
+  const giftBuyVoucherHref = normalizeVoucherHref(gift?.giftBuyVoucherHref) ?? '/workshops/voucher'
   const onlineTitle =
     gift?.onlineTitle ?? (isDe ? DEFAULT_ONLINE_TITLE_DE : DEFAULT_ONLINE_TITLE_EN)
   const onlineDesc =

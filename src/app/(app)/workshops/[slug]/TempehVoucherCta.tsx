@@ -28,7 +28,10 @@ export function TempehVoucherCta({ cms }: { cms?: TempehVoucherCMS }) {
     cms?.description ??
     'Schenke jemandem ein besonderes Erlebnis — unsere Gutscheine sind das perfekte Geschenk für Feinschmecker und gesundheitsbewusste Freunde.'
   const primaryLabel = cms?.primaryLabel ?? 'Gutschein kaufen'
-  const primaryHref = cms?.primaryHref ?? '/voucher'
+  const primaryHref =
+    cms?.primaryHref === '/voucher'
+      ? '/workshops/voucher'
+      : (cms?.primaryHref ?? '/workshops/voucher')
   const secondaryLabel = cms?.secondaryLabel ?? 'Zum Shop'
   const secondaryHref = cms?.secondaryHref ?? '/shop'
   const pills =
