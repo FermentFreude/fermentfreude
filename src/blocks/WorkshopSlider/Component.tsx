@@ -7,7 +7,7 @@ import type {
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
 import Link from 'next/link'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
  *  HARDCODED DEFAULTS  (English — CMS data always wins)
@@ -99,6 +99,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   const scrollRef = useRef({ current: 0, target: 0, limit: 0 })
   const rafRef = useRef<number>(0)
   const isActiveRef = useRef(false)
+  const mobileTrackRef = useRef<HTMLDivElement>(null)
+  const [activeMobileIndex, setActiveMobileIndex] = useState(0)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
   const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
@@ -210,6 +212,36 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
   if (visible === false) return null
 
+  const handleMobileTrackScroll = () => {
+    const track = mobileTrackRef.current
+    if (!track) return
+    const firstCard = track.querySelector<HTMLElement>('.mobile-workshop-track')
+    if (!firstCard) return
+    const gap = 16 // Tailwind gap-4
+    const step = firstCard.offsetWidth + gap
+    if (step <= 0) return
+    const next = Math.round(track.scrollLeft / step)
+    setActiveMobileIndex(Math.max(0, Math.min(resolvedWorkshops.length - 1, next)))
+  }
+
+  const goToMobileSlide = (index: number) => {
+    const track = mobileTrackRef.current
+    if (!track) return
+    const cards = track.querySelectorAll<HTMLElement>('.mobile-workshop-track')
+    const target = cards[index]
+    if (!target) return
+    target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+    setActiveMobileIndex(index)
+  }
+
+  const goToPrevMobileSlide = () => {
+    goToMobileSlide(Math.max(0, activeMobileIndex - 1))
+  }
+
+  const goToNextMobileSlide = () => {
+    goToMobileSlide(Math.min(resolvedWorkshops.length - 1, activeMobileIndex + 1))
+  }
+
   /* ═══════════════════════════════════════════════════════════ */
   /*  RENDER                                                     */
   /* ═══════════════════════════════════════════════════════════ */
@@ -229,6 +261,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
         </div>
 
         <div
+          ref={mobileTrackRef}
+          onScroll={handleMobileTrackScroll}
           className="flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
@@ -284,6 +318,43 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="mt-4 flex items-center justify-center gap-4 px-4">
+          <button
+            type="button"
+            onClick={goToPrevMobileSlide}
+            disabled={activeMobileIndex === 0}
+            aria-label="Previous workshop"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/20 text-black transition-colors disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            <span className="text-lg leading-none">←</span>
+          </button>
+
+          {resolvedWorkshops.map((_, index) => {
+            const isActive = index === activeMobileIndex
+            return (
+              <button
+                key={`dot-${index}`}
+                type="button"
+                onClick={() => goToMobileSlide(index)}
+                aria-label={`Go to workshop ${index + 1}`}
+                className={`rounded-full transition-all duration-200 ${
+                  isActive ? 'h-2.5 w-2.5 bg-black' : 'h-2 w-2 bg-black/25'
+                }`}
+              />
+            )
+          })}
+
+          <button
+            type="button"
+            onClick={goToNextMobileSlide}
+            disabled={activeMobileIndex === resolvedWorkshops.length - 1}
+            aria-label="Next workshop"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/20 text-black transition-colors disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            <span className="text-lg leading-none">→</span>
+          </button>
         </div>
       </section>
 
