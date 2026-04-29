@@ -1307,9 +1307,13 @@ export interface Page {
            */
           title: string;
           /**
+           * Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.
+           */
+          iconSource?: ('preset' | 'custom') | null;
+          /**
            * Icon displayed next to this option. Use email or pickup only.
            */
-          icon: 'email' | 'pickup' | 'card';
+          icon?: ('email' | 'pickup' | 'card') | null;
           id?: string | null;
         }[]
       | null;
@@ -1374,7 +1378,15 @@ export interface Page {
      */
     voucherWhyBenefits?:
       | {
-          icon: 'sparkle' | 'heart' | 'graduation' | 'leaf';
+          /**
+           * Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.
+           */
+          iconSource?: ('preset' | 'custom') | null;
+          icon?: ('sparkle' | 'heart' | 'graduation' | 'leaf') | null;
+          /**
+           * Optional uploaded icon from Media. Recommended: square icon with transparent background.
+           */
+          customIcon?: (string | null) | Media;
           title: string;
           description: string;
           id?: string | null;
@@ -1475,7 +1487,7 @@ export interface Page {
      */
     voucherBenefitsSubtitle?: string | null;
     /**
-     * List of benefits with optional subtext. Shown with green checkmarks in two columns.
+     * List of benefit cards with editable icon, title, and optional subtext.
      */
     voucherBenefits?:
       | {
@@ -1483,6 +1495,18 @@ export interface Page {
            * Main benefit line (e.g. "Valid for all workshops").
            */
           text: string;
+          /**
+           * Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.
+           */
+          iconSource?: ('preset' | 'custom') | null;
+          /**
+           * Card icon shown above this benefit title. Leave empty to use the default sequence.
+           */
+          icon?: ('calendar' | 'shield' | 'users' | 'usersRound' | 'zap' | 'package') | null;
+          /**
+           * Optional uploaded icon from Media. Recommended: square icon with transparent background.
+           */
+          customIcon?: (string | null) | Media;
           /**
            * Optional detail below the title (e.g. "Kombucha, Lakto, Tempeh & seasonal").
            */
@@ -3152,7 +3176,7 @@ export interface ReadyToLearnCtaBlock {
     href: string;
   };
   /**
-   * Secondary call-to-action button (outline style).
+   * Secondary call-to-action button (outline style). Use popup mode to show waitlist instead of linking.
    */
   secondaryButton: {
     /**
@@ -3160,9 +3184,33 @@ export interface ReadyToLearnCtaBlock {
      */
     label: string;
     /**
-     * URL the button links to (e.g. "/courses").
+     * Use "/onlinecourses" as popup trigger. Keep a real URL here (never empty, never delete slug). When popup is off, this URL is used for navigation.
      */
     href: string;
+    /**
+     * When enabled, clicking this button opens the online-course popup. When disabled, it uses the URL above.
+     */
+    openPopup?: boolean | null;
+  };
+  /**
+   * Content shown when the secondary button opens a popup.
+   */
+  popup?: {
+    /**
+     * Small label above the popup heading (e.g. "ONLINE COURSE").
+     */
+    eyebrow?: string | null;
+    /**
+     * Main popup headline.
+     */
+    heading?: string | null;
+    /**
+     * Short supporting text below the popup heading.
+     */
+    description?: string | null;
+    emailPlaceholder?: string | null;
+    submitLabel?: string | null;
+    successMessage?: string | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -4932,6 +4980,7 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               type?: T;
               title?: T;
+              iconSource?: T;
               icon?: T;
               id?: T;
             };
@@ -4952,7 +5001,9 @@ export interface PagesSelect<T extends boolean = true> {
         voucherWhyBenefits?:
           | T
           | {
+              iconSource?: T;
               icon?: T;
+              customIcon?: T;
               title?: T;
               description?: T;
               id?: T;
@@ -4995,6 +5046,9 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              iconSource?: T;
+              icon?: T;
+              customIcon?: T;
               subtext?: T;
               id?: T;
             };
@@ -5591,6 +5645,17 @@ export interface ReadyToLearnCtaBlockSelect<T extends boolean = true> {
     | {
         label?: T;
         href?: T;
+        openPopup?: T;
+      };
+  popup?:
+    | T
+    | {
+        eyebrow?: T;
+        heading?: T;
+        description?: T;
+        emailPlaceholder?: T;
+        submitLabel?: T;
+        successMessage?: T;
       };
   id?: T;
   blockName?: T;

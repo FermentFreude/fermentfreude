@@ -71,7 +71,8 @@ export const ReadyToLearnCTA: Block = {
       type: 'group',
       label: 'Secondary Button',
       admin: {
-        description: 'Secondary call-to-action button (outline style).',
+        description:
+          'Secondary call-to-action button (outline style). Use popup mode to show waitlist instead of linking.',
       },
       fields: [
         {
@@ -88,10 +89,83 @@ export const ReadyToLearnCTA: Block = {
           name: 'href',
           type: 'text',
           required: true,
+          defaultValue: '/onlinecourses',
           label: 'Button URL',
           admin: {
-            description: 'URL the button links to (e.g. "/courses").',
+            description:
+              'Use "/onlinecourses" as popup trigger. Keep a real URL here (never empty, never delete slug). When popup is off, this URL is used for navigation.',
           },
+        },
+        {
+          name: 'openPopup',
+          type: 'checkbox',
+          defaultValue: true,
+          label: 'Open popup instead of link',
+          admin: {
+            description:
+              'When enabled, clicking this button opens the online-course popup. When disabled, it uses the URL above.',
+          },
+        },
+      ],
+    },
+    {
+      name: 'popup',
+      type: 'group',
+      label: 'Online Course Popup',
+      admin: {
+        description: 'Content shown when the secondary button opens a popup.',
+      },
+      fields: [
+        {
+          name: 'eyebrow',
+          type: 'text',
+          localized: true,
+          required: false,
+          label: 'Eyebrow',
+          admin: {
+            description: 'Small label above the popup heading (e.g. "ONLINE COURSE").',
+          },
+        },
+        {
+          name: 'heading',
+          type: 'text',
+          localized: true,
+          required: false,
+          label: 'Popup Heading',
+          admin: {
+            description: 'Main popup headline.',
+          },
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          localized: true,
+          required: false,
+          label: 'Popup Description',
+          admin: {
+            description: 'Short supporting text below the popup heading.',
+          },
+        },
+        {
+          name: 'emailPlaceholder',
+          type: 'text',
+          localized: true,
+          required: false,
+          label: 'Email Placeholder',
+        },
+        {
+          name: 'submitLabel',
+          type: 'text',
+          localized: true,
+          required: false,
+          label: 'Submit Button Label',
+        },
+        {
+          name: 'successMessage',
+          type: 'textarea',
+          localized: true,
+          required: false,
+          label: 'Success Message',
         },
       ],
     },

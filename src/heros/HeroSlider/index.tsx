@@ -4,7 +4,7 @@ import type { Page } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
 import Link from 'next/link'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 import { NavArrow } from './NavArrow'
 import { SlideImage } from './SlideImage'
@@ -12,6 +12,7 @@ import type { ResolvedSlide } from './slide-data'
 import { DEFAULT_SLIDES, isResolvedMedia } from './slide-data'
 import { AUTO_PLAY_INTERVAL, useAutoPlay } from './useAutoPlay'
 import { useSwipe } from './useSwipe'
+import type { SupportedLocale } from '@/utilities/getLocale'
 
 /* ═══════════════════════════════════════════════════════════════
  *  HERO SLIDER — Product Presentation Style
@@ -20,10 +21,31 @@ import { useSwipe } from './useSwipe'
  *  Inspired by Slider Revolution "Chocolate Bar" template.
  * ═══════════════════════════════════════════════════════════════ */
 
-type HeroSliderProps = Page['hero']
+type HeroSliderProps = Page['hero'] & { locale?: SupportedLocale }
 
 export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
   const { setHeaderTheme, setHeroBackgroundColor } = useHeaderTheme()
+
+  const effectiveLocale: SupportedLocale = props.locale ?? 'de'
+
+  const resolveCtaLabel = useCallback(
+    (raw?: string, fallback?: string) => {
+      const label = raw ?? fallback
+      if (!label || typeof label !== 'string')
+        return effectiveLocale === 'de' ? 'Jetzt entdecken' : 'Learn More'
+      // Payload seed / CMS sometimes still contains English "Learn More" even on German pages.
+      // Map it to the correct German copy so the UI stays consistent.
+      const normalized = label.replace(/\s+/gu, ' ').trim().toLowerCase()
+      if (
+        effectiveLocale === 'de' &&
+        (normalized === 'learn more' || normalized === 'workshop' || normalized === 'workshops')
+      ) {
+        return 'Jetzt entdecken'
+      }
+      return label
+    },
+    [effectiveLocale],
+  )
 
   /* ── Merge CMS heroSlides with defaults ───────────────────── */
   const slides: ResolvedSlide[] = useMemo(() => {
@@ -42,9 +64,12 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         attributes: cs.attributes?.length
           ? cs.attributes.map((a) => a.text)
           : (fallback?.attributes ?? []),
-        ctaLabel: cs.ctaLabel ?? fallback?.ctaLabel ?? 'Learn More',
+        ctaLabel: resolveCtaLabel(cs.ctaLabel ?? undefined, fallback?.ctaLabel),
         ctaHref: cs.ctaHref ?? fallback?.ctaHref ?? '#',
-        secondaryCtaLabel: cs.secondaryCtaLabel ?? fallback?.secondaryCtaLabel ?? 'Shop',
+        secondaryCtaLabel: resolveCtaLabel(
+          cs.secondaryCtaLabel ?? undefined,
+          fallback?.secondaryCtaLabel ?? 'Shop',
+        ),
         secondaryCtaHref: cs.secondaryCtaHref ?? fallback?.secondaryCtaHref ?? '/shop',
         panelColor: cs.panelColor ?? fallback?.panelColor ?? '#555954',
         bgColor: cs.bgColor ?? fallback?.bgColor ?? '#D2DFD7',
@@ -54,7 +79,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
         rightImageScale: fallback?.rightImageScale,
       }
     })
-  }, [props])
+  }, [props, resolveCtaLabel])
 
   const {
     activeIndex,

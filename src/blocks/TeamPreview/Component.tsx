@@ -37,7 +37,7 @@ export const TeamPreviewBlock: React.FC<Props> = ({
   const resolvedMembers = members && members.length > 0 ? members : DEFAULTS.members
 
   return (
-    <section id={id ?? undefined} className="section-padding-md">
+    <section id={id ?? undefined} className="section-padding-md pt-0">
       <div className="container mx-auto px-6">
         {/* Mobile: text on top, Desktop: side by side */}
         <div className="flex flex-col lg:flex-row items-start gap-(--space-content-xl)">
