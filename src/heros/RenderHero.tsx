@@ -1,6 +1,7 @@
 import React from 'react'
 
 import type { Page } from '@/payload-types'
+import type { SupportedLocale } from '@/utilities/getLocale'
 
 import { FoodPresentationSlider } from '@/heros/FoodPresentationSlider'
 import { HeroCarousel } from '@/heros/HeroCarousel'
@@ -22,7 +23,9 @@ const heroes = {
   mediumImpact: MediumImpactHero,
 }
 
-export const RenderHero: React.FC<Page['hero']> = (props) => {
+type RenderHeroProps = Page['hero'] & { locale?: SupportedLocale }
+
+export const RenderHero: React.FC<RenderHeroProps> = (props) => {
   const { type } = props || {}
 
   if (!type || type === 'none') return null
