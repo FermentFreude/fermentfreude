@@ -133,6 +133,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
   /* ── Sticky scroll + parallax engine (all breakpoints) ─────── */
   useEffect(() => {
+    // Disabled for reliability: the sticky/parallax scene can leave large blank
+    // areas on some viewports. Keep a simple native horizontal scroll instead.
+    return
+
     const outer = outerRef.current
     const container = containerRef.current
     if (!outer || !container) return
@@ -142,9 +146,14 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
     /* Recalculate outer height and scroll limit */
     const updateDimensions = () => {
-      const overshoot = Math.max(0, container.scrollWidth - window.innerWidth)
+      // Keep the long sticky-scroll effect for desktop only.
+      // On mobile/tablet it creates excessive empty scroll space before the next section.
+      const enableHorizontalScrollScene = window.innerWidth >= 1024
+      const overshoot = enableHorizontalScrollScene
+        ? Math.max(0, container.scrollWidth - window.innerWidth)
+        : 0
       isActiveRef.current = overshoot > 0
-      outer.style.height = `${window.innerHeight + overshoot}px`
+      outer.style.height = enableHorizontalScrollScene ? `${window.innerHeight + overshoot}px` : 'auto'
       scrollRef.current.limit = overshoot
 
       if (!isActiveRef.current) {
@@ -206,30 +215,20 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   /* ═══════════════════════════════════════════════════════════ */
 
   return (
-    /* Outer pin div — JS sets height to 100svh + overshoot on lg+ */
+    /* Standard flow section — no pinned/sticky scene */
     <div
       ref={outerRef}
       id={id ?? undefined}
-      className="relative w-full bg-white"
-      style={{ minHeight: '100svh' }}
+      className="relative w-full bg-white min-h-0"
     >
-      {/* ── Sticky viewport (always visible while scrolling through outer) */}
-      <section
-        className="sticky top-0 w-full bg-white overflow-hidden"
-        style={{ height: '100svh' }}
-      >
-        {/* ── Scroll hint ─────────────────────────────────────── */}
-        <p className="absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
-          scroll →
-        </p>
-
+      <section className="w-full bg-white overflow-visible">
         {/* ══════════════════════════════════════════════════════
          *  RESPONSIVE TRACK — same composition across sizes
          * ══════════════════════════════════════════════════════ */}
-        <div className="absolute inset-0 overflow-hidden select-none">
+        <div className="relative overflow-x-auto select-none py-4">
           <div
             ref={containerRef}
-            className="flex items-center h-full will-change-transform"
+            className="flex items-start min-h-0 will-change-transform"
             style={{ gap: 'clamp(0.75rem, 2vw, 1.5rem)', paddingLeft: '5vw', paddingRight: '5vw' }}
           >
             {resolvedWorkshops.map((workshop, wIdx) => {
@@ -240,10 +239,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               return (
                 <React.Fragment key={wIdx}>
                   {/* ── LEFT COLUMN — title on top, small image below ── */}
-                  <div
-                    className="shrink-0 flex flex-col self-center w-[72vw] sm:w-[20rem] md:w-88 lg:w-85"
-                    style={{ height: 'clamp(62svh, 74svh, 78vh)' }}
-                  >
+                  <div className="shrink-0 flex flex-col self-start w-[72vw] sm:w-[20rem] md:w-88 lg:w-85 h-auto lg:h-[clamp(24rem,42vw,36rem)]">
                     <div className="shrink-0 pb-4 md:pb-5 w-full">
                       <FadeIn>
                         <p
@@ -292,8 +288,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
                   {/* ── BIG IMAGE ───────────────────────────────────── */}
                   <div
-                    className="relative shrink-0 overflow-hidden self-center hidden sm:block rounded-2xl"
-                    style={{ aspectRatio: '3 / 4', height: 'clamp(52svh, 62svh, 68vh)' }}
+                    className="relative shrink-0 overflow-hidden self-start hidden sm:block rounded-2xl"
+                    style={{ aspectRatio: '3 / 4', height: 'clamp(20rem, 34vw, 30rem)' }}
                   >
                     <div
                       ref={(el) => {
@@ -317,7 +313,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
                   {/* ── DETAILS CARD ────────────────────────────────── */}
                   <div
-                    className="shrink-0 relative flex flex-col justify-between self-center rounded-2xl"
+                    className="shrink-0 relative flex flex-col justify-between self-start rounded-2xl"
                     style={{
                       width: 'clamp(220px, 24vw, 280px)',
                       padding: 'clamp(1.25rem, 2.2vw, 2rem)',
