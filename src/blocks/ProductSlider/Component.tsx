@@ -426,24 +426,20 @@ function ProductCard({ product }: { product: Product }) {
                 <Media
                   resource={image}
                   className="relative w-[55%] h-[85%]"
-                  imgClassName={`w-full h-full object-contain transition-all duration-300 drop-shadow-lg group-hover:scale-105 ${
-                    isOutOfStock ? 'group-hover:blur-[3px] group-hover:brightness-90' : ''
-                  }`}
+                  imgClassName="w-full h-full object-contain transition-all duration-300 drop-shadow-lg group-hover:scale-105 group-hover:blur-[3px] group-hover:brightness-90"
                 />
               ) : (
                 <div className="w-[55%] h-[70%] bg-[#ECE5DE] rounded-lg" />
               )}
             </div>
 
-            {/* Sold-out UX hint: keep details discoverable with explicit CTA */}
-            {isOutOfStock && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
-                <div className="absolute rounded-full border border-white/40 bg-black/18 px-9 py-4 backdrop-blur-md shadow-sm" />
-                <span className="relative inline-flex cursor-pointer items-center rounded-full bg-[#E5B765] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1f1f1f] shadow-sm">
-                  Read more
-                </span>
-              </div>
-            )}
+            {/* Read-more hover hint for all products */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
+              <div className="absolute rounded-full border border-white/40 bg-black/18 px-9 py-4 backdrop-blur-md shadow-sm" />
+              <span className="relative inline-flex cursor-pointer items-center rounded-full bg-[#E5B765] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1f1f1f] shadow-sm">
+                Read more
+              </span>
+            </div>
           </div>
         </div>
 
