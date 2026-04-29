@@ -441,9 +441,7 @@ export async function POST(req: NextRequest) {
     const results = await sendScheduledEmails()
     return NextResponse.json(results, { status: 200 })
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : String(error) },
-      { status: 500 },
-    )
+    const msg = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
