@@ -129,7 +129,7 @@ export function VoucherHero({
       <div className="mx-auto max-w-(--content-full) px-(--space-container-x)">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-start">
           {/* Left Column - Voucher Preview Card */}
-          <div className="order-2 lg:order-1">
+          <div className="order-1 lg:order-1">
             <div className="sticky top-4 rounded-2xl border border-ff-border-light/80 bg-[radial-gradient(circle_at_top,#F8F2E6,#FFFFFF)] p-5 md:p-7 shadow-[0_18px_45px_rgba(0,0,0,0.07)] transition-shadow duration-300 hover:shadow-[0_30px_80px_rgba(229,183,101,0.22)]">
               {/* Gift Icon */}
               <div className="absolute top-7 right-7">
@@ -185,7 +185,7 @@ export function VoucherHero({
           </div>
 
           {/* Right Column - Voucher Configuration */}
-          <div className="order-1 lg:order-2">
+          <div className="order-2 lg:order-2">
             <div className="flex flex-col gap-4 md:gap-5">
               <div className="pb-4 md:pb-6 border-b border-ff-border-light min-w-0 max-w-full">
                 <h1 className="font-display text-[clamp(1.75rem,5vw,2.25rem)] font-bold text-ff-near-black leading-tight tracking-tight max-w-full wrap-break-word hyphens-auto">
