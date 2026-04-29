@@ -426,8 +426,17 @@ async function sendScheduledEmails() {
 }
 
 export async function POST(req: NextRequest) {
-  // Scheduled/reminder emails temporarily disabled — only booking confirmations are active
-  return NextResponse.json({ disabled: true, message: 'Scheduled emails temporarily disabled' }, { status: 200 })
+  // Scheduled/reminder emails are temporarily disabled until V2 templates ship.
+  // Only essential confirmation emails (booking, order, voucher) are active in production.
+  // The block below is preserved (not deleted) so it can be re-enabled by flipping the flag.
+  const SCHEDULED_EMAILS_ENABLED = false
+
+  if (!SCHEDULED_EMAILS_ENABLED) {
+    return NextResponse.json(
+      { disabled: true, message: 'Scheduled emails temporarily disabled' },
+      { status: 200 },
+    )
+  }
 
   // Verify request is from Vercel Cron or authorized source
   const authHeader = req.headers.get('authorization')

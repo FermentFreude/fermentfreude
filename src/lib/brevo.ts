@@ -85,39 +85,41 @@ const DEFAULT_SENDER = {
 }
 
 /**
- * Template IDs — created via `pnpm brevo-setup-templates`
- * These IDs are auto-assigned by Brevo in order. Update if you rerun template setup.
- * All 19 templates across 4 categories: Transactional, Workshop, E-commerce, Marketing
+ * Template IDs — managed in Brevo dashboard.
+ *
+ * V2 templates (Apr 2026 launch redesign) are used for the essential confirmation flows.
+ * Non-V2 entries are preserved for templates that don't yet have a V2 (reminders, marketing, etc.).
+ * Reminder/follow-up sends are gated off in code until V2 versions ship.
  */
 export const BREVO_TEMPLATES = {
-  // Transactional (4)
-  ACCOUNT_CREATION: 27,
-  EMAIL_VERIFICATION: 28,
-  PASSWORD_RESET: 29,
-  LOGIN_NOTIFICATION: 30,
+  // Transactional (4) — V2
+  ACCOUNT_CREATION: 66, // V2 (was 27)
+  EMAIL_VERIFICATION: 69, // V2 (was 28)
+  PASSWORD_RESET: 70, // V2 (was 29)
+  LOGIN_NOTIFICATION: 71, // V2 (was 30)
 
-  // Workshop (5)
-  WORKSHOP_BOOKING_CONFIRMATION: 31,
+  // Workshop (5) — booking confirmation V2; reminders & follow-ups still v1 (disabled in code)
+  WORKSHOP_BOOKING_CONFIRMATION: 65, // V2 (was 31)
   WORKSHOP_7DAY_REMINDER: 32,
   WORKSHOP_1DAY_REMINDER: 33,
   POST_WORKSHOP_FOLLOWUP: 34,
   FEEDBACK_REQUEST: 35,
 
-  // E-commerce (4)
-  ORDER_CONFIRMATION: 36,
+  // E-commerce — order confirmation V2; others kept until V2 ships
+  ORDER_CONFIRMATION: 72, // V2 (was 36)
   SHIPPING_NOTIFICATION: 37,
   REVIEW_REQUEST: 38,
   ABANDONED_CART: 39,
 
-  // Marketing (5)
-  NEWSLETTER_WELCOME: 40,
+  // Marketing — newsletter welcome V2; others kept until V2 ships
+  NEWSLETTER_WELCOME: 68, // V2 (was 40)
   COURSE_ENROLLMENT: 41,
   B2B_INQUIRY: 42,
   RE_ENGAGEMENT: 43,
   REFERRAL_PROGRAM: 44,
 
-  // Custom
-  VOUCHER_PURCHASED: 45,
+  // Custom — V2
+  VOUCHER_PURCHASED: 73, // V2 (was 45)
 } as const
 
 type BrevoRecipient = {
