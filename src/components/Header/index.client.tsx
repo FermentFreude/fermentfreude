@@ -5,7 +5,7 @@ import { CMSLink } from '@/components/Link'
 import { gsap } from 'gsap'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { Header } from 'src/payload-types'
 import { AnnouncementBar } from './AnnouncementBar'
@@ -50,7 +50,7 @@ export function HeaderClient({ header }: Props) {
   const navLinksRef = useRef<HTMLUListElement>(null)
 
   // Measure header height
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!headerRef.current) return
     const measure = () => {
       const h = headerRef.current?.offsetHeight ?? 0

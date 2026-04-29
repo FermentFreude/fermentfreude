@@ -26,6 +26,7 @@ import { ProductsCollection } from '@/collections/Products'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
+import { mediaFixR2UrlAfterReadPlugin } from '@/plugins/mediaFixR2UrlAfterRead'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -171,4 +172,6 @@ export const plugins: Plugin[] = [
       }),
     },
   }),
+  // Must run last so it overrides Payload's default `url` afterRead behavior.
+  mediaFixR2UrlAfterReadPlugin,
 ]
