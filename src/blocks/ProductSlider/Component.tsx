@@ -399,7 +399,7 @@ function ProductCard({ product }: { product: Product }) {
         <div className="relative mb-2">
           <div className="relative" style={{ aspectRatio: '328 / 350' }}>
             {isOutOfStock && (
-              <div className="absolute top-3 right-3 z-10">
+              <div className="absolute top-3 right-3 z-20">
                 <span className="inline-block rounded-full bg-black px-3 py-1.5 text-xs font-bold text-white">
                   Sold Out
                 </span>
@@ -426,12 +426,24 @@ function ProductCard({ product }: { product: Product }) {
                 <Media
                   resource={image}
                   className="relative w-[55%] h-[85%]"
-                  imgClassName="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-lg"
+                  imgClassName={`w-full h-full object-contain transition-all duration-300 drop-shadow-lg group-hover:scale-105 ${
+                    isOutOfStock ? 'group-hover:blur-[3px] group-hover:brightness-90' : ''
+                  }`}
                 />
               ) : (
                 <div className="w-[55%] h-[70%] bg-[#ECE5DE] rounded-lg" />
               )}
             </div>
+
+            {/* Sold-out UX hint: keep details discoverable with explicit CTA */}
+            {isOutOfStock && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
+                <div className="absolute rounded-full border border-white/40 bg-black/18 px-9 py-4 backdrop-blur-md shadow-sm" />
+                <span className="relative inline-flex cursor-pointer items-center rounded-full bg-[#E5B765] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1f1f1f] shadow-sm">
+                  Read more
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
