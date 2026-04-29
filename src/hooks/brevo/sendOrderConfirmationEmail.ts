@@ -143,7 +143,9 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       )
     }
 
-    const fmtMoney = (n: number) => `€${n.toFixed(2).replace('.', ',')}`
+    // Payload ecommerce / Stripe store amounts in the smallest currency unit (cents).
+    // Convert to euros for display.
+    const fmtMoney = (cents: number) => `€${(cents / 100).toFixed(2).replace('.', ',')}`
 
     const orderTotalNum = typeof doc.amount === 'number' ? doc.amount : null
     const computedSubtotal =

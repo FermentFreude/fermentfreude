@@ -217,7 +217,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     // Send workshop booking confirmation email now that customer info is available
     const bookingEmail = (updateData.email as string) || booking.email
     if (bookingEmail) {
-      // Resolve location from the appointment (best effort)
+      // Resolve location from the appointment (best effort) — include full address
       let workshopLocation = ''
       if (booking.appointmentId) {
         try {
@@ -229,12 +229,12 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
           })
           if (appointment && (appointment as { location?: unknown }).location) {
             const loc = (appointment as { location?: unknown }).location
-            workshopLocation =
-              typeof loc === 'object' && loc !== null
-                ? ((loc as { name?: string }).name ?? '')
-                : typeof loc === 'string'
-                  ? loc
-                  : ''
+            if (typeof loc === 'object' && loc !== null) {
+              const l = loc as { name?: string; address?: string }
+              workshopLocation = [l.name, l.address].filter(Boolean).join(', ')
+            } else if (typeof loc === 'string') {
+              workshopLocation = loc
+            }
           }
         } catch {
           // ignore — location is best-effort
@@ -266,6 +266,8 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
               (updateData.firstName as string) || booking.firstName || bookingEmail,
             ),
             BOOKING_ID: String(booking.id),
+            BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
+            BOOKING_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.com'}/account/orders`,
           },
         })
         payload.logger.info(

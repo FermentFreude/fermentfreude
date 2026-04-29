@@ -275,7 +275,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               <h2 className="text-ff-black mb-3 text-[1.55rem] leading-[1.05]">{workshop.title}</h2>
               <p className="text-body-sm text-ff-olive text-sm leading-relaxed mb-3">{workshop.description}</p>
 
-              <div className="relative overflow-hidden rounded-xl aspect-[4/3] mb-3">
+              <div className="relative overflow-hidden rounded-xl aspect-4/3 mb-3">
                 {workshop.image ? (
                   <Media
                     resource={workshop.image}
@@ -372,8 +372,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       </section>
 
       {/* Desktop: keep horizontal moving workshop section */}
-      <div ref={outerRef} className="relative hidden lg:block bg-white min-h-[100svh]">
-        <section className="sticky top-0 w-full h-[100svh] bg-white overflow-hidden">
+      <div ref={outerRef} className="relative hidden lg:block bg-white min-h-svh">
+        <section className="sticky top-0 w-full h-svh bg-white overflow-hidden">
           <p className="absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
             scroll →
           </p>

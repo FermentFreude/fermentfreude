@@ -891,6 +891,7 @@
   --ff-gold-light: #edd195;
   --ff-gray-text: #595959;
   --ff-gray-text-light: #6b6b6b;
+  --ff-text-muted: #6b6b6b;
   --ff-border-light: #e8e4d9;
   --ff-card-gray: rgba(193, 193, 193, 0.65);
   --ff-olive: #4b4f4a;
@@ -1014,6 +1015,7 @@
   --color-ff-gold-light: var(--ff-gold-light);
   --color-ff-gray-text: var(--ff-gray-text);
   --color-ff-gray-text-light: var(--ff-gray-text-light);
+  --color-ff-text-muted: var(--ff-text-muted);
   --color-ff-border-light: var(--ff-border-light);
   --color-ff-card-gray: var(--ff-card-gray);
   --color-ff-gray-15: var(--ff-gray-15);

@@ -74,10 +74,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             <div className="w-20 h-20 rounded-full bg-[#555954] flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-subheading font-display text-(--ff-near-black) mb-2">
+            <h1 className="text-subheading font-display text-ff-near-black mb-2">
               {locale === 'de' ? 'Bestellung bestätigt' : 'Order confirmed'}
             </h1>
-            <p className="text-body-sm text-(--ff-text-muted)">
+            <p className="text-body-sm text-ff-text-muted">
               {locale === 'de'
                 ? 'Ihre Zahlung wurde verarbeitet. Ihre Bestellung ist bestätigt.'
                 : 'Your payment has been processed and your order is confirmed.'}
@@ -87,25 +87,25 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
 
         {/* Order Info */}
         {orderId && (
-          <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-            <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-4">
+          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+            <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
               {t.orderInfo}
             </h2>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-(--ff-text-muted)">{t.orderNumber}</span>
-                <span className="font-semibold text-(--ff-near-black)">
+                <span className="text-ff-text-muted">{t.orderNumber}</span>
+                <span className="font-semibold text-ff-near-black">
                   #{orderId.slice(0, 8).toUpperCase()}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-(--ff-text-muted)">{t.orderDate}</span>
-                <span className="font-semibold text-(--ff-near-black)">
+                <span className="text-ff-text-muted">{t.orderDate}</span>
+                <span className="font-semibold text-ff-near-black">
                   {formatDate(new Date().toISOString())}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-(--ff-text-muted)">{t.emailConfirmation}</span>
+                <span className="text-ff-text-muted">{t.emailConfirmation}</span>
                 <span className="font-semibold text-[#555954]">{t.sentToInbox}</span>
               </div>
             </div>
@@ -114,17 +114,17 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
 
         {/* Pickup Details */}
         <Card className="p-6 border border-blue-200 shadow-sm rounded-[--radius-lg] bg-blue-50">
-          <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-4">
+          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
             {locale === 'de' ? 'Abholdetails' : 'Pickup Details'}
           </h2>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <Store className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
               <div>
-                <p className="text-body-sm font-semibold text-(--ff-near-black)">
+                <p className="text-body-sm font-semibold text-ff-near-black">
                   {locale === 'de' ? 'The Ginery' : 'The Ginery'}
                 </p>
-                <p className="text-body-sm text-(--ff-text-muted)">
+                <p className="text-body-sm text-ff-text-muted">
                   Grabenstraße 15, 8010 Graz, Austria
                 </p>
               </div>
@@ -133,10 +133,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               <div className="flex items-start gap-3">
                 <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
                 <div>
-                  <p className="text-body-sm font-semibold text-(--ff-near-black)">
+                  <p className="text-body-sm font-semibold text-ff-near-black">
                     {locale === 'de' ? 'Abholdatum' : 'Pickup Date'}
                   </p>
-                  <p className="text-body-sm text-(--ff-text-muted)">{pickupInfo.date}</p>
+                  <p className="text-body-sm text-ff-text-muted">{pickupInfo.date}</p>
                 </div>
               </div>
             )}
@@ -144,10 +144,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               <div className="flex items-start gap-3">
                 <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
                 <div>
-                  <p className="text-body-sm font-semibold text-(--ff-near-black)">
+                  <p className="text-body-sm font-semibold text-ff-near-black">
                     {locale === 'de' ? 'Abholzeit' : 'Pickup Time'}
                   </p>
-                  <p className="text-body-sm text-(--ff-text-muted)">{pickupInfo.time}</p>
+                  <p className="text-body-sm text-ff-text-muted">{pickupInfo.time}</p>
                 </div>
               </div>
             )}
@@ -155,8 +155,8 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         </Card>
 
         {/* Timeline */}
-        <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-          <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-6">
+        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-6">
             {t.whatsNext}
           </h2>
           <div className="space-y-6">
@@ -165,10 +165,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <CheckCircle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {locale === 'de' ? 'Bestellung bestätigt' : 'Order confirmed'}
                 </h3>
-                <p className="text-body-sm text-(--ff-text-muted)">
+                <p className="text-body-sm text-ff-text-muted">
                   {locale === 'de'
                     ? 'Deine Zahlung wurde verarbeitet und deine Bestellung ist bestätigt.'
                     : 'Your payment has been processed and your order is confirmed.'}
@@ -177,14 +177,14 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             </div>
 
             <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full border-2 border-(--ff-gold) flex items-center justify-center shrink-0">
-                <Package className="w-6 h-6 text-(--ff-gold)" />
+              <div className="w-10 h-10 rounded-full border-2 border-ff-gold flex items-center justify-center shrink-0">
+                <Package className="w-6 h-6 text-ff-gold" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {locale === 'de' ? 'Vorbereitung und Abholung' : 'Preparation & Pickup'}
                 </h3>
-                <p className="text-body-sm text-(--ff-text-muted)">
+                <p className="text-body-sm text-ff-text-muted">
                   {locale === 'de'
                     ? 'Wir bereiten deine Artikel vor und halten sie zur Abholung bereit.'
                     : 'We will prepare your items and have them ready for pickup.'}
@@ -193,14 +193,14 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             </div>
 
             <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full border-2 border-(--ff-gold) flex items-center justify-center shrink-0">
-                <Store className="w-6 h-6 text-(--ff-gold)" />
+              <div className="w-10 h-10 rounded-full border-2 border-ff-gold flex items-center justify-center shrink-0">
+                <Store className="w-6 h-6 text-ff-gold" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {locale === 'de' ? 'Abholen' : 'Ready for Pickup'}
                 </h3>
-                <p className="text-body-sm text-(--ff-text-muted)">
+                <p className="text-body-sm text-ff-text-muted">
                   {locale === 'de'
                     ? 'Hole deine Artikel zu deiner gewählten Zeit und am gewählten Datum ab.'
                     : 'Pick up your items at your selected time and date.'}
@@ -211,26 +211,26 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         </Card>
 
         {/* Next Steps */}
-        <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-          <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-4">
+        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
             {t.whatYouCanDo}
           </h2>
           <div className="space-y-3">
-            <div className="flex items-start gap-3 p-3 bg-(--ff-cream) rounded-[--radius-lg]">
-              <span className="text-(--ff-gold) font-bold">&bull;</span>
-              <p className="text-body-sm text-(--ff-text-muted)">{t.checkEmail}</p>
+            <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
+              <span className="text-ff-gold font-bold">&bull;</span>
+              <p className="text-body-sm text-ff-text-muted">{t.checkEmail}</p>
             </div>
-            <div className="flex items-start gap-3 p-3 bg-(--ff-cream) rounded-[--radius-lg]">
-              <span className="text-(--ff-gold) font-bold">&bull;</span>
-              <p className="text-body-sm text-(--ff-text-muted)">
+            <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
+              <span className="text-ff-gold font-bold">&bull;</span>
+              <p className="text-body-sm text-ff-text-muted">
                 {locale === 'de'
                   ? 'Überprüfe dein Konto-Dashboard, um den Bestellstatus zu verfolgen.'
                   : 'Visit your account dashboard to track your order status.'}
               </p>
             </div>
-            <div className="flex items-start gap-3 p-3 bg-(--ff-cream) rounded-[--radius-lg]">
-              <span className="text-(--ff-gold) font-bold">&bull;</span>
-              <p className="text-body-sm text-(--ff-text-muted)">{t.contactUs}</p>
+            <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
+              <span className="text-ff-gold font-bold">&bull;</span>
+              <p className="text-body-sm text-ff-text-muted">{t.contactUs}</p>
             </div>
           </div>
         </Card>
@@ -239,29 +239,29 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href="/account/orders"
-            className="flex-1 px-6 py-3 bg-(--ff-gold) text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+            className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
           >
             {locale === 'de' ? 'Meine Bestellungen anzeigen' : 'View My Orders'}
           </Link>
           <Link
             href="/shop"
-            className="flex-1 px-6 py-3 border border-(--ff-border-light) text-(--ff-near-black) rounded-[--radius-pill] hover:bg-(--ff-cream) transition-colors font-display font-medium text-center"
+            className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
           >
             {t.continueShopping}
           </Link>
         </div>
 
         {/* Support */}
-        <Card className="p-6 border-0 shadow-sm bg-(--ff-cream) rounded-[--radius-lg]">
-          <h3 className="font-display font-semibold text-(--ff-near-black) mb-2">{t.questions}</h3>
-          <p className="text-body-sm text-(--ff-text-muted) mb-4">
+        <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-[--radius-lg]">
+          <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
+          <p className="text-body-sm text-ff-text-muted mb-4">
             {locale === 'de'
               ? 'Hast du Fragen zu deiner Bestellung?'
               : 'Do you have questions about your order?'}
           </p>
           <a
             href="mailto:fermentfreude@gmail.com"
-            className="text-(--ff-gold) hover:opacity-80 font-display font-medium"
+            className="text-ff-gold hover:opacity-80 font-display font-medium"
           >
             {t.contactSupport}
           </a>
@@ -280,34 +280,34 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             <div className="w-20 h-20 rounded-full bg-[#555954] flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-subheading font-display text-(--ff-near-black) mb-2">
+            <h1 className="text-subheading font-display text-ff-near-black mb-2">
               {t.workshopConfirmed}
             </h1>
-            <p className="text-body-sm text-(--ff-text-muted)">{t.workshopConfirmDesc}</p>
+            <p className="text-body-sm text-ff-text-muted">{t.workshopConfirmDesc}</p>
           </div>
         </Card>
 
         {/* Order Info */}
         {orderId && (
-          <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-            <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-4">
+          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+            <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
               {t.orderInfo}
             </h2>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-(--ff-text-muted)">{t.orderNumber}</span>
-                <span className="font-semibold text-(--ff-near-black)">
+                <span className="text-ff-text-muted">{t.orderNumber}</span>
+                <span className="font-semibold text-ff-near-black">
                   #{orderId.slice(0, 8).toUpperCase()}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-(--ff-text-muted)">{t.orderDate}</span>
-                <span className="font-semibold text-(--ff-near-black)">
+                <span className="text-ff-text-muted">{t.orderDate}</span>
+                <span className="font-semibold text-ff-near-black">
                   {formatDate(new Date().toISOString())}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-(--ff-text-muted)">{t.emailConfirmation}</span>
+                <span className="text-ff-text-muted">{t.emailConfirmation}</span>
                 <span className="font-semibold text-[#555954]">{t.sentToInbox}</span>
               </div>
             </div>
@@ -315,8 +315,8 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         )}
 
         {/* What's Next — Workshop */}
-        <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-          <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-6">
+        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-6">
             {t.whatsNext}
           </h2>
           <div className="space-y-6">
@@ -325,34 +325,34 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <CheckCircle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {t.bookingConfirmed}
                 </h3>
-                <p className="text-body-sm text-(--ff-text-muted)">{t.bookingConfirmedDesc}</p>
+                <p className="text-body-sm text-ff-text-muted">{t.bookingConfirmedDesc}</p>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-(--ff-gold) flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-ff-gold flex items-center justify-center shrink-0">
                 <Mail className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {t.confirmationEmail}
                 </h3>
-                <p className="text-body-sm text-(--ff-text-muted)">{t.confirmationEmailDesc}</p>
+                <p className="text-body-sm text-ff-text-muted">{t.confirmationEmailDesc}</p>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-(--ff-near-black) flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-ff-near-black flex items-center justify-center shrink-0">
                 <CalendarCheck className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {t.workshopDay}
                 </h3>
-                <p className="text-body-sm text-(--ff-text-muted)">{t.workshopDayDesc}</p>
+                <p className="text-body-sm text-ff-text-muted">{t.workshopDayDesc}</p>
               </div>
             </div>
           </div>
@@ -362,25 +362,25 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href={orderId ? `/account/orders/${orderId}` : '/account/orders'}
-            className="flex-1 px-6 py-3 bg-(--ff-near-black) text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+            className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
           >
             {t.viewBookingDetails}
           </Link>
           <Link
             href="/workshops"
-            className="flex-1 px-6 py-3 border border-(--ff-border-light) text-(--ff-near-black) rounded-[--radius-pill] hover:bg-(--ff-cream) transition-colors font-display font-medium text-center"
+            className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
           >
             {t.browseMoreWorkshops}
           </Link>
         </div>
 
         {/* Support */}
-        <Card className="p-6 border-0 shadow-sm bg-(--ff-cream) rounded-[--radius-lg]">
-          <h3 className="font-display font-semibold text-(--ff-near-black) mb-2">{t.questions}</h3>
-          <p className="text-body-sm text-(--ff-text-muted) mb-4">{t.questionsDescWorkshop}</p>
+        <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-[--radius-lg]">
+          <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
+          <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescWorkshop}</p>
           <a
             href="mailto:fermentfreude@gmail.com"
-            className="text-(--ff-gold) hover:opacity-80 font-display font-medium"
+            className="text-ff-gold hover:opacity-80 font-display font-medium"
           >
             {t.contactSupport}
           </a>
@@ -399,34 +399,34 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             <div className="w-20 h-20 rounded-full bg-[#555954] flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-subheading font-display text-(--ff-near-black) mb-2">
+            <h1 className="text-subheading font-display text-ff-near-black mb-2">
               {t.welcomeToCourse}
             </h1>
-            <p className="text-body-sm text-(--ff-text-muted)">{t.courseConfirmDesc}</p>
+            <p className="text-body-sm text-ff-text-muted">{t.courseConfirmDesc}</p>
           </div>
         </Card>
 
         {/* Order Info */}
         {orderId && (
-          <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-            <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-4">
+          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+            <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
               {t.orderInfo}
             </h2>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-(--ff-text-muted)">{t.orderNumber}</span>
-                <span className="font-semibold text-(--ff-near-black)">
+                <span className="text-ff-text-muted">{t.orderNumber}</span>
+                <span className="font-semibold text-ff-near-black">
                   #{orderId.slice(0, 8).toUpperCase()}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-(--ff-text-muted)">{t.orderDate}</span>
-                <span className="font-semibold text-(--ff-near-black)">
+                <span className="text-ff-text-muted">{t.orderDate}</span>
+                <span className="font-semibold text-ff-near-black">
                   {formatDate(new Date().toISOString())}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-(--ff-text-muted)">{t.access}</span>
+                <span className="text-ff-text-muted">{t.access}</span>
                 <span className="font-semibold text-[#555954]">{t.lifetimeAccess}</span>
               </div>
             </div>
@@ -434,8 +434,8 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         )}
 
         {/* What's Next — Course */}
-        <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-          <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-6">
+        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-6">
             {t.whatsNext}
           </h2>
           <div className="space-y-6">
@@ -444,34 +444,34 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <CheckCircle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {t.paymentConfirmed}
                 </h3>
-                <p className="text-body-sm text-(--ff-text-muted)">{t.paymentConfirmedDesc}</p>
+                <p className="text-body-sm text-ff-text-muted">{t.paymentConfirmedDesc}</p>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-(--ff-gold) flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-ff-gold flex items-center justify-center shrink-0">
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {t.youreEnrolled}
                 </h3>
-                <p className="text-body-sm text-(--ff-text-muted)">{t.enrolledDesc}</p>
+                <p className="text-body-sm text-ff-text-muted">{t.enrolledDesc}</p>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-(--ff-near-black) flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-ff-near-black flex items-center justify-center shrink-0">
                 <Play className="w-5 h-5 text-white ml-0.5" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {t.startLearning}
                 </h3>
-                <p className="text-body-sm text-(--ff-text-muted)">{t.startLearningDesc}</p>
+                <p className="text-body-sm text-ff-text-muted">{t.startLearningDesc}</p>
               </div>
             </div>
           </div>
@@ -481,25 +481,25 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href="/account/learning"
-            className="flex-1 px-6 py-3 bg-(--ff-near-black) text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+            className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
           >
             {t.goToLearning}
           </Link>
           <Link
             href="/courses"
-            className="flex-1 px-6 py-3 border border-(--ff-border-light) text-(--ff-near-black) rounded-[--radius-pill] hover:bg-(--ff-cream) transition-colors font-display font-medium text-center"
+            className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
           >
             {t.browseMoreCourses}
           </Link>
         </div>
 
         {/* Support */}
-        <Card className="p-6 border-0 shadow-sm bg-(--ff-cream) rounded-[--radius-lg]">
-          <h3 className="font-display font-semibold text-(--ff-near-black) mb-2">{t.questions}</h3>
-          <p className="text-body-sm text-(--ff-text-muted) mb-4">{t.questionsDescCourse}</p>
+        <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-[--radius-lg]">
+          <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
+          <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescCourse}</p>
           <a
             href="mailto:fermentfreude@gmail.com"
-            className="text-(--ff-gold) hover:opacity-80 font-display font-medium"
+            className="text-ff-gold hover:opacity-80 font-display font-medium"
           >
             {t.contactSupport}
           </a>
@@ -517,34 +517,34 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           <div className="w-20 h-20 rounded-full bg-[#555954] flex items-center justify-center mx-auto mb-5">
             <CheckCircle className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-subheading font-display text-(--ff-near-black) mb-2">
+          <h1 className="text-subheading font-display text-ff-near-black mb-2">
             {t.thankYouOrder}
           </h1>
-          <p className="text-body-sm text-(--ff-text-muted)">{t.orderPlacedDesc}</p>
+          <p className="text-body-sm text-ff-text-muted">{t.orderPlacedDesc}</p>
         </div>
       </Card>
 
       {/* Order Info */}
       {orderId && (
-        <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-          <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-4">
+        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
             {t.orderInfo}
           </h2>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-(--ff-text-muted)">{t.orderNumber}</span>
-              <span className="font-semibold text-(--ff-near-black)">
+              <span className="text-ff-text-muted">{t.orderNumber}</span>
+              <span className="font-semibold text-ff-near-black">
                 #{orderId.slice(0, 8).toUpperCase()}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-(--ff-text-muted)">{t.orderDate}</span>
-              <span className="font-semibold text-(--ff-near-black)">
+              <span className="text-ff-text-muted">{t.orderDate}</span>
+              <span className="font-semibold text-ff-near-black">
                 {formatDate(new Date().toISOString())}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-(--ff-text-muted)">{t.emailConfirmation}</span>
+              <span className="text-ff-text-muted">{t.emailConfirmation}</span>
               <span className="font-semibold text-[#555954]">{t.sentToInbox}</span>
             </div>
           </div>
@@ -552,8 +552,8 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
       )}
 
       {/* Timeline */}
-      <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-        <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-6">
+      <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+        <h2 className="text-lg font-display font-semibold text-ff-near-black mb-6">
           {t.whatsNext}
         </h2>
         <div className="space-y-6">
@@ -562,56 +562,56 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               <CheckCircle className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+              <h3 className="font-display font-semibold text-ff-near-black mb-1">
                 {t.orderConfirmed}
               </h3>
-              <p className="text-body-sm text-(--ff-text-muted)">{t.orderConfirmedDesc}</p>
+              <p className="text-body-sm text-ff-text-muted">{t.orderConfirmedDesc}</p>
             </div>
           </div>
 
           <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-full border-2 border-(--ff-gold) flex items-center justify-center shrink-0">
-              <Package className="w-6 h-6 text-(--ff-gold)" />
+            <div className="w-10 h-10 rounded-full border-2 border-ff-gold flex items-center justify-center shrink-0">
+              <Package className="w-6 h-6 text-ff-gold" />
             </div>
             <div>
-              <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+              <h3 className="font-display font-semibold text-ff-near-black mb-1">
                 {t.processingShipping}
               </h3>
-              <p className="text-body-sm text-(--ff-text-muted)">{t.processingShippingDesc}</p>
+              <p className="text-body-sm text-ff-text-muted">{t.processingShippingDesc}</p>
             </div>
           </div>
 
           <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-full border-2 border-(--ff-gold) flex items-center justify-center shrink-0">
-              <Truck className="w-6 h-6 text-(--ff-gold)" />
+            <div className="w-10 h-10 rounded-full border-2 border-ff-gold flex items-center justify-center shrink-0">
+              <Truck className="w-6 h-6 text-ff-gold" />
             </div>
             <div>
-              <h3 className="font-display font-semibold text-(--ff-near-black) mb-1">
+              <h3 className="font-display font-semibold text-ff-near-black mb-1">
                 {t.onTheWay}
               </h3>
-              <p className="text-body-sm text-(--ff-text-muted)">{t.onTheWayDesc}</p>
+              <p className="text-body-sm text-ff-text-muted">{t.onTheWayDesc}</p>
             </div>
           </div>
         </div>
       </Card>
 
       {/* Next Steps */}
-      <Card className="p-6 border border-(--ff-border-light) shadow-sm rounded-[--radius-lg]">
-        <h2 className="text-lg font-display font-semibold text-(--ff-near-black) mb-4">
+      <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+        <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
           {t.whatYouCanDo}
         </h2>
         <div className="space-y-3">
-          <div className="flex items-start gap-3 p-3 bg-(--ff-cream) rounded-[--radius-lg]">
-            <span className="text-(--ff-gold) font-bold">&bull;</span>
-            <p className="text-body-sm text-(--ff-text-muted)">{t.checkEmail}</p>
+          <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
+            <span className="text-ff-gold font-bold">&bull;</span>
+            <p className="text-body-sm text-ff-text-muted">{t.checkEmail}</p>
           </div>
-          <div className="flex items-start gap-3 p-3 bg-(--ff-cream) rounded-[--radius-lg]">
-            <span className="text-(--ff-gold) font-bold">&bull;</span>
-            <p className="text-body-sm text-(--ff-text-muted)">{t.visitDashboard}</p>
+          <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
+            <span className="text-ff-gold font-bold">&bull;</span>
+            <p className="text-body-sm text-ff-text-muted">{t.visitDashboard}</p>
           </div>
-          <div className="flex items-start gap-3 p-3 bg-(--ff-cream) rounded-[--radius-lg]">
-            <span className="text-(--ff-gold) font-bold">&bull;</span>
-            <p className="text-body-sm text-(--ff-text-muted)">{t.contactUs}</p>
+          <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
+            <span className="text-ff-gold font-bold">&bull;</span>
+            <p className="text-body-sm text-ff-text-muted">{t.contactUs}</p>
           </div>
         </div>
       </Card>
@@ -620,25 +620,25 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
       <div className="flex flex-col sm:flex-row gap-3">
         <Link
           href="/account/orders"
-          className="flex-1 px-6 py-3 bg-(--ff-gold) text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+          className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
         >
           {t.viewMyOrders}
         </Link>
         <Link
           href="/shop"
-          className="flex-1 px-6 py-3 border border-(--ff-border-light) text-(--ff-near-black) rounded-[--radius-pill] hover:bg-(--ff-cream) transition-colors font-display font-medium text-center"
+          className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
         >
           {t.continueShopping}
         </Link>
       </div>
 
       {/* Support */}
-      <Card className="p-6 border-0 shadow-sm bg-(--ff-cream) rounded-[--radius-lg]">
-        <h3 className="font-display font-semibold text-(--ff-near-black) mb-2">{t.questions}</h3>
-        <p className="text-body-sm text-(--ff-text-muted) mb-4">{t.questionsDescOrder}</p>
+      <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-[--radius-lg]">
+        <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
+        <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescOrder}</p>
         <a
           href="mailto:fermentfreude@gmail.com"
-          className="text-(--ff-gold) hover:opacity-80 font-display font-medium"
+          className="text-ff-gold hover:opacity-80 font-display font-medium"
         >
           {t.contactSupport}
         </a>
