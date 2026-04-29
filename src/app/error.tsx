@@ -1,25 +1,35 @@
 'use client'
 
 export default function RootError({
-  error: _error,
+  error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
   return (
-    <div className="mx-auto my-8 flex max-w-xl flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12">
-      <h2 className="text-xl font-bold">Something went wrong</h2>
-      <p className="my-2 text-neutral-600">
-        An unexpected error occurred. Please try again.
-      </p>
-      <button
-        className="mx-auto mt-4 flex w-full items-center justify-center rounded-full bg-[#333333] p-4 font-display font-bold tracking-wide text-white hover:bg-[#1a1a1a]"
-        onClick={() => reset()}
-        type="button"
-      >
-        Try Again
-      </button>
-    </div>
+    <main className="min-h-[70vh] w-full flex items-center justify-center px-4 py-12 sm:py-16 md:py-24">
+      <div className="w-full max-w-xl mx-auto flex flex-col items-start bg-[#FAF7F2] border border-[#1d1d1d]/10 rounded-2xl p-6 sm:p-8 md:p-10">
+        <span className="font-sans text-[10px] uppercase tracking-widest font-semibold bg-[#e6be68] px-1.5 py-0.5 mb-4">
+          Error
+        </span>
+        <h1 className="font-display font-black text-2xl sm:text-3xl md:text-4xl uppercase leading-[1.05] tracking-tight text-[#1d1d1d]">
+          Something went wrong
+        </h1>
+        <p className="mt-3 font-sans text-sm sm:text-base text-[#1d1d1d]/75">
+          An unexpected error occurred. Please try again.
+        </p>
+        {error?.digest ? (
+          <p className="mt-2 font-sans text-xs text-[#1d1d1d]/40">Ref: {error.digest}</p>
+        ) : null}
+        <button
+          className="mt-6 w-full sm:w-auto inline-flex items-center justify-center bg-[#1d1d1d] hover:bg-[#000] text-white font-display font-bold tracking-wide uppercase text-sm px-6 py-3 rounded-full transition-colors"
+          onClick={() => reset()}
+          type="button"
+        >
+          Try Again
+        </button>
+      </div>
+    </main>
   )
 }

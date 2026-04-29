@@ -32,8 +32,12 @@ export function OpeningPopups({ locale }: Props) {
 
     setInitialized(true)
 
-    if (!localStorage.getItem(COOKIE_BANNER_KEY)) {
+    const cookieDismissed = Boolean(localStorage.getItem(COOKIE_BANNER_KEY))
+    if (!cookieDismissed) {
       setCookieBannerOpen(true)
+      // Don't queue the newsletter while the cookie banner is visible — it will
+      // start once the user accepts (see acceptCookies).
+      return
     }
 
     // Show newsletter after 15s if the user hasn't subscribed yet.
@@ -54,6 +58,14 @@ export function OpeningPopups({ locale }: Props) {
   const acceptCookies = () => {
     localStorage.setItem(COOKIE_BANNER_KEY, '1')
     setCookieBannerOpen(false)
+    // Now that the cookie banner is gone, queue the newsletter (if not already subscribed).
+    if (typeof window !== 'undefined' && !localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY)) {
+      window.setTimeout(() => {
+        if (!localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY)) {
+          setNewsletterOpen(true)
+        }
+      }, 15000)
+    }
   }
 
   const submitNewsletter = async (event: React.FormEvent) => {
@@ -116,31 +128,64 @@ export function OpeningPopups({ locale }: Props) {
   return (
     <>
       {cookieBannerOpen ? (
-        <div className="fixed inset-x-4 bottom-4 z-90 sm:left-6 sm:right-6 sm:bottom-6 lg:left-auto lg:right-8 lg:max-w-md">
-          <div className="rounded-2xl border border-[#1d1d1d]/12 bg-[#fdfbf8]/95 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)] backdrop-blur">
-            <p className="font-display text-sm font-bold text-[#1d1d1d] sm:text-base">
-              {isDe ? 'Cookies' : 'Cookies'}
+        <div
+          className="fixed bottom-4 left-1/2 z-90 w-[min(340px,calc(100vw-2rem))] -translate-x-1/2 sm:bottom-6 sm:left-auto sm:right-6 sm:translate-x-0"
+          role="dialog"
+          aria-label={isDe ? 'Cookie-Hinweis' : 'Cookie notice'}
+        >
+          <div
+            className="relative flex flex-col items-center gap-3 px-5 pt-5 pb-4 text-center"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 30,
+              border: '1px solid rgba(0,0,0,0.2)',
+              boxShadow: '0 12px 32px rgba(0,0,0,0.08)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={acceptCookies}
+              aria-label={isDe ? 'Schliessen' : 'Close'}
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-[#1d1d1d]/60 transition-colors hover:bg-[#1d1d1d]/5 hover:text-[#1d1d1d]"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            <div className="text-4xl leading-none" aria-hidden="true">🍪</div>
+
+            <h2 className="font-display text-base font-bold tracking-tight text-[#1d1d1d]">
+              {isDe ? 'Hallo, wir nutzen Cookies!' : 'Hi, we use cookies!'}
+            </h2>
+
+            <p className="font-sans text-xs leading-relaxed text-[#1d1d1d]/70">
+              {isDe ? (
+                <>
+                  Notwendige Cookies halten die Website am Laufen. Mehr dazu in unserer{' '}
+                  <Link href="/datenschutz" className="underline underline-offset-2 hover:text-[#1d1d1d]">
+                    Datenschutzerklaerung
+                  </Link>
+                  .
+                </>
+              ) : (
+                <>
+                  We use essential cookies to keep the site running. Read more in our{' '}
+                  <Link href="/datenschutz" className="underline underline-offset-2 hover:text-[#1d1d1d]">
+                    Privacy Policy
+                  </Link>
+                  .
+                </>
+              )}
             </p>
-            <p className="mt-2 font-sans text-xs leading-relaxed text-[#1d1d1d]/75 sm:text-sm">
-              {isDe
-                ? 'Wir verwenden notwendige Cookies, damit die Website funktioniert. Mehr dazu findest du in unserer Datenschutzerklaerung.'
-                : 'We use essential cookies to keep the website working. You can find more details in our privacy policy.'}
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={acceptCookies}
-                className="rounded-full bg-[#4B4F4A] px-4 py-2 font-display text-xs font-bold text-white transition-colors hover:bg-[#3A3E39] sm:text-sm"
-              >
-                {isDe ? 'Verstanden' : 'Got it'}
-              </button>
-              <Link
-                href={isDe ? '/datenschutz' : '/datenschutz'}
-                className="rounded-full border border-[#1d1d1d]/15 px-4 py-2 font-display text-xs font-bold text-[#1d1d1d] transition-colors hover:bg-[#1d1d1d]/5 sm:text-sm"
-              >
-                {isDe ? 'Datenschutz' : 'Privacy Policy'}
-              </Link>
-            </div>
+
+            <button
+              type="button"
+              onClick={acceptCookies}
+              className="mt-1 w-full rounded-full bg-[#1d1d1d] px-6 py-2.5 font-display text-sm font-bold text-white transition-colors hover:bg-black"
+            >
+              {isDe ? 'Verstanden' : 'Allow'}
+            </button>
           </div>
         </div>
       ) : null}

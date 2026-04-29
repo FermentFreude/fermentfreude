@@ -66,14 +66,49 @@ const DEFAULTS = {
   voucherBenefitsHeading: 'What’s included',
   voucherBenefitsSubtitle: 'All at a glance',
   voucherBenefits: [
-    { text: 'Valid for all workshops', subtext: 'Kombucha, Lacto-vegetables, Tempeh & seasonal' },
-    { text: 'No expiry date', subtext: 'Valid indefinitely' },
-    { text: 'Suitable for beginners & pros', subtext: 'All experience levels welcome' },
-    { text: 'Small groups', subtext: 'Maximum 8 people for intensive support' },
-    { text: 'Quickly available', subtext: 'Digital via email or pick-up at the store' },
-    { text: 'Starter kits & tastings included', subtext: 'Everything to continue at home' },
-    { text: 'Hands-on with ferments to take home', subtext: 'Your own creations and fermentation vessels' },
-    { text: 'Flexible date choice', subtext: 'Workshops available year-round' },
+    {
+      text: 'Valid for all workshops',
+      subtext: 'Kombucha, Lacto-vegetables, Tempeh & seasonal',
+      icon: 'calendar' as const,
+      iconSource: 'preset' as const,
+    },
+    { text: 'No expiry date', subtext: 'Valid indefinitely', icon: 'shield' as const, iconSource: 'preset' as const },
+    {
+      text: 'Suitable for beginners & pros',
+      subtext: 'All experience levels welcome',
+      icon: 'users' as const,
+      iconSource: 'preset' as const,
+    },
+    {
+      text: 'Small groups',
+      subtext: 'Maximum 8 people for intensive support',
+      icon: 'usersRound' as const,
+      iconSource: 'preset' as const,
+    },
+    {
+      text: 'Quickly available',
+      subtext: 'Digital via email or pick-up at the store',
+      icon: 'zap' as const,
+      iconSource: 'preset' as const,
+    },
+    {
+      text: 'Starter kits & tastings included',
+      subtext: 'Everything to continue at home',
+      icon: 'package' as const,
+      iconSource: 'preset' as const,
+    },
+    {
+      text: 'Hands-on with ferments to take home',
+      subtext: 'Your own creations and fermentation vessels',
+      icon: 'calendar' as const,
+      iconSource: 'preset' as const,
+    },
+    {
+      text: 'Flexible date choice',
+      subtext: 'Workshops available year-round',
+      icon: 'shield' as const,
+      iconSource: 'preset' as const,
+    },
   ],
   voucherHowHeading: 'How it works',
   voucherHowSteps: [
@@ -147,7 +182,7 @@ export default async function VoucherPage() {
       ? deliveryOptionsData.map((d) => ({
           type: d.type,
           title: d.title,
-          icon: d.icon,
+          icon: d.icon ?? 'email',
         }))
       : DEFAULTS.deliveryOptions
 
@@ -170,6 +205,8 @@ export default async function VoucherPage() {
     voucherWhyBenefitsData && voucherWhyBenefitsData.length >= 4
       ? voucherWhyBenefitsData.map((b) => ({
           icon: b.icon,
+          iconSource: b.iconSource ?? null,
+          customIcon: typeof b.customIcon === 'object' && b.customIcon !== null ? b.customIcon : null,
           title: b.title,
           description: b.description,
         }))
@@ -187,7 +224,13 @@ export default async function VoucherPage() {
   const voucherBenefits =
     voucherBenefitsData && voucherBenefitsData.length > 0
       ? voucherBenefitsData
-          .map((b) => ({ text: b.text, subtext: b.subtext ?? null }))
+          .map((b) => ({
+            text: b.text,
+            subtext: b.subtext ?? null,
+            icon: b.icon ?? null,
+            iconSource: b.iconSource ?? null,
+            customIcon: typeof b.customIcon === 'object' && b.customIcon !== null ? b.customIcon : null,
+          }))
           .filter((b) => b.text)
       : DEFAULTS.voucherBenefits
   const voucherHowHeading = resolve(v?.voucherHowHeading, DEFAULTS.voucherHowHeading)

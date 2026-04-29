@@ -272,20 +272,27 @@ export async function handleChargeSucceeded({
   req: PayloadRequest
   stripe: Stripe
 }): Promise<void> {
-  const charge = event.data.object as Stripe.Charge
+  const obj = event.data.object as Stripe.Charge | Stripe.PaymentIntent
   const { payload } = req
 
-  const paymentIntentId =
-    typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id
+  // Resolve PaymentIntent ID for both event types:
+  //   - charge.succeeded         → object is Charge,        use .payment_intent
+  //   - payment_intent.succeeded → object is PaymentIntent, use .id
+  let paymentIntentId: string | undefined
+  if (event.type === 'payment_intent.succeeded') {
+    paymentIntentId = (obj as Stripe.PaymentIntent).id
+  } else {
+    const charge = obj as Stripe.Charge
+    paymentIntentId =
+      typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id
+  }
 
   if (!paymentIntentId) {
-    payload.logger.warn('[stripe:charge_succeeded] No payment_intent on charge — skipping')
+    payload.logger.warn(`[stripe:${event.type}] No payment_intent could be resolved — skipping`)
     return
   }
 
-  payload.logger.info(
-    `[stripe:charge_succeeded] Charge ${charge.id} succeeded (PI: ${paymentIntentId})`,
-  )
+  payload.logger.info(`[stripe:${event.type}] ${obj.id} succeeded (PI: ${paymentIntentId})`)
 
   // Find the order by payment intent ID
   const orders = await payload.find({

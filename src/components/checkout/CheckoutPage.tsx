@@ -99,10 +99,10 @@ export const CheckoutPage: React.FC = () => {
     }),
   )
 
-  // Physical products (jarred, fresh, bottled) require store pickup
-  const isAllPhysicalPickup = Boolean(
-    cart?.items?.length &&
-    cart.items.every((item) => {
+  // Any physical item in the cart triggers store pickup (covers pure-physical AND
+  // mixed carts like workshop + jar — the workshop is in-person, the jar is picked up).
+  const hasPhysicalItem = Boolean(
+    cart?.items?.some((item) => {
       if (typeof item.product !== 'object' || item.product === null) return false
       const p = item.product as {
         productType?: string | null
@@ -115,6 +115,9 @@ export const CheckoutPage: React.FC = () => {
     }),
   )
 
+  // Backwards-compatible alias used by the JSX/payment branch below.
+  const isAllPhysicalPickup = hasPhysicalItem
+
   const hasWorkshop = Boolean(
     cart?.items?.some((item) => {
       if (typeof item.product !== 'object' || item.product === null) return false
@@ -126,11 +129,17 @@ export const CheckoutPage: React.FC = () => {
     }),
   )
 
+  // Button enable rules:
+  //   - all-digital cart (workshops + online courses only): email is enough.
+  //   - any physical item: email + pickup date + pickup time.
+  //   - otherwise (legacy fallback): email + billing/shipping address.
   const canGoToPayment = Boolean(
     checkoutEmail &&
-    (isAllDigital || isAllPhysicalPickup
-      ? pickupDate && pickupTime
-      : billingAddress && (billingAddressSameAsShipping || shippingAddress)),
+    (isAllDigital
+      ? true
+      : hasPhysicalItem
+        ? pickupDate && pickupTime
+        : billingAddress && (billingAddressSameAsShipping || shippingAddress)),
   )
 
   // Get available pickup time slots (only times 3+ hours from now)
@@ -487,7 +496,12 @@ export const CheckoutPage: React.FC = () => {
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               Store Pickup
             </h2>
-
+            {hasWorkshop && (
+              <div className="mb-6 rounded-lg bg-[#f5f1e8] px-5 py-4 text-body-sm text-[#555954]">
+                Your cart also includes a workshop. The pickup details below apply to the physical
+                products only — your workshop date stays as booked.
+              </div>
+            )}
             {/* Pickup Location */}
             <div className="mb-6 rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
               <h3 className="mb-3 font-display font-semibold text-ff-near-black">

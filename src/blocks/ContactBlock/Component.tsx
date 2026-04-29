@@ -83,6 +83,16 @@ export const ContactBlockComponent: React.FC<
     address: data?.contact?.address ?? footerContact?.location ?? DEFAULTS.contact.address,
   }
 
+  // Format address to reduce awkward line breaks:
+  // "Street, 8010 Graz" -> "Street 8010 Graz" (keep comma in "Graz, Austria").
+  const formattedAddress = contact.address
+    ? contact.address
+        // CMS textarea / copy-paste sometimes stores newlines; normalize to spaces.
+        .replace(/\s+/gu, ' ')
+        // Remove the comma right before the postal code.
+        .replace(/^(.+?),\s*(\d{4}\s*.*)$/u, '$1 $2')
+    : null
+
   const rawOptions = data?.contactForm?.subjectOptions?.options
   const subjectOptionsList =
     rawOptions && Array.isArray(rawOptions) && rawOptions.length > 0
@@ -221,11 +231,11 @@ export const ContactBlockComponent: React.FC<
                             </svg>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-body-sm font-display font-bold text-ff-charcoal">
+                            <p className="mb-0 text-body-sm font-display font-bold text-ff-charcoal">
                               Location
                             </p>
-                            <p className="mt-0.5 text-body leading-relaxed text-ff-gray-text-light">
-                              {contact.address}
+                            <p className="mb-0 whitespace-nowrap text-body-sm leading-relaxed text-ff-gray-text-light sm:text-body">
+                              {formattedAddress}
                             </p>
                           </div>
                         </div>
@@ -252,10 +262,10 @@ export const ContactBlockComponent: React.FC<
                             </svg>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-body-sm font-display font-bold text-ff-charcoal">
+                            <p className="mb-0 text-body-sm font-display font-bold text-ff-charcoal">
                               Phone
                             </p>
-                            <p className="mt-0.5 text-body leading-relaxed text-ff-gray-text-light">
+                            <p className="mb-0 text-body leading-relaxed text-ff-gray-text-light">
                               {contact.phone}
                             </p>
                           </div>
@@ -283,10 +293,10 @@ export const ContactBlockComponent: React.FC<
                             </svg>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-body-sm font-display font-bold text-ff-charcoal">
+                            <p className="mb-0 text-body-sm font-display font-bold text-ff-charcoal">
                               Mail
                             </p>
-                            <p className="mt-0.5 text-body leading-relaxed text-ff-gray-text-light">
+                            <p className="mb-0 text-body leading-relaxed text-ff-gray-text-light">
                               {contact.email}
                             </p>
                           </div>

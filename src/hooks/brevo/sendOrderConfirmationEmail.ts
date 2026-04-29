@@ -55,6 +55,10 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
     let guestCount = 0
     let workshopPrice = ''
 
+    // Cart-derived monetary breakdown
+    let cartSubtotal: number | null = null
+    let cartShipping: number | null = null
+
     // Try to find workshop bookings associated with this order
     try {
       // Get transaction for this order to find cart ID
@@ -75,6 +79,22 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
           typeof transaction.cart === 'object' ? transaction.cart?.id : transaction.cart
 
         if (cartId) {
+          // Pull cart for subtotal/shipping breakdown
+          try {
+            const cart = await req.payload.findByID({
+              collection: 'carts',
+              id: cartId,
+              depth: 0,
+              overrideAccess: true,
+            })
+            const c = cart as unknown as Record<string, unknown>
+            if (typeof c?.subtotal === 'number') cartSubtotal = c.subtotal as number
+            if (typeof c?.shipmentTotal === 'number') cartShipping = c.shipmentTotal as number
+            else if (typeof c?.shipping === 'number') cartShipping = c.shipping as number
+          } catch {
+            // ignore — cart fields are best-effort
+          }
+
           // Find workshop bookings with this cart ID
           const bookings = await req.payload.find({
             collection: 'workshop-bookings',
@@ -123,9 +143,38 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       )
     }
 
+    const fmtMoney = (n: number) => `€${n.toFixed(2).replace('.', ',')}`
+
+    const orderTotalNum = typeof doc.amount === 'number' ? doc.amount : null
+    const computedSubtotal =
+      cartSubtotal ??
+      (orderTotalNum !== null && cartShipping !== null ? orderTotalNum - cartShipping : null)
+
+    // Format shipping address (best effort)
+    let shippingAddressStr = ''
+    const addr = doc.shippingAddress as Record<string, string | null | undefined> | undefined
+    if (addr) {
+      const lines = [
+        [addr.firstName, addr.lastName].filter(Boolean).join(' '),
+        addr.company,
+        addr.addressLine1,
+        addr.addressLine2,
+        [addr.postalCode, addr.city].filter(Boolean).join(' '),
+        addr.country,
+      ].filter((l) => l && String(l).trim())
+      shippingAddressStr = lines.join('\n')
+    }
+
+    const orderNumber = String(doc.id).slice(-8).toUpperCase()
+
     const emailParams: Record<string, string> = {
       ORDER_ID: String(doc.id),
-      ORDER_TOTAL: String(doc.total ?? ''),
+      ORDER_NUMBER: orderNumber,
+      ORDER_TOTAL: orderTotalNum !== null ? fmtMoney(orderTotalNum) : '',
+      TOTAL: orderTotalNum !== null ? fmtMoney(orderTotalNum) : '',
+      SUBTOTAL: computedSubtotal !== null ? fmtMoney(computedSubtotal) : '',
+      SHIPPING: cartShipping !== null ? fmtMoney(cartShipping) : '€0,00',
+      SHIPPING_ADDRESS: shippingAddressStr,
       ORDER_ITEMS: itemSummary,
       CUSTOMER_NAME: recipientName || recipientEmail,
       ORDER_DATE: new Date().toLocaleDateString('de-DE'),

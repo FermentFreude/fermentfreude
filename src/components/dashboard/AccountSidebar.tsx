@@ -14,14 +14,18 @@ import {
   RotateCcw,
   ShoppingBag,
   Star,
-  Truck,
   User,
   XCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-type NavItem = { key: keyof AccountTranslations; href: string; exact?: boolean; icon: typeof LayoutDashboard }
+type NavItem = {
+  key: keyof AccountTranslations
+  href: string
+  exact?: boolean
+  icon: typeof LayoutDashboard
+}
 
 const NAV_GROUPS: { key: keyof AccountTranslations; items: NavItem[] }[] = [
   {
@@ -46,7 +50,6 @@ const NAV_GROUPS: { key: keyof AccountTranslations; items: NavItem[] }[] = [
     items: [
       { key: 'profile', href: '/account/profile', icon: User },
       { key: 'addresses', href: '/account/addresses', icon: MapPin },
-      { key: 'shipping', href: '/account/shipping-methods', icon: Truck },
       { key: 'paymentMethods', href: '/account/payment-methods', icon: CreditCard },
     ],
   },

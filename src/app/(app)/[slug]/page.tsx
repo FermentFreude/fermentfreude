@@ -64,7 +64,7 @@ export default async function Page({ params }: Args) {
 
   return (
     <article className={isFullBleedHero ? 'pb-24' : `pt-16 pb-24${isLegalPage ? ' page-legal' : ''}`}>
-      <RenderHero {...hero} />
+      <RenderHero {...hero} locale={locale} />
       <RenderBlocks blocks={enrichedLayout} slug={slug} />
       {slug === 'home' && !enrichedLayout.some((b) => b?.blockType === 'testimonials') && (
         <TestimonialsGlobalWrapper id="testimonials" />
