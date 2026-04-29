@@ -158,7 +158,6 @@ export function ProductDetailPage({ product }: { product: Product }) {
   }, []) // intentionally empty — fire only on mount
 
   const isFood = ['jarred', 'fresh', 'bottled'].includes(product.productType || '')
-  const isOutOfStock = !product.inventory || product.inventory === 0
 
   /* ── Specs — built from REAL existing data ── */
   const specs: { label: string; value: string }[] = []
@@ -201,7 +200,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
   const validActiveTab = tabs.find((t) => t.key === activeTab) ? activeTab : tabs[0]?.key
 
   return (
-    <div className="min-h-screen bg-[#f8f5ef]">
+    <div className="min-h-screen bg-white">
       {/* ── Back link ── */}
       <div
         className="pt-6 pb-2"
@@ -209,7 +208,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
       >
         <Link
           href="/shop"
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#e3ddd2] bg-white px-3.5 py-1.5 text-sm font-medium text-[#7a7a7a] hover:text-[#2b2b2d] hover:border-[#cfc6b6] transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[#7a7a7a] hover:text-[#2b2b2d] transition-colors"
         >
           <ChevronLeftIcon className="w-4 h-4" />
           {t('All products', locale)}
@@ -224,12 +223,11 @@ export function ProductDetailPage({ product }: { product: Product }) {
           {/* ═══════════════════════════════════════════
            *  SECTION 1 — Image gallery (left) + Info (right)
            * ═══════════════════════════════════════════ */}
-          <div className="p-0">
-            <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-8 lg:gap-12">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
             {/* ── LEFT: Image Gallery ── */}
             <div className="w-full lg:w-1/2">
               {/* Main image */}
-              <div className="relative rounded-3xl overflow-hidden border border-[#e3ddd2] bg-[#f3f1ec] aspect-4/3 max-h-110 shadow-[0_12px_30px_rgba(0,0,0,0.06)]">
+              <div className="relative rounded-lg overflow-hidden border border-[#e9e9e9] bg-[#f7f7f8] aspect-4/3 max-h-110">
                 {gallery[selectedImageIndex] ? (
                   <Media
                     resource={gallery[selectedImageIndex].image}
@@ -241,7 +239,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                   <div className="w-full h-full bg-[#f7f7f8]" />
                 )}
                 {/* Sold Out Badge */}
-                {isOutOfStock && (
+                {(!product.inventory || product.inventory === 0) && (
                   <div className="absolute top-3 right-3 z-10">
                     <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
                       Sold Out
@@ -252,7 +250,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
 
               {/* Thumbnail strip */}
               {gallery.length > 1 && (
-                <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
+                <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
                   {gallery.map((item, i) => (
                     <button
                       key={item.image.id}
@@ -260,7 +258,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                       className={`relative rounded-lg overflow-hidden shrink-0 w-20 h-20 border transition-all duration-200 ${
                         i === selectedImageIndex
                           ? 'border-[#2b2b2d] ring-1 ring-[#2b2b2d]'
-                          : 'border-[#e3e3e3] hover:border-[#999]'
+                          : 'border-[#e9e9e9] hover:border-[#999]'
                       }`}
                     >
                       <Media
@@ -275,9 +273,9 @@ export function ProductDetailPage({ product }: { product: Product }) {
             </div>
 
             {/* ── RIGHT: Product Info ── */}
-            <div className="w-full flex flex-col rounded-3xl border border-[#e4ddcf] bg-white p-5 sm:p-6 lg:p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+            <div className="w-full lg:w-1/2 flex flex-col">
               {/* Title + Price row */}
-              <div className="border-b border-[#eee8de] pb-5">
+              <div className="border-b border-[#e9e9e9] pb-5">
                 <div className="flex items-start justify-between gap-4">
                   <h1 className="font-display text-3xl md:text-4xl font-bold text-[#2b2b2d] leading-tight">
                     {product.title}
@@ -303,13 +301,9 @@ export function ProductDetailPage({ product }: { product: Product }) {
               </div>
 
               {/* Specs table */}
-              <div className="mt-4 rounded-2xl border border-[#eee8de] bg-[#fcfaf6] px-4 py-3">
-                <div className="space-y-0">
+              <div className="py-4 space-y-0">
                 {specs.map((spec) => (
-                  <div
-                    key={spec.label}
-                    className="flex items-baseline py-2 border-b border-[#f0ebe2] last:border-b-0"
-                  >
+                  <div key={spec.label} className="flex items-baseline py-2">
                     <span className="text-sm font-semibold text-[#2b2b2d] w-28 shrink-0">
                       {spec.label}
                     </span>
@@ -317,12 +311,11 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     <span className="text-sm text-[#777]">{spec.value}</span>
                   </div>
                 ))}
-                </div>
               </div>
 
               {/* Badges + Benefits — combined visual section */}
               {(product.badges?.length || (product.benefits && product.benefits.length > 0)) && (
-                <div className="pt-5">
+                <div className="py-5 border-t border-[#e9e9e9]">
                   {/* Badge icons — single line, responsive */}
                   {product.badges && product.badges.length > 0 && (
                     <div className="flex flex-row gap-3 mb-4 overflow-x-auto pb-2 -mx-1 px-1">
@@ -333,7 +326,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                         return (
                           <div
                             key={badge}
-                          className="group flex flex-col items-center gap-1.5 shrink-0 transition-transform duration-200 hover:scale-105"
+                            className="group flex flex-col items-center gap-1.5 shrink-0 transition-transform duration-200 hover:scale-105"
                           >
                             <div
                               className="w-11 h-11 rounded-full flex items-center justify-center shadow-sm transition-shadow duration-200 group-hover:shadow-md"
@@ -358,15 +351,14 @@ export function ProductDetailPage({ product }: { product: Product }) {
               )}
             </div>
           </div>
-          </div>
 
           {/* ═══════════════════════════════════════════
            *  SECTION 1.5 — Pickup Selection & Add to Cart
            * ═══════════════════════════════════════════ */}
-          {!isOutOfStock && <div className="mt-8 flex flex-col gap-6 rounded-3xl border border-[#e4ddcf] bg-white p-5 sm:p-6 lg:p-7 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+          <div className="mt-8 flex flex-col gap-6">
             {/* ── Pickup Details ── */}
             <div className="w-full">
-              <div className="rounded-2xl border border-[#ebe5da] bg-[#fcfaf6] p-6 lg:p-8">
+              <div className="rounded-2xl border-2 border-[#e9e9e9] bg-[#fafafa] p-6 lg:p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-8 h-8 rounded-full bg-[#4b4f4a] flex items-center justify-center">
                     <StoreIcon className="w-4 h-4 text-white" />
@@ -526,10 +518,10 @@ export function ProductDetailPage({ product }: { product: Product }) {
                 )}
               </div>
             </div>
-          </div>}
+          </div>
 
           {/* Delivery disclaimer */}
-          <p className="mt-6 text-xs text-[#8f8b84] leading-relaxed flex items-start gap-2 bg-white rounded-xl border border-[#e8e1d5] p-3.5">
+          <p className="mt-6 text-xs text-[#999] leading-relaxed flex items-start gap-2 bg-[#fafafa] rounded-lg p-3">
             <PackageIcon className="w-4 h-4 mt-0.5 shrink-0" />
             Delivery is not available at the moment. We are working to ensure the best delivery of
             our fresh products. Only local pickup is possible for now.
@@ -539,22 +531,22 @@ export function ProductDetailPage({ product }: { product: Product }) {
            *  SECTION 2 — Tabs (Description / Health Benefits / Packaging)
            * ═══════════════════════════════════════════ */}
           {tabs.length > 0 && (
-            <div className="mt-14 rounded-3xl border border-[#e4ddcf] bg-white overflow-hidden shadow-[0_10px_28px_rgba(0,0,0,0.035)]">
+            <div className="mt-14 rounded-lg border border-[#e9e9e9] bg-white overflow-hidden">
               {/* Tab bar */}
-              <div className="flex border-b border-[#eee8de] px-5 sm:px-8 gap-4 sm:gap-6 overflow-x-auto">
+              <div className="flex border-b border-[#e9e9e9] px-8 gap-8 overflow-x-auto">
                 {tabs.map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`relative py-4 text-sm sm:text-base font-display font-bold whitespace-nowrap transition-colors ${
+                    className={`relative py-4 text-base font-display font-bold whitespace-nowrap transition-colors ${
                       validActiveTab === tab.key
-                        ? 'text-[#2b2b2d]'
-                        : 'text-[#9a958b] hover:text-[#555]'
+                        ? 'text-[#1d1d1d]'
+                        : 'text-[#98989a] hover:text-[#555]'
                     }`}
                   >
                     {tab.label}
                     {validActiveTab === tab.key && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4b4f4a]" />
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4b4b4b]" />
                     )}
                   </button>
                 ))}

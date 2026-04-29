@@ -3176,7 +3176,7 @@ export interface ReadyToLearnCtaBlock {
     href: string;
   };
   /**
-   * Secondary call-to-action button (outline style).
+   * Secondary call-to-action button (outline style). Use popup mode to show waitlist instead of linking.
    */
   secondaryButton: {
     /**
@@ -3184,9 +3184,33 @@ export interface ReadyToLearnCtaBlock {
      */
     label: string;
     /**
-     * URL the button links to (e.g. "/courses").
+     * URL the button links to (e.g. "/courses"). Leave empty when using popup mode.
      */
-    href: string;
+    href?: string | null;
+    /**
+     * When enabled, clicking this button opens the online-course popup. When disabled, it uses the URL above.
+     */
+    openPopup?: boolean | null;
+  };
+  /**
+   * Content shown when the secondary button opens a popup.
+   */
+  popup?: {
+    /**
+     * Small label above the popup heading (e.g. "ONLINE COURSE").
+     */
+    eyebrow?: string | null;
+    /**
+     * Main popup headline.
+     */
+    heading?: string | null;
+    /**
+     * Short supporting text below the popup heading.
+     */
+    description?: string | null;
+    emailPlaceholder?: string | null;
+    submitLabel?: string | null;
+    successMessage?: string | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -5621,6 +5645,17 @@ export interface ReadyToLearnCtaBlockSelect<T extends boolean = true> {
     | {
         label?: T;
         href?: T;
+        openPopup?: T;
+      };
+  popup?:
+    | T
+    | {
+        eyebrow?: T;
+        heading?: T;
+        description?: T;
+        emailPlaceholder?: T;
+        submitLabel?: T;
+        successMessage?: T;
       };
   id?: T;
   blockName?: T;
