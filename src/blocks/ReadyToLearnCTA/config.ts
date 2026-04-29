@@ -88,11 +88,12 @@ export const ReadyToLearnCTA: Block = {
         {
           name: 'href',
           type: 'text',
-          required: false,
+          required: true,
+          defaultValue: '/onlinecourses',
           label: 'Button URL',
           admin: {
             description:
-              'URL the button links to (e.g. "/courses"). Leave empty when using popup mode.',
+              'Use "/onlinecourses" as popup trigger. Keep a real URL here (never empty, never delete slug). When popup is off, this URL is used for navigation.',
           },
         },
         {

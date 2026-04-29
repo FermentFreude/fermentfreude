@@ -7,12 +7,15 @@ import { X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+const ONLINE_COURSE_POPUP_TRIGGER = '/onlinecourses'
+const ONLINE_COURSE_POPUP_LEGACY_TRIGGERS = ['/courses', '/online-courses']
+
 const DEFAULTS = {
   heading: 'Ready to learn?',
   description:
     'Join our workshops and online courses to learn hands-on fermentation techniques, ask questions, and connect with a community of learners.',
   primaryButton: { label: 'View workshops', href: '/workshops' },
-  secondaryButton: { label: 'Browse online courses', href: '/courses' },
+  secondaryButton: { label: 'Browse online courses', href: ONLINE_COURSE_POPUP_TRIGGER },
   popup: {
     eyebrow: 'ONLINE COURSE',
     heading: 'Learn fermentation without uncertainty',
@@ -24,6 +27,12 @@ const DEFAULTS = {
 }
 
 type Props = ReadyToLearnCtaBlockType & { id?: string }
+
+const normalizePath = (value: string): string => {
+  const trimmed = value.trim()
+  if (!trimmed) return ''
+  return trimmed.replace(/\/+$/u, '').toLowerCase()
+}
 
 export const ReadyToLearnCTABlock: React.FC<Props> = ({
   visible,
@@ -53,9 +62,13 @@ export const ReadyToLearnCTABlock: React.FC<Props> = ({
     label: primaryButton?.label ?? DEFAULTS.primaryButton.label,
     href: primaryButton?.href ?? DEFAULTS.primaryButton.href,
   }
+  const secondaryHref =
+    typeof secondaryButton?.href === 'string' && secondaryButton.href.trim().length > 0
+      ? secondaryButton.href
+      : DEFAULTS.secondaryButton.href
   const resolvedSecondary = {
     label: secondaryButton?.label ?? DEFAULTS.secondaryButton.label,
-    href: secondaryButton?.href ?? DEFAULTS.secondaryButton.href,
+    href: secondaryHref,
     openPopup: secondaryButton?.openPopup ?? true,
   }
   const resolvedPopup = {
@@ -66,7 +79,12 @@ export const ReadyToLearnCTABlock: React.FC<Props> = ({
     submitLabel: popup?.submitLabel ?? DEFAULTS.popup.submitLabel,
     successMessage: popup?.successMessage ?? DEFAULTS.popup.successMessage,
   }
-  const shouldUsePopup = resolvedSecondary.openPopup || !resolvedSecondary.href
+  const normalizedSecondaryHref = normalizePath(resolvedSecondary.href)
+  const isPopupTriggerHref = [
+    normalizePath(ONLINE_COURSE_POPUP_TRIGGER),
+    ...ONLINE_COURSE_POPUP_LEGACY_TRIGGERS.map((value) => normalizePath(value)),
+  ].includes(normalizedSecondaryHref)
+  const shouldUsePopup = Boolean(resolvedSecondary.openPopup && isPopupTriggerHref)
 
   return (
     <section
@@ -96,22 +114,17 @@ export const ReadyToLearnCTABlock: React.FC<Props> = ({
             >
               {resolvedPrimary.label}
             </Link>
-            {shouldUsePopup ? (
-              <button
-                type="button"
-                onClick={() => setShowPopup(true)}
-                className="inline-flex items-center justify-center rounded-(--radius-pill) border-2 border-white/80 bg-transparent text-white font-display font-bold text-base px-8 py-3 transition-all hover:bg-white hover:text-ff-charcoal hover:scale-[1.03] active:scale-[0.97]"
-              >
-                {resolvedSecondary.label}
-              </button>
-            ) : (
-              <Link
-                href={resolvedSecondary.href}
-                className="inline-flex items-center justify-center rounded-(--radius-pill) border-2 border-white/80 bg-transparent text-white font-display font-bold text-base px-8 py-3 transition-all hover:bg-white hover:text-ff-charcoal hover:scale-[1.03] active:scale-[0.97]"
-              >
-                {resolvedSecondary.label}
-              </Link>
-            )}
+            <Link
+              href={resolvedSecondary.href}
+              onClick={(event) => {
+                if (!shouldUsePopup) return
+                event.preventDefault()
+                setShowPopup(true)
+              }}
+              className="inline-flex items-center justify-center rounded-(--radius-pill) border-2 border-white/80 bg-transparent text-white font-display font-bold text-base px-8 py-3 transition-all hover:bg-white hover:text-ff-charcoal hover:scale-[1.03] active:scale-[0.97]"
+            >
+              {resolvedSecondary.label}
+            </Link>
           </div>
         </div>
       </div>

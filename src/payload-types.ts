@@ -3184,9 +3184,9 @@ export interface ReadyToLearnCtaBlock {
      */
     label: string;
     /**
-     * URL the button links to (e.g. "/courses"). Leave empty when using popup mode.
+     * Use "/onlinecourses" as popup trigger. Keep a real URL here (never empty, never delete slug). When popup is off, this URL is used for navigation.
      */
-    href?: string | null;
+    href: string;
     /**
      * When enabled, clicking this button opens the online-course popup. When disabled, it uses the URL above.
      */
