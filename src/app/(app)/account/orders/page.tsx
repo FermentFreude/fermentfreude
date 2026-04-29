@@ -14,19 +14,36 @@ export const metadata = {
   description: 'Your order history',
 }
 
-function StatusDot({ status, t }: { status: string; t: AccountTranslations }) {
-  if (status === 'completed')
+function StatusDot({
+  status,
+  requiresShipping,
+  t,
+}: {
+  status: string
+  requiresShipping: boolean
+  t: AccountTranslations
+}) {
+  if (status === 'completed') {
+    const label = requiresShipping ? t.statusDelivered : t.statusConfirmed
     return (
-      <span className="inline-flex items-center gap-1.5 text-[12px] text-green-700 font-medium">
-        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
-        {t.statusDelivered}
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-[#1a1a1a] font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#1a1a1a] shrink-0" />
+        {label}
       </span>
     )
+  }
   if (status === 'processing')
     return (
-      <span className="inline-flex items-center gap-1.5 text-[12px] text-blue-700 font-medium">
-        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-[#1a1a1a] font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#e6be68] shrink-0" />
         {t.statusProcessing}
+      </span>
+    )
+  if (status === 'cancelled' || status === 'refunded')
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-[#626160] font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#c4bbb3] shrink-0" />
+        {status === 'cancelled' ? t.statusCancelled : t.statusRefunded}
       </span>
     )
   return (
@@ -35,6 +52,21 @@ function StatusDot({ status, t }: { status: string; t: AccountTranslations }) {
       {t.statusPending}
     </span>
   )
+}
+
+function orderRequiresShipping(order: Order): boolean {
+  const items = Array.isArray(order.items) ? order.items : []
+  if (items.length === 0) return false
+  return items.some((item) => {
+    const product = item?.product
+    if (!product || typeof product !== 'object') return true
+    const productType = (product as { productType?: string | null }).productType
+    const slug = (product as { slug?: string | null }).slug
+    const isDigital = productType === 'digital-course'
+    const isWorkshop =
+      productType === 'workshop' || (typeof slug === 'string' && slug.startsWith('workshop-'))
+    return !isDigital && !isWorkshop
+  })
 }
 
 export default async function OrdersPage() {
@@ -54,6 +86,7 @@ export default async function OrdersPage() {
     const result = await payload.find({
       collection: 'orders',
       limit: 100,
+      depth: 2,
       overrideAccess: true,
       where: { customer: { equals: user.id } },
     })
@@ -107,7 +140,11 @@ export default async function OrdersPage() {
                     {formatDate(order.createdAt)}
                   </td>
                   <td className="py-4 px-5">
-                    <StatusDot status={order.status || 'processing'} t={t} />
+                    <StatusDot
+                      status={order.status || 'processing'}
+                      requiresShipping={orderRequiresShipping(order)}
+                      t={t}
+                    />
                   </td>
                   <td className="py-4 px-5 text-[13px] text-[#626160]">
                     {Array.isArray(order.items) ? order.items.length : 0}

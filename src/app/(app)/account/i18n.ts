@@ -40,6 +40,12 @@ export const accountI18n = {
     statusDelivered: 'Geliefert',
     statusProcessing: 'In Bearbeitung',
     statusPending: 'Ausstehend',
+    statusConfirmed: 'Bestätigt',
+    statusCompleted: 'Abgeschlossen',
+    statusCancelled: 'Storniert',
+    statusRefunded: 'Erstattet',
+    noShippingNeeded: 'Kein Versand erforderlich – digitale Inhalte oder Workshop-Tickets.',
+    pickupAtStudio: 'Abholung im Studio – wir senden dir die Abholdetails per E-Mail.',
 
     // Profile
     accountDetails: 'Kontodaten',
@@ -251,6 +257,12 @@ export const accountI18n = {
     statusDelivered: 'Delivered',
     statusProcessing: 'Processing',
     statusPending: 'Pending',
+    statusConfirmed: 'Confirmed',
+    statusCompleted: 'Completed',
+    statusCancelled: 'Cancelled',
+    statusRefunded: 'Refunded',
+    noShippingNeeded: 'No shipping needed — digital content or workshop tickets.',
+    pickupAtStudio: 'Studio pickup — we will email you the pickup details.',
 
     // Profile
     accountDetails: 'Account Details',
