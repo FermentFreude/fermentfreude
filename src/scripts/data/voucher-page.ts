@@ -50,7 +50,8 @@ export function voucherPageDataDE({
       cardDisclaimer: 'Einlösbar in unserem Shop',
       amountSectionLabel: 'WERTGUTSCHEIN',
       deliverySectionLabel: 'VERSANDART',
-      deliveryDisclaimer: 'Wir versenden keine Produkte per Post, damit alles frisch bleibt.',
+      deliveryDisclaimer:
+        'Wir versenden keine Produkte per Post, damit alles frisch bleibt.',
       pickupAddress: 'Grabenstraße 15\n8010 Graz',
       addToCartButton: 'In den Warenkorb',
       voucherShowAmounts: true,
@@ -61,24 +62,28 @@ export function voucherPageDataDE({
         'Du schenkst nicht „irgendetwas“, sondern einen Workshop, der inspiriert, Freude macht und nachhaltig wirkt. Ein Geschenk mit Mehrwert.',
       voucherWhyBenefits: [
         {
+          iconSource: 'preset',
           icon: 'sparkle',
           title: 'Unvergessliches Erlebnis',
           description:
             'Mehr als ein Geschenk – eine Erfahrung, die begeistert und lange in Erinnerung bleibt.',
         },
         {
+          iconSource: 'preset',
           icon: 'heart',
           title: 'Gesundheit & Genuss',
           description:
             'Entdecke probiotikreiche Lebensmittel, die Darmgesundheit und Wohlbefinden fördern.',
         },
         {
+          iconSource: 'preset',
           icon: 'graduation',
           title: 'Wissen fürs Leben',
           description:
             'Lerne traditionelle Techniken, die du immer wieder anwenden kannst – zuhause und kreativ.',
         },
         {
+          iconSource: 'preset',
           icon: 'leaf',
           title: 'Nachhaltig & natürlich',
           description:
@@ -91,30 +96,48 @@ export function voucherPageDataDE({
         {
           text: 'Für alle Workshops gültig',
           subtext: 'Kombucha, Lakto-Gemüse, Tempeh & Saisonales',
+          icon: 'calendar',
+          iconSource: 'preset',
         },
-        { text: 'Ohne Ablaufdatum', subtext: 'Zeitlich unbegrenzt gültig' },
-        { text: 'Für Einsteiger & Profis geeignet', subtext: 'Alle Erfahrungsstufen willkommen' },
-        { text: 'Kleine Gruppen', subtext: 'Maximal 8 Personen für intensive Betreuung' },
+        { text: 'Ohne Ablaufdatum', subtext: 'Zeitlich unbegrenzt gültig', icon: 'shield', iconSource: 'preset' },
+        {
+          text: 'Für Einsteiger & Profis geeignet',
+          subtext: 'Alle Erfahrungsstufen willkommen',
+          icon: 'users',
+          iconSource: 'preset',
+        },
+        {
+          text: 'Kleine Gruppen',
+          subtext: 'Maximal 8 Personen für intensive Betreuung',
+          icon: 'usersRound',
+          iconSource: 'preset',
+        },
         {
           text: 'Schnell verfügbar',
           subtext: 'Digital per E-Mail oder Abholung im Geschäftslokal',
+          icon: 'zap',
+          iconSource: 'preset',
         },
         {
           text: 'Starterkits & Verkostungen inklusive',
           subtext: 'Alles, um zuhause weiterzumachen',
+          icon: 'package',
+          iconSource: 'preset',
         },
         {
           text: 'Praxis mit Fermente für zuhause',
           subtext: 'Eigene Kreationen und Gärgefäße mitnehmen',
+          icon: 'calendar',
+          iconSource: 'preset',
         },
-        { text: 'Flexible Terminwahl', subtext: 'Ganzjährig verfügbare Workshops' },
+        { text: 'Flexible Terminwahl', subtext: 'Ganzjährig verfügbare Workshops', icon: 'shield', iconSource: 'preset' },
       ],
       voucherShowBenefits: true,
       voucherWhyPerfectForVisible: false,
       voucherWhyPerfectForHeading: null,
       voucherWhyPerfectForTags: [],
       voucherShowHow: true,
-      voucherHowHeading: "So funktioniert's",
+      voucherHowHeading: 'So funktioniert\'s',
       voucherHowSteps: [
         { text: 'Kaufen', description: 'Online für €99 bestellen' },
         { text: 'Erhalten', description: 'Digital oder Abholung in Graz' },
@@ -195,7 +218,7 @@ export function voucherPageDataEN(
         id: item.id ?? undefined,
         amount: ['99€'][i] ?? item.amount,
       })),
-      deliveryOptions: (v.deliveryOptions ?? []).map((item) => ({
+      deliveryOptions: (v.deliveryOptions ?? []).map((item, i) => ({
         id: item.id ?? undefined,
         type: item.type,
         title: item.type === 'pickup' ? 'Pick up from store' : 'By email to print at home',
@@ -214,24 +237,27 @@ export function voucherPageDataEN(
       voucherShowCTA: true,
       voucherWhyHeading: 'Why a fermentation voucher is a great gift',
       voucherWhyBody:
-        'You\'re not giving "just something", but a workshop that inspires, brings joy, and has a lasting effect. A gift with added value.',
+        "You're not giving \"just something\", but a workshop that inspires, brings joy, and has a lasting effect. A gift with added value.",
       voucherWhyBenefits: (v.voucherWhyBenefits ?? []).map((item, i) => ({
         id: item.id ?? undefined,
+        iconSource: item.iconSource ?? 'preset',
         icon: item.icon,
-        title:
-          [
-            'Unforgettable experience',
-            'Health & pleasure',
-            'Knowledge for life',
-            'Sustainable & natural',
-          ][i] ?? item.title,
-        description:
-          [
-            'More than a gift – an experience that inspires and stays long in memory.',
-            'Discover probiotic-rich foods that promote gut health and well-being.',
-            'Learn traditional techniques that you can always apply – at home and creatively.',
-            'Connect with natural food processes and sustainable practices.',
-          ][i] ?? item.description,
+        customIcon:
+          typeof item.customIcon === 'string' || item.customIcon === null
+            ? item.customIcon
+            : item.customIcon?.id,
+        title: [
+          'Unforgettable experience',
+          'Health & pleasure',
+          'Knowledge for life',
+          'Sustainable & natural',
+        ][i] ?? item.title,
+        description: [
+          'More than a gift – an experience that inspires and stays long in memory.',
+          'Discover probiotic-rich foods that promote gut health and well-being.',
+          'Learn traditional techniques that you can always apply – at home and creatively.',
+          'Connect with natural food processes and sustainable practices.',
+        ][i] ?? item.description,
       })),
       voucherWhyPerfectForVisible: false,
       voucherWhyPerfectForHeading: null,
@@ -240,30 +266,32 @@ export function voucherPageDataEN(
       voucherBenefitsSubtitle: 'All at a glance',
       voucherBenefits: (v.voucherBenefits ?? []).map((item, i) => ({
         id: item.id ?? undefined,
-        text:
-          [
-            'Valid for all workshops',
-            'No expiry date',
-            'Suitable for beginners & pros',
-            'Small groups',
-            'Quickly available',
-            'Starter kits & tastings included',
-            'Hands-on with ferments to take home',
-            'Flexible date choice',
-          ][i] ?? item.text,
-        subtext:
-          [
-            'Kombucha, Lacto-vegetables, Tempeh & seasonal',
-            'Valid indefinitely',
-            'All experience levels welcome',
-            'Maximum 8 people for intensive support',
-            'Digital via email or pick-up at the store',
-            'Everything to continue at home',
-            'Your own creations and fermentation vessels',
-            'Workshops available year-round',
-          ][i] ??
-          item.subtext ??
-          null,
+        iconSource: item.iconSource ?? 'preset',
+        icon: item.icon,
+        customIcon:
+          typeof item.customIcon === 'string' || item.customIcon === null
+            ? item.customIcon
+            : item.customIcon?.id,
+        text: [
+          'Valid for all workshops',
+          'No expiry date',
+          'Suitable for beginners & pros',
+          'Small groups',
+          'Quickly available',
+          'Starter kits & tastings included',
+          'Hands-on with ferments to take home',
+          'Flexible date choice',
+        ][i] ?? item.text,
+        subtext: [
+          'Kombucha, Lacto-vegetables, Tempeh & seasonal',
+          'Valid indefinitely',
+          'All experience levels welcome',
+          'Maximum 8 people for intensive support',
+          'Digital via email or pick-up at the store',
+          'Everything to continue at home',
+          'Your own creations and fermentation vessels',
+          'Workshops available year-round',
+        ][i] ?? item.subtext ?? null,
       })),
       voucherShowBenefits: true,
       voucherShowHow: true,
@@ -271,15 +299,12 @@ export function voucherPageDataEN(
       voucherHowSteps: (v.voucherHowSteps ?? []).map((item, i) => ({
         id: item.id ?? undefined,
         text: ['Kaufen', 'Erhalten', 'Wählen', 'Genießen'][i] ?? item.text,
-        description:
-          [
-            'Order online for €99',
-            'Digital or pickup in Graz',
-            'Select workshop & date',
-            'Learn & keep fermenting',
-          ][i] ??
-          item.description ??
-          null,
+        description: [
+          'Order online for €99',
+          'Digital or pickup in Graz',
+          'Select workshop & date',
+          'Learn & keep fermenting',
+        ][i] ?? item.description ?? null,
       })),
       starterSetHeading: 'Combine the voucher with a starter set',
       voucherShowStarterSet: false,

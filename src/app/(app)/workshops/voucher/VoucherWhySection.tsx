@@ -5,7 +5,9 @@ import { GraduationCap, Heart, Leaf, Sparkles } from 'lucide-react'
 import { Media } from '@/components/Media'
 
 export type VoucherWhyBenefitItem = {
-  icon: 'sparkle' | 'heart' | 'graduation' | 'leaf'
+  icon?: 'sparkle' | 'heart' | 'graduation' | 'leaf' | null
+  iconSource?: 'preset' | 'custom' | null
+  customIcon?: MediaType | null
   title: string
   description: string
 }
@@ -146,8 +148,12 @@ export function VoucherWhySection({
           role="list"
         >
           {items.slice(0, 4).map((item, i) => {
-            const IconComponent = ICON_MAP[item.icon]
-            const styles = ICON_STYLES[item.icon]
+            const fallbackIcon: keyof typeof ICON_MAP =
+              (DEFAULT_BENEFITS[i]?.icon as keyof typeof ICON_MAP | undefined) ?? 'sparkle'
+            const selectedIcon = (item.icon as keyof typeof ICON_MAP | undefined) ?? fallbackIcon
+            const IconComponent = ICON_MAP[selectedIcon]
+            const styles = ICON_STYLES[selectedIcon]
+            const customIcon = item.iconSource === 'custom' && item.customIcon ? item.customIcon : null
             return (
               <article
                 key={i}
@@ -163,10 +169,20 @@ export function VoucherWhySection({
                     className={`mb-5 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${styles.bg} ${styles.icon} transition-transform duration-300 ease-out group-hover:scale-105`}
                     aria-hidden
                   >
-                    <IconComponent
-                      className="h-6 w-6"
-                      strokeWidth={1.75}
-                    />
+                    {customIcon ? (
+                      <Media
+                        resource={customIcon}
+                        imgClassName="h-6 w-6 object-contain"
+                        width={24}
+                        height={24}
+                        htmlElement={null}
+                      />
+                    ) : (
+                      <IconComponent
+                        className="h-6 w-6"
+                        strokeWidth={1.75}
+                      />
+                    )}
                   </div>
                   <h3
                     className="font-display font-semibold tracking-tight text-ff-near-black"
