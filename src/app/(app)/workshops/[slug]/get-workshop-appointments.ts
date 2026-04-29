@@ -2,6 +2,12 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import type { WorkshopDate } from './workshop-data'
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message
+  if (typeof error === 'string' && error.trim() !== '') return error
+  return 'Unknown appointments fetch error'
+}
+
 /* ═══════════════════════════════════════════════════════════════
  *  getWorkshopAppointments — Database Query Utility
  *
@@ -148,7 +154,7 @@ export async function getWorkshopAppointments(workshopSlug: string): Promise<Wor
       }
     })
   } catch (error) {
-    console.error(`Error fetching appointments for ${workshopSlug}:`, error)
+    console.warn(`Skipping appointments for ${workshopSlug}: ${getErrorMessage(error)}`)
     return []
   }
 }
