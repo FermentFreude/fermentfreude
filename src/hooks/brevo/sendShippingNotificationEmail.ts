@@ -54,10 +54,21 @@ export const sendShippingNotificationEmail: CollectionAfterChangeHook = async ({
 
     // Check if order contains only products (no workshops)
     const items =
-      (doc.items as Array<{ product?: string | object; isWorkshop?: boolean }> | undefined) || []
+      (doc.items as
+        | Array<{
+            product?:
+              | string
+              | { productType?: string | null; slug?: string | null }
+              | null
+          }>
+        | undefined) || []
     const hasWorkshops = items.some((item) => {
       if (typeof item.product === 'object' && item.product) {
-        return (item.product as Record<string, any>)?.isWorkshop === true
+        const p = item.product as { productType?: string | null; slug?: string | null }
+        return (
+          p.productType === 'workshop' ||
+          (typeof p.slug === 'string' && p.slug.startsWith('workshop-'))
+        )
       }
       return false
     })

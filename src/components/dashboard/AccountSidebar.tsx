@@ -14,7 +14,6 @@ import {
   RotateCcw,
   ShoppingBag,
   Star,
-  Truck,
   User,
   XCircle,
 } from 'lucide-react'
@@ -46,7 +45,6 @@ const NAV_GROUPS: { key: keyof AccountTranslations; items: NavItem[] }[] = [
     items: [
       { key: 'profile', href: '/account/profile', icon: User },
       { key: 'addresses', href: '/account/addresses', icon: MapPin },
-      { key: 'shipping', href: '/account/shipping-methods', icon: Truck },
       { key: 'paymentMethods', href: '/account/payment-methods', icon: CreditCard },
     ],
   },

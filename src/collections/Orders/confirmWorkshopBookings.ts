@@ -215,6 +215,35 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     // Send workshop booking confirmation email now that customer info is available
     const bookingEmail = (updateData.email as string) || booking.email
     if (bookingEmail) {
+      // Resolve location from the appointment (best effort)
+      let workshopLocation = ''
+      if (booking.appointmentId) {
+        try {
+          const appointment = await payload.findByID({
+            collection: 'workshop-appointments',
+            id: booking.appointmentId,
+            depth: 1,
+            overrideAccess: true,
+          })
+          if (appointment && (appointment as { location?: unknown }).location) {
+            const loc = (appointment as { location?: unknown }).location
+            workshopLocation =
+              typeof loc === 'object' && loc !== null
+                ? ((loc as { name?: string }).name ?? '')
+                : typeof loc === 'string'
+                  ? loc
+                  : ''
+          }
+        } catch {
+          // ignore — location is best-effort
+        }
+      }
+
+      const formattedPrice =
+        typeof booking.totalPrice === 'number'
+          ? `€${booking.totalPrice.toFixed(2).replace('.', ',')}`
+          : String(booking.totalPrice ?? '')
+
       try {
         await sendTemplateEmail({
           to: [
@@ -227,8 +256,10 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
           params: {
             WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
             WORKSHOP_DATE: String(booking.date ?? ''),
+            WORKSHOP_TIME: String(booking.time ?? ''),
+            WORKSHOP_LOCATION: workshopLocation,
             GUEST_COUNT: String(booking.guestCount ?? 1),
-            TOTAL_PRICE: String(booking.totalPrice ?? ''),
+            TOTAL_PRICE: formattedPrice,
             CUSTOMER_NAME: String(
               (updateData.firstName as string) || booking.firstName || bookingEmail,
             ),

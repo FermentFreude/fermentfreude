@@ -32,8 +32,12 @@ export function OpeningPopups({ locale }: Props) {
 
     setInitialized(true)
 
-    if (!localStorage.getItem(COOKIE_BANNER_KEY)) {
+    const cookieDismissed = Boolean(localStorage.getItem(COOKIE_BANNER_KEY))
+    if (!cookieDismissed) {
       setCookieBannerOpen(true)
+      // Don't queue the newsletter while the cookie banner is visible — it will
+      // start once the user accepts (see acceptCookies).
+      return
     }
 
     // Show newsletter after 15s if the user hasn't subscribed yet.
@@ -54,6 +58,14 @@ export function OpeningPopups({ locale }: Props) {
   const acceptCookies = () => {
     localStorage.setItem(COOKIE_BANNER_KEY, '1')
     setCookieBannerOpen(false)
+    // Now that the cookie banner is gone, queue the newsletter (if not already subscribed).
+    if (typeof window !== 'undefined' && !localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY)) {
+      window.setTimeout(() => {
+        if (!localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY)) {
+          setNewsletterOpen(true)
+        }
+      }, 15000)
+    }
   }
 
   const submitNewsletter = async (event: React.FormEvent) => {
