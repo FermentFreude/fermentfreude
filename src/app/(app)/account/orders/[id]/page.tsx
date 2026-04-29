@@ -109,6 +109,29 @@ export default async function Order({ params, searchParams }: PageProps) {
     notFound()
   }
 
+  // Determine whether this order needs a physical shipping address.
+  // Digital courses and workshops never ship — they shouldn't show a shipping section.
+  const orderItems = Array.isArray(order.items) ? order.items : []
+  const requiresShipping = orderItems.some((item) => {
+    const product = item?.product
+    if (!product || typeof product !== 'object') return true // unknown → assume physical
+    const productType = (product as { productType?: string | null }).productType
+    const slug = (product as { slug?: string | null }).slug
+    const isDigital = productType === 'digital-course'
+    const isWorkshop =
+      productType === 'workshop' || (typeof slug === 'string' && slug.startsWith('workshop-'))
+    return !isDigital && !isWorkshop
+  })
+
+  // Map raw status → user-facing label.
+  // For digital/workshop orders, "completed" reads better as "Confirmed".
+  let statusLabel: string | undefined
+  if (order.status === 'processing') statusLabel = t.statusProcessing
+  else if (order.status === 'completed')
+    statusLabel = requiresShipping ? t.statusCompleted : t.statusConfirmed
+  else if (order.status === 'cancelled') statusLabel = t.statusCancelled
+  else if (order.status === 'refunded') statusLabel = t.statusRefunded
+
   return (
     <div className="">
       <div className="flex gap-8 justify-between items-center mb-6">
@@ -149,7 +172,7 @@ export default async function Order({ params, searchParams }: PageProps) {
           {order.status && (
             <div className="grow max-w-1/3">
               <p className="font-mono uppercase text-primary/50 mb-1 text-sm">{t.status}</p>
-              <OrderStatus className="text-sm" status={order.status} />
+              <OrderStatus className="text-sm" status={order.status} label={statusLabel} />
             </div>
           )}
         </div>
@@ -184,7 +207,7 @@ export default async function Order({ params, searchParams }: PageProps) {
           </div>
         )}
 
-        {order.shippingAddress && (
+        {requiresShipping && order.shippingAddress && (
           <div>
             <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">{t.shippingAddress}</h2>
 
@@ -195,6 +218,13 @@ export default async function Order({ params, searchParams }: PageProps) {
               }}
               hideActions
             />
+          </div>
+        )}
+
+        {!requiresShipping && (
+          <div>
+            <h2 className="font-mono text-primary/50 mb-2 uppercase text-sm">{t.status}</h2>
+            <p className="text-sm text-primary/70">{t.noShippingNeeded}</p>
           </div>
         )}
       </div>

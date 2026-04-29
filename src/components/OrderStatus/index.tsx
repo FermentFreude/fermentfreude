@@ -4,9 +4,11 @@ import { cn } from '@/utilities/cn'
 type Props = {
   status: StatusOptions
   className?: string
+  /** Optional override for the displayed label (e.g. "Confirmed" for digital/workshop orders). */
+  label?: string
 }
 
-export const OrderStatus: React.FC<Props> = ({ status, className }) => {
+export const OrderStatus: React.FC<Props> = ({ status, className, label }) => {
   return (
     <div
       className={cn(
@@ -15,10 +17,11 @@ export const OrderStatus: React.FC<Props> = ({ status, className }) => {
         {
           'bg-primary/10': status === 'processing',
           'bg-success': status === 'completed',
+          'bg-destructive/10': status === 'cancelled' || status === 'refunded',
         },
       )}
     >
-      {status}
+      {label ?? status}
     </div>
   )
 }
