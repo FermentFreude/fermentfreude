@@ -198,7 +198,7 @@ export const ContactBlockComponent: React.FC<
                   {contact.address || contact.phone || contact.email ? (
                     <div className="flex flex-col gap-3">
                       {contact.address ? (
-                        <div className="group flex items-start gap-3 transition-transform duration-300 hover:-translate-y-0.5">
+                        <div className="group flex items-center gap-3 transition-transform duration-300 hover:-translate-y-0.5">
                           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-ff-gold-accent/60 bg-white shadow-sm transition-all duration-300 group-hover:scale-105">
                             <svg
                               className="h-5 w-5 text-ff-gold-accent"
@@ -220,11 +220,11 @@ export const ContactBlockComponent: React.FC<
                               />
                             </svg>
                           </div>
-                          <div className="min-w-0 flex-1">
+                          <div className="min-w-0 flex-1 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
                             <p className="text-body-sm font-display font-bold text-ff-charcoal">
                               Location
                             </p>
-                            <p className="mt-0.5 text-body leading-relaxed text-ff-gray-text-light">
+                            <p className="text-body leading-relaxed text-ff-gray-text-light">
                               {contact.address}
                             </p>
                           </div>
@@ -233,7 +233,7 @@ export const ContactBlockComponent: React.FC<
                       {contact.phone ? (
                         <a
                           href={`tel:${contact.phone.replace(/\s/g, '')}`}
-                          className="group flex items-start gap-3 transition-all duration-300 hover:-translate-y-0.5 hover:opacity-90"
+                          className="group flex items-center gap-3 transition-all duration-300 hover:-translate-y-0.5 hover:opacity-90"
                         >
                           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-ff-gold-accent/60 bg-white shadow-sm transition-all duration-300 group-hover:border-ff-gold-accent group-hover:scale-105">
                             <svg
@@ -251,11 +251,11 @@ export const ContactBlockComponent: React.FC<
                               />
                             </svg>
                           </div>
-                          <div className="min-w-0 flex-1">
+                          <div className="min-w-0 flex-1 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
                             <p className="text-body-sm font-display font-bold text-ff-charcoal">
                               Phone
                             </p>
-                            <p className="mt-0.5 text-body leading-relaxed text-ff-gray-text-light">
+                            <p className="text-body leading-relaxed text-ff-gray-text-light">
                               {contact.phone}
                             </p>
                           </div>
@@ -264,7 +264,7 @@ export const ContactBlockComponent: React.FC<
                       {contact.email ? (
                         <a
                           href={`mailto:${contact.email}`}
-                          className="group flex items-start gap-3 transition-all duration-300 hover:-translate-y-0.5 hover:opacity-90"
+                          className="group flex items-center gap-3 transition-all duration-300 hover:-translate-y-0.5 hover:opacity-90"
                         >
                           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-ff-gold-accent/60 bg-white shadow-sm transition-all duration-300 group-hover:border-ff-gold-accent group-hover:scale-105">
                             <svg
@@ -282,11 +282,11 @@ export const ContactBlockComponent: React.FC<
                               />
                             </svg>
                           </div>
-                          <div className="min-w-0 flex-1">
+                          <div className="min-w-0 flex-1 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
                             <p className="text-body-sm font-display font-bold text-ff-charcoal">
                               Mail
                             </p>
-                            <p className="mt-0.5 text-body leading-relaxed text-ff-gray-text-light">
+                            <p className="text-body leading-relaxed text-ff-gray-text-light">
                               {contact.email}
                             </p>
                           </div>
