@@ -457,10 +457,10 @@ export function WorkshopCalendar({
                         <p className="font-display font-bold text-base text-[#1a1a1a]">
                           {date.availableSpots > 0
                             ? `${date.availableSpots} ${spotsLabel || 'Plätze'}`
-                            : soldOutLabel || 'Ausgebucht'}
+                            : ''}
                         </p>
                         {date.availableSpots === 0 && (
-                          <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                          <span className="inline-block rounded-full bg-black px-2.5 py-1 text-xs font-bold text-white">
                             {soldOutLabel || 'Ausgebucht'}
                           </span>
                         )}
