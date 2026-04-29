@@ -134,20 +134,20 @@ export function FermentedVegHowTos({
 
   const DEFAULT_ARTICLES = getArticlesByWorkshopType(workshopType)
 
-  const articles = DEFAULT_ARTICLES.map((def, i) => {
-    const post = resolvedPosts[i]
-    return {
-      id: post?.id ?? def.id,
-      title: post?.title ?? def.title,
-      description: post?.summary ?? def.description,
-      readTime: post?.readTime ?? def.readTime,
-      image:
-        post?.heroImage && typeof post.heroImage === 'object' && 'url' in post.heroImage
-          ? (post.heroImage as MediaType)
-          : null,
-      href: post?.slug ? `/tipps/${post.slug}` : def.href,
-    }
-  })
+  const articles =
+    resolvedPosts.length > 0
+      ? resolvedPosts.map((post) => ({
+          id: post.id,
+          title: post.title ?? '',
+          description: post.summary ?? '',
+          readTime: post.readTime ?? '',
+          image:
+            post.heroImage && typeof post.heroImage === 'object' && 'url' in post.heroImage
+              ? (post.heroImage as MediaType)
+              : null,
+          href: post.slug ? `/tipps/${post.slug}` : '#',
+        }))
+      : DEFAULT_ARTICLES
 
   return (
     <section ref={sectionRef} className="my-12 py-section-padding-lg lg:my-20">
