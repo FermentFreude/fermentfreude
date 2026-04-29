@@ -121,8 +121,12 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           detailsButtonLabel:
             (w as { detailsButtonLabel?: string | null }).detailsButtonLabel ||
             DEFAULT_DETAILS_CTA_LABEL,
-          nextDate:
-            upcomingDatesByHref?.[w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''] || undefined,
+          nextDate: (() => {
+            const link = w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''
+            const mapped = upcomingDatesByHref?.[link]
+            const fromCMS = (w as { nextDate?: string | null }).nextDate
+            return mapped || fromCMS || undefined
+          })(),
         }))
       : DEFAULT_WORKSHOPS.map((w) => ({
           ...w,
@@ -135,10 +139,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
   /* ── Sticky scroll + parallax engine (all breakpoints) ─────── */
   useEffect(() => {
-    // Keep layout deterministic across viewports: disable JS pin/parallax scene
-    // to prevent accidental blank spacer heights.
-    return
-
     const outer = outerRef.current
     const container = containerRef.current
     if (!outer || !container) return
@@ -288,6 +288,19 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                 )}
               </div>
 
+              {workshop.nextDate ? (
+                <div className="mb-4 pb-3 border-b border-black/10">
+                  <p className="text-[10px] font-display font-bold tracking-widest uppercase text-black/45 mb-1">
+                    {upcomingLabel || 'Upcoming'}
+                  </p>
+                  <p className="text-sm font-display font-bold text-black/85">
+                    {typeof workshop.nextDate === 'object' && workshop.nextDate !== null
+                      ? (workshop as any).nextDate.date
+                      : String(workshop.nextDate)}
+                  </p>
+                </div>
+              ) : null}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {workshop.features.map((feature, fIdx) => (
                   <p
@@ -358,13 +371,17 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
         </div>
       </section>
 
-      {/* Desktop: horizontal section without pinned height */}
-      <div ref={outerRef} className="relative hidden lg:block bg-white">
-        <section className="w-full bg-white overflow-visible py-6">
-          <div className="relative overflow-x-auto select-none">
+      {/* Desktop: keep horizontal moving workshop section */}
+      <div ref={outerRef} className="relative hidden lg:block bg-white min-h-[100svh]">
+        <section className="sticky top-0 w-full h-[100svh] bg-white overflow-hidden">
+          <p className="absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
+            scroll →
+          </p>
+
+          <div className="absolute inset-0 overflow-hidden select-none">
             <div
               ref={containerRef}
-              className="flex items-center min-h-0 will-change-transform"
+              className="flex items-center h-full will-change-transform"
               style={{ gap: 'clamp(0.75rem, 2vw, 1.5rem)', paddingLeft: '5vw', paddingRight: '5vw' }}
             >
             {resolvedWorkshops.map((workshop, wIdx) => {
