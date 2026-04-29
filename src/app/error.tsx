@@ -23,7 +23,7 @@ export default function RootError({
           <p className="mt-2 font-sans text-xs text-[#1d1d1d]/40">Ref: {error.digest}</p>
         ) : null}
         <button
-          className="mt-6 w-full sm:w-auto inline-flex items-center justify-center bg-[#1d1d1d] hover:bg-[#000] text-white font-display font-bold tracking-wide uppercase text-sm px-6 py-3 rounded-full transition-colors"
+          className="mt-6 w-full sm:w-auto inline-flex items-center justify-center bg-[#1d1d1d] hover:bg-black text-white font-display font-bold tracking-wide uppercase text-sm px-6 py-3 rounded-full transition-colors"
           onClick={() => reset()}
           type="button"
         >
