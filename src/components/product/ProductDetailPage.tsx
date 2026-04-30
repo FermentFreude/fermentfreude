@@ -158,6 +158,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
   }, []) // intentionally empty — fire only on mount
 
   const isFood = ['jarred', 'fresh', 'bottled'].includes(product.productType || '')
+  const isOutOfStock = !product.inventory || product.inventory === 0
 
   /* ── Specs — built from REAL existing data ── */
   const specs: { label: string; value: string }[] = []
@@ -239,7 +240,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                   <div className="w-full h-full bg-[#f7f7f8]" />
                 )}
                 {/* Sold Out Badge */}
-                {(!product.inventory || product.inventory === 0) && (
+                {isOutOfStock && (
                   <div className="absolute top-3 right-3 z-10">
                     <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
                       Sold Out
@@ -355,7 +356,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
           {/* ═══════════════════════════════════════════
            *  SECTION 1.5 — Pickup Selection & Add to Cart
            * ═══════════════════════════════════════════ */}
-          <div className="mt-8 flex flex-col gap-6">
+          {!isOutOfStock && <div className="mt-8 flex flex-col gap-6">
             {/* ── Pickup Details ── */}
             <div className="w-full">
               <div className="rounded-2xl border-2 border-[#e9e9e9] bg-[#fafafa] p-6 lg:p-8">
@@ -518,7 +519,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                 )}
               </div>
             </div>
-          </div>
+          </div>}
 
           {/* Delivery disclaimer */}
           <p className="mt-6 text-xs text-[#999] leading-relaxed flex items-start gap-2 bg-[#fafafa] rounded-lg p-3">

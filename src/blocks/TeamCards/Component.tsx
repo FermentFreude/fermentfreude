@@ -161,7 +161,7 @@ export const TeamCardsBlock: React.FC<Props> = ({ visible, label, heading, membe
                       )}
                     </div>
                     <div className="flex flex-1 flex-col gap-1 px-4 pb-3 pt-3 min-h-36">
-                      <h3 className="font-display text-subheading font-bold text-ff-near-black">
+                      <h3 className="font-display text-subheading font-semibold text-ff-near-black">
                         {member.name}
                       </h3>
                       <div
