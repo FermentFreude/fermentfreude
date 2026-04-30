@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
+import { useLocale } from '@/providers/Locale'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Link from 'next/link'
@@ -23,7 +24,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { cssVariables } from '@/cssVariables'
 import { gtmBeginCheckout } from '@/lib/gtm'
 import { Address } from '@/payload-types'
-import { useLocale } from '@/providers/Locale'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { toast } from 'sonner'
 
@@ -74,6 +74,7 @@ const CHECKOUT_DE = {
   connectionError: 'Verbindungsfehler. Bitte versuche es erneut.',
   or: 'oder',
   total: 'Gesamt',
+  errorPrefix: 'Fehler',
 }
 
 const CHECKOUT_EN = {
@@ -123,6 +124,7 @@ const CHECKOUT_EN = {
   connectionError: 'Connection error. Please try again.',
   or: 'or',
   total: 'Total',
+  errorPrefix: 'Error',
 }
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
@@ -152,6 +154,8 @@ const buildMapLink = (name: string, address: string) =>
 
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
+  const { locale } = useLocale()
+  const isDe = locale === 'de'
   const router = useRouter()
   const { cart, clearCart } = useCart()
   const [error, setError] = useState<null | string>(null)
@@ -199,8 +203,7 @@ export const CheckoutPage: React.FC = () => {
     >
   >({})
   const checkoutEmail = email || user?.email || ''
-  const { locale } = useLocale()
-  const t = locale === 'de' ? CHECKOUT_DE : CHECKOUT_EN
+  const t = isDe ? CHECKOUT_DE : CHECKOUT_EN
 
   // Load workshop bookings from localStorage so we can show appointment date/time per item.
   useEffect(() => {
@@ -890,7 +893,7 @@ export const CheckoutPage: React.FC = () => {
               <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
                 {t.payment}
               </h2>
-              {error && <p className="mb-4 text-body-sm text-red-600">{`Error: ${error}`}</p>}
+              {error && <p className="mb-4 text-body-sm text-red-600">{`${t.errorPrefix}: ${error}`}</p>}
               <Elements
                 options={{
                   appearance: {
