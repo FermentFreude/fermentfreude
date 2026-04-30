@@ -15,6 +15,7 @@ import {
 import path from 'path'
 import { buildConfig } from 'payload'
 
+import { Addresses } from '@/collections/Addresses'
 import { BrevoEmailTemplates } from '@/collections/BrevoEmailTemplates'
 import { BrevoTemplates } from '@/collections/BrevoTemplates'
 import { CancellationRequests } from '@/collections/CancellationRequests'
@@ -137,6 +138,7 @@ export default buildConfig({
     fallback: true,
   },
   collections: [
+    Addresses,
     Users,
     Pages,
     Categories,

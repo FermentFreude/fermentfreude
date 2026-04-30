@@ -35,7 +35,10 @@ export const generatePreviewPath = ({ collection, slug }: Props) => {
     slug,
     collection,
     path,
-    previewSecret: process.env.PREVIEW_SECRET || '',
+    // NEXT_PUBLIC_PREVIEW_SECRET is used when this function runs client-side
+    // (Payload admin livePreview.url). PREVIEW_SECRET is the server-side fallback.
+    previewSecret:
+      process.env.NEXT_PUBLIC_PREVIEW_SECRET || process.env.PREVIEW_SECRET || '',
   })
 
   const url = `/next/preview?${encodedParams.toString()}`
