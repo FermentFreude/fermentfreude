@@ -397,8 +397,6 @@ function isResolvedMedia(img: unknown): img is MediaType {
   return typeof img === 'object' && img !== null && 'url' in img
 }
 
-export const dynamic = 'force-dynamic'
-
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'Fermentation | Fermentfreude',
