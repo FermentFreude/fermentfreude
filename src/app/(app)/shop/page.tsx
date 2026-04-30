@@ -3,12 +3,28 @@ import { ShopHeroComponent } from '@/blocks/ShopHero/Component'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 
 import type { Page } from '@/payload-types'
 import type { Metadata } from 'next'
 
-export const dynamic = 'force-dynamic'
+const queryShopPage = unstable_cache(
+  async (locale: string): Promise<Page | null> => {
+    const payload = await getPayload({ config: configPromise })
+    const result = await payload.find({
+      collection: 'pages',
+      where: { slug: { equals: 'shop' } },
+      locale: locale as 'de' | 'en',
+      depth: 2,
+      limit: 1,
+      overrideAccess: false,
+    })
+    return (result.docs?.[0] as Page) ?? null
+  },
+  ['shop-page'],
+  { revalidate: 3600, tags: ['pages'] },
+)
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as 'de' | 'en'
@@ -21,19 +37,6 @@ export async function generateMetadata(): Promise<Metadata> {
     }
   }
   return generateMeta({ doc: page })
-}
-
-async function queryShopPage(locale: string): Promise<Page | null> {
-  const payload = await getPayload({ config: configPromise })
-  const result = await payload.find({
-    collection: 'pages',
-    where: { slug: { equals: 'shop' } },
-    locale: locale as 'de' | 'en',
-    depth: 2,
-    limit: 1,
-    overrideAccess: true,
-  })
-  return (result.docs?.[0] as Page) ?? null
 }
 
 export default async function ShopPage() {

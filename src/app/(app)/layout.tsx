@@ -24,6 +24,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang={locale} suppressHydrationWarning={true}>
       <head>
         <InitTheme />
+        <link rel="preconnect" href="https://use.typekit.net" crossOrigin="" />
+        <link rel="preconnect" href="https://p.typekit.net" crossOrigin="" />
         <link rel="stylesheet" href="https://use.typekit.net/dtk7kir.css" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
 

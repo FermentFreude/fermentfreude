@@ -8,12 +8,10 @@ import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { Carrot, FlaskConical, Milk, Wheat, Wine, Wrench, type LucideIcon } from 'lucide-react'
 import type { Metadata } from 'next'
-import { unstable_noStore as noStore } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import Image from 'next/image'
 import { getPayload } from 'payload'
-
-export const dynamic = 'force-dynamic'
 
 const DEFAULT_HERO_TITLE = 'Master Fermentation from Scratch'
 const DEFAULT_HERO_DESCRIPTION =
@@ -43,12 +41,8 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function CoursesPage() {
-  noStore()
-  const locale = await getLocale()
-  const { isEnabled: draft } = await draftMode()
+async function queryCoursesPage(locale: string, draft: boolean) {
   const payload = await getPayload({ config: configPromise })
-
   const result = await payload.find({
     collection: 'pages',
     where: {
@@ -56,13 +50,27 @@ export default async function CoursesPage() {
       ...(draft ? {} : { _status: { equals: 'published' } }),
     },
     limit: 1,
-    /** Layout block uploads (e.g. course waitlist image) need deeper population than 2 */
     depth: 5,
     draft,
     locale,
-    overrideAccess: true,
+    overrideAccess: draft,
   })
-  const page = result.docs?.[0] as PageType | undefined
+  return (result.docs?.[0] as PageType | undefined) ?? null
+}
+
+const getCachedCoursesPage = unstable_cache(
+  (locale: string) => queryCoursesPage(locale, false),
+  ['courses-page'],
+  { revalidate: 3600, tags: ['pages'] },
+)
+
+export default async function CoursesPage() {
+  const locale = await getLocale()
+  const { isEnabled: draft } = await draftMode()
+
+  const page = draft
+    ? await queryCoursesPage(locale, true)
+    : await getCachedCoursesPage(locale)
   const blocks = page?.layout ?? []
 
   // Extract the FeatureCards block for "What You'll Learn" — render inline with old grid style

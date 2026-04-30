@@ -17,6 +17,7 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
   if (doc.slug === 'workshops') {
     payload.logger.info(`Revalidating /workshops page`)
     revalidatePath('/workshops')
+    revalidateTag('pages')
     return doc
   }
 
@@ -33,6 +34,7 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
 
     payload.logger.info(`Revalidating page at path: ${path}`)
     revalidatePath(path)
+    revalidateTag('pages')
     if (doc.slug === 'voucher') {
       revalidateTag('voucher')
     }
@@ -53,6 +55,7 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
 
     payload.logger.info(`Revalidating old page at path: ${oldPath}`)
     revalidatePath(oldPath)
+    revalidateTag('pages')
     if (previousDoc.slug === 'voucher') {
       revalidateTag('voucher')
     }
@@ -75,6 +78,7 @@ export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { 
               ? `/workshops/${doc?.slug}`
               : `/${doc?.slug}`
     revalidatePath(path)
+    revalidateTag('pages')
     if (doc?.slug === 'voucher') {
       revalidateTag('voucher')
     }

@@ -8,9 +8,8 @@ import { getLocale } from '@/utilities/getLocale'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
-
-export const dynamic = 'force-dynamic'
 
 import { notFound } from 'next/navigation'
 
@@ -88,27 +87,58 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
 const queryPageBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' | 'en' }) => {
   const { isEnabled: draft } = await draftMode()
 
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'pages',
-    depth: 5,
-    draft,
-    limit: 1,
-    locale,
-    overrideAccess: draft,
-    pagination: false,
-    where: {
-      and: [
-        {
-          slug: {
-            equals: slug,
+  if (draft) {
+    // Draft mode: bypass cache, always fetch live content for editors
+    const payload = await getPayload({ config: configPromise })
+    const result = await payload.find({
+      collection: 'pages',
+      depth: 5,
+      draft: true,
+      limit: 1,
+      locale,
+      overrideAccess: true,
+      pagination: false,
+      where: {
+        and: [
+          {
+            slug: {
+              equals: slug,
+            },
           },
-        },
-        ...(draft ? [] : [{ _status: { equals: 'published' } }]),
-      ],
-    },
-  })
+        ],
+      },
+    })
+    return result.docs?.[0] || null
+  }
 
-  return result.docs?.[0] || null
+  // Regular visitors: use cached query result (busted by revalidatePage hook on CMS save)
+  return getCachedPage(slug, locale ?? 'de')
 }
+
+const getCachedPage = unstable_cache(
+  async (slug: string, locale: string) => {
+    const payload = await getPayload({ config: configPromise })
+    const result = await payload.find({
+      collection: 'pages',
+      depth: 5,
+      draft: false,
+      limit: 1,
+      locale,
+      overrideAccess: false,
+      pagination: false,
+      where: {
+        and: [
+          {
+            slug: {
+              equals: slug,
+            },
+          },
+          { _status: { equals: 'published' } },
+        ],
+      },
+    })
+    return result.docs?.[0] || null
+  },
+  ['page-by-slug'],
+  { revalidate: 3600, tags: ['pages'] },
+)

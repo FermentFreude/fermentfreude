@@ -14,11 +14,9 @@ import { getAllWorkshopAppointments } from '@/utilities/getAllWorkshopAppointmen
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import type { Metadata } from 'next'
-import { unstable_noStore as noStore } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
-
-export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -31,19 +29,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function WorkshopsPage() {
-  noStore()
   const locale = await getLocale()
   const { isEnabled: draft } = await draftMode()
 
-  // Fetch all upcoming workshop appointments from database
-  const upcomingAppointments = await getAllWorkshopAppointments()
+  // Fetch all upcoming workshop appointments from database (cached 2 min)
+  const upcomingAppointments = await getCachedWorkshopAppointments()
 
   // Get workshops page data (hero + calendar sections editable from admin)
-  const workshopsPageData = await queryPageBySlug({
-    slug: 'workshops',
-    locale,
-    draft,
-  })
+  const workshopsPageData = draft
+    ? await queryPageBySlug({ slug: 'workshops', locale, draft: true })
+    : await getCachedWorkshopsPage(locale)
 
   // Get CMS data for section titles/descriptions
   const workshopsData = workshopsPageData as Page | undefined
@@ -176,6 +171,20 @@ export default async function WorkshopsPage() {
     </article>
   )
 }
+
+const getCachedWorkshopsPage = unstable_cache(
+  async (locale: string) => {
+    return queryPageBySlug({ slug: 'workshops', locale: locale as 'de' | 'en', draft: false })
+  },
+  ['workshops-page'],
+  { revalidate: 3600, tags: ['pages'] },
+)
+
+const getCachedWorkshopAppointments = unstable_cache(
+  () => getAllWorkshopAppointments(),
+  ['workshop-appointments'],
+  { revalidate: 120, tags: ['workshop-appointments'] },
+)
 
 const queryPageBySlug = async ({
   slug,

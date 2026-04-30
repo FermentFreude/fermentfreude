@@ -10,11 +10,10 @@ import { getLocale } from '@/utilities/getLocale'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import configPromise from '@payload-config'
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 
 import type { Page as PageType } from '@/payload-types'
-
-export const dynamic = 'force-dynamic'
 
 const DEFAULT_HERO_CTA = 'Take A Look'
 const DEFAULT_OFFER_TITLE = 'What we offer'
@@ -44,18 +43,26 @@ const FALLBACK_TRUST_BADGES_EN = [
   'Food Concept Stores',
 ] as const
 
-export async function generateMetadata(): Promise<Metadata> {
-  try {
+const getCachedGastronomyPage = unstable_cache(
+  async (locale: string) => {
     const payload = await getPayload({ config: configPromise })
-    const locale = await getLocale()
     const result = await payload.find({
       collection: 'pages',
       where: { slug: { equals: 'gastronomy' } },
       limit: 1,
-      depth: 0,
-      locale,
+      depth: 4,
+      locale: locale as 'de' | 'en',
     })
-    const doc = result.docs[0] as PageType | undefined
+    return (result.docs[0] as PageType | undefined) ?? null
+  },
+  ['gastronomy-page'],
+  { revalidate: 3600, tags: ['pages'] },
+)
+
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const locale = await getLocale()
+    const doc = await getCachedGastronomyPage(locale)
     if (!doc) return { title: 'Gastronomie | Fermentfreude' }
     return generateMeta({ doc })
   } catch {
@@ -65,15 +72,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function GastronomyPage() {
   const locale = await getLocale()
-  const payload = await getPayload({ config: configPromise })
-  const result = await payload.find({
-    collection: 'pages',
-    where: { slug: { equals: 'gastronomy' } },
-    limit: 1,
-    depth: 4,
-    locale,
-  })
-  const page = result.docs[0] as PageType | undefined
+  const page = await getCachedGastronomyPage(locale)
   const g = page?.gastronomy
 
   const heroCtaLabel = g?.gastronomyHeroCtaLabel ?? DEFAULT_HERO_CTA
