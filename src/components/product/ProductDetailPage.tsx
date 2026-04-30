@@ -19,7 +19,6 @@ import {
   SnowflakeIcon,
   SparklesIcon,
   SproutIcon,
-  StoreIcon,
   WheatOffIcon,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -61,26 +60,12 @@ const BADGE_CONFIG: Record<
 const TRANSLATIONS: Record<string, Record<string, string>> = {
   de: {
     'All products': 'Alle Produkte',
-    'Local Pickup': 'Lokale Abholung',
-    'Select Pickup Date': 'Abholungsdatum wählen',
-    'Select Pickup Time': 'Abholungszeit wählen',
-    'Choose a time slot': 'Zeitfenster wählen',
-    'Date selected': 'Datum ausgewählt:',
-    'Time selected': 'Zeit ausgewählt:',
-    'Ready for pickup': 'Bereit zur Abholung innerhalb von 2 Stunden zu Ihrer ausgewählten Zeit im',
     Description: 'Beschreibung',
     'Health Benefits': 'Gesundheitliche Vorteile',
     'Size/Weight': 'Größe/Gewicht',
   },
   en: {
     'All products': 'All products',
-    'Local Pickup': 'Local Pickup',
-    'Select Pickup Date': 'Select Pickup Date',
-    'Select Pickup Time': 'Select Pickup Time',
-    'Choose a time slot': 'Choose a time slot',
-    'Date selected': 'Date selected:',
-    'Time selected': 'Time selected:',
-    'Ready for pickup': 'Ready for pickup within 2 hours of your selected time at',
     Description: 'Description',
     'Health Benefits': 'Health Benefits',
     'Size/Weight': 'Size/Weight',
@@ -108,8 +93,6 @@ export function ProductDetailPage({ product }: { product: Product }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [activeTab, setActiveTab] = useState<'description' | 'about'>('description')
   const [quantity, setQuantity] = useState(1)
-  const [pickupDate, setPickupDate] = useState<string>('')
-  const [pickupTime, setPickupTime] = useState<string>('')
 
   /* ── Gallery ── */
   const gallery =
@@ -354,110 +337,10 @@ export function ProductDetailPage({ product }: { product: Product }) {
           </div>
 
           {/* ═══════════════════════════════════════════
-           *  SECTION 1.5 — Pickup Selection & Add to Cart
+           *  SECTION 1.5 — Add to Cart
            * ═══════════════════════════════════════════ */}
-          {!isOutOfStock && <div className="mt-8 flex flex-col gap-6">
-            {/* ── Pickup Details ── */}
-            <div className="w-full">
-              <div className="rounded-2xl border-2 border-[#e9e9e9] bg-[#fafafa] p-6 lg:p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 rounded-full bg-[#4b4f4a] flex items-center justify-center">
-                    <StoreIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <h3 className="text-xl lg:text-2xl font-display font-bold text-[#2b2b2d]">
-                    {t('Local Pickup', locale)}
-                  </h3>
-                </div>
-
-                <div className="space-y-5">
-                  {/* Pickup Date */}
-                  <div>
-                    <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2.5">
-                      {t('Select Pickup Date', locale)}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={pickupDate}
-                        onChange={(e) => setPickupDate(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                        className="w-full px-4 py-3.5 rounded-xl border-2 border-[#d5d5d5] bg-white text-[#2b2b2d] font-display font-bold text-base focus:outline-none focus:border-[#4b4f4a] focus:ring-2 focus:ring-[#4b4f4a] focus:ring-opacity-20 transition-all"
-                      />
-                    </div>
-                    {pickupDate && (
-                      <p className="mt-2 text-xs font-display font-bold text-[#4b4f4a]">
-                        ✓ {t('Date selected', locale)}{' '}
-                        {new Date(pickupDate + 'T00:00:00').toLocaleDateString(
-                          locale === 'de' ? 'de-DE' : 'en-US',
-                          { weekday: 'long', month: 'short', day: 'numeric' },
-                        )}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Pickup Time */}
-                  <div>
-                    <label className="block text-sm font-display font-bold text-[#2b2b2d] mb-2.5">
-                      {t('Select Pickup Time', locale)}
-                    </label>
-                    <select
-                      value={pickupTime}
-                      onChange={(e) => setPickupTime(e.target.value)}
-                      className="w-full px-4 py-3.5 rounded-xl border-2 border-[#d5d5d5] bg-white text-[#2b2b2d] font-display font-bold text-base focus:outline-none focus:border-[#4b4f4a] focus:ring-2 focus:ring-[#4b4f4a] focus:ring-opacity-20 transition-all appearance-none bg-no-repeat"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232b2b2d' d='M1 1l5 5 5-5'/%3E%3C/svg%3E")`,
-                        backgroundPosition: 'right 1rem center',
-                        paddingRight: '2.5rem',
-                      }}
-                    >
-                      <option value="">{t('Choose a time slot', locale)}</option>
-                      {locale === 'de' ? (
-                        <>
-                          <option value="10:00">10:00</option>
-                          <option value="11:00">11:00</option>
-                          <option value="12:00">12:00</option>
-                          <option value="13:00">13:00</option>
-                          <option value="14:00">14:00</option>
-                          <option value="15:00">15:00</option>
-                          <option value="16:00">16:00</option>
-                          <option value="17:00">17:00</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="10:00">10:00 AM</option>
-                          <option value="11:00">11:00 AM</option>
-                          <option value="12:00">12:00 PM</option>
-                          <option value="13:00">1:00 PM</option>
-                          <option value="14:00">2:00 PM</option>
-                          <option value="15:00">3:00 PM</option>
-                          <option value="16:00">4:00 PM</option>
-                          <option value="17:00">5:00 PM</option>
-                        </>
-                      )}
-                    </select>
-                    {pickupTime && (
-                      <p className="mt-2 text-xs font-display font-bold text-[#4b4f4a]">
-                        ✓ {t('Time selected', locale)} {pickupTime}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Info message */}
-                  <div className="rounded-xl bg-white p-3.5 border-l-4 border-[#4b4f4a] mt-6">
-                    <p className="text-xs text-[#666] leading-relaxed flex gap-2">
-                      <PackageIcon className="w-4 h-4 mt-0.5 shrink-0 text-[#4b4f4a]" />
-                      <span>
-                        {t('Ready for pickup', locale)}{' '}
-                        <strong>The Ginery, Grabenstrasse 15, 8010 Graz</strong>
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── RIGHT: Qty + Cart ── */}
-            <div className="w-full flex flex-col gap-6">
+          {!isOutOfStock && (
+            <div className="mt-8 flex flex-col gap-6">
               {/* Size/Weight */}
               {hasVariants && (
                 <div className="flex items-center gap-4">
@@ -471,55 +354,38 @@ export function ProductDetailPage({ product }: { product: Product }) {
               )}
 
               {/* Quantity + Add to Cart */}
-              <div className="flex flex-col gap-4">
-                {/* Row: Quantity Selector + Button */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  {/* Quantity Selector */}
-                  <div className="bg-white rounded-xl border-2 border-[#e9e9e9] p-4 inline-flex items-center gap-4 shrink-0">
-                    <span className="text-xs font-display font-bold text-[#999]">QTY:</span>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
-                      >
-                        −
-                      </button>
-                      <span className="w-8 text-center font-display font-bold text-lg text-[#2b2b2d]">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={() => setQuantity((q) => q + 1)}
-                        className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
-                      >
-                        +
-                      </button>
-                    </div>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="bg-white rounded-xl border-2 border-[#e9e9e9] p-4 inline-flex items-center gap-4 shrink-0">
+                  <span className="text-xs font-display font-bold text-[#999]">QTY:</span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
+                    >
+                      −
+                    </button>
+                    <span className="w-8 text-center font-display font-bold text-lg text-[#2b2b2d]">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => setQuantity((q) => q + 1)}
+                      className="w-8 h-8 rounded-lg border-2 border-[#e9e9e9] flex items-center justify-center font-display font-bold text-lg text-[#2b2b2d] hover:bg-[#f0f0f0] hover:border-[#4b4f4a] transition-all"
+                    >
+                      +
+                    </button>
                   </div>
-
-                  {/* Add to Cart Button */}
-                  <Suspense fallback={null}>
-                    <AddToCart
-                      product={product}
-                      quantity={quantity}
-                      disabled={!pickupDate || !pickupTime}
-                      className={`flex-1 h-16 rounded-full text-base font-display font-bold transition-all ${
-                        pickupDate && pickupTime
-                          ? 'bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] shadow-lg'
-                          : 'bg-[#d5d5d5] text-[#888] border-[#d5d5d5] cursor-not-allowed'
-                      }`}
-                    />
-                  </Suspense>
                 </div>
 
-                {/* Help text */}
-                {(!pickupDate || !pickupTime) && (
-                  <p className="text-xs text-[#999] text-center font-display font-medium">
-                    Select date and time above to proceed
-                  </p>
-                )}
+                <Suspense fallback={null}>
+                  <AddToCart
+                    product={product}
+                    quantity={quantity}
+                    className="flex-1 h-16 rounded-full text-base font-display font-bold bg-[#4b4f4a] text-white border-[#4b4f4a] hover:bg-[#3a3e39] shadow-lg transition-all"
+                  />
+                </Suspense>
               </div>
             </div>
-          </div>}
+          )}
 
           {/* Delivery disclaimer */}
           <p className="mt-6 text-xs text-[#999] leading-relaxed flex items-start gap-2 bg-[#fafafa] rounded-lg p-3">
