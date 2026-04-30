@@ -25,6 +25,101 @@ import { gtmBeginCheckout } from '@/lib/gtm'
 import { Address } from '@/payload-types'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { toast } from 'sonner'
+import { useLocale } from '@/providers/Locale'
+
+const CHECKOUT_DE = {
+  processingPayment: 'Zahlung wird verarbeitet…',
+  cartEmpty: 'Dein Warenkorb ist leer.',
+  continueShopping: 'Weiter einkaufen?',
+  contact: 'Kontakt',
+  loginBtn: 'Anmelden',
+  createAccount: 'Konto erstellen',
+  notYou: 'Nicht du?',
+  logOut: 'Abmelden',
+  guestPrompt: 'Gib deine E-Mail-Adresse ein, um als Gast zu bestellen.',
+  emailLabel: 'E-Mail-Adresse',
+  continueAsGuest: 'Als Gast fortfahren',
+  address: 'Adresse',
+  noShipping: 'Workshop / digitales Produkt — keine Lieferadresse erforderlich.',
+  storePickup: 'Abholung im Geschäft',
+  pickupWorkshopNote:
+    'Dein Warenkorb enthält auch einen Workshop. Die Abholdetails gelten nur für die physischen Produkte — dein Workshop-Termin bleibt unverändert.',
+  viewOnMaps: 'Auf Google Maps ansehen',
+  pickupDateLabel: 'Abholdatum',
+  pickupTimeLabel: 'Abholzeit',
+  selectTime: 'Zeit auswählen',
+  remove: 'Entfernen',
+  billingAddress: 'Rechnungsadresse',
+  shippingSameAsBilling: 'Lieferadresse identisch mit Rechnungsadresse',
+  shippingAddress: 'Lieferadresse',
+  shippingAddressPrompt: 'Bitte wähle eine Lieferadresse.',
+  voucherCode: 'Gutschein-Code',
+  voucherPlaceholder: 'FF-GIFT-XXXXXXXX',
+  voucherRedeem: 'Einlösen',
+  voucherRemove: 'Entfernen',
+  voucherEmptyError: 'Bitte gib einen Gutschein-Code ein.',
+  voucherInvalidError: 'Ungültiger Gutschein-Code.',
+  voucherNetworkError: 'Verbindungsfehler. Bitte versuche es erneut.',
+  voucherApplied: (value: number) => `Gutschein €${value} angewendet!`,
+  payment: 'Zahlung',
+  payWithVoucher: 'Jetzt mit Gutschein bestellen',
+  processingOrder: 'Bestellung wird bearbeitet…',
+  goToPayment: 'Zur Zahlung',
+  cancelPayment: 'Zahlung abbrechen',
+  tryAgain: 'Erneut versuchen',
+  yourCart: 'Warenkorb',
+  orderFailed: 'Bestellung fehlgeschlagen.',
+  connectionError: 'Verbindungsfehler. Bitte versuche es erneut.',
+  or: 'oder',
+  total: 'Gesamt',
+}
+
+const CHECKOUT_EN = {
+  processingPayment: 'Processing your payment…',
+  cartEmpty: 'Your cart is empty.',
+  continueShopping: 'Continue shopping?',
+  contact: 'Contact',
+  loginBtn: 'Log in',
+  createAccount: 'Create an account',
+  notYou: 'Not you?',
+  logOut: 'Log out',
+  guestPrompt: 'Enter your email to checkout as a guest.',
+  emailLabel: 'Email Address',
+  continueAsGuest: 'Continue as guest',
+  address: 'Address',
+  noShipping: 'Workshop / digital product — no shipping address required.',
+  storePickup: 'Store Pickup',
+  pickupWorkshopNote:
+    'Your cart also includes a workshop. The pickup details below apply to the physical products only — your workshop date stays as booked.',
+  viewOnMaps: 'View on Google Maps',
+  pickupDateLabel: 'Pickup Date',
+  pickupTimeLabel: 'Pickup Time',
+  selectTime: 'Select a time',
+  remove: 'Remove',
+  billingAddress: 'Billing address',
+  shippingSameAsBilling: 'Shipping is the same as billing',
+  shippingAddress: 'Shipping address',
+  shippingAddressPrompt: 'Please select a shipping address.',
+  voucherCode: 'Voucher Code',
+  voucherPlaceholder: 'FF-GIFT-XXXXXXXX',
+  voucherRedeem: 'Redeem',
+  voucherRemove: 'Remove',
+  voucherEmptyError: 'Please enter a voucher code.',
+  voucherInvalidError: 'Invalid voucher code.',
+  voucherNetworkError: 'Connection error. Please try again.',
+  voucherApplied: (value: number) => `Voucher €${value} applied!`,
+  payment: 'Payment',
+  payWithVoucher: 'Order with voucher',
+  processingOrder: 'Processing order…',
+  goToPayment: 'Go to payment',
+  cancelPayment: 'Cancel payment',
+  tryAgain: 'Try again',
+  yourCart: 'Your cart',
+  orderFailed: 'Order failed.',
+  connectionError: 'Connection error. Please try again.',
+  or: 'or',
+  total: 'Total',
+}
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
@@ -77,6 +172,8 @@ export const CheckoutPage: React.FC = () => {
   const [voucherError, setVoucherError] = useState<string | null>(null)
   const [voucherLoading, setVoucherLoading] = useState(false)
   const checkoutEmail = email || user?.email || ''
+  const { locale } = useLocale()
+  const t = locale === 'de' ? CHECKOUT_DE : CHECKOUT_EN
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
@@ -234,7 +331,7 @@ export const CheckoutPage: React.FC = () => {
     setVoucherError(null)
     const trimmed = voucherCode.trim()
     if (!trimmed) {
-      setVoucherError('Bitte gib einen Gutschein-Code ein.')
+      setVoucherError(t.voucherEmptyError)
       return
     }
     setVoucherLoading(true)
@@ -246,13 +343,13 @@ export const CheckoutPage: React.FC = () => {
       })
       const data = await res.json()
       if (!res.ok || !data.success) {
-        setVoucherError(data.error || 'Ung\u00FCltiger Gutschein-Code.')
+        setVoucherError(data.error || t.voucherInvalidError)
         return
       }
       setVoucherApplied({ code: data.voucher.code, value: data.voucher.value })
-      toast.success(`Gutschein \u20AC${data.voucher.value} angewendet!`)
+      toast.success(t.voucherApplied(data.voucher.value))
     } catch (_err) {
-      setVoucherError('Verbindungsfehler. Bitte versuche es erneut.')
+      setVoucherError(t.voucherNetworkError)
     } finally {
       setVoucherLoading(false)
     }
@@ -265,7 +362,7 @@ export const CheckoutPage: React.FC = () => {
   }, [])
 
   /* ── Computed: voucher covers the full amount? ── */
-  const discountedTotal = Math.max(0, (cart?.subtotal || 0) - (voucherApplied?.value || 0))
+  const discountedTotal = Math.max(0, (cart?.subtotal || 0) - ((voucherApplied?.value || 0) * 100))
   const voucherCoversAll = Boolean(voucherApplied && discountedTotal === 0)
 
   /* ── Place order paid entirely by voucher (no Stripe) ── */
@@ -287,8 +384,8 @@ export const CheckoutPage: React.FC = () => {
       const data = await res.json()
 
       if (!res.ok || !data.success) {
-        setError(data.error || 'Bestellung fehlgeschlagen.')
-        toast.error(data.error || 'Bestellung fehlgeschlagen.')
+        setError(data.error || t.orderFailed)
+        toast.error(data.error || t.orderFailed)
         setProcessingPayment(false)
         return
       }
@@ -300,10 +397,10 @@ export const CheckoutPage: React.FC = () => {
       const emailParam = email ? `&email=${encodeURIComponent(email)}` : ''
       router.push(`/account/order-confirmation?orderId=${data.orderID}&type=${type}${emailParam}`)
     } catch (_err) {
-      setError('Verbindungsfehler. Bitte versuche es erneut.')
+      setError(t.connectionError)
       setProcessingPayment(false)
     }
-  }, [voucherApplied, email, user, clearCart, router, hasWorkshop, isAllDigital])
+  }, [voucherApplied, email, user, clearCart, router, hasWorkshop, isAllDigital, t])
 
   const initiatePaymentIntent = useCallback(
     async (paymentID: string) => {
@@ -363,7 +460,7 @@ export const CheckoutPage: React.FC = () => {
     return (
       <div className="py-12 w-full items-center justify-center">
         <div className="prose dark:prose-invert text-center max-w-none self-center mb-8">
-          <p>Processing your payment...</p>
+          <p>{t.processingPayment}</p>
         </div>
         <LoadingSpinner />
       </div>
@@ -373,8 +470,8 @@ export const CheckoutPage: React.FC = () => {
   if (cartIsEmpty) {
     return (
       <div className="prose dark:prose-invert py-12 w-full items-center">
-        <p>Your cart is empty.</p>
-        <Link href="/search">Continue shopping?</Link>
+        <p>{t.cartEmpty}</p>
+        <Link href="/search">{t.continueShopping}</Link>
       </div>
     )
   }
@@ -386,19 +483,19 @@ export const CheckoutPage: React.FC = () => {
         {/* ── Contact Section ── */}
         <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
           <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
-            Contact
+            {t.contact}
           </h2>
           {!user && (
             <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg bg-[#f5f1e8] p-4">
               <Button asChild variant="outline" className="font-display font-bold">
-                <Link href="/login">Log in</Link>
+                <Link href="/login">{t.loginBtn}</Link>
               </Button>
-              <span className="text-body-sm text-ff-gray-text-light">or</span>
+              <span className="text-body-sm text-ff-gray-text-light">{t.or}</span>
               <Link
                 href="/create-account"
                 className="font-display text-body-sm font-bold text-ff-near-black underline underline-offset-2 hover:text-ff-gold-accent"
               >
-                create an account
+                {t.createAccount}
               </Link>
             </div>
           )}
@@ -407,12 +504,12 @@ export const CheckoutPage: React.FC = () => {
               <div>
                 <p className="font-display text-body font-bold text-ff-near-black">{user.email}</p>
                 <p className="mt-0.5 text-body-sm text-ff-gray-text-light">
-                  Not you?{' '}
+                  {t.notYou}{' '}
                   <Link
                     className="font-bold underline underline-offset-2 hover:text-ff-near-black"
                     href="/logout"
                   >
-                    Log out
+                    {t.logOut}
                   </Link>
                 </p>
               </div>
@@ -431,14 +528,14 @@ export const CheckoutPage: React.FC = () => {
           ) : (
             <div className="space-y-4">
               <p className="text-body-sm text-ff-gray-text-light">
-                Enter your email to checkout as a guest.
+                {t.guestPrompt}
               </p>
               <FormItem>
                 <Label
                   htmlFor="email"
                   className="font-display text-body-sm font-bold text-ff-near-black"
                 >
-                  Email Address
+                  {t.emailLabel}
                 </Label>
                 <Input
                   disabled={!emailEditable}
@@ -458,7 +555,7 @@ export const CheckoutPage: React.FC = () => {
                 }}
                 className="rounded-full bg-ff-near-black px-6 font-display font-bold text-white hover:bg-ff-near-black/80"
               >
-                Continue as guest
+                {t.continueAsGuest}
               </Button>
             </div>
           )}
@@ -468,7 +565,7 @@ export const CheckoutPage: React.FC = () => {
         {isAllDigital ? (
           <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
-              Address
+              {t.address}
             </h2>
             <div className="flex flex-row items-center gap-3 rounded-lg bg-[#f5f1e8] px-5 py-4">
               <svg
@@ -487,19 +584,18 @@ export const CheckoutPage: React.FC = () => {
                 />
               </svg>
               <span className="text-body-sm font-medium text-[#555954]">
-                Workshop / digital product — no shipping address required.
+                {t.noShipping}
               </span>
             </div>
           </section>
         ) : isAllPhysicalPickup ? (
           <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
-              Store Pickup
+              {t.storePickup}
             </h2>
             {hasWorkshop && (
               <div className="mb-6 rounded-lg bg-[#f5f1e8] px-5 py-4 text-body-sm text-[#555954]">
-                Your cart also includes a workshop. The pickup details below apply to the physical
-                products only — your workshop date stays as booked.
+                {t.pickupWorkshopNote}
               </div>
             )}
             {/* Pickup Location */}
@@ -514,7 +610,7 @@ export const CheckoutPage: React.FC = () => {
                 rel="noopener noreferrer"
                 className="text-body-sm text-ff-gold-accent underline hover:text-ff-near-black"
               >
-                View on Google Maps
+                {t.viewOnMaps}
               </a>
             </div>
 
@@ -524,7 +620,7 @@ export const CheckoutPage: React.FC = () => {
                 htmlFor="pickupDate"
                 className="font-display text-body-sm font-bold text-ff-near-black"
               >
-                Pickup Date
+                {t.pickupDateLabel}
               </Label>
               <Input
                 id="pickupDate"
@@ -544,7 +640,7 @@ export const CheckoutPage: React.FC = () => {
                 htmlFor="pickupTime"
                 className="font-display text-body-sm font-bold text-ff-near-black"
               >
-                Pickup Time
+                {t.pickupTimeLabel}
               </Label>
               <select
                 id="pickupTime"
@@ -554,7 +650,7 @@ export const CheckoutPage: React.FC = () => {
                 disabled={Boolean(paymentData) || !pickupDate}
                 className="w-full rounded-md border border-ff-border-light bg-white px-4 py-2 text-body-sm focus:border-ff-near-black focus:ring-ff-near-black disabled:opacity-50"
               >
-                <option value="">Select a time</option>
+                <option value="">{t.selectTime}</option>
                 {getAvailableTimeSlots().map((slot) => (
                   <option key={slot.value} value={slot.value}>
                     {slot.label}
@@ -566,7 +662,7 @@ export const CheckoutPage: React.FC = () => {
         ) : (
           <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
-              Address
+              {t.address}
             </h2>
 
             {billingAddress ? (
@@ -581,14 +677,14 @@ export const CheckoutPage: React.FC = () => {
                         setBillingAddress(undefined)
                       }}
                     >
-                      Remove
+                      {t.remove}
                     </Button>
                   }
                   address={billingAddress}
                 />
               </div>
             ) : user ? (
-              <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
+              <CheckoutAddresses heading={t.billingAddress} setAddress={setBillingAddress} />
             ) : (
               <CreateAddressModal
                 disabled={!email || Boolean(emailEditable)}
@@ -612,7 +708,7 @@ export const CheckoutPage: React.FC = () => {
                 htmlFor="shippingTheSameAsBilling"
                 className="text-body-sm text-ff-gray-text-light"
               >
-                Shipping is the same as billing
+                {t.shippingSameAsBilling}
               </Label>
             </div>
 
@@ -630,7 +726,7 @@ export const CheckoutPage: React.FC = () => {
                             setShippingAddress(undefined)
                           }}
                         >
-                          Remove
+                          {t.remove}
                         </Button>
                       }
                       address={shippingAddress}
@@ -638,8 +734,8 @@ export const CheckoutPage: React.FC = () => {
                   </div>
                 ) : user ? (
                   <CheckoutAddresses
-                    heading="Shipping address"
-                    description="Please select a shipping address."
+                    heading={t.shippingAddress}
+                    description={t.shippingAddressPrompt}
                     setAddress={setShippingAddress}
                   />
                 ) : (
@@ -665,7 +761,7 @@ export const CheckoutPage: React.FC = () => {
               void handleVoucherOrder()
             }}
           >
-            {isProcessingPayment ? 'Bestellung wird bearbeitet…' : 'Jetzt mit Gutschein bestellen'}
+          {isProcessingPayment ? t.processingOrder : t.payWithVoucher}
           </Button>
         ) : !paymentData ? (
           <Button
@@ -676,7 +772,7 @@ export const CheckoutPage: React.FC = () => {
               void initiatePaymentIntent('stripe')
             }}
           >
-            Go to payment
+          {t.goToPayment}
           </Button>
         ) : null}
 
@@ -690,7 +786,7 @@ export const CheckoutPage: React.FC = () => {
               }}
               className="mt-4 rounded-full bg-ff-near-black px-6 font-display font-bold text-white hover:bg-ff-near-black/80"
             >
-              Try again
+              {t.tryAgain}
             </Button>
           </div>
         )}
@@ -699,7 +795,7 @@ export const CheckoutPage: React.FC = () => {
           {!voucherCoversAll && paymentData && typeof paymentData['clientSecret'] === 'string' && (
             <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
               <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
-                Payment
+                {t.payment}
               </h2>
               {error && <p className="mb-4 text-body-sm text-red-600">{`Error: ${error}`}</p>}
               <Elements
@@ -742,7 +838,7 @@ export const CheckoutPage: React.FC = () => {
                     className="self-start font-display text-body-sm font-bold text-ff-gray-text-light underline underline-offset-2 transition-colors hover:text-ff-near-black"
                     onClick={() => setPaymentData(null)}
                   >
-                    Cancel payment
+                    {t.cancelPayment}
                   </button>
                 </div>
               </Elements>
@@ -755,7 +851,7 @@ export const CheckoutPage: React.FC = () => {
         <aside className="order-first w-full lg:order-last lg:w-95 lg:shrink-0 lg:sticky lg:top-8 lg:max-h-[calc(100vh-9rem)]">
           <div className="rounded-xl border border-ff-border-light bg-white overflow-y-auto max-h-[calc(100vh-6rem)] md:max-h-[calc(100vh-8rem)] lg:max-h-none p-6 sm:p-8">
             <h2 className="font-display text-subheading font-bold tracking-tight text-ff-near-black">
-              Your cart
+              {t.yourCart}
             </h2>
 
             <div className="mt-6 flex flex-col gap-5">
@@ -857,7 +953,7 @@ export const CheckoutPage: React.FC = () => {
             {/* Voucher Code Section */}
             <div className="flex flex-col gap-3">
               <h3 className="font-display text-body-sm font-bold uppercase tracking-wider text-ff-near-black">
-                Gutschein-Code
+                {t.voucherCode}
               </h3>
               {voucherApplied ? (
                 <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3">
@@ -873,7 +969,7 @@ export const CheckoutPage: React.FC = () => {
                     onClick={handleRemoveVoucher}
                     className="text-caption font-display font-bold text-ff-gray-text-light underline underline-offset-2 transition-colors hover:text-ff-near-black"
                   >
-                    Entfernen
+                    {t.voucherRemove}
                   </button>
                 </div>
               ) : (
@@ -881,7 +977,7 @@ export const CheckoutPage: React.FC = () => {
                   <Input
                     value={voucherCode}
                     onChange={(e) => setVoucherCode(e.target.value)}
-                    placeholder="FF-GIFT-XXXXXXXX"
+                    placeholder={t.voucherPlaceholder}
                     className="rounded-lg border-ff-border-light font-mono text-body-sm uppercase focus-visible:ring-ff-gold"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -895,7 +991,7 @@ export const CheckoutPage: React.FC = () => {
                     disabled={voucherLoading || !voucherCode.trim()}
                     className="shrink-0 rounded-lg border border-ff-near-black bg-ff-near-black px-4 py-2 font-display text-body-sm font-bold text-white transition-colors hover:bg-ff-near-black/90 disabled:opacity-40"
                   >
-                    {voucherLoading ? '...' : 'Einl\u00F6sen'}
+                    {voucherLoading ? '...' : t.voucherRedeem}
                   </button>
                 </div>
               )}
@@ -906,19 +1002,19 @@ export const CheckoutPage: React.FC = () => {
 
             <div className="my-6 h-px bg-ff-border-light" />
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-3">
               <span className="font-display text-body font-bold uppercase tracking-wider text-ff-near-black">
-                Total
+                {t.total}
               </span>
-              <div className="text-right">
-                {voucherApplied && (
-                  <p className="text-body-sm text-ff-gray-text-light line-through">
+              <div className="flex items-baseline justify-end gap-2 text-right">
+                {voucherApplied ? (
+                  <span className="text-body-sm text-ff-gray-text-light line-through">
                     <Price amount={cart.subtotal || 0} />
-                  </p>
-                )}
+                  </span>
+                ) : null}
                 <Price
-                  className="font-display text-section-heading font-bold text-ff-near-black"
-                  amount={Math.max(0, (cart.subtotal || 0) - (voucherApplied?.value || 0))}
+                  className="font-display text-subheading sm:text-section-heading font-bold text-ff-near-black leading-none whitespace-nowrap"
+                  amount={Math.max(0, (cart.subtotal || 0) - ((voucherApplied?.value || 0) * 100))}
                 />
               </div>
             </div>

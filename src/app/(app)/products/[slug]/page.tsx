@@ -4,6 +4,7 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { GridTileImage } from '@/components/Grid/tile'
 import { CourseProductPage } from '@/components/product/CourseProductPage'
 import { ProductDetailPage } from '@/components/product/ProductDetailPage'
+import { getProductDetailLabelsGlobal } from '@/utilities/getProductDetailLabelsGlobal'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { Metadata } from 'next'
@@ -63,6 +64,7 @@ export default async function ProductPage({ params }: Args) {
   const { slug } = await params
   const locale = await getLocale()
   const product = await queryProductBySlug({ slug, locale })
+  const productDetailLabels = await getProductDetailLabelsGlobal(locale)
 
   if (!product) return notFound()
 
@@ -116,7 +118,7 @@ export default async function ProductPage({ params }: Args) {
         type="application/ld+json"
       />
 
-      <ProductDetailPage product={product} />
+      <ProductDetailPage product={product} productDetailLabels={productDetailLabels} />
 
       {product.layout?.length ? <RenderBlocks blocks={product.layout} /> : <></>}
 

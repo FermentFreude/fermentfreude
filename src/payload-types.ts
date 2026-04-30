@@ -167,6 +167,7 @@ export interface Config {
     'workshop-slider-global': WorkshopSliderGlobal;
     'product-slider-global': ProductSliderGlobal;
     'workshop-cards-global': WorkshopCardsGlobal;
+    'product-detail-labels-global': ProductDetailLabelsGlobal;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -177,6 +178,7 @@ export interface Config {
     'workshop-slider-global': WorkshopSliderGlobalSelect<false> | WorkshopSliderGlobalSelect<true>;
     'product-slider-global': ProductSliderGlobalSelect<false> | ProductSliderGlobalSelect<true>;
     'workshop-cards-global': WorkshopCardsGlobalSelect<false> | WorkshopCardsGlobalSelect<true>;
+    'product-detail-labels-global': ProductDetailLabelsGlobalSelect<false> | ProductDetailLabelsGlobalSelect<true>;
   };
   locale: 'de' | 'en';
   user: User;
@@ -7159,6 +7161,24 @@ export interface WorkshopCardsGlobal {
   createdAt?: string | null;
 }
 /**
+ * Localized labels for product detail headings and notices.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-detail-labels-global".
+ */
+export interface ProductDetailLabelsGlobal {
+  id: string;
+  ingredientsLabel?: string | null;
+  allergensLabel?: string | null;
+  storageShelfLifeLabel?: string | null;
+  shelfLifeLabel?: string | null;
+  howToUseLabel?: string | null;
+  instructionsBeforeUseLabel?: string | null;
+  deliveryNotice?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -7399,6 +7419,22 @@ export interface WorkshopCardsGlobalSelect<T extends boolean = true> {
         nextDate?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-detail-labels-global_select".
+ */
+export interface ProductDetailLabelsGlobalSelect<T extends boolean = true> {
+  ingredientsLabel?: T;
+  allergensLabel?: T;
+  storageShelfLifeLabel?: T;
+  shelfLifeLabel?: T;
+  howToUseLabel?: T;
+  instructionsBeforeUseLabel?: T;
+  deliveryNotice?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
