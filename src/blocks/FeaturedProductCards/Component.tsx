@@ -51,6 +51,7 @@ function getPrimaryBadge(product: Product): { label: string; icon: string } | nu
 function t(key: string, locale: 'de' | 'en'): string {
   const translations: Record<string, Record<'de' | 'en', string>> = {
     'Sold Out': { de: 'Ausverkauft', en: 'Sold Out' },
+    'Order Now': { de: 'Jetzt bestellen', en: 'Order Now' },
   }
   return translations[key]?.[locale] || key
 }
@@ -79,8 +80,13 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
 
   if (visible === false) return null
 
-  const resolvedCta = ctaLabel ?? 'Order Now'
   const locale = (await getLocale()) as 'de' | 'en'
+  const rawCta = ctaLabel?.trim()
+  const normalizedCta = rawCta?.toLowerCase()
+  const resolvedCta =
+    locale === 'de' && (!rawCta || normalizedCta === 'order now' || normalizedCta === 'order')
+      ? t('Order Now', locale)
+      : rawCta || t('Order Now', locale)
   const payload = await getPayload({ config: configPromise })
 
   /* Fetch the 3 card products */
