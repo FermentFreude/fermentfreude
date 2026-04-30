@@ -60,13 +60,14 @@ export async function GET(request: NextRequest) {
     pdf.setFont('helvetica', 'bold')
     pdf.text('Workshop-Erlebnis Gutschein', width / 2, 50, { align: 'center' })
 
-    // Section 2: Gift icon / decoration
-    pdf.setFontSize(12)
-    pdf.text('🎁', width / 2, 65, { align: 'center' })
+    // Section 2: Decorative separator
+    pdf.setDrawColor(212, 165, 116)
+    pdf.setLineWidth(0.5)
+    pdf.line(30, 62, width - 30, 62)
 
     // Section 3: Voucher Code Box
     const boxX = 20
-    const boxY = 75
+    const boxY = 70
     const boxWidth = width - 40
     const boxHeight = 50
 
@@ -148,7 +149,7 @@ export async function GET(request: NextRequest) {
     pdf.setFont('helvetica', 'normal')
     pdf.setTextColor(90, 84, 80)
     pdf.text(
-      'Fragen? Kontaktiere uns unter support@fermentfreude.at oder besuche www.fermentfreude.at',
+      'Fragen? Kontaktiere uns unter kontakt@fermentfreude.at oder besuche www.fermentfreude.at',
       width / 2,
       footerY,
       { align: 'center' },
@@ -232,13 +233,14 @@ export async function POST(request: NextRequest) {
     pdf.setFont('helvetica', 'bold')
     pdf.text('Workshop-Erlebnis Gutschein', width / 2, 50, { align: 'center' })
 
-    // Section 2: Gift icon
-    pdf.setFontSize(12)
-    pdf.text('🎁', width / 2, 65, { align: 'center' })
+    // Section 2: Decorative separator
+    pdf.setDrawColor(212, 165, 116)
+    pdf.setLineWidth(0.5)
+    pdf.line(30, 62, width - 30, 62)
 
     // Section 3: Voucher Code Box
     const boxX = 20
-    const boxY = 75
+    const boxY = 70
     const boxWidth = width - 40
     const boxHeight = 50
 
@@ -314,7 +316,7 @@ export async function POST(request: NextRequest) {
     pdf.setFont('helvetica', 'normal')
     pdf.setTextColor(90, 84, 80)
     pdf.text(
-      'Fragen? Kontaktiere uns unter support@fermentfreude.at oder besuche www.fermentfreude.at',
+      'Fragen? Kontaktiere uns unter kontakt@fermentfreude.at oder besuche www.fermentfreude.at',
       width / 2,
       footerY,
       { align: 'center' },

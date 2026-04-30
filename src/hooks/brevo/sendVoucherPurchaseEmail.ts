@@ -22,16 +22,40 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://fermentfreude.at'
     const pdfUrl = `${baseUrl}/api/voucher/generate-pdf?code=${encodeURIComponent(String(doc.code ?? ''))}`
 
+    // Calculate expiry (12 months from creation)
+    const expiryDate = new Date(doc.createdAt)
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+    const voucherExpiry = expiryDate.toLocaleDateString('de-AT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+
+    // Derive first name from purchaser email (no name field on Voucher collection)
+    const purchaserFirstName = purchaserEmail.split('@')[0] ?? ''
+
+    // Standard URLs for template buttons/links
+    const shopUrl = `${baseUrl}/workshops`
+    const voucherUrl = `${baseUrl}/workshops/voucher`
+    const privacyUrl = `${baseUrl}/datenschutz`
+    const agbUrl = `${baseUrl}/agb`
+
     // Send purchase confirmation to buyer
     await sendTemplateEmail({
       to: [{ email: purchaserEmail }],
       templateId: BREVO_TEMPLATES.VOUCHER_PURCHASED,
       params: {
+        FIRST_NAME: purchaserFirstName,
         VOUCHER_CODE: String(doc.code ?? ''),
-        VOUCHER_VALUE: String(doc.value ?? 99),
+        VOUCHER_AMOUNT: String(doc.value ?? 99),
+        VOUCHER_EXPIRY: voucherExpiry,
         DELIVERY_METHOD: doc.deliveryMethod === 'email' ? 'E-Mail' : 'Abholung',
         RECIPIENT_EMAIL: doc.recipientEmail || '',
         PDF_DOWNLOAD_URL: pdfUrl,
+        SHOP_URL: shopUrl,
+        VOUCHER_URL: voucherUrl,
+        PRIVACY_URL: privacyUrl,
+        AGB_URL: agbUrl,
       },
     })
 
@@ -45,11 +69,17 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
         to: [{ email: doc.recipientEmail }],
         templateId: BREVO_TEMPLATES.VOUCHER_PURCHASED,
         params: {
+          FIRST_NAME: doc.recipientEmail.split('@')[0] ?? purchaserFirstName,
           VOUCHER_CODE: String(doc.code ?? ''),
-          VOUCHER_VALUE: String(doc.value ?? 99),
+          VOUCHER_AMOUNT: String(doc.value ?? 99),
+          VOUCHER_EXPIRY: voucherExpiry,
           DELIVERY_METHOD: 'E-Mail',
           RECIPIENT_EMAIL: doc.recipientEmail,
           PDF_DOWNLOAD_URL: pdfUrl,
+          SHOP_URL: shopUrl,
+          VOUCHER_URL: voucherUrl,
+          PRIVACY_URL: privacyUrl,
+          AGB_URL: agbUrl,
         },
       })
     }

@@ -262,12 +262,15 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             WORKSHOP_LOCATION: workshopLocation,
             GUEST_COUNT: String(booking.guestCount ?? 1),
             TOTAL_PRICE: formattedPrice,
-            CUSTOMER_NAME: String(
+            FIRST_NAME: String(
               (updateData.firstName as string) || booking.firstName || bookingEmail,
             ),
             BOOKING_ID: String(booking.id),
             BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
-            BOOKING_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.com'}/account/orders`,
+            BOOKING_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/account/orders`,
+            WHAT_TO_BRING: '',
+            PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
+            AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,
           },
         })
         payload.logger.info(
