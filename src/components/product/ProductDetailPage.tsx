@@ -186,6 +186,8 @@ export function ProductDetailPage({
       t('Instructions Before Use', locale),
     deliveryNotice: productDetailLabels?.deliveryNotice?.trim() || t('Delivery notice', locale),
   }
+  const luxuryProseClass =
+    'prose prose-sm sm:prose-base max-w-none leading-relaxed text-[#2b2722] prose-headings:font-display prose-headings:text-[#1f1a15] prose-headings:tracking-tight prose-headings:mb-3 prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-p:text-[#4f4941] prose-p:mb-3 prose-strong:text-[#1f1a15] prose-strong:font-semibold prose-ul:my-4 prose-ul:pl-5 prose-li:text-[#4f4941] prose-li:marker:text-[#d9be82] prose-li:mb-1.5 prose-hr:border-[#e5dccd]'
 
   /* ── Specs — built from REAL existing data ── */
   const specs: { label: string; value: string }[] = []
@@ -441,50 +443,49 @@ export function ProductDetailPage({
            *  SECTION 2 — Tabs (Description / Health Benefits / Packaging)
            * ═══════════════════════════════════════════ */}
           {tabs.length > 0 && (
-            <div className="mt-14 rounded-lg border border-[#e9e9e9] bg-white overflow-hidden">
+            <div className="mt-14 overflow-hidden rounded-2xl border border-[#e4ded4] bg-linear-to-br from-[#fffdf8] via-white to-[#f9f5ec] shadow-[0_18px_40px_-28px_rgba(60,45,22,0.45)]">
               {/* Tab bar */}
-              <div className="flex border-b border-[#e9e9e9] px-8 gap-8 overflow-x-auto">
+              <div className="flex items-center gap-2 overflow-x-auto border-b border-[#e6dfd2] px-4 py-4 sm:px-8">
                 {tabs.map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`relative py-4 text-base font-display font-bold whitespace-nowrap transition-colors ${
+                    className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm sm:text-base font-display font-bold transition-all duration-200 ${
                       validActiveTab === tab.key
-                        ? 'text-[#1d1d1d]'
-                        : 'text-[#98989a] hover:text-[#555]'
+                        ? 'bg-[#1f1f1f] text-[#f8f1df] shadow-sm'
+                        : 'text-[#7b7467] hover:text-[#2f2a24] hover:bg-[#f4ecdd]'
                     }`}
                   >
                     {tab.label}
-                    {validActiveTab === tab.key && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4b4b4b]" />
-                    )}
                   </button>
                 ))}
               </div>
 
               {/* Tab content */}
-              <div className="px-8 py-8">
+              <div className="px-5 py-6 sm:px-8 sm:py-8">
                 {/* Description — includes all product details */}
                 {validActiveTab === 'description' && hasDescription && (
-                  <div className="space-y-6">
+                  <div className="space-y-7">
                     {/* Main description */}
                     {hasRichTextContent(product.description) && (
-                      <div className="prose prose-sm max-w-none text-[#1d1d1d] leading-relaxed">
-                        <RichText data={product.description!} enableGutter={false} />
+                      <div className="rounded-xl border border-[#e7dfd2] bg-white/85 px-4 py-4 sm:px-5 sm:py-5 shadow-[0_10px_28px_-22px_rgba(50,35,15,0.55)]">
+                        <div className={luxuryProseClass}>
+                          <RichText data={product.description!} enableGutter={false} />
+                        </div>
                       </div>
                     )}
 
                     {/* Ingredients */}
                     {isFood && product.ingredients && (
-                      <div className="border-t border-[#e9e9e9] pt-5">
-                        <h3 className="text-base font-display font-bold text-[#2b2b2d] mb-2">
+                      <div className="rounded-xl border border-[#e7dfd2] bg-white/70 px-4 py-4 sm:px-5 sm:py-5">
+                        <h3 className="mb-2 text-base font-display font-bold text-[#1f1a15] sm:text-lg">
                           {labels.ingredients}
                         </h3>
-                        <p className="text-sm text-[#777] whitespace-pre-line leading-relaxed">
+                        <p className="whitespace-pre-line text-sm leading-relaxed text-[#5f5850]">
                           {product.ingredients}
                         </p>
                         {product.allergens && (
-                          <p className="mt-2 text-xs text-[#999]">
+                          <p className="mt-2 text-xs text-[#7f766b]">
                             <span className="font-semibold">{labels.allergens}:</span> {product.allergens}
                           </p>
                         )}
@@ -493,17 +494,17 @@ export function ProductDetailPage({
 
                     {/* Storage + Shelf Life */}
                     {isFood && (product.storageInstructions || product.shelfLife) && (
-                      <div className="border-t border-[#e9e9e9] pt-5">
-                        <h3 className="text-base font-display font-bold text-[#2b2b2d] mb-2">
+                      <div className="rounded-xl border border-[#e7dfd2] bg-white/70 px-4 py-4 sm:px-5 sm:py-5">
+                        <h3 className="mb-2 text-base font-display font-bold text-[#1f1a15] sm:text-lg">
                           {labels.storageShelfLife}
                         </h3>
                         {product.storageInstructions && (
-                          <p className="text-sm text-[#777] whitespace-pre-line leading-relaxed">
+                          <p className="whitespace-pre-line text-sm leading-relaxed text-[#5f5850]">
                             {product.storageInstructions}
                           </p>
                         )}
                         {product.shelfLife && (
-                          <p className="mt-2 text-sm text-[#777]">
+                          <p className="mt-2 text-sm text-[#5f5850]">
                             <span className="font-semibold">{labels.shelfLife}:</span> {product.shelfLife}
                           </p>
                         )}
@@ -512,11 +513,11 @@ export function ProductDetailPage({
 
                     {/* How to Use */}
                     {hasRichTextContent(product.howToUse) && (
-                      <div className="border-t border-[#e9e9e9] pt-5">
-                        <h3 className="text-base font-display font-bold text-[#2b2b2d] mb-2">
+                      <div className="rounded-xl border border-[#e7dfd2] bg-white/70 px-4 py-4 sm:px-5 sm:py-5">
+                        <h3 className="mb-2 text-base font-display font-bold text-[#1f1a15] sm:text-lg">
                           {labels.howToUse}
                         </h3>
-                        <div className="prose prose-sm max-w-none text-[#777]">
+                        <div className={luxuryProseClass}>
                           <RichText data={product.howToUse!} enableGutter={false} />
                         </div>
                       </div>
@@ -524,11 +525,11 @@ export function ProductDetailPage({
 
                     {/* Instructions */}
                     {hasRichTextContent(product.userInstructions) && (
-                      <div className="border-t border-[#e9e9e9] pt-5">
-                        <h3 className="text-base font-display font-bold text-[#2b2b2d] mb-2">
+                      <div className="rounded-xl border border-[#e7dfd2] bg-white/70 px-4 py-4 sm:px-5 sm:py-5">
+                        <h3 className="mb-2 text-base font-display font-bold text-[#1f1a15] sm:text-lg">
                           {labels.instructionsBeforeUse}
                         </h3>
-                        <div className="prose prose-sm max-w-none text-[#777]">
+                        <div className={luxuryProseClass}>
                           <RichText data={product.userInstructions!} enableGutter={false} />
                         </div>
                       </div>
@@ -538,7 +539,9 @@ export function ProductDetailPage({
 
                 {/* Health Benefits / About */}
                 {validActiveTab === 'about' && hasAbout && (
-                  <div className="prose prose-sm max-w-none text-[#1d1d1d] leading-relaxed">
+                  <div
+                    className={`rounded-xl border border-[#e7dfd2] bg-white/70 px-4 py-4 sm:px-5 sm:py-5 ${luxuryProseClass}`}
+                  >
                     <RichText data={product.aboutProduct!} enableGutter={false} />
                   </div>
                 )}

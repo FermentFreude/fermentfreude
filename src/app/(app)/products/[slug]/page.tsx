@@ -120,7 +120,7 @@ export default async function ProductPage({ params }: Args) {
 
       <ProductDetailPage product={product} productDetailLabels={productDetailLabels} />
 
-      {product.layout?.length ? <RenderBlocks blocks={product.layout} /> : <></>}
+      {product.layout?.length ? <RenderBlocks blocks={product.layout} slug="product-detail" /> : <></>}
 
       {relatedProducts.length ? (
         <div className="container">
