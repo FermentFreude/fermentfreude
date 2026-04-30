@@ -100,6 +100,7 @@ export const RenderBlocks: React.FC<{
   const blockList = blocks ?? []
   const isAbout = slug === 'about'
   const isShop = slug === 'shop'
+  const isProductDetail = slug === 'product-detail'
   const isLegalPage = slug === 'agb' || slug === 'datenschutz' || slug === 'impressum'
   const gapClass = isAbout
     ? 'mb-12 last:mb-0' // increased margin between sections on About
@@ -153,6 +154,7 @@ export const RenderBlocks: React.FC<{
               { id?: string } & Record<string, unknown>
             >
             const isLegalContentBlock = isLegalPage && blockType === 'content'
+            const isProductContentBlock = isProductDetail && blockType === 'content'
 
             if (Block) {
               return (
@@ -160,7 +162,13 @@ export const RenderBlocks: React.FC<{
                   <Block
                     {...block}
                     id={blockId}
-                    className={isLegalContentBlock ? 'legal-content-block' : undefined}
+                    className={
+                      isLegalContentBlock
+                        ? 'legal-content-block'
+                        : isProductContentBlock
+                          ? 'product-detail-content-block'
+                          : undefined
+                    }
                     legalStyle={isLegalContentBlock}
                   />
                 </div>
