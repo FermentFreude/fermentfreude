@@ -36,6 +36,7 @@ import { WorkshopLocations } from '@/collections/WorkshopLocations'
 import { Workshops } from '@/collections/Workshops'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
+import { ProductDetailLabelsGlobal } from '@/globals/ProductDetailLabels'
 import { ProductSliderGlobal } from '@/globals/ProductSlider'
 import { SponsorsBarGlobal } from '@/globals/SponsorsBar'
 import { TestimonialsGlobal } from '@/globals/Testimonials'
@@ -82,6 +83,7 @@ export default buildConfig({
         'workshop-slider-global',
         'product-slider-global',
         'workshop-cards-global',
+        'product-detail-labels-global',
       ],
       url: ({ globalConfig }) => {
         // Globals: preview on the page where they appear most prominently
@@ -178,6 +180,7 @@ export default buildConfig({
     WorkshopSliderGlobal,
     ProductSliderGlobal,
     WorkshopCardsGlobal,
+    ProductDetailLabelsGlobal,
   ],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',

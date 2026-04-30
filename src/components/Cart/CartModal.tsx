@@ -20,6 +20,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { CartIconButton } from '@/components/Header/CartIconButton'
 import { Button } from '@/components/ui/button'
 import { Product } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
 
@@ -36,8 +37,21 @@ type WorkshopBooking = {
 
 export function CartModal() {
   const { cart } = useCart()
+  const { locale } = useLocale()
+  const isDe = locale === 'de'
   const [isOpen, setIsOpen] = useState(false)
   const [bookingMetadata, setBookingMetadata] = useState<Record<string, WorkshopBooking>>({})
+  const copy = {
+    title: isDe ? 'Warenkorb' : 'My Cart',
+    description: isDe
+      ? 'Verwalte hier deinen Warenkorb und sieh den Gesamtbetrag.'
+      : 'Manage your cart here, add items to view the total.',
+    empty: isDe ? 'Dein Warenkorb ist leer.' : 'Your cart is empty.',
+    total: isDe ? 'Gesamt' : 'Total',
+    checkout: isDe ? 'Zur Kasse' : 'Proceed to Checkout',
+    workshopBooking: isDe ? 'Workshop Buchung' : 'Workshop booking',
+    guests: isDe ? 'Gäste' : 'Guests',
+  }
 
   const pathname = usePathname()
 
@@ -96,15 +110,15 @@ export function CartModal() {
 
       <SheetContent className="flex flex-col">
         <SheetHeader>
-          <SheetTitle>My Cart</SheetTitle>
+          <SheetTitle>{copy.title}</SheetTitle>
 
-          <SheetDescription>Manage your cart here, add items to view the total.</SheetDescription>
+          <SheetDescription>{copy.description}</SheetDescription>
         </SheetHeader>
 
         {isCartEmpty ? (
           <div className="text-center flex flex-col items-center gap-2">
             <ShoppingCart className="h-16" />
-            <p className="text-center text-2xl font-bold">Your cart is empty.</p>
+            <p className="text-center text-2xl font-bold">{copy.empty}</p>
           </div>
         ) : (
           <div className="grow flex px-4">
@@ -209,16 +223,16 @@ export function CartModal() {
                                     <div className="text-sm text-neutral-500 dark:text-neutral-400 space-y-0.5">
                                       <p>{booking.date}</p>
                                       <p>{booking.time} Uhr</p>
-                                      <p>{booking.guestCount} Gäste</p>
+                                      <p>{booking.guestCount} {copy.guests}</p>
                                       <div className="font-semibold text-neutral-700 dark:text-neutral-300">
-                                        Total: €{booking.totalPrice.toFixed(2)}
+                                        {copy.total}: €{booking.totalPrice.toFixed(2)}
                                       </div>
                                     </div>
                                   )
                                 }
                                 return (
                                   <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                    Workshop Buchung
+                                    {copy.workshopBooking}
                                   </p>
                                 )
                               })()
@@ -271,7 +285,7 @@ export function CartModal() {
                 <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                   {typeof cart?.subtotal === 'number' && (
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                      <p>Total</p>
+                      <p>{copy.total}</p>
                       <Price
                         amount={cart?.subtotal}
                         className="text-right text-base text-black dark:text-white"
@@ -281,7 +295,7 @@ export function CartModal() {
 
                   <Button asChild>
                     <Link className="w-full" href="/checkout">
-                      Proceed to Checkout
+                      {copy.checkout}
                     </Link>
                   </Button>
                 </div>

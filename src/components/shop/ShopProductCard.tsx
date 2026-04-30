@@ -4,6 +4,7 @@ import { AddToCart } from '@/components/Cart/AddToCart'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import type { Product } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 import { ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
@@ -29,6 +30,8 @@ export const ShopProductCard: React.FC<Props> = ({
   addToCartColor,
   addToCartHoverColor,
 }) => {
+  const { locale } = useLocale()
+  const isDe = locale === 'de'
   const bgColor = cardBackgroundColor?.trim() || CARD_DEFAULTS.cardBackgroundColor
   const btnColor = addToCartColor?.trim() || CARD_DEFAULTS.addToCartColor
   const btnHoverColor = addToCartHoverColor?.trim() || CARD_DEFAULTS.addToCartHoverColor
@@ -55,7 +58,7 @@ export const ShopProductCard: React.FC<Props> = ({
   const image =
     gallery?.[0]?.image && typeof gallery[0]?.image !== 'string' ? gallery[0]?.image : null
 
-  const label = addToCartLabel ?? 'Add to cart'
+  const label = addToCartLabel ?? (isDe ? 'In den Warenkorb' : 'Add to cart')
 
   const parts = title.split(' ')
   const productName = variantTitle || parts.length > 1 ? (parts[0] ?? title) : title
@@ -95,7 +98,7 @@ export const ShopProductCard: React.FC<Props> = ({
             {isOutOfStock && (
               <div className="absolute top-3 right-3 z-10">
                 <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
-                  Sold Out
+                  {isDe ? 'Ausverkauft' : 'Sold Out'}
                 </span>
               </div>
             )}
@@ -149,7 +152,7 @@ export const ShopProductCard: React.FC<Props> = ({
           <AddToCart
             product={product}
             className="add-to-cart-custom-btn size-full rounded-full border-0 shadow-md [&_svg]:text-white"
-            ariaLabel={isOutOfStock ? 'Sold Out' : label}
+            ariaLabel={isOutOfStock ? (isDe ? 'Ausverkauft' : 'Sold Out') : label}
           >
             <ShoppingCart className="size-5" aria-hidden />
           </AddToCart>

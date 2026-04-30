@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { gtmAddToCart } from '@/lib/gtm'
 import type { Product, Variant } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
@@ -27,6 +28,8 @@ export function AddToCart({
   disabled: externalDisabled = false,
 }: Props) {
   const { addItem, cart, isLoading, incrementItem } = useCart()
+  const { locale } = useLocale()
+  const isDe = locale === 'de'
   const searchParams = useSearchParams()
 
   const selectedVariant = useMemo<Variant | undefined>(() => {
@@ -93,7 +96,7 @@ export function AddToCart({
           }
         }
 
-        toast.success('Item added to cart.')
+        toast.success(isDe ? 'Zum Warenkorb hinzugefügt.' : 'Item added to cart.')
         gtmAddToCart({
           item_id: String(product.id),
           item_name: product.title ?? '',
@@ -105,11 +108,13 @@ export function AddToCart({
         console.error('Failed to add to cart:', error)
         toast.error(
           (error as any)?.message ||
-            'Failed to add item to cart. Please check the browser console for details.',
+            (isDe
+              ? 'Artikel konnte nicht zum Warenkorb hinzugefügt werden.'
+              : 'Failed to add item to cart. Please check the browser console for details.'),
         )
       }
     },
-    [addItem, product, selectedVariant, quantity, incrementItem, cart?.items],
+    [addItem, product, selectedVariant, quantity, incrementItem, cart?.items, isDe],
   )
 
   const disabled = useMemo<boolean>(() => {
@@ -157,7 +162,7 @@ export function AddToCart({
 
   return (
     <Button
-      aria-label={ariaLabel ?? 'Add to cart'}
+      aria-label={ariaLabel ?? (isDe ? 'In den Warenkorb' : 'Add to cart')}
       variant="outline"
       className={clsx(
         {
@@ -169,7 +174,7 @@ export function AddToCart({
       onClick={addToCart}
       type="button"
     >
-      {children ?? 'Add To Cart'}
+      {children ?? (isDe ? 'In den Warenkorb' : 'Add To Cart')}
     </Button>
   )
 }

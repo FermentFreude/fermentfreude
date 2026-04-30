@@ -1,5 +1,6 @@
 import { ShopProductCard } from '@/components/shop/ShopProductCard'
 import type { Product } from '@/payload-types'
+import { getLocale } from '@/utilities/getLocale'
 import Link from 'next/link'
 import React from 'react'
 
@@ -11,7 +12,10 @@ const DEFAULTS = {
   viewAllButtonLabel: 'View All Products',
   viewAllButtonUrl: '/shop',
   loadMoreLabel: 'See All Products',
-  addToCartLabel: 'Add to cart',
+  addToCartLabel: {
+    de: 'In den Warenkorb',
+    en: 'Add to cart',
+  },
 }
 
 const DESIGN_DEFAULTS = {
@@ -43,19 +47,20 @@ type Props = {
   nextPage?: number
 }
 
-export const ShopProductSection: React.FC<Props> = ({
+export const ShopProductSection = async ({
   data,
   products,
   hasMore = false,
   nextPage,
-}) => {
+}: Props) => {
+  const locale = (await getLocale()) as 'de' | 'en'
   const heading = data?.productSectionHeading ?? DEFAULTS.productSectionHeading
   const subheading = data?.productSectionSubheading ?? DEFAULTS.productSectionSubheading
   const intro = data?.productSectionIntro ?? DEFAULTS.productSectionIntro
   const viewAllLabel = data?.viewAllButtonLabel ?? DEFAULTS.viewAllButtonLabel
   const viewAllUrl = data?.viewAllButtonUrl ?? DEFAULTS.viewAllButtonUrl
   const loadMoreLabel = data?.loadMoreLabel ?? DEFAULTS.loadMoreLabel
-  const addToCartLabel = data?.addToCartLabel ?? DEFAULTS.addToCartLabel
+  const addToCartLabel = data?.addToCartLabel ?? DEFAULTS.addToCartLabel[locale]
 
   const sectionBg =
     data?.productSectionBackgroundColor ?? DESIGN_DEFAULTS.productSectionBackgroundColor

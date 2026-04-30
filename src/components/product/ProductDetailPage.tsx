@@ -63,12 +63,28 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     Description: 'Beschreibung',
     'Health Benefits': 'Gesundheitliche Vorteile',
     'Size/Weight': 'Größe/Gewicht',
+    Ingredients: 'Zutaten',
+    Allergens: 'Allergene',
+    'Storage & Shelf Life': 'Lagerung & Haltbarkeit',
+    'Shelf life': 'Haltbarkeit',
+    'How to Use': 'Anwendung',
+    'Instructions Before Use': 'Hinweise vor der Verwendung',
+    'Delivery notice':
+      'Lieferung ist derzeit nicht verfuegbar. Wir arbeiten daran, die beste Lieferung fuer unsere frischen Produkte sicherzustellen. Aktuell ist nur lokale Abholung moeglich.',
   },
   en: {
     'All products': 'All products',
     Description: 'Description',
     'Health Benefits': 'Health Benefits',
     'Size/Weight': 'Size/Weight',
+    Ingredients: 'Ingredients',
+    Allergens: 'Allergens',
+    'Storage & Shelf Life': 'Storage & Shelf Life',
+    'Shelf life': 'Shelf life',
+    'How to Use': 'How to Use',
+    'Instructions Before Use': 'Instructions Before Use',
+    'Delivery notice':
+      'Delivery is not available at the moment. We are working to ensure the best delivery of our fresh products. Only local pickup is possible for now.',
   },
 }
 
@@ -84,10 +100,26 @@ const PRODUCT_TYPE_LABELS: Record<string, string> = {
   'digital-course': 'Digital Course',
 }
 
+type ProductDetailLabels = {
+  ingredientsLabel?: string | null
+  allergensLabel?: string | null
+  storageShelfLifeLabel?: string | null
+  shelfLifeLabel?: string | null
+  howToUseLabel?: string | null
+  instructionsBeforeUseLabel?: string | null
+  deliveryNotice?: string | null
+}
+
 /* ═══════════════════════════════════════════════════════════
  *  Product Detail Page
  * ═══════════════════════════════════════════════════════════ */
-export function ProductDetailPage({ product }: { product: Product }) {
+export function ProductDetailPage({
+  product,
+  productDetailLabels,
+}: {
+  product: Product
+  productDetailLabels?: ProductDetailLabels
+}) {
   const { currency } = useCurrency()
   const { locale } = useLocale()
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -142,6 +174,18 @@ export function ProductDetailPage({ product }: { product: Product }) {
 
   const isFood = ['jarred', 'fresh', 'bottled'].includes(product.productType || '')
   const isOutOfStock = !product.inventory || product.inventory === 0
+  const labels = {
+    ingredients: productDetailLabels?.ingredientsLabel?.trim() || t('Ingredients', locale),
+    allergens: productDetailLabels?.allergensLabel?.trim() || t('Allergens', locale),
+    storageShelfLife:
+      productDetailLabels?.storageShelfLifeLabel?.trim() || t('Storage & Shelf Life', locale),
+    shelfLife: productDetailLabels?.shelfLifeLabel?.trim() || t('Shelf life', locale),
+    howToUse: productDetailLabels?.howToUseLabel?.trim() || t('How to Use', locale),
+    instructionsBeforeUse:
+      productDetailLabels?.instructionsBeforeUseLabel?.trim() ||
+      t('Instructions Before Use', locale),
+    deliveryNotice: productDetailLabels?.deliveryNotice?.trim() || t('Delivery notice', locale),
+  }
 
   /* ── Specs — built from REAL existing data ── */
   const specs: { label: string; value: string }[] = []
@@ -390,8 +434,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
           {/* Delivery disclaimer */}
           <p className="mt-6 text-xs text-[#999] leading-relaxed flex items-start gap-2 bg-[#fafafa] rounded-lg p-3">
             <PackageIcon className="w-4 h-4 mt-0.5 shrink-0" />
-            Delivery is not available at the moment. We are working to ensure the best delivery of
-            our fresh products. Only local pickup is possible for now.
+            {labels.deliveryNotice}
           </p>
 
           {/* ═══════════════════════════════════════════
@@ -435,14 +478,14 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     {isFood && product.ingredients && (
                       <div className="border-t border-[#e9e9e9] pt-5">
                         <h3 className="text-base font-display font-bold text-[#2b2b2d] mb-2">
-                          Ingredients
+                          {labels.ingredients}
                         </h3>
                         <p className="text-sm text-[#777] whitespace-pre-line leading-relaxed">
                           {product.ingredients}
                         </p>
                         {product.allergens && (
                           <p className="mt-2 text-xs text-[#999]">
-                            <span className="font-semibold">Allergens:</span> {product.allergens}
+                            <span className="font-semibold">{labels.allergens}:</span> {product.allergens}
                           </p>
                         )}
                       </div>
@@ -452,7 +495,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     {isFood && (product.storageInstructions || product.shelfLife) && (
                       <div className="border-t border-[#e9e9e9] pt-5">
                         <h3 className="text-base font-display font-bold text-[#2b2b2d] mb-2">
-                          Storage & Shelf Life
+                          {labels.storageShelfLife}
                         </h3>
                         {product.storageInstructions && (
                           <p className="text-sm text-[#777] whitespace-pre-line leading-relaxed">
@@ -461,7 +504,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                         )}
                         {product.shelfLife && (
                           <p className="mt-2 text-sm text-[#777]">
-                            <span className="font-semibold">Shelf life:</span> {product.shelfLife}
+                            <span className="font-semibold">{labels.shelfLife}:</span> {product.shelfLife}
                           </p>
                         )}
                       </div>
@@ -471,7 +514,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     {hasRichTextContent(product.howToUse) && (
                       <div className="border-t border-[#e9e9e9] pt-5">
                         <h3 className="text-base font-display font-bold text-[#2b2b2d] mb-2">
-                          How to Use
+                          {labels.howToUse}
                         </h3>
                         <div className="prose prose-sm max-w-none text-[#777]">
                           <RichText data={product.howToUse!} enableGutter={false} />
@@ -483,7 +526,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
                     {hasRichTextContent(product.userInstructions) && (
                       <div className="border-t border-[#e9e9e9] pt-5">
                         <h3 className="text-base font-display font-bold text-[#2b2b2d] mb-2">
-                          Instructions Before Use
+                          {labels.instructionsBeforeUse}
                         </h3>
                         <div className="prose prose-sm max-w-none text-[#777]">
                           <RichText data={product.userInstructions!} enableGutter={false} />
