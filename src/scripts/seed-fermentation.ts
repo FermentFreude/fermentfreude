@@ -7,12 +7,24 @@
  *
  * Before first run: pnpm seed:placeholders (generates placeholder images if seed-assets is empty)
  */
+
+// Must be set BEFORE payload config is loaded — disables clientUploads so the
+// Local API can upload files server-side to R2 (clientUploads requires a browser).
+process.env.PAYLOAD_SEED = 'true'
+
+// Load .env (dotenv is ok as a static import — it doesn't depend on env vars)
+// @ts-expect-error — dotenv types not resolved via package.json exports
+import { config as loadDotenv } from 'dotenv'
+loadDotenv()
+
 import type { Media } from '@/payload-types'
 import { IMAGE_PRESETS, optimizedFile, readLocalFile } from '@/scripts/seed-image-utils'
-import config from '@payload-config'
 import fs from 'fs'
 import path from 'path'
-import { getPayload } from 'payload'
+
+// Dynamic imports so @payload-config loads AFTER process.env.PAYLOAD_SEED is set
+const { default: config } = await import('@payload-config')
+const { getPayload } = await import('payload')
 
 const LEXICAL_ROOT_WITH_PARAGRAPH = {
   root: {
