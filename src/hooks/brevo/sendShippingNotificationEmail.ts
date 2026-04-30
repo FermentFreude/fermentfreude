@@ -89,7 +89,9 @@ export const sendShippingNotificationEmail: CollectionAfterChangeHook = async ({
           TRACKING_NUMBER: 'Store Pickup',
           CARRIER: 'Ready for Pickup',
           ESTIMATED_DELIVERY: `Ab ${pickupTimeFormatted} Uhr`,
-          TRACKING_URL: `${process.env.NEXT_PUBLIC_SERVER_URL}/store-location`,
+          TRACKING_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/store-location`,
+          PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
+          AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,
         },
       })
 
@@ -133,7 +135,9 @@ export const sendShippingNotificationEmail: CollectionAfterChangeHook = async ({
             month: '2-digit',
             year: 'numeric',
           }),
-          TRACKING_URL: trackingUrl || `https://www.fermentfreude.com/track?order=${doc.id}`,
+          TRACKING_URL: trackingUrl || `https://www.fermentfreude.at/track?order=${doc.id}`,
+          PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
+          AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,
         },
       })
 

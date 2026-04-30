@@ -26,15 +26,19 @@ export const sendAccountCreationEmail: CollectionAfterChangeHook = async ({
 
   try {
     const recipientFirstName = doc.name?.split(' ')[0] || doc.name || email
-    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.com'
+    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
 
     await sendTemplateEmail({
       to: [{ email, name: doc.name || undefined }],
       templateId: BREVO_TEMPLATES.ACCOUNT_CREATION,
       params: {
         FIRST_NAME: recipientFirstName,
+        DASHBOARD_URL: `${serverUrl}/account`,
         LOGIN_URL: `${serverUrl}/login`,
-        WELCOME_MESSAGE: `Willkommen bei FermentFreude, ${recipientFirstName}! Wir freuen uns, Sie in unserer Community zu begrüßen.`,
+        WORKSHOPS_URL: `${serverUrl}/workshops`,
+        PRIVACY_URL: `${serverUrl}/datenschutz`,
+        AGB_URL: `${serverUrl}/agb`,
+        WELCOME_MESSAGE: `Willkommen bei FermentFreude, ${recipientFirstName}! Wir freuen uns, dich in unserer Community zu begrüßen.`,
       },
     })
 
