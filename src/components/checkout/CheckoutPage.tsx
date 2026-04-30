@@ -265,7 +265,8 @@ export const CheckoutPage: React.FC = () => {
   }, [])
 
   /* ── Computed: voucher covers the full amount? ── */
-  const discountedTotal = Math.max(0, (cart?.subtotal || 0) - (voucherApplied?.value || 0))
+  // cart.subtotal is in cents; voucher.value is in euros — multiply by 100 to match units
+  const discountedTotal = Math.max(0, (cart?.subtotal || 0) - (voucherApplied?.value || 0) * 100)
   const voucherCoversAll = Boolean(voucherApplied && discountedTotal === 0)
 
   /* ── Place order paid entirely by voucher (no Stripe) ── */
@@ -918,7 +919,7 @@ export const CheckoutPage: React.FC = () => {
                 )}
                 <Price
                   className="font-display text-section-heading font-bold text-ff-near-black"
-                  amount={Math.max(0, (cart.subtotal || 0) - (voucherApplied?.value || 0))}
+                  amount={Math.max(0, (cart.subtotal || 0) - (voucherApplied?.value || 0) * 100)}
                 />
               </div>
             </div>
