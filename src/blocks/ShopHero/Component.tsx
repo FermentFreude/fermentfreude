@@ -18,10 +18,29 @@ type Slide = NonNullable<ShopHeroBlock['slides']>[number]
 /* ── Translations ──────────────────────────────────────────────── */
 const TRANSLATIONS: Record<string, Record<'de' | 'en', string>> = {
   scroll: { de: 'Scrollen', en: 'scroll' },
+  'Order Now': { de: 'Jetzt bestellen', en: 'Order Now' },
+  'Learn More': { de: 'Mehr erfahren', en: 'Learn More' },
 }
 
 function t(key: string, locale: 'de' | 'en'): string {
   return TRANSLATIONS[key]?.[locale] || key
+}
+
+function resolveLocalizedLabel(raw: string | null | undefined, locale: 'de' | 'en', key: string): string {
+  const base = (raw ?? '').trim()
+  if (!base) return t(key, locale)
+
+  const normalized = base.toLowerCase()
+  if (locale === 'de') {
+    if (key === 'Order Now' && (normalized === 'order now' || normalized === 'order')) {
+      return t('Order Now', locale)
+    }
+    if (key === 'Learn More' && normalized === 'learn more') {
+      return t('Learn More', locale)
+    }
+  }
+
+  return base
 }
 
 const DEFAULT_SLIDES: Slide[] = [
@@ -120,9 +139,9 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
 
   const title = heroTitle ?? 'Our Handmade Products From Our Pick-Up Shop.'
   const price = heroPrice ?? 'from €8.50'
-  const primaryLabel = ctaPrimaryLabel ?? 'Order Now'
+  const primaryLabel = resolveLocalizedLabel(ctaPrimaryLabel, locale, 'Order Now')
   const primaryUrl = ctaPrimaryUrl ?? '/shop#bestsellers'
-  const secondaryLabel = ctaSecondaryLabel ?? 'Learn More'
+  const secondaryLabel = resolveLocalizedLabel(ctaSecondaryLabel, locale, 'Learn More')
   const secondaryUrl = ctaSecondaryUrl ?? '/fermentation'
   const tagline = bottomTagline ?? 'Fermented foods, crafted with care.'
   const subtitle = bottomSubtitle ?? 'Pickup in Graz — freshly made every week.'
