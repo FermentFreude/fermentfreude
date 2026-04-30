@@ -29,14 +29,9 @@ const SUCCESS_DE = {
   pickupAddress: 'Grabenstra\u00DFe 15, 8010 Graz',
   pickupNotification: 'Wir informieren dich per E-Mail, sobald der Gutschein abholbereit ist.',
   howToUse: 'So nutzt du deinen Gutschein:',
-  step1: (
-    <>
-      Besuche <strong>fermentfreude.at/redeem-voucher</strong>
-    </>
-  ),
-  step2: 'Gib deinen Gutschein-Code ein',
-  step3: 'W\u00E4hle einen Workshop und lege ihn in deinen Warenkorb',
-  step4: 'Beim Checkout: Gib deinen Code ein \u2013 die Geb\u00FChr wird direkt abgezogen',
+  step1: 'W\u00E4hle einen Workshop auf fermentfreude.at/workshops',
+  step2: 'Lege den Workshop in den Warenkorb',
+  step3: 'Beim Checkout: Gib deinen Code ein \u2013 die Geb\u00FChr wird direkt abgezogen',
   downloading: 'Wird heruntergeladen...',
   downloadPDF: 'Gutschein als PDF herunterladen',
   backHome: 'Zur Startseite',
@@ -71,14 +66,9 @@ const SUCCESS_EN = {
   pickupAddress: 'Grabenstra\u00DFe 15, 8010 Graz',
   pickupNotification: 'We will notify you by email once the voucher is ready for pickup.',
   howToUse: 'How to use your voucher:',
-  step1: (
-    <>
-      Visit <strong>fermentfreude.at/redeem-voucher</strong>
-    </>
-  ),
-  step2: 'Enter your voucher code',
-  step3: 'Choose a workshop and add it to your cart',
-  step4: 'At checkout: enter your code \u2014 the fee is deducted directly',
+  step1: 'Browse workshops at fermentfreude.at/workshops',
+  step2: 'Add your chosen workshop to the cart',
+  step3: 'At checkout: enter your code \u2014 the fee is deducted directly',
   downloading: 'Downloading...',
   downloadPDF: 'Download voucher as PDF',
   backHome: 'Back to home',
@@ -324,7 +314,7 @@ export function VoucherSuccessClient() {
         <div className="rounded-xl bg-ff-ivory-mist border border-ff-border-light/50 p-6 mb-8 text-left">
           <h3 className="font-display text-body font-bold text-ff-near-black mb-4">{t.howToUse}</h3>
           <ol className="space-y-3">
-            {([t.step1, t.step2, t.step3, t.step4] as React.ReactNode[]).map((step, i) => (
+            {([t.step1, t.step2, t.step3] as React.ReactNode[]).map((step, i) => (
               <li key={i} className="flex gap-3">
                 <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
                   {i + 1}
