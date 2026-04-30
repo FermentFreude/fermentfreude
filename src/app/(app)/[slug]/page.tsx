@@ -9,7 +9,7 @@ import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHr
 import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { unstable_cache } from 'next/cache'
-import { getPayload } from 'payload'
+import { getPayload, type TypedLocale } from 'payload'
 
 import { notFound } from 'next/navigation'
 
@@ -116,7 +116,7 @@ const queryPageBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' |
 }
 
 const getCachedPage = unstable_cache(
-  async (slug: string, locale: string) => {
+  async (slug: string, locale: TypedLocale) => {
     const payload = await getPayload({ config: configPromise })
     const result = await payload.find({
       collection: 'pages',

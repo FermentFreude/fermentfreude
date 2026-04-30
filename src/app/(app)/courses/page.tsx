@@ -11,7 +11,7 @@ import type { Metadata } from 'next'
 import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import Image from 'next/image'
-import { getPayload } from 'payload'
+import { getPayload, type TypedLocale } from 'payload'
 
 const DEFAULT_HERO_TITLE = 'Master Fermentation from Scratch'
 const DEFAULT_HERO_DESCRIPTION =
@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-async function queryCoursesPage(locale: string, draft: boolean) {
+async function queryCoursesPage(locale: TypedLocale, draft: boolean) {
   const payload = await getPayload({ config: configPromise })
   const result = await payload.find({
     collection: 'pages',
@@ -59,7 +59,7 @@ async function queryCoursesPage(locale: string, draft: boolean) {
 }
 
 const getCachedCoursesPage = unstable_cache(
-  (locale: string) => queryCoursesPage(locale, false),
+  (locale: TypedLocale) => queryCoursesPage(locale, false),
   ['courses-page'],
   { revalidate: 3600, tags: ['pages'] },
 )
