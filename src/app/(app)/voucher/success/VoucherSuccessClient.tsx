@@ -2,8 +2,85 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+
+import { useLocale } from '@/providers/Locale'
+
+const SUCCESS_DE = {
+  loading: 'Gutschein wird erstellt\u2026',
+  errorTitle: 'Fehler',
+  successTitle: 'Gutschein erstellt!',
+  successSubtitle: (
+    <>
+      Dein Geschenkgutschein f\u00FCr ein <strong>Workshop-Erlebnis</strong> wurde erfolgreich
+      erstellt.
+    </>
+  ),
+  voucherCodeLabel: 'Gutschein-Code',
+  copyCode: 'Code kopieren',
+  codeCopied: '\u2713 Kopiert!',
+  copyToast: 'Code kopiert!',
+  voucherDesc: (value: number) => `Workshop-Erlebnis Gutschein \u2014 \u20AC${value},00`,
+  deliveredByEmail: 'Per E-Mail zugestellt',
+  emailTo: (email: string) => `An: ${email}`,
+  confirmationSent: 'Eine Best\u00E4tigung wurde auch an deine E-Mail-Adresse gesendet.',
+  readyForPickup: 'Zur Abholung bereit',
+  pickupAddress: 'Grabenstra\u00DFe 15, 8010 Graz',
+  pickupNotification: 'Wir informieren dich per E-Mail, sobald der Gutschein abholbereit ist.',
+  howToUse: 'So nutzt du deinen Gutschein:',
+  step1: 'W\u00E4hle einen Workshop auf fermentfreude.at/workshops',
+  step2: 'Lege den Workshop in den Warenkorb',
+  step3: 'Beim Checkout: Gib deinen Code ein \u2013 die Geb\u00FChr wird direkt abgezogen',
+  downloading: 'Wird heruntergeladen...',
+  downloadPDF: 'Gutschein als PDF herunterladen',
+  backHome: 'Zur Startseite',
+  backVoucher: 'Zur\u00FCck zum Gutschein',
+  buyAnother: 'Weiteren Gutschein kaufen',
+  pdfError: 'PDF konnte nicht heruntergeladen werden.',
+  pdfSuccess: 'PDF heruntergeladen!',
+  pdfDownloadError: 'Fehler beim Download.',
+  confirmError: 'Fehler bei der Best\u00E4tigung.',
+  connectionError: 'Verbindungsfehler. Bitte lade die Seite neu.',
+  noSessionId: 'Keine Sitzungs-ID gefunden.',
+}
+
+const SUCCESS_EN = {
+  loading: 'Creating your voucher\u2026',
+  errorTitle: 'Error',
+  successTitle: 'Voucher created!',
+  successSubtitle: (
+    <>
+      Your gift voucher for a <strong>workshop experience</strong> has been created successfully.
+    </>
+  ),
+  voucherCodeLabel: 'Voucher Code',
+  copyCode: 'Copy code',
+  codeCopied: '\u2713 Copied!',
+  copyToast: 'Code copied!',
+  voucherDesc: (value: number) => `Workshop Experience Voucher \u2014 \u20AC${value}.00`,
+  deliveredByEmail: 'Delivered by email',
+  emailTo: (email: string) => `To: ${email}`,
+  confirmationSent: 'A confirmation has also been sent to your email address.',
+  readyForPickup: 'Ready for pickup',
+  pickupAddress: 'Grabenstra\u00DFe 15, 8010 Graz',
+  pickupNotification: 'We will notify you by email once the voucher is ready for pickup.',
+  howToUse: 'How to use your voucher:',
+  step1: 'Browse workshops at fermentfreude.at/workshops',
+  step2: 'Add your chosen workshop to the cart',
+  step3: 'At checkout: enter your code \u2014 the fee is deducted directly',
+  downloading: 'Downloading...',
+  downloadPDF: 'Download voucher as PDF',
+  backHome: 'Back to home',
+  backVoucher: 'Back to voucher',
+  buyAnother: 'Buy another voucher',
+  pdfError: 'Could not download PDF.',
+  pdfSuccess: 'PDF downloaded!',
+  pdfDownloadError: 'Download error.',
+  confirmError: 'Error confirming voucher.',
+  connectionError: 'Connection error. Please reload the page.',
+  noSessionId: 'No session ID found.',
+}
 
 type VoucherResult = {
   code: string
@@ -15,6 +92,10 @@ type VoucherResult = {
 export function VoucherSuccessClient() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
+  const paymentIntent = searchParams.get('payment_intent')
+
+  const { locale } = useLocale()
+  const t = locale === 'de' ? SUCCESS_DE : SUCCESS_EN
 
   const [voucher, setVoucher] = useState<VoucherResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -23,23 +104,30 @@ export function VoucherSuccessClient() {
   const [codeCopied, setCodeCopied] = useState(false)
   const confirming = useRef(false)
 
-  const confirmVoucher = useCallback(async (sid: string) => {
-    try {
-      const res = await fetch(`/api/voucher/confirm?session_id=${encodeURIComponent(sid)}`)
-      const data = await res.json()
+  const confirmVoucher = useCallback(
+    async (sid: string | null, pi: string | null) => {
+      try {
+        const params = new URLSearchParams()
+        if (sid) params.set('session_id', sid)
+        if (pi) params.set('payment_intent', pi)
 
-      if (!res.ok || !data.success) {
-        setError(data.error || 'Fehler bei der Bestätigung.')
-        return
+        const res = await fetch(`/api/voucher/confirm?${params.toString()}`)
+        const data = await res.json()
+
+        if (!res.ok || !data.success) {
+          setError(data.error || t.confirmError)
+          return
+        }
+
+        setVoucher(data.voucher)
+      } catch (_err) {
+        setError(t.connectionError)
+      } finally {
+        setLoading(false)
       }
-
-      setVoucher(data.voucher)
-    } catch (_err) {
-      setError('Verbindungsfehler. Bitte lade die Seite neu.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    },
+    [t.confirmError, t.connectionError],
+  )
 
   const handleDownloadPDF = useCallback(async () => {
     if (!voucher?.code) return
@@ -50,7 +138,7 @@ export function VoucherSuccessClient() {
         `/api/voucher/generate-pdf?code=${encodeURIComponent(voucher.code)}`,
       )
       if (!response.ok) {
-        toast.error('PDF konnte nicht heruntergeladen werden.')
+        toast.error(t.pdfError)
         return
       }
 
@@ -63,41 +151,41 @@ export function VoucherSuccessClient() {
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-      toast.success('PDF heruntergeladen!')
+      toast.success(t.pdfSuccess)
     } catch (_err) {
-      toast.error('Fehler beim Download.')
+      toast.error(t.pdfDownloadError)
     } finally {
       setPdfLoading(false)
     }
-  }, [voucher?.code])
+  }, [voucher?.code, t.pdfError, t.pdfSuccess, t.pdfDownloadError])
 
   const handleCopyCode = useCallback(() => {
     if (!voucher?.code) return
     navigator.clipboard.writeText(voucher.code)
     setCodeCopied(true)
-    toast.success('Code kopiert!')
+    toast.success(t.copyToast)
     setTimeout(() => setCodeCopied(false), 2000)
-  }, [voucher?.code])
+  }, [voucher?.code, t.copyToast])
 
   useEffect(() => {
-    if (!sessionId) {
-      setError('Keine Sitzungs-ID gefunden.')
+    if (!sessionId && !paymentIntent) {
+      setError(t.noSessionId)
       setLoading(false)
       return
     }
 
     if (!confirming.current) {
       confirming.current = true
-      confirmVoucher(sessionId)
+      confirmVoucher(sessionId, paymentIntent)
     }
-  }, [sessionId, confirmVoucher])
+  }, [sessionId, paymentIntent, confirmVoucher, t.noSessionId])
 
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin h-8 w-8 border-4 border-ff-gold-accent border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="font-sans text-body text-ff-gray-text">Gutschein wird erstellt…</p>
+          <p className="font-sans text-body text-ff-gray-text">{t.loading}</p>
         </div>
       </div>
     )
@@ -115,13 +203,13 @@ export function VoucherSuccessClient() {
               />
             </svg>
           </div>
-          <h1 className="font-display text-h2 font-bold text-ff-near-black mb-3">Fehler</h1>
+          <h1 className="font-display text-h2 font-bold text-ff-near-black mb-3">{t.errorTitle}</h1>
           <p className="font-sans text-body text-ff-gray-text mb-6">{error}</p>
           <Link
             href="/workshops/voucher"
             className="inline-block rounded-full bg-ff-gold-accent px-8 py-3 font-display text-body font-bold text-ff-near-black transition-all hover:bg-ff-gold-accent-dark"
           >
-            Zurück zum Gutschein
+            {t.backVoucher}
           </Link>
         </div>
       </div>
@@ -143,18 +231,13 @@ export function VoucherSuccessClient() {
           </svg>
         </div>
 
-        <h1 className="font-display text-h1 font-bold text-ff-near-black mb-3">
-          Gutschein erstellt!
-        </h1>
-        <p className="font-sans text-body-lg text-ff-gray-text mb-10">
-          Dein Geschenkgutschein f\u00FCr ein <strong>Workshop-Erlebnis</strong> wurde erfolgreich
-          erstellt.
-        </p>
+        <h1 className="font-display text-h1 font-bold text-ff-near-black mb-3">{t.successTitle}</h1>
+        <p className="font-sans text-body-lg text-ff-gray-text mb-10">{t.successSubtitle}</p>
 
         {/* Voucher Code Card with Copy */}
         <div className="rounded-2xl border-2 border-ff-gold-accent bg-[radial-gradient(circle_at_top,#F8F2E6,#FFFFFF)] p-8 mb-8 shadow-md">
           <p className="font-sans text-body-sm font-medium text-ff-gray-text uppercase tracking-wider mb-2">
-            Gutschein-Code
+            {t.voucherCodeLabel}
           </p>
           <p className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ff-near-black tracking-widest select-all mb-4">
             {voucher.code}
@@ -163,12 +246,10 @@ export function VoucherSuccessClient() {
             onClick={handleCopyCode}
             className="mx-auto block rounded-lg bg-ff-gold-accent/10 hover:bg-ff-gold-accent/20 px-4 py-2 font-sans text-body-sm font-medium text-ff-gold-accent transition-colors mb-4"
           >
-            {codeCopied ? '✓ Kopiert!' : 'Code kopieren'}
+            {codeCopied ? t.codeCopied : t.copyCode}
           </button>
           <div className="pt-4 border-t border-ff-border-light">
-            <p className="font-sans text-body text-ff-gray-text">
-              <strong>Workshop-Erlebnis Gutschein</strong> — €{voucher.value},00
-            </p>
+            <p className="font-sans text-body text-ff-gray-text">{t.voucherDesc(voucher.value)}</p>
           </div>
         </div>
 
@@ -190,15 +271,15 @@ export function VoucherSuccessClient() {
               </svg>
               <div>
                 <p className="font-sans text-body font-medium text-ff-near-black">
-                  Per E-Mail zugestellt
+                  {t.deliveredByEmail}
                 </p>
                 {voucher.recipientEmail && (
                   <p className="font-sans text-body-sm text-ff-gray-text mt-1">
-                    An: {voucher.recipientEmail}
+                    {t.emailTo(voucher.recipientEmail)}
                   </p>
                 )}
                 <p className="font-sans text-body-sm text-ff-gray-text mt-1">
-                  Eine Bestätigung wurde auch an deine E-Mail-Adresse gesendet.
+                  {t.confirmationSent}
                 </p>
               </div>
             </div>
@@ -218,13 +299,11 @@ export function VoucherSuccessClient() {
               </svg>
               <div>
                 <p className="font-sans text-body font-medium text-ff-near-black">
-                  Zur Abholung bereit
+                  {t.readyForPickup}
                 </p>
+                <p className="font-sans text-body-sm text-ff-gray-text mt-1">{t.pickupAddress}</p>
                 <p className="font-sans text-body-sm text-ff-gray-text mt-1">
-                  Grabenstraße 15, 8010 Graz
-                </p>
-                <p className="font-sans text-body-sm text-ff-gray-text mt-1">
-                  Wir informieren dich per E-Mail, sobald der Gutschein abholbereit ist.
+                  {t.pickupNotification}
                 </p>
               </div>
             </div>
@@ -233,42 +312,16 @@ export function VoucherSuccessClient() {
 
         {/* Redemption Instructions */}
         <div className="rounded-xl bg-ff-ivory-mist border border-ff-border-light/50 p-6 mb-8 text-left">
-          <h3 className="font-display text-body font-bold text-ff-near-black mb-4">
-            So nutzt du deinen Gutschein:
-          </h3>
+          <h3 className="font-display text-body font-bold text-ff-near-black mb-4">{t.howToUse}</h3>
           <ol className="space-y-3">
-            <li className="flex gap-3">
-              <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
-                1
-              </span>
-              <span className="font-sans text-body text-ff-gray-text pt-0.5">
-                Besuche <strong>fermentfreude.at/redeem-voucher</strong>
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
-                2
-              </span>
-              <span className="font-sans text-body text-ff-gray-text pt-0.5">
-                Gib deinen Gutschein-Code ein
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
-                3
-              </span>
-              <span className="font-sans text-body text-ff-gray-text pt-0.5">
-                Wähle einen Workshop und lege ihn in deinen Warenkorb
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
-                4
-              </span>
-              <span className="font-sans text-body text-ff-gray-text pt-0.5">
-                Beim Checkout: Gib deinen Code ein – die Gebühr wird direkt abgezogen
-              </span>
-            </li>
+            {([t.step1, t.step2, t.step3] as React.ReactNode[]).map((step, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
+                  {i + 1}
+                </span>
+                <span className="font-sans text-body text-ff-gray-text pt-0.5">{step}</span>
+              </li>
+            ))}
           </ol>
         </div>
 
@@ -281,14 +334,14 @@ export function VoucherSuccessClient() {
           {pdfLoading ? (
             <>
               <span className="animate-spin h-4 w-4 border-2 border-ff-near-black border-t-transparent rounded-full" />
-              Wird heruntergeladen...
+              {t.downloading}
             </>
           ) : (
             <>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="inline-block">
                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="currentColor" />
               </svg>
-              Gutschein als PDF herunterladen
+              {t.downloadPDF}
             </>
           )}
         </button>
@@ -299,13 +352,13 @@ export function VoucherSuccessClient() {
             href="/"
             className="inline-block rounded-full bg-ff-gold-accent px-8 py-3 font-display text-body font-bold text-ff-near-black transition-all hover:bg-ff-gold-accent-dark"
           >
-            Zur Startseite
+            {t.backHome}
           </Link>
           <Link
             href="/workshops/voucher"
             className="inline-block rounded-full border-2 border-ff-border-light px-8 py-3 font-display text-body font-bold text-ff-near-black transition-all hover:border-ff-gold-accent/50"
           >
-            Weiteren Gutschein kaufen
+            {t.buyAnother}
           </Link>
         </div>
       </div>
