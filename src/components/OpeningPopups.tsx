@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react'
 
 const COOKIE_BANNER_KEY = 'ff-cookie-banner-dismissed-v1'
 const NEWSLETTER_SUBSCRIBED_KEY = 'ff-newsletter-popup-subscribed-v1'
+const NEWSLETTER_SESSION_KEY = 'ff-newsletter-popup-dismissed-session'
 
 type Props = {
   locale: string
@@ -40,9 +41,12 @@ export function OpeningPopups({ locale }: Props) {
       return
     }
 
-    // Show newsletter after 15s if the user hasn't subscribed yet.
+    // Show newsletter after 15s if the user hasn't subscribed yet and hasn't dismissed it this session.
     const newsletterTimer = setTimeout(() => {
-      if (!localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY)) {
+      if (
+        !localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY) &&
+        !sessionStorage.getItem(NEWSLETTER_SESSION_KEY)
+      ) {
         setNewsletterOpen(true)
       }
     }, 15000)
@@ -51,7 +55,8 @@ export function OpeningPopups({ locale }: Props) {
   }, [])
 
   const closeNewsletter = () => {
-    // Keep this popup recurring on future visits unless the user subscribes.
+    // Suppress for the rest of this session; show again on next visit unless subscribed.
+    sessionStorage.setItem(NEWSLETTER_SESSION_KEY, '1')
     setNewsletterOpen(false)
   }
 
@@ -61,7 +66,10 @@ export function OpeningPopups({ locale }: Props) {
     // Now that the cookie banner is gone, queue the newsletter (if not already subscribed).
     if (typeof window !== 'undefined' && !localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY)) {
       window.setTimeout(() => {
-        if (!localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY)) {
+        if (
+          !localStorage.getItem(NEWSLETTER_SUBSCRIBED_KEY) &&
+          !sessionStorage.getItem(NEWSLETTER_SESSION_KEY)
+        ) {
           setNewsletterOpen(true)
         }
       }, 15000)

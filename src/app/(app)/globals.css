@@ -56,17 +56,17 @@
   --tracking-hero: -0.025em;
 
   /* Display: page titles, large feature headings */
-  --text-display: clamp(2.25rem, 5vw, 4rem);
+  --text-display: clamp(2rem, 3.5vw, 3rem);
   --leading-display: 1.1;
   --tracking-display: -0.025em;
 
   /* Heading: section headings (h2 level) */
-  --text-heading: clamp(1.75rem, 4vw, 3rem);
+  --text-heading: clamp(1.5rem, 2.5vw, 2.25rem);
   --leading-heading: 1.15;
   --tracking-heading: -0.02em;
 
   /* Subheading: subsection headings (h3 level) */
-  --text-subheading: clamp(1.375rem, 3vw, 2rem);
+  --text-subheading: clamp(1.25rem, 2vw, 1.625rem);
   --leading-subheading: 1.25;
   --tracking-subheading: -0.015em;
 
@@ -85,11 +85,11 @@
   /* Section vertical padding */
   --space-section-sm: clamp(3rem, 5vw, 4rem);
   --space-section-md: clamp(4rem, 7vw, 6rem);
-  --space-section-lg: clamp(5rem, 9vw, 8rem);
-  --space-section-xl: clamp(6rem, 11vw, 10rem);
+  --space-section-lg: clamp(4rem, 6vw, 5.5rem);
+  --space-section-xl: clamp(5rem, 8vw, 7rem);
 
   /* Container horizontal padding — consistent across the site */
-  --space-container-x: clamp(1.5rem, 4vw, 6rem);
+  --space-container-x: clamp(1.5rem, 3vw, 4rem);
 
   /* Content gaps */
   --space-content-xs: clamp(0.5rem, 1vw, 0.75rem);
@@ -117,6 +117,10 @@
 /* ── Base Typography ─────────────────────────────────────────── */
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   html,
   body {
     max-width: 100%;
@@ -132,6 +136,7 @@
     letter-spacing: 0.005em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   h1 {
@@ -176,6 +181,19 @@
 
   p {
     margin-bottom: 1.25em;
+  }
+
+  a {
+    transition: color 150ms ease, opacity 150ms ease;
+  }
+
+  button {
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      opacity 150ms ease,
+      box-shadow 150ms ease,
+      transform 150ms ease;
   }
 }
 
@@ -426,12 +444,12 @@
   }
   @media (width >= 64rem) {
     .text-hero {
-      font-size: 3rem;
+      font-size: 2.5rem;
     }
   }
   @media (width >= 80rem) {
     .text-hero {
-      font-size: 3.75rem;
+      font-size: 3rem;
     }
   }
 
