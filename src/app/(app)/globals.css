@@ -374,6 +374,84 @@
     color: #1c1c1c;
   }
 
+  /* === Legal pages — dark mode overrides === */
+  [data-theme='dark'] .page-legal {
+    background: #111111;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext {
+    background: #1a1a1a;
+    color: #e8e8e8;
+    border-color: #2a2a2a;
+    box-shadow:
+      0 24px 46px rgb(0 0 0 / 40%),
+      0 3px 10px rgb(0 0 0 / 20%);
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext h2 {
+    color: #f0f0f0;
+    border-top-color: #2a2a2a;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext h2:first-of-type {
+    color: #ffffff;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext p {
+    color: #d0d0d0;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext a {
+    color: #93b4ff;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext a:hover {
+    color: #b5ceff;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(n + 2):nth-of-type(-n + 8) {
+    color: #c8c8c8;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(2) {
+    color: #f0f0f0;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(3) a {
+    color: #d0d0d0;
+    border-bottom-color: #3a3a3a;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(4) {
+    color: #a0a0a0;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(5) {
+    color: #e8e8e8;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(6),
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(7),
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(8) {
+    color: #c8c8c8;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(6) {
+    border-top-color: #2a2a2a;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(6)::before,
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(7)::before,
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(8)::before {
+    color: #8a8a8a;
+  }
+
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(7) a,
+  [data-theme='dark'] .legal-content-block .legal-richtext > p:nth-of-type(8) a {
+    color: #d0d0d0;
+    border-bottom-color: #3a3a3a;
+  }
+
   /* === Shop Product Card — add-to-cart circle (57.16px, burgundy) === */
   .add-to-cart-custom .add-to-cart-custom-btn {
     width: 57.16px;
@@ -959,6 +1037,47 @@
   --success: oklch(28% 0.1 200deg);
   --warning: oklch(35% 0.08 70deg);
   --error: oklch(45% 0.1 25deg);
+
+  /* ── FermentFreude Brand Tokens — Dark Mode Overrides ─────── */
+  /* Backgrounds: ivory/cream/warm-gray → near-black surfaces */
+  --ff-ivory: #111111;
+  --ff-ivory-mist: #0f0f0f;
+  --ff-cream: #0d0d0d;
+  --ff-warm-gray: #1e1e1e;
+  /* Text: charcoal/near-black/black → near-white */
+  --ff-charcoal: #c0c0c0;
+  --ff-charcoal-dark: #d8d8d8;
+  --ff-near-black: #f0f0f0;
+  --ff-black: #ffffff;
+  --ff-gray-15: #e8e8e8;
+  --ff-white-95: #1a1a1a;
+  /* Muted / secondary text → lighter */
+  --ff-gray-text: #a0a0a0;
+  --ff-gray-text-light: #8a8a8a;
+  --ff-text-muted: #8a8a8a;
+  --ff-gray-muted: #909090;
+  /* Borders → subtle white */
+  --ff-border-light: #2a2a2a;
+  --ff-card-gray: rgba(80, 80, 80, 0.65);
+  /* Olive tones → desaturated light */
+  --ff-olive: #8a8f89;
+  --ff-olive-dark: #7a7f79;
+  /* Dark bg tokens — keep as-is (already dark) */
+  --ff-dark: #1e1e1e;
+  --ff-dark-deep: #1b1b1b;
+  /* Sponsor placeholder → dark */
+  --ff-sponsor-placeholder: #2a2a2a;
+  /* Shop palette */
+  --ff-shop-cream: #161610;
+  /* Navy → muted blue-gray */
+  --ff-navy: #9bb4d8;
+  /* Charcoal hover → lighter */
+  --ff-charcoal-hover: #e0e0e0;
+  /* Gold — unchanged (works on both backgrounds) */
+  /* --ff-gold: #e6be68; */
+  /* --ff-gold-light: #edd195; */
+  /* --ff-gold-accent: #e5b765; */
+  /* --ff-gold-accent-dark: #d4a654; */
 }
 
 @theme inline {

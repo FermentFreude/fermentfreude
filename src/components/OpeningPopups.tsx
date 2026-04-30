@@ -149,11 +149,18 @@ export function OpeningPopups({ locale }: Props) {
               className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-[#1d1d1d]/60 transition-colors hover:bg-[#1d1d1d]/5 hover:text-[#1d1d1d]"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path
+                  d="M1 1l12 12M13 1L1 13"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
             </button>
 
-            <div className="text-4xl leading-none" aria-hidden="true">🍪</div>
+            <div className="text-4xl leading-none" aria-hidden="true">
+              🍪
+            </div>
 
             <h2 className="font-display text-base font-bold tracking-tight text-[#1d1d1d]">
               {isDe ? 'Hallo, wir nutzen Cookies!' : 'Hi, we use cookies!'}
@@ -163,7 +170,10 @@ export function OpeningPopups({ locale }: Props) {
               {isDe ? (
                 <>
                   Notwendige Cookies halten die Website am Laufen. Mehr dazu in unserer{' '}
-                  <Link href="/datenschutz" className="underline underline-offset-2 hover:text-[#1d1d1d]">
+                  <Link
+                    href="/datenschutz"
+                    className="underline underline-offset-2 hover:text-[#1d1d1d]"
+                  >
                     Datenschutzerklaerung
                   </Link>
                   .
@@ -171,7 +181,10 @@ export function OpeningPopups({ locale }: Props) {
               ) : (
                 <>
                   We use essential cookies to keep the site running. Read more in our{' '}
-                  <Link href="/datenschutz" className="underline underline-offset-2 hover:text-[#1d1d1d]">
+                  <Link
+                    href="/datenschutz"
+                    className="underline underline-offset-2 hover:text-[#1d1d1d]"
+                  >
                     Privacy Policy
                   </Link>
                   .

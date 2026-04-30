@@ -57,14 +57,14 @@ export default function NewsletterForm({ locale = 'de' }: Props) {
   }
 
   return (
-    <form className="flex items-center border-b border-[#1d1d1d] pb-1" onSubmit={handleSubmit}>
+    <form className="flex items-center border-b border-[#1d1d1d] dark:border-white/30 pb-1" onSubmit={handleSubmit}>
       <input
         type="email"
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="EMAIL"
-        className="flex-1 bg-transparent font-sans text-sm tracking-wider placeholder:text-[#1d1d1d]/40 focus:outline-none py-2"
+        className="flex-1 bg-transparent font-sans text-sm tracking-wider placeholder:text-[#1d1d1d]/40 dark:placeholder:text-white/40 focus:outline-none py-2"
       />
       <button
         type="submit"

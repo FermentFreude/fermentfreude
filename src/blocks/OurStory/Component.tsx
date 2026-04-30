@@ -64,7 +64,7 @@ export const OurStoryBlock: React.FC<Props> = ({
     <section
       ref={sectionRef}
       id={id ?? undefined}
-      className={`our-story-block section-padding-md bg-white transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+      className={`our-story-block section-padding-md bg-white dark:bg-[#111111] transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
     >
       <div className="container mx-auto container-padding">
         <div className="mx-auto max-w-5xl">

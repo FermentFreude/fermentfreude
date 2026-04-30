@@ -147,7 +147,7 @@ export const FeatureCardsBlock: React.FC<Props> = ({
   if (visible === false) return null
 
   return (
-    <section id={id ?? undefined} className="bg-white section-padding-md">
+    <section id={id ?? undefined} className="bg-white dark:bg-[#111111] section-padding-md">
       <div className="container mx-auto px-6 flex flex-col items-start gap-(--space-content-xl)">
         {/* Header: gold eyebrow on top, then heading row + description */}
         <div className="flex flex-col gap-(--space-content-sm) w-full">
@@ -169,8 +169,8 @@ export const FeatureCardsBlock: React.FC<Props> = ({
                   fontSize: 'clamp(2rem, 4.5vw, 3.75rem)',
                   lineHeight: 1.1,
                   letterSpacing: '-0.01em',
-                  color: '#000',
                 }}
+                className="font-display font-black dark:text-white"
               >
                 {resolvedHeading}
               </h2>
@@ -200,11 +200,10 @@ export const FeatureCardsBlock: React.FC<Props> = ({
           {resolvedDescription && (
             <FadeIn className="max-w-264">
               <p
-                className="font-display font-bold"
+                className="font-display font-bold dark:text-white/80"
                 style={{
                   fontSize: 'clamp(0.9rem, 1.4vw, 1.25rem)',
                   lineHeight: 1.6,
-                  color: '#000',
                 }}
               >
                 {resolvedDescription}
