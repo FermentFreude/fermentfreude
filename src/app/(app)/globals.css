@@ -122,15 +122,19 @@
   }
 
   /*
-   * NOTE: Do NOT set `overflow-x: hidden` on html or body.
-   * It silently breaks `position: sticky` for every descendant — including
-   * the home WorkshopSlider's pinned scene (causes the slider to scroll
-   * away instead of pinning). If you need to prevent horizontal swipe
-   * bleed on a specific page, clip the offending block element instead.
+   * Prevent mobile horizontal swipe bleed without breaking position:sticky.
+   *
+   * IMPORTANT: use `overflow-x: clip`, NOT `overflow-x: hidden`.
+   * `hidden` makes html/body a scroll container, which silently breaks
+   * `position: sticky` for every descendant (e.g. the home WorkshopSlider
+   * pinned scene). `clip` prevents overflow without becoming a scroll
+   * container, so sticky elements continue to pin correctly.
+   * Supported in Safari 16+, Chrome 90+, Firefox 81+.
    */
   html,
   body {
     max-width: 100%;
+    overflow-x: clip;
     overscroll-behavior-x: none;
   }
 
