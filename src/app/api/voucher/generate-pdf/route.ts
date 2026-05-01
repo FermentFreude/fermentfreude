@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { jsPDF } from 'jspdf'
-import { join } from 'path'
 import { NextRequest, NextResponse } from 'next/server'
+import { join } from 'path'
 
 /* ─── shared PDF builder ─────────────────────────────────────── */
 function buildVoucherPDF(sanitizedCode: string): jsPDF {

@@ -1,0 +1,15 @@
+[
+  {
+    "AllowedOrigins": [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://fermentfreude.vercel.app",
+      "https://fermentfreude-git-staging-raphaellas-projects.vercel.app",
+      "https://*.vercel.app"
+    ],
+    "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+    "AllowedHeaders": ["*"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]

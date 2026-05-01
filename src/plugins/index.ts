@@ -25,8 +25,8 @@ import {
 import { ProductsCollection } from '@/collections/Products'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
-import { getServerSideURL } from '@/utilities/getURL'
 import { mediaFixR2UrlAfterReadPlugin } from '@/plugins/mediaFixR2UrlAfterRead'
+import { getServerSideURL } from '@/utilities/getURL'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -43,12 +43,17 @@ const r2Enabled =
   !!process.env.R2_ENDPOINT &&
   !process.env.R2_ENDPOINT.includes('<account-id>')
 
-// Seed scripts set PAYLOAD_SEED=true so that files are uploaded server-side
-// (clientUploads relies on a browser to do the actual S3 PUT, which doesn't
-// exist when running via the Local API in seed / CLI scripts).
-// On Vercel, keep client uploads enabled so admin uploads bypass the serverless
-// body-size limit; Cloudflare R2 bucket CORS must allow browser PUTs.
-const useClientUploads = r2Enabled && process.env.PAYLOAD_SEED !== 'true'
+// clientUploads makes the BROWSER PUT the file directly to R2 (presigned URL).
+// PROBLEM: it bypasses Sharp, so no webp conversion, no resize, and no image
+// `sizes` (thumbnail / card / hero) are ever generated. The admin then crashes
+// after save with `Cannot read properties of undefined (reading 'reduce')`
+// because the upload card UI walks the missing `sizes` array.
+//
+// We therefore keep server-side uploads everywhere (admin + local + seed) so
+// Sharp runs and all variants land in R2. Vercel's 4.5 MB serverless body
+// limit is mitigated by the `optimizedFile()` helper for seeds, and admins
+// upload pre-optimised images.
+const useClientUploads = false
 
 export const plugins: Plugin[] = [
   s3Storage({

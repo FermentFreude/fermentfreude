@@ -486,7 +486,8 @@ export function ProductDetailPage({
                         </p>
                         {product.allergens && (
                           <p className="mt-2 text-xs text-[#7f766b]">
-                            <span className="font-semibold">{labels.allergens}:</span> {product.allergens}
+                            <span className="font-semibold">{labels.allergens}:</span>{' '}
+                            {product.allergens}
                           </p>
                         )}
                       </div>
@@ -505,7 +506,8 @@ export function ProductDetailPage({
                         )}
                         {product.shelfLife && (
                           <p className="mt-2 text-sm text-[#5f5850]">
-                            <span className="font-semibold">{labels.shelfLife}:</span> {product.shelfLife}
+                            <span className="font-semibold">{labels.shelfLife}:</span>{' '}
+                            {product.shelfLife}
                           </p>
                         )}
                       </div>

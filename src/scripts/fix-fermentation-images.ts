@@ -171,9 +171,7 @@ async function fixFermentationImages() {
       return
     }
 
-    payload.logger.info(
-      `  🔧 Re-uploading ${specKey} (was ${filesize} bytes: ${img.filename})`,
-    )
+    payload.logger.info(`  🔧 Re-uploading ${specKey} (was ${filesize} bytes: ${img.filename})`)
     const file = spec.isSvg ? readLocalFile(fullPath) : await optimizedFile(fullPath, spec.preset)
     await payload.update({
       collection: 'media',
@@ -196,8 +194,7 @@ async function fixFermentationImages() {
   await tryFix(fermentation.fermentationCtaBackgroundImage, 'ctaBackground')
 
   // ── Hero benefit block icons ───────────────────────────────────────
-  const heroBlocks =
-    (fermentation.fermentationHeroBlocks as Array<Record<string, unknown>>) ?? []
+  const heroBlocks = (fermentation.fermentationHeroBlocks as Array<Record<string, unknown>>) ?? []
   const iconKeys = ['heroIcon1', 'heroIcon2', 'heroIcon3', 'heroIcon4']
   for (let i = 0; i < heroBlocks.length; i++) {
     await tryFix(heroBlocks[i]?.icon, iconKeys[i] ?? `heroIcon${i + 1}`)

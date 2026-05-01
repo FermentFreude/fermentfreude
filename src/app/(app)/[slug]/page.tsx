@@ -7,8 +7,8 @@ import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import configPromise from '@payload-config'
-import { draftMode } from 'next/headers'
 import { unstable_cache } from 'next/cache'
+import { draftMode } from 'next/headers'
 import { getPayload, type TypedLocale } from 'payload'
 
 import { notFound } from 'next/navigation'
@@ -62,7 +62,9 @@ export default async function Page({ params }: Args) {
   const isLegalPage = LEGAL_SLUGS.includes(slug)
 
   return (
-    <article className={isFullBleedHero ? 'pb-24' : `pt-16 pb-24${isLegalPage ? ' page-legal' : ''}`}>
+    <article
+      className={isFullBleedHero ? 'pb-24' : `pt-16 pb-24${isLegalPage ? ' page-legal' : ''}`}
+    >
       <RenderHero {...hero} locale={locale} />
       <RenderBlocks blocks={enrichedLayout} slug={slug} />
       {slug === 'home' && !enrichedLayout.some((b) => b?.blockType === 'testimonials') && (

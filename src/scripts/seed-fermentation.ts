@@ -114,12 +114,31 @@ function fermentationDataDE(media: FermentationMedia) {
     fermentationWhatImage: media.what?.id ?? null,
     fermentationWhyTitle: 'Warum ist es so besonders?',
     fermentationWhyItems: [
-      { title: 'Verbessert Darmflora und Wohlbefinden', description: 'Fermentierte Lebensmittel unterstützen ein gesundes Mikrobiom.' },
-      { title: 'Einfach und kostengünstig', description: 'Keine Spezialausrüstung nötig—nur Salz, Zeit und Geduld.' },
-      { title: 'Umweltfreundlich und nachhaltig', description: 'Reduziert Lebensmittelverschwendung und verlängert die Haltbarkeit natürlich.' },
-      { title: 'Reich an Aromen und Duft', description: 'Schafft komplexe Umami- und würzige Profile.' },
-      { title: 'Unterstützt einen ausgewogenen Lebensstil', description: 'Verbindet traditionelles Wissen mit moderner Ernährung.' },
-      { title: 'Vielfältige Anwendungen', description: 'Von Gemüse über Milch bis zu Getreide und Getränken.' },
+      {
+        title: 'Verbessert Darmflora und Wohlbefinden',
+        description: 'Fermentierte Lebensmittel unterstützen ein gesundes Mikrobiom.',
+      },
+      {
+        title: 'Einfach und kostengünstig',
+        description: 'Keine Spezialausrüstung nötig—nur Salz, Zeit und Geduld.',
+      },
+      {
+        title: 'Umweltfreundlich und nachhaltig',
+        description:
+          'Reduziert Lebensmittelverschwendung und verlängert die Haltbarkeit natürlich.',
+      },
+      {
+        title: 'Reich an Aromen und Duft',
+        description: 'Schafft komplexe Umami- und würzige Profile.',
+      },
+      {
+        title: 'Unterstützt einen ausgewogenen Lebensstil',
+        description: 'Verbindet traditionelles Wissen mit moderner Ernährung.',
+      },
+      {
+        title: 'Vielfältige Anwendungen',
+        description: 'Von Gemüse über Milch bis zu Getreide und Getränken.',
+      },
     ],
     fermentationWhyImage: media.why?.id ?? null,
     fermentationDangerTitle: 'Ist es gefährlich?',
@@ -288,12 +307,30 @@ function fermentationDataEN(media: FermentationMedia) {
     fermentationWhatImage: media.what?.id ?? null,
     fermentationWhyTitle: 'Why is it so special?',
     fermentationWhyItems: [
-      { title: 'Improves gut flora and overall well-being', description: 'Fermented foods support a healthy microbiome.' },
-      { title: 'Easy and cost-effective', description: 'No special equipment needed—just salt, time, and patience.' },
-      { title: 'Eco-friendly and sustainable', description: 'Reduces food waste and extends shelf life naturally.' },
-      { title: 'Rich in flavors and aromas', description: 'Creates complex umami and tangy profiles.' },
-      { title: 'Supports a balanced lifestyle', description: 'Integrates traditional wisdom with modern nutrition.' },
-      { title: 'Diverse applications', description: 'From vegetables to dairy, grains to beverages.' },
+      {
+        title: 'Improves gut flora and overall well-being',
+        description: 'Fermented foods support a healthy microbiome.',
+      },
+      {
+        title: 'Easy and cost-effective',
+        description: 'No special equipment needed—just salt, time, and patience.',
+      },
+      {
+        title: 'Eco-friendly and sustainable',
+        description: 'Reduces food waste and extends shelf life naturally.',
+      },
+      {
+        title: 'Rich in flavors and aromas',
+        description: 'Creates complex umami and tangy profiles.',
+      },
+      {
+        title: 'Supports a balanced lifestyle',
+        description: 'Integrates traditional wisdom with modern nutrition.',
+      },
+      {
+        title: 'Diverse applications',
+        description: 'From vegetables to dairy, grains to beverages.',
+      },
     ],
     fermentationWhyImage: media.why?.id ?? null,
     fermentationDangerTitle: 'Is it dangerous?',
@@ -463,7 +500,10 @@ async function seedFermentation() {
   }
 
   try {
-    for (const [key, relPath] of Object.entries(imagePaths) as [keyof FermentationMedia, string][]) {
+    for (const [key, relPath] of Object.entries(imagePaths) as [
+      keyof FermentationMedia,
+      string,
+    ][]) {
       const fullPath = path.join(imagesDir, relPath)
       if (!fs.existsSync(fullPath)) {
         payload.logger.warn(`Fermentation image not found: ${fullPath}`)
@@ -519,7 +559,8 @@ async function seedFermentation() {
           layout: [],
           meta: {
             title: 'Fermentation | Fermentfreude',
-            description: 'Entdecke die Kunst der Fermentation. Leitfaden zu Lakto-Fermentation, Kombucha und Tempeh.',
+            description:
+              'Entdecke die Kunst der Fermentation. Leitfaden zu Lakto-Fermentation, Kombucha und Tempeh.',
           },
           fermentation: fermentationDataDE(media),
         },
@@ -533,9 +574,11 @@ async function seedFermentation() {
       })) as unknown as Record<string, unknown>
       const fermentationDE = (freshDE.fermentation ?? {}) as Record<string, unknown>
       const heroBlocksDE = (fermentationDE.fermentationHeroBlocks as Array<{ id?: string }>) ?? []
-      const workshopCardsDE = (fermentationDE.fermentationWorkshopCards as Array<{ id?: string }>) ?? []
+      const workshopCardsDE =
+        (fermentationDE.fermentationWorkshopCards as Array<{ id?: string }>) ?? []
       const whyItemsDE = (fermentationDE.fermentationWhyItems as Array<{ id?: string }>) ?? []
-      const dangerConcernsDE = (fermentationDE.fermentationDangerConcerns as Array<{ id?: string }>) ?? []
+      const dangerConcernsDE =
+        (fermentationDE.fermentationDangerConcerns as Array<{ id?: string }>) ?? []
       const faqItemsDE = (fermentationDE.fermentationFaqItems as Array<{ id?: string }>) ?? []
 
       const dataENWithIds = {
@@ -544,18 +587,22 @@ async function seedFermentation() {
           ...b,
           id: heroBlocksDE[i]?.id,
         })),
-        fermentationWorkshopCards: fermentationDataEN(media).fermentationWorkshopCards.map((c, i) => ({
-          ...c,
-          id: workshopCardsDE[i]?.id,
-        })),
+        fermentationWorkshopCards: fermentationDataEN(media).fermentationWorkshopCards.map(
+          (c, i) => ({
+            ...c,
+            id: workshopCardsDE[i]?.id,
+          }),
+        ),
         fermentationWhyItems: fermentationDataEN(media).fermentationWhyItems.map((item, i) => ({
           ...item,
           id: whyItemsDE[i]?.id,
         })),
-        fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map((item, i) => ({
-          ...item,
-          id: dangerConcernsDE[i]?.id,
-        })),
+        fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map(
+          (item, i) => ({
+            ...item,
+            id: dangerConcernsDE[i]?.id,
+          }),
+        ),
         fermentationFaqItems: fermentationDataEN(media).fermentationFaqItems.map((item, i) => ({
           ...item,
           id: faqItemsDE[i]?.id,
@@ -576,7 +623,8 @@ async function seedFermentation() {
             layout: [],
             meta: {
               title: 'Fermentation | Fermentfreude',
-              description: 'Discover the art of fermentation. A complete guide to lacto-fermentation, kombucha, and tempeh.',
+              description:
+                'Discover the art of fermentation. A complete guide to lacto-fermentation, kombucha, and tempeh.',
             },
             fermentation: dataENWithIds,
           },
@@ -603,7 +651,8 @@ async function seedFermentation() {
       layout: [],
       meta: {
         title: 'Fermentation | Fermentfreude',
-        description: 'Entdecke die Kunst der Fermentation. Leitfaden zu Lakto-Fermentation, Kombucha und Tempeh.',
+        description:
+          'Entdecke die Kunst der Fermentation. Leitfaden zu Lakto-Fermentation, Kombucha und Tempeh.',
       },
       fermentation: fermentationDataDE(media),
     },
@@ -619,7 +668,8 @@ async function seedFermentation() {
   const heroBlocksDE = (fermentationDE.fermentationHeroBlocks as Array<{ id?: string }>) ?? []
   const workshopCardsDE = (fermentationDE.fermentationWorkshopCards as Array<{ id?: string }>) ?? []
   const whyItemsDE = (fermentationDE.fermentationWhyItems as Array<{ id?: string }>) ?? []
-  const dangerConcernsDE = (fermentationDE.fermentationDangerConcerns as Array<{ id?: string }>) ?? []
+  const dangerConcernsDE =
+    (fermentationDE.fermentationDangerConcerns as Array<{ id?: string }>) ?? []
   const faqItemsDE = (fermentationDE.fermentationFaqItems as Array<{ id?: string }>) ?? []
 
   const dataENWithIds = {
@@ -636,10 +686,12 @@ async function seedFermentation() {
       ...item,
       id: whyItemsDE[i]?.id,
     })),
-    fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map((item, i) => ({
-      ...item,
-      id: dangerConcernsDE[i]?.id,
-    })),
+    fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map(
+      (item, i) => ({
+        ...item,
+        id: dangerConcernsDE[i]?.id,
+      }),
+    ),
     fermentationFaqItems: fermentationDataEN(media).fermentationFaqItems.map((item, i) => ({
       ...item,
       id: faqItemsDE[i]?.id,
@@ -660,7 +712,8 @@ async function seedFermentation() {
         layout: [],
         meta: {
           title: 'Fermentation | Fermentfreude',
-          description: 'Discover the art of fermentation. A complete guide to lacto-fermentation, kombucha, and tempeh.',
+          description:
+            'Discover the art of fermentation. A complete guide to lacto-fermentation, kombucha, and tempeh.',
         },
         fermentation: dataENWithIds,
       },

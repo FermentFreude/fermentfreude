@@ -42,11 +42,26 @@ const scripts: Record<string, { name: string; file: string }> = {
   legal: { name: 'Legal pages (datenschutz, agb, impressum)', file: 'seed-legal-pages.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
   kombucha: { name: 'Kombucha workshop (experienceCards)', file: 'seed-kombucha.ts' },
-  'kombucha-detail': { name: 'Kombucha workshop detail (hero, booking, FAQ, how-to)', file: 'seed-kombucha-detail.ts' },
-  'kombucha-phases': { name: 'Kombucha phases block (WorkshopPhases)', file: 'seed-kombucha-phases.ts' },
+  'kombucha-detail': {
+    name: 'Kombucha workshop detail (hero, booking, FAQ, how-to)',
+    file: 'seed-kombucha-detail.ts',
+  },
+  'kombucha-phases': {
+    name: 'Kombucha phases block (WorkshopPhases)',
+    file: 'seed-kombucha-phases.ts',
+  },
 }
 
-const allOrder = ['header', 'home', 'about', 'contact', 'legal', 'voucher', 'kombucha-detail', 'kombucha-phases']
+const allOrder = [
+  'header',
+  'home',
+  'about',
+  'contact',
+  'legal',
+  'voucher',
+  'kombucha-detail',
+  'kombucha-phases',
+]
 
 function runSeed(key: string, extraArgs: string[] = []): boolean {
   const script = scripts[key]

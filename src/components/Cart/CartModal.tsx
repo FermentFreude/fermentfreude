@@ -223,7 +223,9 @@ export function CartModal() {
                                     <div className="text-sm text-neutral-500 dark:text-neutral-400 space-y-0.5">
                                       <p>{booking.date}</p>
                                       <p>{booking.time} Uhr</p>
-                                      <p>{booking.guestCount} {copy.guests}</p>
+                                      <p>
+                                        {booking.guestCount} {copy.guests}
+                                      </p>
                                       <div className="font-semibold text-neutral-700 dark:text-neutral-300">
                                         {copy.total}: €{booking.totalPrice.toFixed(2)}
                                       </div>

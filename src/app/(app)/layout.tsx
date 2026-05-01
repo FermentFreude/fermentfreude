@@ -62,9 +62,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
 
         <Providers>
-          <div id="site-cursor" style={{ display: 'contents' }}><ElasticCursor /></div>
-          <div id="site-splash" style={{ display: 'contents' }}><SplashScreen /></div>
-          <div id="site-admin-bar" style={{ display: 'contents' }}><AdminBar /></div>
+          <div id="site-cursor" style={{ display: 'contents' }}>
+            <ElasticCursor />
+          </div>
+          <div id="site-splash" style={{ display: 'contents' }}>
+            <SplashScreen />
+          </div>
+          <div id="site-admin-bar" style={{ display: 'contents' }}>
+            <AdminBar />
+          </div>
           <LivePreviewListener />
 
           {/* Skip-to-main-content link for keyboard / screen-reader users */}
@@ -75,10 +81,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             Skip to main content
           </a>
 
-          <div id="site-header" style={{ display: 'contents' }}><Header /></div>
+          <div id="site-header" style={{ display: 'contents' }}>
+            <Header />
+          </div>
           <OpeningPopups locale={locale} />
           <main id="main-content">{children}</main>
-          <div id="site-footer" style={{ display: 'contents' }}><Footer /></div>
+          <div id="site-footer" style={{ display: 'contents' }}>
+            <Footer />
+          </div>
         </Providers>
 
         {/* Vercel Analytics — cookieless, GDPR-compliant */}

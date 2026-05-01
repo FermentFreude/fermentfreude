@@ -68,9 +68,7 @@ export default async function CoursesPage() {
   const locale = await getLocale()
   const { isEnabled: draft } = await draftMode()
 
-  const page = draft
-    ? await queryCoursesPage(locale, true)
-    : await getCachedCoursesPage(locale)
+  const page = draft ? await queryCoursesPage(locale, true) : await getCachedCoursesPage(locale)
   const blocks = page?.layout ?? []
 
   // Extract the FeatureCards block for "What You'll Learn" — render inline with old grid style

@@ -23,9 +23,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { cssVariables } from '@/cssVariables'
 import { gtmBeginCheckout } from '@/lib/gtm'
 import { Address } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { toast } from 'sonner'
-import { useLocale } from '@/providers/Locale'
 
 const CHECKOUT_DE = {
   processingPayment: 'Zahlung wird verarbeitet…',
@@ -528,9 +528,7 @@ export const CheckoutPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-body-sm text-ff-gray-text-light">
-                {t.guestPrompt}
-              </p>
+              <p className="text-body-sm text-ff-gray-text-light">{t.guestPrompt}</p>
               <FormItem>
                 <Label
                   htmlFor="email"
@@ -584,9 +582,7 @@ export const CheckoutPage: React.FC = () => {
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span className="text-body-sm font-medium text-[#555954]">
-                {t.noShipping}
-              </span>
+              <span className="text-body-sm font-medium text-[#555954]">{t.noShipping}</span>
             </div>
           </section>
         ) : isAllPhysicalPickup ? (
@@ -762,7 +758,7 @@ export const CheckoutPage: React.FC = () => {
               void handleVoucherOrder()
             }}
           >
-          {isProcessingPayment ? t.processingOrder : t.payWithVoucher}
+            {isProcessingPayment ? t.processingOrder : t.payWithVoucher}
           </Button>
         ) : !paymentData ? (
           <Button
@@ -773,7 +769,7 @@ export const CheckoutPage: React.FC = () => {
               void initiatePaymentIntent('stripe')
             }}
           >
-          {t.goToPayment}
+            {t.goToPayment}
           </Button>
         ) : null}
 
