@@ -247,7 +247,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   /* ═══════════════════════════════════════════════════════════ */
 
   return (
-    <div id={id ?? undefined} className="w-full bg-white">
+    <div id={id ?? undefined} className="cursor-normal-zone w-full bg-white">
       {/* Mobile/tablet: snap carousel with subtle motion (no sticky trap) */}
       <section className="lg:hidden py-6">
         <div className="px-4 mb-3 flex items-center justify-between">
