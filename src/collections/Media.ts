@@ -8,7 +8,6 @@ import {
 import path from 'path'
 
 import { isAdmin } from '@/access/isAdmin'
-import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 
 export const Media: CollectionConfig = {
   admin: {
@@ -21,9 +20,12 @@ export const Media: CollectionConfig = {
     update: isAdmin,
     delete: isAdmin,
   },
-  hooks: {
-    afterChange: [autoTranslateCollection],
-  },
+  // NOTE: autoTranslate is intentionally NOT enabled on Media. It would call
+  // `payload.update` with the entire merged EN document — including the
+  // Sharp-generated `sizes` group — which re-triggers upload processing and
+  // surfaces in the admin as `Cannot read properties of undefined (reading
+  // 'reduce')`. The `alt` text is short; admins fill both DE + EN tabs
+  // directly in the upload form.
   fields: [
     {
       name: 'alt',
