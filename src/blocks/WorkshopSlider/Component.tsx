@@ -1,43 +1,43 @@
 'use client'
 
+import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
 import type {
   Media as MediaType,
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
-import { cn } from '@/utilities/cn'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-
-gsap.registerPlugin(ScrollTrigger)
+import Link from 'next/link'
+import React, { useEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
- *  HARDCODED DEFAULTS (English)
+ *  HARDCODED DEFAULTS  (English — CMS data always wins)
  * ═══════════════════════════════════════════════════════════════ */
 
-const DEFAULT_EYEBROW = 'Workshop Experience'
+const DEFAULT_EYEBROW = 'Experience'
+const DEFAULT_SECTION_HEADING = 'Workshops'
+const DEFAULT_ALL_WORKSHOPS_LABEL = 'See All Workshops'
+const DEFAULT_ALL_WORKSHOPS_LINK = '/workshops'
+const DEFAULT_DETAILS_LABEL = 'Workshop Details'
 
 const DEFAULT_WORKSHOPS = [
   {
     title: 'Lakto-Gemüse',
-    theme: 'light' as const,
+    audienceTag: 'For Chefs and Food Professionals',
     description:
-      'Fermenting vegetables, experiencing different flavours every month.\nDo you have leftover seasonal vegetables and want to transform them into real taste sensations?',
+      'Fermenting vegetables, experiencing different flavours every month. Have leftover seasonal vegetables? Transform them into real taste sensations.',
     features: [
       { text: 'Duration: approx. 3 hours' },
       { text: 'For everyone from beginner to pro.' },
       { text: 'Ingredients, jars, and spices are all provided.' },
-      { text: 'Take all the jars home with you afterward' },
+      { text: 'Take all the jars home with you afterward.' },
     ],
     ctaLink: '/workshops/lakto-gemuese',
-    detailsButtonLabel: 'Workshop Details',
   },
   {
     title: 'Kombucha',
-    theme: 'dark' as const,
+    audienceTag: 'For Chefs and Food Professionals',
     description:
-      'Fermenting tea, creating balanced flavours with every brew.\nCurious how kombucha becomes naturally fizzy, fresh, and complex?',
+      'Fermenting tea, creating balanced flavours with every brew. Curious how kombucha becomes naturally fizzy, fresh, and complex?',
     features: [
       { text: 'Duration: approx. 3 hours' },
       { text: 'For everyone from beginner to pro.' },
@@ -45,13 +45,12 @@ const DEFAULT_WORKSHOPS = [
       { text: 'Take home your own brewed kombucha.' },
     ],
     ctaLink: '/workshops/kombucha',
-    detailsButtonLabel: 'Workshop Details',
   },
   {
     title: 'Tempeh',
-    theme: 'dark' as const,
+    audienceTag: 'For Chefs and Food Professionals',
     description:
-      'From beans to tempeh, understanding texture, taste, and technique.\nLearn how this traditional fermentation becomes a versatile, healthy protein.',
+      'From beans to tempeh — texture, taste, and technique. Learn how this traditional fermentation becomes a versatile, healthy protein.',
     features: [
       { text: 'Duration: approx. 3 hours' },
       { text: 'Suitable for home cooks and professionals.' },
@@ -59,215 +58,123 @@ const DEFAULT_WORKSHOPS = [
       { text: 'Take home freshly made tempeh.' },
     ],
     ctaLink: '/workshops/tempeh',
-    detailsButtonLabel: 'Workshop Details',
   },
 ]
 
 /* ═══════════════════════════════════════════════════════════════ */
 
-/** Per-workshop appointment availability, keyed by ctaLink href. */
-export type WorkshopAvailabilityInfo = {
-  date?: string
-  availableSpots?: number
-  nextAvailableDate?: string
-  nextAvailableSpots?: number
-  isFullyBooked?: boolean
-}
+type Props = WorkshopSliderBlockType & { id?: string }
 
-type Props = WorkshopSliderBlockType & {
-  id?: string
-  /** Map of workshop href → next available date / sold-out status. */
-  availabilityByHref?: Record<string, WorkshopAvailabilityInfo>
-  /** Active locale, used for built-in badge fallbacks. */
-  locale?: 'de' | 'en'
-}
-
-/** Zero-padded index string (0 → "01") */
-function padIndex(i: number): string {
-  return String(i + 1).padStart(2, '0')
-}
-
-/** Resolve Payload media field to an object (or null) */
 function resolveMedia(image: MediaType | string | number | null | undefined): MediaType | null {
   if (!image) return null
   if (typeof image === 'object') return image
   return null
 }
 
-/* ── Theme colour maps ─────────────────────────────────────── */
-const themeStyles = {
-  light: {
-    titleColor: 'text-black',
-    descColor: 'text-[#1A1A1A]',
-    cardBg: 'bg-[var(--ff-ivory-mist,#FAF2E0)]',
-    cardText: 'text-black',
-    cardDivider: 'border-black/15',
-  },
-  dark: {
-    titleColor: 'text-[#555954]',
-    descColor: 'text-[#4B4B4B]',
-    cardBg: 'bg-[#4B4B4B]',
-    cardText: 'text-[#FCF4EA]',
-    cardDivider: 'border-[#FCF4EA]/20',
-  },
-}
-
 /* ═══════════════════════════════════════════════════════════════
  *  COMPONENT
  *
- *  Desktop (lg+): GSAP-pinned horizontal parallax scroll.
- *    Vertical page scroll drives horizontal panel movement.
- *    Each workshop image has an independent parallax offset.
- *    (Codrops "Smooth Horizontal Parallax Gallery" style)
+ *  DOM parallax gallery — exact Codrops approach:
+ *    · Wheel events drive a lerp'd horizontal scroll value
+ *    · Container translateX(-scroll px)
+ *    · Each image inner div is 125% wide, left: -12.5% (headroom)
+ *    · Per-frame: t = (elementCenter - viewportCenter) / viewportCenter
+ *    · Image shifts: translate3d(-t * 10%, 0, 0)  → counter-motion
  *
- *  Mobile: panels stack vertically, natural scroll, no pinning.
+ *  Layout per workshop  [IMG-A 60vh]  [IMG-B 50vh offset]  [CARD]
+ *  Touch drag support included for mobile.
  * ═══════════════════════════════════════════════════════════════ */
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
   eyebrow,
   workshops,
+  allWorkshopsButtonLabel,
+  allWorkshopsLink,
   id,
-  availabilityByHref,
-  locale = 'de',
 }) => {
-  const labels = {
-    nextDate: locale === 'en' ? 'Next date' : 'Nächster Termin',
-    soldOut: locale === 'en' ? 'Fully Booked' : 'Ausgebucht',
-    noDates: locale === 'en' ? 'New dates coming soon' : 'Neue Termine bald verfügbar',
-  }
   const sectionRef = useRef<HTMLElement>(null)
-  const trackRef = useRef<HTMLDivElement>(null)
-  const panelRefs = useRef<(HTMLDivElement | null)[]>([])
-  const imageInnerRefs = useRef<(HTMLDivElement | null)[]>([])
-  const scrollTriggerRef = useRef<ScrollTrigger | null>(null)
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [progress, setProgress] = useState(0)
+  const stickyRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const imgInnerRefs = useRef<(HTMLDivElement | null)[]>([])
+  const [runwayHeight, setRunwayHeight] = useState('100vh')
 
-  /* ── Merge CMS data with defaults ────────────────────────── */
-  const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
+  /* ── merge CMS + defaults ──────────────────────────────────── */
+  const resolvedAllLabel = allWorkshopsButtonLabel || DEFAULT_ALL_WORKSHOPS_LABEL
+  const resolvedAllLink = allWorkshopsLink || DEFAULT_ALL_WORKSHOPS_LINK
   const resolvedWorkshops =
     workshops && workshops.length > 0
       ? workshops.map((w, i) => ({
           title: w.title || DEFAULT_WORKSHOPS[i]?.title || `Workshop ${i + 1}`,
+          audienceTag:
+            (w as { audienceTag?: string }).audienceTag || DEFAULT_WORKSHOPS[i]?.audienceTag || '',
           description: w.description || DEFAULT_WORKSHOPS[i]?.description || '',
-          theme: (w.theme as 'light' | 'dark') || DEFAULT_WORKSHOPS[i]?.theme || 'light',
           features:
             w.features && w.features.length > 0
               ? w.features
-              : DEFAULT_WORKSHOPS[i]?.features || [],
+              : (DEFAULT_WORKSHOPS[i]?.features ?? []),
           image: resolveMedia(w.image as MediaType | string | number | null | undefined),
+          image2: resolveMedia(w.image2 as MediaType | string | number | null | undefined),
           ctaLink: w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || '#',
+          detailsLabel:
+            (w as { detailsButtonLabel?: string }).detailsButtonLabel || DEFAULT_DETAILS_LABEL,
         }))
-      : DEFAULT_WORKSHOPS.map((w) => ({ ...w, image: null as MediaType | null }))
+      : DEFAULT_WORKSHOPS.map((w) => ({
+          ...w,
+          audienceTag: w.audienceTag,
+          image: null as MediaType | null,
+          image2: null as MediaType | null,
+          detailsLabel: DEFAULT_DETAILS_LABEL,
+        }))
 
-  const total = resolvedWorkshops.length
-
-  /* ── GSAP horizontal parallax scroll (desktop only) ──────── */
+  /* ── Scroll-driven horizontal gallery ─────────────────────── */
   useEffect(() => {
     const section = sectionRef.current
-    const track = trackRef.current
-    if (!section || !track) return
+    const container = containerRef.current
+    if (!section || !container) return
 
-    const mm = gsap.matchMedia()
+    const MAX_SHIFT = 10
 
-    mm.add('(min-width: 1024px)', () => {
-      const totalScroll = track.scrollWidth - window.innerWidth
+    /* Calculate how much horizontal overflow the track has */
+    const calcRunway = () => {
+      const scrollableWidth = Math.max(0, container.scrollWidth - window.innerWidth)
+      /* Section height = 1 viewport (sticky area) + scrollable distance + extra buffer
+         so the last workshop is fully visible before the sticky releases */
+      setRunwayHeight(`${window.innerHeight + scrollableWidth + window.innerHeight * 0.8}px`)
+    }
+    calcRunway()
 
-      /* Main horizontal scroll tween, scrubbed by vertical scroll */
-      const scrollTween = gsap.to(track, {
-        x: -totalScroll,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          pin: true,
-          scrub: 0.6,
-          end: () => `+=${totalScroll}`,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            setProgress(self.progress)
-            const idx = Math.min(
-              total - 1,
-              Math.round(self.progress * (total - 1)),
-            )
-            setActiveIndex(idx)
-          },
-        },
+    const onScroll = () => {
+      if (!section || !container) return
+      const rect = section.getBoundingClientRect()
+      const scrollableWidth = Math.max(0, container.scrollWidth - window.innerWidth)
+      if (scrollableWidth <= 0) return
+
+      /* How far into the section we've scrolled (0 → scrollableWidth) */
+      const progress = Math.max(0, Math.min(scrollableWidth, -rect.top))
+      container.style.transform = `translateX(-${progress}px)`
+
+      /* Parallax each image */
+      const vCenter = window.innerWidth * 0.5
+      imgInnerRefs.current.forEach((inner) => {
+        if (!inner) return
+        const outer = inner.parentElement
+        if (!outer) return
+        const outerRect = outer.getBoundingClientRect()
+        const ec = outerRect.left + outerRect.width * 0.5
+        const t = Math.max(-1, Math.min(1, (ec - vCenter) / vCenter))
+        inner.style.transform = `translate3d(${-t * MAX_SHIFT}%, 0, 0)`
       })
+    }
 
-      scrollTriggerRef.current = scrollTween.scrollTrigger ?? null
-
-      /* Parallax offset on each image (Codrops-style) */
-      imageInnerRefs.current.forEach((img, i) => {
-        if (!img || !panelRefs.current[i]) return
-        gsap.fromTo(
-          img,
-          { xPercent: -8 },
-          {
-            xPercent: 8,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: panelRefs.current[i]!,
-              containerAnimation: scrollTween,
-              scrub: true,
-              start: 'left right',
-              end: 'right left',
-            },
-          },
-        )
-      })
-
-      /* Fade-in text per panel */
-      panelRefs.current.forEach((panel) => {
-        if (!panel) return
-        const texts = panel.querySelectorAll('[data-anim="fade"]')
-        gsap.fromTo(
-          texts,
-          { y: 40, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            stagger: 0.08,
-            ease: 'power3.out',
-            duration: 0.8,
-            scrollTrigger: {
-              trigger: panel,
-              containerAnimation: scrollTween,
-              start: 'left 80%',
-              end: 'left 30%',
-              toggleActions: 'play none none reverse',
-            },
-          },
-        )
-      })
-    })
+    window.addEventListener('resize', calcRunway)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
 
     return () => {
-      mm.revert()
-      scrollTriggerRef.current = null
+      window.removeEventListener('resize', calcRunway)
+      window.removeEventListener('scroll', onScroll)
     }
-  }, [total])
-
-  /* ── Navigate via arrows ─────────────────────────────────── */
-  const scrollToWorkshop = useCallback(
-    (index: number) => {
-      const st = scrollTriggerRef.current
-      if (!st) return
-      const clamped = Math.max(0, Math.min(index, total - 1))
-      const targetProgress = clamped / Math.max(1, total - 1)
-      const targetScroll = st.start + (st.end - st.start) * targetProgress
-      window.scrollTo({ top: targetScroll, behavior: 'smooth' })
-    },
-    [total],
-  )
-
-  const handlePrev = useCallback(
-    () => scrollToWorkshop(activeIndex - 1),
-    [activeIndex, scrollToWorkshop],
-  )
-  const handleNext = useCallback(
-    () => scrollToWorkshop(activeIndex + 1),
-    [activeIndex, scrollToWorkshop],
-  )
+  }, [])
 
   /* ═══════════════════════════════════════════════════════════ */
   /*  RENDER                                                    */
@@ -277,244 +184,218 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     <section
       ref={sectionRef}
       id={id ?? undefined}
-      className={cn(
-        'relative py-12 lg:py-0 lg:h-screen',
-        // Mobile: native horizontal swipe carousel with snap.
-        // Desktop: GSAP pins the section and drives horizontal motion.
-        'overflow-x-auto snap-x snap-mandatory lg:overflow-x-hidden lg:overflow-hidden lg:snap-none',
-        '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
-      )}
+      className="relative w-full bg-white"
+      style={{ height: runwayHeight }}
     >
-      {/* ── Horizontal track ─────────────────────────────────── */}
+      {/* Sticky container — pins the gallery in viewport */}
       <div
-        ref={trackRef}
-        className={cn(
-          'flex flex-row gap-4 px-6 sm:px-8',
-          'lg:px-0 lg:gap-0 lg:h-full lg:will-change-transform',
-        )}
+        ref={stickyRef}
+        className="sticky top-0 h-svh flex flex-col justify-center overflow-hidden"
       >
-        {resolvedWorkshops.map((workshop, wIdx) => {
-          const feats = workshop.features ?? []
-          const t = themeStyles[workshop.theme] ?? themeStyles.light
-          const availability = availabilityByHref?.[workshop.ctaLink]
-          const nextDate = availability?.nextAvailableDate || availability?.date
-          const showSoldOutBadge =
-            !!availability && (availability.isFullyBooked || !availability.nextAvailableDate)
-          const showNoDatesBadge = !availability
-
-          return (
-            <div
-              key={wIdx}
-              ref={(el) => {
-                panelRefs.current[wIdx] = el
-              }}
-              className={cn(
-                'shrink-0 snap-start flex flex-col lg:flex-row items-start lg:items-center',
-                'w-[88vw] sm:w-[78vw] lg:w-screen lg:h-full lg:snap-none',
-                'px-0 lg:px-0',
-              )}
-            >
-              {/* ── Left column: text + features ── */}
-              <div className="w-full lg:w-[42%] lg:h-full flex flex-col justify-center lg:pl-12 xl:pl-20 2xl:pl-24 lg:pr-6 xl:pr-10 py-6 lg:py-0">
-                {/* Eyebrow */}
-                <span
-                  data-anim="fade"
-                  className="text-(--ff-gold-accent,#E5B765) font-display font-black text-lg lg:text-[1.75rem] leading-snug"
-                >
-                  {resolvedEyebrow}
-                </span>
-
-                {/* Title */}
-                <h2
-                  data-anim="fade"
-                  className={cn(
-                    'font-display font-black tracking-tight',
-                    'text-4xl sm:text-5xl lg:text-6xl xl:text-[5rem] leading-[1.1]',
-                    'mt-3 lg:mt-5',
-                    t.titleColor,
-                  )}
-                >
-                  {workshop.title}
-                </h2>
-
-                {/* Description */}
-                <p
-                  data-anim="fade"
-                  className={cn(
-                    'font-display text-base sm:text-lg lg:text-xl',
-                    'leading-relaxed whitespace-pre-line max-w-[48ch]',
-                    'mt-3 lg:mt-4',
-                    workshop.theme === 'light' ? 'font-bold' : 'font-medium',
-                    t.descColor,
-                  )}
-                >
-                  {workshop.description}
-                </p>
-
-                {/* Next date + status badge (live from workshop-appointments) */}
-                {(nextDate || showSoldOutBadge || showNoDatesBadge) && (
-                  <div
-                    data-anim="fade"
-                    className="mt-4 lg:mt-5 flex flex-wrap items-center gap-2"
-                  >
-                    {nextDate && !showSoldOutBadge && (
-                      <p
-                        className={cn(
-                          'font-display text-sm sm:text-base',
-                          workshop.theme === 'light'
-                            ? 'text-black/80'
-                            : 'text-[#4B4B4B]',
-                        )}
-                      >
-                        {labels.nextDate}: <span className="font-bold">{nextDate}</span>
-                      </p>
-                    )}
-                    {showSoldOutBadge && (
-                      <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                        {labels.soldOut}
-                      </span>
-                    )}
-                    {showNoDatesBadge && (
-                      <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                        {labels.noDates}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Feature card */}
-                <div
-                  data-anim="fade"
-                  className={cn(
-                    'mt-6 lg:mt-8 rounded-4xl px-6 lg:px-8 py-8 lg:py-10',
-                    t.cardBg,
-                  )}
-                >
-                  {feats.map((feature, fIdx) => (
-                    <React.Fragment key={fIdx}>
-                      <div
-                        className={cn('w-full border-t', t.cardDivider)}
-                        style={{ borderWidth: '0.84px' }}
-                      />
-                      <p
-                        className={cn(
-                          'font-display font-bold text-sm sm:text-base lg:text-lg',
-                          'leading-relaxed py-2.5 lg:py-3',
-                          t.cardText,
-                        )}
-                      >
-                        <span className="opacity-30 mr-3 tabular-nums text-xs font-bold">
-                          {padIndex(fIdx)}
-                        </span>
-                        {(feature as { text?: string }).text}
-                      </p>
-                    </React.Fragment>
-                  ))}
-                  {feats.length > 0 && (
-                    <div
-                      className={cn('w-full border-t', t.cardDivider)}
-                      style={{ borderWidth: '0.84px' }}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* ── Right column: image with parallax ── */}
-              <div className="w-full lg:w-[58%] lg:h-full flex items-center lg:py-8 lg:pr-8 xl:pr-16">
-                <div className="relative w-full aspect-16/10 lg:aspect-auto lg:h-[80vh] rounded-2xl lg:rounded-3xl overflow-hidden">
-                  <div
-                    ref={(el) => {
-                      imageInnerRefs.current[wIdx] = el
-                    }}
-                    className="relative w-full h-full lg:w-[120%] lg:-ml-[10%]"
-                  >
-                    {workshop.image ? (
-                      <Media
-                        resource={workshop.image}
-                        fill
-                        imgClassName="object-cover"
-                        className="absolute inset-0"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-(--ff-warm-gray,#ECE5DE) flex items-center justify-center">
-                        <span className="text-(--ff-charcoal,#4b4b4b) font-display text-lg">
-                          {workshop.title}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+        {/* ── Section heading (left-aligned) ────────────── */}
+        <div className="w-full pb-6 lg:pb-8" style={{ paddingLeft: '5vw', paddingRight: '5vw' }}>
+          <FadeIn>
+            <div className="flex items-start gap-3">
+              <h2
+                className="font-display font-black"
+                style={{
+                  fontSize: 'clamp(2rem, 4.5vw, 3.75rem)',
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.01em',
+                  color: '#000',
+                }}
+              >
+                {DEFAULT_SECTION_HEADING}
+              </h2>
+              <span
+                className="text-eyebrow font-bold text-ff-gold-accent shrink-0"
+                style={{ marginTop: '0.35em' }}
+              >
+                {DEFAULT_EYEBROW}
+              </span>
             </div>
-          )
-        })}
-      </div>
-
-      {/* ── Bottom controls (desktop only, absolute inside pinned section) ── */}
-      <div className="hidden lg:flex absolute bottom-6 xl:bottom-8 left-0 right-0 z-10 items-center px-12 xl:px-20 2xl:px-24 gap-6">
-        {/* Progress bar */}
-        <div className="flex-1 h-0.75 bg-black/10 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-(--ff-charcoal,#4B4B4B) rounded-full"
-            style={{ width: `${progress * 100}%`, transition: 'none' }}
-          />
+          </FadeIn>
         </div>
 
-        {/* Counter */}
-        <span className="font-display font-bold text-lg tabular-nums text-[#351C0B] shrink-0 select-none">
-          {activeIndex + 1}
-          <span className="opacity-30">/ {total}</span>
-        </span>
+        {/* ── Gallery area ──────────────────────────────── */}
+        <div className="relative flex-1 min-h-0">
+          <div className="absolute inset-0 overflow-hidden select-none">
+            <div
+              ref={containerRef}
+              className="flex items-center h-full will-change-transform"
+              style={{ gap: 0 }}
+            >
+              {resolvedWorkshops.map((workshop, wIdx) => {
+                const imgARef = wIdx * 2
+                const imgBRef = wIdx * 2 + 1
+                const secondImg = workshop.image2 ?? workshop.image
 
-        {/* Arrows */}
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={handlePrev}
-            disabled={activeIndex === 0}
-            aria-label="Previous workshop"
-            className={cn(
-              'w-11 h-11 rounded-full border border-[#B3B3B3]',
-              'flex items-center justify-center transition-colors duration-200',
-              'hover:border-[#4B4B4B]',
-              'disabled:opacity-30 disabled:pointer-events-none',
-            )}
+                return (
+                  <div
+                    key={wIdx}
+                    data-workshop-group
+                    className="shrink-0 flex items-center justify-center"
+                    style={{ width: '85vw', gap: 'clamp(0.75rem, 1.5vw, 1.5rem)', paddingLeft: '3vw', paddingRight: '3vw' }}
+                  >
+                    {/* ── LEFT COLUMN — title + small image ── */}
+                    <div
+                      className="shrink-0 flex flex-col self-center"
+                      style={{ height: 'clamp(40vh, 55vh, 70vh)', width: 'auto' }}
+                    >
+                      <div
+                        className="shrink-0 pb-4 lg:pb-5"
+                        style={{ width: 'clamp(180px, 22vw, 340px)' }}
+                      >
+                        <FadeIn>
+                          <h3
+                            className="font-display font-black text-ff-black mb-3 lg:mb-4"
+                            style={{
+                              fontSize: 'clamp(1.35rem, 2.5vw, 2.75rem)',
+                              lineHeight: 1.1,
+                              letterSpacing: '-0.01em',
+                            }}
+                          >
+                            {workshop.title}
+                          </h3>
+                          <p
+                            className="text-body-sm text-ff-olive"
+                            style={{ fontSize: 'clamp(0.75rem, 1vw, 0.9rem)' }}
+                          >
+                            {(() => {
+                              const match = workshop.description.match(/^(.+?[.!?])\s*(.*)$/s)
+                              return match?.[1] ?? workshop.description
+                            })()}
+                          </p>
+                        </FadeIn>
+                      </div>
+
+                      {/* Small image */}
+                      <div
+                        className="relative overflow-hidden rounded-xl lg:rounded-2xl"
+                        style={{ flex: 1, aspectRatio: '4 / 3', minHeight: 0 }}
+                      >
+                        <div
+                          ref={(el) => {
+                            imgInnerRefs.current[imgBRef] = el
+                          }}
+                          className="absolute top-0 h-full will-change-transform"
+                          style={{ left: '-12.5%', width: '125%' }}
+                        >
+                          {secondImg ? (
+                            <Media
+                              resource={secondImg}
+                              fill
+                              imgClassName="object-cover"
+                              className="absolute inset-0"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-[#e0e0e0]" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── BIG IMAGE ──────────────────────────── */}
+                    <div
+                      className="relative shrink-0 overflow-hidden self-center rounded-xl lg:rounded-2xl"
+                      style={{ aspectRatio: '3 / 4', height: 'clamp(35vh, 50vh, 62vh)' }}
+                    >
+                      <div
+                        ref={(el) => {
+                          imgInnerRefs.current[imgARef] = el
+                        }}
+                        className="absolute top-0 h-full will-change-transform"
+                        style={{ left: '-12.5%', width: '125%' }}
+                      >
+                        {workshop.image ? (
+                          <Media
+                            resource={workshop.image}
+                            fill
+                            imgClassName="object-cover"
+                            className="absolute inset-0"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-[#141414]" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* ── DETAILS CARD ── */}
+                    <div
+                      className="shrink-0 relative flex flex-col justify-between self-center rounded-xl lg:rounded-2xl"
+                      style={{
+                        width: 'clamp(200px, 18vw, 280px)',
+                        padding: 'clamp(1.25rem, 2vw, 2rem)',
+                        background: 'rgba(255,255,255,0.5)',
+                        backdropFilter: 'blur(18px)',
+                        WebkitBackdropFilter: 'blur(18px)',
+                        border: '1px solid rgba(255,255,255,0.8)',
+                        boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {workshop.features.map((feature, fIdx) => (
+                          <p
+                            key={fIdx}
+                            className="text-black/70 font-display font-bold leading-relaxed flex gap-2 lg:gap-3"
+                            style={{ fontSize: 'clamp(0.65rem, 0.8vw, 0.75rem)' }}
+                          >
+                            <span className="tabular-nums shrink-0 font-bold">
+                              {String(fIdx + 1).padStart(2, '0')}
+                            </span>
+                            {(feature as { text?: string }).text}
+                          </p>
+                        ))}
+                      </div>
+                      <div className="flex justify-end mt-4 lg:mt-6">
+                        <Link
+                          href={workshop.ctaLink}
+                          aria-label={`${workshop.detailsLabel} – ${workshop.title}`}
+                          className="group inline-flex items-center gap-2 font-display font-bold tracking-wide uppercase text-black/60 transition-colors duration-200 hover:text-black"
+                          style={{ fontSize: 'clamp(0.6rem, 0.75vw, 0.75rem)' }}
+                        >
+                          <span>{workshop.detailsLabel}</span>
+                          <span className="size-7 lg:size-8 rounded-full border border-current flex items-center justify-center transition-all duration-200 group-hover:bg-black group-hover:text-white group-hover:border-black group-hover:scale-110">
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                          </span>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* ── All Workshops button (right-aligned below gallery) ── */}
+        <div
+          className="w-full flex justify-end py-5 lg:py-6"
+          style={{ paddingLeft: '5vw', paddingRight: '5vw' }}
+        >
+          <Link
+            href={resolvedAllLink}
+            className="font-display font-bold uppercase border border-black text-black bg-transparent transition-all duration-200 hover:bg-black hover:text-white"
+            style={{
+              padding: '0.7rem 1.5rem',
+              borderRadius: '2rem',
+              fontSize: 'clamp(0.75rem, 1vw, 0.95rem)',
+              letterSpacing: '0.05em',
+            }}
           >
-            <svg
-              viewBox="0 0 24 24"
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-          <button
-            onClick={handleNext}
-            disabled={activeIndex === total - 1}
-            aria-label="Next workshop"
-            className={cn(
-              'w-11 h-11 rounded-full',
-              'bg-(--ff-charcoal,#4B4B4B) text-white',
-              'flex items-center justify-center transition-colors duration-200',
-              'hover:bg-[#333]',
-              'disabled:opacity-30 disabled:pointer-events-none',
-            )}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </button>
+            {resolvedAllLabel}
+          </Link>
         </div>
       </div>
     </section>

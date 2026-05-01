@@ -22,22 +22,9 @@ function formatUpcomingDate(dateValue: string, locale: SupportedLocale): string 
   return formatter.format(new Date(dateValue))
 }
 
-export type WorkshopDateInfo = {
-  /** Next upcoming appointment (formatted), regardless of availability. */
-  date: string
-  /** Spots available on the next upcoming appointment. */
-  availableSpots?: number
-  /** Next appointment with availableSpots > 0 (formatted). May equal `date`. */
-  nextAvailableDate?: string
-  /** Spots on the next available appointment. */
-  nextAvailableSpots?: number
-  /** True when there are future appointments but none have free spots. */
-  isFullyBooked: boolean
-}
-
 export async function getNextWorkshopDatesByHref(
   locale: SupportedLocale,
-): Promise<Record<string, WorkshopDateInfo>> {
+): Promise<Record<string, { date: string; availableSpots?: number }>> {
   try {
     const payload = await getPayload({ config: configPromise })
 
@@ -54,7 +41,7 @@ export async function getNextWorkshopDatesByHref(
       depth: 2,
     })
 
-    const nextByHref: Record<string, WorkshopDateInfo> = {}
+    const nextByHref: Record<string, { date: string; availableSpots?: number }> = {}
 
     for (const appointment of result.docs) {
       const workshop = appointment.workshop as Workshop | null
@@ -62,31 +49,12 @@ export async function getNextWorkshopDatesByHref(
       if (!workshopSlug || typeof workshopSlug !== 'string') continue
 
       const href = WORKSHOP_SLUG_TO_HREF[workshopSlug]
-      if (!href) continue
+      if (!href || nextByHref[href]) continue
 
-      const formattedDate = formatUpcomingDate(appointment.dateTime, locale)
-      const spots =
-        typeof appointment.availableSpots === 'number' ? appointment.availableSpots : undefined
-      const hasSpots = typeof spots === 'number' ? spots > 0 : true // unknown = treat as available
-
-      const existing = nextByHref[href]
-
-      if (!existing) {
-        nextByHref[href] = {
-          date: formattedDate,
-          availableSpots: spots,
-          nextAvailableDate: hasSpots ? formattedDate : undefined,
-          nextAvailableSpots: hasSpots ? spots : undefined,
-          isFullyBooked: !hasSpots, // tentative; cleared below if a later date has spots
-        }
-        continue
-      }
-
-      // First-upcoming already captured. Only update the "next available" leg.
-      if (hasSpots && !existing.nextAvailableDate) {
-        existing.nextAvailableDate = formattedDate
-        existing.nextAvailableSpots = spots
-        existing.isFullyBooked = false
+      nextByHref[href] = {
+        date: formatUpcomingDate(appointment.dateTime, locale),
+        availableSpots:
+          typeof appointment.availableSpots === 'number' ? appointment.availableSpots : undefined,
       }
     }
 
