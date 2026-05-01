@@ -1,5 +1,6 @@
 import { Media } from '@/components/Media'
 import { getLocale } from '@/utilities/getLocale'
+import { isProductSoldOut } from '@/utilities/productStock'
 import configPromise from '@payload-config'
 import Link from 'next/link'
 import { getPayload } from 'payload'
@@ -168,7 +169,7 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
                   className="group relative flex flex-col no-underline transition-transform duration-300 hover:-translate-y-1"
                 >
                   {/* Sold Out Badge */}
-                  {(!product.inventory || product.inventory === 0) && (
+                  {isProductSoldOut(product) && (
                     <div className="absolute top-3 right-3 z-20">
                       <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
                         {t('Sold Out', locale)}

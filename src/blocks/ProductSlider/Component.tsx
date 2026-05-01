@@ -8,6 +8,7 @@ import type {
   ProductSliderBlock as ProductSliderBlockType,
 } from '@/payload-types'
 import { useLocale } from '@/providers/Locale'
+import { isProductSoldOut } from '@/utilities/productStock'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import Link from 'next/link'
 import React, { useCallback, useRef, useState } from 'react'
@@ -364,8 +365,8 @@ function ProductCard({ product }: { product: Product }) {
   const price = getProductPrice(product)
   const variantLabel = getVariantLabel(product)
   const unitSize = product.unitSize ?? ''
-  const isOutOfStock = !product.inventory || product.inventory === 0
-  const readMoreLabel = locale === 'de' ? 'Mehr erfahren' : 'Read more'
+  const isOutOfStock = isProductSoldOut(product)
+  const readMoreLabel = locale === 'de' ? 'Mehr erfahren →' : 'Read more →'
 
   const handleAddToCart = useCallback(
     (e: React.MouseEvent) => {
@@ -436,19 +437,6 @@ function ProductCard({ product }: { product: Product }) {
               )}
             </div>
 
-            {/* On touch devices there is no reliable hover, so keep sold-out CTA visible on mobile */}
-            <div
-              className={`absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-200 ${
-                isOutOfStock
-                  ? 'opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100'
-                  : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
-              }`}
-            >
-              <div className="absolute rounded-full border border-white/40 bg-black/18 px-9 py-4 backdrop-blur-md shadow-sm" />
-              <span className="relative inline-flex cursor-pointer items-center rounded-full bg-[#E5B765] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1f1f1f] shadow-sm">
-                {readMoreLabel}
-              </span>
-            </div>
           </div>
         </div>
 
@@ -484,6 +472,12 @@ function ProductCard({ product }: { product: Product }) {
               {formattedPrice}
             </p>
           )}
+          <p
+            className="font-display font-bold mt-2 mb-0 underline-offset-4 group-hover:underline"
+            style={{ fontSize: '0.8rem', lineHeight: 1.4, color: '#1a1a1a' }}
+          >
+            {readMoreLabel}
+          </p>
         </div>
       </Link>
     </div>

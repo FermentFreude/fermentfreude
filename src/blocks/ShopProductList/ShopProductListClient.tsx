@@ -4,6 +4,7 @@ import { AddToCart } from '@/components/Cart/AddToCart'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import type { Category, Media as MediaType, Product } from '@/payload-types'
+import { isProductSoldOut } from '@/utilities/productStock'
 import { Eye, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -133,7 +134,7 @@ function ProductCard({ product, onQuickView }: { product: Product; onQuickView: 
   const image = getFirstImage(product)
   const price = product.priceInEUR
   const stock = product.inventory ?? 0
-  const isOutOfStock = stock === 0
+  const isOutOfStock = isProductSoldOut(product)
 
   return (
     <div className="group relative rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
