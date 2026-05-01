@@ -7,7 +7,7 @@ import type {
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
 import Link from 'next/link'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
  *  HARDCODED DEFAULTS  (English — CMS data always wins)
@@ -99,8 +99,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   const scrollRef = useRef({ current: 0, target: 0, limit: 0 })
   const rafRef = useRef<number>(0)
   const isActiveRef = useRef(false)
-  const mobileTrackRef = useRef<HTMLDivElement>(null)
-  const [activeMobileIndex, setActiveMobileIndex] = useState(0)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
   const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
@@ -121,12 +119,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           detailsButtonLabel:
             (w as { detailsButtonLabel?: string | null }).detailsButtonLabel ||
             DEFAULT_DETAILS_CTA_LABEL,
-          nextDate: (() => {
-            const link = w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''
-            const mapped = upcomingDatesByHref?.[link]
-            const fromCMS = (w as { nextDate?: string | null }).nextDate
-            return mapped || fromCMS || undefined
-          })(),
+          nextDate:
+            upcomingDatesByHref?.[w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''] || undefined,
         }))
       : DEFAULT_WORKSHOPS.map((w) => ({
           ...w,
@@ -148,14 +142,9 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
     /* Recalculate outer height and scroll limit */
     const updateDimensions = () => {
-      // Keep the long sticky-scroll effect for desktop only.
-      // On mobile/tablet it creates excessive empty scroll space before the next section.
-      const enableHorizontalScrollScene = window.innerWidth >= 1024
-      const overshoot = enableHorizontalScrollScene
-        ? Math.max(0, container.scrollWidth - window.innerWidth)
-        : 0
+      const overshoot = Math.max(0, container.scrollWidth - window.innerWidth)
       isActiveRef.current = overshoot > 0
-      outer.style.height = enableHorizontalScrollScene ? `${window.innerHeight + overshoot}px` : 'auto'
+      outer.style.height = `${window.innerHeight + overshoot}px`
       scrollRef.current.limit = overshoot
 
       if (!isActiveRef.current) {
@@ -212,178 +201,37 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
   if (visible === false) return null
 
-  const handleMobileTrackScroll = () => {
-    const track = mobileTrackRef.current
-    if (!track) return
-    const firstCard = track.querySelector<HTMLElement>('.mobile-workshop-track')
-    if (!firstCard) return
-    const gap = 16 // Tailwind gap-4
-    const step = firstCard.offsetWidth + gap
-    if (step <= 0) return
-    const next = Math.round(track.scrollLeft / step)
-    setActiveMobileIndex(Math.max(0, Math.min(resolvedWorkshops.length - 1, next)))
-  }
-
-  const goToMobileSlide = (index: number) => {
-    const track = mobileTrackRef.current
-    if (!track) return
-    const cards = track.querySelectorAll<HTMLElement>('.mobile-workshop-track')
-    const target = cards[index]
-    if (!target) return
-    target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
-    setActiveMobileIndex(index)
-  }
-
-  const goToPrevMobileSlide = () => {
-    goToMobileSlide(Math.max(0, activeMobileIndex - 1))
-  }
-
-  const goToNextMobileSlide = () => {
-    goToMobileSlide(Math.min(resolvedWorkshops.length - 1, activeMobileIndex + 1))
-  }
-
   /* ═══════════════════════════════════════════════════════════ */
   /*  RENDER                                                     */
   /* ═══════════════════════════════════════════════════════════ */
 
   return (
-    <div id={id ?? undefined} className="cursor-normal-zone w-full bg-white">
-      {/* Mobile/tablet: snap carousel with subtle motion (no sticky trap) */}
-      <section className="lg:hidden py-6">
-        <div className="px-4 mb-3 flex items-center justify-between">
-          <p
-            className="text-eyebrow font-bold text-[10px] tracking-[0.18em] uppercase"
-            style={{ color: 'var(--ff-gold)' }}
+    /* Outer pin div — JS sets height to 100svh + overshoot on lg+ */
+    <div
+      ref={outerRef}
+      id={id ?? undefined}
+      className="relative w-full bg-white"
+      style={{ minHeight: '100svh' }}
+    >
+      {/* ── Sticky viewport (always visible while scrolling through outer) */}
+      <section
+        className="sticky top-0 w-full bg-white overflow-hidden"
+        style={{ height: '100svh' }}
+      >
+        {/* ── Scroll hint ─────────────────────────────────────── */}
+        <p className="absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
+          scroll →
+        </p>
+
+        {/* ══════════════════════════════════════════════════════
+         *  RESPONSIVE TRACK — same composition across sizes
+         * ══════════════════════════════════════════════════════ */}
+        <div className="absolute inset-0 overflow-hidden select-none">
+          <div
+            ref={containerRef}
+            className="flex items-center h-full will-change-transform"
+            style={{ gap: 'clamp(0.75rem, 2vw, 1.5rem)', paddingLeft: '5vw', paddingRight: '5vw' }}
           >
-            {resolvedEyebrow}
-          </p>
-          <span className="text-[10px] font-display tracking-[0.14em] uppercase text-black/35">Swipe</span>
-        </div>
-
-        <div
-          ref={mobileTrackRef}
-          onScroll={handleMobileTrackScroll}
-          className="flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
-          style={{ WebkitOverflowScrolling: 'touch' }}
-        >
-          <style>{`.mobile-workshop-track::-webkit-scrollbar{display:none}`}</style>
-          {resolvedWorkshops.map((workshop, wIdx) => (
-            <article
-              key={wIdx}
-              className="mobile-workshop-track snap-center shrink-0 w-[88vw] rounded-2xl border border-black/10 bg-white p-4 transition-transform duration-300 active:scale-[0.985]"
-            >
-              <h2 className="text-ff-black mb-3 text-[1.55rem] leading-[1.05]">{workshop.title}</h2>
-              <p className="text-body-sm text-ff-olive text-sm leading-relaxed mb-3">{workshop.description}</p>
-
-              <div className="relative overflow-hidden rounded-xl aspect-4/3 mb-3">
-                {workshop.image ? (
-                  <Media
-                    resource={workshop.image}
-                    fill
-                    imgClassName="object-cover transition-transform duration-500 active:scale-[1.02]"
-                    className="absolute inset-0"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-[#141414]" />
-                )}
-              </div>
-
-              {workshop.nextDate ? (
-                <div className="mb-4 pb-3 border-b border-black/10">
-                  <p className="text-[10px] font-display font-bold tracking-widest uppercase text-black/45 mb-1">
-                    {upcomingLabel || 'Upcoming'}
-                  </p>
-                  <p className="text-sm font-display font-bold text-black/85">
-                    {typeof workshop.nextDate === 'object' && workshop.nextDate !== null
-                      ? (workshop as any).nextDate.date
-                      : String(workshop.nextDate)}
-                  </p>
-                </div>
-              ) : null}
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {workshop.features.map((feature, fIdx) => (
-                  <p
-                    key={fIdx}
-                    className="text-black/70 font-display font-bold text-[11px] leading-relaxed flex gap-3"
-                  >
-                    <span className="tabular-nums shrink-0 font-bold">
-                      {String(fIdx + 1).padStart(2, '0')}
-                    </span>
-                    {(feature as { text?: string }).text}
-                  </p>
-                ))}
-              </div>
-
-              <div className="mt-5 pt-4 border-t border-black/10">
-                <Link
-                  href={workshop.ctaLink}
-                  className="flex items-center justify-between gap-3 group/cta"
-                  aria-label={`Workshop Seite: ${workshop.title}`}
-                >
-                  <span className="text-[11px] font-display font-bold tracking-widest uppercase text-black/40 group-hover/cta:text-black transition-colors duration-200">
-                    {workshop.detailsButtonLabel}
-                  </span>
-                  <span className="size-9 rounded-full border border-black/25 flex items-center justify-center text-base leading-none text-black/35 transition-all duration-200 group-hover/cta:border-black group-hover/cta:text-black group-hover/cta:scale-110">
-                    +
-                  </span>
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="mt-4 flex items-center justify-center gap-4 px-4">
-          <button
-            type="button"
-            onClick={goToPrevMobileSlide}
-            disabled={activeMobileIndex === 0}
-            aria-label="Previous workshop"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/20 text-black transition-colors disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            <span className="text-lg leading-none">←</span>
-          </button>
-
-          {resolvedWorkshops.map((_, index) => {
-            const isActive = index === activeMobileIndex
-            return (
-              <button
-                key={`dot-${index}`}
-                type="button"
-                onClick={() => goToMobileSlide(index)}
-                aria-label={`Go to workshop ${index + 1}`}
-                className={`rounded-full transition-all duration-200 ${
-                  isActive ? 'h-2.5 w-2.5 bg-black' : 'h-2 w-2 bg-black/25'
-                }`}
-              />
-            )
-          })}
-
-          <button
-            type="button"
-            onClick={goToNextMobileSlide}
-            disabled={activeMobileIndex === resolvedWorkshops.length - 1}
-            aria-label="Next workshop"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/20 text-black transition-colors disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            <span className="text-lg leading-none">→</span>
-          </button>
-        </div>
-      </section>
-
-      {/* Desktop: keep horizontal moving workshop section */}
-      <div ref={outerRef} className="relative hidden lg:block bg-white min-h-svh">
-        <section className="sticky top-0 w-full h-svh bg-white overflow-hidden">
-          <p className="absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
-            scroll →
-          </p>
-
-          <div className="absolute inset-0 overflow-hidden select-none">
-            <div
-              ref={containerRef}
-              className="flex items-center h-full will-change-transform"
-              style={{ gap: 'clamp(0.75rem, 2vw, 1.5rem)', paddingLeft: '5vw', paddingRight: '5vw' }}
-            >
             {resolvedWorkshops.map((workshop, wIdx) => {
               const imgAIdx = wIdx * 2
               const imgBIdx = wIdx * 2 + 1
@@ -486,8 +334,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                           {upcomingLabel || 'Upcoming'}
                         </p>
                         <p className="text-sm md:text-base font-display font-bold text-black/85">
-                          {typeof workshop.nextDate === 'object' && workshop.nextDate !== null
-                            ? (workshop as any).nextDate.date
+                          {typeof workshop.nextDate === 'object' && workshop.nextDate !== null 
+                            ? (workshop as any).nextDate.date 
                             : String(workshop.nextDate)}
                         </p>
                       </div>
@@ -531,10 +379,9 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                 </React.Fragment>
               )
             })}
-            </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   )
 }
