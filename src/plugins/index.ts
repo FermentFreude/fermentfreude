@@ -46,10 +46,9 @@ const r2Enabled =
 // Seed scripts set PAYLOAD_SEED=true so that files are uploaded server-side
 // (clientUploads relies on a browser to do the actual S3 PUT, which doesn't
 // exist when running via the Local API in seed / CLI scripts).
-// On Vercel we also prefer server uploads to avoid direct-to-R2 upload failures
-// in the admin when bucket/browser CORS or presigned upload flows break.
-const useClientUploads =
-  r2Enabled && process.env.PAYLOAD_SEED !== 'true' && process.env.VERCEL !== '1'
+// On Vercel, keep client uploads enabled so admin uploads bypass the serverless
+// body-size limit; Cloudflare R2 bucket CORS must allow browser PUTs.
+const useClientUploads = r2Enabled && process.env.PAYLOAD_SEED !== 'true'
 
 export const plugins: Plugin[] = [
   s3Storage({
