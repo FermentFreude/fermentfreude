@@ -108,7 +108,7 @@ export function CartModal() {
         <CartIconButton quantity={totalQuantity} />
       </SheetTrigger>
 
-      <SheetContent className="top-0 h-full pt-(--header-height,56px) flex flex-col">
+      <SheetContent className="top-0 h-full pt-(--header-height,56px) flex flex-col w-full sm:max-w-md md:max-w-lg lg:max-w-xl">
         <SheetHeader className="shrink-0">
           <SheetTitle>{copy.title}</SheetTitle>
 
