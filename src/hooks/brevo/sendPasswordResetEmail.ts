@@ -34,7 +34,7 @@ export const sendPasswordResetEmail: CollectionAfterChangeHook = async ({
 
   try {
     const recipientFirstName = doc.name?.split(' ')[0] || doc.name || email
-    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.com'
+    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
 
     // In a real implementation, the reset token would be passed to this hook
     // via the req context or the doc itself
@@ -50,6 +50,8 @@ export const sendPasswordResetEmail: CollectionAfterChangeHook = async ({
         FIRST_NAME: recipientFirstName,
         RESET_URL: resetUrl,
         EXPIRY_TIME: '1 Stunde',
+        PRIVACY_URL: `${serverUrl}/datenschutz`,
+        AGB_URL: `${serverUrl}/agb`,
       },
     })
 

@@ -151,8 +151,8 @@ export const FeatureCardsBlock: React.FC<Props> = ({
       <div className="container mx-auto px-6 flex flex-col items-start gap-(--space-content-xl)">
         {/* Header: gold eyebrow on top, then heading row + description */}
         <div className="flex flex-col gap-(--space-content-sm) w-full">
-          {/* Top row: heading block left, button right — vertically centered */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-16 w-full">
+          {/* Top row: heading block */}
+          <div className="flex w-full">
             <FadeIn className="flex flex-col items-start gap-2 flex-1">
               {resolvedEyebrow && (
                 <span
@@ -175,25 +175,6 @@ export const FeatureCardsBlock: React.FC<Props> = ({
                 {resolvedHeading}
               </h2>
             </FadeIn>
-
-            {/* CTA button — centered with the heading */}
-            {resolvedButtonLabel && (
-              <FadeIn className="shrink-0">
-                <Link
-                  href={resolvedButtonLink}
-                  className="inline-flex items-center justify-center font-display font-bold text-[#F9F0DC] transition-opacity hover:opacity-90"
-                  style={{
-                    backgroundColor: '#4B4B4B',
-                    borderRadius: '2rem',
-                    padding: '0.875rem 1.5rem',
-                    fontSize: 'clamp(0.85rem, 1.1vw, 1.1rem)',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {resolvedButtonLabel}
-                </Link>
-              </FadeIn>
-            )}
           </div>
 
           {/* Description below the heading row */}
@@ -209,6 +190,25 @@ export const FeatureCardsBlock: React.FC<Props> = ({
               >
                 {resolvedDescription}
               </p>
+            </FadeIn>
+          )}
+
+          {/* CTA directly under the intro description */}
+          {resolvedButtonLabel && (
+            <FadeIn>
+              <Link
+                href={resolvedButtonLink}
+                className="inline-flex items-center justify-center font-display font-bold text-[#F9F0DC] transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor: '#4B4B4B',
+                  borderRadius: '2rem',
+                  padding: '0.875rem 1.5rem',
+                  fontSize: 'clamp(0.85rem, 1.1vw, 1.1rem)',
+                  lineHeight: 1.5,
+                }}
+              >
+                {resolvedButtonLabel}
+              </Link>
             </FadeIn>
           )}
         </div>
@@ -254,6 +254,7 @@ export const FeatureCardsBlock: React.FC<Props> = ({
             </FadeIn>
           ))}
         </div>
+
       </div>
     </section>
   )

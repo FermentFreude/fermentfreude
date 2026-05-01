@@ -119,12 +119,6 @@ export const RenderBlocks: React.FC<{
           const { blockName, blockType } = block
           const blockId = blockName ? toKebabCase(blockName) : undefined
           const blockData = block as unknown as Record<string, unknown>
-          const blockGapClass =
-            slug === 'home' && blockType === 'workshopSlider'
-              ? 'mt-0 mb-0'
-              : slug === 'home' && blockType === 'teamPreview'
-                ? 'mt-0 mb-[var(--space-section-md)] last:mb-0'
-                : gapClass
 
           if (blockData.visible === false) return null
 
@@ -143,7 +137,7 @@ export const RenderBlocks: React.FC<{
           if ((useGlobal || shouldFallbackToGlobalForSponsors) && blockType && blockType in globalWrappers) {
             const GlobalWrapper = globalWrappers[blockType]
             return (
-              <div className={blockGapClass} key={index}>
+              <div className={gapClass} key={index}>
                 <GlobalWrapper id={blockId} fallbackData={blockData} />
               </div>
             )
@@ -158,7 +152,7 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className={blockGapClass} key={index}>
+                <div className={gapClass} key={index}>
                   <Block
                     {...block}
                     id={blockId}

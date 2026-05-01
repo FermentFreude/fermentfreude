@@ -23,13 +23,21 @@ export const sendEnrollmentEmail: CollectionAfterChangeHook = async ({ doc, oper
 
     if (!user?.email) return doc
 
+    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
+
     await sendTemplateEmail({
       to: [{ email: user.email, name: user.name || undefined }],
       templateId: BREVO_TEMPLATES.COURSE_ENROLLMENT,
       params: {
+        FIRST_NAME: user.name?.split(' ')[0] || user.name || user.email,
         COURSE_SLUG: String(doc.courseSlug ?? ''),
-        CUSTOMER_NAME: user.name || user.email,
-        COURSE_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || ''}/kurse/${doc.courseSlug}`,
+        COURSE_TITLE: String(doc.courseSlug ?? ''),
+        COURSE_URL: `${serverUrl}/kurse/${doc.courseSlug}`,
+        LESSON_COUNT: '',
+        FIRST_LESSON_TITLE: '',
+        FIRST_LESSON_DESCRIPTION: '',
+        PRIVACY_URL: `${serverUrl}/datenschutz`,
+        AGB_URL: `${serverUrl}/agb`,
       },
     })
   } catch (error) {

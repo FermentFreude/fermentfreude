@@ -169,6 +169,8 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
     const orderNumber = String(doc.id).slice(-8).toUpperCase()
 
+    const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
+
     const emailParams: Record<string, string> = {
       ORDER_ID: String(doc.id),
       ORDER_NUMBER: orderNumber,
@@ -179,7 +181,12 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       SHIPPING_ADDRESS: shippingAddressStr,
       ORDER_ITEMS: itemSummary,
       CUSTOMER_NAME: recipientName || recipientEmail,
+      FIRST_NAME: recipientName?.split(' ')[0] || recipientName || recipientEmail,
       ORDER_DATE: new Date().toLocaleDateString('de-DE'),
+      ORDER_URL: `${siteUrl}/account/orders`,
+      SHOP_URL: `${siteUrl}/workshops`,
+      PRIVACY_URL: `${siteUrl}/datenschutz`,
+      AGB_URL: `${siteUrl}/agb`,
     }
 
     // Add workshop details if found

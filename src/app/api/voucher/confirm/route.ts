@@ -5,8 +5,10 @@ import { getPayload } from 'payload'
 
 /* ═══════════════════════════════════════════════════════════════
  *  GET /api/voucher/confirm?session_id=cs_xxx
+ *  GET /api/voucher/confirm?payment_intent=pi_xxx
  *
- *  Called from the success page after Stripe redirects back.
+ *  Called from the success page after Stripe redirects back, or
+ *  after inline PaymentElement confirmation.
  *  Verifies the payment, creates a generic Voucher record in
  *  Payload, and sends the voucher email via Brevo.
  *
@@ -17,38 +19,79 @@ import { getPayload } from 'payload'
 export async function GET(request: NextRequest) {
   try {
     const sessionId = request.nextUrl.searchParams.get('session_id')
+    const paymentIntentId = request.nextUrl.searchParams.get('payment_intent')
 
-    if (!sessionId || typeof sessionId !== 'string') {
+    if (!sessionId && !paymentIntentId) {
       return NextResponse.json(
-        { success: false, error: 'Missing session_id parameter.' },
+        { success: false, error: 'Missing session_id or payment_intent parameter.' },
         { status: 400 },
       )
     }
 
-    // ─── Verify Stripe Session ───────────────────────────────────
+    let meta: Record<string, string> = {}
+    let paymentStatus: string = ''
+    let idempotencyKey: string = ''
 
-    let session
-    try {
-      session = await stripe.checkout.sessions.retrieve(sessionId)
-    } catch (_err) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid checkout session.' },
-        { status: 400 },
-      )
-    }
+    if (sessionId) {
+      // ─── Verify via Stripe Checkout Session ─────────────────────
 
-    if (session.payment_status !== 'paid') {
-      return NextResponse.json(
-        { success: false, error: 'Payment has not been completed.' },
-        { status: 402 },
-      )
-    }
+      let session
+      try {
+        session = await stripe.checkout.sessions.retrieve(sessionId)
+      } catch (_err) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid checkout session.' },
+          { status: 400 },
+        )
+      }
 
-    if (session.metadata?.type !== 'voucher_purchase') {
-      return NextResponse.json(
-        { success: false, error: 'This session is not a voucher purchase.' },
-        { status: 400 },
-      )
+      if (session.payment_status !== 'paid') {
+        return NextResponse.json(
+          { success: false, error: 'Payment has not been completed.' },
+          { status: 402 },
+        )
+      }
+
+      if (session.metadata?.type !== 'voucher_purchase') {
+        return NextResponse.json(
+          { success: false, error: 'This session is not a voucher purchase.' },
+          { status: 400 },
+        )
+      }
+
+      meta = session.metadata as Record<string, string>
+      paymentStatus = session.payment_status
+      idempotencyKey = sessionId
+    } else {
+      // ─── Verify via Stripe PaymentIntent ────────────────────────
+
+      let paymentIntent
+      try {
+        paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId!)
+      } catch (_err) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid payment intent.' },
+          { status: 400 },
+        )
+      }
+
+      if (paymentIntent.status !== 'succeeded') {
+        return NextResponse.json(
+          { success: false, error: 'Payment has not been completed.' },
+          { status: 402 },
+        )
+      }
+
+      if (paymentIntent.metadata?.type !== 'voucher_purchase') {
+        return NextResponse.json(
+          { success: false, error: 'This payment is not a voucher purchase.' },
+          { status: 400 },
+        )
+      }
+
+      meta = paymentIntent.metadata as Record<string, string>
+      paymentStatus = paymentIntent.status
+      idempotencyKey = paymentIntentId!
     }
 
     // ─── Idempotency: Check if voucher already exists ────────────
@@ -57,7 +100,7 @@ export async function GET(request: NextRequest) {
 
     const existing = await payload.find({
       collection: 'vouchers',
-      where: { stripeSessionId: { equals: sessionId } },
+      where: { stripeSessionId: { equals: idempotencyKey } },
       limit: 1,
       overrideAccess: true,
     })
@@ -77,7 +120,6 @@ export async function GET(request: NextRequest) {
 
     // ─── Create Voucher Record ───────────────────────────────────
 
-    const meta = session.metadata
     const voucher = await payload.create({
       collection: 'vouchers',
       overrideAccess: true,
@@ -90,13 +132,13 @@ export async function GET(request: NextRequest) {
         purchaserEmail: meta.purchaserEmail,
         recipientEmail: meta.recipientEmail || undefined,
         deliveryMethod: (meta.deliveryMethod as 'email' | 'pickup') || 'email',
-        stripeSessionId: sessionId,
+        stripeSessionId: idempotencyKey,
         redeemed: false,
       },
     })
 
     payload.logger.info(
-      `[voucher/confirm] Created voucher ${voucher.code} for session ${sessionId}`,
+      `[voucher/confirm] Created voucher ${voucher.code} for key ${idempotencyKey}`,
     )
 
     // ─── Email will be sent automatically via afterChange hook ─────

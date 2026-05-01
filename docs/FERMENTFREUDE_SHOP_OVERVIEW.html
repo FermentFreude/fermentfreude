@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FermentFreude — Shop & Bestelllogik Übersicht</title>
+  <style>
+    /* ─── RESET ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ─── TOKENS ─────────────────────────────────────────────────── */
+    :root {
+      --gold:       #e6be68;
+      --gold-light: #f0d49a;
+      --near-black: #1d1d1d;
+      --cream:      #F9F0DC;
+      --cream-dark: #ecdfc2;
+      --warm-gray:  #6b6560;
+      --green:      #3a6b44;
+      --red:        #8b2e2e;
+      --blue:       #2b4e7a;
+      --font:       -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+
+    /* ─── BASE ───────────────────────────────────────────────────── */
+    body {
+      font-family: var(--font);
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--near-black);
+      background: var(--cream);
+      padding: 0;
+    }
+
+    /* ─── COVER PAGE ─────────────────────────────────────────────── */
+    .cover {
+      background: var(--near-black);
+      color: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 40px;
+      page-break-after: always;
+    }
+    .cover .wordmark {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 28px;
+    }
+    .cover h1 {
+      font-size: 38px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    .cover h1 span { color: var(--gold); }
+    .cover .subtitle {
+      font-size: 15px;
+      color: var(--cream-dark);
+      max-width: 480px;
+      margin-bottom: 48px;
+    }
+    .cover .meta {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--warm-gray);
+    }
+    .cover .divider {
+      width: 60px;
+      height: 1px;
+      background: var(--gold);
+      margin: 32px auto;
+    }
+
+    /* ─── MAIN LAYOUT ────────────────────────────────────────────── */
+    .content {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 60px 48px;
+    }
+
+    /* ─── TOC ────────────────────────────────────────────────────── */
+    .toc {
+      background: var(--cream-dark);
+      border-left: 4px solid var(--gold);
+      padding: 28px 32px;
+      margin-bottom: 56px;
+      page-break-after: always;
+    }
+    .toc h2 {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--warm-gray);
+      margin-bottom: 16px;
+    }
+    .toc ol {
+      list-style: decimal;
+      padding-left: 20px;
+    }
+    .toc li {
+      font-size: 13.5px;
+      color: var(--near-black);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .toc li span {
+      color: var(--warm-gray);
+      font-size: 12px;
+    }
+
+    /* ─── SECTION ────────────────────────────────────────────────── */
+    .section {
+      margin-bottom: 52px;
+    }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--cream-dark);
+      padding-bottom: 10px;
+    }
+    .section-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: var(--near-black);
+    }
+
+    h3 {
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--near-black);
+      margin: 28px 0 10px;
+    }
+    h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--near-black);
+      margin: 18px 0 6px;
+    }
+    p {
+      margin-bottom: 12px;
+      color: var(--near-black);
+    }
+
+    /* ─── TABLES ──────────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin-bottom: 20px;
+    }
+    thead tr {
+      background: var(--near-black);
+      color: var(--gold);
+    }
+    thead th {
+      padding: 9px 14px;
+      text-align: left;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    tbody tr:nth-child(even) {
+      background: var(--cream-dark);
+    }
+    tbody tr:nth-child(odd) {
+      background: var(--cream);
+    }
+    tbody td {
+      padding: 9px 14px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+    .tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+    .tag-auto   { background: #d4edda; color: #155724; }
+    .tag-manual { background: #fff3cd; color: #856404; }
+    .tag-never  { background: #f8d7da; color: #721c24; }
+    .tag-always { background: #cce5ff; color: #004085; }
+    .tag-bug    { background: #f8d7da; color: #721c24; border: 1px dashed #721c24; }
+
+    /* ─── CALLOUT BOXES ───────────────────────────────────────────── */
+    .callout {
+      border-left: 4px solid var(--gold);
+      background: #fffdf5;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    .callout.info  { border-color: var(--blue);  background: #f0f4fa; }
+    .callout.warn  { border-color: #c8933b;       background: #fffbf0; }
+    .callout.error { border-color: var(--red);    background: #fdf0f0; }
+    .callout.ok    { border-color: var(--green);  background: #f0faf3; }
+    .callout-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .callout.info  .callout-label { color: var(--blue); }
+    .callout.warn  .callout-label { color: #c8933b; }
+    .callout.error .callout-label { color: var(--red); }
+    .callout.ok    .callout-label { color: var(--green); }
+
+    /* ─── FLOW STEPS ──────────────────────────────────────────────── */
+    .flow {
+      counter-reset: flow-step;
+      margin: 16px 0 20px;
+    }
+    .flow-step {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+    .flow-step::before {
+      counter-increment: flow-step;
+      content: counter(flow-step);
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      background: var(--gold);
+      color: var(--near-black);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .flow-step p { margin: 0; font-size: 13px; }
+    .flow-step strong { color: var(--near-black); }
+
+    /* ─── LAYER BOXES ─────────────────────────────────────────────── */
+    .layers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .layer-box {
+      background: var(--near-black);
+      color: var(--cream);
+      padding: 16px;
+      text-align: center;
+    }
+    .layer-box .layer-num {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .layer-box .layer-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .layer-box .layer-desc {
+      font-size: 11.5px;
+      color: #aaa;
+      margin-top: 5px;
+    }
+
+    /* ─── QUESTIONS BOX ───────────────────────────────────────────── */
+    .questions {
+      background: var(--near-black);
+      color: var(--cream);
+      padding: 28px 32px;
+      margin: 20px 0;
+    }
+    .questions h3 {
+      color: var(--gold);
+      margin-top: 0;
+      text-transform: none;
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+    .question-item {
+      display: flex;
+      gap: 14px;
+      margin: 14px 0;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #333;
+    }
+    .question-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .q-num {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: var(--gold);
+      color: var(--near-black);
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .q-body strong {
+      display: block;
+      color: #fff;
+      font-size: 13.5px;
+      margin-bottom: 4px;
+    }
+    .q-body p {
+      color: #aaa;
+      font-size: 12.5px;
+      margin: 0;
+    }
+    .q-options {
+      margin-top: 6px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .q-option {
+      background: #333;
+      color: var(--cream);
+      font-size: 11.5px;
+      padding: 3px 10px;
+      border-radius: 3px;
+    }
+
+    /* ─── STATUS LEGEND ───────────────────────────────────────────── */
+    .status-flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+    .status-node {
+      background: var(--near-black);
+      color: var(--cream);
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .status-arrow {
+      color: var(--gold);
+      font-size: 18px;
+      padding: 0 4px;
+    }
+
+    /* ─── FOOTER ──────────────────────────────────────────────────── */
+    .footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid var(--cream-dark);
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--warm-gray);
+    }
+
+    /* ─── PRINT ───────────────────────────────────────────────────── */
+    @media print {
+      body { background: #fff; font-size: 12px; }
+      .cover { min-height: 100vh; background: #1d1d1d !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      thead tr { background: #1d1d1d !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      tbody tr:nth-child(even) { background: #f2ede2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .callout { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .questions { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .layer-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .section { page-break-inside: avoid; }
+      table { page-break-inside: avoid; }
+      .callout { page-break-inside: avoid; }
+      @page { margin: 15mm 18mm; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     COVER
+═══════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="wordmark">FermentFreude</div>
+  <h1>Shop & Bestelllogik<br><span>Übersicht</span></h1>
+  <div class="divider"></div>
+  <p class="subtitle">Was passiert wann — von Zahlung bis Lieferung. Für David &amp; Marcel.</p>
+  <p class="meta">Stand: 30. April 2026 &nbsp;·&nbsp; Vertraulich &nbsp;·&nbsp; Interne Verwendung</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CONTENT
+═══════════════════════════════════════════════════════════════ -->
+<div class="content">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>Inhalt</h2>
+    <ol>
+      <li>Was ihr verkauft — 5 Produkttypen</li>
+      <li>Workshops — Struktur &amp; Buchungsablauf</li>
+      <li>Physische Produkte — Ablauf nach Zahlung</li>
+      <li>Online-Kurse — Ablauf nach Zahlung</li>
+      <li>Gutscheine</li>
+      <li>Lagerbestand (Inventar)</li>
+      <li>E-Mails — wann wird was gesendet?</li>
+      <li>Bestellstatus — was bedeutet was?</li>
+      <li>Geplant: Fulfillment-Lifecycle &amp; offene Fragen</li>
+      <li>Admin-Kurzreferenz</li>
+    </ol>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 1
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Was ihr verkauft — 5 Produkttypen</span>
+    </div>
+
+    <p>Im Shop gibt es fünf verschiedene Produktarten. Jede funktioniert intern ein bisschen anders.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Produkttyp</th>
+          <th>Beispiel</th>
+          <th>Was passiert nach Zahlung?</th>
+          <th>Lager?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>jarred</strong><br><em>Eingemachtes</em></td>
+          <td>Kimchi, Sauerkraut, Koji</td>
+          <td>Bestellung landet im Admin, muss manuell verpackt &amp; versendet/abgeholt werden</td>
+          <td>Ja</td>
+        </tr>
+        <tr>
+          <td><strong>fresh</strong><br><em>Frisches</em></td>
+          <td>Sauerteig-Starter, frische Kulturen</td>
+          <td>Wie Eingemachtes — manuelle Vorbereitung &amp; Abholung/Versand</td>
+          <td>Ja</td>
+        </tr>
+        <tr>
+          <td><strong>bottled</strong><br><em>Flaschen</em></td>
+          <td>Kombucha, Kefir-Getränke</td>
+          <td>Wie Eingemachtes — manuelle Vorbereitung</td>
+          <td>Ja</td>
+        </tr>
+        <tr>
+          <td><strong>workshop</strong><br><em>Workshop-Tickets</em></td>
+          <td>Workshop-Grundkurs Ticket</td>
+          <td>Automatisch: Buchung bestätigt, Platz reserviert, E-Mail gesendet</td>
+          <td>Begrenzte Plätze</td>
+        </tr>
+        <tr>
+          <td><strong>digital-course</strong><br><em>Online-Kurse</em></td>
+          <td>Fermentation Basics Kurs</td>
+          <td>Automatisch: Kurs freigeschaltet, Kund:in hat sofort Zugang</td>
+          <td>Unbegrenzt</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <div class="callout-label">Aktuelles Problem</div>
+      Alle Produkttypen springen nach Zahlung sofort auf Status <strong>„Completed"</strong> — auch physische Produkte, die ihr noch verpacken müsst. Das ist ein bekannter Fehler, der behoben werden soll (siehe Abschnitt 9).
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 2
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Workshops — Struktur &amp; Buchungsablauf</span>
+    </div>
+
+    <p>Workshops sind dreischichtig aufgebaut:</p>
+
+    <div class="layers">
+      <div class="layer-box">
+        <div class="layer-num">Schicht 1</div>
+        <div class="layer-name">Workshop</div>
+        <div class="layer-desc">Das Thema (z. B. Grundkurs). Preis, Beschreibung, SEO.</div>
+      </div>
+      <div class="layer-box">
+        <div class="layer-num">Schicht 2</div>
+        <div class="layer-name">Termin</div>
+        <div class="layer-desc">Datum + Uhrzeit, max. 12 Plätze, verfügbare Plätze, veröffentlicht ja/nein.</div>
+      </div>
+      <div class="layer-box">
+        <div class="layer-num">Schicht 3</div>
+        <div class="layer-name">Buchung</div>
+        <div class="layer-desc">Name + E-Mail der Kund:in, zugehöriger Termin, Status.</div>
+      </div>
+    </div>
+
+    <h3>Buchungsablauf (Workshop-Ticket)</h3>
+    <div class="flow">
+      <div class="flow-step"><p>Kund:in wählt Workshop + Datum im Shop aus</p></div>
+      <div class="flow-step"><p>Kund:in bezahlt per Stripe (Kreditkarte / SEPA)</p></div>
+      <div class="flow-step"><p>Stripe bestätigt Zahlung → System erstellt Bestellung</p></div>
+      <div class="flow-step"><p><strong>Automatisch:</strong> Buchung wird auf „confirmed" gesetzt, verfügbare Plätze werden um 1 reduziert</p></div>
+      <div class="flow-step"><p><strong>Automatisch:</strong> Bestätigungs-E-Mail mit Datum, Uhrzeit &amp; Adresse wird gesendet</p></div>
+      <div class="flow-step"><p>Bestellung erhält Status „Completed" (im Admin sichtbar)</p></div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Buchungsstatus</th>
+          <th>Bedeutung</th>
+          <th>Wie gesetzt?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>pending</strong></td>
+          <td>Buchung erstellt, Zahlung noch ausstehend</td>
+          <td>Automatisch bei Checkout</td>
+        </tr>
+        <tr>
+          <td><strong>confirmed</strong></td>
+          <td>Zahlung eingegangen, Platz reserviert</td>
+          <td>Automatisch nach Stripe-Bestätigung</td>
+        </tr>
+        <tr>
+          <td><strong>cancelled</strong></td>
+          <td>Storniert (Platz wird wieder frei)</td>
+          <td>Manuell im Admin</td>
+        </tr>
+        <tr>
+          <td><strong>refunded</strong></td>
+          <td>Rückerstattet</td>
+          <td>Manuell im Admin</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <div class="callout-label">Kapazität</div>
+      Jeder Termin hat maximal <strong>12 Plätze</strong>. Wenn alle Plätze belegt sind, sollte der Termin im Shop nicht mehr buchbar erscheinen. Wenn ihr einen Termin storniert → manuelle Anpassung der verfügbaren Plätze im Admin nötig.
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 3
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Physische Produkte — Ablauf nach Zahlung</span>
+    </div>
+
+    <p>Für Eingemachtes, Frisches und Flaschen (jarred / fresh / bottled):</p>
+
+    <div class="flow">
+      <div class="flow-step"><p>Kund:in kauft im Shop und bezahlt per Stripe</p></div>
+      <div class="flow-step"><p>Zahlung geht ein → Bestellung erscheint im Admin unter <em>Orders</em></p></div>
+      <div class="flow-step"><p>Bestellbestätigungs-E-Mail geht automatisch an Kund:in raus</p></div>
+      <div class="flow-step"><p>Lagerbestand wird automatisch um die bestellte Menge reduziert</p></div>
+      <div class="flow-step"><p><strong>Ihr handelt:</strong> Produkt vorbereiten, verpacken</p></div>
+      <div class="flow-step"><p><strong>Ihr handelt:</strong> Kund:in benachrichtigen (z. B. „Abholung bereit" oder Versand-Info) — derzeit manuell außerhalb des Systems</p></div>
+      <div class="flow-step"><p>Bestellung bleibt auf Status „Completed" (wird sich mit Abschnitt 9 ändern)</p></div>
+    </div>
+
+    <div class="callout error">
+      <div class="callout-label">Fehlende Funktion (bekannt)</div>
+      Es gibt <strong>keine automatische Versand-E-Mail</strong>. Der Code dafür existiert, aber er überwacht einen Status (<em>„shipped"</em>), der technisch nie gesetzt werden kann. Das ist ein bekannter Fehler, der behoben werden soll.
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">Workaround bis zur Lösung</div>
+      Kund:innen bei physischen Bestellungen manuell per E-Mail informieren, wenn ihre Bestellung fertig ist. Oder eine kurze Brevo-E-Mail manuell auslösen.
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 4
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Online-Kurse — Ablauf nach Zahlung</span>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step"><p>Kund:in kauft Online-Kurs und bezahlt per Stripe</p></div>
+      <div class="flow-step"><p>Zahlung geht ein → System erstellt Bestellung</p></div>
+      <div class="flow-step"><p>Bestellbestätigungs-E-Mail geht automatisch raus</p></div>
+      <div class="flow-step"><p><strong>Automatisch:</strong> Kurs wird für das Kund:innen-Konto freigeschaltet</p></div>
+      <div class="flow-step"><p>Kund:in kann sich einloggen und sofort mit dem Kurs beginnen</p></div>
+      <div class="flow-step"><p>Bestellung erhält Status „Completed"</p></div>
+    </div>
+
+    <div class="callout ok">
+      <div class="callout-label">Voll automatisch</div>
+      Online-Kurse laufen komplett automatisch. Kein manueller Schritt nötig.
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 5
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Gutscheine (Gift Vouchers)</span>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step"><p>Jemand kauft einen Gutschein im Shop (€ 99, fixer Preis)</p></div>
+      <div class="flow-step"><p>Zahlung geht ein → System generiert automatisch einen einzigartigen Code (Format: <strong>FF-GIFT-XXXXXXXX</strong>)</p></div>
+      <div class="flow-step"><p>Gutschein-E-Mail mit dem Code geht an Käufer:in raus</p></div>
+      <div class="flow-step"><p>Beschenkter gibt Code beim Checkout ein → Betrag wird abgezogen</p></div>
+      <div class="flow-step"><p>Gutschein wechselt von Status <em>active</em> auf <em>redeemed</em></p></div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Gutscheinstatus</th>
+          <th>Bedeutung</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>active</strong></td>
+          <td>Gültig, noch nicht eingelöst</td>
+        </tr>
+        <tr>
+          <td><strong>redeemed</strong></td>
+          <td>Eingelöst und verbraucht</td>
+        </tr>
+        <tr>
+          <td><strong>expired</strong></td>
+          <td>Abgelaufen (kann manuell im Admin gesetzt werden)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <div class="callout-label">Gutschein-Verwaltung</div>
+      Alle Gutscheine sind im Admin unter <em>Vouchers</em> einsehbar. Ihr könnt dort prüfen, ob ein Code eingelöst wurde und Gutscheine ggf. auf <em>expired</em> setzen.
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 6
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Lagerbestand (Inventar)</span>
+    </div>
+
+    <p>Der Lagerbestand für physische Produkte wird automatisch verwaltet:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Aktion</th>
+          <th>Was passiert mit dem Lager?</th>
+          <th>Automatisch?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bestellung erfolgreich</td>
+          <td>Menge wird abgezogen</td>
+          <td><span class="tag tag-auto">Auto</span></td>
+        </tr>
+        <tr>
+          <td>Bestellung storniert / rückerstattet</td>
+          <td>Menge wird wieder gutgeschrieben</td>
+          <td><span class="tag tag-auto">Auto</span></td>
+        </tr>
+        <tr>
+          <td>Ihr produziert mehr</td>
+          <td>Menge manuell im Admin erhöhen</td>
+          <td><span class="tag tag-manual">Manuell</span></td>
+        </tr>
+        <tr>
+          <td>Lager = 0</td>
+          <td>Produkt sollte als „ausverkauft" erscheinen</td>
+          <td><span class="tag tag-auto">Auto</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <div class="callout-label">Wichtig</div>
+      Workshop-Tickets und Online-Kurse haben keinen klassischen Lagerbestand. Workshops haben <em>Plätze pro Termin</em> (max. 12). Online-Kurse sind unbegrenzt verfügbar.
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 7
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">E-Mails — wann wird was gesendet?</span>
+    </div>
+
+    <p>Alle E-Mails gehen über Brevo (früher Sendinblue). Hier ist eine Übersicht aller automatischen E-Mails:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Auslöser</th>
+          <th>Empfänger:in</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>72</td>
+          <td>Jede erfolgreiche Bestellung (alle Produkttypen)</td>
+          <td>Kund:in</td>
+          <td><span class="tag tag-auto">Funktioniert</span></td>
+        </tr>
+        <tr>
+          <td>65</td>
+          <td>Workshop-Buchung bestätigt</td>
+          <td>Kund:in</td>
+          <td><span class="tag tag-auto">Funktioniert</span></td>
+        </tr>
+        <tr>
+          <td>73</td>
+          <td>Gutschein gekauft</td>
+          <td>Käufer:in</td>
+          <td><span class="tag tag-auto">Funktioniert</span></td>
+        </tr>
+        <tr>
+          <td>37</td>
+          <td>Versandbenachrichtigung (Produkt versendet)</td>
+          <td>Kund:in</td>
+          <td><span class="tag tag-bug">Defekt — sendet nie</span></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Willkommens-E-Mail bei Registrierung</td>
+          <td>Neue Kund:in</td>
+          <td><span class="tag tag-auto">Funktioniert</span></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Passwort zurücksetzen</td>
+          <td>Kund:in</td>
+          <td><span class="tag tag-auto">Funktioniert</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout error">
+      <div class="callout-label">Defekte Versand-E-Mail (Brevo Template #37)</div>
+      Die E-Mail für „Paket versendet" existiert, wird aber nie ausgelöst, weil das System auf einen Status wartet (<em>„shipped"</em>), der technisch nicht gesetzt werden kann. Fix ist in Planung (Abschnitt 9).
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 8
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">Bestellstatus — was bedeutet was?</span>
+    </div>
+
+    <p>Jede Bestellung hat einen von vier möglichen Status-Werten:</p>
+
+    <div class="status-flow">
+      <div class="status-node">processing</div>
+      <div class="status-arrow">→</div>
+      <div class="status-node">completed</div>
+      <div class="status-arrow">·</div>
+      <div class="status-node">cancelled</div>
+      <div class="status-arrow">·</div>
+      <div class="status-node">refunded</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Was bedeutet das?</th>
+          <th>Wie wird es gesetzt?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>processing</strong></td>
+          <td>Zahlung ausstehend oder in Bearbeitung</td>
+          <td>Automatisch beim Erstellen der Bestellung</td>
+        </tr>
+        <tr>
+          <td><strong>completed</strong></td>
+          <td>Zahlung eingegangen (derzeit: sofort nach Stripe-Bestätigung)</td>
+          <td>Automatisch — wird sich mit Abschnitt 9 ändern</td>
+        </tr>
+        <tr>
+          <td><strong>cancelled</strong></td>
+          <td>Bestellung storniert</td>
+          <td>Manuell im Admin oder automatisch bei fehlgeschlagenem Stripe-Webhook</td>
+        </tr>
+        <tr>
+          <td><strong>refunded</strong></td>
+          <td>Betrag zurückerstattet</td>
+          <td>Manuell im Admin, nachdem Rückerstattung in Stripe veranlasst wurde</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <div class="callout-label">Das aktuelle Problem</div>
+      Alle Bestellungen — auch physische Produkte — springen sofort nach Zahlung auf <strong>„completed"</strong>. Das macht es schwer zu erkennen, welche Bestellungen noch bearbeitet werden müssen. Abschnitt 9 zeigt die geplante Lösung.
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 9
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <span class="section-title">Geplant: Fulfillment-Lifecycle &amp; offene Fragen</span>
+    </div>
+
+    <p>Um physische Bestellungen besser zu verwalten, ist ein neuer <strong>Fulfillment-Status</strong> geplant — zusätzlich zum bestehenden Bestellstatus. Dieser würde euch zeigen, in welchem Stadium der Bearbeitung eine Bestellung ist.</p>
+
+    <h3>Geplante Fulfillment-Status</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Bedeutung</th>
+          <th>Wer setzt ihn?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>pending</strong></td>
+          <td>Zahlung eingegangen — noch nichts vorbereitet</td>
+          <td>Automatisch</td>
+        </tr>
+        <tr>
+          <td><strong>preparing</strong></td>
+          <td>Ihr bereitet die Bestellung vor</td>
+          <td>Manuell im Admin</td>
+        </tr>
+        <tr>
+          <td><strong>ready_for_pickup</strong></td>
+          <td>Fertig — Kund:in kann abholen ODER wird versendet</td>
+          <td>Manuell im Admin → E-Mail geht automatisch raus</td>
+        </tr>
+        <tr>
+          <td><strong>fulfilled</strong></td>
+          <td>Abgeholt oder versendet — abgeschlossen</td>
+          <td>Manuell im Admin</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Dieser Plan ist technisch fertig beschrieben. Bevor er umgesetzt wird, brauchen wir eure Antworten auf drei Fragen:</p>
+
+    <div class="questions">
+      <h3>Drei Fragen für David &amp; Marcel</h3>
+
+      <div class="question-item">
+        <div class="q-num">1</div>
+        <div class="q-body">
+          <strong>Wie kommt eure Ware zu den Kund:innen?</strong>
+          <p>Das bestimmt, welche Status-Bezeichnungen und E-Mail-Texte sinnvoll sind.</p>
+          <div class="q-options">
+            <span class="q-option">Nur Abholung vor Ort</span>
+            <span class="q-option">Nur Versand (Post/DHL)</span>
+            <span class="q-option">Beides je nach Produkt</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="q-num">2</div>
+        <div class="q-body">
+          <strong>Wollt ihr Bestellungen im Admin als „erledigt" abhaken können?</strong>
+          <p>Oder reicht es, wenn Kund:innen automatisch eine E-Mail bekommen, sobald ihre Bestellung fertig ist?</p>
+          <div class="q-options">
+            <span class="q-option">Ja, Admin-Checkbox reicht</span>
+            <span class="q-option">Nein, nur die E-Mail</span>
+            <span class="q-option">Beides wäre ideal</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="q-num">3</div>
+        <div class="q-body">
+          <strong>Was soll die automatische E-Mail an Kund:innen sagen?</strong>
+          <p>Wenn ihr eine Bestellung auf „Abholbereit" setzt — was soll die E-Mail beinhalten? Abholadresse, Öffnungszeiten, Hinweise?</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       SECTION 10
+  ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <span class="section-title">Admin-Kurzreferenz</span>
+    </div>
+
+    <p>Alles, was ihr im Admin unter <strong>fermentfreude.vercel.app/admin</strong> findet:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Admin-Bereich</th>
+          <th>Wozu?</th>
+          <th>Wie oft?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Orders</strong></td>
+          <td>Alle Bestellungen einsehen, Status ändern (cancelled/refunded)</td>
+          <td>Täglich</td>
+        </tr>
+        <tr>
+          <td><strong>Workshop Bookings</strong></td>
+          <td>Buchungen verwalten, stornieren, Teilnehmerlisten</td>
+          <td>Vor jedem Workshop</td>
+        </tr>
+        <tr>
+          <td><strong>Workshop Appointments</strong></td>
+          <td>Neue Termine anlegen, Plätze einstellen, veröffentlichen/verstecken</td>
+          <td>Nach Bedarf</td>
+        </tr>
+        <tr>
+          <td><strong>Products</strong></td>
+          <td>Produkte anlegen, Preise, Beschreibungen, Lagermengen</td>
+          <td>Nach Bedarf</td>
+        </tr>
+        <tr>
+          <td><strong>Vouchers</strong></td>
+          <td>Gutscheine einsehen, Status prüfen</td>
+          <td>Nach Bedarf</td>
+        </tr>
+        <tr>
+          <td><strong>Users</strong></td>
+          <td>Kund:innen-Konten, Zugriffsrechte</td>
+          <td>Selten</td>
+        </tr>
+        <tr>
+          <td><strong>Pages / Globals</strong></td>
+          <td>Website-Inhalte, Texte, Bilder, Navigation</td>
+          <td>Nach Bedarf</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Häufige Aufgaben</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Aufgabe</th>
+          <th>Wo im Admin?</th>
+          <th>Automatisch oder manuell?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Neues Workshop-Datum anlegen</td>
+          <td>Workshop Appointments → Create</td>
+          <td><span class="tag tag-manual">Manuell</span></td>
+        </tr>
+        <tr>
+          <td>Workshop-Termin veröffentlichen</td>
+          <td>Workshop Appointments → „isPublished" aktivieren</td>
+          <td><span class="tag tag-manual">Manuell</span></td>
+        </tr>
+        <tr>
+          <td>Bestellung stornieren</td>
+          <td>Orders → Bestellung öffnen → Status „cancelled"</td>
+          <td><span class="tag tag-manual">Manuell</span></td>
+        </tr>
+        <tr>
+          <td>Rückerstattung veranlassen</td>
+          <td>1. Stripe-Dashboard: Rückerstattung durchführen<br>2. Admin → Orders → Status „refunded"</td>
+          <td><span class="tag tag-manual">Manuell</span></td>
+        </tr>
+        <tr>
+          <td>Lagerbestand auffüllen</td>
+          <td>Products → Produkt → Inventory Quantity</td>
+          <td><span class="tag tag-manual">Manuell</span></td>
+        </tr>
+        <tr>
+          <td>Gutschein prüfen/deaktivieren</td>
+          <td>Vouchers → Code suchen → Status ändern</td>
+          <td><span class="tag tag-manual">Manuell</span></td>
+        </tr>
+        <tr>
+          <td>Kund:in informieren (Abholung bereit)</td>
+          <td>Derzeit: manuelle E-Mail außerhalb des Systems</td>
+          <td><span class="tag tag-bug">Noch nicht automatisiert</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>FermentFreude — Internes Dokument</span>
+    <span>Stand: 30. April 2026</span>
+    <span>Vertraulich</span>
+  </div>
+
+</div><!-- .content -->
+</body>
+</html>

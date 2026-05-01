@@ -2,9 +2,34 @@
 
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+
+const HERO_DE = {
+  emailRequired: 'Bitte gib deine E-Mail-Adresse ein.',
+  invalidEmail: 'Ungültiges E-Mail-Format.',
+  invalidRecipientEmail: 'Ungültiges E-Mail-Format für Empfänger.',
+  checkoutError: 'Fehler beim Checkout.',
+  checkoutErrorLater: 'Fehler beim Checkout. Bitte versuche es später.',
+  yourEmail: 'Deine E-Mail-Adresse *',
+  recipientEmailLabel: 'E-Mail des Empfängers (optional)',
+  recipientEmailHint: 'Wenn leer, wird der Gutschein an deine Adresse gesendet.',
+  processing: 'Wird bearbeitet...',
+}
+
+const HERO_EN = {
+  emailRequired: 'Please enter your email address.',
+  invalidEmail: 'Invalid email format.',
+  invalidRecipientEmail: 'Invalid email format for recipient.',
+  checkoutError: 'Checkout error.',
+  checkoutErrorLater: 'Checkout error. Please try again later.',
+  yourEmail: 'Your email address *',
+  recipientEmailLabel: "Recipient's email (optional)",
+  recipientEmailHint: 'If left blank, the voucher will be sent to your address.',
+  processing: 'Processing...',
+}
 
 interface VoucherHeroProps {
   heading: string
@@ -45,6 +70,9 @@ export function VoucherHero({
 }: VoucherHeroProps) {
   const router = useRouter()
 
+  const { locale } = useLocale()
+  const t = locale === 'de' ? HERO_DE : HERO_EN
+
   // Show email and pickup only — post/card removed for freshness
   const visibleDeliveryOptions = deliveryOptions.filter(
     (o) => o.type === 'email' || o.type === 'pickup',
@@ -73,18 +101,18 @@ export function VoucherHero({
   const handleCheckout = useCallback(async () => {
     // Validate emails
     if (!purchaserEmail.trim()) {
-      toast.error('Bitte gib deine E-Mail-Adresse ein.')
+      toast.error(t.emailRequired)
       return
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(purchaserEmail)) {
-      toast.error('Ungültiges E-Mail-Format.')
+      toast.error(t.invalidEmail)
       return
     }
 
     if (selectedDelivery === 'email' && recipientEmail && !emailRegex.test(recipientEmail)) {
-      toast.error('Ungültiges E-Mail-Format für Empfänger.')
+      toast.error(t.invalidRecipientEmail)
       return
     }
 
@@ -106,16 +134,29 @@ export function VoucherHero({
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        toast.error(data.error || 'Fehler beim Checkout.')
+        toast.error(data.error || t.checkoutError)
         return
       }
 
-      if (data.sessionUrl) {
+      if (data.clientSecret) {
+        sessionStorage.setItem(
+          'voucherCheckout',
+          JSON.stringify({
+            clientSecret: data.clientSecret,
+            amount: parseAmount(selectedAmount),
+            deliveryMethod: selectedDelivery,
+            purchaserEmail: purchaserEmail.trim(),
+            recipientEmail:
+              selectedDelivery === 'email' && recipientEmail ? recipientEmail.trim() : undefined,
+          }),
+        )
+        router.push('/voucher/checkout')
+      } else if (data.sessionUrl) {
         router.push(data.sessionUrl)
       }
     } catch (err) {
       console.error('Checkout error:', err)
-      toast.error('Fehler beim Checkout. Bitte versuche es später.')
+      toast.error(t.checkoutErrorLater)
     } finally {
       setIsLoading(false)
     }
@@ -336,7 +377,7 @@ export function VoucherHero({
                 <div className="flex flex-col gap-3 md:gap-4 rounded-2xl border border-ff-border-light bg-ff-cream p-4 md:p-5">
                   <div>
                     <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
-                      Deine E-Mail-Adresse *
+                      {t.yourEmail}
                     </label>
                     <input
                       type="email"
@@ -351,7 +392,7 @@ export function VoucherHero({
                   {selectedDelivery === 'email' && (
                     <div>
                       <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
-                        E-Mail des Empfängers (optional)
+                        {t.recipientEmailLabel}
                       </label>
                       <input
                         type="email"
@@ -362,7 +403,7 @@ export function VoucherHero({
                         disabled={isLoading}
                       />
                       <p className="mt-1.5 font-sans text-caption text-ff-gray-text">
-                        Wenn leer, wird der Gutschein an deine Adresse gesendet.
+                        {t.recipientEmailHint}
                       </p>
                     </div>
                   )}
@@ -377,7 +418,7 @@ export function VoucherHero({
                   disabled={isLoading}
                   className="w-full rounded-full bg-ff-gold-accent px-6 py-3 md:py-4 font-display text-base md:text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Wird bearbeitet...' : addToCartButton}
+                  {isLoading ? t.processing : addToCartButton}
                 </button>
               )}
             </div>

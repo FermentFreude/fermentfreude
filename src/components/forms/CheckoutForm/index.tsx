@@ -9,6 +9,21 @@ import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
 import React, { FormEvent, useCallback } from 'react'
 
+const FORM_DE = {
+  loading: 'Wird geladen…',
+  payNow: 'Jetzt bezahlen',
+  somethingWentWrong: 'Etwas ist schiefgelaufen.',
+  errorConfirming: (msg: string) => `Fehler bei der Bestellbestätigung: ${msg}`,
+  errorSubmitting: (msg: string) => `Fehler beim Absenden der Zahlung: ${msg}`,
+}
+const FORM_EN = {
+  loading: 'Loading…',
+  payNow: 'Pay now',
+  somethingWentWrong: 'Something went wrong.',
+  errorConfirming: (msg: string) => `Error while confirming order: ${msg}`,
+  errorSubmitting: (msg: string) => `Error while submitting payment: ${msg}`,
+}
+
 type Props = {
   customerEmail?: string
   billingAddress?: Partial<Address>
@@ -38,6 +53,7 @@ export const CheckoutForm: React.FC<Props> = ({
   const router = useRouter()
   const { clearCart } = useCart()
   const { confirmOrder } = usePayments()
+  const t = locale === 'de' ? FORM_DE : FORM_EN
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
@@ -99,10 +115,8 @@ export const CheckoutForm: React.FC<Props> = ({
                 )
               }
             } catch (err) {
-              const msg = err instanceof Error ? err.message : isDe ? 'Etwas ist schiefgelaufen.' : 'Something went wrong.'
-              setError(
-                isDe ? `Fehler bei der Bestellbestaetigung: ${msg}` : `Error while confirming order: ${msg}`,
-              )
+              const msg = err instanceof Error ? err.message : t.somethingWentWrong
+              setError(t.errorConfirming(msg))
               setIsLoading(false)
               setProcessingPayment(false)
             }
@@ -113,10 +127,8 @@ export const CheckoutForm: React.FC<Props> = ({
             setProcessingPayment(false)
           }
         } catch (err) {
-          const msg = err instanceof Error ? err.message : isDe ? 'Etwas ist schiefgelaufen.' : 'Something went wrong.'
-          setError(
-            isDe ? `Fehler beim Absenden der Zahlung: ${msg}` : `Error while submitting payment: ${msg}`,
-          )
+          const msg = err instanceof Error ? err.message : t.somethingWentWrong
+          setError(t.errorSubmitting(msg))
           setIsLoading(false)
           setProcessingPayment(false)
         }
@@ -149,7 +161,7 @@ export const CheckoutForm: React.FC<Props> = ({
       <PaymentElement />
       <div className="mt-8 flex gap-4">
         <Button disabled={!stripe || isLoading} type="submit" variant="default">
-          {isLoading ? (isDe ? 'Wird geladen...' : 'Loading...') : isDe ? 'Jetzt zahlen' : 'Pay now'}
+          {isLoading ? t.loading : t.payNow}
         </Button>
       </div>
     </form>

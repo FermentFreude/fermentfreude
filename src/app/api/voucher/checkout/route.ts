@@ -1,13 +1,12 @@
 import { stripe } from '@/lib/stripe'
-import { getServerSideURL } from '@/utilities/getURL'
 import { NextRequest, NextResponse } from 'next/server'
 
 /* ═══════════════════════════════════════════════════════════════
- *  POST /api/voucher/checkout — Create Stripe Checkout Session
+ *  POST /api/voucher/checkout — Create Stripe Payment Intent
  *
- *  Creates a Stripe Checkout Session for a generic workshop
- *  experience gift voucher. No specific workshop is tied to the
- *  purchase — the recipient chooses when they redeem at checkout.
+ *  Creates a Stripe Payment Intent for a generic workshop
+ *  experience gift voucher. Returns a clientSecret so the
+ *  in-app checkout page can render Stripe Elements inline.
  *
  *  The voucher record is created AFTER successful payment
  *  (in /api/voucher/confirm).
@@ -62,27 +61,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // ─── Create Stripe Checkout Session ──────────────────────────
+    // ─── Create Stripe Payment Intent ─────────────────────────────
 
-    const baseUrl = getServerSideURL()
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      customer_email: body.purchaserEmail,
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: 'FermentFreude Geschenkgutschein',
-              description: `Workshop-Erlebnis Gutschein \u00FCber \u20AC${body.amount} \u2014 einl\u00F6sbar f\u00FCr jeden Workshop`,
-            },
-            unit_amount: body.amount * 100,
-          },
-          quantity: 1,
-        },
-      ],
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: body.amount * 100,
+      currency: 'eur',
+      receipt_email: body.purchaserEmail,
       metadata: {
         type: 'voucher_purchase',
         amount: String(body.amount),
@@ -90,20 +74,18 @@ export async function POST(request: NextRequest) {
         purchaserEmail: body.purchaserEmail,
         recipientEmail: body.recipientEmail || '',
       },
-      success_url: `${baseUrl}/voucher/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/workshops/voucher`,
     })
 
-    if (!session.url) {
+    if (!paymentIntent.client_secret) {
       return NextResponse.json(
-        { success: false, error: 'Failed to create checkout session.' },
+        { success: false, error: 'Failed to create payment intent.' },
         { status: 500 },
       )
     }
 
     return NextResponse.json({
       success: true,
-      sessionUrl: session.url,
+      clientSecret: paymentIntent.client_secret,
     })
   } catch (error) {
     console.error('[voucher/checkout] Error:', error)
