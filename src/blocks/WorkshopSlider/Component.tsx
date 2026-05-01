@@ -7,17 +7,14 @@ import type {
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
 import Link from 'next/link'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
  *  HARDCODED DEFAULTS  (English — CMS data always wins)
  * ═══════════════════════════════════════════════════════════════ */
 
-const DEFAULT_EYEBROW = 'Experience'
-const DEFAULT_SECTION_HEADING = 'Workshops'
-const DEFAULT_ALL_WORKSHOPS_LABEL = 'See All Workshops'
-const DEFAULT_ALL_WORKSHOPS_LINK = '/workshops'
-const DEFAULT_DETAILS_LABEL = 'Workshop Details'
+const DEFAULT_EYEBROW = 'Workshop Experience'
+const DEFAULT_DETAILS_CTA_LABEL = 'Explore'
 
 const DEFAULT_WORKSHOPS = [
   {
@@ -63,7 +60,11 @@ const DEFAULT_WORKSHOPS = [
 
 /* ═══════════════════════════════════════════════════════════════ */
 
-type Props = WorkshopSliderBlockType & { id?: string }
+type Props = WorkshopSliderBlockType & {
+  id?: string
+  upcomingLabel?: string
+  upcomingDatesByHref?: Record<string, string>
+}
 
 function resolveMedia(image: MediaType | string | number | null | undefined): MediaType | null {
   if (!image) return null
@@ -74,33 +75,33 @@ function resolveMedia(image: MediaType | string | number | null | undefined): Me
 /* ═══════════════════════════════════════════════════════════════
  *  COMPONENT
  *
- *  DOM parallax gallery — exact Codrops approach:
- *    · Wheel events drive a lerp'd horizontal scroll value
- *    · Container translateX(-scroll px)
- *    · Each image inner div is 125% wide, left: -12.5% (headroom)
- *    · Per-frame: t = (elementCenter - viewportCenter) / viewportCenter
- *    · Image shifts: translate3d(-t * 10%, 0, 0)  → counter-motion
- *
- *  Layout per workshop  [IMG-A 60vh]  [IMG-B 50vh offset]  [CARD]
- *  Touch drag support included for mobile.
+ *  All breakpoints: Sticky-scroll horizontal gallery
+ *    · Outer div height = 100svh + horizontal overshoot
+ *    · Inner <section> is position:sticky top:0 h-svh overflow:hidden
+ *    · window.scroll progress → translateX on the track
+ *    · Per-frame lerp (EASE 0.08) + per-image parallax
+ *    · Same composition as desktop, scaled responsively
+ *    · On mobile the middle image is hidden and CTA text is removed
  * ═══════════════════════════════════════════════════════════════ */
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
+  visible,
   eyebrow,
   workshops,
-  allWorkshopsButtonLabel,
-  allWorkshopsLink,
   id,
+  upcomingLabel,
+  upcomingDatesByHref,
 }) => {
-  const sectionRef = useRef<HTMLElement>(null)
-  const stickyRef = useRef<HTMLDivElement>(null)
+  /* ── refs ──────────────────────────────────────────────────── */
+  const outerRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const imgInnerRefs = useRef<(HTMLDivElement | null)[]>([])
-  const [runwayHeight, setRunwayHeight] = useState('100vh')
+  const scrollRef = useRef({ current: 0, target: 0, limit: 0 })
+  const rafRef = useRef<number>(0)
+  const isActiveRef = useRef(false)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
-  const resolvedAllLabel = allWorkshopsButtonLabel || DEFAULT_ALL_WORKSHOPS_LABEL
-  const resolvedAllLink = allWorkshopsLink || DEFAULT_ALL_WORKSHOPS_LINK
+  const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
   const resolvedWorkshops =
     workshops && workshops.length > 0
       ? workshops.map((w, i) => ({
@@ -115,289 +116,272 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           image: resolveMedia(w.image as MediaType | string | number | null | undefined),
           image2: resolveMedia(w.image2 as MediaType | string | number | null | undefined),
           ctaLink: w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || '#',
-          detailsLabel:
-            (w as { detailsButtonLabel?: string }).detailsButtonLabel || DEFAULT_DETAILS_LABEL,
+          detailsButtonLabel:
+            (w as { detailsButtonLabel?: string | null }).detailsButtonLabel ||
+            DEFAULT_DETAILS_CTA_LABEL,
+          nextDate:
+            upcomingDatesByHref?.[w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''] || undefined,
         }))
       : DEFAULT_WORKSHOPS.map((w) => ({
           ...w,
           audienceTag: w.audienceTag,
           image: null as MediaType | null,
           image2: null as MediaType | null,
-          detailsLabel: DEFAULT_DETAILS_LABEL,
+          detailsButtonLabel: DEFAULT_DETAILS_CTA_LABEL,
+          nextDate: upcomingDatesByHref?.[w.ctaLink],
         }))
 
-  /* ── Scroll-driven horizontal gallery ─────────────────────── */
+  /* ── Sticky scroll + parallax engine (all breakpoints) ─────── */
   useEffect(() => {
-    const section = sectionRef.current
+    const outer = outerRef.current
     const container = containerRef.current
-    if (!section || !container) return
+    if (!outer || !container) return
 
-    const MAX_SHIFT = 10
+    const EASE = 0.08
+    const MAX_SHIFT = 8
 
-    /* Calculate how much horizontal overflow the track has */
-    const calcRunway = () => {
-      const scrollableWidth = Math.max(0, container.scrollWidth - window.innerWidth)
-      /* Section height = 1 viewport (sticky area) + scrollable distance + extra buffer
-         so the last workshop is fully visible before the sticky releases */
-      setRunwayHeight(`${window.innerHeight + scrollableWidth + window.innerHeight * 0.8}px`)
+    /* Recalculate outer height and scroll limit */
+    const updateDimensions = () => {
+      const overshoot = Math.max(0, container.scrollWidth - window.innerWidth)
+      isActiveRef.current = overshoot > 0
+      outer.style.height = `${window.innerHeight + overshoot}px`
+      scrollRef.current.limit = overshoot
+
+      if (!isActiveRef.current) {
+        scrollRef.current.target = 0
+        scrollRef.current.current = 0
+        container.style.transform = 'translateX(0)'
+      }
     }
-    calcRunway()
 
+    updateDimensions()
+
+    /* Map vertical page scroll → horizontal translateX target */
     const onScroll = () => {
-      if (!section || !container) return
-      const rect = section.getBoundingClientRect()
-      const scrollableWidth = Math.max(0, container.scrollWidth - window.innerWidth)
-      if (scrollableWidth <= 0) return
-
-      /* How far into the section we've scrolled (0 → scrollableWidth) */
-      const progress = Math.max(0, Math.min(scrollableWidth, -rect.top))
-      container.style.transform = `translateX(-${progress}px)`
-
-      /* Parallax each image */
-      const vCenter = window.innerWidth * 0.5
-      imgInnerRefs.current.forEach((inner) => {
-        if (!inner) return
-        const outer = inner.parentElement
-        if (!outer) return
-        const outerRect = outer.getBoundingClientRect()
-        const ec = outerRect.left + outerRect.width * 0.5
-        const t = Math.max(-1, Math.min(1, (ec - vCenter) / vCenter))
-        inner.style.transform = `translate3d(${-t * MAX_SHIFT}%, 0, 0)`
-      })
+      if (!isActiveRef.current) return
+      const outerTop = outer.getBoundingClientRect().top + window.scrollY
+      const overshoot = scrollRef.current.limit
+      if (overshoot <= 0) return
+      const progress = Math.max(0, Math.min(1, (window.scrollY - outerTop) / overshoot))
+      scrollRef.current.target = progress * overshoot
     }
 
-    window.addEventListener('resize', calcRunway)
+    /* RAF loop — lerp + parallax */
+    const tick = () => {
+      if (isActiveRef.current) {
+        const s = scrollRef.current
+        s.current += (s.target - s.current) * EASE
+        container.style.transform = `translateX(-${s.current}px)`
+
+        /* Parallax each image inner */
+        const vCenter = window.innerWidth * 0.5
+        imgInnerRefs.current.forEach((inner) => {
+          if (!inner) return
+          const outerEl = inner.parentElement
+          if (!outerEl) return
+          const rect = outerEl.getBoundingClientRect()
+          const ec = rect.left + rect.width * 0.5
+          const t = Math.max(-1, Math.min(1, (ec - vCenter) / vCenter))
+          inner.style.transform = `translate3d(${-t * MAX_SHIFT}%, 0, 0)`
+        })
+      }
+      rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+
     window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
+    window.addEventListener('resize', updateDimensions)
 
     return () => {
-      window.removeEventListener('resize', calcRunway)
+      cancelAnimationFrame(rafRef.current)
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', updateDimensions)
     }
   }, [])
 
+  if (visible === false) return null
+
   /* ═══════════════════════════════════════════════════════════ */
-  /*  RENDER                                                    */
+  /*  RENDER                                                     */
   /* ═══════════════════════════════════════════════════════════ */
 
   return (
-    <section
-      ref={sectionRef}
+    /* Outer pin div — JS sets height to 100svh + overshoot on lg+ */
+    <div
+      ref={outerRef}
       id={id ?? undefined}
       className="relative w-full bg-white"
-      style={{ height: runwayHeight }}
+      style={{ minHeight: '100svh' }}
     >
-      {/* Sticky container — pins the gallery in viewport */}
-      <div
-        ref={stickyRef}
-        className="sticky top-0 h-svh flex flex-col justify-center overflow-hidden"
+      {/* ── Sticky viewport (always visible while scrolling through outer) */}
+      <section
+        className="sticky top-0 w-full bg-white overflow-hidden"
+        style={{ height: '100svh' }}
       >
-        {/* ── Section heading (left-aligned) ────────────── */}
-        <div className="w-full pb-6 lg:pb-8" style={{ paddingLeft: '5vw', paddingRight: '5vw' }}>
-          <FadeIn>
-            <div className="flex items-start gap-3">
-              <h2
-                className="font-display font-black"
-                style={{
-                  fontSize: 'clamp(2rem, 4.5vw, 3.75rem)',
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.01em',
-                  color: '#000',
-                }}
-              >
-                {DEFAULT_SECTION_HEADING}
-              </h2>
-              <span
-                className="text-eyebrow font-bold text-ff-gold-accent shrink-0"
-                style={{ marginTop: '0.35em' }}
-              >
-                {DEFAULT_EYEBROW}
-              </span>
-            </div>
-          </FadeIn>
-        </div>
+        {/* ── Scroll hint ─────────────────────────────────────── */}
+        <p className="absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
+          scroll →
+        </p>
 
-        {/* ── Gallery area ──────────────────────────────── */}
-        <div className="relative flex-1 min-h-0">
-          <div className="absolute inset-0 overflow-hidden select-none">
-            <div
-              ref={containerRef}
-              className="flex items-center h-full will-change-transform"
-              style={{ gap: 0 }}
-            >
-              {resolvedWorkshops.map((workshop, wIdx) => {
-                const imgARef = wIdx * 2
-                const imgBRef = wIdx * 2 + 1
-                const secondImg = workshop.image2 ?? workshop.image
+        {/* ══════════════════════════════════════════════════════
+         *  RESPONSIVE TRACK — same composition across sizes
+         * ══════════════════════════════════════════════════════ */}
+        <div className="absolute inset-0 overflow-hidden select-none">
+          <div
+            ref={containerRef}
+            className="flex items-center h-full will-change-transform"
+            style={{ gap: 'clamp(0.75rem, 2vw, 1.5rem)', paddingLeft: '5vw', paddingRight: '5vw' }}
+          >
+            {resolvedWorkshops.map((workshop, wIdx) => {
+              const imgAIdx = wIdx * 2
+              const imgBIdx = wIdx * 2 + 1
+              const secondImg = workshop.image2 ?? workshop.image
 
-                return (
+              return (
+                <React.Fragment key={wIdx}>
+                  {/* ── LEFT COLUMN — title on top, small image below ── */}
                   <div
-                    key={wIdx}
-                    data-workshop-group
-                    className="shrink-0 flex items-center justify-center"
-                    style={{ width: '85vw', gap: 'clamp(0.75rem, 1.5vw, 1.5rem)', paddingLeft: '3vw', paddingRight: '3vw' }}
+                    className="shrink-0 flex flex-col self-center w-[72vw] sm:w-[20rem] md:w-88 lg:w-85"
+                    style={{ height: 'clamp(62svh, 74svh, 78vh)' }}
                   >
-                    {/* ── LEFT COLUMN — title + small image ── */}
-                    <div
-                      className="shrink-0 flex flex-col self-center"
-                      style={{ height: 'clamp(40vh, 55vh, 70vh)', width: 'auto' }}
-                    >
-                      <div
-                        className="shrink-0 pb-4 lg:pb-5"
-                        style={{ width: 'clamp(180px, 22vw, 340px)' }}
-                      >
-                        <FadeIn>
-                          <h3
-                            className="font-display font-black text-ff-black mb-3 lg:mb-4"
-                            style={{
-                              fontSize: 'clamp(1.35rem, 2.5vw, 2.75rem)',
-                              lineHeight: 1.1,
-                              letterSpacing: '-0.01em',
-                            }}
-                          >
-                            {workshop.title}
-                          </h3>
-                          <p
-                            className="text-body-sm text-ff-olive"
-                            style={{ fontSize: 'clamp(0.75rem, 1vw, 0.9rem)' }}
-                          >
-                            {(() => {
-                              const match = workshop.description.match(/^(.+?[.!?])\s*(.*)$/s)
-                              return match?.[1] ?? workshop.description
-                            })()}
-                          </p>
-                        </FadeIn>
-                      </div>
-
-                      {/* Small image */}
-                      <div
-                        className="relative overflow-hidden rounded-xl lg:rounded-2xl"
-                        style={{ flex: 1, aspectRatio: '4 / 3', minHeight: 0 }}
-                      >
-                        <div
-                          ref={(el) => {
-                            imgInnerRefs.current[imgBRef] = el
-                          }}
-                          className="absolute top-0 h-full will-change-transform"
-                          style={{ left: '-12.5%', width: '125%' }}
+                    <div className="shrink-0 pb-4 md:pb-5 w-full">
+                      <FadeIn>
+                        <p
+                          className="text-eyebrow font-bold mb-2 text-[10px] tracking-[0.18em] uppercase"
+                          style={{ color: 'var(--ff-gold)' }}
                         >
-                          {secondImg ? (
-                            <Media
-                              resource={secondImg}
-                              fill
-                              imgClassName="object-cover"
-                              className="absolute inset-0"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-[#e0e0e0]" />
-                          )}
-                        </div>
-                      </div>
+                          {resolvedEyebrow}
+                        </p>
+                        <h2 className="text-ff-black mb-3 md:mb-4 text-[1.9rem] sm:text-[2.2rem] md:text-[2.5rem] lg:text-inherit leading-[0.95]">
+                          {workshop.title}
+                        </h2>
+                        <p className="text-body-sm text-ff-olive text-[13px] sm:text-sm md:text-[15px] leading-relaxed">
+                          {(() => {
+                            const match = workshop.description.match(/^(.+?[.!?])\s*(.*)$/s)
+                            return match?.[1] ?? workshop.description
+                          })()}
+                        </p>
+                      </FadeIn>
                     </div>
 
-                    {/* ── BIG IMAGE ──────────────────────────── */}
+                    {/* Small image — fills remaining height */}
                     <div
-                      className="relative shrink-0 overflow-hidden self-center rounded-xl lg:rounded-2xl"
-                      style={{ aspectRatio: '3 / 4', height: 'clamp(35vh, 50vh, 62vh)' }}
+                      className="relative overflow-hidden rounded-2xl"
+                      style={{ flex: 1, aspectRatio: '4 / 3', minHeight: 0 }}
                     >
                       <div
                         ref={(el) => {
-                          imgInnerRefs.current[imgARef] = el
+                          imgInnerRefs.current[imgBIdx] = el
                         }}
                         className="absolute top-0 h-full will-change-transform"
                         style={{ left: '-12.5%', width: '125%' }}
                       >
-                        {workshop.image ? (
+                        {secondImg ? (
                           <Media
-                            resource={workshop.image}
+                            resource={secondImg}
                             fill
                             imgClassName="object-cover"
                             className="absolute inset-0"
                           />
                         ) : (
-                          <div className="w-full h-full bg-[#141414]" />
+                          <div className="w-full h-full bg-[#e0e0e0]" />
                         )}
                       </div>
                     </div>
+                  </div>
 
-                    {/* ── DETAILS CARD ── */}
+                  {/* ── BIG IMAGE ───────────────────────────────────── */}
+                  <div
+                    className="relative shrink-0 overflow-hidden self-center hidden sm:block rounded-2xl"
+                    style={{ aspectRatio: '3 / 4', height: 'clamp(52svh, 62svh, 68vh)' }}
+                  >
                     <div
-                      className="shrink-0 relative flex flex-col justify-between self-center rounded-xl lg:rounded-2xl"
-                      style={{
-                        width: 'clamp(200px, 18vw, 280px)',
-                        padding: 'clamp(1.25rem, 2vw, 2rem)',
-                        background: 'rgba(255,255,255,0.5)',
-                        backdropFilter: 'blur(18px)',
-                        WebkitBackdropFilter: 'blur(18px)',
-                        border: '1px solid rgba(255,255,255,0.8)',
-                        boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
+                      ref={(el) => {
+                        imgInnerRefs.current[imgAIdx] = el
                       }}
+                      className="absolute top-0 h-full will-change-transform"
+                      style={{ left: '-12.5%', width: '125%' }}
                     >
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {workshop.features.map((feature, fIdx) => (
-                          <p
-                            key={fIdx}
-                            className="text-black/70 font-display font-bold leading-relaxed flex gap-2 lg:gap-3"
-                            style={{ fontSize: 'clamp(0.65rem, 0.8vw, 0.75rem)' }}
-                          >
-                            <span className="tabular-nums shrink-0 font-bold">
-                              {String(fIdx + 1).padStart(2, '0')}
-                            </span>
-                            {(feature as { text?: string }).text}
-                          </p>
-                        ))}
-                      </div>
-                      <div className="flex justify-end mt-4 lg:mt-6">
-                        <Link
-                          href={workshop.ctaLink}
-                          aria-label={`${workshop.detailsLabel} – ${workshop.title}`}
-                          className="group inline-flex items-center gap-2 font-display font-bold tracking-wide uppercase text-black/60 transition-colors duration-200 hover:text-black"
-                          style={{ fontSize: 'clamp(0.6rem, 0.75vw, 0.75rem)' }}
-                        >
-                          <span>{workshop.detailsLabel}</span>
-                          <span className="size-7 lg:size-8 rounded-full border border-current flex items-center justify-center transition-all duration-200 group-hover:bg-black group-hover:text-white group-hover:border-black group-hover:scale-110">
-                            <svg
-                              width="12"
-                              height="12"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
-                          </span>
-                        </Link>
-                      </div>
+                      {workshop.image ? (
+                        <Media
+                          resource={workshop.image}
+                          fill
+                          imgClassName="object-cover"
+                          className="absolute inset-0"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-[#141414]" />
+                      )}
                     </div>
                   </div>
-                )
-              })}
-            </div>
+
+                  {/* ── DETAILS CARD ────────────────────────────────── */}
+                  <div
+                    className="shrink-0 relative flex flex-col justify-between self-center rounded-2xl"
+                    style={{
+                      width: 'clamp(220px, 24vw, 280px)',
+                      padding: 'clamp(1.25rem, 2.2vw, 2rem)',
+                      background: 'rgba(255,255,255,0.5)',
+                      backdropFilter: 'blur(18px)',
+                      WebkitBackdropFilter: 'blur(18px)',
+                      border: '1px solid rgba(255,255,255,0.8)',
+                      boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
+                    }}
+                  >
+                    {workshop.nextDate ? (
+                      <div className="mb-4 pb-3 border-b border-black/10">
+                        <p className="text-[10px] font-display font-bold tracking-widest uppercase text-black/45 mb-1">
+                          {upcomingLabel || 'Upcoming'}
+                        </p>
+                        <p className="text-sm md:text-base font-display font-bold text-black/85">
+                          {typeof workshop.nextDate === 'object' && workshop.nextDate !== null
+                            ? (workshop as any).nextDate.date
+                            : String(workshop.nextDate)}
+                        </p>
+                      </div>
+                    ) : null}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      {workshop.features.map((feature, fIdx) => (
+                        <p
+                          key={fIdx}
+                          className="text-black/70 font-display font-bold text-[11px] md:text-xs leading-relaxed flex gap-3"
+                        >
+                          <span className="tabular-nums shrink-0 font-bold">
+                            {String(fIdx + 1).padStart(2, '0')}
+                          </span>
+                          {(feature as { text?: string }).text}
+                        </p>
+                      ))}
+                    </div>
+
+                    {/* ── CTA link — text + circle "+" ─────────────── */}
+                    <div className="mt-6 pt-4 border-t border-black/10">
+                      <Link
+                        href={workshop.ctaLink}
+                        className="flex items-center justify-end gap-3 sm:justify-between group/cta"
+                        aria-label={`Workshop Seite: ${workshop.title}`}
+                      >
+                        <span className="text-[11px] font-display font-bold tracking-widest uppercase text-black/40 group-hover/cta:text-black transition-colors duration-200">
+                          {workshop.detailsButtonLabel}
+                        </span>
+                        <span className="size-9 rounded-full border border-black/25 flex items-center justify-center text-base leading-none text-black/35 transition-all duration-200 group-hover/cta:border-black group-hover/cta:text-black group-hover/cta:scale-110">
+                          +
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* ── Gap between workshop groups ─────────────────── */}
+                  {wIdx < resolvedWorkshops.length - 1 && (
+                    <div className="shrink-0" style={{ width: 'clamp(1rem, 4vw, 4vw)' }} />
+                  )}
+                </React.Fragment>
+              )
+            })}
           </div>
         </div>
-
-        {/* ── All Workshops button (right-aligned below gallery) ── */}
-        <div
-          className="w-full flex justify-end py-5 lg:py-6"
-          style={{ paddingLeft: '5vw', paddingRight: '5vw' }}
-        >
-          <Link
-            href={resolvedAllLink}
-            className="font-display font-bold uppercase border border-black text-black bg-transparent transition-all duration-200 hover:bg-black hover:text-white"
-            style={{
-              padding: '0.7rem 1.5rem',
-              borderRadius: '2rem',
-              fontSize: 'clamp(0.75rem, 1vw, 0.95rem)',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {resolvedAllLabel}
-          </Link>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   )
 }
