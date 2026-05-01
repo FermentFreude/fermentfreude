@@ -121,10 +121,16 @@
     scroll-behavior: smooth;
   }
 
+  /*
+   * NOTE: Do NOT set `overflow-x: hidden` on html or body.
+   * It silently breaks `position: sticky` for every descendant — including
+   * the home WorkshopSlider's pinned scene (causes the slider to scroll
+   * away instead of pinning). If you need to prevent horizontal swipe
+   * bleed on a specific page, clip the offending block element instead.
+   */
   html,
   body {
     max-width: 100%;
-    overflow-x: hidden;
     overscroll-behavior-x: none;
   }
 
