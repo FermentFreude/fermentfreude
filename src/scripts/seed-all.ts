@@ -14,6 +14,11 @@
  *   1. Header (global — nav items)
  *   2. Home page (hero + workshop slider with images)
  *   3. About page (with images uploaded to Cloudflare R2)
+ *   ...
+ *   7. Kombucha workshop detail (hero, booking card, FAQ, how-to)
+ *   8. Kombucha phases block (WorkshopPhases)
+ *
+ * Note: `kombucha` (legacy experienceCards) is registered but NOT in allOrder (superseded by kombucha-detail).
  *
  * Run manually: npx tsx src/scripts/seed-all.ts [target]
  */
@@ -36,9 +41,12 @@ const scripts: Record<string, { name: string; file: string }> = {
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
   legal: { name: 'Legal pages (datenschutz, agb, impressum)', file: 'seed-legal-pages.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
+  kombucha: { name: 'Kombucha workshop (experienceCards)', file: 'seed-kombucha.ts' },
+  'kombucha-detail': { name: 'Kombucha workshop detail (hero, booking, FAQ, how-to)', file: 'seed-kombucha-detail.ts' },
+  'kombucha-phases': { name: 'Kombucha phases block (WorkshopPhases)', file: 'seed-kombucha-phases.ts' },
 }
 
-const allOrder = ['header', 'home', 'about', 'contact', 'legal', 'voucher']
+const allOrder = ['header', 'home', 'about', 'contact', 'legal', 'voucher', 'kombucha-detail', 'kombucha-phases']
 
 function runSeed(key: string, extraArgs: string[] = []): boolean {
   const script = scripts[key]
