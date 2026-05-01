@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { getServerSideURL } from '@/utilities/getURL'
 
 /**
  * Send voucher purchase confirmation email via Brevo after a new voucher is created.
@@ -19,7 +20,7 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
 
   try {
     // Build PDF download URL (can be clicked in email to download)
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://fermentfreude.at'
+    const baseUrl = getServerSideURL().replace(/\/$/, '')
     const pdfUrl = `${baseUrl}/api/voucher/generate-pdf?code=${encodeURIComponent(String(doc.code ?? ''))}`
 
     // Calculate expiry (12 months from creation)
