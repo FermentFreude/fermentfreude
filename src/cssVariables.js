@@ -15,3 +15,4 @@ export const cssVariables = {
     error500: 'rgb(255, 111, 118)',
   },
 }
+// trigger
