@@ -140,17 +140,26 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     const EASE = 0.08
     const MAX_SHIFT = 8
 
-    /* Recalculate outer height and scroll limit */
+    /* Recalculate outer height and scroll limit.
+     * Sticky scroll-jacking is kept for desktop (lg+, the signature effect),
+     * but disabled on mobile/tablet where it feels broken on touch:
+     *  - users get "stuck" when scrolling back up,
+     *  - vertical-scroll → horizontal-translate is unintuitive on a phone,
+     *  - mobile address-bar resize causes jumps mid-scrub.
+     * Below lg the section becomes a native horizontal swipe carousel. */
     const updateDimensions = () => {
-      const overshoot = Math.max(0, container.scrollWidth - window.innerWidth)
-      isActiveRef.current = overshoot > 0
-      outer.style.height = `${window.innerHeight + overshoot}px`
+      const enableStickyScene = window.innerWidth >= 1024
+      const overshoot = enableStickyScene
+        ? Math.max(0, container.scrollWidth - window.innerWidth)
+        : 0
+      isActiveRef.current = enableStickyScene && overshoot > 0
+      outer.style.height = enableStickyScene ? `${window.innerHeight + overshoot}px` : ''
       scrollRef.current.limit = overshoot
 
       if (!isActiveRef.current) {
         scrollRef.current.target = 0
         scrollRef.current.current = 0
-        container.style.transform = 'translateX(0)'
+        container.style.transform = ''
       }
     }
 
@@ -206,27 +215,30 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   /* ═══════════════════════════════════════════════════════════ */
 
   return (
-    /* Outer pin div — JS sets height to 100svh + overshoot on lg+ */
+    /* Outer pin div — JS sets height to 100svh + overshoot on lg+.
+     * Below lg, height is auto and the section becomes a normal
+     * horizontal swipe carousel (no scroll-jacking). */
     <div
       ref={outerRef}
       id={id ?? undefined}
-      className="relative w-full bg-white"
-      style={{ minHeight: '100svh' }}
+      className="cursor-normal-zone relative w-full bg-white lg:min-h-svh"
     >
-      {/* ── Sticky viewport (always visible while scrolling through outer) */}
+      {/* ── Viewport: sticky on desktop, native horizontal scroll on mobile */}
       <section
-        className="sticky top-0 w-full bg-white overflow-hidden"
-        style={{ height: '100svh' }}
+        className="relative w-full bg-white overflow-x-auto overflow-y-hidden lg:sticky lg:top-0 lg:overflow-hidden h-auto lg:h-svh py-10 lg:py-0"
+        style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
       >
-        {/* ── Scroll hint ─────────────────────────────────────── */}
-        <p className="absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
+        {/* ── Scroll hint (desktop only — mobile gets native swipe affordance) */}
+        <p className="hidden lg:block absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
           scroll →
         </p>
 
         {/* ══════════════════════════════════════════════════════
-         *  RESPONSIVE TRACK — same composition across sizes
+         *  RESPONSIVE TRACK
+         *   · lg+: absolutely positioned, transformed by JS (sticky scene)
+         *   · <lg: in-flow flex row, native overflow-x with snap
          * ══════════════════════════════════════════════════════ */}
-        <div className="absolute inset-0 overflow-hidden select-none">
+        <div className="lg:absolute lg:inset-0 lg:overflow-hidden select-none snap-x snap-mandatory lg:snap-none">
           <div
             ref={containerRef}
             className="flex items-center h-full will-change-transform"
@@ -241,7 +253,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                 <React.Fragment key={wIdx}>
                   {/* ── LEFT COLUMN — title on top, small image below ── */}
                   <div
-                    className="shrink-0 flex flex-col self-center w-[72vw] sm:w-[20rem] md:w-88 lg:w-85"
+                    className="shrink-0 flex flex-col self-center snap-start lg:snap-none w-[80vw] sm:w-[20rem] md:w-88 lg:w-85"
                     style={{ height: 'clamp(62svh, 74svh, 78vh)' }}
                   >
                     <div className="shrink-0 pb-4 md:pb-5 w-full">
