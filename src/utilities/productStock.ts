@@ -13,7 +13,9 @@ import type { Product, Variant } from '@/payload-types'
  * enough depth to populate `variants.docs` as full objects (depth >= 2).
  * If variants are not populated, we fall back to the parent `inventory` value.
  */
-export function isProductSoldOut(product: Pick<Product, 'inventory' | 'enableVariants' | 'variants'>): boolean {
+export function isProductSoldOut(
+  product: Pick<Product, 'inventory' | 'enableVariants' | 'variants'>,
+): boolean {
   if (product.enableVariants) {
     const docs = product.variants?.docs
     if (Array.isArray(docs) && docs.length > 0) {

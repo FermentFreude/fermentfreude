@@ -436,7 +436,6 @@ function ProductCard({ product }: { product: Product }) {
                 <div className="w-[55%] h-[70%] bg-[#ECE5DE] rounded-lg" />
               )}
             </div>
-
           </div>
         </div>
 

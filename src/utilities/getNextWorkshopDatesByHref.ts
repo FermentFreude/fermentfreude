@@ -51,10 +51,15 @@ export async function getNextWorkshopDatesByHref(
       const href = WORKSHOP_SLUG_TO_HREF[workshopSlug]
       if (!href || nextByHref[href]) continue
 
+      // Skip fully-booked appointments — "next date" must be a date the user
+      // can actually book. If availableSpots is null/undefined we treat the
+      // appointment as available (capacity not tracked / unlimited).
+      const spots = appointment.availableSpots
+      if (typeof spots === 'number' && spots <= 0) continue
+
       nextByHref[href] = {
         date: formatUpcomingDate(appointment.dateTime, locale),
-        availableSpots:
-          typeof appointment.availableSpots === 'number' ? appointment.availableSpots : undefined,
+        availableSpots: typeof spots === 'number' ? spots : undefined,
       }
     }
 
