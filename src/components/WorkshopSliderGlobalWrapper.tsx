@@ -25,9 +25,13 @@ export async function WorkshopSliderGlobalWrapper({
     getNextWorkshopDatesByHref(locale),
   ])
 
-  // Slider only needs the formatted date string per href.
+  // Slider only needs the formatted date string per href; skip sold-out
+  // workshops (no future bookable appointment) so the slider doesn't show a
+  // bogus "Next date" badge for them.
   const upcomingDatesByHref: Record<string, string> = Object.fromEntries(
-    Object.entries(upcomingDatesByHrefRaw).map(([href, info]) => [href, info.date]),
+    Object.entries(upcomingDatesByHrefRaw)
+      .filter(([, info]) => info.date)
+      .map(([href, info]) => [href, info.date as string]),
   )
 
   const upcomingLabel = locale === 'en' ? 'Next date' : 'Nächster Termin'

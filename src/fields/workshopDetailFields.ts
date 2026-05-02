@@ -97,6 +97,16 @@ export const workshopDetailFields: Field[] = [
         admin: { description: 'e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"' },
       },
       {
+        name: 'bookingTitle',
+        type: 'text',
+        localized: true,
+        label: 'Booking Card Title',
+        admin: {
+          description:
+            'Main title shown on the dark booking header (e.g. "Lakto-Fermentiertes Gemüse" / "Lacto-Fermented Vegetables", "Tempeh", "Kombucha"). Set both German and English values.',
+        },
+      },
+      {
         type: 'row',
         fields: [
           {

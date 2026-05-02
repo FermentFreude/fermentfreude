@@ -353,7 +353,7 @@ export const CheckoutPage: React.FC = () => {
     } finally {
       setVoucherLoading(false)
     }
-  }, [voucherCode])
+  }, [voucherCode, t])
 
   const handleRemoveVoucher = useCallback(() => {
     setVoucherApplied(null)

@@ -30,7 +30,7 @@ interface OrderConfirmationPageProps {
 }
 
 export default async function OrderConfirmationPage({ searchParams }: OrderConfirmationPageProps) {
-  const { orderId, type, email } = await searchParams
+  const { orderId, type, email: _email } = await searchParams
   const isWorkshop = type === 'workshop'
   const isCourse = type === 'course'
   const locale = await getLocale()

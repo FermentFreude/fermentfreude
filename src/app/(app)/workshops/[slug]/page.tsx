@@ -301,13 +301,26 @@ export default async function WorkshopDetailPage({ params }: Args) {
   // otherwise fall back to the latest 6 published posts so editors only
   // need to manage articles in /admin/collections/posts (one place,
   // shared across all workshop pages).
-  const perPageHowToArticles = Array.isArray(detail?.howToArticles)
+  // We only count *resolved* posts (objects) — stale relationship IDs that
+  // no longer point to an existing post are returned by Payload as bare
+  // strings and must be ignored, otherwise the page falls into a hardcoded
+  // placeholder state with no cover images (see tempeh page).
+  const perPageHowToArticlesRaw = Array.isArray(detail?.howToArticles)
     ? detail!.howToArticles
     : []
+  const perPageHowToArticles = perPageHowToArticlesRaw.filter(
+    (item): item is Exclude<typeof item, string> =>
+      typeof item === 'object' && item !== null,
+  )
+  // Per founder request (issue tracker #2): show the same articles on every
+  // workshop page (Lakto, Tempeh, Kombucha). The `workshopType` field on
+  // posts is kept as metadata for future per-page curation, but is no longer
+  // used to filter the fallback list — editors only need to publish a post
+  // once and it appears on all three pages automatically.
+  // Per-page `workshopDetail.howToArticles` still wins when set, so editors
+  // can override the list for a specific workshop later.
   const howToArticles =
-    perPageHowToArticles.length > 0
-      ? perPageHowToArticles
-      : await getLatestPosts(locale, 6)
+    perPageHowToArticles.length > 0 ? perPageHowToArticles : await getLatestPosts(locale, 6)
 
   // Voucher CTA: use global data when toggled on, otherwise use inline detail fields
   const useGlobalVoucher = detail?.useGlobalVoucherData !== false
@@ -567,6 +580,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
             ...(detail
               ? {
                   bookingEyebrow: detail.bookingEyebrow,
+                  bookingTitle: detail.bookingTitle,
                   bookingPrice: detail.bookingPrice,
                   bookingPriceSuffix: detail.bookingPriceSuffix,
                   bookingCurrency: detail.bookingCurrency,
@@ -687,6 +701,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
             ...(detail
               ? {
                   bookingEyebrow: detail.bookingEyebrow,
+                  bookingTitle: detail.bookingTitle,
                   bookingPrice: detail.bookingPrice,
                   bookingPriceSuffix: detail.bookingPriceSuffix,
                   bookingCurrency: detail.bookingCurrency,
@@ -793,6 +808,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
             ...(detail
               ? {
                   bookingEyebrow: detail.bookingEyebrow,
+                  bookingTitle: detail.bookingTitle,
                   bookingPrice: detail.bookingPrice,
                   bookingPriceSuffix: detail.bookingPriceSuffix,
                   bookingCurrency: detail.bookingCurrency,

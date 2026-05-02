@@ -58,7 +58,7 @@ export const Posts: CollectionConfig = {
       ],
       admin: {
         description:
-          'Article category. Determines which workshop page this article appears on and how it is filtered. Required.',
+          'Article category (used for grouping and future per-workshop filtering). Required. Note: by default every published article appears on all three workshop pages (Lakto, Tempeh, Kombucha). To restrict articles to a specific workshop page, set them in /admin → Pages → that workshop → "How-To Articles".',
         position: 'sidebar',
       },
     },

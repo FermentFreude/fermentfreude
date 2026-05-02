@@ -45,7 +45,6 @@ export const CheckoutForm: React.FC<Props> = ({
   pickupTime,
 }) => {
   const { locale } = useLocale()
-  const isDe = locale === 'de'
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = React.useState<null | string>(null)
@@ -151,7 +150,9 @@ export const CheckoutForm: React.FC<Props> = ({
       router,
       isAllDigital,
       hasWorkshop,
-      isDe,
+      pickupDate,
+      pickupTime,
+      t,
     ],
   )
 

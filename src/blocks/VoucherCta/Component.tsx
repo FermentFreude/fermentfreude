@@ -172,13 +172,14 @@ export const VoucherCtaBlock: React.FC<Props> = ({
       >
         {backgroundImage ? (
           <>
-            <Media
-              resource={backgroundImage}
-              fill
-              imgClassName="object-cover blur-[2px] scale-105"
-              className="absolute inset-0"
-            />
-            <div className="absolute inset-0 bg-ff-ivory-mist/88" aria-hidden />
+            <div className="absolute inset-0">
+              <Media
+                resource={backgroundImage}
+                fill
+                imgClassName="object-cover"
+              />
+            </div>
+            <div className="absolute inset-0 bg-ff-ivory-mist/82" aria-hidden />
           </>
         ) : null}
 

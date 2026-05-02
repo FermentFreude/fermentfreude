@@ -138,7 +138,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
   } = props
 
   const title = heroTitle ?? 'Our Handmade Products From Our Pick-Up Shop.'
-  const price = heroPrice ?? 'from €8.50'
+  const _price = heroPrice ?? 'from €8.50'
   const primaryLabel = resolveLocalizedLabel(ctaPrimaryLabel, locale, 'Order Now')
   const primaryUrl = ctaPrimaryUrl ?? '/shop#bestsellers'
   const secondaryLabel = resolveLocalizedLabel(ctaSecondaryLabel, locale, 'Learn More')

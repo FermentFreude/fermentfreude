@@ -218,7 +218,7 @@ export function voucherPageDataEN(
         id: item.id ?? undefined,
         amount: ['99€'][i] ?? item.amount,
       })),
-      deliveryOptions: (v.deliveryOptions ?? []).map((item, i) => ({
+      deliveryOptions: (v.deliveryOptions ?? []).map((item) => ({
         id: item.id ?? undefined,
         type: item.type,
         title: item.type === 'pickup' ? 'Pick up from store' : 'By email to print at home',

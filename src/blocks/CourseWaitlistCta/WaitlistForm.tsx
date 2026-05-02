@@ -81,7 +81,7 @@ export function WaitlistForm({ emailPlaceholder, submitLabel, successMessage, lo
           >
             <CheckCircle2 className="size-6 text-ff-olive" strokeWidth={2} aria-hidden />
           </motion.div>
-          <p className="mx-auto max-w-md font-display text-body-lg font-semibold leading-relaxed text-ff-near-black [text-wrap:pretty]">
+          <p className="mx-auto max-w-md font-display text-body-lg font-semibold leading-relaxed text-ff-near-black text-pretty">
             {successMessage}
           </p>
         </motion.div>
@@ -100,7 +100,7 @@ export function WaitlistForm({ emailPlaceholder, submitLabel, successMessage, lo
           name="website"
           tabIndex={-1}
           autoComplete="off"
-          className="absolute -left-[9999px] h-0 w-0 opacity-0"
+          className="sr-only"
           aria-hidden
         />
 
@@ -109,7 +109,7 @@ export function WaitlistForm({ emailPlaceholder, submitLabel, successMessage, lo
           whileHover={reduce ? undefined : { boxShadow: '0 12px 40px -20px rgba(26, 26, 26, 0.12)' }}
           transition={{ duration: 0.25 }}
         >
-          <div className="relative min-h-12 flex-1 sm:min-h-[3rem]">
+          <div className="relative min-h-12 flex-1">
             <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-ff-gray-muted">
               <Mail className="size-5" strokeWidth={2} aria-hidden />
             </span>
@@ -124,14 +124,14 @@ export function WaitlistForm({ emailPlaceholder, submitLabel, successMessage, lo
               onChange={(e) => setEmail(e.target.value)}
               placeholder={emailPlaceholder}
               className={cn(
-                'h-full min-h-12 w-full rounded-lg border-0 bg-ff-warm-gray/20 py-3 pl-12 pr-4 font-sans text-body text-ff-near-black sm:min-h-[3rem]',
-                'placeholder:text-ff-gray-muted transition-[box-shadow] focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/45 focus:ring-offset-0',
+                'h-full min-h-12 w-full rounded-lg border-0 bg-ff-warm-gray/20 py-3 pl-12 pr-4 font-sans text-body text-ff-near-black',
+                'placeholder:text-ff-gray-muted transition-shadow focus:outline-none focus:ring-2 focus:ring-ff-gold-accent/45 focus:ring-offset-0',
               )}
             />
           </div>
           <motion.button
             type="submit"
-            className="group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-ff-gold-accent px-6 font-display text-[0.9375rem] font-bold tracking-wide text-ff-near-black shadow-[0_1px_0_0_rgba(0,0,0,0.06)] transition-colors hover:bg-ff-gold-accent-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ff-gold-accent-dark sm:min-h-[3rem] sm:px-7"
+            className="group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-ff-gold-accent px-6 font-display text-[0.9375rem] font-bold tracking-wide text-ff-near-black shadow-[0_1px_0_0_rgba(0,0,0,0.06)] transition-colors hover:bg-ff-gold-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ff-gold-accent-dark sm:px-7"
             whileTap={reduce ? undefined : { scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           >

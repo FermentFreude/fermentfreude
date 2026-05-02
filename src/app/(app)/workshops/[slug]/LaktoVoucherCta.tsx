@@ -50,12 +50,12 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
             <Media
               resource={cms.backgroundImage as MediaType}
               fill
-              imgClassName="object-cover blur-[2px]"
+              imgClassName="object-cover"
             />
-            <div className="absolute inset-0 bg-ff-ivory-mist/88" aria-hidden />
+            <div className="absolute inset-0 bg-ff-ivory-mist/82" aria-hidden />
             <div className="absolute inset-0 flex items-center justify-center px-6 py-12">
               <div className="mx-auto max-w-3xl text-center">
-                <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-[#555954]/60">
+                <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-[#555954]">
                   {eyebrow}
                 </p>
                 <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-ff-near-black">

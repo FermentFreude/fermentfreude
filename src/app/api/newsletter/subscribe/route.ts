@@ -1,4 +1,4 @@
-import { getBrevoApiKey, upsertContact } from '@/lib/brevo'
+import { BREVO_TEMPLATES, getBrevoApiKey, sendTemplateEmail, upsertContact } from '@/lib/brevo'
 import { NextRequest, NextResponse } from 'next/server'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -39,6 +39,15 @@ export async function POST(request: NextRequest) {
         { status: 502 },
       )
     }
+
+    // Fire-and-forget welcome email — failure must not break the subscribe response.
+    sendTemplateEmail({
+      to: [{ email }],
+      templateId: BREVO_TEMPLATES.NEWSLETTER_WELCOME,
+      params: { LOCALE: locale, EMAIL: email },
+    }).catch((err) => {
+      console.error('[Newsletter] Welcome email failed:', err)
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

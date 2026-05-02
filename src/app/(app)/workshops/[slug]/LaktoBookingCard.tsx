@@ -20,6 +20,7 @@ import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
 
 export type LaktoBookingCMS = {
   bookingEyebrow?: string | null
+  bookingTitle?: string | null
   bookingPrice?: number | null
   bookingPriceSuffix?: string | null
   bookingCurrency?: string | null
@@ -140,6 +141,7 @@ export function LaktoBookingCard({
 }) {
   // ── CMS values → fallback to workshop-data.ts defaults ──
   const bookingEyebrow = cms?.bookingEyebrow ?? workshop.subtitle.toUpperCase()
+  const bookingTitle = cms?.bookingTitle ?? workshop.title
   const price = cms?.bookingPrice ?? workshop.price
   const priceSuffix = cms?.bookingPriceSuffix ?? workshop.priceSuffix
   const currency = cms?.bookingCurrency ?? workshop.currency
@@ -202,7 +204,7 @@ export function LaktoBookingCard({
   // Build merged workshop for BookingModal
   const mergedWorkshop: WorkshopDetailData = {
     ...workshop,
-    title: workshop.title,
+    title: bookingTitle,
     price,
     currency,
     confirmHeading: cms?.modalConfirmHeading ?? workshop.confirmHeading,
@@ -290,7 +292,7 @@ export function LaktoBookingCard({
                       {bookingEyebrow}
                     </p>
                     <h2 className="font-display text-section-heading font-black tracking-tight text-white">
-                      {workshop.title}
+                      {bookingTitle}
                     </h2>
                   </div>
                   {/* Right — price */}

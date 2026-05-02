@@ -50,18 +50,18 @@ export function KombuchaVoucherCta({ cms }: { cms?: KombuchaVoucherCMS }) {
             <Media
               resource={cms.backgroundImage as MediaType}
               fill
-              imgClassName="object-cover blur-[2px]"
+              imgClassName="object-cover"
             />
-            <div className="absolute inset-0 bg-black/45" />
+            <div className="absolute inset-0 bg-black/55" />
             <div className="absolute inset-0 flex items-center justify-center px-6 py-12">
               <div className="mx-auto max-w-3xl text-center">
-                <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-white/80">
+                <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-white">
                   {eyebrow}
                 </p>
                 <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-white">
                   {title}
                 </h2>
-                <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white/90">
+                <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white">
                   {description}
                 </p>
 

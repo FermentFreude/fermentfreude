@@ -665,8 +665,6 @@ export interface CallToActionBlock {
   blockType: 'cta';
 }
 /**
- * Website-Seiten. B2B Gastronomie: Seite mit Slug „gastronomy“ öffnen — Slug steht oben vor den Tabs; Tab „Gastronomy Page“ erscheint danach. EN: open page slug gastronomy; slug field is above the tabs.
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -1092,7 +1090,7 @@ export interface Page {
         }[]
       | null;
     /**
-     * Small label above the guide heading (e.g., "START HERE").
+     * Legacy field — not currently rendered on the page. Kept for backward compatibility.
      */
     fermentationGuideTag?: string | null;
     /**
@@ -1127,6 +1125,10 @@ export interface Page {
      * Optional image (e.g. fermented vegetables, jars, process).
      */
     fermentationWhatImage?: (string | null) | Media;
+    /**
+     * Small label shown above the section title (e.g. "BENEFITS" / "VORTEILE").
+     */
+    fermentationWhyEyebrow?: string | null;
     fermentationWhyTitle?: string | null;
     /**
      * Six benefit items in two columns (e.g., Improved digestion, Rich in enzymes).
@@ -1225,11 +1227,11 @@ export interface Page {
      */
     fermentationFaqCtaBody?: string | null;
     /**
-     * Fallback if CTA title empty. e.g. "Still have questions?"
+     * Legacy field — not rendered. Use "FAQ Bottom CTA Title" instead.
      */
     fermentationFaqMoreText?: string | null;
     /**
-     * e.g. "Contact Us"
+     * Legacy field — not rendered.
      */
     fermentationFaqContactLabel?: string | null;
     fermentationFaqContactUrl?: string | null;
@@ -1789,6 +1791,10 @@ export interface Page {
      * e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"
      */
     bookingEyebrow?: string | null;
+    /**
+     * Main title shown on the dark booking header (e.g. "Lakto-Fermentiertes Gemüse" / "Lacto-Fermented Vegetables", "Tempeh", "Kombucha"). Set both German and English values.
+     */
+    bookingTitle?: string | null;
     /**
      * e.g. "99"
      */
@@ -3773,7 +3779,7 @@ export interface WorkshopPhasesBlock {
 export interface Post {
   id: string;
   /**
-   * Article category. Determines which workshop page this article appears on and how it is filtered. Required.
+   * Article category (used for grouping and future per-workshop filtering). Required. Note: by default every published article appears on all three workshop pages (Lakto, Tempeh, Kombucha). To restrict articles to a specific workshop page, set them in /admin → Pages → that workshop → "How-To Articles".
    */
   workshopType: 'lakto' | 'tempeh' | 'kombucha';
   /**
@@ -4897,6 +4903,7 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         fermentationWhatImage?: T;
+        fermentationWhyEyebrow?: T;
         fermentationWhyTitle?: T;
         fermentationWhyItems?:
           | T
@@ -5157,6 +5164,7 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         bookingEyebrow?: T;
+        bookingTitle?: T;
         bookingPrice?: T;
         bookingPriceSuffix?: T;
         bookingCurrency?: T;

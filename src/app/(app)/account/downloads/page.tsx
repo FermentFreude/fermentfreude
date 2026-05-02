@@ -1,4 +1,4 @@
-import { accountI18n, type AccountTranslations } from '@/app/(app)/account/i18n'
+import { accountI18n } from '@/app/(app)/account/i18n'
 import type { Download, Media, Product } from '@/payload-types'
 import { formatDate } from '@/utilities/form/formatters'
 import { getLocale } from '@/utilities/getLocale'

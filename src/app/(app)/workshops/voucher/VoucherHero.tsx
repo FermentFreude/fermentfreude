@@ -160,7 +160,18 @@ export function VoucherHero({
     } finally {
       setIsLoading(false)
     }
-  }, [purchaserEmail, recipientEmail, selectedAmount, selectedDelivery, router])
+  }, [
+    purchaserEmail,
+    recipientEmail,
+    selectedAmount,
+    selectedDelivery,
+    router,
+    t.checkoutError,
+    t.checkoutErrorLater,
+    t.emailRequired,
+    t.invalidEmail,
+    t.invalidRecipientEmail,
+  ])
 
   const iconColor = (opt: (typeof visibleDeliveryOptions)[0]) =>
     selectedDelivery === opt.type ? '#FFFFFF' : undefined

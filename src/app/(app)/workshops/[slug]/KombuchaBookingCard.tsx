@@ -20,6 +20,7 @@ import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
 
 export type KombuchaBookingCMS = {
   bookingEyebrow?: string | null
+  bookingTitle?: string | null
   bookingPrice?: number | null
   bookingPriceSuffix?: string | null
   bookingCurrency?: string | null
@@ -140,6 +141,7 @@ export function KombuchaBookingCard({
 }) {
   // ── CMS values with Kombucha defaults ──
   const bookingEyebrow = cms?.bookingEyebrow ?? '3-STUNDEN WORKSHOP'
+  const bookingTitle = cms?.bookingTitle ?? 'Kombucha'
   const price = cms?.bookingPrice ?? 79
   const priceSuffix = cms?.bookingPriceSuffix ?? 'pro Person'
   const currency = cms?.bookingCurrency ?? '€'
@@ -250,7 +252,7 @@ export function KombuchaBookingCard({
   const mergedWorkshop: WorkshopDetailData = {
     slug: 'kombucha',
     workshopType: 'kombucha',
-    title: 'Kombucha',
+    title: bookingTitle,
     subtitle: bookingEyebrow,
     description: aboutText,
     price,
@@ -359,7 +361,7 @@ export function KombuchaBookingCard({
                       {bookingEyebrow}
                     </p>
                     <h2 className="font-display text-section-heading font-black tracking-tight text-white">
-                      Kombucha
+                      {bookingTitle}
                     </h2>
                   </div>
                   {/* Right — price */}

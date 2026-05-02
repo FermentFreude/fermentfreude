@@ -56,8 +56,6 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     group: 'Inhalt',
-    description:
-      'Website-Seiten. B2B Gastronomie: Seite mit Slug „gastronomy“ öffnen — Slug steht oben vor den Tabs; Tab „Gastronomy Page“ erscheint danach. EN: open page slug gastronomy; slug field is above the tabs.',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) =>
@@ -907,7 +905,9 @@ export const Pages: CollectionConfig = {
                   localized: true,
                   label: 'Guide Section Tag',
                   admin: {
-                    description: 'Small label above the guide heading (e.g., "START HERE").',
+                    hidden: true,
+                    description:
+                      'Legacy field — not currently rendered on the page. Kept for backward compatibility.',
                   },
                 },
                 {
@@ -1008,6 +1008,17 @@ export const Pages: CollectionConfig = {
               label: '4. Why is it so special?',
               admin: { initCollapsed: false },
               fields: [
+                {
+                  name: 'fermentationWhyEyebrow',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: '"Why is it so special?" Eyebrow',
+                  admin: {
+                    description:
+                      'Small label shown above the section title (e.g. "BENEFITS" / "VORTEILE").',
+                  },
+                },
                 {
                   name: 'fermentationWhyTitle',
                   type: 'text',
@@ -1311,7 +1322,8 @@ export const Pages: CollectionConfig = {
                   localized: true,
                   label: 'FAQ "More" Text (legacy)',
                   admin: {
-                    description: 'Fallback if CTA title empty. e.g. "Still have questions?"',
+                    hidden: true,
+                    description: 'Legacy field — not rendered. Use "FAQ Bottom CTA Title" instead.',
                   },
                 },
                 {
@@ -1320,13 +1332,17 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'FAQ Contact Button Label',
-                  admin: { description: 'e.g. "Contact Us"' },
+                  admin: {
+                    hidden: true,
+                    description: 'Legacy field — not rendered.',
+                  },
                 },
                 {
                   name: 'fermentationFaqContactUrl',
                   type: 'text',
                   required: false,
                   label: 'FAQ Contact Button URL',
+                  admin: { hidden: true },
                 },
               ],
             },

@@ -99,10 +99,20 @@ export default async function GastronomyPage() {
   const nextDates = await getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de')
   const workshopCards = (g?.gastronomyWorkshopCards ?? []).map((c) => {
     const nextDateData = c.buttonUrl ? nextDates[c.buttonUrl] : undefined
+    if (nextDateData) {
+      // Workshop is known to the live appointment system — its data is the
+      // single source of truth (ignore manually-typed admin date).
+      return {
+        ...c,
+        nextDate: nextDateData.date ?? undefined,
+        availableSpots: nextDateData.soldOut ? 0 : nextDateData.availableSpots,
+      }
+    }
+    // Unknown workshop (no slug mapping) — fall back to manual admin fields.
     return {
       ...c,
-      nextDate: nextDateData?.date || c.nextDate || undefined,
-      availableSpots: nextDateData?.availableSpots,
+      nextDate: c.nextDate || undefined,
+      availableSpots: undefined,
     }
   })
   const offerDetails = g?.gastronomyOfferDetails ?? []

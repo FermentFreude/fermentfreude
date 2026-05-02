@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     let meta: Record<string, string> = {}
-    let paymentStatus: string = ''
+    let _paymentStatus: string = ''
     let idempotencyKey: string = ''
 
     if (sessionId) {
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       }
 
       meta = session.metadata as Record<string, string>
-      paymentStatus = session.payment_status
+      _paymentStatus = session.payment_status
       idempotencyKey = sessionId
     } else {
       // ─── Verify via Stripe PaymentIntent ────────────────────────
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       }
 
       meta = paymentIntent.metadata as Record<string, string>
-      paymentStatus = paymentIntent.status
+      _paymentStatus = paymentIntent.status
       idempotencyKey = paymentIntentId!
     }
 

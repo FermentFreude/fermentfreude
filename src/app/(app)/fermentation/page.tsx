@@ -7,6 +7,7 @@ import { WhySection } from '@/app/(app)/fermentation/WhySection'
 import { EditPageLink } from '@/components/EditPageLink'
 import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
+import { OnlineCoursePopupCta } from '@/components/OnlineCoursePopupCta'
 import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import { getLocale } from '@/utilities/getLocale'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
@@ -457,16 +458,18 @@ export default async function FermentationPage({ searchParams }: FermentationPag
     }
   }
 
-  const heroTitle = retouch.heroTitle ?? f?.fermentationHeroTitle ?? DEFAULT_HERO_TITLE
+  // Precedence: CMS (admin-edited) → retouch (locale-aware seed copy) → DEFAULT (English fallback).
+  // This lets founders edit any field in /admin and see it immediately on the live page.
+  const heroTitle = f?.fermentationHeroTitle ?? retouch.heroTitle ?? DEFAULT_HERO_TITLE
   const heroDescription =
-    retouch.heroDescription ?? f?.fermentationHeroDescription ?? DEFAULT_HERO_DESCRIPTION
+    f?.fermentationHeroDescription ?? retouch.heroDescription ?? DEFAULT_HERO_DESCRIPTION
   const heroBenefitsTitle =
-    retouch.heroBenefitsTitle ?? f?.fermentationHeroBenefitsTitle ?? 'WHY FERMENTATION?'
+    f?.fermentationHeroBenefitsTitle ?? retouch.heroBenefitsTitle ?? 'WHY FERMENTATION?'
   let heroBlocks =
-    retouch.heroBlocks?.length > 0
-      ? retouch.heroBlocks
-      : (f?.fermentationHeroBlocks?.length ?? 0) > 0
-        ? (f?.fermentationHeroBlocks ?? [])
+    (f?.fermentationHeroBlocks?.length ?? 0) > 0
+      ? (f?.fermentationHeroBlocks ?? [])
+      : retouch.heroBlocks?.length > 0
+        ? retouch.heroBlocks
         : DEFAULT_HERO_BLOCKS
 
   // Resolve hero block icons if they're just IDs
@@ -492,17 +495,16 @@ export default async function FermentationPage({ searchParams }: FermentationPag
   }
 
   const _guideTag = f?.fermentationGuideTag ?? DEFAULT_GUIDE_TAG
-  const guideTitle = retouch.guideTitle ?? f?.fermentationGuideTitle ?? DEFAULT_GUIDE_TITLE
-  const guideBody = retouch.guideBody ?? f?.fermentationGuideBody ?? DEFAULT_GUIDE_BODY
+  const guideTitle = f?.fermentationGuideTitle ?? retouch.guideTitle ?? DEFAULT_GUIDE_TITLE
+  const guideBody = f?.fermentationGuideBody ?? retouch.guideBody ?? DEFAULT_GUIDE_BODY
   const guideImage = f?.fermentationGuideImage
 
-  const whatTitle = retouch.whatTitle ?? f?.fermentationWhatTitle ?? DEFAULT_WHAT_TITLE
-  const whatBody = retouch.whatBody ?? f?.fermentationWhatBody ?? DEFAULT_WHAT_BODY
-  const whatMotto = retouch.whatMotto ?? f?.fermentationWhatMotto ?? DEFAULT_WHAT_MOTTO
+  const whatTitle = f?.fermentationWhatTitle ?? retouch.whatTitle ?? DEFAULT_WHAT_TITLE
+  const whatBody = f?.fermentationWhatBody ?? retouch.whatBody ?? DEFAULT_WHAT_BODY
+  const whatMotto = f?.fermentationWhatMotto ?? retouch.whatMotto ?? DEFAULT_WHAT_MOTTO
   const whatLinks = f?.fermentationWhatLinks ?? []
   const whatListItems =
-    retouch.whatListItems ??
-    (whatLinks.length > 0
+    whatLinks.length > 0
       ? whatLinks
           .map((l) =>
             typeof l === 'object' && l !== null && 'label' in l
@@ -510,44 +512,52 @@ export default async function FermentationPage({ searchParams }: FermentationPag
               : '',
           )
           .filter(Boolean)
-      : DEFAULT_WHAT_LIST_ITEMS)
+      : retouch.whatListItems && retouch.whatListItems.length > 0
+        ? retouch.whatListItems
+        : DEFAULT_WHAT_LIST_ITEMS
   const whatImage = f?.fermentationWhatImage
 
-  const whyTitle = retouch.whyTitle ?? f?.fermentationWhyTitle ?? DEFAULT_WHY_TITLE
+  const whyTitle = f?.fermentationWhyTitle ?? retouch.whyTitle ?? DEFAULT_WHY_TITLE
+  const whyEyebrow =
+    (f as { fermentationWhyEyebrow?: string } | undefined)?.fermentationWhyEyebrow ??
+    retouch.whyEyebrow ??
+    'BENEFITS'
   const whyItems =
-    retouch.whyItems?.length > 0
-      ? retouch.whyItems
-      : (f?.fermentationWhyItems?.length ?? 0) > 0
-        ? (f?.fermentationWhyItems ?? [])
+    (f?.fermentationWhyItems?.length ?? 0) > 0
+      ? (f?.fermentationWhyItems ?? [])
+      : retouch.whyItems?.length > 0
+        ? retouch.whyItems
         : DEFAULT_WHY_ITEMS
   const whyImage = f?.fermentationWhyImage
 
-  const dangerTitle = retouch.dangerTitle ?? f?.fermentationDangerTitle ?? DEFAULT_DANGER_TITLE
-  const dangerIntro = retouch.dangerIntro ?? f?.fermentationDangerIntro ?? DEFAULT_DANGER_INTRO
+  const dangerTitle = f?.fermentationDangerTitle ?? retouch.dangerTitle ?? DEFAULT_DANGER_TITLE
+  const dangerIntro = f?.fermentationDangerIntro ?? retouch.dangerIntro ?? DEFAULT_DANGER_INTRO
   const dangerConcernsHeading =
-    retouch.dangerConcernsHeading ??
     f?.fermentationDangerConcernsHeading ??
+    retouch.dangerConcernsHeading ??
     DEFAULT_DANGER_CONCERNS_HEADING
   const dangerConcerns =
-    retouch.dangerConcerns?.length > 0
-      ? retouch.dangerConcerns
-      : (f?.fermentationDangerConcerns?.length ?? 0) > 0
-        ? (f?.fermentationDangerConcerns ?? [])
+    (f?.fermentationDangerConcerns?.length ?? 0) > 0
+      ? (f?.fermentationDangerConcerns ?? [])
+      : retouch.dangerConcerns?.length > 0
+        ? retouch.dangerConcerns
         : DEFAULT_DANGER_CONCERNS
   const dangerClosing =
-    retouch.dangerClosing ?? f?.fermentationDangerClosing ?? DEFAULT_DANGER_CLOSING
+    f?.fermentationDangerClosing ?? retouch.dangerClosing ?? DEFAULT_DANGER_CLOSING
 
   const practiceTitle =
-    retouch.practiceTitle ?? f?.fermentationPracticeTitle ?? DEFAULT_PRACTICE_TITLE
+    f?.fermentationPracticeTitle ?? retouch.practiceTitle ?? DEFAULT_PRACTICE_TITLE
   const practiceBody = f?.fermentationPracticeBody
   const practiceImage = f?.fermentationPracticeImage
-  const practiceParagraphs =
-    retouch.practiceParagraphs ??
-    (practiceBody ? practiceBody.split(/\n\n+/).filter(Boolean) : DEFAULT_PRACTICE_PARAGRAPHS)
+  const practiceParagraphs = practiceBody
+    ? practiceBody.split(/\n\n+/).filter(Boolean)
+    : retouch.practiceParagraphs && retouch.practiceParagraphs.length > 0
+      ? retouch.practiceParagraphs
+      : DEFAULT_PRACTICE_PARAGRAPHS
 
-  const ctaTitle = retouch.ctaTitle ?? f?.fermentationCtaTitle ?? DEFAULT_CTA_TITLE
+  const ctaTitle = f?.fermentationCtaTitle ?? retouch.ctaTitle ?? DEFAULT_CTA_TITLE
   const ctaDescription =
-    retouch.ctaDescription ?? f?.fermentationCtaDescription ?? DEFAULT_CTA_DESCRIPTION
+    f?.fermentationCtaDescription ?? retouch.ctaDescription ?? DEFAULT_CTA_DESCRIPTION
   const ctaPrimaryLabel = f?.fermentationCtaPrimaryLabel ?? DEFAULT_CTA_PRIMARY
   const ctaPrimaryUrl = f?.fermentationCtaPrimaryUrl ?? DEFAULT_CTA_PRIMARY_URL
   const ctaSecondaryLabel = f?.fermentationCtaSecondaryLabel ?? DEFAULT_CTA_SECONDARY
@@ -605,23 +615,33 @@ export default async function FermentationPage({ searchParams }: FermentationPag
   const workshopCards = workshopCardsRaw.map((c) => {
     const card = c as { buttonUrl?: string; nextDate?: string }
     const nextDateData = card.buttonUrl ? nextDates[card.buttonUrl] : undefined
+    if (nextDateData) {
+      // Workshop is known to the live appointment system — its data is the
+      // single source of truth (ignore manually-typed admin date).
+      return {
+        ...c,
+        nextDate: nextDateData.date ?? undefined,
+        availableSpots: nextDateData.soldOut ? 0 : nextDateData.availableSpots,
+      }
+    }
+    // Unknown workshop (no slug mapping) — fall back to manual admin fields.
     return {
       ...c,
-      nextDate: nextDateData?.date || card.nextDate || undefined,
-      availableSpots: nextDateData?.availableSpots,
+      nextDate: card.nextDate || undefined,
+      availableSpots: undefined,
     }
   })
 
-  const faqTitle = retouch.faqTitle ?? f?.fermentationFaqTitle ?? DEFAULT_FAQ_TITLE
-  const faqSubtitle = retouch.faqSubtitle ?? f?.fermentationFaqSubtitle ?? DEFAULT_FAQ_SUBTITLE
+  const faqTitle = f?.fermentationFaqTitle ?? retouch.faqTitle ?? DEFAULT_FAQ_TITLE
+  const faqSubtitle = f?.fermentationFaqSubtitle ?? retouch.faqSubtitle ?? DEFAULT_FAQ_SUBTITLE
   const faqItems =
-    retouch.faqItems?.length > 0
-      ? retouch.faqItems
-      : (f?.fermentationFaqItems?.length ?? 0) > 0
-        ? (f?.fermentationFaqItems ?? [])
+    (f?.fermentationFaqItems?.length ?? 0) > 0
+      ? (f?.fermentationFaqItems ?? [])
+      : retouch.faqItems?.length > 0
+        ? retouch.faqItems
         : DEFAULT_FAQ_ITEMS
-  const faqCtaTitle = retouch.faqCtaTitle ?? f?.fermentationFaqCtaTitle ?? DEFAULT_FAQ_CTA_TITLE
-  const faqCtaBody = retouch.faqCtaBody ?? f?.fermentationFaqCtaBody ?? DEFAULT_FAQ_CTA_BODY
+  const faqCtaTitle = f?.fermentationFaqCtaTitle ?? retouch.faqCtaTitle ?? DEFAULT_FAQ_CTA_TITLE
+  const faqCtaBody = f?.fermentationFaqCtaBody ?? retouch.faqCtaBody ?? DEFAULT_FAQ_CTA_BODY
   const _faqMoreText = f?.fermentationFaqMoreText ?? DEFAULT_FAQ_MORE
   const _faqContactLabel = f?.fermentationFaqContactLabel ?? DEFAULT_FAQ_CONTACT
   const _faqContactUrl = f?.fermentationFaqContactUrl ?? DEFAULT_FAQ_CONTACT_URL
@@ -827,7 +847,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
         <FadeIn delay={150}>
           <WhySection
             title={whyTitle}
-            eyebrow={retouch.whyEyebrow}
+            eyebrow={whyEyebrow}
             items={whyItems}
             image={whyImage}
           />
@@ -907,12 +927,11 @@ export default async function FermentationPage({ searchParams }: FermentationPag
                     {ctaPrimaryLabel}
                   </Link>
                   {ctaSecondaryLabel && (
-                    <Link
+                    <OnlineCoursePopupCta
                       href={ctaSecondaryUrl ?? '#'}
+                      label={ctaSecondaryLabel}
                       className="inline-flex items-center justify-center rounded-full bg-white/10 px-8 py-3.5 font-display text-sm font-bold text-white backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:scale-[1.05] hover:bg-white/20 hover:shadow-lg"
-                    >
-                      {ctaSecondaryLabel}
-                    </Link>
+                    />
                   )}
                 </div>
               </div>
@@ -987,9 +1006,14 @@ export default async function FermentationPage({ searchParams }: FermentationPag
               '/assets/images/fermentation/workshop-kombucha.png',
               '/assets/images/fermentation/workshop-tempeh.png',
             ]
+            // CMS image wins; static fallback only when no image is set in admin.
             const fallback =
               (card.buttonUrl && fallbacksByUrl[card.buttonUrl]) ?? fallbacksByIndex[idx]
-            const image = fallback ? { url: fallback } : card.image
+            const image = isResolvedMedia(card.image)
+              ? card.image
+              : fallback
+                ? { url: fallback }
+                : card.image
             return {
               id: card.id,
               title: card.title,

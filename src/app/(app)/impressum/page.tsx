@@ -10,7 +10,7 @@ export default function ImpressumPage() {
   return (
     <main className="page-legal text-[#1d1d1d] py-16 md:py-24">
       <div className="container legal-content-block">
-        <div className="relative mx-auto max-w-[64rem] rounded-[1.5rem] border border-[#e8dfd3] bg-gradient-to-b from-[#fffdfb] to-[#fffaf4] px-6 py-8 shadow-[0_24px_46px_rgb(0_0_0/7%),0_3px_10px_rgb(0_0_0/4%)] md:px-12 md:py-12">
+        <div className="relative mx-auto max-w-5xl rounded-3xl border border-[#e8dfd3] bg-linear-to-b from-[#fffdfb] to-[#fffaf4] px-6 py-8 shadow-[0_24px_46px_rgb(0_0_0/7%),0_3px_10px_rgb(0_0_0/4%)] md:px-12 md:py-12">
           <Image
             src="/icon-logo.svg"
             alt=""

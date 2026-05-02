@@ -18,6 +18,7 @@ import type { Post } from '@/payload-types'
 export async function getLatestPosts(
   locale: 'de' | 'en',
   limit = 6,
+  workshopType?: 'lakto' | 'tempeh' | 'kombucha',
 ): Promise<Post[]> {
   try {
     const payload = await getPayload({ config: configPromise })
@@ -27,6 +28,9 @@ export async function getLatestPosts(
       depth: 2,
       locale,
       sort: '-updatedAt',
+      ...(workshopType
+        ? { where: { workshopType: { equals: workshopType } } }
+        : {}),
     })
     return result.docs as Post[]
   } catch (err) {
