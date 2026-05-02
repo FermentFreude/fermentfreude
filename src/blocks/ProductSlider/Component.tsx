@@ -430,7 +430,7 @@ function ProductCard({ product }: { product: Product }) {
                 <Media
                   resource={image}
                   className="relative w-[55%] h-[85%]"
-                  imgClassName="w-full h-full object-contain transition-all duration-300 drop-shadow-lg group-hover:scale-105 group-hover:blur-[3px] group-hover:brightness-90"
+                  imgClassName="w-full h-full object-contain transition-transform duration-300 drop-shadow-lg group-hover:scale-105"
                 />
               ) : (
                 <div className="w-[55%] h-[70%] bg-[#ECE5DE] rounded-lg" />
