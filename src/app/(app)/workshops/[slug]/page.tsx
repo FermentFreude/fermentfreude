@@ -16,6 +16,7 @@ import { WhyOnlineSection } from '@/components/workshops/WhyOnlineSection'
 import { WorkshopBookingSection } from '@/components/workshops/WorkshopBookingSection'
 import { WorkshopTermineSection } from '@/components/workshops/WorkshopTermineSection'
 import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
+import { getLatestPosts } from '@/utilities/getLatestPosts'
 import { getVoucherCtaGlobal } from '@/utilities/getVoucherCtaGlobal'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 import { findWorkshopBySlug, getAllWorkshops } from '@/utilities/getWorkshops'
@@ -295,6 +296,18 @@ export default async function WorkshopDetailPage({ params }: Args) {
   const workshopPage = workshopPageResult.docs[0] as PageType | undefined
 
   const detail = workshopPage?.workshopDetail
+
+  // How-To Articles: per-page `howToArticles` relationship wins when set,
+  // otherwise fall back to the latest 6 published posts so editors only
+  // need to manage articles in /admin/collections/posts (one place,
+  // shared across all workshop pages).
+  const perPageHowToArticles = Array.isArray(detail?.howToArticles)
+    ? detail!.howToArticles
+    : []
+  const howToArticles =
+    perPageHowToArticles.length > 0
+      ? perPageHowToArticles
+      : await getLatestPosts(locale, 6)
 
   // Voucher CTA: use global data when toggled on, otherwise use inline detail fields
   const useGlobalVoucher = detail?.useGlobalVoucherData !== false
@@ -607,16 +620,12 @@ export default async function WorkshopDetailPage({ params }: Args) {
         {/* 4. Fermented Vegetables How-Tos */}
         <FermentedVegHowTos
           workshopType="lakto"
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.howToEyebrow,
-                  title: detail.howToTitle,
-                  description: detail.howToDescription,
-                  howToArticles: detail.howToArticles,
-                }
-              : undefined
-          }
+          cms={{
+            eyebrow: detail?.howToEyebrow,
+            title: detail?.howToTitle,
+            description: detail?.howToDescription,
+            howToArticles,
+          }}
         />
 
         {/* 5. Booking FAQ */}
@@ -730,16 +739,12 @@ export default async function WorkshopDetailPage({ params }: Args) {
         {/* 5. How-To Articles */}
         <FermentedVegHowTos
           workshopType="tempeh"
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.howToEyebrow,
-                  title: detail.howToTitle,
-                  description: detail.howToDescription,
-                  howToArticles: detail.howToArticles,
-                }
-              : undefined
-          }
+          cms={{
+            eyebrow: detail?.howToEyebrow,
+            title: detail?.howToTitle,
+            description: detail?.howToDescription,
+            howToArticles,
+          }}
         />
 
         {/* 6. FAQ */}
@@ -840,16 +845,12 @@ export default async function WorkshopDetailPage({ params }: Args) {
         {/* 5. How-To Articles */}
         <FermentedVegHowTos
           workshopType="kombucha"
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.howToEyebrow,
-                  title: detail.howToTitle,
-                  description: detail.howToDescription,
-                  howToArticles: detail.howToArticles,
-                }
-              : undefined
-          }
+          cms={{
+            eyebrow: detail?.howToEyebrow,
+            title: detail?.howToTitle,
+            description: detail?.howToDescription,
+            howToArticles,
+          }}
         />
 
         {/* 6. FAQ */}
