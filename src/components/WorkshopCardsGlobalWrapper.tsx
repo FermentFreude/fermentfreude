@@ -34,13 +34,19 @@ export async function WorkshopCardsGlobalWrapper({
     getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de'),
   ])
 
-  // Overlay dynamic dates from workshop-appointments onto each card
+  // Overlay dynamic dates from workshop-appointments onto each card.
+  // When a workshop has no bookable future appointment (every upcoming
+  // appointment is fully booked, e.g. Kombucha right now), mark the card as
+  // sold out (availableSpots: 0) so <WorkshopCardButton> renders the
+  // consistent "Ausgebucht" / "Sold Out" badge instead of a live "Buchen" CTA.
   const cards = (data.cards ?? []).map((card) => {
     const nextDateData = card.buttonUrl ? nextDates[card.buttonUrl] : undefined
+    const isKnownWorkshop = nextDateData !== undefined
+    const isSoldOut = isKnownWorkshop && nextDateData!.soldOut
     return {
       ...card,
       nextDate: nextDateData?.date || coerceNextDate(card.nextDate) || null,
-      availableSpots: nextDateData?.availableSpots,
+      availableSpots: isSoldOut ? 0 : nextDateData?.availableSpots,
     }
   })
 

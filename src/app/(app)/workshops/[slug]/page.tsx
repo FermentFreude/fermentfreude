@@ -17,6 +17,7 @@ import { WorkshopBookingSection } from '@/components/workshops/WorkshopBookingSe
 import { WorkshopTermineSection } from '@/components/workshops/WorkshopTermineSection'
 import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
 import { getLatestPosts } from '@/utilities/getLatestPosts'
+import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import { getVoucherCtaGlobal } from '@/utilities/getVoucherCtaGlobal'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 import { findWorkshopBySlug, getAllWorkshops } from '@/utilities/getWorkshops'
@@ -260,6 +261,14 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
   // Fetch workshop appointments from database
   const workshopAppointments = await getWorkshopAppointments(slug)
+  // Fetch next-bookable-appointment map so the "Other workshops" slider can
+  // render a Sold Out badge + disable the buy button on workshops that have
+  // no future appointment with available spots (e.g. Kombucha right now).
+  const nextDatesByHref = await getNextWorkshopDatesByHref(locale)
+  const soldOutByHref: Record<string, boolean> = Object.fromEntries(
+    Object.entries(nextDatesByHref).map(([href, info]) => [href, Boolean(info.soldOut)]),
+  )
+  const soldOutLabel = locale === 'en' ? 'Sold Out' : 'Ausgebucht'
   const [workshop, allWorkshops, termins, gastronomyResult, workshopPageResult] = await Promise.all(
     [
       findWorkshopBySlug(slug, locale),
@@ -664,6 +673,8 @@ export default async function WorkshopDetailPage({ params }: Args) {
           pillLabel={workshopTypePill}
           buyLabel={bookLabel}
           moreInfoLabel={learnMoreLabel}
+          soldOutByHref={soldOutByHref}
+          soldOutLabel={soldOutLabel}
         />
 
         {/* 7. Voucher CTA */}
@@ -746,6 +757,8 @@ export default async function WorkshopDetailPage({ params }: Args) {
           pillLabel={workshopTypePill}
           buyLabel={bookLabel}
           moreInfoLabel={learnMoreLabel}
+          soldOutByHref={soldOutByHref}
+          soldOutLabel={soldOutLabel}
         />
 
         {/* 4. Voucher CTA */}
@@ -853,6 +866,8 @@ export default async function WorkshopDetailPage({ params }: Args) {
           pillLabel={workshopTypePill}
           buyLabel={bookLabel}
           moreInfoLabel={learnMoreLabel}
+          soldOutByHref={soldOutByHref}
+          soldOutLabel={soldOutLabel}
         />
 
         {/* 4. Voucher CTA */}
@@ -905,8 +920,8 @@ export default async function WorkshopDetailPage({ params }: Args) {
         subtitle={workshopTypesSub}
         pillLabel={workshopTypePill}
         buyLabel={bookLabel}
-        moreInfoLabel={learnMoreLabel}
-      />
+        moreInfoLabel={learnMoreLabel}        soldOutByHref={soldOutByHref}
+        soldOutLabel={soldOutLabel}      />
 
       {/* ── 3. Booking & Details ─────────────────────────────────── */}
       {/* Alle Termine (appointments list) */}
