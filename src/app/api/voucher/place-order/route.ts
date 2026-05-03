@@ -17,7 +17,7 @@ import { getPayload } from 'payload'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { voucherCode, customerEmail, userId } = body
+    const { voucherCode, customerEmail, customerName, userId } = body
 
     if (!voucherCode || typeof voucherCode !== 'string') {
       return NextResponse.json(
@@ -124,6 +124,10 @@ export async function POST(request: NextRequest) {
         })),
         customer: userId || undefined,
         customerEmail: customerEmail || undefined,
+        customerName:
+          typeof customerName === 'string' && customerName.trim().length >= 2
+            ? customerName.trim().slice(0, 250)
+            : undefined,
         status: 'completed',
         amount: 0,
         currency: 'EUR',

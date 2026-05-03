@@ -75,6 +75,15 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     }
   }
 
+  // Prefer the name supplied by the buyer at checkout (guest flow). For
+  // logged-in users, fall back to the user.name resolved above.
+  if (
+    typeof doc.customerName === 'string' &&
+    doc.customerName.trim().length > 0
+  ) {
+    customerName = doc.customerName.trim()
+  }
+
   for (const item of items) {
     const productRef = item?.product
     if (!productRef) continue

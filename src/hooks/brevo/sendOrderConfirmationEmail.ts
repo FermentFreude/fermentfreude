@@ -33,6 +33,14 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       recipientEmail = doc.customerEmail
     }
 
+    if (
+      !recipientName &&
+      typeof doc.customerName === 'string' &&
+      doc.customerName.trim().length > 0
+    ) {
+      recipientName = doc.customerName.trim()
+    }
+
     if (!recipientEmail) return doc
 
     const items: { product?: string | { title?: string } | null; quantity?: number }[] =
