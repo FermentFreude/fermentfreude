@@ -126,6 +126,15 @@ export function UserMenu() {
           )}
         </div>
 
+        {!user && (
+          <>
+            <hr className="border-neutral-100 dark:border-neutral-700" />
+            <ul className="py-2">
+              <MenuLink href="/help" label={t.helpFaq} onClick={() => setIsOpen(false)} />
+            </ul>
+          </>
+        )}
+
         {user && (
           <>
             <hr className="border-neutral-100 dark:border-neutral-700" />
