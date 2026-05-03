@@ -466,10 +466,17 @@ export function KombuchaBookingCard({
                     Aktuell keine Termine geplant — schau bald wieder vorbei.
                   </p>
                 ) : (
-                  cmsDates.map((d) => (
+                  cmsDates.map((d) => {
+                    const isSoldOut = d.spotsLeft <= 0
+                    return (
                     <div
                       key={d.id}
-                      className="bg-[#f9f7f3] border border-[#e8e4d9] rounded-lg p-4 sm:p-5 hover:border-[#555954] transition-all duration-300"
+                      aria-disabled={isSoldOut}
+                      className={`relative rounded-lg p-4 sm:p-5 transition-all duration-300 ${
+                        isSoldOut
+                          ? 'bg-[#ECEAE5] border border-[#d8d4cc] opacity-60'
+                          : 'bg-[#f9f7f3] border border-[#e8e4d9] hover:border-[#555954]'
+                      }`}
                     >
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-start sm:items-center">
                         {/* Date */}
@@ -511,22 +518,29 @@ export function KombuchaBookingCard({
                             Plätze frei
                           </p>
                           <p className="font-display font-bold text-base text-[#1a1a1a]">
-                            {d.spotsLeft > 0 ? `${d.spotsLeft} Plätze` : 'Ausgebucht'}
+                            {isSoldOut ? 'Ausgebucht' : `${d.spotsLeft} Plätze`}
                           </p>
                         </div>
 
                         {/* Action Button */}
                         <div className="pt-2 sm:pt-0">
                           <button
-                            onClick={() => setBookingDate(d)}
-                            className="inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954] transition-all duration-300"
+                            type="button"
+                            onClick={() => !isSoldOut && setBookingDate(d)}
+                            disabled={isSoldOut}
+                            aria-label={isSoldOut ? 'Ausgebucht' : '→ Buchen'}
+                            className={`inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
+                              isSoldOut
+                                ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
+                                : 'bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954]'
+                            }`}
                           >
-                            → Buchen
+                            {isSoldOut ? 'Ausgebucht' : '→ Buchen'}
                           </button>
                         </div>
                       </div>
                     </div>
-                  ))
+                  )})
                 )}
               </div>
             </div>

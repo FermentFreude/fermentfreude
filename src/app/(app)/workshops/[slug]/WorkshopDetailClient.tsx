@@ -394,8 +394,14 @@ function DateCard({
   spotsLabel: string
   onBook: () => void
 }) {
+  const isSoldOut = workshopDate.spotsLeft <= 0
   return (
-    <div className="flex items-center justify-between rounded-xl bg-[#f5f1e8] px-6 py-5 sm:px-8">
+    <div
+      aria-disabled={isSoldOut}
+      className={`flex items-center justify-between rounded-xl px-6 py-5 sm:px-8 ${
+        isSoldOut ? 'bg-[#ECEAE5] opacity-60' : 'bg-[#f5f1e8]'
+      }`}
+    >
       <div className="space-y-1">
         <p className="font-display text-body-lg font-medium text-ff-gray-text">
           {workshopDate.date}
@@ -405,15 +411,22 @@ function DateCard({
           <span>{workshopDate.time}</span>
           <span className="text-ff-gray-text-light">•</span>
           <span>
-            {workshopDate.spotsLeft} {spotsLabel}
+            {isSoldOut ? 'Ausgebucht' : `${workshopDate.spotsLeft} ${spotsLabel}`}
           </span>
         </div>
       </div>
       <button
-        onClick={onBook}
-        className="rounded-(--radius-pill) bg-ff-gray-text px-6 py-2.5 font-display text-body font-medium text-ff-cream transition-colors hover:bg-ff-charcoal"
+        type="button"
+        onClick={() => !isSoldOut && onBook()}
+        disabled={isSoldOut}
+        aria-label={isSoldOut ? 'Ausgebucht' : bookLabel}
+        className={`rounded-(--radius-pill) px-6 py-2.5 font-display text-body font-medium transition-colors ${
+          isSoldOut
+            ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
+            : 'bg-ff-gray-text text-ff-cream hover:bg-ff-charcoal'
+        }`}
       >
-        {bookLabel}
+        {isSoldOut ? 'Ausgebucht' : bookLabel}
       </button>
     </div>
   )

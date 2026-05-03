@@ -37,6 +37,13 @@ type Props = {
   pillLabel: string
   buyLabel: string
   moreInfoLabel: string
+  /**
+   * Map of `/workshops/<slug>` → true when every upcoming appointment for
+   * that workshop is fully booked. When true, the card shows a small grey
+   * "Ausgebucht" / "Sold Out" badge and the buy button is disabled.
+   */
+  soldOutByHref?: Record<string, boolean>
+  soldOutLabel?: string
 }
 
 export function WorkshopTypesSlider({
@@ -46,6 +53,8 @@ export function WorkshopTypesSlider({
   pillLabel: _pillLabel,
   buyLabel,
   moreInfoLabel,
+  soldOutByHref,
+  soldOutLabel = 'Ausgebucht',
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -96,7 +105,7 @@ export function WorkshopTypesSlider({
           ref={scrollRef}
           onScroll={updateScrollState}
           data-workshop-slider
-          className="relative flex h-full gap-0 overflow-x-auto snap-x snap-mandatory"
+          className="relative flex h-full gap-0 overflow-x-auto snap-x snap-mandatory scroll-smooth"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -110,6 +119,7 @@ export function WorkshopTypesSlider({
             const href = slug ? `/workshops/${slug}` : '/workshops'
             const displayImage = isResolvedMedia(w.image2) ? w.image2 : w.image
             const cardBg = getWorkshopCardBg(slug)
+            const isSoldOut = Boolean(soldOutByHref?.[href])
 
             return (
               <div
@@ -120,6 +130,11 @@ export function WorkshopTypesSlider({
                 <div className={`flex w-full flex-col lg:flex-row ${cardBg}`}>
                   {/* Left: text + buttons */}
                   <div className="flex flex-col justify-center px-6 py-8 sm:px-8 md:px-12 lg:w-1/2">
+                    {isSoldOut && (
+                      <span className="mb-3 inline-flex w-fit items-center rounded-full bg-[#d0ccc6] px-3 py-1 font-display text-xs font-bold uppercase tracking-wider text-[#6b6b6b]">
+                        {soldOutLabel}
+                      </span>
+                    )}
                     <h3 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-[#1a1a1a] leading-tight">
                       {w.title}
                     </h3>
@@ -171,25 +186,34 @@ export function WorkshopTypesSlider({
                       )}
                     </div>
                     <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                      <Link
-                        href="/contact"
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-[#555954] px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#333]"
-                      >
-                        {buyLabel}
-                        <svg
-                          className="ml-2 h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                      {isSoldOut ? (
+                        <span
+                          aria-disabled="true"
+                          className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-[#d0ccc6] px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-[#9a9a9a] cursor-not-allowed"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </Link>
+                          {soldOutLabel}
+                        </span>
+                      ) : (
+                        <Link
+                          href="/contact"
+                          className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-[#555954] px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#333]"
+                        >
+                          {buyLabel}
+                          <svg
+                            className="ml-2 h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </Link>
+                      )}
                       <Link
                         href={href}
                         className="inline-flex items-center justify-center whitespace-nowrap rounded-lg border-2 border-[#E5B765] bg-transparent px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-[#555954] transition-colors hover:bg-[#E5B765]/10"
@@ -210,9 +234,14 @@ export function WorkshopTypesSlider({
               </div>
             )
           })}
+        </div>
 
-          {/* ── Bottom Navigation Arrows ───────────────────── */}
-          <div className="absolute bottom-4 md:bottom-6 right-6 md:right-8 flex items-center gap-2 z-10">
+        {/* ── Bottom Navigation Arrows ─────────────────────
+         *  Rendered as SIBLINGS of the scroll container, not children.
+         *  Children would scroll out of view when the user scrubs to the
+         *  last slide (which is what was happening before). */}
+        <div className="container-padding pointer-events-none absolute inset-x-0 bottom-4 md:bottom-6 z-10 mx-auto max-w-7xl flex justify-end">
+          <div className="pointer-events-auto flex items-center gap-2">
             <button
               type="button"
               onClick={() => scroll('left')}
