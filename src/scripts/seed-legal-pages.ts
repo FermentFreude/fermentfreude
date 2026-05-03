@@ -327,7 +327,7 @@ const LEGAL_PAGES: LegalPageSeed[] = [
         heading: 'Your Rights',
         body: [
           'You generally have rights of access, rectification, deletion, restriction, portability, and objection.',
-          'If you believe your data is being processed unlawfully, contact us at fermentfreude@gmail.com.',
+          'If you believe your data is being processed unlawfully, contact us at kontakt@fermentfreude.at.',
         ],
       },
     ],
@@ -351,7 +351,7 @@ const LEGAL_PAGES: LegalPageSeed[] = [
           'Marcel Raunnigger',
           'David Haider',
           'Telefon: +43 (0) 660 49 43 577',
-          'E-Mail: fermentfreude@gmail.com',
+          'E-Mail: kontakt@fermentfreude.at',
           'Website: https://www.ferment-freude.at',
         ],
       },
@@ -522,7 +522,7 @@ const LEGAL_PAGES: LegalPageSeed[] = [
           'Marcel Raunnigger',
           'David Haider',
           'Phone: +43 (0) 660 49 43 577',
-          'Email: fermentfreude@gmail.com',
+          'Email: kontakt@fermentfreude.at',
           'Website: https://www.ferment-freude.at',
         ],
       },
@@ -781,7 +781,7 @@ const LEGAL_PAGES: LegalPageSeed[] = [
         heading: 'Contact',
         body: [
           'Phone: +43 660 4943577',
-          'Email: fermentfreude@gmail.com',
+          'Email: kontakt@fermentfreude.at',
         ],
       },
       {

@@ -267,7 +267,7 @@ export function OpeningPopups({ locale }: Props) {
                   <p className="font-sans text-[11px] sm:text-xs text-red-600">{errorMsg}</p>
                   {errorCode === 'NEWSLETTER_NOT_CONFIGURED' ? (
                     <a
-                      href={`mailto:hello@fermentfreude.com?subject=${
+                      href={`mailto:kontakt@fermentfreude.at?subject=${
                         isDe ? 'Newsletter Anmeldung' : 'Newsletter Signup'
                       }&body=${encodeURIComponent(email || '')}`}
                       className="inline-block font-sans text-[11px] sm:text-xs font-semibold text-[#1d1d1d] underline underline-offset-1"

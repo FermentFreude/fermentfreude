@@ -47,11 +47,7 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
       {hasBackgroundImage ? (
         <div className="overflow-hidden rounded-lg">
           <div className="relative aspect-4/3 md:aspect-21/9 md:min-h-72 w-full">
-            <Media
-              resource={cms.backgroundImage as MediaType}
-              fill
-              imgClassName="object-cover"
-            />
+            <Media resource={cms.backgroundImage as MediaType} fill imgClassName="object-cover" />
             <div className="absolute inset-0 bg-ff-ivory-mist/82" aria-hidden />
             <div className="absolute inset-0 flex items-center justify-center px-6 py-12">
               <div className="mx-auto max-w-3xl text-center">

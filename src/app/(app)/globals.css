@@ -194,7 +194,9 @@
   }
 
   a {
-    transition: color 150ms ease, opacity 150ms ease;
+    transition:
+      color 150ms ease,
+      opacity 150ms ease;
   }
 
   button {
@@ -349,8 +351,7 @@
   .page-legal {
     background:
       radial-gradient(1200px 500px at 10% -10%, #f8f2e9 0%, transparent 60%),
-      radial-gradient(1200px 500px at 100% 0%, #f1e8dc 0%, transparent 58%),
-      #f2ebe2;
+      radial-gradient(1200px 500px at 100% 0%, #f1e8dc 0%, transparent 58%), #f2ebe2;
   }
 
   .legal-content-block {

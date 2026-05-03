@@ -97,9 +97,7 @@ export default async function WorkshopsPage() {
         soldOutLabel={ws?.workshopsCalendarSoldOutLabel}
         bookLabel={ws?.workshopsCalendarBookLabel}
         emptyMessage={ws?.workshopsCalendarEmptyMessage}
-        comingSoonLabel={
-          locale === 'en' ? 'New dates coming soon' : 'Bald neue Termine verfügbar'
-        }
+        comingSoonLabel={locale === 'en' ? 'New dates coming soon' : 'Bald neue Termine verfügbar'}
       />
 
       {/* 3. Voucher CTA — page override or global */}

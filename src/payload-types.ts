@@ -846,6 +846,7 @@ export interface Page {
         | ThreeItemGridBlock
         | BannerBlock
         | FormBlock
+        | HelpFaqBlock
         | VoucherCtaBlock
         | LaktoVoucherCtaBlock
         | CourseWaitlistCtaBlock
@@ -2046,7 +2047,7 @@ export interface Page {
         }[]
       | null;
     /**
-     * Email shown at bottom (e.g. "info@fermentfreude.de").
+     * Email shown at bottom (e.g. "kontakt@fermentfreude.at").
      */
     faqContactEmail?: string | null;
     /**
@@ -2166,7 +2167,7 @@ export interface ContactBlock {
      */
     phone?: string | null;
     /**
-     * Displayed on the contact page (e.g. fermentfreude@gmail.com).
+     * Displayed on the contact page (e.g. kontakt@fermentfreude.at).
      */
     email?: string | null;
   };
@@ -3491,6 +3492,67 @@ export interface FormBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HelpFaqBlock".
+ */
+export interface HelpFaqBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Top of the Help page (eyebrow, title, intro).
+   */
+  header: {
+    /**
+     * Small label above the title (e.g. "HELP & SUPPORT").
+     */
+    eyebrow: string;
+    title: string;
+    intro: string;
+    /**
+     * e.g. "Topics on this page".
+     */
+    tocLabel: string;
+  };
+  /**
+   * Each section becomes a card on the page and an entry in the table of contents. Add, reorder, or delete sections freely.
+   */
+  sections?:
+    | {
+        /**
+         * URL anchor for this section (lowercase, no spaces — e.g. "account", "workshops", "vouchers"). Used in the table-of-contents links. Same value for both languages.
+         */
+        key: string;
+        title: string;
+        intro?: string | null;
+        items?:
+          | {
+              question: string;
+              answer: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Dark card at the bottom inviting visitors to email.
+   */
+  contact: {
+    title: string;
+    body: string;
+    ctaLabel: string;
+    /**
+     * Email address shown next to the button and used for the mailto: link. Same for both languages.
+     */
+    email: string;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'helpFaq';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "VoucherCtaBlock".
  */
 export interface VoucherCtaBlock {
@@ -3639,7 +3701,7 @@ export interface CourseWaitlistCtaBlock {
    */
   submitLabel: string;
   /**
-   * Shown after the visitor’s email app opens (mailto to hello@fermentfreude.com). Explain that they should send the pre-filled message — no server/API.
+   * Shown after the visitor’s email app opens (mailto to kontakt@fermentfreude.at). Explain that they should send the pre-filled message — no server/API.
    */
   successMessage: string;
   id?: string | null;
@@ -4741,6 +4803,7 @@ export interface PagesSelect<T extends boolean = true> {
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        helpFaq?: T | HelpFaqBlockSelect<T>;
         voucherCta?: T | VoucherCtaBlockSelect<T>;
         laktoVoucherCta?: T | LaktoVoucherCtaBlockSelect<T>;
         courseWaitlistCta?: T | CourseWaitlistCtaBlockSelect<T>;
@@ -5785,6 +5848,46 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HelpFaqBlock_select".
+ */
+export interface HelpFaqBlockSelect<T extends boolean = true> {
+  visible?: T;
+  header?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        intro?: T;
+        tocLabel?: T;
+      };
+  sections?:
+    | T
+    | {
+        key?: T;
+        title?: T;
+        intro?: T;
+        items?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  contact?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        ctaLabel?: T;
+        email?: T;
+      };
   id?: T;
   blockName?: T;
 }

@@ -260,7 +260,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               : 'Do you have questions about your order?'}
           </p>
           <a
-            href="mailto:fermentfreude@gmail.com"
+            href="mailto:kontakt@fermentfreude.at"
             className="text-ff-gold hover:opacity-80 font-display font-medium"
           >
             {t.contactSupport}
@@ -379,7 +379,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
           <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescWorkshop}</p>
           <a
-            href="mailto:fermentfreude@gmail.com"
+            href="mailto:kontakt@fermentfreude.at"
             className="text-ff-gold hover:opacity-80 font-display font-medium"
           >
             {t.contactSupport}
@@ -498,7 +498,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
           <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescCourse}</p>
           <a
-            href="mailto:fermentfreude@gmail.com"
+            href="mailto:kontakt@fermentfreude.at"
             className="text-ff-gold hover:opacity-80 font-display font-medium"
           >
             {t.contactSupport}
@@ -637,7 +637,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
         <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescOrder}</p>
         <a
-          href="mailto:fermentfreude@gmail.com"
+          href="mailto:kontakt@fermentfreude.at"
           className="text-ff-gold hover:opacity-80 font-display font-medium"
         >
           {t.contactSupport}

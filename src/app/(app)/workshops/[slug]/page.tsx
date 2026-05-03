@@ -314,12 +314,9 @@ export default async function WorkshopDetailPage({ params }: Args) {
   // no longer point to an existing post are returned by Payload as bare
   // strings and must be ignored, otherwise the page falls into a hardcoded
   // placeholder state with no cover images (see tempeh page).
-  const perPageHowToArticlesRaw = Array.isArray(detail?.howToArticles)
-    ? detail!.howToArticles
-    : []
+  const perPageHowToArticlesRaw = Array.isArray(detail?.howToArticles) ? detail!.howToArticles : []
   const perPageHowToArticles = perPageHowToArticlesRaw.filter(
-    (item): item is Exclude<typeof item, string> =>
-      typeof item === 'object' && item !== null,
+    (item): item is Exclude<typeof item, string> => typeof item === 'object' && item !== null,
   )
   // Per founder request (issue tracker #2): show the same articles on every
   // workshop page (Lakto, Tempeh, Kombucha). The `workshopType` field on
@@ -920,8 +917,10 @@ export default async function WorkshopDetailPage({ params }: Args) {
         subtitle={workshopTypesSub}
         pillLabel={workshopTypePill}
         buyLabel={bookLabel}
-        moreInfoLabel={learnMoreLabel}        soldOutByHref={soldOutByHref}
-        soldOutLabel={soldOutLabel}      />
+        moreInfoLabel={learnMoreLabel}
+        soldOutByHref={soldOutByHref}
+        soldOutLabel={soldOutLabel}
+      />
 
       {/* ── 3. Booking & Details ─────────────────────────────────── */}
       {/* Alle Termine (appointments list) */}
