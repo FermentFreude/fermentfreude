@@ -39,6 +39,9 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
   // Fetch order data to check if it's a pickup order
   let isPickupOrder = false
   let pickupInfo: { date?: string; time?: string } = {}
+  // Resolve pickup location from the workshop-locations collection (admin-managed)
+  let pickupLocationName = 'The Ginery'
+  let pickupLocationAddress = 'Grabenstraße 15, 8010 Graz, Austria'
 
   if (orderId && type === 'order') {
     try {
@@ -58,6 +61,22 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             time: orderData.pickupTime as string | undefined,
           }
         }
+      }
+
+      // Resolve current pickup location (first active record)
+      try {
+        const locations = await payload.find({
+          collection: 'workshop-locations',
+          where: { isActive: { equals: true } },
+          limit: 1,
+          locale,
+          depth: 0,
+        })
+        const loc = locations.docs[0] as { name?: string; address?: string } | undefined
+        if (loc?.name) pickupLocationName = loc.name
+        if (loc?.address) pickupLocationAddress = loc.address
+      } catch {
+        // ignore — fallback used
       }
     } catch (error) {
       console.error('Failed to fetch order:', error)
@@ -122,10 +141,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               <Store className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
               <div>
                 <p className="text-body-sm font-semibold text-ff-near-black">
-                  {locale === 'de' ? 'The Ginery' : 'The Ginery'}
+                  {pickupLocationName}
                 </p>
                 <p className="text-body-sm text-ff-text-muted">
-                  Grabenstraße 15, 8010 Graz, Austria
+                  {pickupLocationAddress}
                 </p>
               </div>
             </div>

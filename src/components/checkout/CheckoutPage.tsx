@@ -128,8 +128,10 @@ const CHECKOUT_EN = {
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
 
-// Store pickup location (currently only The Ginery)
-const PICKUP_LOCATION = {
+// Default pickup location — overridden at runtime by the first active
+// workshop-locations record (admin-managed). Kept here as a static fallback
+// in case the fetch fails or no locations are configured yet.
+const DEFAULT_PICKUP_LOCATION = {
   id: 'the-ginery',
   name: 'The Ginery',
   address: 'Grabenstraße 15, 8010 Graz, Austria',
@@ -144,6 +146,9 @@ const PICKUP_LOCATION = {
     sunday: { open: 'closed', close: 'closed' },
   },
 }
+
+const buildMapLink = (name: string, address: string) =>
+  `https://www.google.com/maps/search/${encodeURIComponent(`${name} ${address}`)}`
 
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
@@ -167,6 +172,7 @@ export const CheckoutPage: React.FC = () => {
   /* ── Pickup State ── */
   const [pickupDate, setPickupDate] = useState<string>('')
   const [pickupTime, setPickupTime] = useState<string>('')
+  const [pickupLocation, setPickupLocation] = useState(DEFAULT_PICKUP_LOCATION)
 
   /* ── Voucher Code State ── */
   const [voucherCode, setVoucherCode] = useState('')
@@ -179,6 +185,39 @@ export const CheckoutPage: React.FC = () => {
   const checkoutEmail = email || user?.email || ''
   const { locale } = useLocale()
   const t = locale === 'de' ? CHECKOUT_DE : CHECKOUT_EN
+
+  // Fetch the active pickup location from the workshop-locations collection.
+  // Falls back to DEFAULT_PICKUP_LOCATION on any error / empty result.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(
+          `/api/workshop-locations?where[isActive][equals]=true&limit=1&depth=0&locale=${locale}`,
+          { cache: 'no-store' },
+        )
+        if (!res.ok) return
+        const json = (await res.json()) as {
+          docs?: { id: string; name?: string; address?: string }[]
+        }
+        const loc = json?.docs?.[0]
+        if (!cancelled && loc?.name && loc?.address) {
+          setPickupLocation({
+            ...DEFAULT_PICKUP_LOCATION,
+            id: loc.id,
+            name: loc.name,
+            address: loc.address,
+            mapLink: buildMapLink(loc.name, loc.address),
+          })
+        }
+      } catch {
+        // ignore — fallback used
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [locale])
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
@@ -251,6 +290,7 @@ export const CheckoutPage: React.FC = () => {
       { value: '10:00', label: '10:00 AM' },
       { value: '11:00', label: '11:00 AM' },
       { value: '12:00', label: '12:00 PM' },
+      { value: '13:00', label: '1:00 PM' },
       { value: '14:00', label: '2:00 PM' },
       { value: '15:00', label: '3:00 PM' },
       { value: '16:00', label: '4:00 PM' },
@@ -418,10 +458,10 @@ export const CheckoutPage: React.FC = () => {
 
         // For pickup orders, pass pickup info instead of addresses
         if (isAllPhysicalPickup) {
-          additionalData.pickupLocation = PICKUP_LOCATION.name
+          additionalData.pickupLocation = pickupLocation.name
           additionalData.pickupDate = pickupDate
           additionalData.pickupTime = pickupTime
-          additionalData.pickupAddress = PICKUP_LOCATION.address
+          additionalData.pickupAddress = pickupLocation.address
         } else {
           // For shipped orders, include addresses
           additionalData.billingAddress = billingAddress
@@ -626,11 +666,11 @@ export const CheckoutPage: React.FC = () => {
             {/* Pickup Location */}
             <div className="mb-6 rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
               <h3 className="mb-3 font-display font-semibold text-ff-near-black">
-                {PICKUP_LOCATION.name}
+                {pickupLocation.name}
               </h3>
-              <p className="mb-3 text-body-sm text-ff-gray-text-light">{PICKUP_LOCATION.address}</p>
+              <p className="mb-3 text-body-sm text-ff-gray-text-light">{pickupLocation.address}</p>
               <a
-                href={PICKUP_LOCATION.mapLink}
+                href={pickupLocation.mapLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-body-sm text-ff-gold-accent underline hover:text-ff-near-black"
