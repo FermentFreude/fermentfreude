@@ -1,13 +1,41 @@
 'use client'
 
 import { useAuth } from '@/providers/Auth'
+import { useLocale } from '@/providers/Locale'
 import { cn } from '@/utilities/cn'
 import { User } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
+const COPY = {
+  de: {
+    accountMenu: 'Konto-Menü',
+    signIn: 'Anmelden',
+    register: 'Registrieren',
+    inASnap: '— ganz schnell',
+    yourAccount: 'Mein Konto',
+    orders: 'Bestellungen',
+    addresses: 'Adressen',
+    helpFaq: 'Hilfe & FAQ',
+    signOut: 'Abmelden',
+  },
+  en: {
+    accountMenu: 'Account menu',
+    signIn: 'Sign in',
+    register: 'Register',
+    inASnap: '— in a snap',
+    yourAccount: 'Your account',
+    orders: 'Orders',
+    addresses: 'Addresses',
+    helpFaq: 'Help & FAQ',
+    signOut: 'Sign out',
+  },
+}
+
 export function UserMenu() {
   const { user } = useAuth()
+  const { locale } = useLocale()
+  const t = COPY[locale === 'de' ? 'de' : 'en']
   const [isOpen, setIsOpen] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -48,7 +76,7 @@ export function UserMenu() {
       <button
         onClick={() => setIsOpen((o) => !o)}
         className="relative p-1.5 text-ff-gray-15 dark:text-neutral-300 hover:text-ff-charcoal dark:hover:text-white transition-colors hover:cursor-pointer"
-        aria-label="Account menu"
+        aria-label={t.accountMenu}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -71,7 +99,7 @@ export function UserMenu() {
                 onClick={() => setIsOpen(false)}
                 className="block w-full text-center rounded-sm bg-ff-near-black dark:bg-white px-4 py-2.5 font-display text-sm font-bold text-white dark:text-ff-near-black transition-colors hover:bg-ff-charcoal dark:hover:bg-neutral-200"
               >
-                Sign in
+                {t.signIn}
               </Link>
               <div className="mt-3 flex items-center gap-2 text-sm">
                 <Link
@@ -79,9 +107,9 @@ export function UserMenu() {
                   onClick={() => setIsOpen(false)}
                   className="font-bold text-ff-near-black dark:text-white underline underline-offset-2 hover:no-underline"
                 >
-                  Register
+                  {t.register}
                 </Link>
-                <span className="text-ff-charcoal dark:text-neutral-400">— in a snap</span>
+                <span className="text-ff-charcoal dark:text-neutral-400">{t.inASnap}</span>
               </div>
             </>
           ) : (
@@ -103,14 +131,14 @@ export function UserMenu() {
             <hr className="border-neutral-100 dark:border-neutral-700" />
 
             <ul className="py-2">
-              <MenuLink href="/account" label="Your account" onClick={() => setIsOpen(false)} />
-              <MenuLink href="/account/orders" label="Orders" onClick={() => setIsOpen(false)} />
+              <MenuLink href="/account" label={t.yourAccount} onClick={() => setIsOpen(false)} />
+              <MenuLink href="/account/orders" label={t.orders} onClick={() => setIsOpen(false)} />
               <MenuLink
                 href="/account/addresses"
-                label="Addresses"
+                label={t.addresses}
                 onClick={() => setIsOpen(false)}
               />
-              <MenuLink href="/help" label="Help & FAQ" onClick={() => setIsOpen(false)} />
+              <MenuLink href="/help" label={t.helpFaq} onClick={() => setIsOpen(false)} />
             </ul>
 
             <hr className="border-neutral-100 dark:border-neutral-700" />
@@ -120,7 +148,7 @@ export function UserMenu() {
                 onClick={() => setIsOpen(false)}
                 className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
               >
-                Sign out
+                {t.signOut}
               </Link>
             </div>
           </>
