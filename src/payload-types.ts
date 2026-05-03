@@ -3936,6 +3936,10 @@ export interface Workshop {
    */
   image?: (string | null) | Media;
   /**
+   * What attendees should bring to the workshop. Plain text — line breaks are preserved in confirmation/reminder emails. Leave empty to omit the section.
+   */
+  whatToBring?: string | null;
+  /**
    * Hide workshop from frontend if unchecked
    */
   isActive?: boolean | null;
@@ -6191,6 +6195,7 @@ export interface WorkshopsSelect<T extends boolean = true> {
   basePrice?: T;
   maxCapacityPerSlot?: T;
   image?: T;
+  whatToBring?: T;
   isActive?: T;
   updatedAt?: T;
   createdAt?: T;
