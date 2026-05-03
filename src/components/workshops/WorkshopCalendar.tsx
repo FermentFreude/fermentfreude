@@ -70,11 +70,17 @@ function WorkshopCard({
   cardImage,
   onBookingClick,
   nextDateLabel,
+  isFullySoldOut,
+  soldOutLabel,
+  comingSoonLabel,
 }: {
   workshop: WorkshopCalendarCard
   cardImage: MediaType | null
   onBookingClick?: (workshop: WorkshopCalendarCard) => void
   nextDateLabel?: string | null
+  isFullySoldOut?: boolean
+  soldOutLabel?: string | null
+  comingSoonLabel?: string | null
 }) {
   return (
     <div className="bg-white border border-[#e8e4d9] rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300 h-full flex flex-col">
@@ -97,22 +103,38 @@ function WorkshopCard({
       {/* Content Section */}
       <div className="flex flex-col flex-1 p-4 sm:p-6">
         {/* Workshop Type Badge */}
-        <div className="mb-3 inline-block">
+        <div className="mb-3 inline-flex flex-wrap items-center gap-2">
           <span className="font-display text-xs sm:text-sm font-bold uppercase tracking-wider bg-[#f5f1e8] text-[#555954] px-3 py-1.5 rounded-full">
             {getWorkshopTypeLabel(workshop.workshopType)}
           </span>
+          {isFullySoldOut && (
+            <span className="font-display text-xs font-bold uppercase tracking-wider bg-[#d0ccc6] text-[#6b6b6b] px-3 py-1.5 rounded-full">
+              {soldOutLabel || 'Ausgebucht'}
+            </span>
+          )}
         </div>
 
-        {/* Next Date */}
-        {workshop.nextDate && (
+        {/* Next Date OR Coming Soon Message */}
+        {isFullySoldOut ? (
           <div className="mb-4">
             <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide">
               {nextDateLabel || 'Nächster Termin'}
             </p>
-            <p className="font-display text-base sm:text-lg font-bold text-[#1a1a1a]">
-              {workshop.nextDate}
+            <p className="font-display text-sm sm:text-base font-medium text-[#6b6b6b] italic">
+              {comingSoonLabel || 'Bald neue Termine verfügbar'}
             </p>
           </div>
+        ) : (
+          workshop.nextDate && (
+            <div className="mb-4">
+              <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide">
+                {nextDateLabel || 'Nächster Termin'}
+              </p>
+              <p className="font-display text-base sm:text-lg font-bold text-[#1a1a1a]">
+                {workshop.nextDate}
+              </p>
+            </div>
+          )
         )}
 
         {/* Duration */}
@@ -145,10 +167,17 @@ function WorkshopCard({
 
           {/* Booking Button */}
           <button
-            onClick={() => onBookingClick?.(workshop)}
-            className="inline-flex items-center justify-center px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide rounded-md bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954] transition-all duration-300"
+            type="button"
+            onClick={() => !isFullySoldOut && onBookingClick?.(workshop)}
+            disabled={isFullySoldOut}
+            aria-disabled={isFullySoldOut}
+            className={`inline-flex items-center justify-center px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide rounded-md transition-all duration-300 ${
+              isFullySoldOut
+                ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
+                : 'bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954]'
+            }`}
           >
-            {workshop.buttonLabel || 'Buchen'}
+            {isFullySoldOut ? soldOutLabel || 'Ausgebucht' : workshop.buttonLabel || 'Buchen'}
           </button>
         </div>
       </div>
@@ -171,6 +200,7 @@ export function WorkshopCalendar({
   soldOutLabel,
   bookLabel,
   emptyMessage,
+  comingSoonLabel,
 }: {
   cards?: WorkshopCalendarCard[] | null
   title?: string | null
@@ -186,6 +216,7 @@ export function WorkshopCalendar({
   soldOutLabel?: string | null
   bookLabel?: string | null
   emptyMessage?: string | null
+  comingSoonLabel?: string | null
 } = {}) {
   // Default workshop card types (fallback when no CMS data)
   const defaultWorkshopCards: WorkshopCalendarCard[] = [
@@ -356,6 +387,15 @@ export function WorkshopCalendar({
                     ? (workshop.cardImage as MediaType)
                     : null
 
+                // Per-card sold-out check: every upcoming appointment for this
+                // workshop type has zero spots → show "Sold Out" badge and
+                // replace the date with a "more dates coming soon" message.
+                const futureAppts = upcomingDates.filter(
+                  (d) => d.workshopType === workshop.workshopType,
+                )
+                const hasAvailable = futureAppts.some((d) => d.availableSpots > 0)
+                const isFullySoldOut = futureAppts.length > 0 && !hasAvailable
+
                 return (
                   <WorkshopCard
                     key={workshop.workshopType}
@@ -363,6 +403,9 @@ export function WorkshopCalendar({
                     cardImage={cardImage}
                     onBookingClick={() => handleCardBookingClick(workshop)}
                     nextDateLabel={nextDateLabel}
+                    isFullySoldOut={isFullySoldOut}
+                    soldOutLabel={soldOutLabel}
+                    comingSoonLabel={comingSoonLabel}
                   />
                 )
               })}
