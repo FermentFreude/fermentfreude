@@ -32,8 +32,14 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
       year: 'numeric',
     })
 
-    // Derive first name from purchaser email (no name field on Voucher collection)
-    const purchaserFirstName = purchaserEmail.split('@')[0] ?? ''
+    // Derive first name: prefer explicit purchaserName, fall back to email local-part
+    const purchaserNameValue =
+      typeof doc.purchaserName === 'string' && doc.purchaserName.trim().length > 0
+        ? doc.purchaserName.trim()
+        : ''
+    const purchaserFirstName = purchaserNameValue
+      ? purchaserNameValue.split(/\s+/)[0]
+      : (purchaserEmail.split('@')[0] ?? '')
 
     // Standard URLs for template buttons/links
     const shopUrl = `${baseUrl}/workshops`

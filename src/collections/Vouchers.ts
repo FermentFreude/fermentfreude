@@ -68,6 +68,14 @@ export const Vouchers: CollectionConfig = {
 
     /* ── Purchaser Details ── */
     {
+      name: 'purchaserName',
+      type: 'text',
+      admin: {
+        description:
+          'Full name of the buyer (used in greeting of confirmation email). Optional for legacy vouchers.',
+      },
+    },
+    {
       name: 'purchaserEmail',
       type: 'email',
       required: true,

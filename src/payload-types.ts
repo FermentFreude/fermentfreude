@@ -4279,6 +4279,10 @@ export interface Voucher {
    */
   value: number;
   /**
+   * Full name of the buyer (used in greeting of confirmation email). Optional for legacy vouchers.
+   */
+  purchaserName?: string | null;
+  /**
    * Email of the buyer (receives purchase confirmation)
    */
   purchaserEmail: string;
@@ -6240,6 +6244,7 @@ export interface VouchersSelect<T extends boolean = true> {
   code?: T;
   status?: T;
   value?: T;
+  purchaserName?: T;
   purchaserEmail?: T;
   recipientEmail?: T;
   deliveryMethod?: T;
