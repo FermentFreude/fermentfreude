@@ -111,6 +111,14 @@ export function UserMenu() {
                 </Link>
                 <span className="text-ff-charcoal dark:text-neutral-400">{t.inASnap}</span>
               </div>
+              <hr className="my-3 border-neutral-100 dark:border-neutral-700" />
+              <Link
+                href="/help"
+                onClick={() => setIsOpen(false)}
+                className="block rounded-lg px-2 py-2 text-sm text-ff-gray-15 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+              >
+                {t.helpFaq}
+              </Link>
             </>
           ) : (
             <div className="flex items-center gap-3 pb-1">
@@ -125,15 +133,6 @@ export function UserMenu() {
             </div>
           )}
         </div>
-
-        {!user && (
-          <>
-            <hr className="border-neutral-100 dark:border-neutral-700" />
-            <ul className="py-2">
-              <MenuLink href="/help" label={t.helpFaq} onClick={() => setIsOpen(false)} />
-            </ul>
-          </>
-        )}
 
         {user && (
           <>
