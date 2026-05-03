@@ -106,7 +106,7 @@ export async function CourseWaitlistCtaBlock({
   }
 
   const imageSlot = hasRenderableImage(mediaForRender) ? (
-    <div className="relative mx-auto aspect-[496/320] w-full max-w-xl overflow-hidden rounded-2xl border border-ff-border-light/50 bg-[#ECE5DE] shadow-md lg:mx-0 lg:max-w-none">
+    <div className="relative mx-auto aspect-496/320 w-full max-w-xl overflow-hidden rounded-2xl border border-ff-border-light/50 bg-[#ECE5DE] shadow-md lg:mx-0 lg:max-w-none">
       <Media
         resource={mediaForRender}
         fill
@@ -134,7 +134,7 @@ export async function CourseWaitlistCtaBlock({
       <ContentSection
         bg="none"
         padding="lg"
-        className="relative overflow-hidden border-t border-ff-border-light/40 bg-gradient-to-b from-ff-ivory via-ff-cream to-ff-warm-gray/50"
+        className="relative overflow-hidden border-t border-ff-border-light/40 bg-linear-to-b from-ff-ivory via-ff-cream to-ff-warm-gray/50"
       >
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_100%_20%,rgba(229,183,101,0.12),transparent_55%)]"
