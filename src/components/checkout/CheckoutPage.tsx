@@ -36,7 +36,9 @@ const CHECKOUT_DE = {
   createAccount: 'Konto erstellen',
   notYou: 'Nicht du?',
   logOut: 'Abmelden',
-  guestPrompt: 'Gib deine E-Mail-Adresse ein, um als Gast zu bestellen.',
+  guestPrompt: 'Gib deinen Namen und deine E-Mail-Adresse ein, um als Gast zu bestellen.',
+  nameLabel: 'Vor- und Nachname',
+  namePlaceholder: 'z. B. Maria Musterfrau',
   emailLabel: 'E-Mail-Adresse',
   continueAsGuest: 'Als Gast fortfahren',
   address: 'Adresse',
@@ -83,7 +85,9 @@ const CHECKOUT_EN = {
   createAccount: 'Create an account',
   notYou: 'Not you?',
   logOut: 'Log out',
-  guestPrompt: 'Enter your email to checkout as a guest.',
+  guestPrompt: 'Enter your name and email to checkout as a guest.',
+  nameLabel: 'Full name',
+  namePlaceholder: 'e.g. Jane Doe',
   emailLabel: 'Email Address',
   continueAsGuest: 'Continue as guest',
   address: 'Address',
@@ -150,6 +154,7 @@ export const CheckoutPage: React.FC = () => {
    * State to manage the email input for guest checkout.
    */
   const [email, setEmail] = useState('')
+  const [customerName, setCustomerName] = useState('')
   const [emailEditable, setEmailEditable] = useState(true)
   const [paymentData, setPaymentData] = useState<null | Record<string, unknown>>(null)
   const { initiatePayment } = usePayments()
@@ -379,6 +384,7 @@ export const CheckoutPage: React.FC = () => {
         body: JSON.stringify({
           voucherCode: voucherApplied.code,
           customerEmail: email || user?.email,
+          customerName: customerName.trim() || user?.name || undefined,
           userId: user?.id,
         }),
       })
@@ -401,7 +407,7 @@ export const CheckoutPage: React.FC = () => {
       setError(t.connectionError)
       setProcessingPayment(false)
     }
-  }, [voucherApplied, email, user, clearCart, router, hasWorkshop, isAllDigital, t])
+  }, [voucherApplied, email, customerName, user, clearCart, router, hasWorkshop, isAllDigital, t])
 
   const initiatePaymentIntent = useCallback(
     async (paymentID: string) => {
@@ -531,6 +537,28 @@ export const CheckoutPage: React.FC = () => {
               <p className="text-body-sm text-ff-gray-text-light">{t.guestPrompt}</p>
               <FormItem>
                 <Label
+                  htmlFor="customerName"
+                  className="font-display text-body-sm font-bold text-ff-near-black"
+                >
+                  {t.nameLabel}
+                </Label>
+                <Input
+                  disabled={!emailEditable}
+                  id="customerName"
+                  name="customerName"
+                  autoComplete="name"
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  value={customerName}
+                  required
+                  type="text"
+                  placeholder={t.namePlaceholder}
+                  minLength={2}
+                  maxLength={250}
+                  className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
+                />
+              </FormItem>
+              <FormItem>
+                <Label
                   htmlFor="email"
                   className="font-display text-body-sm font-bold text-ff-near-black"
                 >
@@ -547,7 +575,7 @@ export const CheckoutPage: React.FC = () => {
                 />
               </FormItem>
               <Button
-                disabled={!email || !emailEditable}
+                disabled={!email || customerName.trim().length < 2 || !emailEditable}
                 onClick={(e) => {
                   e.preventDefault()
                   setEmailEditable(false)
@@ -824,6 +852,7 @@ export const CheckoutPage: React.FC = () => {
                 <div className="flex flex-col gap-6">
                   <CheckoutForm
                     customerEmail={checkoutEmail}
+                    customerName={customerName.trim() || user?.name || ''}
                     billingAddress={billingAddress}
                     setProcessingPayment={setProcessingPayment}
                     isAllDigital={isAllDigital}

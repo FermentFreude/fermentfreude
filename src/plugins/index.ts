@@ -16,6 +16,7 @@ import { isDocumentOwner } from '@/access/isDocumentOwner'
 import { autoCompleteDigitalOrders } from '@/collections/Orders/autoCompleteDigitalOrders'
 import { autoEnrollOnPurchase } from '@/collections/Orders/autoEnrollOnPurchase'
 import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBookings'
+import { copyCustomerNameFromTransaction } from '@/collections/Orders/copyCustomerNameFromTransaction'
 import { decrementInventory } from '@/collections/Orders/decrementInventory'
 import {
   handleChargeRefunded,
@@ -165,8 +166,25 @@ export const plugins: Plugin[] = [
           ...defaultCollection?.admin,
           group: 'Shop',
         },
+        fields: [
+          ...(defaultCollection?.fields ?? []),
+          {
+            name: 'customerName',
+            type: 'text',
+            label: 'Customer name',
+            admin: {
+              description:
+                'Full name supplied by the buyer at checkout. Used to greet the buyer in confirmation emails. Optional for legacy orders.',
+              position: 'sidebar',
+            },
+          },
+        ],
         hooks: {
           ...defaultCollection?.hooks,
+          beforeChange: [
+            ...(defaultCollection?.hooks?.beforeChange ?? []),
+            copyCustomerNameFromTransaction,
+          ],
           afterChange: [
             ...(defaultCollection?.hooks?.afterChange ?? []),
             decrementInventory,
@@ -176,6 +194,23 @@ export const plugins: Plugin[] = [
             autoCompleteDigitalOrders,
           ],
         },
+      }),
+    },
+    transactions: {
+      transactionsCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: [
+          ...(defaultCollection?.fields ?? []),
+          {
+            name: 'customerName',
+            type: 'text',
+            label: 'Customer name',
+            admin: {
+              description:
+                'Full name supplied by the buyer at checkout. Copied to the resulting Order when it is created.',
+            },
+          },
+        ],
       }),
     },
   }),

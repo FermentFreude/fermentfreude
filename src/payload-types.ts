@@ -301,6 +301,10 @@ export interface Order {
   status?: OrderStatus;
   amount?: number | null;
   currency?: 'EUR' | null;
+  /**
+   * Full name supplied by the buyer at checkout. Used to greet the buyer in confirmation emails. Optional for legacy orders.
+   */
+  customerName?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3997,6 +4001,10 @@ export interface Transaction {
   cart?: (string | null) | Cart;
   amount?: number | null;
   currency?: 'EUR' | null;
+  /**
+   * Full name supplied by the buyer at checkout. Copied to the resulting Order when it is created.
+   */
+  customerName?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -6704,6 +6712,7 @@ export interface OrdersSelect<T extends boolean = true> {
   status?: T;
   amount?: T;
   currency?: T;
+  customerName?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -6749,6 +6758,7 @@ export interface TransactionsSelect<T extends boolean = true> {
   cart?: T;
   amount?: T;
   currency?: T;
+  customerName?: T;
   updatedAt?: T;
   createdAt?: T;
 }
