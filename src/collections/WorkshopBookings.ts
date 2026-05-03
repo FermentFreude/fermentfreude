@@ -1,5 +1,4 @@
 import { isAdmin } from '@/access/isAdmin'
-import { sendWorkshopBookingEmail } from '@/hooks/brevo/sendWorkshopBookingEmail'
 import { CollectionConfig } from 'payload'
 
 export const WorkshopBookings: CollectionConfig = {
@@ -7,9 +6,6 @@ export const WorkshopBookings: CollectionConfig = {
   labels: {
     singular: 'Workshop Booking',
     plural: 'Workshop Bookings',
-  },
-  hooks: {
-    afterChange: [sendWorkshopBookingEmail],
   },
   admin: {
     useAsTitle: 'workshopTitle',
