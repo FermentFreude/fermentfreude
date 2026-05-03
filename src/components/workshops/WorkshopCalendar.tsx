@@ -5,6 +5,7 @@ import { addWorkshopToCart } from '@/app/(app)/workshops/[slug]/add-to-cart-util
 import type { WorkshopDetailData } from '@/app/(app)/workshops/[slug]/workshop-data'
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -236,6 +237,7 @@ export function WorkshopCalendar({
   const [cardBookingWorkshop, setCardBookingWorkshop] = useState<WorkshopCalendarCard | null>(null)
   const { addItem } = useCart()
   const router = useRouter()
+  const { locale } = useLocale()
 
   // Use real appointments from database, or empty array if none
   const upcomingDates = useMemo(() => appointments || [], [appointments])
@@ -321,6 +323,7 @@ export function WorkshopCalendar({
         workshopSlug: cardBookingWorkshop.workshopType,
         workshopTitle: getWorkshopTypeLabel(cardBookingWorkshop.workshopType),
         guestCount,
+        locale,
       })
 
       // Clear card booking states
@@ -328,7 +331,7 @@ export function WorkshopCalendar({
       setCardBookingWorkshop(null)
       router.refresh()
     },
-    [cardBookingDate, cardBookingWorkshop, addItem, router],
+    [cardBookingDate, cardBookingWorkshop, addItem, router, locale],
   )
   const filteredDates = selectedType
     ? upcomingDates.filter((d) => d.workshopType === selectedType)
@@ -351,6 +354,7 @@ export function WorkshopCalendar({
         workshopSlug: bookingWorkshop.workshopType,
         workshopTitle: getWorkshopTypeLabel(bookingWorkshop.workshopType),
         guestCount,
+        locale,
       })
 
       // Clear date list booking states
@@ -358,7 +362,7 @@ export function WorkshopCalendar({
       setBookingWorkshop(null)
       router.refresh()
     },
-    [bookingDate, bookingWorkshop, addItem, router],
+    [bookingDate, bookingWorkshop, addItem, router, locale],
   )
 
   return (

@@ -222,7 +222,7 @@ export function CartModal() {
                                   return (
                                     <div className="text-sm text-neutral-500 dark:text-neutral-400 space-y-0.5">
                                       <p>{booking.date}</p>
-                                      <p>{booking.time} Uhr</p>
+                                      <p>{locale === 'de' ? `${booking.time} Uhr` : booking.time}</p>
                                       <p>
                                         {booking.guestCount} {copy.guests}
                                       </p>

@@ -94,12 +94,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               <CheckCircle className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-subheading font-display text-ff-near-black mb-2">
-              {locale === 'de' ? 'Bestellung bestätigt' : 'Order confirmed'}
+              {t.orderConfirmed}
             </h1>
             <p className="text-body-sm text-ff-text-muted">
-              {locale === 'de'
-                ? 'Ihre Zahlung wurde verarbeitet. Ihre Bestellung ist bestätigt.'
-                : 'Your payment has been processed and your order is confirmed.'}
+              {t.orderConfirmedDesc}
             </p>
           </div>
         </Card>
@@ -134,7 +132,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         {/* Pickup Details */}
         <Card className="p-6 border border-blue-200 shadow-sm rounded-[--radius-lg] bg-blue-50">
           <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
-            {locale === 'de' ? 'Abholdetails' : 'Pickup Details'}
+            {t.pickupDetails}
           </h2>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
@@ -153,7 +151,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
                 <div>
                   <p className="text-body-sm font-semibold text-ff-near-black">
-                    {locale === 'de' ? 'Abholdatum' : 'Pickup Date'}
+                    {t.pickupDate}
                   </p>
                   <p className="text-body-sm text-ff-text-muted">{pickupInfo.date}</p>
                 </div>
@@ -164,7 +162,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
                 <div>
                   <p className="text-body-sm font-semibold text-ff-near-black">
-                    {locale === 'de' ? 'Abholzeit' : 'Pickup Time'}
+                    {t.pickupTime}
                   </p>
                   <p className="text-body-sm text-ff-text-muted">{pickupInfo.time}</p>
                 </div>
@@ -185,12 +183,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               </div>
               <div>
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
-                  {locale === 'de' ? 'Bestellung bestätigt' : 'Order confirmed'}
+                  {t.orderConfirmed}
                 </h3>
                 <p className="text-body-sm text-ff-text-muted">
-                  {locale === 'de'
-                    ? 'Deine Zahlung wurde verarbeitet und deine Bestellung ist bestätigt.'
-                    : 'Your payment has been processed and your order is confirmed.'}
+                  {t.orderConfirmedDesc}
                 </p>
               </div>
             </div>
@@ -201,7 +197,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               </div>
               <div>
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
-                  {locale === 'de' ? 'Vorbereitung und Abholung' : 'Preparation & Pickup'}
+                  {t.preparationPickup}
                 </h3>
                 <p className="text-body-sm text-ff-text-muted">
                   {locale === 'de'
@@ -217,7 +213,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               </div>
               <div>
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
-                  {locale === 'de' ? 'Abholen' : 'Ready for Pickup'}
+                  {t.readyForPickup}
                 </h3>
                 <p className="text-body-sm text-ff-text-muted">
                   {locale === 'de'
@@ -242,9 +238,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
               <span className="text-ff-gold font-bold">&bull;</span>
               <p className="text-body-sm text-ff-text-muted">
-                {locale === 'de'
-                  ? 'Überprüfe dein Konto-Dashboard, um den Bestellstatus zu verfolgen.'
-                  : 'Visit your account dashboard to track your order status.'}
+                {t.visitDashboard}
               </p>
             </div>
             <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
@@ -260,7 +254,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             href="/account/orders"
             className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
           >
-            {locale === 'de' ? 'Meine Bestellungen anzeigen' : 'View My Orders'}
+            {t.viewMyOrders}
           </Link>
           <Link
             href="/shop"

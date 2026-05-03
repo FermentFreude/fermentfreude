@@ -3,6 +3,7 @@
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { gtmPurchase } from '@/lib/gtm'
 import { useAuth } from '@/providers/Auth'
+import { useLocale } from '@/providers/Locale'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
@@ -11,6 +12,7 @@ export const ConfirmOrder: React.FC = () => {
   const { user } = useAuth()
   const { confirmOrder } = usePayments()
   const { cart, clearCart } = useCart()
+  const { locale } = useLocale()
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -128,7 +130,9 @@ export const ConfirmOrder: React.FC = () => {
 
   return (
     <div className="text-center w-full flex flex-col items-center justify-start gap-4">
-      <h1 className="text-2xl font-display">Confirming Order</h1>
+      <h1 className="text-2xl font-display">
+        {locale === 'de' ? 'Bestellung wird bestätigt' : 'Confirming Order'}
+      </h1>
 
       <LoadingSpinner className="w-12 h-6" />
     </div>

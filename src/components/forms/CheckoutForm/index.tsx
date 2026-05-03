@@ -76,23 +76,34 @@ export const CheckoutForm: React.FC<Props> = ({
             }
           }
 
+          // Only forward a billing address if we actually have one (typed
+          // shipping checkout). For digital / pickup orders we leave it out
+          // so the Stripe PaymentElement collects it itself — without this,
+          // 3DS-required cards reject the charge for missing billing data.
+          const hasBillingAddress = Boolean(
+            billingAddress?.addressLine1 || billingAddress?.postalCode,
+          )
+          const billingDetails: Record<string, unknown> = {
+            email: customerEmail,
+            ...(customerName ? { name: customerName } : {}),
+            ...(billingAddress?.phone ? { phone: billingAddress.phone } : {}),
+          }
+          if (hasBillingAddress) {
+            billingDetails.address = {
+              line1: billingAddress?.addressLine1,
+              line2: billingAddress?.addressLine2,
+              city: billingAddress?.city,
+              state: billingAddress?.state,
+              postal_code: billingAddress?.postalCode,
+              country: billingAddress?.country,
+            }
+          }
+
           const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
             confirmParams: {
               return_url: returnUrl,
               payment_method_data: {
-                billing_details: {
-                  email: customerEmail,
-                  ...(customerName ? { name: customerName } : {}),
-                  phone: billingAddress?.phone,
-                  address: {
-                    line1: billingAddress?.addressLine1,
-                    line2: billingAddress?.addressLine2,
-                    city: billingAddress?.city,
-                    state: billingAddress?.state,
-                    postal_code: billingAddress?.postalCode,
-                    country: billingAddress?.country,
-                  },
-                },
+                billing_details: billingDetails as never,
               },
             },
             elements,
