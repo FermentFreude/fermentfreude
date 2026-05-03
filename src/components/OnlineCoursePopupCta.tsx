@@ -6,8 +6,6 @@ import { X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-const ONLINE_COURSE_POPUP_TRIGGERS = ['/onlinecourses', '/courses', '/online-courses']
-
 const POPUP_DEFAULTS = {
   de: {
     eyebrow: 'ONLINE-KURS',
@@ -28,8 +26,6 @@ const POPUP_DEFAULTS = {
   },
 }
 
-const normalizePath = (value: string): string => value.trim().replace(/\/+$/u, '').toLowerCase()
-
 type Props = {
   href: string
   label: string
@@ -37,8 +33,8 @@ type Props = {
 }
 
 /**
- * Renders a Link that, when its href matches a known online-course path,
- * intercepts the click and opens a waitlist popup instead of navigating.
+ * Renders a Link that intercepts clicks to open the online-course waitlist popup
+ * instead of navigating. The href is kept as a fallback for right-click / no-JS.
  */
 export function OnlineCoursePopupCta({ href, label, className }: Props) {
   const [open, setOpen] = useState(false)
@@ -53,8 +49,6 @@ export function OnlineCoursePopupCta({ href, label, className }: Props) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [open])
 
-  const normalized = normalizePath(href)
-  const triggersPopup = ONLINE_COURSE_POPUP_TRIGGERS.map(normalizePath).includes(normalized)
   const popup = POPUP_DEFAULTS[locale === 'de' ? 'de' : 'en']
 
   return (
@@ -62,7 +56,6 @@ export function OnlineCoursePopupCta({ href, label, className }: Props) {
       <Link
         href={href}
         onClick={(event) => {
-          if (!triggersPopup) return
           event.preventDefault()
           setOpen(true)
         }}
