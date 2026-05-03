@@ -130,19 +130,12 @@ export function WorkshopCardsSection({
                     locale={locale}
                   />
                 )}
-                {(card.nextDate || card.availableSpots === 0) && (
+                {card.nextDate && (
                   <div className="mt-4 flex items-center gap-2">
-                    {card.nextDate && (
-                      <p className="text-body-sm text-ff-black/70">
-                        {nextDateLabel ? `${nextDateLabel} ` : ''}
-                        {card.nextDate}
-                      </p>
-                    )}
-                    {card.availableSpots === 0 && (
-                      <span className="inline-block bg-red-100 border border-red-300 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                        {locale === 'en' ? 'Sold Out' : 'Ausgebucht'}
-                      </span>
-                    )}
+                    <p className="text-body-sm text-ff-black/70">
+                      {nextDateLabel ? `${nextDateLabel} ` : ''}
+                      {card.nextDate}
+                    </p>
                   </div>
                 )}
               </div>

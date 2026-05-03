@@ -34,6 +34,9 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   buttonLink,
   galleryImages,
   backgroundImage,
+  backgroundTheme,
+  customBackgroundColor,
+  overlayOpacity,
   id,
 }) => {
   const resolvedEyebrow =
@@ -42,6 +45,31 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   const resolvedDescription = description ?? DEFAULTS.description
   const resolvedButtonLabel = buttonLabel ?? DEFAULTS.buttonLabel
   const resolvedButtonLink = buttonLink ?? DEFAULTS.buttonLink
+
+  // Background theme — controls panel bg color, text color, and image overlay tint
+  const theme = backgroundTheme ?? 'light'
+  const isDark = theme === 'dark'
+  const isCustom = theme === 'custom'
+
+  // Panel background (used when no image, or as overlay tint when image is set)
+  const panelBgColor = isCustom
+    ? (customBackgroundColor && customBackgroundColor.trim() !== ''
+        ? customBackgroundColor
+        : '#F6F0E8')
+    : isDark
+      ? '#1a1a1a'
+      : '#F6F0E8'
+
+  // Overlay opacity (0–90%) — admin-controlled. Defaults to 20%.
+  const overlayPct = Math.min(90, Math.max(0, overlayOpacity ?? 20))
+  const overlayAlpha = overlayPct / 100
+
+  // Text colors — flip for dark theme
+  const headingColorClass = isDark ? 'text-white' : 'text-ff-near-black'
+  const descColorClass = isDark ? 'text-white/80' : 'text-ff-gray-text'
+  const ctaBorderClass = isDark
+    ? 'border-white/40 text-white hover:border-white hover:bg-white hover:text-ff-near-black'
+    : 'border-ff-charcoal/35 text-ff-near-black hover:border-ff-charcoal hover:bg-ff-charcoal hover:text-white'
 
   const sectionRef = useRef<HTMLElement>(null)
   const galleryWrapRef = useRef<HTMLDivElement>(null)
@@ -165,10 +193,11 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* ── Text + Button below gallery (soft beige panel) ── */}
+      {/* ── Text + Button below gallery ── */}
       <div
         data-anim="content"
-        className="relative flex flex-col items-center overflow-hidden text-center section-padding-md container-padding bg-ff-ivory-mist"
+        className="relative flex flex-col items-center overflow-hidden text-center section-padding-md container-padding"
+        style={{ backgroundColor: panelBgColor }}
       >
         {backgroundImage ? (
           <>
@@ -179,7 +208,11 @@ export const VoucherCtaBlock: React.FC<Props> = ({
                 imgClassName="object-cover"
               />
             </div>
-            <div className="absolute inset-0 bg-ff-ivory-mist/82" aria-hidden />
+            <div
+              className="absolute inset-0"
+              style={{ backgroundColor: panelBgColor, opacity: overlayAlpha }}
+              aria-hidden
+            />
           </>
         ) : null}
 
@@ -194,20 +227,20 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           ) : null}
           <h2
             data-anim="heading"
-            className="font-display font-bold tracking-tight text-ff-near-black text-balance"
+            className={`font-display font-bold tracking-tight text-balance ${headingColorClass}`}
           >
             {resolvedHeading}
           </h2>
           <p
             data-anim="desc"
-            className="text-body-lg max-w-lg leading-relaxed text-ff-gray-text"
+            className={`text-body-lg max-w-lg leading-relaxed ${descColorClass}`}
           >
             {resolvedDescription}
           </p>
           <Link
             data-anim="cta"
             href={resolvedButtonLink}
-            className="inline-flex items-center justify-center rounded-full border-2 border-ff-charcoal/35 bg-transparent px-6 py-2.5 font-display text-base font-bold uppercase tracking-widest text-ff-near-black transition-all hover:border-ff-charcoal hover:bg-ff-charcoal hover:text-white hover:scale-[1.03] active:scale-[0.97]"
+            className={`inline-flex items-center justify-center rounded-full border-2 bg-transparent px-6 py-2.5 font-display text-base font-bold uppercase tracking-widest transition-all hover:scale-[1.03] active:scale-[0.97] ${ctaBorderClass}`}
           >
             {resolvedButtonLabel}
           </Link>
