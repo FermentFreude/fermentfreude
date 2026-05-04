@@ -19,13 +19,14 @@ import { LanguageToggle } from './LanguageToggle'
 import { MagneticElement } from './MagneticElement'
 import { NavDropdown } from './NavDropdown'
 import { UserMenu } from './UserMenu'
-import { defaultDropdowns, defaultNavItems, getDefaultDropdownKey } from './nav-defaults'
+import { getDefaultDropdowns, getDefaultNavItems, getDefaultDropdownKey } from './nav-defaults'
 
 type Props = {
   header: Header
+  locale: 'de' | 'en'
 }
 
-export function HeaderClient({ header }: Props) {
+export function HeaderClient({ header, locale }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
@@ -130,6 +131,9 @@ export function HeaderClient({ header }: Props) {
     if (!href) return '/'
     return href === '/voucher' ? '/workshops/voucher' : href
   }
+
+  const defaultDropdowns = getDefaultDropdowns(locale)
+  const defaultNavItems = getDefaultNavItems(locale)
 
   // Build nav items array for consistent indexing
   const navItems = hasRealCMSItems
@@ -273,7 +277,15 @@ export function HeaderClient({ header }: Props) {
               <button
                 onClick={() => setIsMenuActive(!isMenuActive)}
                 className="lg:hidden flex items-center justify-center h-10 px-1 text-ff-gray-15 dark:text-neutral-300 transition-colors hover:text-ff-near-black dark:hover:text-white"
-                aria-label={isMenuActive ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-label={
+                  isMenuActive
+                    ? locale === 'de'
+                      ? 'Navigation schließen'
+                      : 'Close navigation menu'
+                    : locale === 'de'
+                      ? 'Navigation öffnen'
+                      : 'Open navigation menu'
+                }
               >
                 {/* Burger bars → X */}
                 <div
@@ -298,6 +310,7 @@ export function HeaderClient({ header }: Props) {
           isActive={isMenuActive}
           setIsActive={setIsMenuActive}
           headerHeight={headerHeight}
+          locale={locale}
         />
       </Suspense>
     </>

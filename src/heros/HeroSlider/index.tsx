@@ -33,14 +33,26 @@ export const HeroSlider: React.FC<HeroSliderProps> = (props) => {
       const label = raw ?? fallback
       if (!label || typeof label !== 'string')
         return effectiveLocale === 'de' ? 'Jetzt entdecken' : 'Learn More'
-      // Payload seed / CMS sometimes still contains English "Learn More" even on German pages.
-      // Map it to the correct German copy so the UI stays consistent.
       const normalized = label.replace(/\s+/gu, ' ').trim().toLowerCase()
-      if (
-        effectiveLocale === 'de' &&
-        (normalized === 'learn more' || normalized === 'workshop' || normalized === 'workshops')
-      ) {
-        return 'Jetzt entdecken'
+      // Normalize common CMS mismatches so the active locale reads consistently.
+      if (effectiveLocale === 'de') {
+        if (
+          normalized === 'learn more' ||
+          normalized === 'workshop' ||
+          normalized === 'workshops'
+        ) {
+          return 'Jetzt entdecken'
+        }
+      } else {
+        if (
+          normalized === 'jetzt entdecken' ||
+          normalized === 'mehr erfahren' ||
+          normalized === 'mehr erfahren →' ||
+          normalized === 'workshop buchen' ||
+          normalized === 'jetzt ansehen'
+        ) {
+          return 'Learn More'
+        }
       }
       return label
     },

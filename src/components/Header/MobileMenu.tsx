@@ -11,17 +11,33 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CHAR_REVEAL } from './anim'
 import {
-  defaultDropdowns,
-  defaultNavItems,
+  getDefaultDropdowns,
+  getDefaultNavItems,
   dropdownItemIsInactive,
   getDefaultDropdownKey,
 } from './nav-defaults'
+
+const MOBILE_AUTH = {
+  de: {
+    myAccount: 'Mein Konto',
+    logOut: 'Abmelden',
+    logIn: 'Anmelden',
+    signUp: 'Registrieren',
+  },
+  en: {
+    myAccount: 'My Account',
+    logOut: 'Log Out',
+    logIn: 'Log In',
+    signUp: 'Sign Up',
+  },
+} as const
 
 interface Props {
   menu: Header['navItems'] | null
   isActive: boolean
   setIsActive: (v: boolean) => void
   headerHeight?: number
+  locale: 'de' | 'en'
 }
 
 interface NavOverlayItem {
@@ -41,7 +57,7 @@ interface NavOverlayItem {
  * - Per-character reveal animations
  * - Smooth transitions
  */
-export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Props) {
+export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, locale }: Props) {
   const { user } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
@@ -66,9 +82,10 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
   }, [isActive, headerHeight])
 
   const hasRealCMSItems = menu && menu.length > 0 && menu.some((i) => i.link?.label)
+  const auth = locale === 'de' ? MOBILE_AUTH.de : MOBILE_AUTH.en
 
   // Build nav items list
-  const navItemsList = buildNavItems(menu, !!hasRealCMSItems)
+  const navItemsList = buildNavItems(menu, !!hasRealCMSItems, locale)
 
   // Close on route change
   useEffect(() => {
@@ -392,7 +409,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
                 <button
                   onClick={closeDetailView}
                   className="p-1.5 sm:p-2 hover:bg-ff-near-black/10 dark:hover:bg-white/15 rounded-lg transition-colors shrink-0 flex items-center justify-center"
-                  aria-label="Close"
+                  aria-label={locale === 'de' ? 'Schließen' : 'Close'}
                 >
                   <X className="w-5 h-5 sm:w-6 sm:h-6 text-ff-near-black dark:text-white" />
                 </button>
@@ -484,7 +501,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
                   }}
                   className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg bg-ff-near-black dark:bg-white text-white dark:text-ff-near-black font-bold text-sm sm:text-base transition-all hover:opacity-90 active:scale-95 text-center cursor-pointer"
                 >
-                  My Account
+                  {auth.myAccount}
                 </Link>
                 <Link
                   href="/logout"
@@ -494,7 +511,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
                   }}
                   className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg bg-ff-warm-gray/20 dark:bg-white/10 text-ff-near-black dark:text-white font-bold text-sm sm:text-base transition-all hover:bg-ff-warm-gray/30 dark:hover:bg-white/15 active:scale-95 text-center cursor-pointer"
                 >
-                  Log Out
+                  {auth.logOut}
                 </Link>
               </>
             ) : (
@@ -507,7 +524,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
                   }}
                   className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg bg-ff-near-black dark:bg-white text-white dark:text-ff-near-black font-bold text-sm sm:text-base transition-all hover:opacity-90 active:scale-95 text-center cursor-pointer"
                 >
-                  Log In
+                  {auth.logIn}
                 </Link>
                 <Link
                   href="/create-account"
@@ -517,7 +534,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
                   }}
                   className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg bg-ff-warm-gray/20 dark:bg-white/10 text-ff-near-black dark:text-white font-bold text-sm sm:text-base transition-all hover:bg-ff-warm-gray/30 dark:hover:bg-white/15 active:scale-95 text-center cursor-pointer"
                 >
-                  Sign Up
+                  {auth.signUp}
                 </Link>
               </>
             )}
@@ -533,8 +550,11 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0 }: Pr
 function buildNavItems(
   menu: Header['navItems'] | null,
   hasRealCMSItems: boolean,
+  locale: 'de' | 'en',
 ): NavOverlayItem[] {
   const items: NavOverlayItem[] = []
+  const defaultDropdowns = getDefaultDropdowns(locale)
+  const defaultNavItems = getDefaultNavItems(locale)
 
   const normalizeHeaderUrl = (url?: string | null): string => {
     if (!url) return '/'

@@ -41,10 +41,16 @@ const QUICK_LINKS_EN = [
   { label: 'Contact', href: '/contact' },
 ]
 
-const LEGAL_LINKS = [
+const LEGAL_LINKS_DE = [
   { label: 'Datenschutz', href: '/datenschutz' },
   { label: 'AGB', href: '/agb' },
   { label: 'Impressum', href: '/impressum' },
+]
+
+const LEGAL_LINKS_EN = [
+  { label: 'Privacy', href: '/datenschutz' },
+  { label: 'Terms', href: '/agb' },
+  { label: 'Imprint', href: '/impressum' },
 ]
 
 const WORKSHOP_LINKS_DE = [
@@ -73,7 +79,9 @@ export async function Footer() {
   const workshopsHeading = footer.workshopsHeading ?? d.workshopsHeading
   const legalHeading = footer.legalHeading ?? d.legalHeading
   const followUsHeading = footer.followUsHeading ?? d.followUsHeading
-  const copyrightText = footer.copyrightText ?? 'FermentFreude — All Rights Reserved'
+  const copyrightText =
+    footer.copyrightText ??
+    (isDe ? 'FermentFreude — Alle Rechte vorbehalten' : 'FermentFreude — All Rights Reserved')
   const accentColorValue =
     typeof (footer as { accentColor?: unknown }).accentColor === 'string'
       ? (footer as { accentColor?: string | null }).accentColor
@@ -120,7 +128,9 @@ export async function Footer() {
   const legalLinks =
     footer.legalLinks && footer.legalLinks.length > 0
       ? footer.legalLinks.map((item) => ({ label: item.link.label, href: resolveHref(item.link) }))
-      : LEGAL_LINKS
+      : isDe
+        ? LEGAL_LINKS_DE
+        : LEGAL_LINKS_EN
 
   const currentYear = new Date().getFullYear()
 
