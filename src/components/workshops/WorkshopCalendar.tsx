@@ -242,11 +242,11 @@ export function WorkshopCalendar({
   // Use real appointments from database, or empty array if none
   const upcomingDates = useMemo(() => appointments || [], [appointments])
 
-  // Helper: Get next available appointment for a workshop type
+  // Helper: Get next BOOKABLE (non-sold-out) appointment for a workshop type
   const getNextAppointment = useCallback(
     (workshopType: string): WorkshopDate | null => {
       const typeAppointments = upcomingDates.filter((d) => d.workshopType === workshopType)
-      return typeAppointments.length > 0 ? typeAppointments[0] : null
+      return typeAppointments.find((d) => d.availableSpots > 0) ?? null
     },
     [upcomingDates],
   )

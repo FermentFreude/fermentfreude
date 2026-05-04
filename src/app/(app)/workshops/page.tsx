@@ -48,9 +48,10 @@ export default async function WorkshopsPage() {
   const extraBlocks = workshopsData?.layout ?? []
 
   // Enhance workshop cards with real next dates from database
+  // Only use the first AVAILABLE (non-sold-out) appointment as the "next date"
   const enhancedCards = ws?.workshopsCalendarCards?.map((card) => {
     const nextAppointment = upcomingAppointments.find(
-      (apt) => apt.workshopType === card.workshopType,
+      (apt) => apt.workshopType === card.workshopType && apt.availableSpots > 0,
     )
     return {
       ...card,
