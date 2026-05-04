@@ -18,6 +18,7 @@ import { autoEnrollOnPurchase } from '@/collections/Orders/autoEnrollOnPurchase'
 import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBookings'
 import { copyCustomerNameFromTransaction } from '@/collections/Orders/copyCustomerNameFromTransaction'
 import { decrementInventory } from '@/collections/Orders/decrementInventory'
+import { restoreWorkshopSpotsOnDelete } from '@/collections/Orders/restoreWorkshopSpotsOnDelete'
 import {
   handleChargeRefunded,
   handleChargeSucceeded,
@@ -192,6 +193,10 @@ export const plugins: Plugin[] = [
             confirmWorkshopBookings,
             sendOrderConfirmationEmail,
             autoCompleteDigitalOrders,
+          ],
+          afterDelete: [
+            ...(defaultCollection?.hooks?.afterDelete ?? []),
+            restoreWorkshopSpotsOnDelete,
           ],
         },
       }),
