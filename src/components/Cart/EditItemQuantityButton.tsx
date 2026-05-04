@@ -34,15 +34,14 @@ export function EditItemQuantityButton({ type, item }: { item: CartItem; type: '
   }, [item, type])
 
   return (
-    <form>
+    <form className="inline-flex h-full flex-none">
       <button
         disabled={disabled || isLoading}
         aria-label={type === 'plus' ? 'Increase item quantity' : 'Reduce item quantity'}
         className={clsx(
-          'ease hover:cursor-pointer flex h-full min-w-9 max-w-9 flex-none items-center justify-center rounded-full px-2 transition-all duration-200 hover:border-neutral-800 hover:opacity-80',
+          'ease hover:cursor-pointer flex h-full min-w-9 max-w-9 flex-none items-center justify-center px-2 transition-all duration-200 hover:opacity-80',
           {
             'cursor-not-allowed': disabled || isLoading,
-            'ml-auto': type === 'minus',
           },
         )}
         onClick={(e: React.FormEvent<HTMLButtonElement>) => {
