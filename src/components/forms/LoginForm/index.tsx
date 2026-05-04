@@ -6,10 +6,11 @@ import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
+import type { SupportedLocale } from '@/utilities/getLocale'
 import { Eye, EyeOff, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 type FormData = {
@@ -17,7 +18,67 @@ type FormData = {
   password: string
 }
 
-export const LoginForm: React.FC = () => {
+const loginFormCopy: Record<
+  SupportedLocale,
+  {
+    emailLabel: string
+    emailPlaceholder: string
+    emailRequired: string
+    passwordLabel: string
+    passwordPlaceholder: string
+    passwordRequired: string
+    showPassword: string
+    hidePassword: string
+    forgotPassword: string
+    createAccount: string
+    rememberLogin: string
+    submit: string
+    processing: string
+    credentialsError: string
+  }
+> = {
+  de: {
+    emailLabel: 'E-Mail',
+    emailPlaceholder: 'deine@email.at',
+    emailRequired: 'Bitte gib deine E-Mail-Adresse ein.',
+    passwordLabel: 'Passwort',
+    passwordPlaceholder: 'Dein Passwort',
+    passwordRequired: 'Bitte gib dein Passwort ein.',
+    showPassword: 'Passwort anzeigen',
+    hidePassword: 'Passwort verbergen',
+    forgotPassword: 'Passwort vergessen?',
+    createAccount: 'Jetzt Konto erstellen',
+    rememberLogin: 'Angemeldet bleiben',
+    submit: 'Anmelden',
+    processing: 'Wird geladen …',
+    credentialsError:
+      'Die Zugangsdaten stimmen nicht. Bitte versuche es erneut.',
+  },
+  en: {
+    emailLabel: 'Email',
+    emailPlaceholder: 'your@email.com',
+    emailRequired: 'Email is required.',
+    passwordLabel: 'Password',
+    passwordPlaceholder: 'Type your password here',
+    passwordRequired: 'Please provide a password.',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+    forgotPassword: 'Forgot your password?',
+    createAccount: 'Create an account Now',
+    rememberLogin: 'Remember my login',
+    submit: 'Enter account',
+    processing: 'Processing',
+    credentialsError:
+      'There was an error with the credentials provided. Please try again.',
+  },
+}
+
+export type LoginFormProps = {
+  locale?: SupportedLocale
+}
+
+export const LoginForm: React.FC<LoginFormProps> = ({ locale = 'de' }) => {
+  const copy = useMemo(() => loginFormCopy[locale], [locale])
   const searchParams = useSearchParams()
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
   const redirect = useRef(searchParams.get('redirect'))
@@ -40,10 +101,10 @@ export const LoginForm: React.FC = () => {
         if (redirect?.current) router.push(redirect.current)
         else router.push('/account')
       } catch (_) {
-        setError('There was an error with the credentials provided. Please try again.')
+        setError(copy.credentialsError)
       }
     },
-    [login, router],
+    [copy.credentialsError, login, router],
   )
 
   return (
@@ -66,16 +127,16 @@ export const LoginForm: React.FC = () => {
       <div className="flex flex-col gap-4">
         <FormItem>
           <Label className="sr-only" htmlFor="email">
-            Email
+            {copy.emailLabel}
           </Label>
           <div className="flex h-11 items-center gap-2 rounded-xl bg-white/90 px-3">
             <Mail className="w-4 h-4 text-[#3D3933]/50 shrink-0" />
             <input
               id="email"
               type="email"
-              placeholder="your@email.com"
+              placeholder={copy.emailPlaceholder}
               className="h-full flex-1 border-none bg-transparent px-1 py-0 text-[13px] font-sans text-[#3D3933] placeholder:text-[#3D3933]/50 outline-none"
-              {...register('email', { required: 'Email is required.' })}
+              {...register('email', { required: copy.emailRequired })}
             />
           </div>
           {errors.email && <FormError message={errors.email.message} />}
@@ -83,23 +144,23 @@ export const LoginForm: React.FC = () => {
 
         <FormItem>
           <Label className="sr-only" htmlFor="password">
-            Password
+            {copy.passwordLabel}
           </Label>
           <div className="flex h-11 items-center gap-2 rounded-xl bg-white/90 px-3">
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="text-[#3D3933]/50 hover:text-[#3D3933] transition-colors cursor-pointer shrink-0"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? copy.hidePassword : copy.showPassword}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Type your password here"
+              placeholder={copy.passwordPlaceholder}
               className="h-full flex-1 border-none bg-transparent px-1 py-0 text-[13px] font-sans text-[#3D3933] placeholder:text-[#3D3933]/50 outline-none"
-              {...register('password', { required: 'Please provide a password.' })}
+              {...register('password', { required: copy.passwordRequired })}
             />
           </div>
           {errors.password && <FormError message={errors.password.message} />}
@@ -110,13 +171,13 @@ export const LoginForm: React.FC = () => {
             href={`/recover-password${allParams}`}
             className="underline underline-offset-4 hover:text-white"
           >
-            Forgot your password?
+            {copy.forgotPassword}
           </Link>
           <Link
             href={`/create-account${allParams}`}
             className="underline underline-offset-4 hover:text-white"
           >
-            Create an account Now
+            {copy.createAccount}
           </Link>
         </div>
       </div>
@@ -136,7 +197,7 @@ export const LoginForm: React.FC = () => {
           >
             {remember ? '✓' : ''}
           </span>
-          <span>Remember my login</span>
+          <span>{copy.rememberLogin}</span>
         </label>
         <Button
           className="h-10 rounded-full bg-linear-to-b from-[#F8F4EB] to-[#EFE8DA] px-8 text-[11px] font-medium font-sans tracking-[0.18em] uppercase text-[#3D3933] shadow-[0_4px_10px_rgba(0,0,0,0.25)] border border-white/60 transition-colors focus-visible:ring-2 focus-visible:ring-[#F5F2EC]/60 hover:from-white hover:to-[#F3ECE0]"
@@ -145,7 +206,7 @@ export const LoginForm: React.FC = () => {
           type="submit"
           variant="default"
         >
-          {isLoading ? 'Processing' : 'Enter account'}
+          {isLoading ? copy.processing : copy.submit}
         </Button>
       </div>
     </form>
