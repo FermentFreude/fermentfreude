@@ -458,7 +458,7 @@ const workshopDetailEN = {
     {
       question: 'How large are the workshop groups?',
       answer:
-        'Our workshops have a maximum of 12 participants to ensure everyone gets personal attention. For groups of 8 or more, we also offer private group workshops — email us at info@fermentfreude.de for a custom quote.',
+        'Our workshops have a maximum of 12 participants to ensure everyone gets personal attention. For groups of 8 or more, we also offer private group workshops — email us at kontakt@fermentfreude.at for a custom quote.',
     },
     {
       question: 'How long is the workshop and when does it start?',

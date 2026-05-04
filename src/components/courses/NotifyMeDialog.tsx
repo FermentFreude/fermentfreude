@@ -1,8 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { cn } from '@/utilities/cn'
+import { useState } from 'react'
 
 type Props = {
   courseTitle: string
@@ -12,7 +19,13 @@ type Props = {
   triggerClassName?: string
 }
 
-export function NotifyMeDialog({ courseTitle, courseSlug, locale, buttonLabel, triggerClassName }: Props) {
+export function NotifyMeDialog({
+  courseTitle,
+  courseSlug,
+  locale,
+  buttonLabel,
+  triggerClassName,
+}: Props) {
   const [open, setOpen] = useState(false)
 
   const heading =
@@ -45,7 +58,7 @@ export function NotifyMeDialog({ courseTitle, courseSlug, locale, buttonLabel, t
       locale === 'de' ? 'Meine E-Mail:' : 'My email:',
     ]
     const body = encodeURIComponent(bodyLines.filter(Boolean).join('\n'))
-    return `mailto:hello@fermentfreude.com?subject=${encodeURIComponent(subject)}&body=${body}`
+    return `mailto:kontakt@fermentfreude.at?subject=${encodeURIComponent(subject)}&body=${body}`
   })()
 
   return (
@@ -91,4 +104,3 @@ export function NotifyMeDialog({ courseTitle, courseSlug, locale, buttonLabel, t
     </Dialog>
   )
 }
-

@@ -208,7 +208,7 @@ const workshopDetailDE = {
     {
       question: 'Wie kann ich stornieren oder umbuchen?',
       answer:
-        'Du kannst bis 48 Stunden vor dem Workshop kostenlos stornieren oder auf einen anderen Termin umbuchen. Schreib uns einfach eine E-Mail an info@fermentfreude.de. Bei späterer Absage behalten wir 50% der Gebühr.',
+        'Du kannst bis 48 Stunden vor dem Workshop kostenlos stornieren oder auf einen anderen Termin umbuchen. Schreib uns einfach eine E-Mail an kontakt@fermentfreude.at. Bei späterer Absage behalten wir 50% der Gebühr.',
     },
     {
       question: 'Was muss ich zum Workshop mitbringen?',
@@ -236,7 +236,7 @@ const workshopDetailDE = {
         'Ja! Alle unsere Lakto-Gemüse-Rezepte sind von Natur aus vegan. Auch die Verkostung bietet vegane Optionen. Bitte teile uns eventuelle Allergien vorab mit.',
     },
   ],
-  faqContactEmail: 'info@fermentfreude.de',
+  faqContactEmail: 'kontakt@fermentfreude.at',
 
   // ── 10. How-To Articles ────────────────────────────────
   // Note: If no posts exist yet, this remains empty []
@@ -452,7 +452,7 @@ const workshopDetailEN = {
     {
       question: 'How can I cancel or reschedule?',
       answer:
-        'You can cancel or reschedule free of charge up to 48 hours before the workshop. Simply send us an email at info@fermentfreude.de. For later cancellations, we retain 50% of the fee.',
+        'You can cancel or reschedule free of charge up to 48 hours before the workshop. Simply send us an email at kontakt@fermentfreude.at. For later cancellations, we retain 50% of the fee.',
     },
     {
       question: 'What do I need to bring?',
@@ -480,7 +480,7 @@ const workshopDetailEN = {
         'Yes! All our lacto-vegetable recipes are naturally vegan. The tasting also offers vegan options. Please let us know about any allergies in advance.',
     },
   ],
-  faqContactEmail: 'info@fermentfreude.de',
+  faqContactEmail: 'kontakt@fermentfreude.at',
 
   // ── 10. How-To Articles ────────────────────────────────
   // Note: If no posts exist yet, this remains empty []

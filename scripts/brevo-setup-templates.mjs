@@ -58,7 +58,7 @@ const TEMPLATES = [
     name: 'WORKSHOP_BOOKING_CONFIRMATION',
     templateName: 'Workshop Booking Confirmation',
     htmlFile: 'public/email-templates/05-workshop-booking-confirmation.html',
-    subject: 'Workshop Buchung bestätigt — {{params.BOOKING_ID}}',
+    subject: 'Workshop Buchung bestätigt — {{params.BOOKING_REF}}',
     category: 'Workshop',
   },
   {

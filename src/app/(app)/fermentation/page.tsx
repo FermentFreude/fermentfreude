@@ -845,12 +845,7 @@ export default async function FermentationPage({ searchParams }: FermentationPag
       {/* Why is it so special? — BENEFITS label, 2x3 cards with numbers & icons */}
       <section className="section-padding-sm bg-white">
         <FadeIn delay={150}>
-          <WhySection
-            title={whyTitle}
-            eyebrow={whyEyebrow}
-            items={whyItems}
-            image={whyImage}
-          />
+          <WhySection title={whyTitle} eyebrow={whyEyebrow} items={whyItems} image={whyImage} />
         </FadeIn>
       </section>
 

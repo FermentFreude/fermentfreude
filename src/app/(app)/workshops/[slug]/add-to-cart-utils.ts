@@ -17,6 +17,20 @@ type AddWorkshopToCartParams = {
   workshopSlug: string
   workshopTitle: string
   guestCount: number
+  locale?: 'de' | 'en'
+}
+
+const TOASTS_DE = {
+  genericError: 'Fehler beim Hinzufügen zum Warenkorb',
+  reloadAndRetry: 'Fehler beim Hinzufügen zum Warenkorb. Bitte lade die Seite neu und versuche es erneut.',
+  success: (count: number, title: string) =>
+    `${count} ${count === 1 ? 'Platz' : 'Plätze'} für ${title} hinzugefügt!`,
+}
+const TOASTS_EN = {
+  genericError: 'Failed to add to cart',
+  reloadAndRetry: 'Failed to add to cart. Please reload the page and try again.',
+  success: (count: number, title: string) =>
+    `${count} ${count === 1 ? 'spot' : 'spots'} for ${title} added!`,
 }
 
 export async function addWorkshopToCart({
@@ -25,7 +39,9 @@ export async function addWorkshopToCart({
   workshopSlug,
   workshopTitle,
   guestCount,
+  locale = 'de',
 }: AddWorkshopToCartParams) {
+  const t = locale === 'en' ? TOASTS_EN : TOASTS_DE
   try {
     // Step 1: Validate server-side (prevents race conditions)
     const response = await fetch('/api/cart/add-workshop', {
@@ -42,7 +58,7 @@ export async function addWorkshopToCart({
 
     // Step 2: Handle validation errors
     if (!response.ok || !data.success) {
-      const errorMessage = data.message || 'Fehler beim Hinzufügen zum Warenkorb'
+      const errorMessage = data.message || t.genericError
       toast.error(errorMessage)
       throw new Error(data.error || 'Failed to add to cart')
     }
@@ -94,9 +110,7 @@ export async function addWorkshopToCart({
       delete bookings[appointmentId]
       localStorage.setItem('workshopBookings', JSON.stringify(bookings))
 
-      toast.error(
-        'Fehler beim Hinzufügen zum Warenkorb. Bitte lade die Seite neu und versuche es erneut.',
-      )
+      toast.error(t.reloadAndRetry)
       throw new Error('addItem failed silently — cart not created')
     }
 
@@ -114,9 +128,7 @@ export async function addWorkshopToCart({
     }
 
     // Step 5: Success feedback
-    toast.success(
-      `${guestCount} ${guestCount === 1 ? 'Platz' : 'Plätze'} für ${workshopTitle} hinzugefügt!`,
-    )
+    toast.success(t.success(guestCount, workshopTitle))
 
     gtmAddToCart({
       item_id: data.cartItem.productId,
@@ -135,7 +147,7 @@ export async function addWorkshopToCart({
       )
     ) {
       // Only show generic error if we haven't already shown a specific one
-      toast.error('Fehler beim Hinzufügen zum Warenkorb')
+      toast.error(t.genericError)
     }
     throw error
   }

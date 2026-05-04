@@ -15,13 +15,31 @@ import { getPayload } from 'payload'
  * ═══════════════════════════════════════════════════════════════ */
 
 export async function POST(request: NextRequest) {
+  // Detect locale from Accept-Language header (default: de)
+  const acceptLanguage = request.headers.get('accept-language') ?? ''
+  const locale: 'de' | 'en' = acceptLanguage.toLowerCase().includes('en') && !acceptLanguage.toLowerCase().startsWith('de') ? 'en' : 'de'
+  const ERR = locale === 'en'
+    ? {
+        codeRequired: 'Voucher code is required.',
+        invalid: 'Invalid voucher code.',
+        alreadyRedeemed: 'This voucher has already been redeemed.',
+        emptyCart: 'Your cart is empty.',
+        failed: 'Order failed. Please try again.',
+      }
+    : {
+        codeRequired: 'Gutschein-Code ist erforderlich.',
+        invalid: 'Ungültiger Gutschein-Code.',
+        alreadyRedeemed: 'Dieser Gutschein wurde bereits eingelöst.',
+        emptyCart: 'Der Warenkorb ist leer.',
+        failed: 'Bestellung fehlgeschlagen. Bitte versuche es erneut.',
+      }
   try {
     const body = await request.json()
-    const { voucherCode, customerEmail, userId } = body
+    const { voucherCode, customerEmail, customerName, userId } = body
 
     if (!voucherCode || typeof voucherCode !== 'string') {
       return NextResponse.json(
-        { success: false, error: 'Voucher code is required.' },
+        { success: false, error: ERR.codeRequired },
         { status: 400 },
       )
     }
@@ -44,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     if (!vouchers.docs.length) {
       return NextResponse.json(
-        { success: false, error: 'Ungültiger Gutschein-Code.' },
+        { success: false, error: ERR.invalid },
         { status: 400 },
       )
     }
@@ -53,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     if (voucher.status !== 'active' || voucher.redeemed) {
       return NextResponse.json(
-        { success: false, error: 'Dieser Gutschein wurde bereits eingelöst.' },
+        { success: false, error: ERR.alreadyRedeemed },
         { status: 400 },
       )
     }
@@ -91,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     if (!cartItems.length) {
       return NextResponse.json(
-        { success: false, error: 'Der Warenkorb ist leer.' },
+        { success: false, error: ERR.emptyCart },
         { status: 400 },
       )
     }
@@ -124,6 +142,10 @@ export async function POST(request: NextRequest) {
         })),
         customer: userId || undefined,
         customerEmail: customerEmail || undefined,
+        customerName:
+          typeof customerName === 'string' && customerName.trim().length >= 2
+            ? customerName.trim().slice(0, 250)
+            : undefined,
         status: 'completed',
         amount: 0,
         currency: 'EUR',
@@ -165,7 +187,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('[place-order] Error:', err)
     return NextResponse.json(
-      { success: false, error: 'Bestellung fehlgeschlagen. Bitte versuche es erneut.' },
+      { success: false, error: ERR.failed },
       { status: 500 },
     )
   }

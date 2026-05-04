@@ -13,6 +13,7 @@ import { CourseWaitlistCta } from '@/blocks/CourseWaitlistCta/config'
 import { FeatureCards } from '@/blocks/FeatureCards/config'
 import { FeaturedProductCards } from '@/blocks/FeaturedProductCards/config'
 import { FormBlock } from '@/blocks/Form/config'
+import { HelpFaqBlock } from '@/blocks/HelpFaqBlock/config'
 import { HeroBanner } from '@/blocks/HeroBanner/config'
 import { LaktoVoucherCtaBlock } from '@/blocks/LaktoVoucherCta/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
@@ -139,6 +140,7 @@ export const Pages: CollectionConfig = {
                 ThreeItemGrid,
                 Banner,
                 FormBlock,
+                HelpFaqBlock,
                 VoucherCta,
                 LaktoVoucherCtaBlock,
                 CourseWaitlistCta,

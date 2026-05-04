@@ -8,11 +8,14 @@ import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 const HERO_DE = {
+  nameRequired: 'Bitte gib deinen Namen ein.',
   emailRequired: 'Bitte gib deine E-Mail-Adresse ein.',
   invalidEmail: 'Ungültiges E-Mail-Format.',
   invalidRecipientEmail: 'Ungültiges E-Mail-Format für Empfänger.',
   checkoutError: 'Fehler beim Checkout.',
   checkoutErrorLater: 'Fehler beim Checkout. Bitte versuche es später.',
+  yourName: 'Dein Name *',
+  yourNamePlaceholder: 'Vor- und Nachname',
   yourEmail: 'Deine E-Mail-Adresse *',
   recipientEmailLabel: 'E-Mail des Empfängers (optional)',
   recipientEmailHint: 'Wenn leer, wird der Gutschein an deine Adresse gesendet.',
@@ -20,11 +23,14 @@ const HERO_DE = {
 }
 
 const HERO_EN = {
+  nameRequired: 'Please enter your name.',
   emailRequired: 'Please enter your email address.',
   invalidEmail: 'Invalid email format.',
   invalidRecipientEmail: 'Invalid email format for recipient.',
   checkoutError: 'Checkout error.',
   checkoutErrorLater: 'Checkout error. Please try again later.',
+  yourName: 'Your name *',
+  yourNamePlaceholder: 'First and last name',
   yourEmail: 'Your email address *',
   recipientEmailLabel: "Recipient's email (optional)",
   recipientEmailHint: 'If left blank, the voucher will be sent to your address.',
@@ -81,6 +87,7 @@ export function VoucherHero({
   const [selectedDelivery, setSelectedDelivery] = useState(
     visibleDeliveryOptions[0]?.type ?? 'email',
   )
+  const [purchaserName, setPurchaserName] = useState('')
   const [purchaserEmail, setPurchaserEmail] = useState('')
   const [recipientEmail, setRecipientEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -99,7 +106,12 @@ export function VoucherHero({
 
   // Handle checkout
   const handleCheckout = useCallback(async () => {
-    // Validate emails
+    // Validate name + emails
+    if (!purchaserName.trim()) {
+      toast.error(t.nameRequired)
+      return
+    }
+
     if (!purchaserEmail.trim()) {
       toast.error(t.emailRequired)
       return
@@ -125,6 +137,7 @@ export function VoucherHero({
         body: JSON.stringify({
           amount: parseAmount(selectedAmount),
           deliveryMethod: selectedDelivery,
+          purchaserName: purchaserName.trim(),
           purchaserEmail: purchaserEmail.trim(),
           recipientEmail:
             selectedDelivery === 'email' && recipientEmail ? recipientEmail.trim() : undefined,
@@ -145,6 +158,7 @@ export function VoucherHero({
             clientSecret: data.clientSecret,
             amount: parseAmount(selectedAmount),
             deliveryMethod: selectedDelivery,
+            purchaserName: purchaserName.trim(),
             purchaserEmail: purchaserEmail.trim(),
             recipientEmail:
               selectedDelivery === 'email' && recipientEmail ? recipientEmail.trim() : undefined,
@@ -161,6 +175,7 @@ export function VoucherHero({
       setIsLoading(false)
     }
   }, [
+    purchaserName,
     purchaserEmail,
     recipientEmail,
     selectedAmount,
@@ -171,6 +186,7 @@ export function VoucherHero({
     t.emailRequired,
     t.invalidEmail,
     t.invalidRecipientEmail,
+    t.nameRequired,
   ])
 
   const iconColor = (opt: (typeof visibleDeliveryOptions)[0]) =>
@@ -386,6 +402,20 @@ export function VoucherHero({
               {/* Email Inputs */}
               {showCTA && (
                 <div className="flex flex-col gap-3 md:gap-4 rounded-2xl border border-ff-border-light bg-ff-cream p-4 md:p-5">
+                  <div>
+                    <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
+                      {t.yourName}
+                    </label>
+                    <input
+                      type="text"
+                      value={purchaserName}
+                      onChange={(e) => setPurchaserName(e.target.value)}
+                      placeholder={t.yourNamePlaceholder}
+                      autoComplete="name"
+                      className="w-full rounded-lg border border-ff-border-light bg-white px-3 py-2 md:py-3 font-sans text-sm md:text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
+                      disabled={isLoading}
+                    />
+                  </div>
                   <div>
                     <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
                       {t.yourEmail}

@@ -26,6 +26,7 @@ const FORM_EN = {
 
 type Props = {
   customerEmail?: string
+  customerName?: string
   billingAddress?: Partial<Address>
   shippingAddress?: Partial<Address>
   setProcessingPayment: React.Dispatch<React.SetStateAction<boolean>>
@@ -37,6 +38,7 @@ type Props = {
 
 export const CheckoutForm: React.FC<Props> = ({
   customerEmail,
+  customerName,
   billingAddress,
   setProcessingPayment,
   isAllDigital,
@@ -64,22 +66,44 @@ export const CheckoutForm: React.FC<Props> = ({
         try {
           const returnUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''}`
 
+          // Stash the buyer name so the redirect-based ConfirmOrder fallback
+          // (Klarna, iDEAL, etc.) can attach it to the transaction too.
+          if (customerName && customerName.trim().length >= 2) {
+            try {
+              sessionStorage.setItem('checkoutCustomerName', customerName.trim())
+            } catch {
+              // ignore
+            }
+          }
+
+          // Only forward a billing address if we actually have one (typed
+          // shipping checkout). For digital / pickup orders we leave it out
+          // so the Stripe PaymentElement collects it itself — without this,
+          // 3DS-required cards reject the charge for missing billing data.
+          const hasBillingAddress = Boolean(
+            billingAddress?.addressLine1 || billingAddress?.postalCode,
+          )
+          const billingDetails: Record<string, unknown> = {
+            email: customerEmail,
+            ...(customerName ? { name: customerName } : {}),
+            ...(billingAddress?.phone ? { phone: billingAddress.phone } : {}),
+          }
+          if (hasBillingAddress) {
+            billingDetails.address = {
+              line1: billingAddress?.addressLine1,
+              line2: billingAddress?.addressLine2,
+              city: billingAddress?.city,
+              state: billingAddress?.state,
+              postal_code: billingAddress?.postalCode,
+              country: billingAddress?.country,
+            }
+          }
+
           const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
             confirmParams: {
               return_url: returnUrl,
               payment_method_data: {
-                billing_details: {
-                  email: customerEmail,
-                  phone: billingAddress?.phone,
-                  address: {
-                    line1: billingAddress?.addressLine1,
-                    line2: billingAddress?.addressLine2,
-                    city: billingAddress?.city,
-                    state: billingAddress?.state,
-                    postal_code: billingAddress?.postalCode,
-                    country: billingAddress?.country,
-                  },
-                },
+                billing_details: billingDetails as never,
               },
             },
             elements,
@@ -88,6 +112,25 @@ export const CheckoutForm: React.FC<Props> = ({
 
           if (paymentIntent && paymentIntent.status === 'succeeded') {
             try {
+              // Attach the buyer name to the transaction so the Order
+              // beforeChange hook can copy it onto the new Order, which lets
+              // confirmation emails greet the buyer by name (instead of the
+              // email local-part).
+              if (customerName && customerName.trim().length >= 2) {
+                try {
+                  await fetch('/api/checkout/attach-customer-name', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      paymentIntentID: paymentIntent.id,
+                      customerName: customerName.trim(),
+                    }),
+                  })
+                } catch {
+                  // Non-fatal: order still gets confirmed.
+                }
+              }
+
               const confirmResult = await confirmOrder('stripe', {
                 additionalData: {
                   paymentIntentID: paymentIntent.id,
@@ -138,6 +181,7 @@ export const CheckoutForm: React.FC<Props> = ({
       stripe,
       elements,
       customerEmail,
+      customerName,
       billingAddress?.phone,
       billingAddress?.addressLine1,
       billingAddress?.addressLine2,

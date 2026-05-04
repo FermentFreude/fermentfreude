@@ -28,7 +28,7 @@ const BOOKING_FAQ: FAQItem[] = [
   {
     question: 'Wie kann ich stornieren oder umbuchen?',
     answer:
-      'Du kannst bis 48 Stunden vor dem Workshop kostenlos stornieren oder auf einen anderen Termin umbuchen. Schreib uns einfach eine E-Mail an info@fermentfreude.de. Bei späterer Absage behalten wir 50% der Gebühr.',
+      'Du kannst bis 48 Stunden vor dem Workshop kostenlos stornieren oder auf einen anderen Termin umbuchen. Schreib uns einfach eine E-Mail an kontakt@fermentfreude.at. Bei späterer Absage behalten wir 50% der Gebühr.',
   },
   {
     question: 'Was muss ich zum Workshop mitbringen?',
@@ -120,9 +120,7 @@ function AccordionItem({
         style={{ maxHeight: height }}
       >
         <div ref={contentRef} className="pb-6 pr-16">
-          <p className="text-body leading-relaxed text-ff-gray-text">
-            {item.answer}
-          </p>
+          <p className="text-body leading-relaxed text-ff-gray-text">{item.answer}</p>
         </div>
       </div>
     </div>

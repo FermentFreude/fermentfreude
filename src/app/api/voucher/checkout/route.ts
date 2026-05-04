@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from 'next/server'
 interface CheckoutBody {
   amount: number
   deliveryMethod: 'email' | 'pickup'
+  purchaserName: string
   purchaserEmail: string
   recipientEmail?: string
 }
@@ -35,6 +36,17 @@ export async function POST(request: NextRequest) {
     if (!body.purchaserEmail || typeof body.purchaserEmail !== 'string') {
       return NextResponse.json(
         { success: false, error: 'Purchaser email is required.' },
+        { status: 400 },
+      )
+    }
+
+    if (
+      !body.purchaserName ||
+      typeof body.purchaserName !== 'string' ||
+      body.purchaserName.trim().length < 2
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Purchaser name is required.' },
         { status: 400 },
       )
     }
@@ -71,6 +83,7 @@ export async function POST(request: NextRequest) {
         type: 'voucher_purchase',
         amount: String(body.amount),
         deliveryMethod: body.deliveryMethod,
+        purchaserName: body.purchaserName.trim().slice(0, 250),
         purchaserEmail: body.purchaserEmail,
         recipientEmail: body.recipientEmail || '',
       },

@@ -14,9 +14,9 @@ type Props = {
   locale: 'de' | 'en'
 }
 
-/** Same pattern as `NotifyMeDialog`: opens the user’s mail app to hello@fermentfreude.com — no server / Brevo. */
+/** Same pattern as `NotifyMeDialog`: opens the user’s mail app to kontakt@fermentfreude.at — no server / Brevo. */
 function buildMailtoHref(email: string, locale: 'de' | 'en'): string {
-  const to = 'hello@fermentfreude.com'
+  const to = 'kontakt@fermentfreude.at'
   const subject =
     locale === 'de'
       ? 'Warteliste: Online-Kurs – FermentFreude'
@@ -28,11 +28,7 @@ function buildMailtoHref(email: string, locale: 'de' | 'en'): string {
           '',
           `Meine E-Mail: ${email}`,
         ]
-      : [
-          'Please add me to the waitlist for the online course.',
-          '',
-          `My email: ${email}`,
-        ]
+      : ['Please add me to the waitlist for the online course.', '', `My email: ${email}`]
   return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`
 }
 
@@ -91,7 +87,11 @@ export function WaitlistForm({ emailPlaceholder, submitLabel, successMessage, lo
 
   return (
     <FadeIn>
-      <form onSubmit={onSubmit} className="mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-none" noValidate>
+      <form
+        onSubmit={onSubmit}
+        className="mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-none"
+        noValidate
+      >
         <label className="sr-only" htmlFor="course-waitlist-email">
           {emailPlaceholder}
         </label>
@@ -106,7 +106,9 @@ export function WaitlistForm({ emailPlaceholder, submitLabel, successMessage, lo
 
         <motion.div
           className="flex flex-col gap-2 rounded-xl border border-ff-border-light bg-white p-1 shadow-sm sm:flex-row sm:items-stretch"
-          whileHover={reduce ? undefined : { boxShadow: '0 12px 40px -20px rgba(26, 26, 26, 0.12)' }}
+          whileHover={
+            reduce ? undefined : { boxShadow: '0 12px 40px -20px rgba(26, 26, 26, 0.12)' }
+          }
           transition={{ duration: 0.25 }}
         >
           <div className="relative min-h-12 flex-1">

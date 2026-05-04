@@ -30,7 +30,6 @@ const QUICK_LINKS_DE = [
   { label: 'Shop', href: '/shop' },
   { label: 'Für Gastronomen', href: '/gastronomy' },
   { label: 'Über uns', href: '/about' },
-  { label: 'Hilfe & FAQ', href: '/help' },
   { label: 'Kontakt', href: '/contact' },
 ]
 
@@ -39,7 +38,6 @@ const QUICK_LINKS_EN = [
   { label: 'Shop', href: '/shop' },
   { label: 'For Chefs', href: '/gastronomy' },
   { label: 'About Us', href: '/about' },
-  { label: 'Help & FAQ', href: '/help' },
   { label: 'Contact', href: '/contact' },
 ]
 
@@ -102,18 +100,12 @@ export async function Footer() {
   }
 
   // Use CMS links when available, otherwise fall back to locale-aware defaults
-  const quickLinksBase =
+  const quickLinks =
     footer.navItems && footer.navItems.length > 0
       ? footer.navItems.map((item) => ({ label: item.link.label, href: resolveHref(item.link) }))
       : isDe
         ? QUICK_LINKS_DE
         : QUICK_LINKS_EN
-
-  // Always ensure the Help & FAQ link is present in the quick links column
-  const helpLink = { label: isDe ? 'Hilfe & FAQ' : 'Help & FAQ', href: '/help' }
-  const quickLinks = quickLinksBase.some((l) => l.href === '/help')
-    ? quickLinksBase
-    : [...quickLinksBase, helpLink]
 
   const workshopLinks =
     footer.workshopLinks && footer.workshopLinks.length > 0
