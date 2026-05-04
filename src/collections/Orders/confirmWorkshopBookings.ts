@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import type { CollectionAfterChangeHook } from 'payload'
 
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
@@ -194,8 +196,10 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     }
 
     // Confirm the booking and attach customer info
+    const downloadToken = randomUUID()
     const updateData: Record<string, unknown> = {
       status: 'confirmed',
+      downloadToken,
     }
 
     if (customerEmail && !booking.email) {
@@ -300,6 +304,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             BOOKING_ID: String(booking.id),
             BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
             BOOKING_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/account/orders`,
+            RECEIPT_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/api/bookings/${booking.id}/receipt?token=${downloadToken}`,
             WHAT_TO_BRING: whatToBring,
             PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
             AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,

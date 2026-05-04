@@ -2202,7 +2202,7 @@ export interface ContactBlock {
        */
       email: string;
       /**
-       * Placeholder for phone field (e.g., "Your Phone").
+       * Not shown on the website — the contact form only collects name and email. Phone stays on the contact card if configured.
        */
       phone?: string | null;
       /**
@@ -4267,6 +4267,10 @@ export interface WorkshopBooking {
    * Any dietary restrictions, allergies, or special requests
    */
   notes?: string | null;
+  /**
+   * Secure token for guest receipt download link. Auto-generated on confirmation.
+   */
+  downloadToken?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -6246,6 +6250,7 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
   lastName?: T;
   phone?: T;
   notes?: T;
+  downloadToken?: T;
   updatedAt?: T;
   createdAt?: T;
 }

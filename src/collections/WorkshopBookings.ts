@@ -127,6 +127,16 @@ export const WorkshopBookings: CollectionConfig = {
       label: 'Special Requests / Notes',
       admin: { description: 'Any dietary restrictions, allergies, or special requests' },
     },
+    {
+      name: 'downloadToken',
+      type: 'text',
+      label: 'Receipt Download Token',
+      admin: {
+        description:
+          'Secure token for guest receipt download link. Auto-generated on confirmation.',
+        readOnly: true,
+      },
+    },
   ],
   timestamps: true,
 }
