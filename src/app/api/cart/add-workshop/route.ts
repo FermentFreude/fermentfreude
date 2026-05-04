@@ -179,6 +179,14 @@ export async function POST(request: NextRequest) {
     const dateDisplay = appointmentDate.toLocaleDateString('de-DE', dateOptions)
     const timeDisplay = appointmentDate.toLocaleTimeString('de-DE', timeOptions)
 
+    // ─── Resolve Location (populated via depth: 2) ──────────────
+    const locationDoc =
+      typeof appointment.location === 'object' && appointment.location !== null
+        ? appointment.location
+        : null
+    const locationName = locationDoc?.name ?? null
+    const locationAddress = locationDoc?.address ?? null
+
     // ─── Fetch Actual Product by Slug ───────────────────────────
     // The placeholder products were seeded with slug "workshop-* "
     // We need the actual database ID to add to cart
@@ -288,6 +296,8 @@ export async function POST(request: NextRequest) {
             guestCount,
             pricePerPerson,
             totalPrice,
+            locationName,
+            locationAddress,
           },
         },
         appointment: {

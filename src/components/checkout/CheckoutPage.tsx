@@ -182,9 +182,37 @@ export const CheckoutPage: React.FC = () => {
   } | null>(null)
   const [voucherError, setVoucherError] = useState<string | null>(null)
   const [voucherLoading, setVoucherLoading] = useState(false)
+  // Workshop booking metadata (date/time/pricePerPerson) — stored in localStorage by add-to-cart-utils
+  // because the Payload ecommerce plugin has no per-item metadata field.
+  const [bookingMetadata, setBookingMetadata] = useState<
+    Record<
+      string,
+      {
+        workshopSlug: string
+        date: string
+        time: string
+        pricePerPerson: number
+        guestCount: number
+        locationName?: string | null
+        locationAddress?: string | null
+      }
+    >
+  >({})
   const checkoutEmail = email || user?.email || ''
   const { locale } = useLocale()
   const t = locale === 'de' ? CHECKOUT_DE : CHECKOUT_EN
+
+  // Load workshop bookings from localStorage so we can show appointment date/time per item.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const stored = localStorage.getItem('workshopBookings')
+    if (!stored) return
+    try {
+      setBookingMetadata(JSON.parse(stored))
+    } catch (error) {
+      console.error('Failed to parse workshop bookings from localStorage:', error)
+    }
+  }, [])
 
   // Fetch the active pickup location from the workshop-locations collection.
   // Falls back to DEFAULT_PICKUP_LOCATION on any error / empty result.
@@ -994,6 +1022,28 @@ export const CheckoutPage: React.FC = () => {
                                 .join(', ')}
                             </p>
                           )}
+                          {(() => {
+                            const isWorkshopBooking =
+                              typeof product.slug === 'string' && product.slug.startsWith('workshop-')
+                            if (!isWorkshopBooking) return null
+                            const workshopSlug = product.slug!.replace('workshop-', '')
+                            const booking = Object.values(bookingMetadata).find(
+                              (b) => b.workshopSlug === workshopSlug,
+                            )
+                            if (!booking) return null
+                            return (
+                              <div className="text-caption text-ff-gray-text-light">
+                                <p>{booking.date}</p>
+                                <p>{locale === 'de' ? `${booking.time} Uhr` : booking.time}</p>
+                                {booking.locationName && (
+                                  <p>
+                                    {booking.locationName}
+                                    {booking.locationAddress ? ` — ${booking.locationAddress}` : ''}
+                                  </p>
+                                )}
+                              </div>
+                            )
+                          })()}
                           <p className="text-caption text-ff-gray-text-light">
                             {'×\u2009'}
                             {quantity}

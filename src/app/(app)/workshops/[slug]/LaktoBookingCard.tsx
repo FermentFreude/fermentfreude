@@ -4,7 +4,7 @@ import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { useLocale } from '@/providers/Locale'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { BookingModal } from './BookingModal'
 import { addWorkshopToCart } from './add-to-cart-utils'
@@ -228,6 +228,7 @@ export function LaktoBookingCard({
   const { addItem } = useCart()
   const { locale } = useLocale()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     const el = sectionRef.current
@@ -244,6 +245,16 @@ export function LaktoBookingCard({
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  useEffect(() => {
+    const shouldOpenBooking = searchParams.get('book') === '1'
+    if (!shouldOpenBooking) return
+
+    setShowDates(true)
+    setTimeout(() => {
+      datesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 150)
+  }, [searchParams])
 
   const handleToggleDates = () => {
     setShowDates((prev) => {

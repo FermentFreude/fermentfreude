@@ -33,6 +33,8 @@ type WorkshopBooking = {
   time: string
   pricePerPerson: number
   totalPrice: number
+  locationName?: string | null
+  locationAddress?: string | null
 }
 
 export function CartModal() {
@@ -219,15 +221,25 @@ export function CartModal() {
                                   (b) => b.workshopSlug === productSlugWithoutPrefix,
                                 )
                                 if (booking) {
+                                  // Use Payload cart item.quantity as source of truth
+                                  // (booking.guestCount may be stale if user added more spots later)
+                                  const guestCount = item.quantity ?? booking.guestCount ?? 1
+                                  const lineTotal = booking.pricePerPerson * guestCount
                                   return (
                                     <div className="text-sm text-neutral-500 dark:text-neutral-400 space-y-0.5">
                                       <p>{booking.date}</p>
                                       <p>{locale === 'de' ? `${booking.time} Uhr` : booking.time}</p>
+                                      {booking.locationName && (
+                                        <p>
+                                          {booking.locationName}
+                                          {booking.locationAddress ? ` — ${booking.locationAddress}` : ''}
+                                        </p>
+                                      )}
                                       <p>
-                                        {booking.guestCount} {copy.guests}
+                                        {guestCount} {copy.guests}
                                       </p>
                                       <div className="font-semibold text-neutral-700 dark:text-neutral-300">
-                                        {copy.total}: €{booking.totalPrice.toFixed(2)}
+                                        {copy.total}: €{lineTotal.toFixed(2)}
                                       </div>
                                     </div>
                                   )

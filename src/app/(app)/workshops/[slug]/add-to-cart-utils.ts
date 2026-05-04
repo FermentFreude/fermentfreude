@@ -76,6 +76,8 @@ export async function addWorkshopToCart({
       time: data.cartItem.metadata.time,
       pricePerPerson: data.cartItem.metadata.pricePerPerson,
       totalPrice: data.cartItem.metadata.totalPrice,
+      locationName: data.cartItem.metadata.locationName ?? null,
+      locationAddress: data.cartItem.metadata.locationAddress ?? null,
       timestamp: Date.now(),
     }
     const existingBookings = JSON.parse(localStorage.getItem('workshopBookings') || '{}')
