@@ -30,7 +30,6 @@ const DEFAULTS_DE = {
       firstName: 'Vorname',
       lastName: 'Nachname',
       email: 'Deine E-Mail',
-      phone: 'Deine Telefonnummer',
       message: 'Deine Nachricht',
     },
     subjectOptions: {
@@ -76,7 +75,6 @@ const DEFAULTS_EN = {
       firstName: 'First name',
       lastName: 'Last name',
       email: 'Your email',
-      phone: 'Your phone',
       message: 'Your message',
     },
     subjectOptions: {
@@ -99,17 +97,153 @@ const CONTACT_UI = {
     location: 'Standort',
     phone: 'Telefon',
     email: 'E-Mail',
-    social: 'Social Media',
+    social: 'Folge uns in den sozialen Medien',
     mapTitle: 'Standortkarte',
   },
   en: {
     location: 'Location',
     phone: 'Phone',
     email: 'Email',
-    social: 'Follow our social media',
+    social: 'Follow us on social media',
     mapTitle: 'Location map',
   },
 } as const
+
+function normLabel(s: string | null | undefined): string {
+  return (s ?? '').replace(/\s+/gu, ' ').trim().toLowerCase()
+}
+
+/** Payload locale fallback can fill DE pages with EN placeholders (and the reverse). */
+function sanitizeContactCopy(
+  contact: {
+    heading: string
+    description: string
+    phone: string
+    email: string
+    address: string
+  },
+  contactForm: {
+    formHeading: string
+    placeholders: {
+      name: string | null
+      firstName: string
+      lastName: string
+      email: string
+      message: string
+    }
+    subjectOptions: { default: string; options: string[] }
+    submitButton: string
+  },
+  isDe: boolean,
+  defaultsDe: typeof DEFAULTS_DE,
+  defaultsEn: typeof DEFAULTS_EN,
+): void {
+  const dDe = defaultsDe.contactForm
+  const dEn = defaultsEn.contactForm
+
+  const enPlaceholder = new Set([
+    'your name',
+    'first name',
+    'last name',
+    'your email',
+    'your e-mail',
+    'email',
+    'e-mail',
+    'your message',
+    'subject',
+  ])
+  const enFormStrings = new Set([
+    'ask us anything',
+    'ask about anything',
+    'send message',
+    'submit now',
+    'submit',
+  ])
+  const enSubjectDefaults = dEn.subjectOptions.options.map(normLabel)
+  const deSubjectDefaults = dDe.subjectOptions.options.map(normLabel)
+
+  const dePlaceholder = new Set([
+    'vorname',
+    'nachname',
+    'dein name',
+    'deine e-mail',
+    'deine email',
+    'deine nachricht',
+    'betreff',
+  ])
+  const deFormStrings = new Set(['frag uns alles', 'jetzt absenden', 'nachricht senden'])
+
+  if (isDe) {
+    if (normLabel(contact.heading) === 'contact' || normLabel(contact.heading) === 'contact detail') {
+      contact.heading = defaultsDe.contact.heading
+    }
+    if (
+      /^if you need\b/i.test(contact.description) ||
+      /^feel free to\b/i.test(contact.description)
+    ) {
+      contact.description = defaultsDe.contact.description
+    }
+    if (enFormStrings.has(normLabel(contactForm.formHeading))) {
+      contactForm.formHeading = dDe.formHeading
+    }
+    const ph = contactForm.placeholders
+    if (ph.name != null && enPlaceholder.has(normLabel(ph.name))) ph.name = dDe.placeholders.name
+    if (enPlaceholder.has(normLabel(ph.firstName))) ph.firstName = dDe.placeholders.firstName
+    if (enPlaceholder.has(normLabel(ph.lastName))) ph.lastName = dDe.placeholders.lastName
+    if (enPlaceholder.has(normLabel(ph.email))) ph.email = dDe.placeholders.email
+    if (enPlaceholder.has(normLabel(ph.message))) ph.message = dDe.placeholders.message
+    if (normLabel(contactForm.subjectOptions.default) === 'subject') {
+      contactForm.subjectOptions.default = dDe.subjectOptions.default
+    }
+    const opts = contactForm.subjectOptions.options
+    if (
+      opts.length === enSubjectDefaults.length &&
+      opts.every((o, i) => normLabel(o) === enSubjectDefaults[i])
+    ) {
+      contactForm.subjectOptions.options = [...dDe.subjectOptions.options]
+    }
+    if (enFormStrings.has(normLabel(contactForm.submitButton))) {
+      contactForm.submitButton = dDe.submitButton
+    }
+  } else {
+    if (
+      normLabel(contact.heading) === 'kontakt' ||
+      normLabel(contact.heading) === 'contact detail'
+    ) {
+      contact.heading = defaultsEn.contact.heading
+    }
+    if (
+      /\b(du möchtest|wir freuen uns|erreichst uns)\b/i.test(contact.description) ||
+      /[äöüß]/iu.test(contact.description)
+    ) {
+      contact.description = defaultsEn.contact.description
+    }
+    if (deFormStrings.has(normLabel(contactForm.formHeading))) {
+      contactForm.formHeading = dEn.formHeading
+    }
+    const ph = contactForm.placeholders
+    if (ph.name != null && dePlaceholder.has(normLabel(ph.name))) ph.name = dEn.placeholders.name
+    if (dePlaceholder.has(normLabel(ph.firstName))) ph.firstName = dEn.placeholders.firstName
+    if (dePlaceholder.has(normLabel(ph.lastName))) ph.lastName = dEn.placeholders.lastName
+    if (dePlaceholder.has(normLabel(ph.email)) || normLabel(ph.email) === 'e-mail') {
+      ph.email = dEn.placeholders.email
+    }
+    if (dePlaceholder.has(normLabel(ph.message))) ph.message = dEn.placeholders.message
+    if (normLabel(contactForm.subjectOptions.default) === 'betreff') {
+      contactForm.subjectOptions.default = dEn.subjectOptions.default
+    }
+    const opts = contactForm.subjectOptions.options
+    if (
+      opts.length === deSubjectDefaults.length &&
+      opts.every((o, i) => normLabel(o) === deSubjectDefaults[i])
+    ) {
+      contactForm.subjectOptions.options = [...dEn.subjectOptions.options]
+    }
+    if (deFormStrings.has(normLabel(contactForm.submitButton))) {
+      contactForm.submitButton = dEn.submitButton
+    }
+  }
+}
 
 export const ContactBlockComponent: React.FC<
   ContactBlockProps & {
@@ -173,7 +307,6 @@ export const ContactBlockComponent: React.FC<
       firstName: placeholders?.firstName ?? defaults.contactForm.placeholders.firstName,
       lastName: placeholders?.lastName ?? defaults.contactForm.placeholders.lastName,
       email: placeholders?.email ?? defaults.contactForm.placeholders.email,
-      phone: placeholders?.phone ?? defaults.contactForm.placeholders.phone ?? null,
       message: placeholders?.message ?? defaults.contactForm.placeholders.message,
     },
     subjectOptions: {
@@ -184,6 +317,8 @@ export const ContactBlockComponent: React.FC<
     },
     submitButton: data?.contactForm?.submitButton ?? defaults.contactForm.submitButton,
   }
+
+  sanitizeContactCopy(contact, contactForm, isDe, DEFAULTS_DE, DEFAULTS_EN)
 
   const ctaBanner = {
     heading: data?.ctaBanner?.heading ?? defaults.ctaBanner.heading,
@@ -450,26 +585,12 @@ export const ContactBlockComponent: React.FC<
                         />
                       </div>
                     )}
-                    {contactForm.placeholders.phone ? (
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <input
-                          type="email"
-                          placeholder={contactForm.placeholders.email}
-                          className={inputBase}
-                        />
-                        <input
-                          type="tel"
-                          placeholder={contactForm.placeholders.phone}
-                          className={inputBase}
-                        />
-                      </div>
-                    ) : (
-                      <input
-                        type="email"
-                        placeholder={contactForm.placeholders.email}
-                        className={inputBase}
-                      />
-                    )}
+                    <input
+                      type="email"
+                      placeholder={contactForm.placeholders.email}
+                      className={inputBase}
+                      autoComplete="email"
+                    />
                     <div className="relative">
                       <select
                         className={`${inputBase} appearance-none pr-10 [&::-ms-expand]:hidden`}
