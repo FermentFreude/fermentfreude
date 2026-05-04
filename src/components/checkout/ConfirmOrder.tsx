@@ -111,7 +111,7 @@ export const ConfirmOrder: React.FC = () => {
             const type = hasCourse ? 'course' : hasWorkshop ? 'workshop' : 'order'
             const emailParam = checkoutEmail ? `&email=${encodeURIComponent(checkoutEmail)}` : ''
             router.push(
-              `/account/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
+              `/checkout/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
             )
           }
           try {

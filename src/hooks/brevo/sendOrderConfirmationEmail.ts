@@ -61,6 +61,7 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       unitCents: number | null
     }
     const resolvedItems: ResolvedItem[] = []
+    let hasWorkshopItem = false
     for (const item of items) {
       const qty = item.quantity ?? 1
       let productDoc:
@@ -80,6 +81,11 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
         }
       } else if (productRef && typeof productRef === 'object') {
         productDoc = productRef as unknown as Record<string, unknown> & { id?: string; title?: string }
+      }
+
+      const productSlug = (productDoc?.slug as string | undefined) ?? ''
+      if (productSlug.startsWith('workshop-')) {
+        hasWorkshopItem = true
       }
 
       const title = (productDoc?.title as string | undefined) ?? 'Product'
@@ -102,6 +108,10 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
       resolvedItems.push({ title, sku, thumbUrl, shortDesc, qty, unitCents })
     }
+
+    // Workshop orders: confirmWorkshopBookings sends the dedicated booking
+    // confirmation email — skip the generic order email to avoid duplicates.
+    if (hasWorkshopItem) return doc
 
     // Plain-text comma string (legacy ORDER_ITEMS — kept for backwards compat)
     const itemSummary = resolvedItems
