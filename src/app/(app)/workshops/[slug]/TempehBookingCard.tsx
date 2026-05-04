@@ -225,7 +225,7 @@ export function TempehBookingCard({
   const sectionRef = useRef<HTMLElement>(null)
   const datesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
-  const { addItem } = useCart()
+  const { addItem, clearCart } = useCart()
   const { locale } = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -698,6 +698,7 @@ export function TempehBookingCard({
             try {
               await addWorkshopToCart({
                 addItemAction: addItem,
+                clearCart,
                 appointmentId: bookingDate.appointmentId ?? bookingDate.id,
                 workshopSlug: 'tempeh',
                 workshopTitle: 'Tempeh Workshop',

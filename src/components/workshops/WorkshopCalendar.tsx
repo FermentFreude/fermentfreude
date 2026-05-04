@@ -235,7 +235,7 @@ export function WorkshopCalendar({
   // Separate state for card bookings
   const [cardBookingDate, setCardBookingDate] = useState<WorkshopDate | null>(null)
   const [cardBookingWorkshop, setCardBookingWorkshop] = useState<WorkshopCalendarCard | null>(null)
-  const { addItem } = useCart()
+  const { addItem, clearCart } = useCart()
   const router = useRouter()
   const { locale } = useLocale()
 
@@ -319,6 +319,7 @@ export function WorkshopCalendar({
 
       await addWorkshopToCart({
         addItemAction: addItem,
+        clearCart,
         appointmentId,
         workshopSlug: cardBookingWorkshop.workshopType,
         workshopTitle: getWorkshopTypeLabel(cardBookingWorkshop.workshopType),
@@ -331,7 +332,7 @@ export function WorkshopCalendar({
       setCardBookingWorkshop(null)
       router.refresh()
     },
-    [cardBookingDate, cardBookingWorkshop, addItem, router, locale],
+    [cardBookingDate, cardBookingWorkshop, addItem, clearCart, router, locale],
   )
   const filteredDates = selectedType
     ? upcomingDates.filter((d) => d.workshopType === selectedType)
@@ -350,6 +351,7 @@ export function WorkshopCalendar({
 
       await addWorkshopToCart({
         addItemAction: addItem,
+        clearCart,
         appointmentId,
         workshopSlug: bookingWorkshop.workshopType,
         workshopTitle: getWorkshopTypeLabel(bookingWorkshop.workshopType),
@@ -362,7 +364,7 @@ export function WorkshopCalendar({
       setBookingWorkshop(null)
       router.refresh()
     },
-    [bookingDate, bookingWorkshop, addItem, router, locale],
+    [bookingDate, bookingWorkshop, addItem, clearCart, router, locale],
   )
 
   return (

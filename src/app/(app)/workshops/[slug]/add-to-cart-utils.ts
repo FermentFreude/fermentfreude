@@ -9,15 +9,45 @@ import { toast } from 'sonner'
  *  1. Validates appointment availability via API (server-side)
  *  2. Prevents race conditions and overbooking
  *  3. Adds to cart only after validation passes
+ *  4. Releases spots if addItem fails (prevents spot leaking)
+ *  5. Clears stale cart on failure so next attempt starts fresh
  * ═══════════════════════════════════════════════════════════════ */
 
 type AddWorkshopToCartParams = {
   addItemAction: (item: { product: string; variant?: string }, quantity?: number) => Promise<void>
+  clearCart?: () => Promise<void>
   appointmentId: string
   workshopSlug: string
   workshopTitle: string
   guestCount: number
   locale?: 'de' | 'en'
+}
+
+/** Verifies that a product ID exists in the Payload ecommerce cart. */
+async function verifyItemInCart(
+  cartId: string | null,
+  cartSecret: string | null,
+  productId: string,
+): Promise<boolean> {
+  if (!cartId) return false
+  try {
+    const url = cartSecret
+      ? `/api/carts/${cartId}?secret=${encodeURIComponent(cartSecret)}`
+      : `/api/carts/${cartId}`
+    const res = await fetch(url, { credentials: 'include' })
+    if (!res.ok) return false
+    const cart = (await res.json()) as {
+      items?: Array<{ product?: string | { id?: string } }>
+    }
+    return (
+      cart.items?.some((item) => {
+        const pId = typeof item.product === 'string' ? item.product : item.product?.id
+        return pId === productId
+      }) ?? false
+    )
+  } catch {
+    return false
+  }
 }
 
 const TOASTS_DE = {
@@ -35,6 +65,7 @@ const TOASTS_EN = {
 
 export async function addWorkshopToCart({
   addItemAction,
+  clearCart,
   appointmentId,
   workshopSlug,
   workshopTitle,
@@ -86,34 +117,52 @@ export async function addWorkshopToCart({
 
     // Step 4: Add to cart with correct quantity (guestCount)
     // This ensures Payload cart calculates: basePrice × quantity = totalPrice
-    // NOTE: addItem from the ecommerce plugin silently swallows errors —
-    // it never throws, so we verify success by checking localStorage after a delay.
-    const cartBefore = localStorage.getItem('cart')
-    console.log('[addWorkshopToCart] Before addItem — cartID in localStorage:', cartBefore)
-
+    // NOTE: addItem from the ecommerce plugin silently swallows errors — it never
+    // throws. We verify success by fetching the cart and checking for the product.
     await addItemAction(
       { product: data.cartItem.productId },
       guestCount, // Pass quantity as second argument, not inside item object
     )
 
     // Wait for React state to commit to localStorage via useEffect
-    await new Promise((resolve) => setTimeout(resolve, 200))
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
-    const cartAfter = localStorage.getItem('cart')
-    console.log('[addWorkshopToCart] After addItem — cartID in localStorage:', cartAfter)
+    const cartId = localStorage.getItem('cart')
+    const cartSecret = localStorage.getItem('cart_secret')
+    const itemAdded = await verifyItemInCart(cartId, cartSecret, data.cartItem.productId)
 
-    if (!cartAfter) {
-      // addItem failed silently — cart was not created/updated
+    if (!itemAdded) {
+      // addItem failed silently (e.g. 403 from stale/expired session cart).
+      // Release the spots that were decremented by the API so users can re-book.
       console.error(
-        '[addWorkshopToCart] addItem failed silently — no cart in localStorage after 200ms',
+        '[addWorkshopToCart] addItem verification failed — releasing spots and clearing stale cart',
       )
-      // Clean up the booking metadata we just stored
-      const bookings = JSON.parse(localStorage.getItem('workshopBookings') || '{}')
-      delete bookings[appointmentId]
-      localStorage.setItem('workshopBookings', JSON.stringify(bookings))
+
+      await fetch('/api/cart/release-spots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appointmentId,
+          guestCount,
+          bookingId: data.bookingId,
+        }),
+      }).catch((err) => console.error('[addWorkshopToCart] release-spots failed:', err))
+
+      // Clear stale cart from localStorage so next page load starts with a fresh cart
+      localStorage.removeItem('cart')
+      localStorage.removeItem('cart_secret')
+      if (clearCart) await clearCart().catch(() => {})
+
+      // Clean up the booking metadata we stored
+      const bookingsMeta = JSON.parse(localStorage.getItem('workshopBookings') || '{}') as Record<
+        string,
+        unknown
+      >
+      delete bookingsMeta[appointmentId]
+      localStorage.setItem('workshopBookings', JSON.stringify(bookingsMeta))
 
       toast.error(t.reloadAndRetry)
-      throw new Error('addItem failed silently — cart not created')
+      throw new Error('addItem verification failed — spots released, please reload and retry')
     }
 
     if (bookingMetadata.bookingId) {
@@ -122,7 +171,7 @@ export async function addWorkshopToCart({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bookingId: bookingMetadata.bookingId,
-          cartId: cartAfter,
+          cartId,
         }),
       }).catch((error) => {
         console.error('[addWorkshopToCart] Failed to link booking to cart:', error)
@@ -145,7 +194,7 @@ export async function addWorkshopToCart({
       !(
         error instanceof Error &&
         (error.message.includes('Failed to add to cart') ||
-          error.message.includes('addItem failed silently'))
+          error.message.includes('addItem verification failed'))
       )
     ) {
       // Only show generic error if we haven't already shown a specific one
