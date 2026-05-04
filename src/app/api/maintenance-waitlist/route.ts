@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { name, email, phone } = body as Record<string, unknown>
+  const { name, email, phone, interest } = body as Record<string, unknown>
 
   if (typeof name !== 'string' || !name.trim()) {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 })
@@ -28,18 +28,33 @@ export async function POST(req: NextRequest) {
     typeof phone === 'string' && phone.trim()
       ? phone.trim().replace(/[^\d\s+\-().]/g, '').slice(0, 30)
       : ''
+  const WORKSHOP_LABELS: Record<string, string> = {
+    basics: 'Fermentation Basics',
+    kombucha: 'Kombucha',
+    lakto: 'Laktofermentation',
+    tempeh: 'Tempeh',
+  }
+  const safeInterest =
+    typeof interest === 'string' && Object.prototype.hasOwnProperty.call(WORKSHOP_LABELS, interest)
+      ? interest
+      : ''
 
   await upsertContact({
     email: safeEmail,
     firstName: safeName,
     attributes: {
       ...(safePhone ? { SMS: safePhone } : {}),
+      ...(safeInterest ? { WORKSHOP_INTEREST: safeInterest } : {}),
       SIGNUP_SOURCE: 'maintenance-page',
     },
   })
 
+  const workshopLabel = safeInterest ? WORKSHOP_LABELS[safeInterest] : ''
   const phoneLine = safePhone
     ? `<p style="color:#555;font-size:0.95rem">Telefon: <strong>${safePhone}</strong></p>`
+    : ''
+  const workshopLine = workshopLabel
+    ? `<p style="color:#555;font-size:0.95rem">Workshop-Interesse: <strong>${workshopLabel}</strong></p>`
     : ''
 
   await sendTransactionalEmail({
@@ -53,6 +68,7 @@ export async function POST(req: NextRequest) {
           schnell wie m&ouml;glich bei dir, um deinen Workshop-Platz zu besprechen.
         </p>
         ${phoneLine}
+        ${workshopLine}
         <hr style="border:none;border-top:1px solid #eee;margin:1.5rem 0"/>
         <p style="color:#888;font-size:0.9rem;line-height:1.6">
           <em>Hi ${safeName}, thanks for reaching out! We are temporarily offline but will

@@ -1,6 +1,5 @@
 'use client'
 
-import { SecondaryLogo } from '@/components/icons'
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -35,6 +34,7 @@ export default function MaintenancePage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [interest, setInterest] = useState('')
   const [notifyLoading, setNotifyLoading] = useState(false)
   const [notifyDone, setNotifyDone] = useState(false)
   const [notifyError, setNotifyError] = useState('')
@@ -54,7 +54,7 @@ export default function MaintenancePage() {
       const res = await fetch('/api/maintenance-waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone }),
+        body: JSON.stringify({ name, email, phone, interest }),
       })
       if (res.ok) {
         setNotifyDone(true)
@@ -90,7 +90,8 @@ export default function MaintenancePage() {
     <div style={{ textAlign: 'center', maxWidth: 440, padding: '2rem', width: '100%' }}>
       {/* Logo */}
       <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
-        <SecondaryLogo width={200} height={86} priority />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/secondary-logo.svg" alt="FermentFreude" width={200} height={86} />
       </div>
 
       {/* Headline */}
@@ -159,6 +160,17 @@ export default function MaintenancePage() {
             onChange={(e) => setPhone(e.target.value)}
             style={INPUT_STYLE}
           />
+          <select
+            value={interest}
+            onChange={(e) => setInterest(e.target.value)}
+            style={{ ...INPUT_STYLE, color: interest ? '#1a1a1a' : '#888' }}
+          >
+            <option value="">Workshop-Interesse (optional)</option>
+            <option value="basics">Fermentation Basics</option>
+            <option value="kombucha">Kombucha</option>
+            <option value="lakto">Laktofermentation</option>
+            <option value="tempeh">Tempeh</option>
+          </select>
           <button
             type="submit"
             disabled={notifyLoading || !email || !name}
