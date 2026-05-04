@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/maintenance') ||
     pathname.startsWith('/api/preview-access') ||
+    pathname.startsWith('/api/maintenance-waitlist') ||
     pathname.startsWith('/admin') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
