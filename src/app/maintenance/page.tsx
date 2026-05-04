@@ -110,8 +110,13 @@ export default function MaintenancePage() {
         Entschuldigung — wir sind vorübergehend offline.
       </p>
       <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '2rem', lineHeight: 1.6 }}>
-        Sorry for the inconvenience! Leave your name and email and we&apos;ll get back to you
-        directly to help you book a workshop.
+        Hinterlasse deinen Namen und deine E-Mail — wir melden uns direkt bei dir, um einen
+        Workshop-Termin zu finden.
+        <br />
+        <span style={{ fontSize: '0.85em' }}>
+          Sorry for the inconvenience! Leave your name and email and we&apos;ll get back to you
+          directly to help you book a workshop.
+        </span>
       </p>
 
       {/* Waitlist form */}

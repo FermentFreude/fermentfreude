@@ -17,7 +17,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
     pathname.startsWith('/media') ||
-    pathname === '/robots.txt'
+    pathname === '/robots.txt' ||
+    // Static public files (images, fonts, etc.)
+    /\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf)$/.test(pathname)
   ) {
     return NextResponse.next()
   }
