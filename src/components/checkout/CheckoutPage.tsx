@@ -153,7 +153,7 @@ const buildMapLink = (name: string, address: string) =>
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
   const router = useRouter()
-  const { cart, clearCart } = useCart()
+  const { cart, clearCart, removeItem } = useCart()
   const [error, setError] = useState<null | string>(null)
   /**
    * State to manage the email input for guest checkout.
@@ -198,6 +198,61 @@ export const CheckoutPage: React.FC = () => {
       }
     >
   >({})
+  const handleRemoveItem = useCallback(
+    async (item: { id?: string | null; product: unknown }) => {
+      const product =
+        typeof item.product === 'object' && item.product !== null
+          ? (item.product as { slug?: string })
+          : null
+      const productSlug = product?.slug
+      if (productSlug?.startsWith('workshop-')) {
+        try {
+          const stored = localStorage.getItem('workshopBookings')
+          if (stored) {
+            const bookings = JSON.parse(stored) as Record<
+              string,
+              {
+                workshopSlug?: string
+                appointmentId?: string
+                bookingId?: string | null
+                guestCount?: number
+              }
+            >
+            const slug = productSlug.replace('workshop-', '')
+            const entry = Object.entries(bookings).find(([, b]) => b.workshopSlug === slug)
+            if (entry) {
+              const [bookingKey, booking] = entry
+              if (booking.appointmentId && booking.guestCount) {
+                await fetch('/api/cart/release-spots', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    appointmentId: booking.appointmentId,
+                    guestCount: booking.guestCount,
+                    bookingId: booking.bookingId ?? undefined,
+                  }),
+                })
+                delete bookings[bookingKey]
+                localStorage.setItem('workshopBookings', JSON.stringify(bookings))
+                setBookingMetadata((prev) => {
+                  const updated = { ...prev }
+                  delete updated[bookingKey]
+                  return updated
+                })
+              }
+            }
+          }
+        } catch (err) {
+          console.error('[CheckoutPage] Failed to release workshop spots:', err)
+        }
+      }
+      if (item.id) {
+        removeItem(item.id)
+      }
+    },
+    [removeItem],
+  )
+
   const checkoutEmail = email || user?.email || ''
   const { locale } = useLocale()
   const t = locale === 'de' ? CHECKOUT_DE : CHECKOUT_EN
@@ -1050,12 +1105,22 @@ export const CheckoutPage: React.FC = () => {
                           </p>
                         </div>
 
-                        {typeof price === 'number' && (
-                          <Price
-                            className="font-display text-body-sm font-bold text-ff-near-black"
-                            amount={price}
-                          />
-                        )}
+                        <div className="flex flex-col items-end gap-1">
+                          {typeof price === 'number' && (
+                            <Price
+                              className="font-display text-body-sm font-bold text-ff-near-black"
+                              amount={price}
+                            />
+                          )}
+                          {!paymentData && (
+                            <button
+                              onClick={() => handleRemoveItem(item)}
+                              className="text-caption font-display text-ff-gray-text-light underline underline-offset-2 transition-colors hover:text-ff-near-black"
+                            >
+                              {t.remove}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )
