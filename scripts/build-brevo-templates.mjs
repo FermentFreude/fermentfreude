@@ -8,8 +8,10 @@
  * - 600px single column, Helvetica/Arial, inline CSS
  * - Brand: cream #F6F0E8, dark #1a1a1a, body #555251, accent #E5B765
  * - Logo submark + Lucide PNG icons hosted on R2 prod bucket
- * - Defensive Liquid: every param wrapped in `| default: ""`
- * - Raw HTML rendering for ORDER_ITEMS_HTML / WORKSHOP_BOOKINGS_HTML
+ * - All Liquid params use `{{ params.X | default: "" }}` defensively.
+ * - Line items / bookings are passed as JSON arrays (params.ITEMS / params.WORKSHOP_BOOKINGS)
+ *   and rendered with `{% for %}` loops — Brevo HTML-escapes string params, so
+ *   pre-built HTML blobs do NOT work and structured loops are required.
  * - Subject lines NOT included here (PUT keeps existing V2 subjects)
  */
 import { writeFileSync, mkdirSync } from 'node:fs'
@@ -361,7 +363,7 @@ ${spacer(8)}
 // 65 — WORKSHOP BOOKING CONFIRMATION
 // =============================================================================
 function tpl_65() {
-  // Fallback: render single-booking detail card if WORKSHOP_BOOKINGS_HTML empty
+  // Fallback: render single-booking detail card if no params.WORKSHOP_BOOKINGS array
   const fallbackBookingCard = card(`
   <tr><td style="padding:18px 20px 8px 20px;">
     <div style="${FONT}font-size:12px;line-height:1.3;color:${C.muted};text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Workshop</div>
@@ -374,14 +376,84 @@ function tpl_65() {
   ${moneyRow({ label: 'Gesamt', value: p('TOTAL_PRICE', '—'), bold: true, accent: true })}
   `)
 
+  const bookingLoopCard = `<tr><td class="ff-px" style="padding:0 32px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:#ffffff;border:1px solid ${C.border};border-radius:8px;">
+      {% for booking in params.WORKSHOP_BOOKINGS %}
+      <tr><td style="padding:18px 20px 8px 20px;{% if forloop.index0 > 0 %}border-top:1px solid ${C.border};{% endif %}">
+        <div style="${FONT}font-size:12px;line-height:1.3;color:${C.muted};text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Workshop</div>
+        <div style="${FONT}font-size:18px;line-height:1.3;color:${C.dark};font-weight:700;margin-top:4px;">{{ booking.title | default: "Workshop" }}</div>
+      </td></tr>
+      <tr>
+        <td style="padding:14px 20px;border-bottom:1px solid ${C.border};">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+            <tr>
+              <td width="40" valign="top" style="padding-right:12px;">
+                <img src="${R2}/calendar.png" alt="" width="24" height="24" style="display:block;border:0;width:24px;height:24px;" />
+              </td>
+              <td valign="middle">
+                <div style="${FONT}font-size:12px;line-height:1.3;color:${C.muted};text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Datum &amp; Uhrzeit</div>
+                <div style="${FONT}font-size:15px;line-height:1.4;color:${C.dark};font-weight:500;margin-top:2px;">{{ booking.dateTime | default: "—" }}</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      {% if booking.location and booking.location != "" %}
+      <tr>
+        <td style="padding:14px 20px;border-bottom:1px solid ${C.border};">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+            <tr>
+              <td width="40" valign="top" style="padding-right:12px;">
+                <img src="${R2}/map-pin.png" alt="" width="24" height="24" style="display:block;border:0;width:24px;height:24px;" />
+              </td>
+              <td valign="middle">
+                <div style="${FONT}font-size:12px;line-height:1.3;color:${C.muted};text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Ort</div>
+                <div style="${FONT}font-size:15px;line-height:1.4;color:${C.dark};font-weight:500;margin-top:2px;">{{ booking.location }}</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      {% endif %}
+      <tr>
+        <td style="padding:14px 20px;border-bottom:1px solid ${C.border};">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+            <tr>
+              <td width="40" valign="top" style="padding-right:12px;">
+                <img src="${R2}/user.png" alt="" width="24" height="24" style="display:block;border:0;width:24px;height:24px;" />
+              </td>
+              <td valign="middle">
+                <div style="${FONT}font-size:12px;line-height:1.3;color:${C.muted};text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Teilnehmer:innen</div>
+                <div style="${FONT}font-size:15px;line-height:1.4;color:${C.dark};font-weight:500;margin-top:2px;">{{ booking.guests | default: "1" }}</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      {% if booking.price and booking.price != "" %}
+      <tr>
+        <td style="padding:10px 20px;{% if forloop.last %}border-top:2px solid ${C.dark};{% else %}border-bottom:1px solid ${C.border};{% endif %}">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+            <tr>
+              <td align="left" style="${FONT}font-size:{% if forloop.last %}17px{% else %}15px{% endif %};line-height:1.4;color:${C.dark};font-weight:{% if forloop.last %}700{% else %}400{% endif %};">{% if forloop.last %}Gesamt{% else %}Preis{% endif %}</td>
+              <td align="right" style="${FONT}font-size:{% if forloop.last %}17px{% else %}15px{% endif %};line-height:1.4;color:${C.dark};font-weight:{% if forloop.last %}700{% else %}400{% endif %};white-space:nowrap;">{{ booking.price }}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </table>
+  </td></tr>
+  <tr><td style="height:16px;line-height:16px;font-size:0;">&nbsp;</td></tr>`
+
   const body = `
 ${intro({
   heading: 'Buchung bestätigt — wir freuen uns!',
   lead: `Hi ${p('FIRST_NAME', 'liebe Genießer:in')}, deine Workshop-Buchung ist eingegangen. Hier sind alle Details. Buchungsnummer: <strong>${p('BOOKING_REF', '—')}</strong>`,
 })}
-{% if params.WORKSHOP_BOOKINGS_HTML and params.WORKSHOP_BOOKINGS_HTML != "" %}
-<tr><td class="ff-px" style="padding:0 32px;">{{ params.WORKSHOP_BOOKINGS_HTML }}</td></tr>
-<tr><td style="height:16px;line-height:16px;font-size:0;">&nbsp;</td></tr>
+{% if params.WORKSHOP_BOOKINGS and params.WORKSHOP_BOOKINGS != empty %}
+${bookingLoopCard}
 {% else %}
 ${fallbackBookingCard}
 {% endif %}
@@ -415,6 +487,57 @@ function tpl_72() {
     Deine Artikel werden in der Bestellübersicht angezeigt.
   </td></tr>`
 
+  const itemsLoop = `<tr><td style="padding:0 20px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+      {% for item in params.ITEMS %}
+      <tr>
+        {% if item.thumbUrl and item.thumbUrl != "" %}
+        <td style="padding:10px 12px 10px 0;vertical-align:top;width:72px;">
+          <img src="{{ item.thumbUrl }}" alt="" width="64" height="64" style="display:block;border:0;width:64px;height:64px;border-radius:6px;object-fit:cover;" />
+        </td>
+        {% endif %}
+        <td style="padding:10px 12px 10px 0;vertical-align:top;${FONT}">
+          <div style="font-size:14px;line-height:1.4;color:${C.dark};font-weight:600;">{{ item.title | default: "Artikel" }}</div>
+          {% if item.shortDesc and item.shortDesc != "" %}
+          <div style="font-size:13px;line-height:1.5;color:${C.body};margin-top:2px;">{{ item.shortDesc }}</div>
+          {% endif %}
+          {% if item.sku and item.sku != "" %}
+          <div style="font-size:12px;line-height:1.4;color:${C.muted};margin-top:2px;">SKU: {{ item.sku }}</div>
+          {% endif %}
+        </td>
+        <td align="right" valign="top" style="padding:10px 0 10px 8px;${FONT}font-size:14px;line-height:1.4;color:${C.dark};white-space:nowrap;">
+          <div>x{{ item.qty | default: 1 }}</div>
+          {% if item.lineTotal and item.lineTotal != "" %}
+          <div style="font-weight:600;margin-top:2px;">{{ item.lineTotal }}</div>
+          {% endif %}
+        </td>
+      </tr>
+      {% if forloop.last == false %}
+      <tr><td colspan="3" style="padding:0;border-bottom:1px solid ${C.border};font-size:0;line-height:0;">&nbsp;</td></tr>
+      {% endif %}
+      {% endfor %}
+    </table>
+  </td></tr>`
+
+  const bookingsLoop = `<tr><td class="ff-px" style="padding:0 32px 8px 32px;">
+  <div style="${FONT}font-size:12px;line-height:1.3;color:${C.muted};text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Inkludierte Workshop-Buchungen</div>
+</td></tr>
+<tr><td class="ff-px" style="padding:0 32px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:#ffffff;border:1px solid ${C.border};border-radius:8px;">
+    {% for booking in params.WORKSHOP_BOOKINGS %}
+    <tr><td style="padding:14px 20px;${FONT}{% if forloop.last == false %}border-bottom:1px solid ${C.border};{% endif %}">
+      <div style="font-size:15px;line-height:1.3;color:${C.dark};font-weight:600;">{{ booking.title | default: "Workshop" }}</div>
+      <div style="font-size:13px;line-height:1.5;color:${C.body};margin-top:4px;">{{ booking.dateTime | default: "" }}</div>
+      {% if booking.location and booking.location != "" %}
+      <div style="font-size:13px;line-height:1.5;color:${C.body};">{{ booking.location }}</div>
+      {% endif %}
+      <div style="font-size:13px;line-height:1.5;color:${C.body};">{{ booking.guests | default: "1" }} {% if booking.guests == 1 %}Person{% else %}Personen{% endif %}{% if booking.price and booking.price != "" %} · {{ booking.price }}{% endif %}</div>
+    </td></tr>
+    {% endfor %}
+  </table>
+</td></tr>
+${spacer(16)}`
+
   const body = `
 ${intro({
   heading: 'Vielen Dank für deine Bestellung!',
@@ -427,8 +550,8 @@ ${intro({
     <tr><td style="padding:18px 20px 6px 20px;">
       <div style="${FONT}font-size:12px;line-height:1.3;color:${C.muted};text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Bestellung ${p('ORDER_NUMBER', '')}</div>
     </td></tr>
-    {% if params.ORDER_ITEMS_HTML and params.ORDER_ITEMS_HTML != "" %}
-    <tr><td style="padding:0 20px;">{{ params.ORDER_ITEMS_HTML }}</td></tr>
+    {% if params.ITEMS and params.ITEMS != empty %}
+    ${itemsLoop}
     {% else %}
     ${fallbackItems}
     {% endif %}
@@ -439,12 +562,8 @@ ${intro({
 </td></tr>
 ${spacer(16)}
 
-{% if params.WORKSHOP_BOOKINGS_HTML and params.WORKSHOP_BOOKINGS_HTML != "" %}
-<tr><td class="ff-px" style="padding:0 32px 8px 32px;">
-  <div style="${FONT}font-size:12px;line-height:1.3;color:${C.muted};text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Inkludierte Workshop-Buchungen</div>
-</td></tr>
-<tr><td class="ff-px" style="padding:0 32px;">{{ params.WORKSHOP_BOOKINGS_HTML }}</td></tr>
-${spacer(16)}
+{% if params.WORKSHOP_BOOKINGS and params.WORKSHOP_BOOKINGS != empty %}
+${bookingsLoop}
 {% endif %}
 
 {% if params.SHIPPING_ADDRESS and params.SHIPPING_ADDRESS != "" %}
