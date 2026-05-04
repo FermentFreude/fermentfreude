@@ -31,10 +31,10 @@ const BTN_PRIMARY: React.CSSProperties = {
 }
 
 export default function MaintenancePage() {
-  // — Waitlist form —
+  // — Contact form —
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [interest, setInterest] = useState('')
+  const [phone, setPhone] = useState('')
   const [notifyLoading, setNotifyLoading] = useState(false)
   const [notifyDone, setNotifyDone] = useState(false)
   const [notifyError, setNotifyError] = useState('')
@@ -54,7 +54,7 @@ export default function MaintenancePage() {
       const res = await fetch('/api/maintenance-waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, interest }),
+        body: JSON.stringify({ name, email, phone }),
       })
       if (res.ok) {
         setNotifyDone(true)
@@ -103,14 +103,14 @@ export default function MaintenancePage() {
           color: '#1a1a1a',
         }}
       >
-        Wir öffnen bald.
+        Wir sind gleich zurück.
       </h1>
       <p style={{ fontSize: '0.95rem', color: '#555', marginBottom: '0.5rem', lineHeight: 1.6 }}>
-        Der Shop ist kurz in der Vorbereitung.
+        Entschuldigung — wir sind vorübergehend offline.
       </p>
       <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '2rem', lineHeight: 1.6 }}>
-        We&apos;re getting ready to open. Leave your email and we&apos;ll let you know the moment
-        we launch — so you can secure your workshop spot first.
+        Sorry for the inconvenience! Leave your name and email and we&apos;ll get back to you
+        directly to help you book a workshop.
       </p>
 
       {/* Waitlist form */}
@@ -126,12 +126,12 @@ export default function MaintenancePage() {
             lineHeight: 1.6,
           }}
         >
-          <strong>Danke! 🌱</strong>
+          <strong>Danke!</strong>
           <br />
-          Wir schreiben dir, sobald der Shop öffnet.
+          Wir melden uns so schnell wie möglich bei dir.
           <br />
           <span style={{ fontSize: '0.85rem', color: '#4a8a4a' }}>
-            Thanks! We&apos;ll send you an email when we launch.
+            Thanks! We&apos;ll be in touch with you shortly.
           </span>
         </div>
       ) : (
@@ -152,19 +152,13 @@ export default function MaintenancePage() {
             style={INPUT_STYLE}
             required
           />
-          <select
-            value={interest}
-            onChange={(e) => setInterest(e.target.value)}
-            style={{ ...INPUT_STYLE, color: interest ? '#1a1a1a' : '#888' }}
-          >
-            <option value="">Workshop-Interesse (optional)</option>
-            <option value="basics">Fermentation Basics</option>
-            <option value="kombucha">Kombucha</option>
-            <option value="lakto">Laktofermentation</option>
-            <option value="tempeh">Tempeh</option>
-            <option value="produkte">Produkte / Shop</option>
-            <option value="alles">Alles / Everything</option>
-          </select>
+          <input
+            type="tel"
+            placeholder="Telefon / Phone (optional)"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            style={INPUT_STYLE}
+          />
           <button
             type="submit"
             disabled={notifyLoading || !email || !name}
@@ -174,7 +168,7 @@ export default function MaintenancePage() {
               cursor: notifyLoading || !email || !name ? 'not-allowed' : 'pointer',
             }}
           >
-            {notifyLoading ? '...' : 'Benachrichtige mich / Notify me'}
+            {notifyLoading ? '...' : 'Rückruf anfordern / Request callback'}
           </button>
           {notifyError && (
             <p style={{ color: '#c00', marginTop: '0.5rem', fontSize: '0.85rem' }}>
