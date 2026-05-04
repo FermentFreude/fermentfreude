@@ -242,9 +242,10 @@ export const ContactBlock: Block = {
               type: 'text',
               required: false,
               localized: true,
-              label: 'Phone Placeholder',
+              label: 'Phone Placeholder (unused)',
               admin: {
-                description: 'Placeholder for phone field (e.g., "Your Phone").',
+                description:
+                  'Not shown on the website — the contact form only collects name and email. Phone stays on the contact card if configured.',
               },
             },
             {
