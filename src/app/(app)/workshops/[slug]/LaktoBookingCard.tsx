@@ -225,7 +225,7 @@ export function LaktoBookingCard({
   const sectionRef = useRef<HTMLElement>(null)
   const datesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
-  const { addItem } = useCart()
+  const { addItem, clearCart } = useCart()
   const { locale } = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -698,6 +698,7 @@ export function LaktoBookingCard({
             try {
               await addWorkshopToCart({
                 addItemAction: addItem,
+                clearCart,
                 appointmentId: bookingDate.appointmentId ?? bookingDate.id,
                 workshopSlug: 'lakto',
                 workshopTitle: 'Lakto-fermentiertes Gemüse Workshop',
