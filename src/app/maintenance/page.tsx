@@ -30,25 +30,7 @@ export default function MaintenancePage() {
   }
 
   return (
-    <html lang="de" suppressHydrationWarning>
-      <head>
-        <title>FermentFreude — Wartung / Maintenance</title>
-        <meta name="robots" content="noindex, nofollow" />
-      </head>
-      <body
-        style={{
-          margin: 0,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily:
-            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          background: '#faf9f6',
-          color: '#1a1a1a',
-        }}
-      >
-        <div style={{ textAlign: 'center', maxWidth: 440, padding: '2rem' }}>
+    <div style={{ textAlign: 'center', maxWidth: 440, padding: '2rem' }}>
           <div
             style={{
               fontSize: '2.5rem',
@@ -138,7 +120,5 @@ export default function MaintenancePage() {
             © {new Date().getFullYear()} FermentFreude
           </p>
         </div>
-      </body>
-    </html>
   )
 }
