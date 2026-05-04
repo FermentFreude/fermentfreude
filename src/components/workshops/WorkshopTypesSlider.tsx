@@ -117,6 +117,7 @@ export function WorkshopTypesSlider({
           {workshops.map((w) => {
             const slug = getSlugFromCtaLink(w.ctaLink)
             const href = slug ? `/workshops/${slug}` : '/workshops'
+            const bookingHref = slug ? `/workshops/${slug}?book=1#booking` : '/workshops'
             const displayImage = isResolvedMedia(w.image2) ? w.image2 : w.image
             const cardBg = getWorkshopCardBg(slug)
             const isSoldOut = Boolean(soldOutByHref?.[href])
@@ -195,7 +196,7 @@ export function WorkshopTypesSlider({
                         </span>
                       ) : (
                         <Link
-                          href="/contact"
+                          href={bookingHref}
                           className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-[#555954] px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#333]"
                         >
                           {buyLabel}
