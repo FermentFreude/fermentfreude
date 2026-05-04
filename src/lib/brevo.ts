@@ -127,10 +127,21 @@ type BrevoRecipient = {
   name?: string
 }
 
+// Brevo accepts nested JSON params (objects, arrays of objects). Templates can
+// then loop over them with `{% for item in params.ITEMS %}`. Pre-built HTML
+// strings passed via params are HTML-escaped by Brevo, so structured data +
+// Liquid loops is the supported way to render dynamic markup.
+type BrevoParamPrimitive = string | number | boolean | null
+type BrevoParamValue =
+  | BrevoParamPrimitive
+  | BrevoParamPrimitive[]
+  | Record<string, BrevoParamPrimitive>
+  | Record<string, BrevoParamPrimitive>[]
+
 type SendTemplateEmailParams = {
   to: BrevoRecipient[]
   templateId: number
-  params?: Record<string, string | number | boolean>
+  params?: Record<string, BrevoParamValue>
   subject?: string
 }
 

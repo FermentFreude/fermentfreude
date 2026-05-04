@@ -50,8 +50,6 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
     }[] = doc.items ?? []
 
     const fmtEuro = (cents: number) => `€${(cents / 100).toFixed(2).replace('.', ',')}`
-    const escapeHtml = (s: string) =>
-      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
     // ─── Resolve product details for each line item (image, sku, price) ───
     type ResolvedItem = {
@@ -110,30 +108,21 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       .map((i) => `${i.title} x${i.qty}`)
       .join(', ')
 
-    // Structured HTML rows for ORDER_ITEMS_HTML — render in template with `{{ params.ORDER_ITEMS_HTML }}` (HTML mode)
-    const itemsHtml = resolvedItems
-      .map((i) => {
-        const lineCents = i.unitCents !== null ? i.unitCents * i.qty : null
-        const linePrice = lineCents !== null ? fmtEuro(lineCents) : ''
-        const thumbCell = i.thumbUrl
-          ? `<img src="${escapeHtml(i.thumbUrl)}" alt="" width="64" height="64" style="display:block;border-radius:6px;object-fit:cover;border:0;" />`
-          : ''
-        const skuLine = i.sku ? `<div style="font-size:12px;color:#777;">SKU: ${escapeHtml(i.sku)}</div>` : ''
-        const descLine = i.shortDesc
-          ? `<div style="font-size:13px;color:#555;margin-top:2px;">${escapeHtml(i.shortDesc)}</div>`
-          : ''
-        return `<tr>
-  <td style="padding:8px 12px 8px 0;vertical-align:top;width:80px;">${thumbCell}</td>
-  <td style="padding:8px 12px;vertical-align:top;font-family:Helvetica,Arial,sans-serif;color:#222;">
-    <div style="font-weight:600;">${escapeHtml(i.title)}</div>
-    ${descLine}
-    ${skuLine}
-  </td>
-  <td style="padding:8px 12px;vertical-align:top;text-align:right;font-family:Helvetica,Arial,sans-serif;color:#222;white-space:nowrap;">x${i.qty}</td>
-  <td style="padding:8px 0 8px 12px;vertical-align:top;text-align:right;font-family:Helvetica,Arial,sans-serif;color:#222;white-space:nowrap;">${linePrice}</td>
-</tr>`
-      })
-      .join('\n')
+    // Structured array for Brevo Liquid `{% for item in params.ITEMS %}` loop.
+    // Brevo HTML-escapes string params, so pre-built HTML blobs render as
+    // visible markup. Pass structured fields and let the template render rows.
+    const itemsArray = resolvedItems.map((i) => {
+      const lineCents = i.unitCents !== null ? i.unitCents * i.qty : null
+      return {
+        title: i.title,
+        sku: i.sku,
+        shortDesc: i.shortDesc,
+        qty: i.qty,
+        thumbUrl: i.thumbUrl,
+        unitPrice: i.unitCents !== null ? fmtEuro(i.unitCents) : '',
+        lineTotal: lineCents !== null ? fmtEuro(lineCents) : '',
+      }
+    })
 
     // ─── Extract Workshop Details ───────────────────────────────
     // Look for workshop-bookings that match this order by checking the cart/transaction
@@ -143,7 +132,14 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
     let workshopLocation = ''
     let guestCount = 0
     let workshopPrice = ''
-    let workshopBookingsHtml = ''
+    type BookingParam = {
+      title: string
+      dateTime: string
+      location: string
+      guests: number
+      price: string
+    }
+    const bookingsArray: BookingParam[] = []
 
     // Cart-derived monetary breakdown
     let cartSubtotal: number | null = null
@@ -206,8 +202,7 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
             guestCount = first.guestCount || 0
             workshopPrice = first.totalPrice ? `€${first.totalPrice.toFixed(2)}` : ''
 
-            // Build per-booking HTML blocks (sequential — Mongo M0)
-            const blocks: string[] = []
+            // Build per-booking structured array for Liquid loop (sequential — Mongo M0)
             for (const b of bookings.docs) {
               let locName = ''
               let locAddress = ''
@@ -239,20 +234,22 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
                 typeof b.totalPrice === 'number'
                   ? `€${b.totalPrice.toFixed(2).replace('.', ',')}`
                   : ''
-              blocks.push(
-                `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 12px 0;border:1px solid #eee;border-radius:6px;">
-  <tr>
-    <td style="padding:12px 16px;font-family:Helvetica,Arial,sans-serif;color:#222;">
-      <div style="font-weight:600;font-size:15px;margin-bottom:4px;">${escapeHtml(String(b.workshopTitle ?? 'Workshop'))}</div>
-      <div style="font-size:13px;color:#555;">${escapeHtml(String(b.date ?? ''))} · ${escapeHtml(String(b.time ?? ''))}</div>
-      ${locName ? `<div style="font-size:13px;color:#555;">${escapeHtml(locName)}${locAddress ? `, ${escapeHtml(locAddress)}` : ''}</div>` : ''}
-      <div style="font-size:13px;color:#555;">${escapeHtml(String(b.guestCount ?? 1))} ${b.guestCount === 1 ? 'Person' : 'Personen'}${linePrice ? ` · ${linePrice}` : ''}</div>
-    </td>
-  </tr>
-</table>`,
+              const dateTimeParts = [String(b.date ?? ''), String(b.time ?? '')].filter(
+                (s) => s.trim() !== '',
               )
+              const locationStr = locName
+                ? locAddress
+                  ? `${locName}, ${locAddress}`
+                  : locName
+                : ''
+              bookingsArray.push({
+                title: String(b.workshopTitle ?? 'Workshop'),
+                dateTime: dateTimeParts.join(' · '),
+                location: locationStr,
+                guests: typeof b.guestCount === 'number' ? b.guestCount : 1,
+                price: linePrice,
+              })
             }
-            workshopBookingsHtml = blocks.join('\n')
 
             // Pickup detection: any workshop booking implies on-site pickup
             isPickup = true
@@ -326,7 +323,10 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
     const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
 
-    const emailParams: Record<string, string> = {
+    const emailParams: Record<
+      string,
+      string | number | Array<Record<string, string | number>>
+    > = {
       ORDER_ID: String(doc.id),
       ORDER_NUMBER: orderNumber,
       ORDER_TOTAL: orderTotalNum !== null ? fmtMoney(orderTotalNum) : '',
@@ -335,8 +335,9 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       SHIPPING: shippingDisplay,
       SHIPPING_ADDRESS: shippingAddressStr,
       ORDER_ITEMS: itemSummary,
-      ORDER_ITEMS_HTML: itemsHtml,
-      WORKSHOP_BOOKINGS_HTML: workshopBookingsHtml,
+      // Structured arrays — Brevo Liquid `{% for item in params.ITEMS %}`
+      ITEMS: itemsArray,
+      WORKSHOP_BOOKINGS: bookingsArray,
       CUSTOMER_NAME: recipientName || recipientEmail,
       FIRST_NAME: recipientName?.split(' ')[0] || recipientName || recipientEmail,
       ORDER_DATE: new Date().toLocaleDateString('de-DE'),
