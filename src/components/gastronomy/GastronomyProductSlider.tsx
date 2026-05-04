@@ -34,15 +34,17 @@ type Props = {
   slides: Slide[]
   ctaLabel: string
   ctaUrl: string
-  /** CMS — falls back to PREV */
+  /** CMS — falls back to PREV / ZURÜCK */
   prevLabel?: string | null
-  /** CMS — falls back to NEXT */
+  /** CMS — falls back to NEXT / VOR */
   nextLabel?: string | null
   /** CMS — ms between auto-advances; default 12000 */
   autoplayIntervalMs?: number | null
+  /** When CMS sends no offer cards, fallback slide copy follows locale */
+  locale?: 'de' | 'en'
 }
 
-const DEFAULT_SLIDES: Slide[] = [
+const DEFAULT_SLIDES_EN: Slide[] = [
   {
     title: 'Professional Training',
     description: "Elevate your team's culinary skills with tailored fermentation workshops.",
@@ -57,6 +59,22 @@ const DEFAULT_SLIDES: Slide[] = [
   },
 ]
 
+const DEFAULT_SLIDES_DE: Slide[] = [
+  {
+    title: 'Professionelle Schulungen',
+    description:
+      'Bringt euer Team mit massgeschneiderten Fermentations-Workshops auf das nächste Level.',
+  },
+  {
+    title: 'Firmen-Events',
+    description: 'Einzigartige Teamevents rund um Fermentation für euer Unternehmen.',
+  },
+  {
+    title: 'Menüentwicklung',
+    description: 'Wir unterstützen euch bei der Integration fermentierter Produkte in eure Karte.',
+  },
+]
+
 export function GastronomyProductSlider({
   slides,
   ctaLabel,
@@ -64,11 +82,14 @@ export function GastronomyProductSlider({
   prevLabel,
   nextLabel,
   autoplayIntervalMs,
+  locale = 'de',
 }: Props) {
   const { setHeaderTheme } = useHeaderTheme()
-  const resolvedSlides = slides?.length > 0 ? slides : DEFAULT_SLIDES
-  const resolvedPrev = prevLabel?.trim() || 'PREV'
-  const resolvedNext = nextLabel?.trim() || 'NEXT'
+  const isDe = locale === 'de'
+  const resolvedSlides =
+    slides?.length > 0 ? slides : isDe ? DEFAULT_SLIDES_DE : DEFAULT_SLIDES_EN
+  const resolvedPrev = prevLabel?.trim() || (isDe ? 'ZURÜCK' : 'PREV')
+  const resolvedNext = nextLabel?.trim() || (isDe ? 'VOR' : 'NEXT')
   const intervalMs =
     typeof autoplayIntervalMs === 'number' &&
     Number.isFinite(autoplayIntervalMs) &&

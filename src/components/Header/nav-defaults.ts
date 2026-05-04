@@ -19,8 +19,8 @@ export interface DefaultNavItem {
   dropdownItems?: DropdownItem[]
 }
 
-/** Default nav items matching the Figma nav order */
-export const defaultNavItems: DefaultNavItem[] = [
+/** English defaults (when locale is EN and CMS nav is empty) */
+export const defaultNavItemsEn: DefaultNavItem[] = [
   { label: 'Home', url: '/' },
   {
     label: 'Workshops',
@@ -62,9 +62,69 @@ export const defaultNavItems: DefaultNavItem[] = [
   },
 ]
 
-/** Default dropdown lookup keyed by identifier */
+/** German defaults (when locale is DE and CMS nav is empty) */
+export const defaultNavItemsDe: DefaultNavItem[] = [
+  { label: 'Startseite', url: '/' },
+  {
+    label: 'Workshops',
+    url: '/workshops',
+    dropdownKey: 'workshops',
+    dropdownItems: [
+      {
+        label: 'Alle Workshops',
+        href: '/workshops',
+        description: 'Alle Präsenz-Workshops entdecken',
+      },
+      { label: 'Lakto-Gemüse', href: '/workshops/lakto-gemuese', isSmall: true },
+      { label: 'Tempeh', href: '/workshops/tempeh', isSmall: true },
+      { label: 'Kombucha', href: '/workshops/kombucha', isSmall: true },
+      {
+        label: 'Online-Kurse',
+        href: '/courses',
+        description: 'Demnächst',
+        disabled: true,
+      },
+      {
+        label: 'Gutschein',
+        href: '/workshops/voucher',
+        description: 'Workshop-Gutscheine',
+      },
+    ],
+  },
+  { label: 'Shop', url: '/shop' },
+  { label: 'Für Gastronomen', url: '/gastronomy' },
+  {
+    label: 'Über uns',
+    url: '/about',
+    dropdownKey: 'about',
+    dropdownItems: [
+      { label: 'Über uns', href: '/about', description: 'Team & Mission' },
+      { label: 'Fermentation', href: '/fermentation', description: 'Was ist Fermentation?' },
+      { label: 'Kontakt', href: '/contact', description: 'Kontakt aufnehmen' },
+    ],
+  },
+]
+
+export function getDefaultNavItems(locale: 'de' | 'en'): DefaultNavItem[] {
+  return locale === 'de' ? defaultNavItemsDe : defaultNavItemsEn
+}
+
+export function getDefaultDropdowns(locale: 'de' | 'en'): Record<string, DropdownItem[]> {
+  const map: Record<string, DropdownItem[]> = {}
+  for (const item of getDefaultNavItems(locale)) {
+    if (item.dropdownKey && item.dropdownItems) {
+      map[item.dropdownKey] = item.dropdownItems
+    }
+  }
+  return map
+}
+
+/** @deprecated Use getDefaultNavItems(locale) */
+export const defaultNavItems = defaultNavItemsEn
+
+/** @deprecated Use getDefaultDropdowns(locale) */
 export const defaultDropdowns: Record<string, DropdownItem[]> = {}
-for (const item of defaultNavItems) {
+for (const item of defaultNavItemsEn) {
   if (item.dropdownKey && item.dropdownItems) {
     defaultDropdowns[item.dropdownKey] = item.dropdownItems
   }
@@ -72,7 +132,7 @@ for (const item of defaultNavItems) {
 
 /** Hrefs marked `disabled` in default nav — applied when CMS omits `disabled`. */
 const defaultInactiveHrefs = new Set<string>()
-for (const item of defaultNavItems) {
+for (const item of defaultNavItemsEn) {
   if (!item.dropdownItems) continue
   for (const d of item.dropdownItems) {
     if (d.disabled) {
@@ -112,10 +172,11 @@ export function dropdownItemIsInactive(item: { href: string; disabled?: boolean 
 
 /** Match a CMS nav item to its default dropdown key */
 export function getDefaultDropdownKey(label?: string | null, url?: string | null): string | null {
-  const l = label?.toLowerCase()
+  const l = label?.toLowerCase().trim()
   if (l === 'workshops' || url === '/workshops') return 'workshops'
   if (
     l === 'about us' ||
+    l === 'über uns' ||
     l === 'about' ||
     l === 'fermentation' ||
     url === '/about' ||

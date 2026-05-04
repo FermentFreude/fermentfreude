@@ -15,17 +15,28 @@ import { getPayload } from 'payload'
 
 import type { Page as PageType } from '@/payload-types'
 
-const DEFAULT_HERO_CTA = 'Take A Look'
-const DEFAULT_OFFER_TITLE = 'What we offer'
-const DEFAULT_CTA_HEADING =
+const DEFAULT_HERO_CTA_EN = 'Take A Look'
+const DEFAULT_HERO_CTA_DE = 'Jetzt ansehen'
+const DEFAULT_OFFER_TITLE_EN = 'What we offer'
+const DEFAULT_OFFER_TITLE_DE = 'Was wir bieten'
+const DEFAULT_CTA_HEADING_EN =
   "Transform tradition into innovation. Fermentation is not just preservation it's the future of gastronomy."
-const DEFAULT_CTA_SUBLINE = 'Partner with us to differentiate your business.'
-const DEFAULT_CTA_BUTTON = 'Send Inquiry'
-const DEFAULT_WORKSHOP_TITLE = 'Next Workshop'
-const DEFAULT_WORKSHOP_SUBTITLE = 'Exclusive and Personalized Fermentations'
-const DEFAULT_WORKSHOP_NEXT_DATE_LABEL = 'Next Appointment:'
-const DEFAULT_SLIDER_PREV = 'PREV'
-const DEFAULT_SLIDER_NEXT = 'NEXT'
+const DEFAULT_CTA_HEADING_DE =
+  'Tradition in Innovation verwandeln. Fermentation ist mehr als Konservierung – sie ist die Zukunft der Gastronomie.'
+const DEFAULT_CTA_SUBLINE_EN = 'Partner with us to differentiate your business.'
+const DEFAULT_CTA_SUBLINE_DE = 'Gemeinsam heben wir euer Angebot von der Masse ab.'
+const DEFAULT_CTA_BUTTON_EN = 'Send inquiry'
+const DEFAULT_CTA_BUTTON_DE = 'Anfrage senden'
+const DEFAULT_WORKSHOP_TITLE_EN = 'Next workshop'
+const DEFAULT_WORKSHOP_TITLE_DE = 'Nächster Workshop'
+const DEFAULT_WORKSHOP_SUBTITLE_EN = 'Exclusive and personalized fermentations'
+const DEFAULT_WORKSHOP_SUBTITLE_DE = 'Exklusive und persönliche Fermentationen'
+const DEFAULT_WORKSHOP_NEXT_DATE_LABEL_EN = 'Next date:'
+const DEFAULT_WORKSHOP_NEXT_DATE_LABEL_DE = 'Nächster Termin:'
+const DEFAULT_SLIDER_PREV_EN = 'PREV'
+const DEFAULT_SLIDER_PREV_DE = 'ZURÜCK'
+const DEFAULT_SLIDER_NEXT_EN = 'NEXT'
+const DEFAULT_SLIDER_NEXT_DE = 'VOR'
 const TRUSTED_BY_DEFAULT = 'Trusted by'
 const TRUSTED_BY_DEFAULT_DE = 'Für Profiküchen'
 const FALLBACK_TRUST_BADGES_DE = [
@@ -46,12 +57,17 @@ const FALLBACK_TRUST_BADGES_EN = [
 const getCachedGastronomyPage = unstable_cache(
   async (locale: string) => {
     const payload = await getPayload({ config: configPromise })
+    const isEn = locale === 'en'
+    // English locale must not inherit German copy from Payload's localization fallback,
+    // or localized blocks (e.g. outcomes) stay DE on /? with EN toggle. Empty EN fields
+    // then use the fallbacks below instead.
     const result = await payload.find({
       collection: 'pages',
       where: { slug: { equals: 'gastronomy' } },
       limit: 1,
       depth: 4,
       locale: locale as 'de' | 'en',
+      ...(isEn ? { fallbackLocale: false } : {}),
     })
     return (result.docs[0] as PageType | undefined) ?? null
   },
@@ -75,27 +91,40 @@ export default async function GastronomyPage() {
   const page = await getCachedGastronomyPage(locale)
   const g = page?.gastronomy
 
-  const heroCtaLabel = g?.gastronomyHeroCtaLabel ?? DEFAULT_HERO_CTA
+  const heroCtaLabel =
+    g?.gastronomyHeroCtaLabel ??
+    (locale === 'de' ? DEFAULT_HERO_CTA_DE : DEFAULT_HERO_CTA_EN)
   const heroCtaUrl = g?.gastronomyHeroCtaUrl ?? '#offer'
   const detailsTitle = g?.gastronomyOfferDetailsTitle?.trim()
   const sectionTitleFallback = g?.gastronomyOfferSectionTitle?.trim()
   const offerGridTitle =
     (detailsTitle && detailsTitle.length > 0 ? detailsTitle : null) ??
     (sectionTitleFallback && sectionTitleFallback.length > 0 ? sectionTitleFallback : null) ??
-    DEFAULT_OFFER_TITLE
+    (locale === 'de' ? DEFAULT_OFFER_TITLE_DE : DEFAULT_OFFER_TITLE_EN)
   const offerCards = g?.gastronomyOfferCards ?? []
 
   const cta = g?.gastronomyCtaBanner
-  const ctaHeading = cta?.heading?.trim() || DEFAULT_CTA_HEADING
-  const ctaSubline = cta?.description?.trim() || DEFAULT_CTA_SUBLINE
-  const ctaButtonLabel = cta?.buttonLabel?.trim() || DEFAULT_CTA_BUTTON
+  const ctaHeading =
+    cta?.heading?.trim() ||
+    (locale === 'de' ? DEFAULT_CTA_HEADING_DE : DEFAULT_CTA_HEADING_EN)
+  const ctaSubline =
+    cta?.description?.trim() ||
+    (locale === 'de' ? DEFAULT_CTA_SUBLINE_DE : DEFAULT_CTA_SUBLINE_EN)
+  const ctaButtonLabel =
+    cta?.buttonLabel?.trim() ||
+    (locale === 'de' ? DEFAULT_CTA_BUTTON_DE : DEFAULT_CTA_BUTTON_EN)
   const ctaButtonHref = cta?.buttonHref?.trim() || '#contact'
 
-  const workshopSectionTitle = g?.gastronomyWorkshopSectionTitle ?? DEFAULT_WORKSHOP_TITLE
-  const workshopSectionSubtitle = g?.gastronomyWorkshopSectionSubtitle ?? DEFAULT_WORKSHOP_SUBTITLE
+  const workshopSectionTitle =
+    g?.gastronomyWorkshopSectionTitle ??
+    (locale === 'de' ? DEFAULT_WORKSHOP_TITLE_DE : DEFAULT_WORKSHOP_TITLE_EN)
+  const workshopSectionSubtitle =
+    g?.gastronomyWorkshopSectionSubtitle ??
+    (locale === 'de' ? DEFAULT_WORKSHOP_SUBTITLE_DE : DEFAULT_WORKSHOP_SUBTITLE_EN)
   const workshopClarification = g?.gastronomyWorkshopClarification ?? null
   const workshopNextDateLabel =
-    g?.gastronomyWorkshopNextDateLabel ?? DEFAULT_WORKSHOP_NEXT_DATE_LABEL
+    g?.gastronomyWorkshopNextDateLabel ??
+    (locale === 'de' ? DEFAULT_WORKSHOP_NEXT_DATE_LABEL_DE : DEFAULT_WORKSHOP_NEXT_DATE_LABEL_EN)
   const nextDates = await getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de')
   const workshopCards = (g?.gastronomyWorkshopCards ?? []).map((c) => {
     const nextDateData = c.buttonUrl ? nextDates[c.buttonUrl] : undefined
@@ -132,8 +161,12 @@ export default async function GastronomyPage() {
         ? [...FALLBACK_TRUST_BADGES_DE]
         : [...FALLBACK_TRUST_BADGES_EN]
 
-  const sliderPrevLabel = g?.gastronomyHeroSliderPrevLabel ?? DEFAULT_SLIDER_PREV
-  const sliderNextLabel = g?.gastronomyHeroSliderNextLabel ?? DEFAULT_SLIDER_NEXT
+  const sliderPrevLabel =
+    g?.gastronomyHeroSliderPrevLabel ??
+    (locale === 'de' ? DEFAULT_SLIDER_PREV_DE : DEFAULT_SLIDER_PREV_EN)
+  const sliderNextLabel =
+    g?.gastronomyHeroSliderNextLabel ??
+    (locale === 'de' ? DEFAULT_SLIDER_NEXT_DE : DEFAULT_SLIDER_NEXT_EN)
   const sliderAutoplayMs =
     typeof g?.gastronomyHeroSliderAutoplayMs === 'number' &&
     Number.isFinite(g.gastronomyHeroSliderAutoplayMs) &&
@@ -154,16 +187,16 @@ export default async function GastronomyPage() {
   ]
   const fallbackOutcomesEN = [
     {
-      before: 'No clear fermentation offer',
-      after: 'Signature components with strong identity',
+      before: 'Vegetarian options without enough substance',
+      after: 'Tempeh as a stand-alone, plant-based main course',
     },
     {
-      before: 'Inconsistent team workflows',
-      after: 'Clear standards for production and service',
+      before: 'Highly processed meat alternatives on the menu',
+      after: 'Fermented products built on real, regional ingredients',
     },
     {
-      before: 'Standard menus with little differentiation',
-      after: 'Distinctive flavors with a unique point of view',
+      before: 'Interchangeable dishes with no clear identity',
+      after: 'Dishes with a distinct signature and real recognition value',
     },
   ]
   const cmsOutcomeRows = (g?.gastronomyOutcomesItems ?? []).filter(
@@ -179,10 +212,13 @@ export default async function GastronomyPage() {
         ? fallbackOutcomesDE
         : fallbackOutcomesEN
   const outcomeLabel =
-    g?.gastronomyOutcomesEyebrow?.trim() || (locale === 'de' ? 'Ergebnisse' : 'Outcomes')
+    g?.gastronomyOutcomesEyebrow?.trim() ||
+    (locale === 'de' ? 'Ergebnisse' : 'The situation in many kitchens')
   const outcomeTitle =
     g?.gastronomyOutcomesTitle?.trim() ||
-    (locale === 'de' ? 'Vorher / Nachher in der Küche' : 'Before / After In The Kitchen')
+    (locale === 'de'
+      ? 'Vorher / Nachher in der Küche'
+      : 'How fermentation transforms your kitchen')
   const outcomeBeforeLabel =
     g?.gastronomyOutcomesBeforeLabel?.trim() || (locale === 'de' ? 'Vorher' : 'Before')
   const outcomeAfterLabel =
@@ -200,7 +236,7 @@ export default async function GastronomyPage() {
         'Praxisnahes Training vor Ort oder hybrid, mit sofort einsetzbaren Techniken für Ihren Alltag.',
     },
     {
-      title: 'Menu Integration',
+      title: 'Menü-Integration',
       description:
         'Wir begleiten die Umsetzung in Ihre Karte, inklusive Prozesse, Qualität und geschmacklicher Linie.',
     },
@@ -332,7 +368,8 @@ export default async function GastronomyPage() {
       : locale === 'de'
         ? fallbackFaqDE
         : fallbackFaqEN
-  const faqMiniLabel = g?.gastronomyFaqEyebrow?.trim() || 'B2B FAQ'
+  const faqMiniLabel =
+    g?.gastronomyFaqEyebrow?.trim() || (locale === 'de' ? 'B2B-FAQ' : 'B2B FAQ')
   const faqMiniTitle =
     g?.gastronomyFaqTitle?.trim() ||
     (locale === 'de'
@@ -348,6 +385,20 @@ export default async function GastronomyPage() {
   const contactFormHeading =
     g?.gastronomyContactFormHeading ?? (locale === 'de' ? 'Frag uns alles' : 'Ask About Anything')
 
+  const contactHeadingFallback =
+    locale === 'de' ? 'Kontakt' : 'Contact'
+  const contactDescriptionFallback =
+    locale === 'de'
+      ? 'Möchtet ihr einen Workshop buchen oder habt ihr Fragen? Wir freuen uns auf eure Nachricht.'
+      : 'Would you like to book a workshop or have questions? We look forward to hearing from you.'
+  const subjectOptionLabels = (subjectOptions?.options ?? [])
+    .map((o) => o?.label?.trim())
+    .filter((x): x is string => Boolean(x))
+  const defaultSubjectOptions =
+    locale === 'de'
+      ? ['Allgemeine Anfrage', 'Workshop', 'Produkt', 'Partnerschaft']
+      : ['General Inquiry', 'Workshop', 'Product', 'Partnership']
+
   const contactBlockProps = {
     blockType: 'contactBlock' as const,
     hideHeroSection: true,
@@ -360,10 +411,8 @@ export default async function GastronomyPage() {
     },
     contactImage: g?.gastronomyContactImage ?? null,
     contact: {
-      heading: g?.gastronomyContactTitle ?? 'Contact',
-      description:
-        g?.gastronomyContactDescription ??
-        'Would you like to book a workshop or have questions? We look forward to hearing from you.',
+      heading: g?.gastronomyContactTitle ?? contactHeadingFallback,
+      description: g?.gastronomyContactDescription ?? contactDescriptionFallback,
       address: g?.gastronomyContactAddress ?? undefined,
       phone: g?.gastronomyContactPhone ?? undefined,
       email: g?.gastronomyContactEmail ?? undefined,
@@ -371,21 +420,22 @@ export default async function GastronomyPage() {
     contactForm: {
       formHeading: contactFormHeading,
       placeholders: {
-        firstName: formPlaceholders?.firstName ?? 'First Name',
-        lastName: formPlaceholders?.lastName ?? 'Last Name',
-        email: formPlaceholders?.email ?? 'Email',
-        message: formPlaceholders?.message ?? 'Message',
+        firstName:
+          formPlaceholders?.firstName ?? (locale === 'de' ? 'Vorname' : 'First Name'),
+        lastName:
+          formPlaceholders?.lastName ?? (locale === 'de' ? 'Nachname' : 'Last Name'),
+        email: formPlaceholders?.email ?? (locale === 'de' ? 'E-Mail' : 'Email'),
+        message: formPlaceholders?.message ?? (locale === 'de' ? 'Nachricht' : 'Message'),
       },
       subjectOptions: {
-        default: subjectOptions?.default ?? 'Subject',
-        options: (subjectOptions?.options ?? []).map((o) => o?.label ?? '') || [
-          'General Inquiry',
-          'Workshop',
-          'Product',
-          'Partnership',
-        ],
+        default:
+          subjectOptions?.default ?? (locale === 'de' ? 'Betreff' : 'Subject'),
+        options:
+          subjectOptionLabels.length > 0 ? subjectOptionLabels : defaultSubjectOptions,
       },
-      submitButton: g?.gastronomySubmitButtonLabel ?? 'Send Message',
+      submitButton:
+        g?.gastronomySubmitButtonLabel ??
+        (locale === 'de' ? 'Nachricht senden' : 'Send message'),
     },
     ctaBanner: {
       heading: '',
@@ -411,6 +461,7 @@ export default async function GastronomyPage() {
         prevLabel={sliderPrevLabel}
         nextLabel={sliderNextLabel}
         autoplayIntervalMs={sliderAutoplayMs}
+        locale={locale}
       />
 
       <section
@@ -594,15 +645,6 @@ export default async function GastronomyPage() {
       {page?.id && (
         <EditPageLink collection="pages" id={String(page.id)} label="Edit page in Admin" />
       )}
-
-      <div className="fixed inset-x-0 bottom-4 z-40 px-4 md:hidden">
-        <Link
-          href={ctaButtonHref}
-          className="block rounded-full bg-[#1b1b1b] px-6 py-3 text-center font-display text-sm font-bold uppercase tracking-wide text-white shadow-[0_12px_26px_rgba(0,0,0,0.28)]"
-        >
-          {ctaButtonLabel}
-        </Link>
-      </div>
     </article>
   )
 }

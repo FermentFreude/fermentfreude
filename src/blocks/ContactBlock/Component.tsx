@@ -7,46 +7,109 @@ import { toKebabCase } from '@/utilities/toKebabCase'
 
 import { ContactCardAnimated } from './ContactCardAnimated'
 
-const DEFAULTS = {
+const DEFAULTS_DE = {
   hero: {
     heading: 'Kontakt',
     subtext:
       'Du möchtest einen Workshop buchen oder hast Fragen? Wir freuen uns auf deine Nachricht.',
-    buttonLabel: null,
-    buttonHref: null,
+    buttonLabel: null as string | null,
+    buttonHref: null as string | null,
   },
   contact: {
-    heading: 'Contact Detail',
+    heading: 'Kontakt',
     description:
-      'If you need any help and prefer to reach out directly, feel free to do it via phone or email.',
+      'Wenn du Hilfe brauchst und uns lieber direkt erreichst, erreichst du uns telefonisch oder per E-Mail.',
     phone: '+43 660 4943577',
     email: 'kontakt@fermentfreude.at',
     address: 'Grabenstraße 15, 8010 Graz, Austria',
   },
   contactForm: {
-    formHeading: 'Ask About Anything',
+    formHeading: 'Frag uns alles',
     placeholders: {
-      name: 'Your Name',
+      name: 'Dein Name',
       firstName: 'Vorname',
       lastName: 'Nachname',
-      email: 'Your Email',
-      phone: 'Your Phone',
-      message: 'Your Message',
+      email: 'Deine E-Mail',
+      phone: 'Deine Telefonnummer',
+      message: 'Deine Nachricht',
     },
     subjectOptions: {
-      default: 'Subject',
-      options: ['General Inquiry', 'Workshop Information', 'Product Question', 'Partnership'],
+      default: 'Betreff',
+      options: [
+        'Allgemeine Anfrage',
+        'Workshop-Information',
+        'Frage zum Produkt',
+        'Partnerschaft',
+      ],
     },
-    submitButton: 'Submit Now',
+    submitButton: 'Jetzt absenden',
   },
   ctaBanner: {
-    heading: 'For Chefs and Food Professionals',
+    heading: 'Für Köche und Gastronomie',
     description:
-      'Looking for fermented, plant-based options that work in professional kitchens? We supply products and knowledge for modern menus.',
-    buttonLabel: 'Learn More',
+      'Sucht ihr fermentierte, pflanzliche Optionen für die Profiküche? Wir liefern Produkte und Know-how für moderne Speisekarten.',
+    buttonLabel: 'Mehr erfahren',
     buttonHref: '/gastronomy',
   },
 }
+
+const DEFAULTS_EN = {
+  hero: {
+    heading: 'Contact',
+    subtext:
+      'Would you like to book a workshop or do you have questions? We look forward to hearing from you.',
+    buttonLabel: null as string | null,
+    buttonHref: null as string | null,
+  },
+  contact: {
+    heading: 'Contact',
+    description:
+      'If you need any help and prefer to reach out directly, feel free to contact us by phone or email.',
+    phone: '+43 660 4943577',
+    email: 'kontakt@fermentfreude.at',
+    address: 'Grabenstraße 15, 8010 Graz, Austria',
+  },
+  contactForm: {
+    formHeading: 'Ask us anything',
+    placeholders: {
+      name: 'Your name',
+      firstName: 'First name',
+      lastName: 'Last name',
+      email: 'Your email',
+      phone: 'Your phone',
+      message: 'Your message',
+    },
+    subjectOptions: {
+      default: 'Subject',
+      options: ['General inquiry', 'Workshop information', 'Product question', 'Partnership'],
+    },
+    submitButton: 'Send message',
+  },
+  ctaBanner: {
+    heading: 'For chefs and food professionals',
+    description:
+      'Looking for fermented, plant-based options that work in professional kitchens? We supply products and knowledge for modern menus.',
+    buttonLabel: 'Learn more',
+    buttonHref: '/gastronomy',
+  },
+}
+
+const CONTACT_UI = {
+  de: {
+    location: 'Standort',
+    phone: 'Telefon',
+    email: 'E-Mail',
+    social: 'Social Media',
+    mapTitle: 'Standortkarte',
+  },
+  en: {
+    location: 'Location',
+    phone: 'Phone',
+    email: 'Email',
+    social: 'Follow our social media',
+    mapTitle: 'Location map',
+  },
+} as const
 
 export const ContactBlockComponent: React.FC<
   ContactBlockProps & {
@@ -57,6 +120,9 @@ export const ContactBlockComponent: React.FC<
   const block = props as ContactBlockProps
   const data = block
   const locale = await getLocale()
+  const isDe = locale === 'de'
+  const defaults = isDe ? DEFAULTS_DE : DEFAULTS_EN
+  const ui = isDe ? CONTACT_UI.de : CONTACT_UI.en
   const footer = (await getCachedGlobal<FooterGlobal>('footer', 1, locale)()) as FooterGlobal
   const social = footer?.socialMedia
 
@@ -69,18 +135,18 @@ export const ContactBlockComponent: React.FC<
 
   const hero = {
     image: heroImage,
-    heading: data?.hero?.heading ?? DEFAULTS.hero.heading,
-    subtext: data?.hero?.subtext ?? DEFAULTS.hero.subtext,
+    heading: data?.hero?.heading ?? defaults.hero.heading,
+    subtext: data?.hero?.subtext ?? defaults.hero.subtext,
     buttonLabel: data?.hero?.buttonLabel ?? null,
     buttonHref: data?.hero?.buttonHref ?? null,
   }
 
   const contact = {
-    heading: data?.contact?.heading ?? DEFAULTS.contact.heading,
-    description: data?.contact?.description ?? DEFAULTS.contact.description,
-    phone: data?.contact?.phone ?? footerContact?.phone ?? DEFAULTS.contact.phone,
-    email: data?.contact?.email ?? DEFAULTS.contact.email,
-    address: data?.contact?.address ?? footerContact?.location ?? DEFAULTS.contact.address,
+    heading: data?.contact?.heading ?? defaults.contact.heading,
+    description: data?.contact?.description ?? defaults.contact.description,
+    phone: data?.contact?.phone ?? footerContact?.phone ?? defaults.contact.phone,
+    email: data?.contact?.email ?? defaults.contact.email,
+    address: data?.contact?.address ?? footerContact?.location ?? defaults.contact.address,
   }
 
   // Format address to reduce awkward line breaks:
@@ -97,32 +163,33 @@ export const ContactBlockComponent: React.FC<
   const subjectOptionsList =
     rawOptions && Array.isArray(rawOptions) && rawOptions.length > 0
       ? rawOptions.map((o: { label?: string }) => (typeof o === 'string' ? o : (o?.label ?? '')))
-      : DEFAULTS.contactForm.subjectOptions.options
+      : defaults.contactForm.subjectOptions.options
 
   const placeholders = data?.contactForm?.placeholders
   const contactForm = {
-    formHeading: data?.contactForm?.formHeading ?? DEFAULTS.contactForm.formHeading,
+    formHeading: data?.contactForm?.formHeading ?? defaults.contactForm.formHeading,
     placeholders: {
-      name: placeholders?.name ?? DEFAULTS.contactForm.placeholders.name ?? null,
-      firstName: placeholders?.firstName ?? DEFAULTS.contactForm.placeholders.firstName,
-      lastName: placeholders?.lastName ?? DEFAULTS.contactForm.placeholders.lastName,
-      email: placeholders?.email ?? DEFAULTS.contactForm.placeholders.email,
-      phone: placeholders?.phone ?? DEFAULTS.contactForm.placeholders.phone ?? null,
-      message: placeholders?.message ?? DEFAULTS.contactForm.placeholders.message,
+      name: placeholders?.name ?? defaults.contactForm.placeholders.name ?? null,
+      firstName: placeholders?.firstName ?? defaults.contactForm.placeholders.firstName,
+      lastName: placeholders?.lastName ?? defaults.contactForm.placeholders.lastName,
+      email: placeholders?.email ?? defaults.contactForm.placeholders.email,
+      phone: placeholders?.phone ?? defaults.contactForm.placeholders.phone ?? null,
+      message: placeholders?.message ?? defaults.contactForm.placeholders.message,
     },
     subjectOptions: {
       default:
-        data?.contactForm?.subjectOptions?.default ?? DEFAULTS.contactForm.subjectOptions.default,
+        data?.contactForm?.subjectOptions?.default ??
+        defaults.contactForm.subjectOptions.default,
       options: subjectOptionsList,
     },
-    submitButton: data?.contactForm?.submitButton ?? DEFAULTS.contactForm.submitButton,
+    submitButton: data?.contactForm?.submitButton ?? defaults.contactForm.submitButton,
   }
 
   const ctaBanner = {
-    heading: data?.ctaBanner?.heading ?? DEFAULTS.ctaBanner.heading,
-    description: data?.ctaBanner?.description ?? DEFAULTS.ctaBanner.description,
-    buttonLabel: data?.ctaBanner?.buttonLabel ?? DEFAULTS.ctaBanner.buttonLabel,
-    buttonHref: data?.ctaBanner?.buttonHref ?? DEFAULTS.ctaBanner.buttonHref,
+    heading: data?.ctaBanner?.heading ?? defaults.ctaBanner.heading,
+    description: data?.ctaBanner?.description ?? defaults.ctaBanner.description,
+    buttonLabel: data?.ctaBanner?.buttonLabel ?? defaults.ctaBanner.buttonLabel,
+    buttonHref: data?.ctaBanner?.buttonHref ?? defaults.ctaBanner.buttonHref,
   }
 
   const mapEmbedUrl =
@@ -232,7 +299,7 @@ export const ContactBlockComponent: React.FC<
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="mb-0 text-body-sm font-display font-bold text-ff-charcoal">
-                              Location
+                              {ui.location}
                             </p>
                             <p className="mb-0 whitespace-nowrap text-body-sm leading-relaxed text-ff-gray-text-light sm:text-body">
                               {formattedAddress}
@@ -263,7 +330,7 @@ export const ContactBlockComponent: React.FC<
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="mb-0 text-body-sm font-display font-bold text-ff-charcoal">
-                              Phone
+                              {ui.phone}
                             </p>
                             <p className="mb-0 text-body leading-relaxed text-ff-gray-text-light">
                               {contact.phone}
@@ -294,7 +361,7 @@ export const ContactBlockComponent: React.FC<
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="mb-0 text-body-sm font-display font-bold text-ff-charcoal">
-                              Mail
+                              {ui.email}
                             </p>
                             <p className="mb-0 text-body leading-relaxed text-ff-gray-text-light">
                               {contact.email}
@@ -307,7 +374,7 @@ export const ContactBlockComponent: React.FC<
                   {hasSocial ? (
                     <div>
                       <p className="text-body font-display font-bold text-ff-charcoal">
-                        Follow Our Social Media
+                        {ui.social}
                       </p>
                       <div className="mt-2 flex gap-3">
                         {social.facebook && (
@@ -364,7 +431,9 @@ export const ContactBlockComponent: React.FC<
                     {useSingleName ? (
                       <input
                         type="text"
-                        placeholder={contactForm.placeholders.name ?? 'Your Name'}
+                        placeholder={
+                          contactForm.placeholders.name ?? defaults.contactForm.placeholders.name
+                        }
                         className={inputBase}
                       />
                     ) : (
@@ -473,7 +542,7 @@ export const ContactBlockComponent: React.FC<
             <div className="relative aspect-video w-full">
               <iframe
                 src={mapEmbedUrl}
-                title="Location map"
+                title={ui.mapTitle}
                 className="absolute inset-0 size-full border-0"
                 allowFullScreen
                 loading="lazy"
