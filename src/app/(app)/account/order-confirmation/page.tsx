@@ -39,6 +39,9 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
   // Fetch order data to check if it's a pickup order
   let isPickupOrder = false
   let pickupInfo: { date?: string; time?: string } = {}
+  // Resolve pickup location from the workshop-locations collection (admin-managed)
+  let pickupLocationName = 'The Ginery'
+  let pickupLocationAddress = 'Grabenstraße 15, 8010 Graz, Austria'
 
   if (orderId && type === 'order') {
     try {
@@ -59,6 +62,22 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           }
         }
       }
+
+      // Resolve current pickup location (first active record)
+      try {
+        const locations = await payload.find({
+          collection: 'workshop-locations',
+          where: { isActive: { equals: true } },
+          limit: 1,
+          locale,
+          depth: 0,
+        })
+        const loc = locations.docs[0] as { name?: string; address?: string } | undefined
+        if (loc?.name) pickupLocationName = loc.name
+        if (loc?.address) pickupLocationAddress = loc.address
+      } catch {
+        // ignore — fallback used
+      }
     } catch (error) {
       console.error('Failed to fetch order:', error)
     }
@@ -75,12 +94,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               <CheckCircle className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-subheading font-display text-ff-near-black mb-2">
-              {locale === 'de' ? 'Bestellung bestätigt' : 'Order confirmed'}
+              {t.orderConfirmed}
             </h1>
             <p className="text-body-sm text-ff-text-muted">
-              {locale === 'de'
-                ? 'Ihre Zahlung wurde verarbeitet. Ihre Bestellung ist bestätigt.'
-                : 'Your payment has been processed and your order is confirmed.'}
+              {t.orderConfirmedDesc}
             </p>
           </div>
         </Card>
@@ -115,17 +132,17 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         {/* Pickup Details */}
         <Card className="p-6 border border-blue-200 shadow-sm rounded-[--radius-lg] bg-blue-50">
           <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
-            {locale === 'de' ? 'Abholdetails' : 'Pickup Details'}
+            {t.pickupDetails}
           </h2>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <Store className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
               <div>
                 <p className="text-body-sm font-semibold text-ff-near-black">
-                  {locale === 'de' ? 'The Ginery' : 'The Ginery'}
+                  {pickupLocationName}
                 </p>
                 <p className="text-body-sm text-ff-text-muted">
-                  Grabenstraße 15, 8010 Graz, Austria
+                  {pickupLocationAddress}
                 </p>
               </div>
             </div>
@@ -134,7 +151,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
                 <div>
                   <p className="text-body-sm font-semibold text-ff-near-black">
-                    {locale === 'de' ? 'Abholdatum' : 'Pickup Date'}
+                    {t.pickupDate}
                   </p>
                   <p className="text-body-sm text-ff-text-muted">{pickupInfo.date}</p>
                 </div>
@@ -145,7 +162,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
                 <div>
                   <p className="text-body-sm font-semibold text-ff-near-black">
-                    {locale === 'de' ? 'Abholzeit' : 'Pickup Time'}
+                    {t.pickupTime}
                   </p>
                   <p className="text-body-sm text-ff-text-muted">{pickupInfo.time}</p>
                 </div>
@@ -166,12 +183,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               </div>
               <div>
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
-                  {locale === 'de' ? 'Bestellung bestätigt' : 'Order confirmed'}
+                  {t.orderConfirmed}
                 </h3>
                 <p className="text-body-sm text-ff-text-muted">
-                  {locale === 'de'
-                    ? 'Deine Zahlung wurde verarbeitet und deine Bestellung ist bestätigt.'
-                    : 'Your payment has been processed and your order is confirmed.'}
+                  {t.orderConfirmedDesc}
                 </p>
               </div>
             </div>
@@ -182,7 +197,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               </div>
               <div>
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
-                  {locale === 'de' ? 'Vorbereitung und Abholung' : 'Preparation & Pickup'}
+                  {t.preparationPickup}
                 </h3>
                 <p className="text-body-sm text-ff-text-muted">
                   {locale === 'de'
@@ -198,7 +213,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               </div>
               <div>
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
-                  {locale === 'de' ? 'Abholen' : 'Ready for Pickup'}
+                  {t.readyForPickup}
                 </h3>
                 <p className="text-body-sm text-ff-text-muted">
                   {locale === 'de'
@@ -223,9 +238,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
               <span className="text-ff-gold font-bold">&bull;</span>
               <p className="text-body-sm text-ff-text-muted">
-                {locale === 'de'
-                  ? 'Überprüfe dein Konto-Dashboard, um den Bestellstatus zu verfolgen.'
-                  : 'Visit your account dashboard to track your order status.'}
+                {t.visitDashboard}
               </p>
             </div>
             <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
@@ -241,7 +254,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             href="/account/orders"
             className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
           >
-            {locale === 'de' ? 'Meine Bestellungen anzeigen' : 'View My Orders'}
+            {t.viewMyOrders}
           </Link>
           <Link
             href="/shop"
@@ -260,7 +273,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               : 'Do you have questions about your order?'}
           </p>
           <a
-            href="mailto:fermentfreude@gmail.com"
+            href="mailto:kontakt@fermentfreude.at"
             className="text-ff-gold hover:opacity-80 font-display font-medium"
           >
             {t.contactSupport}
@@ -379,7 +392,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
           <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescWorkshop}</p>
           <a
-            href="mailto:fermentfreude@gmail.com"
+            href="mailto:kontakt@fermentfreude.at"
             className="text-ff-gold hover:opacity-80 font-display font-medium"
           >
             {t.contactSupport}
@@ -498,7 +511,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
           <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescCourse}</p>
           <a
-            href="mailto:fermentfreude@gmail.com"
+            href="mailto:kontakt@fermentfreude.at"
             className="text-ff-gold hover:opacity-80 font-display font-medium"
           >
             {t.contactSupport}
@@ -637,7 +650,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
         <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescOrder}</p>
         <a
-          href="mailto:fermentfreude@gmail.com"
+          href="mailto:kontakt@fermentfreude.at"
           className="text-ff-gold hover:opacity-80 font-display font-medium"
         >
           {t.contactSupport}

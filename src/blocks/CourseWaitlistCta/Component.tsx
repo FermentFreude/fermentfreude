@@ -5,7 +5,10 @@ import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import type { CourseWaitlistCtaBlock as CourseWaitlistCtaBlockType, Media as MediaType } from '@/payload-types'
+import type {
+  CourseWaitlistCtaBlock as CourseWaitlistCtaBlockType,
+  Media as MediaType,
+} from '@/payload-types'
 
 const DEFAULTS_EN = {
   heading: 'Learn fermentation without uncertainty',
@@ -14,7 +17,7 @@ const DEFAULTS_EN = {
   emailPlaceholder: 'Your email address',
   submitLabel: 'Join the waitlist',
   successMessage:
-    'Thanks! If your email app opened, send the message to join the waitlist. Otherwise email hello@fermentfreude.com.',
+    'Thanks! If your email app opened, send the message to join the waitlist. Otherwise email kontakt@fermentfreude.at.',
 }
 
 const DEFAULTS_DE = {
@@ -24,7 +27,7 @@ const DEFAULTS_DE = {
   emailPlaceholder: 'Deine E-Mail-Adresse',
   submitLabel: 'Auf Warteliste setzen',
   successMessage:
-    'Danke! Wenn sich dein E-Mail-Programm geöffnet hat, sende die Nachricht ab. Sonst schreibe an hello@fermentfreude.com.',
+    'Danke! Wenn sich dein E-Mail-Programm geöffnet hat, sende die Nachricht ab. Sonst schreibe an kontakt@fermentfreude.at.',
 }
 
 /** CMS block props; all content fields optional so the courses page can render a locale-aware fallback before the block is seeded. */
@@ -103,7 +106,7 @@ export async function CourseWaitlistCtaBlock({
   }
 
   const imageSlot = hasRenderableImage(mediaForRender) ? (
-    <div className="relative mx-auto aspect-[496/320] w-full max-w-xl overflow-hidden rounded-2xl border border-ff-border-light/50 bg-[#ECE5DE] shadow-md lg:mx-0 lg:max-w-none">
+    <div className="relative mx-auto aspect-496/320 w-full max-w-xl overflow-hidden rounded-2xl border border-ff-border-light/50 bg-[#ECE5DE] shadow-md lg:mx-0 lg:max-w-none">
       <Media
         resource={mediaForRender}
         fill
@@ -119,7 +122,10 @@ export async function CourseWaitlistCtaBlock({
       ? resolvePublicImageUrl(mediaForRender as MediaType)
       : undefined
   const waitlistImageAlt =
-    hasImg && typeof mediaForRender === 'object' && mediaForRender !== null && typeof mediaForRender.alt === 'string'
+    hasImg &&
+    typeof mediaForRender === 'object' &&
+    mediaForRender !== null &&
+    typeof mediaForRender.alt === 'string'
       ? mediaForRender.alt
       : ''
 
@@ -128,7 +134,7 @@ export async function CourseWaitlistCtaBlock({
       <ContentSection
         bg="none"
         padding="lg"
-        className="relative overflow-hidden border-t border-ff-border-light/40 bg-gradient-to-b from-ff-ivory via-ff-cream to-ff-warm-gray/50"
+        className="relative overflow-hidden border-t border-ff-border-light/40 bg-linear-to-b from-ff-ivory via-ff-cream to-ff-warm-gray/50"
       >
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_100%_20%,rgba(229,183,101,0.12),transparent_55%)]"

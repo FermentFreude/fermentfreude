@@ -9,8 +9,8 @@ import { CMSLink } from '../../components/Link'
 const GOOGLE_MAPS_ADDRESS_URL =
   'https://www.google.com/maps/search/?api=1&query=Grabenstraße+15,+8010+Graz,+Österreich'
 const CONTACT_PHONE_TEXT = 'Telefon: +43 (0) 660 49 43 577'
-const CONTACT_EMAIL_TEXT = 'E-Mail: fermentfreude@gmail.com'
-const CONTACT_EMAIL_URL = 'mailto:fermentfreude@gmail.com'
+const CONTACT_EMAIL_TEXT = 'E-Mail: kontakt@fermentfreude.at'
+const CONTACT_EMAIL_URL = 'mailto:kontakt@fermentfreude.at'
 const CONTACT_WEBSITE_TEXT = 'Website: https://www.ferment-freude.at'
 const CONTACT_WEBSITE_URL = 'https://www.ferment-freude.at'
 

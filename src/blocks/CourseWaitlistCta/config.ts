@@ -76,7 +76,7 @@ export const CourseWaitlistCta: Block = {
       label: 'Success message',
       admin: {
         description:
-          'Shown after the visitor’s email app opens (mailto to hello@fermentfreude.com). Explain that they should send the pre-filled message — no server/API.',
+          'Shown after the visitor’s email app opens (mailto to kontakt@fermentfreude.at). Explain that they should send the pre-filled message — no server/API.',
       },
     },
   ],

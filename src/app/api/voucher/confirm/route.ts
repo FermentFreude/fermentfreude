@@ -129,6 +129,7 @@ export async function GET(request: NextRequest) {
         code: '',
         value: Number(meta.amount),
         status: 'active',
+        purchaserName: meta.purchaserName || undefined,
         purchaserEmail: meta.purchaserEmail,
         recipientEmail: meta.recipientEmail || undefined,
         deliveryMethod: (meta.deliveryMethod as 'email' | 'pickup') || 'email',

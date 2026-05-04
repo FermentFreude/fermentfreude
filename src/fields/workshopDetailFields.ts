@@ -701,7 +701,7 @@ export const workshopDetailFields: Field[] = [
         name: 'faqContactEmail',
         type: 'text',
         label: 'Contact Email',
-        admin: { description: 'Email shown at bottom (e.g. "info@fermentfreude.de").' },
+        admin: { description: 'Email shown at bottom (e.g. "kontakt@fermentfreude.at").' },
       },
     ],
   },

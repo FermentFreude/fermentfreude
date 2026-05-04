@@ -20,7 +20,7 @@ const DEFAULTS = {
     description:
       'If you need any help and prefer to reach out directly, feel free to do it via phone or email.',
     phone: '+43 660 4943577',
-    email: 'fermentfreude@gmail.com',
+    email: 'kontakt@fermentfreude.at',
     address: 'Grabenstraße 15, 8010 Graz, Austria',
   },
   contactForm: {

@@ -75,6 +75,15 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     }
   }
 
+  // Prefer the name supplied by the buyer at checkout (guest flow). For
+  // logged-in users, fall back to the user.name resolved above.
+  if (
+    typeof doc.customerName === 'string' &&
+    doc.customerName.trim().length > 0
+  ) {
+    customerName = doc.customerName.trim()
+  }
+
   for (const item of items) {
     const productRef = item?.product
     if (!productRef) continue
@@ -246,6 +255,29 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
           ? `€${booking.totalPrice.toFixed(2).replace('.', ',')}`
           : String(booking.totalPrice ?? '')
 
+      // Resolve "What to bring" copy from the linked Workshop record
+      let whatToBring = ''
+      if (booking.workshopSlug) {
+        try {
+          const workshops = await payload.find({
+            collection: 'workshops',
+            where: { slug: { equals: booking.workshopSlug } },
+            limit: 1,
+            depth: 0,
+            overrideAccess: true,
+          })
+          const workshop = workshops.docs[0] as { whatToBring?: string } | undefined
+          if (workshop?.whatToBring && typeof workshop.whatToBring === 'string') {
+            whatToBring = workshop.whatToBring
+              .trim()
+              .replace(/\r\n/g, '\n')
+              .replace(/\n/g, '<br>')
+          }
+        } catch {
+          // ignore — what-to-bring is best-effort
+        }
+      }
+
       try {
         await sendTemplateEmail({
           to: [
@@ -268,7 +300,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             BOOKING_ID: String(booking.id),
             BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
             BOOKING_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/account/orders`,
-            WHAT_TO_BRING: '',
+            WHAT_TO_BRING: whatToBring,
             PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
             AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,
           },

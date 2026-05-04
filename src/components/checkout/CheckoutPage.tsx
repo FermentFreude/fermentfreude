@@ -36,7 +36,9 @@ const CHECKOUT_DE = {
   createAccount: 'Konto erstellen',
   notYou: 'Nicht du?',
   logOut: 'Abmelden',
-  guestPrompt: 'Gib deine E-Mail-Adresse ein, um als Gast zu bestellen.',
+  guestPrompt: 'Gib deinen Namen und deine E-Mail-Adresse ein, um als Gast zu bestellen.',
+  nameLabel: 'Vor- und Nachname',
+  namePlaceholder: 'z. B. Maria Musterfrau',
   emailLabel: 'E-Mail-Adresse',
   continueAsGuest: 'Als Gast fortfahren',
   address: 'Adresse',
@@ -83,7 +85,9 @@ const CHECKOUT_EN = {
   createAccount: 'Create an account',
   notYou: 'Not you?',
   logOut: 'Log out',
-  guestPrompt: 'Enter your email to checkout as a guest.',
+  guestPrompt: 'Enter your name and email to checkout as a guest.',
+  nameLabel: 'Full name',
+  namePlaceholder: 'e.g. Jane Doe',
   emailLabel: 'Email Address',
   continueAsGuest: 'Continue as guest',
   address: 'Address',
@@ -124,8 +128,10 @@ const CHECKOUT_EN = {
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
 
-// Store pickup location (currently only The Ginery)
-const PICKUP_LOCATION = {
+// Default pickup location — overridden at runtime by the first active
+// workshop-locations record (admin-managed). Kept here as a static fallback
+// in case the fetch fails or no locations are configured yet.
+const DEFAULT_PICKUP_LOCATION = {
   id: 'the-ginery',
   name: 'The Ginery',
   address: 'Grabenstraße 15, 8010 Graz, Austria',
@@ -141,6 +147,9 @@ const PICKUP_LOCATION = {
   },
 }
 
+const buildMapLink = (name: string, address: string) =>
+  `https://www.google.com/maps/search/${encodeURIComponent(`${name} ${address}`)}`
+
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
   const router = useRouter()
@@ -150,6 +159,7 @@ export const CheckoutPage: React.FC = () => {
    * State to manage the email input for guest checkout.
    */
   const [email, setEmail] = useState('')
+  const [customerName, setCustomerName] = useState('')
   const [emailEditable, setEmailEditable] = useState(true)
   const [paymentData, setPaymentData] = useState<null | Record<string, unknown>>(null)
   const { initiatePayment } = usePayments()
@@ -162,6 +172,7 @@ export const CheckoutPage: React.FC = () => {
   /* ── Pickup State ── */
   const [pickupDate, setPickupDate] = useState<string>('')
   const [pickupTime, setPickupTime] = useState<string>('')
+  const [pickupLocation, setPickupLocation] = useState(DEFAULT_PICKUP_LOCATION)
 
   /* ── Voucher Code State ── */
   const [voucherCode, setVoucherCode] = useState('')
@@ -174,6 +185,39 @@ export const CheckoutPage: React.FC = () => {
   const checkoutEmail = email || user?.email || ''
   const { locale } = useLocale()
   const t = locale === 'de' ? CHECKOUT_DE : CHECKOUT_EN
+
+  // Fetch the active pickup location from the workshop-locations collection.
+  // Falls back to DEFAULT_PICKUP_LOCATION on any error / empty result.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(
+          `/api/workshop-locations?where[isActive][equals]=true&limit=1&depth=0&locale=${locale}`,
+          { cache: 'no-store' },
+        )
+        if (!res.ok) return
+        const json = (await res.json()) as {
+          docs?: { id: string; name?: string; address?: string }[]
+        }
+        const loc = json?.docs?.[0]
+        if (!cancelled && loc?.name && loc?.address) {
+          setPickupLocation({
+            ...DEFAULT_PICKUP_LOCATION,
+            id: loc.id,
+            name: loc.name,
+            address: loc.address,
+            mapLink: buildMapLink(loc.name, loc.address),
+          })
+        }
+      } catch {
+        // ignore — fallback used
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [locale])
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
@@ -246,6 +290,7 @@ export const CheckoutPage: React.FC = () => {
       { value: '10:00', label: '10:00 AM' },
       { value: '11:00', label: '11:00 AM' },
       { value: '12:00', label: '12:00 PM' },
+      { value: '13:00', label: '1:00 PM' },
       { value: '14:00', label: '2:00 PM' },
       { value: '15:00', label: '3:00 PM' },
       { value: '16:00', label: '4:00 PM' },
@@ -379,6 +424,7 @@ export const CheckoutPage: React.FC = () => {
         body: JSON.stringify({
           voucherCode: voucherApplied.code,
           customerEmail: email || user?.email,
+          customerName: customerName.trim() || user?.name || undefined,
           userId: user?.id,
         }),
       })
@@ -401,7 +447,7 @@ export const CheckoutPage: React.FC = () => {
       setError(t.connectionError)
       setProcessingPayment(false)
     }
-  }, [voucherApplied, email, user, clearCart, router, hasWorkshop, isAllDigital, t])
+  }, [voucherApplied, email, customerName, user, clearCart, router, hasWorkshop, isAllDigital, t])
 
   const initiatePaymentIntent = useCallback(
     async (paymentID: string) => {
@@ -412,10 +458,10 @@ export const CheckoutPage: React.FC = () => {
 
         // For pickup orders, pass pickup info instead of addresses
         if (isAllPhysicalPickup) {
-          additionalData.pickupLocation = PICKUP_LOCATION.name
+          additionalData.pickupLocation = pickupLocation.name
           additionalData.pickupDate = pickupDate
           additionalData.pickupTime = pickupTime
-          additionalData.pickupAddress = PICKUP_LOCATION.address
+          additionalData.pickupAddress = pickupLocation.address
         } else {
           // For shipped orders, include addresses
           additionalData.billingAddress = billingAddress
@@ -531,6 +577,28 @@ export const CheckoutPage: React.FC = () => {
               <p className="text-body-sm text-ff-gray-text-light">{t.guestPrompt}</p>
               <FormItem>
                 <Label
+                  htmlFor="customerName"
+                  className="font-display text-body-sm font-bold text-ff-near-black"
+                >
+                  {t.nameLabel}
+                </Label>
+                <Input
+                  disabled={!emailEditable}
+                  id="customerName"
+                  name="customerName"
+                  autoComplete="name"
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  value={customerName}
+                  required
+                  type="text"
+                  placeholder={t.namePlaceholder}
+                  minLength={2}
+                  maxLength={250}
+                  className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
+                />
+              </FormItem>
+              <FormItem>
+                <Label
                   htmlFor="email"
                   className="font-display text-body-sm font-bold text-ff-near-black"
                 >
@@ -547,7 +615,7 @@ export const CheckoutPage: React.FC = () => {
                 />
               </FormItem>
               <Button
-                disabled={!email || !emailEditable}
+                disabled={!email || customerName.trim().length < 2 || !emailEditable}
                 onClick={(e) => {
                   e.preventDefault()
                   setEmailEditable(false)
@@ -598,11 +666,11 @@ export const CheckoutPage: React.FC = () => {
             {/* Pickup Location */}
             <div className="mb-6 rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
               <h3 className="mb-3 font-display font-semibold text-ff-near-black">
-                {PICKUP_LOCATION.name}
+                {pickupLocation.name}
               </h3>
-              <p className="mb-3 text-body-sm text-ff-gray-text-light">{PICKUP_LOCATION.address}</p>
+              <p className="mb-3 text-body-sm text-ff-gray-text-light">{pickupLocation.address}</p>
               <a
-                href={PICKUP_LOCATION.mapLink}
+                href={pickupLocation.mapLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-body-sm text-ff-gold-accent underline hover:text-ff-near-black"
@@ -824,6 +892,7 @@ export const CheckoutPage: React.FC = () => {
                 <div className="flex flex-col gap-6">
                   <CheckoutForm
                     customerEmail={checkoutEmail}
+                    customerName={customerName.trim() || user?.name || ''}
                     billingAddress={billingAddress}
                     setProcessingPayment={setProcessingPayment}
                     isAllDigital={isAllDigital}

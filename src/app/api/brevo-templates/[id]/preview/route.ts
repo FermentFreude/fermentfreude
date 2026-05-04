@@ -30,7 +30,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Build HTML from structured fields
-    let renderedHtml = buildEmailHTML(template as any)
+    let renderedHtml = buildEmailHTML(template as BrevoTemplateDoc)
 
     // Mock data for different template types
     const mockVariables: Record<string, string> = {
@@ -144,10 +144,27 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
+type BrevoTemplateDoc = {
+  subject?: string
+  heroIcon?: string
+  heroHeading?: string
+  heroSubheading?: string
+  greeting?: string
+  bodySection1?: string
+  bodySection2?: string
+  bodySection3?: string
+  bodySection4?: string
+  ctaHeading?: string
+  ctaText?: string
+  ctaUrl?: string
+  ctaDescription?: string
+  footerContent?: string
+}
+
 /**
  * Build HTML from structured email template fields
  */
-function buildEmailHTML(doc: any): string {
+function buildEmailHTML(doc: BrevoTemplateDoc): string {
   const subject = doc.subject || ''
   const heroIcon = doc.heroIcon || '📧'
   const heading = doc.heroHeading || ''

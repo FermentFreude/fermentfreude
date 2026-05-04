@@ -3,6 +3,7 @@
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { gtmPurchase } from '@/lib/gtm'
 import { useAuth } from '@/providers/Auth'
+import { useLocale } from '@/providers/Locale'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
@@ -11,6 +12,7 @@ export const ConfirmOrder: React.FC = () => {
   const { user } = useAuth()
   const { confirmOrder } = usePayments()
   const { cart, clearCart } = useCart()
+  const { locale } = useLocale()
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -30,12 +32,35 @@ export const ConfirmOrder: React.FC = () => {
       if (!isConfirming.current) {
         isConfirming.current = true
 
-        confirmOrder('stripe', {
-          additionalData: {
-            paymentIntentID,
-            ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
-          },
-        }).then((result) => {
+        // Attach the buyer name to the transaction (best-effort) so the Order
+        // beforeChange hook can promote it onto the Order — keeps confirmation
+        // emails personalised for redirect-based payment methods (Klarna,
+        // iDEAL, etc.) that round-trip through this page.
+        let stashedName = ''
+        try {
+          stashedName = sessionStorage.getItem('checkoutCustomerName') || ''
+        } catch {
+          // ignore
+        }
+        const attachPromise =
+          stashedName.trim().length >= 2
+            ? fetch('/api/checkout/attach-customer-name', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  paymentIntentID,
+                  customerName: stashedName.trim(),
+                }),
+              }).catch(() => null)
+            : Promise.resolve(null)
+
+        attachPromise.then(() =>
+          confirmOrder('stripe', {
+            additionalData: {
+              paymentIntentID,
+              ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
+            },
+          }).then((result) => {
           if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
             // GA4 + Meta Pixel: purchase event
             if (cart?.items?.length) {
@@ -89,7 +114,13 @@ export const ConfirmOrder: React.FC = () => {
               `/account/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
             )
           }
-        })
+          try {
+            sessionStorage.removeItem('checkoutCustomerName')
+          } catch {
+            // ignore
+          }
+        }),
+        )
       }
     } else {
       // If no payment intent ID is found, redirect to the home
@@ -99,7 +130,9 @@ export const ConfirmOrder: React.FC = () => {
 
   return (
     <div className="text-center w-full flex flex-col items-center justify-start gap-4">
-      <h1 className="text-2xl font-display">Confirming Order</h1>
+      <h1 className="text-2xl font-display">
+        {locale === 'de' ? 'Bestellung wird bestätigt' : 'Confirming Order'}
+      </h1>
 
       <LoadingSpinner className="w-12 h-6" />
     </div>

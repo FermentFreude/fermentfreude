@@ -3,6 +3,7 @@
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
+import { useLocale } from '@/providers/Locale'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { BookingModal } from './BookingModal'
@@ -225,6 +226,7 @@ export function LaktoBookingCard({
   const datesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
   const { addItem } = useCart()
+  const { locale } = useLocale()
   const router = useRouter()
 
   useEffect(() => {
@@ -689,6 +691,7 @@ export function LaktoBookingCard({
                 workshopSlug: 'lakto',
                 workshopTitle: 'Lakto-fermentiertes Gemüse Workshop',
                 guestCount,
+                locale,
               })
               setBookingDate(null)
               router.refresh()

@@ -60,10 +60,10 @@ export default function AGBPage() {
               <span className="mr-2 text-[#7a6651]">✉</span>
               <span className="font-semibold text-[#7a6651]">E-Mail:</span>{' '}
               <a
-                href="mailto:fermentfreude@gmail.com"
+                href="mailto:kontakt@fermentfreude.at"
                 className="underline hover:text-[#e6be68] transition-colors"
               >
-                fermentfreude@gmail.com
+                kontakt@fermentfreude.at
               </a>
             </p>
             <p className="mt-3">

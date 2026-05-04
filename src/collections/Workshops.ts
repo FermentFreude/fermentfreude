@@ -79,6 +79,15 @@ export const Workshops: CollectionConfig = {
       },
     },
     {
+      name: 'whatToBring',
+      type: 'textarea',
+      localized: true,
+      admin: {
+        description:
+          'What attendees should bring to the workshop. Plain text — line breaks are preserved in confirmation/reminder emails. Leave empty to omit the section.',
+      },
+    },
+    {
       name: 'isActive',
       type: 'checkbox',
       defaultValue: true,

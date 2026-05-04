@@ -256,7 +256,7 @@ function gastronomyDataDE(media: {
     gastronomyContactFormHeading: 'Frag uns alles',
     gastronomyContactAddress: 'Grabenstraße 15, 8010 Graz, Österreich',
     gastronomyContactPhone: '+43 660 4943577',
-    gastronomyContactEmail: 'fermentfreude@gmail.com',
+    gastronomyContactEmail: 'kontakt@fermentfreude.at',
     gastronomyFormPlaceholders: {
       firstName: 'Vorname',
       lastName: 'Nachname',
@@ -466,7 +466,7 @@ function gastronomyDataEN(media: {
     gastronomyContactFormHeading: 'Ask About Anything',
     gastronomyContactAddress: 'Grabenstraße 15, 8010 Graz, Austria',
     gastronomyContactPhone: '+43 660 4943577',
-    gastronomyContactEmail: 'fermentfreude@gmail.com',
+    gastronomyContactEmail: 'kontakt@fermentfreude.at',
     gastronomyFormPlaceholders: {
       firstName: 'First Name',
       lastName: 'Last Name',

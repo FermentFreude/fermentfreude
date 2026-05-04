@@ -80,7 +80,7 @@ export function getBrevoApiKey(): string | undefined {
 
 // Default sender — override with env vars
 const DEFAULT_SENDER = {
-  email: process.env.BREVO_SENDER_EMAIL || 'hello@fermentfreude.com',
+  email: process.env.BREVO_SENDER_EMAIL || 'kontakt@fermentfreude.at',
   name: process.env.BREVO_SENDER_NAME || 'FermentFreude',
 }
 

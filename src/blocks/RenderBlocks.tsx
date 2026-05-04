@@ -4,11 +4,12 @@ import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { CarouselBlock } from '@/blocks/Carousel/Component'
 import { CollectionGridComponent } from '@/blocks/CollectionGrid/Component'
 import { ContactBlockComponent } from '@/blocks/ContactBlock/Component'
-import { CourseWaitlistCtaBlock } from '@/blocks/CourseWaitlistCta/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
+import { CourseWaitlistCtaBlock } from '@/blocks/CourseWaitlistCta/Component'
 import { FeatureCardsBlock } from '@/blocks/FeatureCards/Component'
 import { FeaturedProductCardsComponent } from '@/blocks/FeaturedProductCards/Component'
 import { FormBlock } from '@/blocks/Form/Component'
+import { HelpFaqBlockComponent } from '@/blocks/HelpFaqBlock/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
 import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
@@ -45,6 +46,7 @@ const blockComponents = {
   cta: CallToActionBlock,
   featureCards: FeatureCardsBlock,
   formBlock: FormBlock,
+  helpFaq: HelpFaqBlockComponent,
   heroBanner: HeroBannerBlock,
   mediaBlock: MediaBlock,
   ourStory: OurStoryBlock,
@@ -131,10 +133,13 @@ export const RenderBlocks: React.FC<{
             sponsorRows.length > 0 &&
             sponsorRows.some((row) => !row || typeof row.logo !== 'object' || row.logo === null)
           const shouldFallbackToGlobalForSponsors =
-            blockType === 'sponsorsBar' &&
-            (sponsorRows.length === 0 || hasMissingSponsorMedia)
+            blockType === 'sponsorsBar' && (sponsorRows.length === 0 || hasMissingSponsorMedia)
 
-          if ((useGlobal || shouldFallbackToGlobalForSponsors) && blockType && blockType in globalWrappers) {
+          if (
+            (useGlobal || shouldFallbackToGlobalForSponsors) &&
+            blockType &&
+            blockType in globalWrappers
+          ) {
             const GlobalWrapper = globalWrappers[blockType]
             return (
               <div className={gapClass} key={index}>

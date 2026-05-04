@@ -134,7 +134,7 @@ const courseWaitlistCtaDe = {
   emailPlaceholder: 'Deine E-Mail-Adresse',
   submitLabel: 'Auf Warteliste setzen',
   successMessage:
-    'Danke! Wenn sich dein E-Mail-Programm geöffnet hat, sende die Nachricht ab. Sonst schreibe an hello@fermentfreude.com.',
+    'Danke! Wenn sich dein E-Mail-Programm geöffnet hat, sende die Nachricht ab. Sonst schreibe an kontakt@fermentfreude.at.',
 }
 
 // ── EN block data ────────────────────────────────────────────────────────────
@@ -193,7 +193,7 @@ const courseWaitlistCtaEn = {
   emailPlaceholder: 'Your email address',
   submitLabel: 'Join the waitlist',
   successMessage:
-    'Thanks! If your email app opened, send the message to join the waitlist. Otherwise email hello@fermentfreude.com.',
+    'Thanks! If your email app opened, send the message to join the waitlist. Otherwise email kontakt@fermentfreude.at.',
 }
 
 // ── Seed function ────────────────────────────────────────────────────────────

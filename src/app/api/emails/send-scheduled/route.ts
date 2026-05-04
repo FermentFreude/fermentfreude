@@ -362,6 +362,14 @@ async function sendScheduledEmails() {
           customerEmail = orderData.customerEmail
         }
 
+        // Prefer the buyer-supplied name from checkout (guest flow)
+        if (
+          typeof orderData.customerName === 'string' &&
+          orderData.customerName.trim().length > 0
+        ) {
+          firstName = orderData.customerName.trim().split(/\s+/)[0] || firstName
+        }
+
         if (customerEmail) {
           const items = orderData.items as
             | Array<{ product?: string | Record<string, any> }>

@@ -20,7 +20,7 @@ export const contactDataDE = (args: ContactSeedArgs = {}) => ({
     description:
       'Wenn Sie Hilfe benötigen und uns direkt erreichen möchten, können Sie uns gerne per Telefon oder E-Mail kontaktieren.',
     phone: '+43 660 4943577',
-    email: 'fermentfreude@gmail.com',
+    email: 'kontakt@fermentfreude.at',
     address: 'Grabenstraße 15, 8010 Graz, Austria',
   },
   contactForm: {
@@ -59,8 +59,7 @@ export const contactDataEN = (args: ContactSeedArgs = {}) => ({
   hero: {
     image: args.heroImage,
     heading: 'Contact',
-    subtext:
-      'We are happy to assist with workshop bookings or any questions.',
+    subtext: 'We are happy to assist with workshop bookings or any questions.',
     buttonLabel: 'Explore Workshops',
     buttonHref: '/workshops',
   },
@@ -69,7 +68,7 @@ export const contactDataEN = (args: ContactSeedArgs = {}) => ({
     description:
       'If you need any help and prefer to reach out directly, feel free to do it via phone or email.',
     phone: '+43 660 4943577',
-    email: 'fermentfreude@gmail.com',
+    email: 'kontakt@fermentfreude.at',
     address: 'Grabenstraße 15, 8010 Graz, Austria',
   },
   contactForm: {

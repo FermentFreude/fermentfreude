@@ -106,7 +106,8 @@ export const ContactBlock: Block = {
       required: false,
       label: 'Contact Card Image',
       admin: {
-        description: 'Image displayed on the left side of the contact form card (e.g., team at workshop).',
+        description:
+          'Image displayed on the left side of the contact form card (e.g., team at workshop).',
       },
     },
     {
@@ -131,7 +132,8 @@ export const ContactBlock: Block = {
           localized: true,
           label: 'Contact Detail Description',
           admin: {
-            description: 'Intro text for the contact details panel (e.g., "If you need any help...").',
+            description:
+              'Intro text for the contact details panel (e.g., "If you need any help...").',
           },
         },
         {
@@ -159,7 +161,7 @@ export const ContactBlock: Block = {
           required: false,
           label: 'Email Address',
           admin: {
-            description: 'Displayed on the contact page (e.g. fermentfreude@gmail.com).',
+            description: 'Displayed on the contact page (e.g. kontakt@fermentfreude.at).',
           },
         },
       ],
@@ -201,7 +203,8 @@ export const ContactBlock: Block = {
               localized: true,
               label: 'Name Placeholder (single field)',
               admin: {
-                description: 'When set, a single "Your Name" field is shown. Leave empty to use First + Last Name.',
+                description:
+                  'When set, a single "Your Name" field is shown. Leave empty to use First + Last Name.',
               },
             },
             {
@@ -306,7 +309,8 @@ export const ContactBlock: Block = {
       type: 'group',
       label: 'Promotional CTA Banner',
       admin: {
-        description: 'Dark banner below the contact form (e.g., "For Chefs and Food Professionals").',
+        description:
+          'Dark banner below the contact form (e.g., "For Chefs and Food Professionals").',
       },
       fields: [
         {
@@ -316,7 +320,8 @@ export const ContactBlock: Block = {
           localized: true,
           label: 'Banner Heading',
           admin: {
-            description: 'Main heading in golden accent (e.g., "For Chefs and Food Professionals").',
+            description:
+              'Main heading in golden accent (e.g., "For Chefs and Food Professionals").',
           },
         },
         {
