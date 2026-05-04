@@ -279,11 +279,11 @@ export function CartModal() {
                                   className="flex justify-end space-y-2 text-right text-sm"
                                 />
                               )}
-                              <div className="ml-auto flex h-9 flex-row items-center rounded-lg border">
+                              <div className="ml-auto flex h-9 flex-none flex-row items-center rounded-lg border border-neutral-200 dark:border-neutral-700">
                                 <EditItemQuantityButton item={item} type="minus" />
-                                <p className="w-6 text-center">
-                                  <span className="w-full text-sm">{item.quantity}</span>
-                                </p>
+                                <div className="flex h-full min-w-8 shrink-0 items-center justify-center px-1 text-sm tabular-nums leading-none text-neutral-900 dark:text-neutral-100">
+                                  {item.quantity}
+                                </div>
                                 <EditItemQuantityButton item={item} type="plus" />
                               </div>
                             </>
