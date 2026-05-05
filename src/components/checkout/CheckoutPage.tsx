@@ -724,13 +724,6 @@ export const CheckoutPage: React.FC = () => {
               <Button asChild variant="outline" className="font-display font-bold">
                 <Link href="/login">{t.loginBtn}</Link>
               </Button>
-              <span className="text-body-sm text-ff-gray-text-light">{t.or}</span>
-              <Link
-                href="/create-account"
-                className="font-display text-body-sm font-bold text-ff-near-black underline underline-offset-2 hover:text-ff-gold-accent"
-              >
-                {t.createAccount}
-              </Link>
             </div>
           )}
           {user ? (
@@ -872,31 +865,7 @@ export const CheckoutPage: React.FC = () => {
         </section>
 
         {/* ── Address/Pickup Section ── */}
-        {isAllDigital ? (
-          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
-            <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
-              {t.address}
-            </h2>
-            <div className="flex flex-row items-center gap-3 rounded-lg bg-[#f5f1e8] px-5 py-4">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                className="shrink-0 text-[#555954]"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span className="text-body-sm font-medium text-[#555954]">{t.noShipping}</span>
-            </div>
-          </section>
-        ) : isAllPhysicalPickup ? (
+        {isAllDigital ? null : isAllPhysicalPickup ? (
           <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.storePickup}
@@ -1105,7 +1074,9 @@ export const CheckoutPage: React.FC = () => {
               <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
                 {t.payment}
               </h2>
-              {error && <p className="mb-4 text-body-sm text-red-600">{`${t.errorPrefix}: ${error}`}</p>}
+              {error && (
+                <p className="mb-4 text-body-sm text-red-600">{`${t.errorPrefix}: ${error}`}</p>
+              )}
               <Elements
                 options={{
                   appearance: {
@@ -1239,7 +1210,8 @@ export const CheckoutPage: React.FC = () => {
                           )}
                           {(() => {
                             const isWorkshopBooking =
-                              typeof product.slug === 'string' && product.slug.startsWith('workshop-')
+                              typeof product.slug === 'string' &&
+                              product.slug.startsWith('workshop-')
                             if (!isWorkshopBooking) return null
                             const workshopSlug = product.slug!.replace('workshop-', '')
                             const booking = Object.values(bookingMetadata).find(

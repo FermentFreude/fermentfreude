@@ -51,23 +51,28 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   const isDark = theme === 'dark'
   const isCustom = theme === 'custom'
 
-  // Panel background (used when no image, or as overlay tint when image is set)
+  // Panel background (used when no image present)
   const panelBgColor = isCustom
-    ? (customBackgroundColor && customBackgroundColor.trim() !== ''
-        ? customBackgroundColor
-        : '#F6F0E8')
+    ? customBackgroundColor && customBackgroundColor.trim() !== ''
+      ? customBackgroundColor
+      : '#F6F0E8'
     : isDark
       ? '#1a1a1a'
       : '#F6F0E8'
 
-  // Overlay opacity (0–90%) — admin-controlled. Defaults to 20%.
-  const overlayPct = Math.min(90, Math.max(0, overlayOpacity ?? 20))
+  // When a background image is present we always use a dark scrim + white text
+  // (matches the Kombucha / Tempeh voucher CTA look). The admin overlayOpacity
+  // (0–90%) only controls the strength of that scrim. Defaults to 55%.
+  const hasBgImage = backgroundImage != null
+  const overlayPct = Math.min(90, Math.max(0, overlayOpacity ?? 55))
   const overlayAlpha = overlayPct / 100
+  const overlayColor = hasBgImage ? '#000000' : panelBgColor
 
-  // Text colors — flip for dark theme
-  const headingColorClass = isDark ? 'text-white' : 'text-ff-near-black'
-  const descColorClass = isDark ? 'text-white/80' : 'text-ff-gray-text'
-  const ctaBorderClass = isDark
+  // Text colors — white on image, dark on light panel, white on dark panel
+  const useWhiteText = hasBgImage || isDark
+  const headingColorClass = useWhiteText ? 'text-white' : 'text-ff-near-black'
+  const descColorClass = useWhiteText ? 'text-white/85' : 'text-ff-gray-text'
+  const ctaBorderClass = useWhiteText
     ? 'border-white/40 text-white hover:border-white hover:bg-white hover:text-ff-near-black'
     : 'border-ff-charcoal/35 text-ff-near-black hover:border-ff-charcoal hover:bg-ff-charcoal hover:text-white'
 
@@ -152,7 +157,11 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         textTl.to(eyebrowEl, { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out' })
       }
       textTl
-        .to(headingEl, { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' }, eyebrowEl ? '-=0.35' : 0)
+        .to(
+          headingEl,
+          { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' },
+          eyebrowEl ? '-=0.35' : 0,
+        )
         .to(descEl, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, '-=0.5')
         .to(ctaEl, { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: 'back.out(1.7)' }, '-=0.4')
 
@@ -202,15 +211,11 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         {backgroundImage ? (
           <>
             <div className="absolute inset-0">
-              <Media
-                resource={backgroundImage}
-                fill
-                imgClassName="object-cover"
-              />
+              <Media resource={backgroundImage} fill imgClassName="object-cover" />
             </div>
             <div
               className="absolute inset-0"
-              style={{ backgroundColor: panelBgColor, opacity: overlayAlpha }}
+              style={{ backgroundColor: overlayColor, opacity: overlayAlpha }}
               aria-hidden
             />
           </>
@@ -231,10 +236,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           >
             {resolvedHeading}
           </h2>
-          <p
-            data-anim="desc"
-            className={`text-body-lg max-w-lg leading-relaxed ${descColorClass}`}
-          >
+          <p data-anim="desc" className={`text-body-lg max-w-lg leading-relaxed ${descColorClass}`}>
             {resolvedDescription}
           </p>
           <Link

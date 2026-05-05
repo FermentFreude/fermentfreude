@@ -14,8 +14,8 @@ import {
   Store,
   Truck,
 } from 'lucide-react'
-import Link from 'next/link'
 import { headers as getHeaders } from 'next/headers.js'
+import Link from 'next/link'
 import { getPayload } from 'payload'
 
 export const metadata = {
@@ -112,9 +112,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             <h1 className="text-subheading font-display text-ff-near-black mb-2">
               {t.orderConfirmed}
             </h1>
-            <p className="text-body-sm text-ff-text-muted">
-              {t.orderConfirmedDesc}
-            </p>
+            <p className="text-body-sm text-ff-text-muted">{t.orderConfirmedDesc}</p>
           </div>
         </Card>
 
@@ -157,18 +155,14 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <p className="text-body-sm font-semibold text-ff-near-black">
                   {pickupLocationName}
                 </p>
-                <p className="text-body-sm text-ff-text-muted">
-                  {pickupLocationAddress}
-                </p>
+                <p className="text-body-sm text-ff-text-muted">{pickupLocationAddress}</p>
               </div>
             </div>
             {pickupInfo.date && (
               <div className="flex items-start gap-3">
                 <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
                 <div>
-                  <p className="text-body-sm font-semibold text-ff-near-black">
-                    {t.pickupDate}
-                  </p>
+                  <p className="text-body-sm font-semibold text-ff-near-black">{t.pickupDate}</p>
                   <p className="text-body-sm text-ff-text-muted">{pickupInfo.date}</p>
                 </div>
               </div>
@@ -177,9 +171,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               <div className="flex items-start gap-3">
                 <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
                 <div>
-                  <p className="text-body-sm font-semibold text-ff-near-black">
-                    {t.pickupTime}
-                  </p>
+                  <p className="text-body-sm font-semibold text-ff-near-black">{t.pickupTime}</p>
                   <p className="text-body-sm text-ff-text-muted">{pickupInfo.time}</p>
                 </div>
               </div>
@@ -201,9 +193,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {t.orderConfirmed}
                 </h3>
-                <p className="text-body-sm text-ff-text-muted">
-                  {t.orderConfirmedDesc}
-                </p>
+                <p className="text-body-sm text-ff-text-muted">{t.orderConfirmedDesc}</p>
               </div>
             </div>
 
@@ -253,9 +243,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             </div>
             <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
               <span className="text-ff-gold font-bold">&bull;</span>
-              <p className="text-body-sm text-ff-text-muted">
-                {t.visitDashboard}
-              </p>
+              <p className="text-body-sm text-ff-text-muted">{t.visitDashboard}</p>
             </div>
             <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
               <span className="text-ff-gold font-bold">&bull;</span>
@@ -679,9 +667,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               <Truck className="w-6 h-6 text-ff-gold" />
             </div>
             <div>
-              <h3 className="font-display font-semibold text-ff-near-black mb-1">
-                {t.onTheWay}
-              </h3>
+              <h3 className="font-display font-semibold text-ff-near-black mb-1">{t.onTheWay}</h3>
               <p className="text-body-sm text-ff-text-muted">{t.onTheWayDesc}</p>
             </div>
           </div>

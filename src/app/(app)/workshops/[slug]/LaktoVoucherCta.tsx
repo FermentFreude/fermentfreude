@@ -42,35 +42,35 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
   const hasBackgroundImage = isResolvedMedia(cms?.backgroundImage)
 
   return (
-    <section className="section-padding-lg bg-ff-ivory-mist">
+    <section className="section-padding-lg">
       {/* ── With Background Image ── */}
       {hasBackgroundImage ? (
         <div className="overflow-hidden rounded-lg">
           <div className="relative aspect-4/3 md:aspect-21/9 md:min-h-72 w-full">
             <Media resource={cms.backgroundImage as MediaType} fill imgClassName="object-cover" />
-            <div className="absolute inset-0 bg-ff-ivory-mist/82" aria-hidden />
+            <div className="absolute inset-0 bg-black/55" aria-hidden />
             <div className="absolute inset-0 flex items-center justify-center px-6 py-12">
               <div className="mx-auto max-w-3xl text-center">
-                <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-[#555954]">
+                <p className="mb-4 font-display text-caption font-bold uppercase tracking-[0.25em] text-white">
                   {eyebrow}
                 </p>
-                <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-ff-near-black">
+                <h2 className="hidden sm:block font-display text-display font-bold tracking-tight text-white">
                   {title}
                 </h2>
-                <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-ff-gray-text">
+                <p className="hidden sm:block mx-auto mt-5 max-w-lg text-body-lg leading-relaxed text-white">
                   {description}
                 </p>
 
                 <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Link
                     href={primaryHref}
-                    className="inline-flex items-center justify-center rounded-full bg-[#555954] px-10 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-[#3c3c3c]"
+                    className="inline-flex items-center justify-center rounded-full bg-white px-10 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-[#1A1510] transition-all hover:bg-white/90"
                   >
                     {primaryLabel}
                   </Link>
                   <Link
                     href={secondaryHref}
-                    className="inline-flex items-center justify-center rounded-full border-2 border-[#555954]/30 px-10 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-[#555954] transition-all hover:border-[#555954]"
+                    className="inline-flex items-center justify-center rounded-full border-2 border-white/30 px-10 py-3.5 font-display text-sm font-bold uppercase tracking-widest text-white transition-all hover:border-white"
                   >
                     {secondaryLabel}
                   </Link>
@@ -79,14 +79,11 @@ export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
                 <div className="mt-10 flex items-center justify-center px-2">
                   {pills.map((tag, i) => (
                     <React.Fragment key={tag}>
-                      <span className="text-[#555954] text-[9px] sm:text-[10px] lg:text-xs font-display font-semibold tracking-wide">
+                      <span className="text-white text-[9px] sm:text-[10px] lg:text-xs font-display font-semibold tracking-wide">
                         {tag}
                       </span>
                       {i < pills.length - 1 && (
-                        <span
-                          className="w-px h-4 bg-[#555954]/20 mx-2 sm:mx-3"
-                          aria-hidden="true"
-                        />
+                        <span className="w-px h-4 bg-white/25 mx-2 sm:mx-3" aria-hidden="true" />
                       )}
                     </React.Fragment>
                   ))}

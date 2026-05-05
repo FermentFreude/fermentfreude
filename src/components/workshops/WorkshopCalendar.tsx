@@ -497,24 +497,21 @@ export function WorkshopCalendar({
                       </div>
                     </div>
 
-                    {/* Availability */}
-                    <div>
-                      <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                        {spotsColumnLabel || 'Plätze frei'}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <p className="font-display font-bold text-base text-[#1a1a1a]">
-                          {date.availableSpots > 0
-                            ? `${date.availableSpots} ${spotsLabel || 'Plätze'}`
-                            : ''}
+                    {/* Availability — hidden on sold-out rows; the disabled button already conveys the state */}
+                    {date.availableSpots > 0 ? (
+                      <div>
+                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                          {spotsColumnLabel || 'Plätze frei'}
                         </p>
-                        {date.availableSpots === 0 && (
-                          <span className="inline-block rounded-full bg-black px-2.5 py-1 text-xs font-bold text-white">
-                            {soldOutLabel || 'Ausgebucht'}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <p className="font-display font-bold text-base text-[#1a1a1a]">
+                            {`${date.availableSpots} ${spotsLabel || 'Plätze'}`}
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div aria-hidden="true" />
+                    )}
 
                     {/* Action Button */}
                     <div className="pt-2 sm:pt-0">

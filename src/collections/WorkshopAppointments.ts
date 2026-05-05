@@ -84,9 +84,9 @@ export const WorkshopAppointments: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      ({ data }) => {
-        // Validate dateTime is not in the past
-        if (data?.dateTime) {
+      ({ data, operation }) => {
+        // Validate dateTime is not in the past — only on create
+        if (operation === 'create' && data?.dateTime) {
           const appointmentDate = new Date(data.dateTime)
           const now = new Date()
           if (appointmentDate < now) {

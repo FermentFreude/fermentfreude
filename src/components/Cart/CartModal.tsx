@@ -110,7 +110,7 @@ export function CartModal() {
         <CartIconButton quantity={totalQuantity} />
       </SheetTrigger>
 
-      <SheetContent className="top-0 h-full pt-(--header-height,56px) flex flex-col w-full sm:max-w-md md:max-w-lg lg:max-w-xl">
+      <SheetContent className="flex flex-col w-full sm:max-w-md md:max-w-lg lg:max-w-xl overflow-hidden">
         <SheetHeader className="shrink-0">
           <SheetTitle>{copy.title}</SheetTitle>
 
@@ -118,198 +118,198 @@ export function CartModal() {
         </SheetHeader>
 
         {isCartEmpty ? (
-          <div className="text-center flex flex-col items-center gap-2">
+          <div className="text-center flex flex-col items-center gap-2 px-4">
             <ShoppingCart className="h-16" />
             <p className="text-center text-2xl font-bold">{copy.empty}</p>
           </div>
         ) : (
-          <div className="min-h-0 grow flex flex-col px-4">
-            <div className="flex flex-col w-full min-h-0">
-              <ul className="grow overflow-auto py-4">
-                {cart?.items?.map((item, i) => {
-                  const product = item.product
-                  const variant = item.variant
+          <div className="min-h-0 grow flex flex-col overflow-hidden">
+            <ul className="grow overflow-y-auto py-4 px-4 min-h-0">
+              {cart?.items?.map((item, i) => {
+                const product = item.product
+                const variant = item.variant
 
-                  if (typeof product !== 'object' || !item || !product || !product.slug)
-                    return <React.Fragment key={i} />
+                if (typeof product !== 'object' || !item || !product || !product.slug)
+                  return <React.Fragment key={i} />
 
-                  // Check if this is a workshop booking (product slug starts with "workshop-")
-                  const isWorkshopBooking = product.slug?.startsWith('workshop-')
+                // Check if this is a workshop booking (product slug starts with "workshop-")
+                const isWorkshopBooking = product.slug?.startsWith('workshop-')
 
-                  const metaImage =
-                    product.meta?.image && typeof product.meta?.image === 'object'
-                      ? product.meta.image
-                      : undefined
+                const metaImage =
+                  product.meta?.image && typeof product.meta?.image === 'object'
+                    ? product.meta.image
+                    : undefined
 
-                  const firstGalleryImage =
-                    typeof product.gallery?.[0]?.image === 'object'
-                      ? product.gallery?.[0]?.image
-                      : undefined
+                const firstGalleryImage =
+                  typeof product.gallery?.[0]?.image === 'object'
+                    ? product.gallery?.[0]?.image
+                    : undefined
 
-                  let image = firstGalleryImage || metaImage
-                  let price = product.priceInEUR
+                let image = firstGalleryImage || metaImage
+                let price = product.priceInEUR
 
-                  const isVariant = Boolean(variant) && typeof variant === 'object'
+                const isVariant = Boolean(variant) && typeof variant === 'object'
 
-                  if (isVariant) {
-                    price = variant?.priceInEUR
+                if (isVariant) {
+                  price = variant?.priceInEUR
 
-                    const imageVariant = product.gallery?.find(
-                      (item: {
-                        image: string | import('@/payload-types').Media
-                        variantOption?: (string | null) | import('@/payload-types').VariantOption
-                        id?: string | null
-                      }) => {
-                        if (!item.variantOption) return false
-                        const variantOptionID =
-                          typeof item.variantOption === 'object'
-                            ? item.variantOption.id
-                            : item.variantOption
+                  const imageVariant = product.gallery?.find(
+                    (item: {
+                      image: string | import('@/payload-types').Media
+                      variantOption?: (string | null) | import('@/payload-types').VariantOption
+                      id?: string | null
+                    }) => {
+                      if (!item.variantOption) return false
+                      const variantOptionID =
+                        typeof item.variantOption === 'object'
+                          ? item.variantOption.id
+                          : item.variantOption
 
-                        const hasMatch = variant?.options?.some(
-                          (option: string | import('@/payload-types').VariantOption) => {
-                            if (typeof option === 'object') return option.id === variantOptionID
-                            else return option === variantOptionID
-                          },
-                        )
+                      const hasMatch = variant?.options?.some(
+                        (option: string | import('@/payload-types').VariantOption) => {
+                          if (typeof option === 'object') return option.id === variantOptionID
+                          else return option === variantOptionID
+                        },
+                      )
 
-                        return hasMatch
-                      },
-                    )
+                      return hasMatch
+                    },
+                  )
 
-                    if (imageVariant && typeof imageVariant.image === 'object') {
-                      image = imageVariant.image
-                    }
+                  if (imageVariant && typeof imageVariant.image === 'object') {
+                    image = imageVariant.image
                   }
+                }
 
-                  return (
-                    <li className="flex w-full flex-col" key={i}>
-                      <div className="relative flex w-full flex-row justify-between px-1 py-4">
-                        <div className="absolute z-40 -mt-2 ml-13.75">
-                          <DeleteItemButton item={item} />
-                        </div>
-                        <Link
-                          className="z-30 flex flex-row space-x-4"
-                          href={
-                            isWorkshopBooking
-                              ? `/workshops/${product.slug.replace('workshop-', '')}`
-                              : `/products/${(item.product as Product)?.slug}`
-                          }
-                        >
-                          <div className="relative h-16 w-16 cursor-pointer overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-                            {image?.url && (
-                              <Image
-                                alt={image?.alt || product?.title || ''}
-                                className="h-full w-full object-cover"
-                                height={94}
-                                src={image.url}
-                                width={94}
-                              />
-                            )}
-                          </div>
-
-                          <div className="flex flex-1 flex-col text-base">
-                            <span className="leading-tight">{product?.title}</span>
-                            {isWorkshopBooking ? (
-                              // For workshop bookings, display full booking details from localStorage
-                              (() => {
-                                const productSlugWithoutPrefix = product.slug?.replace(
-                                  'workshop-',
-                                  '',
-                                )
-                                const booking = Object.values(bookingMetadata).find(
-                                  (b) => b.workshopSlug === productSlugWithoutPrefix,
-                                )
-                                if (booking) {
-                                  // Use Payload cart item.quantity as source of truth
-                                  // (booking.guestCount may be stale if user added more spots later)
-                                  const guestCount = item.quantity ?? booking.guestCount ?? 1
-                                  const lineTotal = booking.pricePerPerson * guestCount
-                                  return (
-                                    <div className="text-sm text-neutral-500 dark:text-neutral-400 space-y-0.5">
-                                      <p>{booking.date}</p>
-                                      <p>{locale === 'de' ? `${booking.time} Uhr` : booking.time}</p>
-                                      {booking.locationName && (
-                                        <p>
-                                          {booking.locationName}
-                                          {booking.locationAddress ? ` — ${booking.locationAddress}` : ''}
-                                        </p>
-                                      )}
-                                      <p>
-                                        {guestCount} {copy.guests}
-                                      </p>
-                                    </div>
-                                  )
-                                }
-                                return (
-                                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                    {copy.workshopBooking}
-                                  </p>
-                                )
-                              })()
-                            ) : isVariant && variant ? (
-                              <p className="text-sm text-neutral-500 dark:text-neutral-400 capitalize">
-                                {variant.options
-                                  ?.map(
-                                    (option: string | import('@/payload-types').VariantOption) => {
-                                      if (typeof option === 'object') return option.label
-                                      return null
-                                    },
-                                  )
-                                  .join(', ')}
-                              </p>
-                            ) : null}
-                          </div>
-                        </Link>
-                        <div className="flex h-16 flex-col justify-between">
-                          {isWorkshopBooking ? (
-                            // Workshop: show base price per person in euros (convert from cents)
-                            <span className="flex justify-end text-right text-sm">
-                              €{typeof price === 'number' ? (price / 100).toFixed(2) : '0.00'}
-                            </span>
-                          ) : (
-                            // Regular product: show price and quantity controls
-                            <>
-                              {typeof price === 'number' && (
-                                <Price
-                                  amount={price}
-                                  className="flex justify-end space-y-2 text-right text-sm"
-                                />
-                              )}
-                              <div className="ml-auto flex h-9 flex-none flex-row items-center rounded-lg border border-neutral-200 dark:border-neutral-700">
-                                <EditItemQuantityButton item={item} type="minus" />
-                                <div className="flex h-full min-w-8 shrink-0 items-center justify-center px-1 text-sm tabular-nums leading-none text-neutral-900 dark:text-neutral-100">
-                                  {item.quantity}
-                                </div>
-                                <EditItemQuantityButton item={item} type="plus" />
-                              </div>
-                            </>
+                return (
+                  <li className="flex w-full flex-col" key={i}>
+                    <div className="relative flex w-full flex-row justify-between px-1 py-4">
+                      <div className="absolute z-40 -mt-2 ml-13.75">
+                        <DeleteItemButton item={item} />
+                      </div>
+                      <Link
+                        className="z-30 flex flex-row space-x-4"
+                        href={
+                          isWorkshopBooking
+                            ? `/workshops/${product.slug.replace('workshop-', '')}`
+                            : `/products/${(item.product as Product)?.slug}`
+                        }
+                      >
+                        <div className="relative h-16 w-16 cursor-pointer overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                          {image?.url && (
+                            <Image
+                              alt={image?.alt || product?.title || ''}
+                              className="h-full w-full object-cover"
+                              height={94}
+                              src={image.url}
+                              width={94}
+                            />
                           )}
                         </div>
+
+                        <div className="flex flex-1 flex-col text-base">
+                          <span className="leading-tight">{product?.title}</span>
+                          {isWorkshopBooking ? (
+                            // For workshop bookings, display full booking details from localStorage
+                            (() => {
+                              const productSlugWithoutPrefix = product.slug?.replace(
+                                'workshop-',
+                                '',
+                              )
+                              const booking = Object.values(bookingMetadata).find(
+                                (b) => b.workshopSlug === productSlugWithoutPrefix,
+                              )
+                              if (booking) {
+                                // Use Payload cart item.quantity as source of truth
+                                // (booking.guestCount may be stale if user added more spots later)
+                                const guestCount = item.quantity ?? booking.guestCount ?? 1
+                                const _lineTotal = booking.pricePerPerson * guestCount
+                                return (
+                                  <div className="text-sm text-neutral-500 dark:text-neutral-400 space-y-0.5">
+                                    <p>{booking.date}</p>
+                                    <p>{locale === 'de' ? `${booking.time} Uhr` : booking.time}</p>
+                                    {booking.locationName && (
+                                      <p>
+                                        {booking.locationName}
+                                        {booking.locationAddress
+                                          ? ` — ${booking.locationAddress}`
+                                          : ''}
+                                      </p>
+                                    )}
+                                    <p>
+                                      {guestCount} {copy.guests}
+                                    </p>
+                                  </div>
+                                )
+                              }
+                              return (
+                                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                  {copy.workshopBooking}
+                                </p>
+                              )
+                            })()
+                          ) : isVariant && variant ? (
+                            <p className="text-sm text-neutral-500 dark:text-neutral-400 capitalize">
+                              {variant.options
+                                ?.map(
+                                  (option: string | import('@/payload-types').VariantOption) => {
+                                    if (typeof option === 'object') return option.label
+                                    return null
+                                  },
+                                )
+                                .join(', ')}
+                            </p>
+                          ) : null}
+                        </div>
+                      </Link>
+                      <div className="flex h-16 flex-col justify-between">
+                        {isWorkshopBooking ? (
+                          // Workshop: show base price per person in euros (convert from cents)
+                          <span className="flex justify-end text-right text-sm">
+                            €{typeof price === 'number' ? (price / 100).toFixed(2) : '0.00'}
+                          </span>
+                        ) : (
+                          // Regular product: show price and quantity controls
+                          <>
+                            {typeof price === 'number' && (
+                              <Price
+                                amount={price}
+                                className="flex justify-end space-y-2 text-right text-sm"
+                              />
+                            )}
+                            <div className="ml-auto flex h-9 flex-none flex-row items-center rounded-lg border border-neutral-200 dark:border-neutral-700">
+                              <EditItemQuantityButton item={item} type="minus" />
+                              <div className="flex h-full min-w-8 shrink-0 items-center justify-center px-1 text-sm tabular-nums leading-none text-neutral-900 dark:text-neutral-100">
+                                {item.quantity}
+                              </div>
+                              <EditItemQuantityButton item={item} type="plus" />
+                            </div>
+                          </>
+                        )}
                       </div>
-                    </li>
-                  )
-                })}
-              </ul>
-
-              <div className="shrink-0 px-4">
-                <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                  {typeof cart?.subtotal === 'number' && cart.subtotal > 0 && (
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                      <p>{copy.total}</p>
-                      <Price
-                        amount={cart?.subtotal}
-                        className="text-right text-base text-black dark:text-white"
-                      />
                     </div>
-                  )}
+                  </li>
+                )
+              })}
+            </ul>
 
-                  <Button asChild>
-                    <Link className="w-full" href="/checkout">
-                      {copy.checkout}
-                    </Link>
-                  </Button>
-                </div>
+            <div className="shrink-0 border-t border-neutral-200 dark:border-neutral-700 px-4 pb-6 pt-4">
+              <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                {typeof cart?.subtotal === 'number' && cart.subtotal > 0 && (
+                  <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-3 pt-1 dark:border-neutral-700">
+                    <p>{copy.total}</p>
+                    <Price
+                      amount={cart?.subtotal}
+                      className="text-right text-base text-black dark:text-white"
+                    />
+                  </div>
+                )}
+
+                <Button asChild>
+                  <Link className="w-full" href="/checkout">
+                    {copy.checkout}
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>

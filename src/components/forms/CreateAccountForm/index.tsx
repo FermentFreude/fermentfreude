@@ -181,7 +181,7 @@ export const CreateAccountForm: React.FC = () => {
           </Link>
         </div>
 
-        <div className="flex items-start gap-3 pt-1 text-[#E5DDCF]">
+        <div className="flex items-start gap-3 pt-1 text-white">
           <input
             id="marketingConsent"
             type="checkbox"
