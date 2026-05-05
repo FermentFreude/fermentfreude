@@ -53,15 +53,7 @@ const MOCK = {
     GUEST_COUNT: '2',
     TOTAL_PRICE: '€ 178,00',
     WHAT_TO_BRING: 'Schürze · ein Glas (500 ml) · Lust auf gute Gespräche',
-    WORKSHOP_BOOKINGS: [
-      {
-        title: 'Tempeh Basics',
-        dateTime: 'Sa, 6. Juni 2026 · 10:00 – 14:00',
-        location: 'Studio Wien, Schönbrunner Str. 12, 1050',
-        guests: 2,
-        price: '€ 178,00',
-      },
-    ],
+    WORKSHOP_BOOKINGS_HTML: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#fff;border:1px solid #E8DFD0;border-radius:8px;margin:8px 0;"><tr><td style="padding:18px 20px 8px;"><div style="font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#8a8783;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Workshop</div><div style="font-family:Helvetica,Arial,sans-serif;font-size:18px;color:#1a1a1a;font-weight:700;margin-top:4px;">Tempeh Basics</div></td></tr><tr><td style="padding:8px 20px 18px;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#555251;line-height:1.6;">Sa, 6. Juni 2026 · 10:00 – 14:00 · Studio Wien · 2 Plätze · € 178,00</td></tr></table>`,
     PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
     AGB_URL: 'https://www.fermentfreude.at/agb',
   },
@@ -105,27 +97,22 @@ const MOCK = {
     SHIPPING: '€ 5,90',
     TOTAL: '€ 59,90',
     SHIPPING_ADDRESS: 'Max Mustermann\nMusterstraße 1\n1010 Wien\nÖsterreich',
-    ITEMS: [
-      {
-        title: 'Tempeh Starter Kit',
-        sku: 'TMP-001',
-        shortDesc: 'Alles für deinen ersten Tempeh',
-        qty: 2,
-        thumbUrl: '',
-        unitPrice: '€ 24,00',
-        lineTotal: '€ 48,00',
-      },
-      {
-        title: 'Kombucha SCOBY',
-        sku: 'KBC-002',
-        shortDesc: '',
-        qty: 1,
-        thumbUrl: '',
-        unitPrice: '€ 6,00',
-        lineTotal: '€ 6,00',
-      },
-    ],
-    WORKSHOP_BOOKINGS: [],
+    ORDER_ITEMS_HTML: `
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+  <tr><td style="padding:14px 0;border-bottom:1px solid #E8DFD0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5;">Tempeh Starter Kit<br><span style="color:#8a8783;font-size:12px;">2 × € 24,00</span></td>
+      <td align="right" style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a1a;font-weight:600;white-space:nowrap;">€ 48,00</td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="padding:14px 0;border-bottom:1px solid #E8DFD0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5;">Kombucha SCOBY<br><span style="color:#8a8783;font-size:12px;">1 × € 6,00</span></td>
+      <td align="right" style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a1a;font-weight:600;white-space:nowrap;">€ 6,00</td>
+    </tr></table>
+  </td></tr>
+</table>`,
+    WORKSHOP_BOOKINGS_HTML: '',
     PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
     AGB_URL: 'https://www.fermentfreude.at/agb',
   },

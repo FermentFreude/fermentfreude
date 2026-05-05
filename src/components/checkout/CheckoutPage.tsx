@@ -305,6 +305,39 @@ export const CheckoutPage: React.FC = () => {
     }
   }, [locale])
 
+  // Fetch the active pickup location from the workshop-locations collection.
+  // Falls back to DEFAULT_PICKUP_LOCATION on any error / empty result.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(
+          `/api/workshop-locations?where[isActive][equals]=true&limit=1&depth=0&locale=${locale}`,
+          { cache: 'no-store' },
+        )
+        if (!res.ok) return
+        const json = (await res.json()) as {
+          docs?: { id: string; name?: string; address?: string }[]
+        }
+        const loc = json?.docs?.[0]
+        if (!cancelled && loc?.name && loc?.address) {
+          setPickupLocation({
+            ...DEFAULT_PICKUP_LOCATION,
+            id: loc.id,
+            name: loc.name,
+            address: loc.address,
+            mapLink: buildMapLink(loc.name, loc.address),
+          })
+        }
+      } catch {
+        // ignore — fallback used
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [locale])
+
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
   // Digital products (courses) and workshops don't need a shipping address.
