@@ -61,21 +61,23 @@ async function run() {
 
   for (const o of allOrders.docs) {
     const email =
-      typeof o.orderedBy === 'object' && o.orderedBy !== null
-        ? (o.orderedBy as { email?: string }).email
-        : ((o.email as string | undefined) ?? '(no email)')
-    const total = typeof o.total === 'number' ? `€${(o.total / 100).toFixed(2)}` : '—'
-    console.log(
-      `  [${o.stripePaymentIntentID ?? 'no-payment-id'}] ${email} | ${total} | id=${o.id}`,
-    )
+      typeof o.customer === 'object' && o.customer !== null
+        ? (o.customer.email ?? '(no email)')
+        : (o.customerEmail ?? '(no email)')
+    const total = typeof o.amount === 'number' ? `€${(o.amount / 100).toFixed(2)}` : '—'
+    console.log(`  [${o.status ?? 'no-status'}] ${email} | ${total} | id=${o.id}`)
   }
 
-  // Keep orders that have a Stripe payment intent ID (real payment)
+  // Keep orders for Florian (real payment); delete the rest as test data.
+  const orderEmail = (o: (typeof allOrders.docs)[number]): string | null => {
+    if (typeof o.customer === 'object' && o.customer !== null) return o.customer.email ?? null
+    return o.customerEmail ?? null
+  }
   const realOrders = allOrders.docs.filter(
-    (o) => typeof o.stripePaymentIntentID === 'string' && o.stripePaymentIntentID.length > 0,
+    (o) => orderEmail(o)?.toLowerCase() === KEEP_EMAIL.toLowerCase(),
   )
   const testOrders = allOrders.docs.filter(
-    (o) => typeof o.stripePaymentIntentID !== 'string' || o.stripePaymentIntentID.length === 0,
+    (o) => orderEmail(o)?.toLowerCase() !== KEEP_EMAIL.toLowerCase(),
   )
 
   console.log(`\n✅ Orders with payment (keeping): ${realOrders.length}`)
