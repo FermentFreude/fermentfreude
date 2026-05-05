@@ -15,6 +15,7 @@ const FORM_DE = {
   somethingWentWrong: 'Etwas ist schiefgelaufen.',
   errorConfirming: (msg: string) => `Fehler bei der Bestellbestätigung: ${msg}`,
   errorSubmitting: (msg: string) => `Fehler beim Absenden der Zahlung: ${msg}`,
+  poweredByStripe: 'Sicher bezahlen mit Stripe',
 }
 const FORM_EN = {
   loading: 'Loading…',
@@ -22,6 +23,7 @@ const FORM_EN = {
   somethingWentWrong: 'Something went wrong.',
   errorConfirming: (msg: string) => `Error while confirming order: ${msg}`,
   errorSubmitting: (msg: string) => `Error while submitting payment: ${msg}`,
+  poweredByStripe: 'Secured by Stripe',
 }
 
 type Props = {
@@ -204,10 +206,26 @@ export const CheckoutForm: React.FC<Props> = ({
     <form onSubmit={handleSubmit}>
       {error && <Message error={error} />}
       <PaymentElement />
-      <div className="mt-8 flex gap-4">
-        <Button disabled={!stripe || isLoading} type="submit" variant="default">
-          {isLoading ? t.loading : t.payNow}
-        </Button>
+      <div className="mt-8 flex flex-col gap-3">
+        <div className="flex gap-4">
+          <Button disabled={!stripe || isLoading} type="submit" variant="default">
+            {isLoading ? t.loading : t.payNow}
+          </Button>
+        </div>
+        {/* Stripe trust badge */}
+        <div className="flex items-center gap-1.5">
+          <svg
+            className="size-3.5 shrink-0 text-ff-gray-text-light opacity-70"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+          </svg>
+          <span className="font-sans text-xs text-ff-gray-text-light opacity-70">
+            {t.poweredByStripe}
+          </span>
+        </div>
       </div>
     </form>
   )

@@ -75,6 +75,14 @@ const CHECKOUT_DE = {
   or: 'oder',
   total: 'Gesamt',
   errorPrefix: 'Fehler',
+  alreadyHaveAccount: 'Schon ein Konto?',
+  createAccountToggle: 'Konto für spätere Bestellungen erstellen (optional)',
+  passwordLabel: 'Passwort',
+  passwordPlaceholder: 'Mindestens 8 Zeichen',
+  continueAndCreate: 'Konto erstellen & fortfahren',
+  createAccountError: 'Konto konnte nicht erstellt werden. Bitte versuche es erneut.',
+  createAccountEmailExists: 'Diese E-Mail ist bereits registriert. Bitte melde dich an.',
+  createAccountNetworkError: 'Verbindungsfehler. Bitte versuche es erneut.',
 }
 
 const CHECKOUT_EN = {
@@ -125,6 +133,14 @@ const CHECKOUT_EN = {
   or: 'or',
   total: 'Total',
   errorPrefix: 'Error',
+  alreadyHaveAccount: 'Already have an account?',
+  createAccountToggle: 'Create an account for future orders (optional)',
+  passwordLabel: 'Password',
+  passwordPlaceholder: 'At least 8 characters',
+  continueAndCreate: 'Create account & continue',
+  createAccountError: 'Could not create account. Please try again.',
+  createAccountEmailExists: 'This email is already registered. Please log in.',
+  createAccountNetworkError: 'Connection error. Please try again.',
 }
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
@@ -153,7 +169,7 @@ const buildMapLink = (name: string, address: string) =>
   `https://www.google.com/maps/search/${encodeURIComponent(`${name} ${address}`)}`
 
 export const CheckoutPage: React.FC = () => {
-  const { user } = useAuth()
+  const { user, login } = useAuth()
   const { locale } = useLocale()
   const isDe = locale === 'de'
   const router = useRouter()
@@ -165,6 +181,11 @@ export const CheckoutPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [customerName, setCustomerName] = useState('')
   const [emailEditable, setEmailEditable] = useState(true)
+  /* ── Optional account creation during guest checkout ── */
+  const [createAccountOpt, setCreateAccountOpt] = useState(false)
+  const [accountPassword, setAccountPassword] = useState('')
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false)
+  const [createAccountError, setCreateAccountError] = useState<string | null>(null)
   const [paymentData, setPaymentData] = useState<null | Record<string, unknown>>(null)
   const { initiatePayment } = usePayments()
   const { addresses } = useAddresses()
@@ -620,6 +641,52 @@ export const CheckoutPage: React.FC = () => {
     ],
   )
 
+  /* ── Guest Continue Handler (with optional account creation) ── */
+  const handleGuestContinue = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault()
+      if (createAccountOpt && accountPassword.length >= 8) {
+        setIsCreatingAccount(true)
+        setCreateAccountError(null)
+        try {
+          const res = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email,
+              password: accountPassword,
+              name: customerName.trim() || undefined,
+            }),
+          })
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            const errMsg: string = data?.errors?.[0]?.message ?? ''
+            if (/duplicate|already exist/i.test(errMsg)) {
+              setCreateAccountError(t.createAccountEmailExists)
+            } else {
+              setCreateAccountError(t.createAccountError)
+            }
+            setIsCreatingAccount(false)
+            return
+          }
+          // Auto-login with the new credentials
+          try {
+            await login({ email, password: accountPassword })
+          } catch {
+            // Login failed after create — still continue as guest
+          }
+        } catch {
+          setCreateAccountError(t.createAccountNetworkError)
+          setIsCreatingAccount(false)
+          return
+        }
+        setIsCreatingAccount(false)
+      }
+      setEmailEditable(false)
+    },
+    [createAccountOpt, accountPassword, email, customerName, login, t],
+  )
+
   if (!stripe) return null
 
   if (cartIsEmpty && isProcessingPayment) {
@@ -653,6 +720,7 @@ export const CheckoutPage: React.FC = () => {
           </h2>
           {!user && (
             <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg bg-[#f5f1e8] p-4">
+              <span className="text-body-sm text-ff-gray-text-light">{t.alreadyHaveAccount}</span>
               <Button asChild variant="outline" className="font-display font-bold">
                 <Link href="/login">{t.loginBtn}</Link>
               </Button>
@@ -733,15 +801,71 @@ export const CheckoutPage: React.FC = () => {
                   className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
                 />
               </FormItem>
+
+              {/* Optional account creation */}
+              <div className="rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="createAccountOpt"
+                    checked={createAccountOpt}
+                    onCheckedChange={(v) => {
+                      setCreateAccountOpt(Boolean(v))
+                      setCreateAccountError(null)
+                    }}
+                    disabled={!emailEditable}
+                    className="mt-0.5"
+                  />
+                  <Label
+                    htmlFor="createAccountOpt"
+                    className="cursor-pointer font-display text-body-sm font-bold leading-snug text-ff-near-black"
+                  >
+                    {t.createAccountToggle}
+                  </Label>
+                </div>
+                {createAccountOpt && (
+                  <FormItem className="mt-3">
+                    <Label
+                      htmlFor="accountPassword"
+                      className="font-display text-body-sm font-bold text-ff-near-black"
+                    >
+                      {t.passwordLabel}
+                    </Label>
+                    <Input
+                      id="accountPassword"
+                      name="accountPassword"
+                      type="password"
+                      value={accountPassword}
+                      onChange={(e) => setAccountPassword(e.target.value)}
+                      disabled={!emailEditable}
+                      placeholder={t.passwordPlaceholder}
+                      minLength={8}
+                      maxLength={100}
+                      className="rounded-md border-ff-border-light bg-white focus:border-ff-near-black focus:ring-ff-near-black"
+                    />
+                  </FormItem>
+                )}
+              </div>
+
+              {createAccountError && (
+                <p className="text-body-sm text-red-600">{createAccountError}</p>
+              )}
+
               <Button
-                disabled={!email || customerName.trim().length < 2 || !emailEditable}
-                onClick={(e) => {
-                  e.preventDefault()
-                  setEmailEditable(false)
-                }}
+                disabled={
+                  !email ||
+                  customerName.trim().length < 2 ||
+                  !emailEditable ||
+                  (createAccountOpt && accountPassword.length < 8) ||
+                  isCreatingAccount
+                }
+                onClick={(e) => void handleGuestContinue(e)}
                 className="rounded-full bg-ff-near-black px-6 font-display font-bold text-white hover:bg-ff-near-black/80"
               >
-                {t.continueAsGuest}
+                {isCreatingAccount
+                  ? '…'
+                  : createAccountOpt
+                    ? t.continueAndCreate
+                    : t.continueAsGuest}
               </Button>
             </div>
           )}
