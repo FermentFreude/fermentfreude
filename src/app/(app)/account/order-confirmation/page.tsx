@@ -7,6 +7,7 @@ import {
   BookOpen,
   CalendarCheck,
   CheckCircle,
+  Download,
   Mail,
   Package,
   Play,
@@ -43,18 +44,25 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
   let pickupLocationName = 'The Ginery'
   let pickupLocationAddress = 'Grabenstraße 15, 8010 Graz, Austria'
 
-  if (orderId && type === 'order') {
+  let downloadToken: string | null = null
+
+  if (orderId) {
     try {
       const payload = await getPayload({ config: configPromise })
       const order = await payload.findByID({
         collection: 'orders',
         id: orderId,
+        depth: 0,
+        overrideAccess: true,
       })
 
-      // Check if order has pickupDate and pickupTime (physical products for pickup)
+      // Extract downloadToken for receipt download
       if (order && typeof order === 'object') {
         const orderData = order as unknown as Record<string, unknown>
-        if (orderData.pickupDate || orderData.pickupTime) {
+        downloadToken = (orderData.downloadToken as string | null) ?? null
+
+        // Check if order has pickupDate and pickupTime (physical products for pickup)
+        if (type === 'order' && (orderData.pickupDate || orderData.pickupTime)) {
           isPickupOrder = true
           pickupInfo = {
             date: orderData.pickupDate as string | undefined,
@@ -63,20 +71,22 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         }
       }
 
-      // Resolve current pickup location (first active record)
-      try {
-        const locations = await payload.find({
-          collection: 'workshop-locations',
-          where: { isActive: { equals: true } },
-          limit: 1,
-          locale,
-          depth: 0,
-        })
-        const loc = locations.docs[0] as { name?: string; address?: string } | undefined
-        if (loc?.name) pickupLocationName = loc.name
-        if (loc?.address) pickupLocationAddress = loc.address
-      } catch {
-        // ignore — fallback used
+      // Resolve current pickup location (first active record) — only for physical orders
+      if (type === 'order') {
+        try {
+          const locations = await payload.find({
+            collection: 'workshop-locations',
+            where: { isActive: { equals: true } },
+            limit: 1,
+            locale,
+            depth: 0,
+          })
+          const loc = locations.docs[0] as { name?: string; address?: string } | undefined
+          if (loc?.name) pickupLocationName = loc.name
+          if (loc?.address) pickupLocationAddress = loc.address
+        } catch {
+          // ignore — fallback used
+        }
       }
     } catch (error) {
       console.error('Failed to fetch order:', error)
@@ -372,6 +382,27 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         </Card>
 
         {/* Action Buttons — Workshop */}
+        {orderId && downloadToken && (
+          <Card className="p-4 border border-ff-border-light shadow-sm rounded-[--radius-lg] bg-ff-cream">
+            <p className="text-body-sm text-ff-text-muted text-center mb-3">
+              {locale === 'de'
+                ? 'Deine Rechnung wurde per E-Mail gesendet.'
+                : 'Your receipt has been sent to your email.'}
+            </p>
+            <div className="flex justify-center">
+              <a
+                href={`/api/orders/${orderId}/receipt?token=${downloadToken}`}
+                download
+                className="inline-flex items-center gap-2 px-4 py-2 bg-ff-near-black text-white text-sm rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium"
+              >
+                <Download className="w-4 h-4" />
+                {locale === 'de' ? 'Rechnung herunterladen' : 'Download Receipt'}
+              </a>
+            </div>
+          </Card>
+        )}
+
+        {/* Action Buttons — Workshop */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href={orderId ? `/account/orders/${orderId}` : '/account/orders'}
@@ -489,6 +520,27 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             </div>
           </div>
         </Card>
+
+        {/* Action Buttons — Course */}
+        {orderId && downloadToken && (
+          <Card className="p-4 border border-ff-border-light shadow-sm rounded-[--radius-lg] bg-ff-cream">
+            <p className="text-body-sm text-ff-text-muted text-center mb-3">
+              {locale === 'de'
+                ? 'Deine Rechnung wurde per E-Mail gesendet.'
+                : 'Your receipt has been sent to your email.'}
+            </p>
+            <div className="flex justify-center">
+              <a
+                href={`/api/orders/${orderId}/receipt?token=${downloadToken}`}
+                download
+                className="inline-flex items-center gap-2 px-4 py-2 bg-ff-near-black text-white text-sm rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium"
+              >
+                <Download className="w-4 h-4" />
+                {locale === 'de' ? 'Rechnung herunterladen' : 'Download Receipt'}
+              </a>
+            </div>
+          </Card>
+        )}
 
         {/* Action Buttons — Course */}
         <div className="flex flex-col sm:flex-row gap-3">
@@ -628,6 +680,27 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           </div>
         </div>
       </Card>
+
+      {/* Receipt Download */}
+      {orderId && downloadToken && (
+        <Card className="p-4 border border-ff-border-light shadow-sm rounded-[--radius-lg] bg-ff-cream">
+          <p className="text-body-sm text-ff-text-muted text-center mb-3">
+            {locale === 'de'
+              ? 'Deine Rechnung wurde per E-Mail gesendet.'
+              : 'Your receipt has been sent to your email.'}
+          </p>
+          <div className="flex justify-center">
+            <a
+              href={`/api/orders/${orderId}/receipt?token=${downloadToken}`}
+              download
+              className="inline-flex items-center gap-2 px-4 py-2 bg-ff-near-black text-white text-sm rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium"
+            >
+              <Download className="w-4 h-4" />
+              {locale === 'de' ? 'Rechnung herunterladen' : 'Download Receipt'}
+            </a>
+          </div>
+        </Card>
+      )}
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-3">
