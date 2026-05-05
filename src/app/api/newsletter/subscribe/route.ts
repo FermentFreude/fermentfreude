@@ -44,7 +44,11 @@ export async function POST(request: NextRequest) {
     sendTemplateEmail({
       to: [{ email }],
       templateId: BREVO_TEMPLATES.NEWSLETTER_WELCOME,
-      params: { LOCALE: locale, EMAIL: email },
+      params: {
+        LOCALE: locale,
+        EMAIL: email,
+        UNSUBSCRIBE_URL: `${process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://www.fermentfreude.at'}/login`,
+      },
     }).catch((err) => {
       console.error('[Newsletter] Welcome email failed:', err)
     })

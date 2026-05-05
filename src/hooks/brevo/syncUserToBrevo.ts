@@ -32,6 +32,7 @@ export const syncUserToBrevo: CollectionAfterChangeHook = async ({ doc, operatio
       templateId: BREVO_TEMPLATES.NEWSLETTER_WELCOME,
       params: {
         CUSTOMER_NAME: doc.name || email,
+        UNSUBSCRIBE_URL: `${process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://www.fermentfreude.at'}/login`,
       },
     })
   } catch (error) {
