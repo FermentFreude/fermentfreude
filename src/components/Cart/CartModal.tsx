@@ -123,8 +123,8 @@ export function CartModal() {
             <p className="text-center text-2xl font-bold">{copy.empty}</p>
           </div>
         ) : (
-          <div className="grow flex px-4">
-            <div className="flex flex-col justify-between w-full">
+          <div className="min-h-0 grow flex flex-col px-4">
+            <div className="flex flex-col w-full min-h-0">
               <ul className="grow overflow-auto py-4">
                 {cart?.items?.map((item, i) => {
                   const product = item.product
@@ -238,9 +238,6 @@ export function CartModal() {
                                       <p>
                                         {guestCount} {copy.guests}
                                       </p>
-                                      <div className="font-semibold text-neutral-700 dark:text-neutral-300">
-                                        {copy.total}: €{lineTotal.toFixed(2)}
-                                      </div>
                                     </div>
                                   )
                                 }
@@ -295,9 +292,9 @@ export function CartModal() {
                 })}
               </ul>
 
-              <div className="px-4">
+              <div className="shrink-0 px-4">
                 <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                  {typeof cart?.subtotal === 'number' && (
+                  {typeof cart?.subtotal === 'number' && cart.subtotal > 0 && (
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                       <p>{copy.total}</p>
                       <Price
