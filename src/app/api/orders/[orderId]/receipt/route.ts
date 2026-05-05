@@ -1,0 +1,189 @@
+import configPromise from '@payload-config'
+import { NextRequest, NextResponse } from 'next/server'
+import { getPayload } from 'payload'
+import { generateOrderReceiptPDF } from '@/lib/generateOrderReceiptPDF'
+
+/* ═══════════════════════════════════════════════════════════════
+ *  GET /api/orders/[orderId]/receipt?token=<downloadToken>
+ *
+ *  Token-secured endpoint: returns a PDF receipt for a paid order.
+ *  No authentication cookie required — the downloadToken (UUID stored
+ *  on the order) acts as the credential. Works for guests and users.
+ *
+ *  Security:
+ *  - Token must match the stored downloadToken exactly
+ *  - Returns 401 for missing/invalid token
+ *  - Returns 404 for unknown orderId
+ *  - Returns 403 if order is not paid
+ * ═══════════════════════════════════════════════════════════════ */
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ orderId: string }> },
+) {
+  try {
+    const { orderId } = await params
+    const token = request.nextUrl.searchParams.get('token')
+
+    // ── Input validation ──────────────────────────────────────────────────
+    if (!orderId || typeof orderId !== 'string' || orderId.trim().length === 0) {
+      return NextResponse.json({ error: 'Order ID is required.' }, { status: 400 })
+    }
+
+    if (!token || typeof token !== 'string' || token.trim().length === 0) {
+      return NextResponse.json({ error: 'Download token is required.' }, { status: 401 })
+    }
+
+    const payload = await getPayload({ config: await configPromise })
+
+    // ── Fetch order ────────────────────────────────────────────────────────
+    let order: Record<string, unknown> | null = null
+    try {
+      order = (await payload.findByID({
+        collection: 'orders',
+        id: orderId,
+        depth: 1,
+        overrideAccess: true, // token is the auth — no cookie required
+      })) as unknown as Record<string, unknown> | null
+    } catch {
+      return NextResponse.json({ error: 'Order not found.' }, { status: 404 })
+    }
+
+    if (!order) {
+      return NextResponse.json({ error: 'Order not found.' }, { status: 404 })
+    }
+
+    // ── Token validation ───────────────────────────────────────────────────
+    const storedToken = order.downloadToken as string | undefined | null
+    if (!storedToken || storedToken !== token) {
+      return NextResponse.json({ error: 'Invalid or expired download token.' }, { status: 401 })
+    }
+
+    // ── Status check ───────────────────────────────────────────────────────
+    // Ecommerce plugin sets `orderstatus` (or a similar status field). Accept paid orders.
+    const status = (order.orderstatus ?? order.status ?? order.paymentStatus) as string | undefined
+    const isPaid =
+      !status || // no status field = legacy paid order
+      status === 'paid' ||
+      status === 'completed' ||
+      status === 'complete' ||
+      status === 'fulfilled'
+
+    if (!isPaid) {
+      return NextResponse.json(
+        { error: 'Receipt is only available for paid orders.' },
+        { status: 403 },
+      )
+    }
+
+    // ── Resolve customer info ──────────────────────────────────────────────
+    let customerFirstName = ''
+    let customerLastName = ''
+    let customerEmail = ''
+    let shippingAddress: string | undefined
+
+    const customerRef = order.customer
+    if (customerRef && typeof customerRef === 'object') {
+      const u = customerRef as Record<string, unknown>
+      const fullName = (u.name as string | undefined) ?? ''
+      const parts = fullName.split(' ')
+      customerFirstName = parts[0] ?? ''
+      customerLastName = parts.slice(1).join(' ')
+      customerEmail = (u.email as string | undefined) ?? ''
+    } else if (order.customerEmail) {
+      customerEmail = order.customerEmail as string
+    }
+
+    // Try to split customerName if provided
+    if (!customerFirstName && order.customerName) {
+      const parts = (order.customerName as string).split(' ')
+      customerFirstName = parts[0] ?? ''
+      customerLastName = parts.slice(1).join(' ')
+    }
+
+    // Build shipping address string
+    const addr = order.shippingAddress as Record<string, string | null | undefined> | undefined
+    if (addr) {
+      const lines = [
+        [addr.firstName, addr.lastName].filter(Boolean).join(' '),
+        addr.company,
+        addr.addressLine1,
+        addr.addressLine2,
+        [addr.postalCode, addr.city].filter(Boolean).join(' '),
+        addr.country,
+      ].filter((l) => l && String(l).trim())
+      if (lines.length > 0) shippingAddress = lines.join('\n')
+    }
+
+    // ── Resolve line items ─────────────────────────────────────────────────
+    const rawItems = (order.items as Record<string, unknown>[] | undefined) ?? []
+    const receiptItems = rawItems.map((item) => {
+      const productRef = item.product
+      let title = 'Product'
+      let sku: string | undefined
+
+      if (productRef && typeof productRef === 'object') {
+        const p = productRef as Record<string, unknown>
+        title = (p.title as string | undefined) ?? title
+        sku = (p.sku as string | undefined) ?? undefined
+      }
+
+      const qty = typeof item.quantity === 'number' ? item.quantity : 1
+      // unit price: prefer variant price, then product price
+      const unitPrice =
+        typeof item.price === 'number'
+          ? item.price
+          : typeof item.unitPrice === 'number'
+            ? item.unitPrice
+            : 0
+
+      return { title, sku, qty, unitPrice }
+    })
+
+    // ── Monetary totals ────────────────────────────────────────────────────
+    const totalCents = typeof order.amount === 'number' ? order.amount : 0
+    const shippingCents =
+      typeof order.shippingAmount === 'number'
+        ? order.shippingAmount
+        : typeof order.shipping === 'number'
+          ? order.shipping
+          : 0
+    const subtotalCents = totalCents - shippingCents
+
+    // ── Generate PDF ───────────────────────────────────────────────────────
+    const issueDate = order.updatedAt ? new Date(order.updatedAt as string) : new Date()
+    const orderNumber = String(order.id).slice(-8).toUpperCase()
+
+    const pdfBuffer = generateOrderReceiptPDF({
+      orderId: String(order.id),
+      orderNumber,
+      items: receiptItems,
+      subtotalCents: Math.max(subtotalCents, 0),
+      shippingCents: Math.max(shippingCents, 0),
+      totalCents,
+      shippingAddress,
+      customerFirstName,
+      customerLastName,
+      customerEmail,
+      issueDate,
+      locale: 'de',
+    })
+
+    // ── Stream PDF ─────────────────────────────────────────────────────────
+    const filename = `fermentfreude-bestellung-${orderNumber}.pdf`
+
+    return new NextResponse(pdfBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': String(pdfBuffer.length),
+        'Cache-Control': 'private, no-store',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    })
+  } catch (error) {
+    console.error('[order-receipt] Unexpected error:', error)
+    return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 })
+  }
+}

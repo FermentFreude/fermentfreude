@@ -179,6 +179,16 @@ export const plugins: Plugin[] = [
               position: 'sidebar',
             },
           },
+          {
+            name: 'downloadToken',
+            type: 'text',
+            label: 'Download Token',
+            admin: {
+              description:
+                'UUID token for secure receipt download via /api/orders/[id]/receipt?token=... Set automatically when order confirmation email is sent.',
+              position: 'sidebar',
+            },
+          },
         ],
         hooks: {
           ...defaultCollection?.hooks,

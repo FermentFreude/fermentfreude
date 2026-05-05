@@ -333,6 +333,26 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
     const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
 
+    // ─── Generate secure download token for receipt ───────────────────────
+    const { randomUUID } = await import('crypto')
+    const downloadToken = randomUUID()
+
+    // Save token to order (fire-and-forget with error logging — don't block email)
+    try {
+      await req.payload.update({
+        collection: 'orders',
+        id: doc.id,
+        data: { downloadToken } as Record<string, unknown>,
+        overrideAccess: true,
+      })
+    } catch (tokenErr) {
+      req.payload.logger.warn(
+        `[Brevo] Could not save downloadToken for order ${doc.id}: ${tokenErr instanceof Error ? tokenErr.message : String(tokenErr)}`,
+      )
+    }
+
+    const RECEIPT_URL = `${siteUrl}/api/orders/${doc.id}/receipt?token=${downloadToken}`
+
     const emailParams: Record<
       string,
       string | number | Array<Record<string, string | number>>
@@ -353,6 +373,7 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       ORDER_DATE: new Date().toLocaleDateString('de-DE'),
       ORDER_URL: `${siteUrl}/account/orders`,
       SHOP_URL: `${siteUrl}/workshops`,
+      RECEIPT_URL,
       PRIVACY_URL: `${siteUrl}/datenschutz`,
       AGB_URL: `${siteUrl}/agb`,
     }

@@ -14,6 +14,7 @@ import {
   Truck,
 } from 'lucide-react'
 import Link from 'next/link'
+import { headers as getHeaders } from 'next/headers.js'
 import { getPayload } from 'payload'
 
 export const metadata = {
@@ -36,6 +37,12 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
   const locale = await getLocale()
   const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
+  // Detect authenticated user — guests get different CTAs (no /account/* links)
+  const reqHeaders = await getHeaders()
+  const payload = await getPayload({ config: configPromise })
+  const { user } = await payload.auth({ headers: reqHeaders })
+  const isLoggedIn = !!user
+
   // Fetch order data to check if it's a pickup order
   let isPickupOrder = false
   let pickupInfo: { date?: string; time?: string } = {}
@@ -45,7 +52,6 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
 
   if (orderId && type === 'order') {
     try {
-      const payload = await getPayload({ config: configPromise })
       const order = await payload.findByID({
         collection: 'orders',
         id: orderId,
@@ -371,14 +377,32 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           </div>
         </Card>
 
+        {/* Receipt note */}
+        <Card className="p-4 border border-ff-border-light shadow-sm rounded-[--radius-lg] bg-ff-cream">
+          <p className="text-body-sm text-ff-text-muted text-center">
+            {locale === 'de'
+              ? 'Deine Rechnung wurde per E-Mail gesendet.'
+              : 'Your receipt has been sent to your email.'}
+          </p>
+        </Card>
+
         {/* Action Buttons — Workshop */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <Link
-            href={orderId ? `/account/orders/${orderId}` : '/account/orders'}
-            className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
-          >
-            {t.viewBookingDetails}
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              href={orderId ? `/account/orders/${orderId}` : '/account/orders'}
+              className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+            >
+              {t.viewBookingDetails}
+            </Link>
+          ) : (
+            <Link
+              href="/workshops"
+              className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+            >
+              {t.browseMoreWorkshops}
+            </Link>
+          )}
           <Link
             href="/workshops"
             className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
@@ -490,14 +514,32 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           </div>
         </Card>
 
+        {/* Receipt note */}
+        <Card className="p-4 border border-ff-border-light shadow-sm rounded-[--radius-lg] bg-ff-cream">
+          <p className="text-body-sm text-ff-text-muted text-center">
+            {locale === 'de'
+              ? 'Deine Rechnung wurde per E-Mail gesendet.'
+              : 'Your receipt has been sent to your email.'}
+          </p>
+        </Card>
+
         {/* Action Buttons — Course */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <Link
-            href="/account/learning"
-            className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
-          >
-            {t.goToLearning}
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              href="/account/learning"
+              className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+            >
+              {t.goToLearning}
+            </Link>
+          ) : (
+            <Link
+              href="/courses"
+              className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+            >
+              {t.browseMoreCourses}
+            </Link>
+          )}
           <Link
             href="/courses"
             className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
@@ -629,14 +671,32 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         </div>
       </Card>
 
+      {/* Receipt note */}
+      <Card className="p-4 border border-ff-border-light shadow-sm rounded-[--radius-lg] bg-ff-cream">
+        <p className="text-body-sm text-ff-text-muted text-center">
+          {locale === 'de'
+            ? 'Deine Rechnung wurde per E-Mail gesendet.'
+            : 'Your receipt has been sent to your email.'}
+        </p>
+      </Card>
+
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Link
-          href="/account/orders"
-          className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
-        >
-          {t.viewMyOrders}
-        </Link>
+        {isLoggedIn ? (
+          <Link
+            href="/account/orders"
+            className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+          >
+            {t.viewMyOrders}
+          </Link>
+        ) : (
+          <Link
+            href="/shop"
+            className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+          >
+            {t.continueShopping}
+          </Link>
+        )}
         <Link
           href="/shop"
           className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"

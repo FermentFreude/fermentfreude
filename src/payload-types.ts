@@ -305,6 +305,10 @@ export interface Order {
    * Full name supplied by the buyer at checkout. Used to greet the buyer in confirmation emails. Optional for legacy orders.
    */
   customerName?: string | null;
+  /**
+   * UUID token for secure receipt download via /api/orders/[id]/receipt?token=... Set automatically when order confirmation email is sent.
+   */
+  downloadToken?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -6723,6 +6727,7 @@ export interface OrdersSelect<T extends boolean = true> {
   amount?: T;
   currency?: T;
   customerName?: T;
+  downloadToken?: T;
   updatedAt?: T;
   createdAt?: T;
 }

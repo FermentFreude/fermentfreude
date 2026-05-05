@@ -47,7 +47,7 @@ export async function GET(
         collection: 'workshop-bookings',
         id: bookingId,
         depth: 0,
-        overrideAccess: false,
+        overrideAccess: true, // token is the auth — no cookie required
       })
     } catch {
       return NextResponse.json({ error: 'Booking not found.' }, { status: 404 })
