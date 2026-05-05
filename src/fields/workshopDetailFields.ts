@@ -442,7 +442,6 @@ export const workshopDetailFields: Field[] = [
     admin: {
       initCollapsed: true,
       description: 'Horizontal timeline with seasonal months and recipes.',
-      condition: (data) => data?.showSeasonalCalendar === true,
     },
     fields: [
       {

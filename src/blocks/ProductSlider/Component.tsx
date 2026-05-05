@@ -361,6 +361,7 @@ function ProductCard({ product }: { product: Product }) {
   const [cartHovered, setCartHovered] = useState(false)
   const { addItem } = useCart()
   const { locale } = useLocale()
+  const isDe = locale === 'de'
   const image = getProductImage(product)
   const price = getProductPrice(product)
   const variantLabel = getVariantLabel(product)
@@ -375,7 +376,7 @@ function ProductCard({ product }: { product: Product }) {
       if (isOutOfStock) return
 
       addItem({ product: product.id }).then(() => {
-        toast.success('Item added to cart.')
+        toast.success(isDe ? 'Zum Warenkorb hinzugefügt.' : 'Item added to cart.')
         gtmAddToCart({
           item_id: String(product.id),
           item_name: product.title ?? '',
@@ -385,7 +386,7 @@ function ProductCard({ product }: { product: Product }) {
         })
       })
     },
-    [addItem, isOutOfStock, product, price],
+    [addItem, isDe, isOutOfStock, product, price],
   )
 
   // Format price: value is in cents, convert to euros
