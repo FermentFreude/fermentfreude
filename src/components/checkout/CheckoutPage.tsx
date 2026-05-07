@@ -1034,7 +1034,10 @@ export const CheckoutPage: React.FC = () => {
           </section>
         )}
 
-        {/* Sprint 3: per-seat gift allocation (one block per workshop in cart) */}
+        {/* Sprint 3: per-seat gift / companion allocation.
+            Hidden entirely when every workshop is a single solo seat — solo bookings
+            should be a normal checkout. Only shown when the buyer has 2+ seats on at
+            least one workshop in the cart. */}
         {!paymentData &&
           (() => {
             const workshopItems = (cart?.items ?? []).filter((item) => {
@@ -1045,6 +1048,10 @@ export const CheckoutPage: React.FC = () => {
               return Boolean(product?.slug?.startsWith('workshop-'))
             })
             if (workshopItems.length === 0) return null
+            // Only show the allocation section when there is at least one workshop
+            // with more than one seat. A single-seat solo booking needs no extra UI.
+            const needsAllocation = workshopItems.some((item) => (item.quantity ?? 1) > 1)
+            if (!needsAllocation) return null
 
             return (
               <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
