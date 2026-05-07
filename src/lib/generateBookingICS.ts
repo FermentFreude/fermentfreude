@@ -17,9 +17,16 @@ export type BookingICSInput = {
   bookingId: string
   /** Workshop title displayed as the event SUMMARY. */
   title: string
-  /** YYYY-MM-DD (ISO date). */
+  /**
+   * Date in ISO `YYYY-MM-DD` format (Vienna local calendar date).
+   * Other formats fall back to `new Date(input.date)` parsing — pass ISO
+   * for reliable results.
+   */
   date: string
-  /** Free-form time string, e.g. "18:00–21:00" or "18:00". */
+  /**
+   * Free-form Vienna-local time string, e.g. "18:00 – 21:00" or "18:00".
+   * The numeric tokens are emitted verbatim with `TZID=Europe/Vienna`.
+   */
   time: string
   /** Optional venue/address used as LOCATION. */
   location?: string
@@ -40,12 +47,23 @@ function escapeText(value: string): string {
     .replace(/\r\n|\n|\r/g, '\\n')
 }
 
-/** Format a JS Date to a floating local-time iCal value (YYYYMMDDTHHMMSS). */
-function formatLocal(date: Date): string {
+/**
+ * Format literal Y/M/D/H/M/S parts to a local-time iCal value (YYYYMMDDTHHMMSS).
+ * The values are emitted verbatim — no Date object is constructed, so this is
+ * safe to use with TZID and is independent of the server's local timezone.
+ */
+function formatParts(parts: {
+  year: number
+  month: number // 1-12
+  day: number
+  hour: number
+  minute: number
+  second: number
+}): string {
   const pad = (n: number) => String(n).padStart(2, '0')
   return (
-    `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}` +
-    `T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`
+    `${parts.year}${pad(parts.month)}${pad(parts.day)}` +
+    `T${pad(parts.hour)}${pad(parts.minute)}${pad(parts.second)}`
   )
 }
 
@@ -134,23 +152,77 @@ export function generateBookingICS(input: BookingICSInput): string {
   const range = parseTimeRange(input.time)
   const startH = range?.startH ?? 18
   const startM = range?.startM ?? 0
-  const start = new Date(year, month, day, startH, startM, 0)
 
-  let end: Date
+  let endH: number
+  let endM: number
+  let endDay = day
+  let endMonth = month // 0-based
+  let endYear = year
   if (range?.endH !== undefined) {
-    end = new Date(year, month, day, range.endH, range.endM ?? 0, 0)
+    endH = range.endH
+    endM = range.endM ?? 0
     // If end appears to wrap past midnight (e.g. 18:00-01:00), bump to next day.
-    if (end.getTime() <= start.getTime()) {
-      end = new Date(end.getTime() + 24 * 60 * 60 * 1000)
+    if (endH * 60 + endM <= startH * 60 + startM) {
+      const next = new Date(Date.UTC(year, month, day + 1))
+      endYear = next.getUTCFullYear()
+      endMonth = next.getUTCMonth()
+      endDay = next.getUTCDate()
     }
   } else {
     // Default workshop duration: 3 hours.
-    end = new Date(start.getTime() + 3 * 60 * 60 * 1000)
+    endH = (startH + 3) % 24
+    endM = startM
+    if (startH + 3 >= 24) {
+      const next = new Date(Date.UTC(year, month, day + 1))
+      endYear = next.getUTCFullYear()
+      endMonth = next.getUTCMonth()
+      endDay = next.getUTCDate()
+    }
   }
+
+  const startStr = formatParts({
+    year,
+    month: month + 1,
+    day,
+    hour: startH,
+    minute: startM,
+    second: 0,
+  })
+  const endStr = formatParts({
+    year: endYear,
+    month: endMonth + 1,
+    day: endDay,
+    hour: endH,
+    minute: endM,
+    second: 0,
+  })
 
   const descriptionParts: string[] = []
   if (input.description) descriptionParts.push(input.description)
   if (input.url) descriptionParts.push(input.url)
+
+  // Minimal VTIMEZONE block for Europe/Vienna covering CET (UTC+1) / CEST (UTC+2)
+  // DST transitions per EU rules. Required by RFC 5545 §3.6.5 when DTSTART uses
+  // a TZID. Apple Calendar, Google Calendar, Outlook all honour this.
+  const VTIMEZONE_VIENNA = [
+    'BEGIN:VTIMEZONE',
+    'TZID:Europe/Vienna',
+    'BEGIN:DAYLIGHT',
+    'TZOFFSETFROM:+0100',
+    'TZOFFSETTO:+0200',
+    'TZNAME:CEST',
+    'DTSTART:19700329T020000',
+    'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
+    'END:DAYLIGHT',
+    'BEGIN:STANDARD',
+    'TZOFFSETFROM:+0200',
+    'TZOFFSETTO:+0100',
+    'TZNAME:CET',
+    'DTSTART:19701025T030000',
+    'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+    'END:STANDARD',
+    'END:VTIMEZONE',
+  ]
 
   const lines: string[] = [
     'BEGIN:VCALENDAR',
@@ -158,11 +230,12 @@ export function generateBookingICS(input: BookingICSInput): string {
     `PRODID:${PRODID}`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
+    ...VTIMEZONE_VIENNA,
     'BEGIN:VEVENT',
     `UID:${escapeText(input.bookingId)}@fermentfreude.at`,
     `DTSTAMP:${formatUTC(new Date())}`,
-    `DTSTART:${formatLocal(start)}`,
-    `DTEND:${formatLocal(end)}`,
+    `DTSTART;TZID=Europe/Vienna:${startStr}`,
+    `DTEND;TZID=Europe/Vienna:${endStr}`,
     `SUMMARY:${escapeText(input.title)}`,
   ]
   if (input.location) lines.push(`LOCATION:${escapeText(input.location)}`)

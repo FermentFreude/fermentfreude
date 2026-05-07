@@ -135,7 +135,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
 
     // ── Strategy 2: match by workshopSlug + guestCount + email ──
 
-    if (customerEmail) {
+    if (!booking && customerEmail) {
       const byEmail = await payload.find({
         collection: 'workshop-bookings',
         where: {
@@ -229,8 +229,13 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     // Send workshop booking confirmation email now that customer info is available
     const bookingEmail = (updateData.email as string) || booking.email
     if (bookingEmail) {
-      // Resolve location from the appointment (best effort) — include full address
+      // Resolve location AND the ISO date / Vienna time range from the
+      // appointment in a single fetch. We need the ISO date for the .ics
+      // attachment because `booking.date` is a German display string
+      // (e.g. "4. Mai 2026") that the iCal builder can't parse.
       let workshopLocation = ''
+      let icsDate = '' // YYYY-MM-DD in Europe/Vienna
+      let icsTime = String(booking.time ?? '') // HH:MM[ – HH:MM] in Europe/Vienna
       if (booking.appointmentId) {
         try {
           const appointment = await payload.findByID({
@@ -239,7 +244,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             depth: 1,
             overrideAccess: true,
           })
-          if (appointment && (appointment as { location?: unknown }).location) {
+          if (appointment) {
             const loc = (appointment as { location?: unknown }).location
             if (typeof loc === 'object' && loc !== null) {
               const l = loc as { name?: string; address?: string }
@@ -247,9 +252,42 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             } else if (typeof loc === 'string') {
               workshopLocation = loc
             }
+
+            const dateTimeRaw = (appointment as { dateTime?: unknown }).dateTime
+            if (typeof dateTimeRaw === 'string' || dateTimeRaw instanceof Date) {
+              const dt = new Date(dateTimeRaw as string | Date)
+              if (!Number.isNaN(dt.getTime())) {
+                // Build YYYY-MM-DD in Europe/Vienna using Intl parts.
+                const dateParts = new Intl.DateTimeFormat('en-CA', {
+                  timeZone: 'Europe/Vienna',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                }).formatToParts(dt)
+                const y = dateParts.find((p) => p.type === 'year')?.value
+                const m = dateParts.find((p) => p.type === 'month')?.value
+                const d = dateParts.find((p) => p.type === 'day')?.value
+                if (y && m && d) icsDate = `${y}-${m}-${d}`
+
+                // Build "HH:MM – HH:MM" (Vienna) — workshop duration = 3 hours
+                // to match the rest of the system (see getAllWorkshopAppointments
+                // and get-workshop-appointments).
+                const timeOpts: Intl.DateTimeFormatOptions = {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZone: 'Europe/Vienna',
+                  hour12: false,
+                }
+                const startStr = dt.toLocaleTimeString('de-DE', timeOpts)
+                const endStr = new Date(
+                  dt.getTime() + 3 * 60 * 60 * 1000,
+                ).toLocaleTimeString('de-DE', timeOpts)
+                icsTime = `${startStr} – ${endStr}`
+              }
+            }
           }
         } catch {
-          // ignore — location is best-effort
+          // ignore — location/ICS date are best-effort
         }
       }
 
@@ -286,8 +324,8 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         const ics = generateBookingICS({
           bookingId: String(booking.id),
           title: String(booking.workshopTitle ?? 'Workshop'),
-          date: String(booking.date ?? ''),
-          time: String(booking.time ?? ''),
+          date: icsDate || String(booking.date ?? ''),
+          time: icsTime,
           location: workshopLocation || undefined,
           url: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/account/orders`,
         })
@@ -341,9 +379,13 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             WORKSHOP_LOCATION: workshopLocation,
             GUEST_COUNT: String(booking.guestCount ?? 1),
             TOTAL_PRICE: formattedPrice,
-            FIRST_NAME: String(
-              (updateData.firstName as string) || booking.firstName || bookingEmail,
-            ),
+            FIRST_NAME: (() => {
+              const fromUpdate =
+                typeof updateData.firstName === 'string' ? updateData.firstName.trim() : ''
+              const fromBooking =
+                typeof booking.firstName === 'string' ? booking.firstName.trim() : ''
+              return fromUpdate || fromBooking || 'Gast'
+            })(),
             BOOKING_ID: String(booking.id),
             BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
             SEATS: seatsArray,
