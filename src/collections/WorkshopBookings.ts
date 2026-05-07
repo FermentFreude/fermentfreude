@@ -137,6 +137,62 @@ export const WorkshopBookings: CollectionConfig = {
         readOnly: true,
       },
     },
+    {
+      name: 'seats',
+      type: 'array',
+      label: 'Per-Seat Recipient Details',
+      admin: {
+        description:
+          'Optional per-seat info collected at checkout. If a seat is marked as a gift and has a recipient email, the gift notification email (without price) is sent to that address. Otherwise the booking confirmation goes only to the payer.',
+      },
+      fields: [
+        {
+          name: 'isGift',
+          type: 'checkbox',
+          defaultValue: false,
+          label: 'Is a gift',
+          admin: {
+            description:
+              'When true, the recipient gets the gift notification email instead of the payer receiving an extra confirmation.',
+          },
+        },
+        {
+          name: 'recipientName',
+          type: 'text',
+          label: 'Recipient Name',
+          admin: {
+            description: 'Name shown on the gift email and on the workshop attendee list.',
+          },
+        },
+        {
+          name: 'recipientEmail',
+          type: 'email',
+          label: 'Recipient Email',
+          admin: {
+            description:
+              'If supplied with isGift, recipient receives the gift notification + .ics. Otherwise ignored.',
+          },
+        },
+        {
+          name: 'giftNote',
+          type: 'textarea',
+          label: 'Personal Gift Note',
+          maxLength: 500,
+          admin: {
+            description: 'Optional personal note from the buyer (max 500 chars).',
+          },
+        },
+        {
+          name: 'giftEmailSentAt',
+          type: 'date',
+          label: 'Gift Email Sent At',
+          admin: {
+            readOnly: true,
+            description: 'Set after the gift notification has been dispatched.',
+          },
+        },
+      ],
+    },
   ],
   timestamps: true,
 }

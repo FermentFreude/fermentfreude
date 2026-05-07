@@ -283,29 +283,30 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         }
       }
 
+      // Build .ics calendar attachment so recipients can add the workshop
+      // to their calendar app with one tap. Hoisted out of the try below so
+      // the per-seat gift loop further down can reuse the same attachment.
+      let icsAttachment: { name: string; content: string } | null = null
       try {
-        // Build .ics calendar attachment so recipients can add the workshop
-        // to their calendar app with one tap.
-        let icsAttachment: { name: string; content: string } | null = null
-        try {
-          const ics = generateBookingICS({
-            bookingId: String(booking.id),
-            title: String(booking.workshopTitle ?? 'Workshop'),
-            date: String(booking.date ?? ''),
-            time: String(booking.time ?? ''),
-            location: workshopLocation || undefined,
-            url: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/account/orders`,
-          })
-          icsAttachment = {
-            name: 'fermentfreude-workshop.ics',
-            content: Buffer.from(ics, 'utf-8').toString('base64'),
-          }
-        } catch (icsError) {
-          payload.logger.warn(
-            `[confirmWorkshopBookings] Failed to build .ics for booking ${booking.id}: ${icsError instanceof Error ? icsError.message : String(icsError)}`,
-          )
+        const ics = generateBookingICS({
+          bookingId: String(booking.id),
+          title: String(booking.workshopTitle ?? 'Workshop'),
+          date: String(booking.date ?? ''),
+          time: String(booking.time ?? ''),
+          location: workshopLocation || undefined,
+          url: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/account/orders`,
+        })
+        icsAttachment = {
+          name: 'fermentfreude-workshop.ics',
+          content: Buffer.from(ics, 'utf-8').toString('base64'),
         }
+      } catch (icsError) {
+        payload.logger.warn(
+          `[confirmWorkshopBookings] Failed to build .ics for booking ${booking.id}: ${icsError instanceof Error ? icsError.message : String(icsError)}`,
+        )
+      }
 
+      try {
         await sendTemplateEmail({
           to: [
             {
@@ -341,6 +342,90 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         payload.logger.error(
           `[confirmWorkshopBookings] Failed to send booking email for ${booking.id}: ${error instanceof Error ? error.message : String(error)}`,
         )
+      }
+
+      // ── Sprint 3 — per-seat gift notifications ──
+      // For every seat marked isGift with a recipient email, send the gift
+      // template (no price). Skips silently if the gift template ID hasn't
+      // been configured via BREVO_TEMPLATE_WORKSHOP_GIFT_NOTIFICATION yet.
+      const seats = Array.isArray((booking as { seats?: unknown }).seats)
+        ? ((booking as { seats: Array<{
+            id?: string
+            isGift?: boolean | null
+            recipientName?: string | null
+            recipientEmail?: string | null
+            giftNote?: string | null
+            giftEmailSentAt?: string | null
+          }> }).seats)
+        : []
+
+      const giftTemplateId = BREVO_TEMPLATES.WORKSHOP_GIFT_NOTIFICATION
+
+      for (const seat of seats) {
+        if (!seat?.isGift) continue
+        if (!seat.recipientEmail) continue
+        if (seat.giftEmailSentAt) continue // already sent — idempotent
+
+        if (!giftTemplateId) {
+          payload.logger.warn(
+            `[confirmWorkshopBookings] Skipping gift email for seat ${seat.id ?? '?'} on booking ${booking.id} — BREVO_TEMPLATE_WORKSHOP_GIFT_NOTIFICATION not set.`,
+          )
+          continue
+        }
+
+        try {
+          await sendTemplateEmail({
+            to: [
+              {
+                email: seat.recipientEmail,
+                name: seat.recipientName ?? undefined,
+              },
+            ],
+            templateId: giftTemplateId,
+            params: {
+              WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
+              WORKSHOP_DATE: String(booking.date ?? ''),
+              WORKSHOP_TIME: String(booking.time ?? ''),
+              WORKSHOP_LOCATION: workshopLocation,
+              RECIPIENT_NAME: String(seat.recipientName ?? ''),
+              SENDER_NAME: String(
+                (updateData.firstName as string) || booking.firstName || '',
+              ),
+              GIFT_NOTE: String(seat.giftNote ?? ''),
+              WHAT_TO_BRING: whatToBring,
+              PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
+              AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,
+            },
+            attachments: icsAttachment ? [icsAttachment] : undefined,
+          })
+
+          // Mark sent so we don't double-send on any later hook re-run.
+          if (seat.id) {
+            try {
+              const updatedSeats = seats.map((s) =>
+                s.id === seat.id ? { ...s, giftEmailSentAt: new Date().toISOString() } : s,
+              )
+              await payload.update({
+                collection: 'workshop-bookings',
+                id: booking.id,
+                data: { seats: updatedSeats },
+                overrideAccess: true,
+              })
+            } catch (markErr) {
+              payload.logger.warn(
+                `[confirmWorkshopBookings] Sent gift email but failed to mark seat ${seat.id}: ${markErr instanceof Error ? markErr.message : String(markErr)}`,
+              )
+            }
+          }
+
+          payload.logger.info(
+            `[confirmWorkshopBookings] Sent gift notification to ${seat.recipientEmail} for booking ${booking.id} seat ${seat.id ?? '?'}`,
+          )
+        } catch (error) {
+          payload.logger.error(
+            `[confirmWorkshopBookings] Failed to send gift email for booking ${booking.id} seat ${seat.id ?? '?'}: ${error instanceof Error ? error.message : String(error)}`,
+          )
+        }
       }
     }
   }

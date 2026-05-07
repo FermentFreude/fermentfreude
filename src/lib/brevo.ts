@@ -100,6 +100,7 @@ export const BREVO_TEMPLATES = {
 
   // Workshop (5) — booking confirmation V2; reminders & follow-ups still v1 (disabled in code)
   WORKSHOP_BOOKING_CONFIRMATION: 65, // V2 (was 31)
+  WORKSHOP_GIFT_NOTIFICATION: Number(process.env.BREVO_TEMPLATE_WORKSHOP_GIFT_NOTIFICATION) || 0, // Sprint 3 — set ID via env once founders create the template in Brevo (no price; sent to recipient).
   WORKSHOP_7DAY_REMINDER: 32,
   WORKSHOP_1DAY_REMINDER: 33,
   POST_WORKSHOP_FOLLOWUP: 34,

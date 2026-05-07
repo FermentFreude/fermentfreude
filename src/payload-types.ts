@@ -4281,6 +4281,34 @@ export interface WorkshopBooking {
    * Secure token for guest receipt download link. Auto-generated on confirmation.
    */
   downloadToken?: string | null;
+  /**
+   * Optional per-seat info collected at checkout. If a seat is marked as a gift and has a recipient email, the gift notification email (without price) is sent to that address. Otherwise the booking confirmation goes only to the payer.
+   */
+  seats?:
+    | {
+        /**
+         * When true, the recipient gets the gift notification email instead of the payer receiving an extra confirmation.
+         */
+        isGift?: boolean | null;
+        /**
+         * Name shown on the gift email and on the workshop attendee list.
+         */
+        recipientName?: string | null;
+        /**
+         * If supplied with isGift, recipient receives the gift notification + .ics. Otherwise ignored.
+         */
+        recipientEmail?: string | null;
+        /**
+         * Optional personal note from the buyer (max 500 chars).
+         */
+        giftNote?: string | null;
+        /**
+         * Set after the gift notification has been dispatched.
+         */
+        giftEmailSentAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4313,13 +4341,21 @@ export interface Voucher {
    */
   purchaserEmail: string;
   /**
-   * Email of the recipient (receives voucher code if email delivery)
+   * Name of the recipient (used on the gift card and in the email greeting).
+   */
+  recipientName?: string | null;
+  /**
+   * Email of the recipient (used when deliveryMethod = email-recipient).
    */
   recipientEmail?: string | null;
   /**
+   * Optional personal note from the buyer printed on the gift card (max 500 chars).
+   */
+  personalNote?: string | null;
+  /**
    * How the voucher is delivered to the recipient
    */
-  deliveryMethod: 'email' | 'pickup';
+  deliveryMethod: 'email-recipient' | 'email-self' | 'pdf' | 'email' | 'pickup';
   /**
    * Stripe Checkout Session ID for payment verification
    */
@@ -6261,6 +6297,16 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
   phone?: T;
   notes?: T;
   downloadToken?: T;
+  seats?:
+    | T
+    | {
+        isGift?: T;
+        recipientName?: T;
+        recipientEmail?: T;
+        giftNote?: T;
+        giftEmailSentAt?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -6274,7 +6320,9 @@ export interface VouchersSelect<T extends boolean = true> {
   value?: T;
   purchaserName?: T;
   purchaserEmail?: T;
+  recipientName?: T;
   recipientEmail?: T;
+  personalNote?: T;
   deliveryMethod?: T;
   stripeSessionId?: T;
   redeemed?: T;

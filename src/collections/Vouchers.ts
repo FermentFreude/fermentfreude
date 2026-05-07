@@ -84,10 +84,26 @@ export const Vouchers: CollectionConfig = {
 
     /* ── Recipient Details ── */
     {
+      name: 'recipientName',
+      type: 'text',
+      admin: {
+        description: 'Name of the recipient (used on the gift card and in the email greeting).',
+      },
+    },
+    {
       name: 'recipientEmail',
       type: 'email',
       admin: {
-        description: 'Email of the recipient (receives voucher code if email delivery)',
+        description:
+          'Email of the recipient (used when deliveryMethod = email-recipient).',
+      },
+    },
+    {
+      name: 'personalNote',
+      type: 'textarea',
+      maxLength: 500,
+      admin: {
+        description: 'Optional personal note from the buyer printed on the gift card (max 500 chars).',
       },
     },
 
@@ -96,10 +112,15 @@ export const Vouchers: CollectionConfig = {
       name: 'deliveryMethod',
       type: 'select',
       required: true,
-      defaultValue: 'email',
+      defaultValue: 'email-self',
       options: [
-        { label: 'E-Mail', value: 'email' },
-        { label: 'Abholung / Pickup', value: 'pickup' },
+        // Sprint 3 — Rare-Beauty-style three options.
+        { label: 'Direkt an Empfänger:in / Direct to recipient', value: 'email-recipient' },
+        { label: 'An mich (zum Weiterleiten) / To me (forward later)', value: 'email-self' },
+        { label: 'PDF zum Ausdrucken / PDF to print', value: 'pdf' },
+        // Legacy values kept for backwards compatibility with existing vouchers.
+        { label: 'E-Mail (legacy)', value: 'email' },
+        { label: 'Abholung / Pickup (legacy)', value: 'pickup' },
       ],
       admin: { description: 'How the voucher is delivered to the recipient' },
     },
