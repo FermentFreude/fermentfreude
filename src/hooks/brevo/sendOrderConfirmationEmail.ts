@@ -350,9 +350,12 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       CUSTOMER_NAME: recipientName || recipientEmail,
       FIRST_NAME: recipientName?.split(' ')[0] || recipientName || recipientEmail,
       ORDER_DATE: new Date().toLocaleDateString('de-DE'),
+      // ORDER_URL is only shown for registered users (template uses IS_REGISTERED_USER guard)
       ORDER_URL: `${siteUrl}/account/orders`,
       SHOP_URL: `${siteUrl}/workshops`,
       RECEIPT_URL,
+      // 1 = registered user, '' = guest — template uses this to conditionally show "View order" button
+      IS_REGISTERED_USER: customerId ? '1' : '',
       PRIVACY_URL: `${siteUrl}/datenschutz`,
       AGB_URL: `${siteUrl}/agb`,
     }

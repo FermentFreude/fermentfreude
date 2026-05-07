@@ -265,14 +265,99 @@
             </td>
           </tr>
 
-          <!-- BOOKING REF + CTA -->
+          <!-- TICKETS — one block per booked seat -->
+          {% for seat in params.SEATS %}
+          <tr>
+            <td class="mobile-pad" style="padding: 8px 40px">
+              <table
+                cellpadding="0"
+                cellspacing="0"
+                role="presentation"
+                width="100%"
+                style="
+                  border: 2px dashed #e5b765;
+                  border-radius: 8px;
+                  background-color: #fffdf7;
+                "
+              >
+                <tr>
+                  <td style="padding: 20px 24px">
+                    <!-- Ticket header row -->
+                    <table cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tr>
+                        <td style="vertical-align: middle">
+                          <p
+                            style="
+                              font-size: 11px;
+                              font-weight: 700;
+                              color: #e5b765;
+                              text-transform: uppercase;
+                              letter-spacing: 0.08em;
+                              margin: 0 0 4px;
+                            "
+                          >
+                            🎫 Ticket
+                          </p>
+                          <p
+                            style="font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 0"
+                          >
+                            Sitz {{ seat.NUMBER }} / {{ params.GUEST_COUNT }}
+                          </p>
+                        </td>
+                        <td style="text-align: right; vertical-align: middle">
+                          <p style="font-size: 12px; color: #595959; margin: 0">
+                            Buchungsnr.<br />
+                            <strong style="color: #1a1a1a; font-size: 13px"
+                              >{{ params.BOOKING_REF }}</strong
+                            >
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div
+                      style="border-top: 1px dashed #e8e4d9; margin: 14px 0"
+                    ></div>
+
+                    <!-- Workshop info -->
+                    <p
+                      style="font-size: 14px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px"
+                    >
+                      {{ params.WORKSHOP_TITLE }}
+                    </p>
+                    <p style="font-size: 13px; color: #595959; margin: 0 0 2px">
+                      📅 {{ params.WORKSHOP_DATE }}
+                    </p>
+                    <p style="font-size: 13px; color: #595959; margin: 0 0 2px">
+                      🕐 {{ params.WORKSHOP_TIME }}
+                    </p>
+                    {% if params.WORKSHOP_LOCATION %}
+                    <p style="font-size: 13px; color: #595959; margin: 0 0 2px">
+                      📍 {{ params.WORKSHOP_LOCATION }}
+                    </p>
+                    {% endif %}
+
+                    {% if seat.NAME %}
+                    <div
+                      style="border-top: 1px dashed #e8e4d9; margin: 14px 0"
+                    ></div>
+                    <p style="font-size: 13px; color: #595959; margin: 0">
+                      Teilnehmer:
+                      <strong style="color: #1a1a1a">{{ seat.NAME }}</strong>
+                    </p>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          {% endfor %}
+
+          <!-- PRINT CTA -->
           <tr>
             <td style="padding: 24px 40px 40px; text-align: center">
-              <p style="color: #595959; font-size: 13px; margin: 0 0 20px">
-                Buchungsnummer: <strong style="color: #1a1a1a">{{ params.BOOKING_REF }}</strong>
-              </p>
               <a
-                href="{{ params.BOOKING_URL }}"
+                href="{{ params.TICKETS_URL }}"
                 style="
                   background-color: #e5b765;
                   color: #ffffff;
@@ -284,7 +369,7 @@
                   display: inline-block;
                 "
               >
-                Buchung ansehen
+                Tickets ansehen &amp; drucken
               </a>
             </td>
           </tr>

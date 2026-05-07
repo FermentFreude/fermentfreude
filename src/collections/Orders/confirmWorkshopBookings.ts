@@ -301,6 +301,30 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         )
       }
 
+      const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
+
+      // Build per-seat array for the email tickets loop.
+      // Each entry: NUMBER (1-based), NAME (attendee name if set, else empty string).
+      type BrevoSeat = { NUMBER: string; NAME: string }
+      const seatsArray: BrevoSeat[] = []
+      const bookingSeats = (booking.seats as { recipientName?: string }[] | undefined) ?? []
+      const totalSeats = typeof booking.guestCount === 'number' ? booking.guestCount : 1
+      for (let i = 0; i < totalSeats; i++) {
+        seatsArray.push({
+          NUMBER: String(i + 1),
+          NAME: bookingSeats[i]?.recipientName ?? '',
+        })
+      }
+
+      // Tickets page URL uses the ORDER's downloadToken (not the booking receipt token)
+      const orderDownloadToken =
+        typeof (doc as { downloadToken?: unknown }).downloadToken === 'string'
+          ? (doc as { downloadToken?: string }).downloadToken!
+          : ''
+      const ticketsUrl = orderDownloadToken
+        ? `${SERVER_URL}/orders/${doc.id}/tickets?token=${orderDownloadToken}`
+        : `${SERVER_URL}/account/orders`
+
       try {
         await sendTemplateEmail({
           to: [
@@ -322,11 +346,11 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             ),
             BOOKING_ID: String(booking.id),
             BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
-            BOOKING_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/account/orders`,
-            RECEIPT_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/api/bookings/${booking.id}/receipt?token=${downloadToken}`,
+            SEATS: seatsArray,
+            TICKETS_URL: ticketsUrl,
             WHAT_TO_BRING: whatToBring,
-            PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
-            AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,
+            PRIVACY_URL: `${SERVER_URL}/datenschutz`,
+            AGB_URL: `${SERVER_URL}/agb`,
           },
           attachments: icsAttachment ? [icsAttachment] : undefined,
         })

@@ -282,7 +282,8 @@
             </td>
           </tr>
 
-          <!-- CTA -->
+          <!-- CTA — only shown for registered users -->
+          {% if params.IS_REGISTERED_USER %}
           <tr>
             <td style="padding: 24px 40px 16px; text-align: center">
               <a
@@ -302,6 +303,7 @@
               </a>
             </td>
           </tr>
+          {% endif %}
 
           <!-- RECEIPT DOWNLOAD -->
           {% if params.RECEIPT_URL %}
