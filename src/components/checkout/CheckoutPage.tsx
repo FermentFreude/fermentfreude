@@ -1056,12 +1056,12 @@ export const CheckoutPage: React.FC = () => {
             return (
               <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
                 <h2 className="mb-2 font-display text-subheading font-bold text-ff-near-black">
-                  {isDe ? 'Sitzplätze & Geschenke' : 'Seats & gifts'}
+                  {isDe ? 'Deine Gäste' : 'Your guests'}
                 </h2>
                 <p className="mb-6 text-body-sm text-ff-gray-text-light">
                   {isDe
-                    ? 'Überprüfe die gebuchten Sitzplätze. Optional kannst du einzelne Sitze als Geschenk markieren — der/die Empfänger:in erhält dann eine eigene Bestätigung.'
-                    : 'Review the seats you booked. Optionally mark individual seats as a gift — the recipient will receive their own confirmation.'}
+                    ? 'Du buchst mehrere Sitze. Optional kannst du die Namen deiner Gäste eintragen — das hilft uns am Workshop-Tag bei der Begrüßung. Alle Bestätigungen, Tickets und Kalendereinträge erhältst nur du als Buchende:r.'
+                    : 'You are booking more than one seat. Optionally enter the names of your guests — it helps us welcome them on the workshop day. All confirmations, tickets and calendar invites are sent only to you as the buyer.'}
                 </p>
                 <div className="flex flex-col gap-8">
                   {workshopItems.map((item, idx) => {

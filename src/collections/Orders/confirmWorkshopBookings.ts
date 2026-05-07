@@ -338,91 +338,20 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         )
       }
 
-      // ── Sprint 3 — per-seat gift notifications ──
-      // For every seat marked isGift with a recipient email, send the gift
-      // template (no price). Skips silently if the gift template ID hasn't
-      // been configured via BREVO_TEMPLATE_WORKSHOP_GIFT_NOTIFICATION yet.
-      const seats = Array.isArray((booking as { seats?: unknown }).seats)
-        ? (
-            booking as {
-              seats: Array<{
-                id?: string
-                isGift?: boolean | null
-                recipientName?: string | null
-                recipientEmail?: string | null
-                giftNote?: string | null
-                giftEmailSentAt?: string | null
-              }>
-            }
-          ).seats
-        : []
-
-      const giftTemplateId = BREVO_TEMPLATES.WORKSHOP_GIFT_NOTIFICATION
-
-      for (const seat of seats) {
-        if (!seat?.isGift) continue
-        if (!seat.recipientEmail) continue
-        if (seat.giftEmailSentAt) continue // already sent — idempotent
-
-        if (!giftTemplateId) {
-          payload.logger.warn(
-            `[confirmWorkshopBookings] Skipping gift email for seat ${seat.id ?? '?'} on booking ${booking.id} — BREVO_TEMPLATE_WORKSHOP_GIFT_NOTIFICATION not set.`,
-          )
-          continue
-        }
-
-        try {
-          await sendTemplateEmail({
-            to: [
-              {
-                email: seat.recipientEmail,
-                name: seat.recipientName ?? undefined,
-              },
-            ],
-            templateId: giftTemplateId,
-            params: {
-              WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
-              WORKSHOP_DATE: String(booking.date ?? ''),
-              WORKSHOP_TIME: String(booking.time ?? ''),
-              WORKSHOP_LOCATION: workshopLocation,
-              RECIPIENT_NAME: String(seat.recipientName ?? ''),
-              SENDER_NAME: String((updateData.firstName as string) || booking.firstName || ''),
-              GIFT_NOTE: String(seat.giftNote ?? ''),
-              WHAT_TO_BRING: whatToBring,
-              PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
-              AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,
-            },
-            attachments: icsAttachment ? [icsAttachment] : undefined,
-          })
-
-          // Mark sent so we don't double-send on any later hook re-run.
-          if (seat.id) {
-            try {
-              const updatedSeats = seats.map((s) =>
-                s.id === seat.id ? { ...s, giftEmailSentAt: new Date().toISOString() } : s,
-              )
-              await payload.update({
-                collection: 'workshop-bookings',
-                id: booking.id,
-                data: { seats: updatedSeats },
-                overrideAccess: true,
-              })
-            } catch (markErr) {
-              payload.logger.warn(
-                `[confirmWorkshopBookings] Sent gift email but failed to mark seat ${seat.id}: ${markErr instanceof Error ? markErr.message : String(markErr)}`,
-              )
-            }
-          }
-
-          payload.logger.info(
-            `[confirmWorkshopBookings] Sent gift notification to ${seat.recipientEmail} for booking ${booking.id} seat ${seat.id ?? '?'}`,
-          )
-        } catch (error) {
-          payload.logger.error(
-            `[confirmWorkshopBookings] Failed to send gift email for booking ${booking.id} seat ${seat.id ?? '?'}: ${error instanceof Error ? error.message : String(error)}`,
-          )
-        }
-      }
+      // ── Per-seat guest emails — DISABLED (founders' decision, May 2026) ──
+      // The founders intentionally do NOT want any separate emails sent to
+      // guests/recipients. All workshop confirmations, .ics calendar files
+      // and invoices go to the buyer/payer only. The buyer forwards the
+      // information to their guests themselves. (Vouchers are the dedicated
+      // gift flow — recipients there only receive a confirmation when they
+      // personally redeem the voucher and book a workshop with their own
+      // email address.)
+      //
+      // We still persist optional guest names + notes per seat so the founders
+      // see the attendee list in the admin. The block below is kept as a
+      // commented-out reference in case this policy is revisited.
+      //
+      // for (const seat of seats) { … sendTemplateEmail to seat.recipientEmail … }
     }
   }
 
