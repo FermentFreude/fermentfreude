@@ -157,9 +157,10 @@
                     </h2>
 
                     <!-- ITEM ROW (repeatable via Brevo loop) -->
-                    <!-- {% for item in params.ITEMS %} -->
+                    {% for item in params.ITEMS %}
                     <table cellpadding="0" cellspacing="0" role="presentation" width="100%">
                       <tr>
+                        {% if item.IMAGE_URL %}
                         <td style="width: 60px; padding: 8px 12px 8px 0; vertical-align: top">
                           <img
                             src="{{ item.IMAGE_URL }}"
@@ -175,6 +176,7 @@
                             "
                           />
                         </td>
+                        {% endif %}
                         <td style="padding: 8px 0; vertical-align: top">
                           <p style="font-size: 14px; font-weight: 600; color: #1a1a1a; margin: 0">
                             {{ item.TITLE }}
@@ -202,7 +204,7 @@
                         </td>
                       </tr>
                     </table>
-                    <!-- {% endfor %} -->
+                    {% endfor %}
 
                     <!-- TOTALS -->
                     <table
@@ -282,7 +284,7 @@
 
           <!-- CTA -->
           <tr>
-            <td style="padding: 24px 40px 40px; text-align: center">
+            <td style="padding: 24px 40px 16px; text-align: center">
               <a
                 href="{{ params.ORDER_URL }}"
                 style="
@@ -300,6 +302,30 @@
               </a>
             </td>
           </tr>
+
+          <!-- RECEIPT DOWNLOAD -->
+          {% if params.RECEIPT_URL %}
+          <tr>
+            <td style="padding: 0 40px 40px; text-align: center">
+              <a
+                href="{{ params.RECEIPT_URL }}"
+                style="
+                  background-color: transparent;
+                  color: #595959;
+                  border: 1px solid #c8c4bc;
+                  border-radius: 40px;
+                  padding: 12px 32px;
+                  font-weight: 600;
+                  font-size: 14px;
+                  text-decoration: none;
+                  display: inline-block;
+                "
+              >
+                Rechnung herunterladen
+              </a>
+            </td>
+          </tr>
+          {% endif %}
 
           <!-- FOOTER -->
           <tr>

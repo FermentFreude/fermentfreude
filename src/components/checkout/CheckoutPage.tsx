@@ -587,7 +587,8 @@ export const CheckoutPage: React.FC = () => {
 
       const type = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
       const emailParam = email ? `&email=${encodeURIComponent(email)}` : ''
-      router.push(`/account/order-confirmation?orderId=${data.orderID}&type=${type}${emailParam}`)
+      const confirmationBase = user ? '/account' : '/checkout'
+      router.push(`${confirmationBase}/order-confirmation?orderId=${data.orderID}&type=${type}${emailParam}`)
     } catch (_err) {
       setError(t.connectionError)
       setProcessingPayment(false)

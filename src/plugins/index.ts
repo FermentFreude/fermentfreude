@@ -17,6 +17,7 @@ import { autoCompleteDigitalOrders } from '@/collections/Orders/autoCompleteDigi
 import { autoEnrollOnPurchase } from '@/collections/Orders/autoEnrollOnPurchase'
 import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBookings'
 import { copyCustomerNameFromTransaction } from '@/collections/Orders/copyCustomerNameFromTransaction'
+import { generateDownloadToken } from '@/collections/Orders/generateDownloadToken'
 import { decrementInventory } from '@/collections/Orders/decrementInventory'
 import { restoreWorkshopSpotsOnDelete } from '@/collections/Orders/restoreWorkshopSpotsOnDelete'
 import { setInvoiceIssuedAt } from '@/collections/Orders/setInvoiceIssuedAt'
@@ -208,6 +209,7 @@ export const plugins: Plugin[] = [
           beforeChange: [
             ...(defaultCollection?.hooks?.beforeChange ?? []),
             copyCustomerNameFromTransaction,
+            generateDownloadToken,
           ],
           afterChange: [
             ...(defaultCollection?.hooks?.afterChange ?? []),
