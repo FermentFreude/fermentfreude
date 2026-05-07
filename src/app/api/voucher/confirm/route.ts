@@ -131,8 +131,16 @@ export async function GET(request: NextRequest) {
         status: 'active',
         purchaserName: meta.purchaserName || undefined,
         purchaserEmail: meta.purchaserEmail,
+        recipientName: meta.recipientName || undefined,
         recipientEmail: meta.recipientEmail || undefined,
-        deliveryMethod: (meta.deliveryMethod as 'email' | 'pickup') || 'email',
+        personalNote: meta.personalNote || undefined,
+        deliveryMethod:
+          (meta.deliveryMethod as
+            | 'email-recipient'
+            | 'email-self'
+            | 'pdf'
+            | 'email'
+            | 'pickup') || 'email-self',
         stripeSessionId: idempotencyKey,
         redeemed: false,
       },

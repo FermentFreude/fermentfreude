@@ -49,8 +49,17 @@ const DEFAULTS = {
     'The perfect gift for foodies and the health-conscious.\nChoose an amount and receive your voucher.',
   voucherAmounts: [{ amount: '99€' }],
   deliveryOptions: [
-    { type: 'email', title: 'By email to print at home', icon: 'email' as const },
-    { type: 'pickup', title: 'Pick up from store', icon: 'pickup' as const },
+    {
+      type: 'email-recipient',
+      title: 'Send directly to recipient by email',
+      icon: 'email' as const,
+    },
+    {
+      type: 'email-self',
+      title: 'Send to me — I will forward it',
+      icon: 'email' as const,
+    },
+    { type: 'pdf', title: 'PDF to print at home', icon: 'pdf' as const },
   ],
   cardLabel: 'GIFT VOUCHER',
   valueLabel: 'Voucher value',

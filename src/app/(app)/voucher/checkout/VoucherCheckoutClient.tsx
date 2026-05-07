@@ -17,7 +17,12 @@ const CHECKOUT_DE = {
   delivery: 'Zustellung',
   deliveryEmail: 'Per E-Mail',
   deliveryPickup: 'Abholung',
+  deliveryEmailRecipient: 'Direkt an Empfänger:in',
+  deliveryEmailSelf: 'An mich (zum Weiterleiten)',
+  deliveryPdf: 'PDF zum Ausdrucken',
   to: 'An',
+  recipientLabel: 'Empfänger:in',
+  personalNoteLabel: 'Persönliche Notiz',
   payNow: 'Jetzt bezahlen',
   processing: 'Wird verarbeitet…',
   backToVoucher: 'Zurück zum Gutschein',
@@ -35,7 +40,12 @@ const CHECKOUT_EN = {
   delivery: 'Delivery',
   deliveryEmail: 'By Email',
   deliveryPickup: 'Pickup',
+  deliveryEmailRecipient: 'Direct to recipient',
+  deliveryEmailSelf: 'To me (forward later)',
+  deliveryPdf: 'PDF to print',
   to: 'To',
+  recipientLabel: 'Recipient',
+  personalNoteLabel: 'Personal note',
   payNow: 'Pay now',
   processing: 'Processing…',
   backToVoucher: 'Back to voucher',
@@ -48,9 +58,27 @@ const CHECKOUT_EN = {
 interface VoucherSession {
   clientSecret: string
   amount: number
-  deliveryMethod: 'email' | 'pickup'
+  deliveryMethod: 'email-recipient' | 'email-self' | 'pdf' | 'email' | 'pickup'
   purchaserEmail: string
+  recipientName?: string
   recipientEmail?: string
+  personalNote?: string
+}
+
+function deliveryLabel(method: VoucherSession['deliveryMethod'], t: typeof CHECKOUT_DE) {
+  switch (method) {
+    case 'email-recipient':
+      return t.deliveryEmailRecipient
+    case 'email-self':
+      return t.deliveryEmailSelf
+    case 'pdf':
+      return t.deliveryPdf
+    case 'pickup':
+      return t.deliveryPickup
+    case 'email':
+    default:
+      return t.deliveryEmail
+  }
 }
 
 // ─── Inner form (rendered inside <Elements>) ─────────────────────────────────
@@ -92,10 +120,11 @@ function CheckoutForm({ session, t }: { session: VoucherSession; t: typeof CHECK
     [stripe, elements, router, t.paymentError],
   )
 
+  const showsRecipient =
+    session.deliveryMethod === 'email-recipient' || session.deliveryMethod === 'email'
   const recipientDisplay =
-    session.deliveryMethod === 'email' && session.recipientEmail
-      ? session.recipientEmail
-      : session.purchaserEmail
+    showsRecipient && session.recipientEmail ? session.recipientEmail : session.purchaserEmail
+  const recipientNameDisplay = session.recipientName?.trim() || ''
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -112,11 +141,21 @@ function CheckoutForm({ session, t }: { session: VoucherSession; t: typeof CHECK
         </div>
         <div className="mt-2 flex flex-col gap-0.5">
           <span className="font-sans text-body-sm text-ff-gray-text">
-            {t.delivery}: {session.deliveryMethod === 'email' ? t.deliveryEmail : t.deliveryPickup}
+            {t.delivery}: {deliveryLabel(session.deliveryMethod, t)}
           </span>
-          {session.deliveryMethod === 'email' && (
+          {recipientNameDisplay && (
+            <span className="font-sans text-body-sm text-ff-gray-text">
+              {t.recipientLabel}: {recipientNameDisplay}
+            </span>
+          )}
+          {showsRecipient && (
             <span className="font-sans text-body-sm text-ff-gray-text">
               {t.to}: {recipientDisplay}
+            </span>
+          )}
+          {session.personalNote && (
+            <span className="font-sans text-body-sm text-ff-gray-text italic">
+              “{session.personalNote.length > 80 ? session.personalNote.slice(0, 77) + '…' : session.personalNote}”
             </span>
           )}
         </div>

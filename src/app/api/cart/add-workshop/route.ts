@@ -16,7 +16,36 @@ import { getPayload } from 'payload'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { appointmentId, workshopSlug, guestCount: rawGuestCount } = body
+    const { appointmentId, workshopSlug, guestCount: rawGuestCount, seats: rawSeats } = body
+
+    // ─── Sprint 3 — sanitize optional per-seat gift info ────────
+    type SeatInput = {
+      isGift?: boolean
+      recipientName?: string
+      recipientEmail?: string
+      giftNote?: string
+    }
+    const sanitizedSeats: SeatInput[] = Array.isArray(rawSeats)
+      ? (rawSeats as unknown[])
+          .map((s) => {
+            if (!s || typeof s !== 'object') return null
+            const seat = s as Record<string, unknown>
+            return {
+              isGift: Boolean(seat.isGift),
+              recipientName:
+                typeof seat.recipientName === 'string'
+                  ? seat.recipientName.trim().slice(0, 250)
+                  : undefined,
+              recipientEmail:
+                typeof seat.recipientEmail === 'string'
+                  ? seat.recipientEmail.trim().slice(0, 250)
+                  : undefined,
+              giftNote:
+                typeof seat.giftNote === 'string' ? seat.giftNote.slice(0, 500) : undefined,
+            } as SeatInput
+          })
+          .filter((s): s is SeatInput => s !== null)
+      : []
 
     // Debug logging
     console.log('[add-workshop] Request received:', {
@@ -269,6 +298,7 @@ export async function POST(request: NextRequest) {
           guestCount,
           pricePerPerson,
           totalPrice,
+          ...(sanitizedSeats.length > 0 ? { seats: sanitizedSeats } : {}),
         },
         overrideAccess: true,
       })

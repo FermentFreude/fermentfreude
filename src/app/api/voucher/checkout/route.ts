@@ -14,11 +14,15 @@ import { NextRequest, NextResponse } from 'next/server'
 
 interface CheckoutBody {
   amount: number
-  deliveryMethod: 'email' | 'pickup'
+  deliveryMethod: 'email-recipient' | 'email-self' | 'pdf' | 'email' | 'pickup'
   purchaserName: string
   purchaserEmail: string
+  recipientName?: string
   recipientEmail?: string
+  personalNote?: string
 }
+
+const VALID_DELIVERY_METHODS = ['email-recipient', 'email-self', 'pdf', 'email', 'pickup'] as const
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,7 +63,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!['email', 'pickup'].includes(body.deliveryMethod)) {
+    if (!VALID_DELIVERY_METHODS.includes(body.deliveryMethod as (typeof VALID_DELIVERY_METHODS)[number])) {
       return NextResponse.json(
         { success: false, error: 'Invalid delivery method.' },
         { status: 400 },
@@ -73,6 +77,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // For email-recipient delivery, recipientEmail is required
+    if (body.deliveryMethod === 'email-recipient' && !body.recipientEmail) {
+      return NextResponse.json(
+        { success: false, error: 'Recipient email is required for direct delivery.' },
+        { status: 400 },
+      )
+    }
+
+    const recipientName =
+      typeof body.recipientName === 'string' ? body.recipientName.trim().slice(0, 250) : ''
+    const personalNote =
+      typeof body.personalNote === 'string' ? body.personalNote.trim().slice(0, 500) : ''
+
     // ─── Create Stripe Payment Intent ─────────────────────────────
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -85,7 +102,9 @@ export async function POST(request: NextRequest) {
         deliveryMethod: body.deliveryMethod,
         purchaserName: body.purchaserName.trim().slice(0, 250),
         purchaserEmail: body.purchaserEmail,
+        recipientName,
         recipientEmail: body.recipientEmail || '',
+        personalNote,
       },
     })
 

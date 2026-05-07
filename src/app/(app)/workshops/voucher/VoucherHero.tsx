@@ -12,14 +12,21 @@ const HERO_DE = {
   emailRequired: 'Bitte gib deine E-Mail-Adresse ein.',
   invalidEmail: 'Ungültiges E-Mail-Format.',
   invalidRecipientEmail: 'Ungültiges E-Mail-Format für Empfänger.',
+  recipientEmailRequired: 'Bitte gib die E-Mail des Empfängers ein.',
   checkoutError: 'Fehler beim Checkout.',
   checkoutErrorLater: 'Fehler beim Checkout. Bitte versuche es später.',
   yourName: 'Dein Name *',
   yourNamePlaceholder: 'Vor- und Nachname',
   yourEmail: 'Deine E-Mail-Adresse *',
-  recipientEmailLabel: 'E-Mail des Empfängers (optional)',
-  recipientEmailHint: 'Wenn leer, wird der Gutschein an deine Adresse gesendet.',
-  processing: 'Wird bearbeitet...',
+  recipientNameLabel: 'Name des Empfängers',
+  recipientNamePlaceholder: 'Vor- und Nachname',
+  recipientEmailLabel: 'E-Mail des Empfängers *',
+  recipientEmailHint: 'Wir senden den Gutschein direkt an diese Adresse.',
+  personalNoteLabel: 'Persönliche Notiz (optional)',
+  personalNotePlaceholder: 'Eine persönliche Botschaft für den Empfänger…',
+  personalNoteCounter: (n: number) => `${n}/500 Zeichen`,
+  cardForLabel: 'Für',
+  processing: 'Wird bearbeitet…',
 }
 
 const HERO_EN = {
@@ -27,14 +34,21 @@ const HERO_EN = {
   emailRequired: 'Please enter your email address.',
   invalidEmail: 'Invalid email format.',
   invalidRecipientEmail: 'Invalid email format for recipient.',
+  recipientEmailRequired: "Please enter the recipient's email.",
   checkoutError: 'Checkout error.',
   checkoutErrorLater: 'Checkout error. Please try again later.',
   yourName: 'Your name *',
   yourNamePlaceholder: 'First and last name',
   yourEmail: 'Your email address *',
-  recipientEmailLabel: "Recipient's email (optional)",
-  recipientEmailHint: 'If left blank, the voucher will be sent to your address.',
-  processing: 'Processing...',
+  recipientNameLabel: "Recipient's name",
+  recipientNamePlaceholder: 'First and last name',
+  recipientEmailLabel: "Recipient's email *",
+  recipientEmailHint: 'We will send the voucher directly to this address.',
+  personalNoteLabel: 'Personal note (optional)',
+  personalNotePlaceholder: 'A personal message for the recipient…',
+  personalNoteCounter: (n: number) => `${n}/500 characters`,
+  cardForLabel: 'For',
+  processing: 'Processing…',
 }
 
 interface VoucherHeroProps {
@@ -79,17 +93,19 @@ export function VoucherHero({
   const { locale } = useLocale()
   const t = locale === 'de' ? HERO_DE : HERO_EN
 
-  // Show email and pickup only — post/card removed for freshness
+  // Show only the new tri-option set; legacy values (email/pickup) hidden but supported.
   const visibleDeliveryOptions = deliveryOptions.filter(
-    (o) => o.type === 'email' || o.type === 'pickup',
+    (o) => o.type === 'email-recipient' || o.type === 'email-self' || o.type === 'pdf',
   )
   const [selectedAmount, setSelectedAmount] = useState(amounts[0] ?? '50€')
   const [selectedDelivery, setSelectedDelivery] = useState(
-    visibleDeliveryOptions[0]?.type ?? 'email',
+    visibleDeliveryOptions[0]?.type ?? 'email-self',
   )
   const [purchaserName, setPurchaserName] = useState('')
   const [purchaserEmail, setPurchaserEmail] = useState('')
+  const [recipientName, setRecipientName] = useState('')
   const [recipientEmail, setRecipientEmail] = useState('')
+  const [personalNote, setPersonalNote] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   // Format amount for display (e.g., "50€" -> "€50,00")
@@ -123,12 +139,28 @@ export function VoucherHero({
       return
     }
 
-    if (selectedDelivery === 'email' && recipientEmail && !emailRegex.test(recipientEmail)) {
+    if (selectedDelivery === 'email-recipient') {
+      if (!recipientEmail.trim()) {
+        toast.error(t.recipientEmailRequired)
+        return
+      }
+      if (!emailRegex.test(recipientEmail)) {
+        toast.error(t.invalidRecipientEmail)
+        return
+      }
+    } else if (recipientEmail && !emailRegex.test(recipientEmail)) {
       toast.error(t.invalidRecipientEmail)
       return
     }
 
     setIsLoading(true)
+
+    const sendRecipientEmail =
+      selectedDelivery === 'email-recipient' && recipientEmail.trim()
+        ? recipientEmail.trim()
+        : undefined
+    const sendRecipientName = recipientName.trim() || undefined
+    const sendPersonalNote = personalNote.trim() || undefined
 
     try {
       const response = await fetch('/api/voucher/checkout', {
@@ -139,8 +171,9 @@ export function VoucherHero({
           deliveryMethod: selectedDelivery,
           purchaserName: purchaserName.trim(),
           purchaserEmail: purchaserEmail.trim(),
-          recipientEmail:
-            selectedDelivery === 'email' && recipientEmail ? recipientEmail.trim() : undefined,
+          recipientName: sendRecipientName,
+          recipientEmail: sendRecipientEmail,
+          personalNote: sendPersonalNote,
         }),
       })
 
@@ -160,8 +193,9 @@ export function VoucherHero({
             deliveryMethod: selectedDelivery,
             purchaserName: purchaserName.trim(),
             purchaserEmail: purchaserEmail.trim(),
-            recipientEmail:
-              selectedDelivery === 'email' && recipientEmail ? recipientEmail.trim() : undefined,
+            recipientName: sendRecipientName,
+            recipientEmail: sendRecipientEmail,
+            personalNote: sendPersonalNote,
           }),
         )
         router.push('/voucher/checkout')
@@ -177,7 +211,9 @@ export function VoucherHero({
   }, [
     purchaserName,
     purchaserEmail,
+    recipientName,
     recipientEmail,
+    personalNote,
     selectedAmount,
     selectedDelivery,
     router,
@@ -187,6 +223,7 @@ export function VoucherHero({
     t.invalidEmail,
     t.invalidRecipientEmail,
     t.nameRequired,
+    t.recipientEmailRequired,
   ])
 
   const iconColor = (opt: (typeof visibleDeliveryOptions)[0]) =>
@@ -249,6 +286,26 @@ export function VoucherHero({
               <p className="font-sans text-body-sm text-ff-gray-text/90 text-center mt-5 leading-relaxed">
                 {cardDisclaimer}
               </p>
+
+              {(recipientName.trim() || personalNote.trim()) && (
+                <div className="mt-5 pt-5 border-t border-ff-border-light/60">
+                  {recipientName.trim() && (
+                    <p className="font-display text-body-sm font-semibold text-ff-near-black text-center">
+                      {t.cardForLabel}{' '}
+                      <span className="text-ff-gold-accent">{recipientName.trim()}</span>
+                    </p>
+                  )}
+                  {personalNote.trim() && (
+                    <p className="font-sans text-body-sm italic text-ff-gray-text text-center mt-2 leading-snug">
+                      “
+                      {personalNote.trim().length > 140
+                        ? personalNote.trim().slice(0, 137) + '…'
+                        : personalNote.trim()}
+                      ”
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -344,6 +401,13 @@ export function VoucherHero({
                                 fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
                               />
                             </svg>
+                          ) : option.icon === 'pdf' ? (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                              <path
+                                d="M14 2H6C4.9 2 4.01 2.9 4.01 4L4 20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2ZM6 20V4H13V9H18V20H6ZM8 13H16V15H8V13ZM8 17H13V19H8V17Z"
+                                fill={selectedDelivery === option.type ? '#fff' : '#6b6b6b'}
+                              />
+                            </svg>
                           ) : (
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
                               <path
@@ -430,24 +494,73 @@ export function VoucherHero({
                     />
                   </div>
 
-                  {selectedDelivery === 'email' && (
+                  {selectedDelivery === 'email-recipient' && (
+                    <>
+                      <div>
+                        <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
+                          {t.recipientNameLabel}
+                        </label>
+                        <input
+                          type="text"
+                          value={recipientName}
+                          onChange={(e) => setRecipientName(e.target.value.slice(0, 250))}
+                          placeholder={t.recipientNamePlaceholder}
+                          className="w-full rounded-lg border border-ff-border-light bg-white px-3 py-2 md:py-3 font-sans text-sm md:text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
+                          disabled={isLoading}
+                        />
+                      </div>
+                      <div>
+                        <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
+                          {t.recipientEmailLabel}
+                        </label>
+                        <input
+                          type="email"
+                          value={recipientEmail}
+                          onChange={(e) => setRecipientEmail(e.target.value)}
+                          placeholder="empfänger@email.de"
+                          className="w-full rounded-lg border border-ff-border-light bg-white px-3 py-2 md:py-3 font-sans text-sm md:text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
+                          disabled={isLoading}
+                        />
+                        <p className="mt-1.5 font-sans text-caption text-ff-gray-text">
+                          {t.recipientEmailHint}
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {selectedDelivery === 'pdf' && (
                     <div>
                       <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
-                        {t.recipientEmailLabel}
+                        {t.recipientNameLabel}
                       </label>
                       <input
-                        type="email"
-                        value={recipientEmail}
-                        onChange={(e) => setRecipientEmail(e.target.value)}
-                        placeholder="empfänger@email.de"
+                        type="text"
+                        value={recipientName}
+                        onChange={(e) => setRecipientName(e.target.value.slice(0, 250))}
+                        placeholder={t.recipientNamePlaceholder}
                         className="w-full rounded-lg border border-ff-border-light bg-white px-3 py-2 md:py-3 font-sans text-sm md:text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors"
                         disabled={isLoading}
                       />
-                      <p className="mt-1.5 font-sans text-caption text-ff-gray-text">
-                        {t.recipientEmailHint}
-                      </p>
                     </div>
                   )}
+
+                  <div>
+                    <label className="font-sans text-caption font-bold text-ff-near-black block mb-1.5">
+                      {t.personalNoteLabel}
+                    </label>
+                    <textarea
+                      value={personalNote}
+                      onChange={(e) => setPersonalNote(e.target.value.slice(0, 500))}
+                      placeholder={t.personalNotePlaceholder}
+                      rows={3}
+                      maxLength={500}
+                      className="w-full rounded-lg border border-ff-border-light bg-white px-3 py-2 md:py-3 font-sans text-sm md:text-body text-ff-near-black placeholder-ff-gray-text/50 focus:border-ff-gold-accent focus:outline-none transition-colors resize-none"
+                      disabled={isLoading}
+                    />
+                    <p className="mt-1 text-right font-sans text-caption text-ff-gray-text">
+                      {t.personalNoteCounter(personalNote.length)}
+                    </p>
+                  </div>
                 </div>
               )}
 

@@ -255,7 +255,7 @@ export function VoucherSuccessClient() {
 
         {/* Delivery Info */}
         <div className="rounded-xl bg-ff-cream border border-ff-border-light p-5 mb-8 text-left">
-          {voucher.deliveryMethod === 'email' ? (
+          {voucher.deliveryMethod !== 'pickup' ? (
             <div className="flex items-start gap-3">
               <svg
                 width="20"

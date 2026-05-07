@@ -23,9 +23,11 @@ import { Product } from '@/payload-types'
 import { useLocale } from '@/providers/Locale'
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
+import { WorkshopSeatsEditor, type SeatDraft } from './WorkshopSeatsEditor'
 
 type WorkshopBooking = {
   appointmentId: string
+  bookingId?: string | null
   workshopSlug: string
   workshopTitle: string
   guestCount: number
@@ -35,6 +37,7 @@ type WorkshopBooking = {
   totalPrice: number
   locationName?: string | null
   locationAddress?: string | null
+  seats?: SeatDraft[]
 }
 
 export function CartModal() {
@@ -84,6 +87,20 @@ export function CartModal() {
   // Check if cart is truly empty (no Payload items AND no localStorage bookings)
   const isCartEmpty =
     (!cart || cart?.items?.length === 0) && Object.keys(bookingMetadata).length === 0
+
+  // Signal cart-open state to the rest of the app (header reads this to keep
+  // the navbar pinned in place while the cart drawer is visible).
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    if (isOpen) {
+      document.body.dataset.cartOpen = 'true'
+    } else {
+      delete document.body.dataset.cartOpen
+    }
+    return () => {
+      delete document.body.dataset.cartOpen
+    }
+  }, [isOpen])
 
   // GA4: view_cart — fires when cart drawer opens
   useEffect(() => {
@@ -181,6 +198,16 @@ export function CartModal() {
                   }
                 }
 
+                // Pre-resolve booking metadata so we can render seats editor outside the <Link>
+                const productSlugWithoutPrefix = product.slug?.replace('workshop-', '')
+                const matchedBooking = isWorkshopBooking
+                  ? Object.values(bookingMetadata).find(
+                      (b) => b.workshopSlug === productSlugWithoutPrefix,
+                    ) ?? null
+                  : null
+                const guestCountForBooking =
+                  matchedBooking ? item.quantity ?? matchedBooking.guestCount ?? 1 : 0
+
                 return (
                   <li className="flex w-full flex-col" key={i}>
                     <div className="relative flex w-full flex-row justify-between px-1 py-4">
@@ -212,27 +239,22 @@ export function CartModal() {
                           {isWorkshopBooking ? (
                             // For workshop bookings, display full booking details from localStorage
                             (() => {
-                              const productSlugWithoutPrefix = product.slug?.replace(
-                                'workshop-',
-                                '',
-                              )
-                              const booking = Object.values(bookingMetadata).find(
-                                (b) => b.workshopSlug === productSlugWithoutPrefix,
-                              )
-                              if (booking) {
-                                // Use Payload cart item.quantity as source of truth
-                                // (booking.guestCount may be stale if user added more spots later)
-                                const guestCount = item.quantity ?? booking.guestCount ?? 1
-                                const _lineTotal = booking.pricePerPerson * guestCount
+                              if (matchedBooking) {
+                                const guestCount = guestCountForBooking
+                                const _lineTotal = matchedBooking.pricePerPerson * guestCount
                                 return (
                                   <div className="text-sm text-neutral-500 dark:text-neutral-400 space-y-0.5">
-                                    <p>{booking.date}</p>
-                                    <p>{locale === 'de' ? `${booking.time} Uhr` : booking.time}</p>
-                                    {booking.locationName && (
+                                    <p>{matchedBooking.date}</p>
+                                    <p>
+                                      {locale === 'de'
+                                        ? `${matchedBooking.time} Uhr`
+                                        : matchedBooking.time}
+                                    </p>
+                                    {matchedBooking.locationName && (
                                       <p>
-                                        {booking.locationName}
-                                        {booking.locationAddress
-                                          ? ` — ${booking.locationAddress}`
+                                        {matchedBooking.locationName}
+                                        {matchedBooking.locationAddress
+                                          ? ` — ${matchedBooking.locationAddress}`
                                           : ''}
                                       </p>
                                     )}
@@ -288,6 +310,17 @@ export function CartModal() {
                         )}
                       </div>
                     </div>
+                    {/* Sprint 3: optional per-seat gift editor (outside <Link> so inputs work) */}
+                    {isWorkshopBooking && matchedBooking && (
+                      <div className="px-1 -mt-2 mb-2">
+                        <WorkshopSeatsEditor
+                          appointmentId={matchedBooking.appointmentId}
+                          bookingId={matchedBooking.bookingId ?? null}
+                          guestCount={guestCountForBooking}
+                          initialSeats={matchedBooking.seats}
+                        />
+                      </div>
+                    )}
                   </li>
                 )
               })}
