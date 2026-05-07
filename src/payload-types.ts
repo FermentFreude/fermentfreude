@@ -4282,28 +4282,28 @@ export interface WorkshopBooking {
    */
   downloadToken?: string | null;
   /**
-   * Optional per-seat info collected at checkout. If a seat is marked as a gift and has a recipient email, the gift notification email (without price) is sent to that address. Otherwise the booking confirmation goes only to the payer.
+   * One entry per booked seat. Seat 1 is the buyer themselves. Additional seats may include the guest name and any note (e.g. dietary requirements like vegetarian, vegan, allergies). All confirmation emails are sent only to the buyer — guests do NOT receive separate emails.
    */
   seats?:
     | {
         /**
-         * When true, the recipient gets the gift notification email instead of the payer receiving an extra confirmation.
+         * Legacy field. As of May 2026 we no longer send separate emails to guests — vouchers are the dedicated gift flow. Always false for new bookings.
          */
         isGift?: boolean | null;
         /**
-         * Name shown on the gift email and on the workshop attendee list.
+         * Name of the person attending in this seat (optional). Shown on the workshop attendee list.
          */
         recipientName?: string | null;
         /**
-         * If supplied with isGift, recipient receives the gift notification + .ics. Otherwise ignored.
+         * Legacy field. As of May 2026 we no longer collect or email guests directly. Always empty for new bookings.
          */
         recipientEmail?: string | null;
         /**
-         * Optional personal note from the buyer (max 500 chars).
+         * Optional note about this guest — typically dietary requirements (vegetarian, vegan, gluten-free, allergies) or accessibility needs.
          */
         giftNote?: string | null;
         /**
-         * Set after the gift notification has been dispatched.
+         * Legacy field. No longer written — guest emails are disabled.
          */
         giftEmailSentAt?: string | null;
         id?: string | null;

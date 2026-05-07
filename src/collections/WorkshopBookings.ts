@@ -140,55 +140,59 @@ export const WorkshopBookings: CollectionConfig = {
     {
       name: 'seats',
       type: 'array',
-      label: 'Per-Seat Recipient Details',
+      label: 'Guests (per seat)',
       admin: {
         description:
-          'Optional per-seat info collected at checkout. If a seat is marked as a gift and has a recipient email, the gift notification email (without price) is sent to that address. Otherwise the booking confirmation goes only to the payer.',
+          'One entry per booked seat. Seat 1 is the buyer themselves. Additional seats may include the guest name and any note (e.g. dietary requirements like vegetarian, vegan, allergies). All confirmation emails are sent only to the buyer — guests do NOT receive separate emails.',
       },
       fields: [
         {
           name: 'isGift',
           type: 'checkbox',
           defaultValue: false,
-          label: 'Is a gift',
+          label: 'Legacy: Is a gift (unused)',
           admin: {
             description:
-              'When true, the recipient gets the gift notification email instead of the payer receiving an extra confirmation.',
+              'Legacy field. As of May 2026 we no longer send separate emails to guests — vouchers are the dedicated gift flow. Always false for new bookings.',
+            hidden: true,
           },
         },
         {
           name: 'recipientName',
           type: 'text',
-          label: 'Recipient Name',
+          label: 'Guest Name',
           admin: {
-            description: 'Name shown on the gift email and on the workshop attendee list.',
+            description: 'Name of the person attending in this seat (optional). Shown on the workshop attendee list.',
           },
         },
         {
           name: 'recipientEmail',
           type: 'email',
-          label: 'Recipient Email',
+          label: 'Legacy: Recipient Email (unused)',
           admin: {
             description:
-              'If supplied with isGift, recipient receives the gift notification + .ics. Otherwise ignored.',
+              'Legacy field. As of May 2026 we no longer collect or email guests directly. Always empty for new bookings.',
+            hidden: true,
           },
         },
         {
           name: 'giftNote',
           type: 'textarea',
-          label: 'Personal Gift Note',
+          label: 'Note (e.g. dietary requirements)',
           maxLength: 500,
           admin: {
-            description: 'Optional personal note from the buyer (max 500 chars).',
+            description:
+              'Optional note about this guest — typically dietary requirements (vegetarian, vegan, gluten-free, allergies) or accessibility needs.',
           },
         },
         {
           name: 'giftEmailSentAt',
           type: 'date',
-          label: 'Gift Email Sent At',
+          label: 'Legacy: Gift Email Sent At (unused)',
           admin: {
             readOnly: true,
-            description: 'Set after the gift notification has been dispatched.',
+            hidden: true,
+            description: 'Legacy field. No longer written — guest emails are disabled.',
           },
         },
       ],
