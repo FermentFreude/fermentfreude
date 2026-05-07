@@ -38,8 +38,10 @@ export type SeatDraft = {
 }
 
 const COPY_DE = {
-  buyerSeat: 'Sitz 1 — Du (Buchende:r)',
+  seatLabel: (n: number) => `Sitz ${n}`,
+  buyerToggle: 'Ich nehme selbst teil',
   buyerHint: 'Du erhältst alle Bestätigungen und Tickets per E-Mail.',
+  buyerNotAttendingHint: 'Wer nimmt Sitz 1 ein?',
   guestSeat: (n: number) => `Gast ${n}`,
   guestNameLabel: 'Name (optional)',
   guestNamePlaceholder: 'z. B. Anna Müller',
@@ -54,8 +56,10 @@ const COPY_DE = {
 }
 
 const COPY_EN = {
-  buyerSeat: 'Seat 1 — You (the buyer)',
+  seatLabel: (n: number) => `Seat ${n}`,
+  buyerToggle: "I'm attending too",
   buyerHint: 'You will receive all confirmations and tickets by email.',
+  buyerNotAttendingHint: "Who's taking Seat 1?",
   guestSeat: (n: number) => `Guest ${n}`,
   guestNameLabel: 'Name (optional)',
   guestNamePlaceholder: 'e.g. Anna Müller',
@@ -91,6 +95,7 @@ export function WorkshopSeatsEditor({
   const { locale } = useLocale()
   const t = locale === 'de' ? COPY_DE : COPY_EN
 
+  const [buyerIsAttending, setBuyerIsAttending] = useState(true)
   const [seats, setSeats] = useState<SeatDraft[]>(() =>
     Array.from({ length: guestCount }, (_, i) => initialSeats?.[i] ?? emptySeat()),
   )
@@ -171,10 +176,76 @@ export function WorkshopSeatsEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Seat 1 — buyer (locked) */}
-      <div className="rounded-lg border border-ff-border-light bg-ff-surface-soft px-4 py-3">
-        <p className="font-display text-body-sm font-bold text-ff-near-black">{t.buyerSeat}</p>
-        <p className="mt-1 text-caption text-ff-gray-text-light">{t.buyerHint}</p>
+      {/* Seat 1 — buyer, with attending toggle */}
+      <div className="rounded-lg border border-ff-border-light bg-ff-surface-soft px-4 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="font-display text-body-sm font-bold text-ff-near-black">
+            {t.seatLabel(1)}
+          </p>
+          {/* Toggle */}
+          <label className="flex cursor-pointer items-center gap-2 select-none">
+            <span className="text-caption text-ff-gray-text-light">{t.buyerToggle}</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={buyerIsAttending}
+              onClick={() => {
+                const next = !buyerIsAttending
+                setBuyerIsAttending(next)
+                // Clear seat 0 name when switching back to "I'm attending"
+                if (next) updateSeat(0, { recipientName: '', giftNote: '' })
+              }}
+              className={[
+                'relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ff-near-black',
+                buyerIsAttending ? 'bg-ff-near-black' : 'bg-ff-border-light',
+              ].join(' ')}
+            >
+              <span
+                className={[
+                  'pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transition-transform',
+                  buyerIsAttending ? 'translate-x-4' : 'translate-x-0',
+                ].join(' ')}
+              />
+            </button>
+          </label>
+        </div>
+
+        {buyerIsAttending ? (
+          <p className="mt-2 text-caption text-ff-gray-text-light">{t.buyerHint}</p>
+        ) : (
+          <div className="mt-3 flex flex-col gap-3">
+            <p className="text-caption text-ff-gray-text-light">{t.buyerNotAttendingHint}</p>
+            <label className="block">
+              <span className="mb-1 block text-caption text-ff-gray-text-light">
+                {t.guestNameLabel}
+              </span>
+              <input
+                type="text"
+                value={seats[0]?.recipientName ?? ''}
+                onChange={(e) => updateSeat(0, { recipientName: e.target.value.slice(0, 120) })}
+                placeholder={t.guestNamePlaceholder}
+                maxLength={120}
+                className="w-full rounded-md border border-ff-border-light bg-white px-3 py-2 text-body-sm text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-near-black focus:outline-none"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-caption text-ff-gray-text-light">
+                {t.guestNoteLabel}
+              </span>
+              <input
+                type="text"
+                value={seats[0]?.giftNote ?? ''}
+                onChange={(e) => updateSeat(0, { giftNote: e.target.value.slice(0, 200) })}
+                placeholder={t.guestNotePlaceholder}
+                maxLength={200}
+                className="w-full rounded-md border border-ff-border-light bg-white px-3 py-2 text-body-sm text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-near-black focus:outline-none"
+              />
+              <span className="mt-1 block text-right text-caption text-ff-gray-text-light">
+                {t.charCount((seats[0]?.giftNote ?? '').length)}
+              </span>
+            </label>
+          </div>
+        )}
       </div>
 
       {/* Seats 2..N — guests (optional names + notes) */}
@@ -186,7 +257,7 @@ export function WorkshopSeatsEditor({
             <p className="mb-3 font-display text-body-sm font-bold text-ff-near-black">
               {t.guestSeat(idx)}{' '}
               <span className="text-caption font-normal text-ff-gray-text-light">
-                · {locale === 'de' ? `Sitz ${seatNumber}` : `Seat ${seatNumber}`}
+                · {t.seatLabel(seatNumber)}
               </span>
             </p>
             <div className="flex flex-col gap-3">

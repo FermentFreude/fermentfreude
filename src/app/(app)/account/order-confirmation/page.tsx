@@ -398,6 +398,14 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           >
             {t.viewBookingDetails}
           </Link>
+          {downloadToken && orderId && (
+            <Link
+              href={`/orders/${orderId}/tickets?token=${downloadToken}`}
+              className="flex-1 px-6 py-3 border border-ff-gold text-ff-gold rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
+            >
+              {t.viewTickets}
+            </Link>
+          )}
           <Link
             href="/workshops"
             className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"

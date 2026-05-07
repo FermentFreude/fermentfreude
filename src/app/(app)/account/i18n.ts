@@ -189,6 +189,8 @@ export const accountI18n = {
       'Komm einfach pünktlich — wir kümmern uns um den Rest. Alle Materialien sind inklusive.',
     viewBookingDetails: 'Buchungsdetails ansehen',
     browseMoreWorkshops: 'Weitere Workshops',
+    viewTickets: 'Tickets ansehen & drucken',
+    printTickets: 'Tickets drucken',
     questionsDescWorkshop: 'Fragen zum Workshop? Unser Team hilft dir gerne weiter.',
 
     // Layout
@@ -409,6 +411,8 @@ export const accountI18n = {
     workshopDayDesc: 'Just show up on time — we take care of the rest. All materials are included.',
     viewBookingDetails: 'View Booking Details',
     browseMoreWorkshops: 'Browse More Workshops',
+    viewTickets: 'View & Print Tickets',
+    printTickets: 'Print Tickets',
     questionsDescWorkshop: 'Questions about your workshop? Our team is happy to help.',
 
     // Layout

@@ -4282,6 +4282,10 @@ export interface WorkshopBooking {
    */
   downloadToken?: string | null;
   /**
+   * ID of the order that confirmed this booking. Set automatically on payment.
+   */
+  orderId?: string | null;
+  /**
    * One entry per booked seat. Seat 1 is the buyer themselves. Additional seats may include the guest name and any note (e.g. dietary requirements like vegetarian, vegan, allergies). All confirmation emails are sent only to the buyer — guests do NOT receive separate emails.
    */
   seats?:
@@ -6297,6 +6301,7 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
   phone?: T;
   notes?: T;
   downloadToken?: T;
+  orderId?: T;
   seats?:
     | T
     | {

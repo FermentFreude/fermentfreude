@@ -138,6 +138,15 @@ export const WorkshopBookings: CollectionConfig = {
       },
     },
     {
+      name: 'orderId',
+      type: 'text',
+      label: 'Order ID',
+      admin: {
+        description: 'ID of the order that confirmed this booking. Set automatically on payment.',
+        readOnly: true,
+      },
+    },
+    {
       name: 'seats',
       type: 'array',
       label: 'Guests (per seat)',

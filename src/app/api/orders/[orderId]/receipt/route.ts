@@ -60,18 +60,17 @@ export async function GET(
     }
 
     // ── Status check ───────────────────────────────────────────────────────
-    // Ecommerce plugin sets `orderstatus` (or a similar status field). Accept paid orders.
+    // Ecommerce plugin sets the status field. Accept any non-cancelled/refunded status.
+    // 'processing' is the initial status assigned at order creation — Stripe redirects the
+    // buyer to the confirmation page immediately after payment while the webhook (which
+    // transitions the order to 'completed') may still be in transit. Blocking 'processing'
+    // would cause a race condition where the download fails right after checkout.
     const status = (order.orderstatus ?? order.status ?? order.paymentStatus) as string | undefined
-    const isPaid =
-      !status || // no status field = legacy paid order
-      status === 'paid' ||
-      status === 'completed' ||
-      status === 'complete' ||
-      status === 'fulfilled'
+    const isRejected = status === 'cancelled' || status === 'refunded' || status === 'failed'
 
-    if (!isPaid) {
+    if (isRejected) {
       return NextResponse.json(
-        { error: 'Receipt is only available for paid orders.' },
+        { error: 'Receipt is not available for cancelled or refunded orders.' },
         { status: 403 },
       )
     }

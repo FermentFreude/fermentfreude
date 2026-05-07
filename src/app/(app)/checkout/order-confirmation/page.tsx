@@ -99,6 +99,32 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
     }
   }
 
+  // For workshop orders, look up the associated booking to get the correct receipt URL.
+  // The booking receipt (/api/bookings/[id]/receipt) is pre-tested and always works;
+  // use it instead of the order receipt for the workshop confirmation download button.
+  let bookingId: string | null = null
+  let bookingDownloadToken: string | null = null
+
+  if (isWorkshop && orderId) {
+    try {
+      const bookings = await payload.find({
+        collection: 'workshop-bookings',
+        where: { orderId: { equals: orderId } },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const booking = bookings.docs[0]
+      if (booking) {
+        bookingId = String(booking.id)
+        const bookingData = booking as unknown as Record<string, unknown>
+        bookingDownloadToken = (bookingData.downloadToken as string | null) ?? null
+      }
+    } catch {
+      // Non-fatal: fall back to order receipt link if booking lookup fails
+    }
+  }
+
   // ─── Pickup order confirmation ─────────────────────────────
   if (isPickupOrder) {
     return (
@@ -382,10 +408,14 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               ? 'Deine Rechnung wurde per E-Mail gesendet.'
               : 'Your receipt has been sent to your email.'}
           </p>
-          {orderId && downloadToken && (
+          {(bookingId && bookingDownloadToken) || (orderId && downloadToken) ? (
             <div className="flex justify-center">
               <a
-                href={`/api/orders/${orderId}/receipt?token=${downloadToken}`}
+                href={
+                  bookingId && bookingDownloadToken
+                    ? `/api/bookings/${bookingId}/receipt?token=${bookingDownloadToken}`
+                    : `/api/orders/${orderId}/receipt?token=${downloadToken}`
+                }
                 download
                 className="inline-flex items-center gap-2 px-4 py-2 bg-ff-near-black text-white text-sm rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium"
               >
@@ -393,7 +423,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 {locale === 'de' ? 'Rechnung herunterladen' : 'Download Receipt'}
               </a>
             </div>
-          )}
+          ) : null}
         </Card>
 
         {/* Action Buttons — Workshop */}
@@ -406,6 +436,14 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               >
                 {t.viewBookingDetails}
               </Link>
+              {downloadToken && orderId && (
+                <Link
+                  href={`/orders/${orderId}/tickets?token=${downloadToken}`}
+                  className="flex-1 px-6 py-3 border border-ff-gold text-ff-gold rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
+                >
+                  {t.viewTickets}
+                </Link>
+              )}
               <Link
                 href="/workshops"
                 className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
@@ -414,12 +452,22 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               </Link>
             </>
           ) : (
-            <Link
-              href="/workshops"
-              className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
-            >
-              {t.browseMoreWorkshops}
-            </Link>
+            <>
+              {downloadToken && orderId && (
+                <Link
+                  href={`/orders/${orderId}/tickets?token=${downloadToken}`}
+                  className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+                >
+                  {t.viewTickets}
+                </Link>
+              )}
+              <Link
+                href="/workshops"
+                className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
+              >
+                {t.browseMoreWorkshops}
+              </Link>
+            </>
           )}
         </div>
 

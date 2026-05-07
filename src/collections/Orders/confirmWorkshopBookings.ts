@@ -198,6 +198,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     const updateData: Record<string, unknown> = {
       status: 'confirmed',
       downloadToken,
+      orderId: doc.id,
     }
 
     if (customerEmail && !booking.email) {
