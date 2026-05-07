@@ -23,7 +23,7 @@ import { Product } from '@/payload-types'
 import { useLocale } from '@/providers/Locale'
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
-import { WorkshopSeatsEditor, type SeatDraft } from './WorkshopSeatsEditor'
+import type { SeatDraft } from './WorkshopSeatsEditor'
 
 type WorkshopBooking = {
   appointmentId: string
@@ -311,17 +311,6 @@ export function CartModal() {
                         )}
                       </div>
                     </div>
-                    {/* Sprint 3: optional per-seat gift editor (outside <Link> so inputs work) */}
-                    {isWorkshopBooking && matchedBooking && (
-                      <div className="px-1 -mt-2 mb-2">
-                        <WorkshopSeatsEditor
-                          appointmentId={matchedBooking.appointmentId}
-                          bookingId={matchedBooking.bookingId ?? null}
-                          guestCount={guestCountForBooking}
-                          initialSeats={matchedBooking.seats}
-                        />
-                      </div>
-                    )}
                   </li>
                 )
               })}
