@@ -138,11 +138,19 @@ type BrevoParamValue =
   | Record<string, BrevoParamPrimitive>
   | Record<string, BrevoParamPrimitive>[]
 
+type BrevoAttachment = {
+  /** Filename shown to the recipient (e.g. 'workshop.ics'). */
+  name: string
+  /** Base64-encoded file content. */
+  content: string
+}
+
 type SendTemplateEmailParams = {
   to: BrevoRecipient[]
   templateId: number
   params?: Record<string, BrevoParamValue>
   subject?: string
+  attachments?: BrevoAttachment[]
 }
 
 type SendTransactionalEmailParams = {
@@ -161,6 +169,7 @@ export async function sendTemplateEmail({
   templateId,
   params,
   subject,
+  attachments,
 }: SendTemplateEmailParams): Promise<{ success: boolean; messageId?: string }> {
   const apiKey = getBrevoApiKey()
   if (!apiKey) {
@@ -176,6 +185,7 @@ export async function sendTemplateEmail({
     }
     if (params) body.params = params
     if (subject) body.subject = subject
+    if (attachments && attachments.length > 0) body.attachment = attachments
 
     const response = await fetch(`${BREVO_API_URL}/smtp/email`, {
       method: 'POST',

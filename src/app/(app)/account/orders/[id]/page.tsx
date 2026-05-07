@@ -81,6 +81,7 @@ export default async function Order({ params, searchParams }: PageProps) {
         createdAt: true,
         updatedAt: true,
         shippingAddress: true,
+        downloadToken: true,
       },
     })
 
@@ -176,6 +177,21 @@ export default async function Order({ params, searchParams }: PageProps) {
             </div>
           )}
         </div>
+
+        {order.downloadToken &&
+          (order.status === 'completed' || order.status === 'processing') && (
+            <div>
+              <Button asChild variant="outline" size="sm">
+                <a
+                  href={`/api/orders/${order.id}/receipt?token=${encodeURIComponent(order.downloadToken)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t.downloadInvoice}
+                </a>
+              </Button>
+            </div>
+          )}
 
         {order.items && (
           <div>

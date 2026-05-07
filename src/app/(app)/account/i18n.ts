@@ -46,6 +46,7 @@ export const accountI18n = {
     statusRefunded: 'Erstattet',
     noShippingNeeded: 'Kein Versand erforderlich – digitale Inhalte oder Workshop-Tickets.',
     pickupAtStudio: 'Abholung im Studio – wir senden dir die Abholdetails per E-Mail.',
+    downloadInvoice: 'Rechnung herunterladen',
 
     // Profile
     accountDetails: 'Kontodaten',
@@ -268,6 +269,7 @@ export const accountI18n = {
     statusRefunded: 'Refunded',
     noShippingNeeded: 'No shipping needed — digital content or workshop tickets.',
     pickupAtStudio: 'Studio pickup — we will email you the pickup details.',
+    downloadInvoice: 'Download invoice',
 
     // Profile
     accountDetails: 'Account Details',

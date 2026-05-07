@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 import type { CollectionAfterChangeHook } from 'payload'
 
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { generateBookingICS } from '@/lib/generateBookingICS'
 
 /**
  * confirmWorkshopBookings — Orders afterChange hook.
@@ -283,6 +284,28 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       }
 
       try {
+        // Build .ics calendar attachment so recipients can add the workshop
+        // to their calendar app with one tap.
+        let icsAttachment: { name: string; content: string } | null = null
+        try {
+          const ics = generateBookingICS({
+            bookingId: String(booking.id),
+            title: String(booking.workshopTitle ?? 'Workshop'),
+            date: String(booking.date ?? ''),
+            time: String(booking.time ?? ''),
+            location: workshopLocation || undefined,
+            url: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/account/orders`,
+          })
+          icsAttachment = {
+            name: 'fermentfreude-workshop.ics',
+            content: Buffer.from(ics, 'utf-8').toString('base64'),
+          }
+        } catch (icsError) {
+          payload.logger.warn(
+            `[confirmWorkshopBookings] Failed to build .ics for booking ${booking.id}: ${icsError instanceof Error ? icsError.message : String(icsError)}`,
+          )
+        }
+
         await sendTemplateEmail({
           to: [
             {
@@ -309,6 +332,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
             AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,
           },
+          attachments: icsAttachment ? [icsAttachment] : undefined,
         })
         payload.logger.info(
           `[confirmWorkshopBookings] Sent booking confirmation email to ${bookingEmail} for booking ${booking.id}`,
