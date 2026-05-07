@@ -182,10 +182,7 @@ export function WorkshopSeatsEditor({
         const idx = sliceIdx + 1
         const seatNumber = idx + 1
         return (
-          <div
-            key={idx}
-            className="rounded-lg border border-ff-border-light bg-white px-4 py-4"
-          >
+          <div key={idx} className="rounded-lg border border-ff-border-light bg-white px-4 py-4">
             <p className="mb-3 font-display text-body-sm font-bold text-ff-near-black">
               {t.guestSeat(idx)}{' '}
               <span className="text-caption font-normal text-ff-gray-text-light">

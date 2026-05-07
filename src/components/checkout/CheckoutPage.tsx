@@ -1080,8 +1080,8 @@ export const CheckoutPage: React.FC = () => {
                           </p>
                           <p className="text-body-sm text-ff-gray-text-light">
                             {booking.date} ·{' '}
-                            {locale === 'de' ? `${booking.time} Uhr` : booking.time} ·{' '}
-                            {guestCount} {isDe ? 'Sitzplätze' : 'seats'}
+                            {locale === 'de' ? `${booking.time} Uhr` : booking.time} · {guestCount}{' '}
+                            {isDe ? 'Sitzplätze' : 'seats'}
                           </p>
                         </div>
                         <WorkshopSeatsEditor

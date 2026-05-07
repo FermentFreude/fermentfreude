@@ -162,7 +162,8 @@ export const WorkshopBookings: CollectionConfig = {
           type: 'text',
           label: 'Guest Name',
           admin: {
-            description: 'Name of the person attending in this seat (optional). Shown on the workshop attendee list.',
+            description:
+              'Name of the person attending in this seat (optional). Shown on the workshop attendee list.',
           },
         },
         {

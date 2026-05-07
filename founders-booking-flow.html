@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FermentFreude — Booking flow: scenarios & decisions</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.55;color:#1a1a1a;max-width:760px;margin:32px auto;padding:0 20px;background:#fafaf7}
+  h1{font-size:26px;margin-top:0}
+  h2{font-size:20px;margin-top:36px;border-bottom:2px solid #1a1a1a;padding-bottom:6px}
+  h3{font-size:16px;margin-top:22px;color:#444}
+  table{border-collapse:collapse;width:100%;margin:12px 0 18px;background:#fff}
+  th,td{border:1px solid #d8d4cc;padding:10px 12px;vertical-align:top;text-align:left;font-size:14px}
+  th{background:#f0ebe1;font-weight:700}
+  blockquote{margin:14px 0;padding:10px 16px;border-left:4px solid #b8a878;background:#fffbf0;font-style:italic;color:#444}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;background:#e8f3e8;color:#1d5a1d;font-size:12px;font-weight:700}
+  .ok{background:#e8f3e8;color:#1d5a1d}
+  .q{background:#fdecec;color:#8a1c1c}
+  a{color:#1a1a1a;font-weight:600}
+  .recommend{background:#fff7df;border-left:4px solid #d4a017;padding:10px 14px;margin:8px 0 18px;font-size:14px}
+  .tldr{background:#1a1a1a;color:#fff;padding:18px 22px;border-radius:10px;margin-top:36px}
+  .tldr table th,.tldr table td{border-color:#444;color:#fff;background:#222}
+  .tldr table th{background:#000}
+  .footer{margin-top:30px;font-size:14px;color:#666}
+  ol li{margin:6px 0}
+  code{background:#eee;padding:1px 6px;border-radius:4px;font-size:13px}
+</style>
+</head>
+<body>
+
+<p>Hi David, hi Marcel 👋</p>
+
+<p>Thanks for the clear message — <em>"all confirmations go only to the buyer"</em> is exactly what's now live on staging.</p>
+
+<p>One small clarification: in the previous version I wrote <em>"Gift"</em> for the multi-seat fields. That was the wrong word — it sounded like it competed with your Voucher product. The Voucher is and stays your gift product. The new fields are now called <strong>"Guests"</strong> — meaning <em>the friends, family or colleagues the buyer is bringing along to the workshop</em>.</p>
+
+<p>👉 <strong>Try it now:</strong> <a href="https://fermentfreude.vercel.app">fermentfreude.vercel.app</a><br>
+<small>(Add 2+ seats of any workshop to the cart and go to checkout — you'll see the new "Your guests" section.)</small></p>
+
+<p>Below: real customer scenarios. After each one I ask you <strong>one</strong> question. Just reply with the letter (A / B / C). That's all I need.</p>
+
+<h2>What's already done (no decision needed)</h2>
+<table>
+  <tr><th>What</th><th>Status</th></tr>
+  <tr><td>Cart sidebar — clean, no extra inputs</td><td><span class="pill ok">✅ Live</span></td></tr>
+  <tr><td>All emails (confirmation, ticket, .ics, invoice) → <strong>buyer only</strong></td><td><span class="pill ok">✅ Live</span></td></tr>
+  <tr><td>Vouchers — untouched, work exactly as before</td><td><span class="pill ok">✅ Live</span></td></tr>
+  <tr><td>Solo bookings (1 seat) — no extra section, just pay</td><td><span class="pill ok">✅ Live</span></td></tr>
+  <tr><td>Multi-seat checkout shows <strong>"Your guests"</strong> with optional name + note</td><td><span class="pill ok">✅ Live</span></td></tr>
+  <tr><td>Optional note (e.g. <em>"vegetarian"</em>, <em>"gluten-free"</em>) visible to you in <code>/admin → Workshop Bookings → Guests</code></td><td><span class="pill ok">✅ Live</span></td></tr>
+</table>
+
+<h2>Scenario 1 — Solo booking</h2>
+<blockquote>"I book Kombucha for myself."</blockquote>
+<table>
+  <tr><th>Seats</th><td>1</td></tr>
+  <tr><th>What the buyer fills in</th><td>Just name + email + pay. No guest section.</td></tr>
+  <tr><th>What you see in admin</th><td>One booking, one attendee (the buyer).</td></tr>
+  <tr><th>What gets emailed</th><td>1 confirmation + 1 .ics + 1 invoice → buyer.</td></tr>
+</table>
+<p><span class="pill ok">✅ Already perfect. No question.</span></p>
+
+<h2>Scenario 2 — Couple</h2>
+<blockquote>"I book Kombucha for me + my husband."</blockquote>
+<table>
+  <tr><th>Seats</th><td>2</td></tr>
+  <tr><th>What the buyer fills in</th><td>Name + email + pay. <strong>Plus</strong> "Your guests": Seat 1 = me (locked). Seat 2 = optional name + optional note.</td></tr>
+  <tr><th>What you see in admin</th><td>One booking, 2 seats. Seat 2 may show <em>"Tom — vegetarian"</em>.</td></tr>
+  <tr><th>What gets emailed</th><td><strong>1</strong> bundled confirmation → buyer ("2 seats Kombucha").</td></tr>
+</table>
+<p><span class="pill ok">✅ Already works. No question.</span></p>
+
+<h2>Scenario 3 — Group booking <em>(this is the important one)</em></h2>
+<p>Two real flavours of the same situation: <strong>one buyer, multiple attendees who each need their own ticket.</strong></p>
+
+<h3>3a — Friends paying me back</h3>
+<blockquote>"I book 4 seats Kombucha. My 3 friends Venmo me their share later. I want each of them to have their own ticket so I can forward it on WhatsApp."</blockquote>
+
+<h3>3b — Company / team booking <em>(B2B)</em></h3>
+<blockquote>"I'm the office manager at a Berlin agency. I book 8 seats Tempeh as a team-building activity. I pay with the company card and need a single invoice with our company name + VAT ID. Each colleague should still get their own ticket so HR can hand them out."</blockquote>
+
+<table>
+  <tr><th>Seats</th><td>4 (friends) / 8 (company)</td></tr>
+  <tr><th>Buyer fills in</th><td>Name + email + pay. <strong>Plus</strong> "Your guests" with optional name + dietary note per seat. <em>(Company case: also the company name on the invoice.)</em></td></tr>
+  <tr><th>What you see in admin</th><td><strong>One</strong> booking, all seats with names + dietary notes (e.g. <em>"Anna — vegan"</em>, <em>"Tom — gluten-free"</em>). Perfect for prep + name tags.</td></tr>
+  <tr><th>Invoice</th><td>One invoice to the buyer (or the company).</td></tr>
+</table>
+
+<h3><span class="pill q">❓ Question 1</span> How should we send the confirmation?</h3>
+<table>
+  <tr><th>Option</th><th>What the buyer gets in their inbox</th><th>Pros</th><th>Cons</th></tr>
+  <tr>
+    <td><strong>A — Bundled (current)</strong></td>
+    <td>1 email: <em>"4 seats for Kombucha on 12 May"</em> + 1 .ics + 1 invoice</td>
+    <td>Cleanest inbox</td>
+    <td>Hard to forward just one ticket. HR can't hand out individual tickets.</td>
+  </tr>
+  <tr>
+    <td><strong>B — Separate emails</strong></td>
+    <td>N emails (one per seat), each with its own ticket + .ics, all to the buyer</td>
+    <td>Buyer can forward each one to a friend / colleague</td>
+    <td>Inbox flooded — 8 emails for one purchase feels noisy</td>
+  </tr>
+  <tr>
+    <td><strong>C — Bundled + printable PDF tickets</strong></td>
+    <td>1 email + N individual ticket PDFs attached + 1 invoice</td>
+    <td>Best of both: clean inbox, easy to forward AND print. Works equally well for friends and HR teams.</td>
+    <td>Takes us a bit longer to build</td>
+  </tr>
+</table>
+<div class="recommend">👉 <strong>My recommendation: C</strong> — it's the only option that also covers your B2B case cleanly.</div>
+
+<h2>Scenario 4 — Mixed order</h2>
+<blockquote>"I book 2 seats Kombucha + 1 seat Tempeh in the same order."</blockquote>
+<table>
+  <tr><th>Workshops</th><td>2 different (different dates)</td></tr>
+  <tr><th>What you see in admin</th><td>2 separate bookings.</td></tr>
+  <tr><th>Invoice</th><td>1 combined invoice.</td></tr>
+</table>
+
+<h3><span class="pill q">❓ Question 2</span> How should we group the confirmations?</h3>
+<table>
+  <tr><th>Option</th><th>What the buyer gets</th><th>When to choose it</th></tr>
+  <tr><td><strong>A — One email per workshop (current)</strong></td><td>2 emails, each with its own .ics</td><td>Calendar stays clean, each event is its own thread</td></tr>
+  <tr><td><strong>B — One single email</strong></td><td>1 email listing both workshops, both .ics attached</td><td>Cleanest inbox, but harder to find later</td></tr>
+</table>
+<div class="recommend">👉 <strong>My recommendation: A</strong>. Each workshop is its own event — separate email feels right.</div>
+
+<h2>Scenario 5 — True gift</h2>
+<blockquote>"I want to give a Kombucha workshop as a Christmas present."</blockquote>
+<table>
+  <tr><th>Product</th><td><strong>Voucher</strong> (existing flow, untouched)</td></tr>
+  <tr><th>What gets emailed</th><td>Buyer gets the voucher PDF; recipient only gets emailed when <strong>they</strong> redeem the code with <strong>their</strong> email.</td></tr>
+</table>
+<p><span class="pill ok">✅ Already perfect. No question.</span></p>
+
+<h2><span class="pill q">❓ Question 3</span> Printable tickets / handouts</h2>
+<p>Do you want a <strong>printable PDF ticket</strong> (one per seat) attached to the confirmation email — so the buyer can print it at home and you can hand it out at the door if needed?</p>
+<table>
+  <tr><th>Option</th><th></th></tr>
+  <tr><td><strong>A</strong></td><td>Yes, attach a printable PDF ticket per seat</td></tr>
+  <tr><td><strong>B</strong></td><td>No, the email itself is the ticket (current)</td></tr>
+</table>
+<div class="recommend">👉 Connected to Q1: if you pick <strong>C</strong> there, this is automatically <strong>A</strong> here.</div>
+
+<h2>Quick test you can do right now</h2>
+<ol>
+  <li>Open: <a href="https://fermentfreude.vercel.app">fermentfreude.vercel.app</a></li>
+  <li>Add <strong>3 seats</strong> of any workshop to the cart.</li>
+  <li>Go to checkout — you'll see the <strong>"Your guests"</strong> section above the pay button.</li>
+  <li>Try to pay <strong>without</strong> filling in any guest name or note — it should let you (only your name + email are required). <em>(If it blocks you, tell me — that's a bug, the guest fields are meant to be optional.)</em></li>
+  <li>Then try filling in <em>"Anna — vegetarian"</em> for Seat 2 and complete the test booking. You'll see it in <code>/admin → Workshop Bookings</code>.</li>
+</ol>
+
+<div class="tldr">
+  <h2 style="color:#fff;border-color:#fff;margin-top:0">TL;DR — just reply with this</h2>
+  <table>
+    <tr><th>Question</th><th>Your answer</th></tr>
+    <tr><td>Q1 — Multi-seat confirmation style</td><td><strong>A / B / C</strong></td></tr>
+    <tr><td>Q2 — Multi-workshop email grouping</td><td><strong>A / B</strong></td></tr>
+    <tr><td>Q3 — Printable PDF tickets</td><td><strong>A / B</strong></td></tr>
+  </table>
+  <p style="margin-bottom:0">Once you reply, I'll deploy to production the same day. 🌱</p>
+</div>
+
+<p class="footer">— Rafaela</p>
+
+</body>
+</html>
