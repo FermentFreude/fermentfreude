@@ -3,7 +3,7 @@ import { PrintTicketsButton } from '@/components/PrintTicketsButton'
 import type { Order, WorkshopBooking } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
-import { Calendar, Clock, MapPin, Ticket, Users } from 'lucide-react'
+import { Calendar, Clock, MapPin, Ticket } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
@@ -135,8 +135,42 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
     // ignore — fallback used
   }
 
-  // ── 4. Render ─────────────────────────────────────────────────────────────
-  const noTickets = bookings.length === 0
+  // ── 4. Build flat per-seat list ──────────────────────────────────────────
+  interface SeatTicket {
+    key: string
+    workshopTitle: string
+    date: string
+    time: string
+    seatIndex: number   // 0-based
+    totalSeats: number
+    name: string        // '' if not set
+    note: string        // giftNote / dietary requirements
+    bookingRef: string
+  }
+
+  const seatTickets: SeatTicket[] = []
+
+  for (const booking of bookings) {
+    const totalSeats = typeof booking.guestCount === 'number' ? booking.guestCount : 1
+    const seats = (booking.seats ?? []) as { recipientName?: string; giftNote?: string }[]
+
+    for (let i = 0; i < totalSeats; i++) {
+      seatTickets.push({
+        key: `${booking.id}-${i}`,
+        workshopTitle: booking.workshopTitle ?? 'Workshop',
+        date: booking.date ?? '',
+        time: booking.time ?? '',
+        seatIndex: i,
+        totalSeats,
+        name: seats[i]?.recipientName ?? '',
+        note: seats[i]?.giftNote ?? '',
+        bookingRef: `#${booking.id.slice(0, 8).toUpperCase()}`,
+      })
+    }
+  }
+
+  // ── 5. Render ─────────────────────────────────────────────────────────────
+  const noTickets = seatTickets.length === 0
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
@@ -177,112 +211,100 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
         </div>
       ) : (
         <div className="space-y-6">
-          {bookings.map((booking) => {
-            const attendeeName =
-              [booking.firstName, booking.lastName].filter(Boolean).join(' ') ||
-              booking.email ||
-              (locale === 'de' ? 'Teilnehmer' : 'Attendee')
-
-            const guestNames = (booking.seats ?? [])
-              .map((s) => s.recipientName)
-              .filter((n): n is string => Boolean(n))
-
-            return (
-              <div
-                key={booking.id}
-                className="ticket-card border-2 border-ff-near-black rounded-[--radius-lg] overflow-hidden"
-              >
-                {/* Ticket header */}
-                <div className="bg-ff-near-black px-6 py-4 flex items-center justify-between">
-                  <span className="font-display font-semibold text-white text-lg tracking-wide">
-                    FermentFreude
+          {seatTickets.map((seat) => (
+            <div
+              key={seat.key}
+              className="ticket-card border-2 border-ff-near-black rounded-[--radius-lg] overflow-hidden"
+            >
+              {/* Ticket header */}
+              <div className="bg-ff-near-black px-6 py-4 flex items-center justify-between">
+                <span className="font-display font-semibold text-white text-lg tracking-wide">
+                  FermentFreude
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-ff-gold font-display text-sm font-semibold">
+                    {locale === 'de'
+                      ? `Ticket ${seat.seatIndex + 1} / ${seat.totalSeats}`
+                      : `Ticket ${seat.seatIndex + 1} of ${seat.totalSeats}`}
                   </span>
-                  <Ticket className="w-6 h-6 text-ff-gold" />
+                  <Ticket className="w-5 h-5 text-ff-gold" />
                 </div>
+              </div>
 
-                {/* Dashed separator */}
-                <div className="border-b-2 border-dashed border-ff-near-black mx-6" />
+              {/* Dashed separator */}
+              <div className="border-b-2 border-dashed border-ff-near-black mx-6" />
 
-                {/* Ticket body */}
-                <div className="px-6 py-5 space-y-4">
-                  <h2 className="text-xl font-display font-semibold text-ff-near-black leading-tight">
-                    {booking.workshopTitle}
-                  </h2>
+              {/* Ticket body */}
+              <div className="px-6 py-5 space-y-4">
+                <h2 className="text-xl font-display font-semibold text-ff-near-black leading-tight">
+                  {seat.workshopTitle}
+                </h2>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="flex items-start gap-2">
-                      <Calendar className="w-4 h-4 text-ff-gold mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display">
-                          {t.date}
-                        </p>
-                        <p className="text-sm font-semibold text-ff-near-black">{booking.date}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-2">
-                      <Clock className="w-4 h-4 text-ff-gold mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display">
-                          {locale === 'de' ? 'Zeit' : 'Time'}
-                        </p>
-                        <p className="text-sm font-semibold text-ff-near-black">{booking.time}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-2 sm:col-span-2">
-                      <MapPin className="w-4 h-4 text-ff-gold mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display">
-                          {locale === 'de' ? 'Ort' : 'Location'}
-                        </p>
-                        <p className="text-sm font-semibold text-ff-near-black">{locationName}</p>
-                        <p className="text-xs text-ff-text-muted">{locationAddress}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Dashed separator */}
-                <div className="border-b-2 border-dashed border-ff-near-black mx-6" />
-
-                {/* Ticket footer */}
-                <div className="px-6 py-4 bg-[#f6f3f0] flex items-start justify-between gap-4 flex-wrap">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex items-start gap-2">
-                    <Users className="w-4 h-4 text-ff-gold mt-0.5 shrink-0" />
+                    <Calendar className="w-4 h-4 text-ff-gold mt-0.5 shrink-0" />
                     <div>
                       <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display">
-                        {locale === 'de' ? 'Teilnehmer' : 'Attendees'}
+                        {t.date}
                       </p>
-                      <p className="text-sm font-semibold text-ff-near-black">{attendeeName}</p>
-                      {guestNames.length > 0 && (
-                        <p className="text-xs text-ff-text-muted">{guestNames.join(', ')}</p>
-                      )}
-                      <p className="text-xs text-ff-text-muted mt-0.5">
-                        {booking.guestCount}{' '}
-                        {booking.guestCount === 1
-                          ? locale === 'de'
-                            ? 'Person'
-                            : 'person'
-                          : locale === 'de'
-                            ? 'Personen'
-                            : 'people'}
-                      </p>
+                      <p className="text-sm font-semibold text-ff-near-black">{seat.date}</p>
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display">
-                      {locale === 'de' ? 'Buchungs-Nr.' : 'Booking Ref.'}
-                    </p>
-                    <p className="text-sm font-semibold text-ff-near-black font-mono">
-                      #{booking.id.slice(0, 8).toUpperCase()}
-                    </p>
+                  <div className="flex items-start gap-2">
+                    <Clock className="w-4 h-4 text-ff-gold mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display">
+                        {locale === 'de' ? 'Zeit' : 'Time'}
+                      </p>
+                      <p className="text-sm font-semibold text-ff-near-black">{seat.time}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 sm:col-span-2">
+                    <MapPin className="w-4 h-4 text-ff-gold mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display">
+                        {locale === 'de' ? 'Ort' : 'Location'}
+                      </p>
+                      <p className="text-sm font-semibold text-ff-near-black">{locationName}</p>
+                      <p className="text-xs text-ff-text-muted">{locationAddress}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            )
-          })}
+
+              {/* Dashed separator */}
+              <div className="border-b-2 border-dashed border-ff-near-black mx-6" />
+
+              {/* Ticket footer — attendee + booking ref */}
+              <div className="px-6 py-4 bg-[#f6f3f0] flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display mb-0.5">
+                    {locale === 'de' ? 'Teilnehmer' : 'Attendee'}
+                  </p>
+                  <p className="text-sm font-semibold text-ff-near-black">
+                    {seat.name ||
+                      (locale === 'de'
+                        ? `${seat.seatIndex + 1} Platz`
+                        : `Seat ${seat.seatIndex + 1}`)}
+                  </p>
+                  {seat.note && (
+                    <p className="text-xs text-ff-text-muted mt-0.5 max-w-xs">{seat.note}</p>
+                  )}
+                </div>
+
+                <div className="text-right">
+                  <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display">
+                    {locale === 'de' ? 'Buchungs-Nr.' : 'Booking Ref.'}
+                  </p>
+                  <p className="text-sm font-semibold text-ff-near-black font-mono">
+                    {seat.bookingRef}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
