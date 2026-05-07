@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FermentFreude — Bestell- & Geschenk-Flow · Plan für David & Marcel</title>
+    <style>
+      :root {
+        --bg: #f6f3f0;
+        --surface: #ffffff;
+        --ink: #1a1a1a;
+        --ink-soft: #555251;
+        --muted: #8a8783;
+        --line: #e8dfd0;
+        --accent: #c89a3a;
+        --green: #2f7a3e;
+        --red: #b3261e;
+        --amber: #b25e09;
+        --info: #2a5d8f;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .page {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 48px 28px 96px;
+      }
+      header.cover {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 40px 36px;
+        margin-bottom: 32px;
+      }
+      header.cover .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+        color: var(--accent);
+        font-weight: 700;
+        margin: 0 0 12px;
+      }
+      header.cover h1 {
+        font-size: 34px;
+        line-height: 1.15;
+        margin: 0 0 8px;
+        letter-spacing: -0.01em;
+      }
+      header.cover p.lede {
+        margin: 0;
+        color: var(--ink-soft);
+        font-size: 17px;
+      }
+      header.cover .meta {
+        margin-top: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      header.cover .meta strong { color: var(--ink); font-weight: 600; }
+
+      section {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 28px 32px;
+        margin-bottom: 22px;
+      }
+      section h2 {
+        font-size: 22px;
+        margin: 0 0 14px;
+        letter-spacing: -0.005em;
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+      }
+      section h2 .num {
+        font-size: 12px;
+        font-weight: 700;
+        background: var(--ink);
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 999px;
+        letter-spacing: 0.04em;
+      }
+      section h3 {
+        font-size: 16px;
+        margin: 22px 0 8px;
+        color: var(--ink);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+      }
+      p { margin: 0 0 12px; color: var(--ink-soft); }
+      ul, ol { margin: 0 0 14px 22px; padding: 0; color: var(--ink-soft); }
+      li { margin-bottom: 6px; }
+      strong { color: var(--ink); font-weight: 600; }
+      em { color: var(--ink); font-style: normal; font-weight: 500; }
+      code {
+        background: #f0ece5;
+        border: 1px solid var(--line);
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+
+      .callout {
+        border-left: 4px solid var(--accent);
+        background: #fbf4e6;
+        padding: 14px 18px;
+        border-radius: 6px;
+        margin: 16px 0;
+      }
+      .callout.warn { border-left-color: var(--amber); background: #fff4e0; }
+      .callout.bad  { border-left-color: var(--red);   background: #fbe7e6; }
+      .callout.ok   { border-left-color: var(--green); background: #e9f3ec; }
+      .callout.info { border-left-color: var(--info);  background: #e7f0f8; }
+      .callout p { margin: 0; color: var(--ink); }
+      .callout p + p { margin-top: 8px; }
+      .callout .tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 6px;
+        color: var(--ink);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 12px 0 18px;
+        font-size: 14px;
+      }
+      th, td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        background: #faf6ee;
+        font-weight: 700;
+        color: var(--ink);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      td { color: var(--ink-soft); }
+      td strong { color: var(--ink); }
+
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .pill.high   { background: #fbe7e6; color: var(--red); }
+      .pill.med    { background: #fff4e0; color: var(--amber); }
+      .pill.low    { background: #e7f0f8; color: var(--info); }
+      .pill.future { background: #ece9e2; color: var(--muted); }
+      .pill.done   { background: #e9f3ec; color: var(--green); }
+
+      .seat-mock {
+        background: #fbf8f2;
+        border: 1px dashed var(--line);
+        border-radius: 10px;
+        padding: 18px 20px;
+        font-family: 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        white-space: pre;
+        color: var(--ink);
+        overflow-x: auto;
+        margin: 12px 0 18px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 12px 0 18px;
+      }
+      @media (max-width: 640px) {
+        .grid-2 { grid-template-columns: 1fr; }
+        header.cover { padding: 28px 22px; }
+        section { padding: 22px 20px; }
+      }
+
+      .footnote {
+        text-align: center;
+        margin-top: 32px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      hr.soft {
+        border: none;
+        border-top: 1px solid var(--line);
+        margin: 22px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="cover">
+        <p class="eyebrow">Status-Report für David &amp; Marcel · Mai 2026</p>
+        <h1>Checkout, Rechnung &amp; Geschenk-Flow</h1>
+        <p class="lede">
+          Wo wir gerade stehen, was kaputt ist, was schon läuft, und wie ein sauberer
+          Checkout für euch aussehen wird — inkl. der Antworten auf eure E-Mail.
+        </p>
+        <div class="meta">
+          <span><strong>Status:</strong> In Arbeit — Sprint 1 startet diese Woche</span>
+          <span><strong>Risiko:</strong> Niedrig — alles auf Staging testbar</span>
+        </div>
+
+        <div class="callout info" style="margin-top: 22px;">
+          <span class="tag">Persönliche Notiz von Rafaela</span>
+          <p>
+            Hallo ihr beiden — ich wollte diesen Report eigentlich schon gestern fertig haben,
+            war aber den ganzen Tag draußen und konnte nicht dran arbeiten. Heute bin ich dran
+            und setze die ersten Fixes direkt um. Unten findet ihr den ehrlichen Stand:
+            was läuft, was nicht, was als Nächstes passiert — plus die Antworten auf eure
+            Fragen zum Issue-Tracker und zum Weiter-Testen.
+          </p>
+        </div>
+      </header>
+
+      <!-- ─────────────── 1. Was wir heute sehen ─────────────── -->
+      <section>
+        <h2><span class="num">1</span>Was heute kaputt ist (echte Beispiele)</h2>
+        <p>
+          Ausgangspunkt: eine Test-Bestellung mit der echten Bestellbestätigungs-E-Mail und dem
+          PDF-Anhang. Wir haben fünf konkrete Probleme gefunden.
+        </p>
+
+        <div class="callout bad">
+          <span class="tag">Bug 1 · Hoch</span>
+          <p>
+            <strong>„Rechnung herunterladen" zeigt: Invalid or expired download token.</strong>
+            Der Sicherheitsschlüssel für den PDF-Link wird bei jeder E-Mail neu erzeugt und
+            überschreibt den vorherigen. Sobald die zweite Bestätigungs-Mail rausgeht
+            (z. B. nach Stripe-Zahlungsbestätigung), ist der Link aus der ersten Mail tot.
+          </p>
+        </div>
+
+        <div class="callout bad">
+          <span class="tag">Bug 2 · Hoch</span>
+          <p>
+            <strong>In der E-Mail steht „Deine Artikel werden in der Bestellübersicht angezeigt"
+            und Zwischensumme: —.</strong>
+            Das ist der Notfall-Text, weil die Artikelliste &amp; die Zwischensumme leer ankommen.
+            Der Gesamtbetrag (€304,20) wird angezeigt, aber der Kunde sieht nicht, was er gekauft
+            hat. Wirkt unprofessionell.
+          </p>
+        </div>
+
+        <div class="callout warn">
+          <span class="tag">Bug 3 · Hoch · UX-Verwirrung</span>
+          <p>
+            <strong>Das PDF zeigt €99 — die Bestellung war €304,20.</strong>
+            Korrekt erklärbar (das PDF ist die Quittung für <em>einen Sitzplatz</em>),
+            aber für den Kunden sieht es nach einer falschen Rechnung aus. Wir haben heute zwei
+            parallele E-Mail-Flows, die nicht zueinander passen:
+          </p>
+          <ul>
+            <li><strong>Bestellbestätigung</strong> (mit defektem Link &amp; leerer Liste)</li>
+            <li><strong>Workshop-Buchungsbestätigung</strong> (mit funktionierendem PDF pro Sitz)</li>
+          </ul>
+        </div>
+
+        <div class="callout warn">
+          <span class="tag">Bug 4 · Mittel · Rechtlich relevant</span>
+          <p>
+            <strong>Die Rechnung enthält Platzhalter:</strong>
+            <code>IBAN: AT[XX XXXX...]</code>, <code>BIC: [BICXXXXXXXX]</code>,
+            <code>UID: ATU[XXXXXXXX]</code>, <code>FN [XXXXXXXX]</code>, „Schottenring 16".
+            Ihr habt eure echten Geschäftsdaten nie eingegeben.
+            Für eine gültige Rechnung in Österreich müssen UID, FN und Bankdaten korrekt sein.
+          </p>
+        </div>
+
+        <div class="callout warn">
+          <span class="tag">Bug 5 · Mittel · Rechtlich relevant</span>
+          <p>
+            <strong>Falsches Rechnungsdatum.</strong>
+            Heute steht im PDF immer das aktuelle Datum, an dem der Kunde es runterlädt.
+            Korrekt wäre das <em>Zahlungsdatum</em>. Wer das PDF nächsten Monat neu öffnet,
+            sieht ein anderes Datum.
+          </p>
+        </div>
+      </section>
+
+      <!-- ─────────────── 2. Geistiges Modell ─────────────── -->
+      <section>
+        <h2><span class="num">2</span>Das mentale Modell — was ist eine Bestellung, eine Buchung, ein Gutschein?</h2>
+        <p>
+          Heute werden im Code drei verschiedene Dinge nebeneinander geführt. Sobald wir
+          sauber benennen, was was ist, beantworten sich 80 % der „soll diese E-Mail an X
+          oder Y?"-Fragen von selbst. Hier die Definitionen plus der ehrliche Status — was
+          läuft, was fehlt, was später kommt.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Begriff</th>
+              <th>Was es ist</th>
+              <th>Status heute</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bestellung</strong> (Order)</td>
+              <td>
+                Der Kauf, für den <em>eine</em> Rechnung ausgestellt wird. Ein Zahler, eine
+                Summe, ein PDF.
+              </td>
+              <td><span class="pill done">funktioniert</span> &mdash; bis auf die 5 Bugs aus Abschnitt 1.</td>
+            </tr>
+            <tr>
+              <td><strong>Buchung</strong> (Booking)</td>
+              <td>
+                Ein einzelner Sitzplatz bei einem konkreten Workshop-Termin. Eine Person,
+                ein Datum, eine Bestätigungs-E-Mail (geplant: mit Kalender-Datei).
+              </td>
+              <td><span class="pill med">teilweise</span> &mdash; siehe Erklärung unten.</td>
+            </tr>
+            <tr>
+              <td><strong>Gutschein</strong> (Voucher)</td>
+              <td>
+                Vorausbezahltes Guthaben ohne festes Datum/Workshop. Der Empfänger löst
+                später selbst ein.
+              </td>
+              <td><span class="pill done">funktioniert</span> &mdash; siehe Erklärung unten.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Wie Buchungen heute funktionieren</h3>
+        <p>
+          Der Kunde wählt auf einer Workshop-Seite einen Termin (z. B. Lakto am 22.05.) und
+          eine Anzahl Plätze. Stripe-Zahlung läuft, danach passiert in dieser Reihenfolge:
+        </p>
+        <ol>
+          <li>Eine <strong>Bestellung</strong> wird angelegt mit der Anzahl bezahlter Plätze.</li>
+          <li>Pro Platz wird automatisch eine <strong>Buchung</strong> erzeugt
+              (<code>WorkshopBookings</code>-Sammlung im Admin).</li>
+          <li>Der freie Platz-Zähler des Workshop-Termins (<code>workshop-appointments</code>)
+              wird entsprechend reduziert.</li>
+          <li>Der Zahler bekommt die Bestellbestätigung. Pro Buchung geht zusätzlich eine
+              Workshop-Bestätigung raus (heute identisch an den Zahler &mdash; siehe nächster Punkt).</li>
+        </ol>
+        <p>
+          <strong>Was funktioniert:</strong> Plätze werden korrekt reserviert, im Admin sind
+          alle Buchungen sichtbar, ihr seht pro Termin die Teilnehmerzahl. <strong>Was fehlt:</strong>
+          eine Buchung kennt heute nur die <em>Stückzahl</em>, nicht <em>wer</em> auf dem Platz
+          sitzt. Deshalb kann eine Geschenk-Mail oder ein Namensschild für die Begleitung heute
+          nicht automatisch entstehen — das holen wir in Sprint 3 nach (Pro-Sitz-Felder Name /
+          E-Mail / Notiz, siehe Mockup in Abschnitt 5).
+        </p>
+
+        <h3>Wie der Gutschein heute funktioniert</h3>
+        <p>
+          Der Gutschein ist ein eigenes Produkt unter <code>/workshops/voucher</code> mit
+          eigenem Checkout. <strong>Es funktioniert vollständig:</strong>
+        </p>
+        <ul>
+          <li>Wert auswählen (z. B. €99 oder freier Betrag), kaufen, Stripe-Zahlung.</li>
+          <li>Eindeutiger Gutschein-Code wird generiert und per E-Mail zugestellt.</li>
+          <li>Empfänger löst beim Workshop-Checkout mit Code ein, Restguthaben bleibt erhalten.</li>
+          <li>Mehrere Gutscheine in einer Bestellung sind möglich (1, 2 oder mehr — funktioniert).</li>
+        </ul>
+
+        <div class="callout warn">
+          <span class="tag">Was beim Gutschein <em>fehlt</em> (nicht „kaputt", sondern „noch nicht gebaut")</span>
+          <p>
+            Der Gutschein-Kauf läuft heute in einem <strong>separaten Checkout</strong>, parallel
+            zum Workshop-Warenkorb. Das heißt:
+          </p>
+          <ul>
+            <li><strong>Man kann einen Gutschein nicht zusammen mit einem Workshop in den
+                gleichen Warenkorb legen.</strong> Wer beides will, muss heute zwei Bestellungen
+                machen.</li>
+            <li><strong>Es gibt nur eine Lieferart:</strong> die Code-Mail geht immer an die
+                E-Mail-Adresse, die im Checkout eingegeben wurde. Keine Wahl zwischen „direkt
+                an Empfänger / an mich zum Weiterleiten / PDF zum Selbst-Ausdrucken".</li>
+            <li><strong>Keine persönliche Notiz</strong> auf der Gutschein-Karte und keine
+                Live-Vorschau wie bei Rare Beauty (drei Optionen: per Link, per E-Mail an die
+                beschenkte Person, oder PDF-Download — siehe euer Screenshot).</li>
+          </ul>
+          <p>
+            Das ist das Feature-Set, das Rafaela im Sinn hatte als „Rare-Beauty-Pattern".
+            Sprint 3 baut das ein und vereinheitlicht es mit den Pro-Sitz-Feldern für
+            Workshop-Geschenke, damit Gutschein und Geschenk denselben sauberen Flow nutzen.
+          </p>
+        </div>
+
+        <div class="callout info">
+          <p>
+            <strong>Die einzige Beziehung, die zählt:</strong> Eine Bestellung kann mehrere
+            Buchungen <em>und/oder</em> mehrere Gutscheine enthalten. Der Zahler bekommt
+            immer eine Rechnung über alles. Jeder Teilnehmer bekommt seine eigene
+            Workshop-Mail. Jeder Gutschein-Empfänger bekommt seinen eigenen Code.
+          </p>
+        </div>
+      </section>
+
+      <!-- ─────────────── 3. Geschenk-Frage ─────────────── -->
+      <section>
+        <h2><span class="num">3</span>Geschenk, Gutschein, Begleitung — wo der Toggle hingehört</h2>
+
+        <div class="callout info">
+          <span class="tag">Klarstellung</span>
+          <p>
+            Beim letzten Gespräch ging es um den Toggle, den Rare Beauty im Checkout zeigt.
+            <strong>Dieser Toggle ist <em>nicht</em> für „Geschenk ja/nein", sondern für
+            „Mit oder ohne Konto bestellen" (Guest Checkout vs. Konto anlegen).</strong>
+            Genau diesen Toggle bauen wir auch ein — siehe Sprint 2.
+          </p>
+          <p>
+            Die Frage „ist das ein Geschenk?" ist eine andere Geschichte und gehört <em>pro
+            Sitzplatz</em> in den Warenkorb (siehe Mockup unten), nicht als globaler Schalter.
+            Warum, erklären wir gleich.
+          </p>
+        </div>
+
+        <p>
+          Wenn jemand einen Workshop für jemand anderen kauft, soll das automatisch einen
+          Gutschein verschicken? <strong>Nein</strong> — das wäre die falsche Lösung, weil
+          <strong>drei verschiedene Szenarien existieren</strong>, aber ein einfacher Toggle
+          nur zwei kennt.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Szenario</th>
+              <th>Was der Kunde will</th>
+              <th>Was passieren muss</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ich + Freund</strong></td>
+              <td>2 Plätze, gleiches Datum, ich bringe meine Partnerin mit.</td>
+              <td>1 Bestätigung an mich. Vielleicht Name der +1 fürs Namensschild.</td>
+            </tr>
+            <tr>
+              <td><strong>Geschenk an konkretes Datum</strong></td>
+              <td>Ich kaufe Lakto am 22.05. und schenke es Anna.</td>
+              <td>Anna bekommt eine „Du hast einen Workshop geschenkt bekommen"-Mail mit
+                  Kalender-Datei. <em>Kein Preis</em>. Ich bekomme die Rechnung.</td>
+            </tr>
+            <tr>
+              <td><strong>Gutschein</strong></td>
+              <td>Ich weiß noch nicht welcher Workshop / welches Datum — Anna soll selbst wählen.</td>
+              <td>Gutschein-Code wird per E-Mail an Anna geschickt (oder an mich zum Ausdrucken).
+                  Anna löst später ein.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          <strong>Die Lösung:</strong> Wir lassen den Gutschein als eigenes Produkt
+          (<code>/workshops/voucher</code>), und auf <em>jedem Workshop</em> bekommt jeder Sitz
+          ein paar optionale Felder — Name, E-Mail, Notiz. Das ist es schon.
+        </p>
+      </section>
+
+      <!-- ─────────────── 3b. Checkout-Szenarien ─────────────── -->
+      <section>
+        <h2><span class="num">4</span>Checkout-Szenarien — wer durchläuft welchen Flow</h2>
+        <p>
+          Damit klar ist, was wir bauen müssen: das hier sind die realen Wege, die ein Kunde
+          nehmen kann. Jede Zeile = ein Hypothesen-Fall. Status zeigt, was heute schon geht
+          und was noch fehlt.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Wer / Was</th>
+              <th>Konto?</th>
+              <th>Was im Warenkorb passiert</th>
+              <th>E-Mails</th>
+              <th>Status heute</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Stammkunde, 1 Workshop für sich</strong></td>
+              <td>Eingeloggt</td>
+              <td>Daten vorausgefüllt, „Sitz für mich" vorausgewählt.</td>
+              <td>1× Bestellbestätigung + Rechnung + Workshop-Mail.</td>
+              <td><span class="pill med">teilweise</span> — E-Mail kommt, aber Link &amp; Liste kaputt</td>
+            </tr>
+            <tr>
+              <td><strong>Neukunde, 1 Workshop, kein Konto gewünscht</strong></td>
+              <td>Gast</td>
+              <td>Toggle „ohne Konto bestellen" (wie Rare Beauty) — nur Pflichtfelder.</td>
+              <td>Gleiche E-Mails, plus Hinweis „du kannst dir hier ein Konto anlegen".</td>
+              <td><span class="pill high">fehlt</span> — Guest-Checkout-Toggle existiert noch nicht</td>
+            </tr>
+            <tr>
+              <td><strong>Neukunde, 1 Workshop, möchte Konto</strong></td>
+              <td>Registriert beim Checkout</td>
+              <td>Toggle „Konto anlegen" → Passwort-Feld erscheint.</td>
+              <td>Bestätigung + Workshop-Mail + Willkommens-Mail.</td>
+              <td><span class="pill high">fehlt</span> — kein Inline-Account-Anlegen</td>
+            </tr>
+            <tr>
+              <td><strong>Paar/Freunde, 2 Plätze gleicher Workshop</strong></td>
+              <td>Egal</td>
+              <td>Sitz 1 = ich. Sitz 2 = Begleitung — nur Name optional fürs Namensschild.</td>
+              <td>1× Bestellbestätigung + Rechnung + 1× Workshop-Mail an Zahler (nennt Begleitung).</td>
+              <td><span class="pill high">fehlt</span> — heute nur Stückzahl, keine Pro-Sitz-Felder</td>
+            </tr>
+            <tr>
+              <td><strong>Geschenk an konkretes Datum</strong></td>
+              <td>Egal</td>
+              <td>Sitz 2: Name + E-Mail des Beschenkten + persönliche Notiz.</td>
+              <td>Zahler: Rechnung. Empfänger: „Du hast einen Workshop geschenkt bekommen" + .ics, <em>ohne Preis</em>.</td>
+              <td><span class="pill high">fehlt</span> — heute keine separate E-Mail-Vorlage</td>
+            </tr>
+            <tr>
+              <td><strong>Gutschein (offenes Guthaben)</strong></td>
+              <td>Egal</td>
+              <td>Eigenes Produkt <code>/workshops/voucher</code>. Lieferart wählbar.</td>
+              <td>Zahler: Rechnung. Empfänger (oder Zahler): Gutschein-Code + Einlöse-Anleitung.</td>
+              <td><span class="pill med">teilweise</span> — Produkt da, UX/Lieferart fehlt</td>
+            </tr>
+            <tr>
+              <td><strong>Gemischter Warenkorb</strong> (Workshop + Buch)</td>
+              <td>Egal</td>
+              <td>Pro Workshop-Sitz die Felder oben. Versand-Adresse für Buch.</td>
+              <td>Bestellbestätigung + Versand-Tracking + Workshop-Mails.</td>
+              <td><span class="pill med">teilweise</span> — Versand-Mails noch nicht final</td>
+            </tr>
+            <tr>
+              <td><strong>Firmen-/Gruppenbuchung (5+ Plätze)</strong></td>
+              <td>Eingeloggt empfohlen</td>
+              <td>Mengenrabatt-Hinweis. Pro Sitz Name (Teilnehmerliste fürs Catering).</td>
+              <td>Eine Sammel-Rechnung an die Firma + 5× Workshop-Mails an Mitarbeiter.</td>
+              <td><span class="pill future">später</span> — kein Sondercase im Sprint 1–3</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          <strong>Lesart:</strong> Sprint 1 stoppt die Blutung für die ersten zwei Zeilen.
+          Sprint 2 macht Guest-Checkout &amp; Inline-Konto-Anlegen (die Rare-Beauty-Idee).
+          Sprint 3 macht alle Geschenk-/Gutschein-/Begleitungs-Fälle in einem Aufwasch.
+        </p>
+      </section>
+
+      <!-- ─────────────── 4. Warenkorb-Mockup ─────────────── -->
+      <section>
+        <h2><span class="num">5</span>So sieht der neue Warenkorb aus</h2>
+        <p>
+          Wenn jemand z. B. 2× „Lakto-fermentiertes Gemüse" am 22.05. in den Warenkorb legt,
+          klappen <em>pro Sitzplatz</em> ein paar optionale Felder auf:
+        </p>
+
+        <div class="seat-mock">Lakto-fermentiertes Gemüse — 22. Mai 2026 · 17:30        €99,00
+
+┌─────────────────────────────────────────────────────────────┐
+│  Sitzplatz 1                          [✓ für mich — David]  │  ← automatisch
+│                                                             │
+│  Sitzplatz 2  ⓘ Wer nimmt diesen Platz wahr?               │
+│    ◯ Ich bringe jemanden mit (eigener Name optional)        │
+│    ◉ Das ist ein Geschenk — direkt an die Person schicken   │
+│       Name:    [____________]                               │
+│       E-Mail:  [____________]                               │
+│       Notiz:   [____________]   (optional, max 500 Z.)      │
+│       ☐ Geschenk-Mail jetzt senden                          │
+│         (Standard: bei erfolgreicher Zahlung)               │
+└─────────────────────────────────────────────────────────────┘</div>
+
+        <p>
+          <strong>Was das technisch löst:</strong>
+        </p>
+        <ul>
+          <li>Wir wissen pro Sitz, ob es ein Geschenk ist → richtige E-Mail-Vorlage.</li>
+          <li>Wir wissen, an wen die Workshop-Bestätigung mit Kalender-Datei geht.</li>
+          <li>Der Zahler bekommt <em>immer</em> die volle Rechnung — Geschenk-Mails enthalten
+              <em>nie</em> einen Preis.</li>
+          <li>Namen tauchen automatisch auf der Teilnehmerliste auf, die ihr zum Workshop bekommt.</li>
+        </ul>
+      </section>
+
+      <!-- ─────────────── 5. E-Mail-Matrix ─────────────── -->
+      <section>
+        <h2><span class="num">6</span>Welche E-Mail geht an wen?</h2>
+        <p>Die klare Regel — gilt für jede Bestellung:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Sitz-Konfiguration</th>
+              <th>E-Mail an Zahler</th>
+              <th>E-Mail an Empfänger</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Standard (kein Empfänger angegeben)</td>
+              <td>Bestellbestätigung mit Rechnungs-PDF + Workshop-Infos + Kalender</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Nur Name eingegeben („+1 Lisa")</td>
+              <td>Bestellbestätigung mit Rechnungs-PDF — nennt „+1 Lisa" als Begleitung</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Name + E-Mail (Geschenk)</td>
+              <td>Bestellbestätigung mit Rechnungs-PDF (zeigt: 1× Geschenk an Anna)</td>
+              <td>„Du hast einen Workshop geschenkt bekommen" + Kalender + persönliche Notiz.
+                  <strong>Ohne Preis.</strong></td>
+            </tr>
+            <tr>
+              <td>Gutschein gekauft</td>
+              <td>Bestellbestätigung mit Rechnungs-PDF</td>
+              <td>Gutschein-Code mit Anleitung zum Einlösen (oder PDF zum Selbst-Ausdrucken,
+                  wenn der Zahler das gewählt hat)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ─────────────── 6. Was wir am Gutschein verbessern ─────────────── -->
+      <section>
+        <h2><span class="num">7</span>Gutschein-Flow aufräumen</h2>
+        <p>Das gleiche Empfänger-Schema wie oben, aber speziell für Gutscheine zugeschnitten:</p>
+        <ul>
+          <li><strong>Drei Lieferarten:</strong> direkt an Empfänger / an mich (zum Weiterleiten) / PDF zum Ausdrucken.</li>
+          <li><strong>Persönliche Notiz</strong> (max. 500 Zeichen) auf der Gutschein-Karte.</li>
+          <li><strong>Live-Vorschau</strong> der Gutschein-Karte beim Ausfüllen — wie Rare Beauty.</li>
+          <li><strong>Geplanter Versand</strong> (z. B. „am 24.12. um 8 Uhr morgens") —
+              technisch via Brevo möglich, ca. 1 Tag Arbeit. <em>Sprint „Future".</em></li>
+          <li><strong>Geschäftsdaten</strong> (UID, FN, IBAN) kommen aus derselben zentralen
+              Quelle wie die normalen Rechnungen — einmal pflegen, überall korrekt.</li>
+        </ul>
+      </section>
+
+      <!-- ─────────────── 7. Sprint-Plan ─────────────── -->
+      <section>
+        <h2><span class="num">8</span>Sprint-Plan — Reihenfolge zum Umsetzen</h2>
+
+        <h3>Sprint 1 · „Blutung stoppen" <span class="pill done">in Arbeit</span></h3>
+        <ol>
+          <li>Download-Token nicht mehr neu erzeugen — einmal generieren, dann wiederverwenden.</li>
+          <li>Bestellbestätigung zeigt immer Artikelliste &amp; Zwischensumme — nie mehr „—".</li>
+          <li>Rechnungsdatum = Zahlungsdatum, dauerhaft gespeichert.</li>
+          <li>Geschäftsdaten (Adresse, IBAN, BIC, UID, FN) in das Admin-Panel als ein zentrales
+              Feld. Ihr pflegt es einmal, alle PDFs ziehen daraus.</li>
+        </ol>
+
+        <h3>Sprint 2 · „Klarer Checkout &amp; eine Rechnung"</h3>
+        <ol>
+          <li><strong>Guest-Checkout-Toggle</strong> (à la Rare Beauty): „ohne Konto bestellen"
+              vs. „Konto anlegen" — direkt im Checkout, kein Zwang zur Registrierung.</li>
+          <li>Eine Bestell-Rechnung pro Bestellung (statt eine pro Sitz). Pro-Sitz-PDFs werden zu
+              „Teilnahmebestätigungen" — keine Rechnungen mehr.</li>
+          <li>„Rechnung herunterladen"-Button im Konto-Bereich
+              (<code>/account/orders/[id]</code>) — nicht nur in der E-Mail.</li>
+          <li>Kalender-Datei (.ics) automatisch an jede Workshop-Bestätigung anhängen.</li>
+        </ol>
+
+        <h3>Sprint 3 · „Geschenk &amp; Gutschein vereinheitlicht"</h3>
+        <ol>
+          <li>Pro-Sitz-Felder im Warenkorb (Name / E-Mail / Notiz).</li>
+          <li>Neue E-Mail-Vorlage „Du hast einen Workshop geschenkt bekommen" (ohne Preis).</li>
+          <li>Gutschein-Seite bekommt dieselben Empfänger-Felder + Live-Vorschau.</li>
+          <li>Drei Lieferarten für Gutscheine.</li>
+        </ol>
+
+        <h3>Später · „Nice to have" <span class="pill future">parken</span></h3>
+        <ul>
+          <li>Geplanter Versand (z. B. zu Weihnachten) — Brevo unterstützt das nativ.</li>
+          <li>Mehrere Gutschein-Karten-Designs zur Auswahl.</li>
+          <li>SMS-Versand (von Brevo unterstützt) — nur wenn Bedarf.</li>
+        </ul>
+      </section>
+
+      <!-- ─────────────── 8b. Antworten auf eure Fragen ─────────────── -->
+      <section>
+        <h2><span class="num">9</span>Antworten auf eure Fragen aus der E-Mail</h2>
+
+        <h3>Issue-Tracker 2 oder schon Tracker 3?</h3>
+        <p>
+          <strong>Tracker 2 weiter befüllen, bis er voll ist.</strong> Ihr müsst nichts
+          umstellen. Wir lesen beide Tracker mit, und alles, was während Sprint 1 reinkommt,
+          fließt automatisch in die nächsten Sprints ein. Wechsel zu Tracker 3 macht ihr
+          einfach, wenn Tracker 2 unübersichtlich wird — nicht wegen uns.
+        </p>
+
+        <h3>Sollen wir weiter testen / am Dashboard / in Brevo arbeiten?</h3>
+        <p>
+          <strong>Ja, bitte testet wie gewohnt weiter.</strong> Es läuft im Hintergrund
+          <em>nichts</em>, was eure Tests stört oder eure Änderungen überschreiben würde:
+        </p>
+        <ul>
+          <li><strong>Buchungen testen:</strong> gerne. Jede Test-Bestellung hilft uns, weitere
+              Edge-Cases für die Checkout-Tabelle oben zu finden.</li>
+          <li><strong>Dashboard anpassen:</strong> ja — alles, was ihr im Admin ändert (Texte,
+              Bilder, Workshop-Daten), bleibt erhalten. Wir arbeiten ausschließlich am Code,
+              nicht an euren Inhalten.</li>
+          <li><strong>Brevo anpassen:</strong> ja, mit einer Einschränkung — die
+              Templates <code>72-order-confirmation</code> und die Workshop-Bestätigung
+              fassen wir gerade an. Wenn ihr da Texte/Layout ändern wollt, kurz Bescheid
+              geben, damit wir nichts überschreiben. Alle anderen Brevo-Templates &amp;
+              Listen sind frei.</li>
+          <li><strong>„Geht im Hintergrund was?":</strong> Nein — keine geheimen
+              Hintergrund-Jobs, keine automatischen Migrationen. Alles, was wir machen,
+              landet zuerst auf Staging, dann sehen wir es gemeinsam, dann live.</li>
+        </ul>
+
+        <div class="callout ok">
+          <p>
+            <strong>Kurzfassung:</strong> weitermachen wie bisher, Tracker 2 nutzen, weiter
+            testen, Dashboard &amp; Brevo gerne anfassen — bei den zwei genannten
+            E-Mail-Templates kurz pingen.
+          </p>
+        </div>
+      </section>
+
+      <!-- ─────────────── 9. Was wir von euch brauchen ─────────────── -->
+      <section>
+        <h2><span class="num">10</span>Was wir von euch brauchen — bevor Sprint 1 fertig wird</h2>
+        <ul>
+          <li><strong>Geschäftsdaten:</strong> echte Geschäftsadresse, UID-Nummer, FN-Nummer + Gericht,
+              IBAN, BIC, Bankname.</li>
+          <li><strong>Freigabe</strong> dieses Plans — Sprint 1 starten wir nach eurem „Go".</li>
+          <li><strong>Optional, aber hilfreich:</strong> Wenn ihr einen Wunsch-Wortlaut für die
+              „Du hast einen Workshop geschenkt bekommen"-E-Mail habt, schickt ihn uns. Sonst
+              schreiben wir einen Vorschlag, ihr passt ihn an.</li>
+        </ul>
+      </section>
+
+      <!-- ─────────────── 10. Was wir NICHT machen ─────────────── -->
+      <section>
+        <h2><span class="num">11</span>Was wir bewusst <em>nicht</em> tun</h2>
+        <ul>
+          <li>Kein „Ist das ein Geschenk?"-Schalter — das verwirrt mehr als es hilft.</li>
+          <li>Kein automatischer Gutschein bei Geschenk-Käufen — Gutschein und Geschenk-Buchung
+              sind verschiedene Produkte.</li>
+          <li>Keine Änderungen an bestehenden Buchungen oder Daten ohne explizite Freigabe.</li>
+          <li>Alles wird zuerst auf Staging getestet, bevor es live geht.</li>
+        </ul>
+      </section>
+
+      <p class="footnote">
+        FermentFreude OG · Status-Report v2 · 6. Mai 2026 · für David &amp; Marcel
+      </p>
+    </div>
+  </body>
+</html>

@@ -63,7 +63,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!VALID_DELIVERY_METHODS.includes(body.deliveryMethod as (typeof VALID_DELIVERY_METHODS)[number])) {
+    if (
+      !VALID_DELIVERY_METHODS.includes(
+        body.deliveryMethod as (typeof VALID_DELIVERY_METHODS)[number],
+      )
+    ) {
       return NextResponse.json(
         { success: false, error: 'Invalid delivery method.' },
         { status: 400 },

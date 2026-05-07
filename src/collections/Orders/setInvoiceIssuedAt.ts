@@ -10,11 +10,7 @@ import type { CollectionAfterChangeHook } from 'payload'
  *
  * Sequential write only (Atlas M0 has no transactions).
  */
-export const setInvoiceIssuedAt: CollectionAfterChangeHook = async ({
-  doc,
-  operation,
-  req,
-}) => {
+export const setInvoiceIssuedAt: CollectionAfterChangeHook = async ({ doc, operation, req }) => {
   if (operation !== 'create') return doc
 
   const existing = (doc as { invoiceIssuedAt?: string | null }).invoiceIssuedAt

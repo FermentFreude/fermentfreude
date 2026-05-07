@@ -37,6 +37,7 @@ const V2_TEMPLATES = [
   { id: 71, slug: 'login-notification' },
   { id: 72, slug: 'order-confirmation' },
   { id: 73, slug: 'voucher-purchased' },
+  { id: 93, slug: 'workshop-gift' },
 ]
 
 // Mock params per template for test sends
@@ -53,6 +54,7 @@ const MOCK = {
     GUEST_COUNT: '2',
     TOTAL_PRICE: '€ 178,00',
     WHAT_TO_BRING: 'Schürze · ein Glas (500 ml) · Lust auf gute Gespräche',
+    RECEIPT_URL: 'https://www.fermentfreude.at/api/bookings/abc123/receipt?token=test-token',
     WORKSHOP_BOOKINGS_HTML: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#fff;border:1px solid #E8DFD0;border-radius:8px;margin:8px 0;"><tr><td style="padding:18px 20px 8px;"><div style="font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#8a8783;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Workshop</div><div style="font-family:Helvetica,Arial,sans-serif;font-size:18px;color:#1a1a1a;font-weight:700;margin-top:4px;">Tempeh Basics</div></td></tr><tr><td style="padding:8px 20px 18px;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#555251;line-height:1.6;">Sa, 6. Juni 2026 · 10:00 – 14:00 · Studio Wien · 2 Plätze · € 178,00</td></tr></table>`,
     PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
     AGB_URL: 'https://www.fermentfreude.at/agb',
@@ -97,6 +99,7 @@ const MOCK = {
     SHIPPING: '€ 5,90',
     TOTAL: '€ 59,90',
     SHIPPING_ADDRESS: 'Max Mustermann\nMusterstraße 1\n1010 Wien\nÖsterreich',
+    RECEIPT_URL: 'https://www.fermentfreude.at/api/orders/order_abc123/receipt?token=test-token',
     ORDER_ITEMS_HTML: `
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
   <tr><td style="padding:14px 0;border-bottom:1px solid #E8DFD0;">
@@ -113,6 +116,18 @@ const MOCK = {
   </td></tr>
 </table>`,
     WORKSHOP_BOOKINGS_HTML: '',
+    PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
+    AGB_URL: 'https://www.fermentfreude.at/agb',
+  },
+  93: {
+    RECIPIENT_NAME: 'Lena',
+    SENDER_NAME: 'Max',
+    GIFT_NOTE: 'Ich dachte mir, das ist genau dein Ding — viel Spaß damit!',
+    WORKSHOP_TITLE: 'Tempeh Basics',
+    WORKSHOP_DATE: 'Sa, 6. Juni 2026',
+    WORKSHOP_TIME: '10:00 – 14:00',
+    WORKSHOP_LOCATION: 'Studio Wien, Schönbrunner Str. 12, 1050',
+    WHAT_TO_BRING: 'Schürze · ein Glas (500 ml) · Lust auf gute Gespräche',
     PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
     AGB_URL: 'https://www.fermentfreude.at/agb',
   },
@@ -174,6 +189,21 @@ async function updateTemplateHtml(id, html) {
   })
 }
 
+async function createTemplate({ name, subject, htmlContent, replyTo, tag }) {
+  return brevoFetch(`https://api.brevo.com/v3/smtp/templates`, {
+    method: 'POST',
+    body: JSON.stringify({
+      templateName: name,
+      subject,
+      sender: { name: 'FermentFreude', email: 'kontakt@fermentfreude.at' },
+      replyTo: replyTo || 'kontakt@fermentfreude.at',
+      htmlContent,
+      isActive: true,
+      tag: tag || 'v2-2026-05',
+    }),
+  })
+}
+
 async function sendTestEmail(id, params) {
   const tpl = await getTemplate(id)
   return brevoFetch(`https://api.brevo.com/v3/smtp/email`, {
@@ -189,10 +219,14 @@ async function sendTestEmail(id, params) {
   })
 }
 
-function loadHtml(id) {
+function loadHtml(id, slug) {
   const files = readdirSync(TEMPLATES_DIR)
-  const match = files.find((f) => f.startsWith(`${id}-`) && f.endsWith('.html'))
-  if (!match) throw new Error(`No HTML file for template ${id} in ${TEMPLATES_DIR}`)
+  let match = files.find((f) => f.startsWith(`${id}-`) && f.endsWith('.html'))
+  if (!match && slug) {
+    match = files.find((f) => f.endsWith(`-${slug}.html`) || f === `${slug}.html`)
+  }
+  if (!match)
+    throw new Error(`No HTML file for template ${id} (slug=${slug ?? '?'}) in ${TEMPLATES_DIR}`)
   return readFileSync(path.join(TEMPLATES_DIR, match), 'utf8')
 }
 
@@ -202,10 +236,47 @@ function loadHtml(id) {
 const args = process.argv.slice(2)
 const dryRun = args.includes('--dry')
 const testMode = args.includes('--test')
+const createMode = args.includes('--create')
 const idArg = args.find((a) => /^\d+$/.test(a))
-const targetIds = idArg
-  ? [Number(idArg)]
-  : V2_TEMPLATES.map((t) => t.id)
+const targetIds = idArg ? [Number(idArg)] : V2_TEMPLATES.map((t) => t.id)
+
+if (createMode) {
+  // Usage: --create <slug> --name "..." --subject "..."
+  // Reads HTML from public/email-templates/v2/<slug>.html (without numeric prefix)
+  const slugIdx = args.indexOf('--create')
+  const slug = args[slugIdx + 1]
+  if (!slug) {
+    console.error('Usage: --create <slug> [--name "..."] [--subject "..."]')
+    process.exit(1)
+  }
+  const nameIdx = args.indexOf('--name')
+  const subjIdx = args.indexOf('--subject')
+  const name = nameIdx > -1 ? args[nameIdx + 1] : `FermentFreude — ${slug}`
+  const subject = subjIdx > -1 ? args[subjIdx + 1] : 'FermentFreude'
+
+  // Find a file matching <id>-<slug>.html OR <slug>.html
+  const files = readdirSync(TEMPLATES_DIR)
+  const file = files.find(
+    (f) => f.endsWith('.html') && (f === `${slug}.html` || f.endsWith(`-${slug}.html`)),
+  )
+  if (!file) {
+    console.error(`No HTML file matching slug "${slug}" in ${TEMPLATES_DIR}`)
+    process.exit(1)
+  }
+  const html = readFileSync(path.join(TEMPLATES_DIR, file), 'utf8')
+  console.log(`\n📨 CREATE mode — slug=${slug}, file=${file}, ${html.length} bytes`)
+  console.log(`     name:    ${name}`)
+  console.log(`     subject: ${subject}\n`)
+  if (dryRun) {
+    console.log('(dry-run, not created)')
+    process.exit(0)
+  }
+  const r = await createTemplate({ name, subject, htmlContent: html })
+  console.log(`✓ Created Brevo template — ID = ${r.id}`)
+  console.log(`\n  → Add to .env / Vercel:`)
+  console.log(`     BREVO_TEMPLATE_WORKSHOP_GIFT_NOTIFICATION=${r.id}\n`)
+  process.exit(0)
+}
 
 if (testMode) {
   console.log(`\n🧪 TEST MODE — sending preview emails to ${TEST_EMAIL}\n`)
@@ -229,7 +300,8 @@ if (testMode) {
 console.log(`\n📧 ${dryRun ? 'DRY-RUN' : 'PUSH'} — ${targetIds.length} V2 template(s)\n`)
 for (const id of targetIds) {
   try {
-    const html = loadHtml(id)
+    const slug = V2_TEMPLATES.find((t) => t.id === id)?.slug
+    const html = loadHtml(id, slug)
     const before = await getTemplate(id)
     console.log(`  #${id} ${before.name}`)
     console.log(`     subject: ${before.subject}`)

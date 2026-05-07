@@ -155,7 +155,11 @@ function CheckoutForm({ session, t }: { session: VoucherSession; t: typeof CHECK
           )}
           {session.personalNote && (
             <span className="font-sans text-body-sm text-ff-gray-text italic">
-              “{session.personalNote.length > 80 ? session.personalNote.slice(0, 77) + '…' : session.personalNote}”
+              “
+              {session.personalNote.length > 80
+                ? session.personalNote.slice(0, 77) + '…'
+                : session.personalNote}
+              ”
             </span>
           )}
         </div>

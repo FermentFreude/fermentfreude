@@ -50,6 +50,11 @@ const ICONS = [
     r2: 'media/email/facebook.png',
     name: 'Facebook Icon',
   },
+  {
+    local: path.join(projectRoot, 'public/assets/icons/email/gift-dark.png'),
+    r2: 'media/email/gift-dark.png',
+    name: 'Gift Icon (dark)',
+  },
 ]
 
 async function uploadIcons() {

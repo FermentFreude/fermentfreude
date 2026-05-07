@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       SUBTOTAL: '€24,99',
       SHIPPING: '€5,00',
       TOTAL: '€29,99',
-      SHIPPING_ADDRESS: 'Max Mustermann, Musterstraße 1, 1010 Wien, Österreich',
+      SHIPPING_ADDRESS: 'Max Mustermann, Musterstraße 1, 8010 Graz, Österreich',
       ORDER_URL: 'https://fermentfreude.at/orders/12345',
       TRACKING_NUMBER: 'DHL123456789',
       CARRIER: 'DHL',

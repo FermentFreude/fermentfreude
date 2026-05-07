@@ -1,19 +1,16 @@
-import { jsPDF } from 'jspdf'
 import fs from 'fs'
+import { jsPDF } from 'jspdf'
 import path from 'path'
 
 // ─── Company Details ────────────────────────────────────────────────────────
+// Bank details (IBAN/BIC) are intentionally not printed on invoices —
+// every order is paid through Stripe, so customers never need bank info.
+// UID / FN are not shown until founders provide official numbers.
 const COMPANY = {
-  name: 'FermentFreude OG',
-  address: 'Schottenring 16',
-  city: '1010 Wien',
+  name: 'Fermentfreude OG',
+  address: 'Grabenstraße 15',
+  city: '8010 Graz',
   country: 'Österreich',
-  uid: 'ATU[XXXXXXXX]', // TODO: Replace with official UID number
-  fn: 'FN [XXXXXXXX]', // TODO: Replace with Firmenbuchnummer
-  handelsgericht: 'Handelsgericht Wien',
-  iban: 'AT[XX XXXX XXXX XXXX XXXX]', // TODO: Replace with official IBAN
-  bic: '[BICXXXXXXXX]', // TODO: Replace with official BIC
-  bank: '[Bank Name]', // TODO: Replace with bank name
   email: 'hello@fermentfreude.at',
   website: 'www.fermentfreude.at',
 }
@@ -45,12 +42,6 @@ export interface OrderReceiptBusinessInfo {
   email?: string | null
   website?: string | null
   phone?: string | null
-  uid?: string | null
-  fn?: string | null
-  court?: string | null
-  iban?: string | null
-  bic?: string | null
-  bank?: string | null
   vatRate?: number | null
   /** § 6 Abs. 1 Z 27 UStG — small business: no VAT shown on invoices. */
   isKleinunternehmer?: boolean | null
@@ -103,12 +94,6 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
     country: b.country || COMPANY.country,
     email: b.email || COMPANY.email,
     website: b.website || COMPANY.website,
-    uid: b.uid || COMPANY.uid,
-    fn: b.fn || COMPANY.fn,
-    court: b.court || COMPANY.handelsgericht,
-    iban: b.iban || COMPANY.iban,
-    bic: b.bic || COMPANY.bic,
-    bank: b.bank || COMPANY.bank,
     vatRate: typeof b.vatRate === 'number' && b.vatRate >= 0 ? b.vatRate / 100 : 0.2,
     isKleinunternehmer: b.isKleinunternehmer === true,
   }
@@ -238,7 +223,9 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   }
 
   // Right: order ID + payment status
-  let ry2 = y - (data.shippingAddress ? data.shippingAddress.split('\n').filter(Boolean).length * 4 + 10 : 10)
+  let ry2 =
+    y -
+    (data.shippingAddress ? data.shippingAddress.split('\n').filter(Boolean).length * 4 + 10 : 10)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(7)
   doc.setTextColor(...COLORS.grayLabel)
@@ -365,9 +352,14 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
     y += 6
   }
 
-  labelLine(data.locale === 'de' ? 'Nettobetrag' : 'Subtotal', formatCurrency(Math.round(netAmount)))
   labelLine(
-    data.locale === 'de' ? `MwSt. ${Math.round(vatRate * 100)}%` : `VAT ${Math.round(vatRate * 100)}%`,
+    data.locale === 'de' ? 'Nettobetrag' : 'Subtotal',
+    formatCurrency(Math.round(netAmount)),
+  )
+  labelLine(
+    data.locale === 'de'
+      ? `MwSt. ${Math.round(vatRate * 100)}%`
+      : `VAT ${Math.round(vatRate * 100)}%`,
     formatCurrency(Math.round(vatAmount)),
   )
 
@@ -404,73 +396,45 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   y += 6
 
   // ─── FOOTER BOX ──────────────────────────────────────────────────────────
-  const footerBoxY = Math.max(y, 220)
-  const footerBoxH = 30
+  // Single contact band — no bank details (Stripe-only payments) and no
+  // placeholder legal numbers. Will be expanded once founders provide UID/FN.
+  const footerBoxY = Math.max(y, 240)
+  const footerBoxH = 22
   const footerBoxPad = 5
 
   doc.setFillColor(...COLORS.lightGray)
   doc.rect(marginL, footerBoxY, contentWidth, footerBoxH, 'F')
 
-  const fc1X = marginL + footerBoxPad
-  const fc2X = marginL + contentWidth / 3 + footerBoxPad
-  const fc3X = marginL + (contentWidth * 2) / 3 + footerBoxPad
-  let fy = footerBoxY + footerBoxPad + 3
+  const centerX = marginL + contentWidth / 2
+  let fy = footerBoxY + footerBoxPad + 2
 
-  // Column 1: Payment Details
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(6.5)
   doc.setTextColor(...COLORS.grayLabel)
-  doc.text(data.locale === 'de' ? 'ZAHLUNGSDETAILS' : 'PAYMENT DETAILS', fc1X, fy)
+  doc.text(data.locale === 'de' ? 'KONTAKT' : 'CONTACT', centerX, fy, { align: 'center' })
   fy += 4
   doc.setFont('helvetica', 'normal')
-  doc.setFontSize(7)
+  doc.setFontSize(7.5)
   doc.setTextColor(...COLORS.darkText)
-  doc.text(`IBAN: ${biz.iban}`, fc1X, fy)
-  fy += 4
-  doc.text(`BIC: ${biz.bic}`, fc1X, fy)
-  fy += 4
-  doc.text(biz.bank, fc1X, fy)
-
-  // Column 2: Legal
-  let fy2 = footerBoxY + footerBoxPad + 3
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(6.5)
-  doc.setTextColor(...COLORS.grayLabel)
-  doc.text(data.locale === 'de' ? 'RECHTLICHE INFORMATIONEN' : 'LEGAL INFORMATION', fc2X, fy2)
-  fy2 += 4
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(7)
-  doc.setTextColor(...COLORS.darkText)
-  doc.text(biz.uid, fc2X, fy2)
-  fy2 += 4
-  doc.text(biz.fn, fc2X, fy2)
-  fy2 += 4
-  doc.text(biz.court, fc2X, fy2)
-
-  // Column 3: Thank you
-  let fy3 = footerBoxY + footerBoxPad + 3
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(6.5)
-  doc.setTextColor(...COLORS.grayLabel)
-  doc.text(data.locale === 'de' ? 'KONTAKT' : 'CONTACT', fc3X, fy3)
-  fy3 += 4
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(7)
-  doc.setTextColor(...COLORS.darkText)
-  doc.text(biz.email, fc3X, fy3)
-  fy3 += 4
-  doc.text(biz.website, fc3X, fy3)
-  fy3 += 4
+  doc.text(`${biz.email}   ·   ${biz.website}`, centerX, fy, { align: 'center' })
+  fy += 5
   doc.setFont('helvetica', 'italic')
-  doc.setFontSize(7)
+  doc.setFontSize(7.5)
   doc.setTextColor(...COLORS.grayLabel)
-  doc.text(data.locale === 'de' ? 'Vielen Dank für deinen Einkauf!' : 'Thank you for your order!', fc3X, fy3)
+  doc.text(
+    data.locale === 'de' ? 'Vielen Dank für deinen Einkauf!' : 'Thank you for your order!',
+    centerX,
+    fy,
+    { align: 'center' },
+  )
 
   // Bottom page number
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(7)
   doc.setTextColor(...COLORS.grayLabel)
-  doc.text(`${data.locale === 'de' ? 'Seite' : 'Page'} 1/1`, pageWidth / 2, 290, { align: 'center' })
+  doc.text(`${data.locale === 'de' ? 'Seite' : 'Page'} 1/1`, pageWidth / 2, 290, {
+    align: 'center',
+  })
 
   return Buffer.from(doc.output('arraybuffer'))
 }

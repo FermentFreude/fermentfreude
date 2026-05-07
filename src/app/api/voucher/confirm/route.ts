@@ -135,12 +135,8 @@ export async function GET(request: NextRequest) {
         recipientEmail: meta.recipientEmail || undefined,
         personalNote: meta.personalNote || undefined,
         deliveryMethod:
-          (meta.deliveryMethod as
-            | 'email-recipient'
-            | 'email-self'
-            | 'pdf'
-            | 'email'
-            | 'pickup') || 'email-self',
+          (meta.deliveryMethod as 'email-recipient' | 'email-self' | 'pdf' | 'email' | 'pickup') ||
+          'email-self',
         stripeSessionId: idempotencyKey,
         redeemed: false,
       },

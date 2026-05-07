@@ -1,8 +1,8 @@
+import { generateWorkshopReceiptPDF } from '@/lib/generateWorkshopReceiptPDF'
+import type { WorkshopBooking } from '@/payload-types'
 import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
-import type { WorkshopBooking } from '@/payload-types'
-import { generateWorkshopReceiptPDF } from '@/lib/generateWorkshopReceiptPDF'
 
 /* ═══════════════════════════════════════════════════════════════
  *  GET /api/bookings/[bookingId]/receipt?token=<downloadToken>
@@ -32,10 +32,7 @@ export async function GET(
     }
 
     if (!token || typeof token !== 'string' || token.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Download token is required.' },
-        { status: 401 },
-      )
+      return NextResponse.json({ error: 'Download token is required.' }, { status: 401 })
     }
 
     const payload = await getPayload({ config: await configPromise })
@@ -84,12 +81,6 @@ export async function GET(
           country?: string | null
           email?: string | null
           website?: string | null
-          uid?: string | null
-          fn?: string | null
-          court?: string | null
-          iban?: string | null
-          bic?: string | null
-          bank?: string | null
           vatRate?: number | null
           isKleinunternehmer?: boolean
         }
@@ -109,12 +100,6 @@ export async function GET(
           country: biz.country as string | undefined,
           email: biz.email as string | undefined,
           website: biz.website as string | undefined,
-          uid: biz.uid as string | undefined,
-          fn: biz.fn as string | undefined,
-          court: biz.court as string | undefined,
-          iban: biz.iban as string | undefined,
-          bic: biz.bic as string | undefined,
-          bank: biz.bankName as string | undefined,
           vatRate: typeof biz.vatRate === 'number' ? (biz.vatRate as number) : null,
           isKleinunternehmer: biz.isKleinunternehmer === true,
         }

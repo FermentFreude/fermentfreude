@@ -71,7 +71,7 @@ const DEFAULTS = {
   addToCartButton: 'Add to cart',
   voucherWhyHeading: 'Why a fermentation voucher is a great gift',
   voucherWhyBody:
-    "You're not giving \"just something\", but a workshop that inspires, brings joy, and has a lasting effect. A gift with added value.",
+    'You\'re not giving "just something", but a workshop that inspires, brings joy, and has a lasting effect. A gift with added value.',
   voucherBenefitsHeading: 'What’s included',
   voucherBenefitsSubtitle: 'All at a glance',
   voucherBenefits: [
@@ -81,7 +81,12 @@ const DEFAULTS = {
       icon: 'calendar' as const,
       iconSource: 'preset' as const,
     },
-    { text: 'No expiry date', subtext: 'Valid indefinitely', icon: 'shield' as const, iconSource: 'preset' as const },
+    {
+      text: 'No expiry date',
+      subtext: 'Valid indefinitely',
+      icon: 'shield' as const,
+      iconSource: 'preset' as const,
+    },
     {
       text: 'Suitable for beginners & pros',
       subtext: 'All experience levels welcome',
@@ -215,7 +220,8 @@ export default async function VoucherPage() {
       ? voucherWhyBenefitsData.map((b) => ({
           icon: b.icon,
           iconSource: b.iconSource ?? null,
-          customIcon: typeof b.customIcon === 'object' && b.customIcon !== null ? b.customIcon : null,
+          customIcon:
+            typeof b.customIcon === 'object' && b.customIcon !== null ? b.customIcon : null,
           title: b.title,
           description: b.description,
         }))
@@ -223,10 +229,7 @@ export default async function VoucherPage() {
   const voucherWhyPerfectForVisible = v?.voucherWhyPerfectForVisible ?? null
   const voucherWhyPerfectForHeading = v?.voucherWhyPerfectForHeading ?? null
   const voucherWhyPerfectForTags = v?.voucherWhyPerfectForTags ?? null
-  const voucherBenefitsHeading = resolve(
-    v?.voucherBenefitsHeading,
-    DEFAULTS.voucherBenefitsHeading,
-  )
+  const voucherBenefitsHeading = resolve(v?.voucherBenefitsHeading, DEFAULTS.voucherBenefitsHeading)
   const voucherBenefitsSubtitle = v?.voucherBenefitsSubtitle ?? DEFAULTS.voucherBenefitsSubtitle
 
   const voucherBenefitsData = v?.voucherBenefits ?? null
@@ -238,7 +241,8 @@ export default async function VoucherPage() {
             subtext: b.subtext ?? null,
             icon: b.icon ?? null,
             iconSource: b.iconSource ?? null,
-            customIcon: typeof b.customIcon === 'object' && b.customIcon !== null ? b.customIcon : null,
+            customIcon:
+              typeof b.customIcon === 'object' && b.customIcon !== null ? b.customIcon : null,
           }))
           .filter((b) => b.text)
       : DEFAULTS.voucherBenefits

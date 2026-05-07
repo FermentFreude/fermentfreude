@@ -54,10 +54,7 @@ export async function POST(request: NextRequest) {
     const { bookingId, seats } = body as { bookingId?: string; seats?: unknown }
 
     if (!bookingId || typeof bookingId !== 'string') {
-      return NextResponse.json(
-        { success: false, error: 'Missing bookingId.' },
-        { status: 400 },
-      )
+      return NextResponse.json({ success: false, error: 'Missing bookingId.' }, { status: 400 })
     }
 
     const sanitized = sanitizeSeats(seats)
@@ -74,10 +71,7 @@ export async function POST(request: NextRequest) {
         overrideAccess: true,
       })
     } catch {
-      return NextResponse.json(
-        { success: false, error: 'Booking not found.' },
-        { status: 404 },
-      )
+      return NextResponse.json({ success: false, error: 'Booking not found.' }, { status: 404 })
     }
 
     if (booking.status !== 'pending') {
@@ -100,9 +94,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[update-seats] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 },
-    )
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }

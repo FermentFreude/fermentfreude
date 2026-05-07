@@ -62,7 +62,9 @@ function formatUTC(date: Date): string {
  * Extract one or two HH:MM time tokens from a free-form string.
  * Recognises "HH:MM" and "HH" (assumes :00). Returns null if nothing matches.
  */
-function parseTimeRange(time: string): { startH: number; startM: number; endH?: number; endM?: number } | null {
+function parseTimeRange(
+  time: string,
+): { startH: number; startM: number; endH?: number; endM?: number } | null {
   if (!time) return null
   const matches = time.match(/(\d{1,2})(?::(\d{2}))?/g)
   if (!matches || matches.length === 0) return null

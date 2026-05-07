@@ -201,12 +201,13 @@ export function CartModal() {
                 // Pre-resolve booking metadata so we can render seats editor outside the <Link>
                 const productSlugWithoutPrefix = product.slug?.replace('workshop-', '')
                 const matchedBooking = isWorkshopBooking
-                  ? Object.values(bookingMetadata).find(
+                  ? (Object.values(bookingMetadata).find(
                       (b) => b.workshopSlug === productSlugWithoutPrefix,
-                    ) ?? null
+                    ) ?? null)
                   : null
-                const guestCountForBooking =
-                  matchedBooking ? item.quantity ?? matchedBooking.guestCount ?? 1 : 0
+                const guestCountForBooking = matchedBooking
+                  ? (item.quantity ?? matchedBooking.guestCount ?? 1)
+                  : 0
 
                 return (
                   <li className="flex w-full flex-col" key={i}>

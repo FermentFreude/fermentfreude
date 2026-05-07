@@ -94,8 +94,7 @@ export const Vouchers: CollectionConfig = {
       name: 'recipientEmail',
       type: 'email',
       admin: {
-        description:
-          'Email of the recipient (used when deliveryMethod = email-recipient).',
+        description: 'Email of the recipient (used when deliveryMethod = email-recipient).',
       },
     },
     {
@@ -103,7 +102,8 @@ export const Vouchers: CollectionConfig = {
       type: 'textarea',
       maxLength: 500,
       admin: {
-        description: 'Optional personal note from the buyer printed on the gift card (max 500 chars).',
+        description:
+          'Optional personal note from the buyer printed on the gift card (max 500 chars).',
       },
     },
 

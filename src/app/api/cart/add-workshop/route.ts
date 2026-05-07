@@ -40,8 +40,7 @@ export async function POST(request: NextRequest) {
                 typeof seat.recipientEmail === 'string'
                   ? seat.recipientEmail.trim().slice(0, 250)
                   : undefined,
-              giftNote:
-                typeof seat.giftNote === 'string' ? seat.giftNote.slice(0, 500) : undefined,
+              giftNote: typeof seat.giftNote === 'string' ? seat.giftNote.slice(0, 500) : undefined,
             } as SeatInput
           })
           .filter((s): s is SeatInput => s !== null)

@@ -80,10 +80,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
 
   // Prefer the name supplied by the buyer at checkout (guest flow). For
   // logged-in users, fall back to the user.name resolved above.
-  if (
-    typeof doc.customerName === 'string' &&
-    doc.customerName.trim().length > 0
-  ) {
+  if (typeof doc.customerName === 'string' && doc.customerName.trim().length > 0) {
     customerName = doc.customerName.trim()
   }
 
@@ -273,10 +270,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
           })
           const workshop = workshops.docs[0] as { whatToBring?: string } | undefined
           if (workshop?.whatToBring && typeof workshop.whatToBring === 'string') {
-            whatToBring = workshop.whatToBring
-              .trim()
-              .replace(/\r\n/g, '\n')
-              .replace(/\n/g, '<br>')
+            whatToBring = workshop.whatToBring.trim().replace(/\r\n/g, '\n').replace(/\n/g, '<br>')
           }
         } catch {
           // ignore — what-to-bring is best-effort
@@ -349,14 +343,18 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       // template (no price). Skips silently if the gift template ID hasn't
       // been configured via BREVO_TEMPLATE_WORKSHOP_GIFT_NOTIFICATION yet.
       const seats = Array.isArray((booking as { seats?: unknown }).seats)
-        ? ((booking as { seats: Array<{
-            id?: string
-            isGift?: boolean | null
-            recipientName?: string | null
-            recipientEmail?: string | null
-            giftNote?: string | null
-            giftEmailSentAt?: string | null
-          }> }).seats)
+        ? (
+            booking as {
+              seats: Array<{
+                id?: string
+                isGift?: boolean | null
+                recipientName?: string | null
+                recipientEmail?: string | null
+                giftNote?: string | null
+                giftEmailSentAt?: string | null
+              }>
+            }
+          ).seats
         : []
 
       const giftTemplateId = BREVO_TEMPLATES.WORKSHOP_GIFT_NOTIFICATION
@@ -388,9 +386,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
               WORKSHOP_TIME: String(booking.time ?? ''),
               WORKSHOP_LOCATION: workshopLocation,
               RECIPIENT_NAME: String(seat.recipientName ?? ''),
-              SENDER_NAME: String(
-                (updateData.firstName as string) || booking.firstName || '',
-              ),
+              SENDER_NAME: String((updateData.firstName as string) || booking.firstName || ''),
               GIFT_NOTE: String(seat.giftNote ?? ''),
               WHAT_TO_BRING: whatToBring,
               PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,

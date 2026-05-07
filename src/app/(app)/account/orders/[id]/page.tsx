@@ -178,20 +178,19 @@ export default async function Order({ params, searchParams }: PageProps) {
           )}
         </div>
 
-        {order.downloadToken &&
-          (order.status === 'completed' || order.status === 'processing') && (
-            <div>
-              <Button asChild variant="outline" size="sm">
-                <a
-                  href={`/api/orders/${order.id}/receipt?token=${encodeURIComponent(order.downloadToken)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t.downloadInvoice}
-                </a>
-              </Button>
-            </div>
-          )}
+        {order.downloadToken && (order.status === 'completed' || order.status === 'processing') && (
+          <div>
+            <Button asChild variant="outline" size="sm">
+              <a
+                href={`/api/orders/${order.id}/receipt?token=${encodeURIComponent(order.downloadToken)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.downloadInvoice}
+              </a>
+            </Button>
+          </div>
+        )}
 
         {order.items && (
           <div>
@@ -225,7 +224,9 @@ export default async function Order({ params, searchParams }: PageProps) {
 
         {requiresShipping && order.shippingAddress && (
           <div>
-            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">{t.shippingAddress}</h2>
+            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">
+              {t.shippingAddress}
+            </h2>
 
             <AddressItem
               address={{

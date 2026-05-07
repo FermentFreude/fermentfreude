@@ -26,15 +26,19 @@ export const syncUserToBrevo: CollectionAfterChangeHook = async ({ doc, operatio
       },
     })
 
-    // Send welcome email
-    await sendTemplateEmail({
-      to: [{ email, name: doc.name || undefined }],
-      templateId: BREVO_TEMPLATES.NEWSLETTER_WELCOME,
-      params: {
-        CUSTOMER_NAME: doc.name || email,
-        UNSUBSCRIBE_URL: `${process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://www.fermentfreude.at'}/login`,
-      },
-    })
+    // Newsletter welcome email — only if the user explicitly opted into marketing
+    // during signup. The transactional account-creation email (template #66) is
+    // handled separately by `sendAccountCreationEmail` and always fires.
+    if (doc.marketingConsent) {
+      await sendTemplateEmail({
+        to: [{ email, name: doc.name || undefined }],
+        templateId: BREVO_TEMPLATES.NEWSLETTER_WELCOME,
+        params: {
+          CUSTOMER_NAME: doc.name || email,
+          UNSUBSCRIBE_URL: `${process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://www.fermentfreude.at'}/login`,
+        },
+      })
+    }
   } catch (error) {
     req.payload.logger.error(
       `[Brevo] User sync/welcome email failed for ${email}: ${error instanceof Error ? error.message : String(error)}`,

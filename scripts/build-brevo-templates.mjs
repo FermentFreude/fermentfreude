@@ -6,13 +6,13 @@
  *
  * Design:
  * - 600px single column, Helvetica/Arial, inline CSS
- * - Brand: cream #F6F0E8, dark #1a1a1a, body #555251, accent #E5B765
+ * - Brand: white #FFFFFF, dark #1a1a1a, body #555251, accent #E5B765
  * - Logo submark + Lucide PNG icons hosted on R2 prod bucket
  * - Defensive Liquid: every param wrapped in `| default: ""`
  * - Raw HTML rendering for ORDER_ITEMS_HTML / WORKSHOP_BOOKINGS_HTML
  * - Subject lines NOT included here (PUT keeps existing V2 subjects)
  */
-import { writeFileSync, mkdirSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -23,13 +23,20 @@ mkdirSync(OUT_DIR, { recursive: true })
 const R2 = 'https://pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev/media/email'
 const SITE = 'https://www.fermentfreude.at'
 
+// Real social URLs (verified against codebase + globals seed)
+const SOCIAL = {
+  instagram: 'https://www.instagram.com/fermentfreude/',
+  facebook: 'https://www.facebook.com/people/Ferment-Freude/100087329564765/',
+}
+
 // Brand tokens
 const C = {
-  cream: '#F6F0E8',
+  cream: '#FFFFFF',
+  white: '#ffffff',
   dark: '#1a1a1a',
   body: '#555251',
   muted: '#8a8783',
-  accent: '#E5B765',
+  accent: '#E5B765', // brand yellow
   border: '#E8DFD0',
   rowAlt: '#FAF6EE',
   danger: '#c2410c',
@@ -37,7 +44,9 @@ const C = {
   buttonText: '#1a1a1a',
 }
 
-const FONT = `font-family: Helvetica, Arial, sans-serif;`
+// Neue Haas Grotesk progressive enhancement — falls back to Helvetica/Arial
+// in clients that don't support custom fonts (most do not in transactional email).
+const FONT = `font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;`
 
 // =============================================================================
 // PARTIALS
@@ -48,52 +57,93 @@ function preheader(text) {
 }
 
 function header() {
+  // White header. Logo only. Bottom = 3px yellow brand border.
   return `<tr>
-  <td align="center" style="padding:32px 24px 16px 24px;background-color:${C.cream};">
-    <a href="${SITE}" style="text-decoration:none;border:0;outline:none;">
-      <img src="${R2}/submark-dark.png" alt="FermentFreude" width="72" height="72" style="display:block;border:0;outline:none;width:72px;height:auto;" />
-    </a>
+  <td style="padding:0;background-color:${C.white};">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+      <tr>
+        <td align="center" style="padding:36px 24px 28px 24px;background-color:${C.white};">
+          <a href="${SITE}" style="text-decoration:none;border:0;outline:none;">
+            <img src="${R2}/submark-dark.png" alt="FermentFreude" width="80" height="80" style="display:block;border:0;outline:none;width:80px;height:auto;margin:0 auto;" />
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td style="height:3px;line-height:3px;font-size:0;background-color:${C.accent};">&nbsp;</td>
+      </tr>
+    </table>
   </td>
 </tr>`
 }
 
 function footer() {
+  // White footer. Yellow top border + small accent dividers. Black bold text.
+  // Real social URLs. Logo only — no marketing copy.
   return `<tr>
-  <td style="padding:0;background-color:${C.dark};">
+  <td style="padding:0;background-color:${C.white};">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+      <!-- Yellow brand border (top) -->
       <tr>
-        <td align="center" style="padding:32px 24px 16px 24px;">
+        <td style="height:3px;line-height:3px;font-size:0;background-color:${C.accent};">&nbsp;</td>
+      </tr>
+      <!-- Logo -->
+      <tr>
+        <td align="center" style="padding:36px 24px 12px 24px;background-color:${C.white};">
           <a href="${SITE}" style="text-decoration:none;border:0;outline:none;">
-            <img src="${R2}/submark-light.png" alt="FermentFreude" width="48" height="48" style="display:block;border:0;outline:none;width:48px;height:auto;" />
+            <img src="${R2}/submark-dark.png" alt="FermentFreude" width="56" height="56" style="display:block;border:0;outline:none;width:56px;height:auto;margin:0 auto;" />
           </a>
         </td>
       </tr>
+      <!-- Email link -->
       <tr>
-        <td align="center" style="padding:0 24px 16px 24px;${FONT}font-size:13px;line-height:1.5;color:#cbc6bd;">
-          FermentFreude ist ein Workshop-Studio in Wien rund um Fermentation.<br>
-          David &amp; Marcel — <a href="mailto:kontakt@fermentfreude.at" style="color:#cbc6bd;text-decoration:underline;">kontakt@fermentfreude.at</a>
+        <td align="center" style="padding:0 24px 20px 24px;background-color:${C.white};${FONT}font-size:14px;line-height:1.5;color:${C.dark};font-weight:700;letter-spacing:0.01em;">
+          <a href="mailto:kontakt@fermentfreude.at" style="color:${C.dark};text-decoration:none;font-weight:700;">kontakt@fermentfreude.at</a>
         </td>
       </tr>
+      <!-- Yellow accent divider -->
       <tr>
-        <td align="center" style="padding:0 24px 20px 24px;">
-          <a href="https://instagram.com/fermentfreude" style="display:inline-block;margin:0 6px;text-decoration:none;border:0;">
-            <img src="${R2}/instagram.png" alt="Instagram" width="24" height="24" style="display:block;border:0;outline:none;width:24px;height:24px;" />
+        <td align="center" style="padding:0 24px;background-color:${C.white};">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td style="width:48px;height:2px;line-height:2px;font-size:0;background-color:${C.accent};">&nbsp;</td>
+          </tr></table>
+        </td>
+      </tr>
+      <!-- Social icons (Instagram + Facebook — verified real URLs) -->
+      <tr>
+        <td align="center" style="padding:20px 24px 24px 24px;background-color:${C.white};">
+          <a href="${SOCIAL.instagram}" style="display:inline-block;margin:0 8px;text-decoration:none;border:0;">
+            <img src="${R2}/instagram.png" alt="Instagram" width="28" height="28" style="display:block;border:0;outline:none;width:28px;height:28px;" />
           </a>
-          <a href="https://facebook.com/fermentfreude" style="display:inline-block;margin:0 6px;text-decoration:none;border:0;">
-            <img src="${R2}/facebook.png" alt="Facebook" width="24" height="24" style="display:block;border:0;outline:none;width:24px;height:24px;" />
+          <a href="${SOCIAL.facebook}" style="display:inline-block;margin:0 8px;text-decoration:none;border:0;">
+            <img src="${R2}/facebook.png" alt="Facebook" width="28" height="28" style="display:block;border:0;outline:none;width:28px;height:28px;" />
           </a>
         </td>
       </tr>
+      <!-- Legal links — black bold -->
       <tr>
-        <td align="center" style="padding:0 24px 28px 24px;${FONT}font-size:12px;line-height:1.6;color:#9b9690;">
-          <a href="${SITE}/datenschutz" style="color:#9b9690;text-decoration:underline;">Datenschutz</a>
-          &nbsp;·&nbsp;
-          <a href="${SITE}/agb" style="color:#9b9690;text-decoration:underline;">AGB</a>
-          &nbsp;·&nbsp;
-          <a href="${SITE}/impressum" style="color:#9b9690;text-decoration:underline;">Impressum</a>
-          <br><br>
-          &copy; FermentFreude — Wien, Österreich
+        <td align="center" style="padding:0 24px 20px 24px;background-color:${C.white};${FONT}font-size:13px;line-height:1.6;color:${C.dark};font-weight:700;letter-spacing:0.02em;">
+          <a href="${SITE}/datenschutz" style="color:${C.dark};text-decoration:none;font-weight:700;">Datenschutz</a>
+          <span style="color:${C.accent};font-weight:700;">&nbsp;·&nbsp;</span>
+          <a href="${SITE}/agb" style="color:${C.dark};text-decoration:none;font-weight:700;">AGB</a>
+          <span style="color:${C.accent};font-weight:700;">&nbsp;·&nbsp;</span>
+          <a href="${SITE}/impressum" style="color:${C.dark};text-decoration:none;font-weight:700;">Impressum</a>
         </td>
+      </tr>
+      <!-- Address -->
+      <tr>
+        <td align="center" style="padding:0 24px 12px 24px;background-color:${C.white};${FONT}font-size:12px;line-height:1.6;color:${C.dark};font-weight:700;letter-spacing:0.02em;">
+          Fermentfreude OG &middot; Grabenstraße 15, 8010 Graz, Österreich
+        </td>
+      </tr>
+      <!-- Copyright -->
+      <tr>
+        <td align="center" style="padding:0 24px 28px 24px;background-color:${C.white};${FONT}font-size:11px;line-height:1.5;color:${C.muted};letter-spacing:0.04em;">
+          &copy; FermentFreude
+        </td>
+      </tr>
+      <!-- Yellow brand border (bottom) -->
+      <tr>
+        <td style="height:3px;line-height:3px;font-size:0;background-color:${C.accent};">&nbsp;</td>
       </tr>
     </table>
   </td>
@@ -127,7 +177,9 @@ ${preheader(preheaderText)}
     <td align="center" style="padding:0;">
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="ff-container" style="border-collapse:collapse;width:600px;max-width:600px;background-color:${C.cream};">
         ${header()}
+        <tr><td style="height:24px;line-height:24px;font-size:0;background-color:${C.cream};">&nbsp;</td></tr>
         ${body}
+        <tr><td style="height:8px;line-height:8px;font-size:0;background-color:${C.cream};">&nbsp;</td></tr>
         ${footer()}
       </table>
     </td>
@@ -394,6 +446,18 @@ ${card(`
 `)}
 {% endif %}
 ${ctaRow(p('BOOKING_URL', SITE + '/account/orders'), 'Buchung im Konto ansehen')}
+{% if params.RECEIPT_URL and params.RECEIPT_URL != "" %}
+${spacer(8)}
+<tr><td class="ff-px" align="center" style="padding:0 32px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 auto;">
+    <tr>
+      <td align="center" style="border-radius:6px;border:2px solid ${C.dark};background-color:${C.white};">
+        <a href="{{ params.RECEIPT_URL }}" target="_blank" rel="noopener" style="display:inline-block;padding:12px 28px;${FONT}font-size:14px;font-weight:700;letter-spacing:0.02em;color:${C.dark};text-decoration:none;border-radius:6px;">Rechnung als PDF herunterladen</a>
+      </td>
+    </tr>
+  </table>
+</td></tr>
+{% endif %}
 ${spacer(16)}
 ${note('Du musst absagen oder verschieben? Antworte auf diese E-Mail — wir helfen dir gerne weiter.')}
 ${spacer(8)}
@@ -457,6 +521,18 @@ ${card(`
 {% endif %}
 
 ${ctaRow(p('ORDER_URL', SITE + '/account/orders'), 'Bestellung ansehen')}
+{% if params.RECEIPT_URL and params.RECEIPT_URL != "" %}
+${spacer(8)}
+<tr><td class="ff-px" align="center" style="padding:0 32px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 auto;">
+    <tr>
+      <td align="center" style="border-radius:6px;border:2px solid ${C.dark};background-color:${C.white};">
+        <a href="{{ params.RECEIPT_URL }}" target="_blank" rel="noopener" style="display:inline-block;padding:12px 28px;${FONT}font-size:14px;font-weight:700;letter-spacing:0.02em;color:${C.dark};text-decoration:none;border-radius:6px;">Rechnung als PDF herunterladen</a>
+      </td>
+    </tr>
+  </table>
+</td></tr>
+{% endif %}
 ${spacer(16)}
 ${note('Du hast Fragen zu deiner Bestellung? Antworte einfach auf diese E-Mail.')}
 ${spacer(8)}
@@ -480,20 +556,20 @@ ${intro({
 
 <!-- Voucher card -->
 <tr><td class="ff-px" style="padding:0 32px;">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${C.dark};border-radius:8px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${C.accent};border-radius:8px;">
     <tr><td align="center" style="padding:28px 24px 8px 24px;">
-      <img src="${R2}/gift.png" alt="" width="40" height="40" style="display:block;border:0;width:40px;height:40px;margin:0 auto;" />
+      <img src="${R2}/gift-dark.png" alt="" width="40" height="40" style="display:block;border:0;width:40px;height:40px;margin:0 auto;" />
     </td></tr>
-    <tr><td align="center" style="padding:6px 24px 4px 24px;${FONT}font-size:12px;line-height:1.3;color:#cbc6bd;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+    <tr><td align="center" style="padding:6px 24px 4px 24px;${FONT}font-size:12px;line-height:1.3;color:${C.dark};text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">
       Gutscheinwert
     </td></tr>
-    <tr><td align="center" style="padding:0 24px 16px 24px;${FONT}font-size:36px;line-height:1.1;color:${C.accent};font-weight:700;letter-spacing:-0.01em;">
+    <tr><td align="center" style="padding:0 24px 16px 24px;${FONT}font-size:36px;line-height:1.1;color:${C.dark};font-weight:700;letter-spacing:-0.01em;">
       ${p('VOUCHER_AMOUNT', '99')} €
     </td></tr>
-    <tr><td align="center" style="padding:0 24px 8px 24px;${FONT}font-size:12px;line-height:1.3;color:#cbc6bd;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+    <tr><td align="center" style="padding:0 24px 8px 24px;${FONT}font-size:12px;line-height:1.3;color:${C.dark};text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">
       Code
     </td></tr>
-    <tr><td align="center" style="padding:0 24px 28px 24px;${FONT}font-size:24px;line-height:1.2;color:#ffffff;font-weight:700;letter-spacing:0.12em;font-family:'Courier New',Courier,monospace;">
+    <tr><td align="center" style="padding:0 24px 28px 24px;${FONT}font-size:24px;line-height:1.2;color:${C.dark};font-weight:700;letter-spacing:0.12em;font-family:'Courier New',Courier,monospace;">
       ${p('VOUCHER_CODE', '—')}
     </td></tr>
   </table>

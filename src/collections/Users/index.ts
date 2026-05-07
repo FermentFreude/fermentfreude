@@ -5,6 +5,9 @@ import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
 import { adminOrSelf } from '@/access/adminOrSelf'
 import { publicAccess } from '@/access/publicAccess'
 import { checkRole } from '@/access/utilities'
+import { forgotPasswordEmailHTML, forgotPasswordEmailSubject } from '@/auth/brevoAuthEmails'
+import { sendAccountCreationEmail } from '@/hooks/brevo/sendAccountCreationEmail'
+import { sendLoginNotificationEmail } from '@/hooks/brevo/sendLoginNotificationEmail'
 import { syncUserToBrevo } from '@/hooks/brevo/syncUserToBrevo'
 
 import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
@@ -25,9 +28,25 @@ export const Users: CollectionConfig = {
   },
   auth: {
     tokenExpiration: 1209600,
+    forgotPassword: {
+      generateEmailHTML: forgotPasswordEmailHTML,
+      generateEmailSubject: forgotPasswordEmailSubject,
+    },
+    // Email verification (Brevo template #69) is wired but DISABLED by default.
+    // Enabling `verify` will block existing users who don't have `_verified: true`
+    // from logging in. Before flipping it on:
+    //   1. Run: `pnpm tsx scripts/mark-existing-users-verified.ts`
+    //      against the target DB (staging first, then prod).
+    //   2. Add this import:
+    //        import { verifyEmailHTML, verifyEmailSubject } from '@/auth/brevoAuthEmails'
+    //   3. Replace the `verify: false` line below with:
+    //        verify: { generateEmailHTML: verifyEmailHTML, generateEmailSubject: verifyEmailSubject },
+    //   4. `pnpm generate:types && npx tsc --noEmit`.
+    verify: false,
   },
   hooks: {
-    afterChange: [syncUserToBrevo],
+    afterChange: [sendAccountCreationEmail, syncUserToBrevo],
+    afterLogin: [sendLoginNotificationEmail],
   },
   fields: [
     {

@@ -65,9 +65,7 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
     const resolvedItems: ResolvedItem[] = []
     for (const item of items) {
       const qty = item.quantity ?? 1
-      let productDoc:
-        | (Record<string, unknown> & { id?: string; title?: string })
-        | undefined
+      let productDoc: (Record<string, unknown> & { id?: string; title?: string }) | undefined
       const productRef = item.product
       if (typeof productRef === 'string') {
         try {
@@ -81,7 +79,10 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
           productDoc = undefined
         }
       } else if (productRef && typeof productRef === 'object') {
-        productDoc = productRef as unknown as Record<string, unknown> & { id?: string; title?: string }
+        productDoc = productRef as unknown as Record<string, unknown> & {
+          id?: string
+          title?: string
+        }
       }
 
       const title = (productDoc?.title as string | undefined) ?? 'Product'
@@ -92,9 +93,7 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
       // Resolve thumbnail from first gallery image
       let thumbUrl = ''
-      const gallery = productDoc?.gallery as
-        | { image?: { url?: string } | string }[]
-        | undefined
+      const gallery = productDoc?.gallery as { image?: { url?: string } | string }[] | undefined
       if (Array.isArray(gallery) && gallery.length > 0) {
         const first = gallery[0]
         if (first && typeof first.image === 'object' && first.image?.url) {
@@ -106,9 +105,7 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
     }
 
     // Plain-text comma string (legacy ORDER_ITEMS — kept for backwards compat)
-    const itemSummary = resolvedItems
-      .map((i) => `${i.title} x${i.qty}`)
-      .join(', ')
+    const itemSummary = resolvedItems.map((i) => `${i.title} x${i.qty}`).join(', ')
 
     // Structured HTML rows for ORDER_ITEMS_HTML — render in template with `{{ params.ORDER_ITEMS_HTML }}` (HTML mode)
     const itemsHtml = resolvedItems
@@ -118,7 +115,9 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
         const thumbCell = i.thumbUrl
           ? `<img src="${escapeHtml(i.thumbUrl)}" alt="" width="64" height="64" style="display:block;border-radius:6px;object-fit:cover;border:0;" />`
           : ''
-        const skuLine = i.sku ? `<div style="font-size:12px;color:#777;">SKU: ${escapeHtml(i.sku)}</div>` : ''
+        const skuLine = i.sku
+          ? `<div style="font-size:12px;color:#777;">SKU: ${escapeHtml(i.sku)}</div>`
+          : ''
         const descLine = i.shortDesc
           ? `<div style="font-size:13px;color:#555;margin-top:2px;">${escapeHtml(i.shortDesc)}</div>`
           : ''

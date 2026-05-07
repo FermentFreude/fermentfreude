@@ -52,8 +52,7 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
         ? (doc.recipientEmail.split('@')[0] ?? '')
         : ''
 
-    const personalNote =
-      typeof doc.personalNote === 'string' ? doc.personalNote.trim() : ''
+    const personalNote = typeof doc.personalNote === 'string' ? doc.personalNote.trim() : ''
 
     const shopUrl = `${baseUrl}/workshops`
     const voucherUrl = `${baseUrl}/workshops/voucher`

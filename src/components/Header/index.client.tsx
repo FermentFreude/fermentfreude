@@ -19,7 +19,7 @@ import { LanguageToggle } from './LanguageToggle'
 import { MagneticElement } from './MagneticElement'
 import { NavDropdown } from './NavDropdown'
 import { UserMenu } from './UserMenu'
-import { getDefaultDropdowns, getDefaultNavItems, getDefaultDropdownKey } from './nav-defaults'
+import { getDefaultDropdownKey, getDefaultDropdowns, getDefaultNavItems } from './nav-defaults'
 
 type Props = {
   header: Header
@@ -36,6 +36,17 @@ export function HeaderClient({ header, locale }: Props) {
 
   // Menu active state (shared between header bar + overlay)
   const [isMenuActive, setIsMenuActive] = useState(false)
+
+  // Track whether the cart drawer is open (CartModal sets body[data-cart-open])
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const update = () => setIsCartOpen(document.body.dataset.cartOpen === 'true')
+    update()
+    const observer = new MutationObserver(update)
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-cart-open'] })
+    return () => observer.disconnect()
+  }, [])
 
   // Hide-on-scroll-down, show-on-scroll-up + track "at top"
   const [hidden, setHidden] = useState(false)
@@ -68,19 +79,24 @@ export function HeaderClient({ header, locale }: Props) {
     const y = window.scrollY
     setIsAtTop(y < 10)
     // Only hide after scrolling past 80px so the header doesn't flicker at the very top
-    // Don't hide when menu is active
-    if (!isMenuActive && y > 80 && y > lastScrollY.current) {
+    // Don't hide when menu or cart is active
+    if (!isMenuActive && !isCartOpen && y > 80 && y > lastScrollY.current) {
       setHidden(true)
     } else {
       setHidden(false)
     }
     lastScrollY.current = y
-  }, [isMenuActive])
+  }, [isMenuActive, isCartOpen])
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [handleScroll])
+
+  // If the cart opens while the navbar is tucked away, force it back into view.
+  useEffect(() => {
+    if (isCartOpen) setHidden(false)
+  }, [isCartOpen])
 
   // Apply blur/focus effect to sibling nav items
   useEffect(() => {
@@ -168,23 +184,25 @@ export function HeaderClient({ header, locale }: Props) {
     <>
       <header
         ref={headerRef}
-        className={cn(
-          'z-60 w-full transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
-          isHomePage ? 'fixed top-0' : 'sticky top-0',
-          hidden && !isMenuActive && '-translate-y-full',
-        )}
+        className={cn('z-60 w-full', isHomePage ? 'fixed top-0' : 'sticky top-0')}
         data-transparent={isTransparent ? '' : undefined}
         data-header-theme={mounted && isTransparent && headerTheme === 'dark' ? 'dark' : undefined}
       >
-        <AnnouncementBar
-          enabled={header.announcementBar?.enabled}
-          text={header.announcementBar?.text}
-          link={header.announcementBar?.link}
-        />
+        {/* Announcement bar — always visible, sits above nav so the nav can
+            tuck under it on scroll-down without any visual overlap. */}
+        <div className="relative z-10">
+          <AnnouncementBar
+            enabled={header.announcementBar?.enabled}
+            text={header.announcementBar?.text}
+            link={header.announcementBar?.link}
+          />
+        </div>
+        {/* Navbar — slides up out of view on scroll-down, drops back in on scroll-up. */}
         <nav
           className={cn(
-            'border-b transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
-            isTransparent
+            'relative border-b transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
+            hidden && !isMenuActive && !isCartOpen && '-translate-y-full',
+            isTransparent && !isCartOpen
               ? 'bg-transparent backdrop-blur-none border-transparent dark:bg-transparent dark:backdrop-blur-none dark:border-transparent'
               : 'nav-glass border-white/30 dark:border-white/6',
           )}

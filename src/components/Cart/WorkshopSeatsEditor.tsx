@@ -44,13 +44,13 @@ const COPY_DE = {
   saving: 'Wird gespeichert…',
   saved: 'Gespeichert',
   saveError: 'Speichern fehlgeschlagen',
-  emailHint: 'Wir senden eine separate Bestätigung + Kalendereintrag (ohne Preis) an diese Adresse.',
+  emailHint:
+    'Wir senden eine separate Bestätigung + Kalendereintrag (ohne Preis) an diese Adresse.',
 }
 
 const COPY_EN = {
   toggle: 'Add gift seats',
-  helper:
-    'Mark seats as a gift so the recipient receives their own confirmation email.',
+  helper: 'Mark seats as a gift so the recipient receives their own confirmation email.',
   seat: (n: number) => `Seat ${n}`,
   forMe: 'For me',
   forGift: 'Gift',
@@ -89,9 +89,7 @@ export function WorkshopSeatsEditor({
   const { locale } = useLocale()
   const t = locale === 'de' ? COPY_DE : COPY_EN
 
-  const [expanded, setExpanded] = useState(() =>
-    Boolean(initialSeats?.some((s) => s.isGift)),
-  )
+  const [expanded, setExpanded] = useState(() => Boolean(initialSeats?.some((s) => s.isGift)))
   const [seats, setSeats] = useState<SeatDraft[]>(() => {
     const base = Array.from({ length: guestCount }, (_, i) => initialSeats?.[i] ?? emptySeat())
     return base
@@ -105,10 +103,7 @@ export function WorkshopSeatsEditor({
     setSeats((prev) => {
       if (prev.length === guestCount) return prev
       if (prev.length < guestCount) {
-        return [
-          ...prev,
-          ...Array.from({ length: guestCount - prev.length }, () => emptySeat()),
-        ]
+        return [...prev, ...Array.from({ length: guestCount - prev.length }, () => emptySeat())]
       }
       return prev.slice(0, guestCount)
     })
@@ -299,9 +294,7 @@ export function WorkshopSeatsEditor({
           <div className="text-right text-[11px] min-h-[1em] text-neutral-500 dark:text-neutral-400">
             {saveStatus === 'saving' && t.saving}
             {saveStatus === 'saved' && t.saved}
-            {saveStatus === 'error' && (
-              <span className="text-red-500">{t.saveError}</span>
-            )}
+            {saveStatus === 'error' && <span className="text-red-500">{t.saveError}</span>}
           </div>
         </div>
       )}
