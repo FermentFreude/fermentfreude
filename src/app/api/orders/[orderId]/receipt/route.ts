@@ -151,8 +151,66 @@ export async function GET(
     const subtotalCents = totalCents - shippingCents
 
     // ── Generate PDF ───────────────────────────────────────────────────────
-    const issueDate = order.updatedAt ? new Date(order.updatedAt as string) : new Date()
+    // Always prefer the frozen invoiceIssuedAt — never updatedAt, since the
+    // order may be touched long after issuance (status changes, refunds, etc).
+    const issuedRaw = (order as { invoiceIssuedAt?: string | null }).invoiceIssuedAt
+    const issueDate = issuedRaw
+      ? new Date(issuedRaw)
+      : order.createdAt
+        ? new Date(order.createdAt as string)
+        : new Date()
     const orderNumber = String(order.id).slice(-8).toUpperCase()
+
+    // ── Resolve live business info (single source of truth) ───────────────
+    let business:
+      | {
+          name?: string | null
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          email?: string | null
+          website?: string | null
+          phone?: string | null
+          uid?: string | null
+          fn?: string | null
+          court?: string | null
+          iban?: string | null
+          bic?: string | null
+          bank?: string | null
+          vatRate?: number | null
+          isKleinunternehmer?: boolean
+        }
+      | undefined
+    try {
+      const biz = (await payload.findGlobal({
+        slug: 'business-info' as never,
+        depth: 0,
+      })) as unknown as Record<string, unknown> | null
+      if (biz) {
+        const cityVal = (biz.city as string | undefined) || ''
+        const postalVal = (biz.postalCode as string | undefined) || ''
+        business = {
+          name: biz.companyName as string | undefined,
+          address: biz.addressLine1 as string | undefined,
+          city: [postalVal, cityVal].filter(Boolean).join(' '),
+          country: biz.country as string | undefined,
+          email: biz.email as string | undefined,
+          website: biz.website as string | undefined,
+          phone: biz.phone as string | undefined,
+          uid: biz.uid as string | undefined,
+          fn: biz.fn as string | undefined,
+          court: biz.court as string | undefined,
+          iban: biz.iban as string | undefined,
+          bic: biz.bic as string | undefined,
+          bank: biz.bankName as string | undefined,
+          vatRate: typeof biz.vatRate === 'number' ? (biz.vatRate as number) : null,
+          isKleinunternehmer: biz.isKleinunternehmer === true,
+        }
+      }
+    } catch (bizErr) {
+      // Non-fatal — PDF will fall back to hardcoded COMPANY constants.
+      console.warn('[order-receipt] Could not load business-info global:', bizErr)
+    }
 
     const pdfBuffer = generateOrderReceiptPDF({
       orderId: String(order.id),
@@ -167,6 +225,7 @@ export async function GET(
       customerEmail,
       issueDate,
       locale: 'de',
+      business,
     })
 
     // ── Stream PDF ─────────────────────────────────────────────────────────

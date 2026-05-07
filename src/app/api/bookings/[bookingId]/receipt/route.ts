@@ -75,6 +75,54 @@ export async function GET(
     // ── Build receipt data ─────────────────────────────────────────────────
     const issueDate = booking.updatedAt ? new Date(booking.updatedAt as string) : new Date()
 
+    // ── Resolve live business info (single source of truth) ───────────────
+    let business:
+      | {
+          name?: string | null
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          email?: string | null
+          website?: string | null
+          uid?: string | null
+          fn?: string | null
+          court?: string | null
+          iban?: string | null
+          bic?: string | null
+          bank?: string | null
+          vatRate?: number | null
+          isKleinunternehmer?: boolean
+        }
+      | undefined
+    try {
+      const biz = (await payload.findGlobal({
+        slug: 'business-info' as never,
+        depth: 0,
+      })) as unknown as Record<string, unknown> | null
+      if (biz) {
+        const cityVal = (biz.city as string | undefined) || ''
+        const postalVal = (biz.postalCode as string | undefined) || ''
+        business = {
+          name: biz.companyName as string | undefined,
+          address: biz.addressLine1 as string | undefined,
+          city: [postalVal, cityVal].filter(Boolean).join(' '),
+          country: biz.country as string | undefined,
+          email: biz.email as string | undefined,
+          website: biz.website as string | undefined,
+          uid: biz.uid as string | undefined,
+          fn: biz.fn as string | undefined,
+          court: biz.court as string | undefined,
+          iban: biz.iban as string | undefined,
+          bic: biz.bic as string | undefined,
+          bank: biz.bankName as string | undefined,
+          vatRate: typeof biz.vatRate === 'number' ? (biz.vatRate as number) : null,
+          isKleinunternehmer: biz.isKleinunternehmer === true,
+        }
+      }
+    } catch (bizErr) {
+      console.warn('[booking-receipt] Could not load business-info global:', bizErr)
+    }
+
     const pdfBuffer = generateWorkshopReceiptPDF({
       bookingId: String(booking.id),
       workshopTitle: booking.workshopTitle ?? 'Workshop',
@@ -89,6 +137,7 @@ export async function GET(
       customerEmail: booking.email ?? '',
       issueDate,
       locale: 'de', // Receipts default to German (Austrian market)
+      business,
     })
 
     // ── Stream PDF ─────────────────────────────────────────────────────────

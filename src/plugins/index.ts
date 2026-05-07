@@ -19,6 +19,7 @@ import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBoo
 import { copyCustomerNameFromTransaction } from '@/collections/Orders/copyCustomerNameFromTransaction'
 import { decrementInventory } from '@/collections/Orders/decrementInventory'
 import { restoreWorkshopSpotsOnDelete } from '@/collections/Orders/restoreWorkshopSpotsOnDelete'
+import { setInvoiceIssuedAt } from '@/collections/Orders/setInvoiceIssuedAt'
 import {
   handleChargeRefunded,
   handleChargeSucceeded,
@@ -189,6 +190,18 @@ export const plugins: Plugin[] = [
               position: 'sidebar',
             },
           },
+          {
+            name: 'invoiceIssuedAt',
+            type: 'date',
+            label: 'Invoice issued at',
+            admin: {
+              description:
+                'Frozen invoice date. Set once when the order is paid and never overwritten — guarantees the PDF receipt shows the same date no matter when it is downloaded.',
+              position: 'sidebar',
+              readOnly: true,
+              date: { pickerAppearance: 'dayAndTime' },
+            },
+          },
         ],
         hooks: {
           ...defaultCollection?.hooks,
@@ -198,6 +211,7 @@ export const plugins: Plugin[] = [
           ],
           afterChange: [
             ...(defaultCollection?.hooks?.afterChange ?? []),
+            setInvoiceIssuedAt,
             decrementInventory,
             autoEnrollOnPurchase,
             confirmWorkshopBookings,

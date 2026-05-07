@@ -30,6 +30,25 @@ const COLORS = {
 }
 
 // ─── Input Interface ────────────────────────────────────────────────────────
+export interface WorkshopReceiptBusinessInfo {
+  name?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  email?: string | null
+  website?: string | null
+  uid?: string | null
+  fn?: string | null
+  court?: string | null
+  iban?: string | null
+  bic?: string | null
+  bank?: string | null
+  /** Reduced rate (%) applied when not Kleinunternehmer. Default 10 for AT workshops. */
+  vatRate?: number | null
+  /** § 6 Abs. 1 Z 27 UStG — small business: no VAT shown. */
+  isKleinunternehmer?: boolean | null
+}
+
 export interface WorkshopReceiptData {
   bookingId: string
   workshopTitle: string
@@ -44,6 +63,8 @@ export interface WorkshopReceiptData {
   customerEmail: string
   issueDate: Date
   locale: 'de' | 'en'
+  /** Resolved live from the BusinessInfo global. Falls back to COMPANY constants. */
+  business?: WorkshopReceiptBusinessInfo
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -64,7 +85,24 @@ function splitLines(doc: jsPDF, text: string, maxWidth: number): string[] {
 }
 
 // ─── Main Generator ─────────────────────────────────────────────────────────
-export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
+export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {  const b = data.business ?? {}
+  const biz = {
+    name: b.name || COMPANY.name,
+    address: b.address || COMPANY.address,
+    city: b.city || COMPANY.city,
+    country: b.country || COMPANY.country,
+    email: b.email || COMPANY.email,
+    website: b.website || COMPANY.website,
+    uid: b.uid || COMPANY.uid,
+    fn: b.fn || COMPANY.fn,
+    court: b.court || COMPANY.handelsgericht,
+    iban: b.iban || COMPANY.iban,
+    bic: b.bic || COMPANY.bic,
+    bank: b.bank || COMPANY.bank,
+    // Workshops are an educational service in AT → reduced 10 % rate by default.
+    vatRate: typeof b.vatRate === 'number' && b.vatRate >= 0 ? b.vatRate / 100 : 0.1,
+    isKleinunternehmer: b.isKleinunternehmer === true,
+  }
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
   // A4: 210mm wide × 297mm tall
@@ -126,16 +164,16 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(9)
   doc.setTextColor(...COLORS.darkText)
-  doc.text(COMPANY.name, marginL, y)
+  doc.text(biz.name, marginL, y)
 
   y += 5
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
-  doc.text(COMPANY.address, marginL, y)
+  doc.text(biz.address, marginL, y)
   y += 4.5
-  doc.text(`${COMPANY.city}, ${COMPANY.country}`, marginL, y)
+  doc.text(`${biz.city}, ${biz.country}`, marginL, y)
   y += 4.5
-  doc.text(COMPANY.email, marginL, y)
+  doc.text(biz.email, marginL, y)
 
   // Right: invoice number + issue date
   const rightX = pageWidth - marginR
@@ -355,7 +393,25 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
   doc.text(data.locale === 'de' ? 'GESAMTBETRAG' : 'TOTAL AMOUNT', totalsLabelX - 5, y)
   doc.text(formatCurrency(data.totalPrice), totalsValueX, y, { align: 'right' })
 
-  y += 14
+  y += 8
+
+  if (biz.isKleinunternehmer) {
+    doc.setFont('helvetica', 'italic')
+    doc.setFontSize(8)
+    doc.setTextColor(...COLORS.grayLabel)
+    const kuNote =
+      data.locale === 'de'
+        ? 'Gemäß § 6 Abs. 1 Z 27 UStG keine Umsatzsteuer ausgewiesen (Kleinunternehmer).'
+        : 'No VAT charged — small business exemption (§ 6 Abs. 1 Z 27 Austrian VAT Act).'
+    const kuLines = splitLines(doc, kuNote, contentWidth - 40)
+    kuLines.forEach((line: string) => {
+      doc.text(line, totalsValueX, y, { align: 'right' })
+      y += 4
+    })
+    y += 2
+  }
+
+  y += 6
 
   // ─── FOOTER BOX ───────────────────────────────────────────────────────────
 
@@ -382,11 +438,11 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(7)
   doc.setTextColor(...COLORS.darkText)
-  doc.text(`IBAN: ${COMPANY.iban}`, fc1X, fy)
+  doc.text(`IBAN: ${biz.iban}`, fc1X, fy)
   fy += 4
-  doc.text(`BIC: ${COMPANY.bic}`, fc1X, fy)
+  doc.text(`BIC: ${biz.bic}`, fc1X, fy)
   fy += 4
-  doc.text(COMPANY.bank, fc1X, fy)
+  doc.text(biz.bank, fc1X, fy)
 
   // Column 2: Legal Information
   let fy2 = footerBoxY + footerBoxPad + 3
@@ -398,11 +454,11 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(7)
   doc.setTextColor(...COLORS.darkText)
-  doc.text(`UID: ${COMPANY.uid}`, fc2X, fy2)
+  doc.text(`UID: ${biz.uid}`, fc2X, fy2)
   fy2 += 4
-  doc.text(COMPANY.fn, fc2X, fy2)
+  doc.text(biz.fn, fc2X, fy2)
   fy2 += 4
-  doc.text(COMPANY.handelsgericht, fc2X, fy2)
+  doc.text(biz.court, fc2X, fy2)
 
   // Column 3: Thank You message (italic gold)
   let fy3 = footerBoxY + footerBoxPad + 3
@@ -428,7 +484,7 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
   doc.setTextColor(...COLORS.grayLabel)
   const year = data.issueDate.getFullYear()
   doc.text(
-    `© ${year} FERMENTFREUDE OG · ${COMPANY.website}`,
+    `© ${year} FERMENTFREUDE OG · ${biz.website}`,
     pageWidth / 2,
     copyrightY,
     { align: 'center' },

@@ -161,6 +161,7 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    'business-info': BusinessInfo;
     'testimonials-global': TestimonialsGlobal;
     'sponsors-bar-global': SponsorsBarGlobal;
     'voucher-cta-global': VoucherCtaGlobal;
@@ -172,6 +173,7 @@ export interface Config {
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'business-info': BusinessInfoSelect<false> | BusinessInfoSelect<true>;
     'testimonials-global': TestimonialsGlobalSelect<false> | TestimonialsGlobalSelect<true>;
     'sponsors-bar-global': SponsorsBarGlobalSelect<false> | SponsorsBarGlobalSelect<true>;
     'voucher-cta-global': VoucherCtaGlobalSelect<false> | VoucherCtaGlobalSelect<true>;
@@ -309,6 +311,10 @@ export interface Order {
    * UUID token for secure receipt download via /api/orders/[id]/receipt?token=... Set automatically when order confirmation email is sent.
    */
   downloadToken?: string | null;
+  /**
+   * Frozen invoice date. Set once when the order is paid and never overwritten — guarantees the PDF receipt shows the same date no matter when it is downloaded.
+   */
+  invoiceIssuedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -6728,6 +6734,7 @@ export interface OrdersSelect<T extends boolean = true> {
   currency?: T;
   customerName?: T;
   downloadToken?: T;
+  invoiceIssuedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -7005,6 +7012,51 @@ export interface Footer {
     instagram?: string | null;
     linkedin?: string | null;
   };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Rechnungs- und Bankdaten für alle PDF-Belege (Bestellungen, Workshop-Buchungen, Gutscheine). Wird nur einmal ausgefüllt — alle Rechnungen lesen automatisch von hier.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "business-info".
+ */
+export interface BusinessInfo {
+  id: string;
+  /**
+   * Vollständiger eingetragener Firmenname inkl. Rechtsform.
+   */
+  companyName: string;
+  addressLine1: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  email: string;
+  website?: string | null;
+  phone?: string | null;
+  /**
+   * Österreichische Umsatzsteuer-Identifikationsnummer (z. B. ATU12345678). Auf jeder Rechnung Pflicht.
+   */
+  uid?: string | null;
+  /**
+   * Firmenbuchnummer inkl. Präfix "FN" (z. B. FN 123456a).
+   */
+  fn?: string | null;
+  court?: string | null;
+  /**
+   * Wenn aktiviert: Auf Rechnungen wird KEINE Umsatzsteuer ausgewiesen, stattdessen der Kleinunternehmer-Hinweis. MwSt.-Satz unten wird ignoriert.
+   */
+  isKleinunternehmer?: boolean | null;
+  /**
+   * Nur relevant wenn Kleinunternehmer-Regelung deaktiviert ist. Standard Österreich: 20 %.
+   */
+  vatRate?: number | null;
+  /**
+   * Wird auf jeder Rechnung im Footer angezeigt.
+   */
+  iban?: string | null;
+  bic?: string | null;
+  bankName?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -7423,6 +7475,31 @@ export interface FooterSelect<T extends boolean = true> {
         instagram?: T;
         linkedin?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "business-info_select".
+ */
+export interface BusinessInfoSelect<T extends boolean = true> {
+  companyName?: T;
+  addressLine1?: T;
+  postalCode?: T;
+  city?: T;
+  country?: T;
+  email?: T;
+  website?: T;
+  phone?: T;
+  uid?: T;
+  fn?: T;
+  court?: T;
+  isKleinunternehmer?: T;
+  vatRate?: T;
+  iban?: T;
+  bic?: T;
+  bankName?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

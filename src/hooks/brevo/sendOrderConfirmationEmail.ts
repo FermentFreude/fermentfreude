@@ -326,36 +326,62 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
     const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
 
-    // ─── Generate secure download token for receipt ───────────────────────
-    const { randomUUID } = await import('crypto')
-    const downloadToken = randomUUID()
+    // ─── Reuse existing download token, or generate once and persist ──────
+    // The token MUST be stable for the lifetime of the order so the receipt
+    // link in the customer's inbox keeps working. Regenerating on every hook
+    // fire (e.g. status updates) would silently break old emails.
+    const existingToken =
+      typeof (doc as { downloadToken?: unknown }).downloadToken === 'string' &&
+      (doc as { downloadToken?: string }).downloadToken!.length > 0
+        ? (doc as { downloadToken?: string }).downloadToken!
+        : null
 
-    // Save token to order (fire-and-forget with error logging — don't block email)
-    try {
-      await req.payload.update({
-        collection: 'orders',
-        id: doc.id,
-        data: { downloadToken } as Record<string, unknown>,
-        overrideAccess: true,
-      })
-    } catch (tokenErr) {
-      req.payload.logger.warn(
-        `[Brevo] Could not save downloadToken for order ${doc.id}: ${tokenErr instanceof Error ? tokenErr.message : String(tokenErr)}`,
-      )
+    let downloadToken = existingToken
+    if (!downloadToken) {
+      const { randomUUID } = await import('crypto')
+      downloadToken = randomUUID()
+      try {
+        await req.payload.update({
+          collection: 'orders',
+          id: doc.id,
+          data: { downloadToken } as Record<string, unknown>,
+          overrideAccess: true,
+        })
+      } catch (tokenErr) {
+        req.payload.logger.warn(
+          `[Brevo] Could not save downloadToken for order ${doc.id}: ${tokenErr instanceof Error ? tokenErr.message : String(tokenErr)}`,
+        )
+      }
     }
 
     const RECEIPT_URL = `${siteUrl}/api/orders/${doc.id}/receipt?token=${downloadToken}`
+
+    // ─── Resolve ORDER_ITEMS_HTML and SUBTOTAL with safe fallbacks ────────
+    // If the order has no product line items (e.g. workshop-only purchase),
+    // fall back to the workshop booking blocks so the email is never empty.
+    // SUBTOTAL must always have a value — fall back to total minus shipping,
+    // or the total itself if we have nothing else.
+    const safeOrderItemsHtml = itemsHtml || workshopBookingsHtml || ''
+    const safeOrderItemsSummary =
+      itemSummary ||
+      (workshopDate ? `Workshop ${workshopDate}${workshopTime ? ` ${workshopTime}` : ''}` : '')
+    const safeSubtotal =
+      computedSubtotal !== null
+        ? fmtMoney(computedSubtotal)
+        : orderTotalNum !== null
+          ? fmtMoney(orderTotalNum)
+          : ''
 
     const emailParams: Record<string, string> = {
       ORDER_ID: String(doc.id),
       ORDER_NUMBER: orderNumber,
       ORDER_TOTAL: orderTotalNum !== null ? fmtMoney(orderTotalNum) : '',
       TOTAL: orderTotalNum !== null ? fmtMoney(orderTotalNum) : '',
-      SUBTOTAL: computedSubtotal !== null ? fmtMoney(computedSubtotal) : '',
+      SUBTOTAL: safeSubtotal,
       SHIPPING: shippingDisplay,
       SHIPPING_ADDRESS: shippingAddressStr,
-      ORDER_ITEMS: itemSummary,
-      ORDER_ITEMS_HTML: itemsHtml,
+      ORDER_ITEMS: safeOrderItemsSummary,
+      ORDER_ITEMS_HTML: safeOrderItemsHtml,
       WORKSHOP_BOOKINGS_HTML: workshopBookingsHtml,
       CUSTOMER_NAME: recipientName || recipientEmail,
       FIRST_NAME: recipientName?.split(' ')[0] || recipientName || recipientEmail,

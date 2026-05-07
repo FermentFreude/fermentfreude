@@ -37,6 +37,25 @@ export interface OrderReceiptItem {
   unitPrice: number // in cents
 }
 
+export interface OrderReceiptBusinessInfo {
+  name?: string | null
+  address?: string | null
+  city?: string | null
+  country?: string | null
+  email?: string | null
+  website?: string | null
+  phone?: string | null
+  uid?: string | null
+  fn?: string | null
+  court?: string | null
+  iban?: string | null
+  bic?: string | null
+  bank?: string | null
+  vatRate?: number | null
+  /** § 6 Abs. 1 Z 27 UStG — small business: no VAT shown on invoices. */
+  isKleinunternehmer?: boolean | null
+}
+
 export interface OrderReceiptData {
   orderId: string
   orderNumber: string
@@ -50,6 +69,8 @@ export interface OrderReceiptData {
   customerEmail: string
   issueDate: Date
   locale: 'de' | 'en'
+  /** Resolved live from the BusinessInfo global. Falls back to COMPANY constants. */
+  business?: OrderReceiptBusinessInfo
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -71,6 +92,27 @@ function splitLines(doc: jsPDF, text: string, maxWidth: number): string[] {
 
 // ─── Main Generator ─────────────────────────────────────────────────────────
 export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
+  // Resolve business info: every field falls back to the COMPANY constant so
+  // the PDF still renders even if the BusinessInfo global has not been filled
+  // out yet (e.g. on first deploy, or for legacy orders saved before launch).
+  const b = data.business ?? {}
+  const biz = {
+    name: b.name || COMPANY.name,
+    address: b.address || COMPANY.address,
+    city: b.city || COMPANY.city,
+    country: b.country || COMPANY.country,
+    email: b.email || COMPANY.email,
+    website: b.website || COMPANY.website,
+    uid: b.uid || COMPANY.uid,
+    fn: b.fn || COMPANY.fn,
+    court: b.court || COMPANY.handelsgericht,
+    iban: b.iban || COMPANY.iban,
+    bic: b.bic || COMPANY.bic,
+    bank: b.bank || COMPANY.bank,
+    vatRate: typeof b.vatRate === 'number' && b.vatRate >= 0 ? b.vatRate / 100 : 0.2,
+    isKleinunternehmer: b.isKleinunternehmer === true,
+  }
+
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
   const pageWidth = 210
@@ -126,15 +168,15 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(9)
   doc.setTextColor(...COLORS.darkText)
-  doc.text(COMPANY.name, marginL, y)
+  doc.text(biz.name, marginL, y)
   y += 5
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
-  doc.text(COMPANY.address, marginL, y)
+  doc.text(biz.address, marginL, y)
   y += 4.5
-  doc.text(`${COMPANY.city}, ${COMPANY.country}`, marginL, y)
+  doc.text(`${biz.city}, ${biz.country}`, marginL, y)
   y += 4.5
-  doc.text(COMPANY.email, marginL, y)
+  doc.text(biz.email, marginL, y)
 
   // Right: order number + issue date
   let ry = y - 14
@@ -305,8 +347,8 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   y += 2
 
   // ─── TOTALS SECTION ──────────────────────────────────────────────────────
-  // Austrian standard VAT for physical goods: 20%
-  const vatRate = 0.2
+  // Austrian standard VAT for physical goods (configurable via BusinessInfo).
+  const vatRate = biz.vatRate
   const netAmount = data.totalCents / (1 + vatRate)
   const vatAmount = data.totalCents - netAmount
 
@@ -324,7 +366,10 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   }
 
   labelLine(data.locale === 'de' ? 'Nettobetrag' : 'Subtotal', formatCurrency(Math.round(netAmount)))
-  labelLine(data.locale === 'de' ? 'MwSt. 20%' : 'VAT 20%', formatCurrency(Math.round(vatAmount)))
+  labelLine(
+    data.locale === 'de' ? `MwSt. ${Math.round(vatRate * 100)}%` : `VAT ${Math.round(vatRate * 100)}%`,
+    formatCurrency(Math.round(vatAmount)),
+  )
 
   y += 2
   doc.setDrawColor(...COLORS.darkText)
@@ -338,7 +383,25 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   doc.text(data.locale === 'de' ? 'GESAMTBETRAG' : 'TOTAL AMOUNT', totalsLabelX - 5, y)
   doc.text(formatCurrency(data.totalCents), totalsValueX, y, { align: 'right' })
 
-  y += 14
+  y += 8
+
+  if (biz.isKleinunternehmer) {
+    doc.setFont('helvetica', 'italic')
+    doc.setFontSize(8)
+    doc.setTextColor(...COLORS.grayLabel)
+    const kuNote =
+      data.locale === 'de'
+        ? 'Gemäß § 6 Abs. 1 Z 27 UStG keine Umsatzsteuer ausgewiesen (Kleinunternehmer).'
+        : 'No VAT charged — small business exemption (§ 6 Abs. 1 Z 27 Austrian VAT Act).'
+    const kuLines = splitLines(doc, kuNote, contentWidth - 40)
+    kuLines.forEach((line: string) => {
+      doc.text(line, totalsValueX, y, { align: 'right' })
+      y += 4
+    })
+    y += 2
+  }
+
+  y += 6
 
   // ─── FOOTER BOX ──────────────────────────────────────────────────────────
   const footerBoxY = Math.max(y, 220)
@@ -362,11 +425,11 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(7)
   doc.setTextColor(...COLORS.darkText)
-  doc.text(`IBAN: ${COMPANY.iban}`, fc1X, fy)
+  doc.text(`IBAN: ${biz.iban}`, fc1X, fy)
   fy += 4
-  doc.text(`BIC: ${COMPANY.bic}`, fc1X, fy)
+  doc.text(`BIC: ${biz.bic}`, fc1X, fy)
   fy += 4
-  doc.text(COMPANY.bank, fc1X, fy)
+  doc.text(biz.bank, fc1X, fy)
 
   // Column 2: Legal
   let fy2 = footerBoxY + footerBoxPad + 3
@@ -378,11 +441,11 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(7)
   doc.setTextColor(...COLORS.darkText)
-  doc.text(COMPANY.uid, fc2X, fy2)
+  doc.text(biz.uid, fc2X, fy2)
   fy2 += 4
-  doc.text(COMPANY.fn, fc2X, fy2)
+  doc.text(biz.fn, fc2X, fy2)
   fy2 += 4
-  doc.text(COMPANY.handelsgericht, fc2X, fy2)
+  doc.text(biz.court, fc2X, fy2)
 
   // Column 3: Thank you
   let fy3 = footerBoxY + footerBoxPad + 3
@@ -394,9 +457,9 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(7)
   doc.setTextColor(...COLORS.darkText)
-  doc.text(COMPANY.email, fc3X, fy3)
+  doc.text(biz.email, fc3X, fy3)
   fy3 += 4
-  doc.text(COMPANY.website, fc3X, fy3)
+  doc.text(biz.website, fc3X, fy3)
   fy3 += 4
   doc.setFont('helvetica', 'italic')
   doc.setFontSize(7)

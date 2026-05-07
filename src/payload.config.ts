@@ -36,6 +36,7 @@ import { WorkshopLocations } from '@/collections/WorkshopLocations'
 import { Workshops } from '@/collections/Workshops'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
+import { BusinessInfoGlobal } from '@/globals/BusinessInfo'
 import { ProductDetailLabelsGlobal } from '@/globals/ProductDetailLabels'
 import { ProductSliderGlobal } from '@/globals/ProductSlider'
 import { SponsorsBarGlobal } from '@/globals/SponsorsBar'
@@ -201,6 +202,7 @@ export default buildConfig({
   globals: [
     Header,
     Footer,
+    BusinessInfoGlobal,
     TestimonialsGlobal,
     SponsorsBarGlobal,
     VoucherCtaGlobal,
