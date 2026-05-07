@@ -16,6 +16,7 @@ import React, { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { AddressItem } from '@/components/addresses/AddressItem'
 import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
+import { WorkshopSeatsEditor, type SeatDraft } from '@/components/Cart/WorkshopSeatsEditor'
 import { CheckoutAddresses } from '@/components/checkout/CheckoutAddresses'
 import { CheckoutForm } from '@/components/forms/CheckoutForm'
 import { FormItem } from '@/components/forms/FormItem'
@@ -213,13 +214,17 @@ export const CheckoutPage: React.FC = () => {
     Record<
       string,
       {
+        appointmentId: string
+        bookingId?: string | null
         workshopSlug: string
+        workshopTitle?: string
         date: string
         time: string
         pricePerPerson: number
         guestCount: number
         locationName?: string | null
         locationAddress?: string | null
+        seats?: SeatDraft[]
       }
     >
   >({})
@@ -1028,6 +1033,63 @@ export const CheckoutPage: React.FC = () => {
             )}
           </section>
         )}
+
+        {/* Sprint 3: per-seat gift allocation (one block per workshop in cart) */}
+        {!paymentData &&
+          (() => {
+            const workshopItems = (cart?.items ?? []).filter((item) => {
+              const product =
+                typeof item.product === 'object' && item.product !== null
+                  ? (item.product as { slug?: string })
+                  : null
+              return Boolean(product?.slug?.startsWith('workshop-'))
+            })
+            if (workshopItems.length === 0) return null
+
+            return (
+              <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+                <h2 className="mb-2 font-display text-subheading font-bold text-ff-near-black">
+                  {isDe ? 'Sitzplätze & Geschenke' : 'Seats & gifts'}
+                </h2>
+                <p className="mb-6 text-body-sm text-ff-gray-text-light">
+                  {isDe
+                    ? 'Überprüfe die gebuchten Sitzplätze. Optional kannst du einzelne Sitze als Geschenk markieren — der/die Empfänger:in erhält dann eine eigene Bestätigung.'
+                    : 'Review the seats you booked. Optionally mark individual seats as a gift — the recipient will receive their own confirmation.'}
+                </p>
+                <div className="flex flex-col gap-8">
+                  {workshopItems.map((item, idx) => {
+                    const product = item.product as { slug: string; title?: string }
+                    const workshopSlug = product.slug.replace('workshop-', '')
+                    const booking = Object.values(bookingMetadata).find(
+                      (b) => b.workshopSlug === workshopSlug,
+                    )
+                    if (!booking) return null
+                    const guestCount = item.quantity ?? booking.guestCount ?? 1
+                    return (
+                      <div key={idx} className="flex flex-col gap-3">
+                        <div>
+                          <p className="font-display text-body font-bold text-ff-near-black">
+                            {product.title ?? booking.workshopTitle ?? workshopSlug}
+                          </p>
+                          <p className="text-body-sm text-ff-gray-text-light">
+                            {booking.date} ·{' '}
+                            {locale === 'de' ? `${booking.time} Uhr` : booking.time} ·{' '}
+                            {guestCount} {isDe ? 'Sitzplätze' : 'seats'}
+                          </p>
+                        </div>
+                        <WorkshopSeatsEditor
+                          appointmentId={booking.appointmentId}
+                          bookingId={booking.bookingId ?? null}
+                          guestCount={guestCount}
+                          initialSeats={booking.seats}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            )
+          })()}
 
         {!paymentData && voucherCoversAll ? (
           <Button
