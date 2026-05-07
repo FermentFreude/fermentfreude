@@ -136,13 +136,18 @@ export async function getWorkshopAppointments(workshopSlug: string): Promise<Wor
       }
       const dateDisplay = date.toLocaleDateString('de-DE', dateOptions)
 
-      // Format time: "14:00" (workshop duration assumed 3 hours)
-      const startHour = date.getHours().toString().padStart(2, '0')
-      const startMin = date.getMinutes().toString().padStart(2, '0')
+      // Format time: "14:00 – 17:00" (workshop duration assumed 3 hours)
+      // Always use Europe/Vienna timezone so calendar and cart display consistently.
+      const timeOpts: Intl.DateTimeFormatOptions = {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Europe/Vienna',
+        hour12: false,
+      }
       const endDate = new Date(date.getTime() + 3 * 60 * 60 * 1000) // +3 hours
-      const endHour = endDate.getHours().toString().padStart(2, '0')
-      const endMin = endDate.getMinutes().toString().padStart(2, '0')
-      const timeDisplay = `${startHour}:${startMin} – ${endHour}:${endMin}`
+      const startTime = date.toLocaleTimeString('de-DE', timeOpts)
+      const endTime = endDate.toLocaleTimeString('de-DE', timeOpts)
+      const timeDisplay = `${startTime} – ${endTime}`
 
       return {
         id: appointment.id,
