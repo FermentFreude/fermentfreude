@@ -47,7 +47,7 @@ export default async function Page({ params }: Args) {
 
     return {
       ...block,
-      upcomingLabel: locale === 'de' ? 'Nächster Termin' : 'Upcoming',
+      upcomingLabel: locale === 'de' ? 'Nächster Termin' : 'Next date',
       upcomingDatesByHref: nextWorkshopDatesByHref,
     }
   })

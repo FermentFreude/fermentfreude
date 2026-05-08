@@ -18,7 +18,7 @@ export const Providers: React.FC<{
           <HeaderThemeProvider>
             <SonnerProvider>
               <EcommerceProvider
-                debug={true}
+                debug={process.env.NODE_ENV !== 'production'}
                 enableVariants={true}
                 currenciesConfig={{
                   defaultCurrency: 'EUR',
