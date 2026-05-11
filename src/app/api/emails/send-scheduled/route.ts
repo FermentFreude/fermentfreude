@@ -154,7 +154,7 @@ async function sendScheduledEmails() {
               FIRST_NAME: firstName,
               WORKSHOP_NAME: workshopName,
               WORKSHOP_DATE: new Date(tomorrow).toLocaleDateString('de-DE'),
-              TIME: '18:00 Uhr',
+              TIME: '18 Uhr',
               LOCATION: 'FermentFreude Workshop',
               JOIN_INSTRUCTIONS: 'Bitte 15 Minuten früher anmelden',
             },

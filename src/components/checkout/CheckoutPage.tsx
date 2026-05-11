@@ -24,6 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { cssVariables } from '@/cssVariables'
 import { gtmBeginCheckout } from '@/lib/gtm'
 import { Address } from '@/payload-types'
+import { formatTimeForLocale } from '@/utilities/formatTime'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { toast } from 'sonner'
 
@@ -151,6 +152,18 @@ const DEFAULT_PICKUP_LOCATION = {
 
 const buildMapLink = (name: string, address: string) =>
   `https://www.google.com/maps/search/${encodeURIComponent(`${name} ${address}`)}`
+
+const PICKUP_TIME_VALUES = [
+  '09:00',
+  '10:00',
+  '11:00',
+  '12:00',
+  '13:00',
+  '14:00',
+  '15:00',
+  '16:00',
+  '17:00',
+]
 
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
@@ -316,17 +329,10 @@ export const CheckoutPage: React.FC = () => {
 
   // Get available pickup time slots (only times 3+ hours from now)
   const getAvailableTimeSlots = useCallback(() => {
-    const allTimeSlots = [
-      { value: '09:00', label: '9:00 AM' },
-      { value: '10:00', label: '10:00 AM' },
-      { value: '11:00', label: '11:00 AM' },
-      { value: '12:00', label: '12:00 PM' },
-      { value: '13:00', label: '1:00 PM' },
-      { value: '14:00', label: '2:00 PM' },
-      { value: '15:00', label: '3:00 PM' },
-      { value: '16:00', label: '4:00 PM' },
-      { value: '17:00', label: '5:00 PM' },
-    ]
+    const allTimeSlots = PICKUP_TIME_VALUES.map((value) => ({
+      value,
+      label: formatTimeForLocale(value, locale),
+    }))
 
     // If no date selected, return all slots
     if (!pickupDate) return allTimeSlots
@@ -351,7 +357,7 @@ export const CheckoutPage: React.FC = () => {
     }
 
     return allTimeSlots
-  }, [pickupDate])
+  }, [locale, pickupDate])
 
   // On date change, clear pickup time if it becomes unavailable
   useEffect(() => {
@@ -1037,7 +1043,7 @@ export const CheckoutPage: React.FC = () => {
                             return (
                               <div className="text-caption text-ff-gray-text-light">
                                 <p>{booking.date}</p>
-                                <p>{locale === 'de' ? `${booking.time} Uhr` : booking.time}</p>
+                                <p>{formatTimeForLocale(booking.time, locale)}</p>
                                 {booking.locationName && (
                                   <p>
                                     {booking.locationName}

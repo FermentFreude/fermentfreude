@@ -1,4 +1,5 @@
 import type { WorkshopAppointment } from '@/payload-types'
+import { formatTimeForLocale } from '@/utilities/formatTime'
 import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
@@ -177,7 +178,10 @@ export async function POST(request: NextRequest) {
     }
 
     const dateDisplay = appointmentDate.toLocaleDateString('de-DE', dateOptions)
-    const timeDisplay = appointmentDate.toLocaleTimeString('de-DE', timeOptions)
+    const timeDisplay = formatTimeForLocale(
+      appointmentDate.toLocaleTimeString('de-DE', timeOptions),
+      'de',
+    )
 
     // ─── Resolve Location (populated via depth: 2) ──────────────
     const locationDoc =

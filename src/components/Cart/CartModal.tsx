@@ -21,6 +21,7 @@ import { CartIconButton } from '@/components/Header/CartIconButton'
 import { Button } from '@/components/ui/button'
 import { Product } from '@/payload-types'
 import { useLocale } from '@/providers/Locale'
+import { formatTimeForLocale } from '@/utilities/formatTime'
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
 
@@ -228,7 +229,7 @@ export function CartModal() {
                                   return (
                                     <div className="text-sm text-neutral-500 dark:text-neutral-400 space-y-0.5">
                                       <p>{booking.date}</p>
-                                      <p>{locale === 'de' ? `${booking.time} Uhr` : booking.time}</p>
+                                      <p>{formatTimeForLocale(booking.time, locale)}</p>
                                       {booking.locationName && (
                                         <p>
                                           {booking.locationName}

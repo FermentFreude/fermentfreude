@@ -6,10 +6,11 @@ import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
+import type { SupportedLocale } from '@/utilities/getLocale'
 import { Eye, EyeOff, Mail, User } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 type FormData = {
@@ -20,7 +21,148 @@ type FormData = {
   marketingConsent: boolean
 }
 
-export const CreateAccountForm: React.FC = () => {
+type CreateAccountFormCopy = {
+  firstNameLabel: string
+  firstNamePlaceholder: string
+  firstNameRequired: string
+  lastNameLabel: string
+  lastNamePlaceholder: string
+  lastNameRequired: string
+  emailLabel: string
+  emailPlaceholder: string
+  emailRequired: string
+  emailInvalid: string
+  passwordLabel: string
+  passwordPlaceholder: string
+  passwordRequired: string
+  passwordMinLength: string
+  showPassword: string
+  hidePassword: string
+  passwordHint: string
+  loginLink: string
+  marketingConsent: string
+  privacyPolicy: string
+  submit: string
+  processing: string
+  successMessage: string
+  createError: string
+  accountExistsError: string
+  credentialsError: string
+}
+
+const createAccountFormCopy: Record<SupportedLocale, CreateAccountFormCopy> = {
+  de: {
+    firstNameLabel: 'Vorname',
+    firstNamePlaceholder: 'Vorname',
+    firstNameRequired: 'Bitte gib deinen Vornamen ein.',
+    lastNameLabel: 'Nachname',
+    lastNamePlaceholder: 'Nachname',
+    lastNameRequired: 'Bitte gib deinen Nachnamen ein.',
+    emailLabel: 'E-Mail',
+    emailPlaceholder: 'deine@email.at',
+    emailRequired: 'Bitte gib deine E-Mail-Adresse ein.',
+    emailInvalid: 'Bitte gib eine gültige E-Mail-Adresse ein.',
+    passwordLabel: 'Passwort',
+    passwordPlaceholder: 'Dein Passwort',
+    passwordRequired: 'Bitte gib ein Passwort ein.',
+    passwordMinLength: 'Bitte verwende mindestens 8 Zeichen.',
+    showPassword: 'Passwort anzeigen',
+    hidePassword: 'Passwort verbergen',
+    passwordHint: '*Erstelle ein starkes Passwort',
+    loginLink: 'Hier anmelden',
+    marketingConsent: 'Ich möchte Neuigkeiten, Angebote und Updates per E-Mail erhalten.',
+    privacyPolicy: 'Datenschutzerklärung',
+    submit: 'Konto erstellen',
+    processing: 'Wird erstellt …',
+    successMessage: 'Konto erfolgreich erstellt',
+    createError: 'Beim Erstellen des Kontos ist ein Fehler aufgetreten.',
+    accountExistsError: 'Für diese E-Mail-Adresse gibt es bereits ein Konto. Bitte melde dich an.',
+    credentialsError:
+      'Das Konto wurde erstellt, aber die automatische Anmeldung ist fehlgeschlagen. Bitte melde dich an.',
+  },
+  en: {
+    firstNameLabel: 'First name',
+    firstNamePlaceholder: 'First name',
+    firstNameRequired: 'First name is required.',
+    lastNameLabel: 'Last name',
+    lastNamePlaceholder: 'Last name',
+    lastNameRequired: 'Last name is required.',
+    emailLabel: 'Email',
+    emailPlaceholder: 'your@email.com',
+    emailRequired: 'Email is required.',
+    emailInvalid: 'Please enter a valid email address.',
+    passwordLabel: 'Password',
+    passwordPlaceholder: 'Type your password here',
+    passwordRequired: 'Password is required.',
+    passwordMinLength: 'Please use at least 8 characters.',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+    passwordHint: '*Create a strong password',
+    loginLink: 'Log in here',
+    marketingConsent: 'I agree to receive news, offers, and updates by email.',
+    privacyPolicy: 'Privacy Policy',
+    submit: 'Register account',
+    processing: 'Processing',
+    successMessage: 'Account created successfully',
+    createError: 'There was an error creating the account.',
+    accountExistsError: 'An account with this email already exists. Please log in.',
+    credentialsError:
+      'The account was created, but automatic login failed. Please log in.',
+  },
+}
+
+const getResponseMessage = async (response: Response) => {
+  try {
+    const data = (await response.json()) as {
+      error?: string
+      message?: string
+      errors?: Array<{
+        data?: { errors?: Array<{ message?: string; path?: string }> }
+        message?: string
+      }>
+    }
+
+    return (
+      data.errors?.[0]?.data?.errors?.[0]?.message ||
+      data.errors?.[0]?.message ||
+      data.message ||
+      data.error
+    )
+  } catch {
+    return undefined
+  }
+}
+
+const resolveCreateAccountError = (message: string | undefined, copy: CreateAccountFormCopy) => {
+  const normalized = message?.toLowerCase() ?? ''
+
+  if (
+    normalized.includes('already') ||
+    normalized.includes('duplicate') ||
+    normalized.includes('exists') ||
+    normalized.includes('unique')
+  ) {
+    return copy.accountExistsError
+  }
+
+  if (
+    normalized.includes('valid email') ||
+    (normalized.includes('invalid') && normalized.includes('email'))
+  ) {
+    return copy.emailInvalid
+  }
+
+  if (normalized.includes('password')) return copy.passwordMinLength
+
+  return copy.createError
+}
+
+export type CreateAccountFormProps = {
+  locale?: SupportedLocale
+}
+
+export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ locale = 'de' }) => {
+  const copy = useMemo(() => createAccountFormCopy[locale], [locale])
   const searchParams = useSearchParams()
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
   const { login } = useAuth()
@@ -36,43 +178,53 @@ export const CreateAccountForm: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
+      setError(null)
+      setLoading(true)
+
       const body = {
-        email: data.email,
+        email: data.email.trim().toLowerCase(),
         password: data.password,
         name: [data.firstName, data.lastName].filter(Boolean).join(' ').trim() || undefined,
         marketingConsent: data.marketingConsent ?? false,
       }
-      const response = await fetch(`/api/users`, {
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-      })
+
+      let response: Response
+
+      try {
+        response = await fetch('/api/users', {
+          body: JSON.stringify(body),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        })
+      } catch {
+        setError(copy.createError)
+        setLoading(false)
+        return
+      }
 
       if (!response.ok) {
-        const message = response.statusText || 'There was an error creating the account.'
-        setError(message)
+        const message = await getResponseMessage(response)
+        setError(resolveCreateAccountError(message, copy))
+        setLoading(false)
         return
       }
 
       const redirectTo = searchParams.get('redirect')
 
-      const timer = setTimeout(() => {
-        setLoading(true)
-      }, 1000)
-
       try {
-        await login({ email: data.email, password: data.password })
-        clearTimeout(timer)
+        await login({ email: body.email, password: data.password })
         if (redirectTo) router.push(redirectTo)
-        else router.push(`/account?success=${encodeURIComponent('Account created successfully')}`)
+        else router.push(`/account?success=${encodeURIComponent(copy.successMessage)}`)
       } catch (_) {
-        clearTimeout(timer)
-        setError('There was an error with the credentials provided. Please try again.')
+        setError(copy.credentialsError)
+      } finally {
+        setLoading(false)
       }
     },
-    [login, router, searchParams],
+    [copy, login, router, searchParams],
   )
 
   const inputWrap = 'flex h-11 items-center gap-2 rounded-xl bg-white/90 px-3'
@@ -98,32 +250,32 @@ export const CreateAccountForm: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <FormItem>
             <Label className="sr-only" htmlFor="firstName">
-              First name
+              {copy.firstNameLabel}
             </Label>
             <div className={inputWrap}>
               <User className="w-4 h-4 text-[#3D3933]/50 shrink-0" />
               <input
                 id="firstName"
                 type="text"
-                placeholder="First name"
+                placeholder={copy.firstNamePlaceholder}
                 className="h-full flex-1 border-none bg-transparent px-1 py-0 text-[13px] font-sans text-[#3D3933] placeholder:text-[#3D3933]/50 outline-none"
-                {...register('firstName', { required: 'First name is required.' })}
+                {...register('firstName', { required: copy.firstNameRequired })}
               />
             </div>
             {errors.firstName && <FormError message={errors.firstName.message} />}
           </FormItem>
           <FormItem>
             <Label className="sr-only" htmlFor="lastName">
-              Last name
+              {copy.lastNameLabel}
             </Label>
             <div className={inputWrap}>
               <User className="w-4 h-4 text-[#3D3933]/50 shrink-0" />
               <input
                 id="lastName"
                 type="text"
-                placeholder="Last name"
+                placeholder={copy.lastNamePlaceholder}
                 className="h-full flex-1 border-none bg-transparent px-1 py-0 text-[13px] font-sans text-[#3D3933] placeholder:text-[#3D3933]/50 outline-none"
-                {...register('lastName', { required: 'Last name is required.' })}
+                {...register('lastName', { required: copy.lastNameRequired })}
               />
             </div>
             {errors.lastName && <FormError message={errors.lastName.message} />}
@@ -132,16 +284,16 @@ export const CreateAccountForm: React.FC = () => {
 
         <FormItem>
           <Label className="sr-only" htmlFor="email">
-            Email
+            {copy.emailLabel}
           </Label>
           <div className={inputWrap}>
             <Mail className="w-4 h-4 text-[#3D3933]/50 shrink-0" />
             <input
               id="create-email"
               type="email"
-              placeholder="your@email.com"
+              placeholder={copy.emailPlaceholder}
               className="h-full flex-1 border-none bg-transparent px-1 py-0 text-[13px] font-sans text-[#3D3933] placeholder:text-[#3D3933]/50 outline-none"
-              {...register('email', { required: 'Email is required.' })}
+              {...register('email', { required: copy.emailRequired })}
             />
           </div>
           {errors.email && <FormError message={errors.email.message} />}
@@ -149,35 +301,38 @@ export const CreateAccountForm: React.FC = () => {
 
         <FormItem>
           <Label className="sr-only" htmlFor="password">
-            Password
+            {copy.passwordLabel}
           </Label>
           <div className={inputWrap}>
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="text-[#3D3933]/50 hover:text-[#3D3933] transition-colors cursor-pointer shrink-0"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? copy.hidePassword : copy.showPassword}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
             <input
               id="create-password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Type your password here"
+              placeholder={copy.passwordPlaceholder}
               className="h-full flex-1 border-none bg-transparent px-1 py-0 text-[13px] font-sans text-[#3D3933] placeholder:text-[#3D3933]/50 outline-none"
-              {...register('password', { required: 'Password is required.' })}
+              {...register('password', {
+                minLength: { value: 8, message: copy.passwordMinLength },
+                required: copy.passwordRequired,
+              })}
             />
           </div>
           {errors.password && <FormError message={errors.password.message} />}
         </FormItem>
 
         <div className="flex items-center justify-between gap-4 pt-0.5 text-[12px] font-sans text-[#E5DDCF]">
-          <span>*Create a strong password</span>
+          <span>{copy.passwordHint}</span>
           <Link
             href={`/login${allParams}`}
             className="underline underline-offset-4 text-[#FAF2DE] hover:text-white"
           >
-            Log in here
+            {copy.loginLink}
           </Link>
         </div>
 
@@ -192,9 +347,9 @@ export const CreateAccountForm: React.FC = () => {
             htmlFor="marketingConsent"
             className="cursor-pointer text-[12px] leading-relaxed font-sans"
           >
-            I agree to receive news, offers, and updates by email.{' '}
-            <Link href="/privacy" className="underline underline-offset-4 hover:text-white">
-              Privacy Policy
+            {copy.marketingConsent}{' '}
+            <Link href="/datenschutz" className="underline underline-offset-4 hover:text-white">
+              {copy.privacyPolicy}
             </Link>
           </Label>
         </div>
@@ -208,7 +363,7 @@ export const CreateAccountForm: React.FC = () => {
           type="submit"
           variant="default"
         >
-          {loading ? 'Processing' : 'Register account'}
+          {loading ? copy.processing : copy.submit}
         </Button>
       </div>
     </form>
