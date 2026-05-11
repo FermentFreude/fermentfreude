@@ -31,6 +31,7 @@ type CreateAccountFormCopy = {
   emailLabel: string
   emailPlaceholder: string
   emailRequired: string
+  emailInvalid: string
   passwordLabel: string
   passwordPlaceholder: string
   passwordRequired: string
@@ -60,6 +61,7 @@ const createAccountFormCopy: Record<SupportedLocale, CreateAccountFormCopy> = {
     emailLabel: 'E-Mail',
     emailPlaceholder: 'deine@email.at',
     emailRequired: 'Bitte gib deine E-Mail-Adresse ein.',
+    emailInvalid: 'Bitte gib eine gültige E-Mail-Adresse ein.',
     passwordLabel: 'Passwort',
     passwordPlaceholder: 'Dein Passwort',
     passwordRequired: 'Bitte gib ein Passwort ein.',
@@ -88,6 +90,7 @@ const createAccountFormCopy: Record<SupportedLocale, CreateAccountFormCopy> = {
     emailLabel: 'Email',
     emailPlaceholder: 'your@email.com',
     emailRequired: 'Email is required.',
+    emailInvalid: 'Please enter a valid email address.',
     passwordLabel: 'Password',
     passwordPlaceholder: 'Type your password here',
     passwordRequired: 'Password is required.',
@@ -113,10 +116,18 @@ const getResponseMessage = async (response: Response) => {
     const data = (await response.json()) as {
       error?: string
       message?: string
-      errors?: Array<{ message?: string }>
+      errors?: Array<{
+        data?: { errors?: Array<{ message?: string; path?: string }> }
+        message?: string
+      }>
     }
 
-    return data.errors?.[0]?.message || data.message || data.error
+    return (
+      data.errors?.[0]?.data?.errors?.[0]?.message ||
+      data.errors?.[0]?.message ||
+      data.message ||
+      data.error
+    )
   } catch {
     return undefined
   }
@@ -132,6 +143,13 @@ const resolveCreateAccountError = (message: string | undefined, copy: CreateAcco
     normalized.includes('unique')
   ) {
     return copy.accountExistsError
+  }
+
+  if (
+    normalized.includes('valid email') ||
+    (normalized.includes('invalid') && normalized.includes('email'))
+  ) {
+    return copy.emailInvalid
   }
 
   if (normalized.includes('password')) return copy.passwordMinLength
@@ -173,11 +191,8 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ locale = '
       let response: Response
 
       try {
-        response = await fetch('/api/users/create', {
-          body: JSON.stringify({
-            ...body,
-            passwordConfirm: data.password,
-          }),
+        response = await fetch('/api/users', {
+          body: JSON.stringify(body),
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
