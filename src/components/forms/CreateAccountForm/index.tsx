@@ -173,8 +173,12 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ locale = '
       let response: Response
 
       try {
-        response = await fetch(`/api/users`, {
-          body: JSON.stringify(body),
+        response = await fetch('/api/users/create', {
+          body: JSON.stringify({
+            ...body,
+            passwordConfirm: data.password,
+          }),
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
