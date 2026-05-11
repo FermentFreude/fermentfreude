@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { formatTimeForLocale } from '@/utilities/formatTime'
 
 /**
  * confirmWorkshopBookings — Orders afterChange hook.
@@ -290,7 +291,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
           params: {
             WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
             WORKSHOP_DATE: String(booking.date ?? ''),
-            WORKSHOP_TIME: String(booking.time ?? ''),
+            WORKSHOP_TIME: formatTimeForLocale(String(booking.time ?? ''), 'de'),
             WORKSHOP_LOCATION: workshopLocation,
             GUEST_COUNT: String(booking.guestCount ?? 1),
             TOTAL_PRICE: formattedPrice,

@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { formatTimeForLocale } from '@/utilities/formatTime'
 
 /**
  * Send order confirmation email via Brevo after a new order is created.
@@ -198,7 +199,7 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
             // Surface first booking through the legacy singular params
             const first = bookings.docs[0]
             workshopDate = first.date || ''
-            workshopTime = first.time || ''
+            workshopTime = formatTimeForLocale(first.time, 'de')
             guestCount = first.guestCount || 0
             workshopPrice = first.totalPrice ? `€${first.totalPrice.toFixed(2)}` : ''
 

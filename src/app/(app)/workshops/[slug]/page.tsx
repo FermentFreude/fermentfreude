@@ -2,6 +2,7 @@ import type { Media as MediaType, Page as PageType } from '@/payload-types'
 import type { Metadata } from 'next'
 
 import { Media } from '@/components/Media'
+import { formatTimeForLocale } from '@/utilities/formatTime'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
@@ -73,7 +74,7 @@ const DEFAULT_DETAILS_LABEL_DE = 'Workshop Details'
 const DEFAULT_DETAILS_LABEL_EN = 'Workshop Details'
 const DEFAULT_RESERVE_LABEL_DE = 'Platz reservieren'
 const DEFAULT_RESERVE_LABEL_EN = 'Reserve Your Spot'
-const DEFAULT_TIME_STARTS_DE = 'Startet um 11:00 Uhr'
+const DEFAULT_TIME_STARTS_DE = 'Startet um 11 Uhr'
 const DEFAULT_TIME_STARTS_EN = 'Starts at 11:00 AM'
 const DEFAULT_GIFT_TITLE_DE = 'Verschenke ein besonderes Geschmackserlebnis'
 const DEFAULT_GIFT_TITLE_EN = 'Gift a special tasty experience'
@@ -543,7 +544,13 @@ export default async function WorkshopDetailPage({ params }: Args) {
   const workshopTermins = termins.filter((t) => t.workshopSlug === slug)
   const bookingDateOptions =
     workshopTermins.length > 0
-      ? workshopTermins.map((t) => ({ id: t.id, label: `${t.date} · ${t.timeStart}–${t.timeEnd}` }))
+      ? workshopTermins.map((t) => ({
+          id: t.id,
+          label: `${t.date} · ${formatTimeForLocale(t.timeStart, locale)} – ${formatTimeForLocale(
+            t.timeEnd,
+            locale,
+          )}`,
+        }))
       : [{ id: 'placeholder', label: isDe ? 'Termine folgen' : 'Dates to follow' }]
 
   const galleryImages = [

@@ -1,3 +1,4 @@
+import { formatTimeForLocale } from '@/utilities/formatTime'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import type { WorkshopDate } from './workshop-data'
@@ -136,13 +137,16 @@ export async function getWorkshopAppointments(workshopSlug: string): Promise<Wor
       }
       const dateDisplay = date.toLocaleDateString('de-DE', dateOptions)
 
-      // Format time: "14:00" (workshop duration assumed 3 hours)
+      // Format time: "14 Uhr – 17 Uhr" (workshop duration assumed 3 hours)
       const startHour = date.getHours().toString().padStart(2, '0')
       const startMin = date.getMinutes().toString().padStart(2, '0')
       const endDate = new Date(date.getTime() + 3 * 60 * 60 * 1000) // +3 hours
       const endHour = endDate.getHours().toString().padStart(2, '0')
       const endMin = endDate.getMinutes().toString().padStart(2, '0')
-      const timeDisplay = `${startHour}:${startMin} – ${endHour}:${endMin}`
+      const timeDisplay = formatTimeForLocale(
+        `${startHour}:${startMin} – ${endHour}:${endMin}`,
+        'de',
+      )
 
       return {
         id: appointment.id,

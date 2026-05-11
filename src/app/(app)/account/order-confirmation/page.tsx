@@ -1,6 +1,7 @@
 import { accountI18n } from '@/app/(app)/account/i18n'
 import { Card } from '@/components/ui/card'
 import { formatDate } from '@/utilities/form/formatters'
+import { formatTimeForLocale } from '@/utilities/formatTime'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import {
@@ -164,7 +165,9 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                   <p className="text-body-sm font-semibold text-ff-near-black">
                     {t.pickupTime}
                   </p>
-                  <p className="text-body-sm text-ff-text-muted">{pickupInfo.time}</p>
+                  <p className="text-body-sm text-ff-text-muted">
+                    {formatTimeForLocale(pickupInfo.time, locale)}
+                  </p>
                 </div>
               </div>
             )}

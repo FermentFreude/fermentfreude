@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { formatTimeForLocale } from '@/utilities/formatTime'
 
 /**
  * Send shipping notification email via Brevo when order status changes to 'shipped'.
@@ -88,7 +89,7 @@ export const sendShippingNotificationEmail: CollectionAfterChangeHook = async ({
           ORDER_NUMBER: String(doc.id),
           TRACKING_NUMBER: 'Store Pickup',
           CARRIER: 'Ready for Pickup',
-          ESTIMATED_DELIVERY: `Ab ${pickupTimeFormatted} Uhr`,
+          ESTIMATED_DELIVERY: `Ab ${formatTimeForLocale(pickupTimeFormatted, 'de')}`,
           TRACKING_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/store-location`,
           PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,
           AGB_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/agb`,

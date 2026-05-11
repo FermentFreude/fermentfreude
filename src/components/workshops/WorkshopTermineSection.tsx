@@ -10,6 +10,8 @@ import {
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
+import { useLocale } from '@/providers/Locale'
+import { formatTimeForLocale } from '@/utilities/formatTime'
 import type { WorkshopTermin } from '@/utilities/getWorkshopTermine'
 
 function getTerminCardBg(workshopSlug: string): string {
@@ -23,13 +25,6 @@ function getTerminCardBg(workshopSlug: string): string {
     default:
       return 'bg-[#E8E4D9]'
   }
-}
-
-function formatTime24to12(time: string): string {
-  const [h, m] = time.split(':').map(Number)
-  const period = h >= 12 ? 'PM' : 'AM'
-  const h12 = h % 12 || 12
-  return m > 0 ? `${h12}:${String(m).padStart(2, '0')} ${period}` : `${h12} ${period}`
 }
 
 type Props = {
@@ -49,6 +44,7 @@ export function WorkshopTermineSection({
   slotsFreeLabel,
   filterAllLabel,
 }: Props) {
+  const { locale } = useLocale()
   const [filter, setFilter] = useState<string>('all')
 
   const workshopTypes = useMemo(() => {
@@ -125,7 +121,8 @@ export function WorkshopTermineSection({
                               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
-                          {formatTime24to12(t.timeStart)} – {formatTime24to12(t.timeEnd)}
+                          {formatTimeForLocale(t.timeStart, locale)} –{' '}
+                          {formatTimeForLocale(t.timeEnd, locale)}
                         </span>
                         <span className="flex items-center gap-2">
                           <span className="size-1.5 shrink-0 rounded-full bg-[#1a1a1a]" />

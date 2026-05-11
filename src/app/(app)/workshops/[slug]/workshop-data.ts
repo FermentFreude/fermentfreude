@@ -9,7 +9,7 @@
 export interface WorkshopDate {
   id: string
   date: string // Display date, e.g. "February 15, 2026"
-  time: string // Display time, e.g. "2:00 PM - 5:00 PM"
+  time: string // Display time, e.g. "14 Uhr – 17 Uhr"
   spotsLeft: number
   appointmentId?: string // NEW: From WorkshopAppointments._id
   availableSpots?: number // NEW: From WorkshopAppointments.availableSpots
