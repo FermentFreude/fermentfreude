@@ -17,8 +17,8 @@ import { autoCompleteDigitalOrders } from '@/collections/Orders/autoCompleteDigi
 import { autoEnrollOnPurchase } from '@/collections/Orders/autoEnrollOnPurchase'
 import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBookings'
 import { copyCustomerNameFromTransaction } from '@/collections/Orders/copyCustomerNameFromTransaction'
-import { generateDownloadToken } from '@/collections/Orders/generateDownloadToken'
 import { decrementInventory } from '@/collections/Orders/decrementInventory'
+import { generateDownloadToken } from '@/collections/Orders/generateDownloadToken'
 import { restoreWorkshopSpotsOnDelete } from '@/collections/Orders/restoreWorkshopSpotsOnDelete'
 import { setInvoiceIssuedAt } from '@/collections/Orders/setInvoiceIssuedAt'
 import {
@@ -178,6 +178,26 @@ export const plugins: Plugin[] = [
             admin: {
               description:
                 'Full name supplied by the buyer at checkout. Used to greet the buyer in confirmation emails. Optional for legacy orders.',
+              position: 'sidebar',
+            },
+          },
+          {
+            name: 'customerPhone',
+            type: 'text',
+            label: 'Customer phone',
+            admin: {
+              description:
+                'Phone number supplied by the buyer at checkout. Required for workshop contact.',
+              position: 'sidebar',
+            },
+          },
+          {
+            name: 'customerDietSpecs',
+            type: 'textarea',
+            label: 'Customer dietary specifications',
+            admin: {
+              description:
+                'Dietary restrictions and specifications provided by the buyer at checkout.',
               position: 'sidebar',
             },
           },
