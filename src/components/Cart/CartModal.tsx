@@ -16,7 +16,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
 
 import { CartIconButton } from '@/components/Header/CartIconButton'
 import { Button } from '@/components/ui/button'
@@ -42,12 +41,11 @@ type WorkshopBooking = {
 }
 
 export function CartModal() {
-  const { cart, incrementItem, decrementItem, isLoading } = useCart()
+  const { cart } = useCart()
   const { locale } = useLocale()
   const isDe = locale === 'de'
   const [isOpen, setIsOpen] = useState(false)
   const [bookingMetadata, setBookingMetadata] = useState<Record<string, WorkshopBooking>>({})
-  const [workshopQuantityBusyId, setWorkshopQuantityBusyId] = useState<string | null>(null)
   const copy = {
     title: isDe ? 'Warenkorb' : 'My Cart',
     description: isDe
@@ -58,7 +56,6 @@ export function CartModal() {
     checkout: isDe ? 'Zur Kasse' : 'Proceed to Checkout',
     workshopBooking: isDe ? 'Workshop Buchung' : 'Workshop booking',
     guests: isDe ? 'Gäste' : 'Guests',
-    seatsLabel: isDe ? 'Plätze' : 'Seats',
   }
 
   const pathname = usePathname()
@@ -203,78 +200,14 @@ export function CartModal() {
 
                 // Pre-resolve booking metadata so we can render seats editor outside the <Link>
                 const productSlugWithoutPrefix = product.slug?.replace('workshop-', '')
-                const matchedBookingEntry = isWorkshopBooking
-                  ? (Object.entries(bookingMetadata).find(
-                      ([, b]) => b.workshopSlug === productSlugWithoutPrefix,
+                const matchedBooking = isWorkshopBooking
+                  ? (Object.values(bookingMetadata).find(
+                      (b) => b.workshopSlug === productSlugWithoutPrefix,
                     ) ?? null)
                   : null
-                const matchedBooking = matchedBookingEntry ? matchedBookingEntry[1] : null
                 const guestCountForBooking = matchedBooking
                   ? (item.quantity ?? matchedBooking.guestCount ?? 1)
                   : 0
-                const isWorkshopQtyBusy = workshopQuantityBusyId === item.id
-
-                const updateWorkshopQuantity = async (nextGuestCount: number) => {
-                  if (!item.id) return
-                  if (!matchedBooking?.appointmentId) return
-
-                  const prevGuestCount = guestCountForBooking || 1
-                  if (nextGuestCount === prevGuestCount) return
-
-                  setWorkshopQuantityBusyId(item.id)
-                  try {
-                    const res = await fetch('/api/cart/update-workshop-quantity', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        appointmentId: matchedBooking.appointmentId,
-                        bookingId: matchedBooking.bookingId ?? null,
-                        nextGuestCount,
-                      }),
-                    })
-
-                    const data = (await res.json()) as { success?: boolean; error?: string }
-                    if (!res.ok || !data?.success) {
-                      toast.error(
-                        typeof data?.error === 'string'
-                          ? data.error
-                          : isDe
-                            ? 'Konnte die Plätze nicht aktualisieren.'
-                            : 'Could not update seats.',
-                      )
-                      return
-                    }
-
-                    // Update localStorage + component state so booking details reflect new guestCount.
-                    const stored = localStorage.getItem('workshopBookings')
-                    const parsed = stored ? (JSON.parse(stored) as Record<string, WorkshopBooking>) : {}
-                    if (matchedBookingEntry) {
-                      const key = matchedBookingEntry[0]
-                      const prev = parsed[key]
-                      if (prev) {
-                        parsed[key] = {
-                          ...prev,
-                          guestCount: nextGuestCount,
-                          totalPrice: prev.pricePerPerson * nextGuestCount,
-                        }
-                        localStorage.setItem('workshopBookings', JSON.stringify(parsed))
-                        setBookingMetadata(parsed)
-                      }
-                    }
-
-                    // Finally, update cart quantity (this drives totals).
-                    if (nextGuestCount > prevGuestCount) {
-                      incrementItem(item.id)
-                    } else {
-                      decrementItem(item.id)
-                    }
-                  } catch (err) {
-                    console.error('[CartModal] Failed to update workshop quantity:', err)
-                    toast.error(isDe ? 'Netzwerkfehler beim Aktualisieren.' : 'Network error while updating.')
-                  } finally {
-                    setWorkshopQuantityBusyId(null)
-                  }
-                }
 
                 return (
                   <li className="flex w-full flex-col" key={i}>
@@ -354,54 +287,10 @@ export function CartModal() {
                       </Link>
                       <div className="flex h-16 flex-col justify-between">
                         {isWorkshopBooking ? (
-                          <>
-                            {/* Workshop: show base price per person in euros (convert from cents) */}
-                            <span className="flex justify-end text-right text-sm">
-                              €{typeof price === 'number' ? (price / 100).toFixed(2) : '0.00'}
-                            </span>
-                            <div className="ml-auto flex h-9 flex-none flex-row items-center rounded-lg border border-neutral-200 dark:border-neutral-700">
-                              <button
-                                type="button"
-                                aria-label={isDe ? 'Plätze reduzieren' : 'Reduce seats'}
-                                disabled={
-                                  !item.id ||
-                                  !matchedBooking?.appointmentId ||
-                                  isLoading ||
-                                  isWorkshopQtyBusy ||
-                                  guestCountForBooking <= 1
-                                }
-                                className="ease hover:cursor-pointer flex h-full min-w-9 max-w-9 flex-none items-center justify-center px-2 transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  void updateWorkshopQuantity(Math.max(1, guestCountForBooking - 1))
-                                }}
-                              >
-                                <span className="text-base leading-none">−</span>
-                              </button>
-                              <div className="flex h-full min-w-8 shrink-0 items-center justify-center px-1 text-sm tabular-nums leading-none text-neutral-900 dark:text-neutral-100">
-                                {guestCountForBooking}
-                              </div>
-                              <button
-                                type="button"
-                                aria-label={isDe ? 'Plätze erhöhen' : 'Increase seats'}
-                                disabled={
-                                  !item.id ||
-                                  !matchedBooking?.appointmentId ||
-                                  isLoading ||
-                                  isWorkshopQtyBusy ||
-                                  guestCountForBooking >= 12
-                                }
-                                className="ease hover:cursor-pointer flex h-full min-w-9 max-w-9 flex-none items-center justify-center px-2 transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  void updateWorkshopQuantity(Math.min(12, guestCountForBooking + 1))
-                                }}
-                              >
-                                <span className="text-base leading-none">+</span>
-                              </button>
-                            </div>
-                            <span className="sr-only">{copy.seatsLabel}</span>
-                          </>
+                          // Workshop: show base price per person in euros (convert from cents)
+                          <span className="flex justify-end text-right text-sm">
+                            €{typeof price === 'number' ? (price / 100).toFixed(2) : '0.00'}
+                          </span>
                         ) : (
                           // Regular product: show price and quantity controls
                           <>
