@@ -139,7 +139,6 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
   y += 26
 
   // Company info (left) | Invoice meta (right)
-  const colMid = pageWidth / 2
 
   // Left: company name + address
   doc.setFont('helvetica', 'normal')
@@ -343,23 +342,6 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(...COLORS.darkText)
   doc.text(formatCurrency(data.totalPrice), totalsValueX, y, { align: 'right' })
-
-  y += 8
-
-  // Legal notice — this document is NOT an invoice. The Rechnung is sent
-  // separately with the order confirmation email.
-  doc.setFont('helvetica', 'italic')
-  doc.setFontSize(8)
-  doc.setTextColor(...COLORS.grayLabel)
-  const notInvoiceNote =
-    data.locale === 'de'
-      ? 'Dies ist keine Rechnung. Den Rechnungsbeleg findest du in der Bestellbestätigungs-E-Mail.'
-      : 'This is not an invoice. The invoice was sent with your order confirmation email.'
-  const notInvoiceLines = splitLines(doc, notInvoiceNote, contentWidth - 40)
-  notInvoiceLines.forEach((line: string) => {
-    doc.text(line, totalsValueX, y, { align: 'right' })
-    y += 4
-  })
 
   y += 8
 
