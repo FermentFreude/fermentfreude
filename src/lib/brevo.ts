@@ -98,9 +98,10 @@ export const BREVO_TEMPLATES = {
   PASSWORD_RESET: 70, // V2 (was 29)
   LOGIN_NOTIFICATION: 71, // V2 (was 30)
 
-  // Workshop (5) — booking confirmation V2; reminders & follow-ups still v1 (disabled in code)
+  // Workshop (6) — booking confirmation V2; reminders & follow-ups still v1 (disabled in code)
   WORKSHOP_BOOKING_CONFIRMATION: 65, // V2 (was 31)
   WORKSHOP_GIFT_NOTIFICATION: 93, // V2 — Sprint 3, sent per gift seat (no price)
+  ADMIN_WORKSHOP_NOTIFICATION: 94, // Admin notification for new workshop bookings
   WORKSHOP_7DAY_REMINDER: 32,
   WORKSHOP_1DAY_REMINDER: 33,
   POST_WORKSHOP_FOLLOWUP: 34,

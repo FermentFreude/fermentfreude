@@ -62,6 +62,8 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
   const customerId = typeof doc.customer === 'object' ? doc.customer?.id : doc.customer
   let customerEmail: string | undefined = doc.customerEmail || undefined
   let customerName: string | undefined
+  let customerPhone: string | undefined = doc.customerPhone || undefined
+  let customerDietSpecs: string | undefined = doc.customerDietSpecs || undefined
 
   if (customerId) {
     try {
@@ -73,15 +75,22 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       })
       if (!customerEmail) customerEmail = user?.email || undefined
       customerName = user?.name || undefined
+      // Note: User collection doesn't have phone field, phone is stored in order
     } catch {
       // Non-fatal: booking still gets confirmed
     }
   }
 
-  // Prefer the name supplied by the buyer at checkout (guest flow). For
-  // logged-in users, fall back to the user.name resolved above.
+  // Prefer the data supplied by the buyer at checkout (guest flow). For
+  // logged-in users, fall back to the user data resolved above.
   if (typeof doc.customerName === 'string' && doc.customerName.trim().length > 0) {
     customerName = doc.customerName.trim()
+  }
+  if (typeof doc.customerPhone === 'string' && doc.customerPhone.trim().length > 0) {
+    customerPhone = doc.customerPhone.trim()
+  }
+  if (typeof doc.customerDietSpecs === 'string' && doc.customerDietSpecs.trim().length > 0) {
+    customerDietSpecs = doc.customerDietSpecs.trim()
   }
 
   for (const item of items) {
@@ -207,6 +216,12 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     if (customerName && !booking.firstName) {
       updateData.firstName = customerName
     }
+    if (customerPhone && !booking.phone) {
+      updateData.phone = customerPhone
+    }
+    if (customerDietSpecs && !booking.notes) {
+      updateData.notes = customerDietSpecs
+    }
 
     try {
       await payload.update({
@@ -279,9 +294,10 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
                   hour12: false,
                 }
                 const startStr = dt.toLocaleTimeString('de-DE', timeOpts)
-                const endStr = new Date(
-                  dt.getTime() + 3 * 60 * 60 * 1000,
-                ).toLocaleTimeString('de-DE', timeOpts)
+                const endStr = new Date(dt.getTime() + 3 * 60 * 60 * 1000).toLocaleTimeString(
+                  'de-DE',
+                  timeOpts,
+                )
                 icsTime = `${startStr} – ${endStr}`
               }
             }
@@ -386,6 +402,16 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
                 typeof booking.firstName === 'string' ? booking.firstName.trim() : ''
               return fromUpdate || fromBooking || 'Gast'
             })(),
+            CUSTOMER_PHONE: (() => {
+              const fromUpdate = typeof updateData.phone === 'string' ? updateData.phone.trim() : ''
+              const fromBooking = typeof booking.phone === 'string' ? booking.phone.trim() : ''
+              return fromUpdate || fromBooking || 'Nicht angegeben'
+            })(),
+            CUSTOMER_DIET_SPECS: (() => {
+              const fromUpdate = typeof updateData.notes === 'string' ? updateData.notes.trim() : ''
+              const fromBooking = typeof booking.notes === 'string' ? booking.notes.trim() : ''
+              return fromUpdate || fromBooking || 'Keine Angabe'
+            })(),
             BOOKING_ID: String(booking.id),
             BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
             SEATS: seatsArray,
@@ -402,6 +428,54 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       } catch (error) {
         payload.logger.error(
           `[confirmWorkshopBookings] Failed to send booking email for ${booking.id}: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
+
+      // Send admin notification email
+      try {
+        const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'kontakt@fermentfreude.at'
+        if (adminEmail) {
+          await sendTemplateEmail({
+            to: [{ email: adminEmail, name: 'FermentFreude Admin' }],
+            templateId: BREVO_TEMPLATES.ADMIN_WORKSHOP_NOTIFICATION,
+            params: {
+              WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
+              WORKSHOP_DATE: String(booking.date ?? ''),
+              WORKSHOP_TIME: String(booking.time ?? ''),
+              WORKSHOP_LOCATION: workshopLocation,
+              CUSTOMER_NAME: (() => {
+                const fromUpdate =
+                  typeof updateData.firstName === 'string' ? updateData.firstName.trim() : ''
+                const fromBooking =
+                  typeof booking.firstName === 'string' ? booking.firstName.trim() : ''
+                return fromUpdate || fromBooking || 'Unbekannt'
+              })(),
+              CUSTOMER_EMAIL: bookingEmail,
+              CUSTOMER_PHONE: (() => {
+                const fromUpdate =
+                  typeof updateData.phone === 'string' ? updateData.phone.trim() : ''
+                const fromBooking = typeof booking.phone === 'string' ? booking.phone.trim() : ''
+                return fromUpdate || fromBooking || 'Nicht angegeben'
+              })(),
+              CUSTOMER_DIET_SPECS: (() => {
+                const fromUpdate =
+                  typeof updateData.notes === 'string' ? updateData.notes.trim() : ''
+                const fromBooking = typeof booking.notes === 'string' ? booking.notes.trim() : ''
+                return fromUpdate || fromBooking || 'Keine Angabe'
+              })(),
+              GUEST_COUNT: String(booking.guestCount ?? 1),
+              TOTAL_PRICE: formattedPrice,
+              BOOKING_ID: String(booking.id),
+              BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
+            },
+          })
+          payload.logger.info(
+            `[confirmWorkshopBookings] Sent admin notification email for booking ${booking.id}`,
+          )
+        }
+      } catch (error) {
+        payload.logger.error(
+          `[confirmWorkshopBookings] Failed to send admin notification for ${booking.id}: ${error instanceof Error ? error.message : String(error)}`,
         )
       }
 
