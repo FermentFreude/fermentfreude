@@ -84,6 +84,14 @@ const CHECKOUT_DE = {
   createAccountError: 'Konto konnte nicht erstellt werden. Bitte versuche es erneut.',
   createAccountEmailExists: 'Diese E-Mail ist bereits registriert. Bitte melde dich an.',
   createAccountNetworkError: 'Verbindungsfehler. Bitte versuche es erneut.',
+  // New fields for workshop checkout
+  phoneLabel: 'Telefonnummer',
+  phonePlaceholder: '+49 123 456789',
+  phoneRequiredError: 'Telefonnummer ist erforderlich',
+  phoneInvalidError: 'Bitte geben Sie eine gültige Telefonnummer im Format +49... ein',
+  dietLabel: 'Ernährungshinweise (optional)',
+  dietPlaceholder: 'z.B. vegetarisch, vegan, glutenfrei, Allergien...',
+  dietCharCount: (n: number) => `${n} / 500`,
 }
 
 const CHECKOUT_EN = {
@@ -142,6 +150,14 @@ const CHECKOUT_EN = {
   createAccountError: 'Could not create account. Please try again.',
   createAccountEmailExists: 'This email is already registered. Please log in.',
   createAccountNetworkError: 'Connection error. Please try again.',
+  // New fields for workshop checkout
+  phoneLabel: 'Phone number',
+  phonePlaceholder: '+49 123 456789',
+  phoneRequiredError: 'Phone number is required',
+  phoneInvalidError: 'Please enter a valid phone number in format +49...',
+  dietLabel: 'Dietary specifications (optional)',
+  dietPlaceholder: 'e.g. vegetarian, vegan, gluten-free, allergies...',
+  dietCharCount: (n: number) => `${n} / 500`,
 }
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
@@ -181,7 +197,34 @@ export const CheckoutPage: React.FC = () => {
    */
   const [email, setEmail] = useState('')
   const [customerName, setCustomerName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [dietSpecs, setDietSpecs] = useState('')
+  const [phoneError, setPhoneError] = useState<string | null>(null)
   const [emailEditable, setEmailEditable] = useState(true)
+
+  // Phone validation (E.164 format: +[1-9][0-9]{6,14})
+  const validatePhone = (phoneNumber: string): string | null => {
+    const trimmed = phoneNumber.trim()
+    if (!trimmed) {
+      return t.phoneRequiredError
+    }
+
+    // E.164 format validation: + followed by 6-15 digits (allowing spaces/hyphens)
+    const phoneRegex = /^\+[1-9][\d\s-]{5,14}$/
+    if (!phoneRegex.test(trimmed)) {
+      return t.phoneInvalidError
+    }
+
+    // Remove non-digits and check length (6-15 digits total)
+    const digitsOnly = trimmed.replace(/[\s-]/g, '')
+    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+      // + plus 6-14 digits
+      return t.phoneInvalidError
+    }
+
+    return null
+  }
+
   /* ── Optional account creation during guest checkout ── */
   const [createAccountOpt, setCreateAccountOpt] = useState(false)
   const [accountPassword, setAccountPassword] = useState('')
@@ -588,7 +631,9 @@ export const CheckoutPage: React.FC = () => {
       const type = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
       const emailParam = email ? `&email=${encodeURIComponent(email)}` : ''
       const confirmationBase = user ? '/account' : '/checkout'
-      router.push(`${confirmationBase}/order-confirmation?orderId=${data.orderID}&type=${type}${emailParam}`)
+      router.push(
+        `${confirmationBase}/order-confirmation?orderId=${data.orderID}&type=${type}${emailParam}`,
+      )
     } catch (_err) {
       setError(t.connectionError)
       setProcessingPayment(false)
@@ -600,6 +645,9 @@ export const CheckoutPage: React.FC = () => {
       try {
         const additionalData: Record<string, unknown> = {
           ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
+          ...(customerName.trim() ? { customerName: customerName.trim() } : {}),
+          ...(phone.trim() ? { customerPhone: phone.trim() } : {}),
+          ...(dietSpecs.trim() ? { customerDietSpecs: dietSpecs.trim() } : {}),
         }
 
         // For pickup orders, pass pickup info instead of addresses
@@ -640,6 +688,9 @@ export const CheckoutPage: React.FC = () => {
       billingAddressSameAsShipping,
       shippingAddress,
       checkoutEmail,
+      customerName,
+      phone,
+      dietSpecs,
       initiatePayment,
       isAllPhysicalPickup,
       pickupDate,
@@ -651,6 +702,14 @@ export const CheckoutPage: React.FC = () => {
   const handleGuestContinue = useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault()
+
+      // Validate phone number before proceeding
+      const phoneValidationError = validatePhone(phone)
+      if (phoneValidationError) {
+        setPhoneError(phoneValidationError)
+        return
+      }
+
       if (createAccountOpt && accountPassword.length >= 8) {
         setIsCreatingAccount(true)
         setCreateAccountError(null)
@@ -690,7 +749,7 @@ export const CheckoutPage: React.FC = () => {
       }
       setEmailEditable(false)
     },
-    [createAccountOpt, accountPassword, email, customerName, login, t],
+    [createAccountOpt, accountPassword, email, customerName, login, t, phone],
   )
 
   if (!stripe) return null
@@ -801,6 +860,63 @@ export const CheckoutPage: React.FC = () => {
                 />
               </FormItem>
 
+              {/* Phone number (required for workshops) */}
+              <FormItem>
+                <Label
+                  htmlFor="phone"
+                  className="font-display text-body-sm font-bold text-ff-near-black"
+                >
+                  {t.phoneLabel}
+                  <span className="ml-1 text-red-500">*</span>
+                </Label>
+                <Input
+                  disabled={!emailEditable}
+                  id="phone"
+                  name="phone"
+                  autoComplete="tel"
+                  onChange={(e) => {
+                    setPhone(e.target.value)
+                    setPhoneError(validatePhone(e.target.value))
+                  }}
+                  onBlur={(e) => setPhoneError(validatePhone(e.target.value))}
+                  value={phone}
+                  required
+                  type="tel"
+                  placeholder={t.phonePlaceholder}
+                  className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
+                />
+                {phoneError && <p className="text-body-sm text-red-600">{phoneError}</p>}
+              </FormItem>
+
+              {/* Dietary specifications (optional) */}
+              <FormItem>
+                <Label
+                  htmlFor="dietSpecs"
+                  className="font-display text-body-sm font-bold text-ff-near-black"
+                >
+                  {t.dietLabel}
+                </Label>
+                <textarea
+                  disabled={!emailEditable}
+                  id="dietSpecs"
+                  name="dietSpecs"
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value.length <= 500) {
+                      setDietSpecs(value)
+                    }
+                  }}
+                  value={dietSpecs}
+                  placeholder={t.dietPlaceholder}
+                  rows={3}
+                  maxLength={500}
+                  className="w-full rounded-md border border-ff-border-light bg-[#f9f7f3] px-3 py-2 font-sans text-body-sm text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-near-black focus:ring-ff-near-black"
+                />
+                <div className="text-right text-body-xs text-ff-gray-text-light">
+                  {t.dietCharCount(dietSpecs.length)}
+                </div>
+              </FormItem>
+
               {/* Optional account creation */}
               <div className="rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
                 <div className="flex items-start gap-3">
@@ -855,7 +971,9 @@ export const CheckoutPage: React.FC = () => {
                   customerName.trim().length < 2 ||
                   !emailEditable ||
                   (createAccountOpt && accountPassword.length < 8) ||
-                  isCreatingAccount
+                  isCreatingAccount ||
+                  Boolean(phoneError) ||
+                  !phone.trim()
                 }
                 onClick={(e) => void handleGuestContinue(e)}
                 className="rounded-full bg-ff-near-black px-6 font-display font-bold text-white hover:bg-ff-near-black/80"

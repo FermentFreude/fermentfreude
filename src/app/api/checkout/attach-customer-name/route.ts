@@ -5,12 +5,12 @@ import { getPayload } from 'payload'
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/checkout/attach-customer-name
  *
- *  Stores the guest buyer's full name on the pending Stripe transaction
+ *  Stores the guest buyer's contact information on the pending Stripe transaction
  *  identified by `paymentIntentID`. Called by the checkout form right
  *  after Stripe confirms the payment but before the plugin's
  *  confirmOrder endpoint creates the Order. The Order beforeChange hook
- *  `copyCustomerNameFromTransaction` then promotes the value onto the
- *  Order so confirmation emails greet the buyer by name.
+ *  `copyCustomerNameFromTransaction` then promotes the values onto the
+ *  Order so confirmation emails and admin notifications have the data.
  * ═══════════════════════════════════════════════════════════════ */
 
 export async function POST(request: NextRequest) {
@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
       body && typeof body.paymentIntentID === 'string' ? body.paymentIntentID.trim() : ''
     const customerName =
       body && typeof body.customerName === 'string' ? body.customerName.trim() : ''
+    const customerPhone =
+      body && typeof body.customerPhone === 'string' ? body.customerPhone.trim() : ''
+    const customerDietSpecs =
+      body && typeof body.customerDietSpecs === 'string' ? body.customerDietSpecs.trim() : ''
 
     if (!paymentIntentID) {
       return NextResponse.json(
@@ -50,10 +54,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const updateData: Record<string, unknown> = {
+      customerName: customerName.slice(0, 250),
+    }
+
+    if (customerPhone) {
+      updateData.customerPhone = customerPhone
+    }
+
+    if (customerDietSpecs) {
+      updateData.customerDietSpecs = customerDietSpecs
+    }
+
     await payload.update({
       collection: 'transactions',
       id: tx.docs[0].id,
-      data: { customerName: customerName.slice(0, 250) },
+      data: updateData,
       overrideAccess: true,
     })
 
@@ -61,7 +77,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('[attach-customer-name] Error:', err)
     return NextResponse.json(
-      { success: false, error: 'Failed to attach customer name.' },
+      { success: false, error: 'Failed to attach customer data.' },
       { status: 500 },
     )
   }

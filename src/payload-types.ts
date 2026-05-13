@@ -308,6 +308,14 @@ export interface Order {
    */
   customerName?: string | null;
   /**
+   * Phone number supplied by the buyer at checkout. Required for workshop contact.
+   */
+  customerPhone?: string | null;
+  /**
+   * Dietary restrictions and specifications provided by the buyer at checkout.
+   */
+  customerDietSpecs?: string | null;
+  /**
    * UUID token for secure receipt download via /api/orders/[id]/receipt?token=... Set automatically when order confirmation email is sent.
    */
   downloadToken?: string | null;
@@ -6786,6 +6794,8 @@ export interface OrdersSelect<T extends boolean = true> {
   amount?: T;
   currency?: T;
   customerName?: T;
+  customerPhone?: T;
+  customerDietSpecs?: T;
   downloadToken?: T;
   invoiceIssuedAt?: T;
   updatedAt?: T;
