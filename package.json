@@ -16,6 +16,8 @@
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation next lint --fix",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "seed": "npx tsx src/scripts/seed-all.ts",
+    "upload:email-icons": "node --env-file=.env scripts/upload-email-icons-to-r2.mjs",
+    "upload:email-icons:dry": "node scripts/upload-email-icons-to-r2.mjs --dry-run",
     "seed:placeholders": "npx tsx src/scripts/generate-placeholder-images.ts",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
