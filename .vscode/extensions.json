@@ -6,6 +6,7 @@
     "ms-vscode.vscode-typescript-next",
     "github.vscode-pull-request-github",
     "eamodio.gitlens",
-    "github.copilot"
+    "github.copilot",
+    "khaled.vscode-openrouter-extension"
   ]
 }

@@ -29,6 +29,17 @@ const TEST_EMAIL = 'kontakt@fermentfreude.at'
 
 // Templates we manage (V2 only). Order = founder edit priority.
 const V2_TEMPLATES = [
+  { id: 32, slug: 'workshop-7day-reminder' },
+  { id: 33, slug: 'workshop-1day-reminder' },
+  { id: 34, slug: 'post-workshop-followup' },
+  { id: 35, slug: 'feedback-request' },
+  { id: 37, slug: 'shipping-notification' },
+  { id: 38, slug: 'review-request' },
+  { id: 39, slug: 'abandoned-cart' },
+  { id: 41, slug: 'course-enrollment' },
+  { id: 42, slug: 'b2b-inquiry' },
+  { id: 43, slug: 're-engagement' },
+  { id: 44, slug: 'referral-program' },
   { id: 65, slug: 'workshop-booking' },
   { id: 66, slug: 'account-creation' },
   { id: 68, slug: 'newsletter-welcome' },
@@ -42,6 +53,65 @@ const V2_TEMPLATES = [
 
 // Mock params per template for test sends
 const MOCK = {
+  32: {
+    FIRST_NAME: 'Max',
+    WORKSHOP_TITLE: 'Tempeh Basics',
+    WORKSHOP_DATE: 'Sa, 30. Juni 2026',
+    WORKSHOP_TIME: '10:00 – 14:00',
+    WORKSHOP_LOCATION: 'Studio Wien, Schönbrunner Str. 12, 1050',
+    PREP_TIPS: 'Bitte denk daran, ein sauberes 500ml Glas mitzubringen.',
+    BOOKING_URL: 'https://www.fermentfreude.at/account/orders',
+  },
+  33: {
+    FIRST_NAME: 'Max',
+    WORKSHOP_TITLE: 'Tempeh Basics',
+    WORKSHOP_DATE: 'Morgen, Sa, 23. Juni 2026',
+    WORKSHOP_TIME: '10:00 – 14:00',
+    WORKSHOP_LOCATION: 'Studio Wien, Schönbrunner Str. 12, 1050',
+    BOOKING_URL: 'https://www.fermentfreude.at/account/orders',
+  },
+  34: {
+    FIRST_NAME: 'Max',
+    WORKSHOP_TITLE: 'Tempeh Basics',
+  },
+  35: {
+    FIRST_NAME: 'Max',
+    WORKSHOP_TITLE: 'Tempeh Basics',
+    FEEDBACK_URL: 'https://www.fermentfreude.at/feedback/abc123',
+  },
+  37: {
+    FIRST_NAME: 'Max',
+    ORDER_NUMBER: 'AB12CD34',
+    CARRIER: 'Österreichische Post',
+    TRACKING_NUMBER: 'JJ123456789AT',
+    ESTIMATED_DELIVERY: 'Dienstag, 26. Mai',
+    TRACKING_URL: 'https://www.post.at/s/sendungsdetails?sn=JJ123456789AT',
+  },
+  38: {
+    FIRST_NAME: 'Max',
+    ORDER_NUMBER: 'AB12CD34',
+    REVIEW_URL: 'https://www.fermentfreude.at/account/orders',
+  },
+  39: {
+    FIRST_NAME: 'Max',
+    WORKSHOP_TITLE: 'Tempeh Basics',
+  },
+  41: {
+    FIRST_NAME: 'Max',
+    COURSE_TITLE: 'Kombucha Meistern',
+    COURSE_URL: 'https://www.fermentfreude.at/account/courses',
+  },
+  42: {
+    COMPANY_NAME: 'Bio-Markt Sonnenschein',
+  },
+  43: {
+    FIRST_NAME: 'Max',
+  },
+  44: {
+    FIRST_NAME: 'Max',
+    REWARD_AMOUNT: '€ 10,- Gutschein',
+    REFERRAL_URL: 'https://www.fermentfreude.at/account/referral',
+  },
   65: {
     FIRST_NAME: 'Max',
     BOOKING_ID: 'abc123def456',
@@ -55,6 +125,7 @@ const MOCK = {
     TOTAL_PRICE: '€ 178,00',
     WHAT_TO_BRING: 'Schürze · ein Glas (500 ml) · Lust auf gute Gespräche',
     RECEIPT_URL: 'https://www.fermentfreude.at/api/bookings/abc123/receipt?token=test-token',
+    TICKETS_URL: 'https://www.fermentfreude.at/orders/order_abc123/tickets?token=test-token',
     WORKSHOP_BOOKINGS_HTML: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#fff;border:1px solid #E8DFD0;border-radius:8px;margin:8px 0;"><tr><td style="padding:18px 20px 8px;"><div style="font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#8a8783;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Workshop</div><div style="font-family:Helvetica,Arial,sans-serif;font-size:18px;color:#1a1a1a;font-weight:700;margin-top:4px;">Tempeh Basics</div></td></tr><tr><td style="padding:8px 20px 18px;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#555251;line-height:1.6;">Sa, 6. Juni 2026 · 10:00 – 14:00 · Studio Wien · 2 Plätze · € 178,00</td></tr></table>`,
     PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
     AGB_URL: 'https://www.fermentfreude.at/agb',
@@ -100,6 +171,20 @@ const MOCK = {
     TOTAL: '€ 59,90',
     SHIPPING_ADDRESS: 'Max Mustermann\nMusterstraße 1\n1010 Wien\nÖsterreich',
     RECEIPT_URL: 'https://www.fermentfreude.at/api/orders/order_abc123/receipt?token=test-token',
+    ITEMS: [
+      {
+        IMAGE_URL: 'https://pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev/media/email/shopping-cart-white.png', // Placeholder
+        TITLE: 'Tempeh Starter Kit',
+        QUANTITY: '2',
+        PRICE: '€ 48,00',
+      },
+      {
+        IMAGE_URL: 'https://pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev/media/email/shopping-cart-white.png', // Placeholder
+        TITLE: 'Kombucha SCOBY',
+        QUANTITY: '1',
+        PRICE: '€ 6,00',
+      },
+    ],
     ORDER_ITEMS_HTML: `
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
   <tr><td style="padding:14px 0;border-bottom:1px solid #E8DFD0;">
