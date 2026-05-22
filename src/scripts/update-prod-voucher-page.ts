@@ -111,7 +111,7 @@ async function run() {
 
   // Map existing delivery options to new types
   const existingOptions = (v.deliveryOptions as Array<{ id?: string; type: string; title: string; icon: string }>) ?? []
-  const deDeliveryOptions = [
+  const deDeliveryOptions: Array<{ id?: string | null; type: string; title: string; icon: 'email' | 'card' | 'pickup' }> = [
     {
       id: existingOptions[0]?.id,
       type: 'email-recipient',
