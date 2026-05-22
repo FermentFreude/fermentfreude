@@ -211,6 +211,10 @@ async function run() {
   let created = 0
   for (const a of REAL_APPOINTMENTS) {
     const dateTime = viennaIso(a.date, a.time)
+    if (new Date(dateTime) < new Date()) {
+      console.log(`  ⏭️  ${a.workshop.padEnd(8)} | ${a.date} ${a.time} | skipped (past date)`)
+      continue
+    }
     const doc = await payload.create({
       collection: 'workshop-appointments',
       data: {
