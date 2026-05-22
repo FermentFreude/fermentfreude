@@ -46,7 +46,7 @@ export const metadata: Metadata = {
 const DEFAULTS = {
   heroHeading: 'Give the gift of fermentation',
   heroDescription:
-    'The perfect gift for foodies and the health-conscious.\nChoose an amount and receive your voucher.',
+    'The perfect gift for foodies and the health-conscious.\nFor €99 you give one of our workshops.',
   voucherAmounts: [{ amount: '99€' }],
   deliveryOptions: [
     {
@@ -59,15 +59,14 @@ const DEFAULTS = {
       title: 'Send to me — I will forward it',
       icon: 'email' as const,
     },
-    { type: 'pdf', title: 'PDF to print at home', icon: 'pdf' as const },
   ],
   cardLabel: 'GIFT VOUCHER',
   valueLabel: 'Voucher value',
-  cardDisclaimer: 'Redeemable in our shop',
+  cardDisclaimer: 'Redeemable for workshops on fermentfreude.at',
   amountSectionLabel: 'VOUCHER VALUE',
-  deliverySectionLabel: 'DELIVERY METHOD',
-  deliveryDisclaimer: 'We cannot ship products by post to ensure freshness.',
-  pickupAddress: 'Grabenstraße 15\n8010 Graz',
+  deliverySectionLabel: 'DELIVERY',
+  deliveryDisclaimer: null,
+  pickupAddress: null,
   addToCartButton: 'Add to cart',
   voucherWhyHeading: 'Why a fermentation voucher is a great gift',
   voucherWhyBody:
@@ -142,22 +141,22 @@ const DEFAULTS = {
   faqs: [
     {
       question: 'How long is a voucher valid?',
-      answer:
-        'Our vouchers are valid for 12 months from the date of purchase and can be redeemed for workshops, online courses and products.',
+      answer: 'Our vouchers are valid for 12 months from the date of purchase.',
     },
     {
-      question: 'Can the voucher be redeemed in instalments?',
+      question: 'Which workshops can I redeem the voucher for?',
       answer:
-        'Yes, you can use the voucher in several steps. The remaining balance stays on the voucher.',
+        'The voucher is valid for all our workshops — Kombucha, Lacto-vegetables, Tempeh and seasonal workshops.',
     },
     {
-      question: 'Where can I enter the code?',
+      question: 'How do I redeem the voucher?',
       answer:
-        'During checkout you can enter the voucher code in the cart. The amount is automatically deducted from the total.',
+        'Choose your workshop on fermentfreude.at, book your date and enter the voucher code at checkout. The full amount will be applied.',
     },
     {
-      question: 'Can a voucher be topped up?',
-      answer: 'Yes, you can top up an existing voucher with an additional amount at any time.',
+      question: 'How do I receive the voucher after purchase?',
+      answer:
+        'You will receive your voucher immediately by email. You can forward it directly to the recipient or provide us with their email address so we can send it to them directly.',
     },
   ],
 }
