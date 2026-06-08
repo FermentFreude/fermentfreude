@@ -47,15 +47,17 @@ export default async function WorkshopsPage() {
   // Any extra blocks added in the Content tab (e.g., Gastronomy Banner)
   const extraBlocks = workshopsData?.layout ?? []
 
-  // Enhance workshop cards with real next dates from database
-  // Only use the first AVAILABLE (non-sold-out) appointment as the "next date"
+  // Enhance workshop cards with real next dates from database.
+  // Only use the first AVAILABLE (non-sold-out) appointment as the "next date".
+  // Never fall back to the CMS card.nextDate — that string becomes stale and
+  // would show past dates once all future appointments expire.
   const enhancedCards = ws?.workshopsCalendarCards?.map((card) => {
     const nextAppointment = upcomingAppointments.find(
       (apt) => apt.workshopType === card.workshopType && apt.availableSpots > 0,
     )
     return {
       ...card,
-      nextDate: nextAppointment?.date || card.nextDate,
+      nextDate: nextAppointment?.date ?? null,
     }
   })
 
