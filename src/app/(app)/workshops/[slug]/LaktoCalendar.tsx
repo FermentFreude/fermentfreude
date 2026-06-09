@@ -97,7 +97,11 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
         }))
       : MONTHS
 
-  const [activeIndex, setActiveIndex] = useState(0)
+  const currentMonthNum = String(new Date().getMonth() + 1).padStart(2, '0')
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const idx = months.findIndex((m) => m.monthNumber === currentMonthNum)
+    return idx >= 0 ? idx : 0
+  })
   const [isVisible, setIsVisible] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
 

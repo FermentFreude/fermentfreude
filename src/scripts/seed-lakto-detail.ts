@@ -182,6 +182,18 @@ const workshopDetailDE = {
         { name: 'Kohlrabi-Kimchi' },
       ],
     },
+    {
+      month: 'Juni',
+      monthShort: 'JUN',
+      monthNumber: '06',
+      season: 'SOMMER',
+      accent: '#4a7c59',
+      recipes: [
+        { name: 'Fermentierte Zucchini' },
+        { name: 'Milchsaure Gurken' },
+        { name: 'Erdbeer-Kimchi' },
+      ],
+    },
   ],
 
   // ── 7. Voucher CTA ────────────────────────────────────
@@ -425,6 +437,18 @@ const workshopDetailEN = {
         { name: 'Fermented Asparagus' },
         { name: 'Rhubarb Sauerkraut' },
         { name: 'Kohlrabi Kimchi' },
+      ],
+    },
+    {
+      month: 'June',
+      monthShort: 'JUN',
+      monthNumber: '06',
+      season: 'SUMMER',
+      accent: '#4a7c59',
+      recipes: [
+        { name: 'Fermented Zucchini' },
+        { name: 'Lacto-Fermented Cucumbers' },
+        { name: 'Strawberry Kimchi' },
       ],
     },
   ],

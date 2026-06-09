@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       }
   try {
     const body = await request.json()
-    const { voucherCode, customerEmail, customerName, userId } = body
+    const { voucherCode, customerEmail, customerName, userId, cartItems: clientCartItems } = body
 
     if (!voucherCode || typeof voucherCode !== 'string') {
       return NextResponse.json(
@@ -105,6 +105,21 @@ export async function POST(request: NextRequest) {
             quantity: item.quantity ?? 1,
           }))
       }
+    }
+
+    // Fallback to client-provided cart items (covers guests and carts not yet synced to DB)
+    if (!cartItems.length && Array.isArray(clientCartItems) && clientCartItems.length) {
+      cartItems = clientCartItems
+        .filter((item: unknown) => {
+          if (typeof item !== 'object' || item === null) return false
+          const i = item as Record<string, unknown>
+          return typeof i.product === 'string' && i.product.length > 0
+        })
+        .map((item: Record<string, unknown>) => ({
+          product: item.product as string,
+          variant: typeof item.variant === 'string' ? item.variant : null,
+          quantity: typeof item.quantity === 'number' && item.quantity > 0 ? item.quantity : 1,
+        }))
     }
 
     if (!cartItems.length) {

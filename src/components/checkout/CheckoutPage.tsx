@@ -606,6 +606,20 @@ export const CheckoutPage: React.FC = () => {
     setError(null)
 
     try {
+      const clientCartItems = (cart?.items ?? [])
+        .filter((item) => item.product)
+        .map((item) => ({
+          product:
+            typeof item.product === 'object' && item.product !== null
+              ? (item.product as { id: string }).id
+              : String(item.product),
+          variant:
+            item.variant && typeof item.variant === 'object'
+              ? (item.variant as { id: string }).id
+              : (item.variant ?? null),
+          quantity: item.quantity ?? 1,
+        }))
+
       const res = await fetch('/api/voucher/place-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -614,6 +628,7 @@ export const CheckoutPage: React.FC = () => {
           customerEmail: email || user?.email,
           customerName: customerName.trim() || user?.name || undefined,
           userId: user?.id,
+          cartItems: clientCartItems,
         }),
       })
       const data = await res.json()
