@@ -37,6 +37,9 @@ export interface WorkshopReceiptBusinessInfo {
   vatRate?: number | null
   /** § 6 Abs. 1 Z 27 UStG — small business: no VAT shown. */
   isKleinunternehmer?: boolean | null
+  uid?: string | null
+  fn?: string | null
+  court?: string | null
 }
 
 export interface WorkshopReceiptData {
@@ -87,6 +90,9 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
     // Workshops are an educational service in AT → reduced 10 % rate by default.
     vatRate: typeof b.vatRate === 'number' && b.vatRate >= 0 ? b.vatRate / 100 : 0.1,
     isKleinunternehmer: b.isKleinunternehmer === true,
+    uid: b.uid || null,
+    fn: b.fn || null,
+    court: b.court || null,
   }
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
@@ -346,9 +352,9 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
   y += 8
 
   // ─── FOOTER BOX ───────────────────────────────────────────────────────────
-  // No bank/legal placeholders. Two columns: ticket reminder + thank-you.
+  const legalLineCount = [biz.uid, biz.fn, biz.court].filter(Boolean).length > 0 ? 1 : 0
   const footerBoxY = Math.max(y, 230)
-  const footerBoxH = 26
+  const footerBoxH = 26 + legalLineCount * 4
   const footerBoxPad = 5
 
   doc.setFillColor(...COLORS.lightGray)
@@ -392,6 +398,19 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
     doc.text(line, fc2X, fy2)
     fy2 += 4.5
   })
+
+  // Legal identifiers (UID, FN, court) — bottom of footer box
+  const legalParts: string[] = []
+  if (biz.uid) legalParts.push(`UID: ${biz.uid}`)
+  if (biz.fn) legalParts.push(`FN: ${biz.fn}`)
+  if (biz.court) legalParts.push(biz.court)
+  if (legalParts.length > 0) {
+    const legalY = footerBoxY + footerBoxH - 6
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(6.5)
+    doc.setTextColor(...COLORS.grayLabel)
+    doc.text(legalParts.join('   ·   '), marginL + contentWidth / 2, legalY, { align: 'center' })
+  }
 
   // ─── FOOTER COPYRIGHT ─────────────────────────────────────────────────────
 

@@ -45,6 +45,9 @@ export interface OrderReceiptBusinessInfo {
   vatRate?: number | null
   /** § 6 Abs. 1 Z 27 UStG — small business: no VAT shown on invoices. */
   isKleinunternehmer?: boolean | null
+  uid?: string | null
+  fn?: string | null
+  court?: string | null
 }
 
 export interface OrderReceiptData {
@@ -96,6 +99,9 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
     website: b.website || COMPANY.website,
     vatRate: typeof b.vatRate === 'number' && b.vatRate >= 0 ? b.vatRate / 100 : 0.2,
     isKleinunternehmer: b.isKleinunternehmer === true,
+    uid: b.uid || null,
+    fn: b.fn || null,
+    court: b.court || null,
   }
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
@@ -396,10 +402,9 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   y += 6
 
   // ─── FOOTER BOX ──────────────────────────────────────────────────────────
-  // Single contact band — no bank details (Stripe-only payments) and no
-  // placeholder legal numbers. Will be expanded once founders provide UID/FN.
+  const legalLineCount = [biz.uid, biz.fn, biz.court].filter(Boolean).length > 0 ? 1 : 0
   const footerBoxY = Math.max(y, 240)
-  const footerBoxH = 22
+  const footerBoxH = 22 + legalLineCount * 4
   const footerBoxPad = 5
 
   doc.setFillColor(...COLORS.lightGray)
@@ -417,7 +422,21 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   doc.setFontSize(7.5)
   doc.setTextColor(...COLORS.darkText)
   doc.text(`${biz.email}   ·   ${biz.website}`, centerX, fy, { align: 'center' })
-  fy += 5
+  fy += 4
+
+  // Legal identifiers (UID, FN, court) — only printed when present
+  const legalParts: string[] = []
+  if (biz.uid) legalParts.push(`UID: ${biz.uid}`)
+  if (biz.fn) legalParts.push(`FN: ${biz.fn}`)
+  if (biz.court) legalParts.push(biz.court)
+  if (legalParts.length > 0) {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(6.5)
+    doc.setTextColor(...COLORS.grayLabel)
+    doc.text(legalParts.join('   ·   '), centerX, fy, { align: 'center' })
+    fy += 4
+  }
+
   doc.setFont('helvetica', 'italic')
   doc.setFontSize(7.5)
   doc.setTextColor(...COLORS.grayLabel)

@@ -172,6 +172,9 @@ export async function GET(
           phone?: string | null
           vatRate?: number | null
           isKleinunternehmer?: boolean
+          uid?: string | null
+          fn?: string | null
+          court?: string | null
         }
       | undefined
     try {
@@ -192,6 +195,9 @@ export async function GET(
           phone: biz.phone as string | undefined,
           vatRate: typeof biz.vatRate === 'number' ? (biz.vatRate as number) : null,
           isKleinunternehmer: biz.isKleinunternehmer === true,
+          uid: (biz.uid as string | undefined) || null,
+          fn: (biz.fn as string | undefined) || null,
+          court: (biz.court as string | undefined) || null,
         }
       }
     } catch (bizErr) {
