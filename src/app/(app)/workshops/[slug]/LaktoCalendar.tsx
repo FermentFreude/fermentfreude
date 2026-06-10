@@ -126,7 +126,7 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
     if (!isVisible) return
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % months.length)
-    }, 5000)
+    }, 8000)
     return () => clearInterval(interval)
   }, [isVisible, months.length])
 
@@ -135,11 +135,11 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
   if (months.length === 0) return null
 
   return (
-    <section ref={sectionRef} className="section-padding-lg overflow-hidden bg-ff-cream">
+    <section ref={sectionRef} className="section-padding overflow-hidden bg-ff-cream">
       <div className="container mx-auto container-padding">
         {/* ── Header ─────────────────────────────────── */}
         <div
-          className={`mb-16 transition-all duration-700 ${
+          className={`mb-10 transition-all duration-700 ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}
         >
@@ -159,7 +159,7 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
 
         {/* ── Timeline Navigation ────────────────────── */}
         <div
-          className={`relative mb-12 transition-all duration-700 ${
+          className={`relative mb-8 transition-all duration-700 ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
           }`}
           style={{ transitionDelay: '200ms' }}
@@ -231,28 +231,28 @@ export function LaktoCalendar({ cms }: { cms?: LaktoCalendarCMS }) {
 
           <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-0">
             {/* Left: Month info */}
-            <div className="flex flex-col justify-center px-8 py-10 sm:px-10 lg:border-r lg:border-ff-border-light">
+            <div className="flex flex-col justify-center px-6 py-7 sm:px-8 lg:border-r lg:border-ff-border-light">
               <p className="mb-1 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-ff-gray-text-light">
                 {active.season}
               </p>
-              <h3 className="font-display text-display font-bold tracking-tight text-ff-near-black">
+              <h3 className="font-display text-section-heading font-bold tracking-tight text-ff-near-black">
                 {active.month}
               </h3>
               <div
-                className="mt-4 h-1 w-16 rounded-full transition-colors duration-500"
+                className="mt-3 h-1 w-12 rounded-full transition-colors duration-500"
                 style={{ backgroundColor: active.accent }}
               />
-              <p className="mt-4 text-body text-ff-gray-text">
+              <p className="mt-3 text-body text-ff-gray-text">
                 {active.recipes.length} saisonale Rezepte
               </p>
             </div>
 
             {/* Right: Recipes */}
-            <div className="px-8 py-10 sm:px-10">
-              <p className="mb-6 font-display text-[11px] font-bold uppercase tracking-[0.15em] text-ff-gray-text-light">
+            <div className="px-6 py-7 sm:px-8">
+              <p className="mb-4 font-display text-[11px] font-bold uppercase tracking-[0.15em] text-ff-gray-text-light">
                 REZEPTE DIESES MONATS
               </p>
-              <ul className="space-y-5">
+              <ul className="space-y-3">
                 {active.recipes.map((recipe, j) => (
                   <li
                     key={`${active.month}-${j}`}
