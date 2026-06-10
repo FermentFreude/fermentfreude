@@ -205,9 +205,12 @@ export async function GET(
       console.warn('[order-receipt] Could not load business-info global:', bizErr)
     }
 
+    const invoiceNumber = (order as { invoiceNumber?: string | null }).invoiceNumber || null
+
     const pdfBuffer = generateOrderReceiptPDF({
       orderId: String(order.id),
       orderNumber,
+      invoiceNumber,
       items: receiptItems,
       subtotalCents: Math.max(subtotalCents, 0),
       shippingCents: Math.max(shippingCents, 0),

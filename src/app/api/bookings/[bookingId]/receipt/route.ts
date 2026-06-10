@@ -72,6 +72,22 @@ export async function GET(
     // ── Build receipt data ─────────────────────────────────────────────────
     const issueDate = booking.updatedAt ? new Date(booking.updatedAt as string) : new Date()
 
+    // Look up the invoice number from the linked order
+    let invoiceNumber: string | null = null
+    if (booking.orderId) {
+      try {
+        const order = await payload.findByID({
+          collection: 'orders',
+          id: booking.orderId,
+          depth: 0,
+          overrideAccess: true,
+        })
+        invoiceNumber = (order as unknown as Record<string, unknown>).invoiceNumber as string | null ?? null
+      } catch {
+        // Non-fatal — fall back to booking reference
+      }
+    }
+
     // ── Resolve live business info (single source of truth) ───────────────
     let business:
       | {
@@ -116,6 +132,7 @@ export async function GET(
 
     const pdfBuffer = generateWorkshopReceiptPDF({
       bookingId: String(booking.id),
+      invoiceNumber,
       workshopTitle: booking.workshopTitle ?? 'Workshop',
       workshopDate: booking.date ?? '',
       workshopTime: booking.time ?? '',

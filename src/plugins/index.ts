@@ -27,6 +27,7 @@ import {
   handlePaymentFailed,
 } from '@/collections/Orders/stripeWebhooks'
 import { ProductsCollection } from '@/collections/Products'
+import { assignInvoiceNumber } from '@/hooks/assignInvoiceNumber'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
 import { mediaFixR2UrlAfterReadPlugin } from '@/plugins/mediaFixR2UrlAfterRead'
@@ -202,6 +203,16 @@ export const plugins: Plugin[] = [
             },
           },
           {
+            name: 'invoiceNumber',
+            type: 'text',
+            label: 'Invoice Number',
+            admin: {
+              description: 'Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on order creation.',
+              position: 'sidebar',
+              readOnly: true,
+            },
+          },
+          {
             name: 'downloadToken',
             type: 'text',
             label: 'Download Token',
@@ -228,6 +239,7 @@ export const plugins: Plugin[] = [
           ...defaultCollection?.hooks,
           beforeChange: [
             ...(defaultCollection?.hooks?.beforeChange ?? []),
+            assignInvoiceNumber,
             copyCustomerNameFromTransaction,
             generateDownloadToken,
           ],

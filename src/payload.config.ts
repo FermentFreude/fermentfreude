@@ -35,6 +35,7 @@ import { WorkshopBookings } from '@/collections/WorkshopBookings'
 import { WorkshopLocations } from '@/collections/WorkshopLocations'
 import { Workshops } from '@/collections/Workshops'
 import { BusinessInfoGlobal } from '@/globals/BusinessInfo'
+import { InvoiceCounterGlobal } from '@/globals/InvoiceCounter'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { ProductDetailLabelsGlobal } from '@/globals/ProductDetailLabels'
@@ -203,6 +204,7 @@ export default buildConfig({
     Header,
     Footer,
     BusinessInfoGlobal,
+    InvoiceCounterGlobal,
     TestimonialsGlobal,
     SponsorsBarGlobal,
     VoucherCtaGlobal,

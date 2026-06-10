@@ -53,6 +53,7 @@ export interface OrderReceiptBusinessInfo {
 export interface OrderReceiptData {
   orderId: string
   orderNumber: string
+  invoiceNumber?: string | null
   items: OrderReceiptItem[]
   subtotalCents: number
   shippingCents: number
@@ -169,17 +170,17 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   y += 4.5
   doc.text(biz.email, marginL, y)
 
-  // Right: order number + issue date
+  // Right: invoice number + issue date
   let ry = y - 14
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(7)
   doc.setTextColor(...COLORS.grayLabel)
-  doc.text(data.locale === 'de' ? 'BESTELLNUMMER' : 'ORDER NUMBER', rightX, ry, { align: 'right' })
+  doc.text(data.locale === 'de' ? 'RECHNUNGSNUMMER' : 'INVOICE NUMBER', rightX, ry, { align: 'right' })
   ry += 5
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(9)
   doc.setTextColor(...COLORS.darkText)
-  doc.text(`#${data.orderNumber}`, rightX, ry, { align: 'right' })
+  doc.text(data.invoiceNumber ?? `#${data.orderNumber}`, rightX, ry, { align: 'right' })
 
   ry += 8
   doc.setFont('helvetica', 'normal')

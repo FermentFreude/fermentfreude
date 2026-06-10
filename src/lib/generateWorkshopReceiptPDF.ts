@@ -44,6 +44,7 @@ export interface WorkshopReceiptBusinessInfo {
 
 export interface WorkshopReceiptData {
   bookingId: string
+  invoiceNumber?: string | null
   workshopTitle: string
   workshopDate: string // e.g. "15. März 2025"
   workshopTime: string // e.g. "10:00 – 13:00 Uhr"
@@ -174,15 +175,15 @@ export function generateWorkshopReceiptPDF(data: WorkshopReceiptData): Buffer {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(7)
   doc.setTextColor(...COLORS.grayLabel)
-  doc.text(data.locale === 'de' ? 'BUCHUNGSNUMMER' : 'BOOKING NUMBER', rightX, ry, {
+  doc.text(data.locale === 'de' ? 'RECHNUNGSNUMMER' : 'INVOICE NUMBER', rightX, ry, {
     align: 'right',
   })
   ry += 5
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(9)
   doc.setTextColor(...COLORS.darkText)
-  const bookingRef = `#BOOKING-${data.bookingId.slice(-8).toUpperCase()}`
-  doc.text(bookingRef, rightX, ry, { align: 'right' })
+  const invoiceRef = data.invoiceNumber ?? `#BOOKING-${data.bookingId.slice(-8).toUpperCase()}`
+  doc.text(invoiceRef, rightX, ry, { align: 'right' })
 
   ry += 8
   doc.setFont('helvetica', 'normal')

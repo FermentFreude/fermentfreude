@@ -1,4 +1,5 @@
 import { adminOnly } from '@/access/adminOnly'
+import { assignInvoiceNumber } from '@/hooks/assignInvoiceNumber'
 import { sendVoucherPurchaseEmail } from '@/hooks/brevo/sendVoucherPurchaseEmail'
 import crypto from 'crypto'
 import type { CollectionConfig } from 'payload'
@@ -175,6 +176,16 @@ export const Vouchers: CollectionConfig = {
       },
     },
     {
+      name: 'invoiceNumber',
+      type: 'text',
+      label: 'Invoice Number',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on purchase.',
+      },
+    },
+    {
       name: 'notes',
       type: 'textarea',
       admin: {
@@ -190,6 +201,7 @@ export const Vouchers: CollectionConfig = {
         }
         return data
       },
+      assignInvoiceNumber,
     ],
     afterChange: [sendVoucherPurchaseEmail],
   },

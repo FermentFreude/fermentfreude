@@ -162,6 +162,7 @@ export interface Config {
     header: Header;
     footer: Footer;
     'business-info': BusinessInfo;
+    'invoice-counter': InvoiceCounter;
     'testimonials-global': TestimonialsGlobal;
     'sponsors-bar-global': SponsorsBarGlobal;
     'voucher-cta-global': VoucherCtaGlobal;
@@ -174,6 +175,7 @@ export interface Config {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'business-info': BusinessInfoSelect<false> | BusinessInfoSelect<true>;
+    'invoice-counter': InvoiceCounterSelect<false> | InvoiceCounterSelect<true>;
     'testimonials-global': TestimonialsGlobalSelect<false> | TestimonialsGlobalSelect<true>;
     'sponsors-bar-global': SponsorsBarGlobalSelect<false> | SponsorsBarGlobalSelect<true>;
     'voucher-cta-global': VoucherCtaGlobalSelect<false> | VoucherCtaGlobalSelect<true>;
@@ -315,6 +317,10 @@ export interface Order {
    * Dietary restrictions and specifications provided by the buyer at checkout.
    */
   customerDietSpecs?: string | null;
+  /**
+   * Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on order creation.
+   */
+  invoiceNumber?: string | null;
   /**
    * UUID token for secure receipt download via /api/orders/[id]/receipt?token=... Set automatically when order confirmation email is sent.
    */
@@ -4389,6 +4395,10 @@ export interface Voucher {
    */
   redeemedBy?: (string | null) | User;
   /**
+   * Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on purchase.
+   */
+  invoiceNumber?: string | null;
+  /**
    * Internal notes about this voucher
    */
   notes?: string | null;
@@ -6342,6 +6352,7 @@ export interface VouchersSelect<T extends boolean = true> {
   redeemedOn?: T;
   redeemedForWorkshop?: T;
   redeemedBy?: T;
+  invoiceNumber?: T;
   notes?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -6796,6 +6807,7 @@ export interface OrdersSelect<T extends boolean = true> {
   customerName?: T;
   customerPhone?: T;
   customerDietSpecs?: T;
+  invoiceNumber?: T;
   downloadToken?: T;
   invoiceIssuedAt?: T;
   updatedAt?: T;
@@ -7120,6 +7132,25 @@ export interface BusinessInfo {
   iban?: string | null;
   bic?: string | null;
   bankName?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Auto-managed sequential invoice counter. Do not edit manually.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoice-counter".
+ */
+export interface InvoiceCounter {
+  id: string;
+  /**
+   * Year of the last issued invoice.
+   */
+  lastYear?: number | null;
+  /**
+   * Last sequential number issued in lastYear.
+   */
+  lastNumber?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -7563,6 +7594,17 @@ export interface BusinessInfoSelect<T extends boolean = true> {
   iban?: T;
   bic?: T;
   bankName?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoice-counter_select".
+ */
+export interface InvoiceCounterSelect<T extends boolean = true> {
+  lastYear?: T;
+  lastNumber?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
