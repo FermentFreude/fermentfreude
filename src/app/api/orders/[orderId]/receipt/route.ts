@@ -244,7 +244,7 @@ export async function GET(
 
     const invoiceNumber = (order as { invoiceNumber?: string | null }).invoiceNumber || null
 
-    const pdfBuffer = generateOrderReceiptPDF({
+    const pdfBuffer = await generateOrderReceiptPDF({
       orderId: String(order.id),
       orderNumber,
       invoiceNumber,

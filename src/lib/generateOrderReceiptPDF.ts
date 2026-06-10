@@ -1,6 +1,7 @@
 import fs from 'fs'
 import { jsPDF } from 'jspdf'
 import path from 'path'
+import sharp from 'sharp'
 
 // ─── Company Details ────────────────────────────────────────────────────────
 // Bank details (IBAN/BIC) are intentionally not printed on invoices —
@@ -86,7 +87,7 @@ function splitLines(doc: jsPDF, text: string, maxWidth: number): string[] {
 }
 
 // ─── Main Generator ─────────────────────────────────────────────────────────
-export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
+export async function generateOrderReceiptPDF(data: OrderReceiptData): Promise<Buffer> {
   // Resolve business info: every field falls back to the COMPANY constant so
   // the PDF still renders even if the BusinessInfo global has not been filled
   // out yet (e.g. on first deploy, or for legacy orders saved before launch).
@@ -112,14 +113,15 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
   const marginR = 20
   const contentWidth = pageWidth - marginL - marginR
 
-  // ─── Load logo ──────────────────────────────────────────────────────────
+  // ─── Load logo (SVG → PNG via sharp) ────────────────────────────────────
   let logoBase64: string | null = null
   try {
-    const logoPath = path.join(process.cwd(), 'public', 'submark-dark.png')
-    const logoBuf = fs.readFileSync(logoPath)
-    logoBase64 = logoBuf.toString('base64')
+    const svgPath = path.join(process.cwd(), 'public', 'logo-invoice.svg')
+    const svgBuf = fs.readFileSync(svgPath)
+    const pngBuf = await sharp(svgBuf).resize(180, 180).png().toBuffer()
+    logoBase64 = pngBuf.toString('base64')
   } catch {
-    // logo not critical — continue without it
+    // logo not critical — fall back to monogram
   }
 
   // ─── HEADER ─────────────────────────────────────────────────────────────
@@ -130,13 +132,17 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
 
   let y = 18
 
-  // 2-color monogram: dark box + beige "FF" (black & beige as requested)
-  doc.setFillColor(...COLORS.darkText)
-  doc.rect(marginL, y, 18, 18, 'F')
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(9)
-  doc.setTextColor(246, 240, 232)
-  doc.text('FF', marginL + 9, y + 11, { align: 'center' })
+  if (logoBase64) {
+    doc.addImage(`data:image/png;base64,${logoBase64}`, 'PNG', marginL, y, 18, 18)
+  } else {
+    // 2-color fallback monogram
+    doc.setFillColor(...COLORS.darkText)
+    doc.rect(marginL, y, 18, 18, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(246, 240, 232)
+    doc.text('FF', marginL + 9, y + 11, { align: 'center' })
+  }
 
   const titleText = data.locale === 'de' ? 'RECHNUNG' : 'RECEIPT'
   doc.setFont('helvetica', 'bold')
