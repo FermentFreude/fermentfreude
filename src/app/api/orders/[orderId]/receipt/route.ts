@@ -137,7 +137,7 @@ export async function GET(
 
       if (bookings.totalDocs > 0) {
         receiptItems = bookings.docs.map((b) => {
-          const titleParts = [b.workshopTitle, b.date, b.time].filter(Boolean)
+          const titleParts = [b.workshopTitle ? `${b.workshopTitle}-Workshop` : '', b.date, b.time].filter(Boolean)
           return {
             title: titleParts.join(' · '),
             qty: b.guestCount ?? 1,
