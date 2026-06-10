@@ -1,50 +1,14 @@
-/**
- * Quick script to check if appointments exist in database
- */
-
-import 'dotenv/config'
-
-import config from '@payload-config'
 import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 
-async function checkAppointments() {
-  console.log('🔍 Checking workshop appointments...\n')
-
-  const payload = await getPayload({ config })
-
-  const appointments = await payload.find({
-    collection: 'workshop-appointments',
-    limit: 50,
-    depth: 2,
-  })
-
-  console.log(`📊 Found ${appointments.docs.length} appointments in database:\n`)
-
-  if (appointments.docs.length === 0) {
-    console.log('❌ No appointments found!\n')
-    console.log('Run: npx tsx src/scripts/seed-real-workshop-dates.ts')
-    process.exit(1)
+async function main() {
+  const payload = await getPayload({ config: await configPromise })
+  const appts = await payload.find({ collection: 'workshop-appointments', limit: 50, depth: 2, overrideAccess: true })
+  for (const a of appts.docs) {
+    const w = typeof a.workshop === 'object' ? (a.workshop as any)?.title : a.workshop
+    const max = typeof a.workshop === 'object' ? (a.workshop as any)?.maxCapacityPerSlot : null
+    console.log(JSON.stringify({ id: a.id, workshop: w, dateTime: (a as any).dateTime, available: a.availableSpots, max }))
   }
-
-  for (const apt of appointments.docs) {
-    const workshop = typeof apt.workshop === 'object' ? apt.workshop.title : apt.workshop
-    const location = typeof apt.location === 'object' ? apt.location.name : apt.location
-    const date = new Date(apt.dateTime as string)
-    const formatted = date.toLocaleString('de-DE', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-      timeZone: 'Europe/Vienna',
-    })
-
-    console.log(
-      `✓ ${String(workshop).padEnd(25)} | ${formatted} | ${location} | ${apt.availableSpots} spots`,
-    )
-  }
-
-  console.log(`\n✅ Total: ${appointments.docs.length} appointments`)
+  process.exit(0)
 }
-
-checkAppointments().catch((err) => {
-  console.error('❌ Check failed:', err)
-  process.exit(1)
-})
+main().catch(e => { console.error(e); process.exit(1) })
