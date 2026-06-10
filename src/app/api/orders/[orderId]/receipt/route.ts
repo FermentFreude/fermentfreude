@@ -117,48 +117,34 @@ export async function GET(
     // ── Resolve line items ─────────────────────────────────────────────────
     // For workshop orders the ecommerce plugin stores items with unitPrice=0
     // because pricing lives on the workshop-booking, not the product.
-    // We look up the bookings first and use them as line items when available.
+    // Look up confirmed bookings by orderId — the direct, precise link.
     type ReceiptItem = { title: string; sku?: string; qty: number; unitPrice: number }
     let receiptItems: ReceiptItem[] = []
 
-    // Try to find workshop bookings via: order → transaction → cart → bookings
     try {
-      const transactions = await payload.find({
-        collection: 'transactions',
-        where: { order: { equals: String(order.id) } },
-        limit: 1,
+      const bookings = await payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [
+            { orderId: { equals: String(order.id) } },
+            { status: { equals: 'confirmed' } },
+          ],
+        },
+        limit: 50,
         depth: 0,
         overrideAccess: true,
       })
 
-      if (transactions.totalDocs > 0) {
-        const transaction = transactions.docs[0]
-        const cartId =
-          typeof transaction.cart === 'object'
-            ? ((transaction.cart as unknown as Record<string, unknown>)?.id as string)
-            : (transaction.cart as string | undefined)
-
-        if (cartId) {
-          const bookings = await payload.find({
-            collection: 'workshop-bookings',
-            where: { cartSlug: { equals: cartId } },
-            limit: 50,
-            depth: 0,
-            overrideAccess: true,
-          })
-
-          if (bookings.totalDocs > 0) {
-            receiptItems = bookings.docs.map((b) => {
-              const titleParts = [b.workshopTitle, b.date, b.time].filter(Boolean)
-              return {
-                title: titleParts.join(' · '),
-                qty: b.guestCount ?? 1,
-                // pricePerPerson is in euros — convert to cents for the PDF generator
-                unitPrice: Math.round((b.pricePerPerson ?? 0) * 100),
-              }
-            })
+      if (bookings.totalDocs > 0) {
+        receiptItems = bookings.docs.map((b) => {
+          const titleParts = [b.workshopTitle, b.date, b.time].filter(Boolean)
+          return {
+            title: titleParts.join(' · '),
+            qty: b.guestCount ?? 1,
+            // pricePerPerson is in euros — convert to cents for the PDF generator
+            unitPrice: Math.round((b.pricePerPerson ?? 0) * 100),
           }
-        }
+        })
       }
     } catch {
       // Non-fatal — fall through to product-based items below
