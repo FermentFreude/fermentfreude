@@ -2,8 +2,39 @@ import { readFileSync } from 'fs'
 import { jsPDF } from 'jspdf'
 import { NextRequest, NextResponse } from 'next/server'
 import { join } from 'path'
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
-/* ─── shared PDF builder ─────────────────────────────────────── */
+/* ─── template-based PDF builder (primary) ───────────────────── */
+async function buildVoucherPDFFromTemplate(sanitizedCode: string): Promise<Buffer> {
+  const templatePath = join(process.cwd(), 'public', 'voucher-template.pdf')
+  const templateBytes = readFileSync(templatePath)
+  const pdfDoc = await PDFDocument.load(templateBytes)
+  const page = pdfDoc.getPages()[0]
+  const { width, height } = page.getSize()
+
+  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  const fontSize = 12
+
+  // Center the code horizontally in the blank box on the design.
+  // The code box is roughly centered at 76% of width, 19% of height from bottom.
+  // Adjust these constants if the text needs repositioning after visual check.
+  const boxCenterX = width * 0.76
+  const boxCenterY = height * 0.19
+  const textWidth = font.widthOfTextAtSize(sanitizedCode, fontSize)
+
+  page.drawText(sanitizedCode, {
+    x: boxCenterX - textWidth / 2,
+    y: boxCenterY,
+    size: fontSize,
+    font,
+    color: rgb(0.98, 0.95, 0.88), // near-white beige — readable on dark box
+  })
+
+  const pdfBytes = await pdfDoc.save()
+  return Buffer.from(pdfBytes)
+}
+
+/* ─── fallback programmatic PDF builder ─────────────────────── */
 function buildVoucherPDF(sanitizedCode: string): jsPDF {
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const width = pdf.internal.pageSize.getWidth()
@@ -153,8 +184,14 @@ export async function GET(request: NextRequest) {
       )
     }
     const sanitizedCode = code.trim().toUpperCase()
-    const pdf = buildVoucherPDF(sanitizedCode)
-    const pdfBuffer = pdf.output('arraybuffer')
+    let pdfBuffer: Buffer
+    try {
+      pdfBuffer = await buildVoucherPDFFromTemplate(sanitizedCode)
+    } catch {
+      // Fall back to programmatic PDF if template is unavailable
+      const pdf = buildVoucherPDF(sanitizedCode)
+      pdfBuffer = Buffer.from(new Uint8Array(pdf.output('arraybuffer')))
+    }
     return new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
@@ -184,9 +221,14 @@ export async function POST(request: NextRequest) {
       )
     }
     const sanitizedCode = code.trim().toUpperCase()
-    const pdf = buildVoucherPDF(sanitizedCode)
-    const pdfBuffer = pdf.output('arraybuffer')
-    const base64 = Buffer.from(pdfBuffer).toString('base64')
+    let pdfBuffer: Buffer
+    try {
+      pdfBuffer = await buildVoucherPDFFromTemplate(sanitizedCode)
+    } catch {
+      const pdf = buildVoucherPDF(sanitizedCode)
+      pdfBuffer = Buffer.from(new Uint8Array(pdf.output('arraybuffer')))
+    }
+    const base64 = pdfBuffer.toString('base64')
     return NextResponse.json({
       success: true,
       pdf: {

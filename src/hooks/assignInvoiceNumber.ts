@@ -15,6 +15,7 @@ export const assignInvoiceNumber: CollectionBeforeChangeHook = async ({
   req,
 }) => {
   if (operation !== 'create') return data
+  if (req?.context?.skipVoucherEmail) return data
 
   const { payload } = req
   const year = new Date().getFullYear()
