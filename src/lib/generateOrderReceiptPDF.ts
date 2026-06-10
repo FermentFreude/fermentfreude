@@ -130,16 +130,13 @@ export function generateOrderReceiptPDF(data: OrderReceiptData): Buffer {
 
   let y = 18
 
-  if (logoBase64) {
-    doc.addImage(`data:image/png;base64,${logoBase64}`, 'PNG', marginL, y, 18, 18)
-  } else {
-    doc.setFillColor(...COLORS.darkText)
-    doc.rect(marginL, y, 18, 18, 'F')
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(9)
-    doc.setTextColor(...COLORS.white)
-    doc.text('FF', marginL + 9, y + 11, { align: 'center' })
-  }
+  // 2-color monogram: dark box + beige "FF" (black & beige as requested)
+  doc.setFillColor(...COLORS.darkText)
+  doc.rect(marginL, y, 18, 18, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(9)
+  doc.setTextColor(246, 240, 232)
+  doc.text('FF', marginL + 9, y + 11, { align: 'center' })
 
   const titleText = data.locale === 'de' ? 'RECHNUNG' : 'RECEIPT'
   doc.setFont('helvetica', 'bold')

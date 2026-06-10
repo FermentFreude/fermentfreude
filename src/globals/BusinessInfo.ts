@@ -37,7 +37,7 @@ export const BusinessInfoGlobal: GlobalConfig = {
               name: 'companyName',
               type: 'text',
               required: true,
-              defaultValue: 'FermentFreude OG',
+              defaultValue: 'Fermentfreude OG',
               label: 'Firmenname',
               admin: {
                 description: 'Vollständiger eingetragener Firmenname inkl. Rechtsform.',
