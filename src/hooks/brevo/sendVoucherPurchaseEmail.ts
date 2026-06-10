@@ -18,6 +18,7 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
   req,
 }) => {
   if (operation !== 'create') return doc
+  if (req?.context?.skipVoucherEmail) return doc
 
   const purchaserEmail = doc.purchaserEmail
   if (!purchaserEmail) return doc
