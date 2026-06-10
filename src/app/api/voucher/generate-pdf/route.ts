@@ -13,13 +13,11 @@ async function buildVoucherPDFFromTemplate(sanitizedCode: string): Promise<Buffe
   const { width, height } = page.getSize()
 
   const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-  const fontSize = 12
+  const fontSize = 11
 
-  // Center the code horizontally in the blank box on the design.
-  // The code box is roughly centered at 76% of width, 19% of height from bottom.
-  // Adjust these constants if the text needs repositioning after visual check.
-  const boxCenterX = width * 0.76
-  const boxCenterY = height * 0.19
+  // Calibrated against the template: box is centered at 61% width, 14% height (bottom-left origin).
+  const boxCenterX = width * 0.61
+  const boxCenterY = height * 0.14
   const textWidth = font.widthOfTextAtSize(sanitizedCode, fontSize)
 
   page.drawText(sanitizedCode, {
