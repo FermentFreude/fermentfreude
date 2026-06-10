@@ -185,6 +185,18 @@ export const Vouchers: CollectionConfig = {
         description: 'Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on purchase.',
       },
     },
+    /* ── PDF Download (admin-only button) ── */
+    {
+      name: 'downloadPdf',
+      type: 'ui',
+      admin: {
+        position: 'sidebar',
+        components: {
+          Field: '@/components/admin/VoucherDownloadButton#VoucherDownloadButton',
+        },
+      },
+    },
+
     {
       name: 'notes',
       type: 'textarea',
