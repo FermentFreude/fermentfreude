@@ -122,6 +122,10 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     const guestCount = item.quantity ?? 1
 
     // ── Strategy 1: match by cart ID + workshop + guest count ──
+    // Also matches already-confirmed bookings (status may be 'confirmed' if
+    // the charge.succeeded webhook fired before this hook ran — race condition
+    // on Stripe event ordering). orderId is always stamped here so the receipt
+    // route can look up bookings by orderId reliably.
     let booking = null
 
     if (cartId) {
@@ -131,7 +135,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
           and: [
             { cartSlug: { equals: cartId } },
             { workshopSlug: { equals: workshopSlug } },
-            { status: { equals: 'pending' } },
+            { status: { in: ['pending', 'confirmed'] } },
             { guestCount: { equals: guestCount } },
           ],
         },

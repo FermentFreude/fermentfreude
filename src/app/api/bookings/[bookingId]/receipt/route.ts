@@ -72,19 +72,54 @@ export async function GET(
     // ── Build receipt data ─────────────────────────────────────────────────
     const issueDate = booking.updatedAt ? new Date(booking.updatedAt as string) : new Date()
 
-    // Look up the invoice number from the linked order
+    // Look up the invoice number from the linked order.
+    // booking.orderId may be absent if the charge.succeeded webhook confirmed
+    // the booking before confirmWorkshopBookings ran — fall back to a cartSlug search.
     let invoiceNumber: string | null = null
-    if (booking.orderId) {
+    const orderId = booking.orderId ?? null
+    if (orderId) {
       try {
         const order = await payload.findByID({
           collection: 'orders',
-          id: booking.orderId,
+          id: orderId,
           depth: 0,
           overrideAccess: true,
         })
-        invoiceNumber = (order as unknown as Record<string, unknown>).invoiceNumber as string | null ?? null
+        invoiceNumber =
+          ((order as unknown as Record<string, unknown>).invoiceNumber as string | null) ?? null
       } catch {
-        // Non-fatal — fall back to booking reference
+        // Non-fatal — fall back below
+      }
+    }
+    // Fallback: find the order via cartSlug → transaction
+    if (!invoiceNumber && booking.cartSlug) {
+      try {
+        const txs = await payload.find({
+          collection: 'transactions',
+          where: { cart: { equals: booking.cartSlug } },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const txDoc = txs.docs[0]
+        const txOrder = txDoc ? (txDoc as unknown as Record<string, unknown>).order : null
+        const txOrderId = txOrder
+          ? typeof txOrder === 'object'
+            ? (txOrder as Record<string, unknown>)?.id
+            : txOrder
+          : null
+        if (txOrderId) {
+          const orderRaw = await payload.findByID({
+            collection: 'orders',
+            id: String(txOrderId),
+            depth: 0,
+            overrideAccess: true,
+          })
+          const orderData = orderRaw as unknown as Record<string, unknown> | null
+          invoiceNumber = (orderData?.invoiceNumber as string | null) ?? null
+        }
+      } catch {
+        // Non-fatal — PDF will show booking reference as fallback
       }
     }
 
