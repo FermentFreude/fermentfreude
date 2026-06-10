@@ -115,29 +115,80 @@ export async function GET(
     }
 
     // ── Resolve line items ─────────────────────────────────────────────────
-    const rawItems = (order.items as Record<string, unknown>[] | undefined) ?? []
-    const receiptItems = rawItems.map((item) => {
-      const productRef = item.product
-      let title = 'Product'
-      let sku: string | undefined
+    // For workshop orders the ecommerce plugin stores items with unitPrice=0
+    // because pricing lives on the workshop-booking, not the product.
+    // We look up the bookings first and use them as line items when available.
+    type ReceiptItem = { title: string; sku?: string; qty: number; unitPrice: number }
+    let receiptItems: ReceiptItem[] = []
 
-      if (productRef && typeof productRef === 'object') {
-        const p = productRef as Record<string, unknown>
-        title = (p.title as string | undefined) ?? title
-        sku = (p.sku as string | undefined) ?? undefined
+    // Try to find workshop bookings via: order → transaction → cart → bookings
+    try {
+      const transactions = await payload.find({
+        collection: 'transactions',
+        where: { order: { equals: String(order.id) } },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      if (transactions.totalDocs > 0) {
+        const transaction = transactions.docs[0]
+        const cartId =
+          typeof transaction.cart === 'object'
+            ? ((transaction.cart as unknown as Record<string, unknown>)?.id as string)
+            : (transaction.cart as string | undefined)
+
+        if (cartId) {
+          const bookings = await payload.find({
+            collection: 'workshop-bookings',
+            where: { cartSlug: { equals: cartId } },
+            limit: 50,
+            depth: 0,
+            overrideAccess: true,
+          })
+
+          if (bookings.totalDocs > 0) {
+            receiptItems = bookings.docs.map((b) => {
+              const titleParts = [b.workshopTitle, b.date, b.time].filter(Boolean)
+              return {
+                title: titleParts.join(' · '),
+                qty: b.guestCount ?? 1,
+                // pricePerPerson is in euros — convert to cents for the PDF generator
+                unitPrice: Math.round((b.pricePerPerson ?? 0) * 100),
+              }
+            })
+          }
+        }
       }
+    } catch {
+      // Non-fatal — fall through to product-based items below
+    }
 
-      const qty = typeof item.quantity === 'number' ? item.quantity : 1
-      // unit price: prefer variant price, then product price
-      const unitPrice =
-        typeof item.price === 'number'
-          ? item.price
-          : typeof item.unitPrice === 'number'
-            ? item.unitPrice
-            : 0
+    // Fall back to order.items for non-workshop purchases
+    if (receiptItems.length === 0) {
+      const rawItems = (order.items as Record<string, unknown>[] | undefined) ?? []
+      receiptItems = rawItems.map((item) => {
+        const productRef = item.product
+        let title = 'Product'
+        let sku: string | undefined
 
-      return { title, sku, qty, unitPrice }
-    })
+        if (productRef && typeof productRef === 'object') {
+          const p = productRef as Record<string, unknown>
+          title = (p.title as string | undefined) ?? title
+          sku = (p.sku as string | undefined) ?? undefined
+        }
+
+        const qty = typeof item.quantity === 'number' ? item.quantity : 1
+        const unitPrice =
+          typeof item.price === 'number'
+            ? item.price
+            : typeof item.unitPrice === 'number'
+              ? item.unitPrice
+              : 0
+
+        return { title, sku, qty, unitPrice }
+      })
+    }
 
     // ── Monetary totals ────────────────────────────────────────────────────
     const totalCents = typeof order.amount === 'number' ? order.amount : 0
