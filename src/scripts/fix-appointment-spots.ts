@@ -18,7 +18,7 @@ async function main() {
   }
   const workshops = await payload.find({ collection: 'workshops', limit: 50, depth: 0, overrideAccess: true })
   for (const w of workshops.docs) {
-    const title = (w as Record<string, unknown>).title as string
+    const title = ((w as unknown) as Record<string, unknown>).title as string
     const target = capacityByTitle[title]
     if (target !== undefined) {
       await payload.update({ collection: 'workshops', id: w.id, data: { maxCapacityPerSlot: target } as never, overrideAccess: true })
