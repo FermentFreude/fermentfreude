@@ -164,7 +164,7 @@ export const CheckoutForm: React.FC<Props> = ({
                   : ''
                 const type = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
                 router.push(
-                  `/account/order-confirmation?orderId=${confirmResult.orderID}&type=${type}${emailParam}`,
+                  `/checkout/order-confirmation?orderId=${confirmResult.orderID}&type=${type}${emailParam}`,
                 )
               }
             } catch (err) {
