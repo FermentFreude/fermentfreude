@@ -15,9 +15,9 @@ async function buildVoucherPDFFromTemplate(sanitizedCode: string): Promise<Buffe
   const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
   const fontSize = 11
 
-  // Calibrated against the template: box is centered at 61% width, 14% height (bottom-left origin).
-  const boxCenterX = width * 0.61
-  const boxCenterY = height * 0.14
+  // Calibrated against the template: code box is centered at 50% width, 10% height (bottom-left origin).
+  const boxCenterX = width * 0.50
+  const boxCenterY = height * 0.10 + 5.7 // +2 mm up
   const textWidth = font.widthOfTextAtSize(sanitizedCode, fontSize)
 
   page.drawText(sanitizedCode, {
