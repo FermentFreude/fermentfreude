@@ -1,11 +1,12 @@
 'use client'
 
+import Link from 'next/link'
 import React from 'react'
 
 export const WorkshopRosterNavLink: React.FC = () => {
   return (
     <div style={{ padding: '0 16px 8px' }}>
-      <a
+      <Link
         href="/admin/workshop-roster"
         style={{
           display: 'flex',
@@ -46,7 +47,7 @@ export const WorkshopRosterNavLink: React.FC = () => {
           <line x1="8" y1="18" x2="13" y2="18" />
         </svg>
         Workshop Übersicht
-      </a>
+      </Link>
     </div>
   )
 }
