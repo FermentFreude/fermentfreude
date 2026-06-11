@@ -59,6 +59,8 @@ export interface OrderReceiptData {
   subtotalCents: number
   shippingCents: number
   totalCents: number
+  /** Voucher/gift-card discount in cents. When > 0 a "Gutschein − €X" line is shown. */
+  voucherDiscountCents?: number
   shippingAddress?: string // formatted multi-line string
   customerFirstName: string
   customerLastName: string
@@ -334,6 +336,21 @@ export async function generateOrderReceiptPDF(data: OrderReceiptData): Promise<B
     doc.setTextColor(...COLORS.darkText)
     doc.text(shippingLabel, col.descX, y)
     doc.text(formatCurrency(data.shippingCents), col.totalX, y, { align: 'right' })
+    y += 6
+    doc.setDrawColor(...COLORS.divider)
+    doc.setLineWidth(0.3)
+    doc.line(marginL, y, pageWidth - marginR, y)
+    y += 6
+  }
+
+  // Voucher deduction row (if a gift voucher was redeemed)
+  if (data.voucherDiscountCents && data.voucherDiscountCents > 0) {
+    const voucherLabel = data.locale === 'de' ? 'Gutschein' : 'Gift voucher'
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(...COLORS.darkText)
+    doc.text(voucherLabel, col.descX, y)
+    doc.text(`− ${formatCurrency(data.voucherDiscountCents)}`, col.totalX, y, { align: 'right' })
     y += 6
     doc.setDrawColor(...COLORS.divider)
     doc.setLineWidth(0.3)

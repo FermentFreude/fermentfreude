@@ -186,6 +186,13 @@ export async function GET(
           : 0
     const subtotalCents = totalCents - shippingCents
 
+    // Voucher discount: if items sum to more than the order total a gift voucher
+    // was redeemed. The discount is the difference so the totals section shows
+    // a "Gutschein − €X" line and the €0 grand total makes sense at a glance.
+    const itemsGrossCents = receiptItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0)
+    const grossBeforeDiscount = itemsGrossCents + shippingCents
+    const voucherDiscountCents = grossBeforeDiscount > totalCents ? grossBeforeDiscount - totalCents : 0
+
     // ── Generate PDF ───────────────────────────────────────────────────────
     // Always prefer the frozen invoiceIssuedAt — never updatedAt, since the
     // order may be touched long after issuance (status changes, refunds, etc).
@@ -252,6 +259,7 @@ export async function GET(
       subtotalCents: Math.max(subtotalCents, 0),
       shippingCents: Math.max(shippingCents, 0),
       totalCents,
+      voucherDiscountCents: voucherDiscountCents > 0 ? voucherDiscountCents : undefined,
       shippingAddress,
       customerFirstName,
       customerLastName,
