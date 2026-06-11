@@ -204,7 +204,6 @@ export const CheckoutPage: React.FC = () => {
   const [phone, setPhone] = useState('')
   const [dietSpecs, setDietSpecs] = useState('')
   const [phoneError, setPhoneError] = useState<string | null>(null)
-  const [emailEditable, setEmailEditable] = useState(true)
 
   // Phone validation (optional field — only validates format if non-empty)
   const validatePhone = (phoneNumber: string): string | null => {
@@ -867,7 +866,7 @@ export const CheckoutPage: React.FC = () => {
                   {t.emailLabel}
                 </Label>
                 <Input
-                  disabled={createAccountOpt && !emailEditable}
+                  disabled={false}
                   id="email"
                   name="email"
                   onChange={(e) => setEmail(e.target.value)}
@@ -886,7 +885,7 @@ export const CheckoutPage: React.FC = () => {
                   {t.phoneLabel}
                 </Label>
                 <Input
-                  disabled={createAccountOpt && !emailEditable}
+                  disabled={false}
                   id="phone"
                   name="phone"
                   autoComplete="tel"
@@ -912,7 +911,7 @@ export const CheckoutPage: React.FC = () => {
                   {t.dietLabel}
                 </Label>
                 <textarea
-                  disabled={createAccountOpt && !emailEditable}
+                  disabled={false}
                   id="dietSpecs"
                   name="dietSpecs"
                   onChange={(e) => {
@@ -1083,7 +1082,7 @@ export const CheckoutPage: React.FC = () => {
               <CheckoutAddresses heading={t.billingAddress} setAddress={setBillingAddress} />
             ) : (
               <CreateAddressModal
-                disabled={!email || Boolean(emailEditable)}
+                disabled={!email}
                 callback={(address) => {
                   setBillingAddress(address)
                 }}
@@ -1095,7 +1094,7 @@ export const CheckoutPage: React.FC = () => {
               <Checkbox
                 id="shippingTheSameAsBilling"
                 checked={billingAddressSameAsShipping}
-                disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
+                disabled={Boolean(paymentData || (!user && !email))}
                 onCheckedChange={(state) => {
                   setBillingAddressSameAsShipping(state as boolean)
                 }}
@@ -1139,7 +1138,7 @@ export const CheckoutPage: React.FC = () => {
                     callback={(address) => {
                       setShippingAddress(address)
                     }}
-                    disabled={!email || Boolean(emailEditable)}
+                    disabled={!email}
                     skipSubmission={true}
                   />
                 )}
