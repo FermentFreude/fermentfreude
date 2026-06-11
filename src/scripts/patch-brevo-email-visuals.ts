@@ -85,10 +85,11 @@ async function uploadToR2(pngBuffer: Buffer): Promise<void> {
 }
 
 // ── Step 3: Brevo helpers ──────────────────────────────────────────────────
-async function getTemplate(id: number): Promise<{ htmlContent?: string }> {
+async function getTemplate(id: number): Promise<{ htmlContent?: string } | null> {
   const res = await fetch(`${BREVO_API}/smtp/templates/${id}`, {
     headers: { 'api-key': BREVO_KEY, accept: 'application/json' },
   })
+  if (res.status === 404) return null
   if (!res.ok) throw new Error(`GET template ${id} failed: ${await res.text()}`)
   return res.json() as Promise<{ htmlContent?: string }>
 }
@@ -149,6 +150,10 @@ async function main() {
   for (const id of TEMPLATE_IDS) {
     console.log(`\nPatching Brevo template ${id}…`)
     const tpl = await getTemplate(id)
+    if (!tpl) {
+      console.log(`  Template ${id} not found in Brevo — skipping`)
+      continue
+    }
     const original = tpl.htmlContent ?? ''
     if (!original) {
       console.warn(`  Template ${id} has no htmlContent — skipping`)
