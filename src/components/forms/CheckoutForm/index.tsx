@@ -29,6 +29,8 @@ const FORM_EN = {
 type Props = {
   customerEmail?: string
   customerName?: string
+  customerPhone?: string
+  customerDietSpecs?: string
   billingAddress?: Partial<Address>
   shippingAddress?: Partial<Address>
   setProcessingPayment: React.Dispatch<React.SetStateAction<boolean>>
@@ -41,6 +43,8 @@ type Props = {
 export const CheckoutForm: React.FC<Props> = ({
   customerEmail,
   customerName,
+  customerPhone,
+  customerDietSpecs,
   billingAddress,
   setProcessingPayment,
   isAllDigital,
@@ -126,6 +130,9 @@ export const CheckoutForm: React.FC<Props> = ({
                     body: JSON.stringify({
                       paymentIntentID: paymentIntent.id,
                       customerName: customerName.trim(),
+                      ...(customerEmail ? { customerEmail } : {}),
+                      ...(customerPhone ? { customerPhone } : {}),
+                      ...(customerDietSpecs ? { customerDietSpecs } : {}),
                     }),
                   })
                 } catch {
@@ -137,6 +144,8 @@ export const CheckoutForm: React.FC<Props> = ({
                 additionalData: {
                   paymentIntentID: paymentIntent.id,
                   ...(customerEmail ? { customerEmail } : {}),
+                  ...(customerPhone ? { customerPhone } : {}),
+                  ...(customerDietSpecs ? { customerDietSpecs } : {}),
                   ...(pickupDate ? { pickupDate } : {}),
                   ...(pickupTime ? { pickupTime } : {}),
                 },
@@ -184,6 +193,8 @@ export const CheckoutForm: React.FC<Props> = ({
       elements,
       customerEmail,
       customerName,
+      customerPhone,
+      customerDietSpecs,
       billingAddress?.phone,
       billingAddress?.addressLine1,
       billingAddress?.addressLine2,

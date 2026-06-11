@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 
 import type { CollectionAfterChangeHook } from 'payload'
 
-import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 import { generateBookingICS } from '@/lib/generateBookingICS'
 
 /**
@@ -438,45 +438,49 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       // Send admin notification email
       try {
         const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'kontakt@fermentfreude.at'
-        if (adminEmail) {
-          await sendTemplateEmail({
-            to: [{ email: adminEmail, name: 'FermentFreude Admin' }],
-            templateId: BREVO_TEMPLATES.ADMIN_WORKSHOP_NOTIFICATION,
-            params: {
-              WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
-              WORKSHOP_DATE: String(booking.date ?? ''),
-              WORKSHOP_TIME: String(booking.time ?? ''),
-              WORKSHOP_LOCATION: workshopLocation,
-              CUSTOMER_NAME: (() => {
-                const fromUpdate =
-                  typeof updateData.firstName === 'string' ? updateData.firstName.trim() : ''
-                const fromBooking =
-                  typeof booking.firstName === 'string' ? booking.firstName.trim() : ''
-                return fromUpdate || fromBooking || 'Unbekannt'
-              })(),
-              CUSTOMER_EMAIL: bookingEmail,
-              CUSTOMER_PHONE: (() => {
-                const fromUpdate =
-                  typeof updateData.phone === 'string' ? updateData.phone.trim() : ''
-                const fromBooking = typeof booking.phone === 'string' ? booking.phone.trim() : ''
-                return fromUpdate || fromBooking || 'Nicht angegeben'
-              })(),
-              CUSTOMER_DIET_SPECS: (() => {
-                const fromUpdate =
-                  typeof updateData.notes === 'string' ? updateData.notes.trim() : ''
-                const fromBooking = typeof booking.notes === 'string' ? booking.notes.trim() : ''
-                return fromUpdate || fromBooking || 'Keine Angabe'
-              })(),
-              GUEST_COUNT: String(booking.guestCount ?? 1),
-              TOTAL_PRICE: formattedPrice,
-              BOOKING_ID: String(booking.id),
-              BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
-            },
-          })
-          payload.logger.info(
-            `[confirmWorkshopBookings] Sent admin notification email for booking ${booking.id}`,
-          )
-        }
+        const adminName = (() => {
+          const fromUpdate =
+            typeof updateData.firstName === 'string' ? updateData.firstName.trim() : ''
+          const fromBooking =
+            typeof booking.firstName === 'string' ? booking.firstName.trim() : ''
+          return fromUpdate || fromBooking || 'Unbekannt'
+        })()
+        const adminPhone = (() => {
+          const fromUpdate = typeof updateData.phone === 'string' ? updateData.phone.trim() : ''
+          const fromBooking = typeof booking.phone === 'string' ? booking.phone.trim() : ''
+          return fromUpdate || fromBooking || 'Nicht angegeben'
+        })()
+        const adminDiet = (() => {
+          const fromUpdate = typeof updateData.notes === 'string' ? updateData.notes.trim() : ''
+          const fromBooking = typeof booking.notes === 'string' ? booking.notes.trim() : ''
+          return fromUpdate || fromBooking || 'Keine Angabe'
+        })()
+        const bookingRef = String(booking.id).slice(-8).toUpperCase()
+        const htmlContent = `
+<h2 style="font-family:sans-serif;margin-bottom:16px">
+  Neue Buchung: ${String(booking.workshopTitle ?? 'Workshop')}
+</h2>
+<table style="font-family:sans-serif;border-collapse:collapse;font-size:14px">
+  <tr><td style="padding:4px 12px 4px 0;color:#555;white-space:nowrap">Workshop</td><td style="padding:4px 0"><strong>${String(booking.workshopTitle ?? '')}</strong></td></tr>
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Datum</td><td style="padding:4px 0">${String(booking.date ?? '')} · ${String(booking.time ?? '')}</td></tr>
+  ${workshopLocation ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Ort</td><td style="padding:4px 0">${workshopLocation}</td></tr>` : ''}
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Gäste</td><td style="padding:4px 0">${String(booking.guestCount ?? 1)}</td></tr>
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Gesamtpreis</td><td style="padding:4px 0">${formattedPrice}</td></tr>
+  <tr><td style="padding:16px 12px 4px 0;color:#555;border-top:1px solid #eee">Name</td><td style="padding:16px 0 4px;border-top:1px solid #eee">${adminName}</td></tr>
+  <tr><td style="padding:4px 12px 4px 0;color:#555">E-Mail</td><td style="padding:4px 0"><a href="mailto:${bookingEmail}">${bookingEmail}</a></td></tr>
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Telefon</td><td style="padding:4px 0">${adminPhone}</td></tr>
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Ernährungshinweise</td><td style="padding:4px 0">${adminDiet}</td></tr>
+  <tr><td style="padding:16px 12px 4px 0;color:#555;border-top:1px solid #eee">Buchungs-ID</td><td style="padding:16px 0 4px;border-top:1px solid #eee;font-family:monospace">${bookingRef}</td></tr>
+</table>`
+
+        await sendTransactionalEmail({
+          to: [{ email: adminEmail, name: 'FermentFreude Admin' }],
+          subject: `Neue Buchung: ${String(booking.workshopTitle ?? 'Workshop')} · ${String(booking.date ?? '')}`,
+          htmlContent,
+        })
+        payload.logger.info(
+          `[confirmWorkshopBookings] Sent admin notification email for booking ${booking.id}`,
+        )
       } catch (error) {
         payload.logger.error(
           `[confirmWorkshopBookings] Failed to send admin notification for ${booking.id}: ${error instanceof Error ? error.message : String(error)}`,
