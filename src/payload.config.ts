@@ -101,7 +101,7 @@ export default buildConfig({
         Logo: '/components/admin/Logo#Logo',
         Icon: '/components/admin/Icon#Icon',
       },
-      afterNavLinks: ['/components/admin/WorkshopRosterNavLink#WorkshopRosterNavLink'],
+      beforeNavLinks: ['/components/admin/WorkshopRosterNavLink#WorkshopRosterNavLink'],
       views: {
         workshopRoster: {
           Component: '/components/admin/WorkshopRosterView#WorkshopRosterView',
