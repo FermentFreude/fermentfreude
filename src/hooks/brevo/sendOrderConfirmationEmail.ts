@@ -99,6 +99,38 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
         }
       }
 
+      // For workshop products with no gallery image, try the workshops collection cover image
+      const productSlugRaw = productDoc?.slug as string | undefined
+      if (!thumbUrl && typeof productSlugRaw === 'string' && productSlugRaw.startsWith('workshop-')) {
+        const wsSlug = productSlugRaw.replace('workshop-', '')
+        try {
+          const wsResult = await req.payload.find({
+            collection: 'workshops',
+            where: { slug: { equals: wsSlug } },
+            limit: 1,
+            depth: 2,
+            overrideAccess: true,
+          })
+          const ws = wsResult.docs[0] as unknown as
+            | Record<string, unknown>
+            | undefined
+          if (ws) {
+            const heroImg = ws.heroImage as { url?: string } | undefined
+            if (heroImg?.url) thumbUrl = heroImg.url
+            if (!thumbUrl) {
+              const wsGallery = ws.gallery as { image?: { url?: string } }[] | undefined
+              thumbUrl = wsGallery?.[0]?.image?.url ?? ''
+            }
+          }
+        } catch {
+          // non-fatal — fall through to placeholder below
+        }
+        // Placeholder: the dark submark served from the Next.js public folder
+        if (!thumbUrl) {
+          thumbUrl = `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/submark-dark.png`
+        }
+      }
+
       resolvedItems.push({ title, sku, thumbUrl, shortDesc, qty, unitCents })
     }
 
@@ -226,7 +258,7 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
               ]
               if (locName) titleParts.push(locName + (locAddress ? `, ${locAddress}` : ''))
               itemsArray.push({
-                IMAGE_URL: '',
+                IMAGE_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/submark-dark.png`,
                 TITLE: titleParts.filter((s) => s).join(' · '),
                 QUANTITY: `${guestCountNum} ${guestCountNum === 1 ? 'Person' : 'Personen'}`,
                 PRICE: linePrice,
