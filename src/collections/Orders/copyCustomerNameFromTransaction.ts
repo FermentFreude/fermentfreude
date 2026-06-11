@@ -35,7 +35,18 @@ export const copyCustomerNameFromTransaction: CollectionBeforeChangeHook = async
         data.customerName = name.trim()
       }
     }
-    
+
+    // Copy customer email if not already set — covers the case where a browser
+    // session persisted (user thought they logged out) so the plugin set
+    // `customer` instead of `customerEmail` on the Order. The transaction has
+    // the form-entered email from attach-customer-name, which is authoritative.
+    if (!data.customerEmail) {
+      const email = (tx as unknown as { customerEmail?: string | null })?.customerEmail
+      if (typeof email === 'string' && email.trim().length > 0) {
+        data.customerEmail = email.trim()
+      }
+    }
+
     // Copy customer phone if not already set
     if (!data.customerPhone) {
       const phone = (tx as unknown as { customerPhone?: string | null })?.customerPhone
@@ -43,7 +54,7 @@ export const copyCustomerNameFromTransaction: CollectionBeforeChangeHook = async
         data.customerPhone = phone.trim()
       }
     }
-    
+
     // Copy customer diet specs if not already set
     if (!data.customerDietSpecs) {
       const dietSpecs = (tx as unknown as { customerDietSpecs?: string | null })?.customerDietSpecs

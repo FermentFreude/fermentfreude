@@ -1310,6 +1310,8 @@ export const CheckoutPage: React.FC = () => {
                   <CheckoutForm
                     customerEmail={checkoutEmail}
                     customerName={customerName.trim() || user?.name || ''}
+                    customerPhone={phone.trim() || undefined}
+                    customerDietSpecs={dietSpecs.trim() || undefined}
                     billingAddress={billingAddress}
                     setProcessingPayment={setProcessingPayment}
                     isAllDigital={isAllDigital}

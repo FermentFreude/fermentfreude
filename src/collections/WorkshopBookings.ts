@@ -10,7 +10,7 @@ export const WorkshopBookings: CollectionConfig = {
   admin: {
     useAsTitle: 'workshopTitle',
     group: 'Workshops',
-    defaultColumns: ['workshopTitle', 'date', 'guestCount', 'totalPrice', 'createdAt'],
+    defaultColumns: ['workshopTitle', 'date', 'firstName', 'email', 'guestCount', 'status'],
   },
   access: {
     read: isAdmin,

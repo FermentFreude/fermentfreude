@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
       body && typeof body.paymentIntentID === 'string' ? body.paymentIntentID.trim() : ''
     const customerName =
       body && typeof body.customerName === 'string' ? body.customerName.trim() : ''
+    const customerEmail =
+      body && typeof body.customerEmail === 'string' ? body.customerEmail.trim() : ''
     const customerPhone =
       body && typeof body.customerPhone === 'string' ? body.customerPhone.trim() : ''
     const customerDietSpecs =
@@ -56,6 +58,10 @@ export async function POST(request: NextRequest) {
 
     const updateData: Record<string, unknown> = {
       customerName: customerName.slice(0, 250),
+    }
+
+    if (customerEmail) {
+      updateData.customerEmail = customerEmail
     }
 
     if (customerPhone) {
