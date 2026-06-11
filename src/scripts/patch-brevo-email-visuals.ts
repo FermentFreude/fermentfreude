@@ -44,8 +44,8 @@ const PROD_PUBLIC_URL = 'https://pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev'
 const LOGO_R2_KEY = 'media/fermentfreude-logo-email.png'
 const LOGO_URL = `${PROD_PUBLIC_URL}/${LOGO_R2_KEY}`
 
-// Template IDs to patch (workshop booking confirmation + order confirmation)
-const TEMPLATE_IDS = [65, 72]
+// All active V2 transactional templates
+const TEMPLATE_IDS = [65, 66, 68, 69, 70, 71, 72, 73, 93, 94]
 
 // ── Step 1: Convert logo-invoice.svg → PNG ─────────────────────────────────
 async function buildLogoPng(): Promise<Buffer> {
