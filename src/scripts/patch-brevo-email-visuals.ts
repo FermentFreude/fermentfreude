@@ -1,19 +1,18 @@
 /**
- * One-shot script: patches Brevo email templates 65 + 72 to fix:
- *   1. Copyright text "FermentFreude" → "Fermentfreude"
- *   2. Logo: replaces any submark/icon img with the full dark-bg logo
- *   3. Header background: ensures dark (#0D0A06) on the logo row
+ * One-shot script: converts logo-invoice.svg to PNG, uploads it to the production
+ * R2 bucket, then patches Brevo email templates 65 + 72 to use it as the header
+ * logo and fixes "FermentFreude" → "Fermentfreude" in the footer.
  *
- * Run once from a machine that has BREVO_API_KEY in the environment:
- *   pnpm ts-node --transpile-only src/scripts/patch-brevo-email-visuals.ts
- *
- * Safe to run multiple times — patches are idempotent.
+ * Run once (needs R2 + Brevo credentials in .env / .env.local):
+ *   pnpm patch:email-visuals
  */
 
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import * as fs from 'fs'
 import * as path from 'path'
+import sharp from 'sharp'
 
-// ── Load env manually (same approach as lib/brevo.ts) ─────────────────────
+// ── Load .env / .env.local ─────────────────────────────────────────────────
 function loadEnv() {
   for (const name of ['.env', '.env.local']) {
     const full = path.join(process.cwd(), name)
@@ -24,7 +23,10 @@ function loadEnv() {
       const m = t.match(/^([A-Z0-9_]+)\s*=\s*(.*)$/)
       if (!m) continue
       let val = m[2].trim()
-      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'")))
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      )
         val = val.slice(1, -1)
       if (!process.env[m[1]]) process.env[m[1]] = val
     }
@@ -32,29 +34,70 @@ function loadEnv() {
 }
 loadEnv()
 
+// ── Constants ──────────────────────────────────────────────────────────────
 const BREVO_API = 'https://api.brevo.com/v3'
-const API_KEY = process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY || ''
+const BREVO_KEY = process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY || ''
 
-// Production full-logo URL (light/beige logo on dark background, same as invoice style)
-const FULL_LOGO_URL =
-  'https://pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev/media/fermentfreude-logo-light.png'
+// Always upload logo to the PRODUCTION bucket so the URL is stable for emails
+const PROD_BUCKET = 'fermentfreude-media'
+const PROD_PUBLIC_URL = 'https://pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev'
+const LOGO_R2_KEY = 'media/fermentfreude-logo-email.png'
+const LOGO_URL = `${PROD_PUBLIC_URL}/${LOGO_R2_KEY}`
 
-// Template IDs to patch
-const TEMPLATE_IDS = [65, 72] // workshop booking confirmation, order confirmation
+// Template IDs to patch (workshop booking confirmation + order confirmation)
+const TEMPLATE_IDS = [65, 72]
 
-async function getTemplate(id: number): Promise<{ htmlContent?: string; subject?: string }> {
+// ── Step 1: Convert logo-invoice.svg → PNG ─────────────────────────────────
+async function buildLogoPng(): Promise<Buffer> {
+  const svgPath = path.join(process.cwd(), 'public', 'logo-invoice.svg')
+  if (!fs.existsSync(svgPath)) throw new Error(`logo-invoice.svg not found at ${svgPath}`)
+  const svg = fs.readFileSync(svgPath)
+  // 300 × 289 px — crisp on retina, well within email limits
+  return sharp(svg).resize(300).png({ compressionLevel: 9 }).toBuffer()
+}
+
+// ── Step 2: Upload PNG to R2 production ────────────────────────────────────
+async function uploadToR2(pngBuffer: Buffer): Promise<void> {
+  const endpoint = process.env.R2_ENDPOINT
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY
+
+  if (!endpoint || !accessKeyId || !secretAccessKey) {
+    throw new Error('Missing R2_ENDPOINT, R2_ACCESS_KEY_ID or R2_SECRET_ACCESS_KEY in env')
+  }
+
+  const s3 = new S3Client({
+    endpoint,
+    credentials: { accessKeyId, secretAccessKey },
+    region: 'auto',
+    forcePathStyle: true, // required for Cloudflare R2
+  })
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: PROD_BUCKET,
+      Key: LOGO_R2_KEY,
+      Body: pngBuffer,
+      ContentType: 'image/png',
+      CacheControl: 'public, max-age=31536000',
+    }),
+  )
+}
+
+// ── Step 3: Brevo helpers ──────────────────────────────────────────────────
+async function getTemplate(id: number): Promise<{ htmlContent?: string }> {
   const res = await fetch(`${BREVO_API}/smtp/templates/${id}`, {
-    headers: { 'api-key': API_KEY, accept: 'application/json' },
+    headers: { 'api-key': BREVO_KEY, accept: 'application/json' },
   })
   if (!res.ok) throw new Error(`GET template ${id} failed: ${await res.text()}`)
-  return res.json() as Promise<{ htmlContent?: string; subject?: string }>
+  return res.json() as Promise<{ htmlContent?: string }>
 }
 
 async function updateTemplate(id: number, htmlContent: string): Promise<void> {
   const res = await fetch(`${BREVO_API}/smtp/templates/${id}`, {
     method: 'PUT',
     headers: {
-      'api-key': API_KEY,
+      'api-key': BREVO_KEY,
       'content-type': 'application/json',
       accept: 'application/json',
     },
@@ -63,74 +106,59 @@ async function updateTemplate(id: number, htmlContent: string): Promise<void> {
   if (!res.ok) throw new Error(`PUT template ${id} failed: ${await res.text()}`)
 }
 
-function patchHtml(html: string): string {
+// ── Step 4: HTML patching ──────────────────────────────────────────────────
+function patchHtml(html: string, logoUrl: string): string {
   let out = html
 
-  // 1. Fix copyright capitalisation
-  out = out.replace(/©\s*FermentFreude(?!\s*OG)/g, '© Fermentfreude')
-  out = out.replace(/FermentFreude GmbH/g, 'Fermentfreude OG')
-
-  // 2. Fix any remaining "FermentFreude" in footer/body text
-  //    (careful: don't touch template variable names like {{ params.X }})
-  out = out.replace(/(?<!\{[^}]*)FermentFreude(?![^{]*\})/g, 'Fermentfreude')
-
-  // 3. Replace submark / icon logo with full wordmark logo
-  //    Matches <img ... src="...submark..." ...> or "...icon-logo..."
+  // a) Replace any existing logo/submark img with the invoice logo PNG
+  //    Catches <img ... src="...submark..." ...> and similar icon patterns
   out = out.replace(
-    /<img\s[^>]*src="[^"]*(?:submark|icon)[^"]*"[^>]*>/gi,
-    `<img src="${FULL_LOGO_URL}" alt="Fermentfreude" width="160" style="max-width:160px;height:auto;display:block;margin:0 auto;" />`,
+    /<img\s[^>]*src="[^"]*(?:submark|icon[-_]?logo|fermentfreude[-_]logo)[^"]*"[^>]*>/gi,
+    `<img src="${logoUrl}" alt="Fermentfreude" width="120" height="116" style="width:120px;height:auto;display:block;margin:0 auto;" />`,
   )
 
-  // 4. Ensure the logo header row has the dark background matching the invoice
-  //    Replace any light-coloured table-cell/div that wraps the logo img
-  //    Pattern: background[-color]: #f... or #FAF... near the logo header
-  //    We look for the typical header cell that contains the logo area.
-  //    This is safe because we only replace within a 200-char window around "logo-light.png"
-  const logoPos = out.indexOf('logo-light.png')
-  if (logoPos !== -1) {
-    const searchStart = Math.max(0, logoPos - 500)
-    const searchEnd = Math.min(out.length, logoPos + 200)
-    const before = out.slice(0, searchStart)
-    let segment = out.slice(searchStart, searchEnd)
-    const after = out.slice(searchEnd)
+  // b) Fix copyright capitalisation wherever it appears in the footer
+  out = out.replace(/©\s*FermentFreude\b/g, '© Fermentfreude')
 
-    // Replace light background colors in this segment with the dark invoice color
-    segment = segment.replace(
-      /background(?:-color)?:\s*#(?:f9f0dc|faf2e0|ffffff|f5f5f5|fffaf5|f8f4ed)/gi,
-      'background-color: #0D0A06',
-    )
-    segment = segment.replace(
-      /background(?:-color)?:\s*(?:white|#fff\b)/gi,
-      'background-color: #0D0A06',
-    )
-
-    out = before + segment + after
-  }
+  // c) Fix any remaining brand-name capitalisation in visible text
+  //    (avoids touching template variable names like {{ params.FIRST_NAME }})
+  out = out.replace(/(?<!\{[^}]{0,50})FermentFreude\b(?![^{]{0,50}\})/g, 'Fermentfreude')
+  out = out.replace(/FermentFreude GmbH/g, 'Fermentfreude OG')
 
   return out
 }
 
+// ── Main ───────────────────────────────────────────────────────────────────
 async function main() {
-  if (!API_KEY) {
-    console.error('BREVO_API_KEY not set. Export it or add it to .env.local')
+  if (!BREVO_KEY) {
+    console.error('BREVO_API_KEY not found in environment. Add it to .env.local and retry.')
     process.exit(1)
   }
 
+  // 1. Convert SVG → PNG
+  console.log('Converting logo-invoice.svg to PNG…')
+  const pngBuffer = await buildLogoPng()
+  console.log(`  PNG size: ${pngBuffer.length} bytes`)
+
+  // 2. Upload to R2
+  console.log(`Uploading to R2 production bucket (${PROD_BUCKET})…`)
+  await uploadToR2(pngBuffer)
+  console.log(`  ✓ Uploaded → ${LOGO_URL}`)
+
+  // 3. Patch Brevo templates
   for (const id of TEMPLATE_IDS) {
-    console.log(`\nPatching template ${id}…`)
+    console.log(`\nPatching Brevo template ${id}…`)
     const tpl = await getTemplate(id)
     const original = tpl.htmlContent ?? ''
     if (!original) {
       console.warn(`  Template ${id} has no htmlContent — skipping`)
       continue
     }
-
-    const patched = patchHtml(original)
+    const patched = patchHtml(original, LOGO_URL)
     if (patched === original) {
       console.log(`  No changes needed for template ${id}`)
       continue
     }
-
     await updateTemplate(id, patched)
     console.log(`  ✓ Template ${id} updated`)
   }
@@ -138,7 +166,7 @@ async function main() {
   console.log('\nDone. Send a test booking to verify the email looks correct.')
 }
 
-main().catch((err) => {
+main().catch((err: unknown) => {
   console.error(err)
   process.exit(1)
 })
