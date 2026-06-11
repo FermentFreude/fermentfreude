@@ -16,10 +16,6 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
   const customerId = typeof doc.customer === 'object' ? doc.customer?.id : doc.customer
 
-  req.payload.logger.info(
-    `[Brevo:orderConfirmation] order=${doc.id} customerId=${customerId ?? 'none'} customerEmail=${doc.customerEmail ?? 'none'}`,
-  )
-
   try {
     let recipientEmail: string | undefined
     let recipientName: string | undefined
@@ -44,10 +40,6 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
     ) {
       recipientName = doc.customerName.trim()
     }
-
-    req.payload.logger.info(
-      `[Brevo:orderConfirmation] recipientEmail=${recipientEmail ?? 'MISSING'} order=${doc.id}`,
-    )
 
     if (!recipientEmail) return doc
 
@@ -417,17 +409,11 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       emailParams.TOTAL_PRICE = workshopPrice
     }
 
-    req.payload.logger.info(
-      `[Brevo:orderConfirmation] calling sendTemplateEmail to=${recipientEmail} templateId=${BREVO_TEMPLATES.ORDER_CONFIRMATION}`,
-    )
-    const result = await sendTemplateEmail({
+    await sendTemplateEmail({
       to: [{ email: recipientEmail, name: recipientName }],
       templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION,
       params: emailParams,
     })
-    req.payload.logger.info(
-      `[Brevo:orderConfirmation] sendTemplateEmail result=${JSON.stringify(result)} order=${doc.id}`,
-    )
   } catch (error) {
     req.payload.logger.error(
       `[Brevo] Order confirmation email FAILED for order ${doc.id}: ${error instanceof Error ? error.message : String(error)}`,
