@@ -460,6 +460,7 @@ export const CheckoutPage: React.FC = () => {
   const canGoToPayment = Boolean(
     checkoutEmail &&
     !phoneError &&
+    (!createAccountOpt || accountPassword.length >= 8) &&
     (isAllDigital
       ? true
       : hasPhysicalItem
@@ -534,7 +535,6 @@ export const CheckoutPage: React.FC = () => {
       setEmail('')
       setFirstName('')
       setLastName('')
-      setEmailEditable(true)
     }
   }, [])
 
@@ -711,59 +711,39 @@ export const CheckoutPage: React.FC = () => {
     ],
   )
 
-  /* ── Guest Continue Handler (with optional account creation) ── */
-  const handleGuestContinue = useCallback(
-    async (e: React.MouseEvent) => {
-      e.preventDefault()
-
-      // Validate phone number before proceeding
-      const phoneValidationError = validatePhone(phone)
-      if (phoneValidationError) {
-        setPhoneError(phoneValidationError)
-        return
-      }
-
-      if (createAccountOpt && accountPassword.length >= 8) {
-        setIsCreatingAccount(true)
-        setCreateAccountError(null)
-        try {
-          const res = await fetch('/api/users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email,
-              password: accountPassword,
-              name: customerName || undefined,
-            }),
-          })
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}))
-            const errMsg: string = data?.errors?.[0]?.message ?? ''
-            if (/duplicate|already exist/i.test(errMsg)) {
-              setCreateAccountError(t.createAccountEmailExists)
-            } else {
-              setCreateAccountError(t.createAccountError)
-            }
-            setIsCreatingAccount(false)
-            return
-          }
-          // Auto-login with the new credentials
-          try {
-            await login({ email, password: accountPassword })
-          } catch {
-            // Login failed after create — still continue as guest
-          }
-        } catch {
-          setCreateAccountError(t.createAccountNetworkError)
-          setIsCreatingAccount(false)
-          return
-        }
+  /* ── Account creation — runs transparently before payment ── */
+  const maybeCreateAccount = useCallback(async (): Promise<boolean> => {
+    if (!createAccountOpt || accountPassword.length < 8 || user) return true
+    setIsCreatingAccount(true)
+    setCreateAccountError(null)
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: accountPassword, name: customerName || undefined }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        const errMsg: string = data?.errors?.[0]?.message ?? ''
+        setCreateAccountError(
+          /duplicate|already exist/i.test(errMsg) ? t.createAccountEmailExists : t.createAccountError,
+        )
         setIsCreatingAccount(false)
+        return false
       }
-      setEmailEditable(false)
-    },
-    [createAccountOpt, accountPassword, email, firstName, lastName, login, t, phone],
-  )
+      try {
+        await login({ email, password: accountPassword })
+      } catch {
+        // Login failed after create — still proceed as guest
+      }
+    } catch {
+      setCreateAccountError(t.createAccountNetworkError)
+      setIsCreatingAccount(false)
+      return false
+    }
+    setIsCreatingAccount(false)
+    return true
+  }, [createAccountOpt, accountPassword, user, email, customerName, login, t])
 
   if (!stripe) return null
 
@@ -842,7 +822,7 @@ export const CheckoutPage: React.FC = () => {
                     {t.firstNameLabel}
                   </Label>
                   <Input
-                    disabled={createAccountOpt && !emailEditable}
+                    disabled={false}
                     id="firstName"
                     name="firstName"
                     autoComplete="given-name"
@@ -864,7 +844,7 @@ export const CheckoutPage: React.FC = () => {
                     {t.lastNameLabel}
                   </Label>
                   <Input
-                    disabled={createAccountOpt && !emailEditable}
+                    disabled={false}
                     id="lastName"
                     name="lastName"
                     autoComplete="family-name"
@@ -962,7 +942,7 @@ export const CheckoutPage: React.FC = () => {
                       setCreateAccountOpt(Boolean(v))
                       setCreateAccountError(null)
                     }}
-                    disabled={createAccountOpt && !emailEditable}
+                    disabled={false}
                     className="mt-0.5"
                   />
                   <Label
@@ -986,7 +966,7 @@ export const CheckoutPage: React.FC = () => {
                       type="password"
                       value={accountPassword}
                       onChange={(e) => setAccountPassword(e.target.value)}
-                      disabled={createAccountOpt && !emailEditable}
+                      disabled={false}
                       placeholder={t.passwordPlaceholder}
                       minLength={8}
                       maxLength={100}
@@ -998,23 +978,6 @@ export const CheckoutPage: React.FC = () => {
 
               {createAccountError && (
                 <p className="text-body-sm text-red-600">{createAccountError}</p>
-              )}
-
-              {createAccountOpt && (
-                <Button
-                  disabled={
-                    !email ||
-                    firstName.trim().length < 1 ||
-                    !emailEditable ||
-                    accountPassword.length < 8 ||
-                    isCreatingAccount ||
-                    Boolean(phoneError)
-                  }
-                  onClick={(e) => void handleGuestContinue(e)}
-                  className="rounded-full bg-ff-near-black px-6 font-display font-bold text-white hover:bg-ff-near-black/80"
-                >
-                  {isCreatingAccount ? '…' : t.continueAndCreate}
-                </Button>
               )}
             </div>
           )}
@@ -1252,24 +1215,30 @@ export const CheckoutPage: React.FC = () => {
         {!paymentData && voucherCoversAll ? (
           <Button
             className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
-            disabled={!canGoToPayment || isProcessingPayment}
+            disabled={!canGoToPayment || isProcessingPayment || isCreatingAccount}
             onClick={(e) => {
               e.preventDefault()
-              void handleVoucherOrder()
+              void (async () => {
+                if (!(await maybeCreateAccount())) return
+                void handleVoucherOrder()
+              })()
             }}
           >
-            {isProcessingPayment ? t.processingOrder : t.payWithVoucher}
+            {isCreatingAccount ? '…' : isProcessingPayment ? t.processingOrder : t.payWithVoucher}
           </Button>
         ) : !paymentData ? (
           <Button
             className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
-            disabled={!canGoToPayment}
+            disabled={!canGoToPayment || isCreatingAccount}
             onClick={(e) => {
               e.preventDefault()
-              void initiatePaymentIntent('stripe')
+              void (async () => {
+                if (!(await maybeCreateAccount())) return
+                void initiatePaymentIntent('stripe')
+              })()
             }}
           >
-            {t.goToPayment}
+            {isCreatingAccount ? '…' : t.goToPayment}
           </Button>
         ) : null}
 
