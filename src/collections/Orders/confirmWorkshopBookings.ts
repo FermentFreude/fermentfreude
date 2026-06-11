@@ -30,6 +30,10 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
   if (operation !== 'create') return doc
 
   const { payload } = req
+
+  payload.logger.info(
+    `[confirmWorkshopBookings] FIRED order=${doc.id} customerEmail=${doc.customerEmail ?? 'none'} items=${JSON.stringify((doc.items ?? []).map((i: { product?: unknown; quantity?: number }) => ({ product: typeof i.product === 'object' ? (i.product as { slug?: string })?.slug : i.product, qty: i.quantity })))}`,
+  )
   const transactionRef = Array.isArray(doc.transactions) ? doc.transactions[0] : undefined
   const transactionId =
     transactionRef && typeof transactionRef === 'object' ? transactionRef.id : transactionRef
@@ -247,6 +251,9 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
 
     // Send workshop booking confirmation email now that customer info is available
     const bookingEmail = (updateData.email as string) || booking.email
+    payload.logger.info(
+      `[confirmWorkshopBookings] booking=${booking.id} workshopSlug=${workshopSlug} bookingEmail=${bookingEmail ?? 'MISSING'} customerEmail=${customerEmail ?? 'none'}`,
+    )
     if (bookingEmail) {
       // Resolve location AND the ISO date / Vienna time range from the
       // appointment in a single fetch. We need the ISO date for the .ics
