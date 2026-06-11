@@ -37,9 +37,11 @@ const CHECKOUT_DE = {
   createAccount: 'Konto erstellen',
   notYou: 'Nicht du?',
   logOut: 'Abmelden',
-  guestPrompt: 'Gib deinen Namen und deine E-Mail-Adresse ein, um als Gast zu bestellen.',
-  nameLabel: 'Vor- und Nachname',
-  namePlaceholder: 'z. B. Maria Musterfrau',
+  guestPrompt: 'Gib deine Kontaktdaten ein, um als Gast zu bestellen.',
+  firstNameLabel: 'Vorname',
+  firstNamePlaceholder: 'z. B. Maria',
+  lastNameLabel: 'Nachname',
+  lastNamePlaceholder: 'z. B. Musterfrau',
   emailLabel: 'E-Mail-Adresse',
   continueAsGuest: 'Als Gast fortfahren',
   address: 'Adresse',
@@ -85,10 +87,9 @@ const CHECKOUT_DE = {
   createAccountEmailExists: 'Diese E-Mail ist bereits registriert. Bitte melde dich an.',
   createAccountNetworkError: 'Verbindungsfehler. Bitte versuche es erneut.',
   // New fields for workshop checkout
-  phoneLabel: 'Telefonnummer',
-  phonePlaceholder: '+49 123 456789',
-  phoneRequiredError: 'Telefonnummer ist erforderlich',
-  phoneInvalidError: 'Bitte geben Sie eine gültige Telefonnummer im Format +49... ein',
+  phoneLabel: 'Telefonnummer (optional)',
+  phonePlaceholder: '+43 123 456789',
+  phoneInvalidError: 'Bitte eine gültige Telefonnummer mit Ländervorwahl eingeben (z.B. +43...)',
   dietLabel: 'Ernährungshinweise (optional)',
   dietPlaceholder: 'z.B. vegetarisch, vegan, glutenfrei, Allergien...',
   dietCharCount: (n: number) => `${n} / 500`,
@@ -103,9 +104,11 @@ const CHECKOUT_EN = {
   createAccount: 'Create an account',
   notYou: 'Not you?',
   logOut: 'Log out',
-  guestPrompt: 'Enter your name and email to checkout as a guest.',
-  nameLabel: 'Full name',
-  namePlaceholder: 'e.g. Jane Doe',
+  guestPrompt: 'Enter your contact details to checkout as a guest.',
+  firstNameLabel: 'First name',
+  firstNamePlaceholder: 'e.g. Jane',
+  lastNameLabel: 'Last name',
+  lastNamePlaceholder: 'e.g. Doe',
   emailLabel: 'Email Address',
   continueAsGuest: 'Continue as guest',
   address: 'Address',
@@ -151,10 +154,9 @@ const CHECKOUT_EN = {
   createAccountEmailExists: 'This email is already registered. Please log in.',
   createAccountNetworkError: 'Connection error. Please try again.',
   // New fields for workshop checkout
-  phoneLabel: 'Phone number',
-  phonePlaceholder: '+49 123 456789',
-  phoneRequiredError: 'Phone number is required',
-  phoneInvalidError: 'Please enter a valid phone number in format +49...',
+  phoneLabel: 'Phone number (optional)',
+  phonePlaceholder: '+43 123 456789',
+  phoneInvalidError: 'Please enter a valid phone number with country code (e.g. +43...)',
   dietLabel: 'Dietary specifications (optional)',
   dietPlaceholder: 'e.g. vegetarian, vegan, gluten-free, allergies...',
   dietCharCount: (n: number) => `${n} / 500`,
@@ -196,31 +198,24 @@ export const CheckoutPage: React.FC = () => {
    * State to manage the email input for guest checkout.
    */
   const [email, setEmail] = useState('')
-  const [customerName, setCustomerName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const customerName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
   const [phone, setPhone] = useState('')
   const [dietSpecs, setDietSpecs] = useState('')
   const [phoneError, setPhoneError] = useState<string | null>(null)
   const [emailEditable, setEmailEditable] = useState(true)
 
-  // Phone validation (E.164 format: +[1-9][0-9]{6,14})
+  // Phone validation (optional field — only validates format if non-empty)
   const validatePhone = (phoneNumber: string): string | null => {
     const trimmed = phoneNumber.trim()
-    if (!trimmed) {
-      return t.phoneRequiredError
-    }
+    if (!trimmed) return null // optional
 
-    // E.164 format validation: + followed by 6-15 digits (allowing spaces/hyphens)
     const phoneRegex = /^\+[1-9][\d\s-]{5,14}$/
-    if (!phoneRegex.test(trimmed)) {
-      return t.phoneInvalidError
-    }
+    if (!phoneRegex.test(trimmed)) return t.phoneInvalidError
 
-    // Remove non-digits and check length (6-15 digits total)
     const digitsOnly = trimmed.replace(/[\s-]/g, '')
-    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
-      // + plus 6-14 digits
-      return t.phoneInvalidError
-    }
+    if (digitsOnly.length < 7 || digitsOnly.length > 15) return t.phoneInvalidError
 
     return null
   }
@@ -464,6 +459,7 @@ export const CheckoutPage: React.FC = () => {
   //   - otherwise (legacy fallback): email + billing/shipping address.
   const canGoToPayment = Boolean(
     checkoutEmail &&
+    !phoneError &&
     (isAllDigital
       ? true
       : hasPhysicalItem
@@ -536,6 +532,8 @@ export const CheckoutPage: React.FC = () => {
       setBillingAddress(undefined)
       setBillingAddressSameAsShipping(true)
       setEmail('')
+      setFirstName('')
+      setLastName('')
       setEmailEditable(true)
     }
   }, [])
@@ -735,7 +733,7 @@ export const CheckoutPage: React.FC = () => {
             body: JSON.stringify({
               email,
               password: accountPassword,
-              name: customerName.trim() || undefined,
+              name: customerName || undefined,
             }),
           })
           if (!res.ok) {
@@ -764,7 +762,7 @@ export const CheckoutPage: React.FC = () => {
       }
       setEmailEditable(false)
     },
-    [createAccountOpt, accountPassword, email, customerName, login, t, phone],
+    [createAccountOpt, accountPassword, email, firstName, lastName, login, t, phone],
   )
 
   if (!stripe) return null
@@ -835,28 +833,52 @@ export const CheckoutPage: React.FC = () => {
           ) : (
             <div className="space-y-4">
               <p className="text-body-sm text-ff-gray-text-light">{t.guestPrompt}</p>
-              <FormItem>
-                <Label
-                  htmlFor="customerName"
-                  className="font-display text-body-sm font-bold text-ff-near-black"
-                >
-                  {t.nameLabel}
-                </Label>
-                <Input
-                  disabled={!emailEditable}
-                  id="customerName"
-                  name="customerName"
-                  autoComplete="name"
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  value={customerName}
-                  required
-                  type="text"
-                  placeholder={t.namePlaceholder}
-                  minLength={2}
-                  maxLength={250}
-                  className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
-                />
-              </FormItem>
+              <div className="grid grid-cols-2 gap-3">
+                <FormItem>
+                  <Label
+                    htmlFor="firstName"
+                    className="font-display text-body-sm font-bold text-ff-near-black"
+                  >
+                    {t.firstNameLabel}
+                  </Label>
+                  <Input
+                    disabled={createAccountOpt && !emailEditable}
+                    id="firstName"
+                    name="firstName"
+                    autoComplete="given-name"
+                    onChange={(e) => setFirstName(e.target.value)}
+                    value={firstName}
+                    required
+                    type="text"
+                    placeholder={t.firstNamePlaceholder}
+                    minLength={1}
+                    maxLength={100}
+                    className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
+                  />
+                </FormItem>
+                <FormItem>
+                  <Label
+                    htmlFor="lastName"
+                    className="font-display text-body-sm font-bold text-ff-near-black"
+                  >
+                    {t.lastNameLabel}
+                  </Label>
+                  <Input
+                    disabled={createAccountOpt && !emailEditable}
+                    id="lastName"
+                    name="lastName"
+                    autoComplete="family-name"
+                    onChange={(e) => setLastName(e.target.value)}
+                    value={lastName}
+                    required
+                    type="text"
+                    placeholder={t.lastNamePlaceholder}
+                    minLength={1}
+                    maxLength={100}
+                    className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
+                  />
+                </FormItem>
+              </div>
               <FormItem>
                 <Label
                   htmlFor="email"
@@ -865,7 +887,7 @@ export const CheckoutPage: React.FC = () => {
                   {t.emailLabel}
                 </Label>
                 <Input
-                  disabled={!emailEditable}
+                  disabled={createAccountOpt && !emailEditable}
                   id="email"
                   name="email"
                   onChange={(e) => setEmail(e.target.value)}
@@ -875,17 +897,16 @@ export const CheckoutPage: React.FC = () => {
                 />
               </FormItem>
 
-              {/* Phone number (required for workshops) */}
+              {/* Phone number (optional) */}
               <FormItem>
                 <Label
                   htmlFor="phone"
                   className="font-display text-body-sm font-bold text-ff-near-black"
                 >
                   {t.phoneLabel}
-                  <span className="ml-1 text-red-500">*</span>
                 </Label>
                 <Input
-                  disabled={!emailEditable}
+                  disabled={createAccountOpt && !emailEditable}
                   id="phone"
                   name="phone"
                   autoComplete="tel"
@@ -895,7 +916,6 @@ export const CheckoutPage: React.FC = () => {
                   }}
                   onBlur={(e) => setPhoneError(validatePhone(e.target.value))}
                   value={phone}
-                  required
                   type="tel"
                   placeholder={t.phonePlaceholder}
                   className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
@@ -912,7 +932,7 @@ export const CheckoutPage: React.FC = () => {
                   {t.dietLabel}
                 </Label>
                 <textarea
-                  disabled={!emailEditable}
+                  disabled={createAccountOpt && !emailEditable}
                   id="dietSpecs"
                   name="dietSpecs"
                   onChange={(e) => {
@@ -942,7 +962,7 @@ export const CheckoutPage: React.FC = () => {
                       setCreateAccountOpt(Boolean(v))
                       setCreateAccountError(null)
                     }}
-                    disabled={!emailEditable}
+                    disabled={createAccountOpt && !emailEditable}
                     className="mt-0.5"
                   />
                   <Label
@@ -966,7 +986,7 @@ export const CheckoutPage: React.FC = () => {
                       type="password"
                       value={accountPassword}
                       onChange={(e) => setAccountPassword(e.target.value)}
-                      disabled={!emailEditable}
+                      disabled={createAccountOpt && !emailEditable}
                       placeholder={t.passwordPlaceholder}
                       minLength={8}
                       maxLength={100}
@@ -980,25 +1000,22 @@ export const CheckoutPage: React.FC = () => {
                 <p className="text-body-sm text-red-600">{createAccountError}</p>
               )}
 
-              <Button
-                disabled={
-                  !email ||
-                  customerName.trim().length < 2 ||
-                  !emailEditable ||
-                  (createAccountOpt && accountPassword.length < 8) ||
-                  isCreatingAccount ||
-                  Boolean(phoneError) ||
-                  !phone.trim()
-                }
-                onClick={(e) => void handleGuestContinue(e)}
-                className="rounded-full bg-ff-near-black px-6 font-display font-bold text-white hover:bg-ff-near-black/80"
-              >
-                {isCreatingAccount
-                  ? '…'
-                  : createAccountOpt
-                    ? t.continueAndCreate
-                    : t.continueAsGuest}
-              </Button>
+              {createAccountOpt && (
+                <Button
+                  disabled={
+                    !email ||
+                    firstName.trim().length < 1 ||
+                    !emailEditable ||
+                    accountPassword.length < 8 ||
+                    isCreatingAccount ||
+                    Boolean(phoneError)
+                  }
+                  onClick={(e) => void handleGuestContinue(e)}
+                  className="rounded-full bg-ff-near-black px-6 font-display font-bold text-white hover:bg-ff-near-black/80"
+                >
+                  {isCreatingAccount ? '…' : t.continueAndCreate}
+                </Button>
+              )}
             </div>
           )}
         </section>
