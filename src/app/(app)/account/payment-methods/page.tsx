@@ -1,5 +1,5 @@
 import { accountI18n } from '@/app/(app)/account/i18n'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import type { User } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
@@ -43,7 +43,7 @@ export default async function PaymentMethodsPage() {
   let cards: StripeCard[] = []
 
   if (customerId) {
-    const pmResult = await stripe.paymentMethods.list({
+    const pmResult = await getStripe().paymentMethods.list({
       customer: customerId,
       type: 'card',
     })
