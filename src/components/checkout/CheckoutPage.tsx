@@ -52,6 +52,7 @@ const CHECKOUT_DE = {
   viewOnMaps: 'Auf Google Maps ansehen',
   pickupDateLabel: 'Abholdatum',
   pickupTimeLabel: 'Abholzeit',
+  selectDate: 'Datum auswählen',
   selectTime: 'Zeit auswählen',
   remove: 'Entfernen',
   billingAddress: 'Rechnungsadresse',
@@ -119,6 +120,7 @@ const CHECKOUT_EN = {
   viewOnMaps: 'View on Google Maps',
   pickupDateLabel: 'Pickup Date',
   pickupTimeLabel: 'Pickup Time',
+  selectDate: 'Select a date',
   selectTime: 'Select a time',
   remove: 'Remove',
   billingAddress: 'Billing address',
@@ -468,52 +470,44 @@ export const CheckoutPage: React.FC = () => {
         : billingAddress && (billingAddressSameAsShipping || shippingAddress)),
   )
 
-  // Get available pickup time slots (only times 3+ hours from now)
-  const getAvailableTimeSlots = useCallback(() => {
-    const allTimeSlots = [
-      { value: '09:00', label: '9:00 AM' },
-      { value: '10:00', label: '10:00 AM' },
-      { value: '11:00', label: '11:00 AM' },
-      { value: '12:00', label: '12:00 PM' },
-      { value: '13:00', label: '1:00 PM' },
-      { value: '14:00', label: '2:00 PM' },
-      { value: '15:00', label: '3:00 PM' },
-      { value: '16:00', label: '4:00 PM' },
-      { value: '17:00', label: '5:00 PM' },
-    ]
+  // Ginery opening hours: Wednesday and Thursday, 16:00–19:00
+  const PICKUP_TIME_SLOTS = [
+    { value: '16:00', label: '16:00' },
+    { value: '17:00', label: '17:00' },
+    { value: '18:00', label: '18:00' },
+    { value: '19:00', label: '19:00' },
+  ]
 
-    // If no date selected, return all slots
-    if (!pickupDate) return allTimeSlots
+  // Generate the next 8 Wed/Thu dates starting from tomorrow
+  const getAvailablePickupDates = useCallback(() => {
+    const dates: { value: string; label: string }[] = []
+    const cursor = new Date()
+    cursor.setHours(0, 0, 0, 0)
+    cursor.setDate(cursor.getDate() + 1) // start from tomorrow
 
-    const now = new Date()
-    const selectedDate = new Date(pickupDate)
-    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-
-    // If selected date is in the future, allow all times
-    if (selectedDate > todayDate) {
-      return allTimeSlots
+    while (dates.length < 8) {
+      const dow = cursor.getDay() // 3 = Wed, 4 = Thu
+      if (dow === 3 || dow === 4) {
+        const year = cursor.getFullYear()
+        const month = String(cursor.getMonth() + 1).padStart(2, '0')
+        const day = String(cursor.getDate()).padStart(2, '0')
+        const value = `${year}-${month}-${day}`
+        const label = cursor.toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-GB', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+        })
+        dates.push({ value, label })
+      }
+      cursor.setDate(cursor.getDate() + 1)
     }
+    return dates
+  }, [locale])
 
-    // If selected date is today, filter out times less than 3 hours away
-    if (selectedDate.getTime() === todayDate.getTime()) {
-      const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000)
-      return allTimeSlots.filter((slot) => {
-        const [hours, minutes] = slot.value.split(':').map(Number)
-        const slotTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
-        return slotTime >= threeHoursLater
-      })
-    }
-
-    return allTimeSlots
-  }, [pickupDate])
-
-  // On date change, clear pickup time if it becomes unavailable
+  // Clear pickup time when date changes
   useEffect(() => {
-    const availableSlots = getAvailableTimeSlots()
-    if (pickupTime && !availableSlots.some((slot) => slot.value === pickupTime)) {
-      setPickupTime('')
-    }
-  }, [pickupDate, pickupTime, getAvailableTimeSlots])
+    setPickupTime('')
+  }, [pickupDate])
 
   // On initial load wait for addresses to be loaded and check to see if we can prefill a default one
   useEffect(() => {
@@ -1018,16 +1012,21 @@ export const CheckoutPage: React.FC = () => {
               >
                 {t.pickupDateLabel}
               </Label>
-              <Input
+              <select
                 id="pickupDate"
                 name="pickupDate"
-                type="date"
                 value={pickupDate}
                 onChange={(e) => setPickupDate(e.target.value)}
                 disabled={Boolean(paymentData)}
-                min={new Date().toISOString().split('T')[0]}
-                className="rounded-md border-ff-border-light bg-white focus:border-ff-near-black focus:ring-ff-near-black"
-              />
+                className="w-full rounded-md border border-ff-border-light bg-white px-4 py-2 text-body-sm focus:border-ff-near-black focus:ring-ff-near-black disabled:opacity-50"
+              >
+                <option value="">{t.selectDate}</option>
+                {getAvailablePickupDates().map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                ))}
+              </select>
             </FormItem>
 
             {/* Pickup Time */}
@@ -1047,7 +1046,7 @@ export const CheckoutPage: React.FC = () => {
                 className="w-full rounded-md border border-ff-border-light bg-white px-4 py-2 text-body-sm focus:border-ff-near-black focus:ring-ff-near-black disabled:opacity-50"
               >
                 <option value="">{t.selectTime}</option>
-                {getAvailableTimeSlots().map((slot) => (
+                {PICKUP_TIME_SLOTS.map((slot) => (
                   <option key={slot.value} value={slot.value}>
                     {slot.label}
                   </option>
