@@ -62,10 +62,28 @@ export type PickupOrderRow = {
   notes: string
 }
 
+export type VoucherRow = {
+  id: string
+  code: string
+  value: number
+  status: 'active' | 'redeemed' | 'expired'
+  purchaserName: string
+  purchaserEmail: string
+  recipientName: string
+  recipientEmail: string
+  personalNote: string
+  deliveryMethod: string
+  redeemedOn: string
+  redeemedForWorkshop: string
+  invoiceNumber: string
+  createdAt: string
+}
+
 export type RosterData = {
   stats: RosterStats
   appointments: AppointmentRow[]
   bookingsByAppointment: Record<string, BookingRow[]>
   participants: ParticipantRow[]
   pickupOrders: PickupOrderRow[]
+  vouchers: VoucherRow[]
 }

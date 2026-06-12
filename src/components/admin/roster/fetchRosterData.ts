@@ -9,6 +9,7 @@ import type {
   ParticipantRow,
   RosterData,
   RosterStats,
+  VoucherRow,
 } from './types'
 
 function fmtDate(iso: string): string {
@@ -211,7 +212,53 @@ export async function fetchRosterData(): Promise<RosterData> {
       } satisfies PickupOrderRow
     })
 
-  // ── 5. Stats ───────────────────────────────────────────────────────────────
+  // ── 5. Vouchers ────────────────────────────────────────────────────────────
+  const voucherResult = await payload.find({
+    collection: 'vouchers',
+    sort: '-createdAt',
+    limit: 500,
+    overrideAccess: true,
+  })
+
+  const vouchers: VoucherRow[] = voucherResult.docs.map((v) => {
+    const vd = v as unknown as {
+      code?: string
+      value?: number
+      status?: string
+      purchaserName?: string
+      purchaserEmail?: string
+      recipientName?: string
+      recipientEmail?: string
+      personalNote?: string
+      deliveryMethod?: string
+      redeemedOn?: string
+      redeemedForWorkshop?: string
+      invoiceNumber?: string
+      createdAt?: string
+    }
+    return {
+      id: String(v.id),
+      code: vd.code ?? '',
+      value: vd.value ?? 0,
+      status: (vd.status as VoucherRow['status']) ?? 'active',
+      purchaserName: vd.purchaserName ?? '',
+      purchaserEmail: vd.purchaserEmail ?? '',
+      recipientName: vd.recipientName ?? '',
+      recipientEmail: vd.recipientEmail ?? '',
+      personalNote: vd.personalNote ?? '',
+      deliveryMethod: vd.deliveryMethod ?? '',
+      redeemedOn: vd.redeemedOn
+        ? new Date(vd.redeemedOn).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
+        : '',
+      redeemedForWorkshop: vd.redeemedForWorkshop ?? '',
+      invoiceNumber: vd.invoiceNumber ?? '',
+      createdAt: vd.createdAt
+        ? new Date(vd.createdAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
+        : '',
+    } satisfies VoucherRow
+  })
+
+  // ── 6. Stats ───────────────────────────────────────────────────────────────
   const upcomingWorkshops = appointments.filter((a) => !a.isPast).length
   const totalParticipants = Object.values(bookingsByAppointment).reduce(
     (sum, bookings) => sum + bookings.reduce((s, b) => s + b.guestCount, 0),
@@ -233,5 +280,5 @@ export async function fetchRosterData(): Promise<RosterData> {
     workshopRevenue,
   }
 
-  return { stats, appointments, bookingsByAppointment, participants, pickupOrders }
+  return { stats, appointments, bookingsByAppointment, participants, pickupOrders, vouchers }
 }

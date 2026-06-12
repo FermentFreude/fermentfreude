@@ -6,10 +6,11 @@ import { DashboardView } from './DashboardView'
 import { ParticipantsView } from './ParticipantsView'
 import { PickupsView } from './PickupsView'
 import type { RosterData } from './types'
+import { VouchersView } from './VouchersView'
 import { WorkshopDetailView } from './WorkshopDetailView'
 import { WorkshopsView } from './WorkshopsView'
 
-type Section = 'dashboard' | 'workshops' | 'detail' | 'participants' | 'pickups'
+type Section = 'dashboard' | 'workshops' | 'detail' | 'participants' | 'pickups' | 'vouchers'
 
 const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
   {
@@ -51,6 +52,19 @@ const SHOP_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+      </svg>
+    ),
+  },
+  {
+    id: 'vouchers',
+    label: 'Gutscheine',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6" />
+        <path d="M22 7H2v5h20V7z" />
+        <path d="M12 22V7" />
+        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
       </svg>
     ),
   },
@@ -189,6 +203,9 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
         {section === 'participants' && <ParticipantsView participants={data.participants} stats={data.stats} />}
         {section === 'pickups' && (
           <PickupsView orders={data.pickupOrders} onRefresh={refresh} />
+        )}
+        {section === 'vouchers' && (
+          <VouchersView vouchers={data.vouchers} onRefresh={refresh} />
         )}
       </main>
     </div>
