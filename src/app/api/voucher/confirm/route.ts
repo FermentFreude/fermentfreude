@@ -1,4 +1,4 @@
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import config from '@/payload.config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
       let session
       try {
-        session = await stripe.checkout.sessions.retrieve(sessionId)
+        session = await getStripe().checkout.sessions.retrieve(sessionId)
       } catch (_err) {
         return NextResponse.json(
           { success: false, error: 'Invalid checkout session.' },
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 
       let paymentIntent
       try {
-        paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId!)
+        paymentIntent = await getStripe().paymentIntents.retrieve(paymentIntentId!)
       } catch (_err) {
         return NextResponse.json(
           { success: false, error: 'Invalid payment intent.' },

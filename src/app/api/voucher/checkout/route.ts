@@ -1,4 +1,4 @@
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import { NextRequest, NextResponse } from 'next/server'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     // ─── Create Stripe Payment Intent ─────────────────────────────
 
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await getStripe().paymentIntents.create({
       amount: body.amount * 100,
       currency: 'eur',
       receipt_email: body.purchaserEmail,
