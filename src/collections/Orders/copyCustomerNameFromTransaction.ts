@@ -28,9 +28,19 @@ export const copyCustomerNameFromTransaction: CollectionBeforeChangeHook = async
       overrideAccess: true,
     })
     
-    // Copy customer name if not already set
+    // Copy customer first/last name if not already set
+    const txAny = tx as unknown as Record<string, string | null | undefined>
+    if (!data.customerFirstName) {
+      const v = txAny.customerFirstName
+      if (typeof v === 'string' && v.trim().length > 0) data.customerFirstName = v.trim()
+    }
+    if (!data.customerLastName) {
+      const v = txAny.customerLastName
+      if (typeof v === 'string' && v.trim().length > 0) data.customerLastName = v.trim()
+    }
+    // Keep legacy customerName in sync
     if (!data.customerName) {
-      const name = (tx as unknown as { customerName?: string | null })?.customerName
+      const name = txAny.customerName
       if (typeof name === 'string' && name.trim().length > 0) {
         data.customerName = name.trim()
       }
@@ -41,26 +51,35 @@ export const copyCustomerNameFromTransaction: CollectionBeforeChangeHook = async
     // `customer` instead of `customerEmail` on the Order. The transaction has
     // the form-entered email from attach-customer-name, which is authoritative.
     if (!data.customerEmail) {
-      const email = (tx as unknown as { customerEmail?: string | null })?.customerEmail
-      if (typeof email === 'string' && email.trim().length > 0) {
-        data.customerEmail = email.trim()
-      }
+      const email = txAny.customerEmail
+      if (typeof email === 'string' && email.trim().length > 0) data.customerEmail = email.trim()
     }
 
-    // Copy customer phone if not already set
     if (!data.customerPhone) {
-      const phone = (tx as unknown as { customerPhone?: string | null })?.customerPhone
-      if (typeof phone === 'string' && phone.trim().length > 0) {
-        data.customerPhone = phone.trim()
-      }
+      const phone = txAny.customerPhone
+      if (typeof phone === 'string' && phone.trim().length > 0) data.customerPhone = phone.trim()
     }
 
     // Copy customer diet specs if not already set
     if (!data.customerDietSpecs) {
-      const dietSpecs = (tx as unknown as { customerDietSpecs?: string | null })?.customerDietSpecs
+      const dietSpecs = txAny.customerDietSpecs
       if (typeof dietSpecs === 'string' && dietSpecs.trim().length > 0) {
         data.customerDietSpecs = dietSpecs.trim()
       }
+    }
+
+    // Copy pickup fields if not already set
+    const pickupFields = ['pickupDate', 'pickupTime', 'pickupLocation', 'pickupAddress'] as const
+    for (const field of pickupFields) {
+      if (!data[field]) {
+        const v = txAny[field]
+        if (typeof v === 'string' && v.trim().length > 0) data[field] = v.trim()
+      }
+    }
+
+    // Default pickupStatus to 'pending' for new pickup orders
+    if (!data.pickupStatus && data.pickupDate) {
+      data.pickupStatus = 'pending'
     }
   } catch {
     // Non-fatal: order still gets created, emails fall back to email local-part.
