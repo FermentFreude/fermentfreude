@@ -55,7 +55,7 @@ export function DashboardView({ data, onSelectWorkshop, onNavigate }: Props) {
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
         <StatCard
           label="Kommende Workshops"
           value={stats.upcomingWorkshops}

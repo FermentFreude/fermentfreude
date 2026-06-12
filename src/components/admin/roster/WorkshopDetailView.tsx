@@ -75,7 +75,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
         {bookings.length === 0 ? (
           <p style={{ color: 'var(--theme-text)', opacity: 0.5, margin: 0 }}>Noch keine bestätigten Buchungen.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
             {bookings.map((booking, i) => {
               const name = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || booking.email || '—'
               return (
@@ -146,7 +146,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
       </div>
 
       {/* Summary stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         {[
           { label: 'Teilnehmer', value: `${appointment.totalBooked}/${appointment.capacity}`, icon: '👤' },
           { label: 'Uhrzeit', value: appointment.time, icon: '🕐' },

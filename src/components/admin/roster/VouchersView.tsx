@@ -277,7 +277,7 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
       )}
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px', marginBottom: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '28px' }}>
         {[
           { label: 'Gesamt Gutscheine', value: vouchers.length },
           { label: 'Aktiv', value: active, accent: 'green' },
@@ -341,7 +341,8 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
           background: 'var(--theme-elevation-50)', border: '1px solid var(--theme-elevation-100)',
           borderRadius: '12px', overflow: 'hidden',
         }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+          <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: 'var(--theme-elevation-100)' }}>
                 {['Code', 'Wert', 'Status', 'Käufer:in → Empfänger:in', 'Erstellt', 'PDF'].map((col) => (
@@ -419,6 +420,7 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
               ))}
             </tbody>
           </table>
+          </div>
           {redeemed > 0 && filter !== 'active' && (
             <div style={{ padding: '12px 16px', borderTop: '1px solid var(--theme-elevation-100)', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.45 }}>
               Eingelöster Gesamtwert: €{redeemedValue}

@@ -44,7 +44,7 @@ export function ParticipantsView({ participants, stats }: Props) {
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '32px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
         {[
           { label: 'Gesamt Kunden', value: participants.length, icon: '👤' },
           { label: 'Bestätigte Buchungen', value: stats.totalParticipants, icon: '📅' },
@@ -96,7 +96,8 @@ export function ParticipantsView({ participants, stats }: Props) {
             {query ? 'Keine Ergebnisse gefunden.' : 'Noch keine Teilnehmer.'}
           </p>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+          <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: '560px', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: 'var(--theme-elevation-100)' }}>
                 {['Name', 'E-Mail', 'Telefon', 'Workshop'].map((col) => (
@@ -148,6 +149,7 @@ export function ParticipantsView({ participants, stats }: Props) {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

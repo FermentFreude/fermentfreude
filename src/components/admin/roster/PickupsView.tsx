@@ -210,7 +210,7 @@ export function PickupsView({ orders, onRefresh }: Props) {
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px', marginBottom: '32px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px', marginBottom: '32px' }}>
         {[
           { label: 'In Bearbeitung', value: inProgress, accent: 'orange' },
           { label: 'Abholbereit', value: ready, accent: 'blue' },
