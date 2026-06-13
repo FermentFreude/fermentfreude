@@ -79,8 +79,7 @@ export const Vouchers: CollectionConfig = {
     {
       name: 'purchaserEmail',
       type: 'email',
-      required: true,
-      admin: { description: 'Email of the buyer (receives purchase confirmation)' },
+      admin: { description: 'Email of the buyer (receives purchase confirmation). Leave blank for manually-created vouchers.' },
     },
 
     /* ── Recipient Details ── */
@@ -206,13 +205,18 @@ export const Vouchers: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [
+    beforeValidate: [
+      // Code generation MUST run before validation — code is required+unique,
+      // but the client never sends it. beforeChange runs after validation in
+      // Payload 3.x, so we generate here instead.
       async ({ data, operation }) => {
-        if (operation === 'create' && !data?.code) {
+        if (operation === 'create' && data && !data.code) {
           data.code = generateVoucherCode()
         }
         return data
       },
+    ],
+    beforeChange: [
       assignInvoiceNumber,
     ],
     afterChange: [sendVoucherPurchaseEmail],

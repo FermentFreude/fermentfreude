@@ -37,16 +37,17 @@ export async function createVoucher(params: {
     collection: 'vouchers',
     draft: false,
     data: {
-      code: '',
+      // code is intentionally omitted — beforeValidate hook generates it
       value: params.value,
       status: 'active',
       deliveryMethod: 'pdf',
-      purchaserName: params.purchaserName ?? '',
-      purchaserEmail: '',
-      recipientName: params.recipientName ?? '',
-      recipientEmail: params.recipientEmail ?? '',
-      personalNote: params.personalNote ?? '',
-    },
+      // Empty strings omitted — purchaserEmail is no longer required (manually-created vouchers have no online buyer)
+      ...(params.purchaserName?.trim() ? { purchaserName: params.purchaserName.trim() } : {}),
+      ...(params.recipientName?.trim() ? { recipientName: params.recipientName.trim() } : {}),
+      ...(params.recipientEmail?.trim() ? { recipientEmail: params.recipientEmail.trim() } : {}),
+      ...(params.personalNote?.trim() ? { personalNote: params.personalNote.trim() } : {}),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any,
     overrideAccess: true,
   })
   const v = created as unknown as { code?: string; id: string }
