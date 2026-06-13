@@ -10,7 +10,7 @@ export const WorkshopBookings: CollectionConfig = {
   admin: {
     useAsTitle: 'workshopTitle',
     group: 'Workshops',
-    defaultColumns: ['workshopTitle', 'date', 'firstName', 'email', 'guestCount', 'status'],
+    defaultColumns: ['workshopTitle', 'date', 'firstName', 'lastName', 'email', 'guestCount', 'notes', 'status'],
   },
   access: {
     read: isAdmin,
@@ -19,6 +19,7 @@ export const WorkshopBookings: CollectionConfig = {
     delete: isAdmin,
   },
   fields: [
+    // ── Sidebar ────────────────────────────────────────────────
     {
       name: 'status',
       type: 'select',
@@ -33,9 +34,89 @@ export const WorkshopBookings: CollectionConfig = {
       ],
       admin: {
         position: 'sidebar',
-        description:
-          'Auto-set to pending on cart add. Transitions to confirmed after Stripe payment succeeds.',
+        description: 'Set to "Confirmed" for phone/manual bookings where payment was received outside of Stripe.',
       },
+    },
+    {
+      name: 'appointmentId',
+      type: 'text',
+      label: 'Appointment ID',
+      admin: {
+        position: 'sidebar',
+        description: 'ID of the WorkshopAppointment. Auto-populated for online bookings. Leave blank for phone bookings.',
+      },
+    },
+    {
+      name: 'cartSlug',
+      type: 'text',
+      label: 'Cart ID',
+      admin: {
+        position: 'sidebar',
+        description: 'Auto-populated for online bookings. Not needed for phone bookings.',
+      },
+    },
+    {
+      name: 'orderId',
+      type: 'text',
+      label: 'Order ID',
+      admin: {
+        position: 'sidebar',
+        description: 'Set automatically when payment is confirmed via Stripe.',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'downloadToken',
+      type: 'text',
+      label: 'Receipt Download Token',
+      admin: {
+        position: 'sidebar',
+        description: 'Auto-generated on confirmation. Used for the guest receipt download link.',
+        readOnly: true,
+      },
+    },
+
+    // ── Customer info (fills first — critical for phone bookings) ──
+    {
+      name: 'firstName',
+      type: 'text',
+      label: 'First Name',
+      admin: {
+        description: 'Customer first name. Auto-populated from checkout for online bookings.',
+      },
+    },
+    {
+      name: 'lastName',
+      type: 'text',
+      label: 'Last Name',
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      admin: { description: 'Used to send the booking confirmation email.' },
+    },
+    {
+      name: 'phone',
+      type: 'text',
+      label: 'Phone Number',
+    },
+    {
+      name: 'notes',
+      type: 'textarea',
+      label: 'Dietary Requirements / Special Requests',
+      admin: {
+        description: 'Dietary restrictions, allergies, intolerances, or any other special requests.',
+      },
+    },
+
+    // ── Workshop & booking details ─────────────────────────────
+    {
+      name: 'workshopTitle',
+      type: 'text',
+      required: true,
+      label: 'Workshop',
+      admin: { description: 'e.g. "Kombucha Workshop"' },
     },
     {
       name: 'workshopSlug',
@@ -45,32 +126,18 @@ export const WorkshopBookings: CollectionConfig = {
       admin: { description: 'e.g. "kombucha", "lakto", "tempeh"' },
     },
     {
-      name: 'appointmentId',
-      type: 'text',
-      required: true,
-      label: 'Appointment ID',
-      admin: { description: 'ID of the WorkshopAppointment' },
-    },
-    {
-      name: 'workshopTitle',
-      type: 'text',
-      required: true,
-      label: 'Workshop Title',
-      admin: { description: 'e.g. "Kombucha Workshop"' },
-    },
-    {
       name: 'date',
       type: 'text',
       required: true,
-      label: 'Appointment Date',
-      admin: { description: 'Formatted date string' },
+      label: 'Date',
+      admin: { description: 'Formatted date string, e.g. "14. Juni 2026"' },
     },
     {
       name: 'time',
       type: 'text',
       required: true,
-      label: 'Appointment Time',
-      admin: { description: 'Formatted time string' },
+      label: 'Time',
+      admin: { description: 'Formatted time string, e.g. "10:00 – 13:00"' },
     },
     {
       name: 'guestCount',
@@ -92,118 +159,52 @@ export const WorkshopBookings: CollectionConfig = {
       required: true,
       label: 'Total Price (€)',
     },
-    {
-      name: 'cartSlug',
-      type: 'text',
-      label: 'Temporary Cart ID',
-      admin: { description: 'For linking to cart items (temporary until checkout)' },
-    },
-    {
-      name: 'email',
-      type: 'email',
-      label: 'Customer Email',
-      admin: { description: 'Email for booking confirmation' },
-    },
-    {
-      name: 'firstName',
-      type: 'text',
-      label: 'Customer First Name',
-      admin: { description: 'For personalizing the booking confirmation email' },
-    },
-    {
-      name: 'lastName',
-      type: 'text',
-      label: 'Customer Last Name',
-    },
-    {
-      name: 'phone',
-      type: 'text',
-      label: 'Phone Number',
-      admin: { description: 'Optional contact number' },
-    },
-    {
-      name: 'notes',
-      type: 'textarea',
-      label: 'Special Requests / Notes',
-      admin: { description: 'Any dietary restrictions, allergies, or special requests' },
-    },
-    {
-      name: 'downloadToken',
-      type: 'text',
-      label: 'Receipt Download Token',
-      admin: {
-        description:
-          'Secure token for guest receipt download link. Auto-generated on confirmation.',
-        readOnly: true,
-      },
-    },
-    {
-      name: 'orderId',
-      type: 'text',
-      label: 'Order ID',
-      admin: {
-        description: 'ID of the order that confirmed this booking. Set automatically on payment.',
-        readOnly: true,
-      },
-    },
+
+    // ── Per-seat guest details ─────────────────────────────────
     {
       name: 'seats',
       type: 'array',
       label: 'Guests (per seat)',
       admin: {
         description:
-          'One entry per booked seat. Seat 1 is the buyer themselves. Additional seats may include the guest name and any note (e.g. dietary requirements like vegetarian, vegan, allergies). All confirmation emails are sent only to the buyer — guests do NOT receive separate emails.',
+          'One entry per booked seat. Seat 1 is the buyer. Additional seats can include a guest name and dietary notes. Confirmation emails go only to the buyer.',
       },
       fields: [
-        {
-          name: 'isGift',
-          type: 'checkbox',
-          defaultValue: false,
-          label: 'Legacy: Is a gift (unused)',
-          admin: {
-            description:
-              'Legacy field. As of May 2026 we no longer send separate emails to guests — vouchers are the dedicated gift flow. Always false for new bookings.',
-            hidden: true,
-          },
-        },
         {
           name: 'recipientName',
           type: 'text',
           label: 'Guest Name',
           admin: {
-            description:
-              'Name of the person attending in this seat (optional). Shown on the workshop attendee list.',
-          },
-        },
-        {
-          name: 'recipientEmail',
-          type: 'email',
-          label: 'Legacy: Recipient Email (unused)',
-          admin: {
-            description:
-              'Legacy field. As of May 2026 we no longer collect or email guests directly. Always empty for new bookings.',
-            hidden: true,
+            description: 'Name of the person attending this seat (optional).',
           },
         },
         {
           name: 'giftNote',
           type: 'textarea',
-          label: 'Note (e.g. dietary requirements)',
+          label: 'Dietary / Notes',
           maxLength: 500,
           admin: {
-            description:
-              'Optional note about this guest — typically dietary requirements (vegetarian, vegan, gluten-free, allergies) or accessibility needs.',
+            description: 'Dietary requirements, allergies, or accessibility needs for this guest.',
           },
+        },
+        {
+          name: 'isGift',
+          type: 'checkbox',
+          defaultValue: false,
+          label: 'Legacy: Is a gift (unused)',
+          admin: { hidden: true },
+        },
+        {
+          name: 'recipientEmail',
+          type: 'email',
+          label: 'Legacy: Recipient Email (unused)',
+          admin: { hidden: true },
         },
         {
           name: 'giftEmailSentAt',
           type: 'date',
           label: 'Legacy: Gift Email Sent At (unused)',
-          admin: {
-            readOnly: true,
-            hidden: true,
-            description: 'Legacy field. No longer written — guest emails are disabled.',
-          },
+          admin: { hidden: true, readOnly: true },
         },
       ],
     },

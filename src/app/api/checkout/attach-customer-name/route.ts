@@ -18,8 +18,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => null)
     const paymentIntentID =
       body && typeof body.paymentIntentID === 'string' ? body.paymentIntentID.trim() : ''
-    const customerName =
-      body && typeof body.customerName === 'string' ? body.customerName.trim() : ''
+    const customerFirstName =
+      body && typeof body.customerFirstName === 'string' ? body.customerFirstName.trim() : ''
+    const customerLastName =
+      body && typeof body.customerLastName === 'string' ? body.customerLastName.trim() : ''
+    const customerName = [customerFirstName, customerLastName].filter(Boolean).join(' ')
     const customerEmail =
       body && typeof body.customerEmail === 'string' ? body.customerEmail.trim() : ''
     const customerPhone =
@@ -33,9 +36,9 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       )
     }
-    if (customerName.length < 2 || customerName.length > 250) {
+    if (customerFirstName.length < 1 || customerFirstName.length > 250) {
       return NextResponse.json(
-        { success: false, error: 'customerName must be 2-250 characters.' },
+        { success: false, error: 'customerFirstName is required (1-250 characters).' },
         { status: 400 },
       )
     }
@@ -57,20 +60,23 @@ export async function POST(request: NextRequest) {
     }
 
     const updateData: Record<string, unknown> = {
-      customerName: customerName.slice(0, 250),
+      customerFirstName: customerFirstName.slice(0, 250),
+      customerName: customerName.slice(0, 500),
     }
 
-    if (customerEmail) {
-      updateData.customerEmail = customerEmail
-    }
+    if (customerLastName) updateData.customerLastName = customerLastName.slice(0, 250)
+    if (customerEmail) updateData.customerEmail = customerEmail
+    if (customerPhone) updateData.customerPhone = customerPhone
+    if (customerDietSpecs) updateData.customerDietSpecs = customerDietSpecs
 
-    if (customerPhone) {
-      updateData.customerPhone = customerPhone
-    }
-
-    if (customerDietSpecs) {
-      updateData.customerDietSpecs = customerDietSpecs
-    }
+    const pickupDate = body && typeof body.pickupDate === 'string' ? body.pickupDate.trim() : ''
+    const pickupTime = body && typeof body.pickupTime === 'string' ? body.pickupTime.trim() : ''
+    const pickupLocation = body && typeof body.pickupLocation === 'string' ? body.pickupLocation.trim() : ''
+    const pickupAddress = body && typeof body.pickupAddress === 'string' ? body.pickupAddress.trim() : ''
+    if (pickupDate) updateData.pickupDate = pickupDate
+    if (pickupTime) updateData.pickupTime = pickupTime
+    if (pickupLocation) updateData.pickupLocation = pickupLocation
+    if (pickupAddress) updateData.pickupAddress = pickupAddress
 
     await payload.update({
       collection: 'transactions',

@@ -58,10 +58,11 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     quantity?: number
   }[] = doc.items ?? []
 
-  // Resolve customer email — from user record or guest checkout field
+  // Resolve customer fields — from order or fallback to user record
   const customerId = typeof doc.customer === 'object' ? doc.customer?.id : doc.customer
   let customerEmail: string | undefined = doc.customerEmail || undefined
-  let customerName: string | undefined
+  let customerFirstName: string | undefined
+  let customerLastName: string | undefined
   let customerPhone: string | undefined = doc.customerPhone || undefined
   let customerDietSpecs: string | undefined = doc.customerDietSpecs || undefined
 
@@ -74,17 +75,27 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         overrideAccess: true,
       })
       if (!customerEmail) customerEmail = user?.email || undefined
-      customerName = user?.name || undefined
-      // Note: User collection doesn't have phone field, phone is stored in order
+      // User.name is a single field — use it as firstName fallback only
+      if (user?.name) customerFirstName = user.name
     } catch {
       // Non-fatal: booking still gets confirmed
     }
   }
 
-  // Prefer the data supplied by the buyer at checkout (guest flow). For
-  // logged-in users, fall back to the user data resolved above.
-  if (typeof doc.customerName === 'string' && doc.customerName.trim().length > 0) {
-    customerName = doc.customerName.trim()
+  // Prefer checkout-supplied data over user record.
+  const docAny = doc as unknown as Record<string, string | null | undefined>
+  if (typeof docAny.customerFirstName === 'string' && docAny.customerFirstName.trim().length > 0) {
+    customerFirstName = docAny.customerFirstName.trim()
+  }
+  if (typeof docAny.customerLastName === 'string' && docAny.customerLastName.trim().length > 0) {
+    customerLastName = docAny.customerLastName.trim()
+  }
+  // Legacy fallback: old orders only have customerName (combined) — split on first space
+  if (!customerFirstName && typeof doc.customerName === 'string' && doc.customerName.trim().length > 0) {
+    const full = doc.customerName.trim()
+    const spaceIdx = full.indexOf(' ')
+    customerFirstName = spaceIdx > 0 ? full.slice(0, spaceIdx) : full
+    if (spaceIdx > 0 && !customerLastName) customerLastName = full.slice(spaceIdx + 1)
   }
   if (typeof doc.customerPhone === 'string' && doc.customerPhone.trim().length > 0) {
     customerPhone = doc.customerPhone.trim()
@@ -214,18 +225,11 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       orderId: doc.id,
     }
 
-    if (customerEmail && !booking.email) {
-      updateData.email = customerEmail
-    }
-    if (customerName && !booking.firstName) {
-      updateData.firstName = customerName
-    }
-    if (customerPhone && !booking.phone) {
-      updateData.phone = customerPhone
-    }
-    if (customerDietSpecs && !booking.notes) {
-      updateData.notes = customerDietSpecs
-    }
+    if (customerEmail && !booking.email) updateData.email = customerEmail
+    if (customerFirstName && !booking.firstName) updateData.firstName = customerFirstName
+    if (customerLastName && !booking.lastName) updateData.lastName = customerLastName
+    if (customerPhone && !booking.phone) updateData.phone = customerPhone
+    if (customerDietSpecs && !booking.notes) updateData.notes = customerDietSpecs
 
     try {
       await payload.update({

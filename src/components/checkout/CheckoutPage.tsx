@@ -652,6 +652,8 @@ export const CheckoutPage: React.FC = () => {
       try {
         const additionalData: Record<string, unknown> = {
           ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
+          ...(firstName.trim() ? { customerFirstName: firstName.trim() } : {}),
+          ...(lastName.trim() ? { customerLastName: lastName.trim() } : {}),
           ...(customerName.trim() ? { customerName: customerName.trim() } : {}),
           ...(phone.trim() ? { customerPhone: phone.trim() } : {}),
           ...(dietSpecs.trim() ? { customerDietSpecs: dietSpecs.trim() } : {}),

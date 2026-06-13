@@ -1,11 +1,15 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import React from 'react'
 
 export const WorkshopRosterNavLink: React.FC = () => {
+  const pathname = usePathname()
+  const isActive = pathname?.startsWith('/admin/workshop-roster')
+
   return (
-    <div style={{ padding: '0 16px 8px' }}>
+    <div style={{ padding: '0 8px 8px' }}>
       <Link
         href="/admin/workshop-roster"
         style={{
@@ -15,17 +19,17 @@ export const WorkshopRosterNavLink: React.FC = () => {
           padding: '8px 12px',
           borderRadius: '4px',
           fontSize: '13px',
-          fontWeight: 500,
+          fontWeight: isActive ? 600 : 500,
           color: 'var(--theme-text)',
           textDecoration: 'none',
-          background: 'transparent',
+          background: isActive ? 'var(--theme-elevation-100)' : 'transparent',
           transition: 'background 0.15s',
         }}
         onMouseEnter={(e) => {
-          ;(e.currentTarget as HTMLAnchorElement).style.background = 'var(--theme-elevation-100)'
+          if (!isActive) (e.currentTarget as HTMLAnchorElement).style.background = 'var(--theme-elevation-50)'
         }}
         onMouseLeave={(e) => {
-          ;(e.currentTarget as HTMLAnchorElement).style.background = 'transparent'
+          if (!isActive) (e.currentTarget as HTMLAnchorElement).style.background = 'transparent'
         }}
       >
         <svg
@@ -37,16 +41,14 @@ export const WorkshopRosterNavLink: React.FC = () => {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ opacity: 0.7, flexShrink: 0 }}
+          style={{ opacity: isActive ? 1 : 0.65, flexShrink: 0 }}
         >
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-          <line x1="16" y1="2" x2="16" y2="6" />
-          <line x1="8" y1="2" x2="8" y2="6" />
-          <line x1="3" y1="10" x2="21" y2="10" />
-          <line x1="8" y1="14" x2="16" y2="14" />
-          <line x1="8" y1="18" x2="13" y2="18" />
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
         </svg>
-        Workshop Übersicht
+        Tagesübersicht
       </Link>
     </div>
   )

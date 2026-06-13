@@ -173,9 +173,27 @@ export const plugins: Plugin[] = [
         fields: [
           ...(defaultCollection?.fields ?? []),
           {
+            name: 'customerFirstName',
+            type: 'text',
+            label: 'Customer first name',
+            admin: {
+              description: 'First name supplied by the buyer at checkout.',
+              position: 'sidebar',
+            },
+          },
+          {
+            name: 'customerLastName',
+            type: 'text',
+            label: 'Customer last name',
+            admin: {
+              description: 'Last name supplied by the buyer at checkout.',
+              position: 'sidebar',
+            },
+          },
+          {
             name: 'customerName',
             type: 'text',
-            label: 'Customer name',
+            label: 'Customer name (legacy)',
             admin: {
               description:
                 'Full name supplied by the buyer at checkout. Used to greet the buyer in confirmation emails. Optional for legacy orders.',
@@ -200,6 +218,57 @@ export const plugins: Plugin[] = [
               description:
                 'Dietary restrictions and specifications provided by the buyer at checkout.',
               position: 'sidebar',
+            },
+          },
+          {
+            name: 'pickupDate',
+            type: 'text',
+            label: 'Pickup Date',
+            admin: {
+              description: 'Date chosen by buyer for in-store pickup (e.g. "14.05.2026"). Auto-set from checkout.',
+              position: 'sidebar',
+            },
+          },
+          {
+            name: 'pickupTime',
+            type: 'text',
+            label: 'Pickup Time',
+            admin: {
+              description: 'Time slot chosen for pickup (e.g. "14:00 – 16:00").',
+              position: 'sidebar',
+            },
+          },
+          {
+            name: 'pickupLocation',
+            type: 'text',
+            label: 'Pickup Location',
+            admin: {
+              description: 'Store location name for pickup.',
+              position: 'sidebar',
+            },
+          },
+          {
+            name: 'pickupAddress',
+            type: 'text',
+            label: 'Pickup Address',
+            admin: {
+              description: 'Full address of the pickup location.',
+              position: 'sidebar',
+            },
+          },
+          {
+            name: 'pickupStatus',
+            type: 'select',
+            label: 'Pickup Status',
+            options: [
+              { label: 'In Bearbeitung', value: 'pending' },
+              { label: 'Abholbereit', value: 'ready' },
+              { label: 'Abgeholt', value: 'collected' },
+            ],
+            admin: {
+              description: 'Fulfillment status for pickup orders. Only relevant when Pickup Date is set.',
+              position: 'sidebar',
+              condition: (data) => Boolean(data?.pickupDate),
             },
           },
           {
@@ -265,13 +334,53 @@ export const plugins: Plugin[] = [
         fields: [
           ...(defaultCollection?.fields ?? []),
           {
+            name: 'customerFirstName',
+            type: 'text',
+            label: 'Customer first name',
+            admin: {
+              description: 'First name supplied by the buyer at checkout.',
+            },
+          },
+          {
+            name: 'customerLastName',
+            type: 'text',
+            label: 'Customer last name',
+            admin: {
+              description: 'Last name supplied by the buyer at checkout.',
+            },
+          },
+          {
             name: 'customerName',
             type: 'text',
-            label: 'Customer name',
+            label: 'Customer name (legacy)',
             admin: {
               description:
                 'Full name supplied by the buyer at checkout. Copied to the resulting Order when it is created.',
             },
+          },
+          {
+            name: 'pickupDate',
+            type: 'text',
+            label: 'Pickup Date',
+            admin: { description: 'Date chosen for in-store pickup. Copied to Order on creation.' },
+          },
+          {
+            name: 'pickupTime',
+            type: 'text',
+            label: 'Pickup Time',
+            admin: { description: 'Time slot chosen for pickup.' },
+          },
+          {
+            name: 'pickupLocation',
+            type: 'text',
+            label: 'Pickup Location',
+            admin: { description: 'Store location name.' },
+          },
+          {
+            name: 'pickupAddress',
+            type: 'text',
+            label: 'Pickup Address',
+            admin: { description: 'Full address of the pickup location.' },
           },
         ],
       }),
