@@ -392,7 +392,7 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
                     )}
                     {v.personalNote && (
                       <p style={{ margin: '3px 0 0', fontSize: '11px', color: 'var(--theme-text)', opacity: 0.45, fontStyle: 'italic' }}>
-                        „{v.personalNote.slice(0, 60)}{v.personalNote.length > 60 ? '…' : ''}"
+                        &bdquo;{v.personalNote.slice(0, 60)}{v.personalNote.length > 60 ? '…' : ''}&ldquo;
                       </p>
                     )}
                   </td>
