@@ -70,7 +70,8 @@ export async function POST(request: NextRequest) {
         depth: 0,
         overrideAccess: true,
       })
-    } catch {
+    } catch (err) {
+      console.error('[update-seats] findByID failed for bookingId', bookingId, err)
       return NextResponse.json({ success: false, error: 'Booking not found.' }, { status: 404 })
     }
 

@@ -9,8 +9,21 @@ import type {
   ParticipantRow,
   RosterData,
   RosterStats,
+  SeatEntry,
   VoucherRow,
 } from './types'
+
+/** Extract plain text from a Lexical rich-text JSON node (recursive). */
+function lexicalToPlainText(value: unknown): string {
+  if (!value || typeof value !== 'object') return typeof value === 'string' ? value : ''
+  const node = value as Record<string, unknown>
+  if (typeof node.text === 'string') return node.text
+  if (node.root) return lexicalToPlainText(node.root)
+  if (Array.isArray(node.children)) {
+    return (node.children as unknown[]).map(lexicalToPlainText).filter(Boolean).join(' ')
+  }
+  return ''
+}
 
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString('de-DE', {
@@ -57,7 +70,7 @@ export async function fetchRosterData(): Promise<RosterData> {
     const locationAny = location as Record<string, unknown> | null
 
     const title = String(workshopAny?.title ?? 'Workshop')
-    const description = String(workshopAny?.description ?? '')
+    const description = lexicalToPlainText(workshopAny?.description)
     const pricePerPerson = Number(workshopAny?.basePrice ?? 0)
     const locationName = String(locationAny?.name ?? '')
     const dateTimeStr = String(appt.dateTime ?? '')
@@ -104,8 +117,13 @@ export async function fetchRosterData(): Promise<RosterData> {
         phone?: string
         guestCount?: number
         notes?: string
+        seats?: Array<{ recipientName?: string; giftNote?: string }>
         createdAt?: string
       }
+      const seats: SeatEntry[] = (bk.seats ?? []).map((s) => ({
+        recipientName: s.recipientName?.trim() ?? '',
+        giftNote: s.giftNote?.trim() ?? '',
+      }))
       return {
         id: String(b.id),
         firstName: bk.firstName ?? '',
@@ -113,7 +131,8 @@ export async function fetchRosterData(): Promise<RosterData> {
         email: bk.email ?? '',
         phone: bk.phone ?? '',
         guestCount: bk.guestCount ?? 1,
-        notes: bk.notes ?? '',
+        notes: bk.notes?.trim() ?? '',
+        seats,
         createdAt: bk.createdAt ?? '',
       } satisfies BookingRow
     })
