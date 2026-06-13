@@ -48,7 +48,7 @@ export const WorkshopRosterNavLink: React.FC = () => {
           <rect x="14" y="14" width="7" height="7" />
           <rect x="3" y="14" width="7" height="7" />
         </svg>
-        Tagesübersicht
+        Roster
       </Link>
     </div>
   )
