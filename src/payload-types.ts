@@ -4395,9 +4395,9 @@ export interface Voucher {
    */
   purchaserName?: string | null;
   /**
-   * Email of the buyer (receives purchase confirmation)
+   * Email of the buyer (receives purchase confirmation). Leave blank for manually-created vouchers.
    */
-  purchaserEmail: string;
+  purchaserEmail?: string | null;
   /**
    * Name of the recipient (used on the gift card and in the email greeting).
    */
@@ -4418,10 +4418,6 @@ export interface Voucher {
    * Stripe Checkout Session ID for payment verification
    */
   stripeSessionId?: string | null;
-  /**
-   * UUID for shareable gift link (/voucher/gift/[token])
-   */
-  giftToken?: string | null;
   /**
    * Automatically set to true when voucher is used
    */
@@ -6392,7 +6388,6 @@ export interface VouchersSelect<T extends boolean = true> {
   personalNote?: T;
   deliveryMethod?: T;
   stripeSessionId?: T;
-  giftToken?: T;
   redeemed?: T;
   redeemedOn?: T;
   redeemedForWorkshop?: T;
