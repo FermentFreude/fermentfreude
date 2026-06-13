@@ -16,6 +16,15 @@ export async function updatePickupStatus(
   })
 }
 
+export async function deleteVoucher(voucherId: string): Promise<void> {
+  const payload = await getPayload({ config: configPromise })
+  await payload.delete({
+    collection: 'vouchers',
+    id: voucherId,
+    overrideAccess: true,
+  })
+}
+
 export async function createVoucher(params: {
   value: number
   purchaserName?: string

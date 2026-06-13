@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from 'react'
 
-import { createVoucher } from './actions'
+import { createVoucher, deleteVoucher } from './actions'
 import type { VoucherRow } from './types'
 
 interface Props {
@@ -63,6 +63,8 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
   const [lastCreated, setLastCreated] = useState<{ code: string; value: number } | null>(null)
   const [isPending, startTransition] = useTransition()
   const [formError, setFormError] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; code: string } | null>(null)
+  const [isDeleting, startDeleteTransition] = useTransition()
 
   const active = vouchers.filter((v) => v.status === 'active').length
   const redeemed = vouchers.filter((v) => v.status === 'redeemed').length
@@ -107,8 +109,69 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
     })
   }
 
+  const handleDelete = () => {
+    if (!confirmDelete) return
+    startDeleteTransition(async () => {
+      await deleteVoucher(confirmDelete.id)
+      setConfirmDelete(null)
+      await onRefresh()
+    })
+  }
+
   return (
     <div style={{ padding: '40px', maxWidth: '960px' }}>
+      {/* Delete confirmation modal */}
+      {confirmDelete && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px',
+        }}>
+          <div style={{
+            background: 'var(--theme-elevation-0)', borderRadius: '14px',
+            padding: '28px 32px', maxWidth: '420px', width: '100%',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          }}>
+            <div style={{ marginBottom: '20px' }}>
+              <p style={{ margin: '0 0 6px', fontSize: '18px', fontWeight: 700, color: 'var(--theme-text)' }}>
+                Gutschein löschen?
+              </p>
+              <p style={{ margin: 0, fontSize: '14px', color: 'var(--theme-text)', opacity: 0.6, lineHeight: 1.5 }}>
+                Gutschein{' '}
+                <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--theme-text)', opacity: 1 }}>
+                  {confirmDelete.code}
+                </span>{' '}
+                wird permanent gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setConfirmDelete(null)}
+                disabled={isDeleting}
+                style={{
+                  padding: '9px 18px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px',
+                  fontWeight: 500, background: 'transparent', border: '1px solid var(--theme-elevation-200)',
+                  color: 'var(--theme-text)', opacity: isDeleting ? 0.5 : 1,
+                }}
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                style={{
+                  padding: '9px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                  fontSize: '14px', fontWeight: 600, background: '#dc2626', color: '#fff',
+                  opacity: isDeleting ? 0.5 : 1,
+                }}
+              >
+                {isDeleting ? 'Wird gelöscht…' : 'Ja, löschen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', gap: '16px', flexWrap: 'wrap' }}>
         <div>
@@ -345,7 +408,7 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
           <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: 'var(--theme-elevation-100)' }}>
-                {['Code', 'Wert', 'Status', 'Käufer:in → Empfänger:in', 'Erstellt', 'PDF'].map((col) => (
+                {['Code', 'Wert', 'Status', 'Käufer:in → Empfänger:in', 'Erstellt', 'PDF', ''].map((col) => (
                   <th key={col} style={{
                     padding: '10px 16px', textAlign: 'left', fontWeight: 600, fontSize: '11px',
                     textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--theme-text)', opacity: 0.55,
@@ -415,6 +478,22 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                       PDF
                     </a>
+                  </td>
+                  <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                    <button
+                      onClick={() => setConfirmDelete({ id: v.id, code: v.code })}
+                      title="Gutschein löschen"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        width: '32px', height: '32px', borderRadius: '6px', border: 'none',
+                        cursor: 'pointer', background: 'transparent', color: '#dc2626',
+                        opacity: 0.6, transition: 'opacity 0.15s, background 0.15s',
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; (e.currentTarget as HTMLButtonElement).style.background = '#fee2e2' }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.6'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                    </button>
                   </td>
                 </tr>
               ))}
