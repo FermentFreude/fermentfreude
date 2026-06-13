@@ -1,3 +1,4 @@
+import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
@@ -250,6 +251,47 @@ export async function POST(request: NextRequest) {
             data: updateData,
             overrideAccess: true,
           })
+
+          // Send booking confirmation email (confirmWorkshopBookings hook may have
+          // missed this booking since voucher orders have no Stripe transaction/cartId).
+          // Guard: only send here if the booking was NOT already confirmed by the hook
+          // (i.e. it was still 'pending' when we found it above — we just confirmed it).
+          const recipientEmail = (updateData.email as string | undefined) || booking.email
+          if (recipientEmail) {
+            try {
+              const firstName = (updateData.firstName as string | undefined) || booking.firstName || 'Gast'
+              const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
+              const formattedPrice = typeof booking.totalPrice === 'number'
+                ? `€${booking.totalPrice.toFixed(2).replace('.', ',')}`
+                : String(booking.totalPrice ?? '')
+
+              await sendTemplateEmail({
+                to: [{ email: recipientEmail, name: firstName }],
+                templateId: BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION,
+                params: {
+                  WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
+                  WORKSHOP_DATE: String(booking.date ?? ''),
+                  WORKSHOP_TIME: String(booking.time ?? ''),
+                  WORKSHOP_LOCATION: '',
+                  GUEST_COUNT: String(booking.guestCount ?? 1),
+                  TOTAL_PRICE: formattedPrice,
+                  FIRST_NAME: firstName,
+                  CUSTOMER_PHONE: '',
+                  CUSTOMER_DIET_SPECS: 'Keine Angabe',
+                  BOOKING_ID: String(booking.id),
+                  BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
+                  SEATS: [],
+                  TICKETS_URL: `${SERVER_URL}/account/orders`,
+                  WHAT_TO_BRING: '',
+                  PRIVACY_URL: `${SERVER_URL}/datenschutz`,
+                  AGB_URL: `${SERVER_URL}/agb`,
+                },
+              })
+            } catch (emailErr) {
+              console.error('[place-order] Failed to send booking confirmation email:', emailErr)
+              // Non-fatal
+            }
+          }
         }
       } catch (bookingErr) {
         console.error('[place-order] Failed to confirm booking for', workshopSlug, bookingErr)
