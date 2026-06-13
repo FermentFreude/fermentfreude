@@ -19,6 +19,11 @@ export type AppointmentRow = {
   isPast: boolean
 }
 
+export type SeatEntry = {
+  recipientName: string
+  giftNote: string
+}
+
 export type BookingRow = {
   id: string
   firstName: string
@@ -27,6 +32,7 @@ export type BookingRow = {
   phone: string
   guestCount: number
   notes: string
+  seats: SeatEntry[]
   createdAt: string
 }
 

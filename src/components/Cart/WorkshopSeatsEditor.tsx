@@ -155,6 +155,10 @@ export function WorkshopSeatsEditor({
             lastSavedJsonRef.current = json
             setSaveStatus('saved')
             setTimeout(() => setSaveStatus('idle'), 1500)
+          } else if (res.status === 404 || res.status === 409) {
+            // Booking not found or already confirmed — seats are optional metadata
+            // for the admin only; the checkout and confirmation proceed regardless.
+            setSaveStatus('idle')
           } else {
             setSaveStatus('error')
           }
