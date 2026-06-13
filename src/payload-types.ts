@@ -306,6 +306,14 @@ export interface Order {
   amount?: number | null;
   currency?: 'EUR' | null;
   /**
+   * First name supplied by the buyer at checkout.
+   */
+  customerFirstName?: string | null;
+  /**
+   * Last name supplied by the buyer at checkout.
+   */
+  customerLastName?: string | null;
+  /**
    * Full name supplied by the buyer at checkout. Used to greet the buyer in confirmation emails. Optional for legacy orders.
    */
   customerName?: string | null;
@@ -317,6 +325,26 @@ export interface Order {
    * Dietary restrictions and specifications provided by the buyer at checkout.
    */
   customerDietSpecs?: string | null;
+  /**
+   * Date chosen by buyer for in-store pickup (e.g. "14.05.2026"). Auto-set from checkout.
+   */
+  pickupDate?: string | null;
+  /**
+   * Time slot chosen for pickup (e.g. "14:00 – 16:00").
+   */
+  pickupTime?: string | null;
+  /**
+   * Store location name for pickup.
+   */
+  pickupLocation?: string | null;
+  /**
+   * Full address of the pickup location.
+   */
+  pickupAddress?: string | null;
+  /**
+   * Fulfillment status for pickup orders. Only relevant when Pickup Date is set.
+   */
+  pickupStatus?: ('pending' | 'ready' | 'collected') | null;
   /**
    * Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on order creation.
    */
@@ -4030,9 +4058,33 @@ export interface Transaction {
   amount?: number | null;
   currency?: 'EUR' | null;
   /**
+   * First name supplied by the buyer at checkout.
+   */
+  customerFirstName?: string | null;
+  /**
+   * Last name supplied by the buyer at checkout.
+   */
+  customerLastName?: string | null;
+  /**
    * Full name supplied by the buyer at checkout. Copied to the resulting Order when it is created.
    */
   customerName?: string | null;
+  /**
+   * Date chosen for in-store pickup. Copied to Order on creation.
+   */
+  pickupDate?: string | null;
+  /**
+   * Time slot chosen for pickup.
+   */
+  pickupTime?: string | null;
+  /**
+   * Store location name.
+   */
+  pickupLocation?: string | null;
+  /**
+   * Full address of the pickup location.
+   */
+  pickupAddress?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4244,85 +4296,73 @@ export interface WorkshopAppointment {
 export interface WorkshopBooking {
   id: string;
   /**
-   * Auto-set to pending on cart add. Transitions to confirmed after Stripe payment succeeds.
+   * Set to "Confirmed" for phone/manual bookings where payment was received outside of Stripe.
    */
   status: 'pending' | 'confirmed' | 'cancelled' | 'refunded';
   /**
-   * e.g. "kombucha", "lakto", "tempeh"
+   * ID of the WorkshopAppointment. Auto-populated for online bookings. Leave blank for phone bookings.
    */
-  workshopSlug: string;
+  appointmentId?: string | null;
   /**
-   * ID of the WorkshopAppointment
+   * Auto-populated for online bookings. Not needed for phone bookings.
    */
-  appointmentId: string;
+  cartSlug?: string | null;
+  /**
+   * Set automatically when payment is confirmed via Stripe.
+   */
+  orderId?: string | null;
+  /**
+   * Auto-generated on confirmation. Used for the guest receipt download link.
+   */
+  downloadToken?: string | null;
+  /**
+   * Customer first name. Auto-populated from checkout for online bookings.
+   */
+  firstName?: string | null;
+  lastName?: string | null;
+  /**
+   * Used to send the booking confirmation email.
+   */
+  email?: string | null;
+  phone?: string | null;
+  /**
+   * Dietary restrictions, allergies, intolerances, or any other special requests.
+   */
+  notes?: string | null;
   /**
    * e.g. "Kombucha Workshop"
    */
   workshopTitle: string;
   /**
-   * Formatted date string
+   * e.g. "kombucha", "lakto", "tempeh"
+   */
+  workshopSlug: string;
+  /**
+   * Formatted date string, e.g. "14. Juni 2026"
    */
   date: string;
   /**
-   * Formatted time string
+   * Formatted time string, e.g. "10:00 – 13:00"
    */
   time: string;
   guestCount: number;
   pricePerPerson: number;
   totalPrice: number;
   /**
-   * For linking to cart items (temporary until checkout)
-   */
-  cartSlug?: string | null;
-  /**
-   * Email for booking confirmation
-   */
-  email?: string | null;
-  /**
-   * For personalizing the booking confirmation email
-   */
-  firstName?: string | null;
-  lastName?: string | null;
-  /**
-   * Optional contact number
-   */
-  phone?: string | null;
-  /**
-   * Any dietary restrictions, allergies, or special requests
-   */
-  notes?: string | null;
-  /**
-   * Secure token for guest receipt download link. Auto-generated on confirmation.
-   */
-  downloadToken?: string | null;
-  /**
-   * ID of the order that confirmed this booking. Set automatically on payment.
-   */
-  orderId?: string | null;
-  /**
-   * One entry per booked seat. Seat 1 is the buyer themselves. Additional seats may include the guest name and any note (e.g. dietary requirements like vegetarian, vegan, allergies). All confirmation emails are sent only to the buyer — guests do NOT receive separate emails.
+   * One entry per booked seat. Seat 1 is the buyer. Additional seats can include a guest name and dietary notes. Confirmation emails go only to the buyer.
    */
   seats?:
     | {
         /**
-         * Legacy field. As of May 2026 we no longer send separate emails to guests — vouchers are the dedicated gift flow. Always false for new bookings.
-         */
-        isGift?: boolean | null;
-        /**
-         * Name of the person attending in this seat (optional). Shown on the workshop attendee list.
+         * Name of the person attending this seat (optional).
          */
         recipientName?: string | null;
         /**
-         * Legacy field. As of May 2026 we no longer collect or email guests directly. Always empty for new bookings.
-         */
-        recipientEmail?: string | null;
-        /**
-         * Optional note about this guest — typically dietary requirements (vegetarian, vegan, gluten-free, allergies) or accessibility needs.
+         * Dietary requirements, allergies, or accessibility needs for this guest.
          */
         giftNote?: string | null;
-        /**
-         * Legacy field. No longer written — guest emails are disabled.
-         */
+        isGift?: boolean | null;
+        recipientEmail?: string | null;
         giftEmailSentAt?: string | null;
         id?: string | null;
       }[]
@@ -4378,6 +4418,10 @@ export interface Voucher {
    * Stripe Checkout Session ID for payment verification
    */
   stripeSessionId?: string | null;
+  /**
+   * UUID for shareable gift link (/voucher/gift/[token])
+   */
+  giftToken?: string | null;
   /**
    * Automatically set to true when voucher is used
    */
@@ -6304,29 +6348,29 @@ export interface WorkshopAppointmentsSelect<T extends boolean = true> {
  */
 export interface WorkshopBookingsSelect<T extends boolean = true> {
   status?: T;
-  workshopSlug?: T;
   appointmentId?: T;
+  cartSlug?: T;
+  orderId?: T;
+  downloadToken?: T;
+  firstName?: T;
+  lastName?: T;
+  email?: T;
+  phone?: T;
+  notes?: T;
   workshopTitle?: T;
+  workshopSlug?: T;
   date?: T;
   time?: T;
   guestCount?: T;
   pricePerPerson?: T;
   totalPrice?: T;
-  cartSlug?: T;
-  email?: T;
-  firstName?: T;
-  lastName?: T;
-  phone?: T;
-  notes?: T;
-  downloadToken?: T;
-  orderId?: T;
   seats?:
     | T
     | {
-        isGift?: T;
         recipientName?: T;
-        recipientEmail?: T;
         giftNote?: T;
+        isGift?: T;
+        recipientEmail?: T;
         giftEmailSentAt?: T;
         id?: T;
       };
@@ -6348,6 +6392,7 @@ export interface VouchersSelect<T extends boolean = true> {
   personalNote?: T;
   deliveryMethod?: T;
   stripeSessionId?: T;
+  giftToken?: T;
   redeemed?: T;
   redeemedOn?: T;
   redeemedForWorkshop?: T;
@@ -6804,9 +6849,16 @@ export interface OrdersSelect<T extends boolean = true> {
   status?: T;
   amount?: T;
   currency?: T;
+  customerFirstName?: T;
+  customerLastName?: T;
   customerName?: T;
   customerPhone?: T;
   customerDietSpecs?: T;
+  pickupDate?: T;
+  pickupTime?: T;
+  pickupLocation?: T;
+  pickupAddress?: T;
+  pickupStatus?: T;
   invoiceNumber?: T;
   downloadToken?: T;
   invoiceIssuedAt?: T;
@@ -6855,7 +6907,13 @@ export interface TransactionsSelect<T extends boolean = true> {
   cart?: T;
   amount?: T;
   currency?: T;
+  customerFirstName?: T;
+  customerLastName?: T;
   customerName?: T;
+  pickupDate?: T;
+  pickupTime?: T;
+  pickupLocation?: T;
+  pickupAddress?: T;
   updatedAt?: T;
   createdAt?: T;
 }
