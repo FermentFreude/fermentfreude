@@ -121,6 +121,19 @@ export async function GET(
     type ReceiptItem = { title: string; sku?: string; qty: number; unitPrice: number }
     let receiptItems: ReceiptItem[] = []
 
+    const bookingToReceiptItem = (b: Record<string, unknown>): ReceiptItem => {
+      const titleParts = [
+        b.workshopTitle ? `${b.workshopTitle}` : '',
+        b.date,
+        b.time,
+      ].filter(Boolean)
+      return {
+        title: titleParts.join(' · '),
+        qty: typeof b.guestCount === 'number' ? b.guestCount : 1,
+        unitPrice: Math.round(((b.pricePerPerson as number | undefined) ?? 0) * 100),
+      }
+    }
+
     try {
       const bookings = await payload.find({
         collection: 'workshop-bookings',
@@ -136,18 +149,54 @@ export async function GET(
       })
 
       if (bookings.totalDocs > 0) {
-        receiptItems = bookings.docs.map((b) => {
-          const titleParts = [b.workshopTitle ? `${b.workshopTitle}-Workshop` : '', b.date, b.time].filter(Boolean)
-          return {
-            title: titleParts.join(' · '),
-            qty: b.guestCount ?? 1,
-            // pricePerPerson is in euros — convert to cents for the PDF generator
-            unitPrice: Math.round((b.pricePerPerson ?? 0) * 100),
-          }
-        })
+        receiptItems = bookings.docs.map((b) => bookingToReceiptItem(b as unknown as Record<string, unknown>))
       }
     } catch {
-      // Non-fatal — fall through to product-based items below
+      // Non-fatal — try fallback below
+    }
+
+    // Fallback: voucher orders placed before the orderId fix — find confirmed bookings
+    // by customer email + workshop slugs resolved from the order items.
+    if (receiptItems.length === 0 && customerEmail) {
+      try {
+        const rawItems = (order.items as Record<string, unknown>[] | undefined) ?? []
+        const workshopSlugs: string[] = []
+        for (const item of rawItems) {
+          const productRef = item.product
+          let slug: string | null = null
+          if (productRef && typeof productRef === 'object') {
+            slug = ((productRef as Record<string, unknown>).slug as string | undefined) ?? null
+          } else if (typeof productRef === 'string') {
+            try {
+              const p = await payload.findByID({ collection: 'products', id: productRef, depth: 0, overrideAccess: true })
+              slug = (p as unknown as { slug?: string })?.slug ?? null
+            } catch { /* ignore */ }
+          }
+          if (slug?.startsWith('workshop-')) workshopSlugs.push(slug.replace(/^workshop-/, ''))
+        }
+
+        if (workshopSlugs.length > 0) {
+          const fallback = await payload.find({
+            collection: 'workshop-bookings',
+            where: {
+              and: [
+                { email: { equals: customerEmail } },
+                { status: { equals: 'confirmed' } },
+                { workshopSlug: { in: workshopSlugs } },
+              ],
+            },
+            sort: '-createdAt',
+            limit: 50,
+            depth: 0,
+            overrideAccess: true,
+          })
+          if (fallback.totalDocs > 0) {
+            receiptItems = fallback.docs.map((b) => bookingToReceiptItem(b as unknown as Record<string, unknown>))
+          }
+        }
+      } catch {
+        // Non-fatal — fall through to product-based items below
+      }
     }
 
     // Fall back to order.items for non-workshop purchases
