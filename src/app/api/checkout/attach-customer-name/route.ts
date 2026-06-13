@@ -18,11 +18,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => null)
     const paymentIntentID =
       body && typeof body.paymentIntentID === 'string' ? body.paymentIntentID.trim() : ''
-    const customerFirstName =
-      body && typeof body.customerFirstName === 'string' ? body.customerFirstName.trim() : ''
-    const customerLastName =
-      body && typeof body.customerLastName === 'string' ? body.customerLastName.trim() : ''
-    const customerName = [customerFirstName, customerLastName].filter(Boolean).join(' ')
+    // Support both split firstName/lastName (CheckoutForm) and combined customerName (ConfirmOrder redirect)
+    const rawCustomerName =
+      body && typeof body.customerName === 'string' ? body.customerName.trim() : ''
+    const customerFirstName = (() => {
+      if (body && typeof body.customerFirstName === 'string' && body.customerFirstName.trim()) {
+        return body.customerFirstName.trim()
+      }
+      // Fall back to first word of combined customerName (redirect-based payment fallback)
+      if (rawCustomerName) {
+        const spaceIdx = rawCustomerName.indexOf(' ')
+        return spaceIdx > 0 ? rawCustomerName.slice(0, spaceIdx) : rawCustomerName
+      }
+      return ''
+    })()
+    const customerLastName = (() => {
+      if (body && typeof body.customerLastName === 'string' && body.customerLastName.trim()) {
+        return body.customerLastName.trim()
+      }
+      if (rawCustomerName) {
+        const spaceIdx = rawCustomerName.indexOf(' ')
+        return spaceIdx > 0 ? rawCustomerName.slice(spaceIdx + 1) : ''
+      }
+      return ''
+    })()
+    const customerName = rawCustomerName || [customerFirstName, customerLastName].filter(Boolean).join(' ')
     const customerEmail =
       body && typeof body.customerEmail === 'string' ? body.customerEmail.trim() : ''
     const customerPhone =
@@ -36,13 +56,6 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       )
     }
-    if (customerFirstName.length < 1 || customerFirstName.length > 250) {
-      return NextResponse.json(
-        { success: false, error: 'customerFirstName is required (1-250 characters).' },
-        { status: 400 },
-      )
-    }
-
     const payload = await getPayload({ config: await configPromise })
 
     const tx = await payload.find({

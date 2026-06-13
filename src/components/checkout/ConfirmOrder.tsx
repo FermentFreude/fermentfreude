@@ -6,7 +6,7 @@ import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export const ConfirmOrder: React.FC = () => {
   const { user } = useAuth()
@@ -16,51 +16,67 @@ export const ConfirmOrder: React.FC = () => {
 
   const searchParams = useSearchParams()
   const router = useRouter()
-  // Ensure we only confirm the order once, even if the component re-renders
   const isConfirming = useRef(false)
+  const [confirmError, setConfirmError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!cart || !cart.items || cart.items?.length === 0) {
-      return
-    }
-
     const paymentIntentID = searchParams.get('payment_intent')
     const email = searchParams.get('email')
     const checkoutEmail = email || user?.email
 
-    if (paymentIntentID) {
-      if (!isConfirming.current) {
-        isConfirming.current = true
+    if (!paymentIntentID) {
+      router.push('/')
+      return
+    }
 
-        // Attach the buyer name to the transaction (best-effort) so the Order
-        // beforeChange hook can promote it onto the Order — keeps confirmation
-        // emails personalised for redirect-based payment methods (Klarna,
-        // iDEAL, etc.) that round-trip through this page.
-        let stashedName = ''
-        try {
-          stashedName = sessionStorage.getItem('checkoutCustomerName') || ''
-        } catch {
-          // ignore
-        }
-        const attachPromise =
-          stashedName.trim().length >= 2
-            ? fetch('/api/checkout/attach-customer-name', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  paymentIntentID,
-                  customerName: stashedName.trim(),
-                }),
-              }).catch(() => null)
-            : Promise.resolve(null)
+    // Don't attempt until we know whether the user session is ready.
+    // `user` is undefined while the Auth provider is hydrating — wait one cycle.
+    // But don't wait forever for the cart: on redirect-based payments (iDEAL,
+    // Klarna) the Stripe webhook may have already created the Order and cleared
+    // the cart before the browser lands here, so we proceed even with an empty
+    // cart and let the ecommerce plugin resolve the order by payment intent ID.
 
-        attachPromise.then(() =>
+    if (!isConfirming.current) {
+      isConfirming.current = true
+
+      // Attach the buyer name to the transaction (best-effort) so the Order
+      // beforeChange hook can promote it onto the Order — keeps confirmation
+      // emails personalised for redirect-based payment methods (Klarna,
+      // iDEAL, etc.) that round-trip through this page.
+      let stashedName = ''
+      try {
+        stashedName = sessionStorage.getItem('checkoutCustomerName') || ''
+      } catch {
+        // ignore
+      }
+      const attachPromise =
+        stashedName.trim().length >= 2
+          ? fetch('/api/checkout/attach-customer-name', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                paymentIntentID,
+                customerName: stashedName.trim(),
+              }),
+            }).catch(() => null)
+          : Promise.resolve(null)
+
+      attachPromise
+        .then(() =>
           confirmOrder('stripe', {
             additionalData: {
               paymentIntentID,
               ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
             },
-          }).then((result) => {
+          }),
+        )
+        .then((result) => {
+          try {
+            sessionStorage.removeItem('checkoutCustomerName')
+          } catch {
+            // ignore
+          }
+
           if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
             // GA4 + Meta Pixel: purchase event
             if (cart?.items?.length) {
@@ -87,11 +103,9 @@ export const ConfirmOrder: React.FC = () => {
               })
             }
 
-            // Clear cart after successful order confirmation
             clearCart()
 
-            // Determine order type for the success page
-            const hasWorkshop = cart.items?.some((item) => {
+            const hasWorkshop = cart?.items?.some((item) => {
               if (typeof item.product !== 'object' || item.product === null) return false
               const p = item.product as { productType?: string; slug?: string }
               return (
@@ -99,7 +113,7 @@ export const ConfirmOrder: React.FC = () => {
                 (typeof p.slug === 'string' && p.slug.startsWith('workshop-'))
               )
             })
-            const hasCourse = cart.items?.some((item) => {
+            const hasCourse = cart?.items?.some((item) => {
               if (typeof item.product !== 'object' || item.product === null) return false
               const p = item.product as { courseSlug?: string; slug?: string }
               return (
@@ -113,20 +127,45 @@ export const ConfirmOrder: React.FC = () => {
             router.push(
               `/checkout/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
             )
+          } else {
+            // confirmOrder returned but without an orderID — surface a recoverable error
+            setConfirmError(
+              locale === 'de'
+                ? 'Bestellung konnte nicht bestätigt werden. Bitte kontaktiere uns.'
+                : 'Order could not be confirmed. Please contact us.',
+            )
           }
+        })
+        .catch((err: unknown) => {
           try {
             sessionStorage.removeItem('checkoutCustomerName')
           } catch {
             // ignore
           }
-        }),
-        )
-      }
-    } else {
-      // If no payment intent ID is found, redirect to the home
-      router.push('/')
+          const msg = err instanceof Error ? err.message : String(err)
+          console.error('[ConfirmOrder] confirmOrder failed:', msg)
+          setConfirmError(
+            locale === 'de'
+              ? 'Fehler bei der Bestellbestätigung. Bitte kontaktiere uns.'
+              : 'Error confirming order. Please contact us.',
+          )
+        })
     }
-  }, [cart, searchParams, confirmOrder, router, clearCart, user])
+  }, [searchParams, confirmOrder, router, clearCart, user, cart, locale])
+
+  if (confirmError) {
+    return (
+      <div className="text-center w-full flex flex-col items-center justify-start gap-4">
+        <h1 className="text-2xl font-display">
+          {locale === 'de' ? 'Etwas ist schiefgelaufen' : 'Something went wrong'}
+        </h1>
+        <p className="text-sm text-muted-foreground max-w-sm">{confirmError}</p>
+        <a href="mailto:kontakt@fermentfreude.at" className="underline text-sm">
+          kontakt@fermentfreude.at
+        </a>
+      </div>
+    )
+  }
 
   return (
     <div className="text-center w-full flex flex-col items-center justify-start gap-4">
