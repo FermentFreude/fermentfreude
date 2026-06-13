@@ -350,7 +350,7 @@ export async function generateOrderReceiptPDF(data: OrderReceiptData): Promise<B
     doc.setFontSize(9)
     doc.setTextColor(...COLORS.darkText)
     doc.text(voucherLabel, col.descX, y)
-    doc.text(`− ${formatCurrency(data.voucherDiscountCents)}`, col.totalX, y, { align: 'right' })
+    doc.text(`-${formatCurrency(data.voucherDiscountCents)}`, col.totalX, y, { align: 'right' })
     y += 6
     doc.setDrawColor(...COLORS.divider)
     doc.setLineWidth(0.3)

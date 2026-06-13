@@ -74,13 +74,51 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
 
         {bookings.length === 0 ? (
           <p style={{ color: 'var(--theme-text)', opacity: 0.5, margin: 0 }}>Noch keine bestätigten Buchungen.</p>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-            {bookings.map((booking, i) => {
-              const name = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || booking.email || '—'
-              return (
+        ) : (() => {
+          // Expand each booking into one card per seat so dietary notes are shown individually.
+          type SeatCard = {
+            key: string
+            seatNumber: number
+            name: string
+            email: string
+            phone: string
+            notes: string
+            createdAt: string
+            isBuyer: boolean
+          }
+          const cards: SeatCard[] = []
+          let seatCounter = 0
+
+          for (const booking of bookings) {
+            const buyerName = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || booking.email || '—'
+            const count = Math.max(booking.guestCount, 1)
+
+            for (let si = 0; si < count; si++) {
+              seatCounter++
+              const seat = booking.seats[si]
+              const isBuyer = si === 0
+              // Seat 0 = buyer (recipientName is empty when buyer attends themselves)
+              const seatName = seat?.recipientName || (isBuyer ? buyerName : `Gast ${si + 1}`)
+              const seatNotes = seat?.giftNote || (isBuyer ? booking.notes : '')
+
+              cards.push({
+                key: `${booking.id}-${si}`,
+                seatNumber: seatCounter,
+                name: seatName,
+                email: isBuyer ? booking.email : '',
+                phone: isBuyer ? booking.phone : '',
+                notes: seatNotes,
+                createdAt: booking.createdAt,
+                isBuyer,
+              })
+            }
+          }
+
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+              {cards.map((card) => (
                 <div
-                  key={booking.id}
+                  key={card.key}
                   style={{
                     background: 'var(--theme-elevation-0)', border: '1px solid var(--theme-elevation-100)',
                     borderRadius: '10px', padding: '18px',
@@ -93,9 +131,9 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: '11px', fontWeight: 700, color: 'var(--theme-text)', flexShrink: 0,
                       }}>
-                        {i + 1}
+                        {card.seatNumber}
                       </span>
-                      <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--theme-text)' }}>{name}</span>
+                      <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--theme-text)' }}>{card.name}</span>
                     </div>
                     <span style={{
                       fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '999px',
@@ -105,44 +143,44 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
                     </span>
                   </div>
 
-                  {booking.email && (
+                  {card.email && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, flexShrink: 0 }}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                      <a href={`mailto:${booking.email}`} style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.75, textDecoration: 'none' }}
+                      <a href={`mailto:${card.email}`} style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.75, textDecoration: 'none' }}
                         onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline' }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none' }}
                       >
-                        {booking.email}
+                        {card.email}
                       </a>
                     </div>
                   )}
 
-                  {booking.phone && (
+                  {card.phone && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, flexShrink: 0 }}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17v-.08z"/></svg>
-                      <span style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.75 }}>{booking.phone}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.75 }}>{card.phone}</span>
                     </div>
                   )}
 
-                  {booking.notes && (
+                  {card.notes && (
                     <div style={{
                       marginTop: '10px', padding: '10px 12px', borderRadius: '6px',
                       background: '#fffbeb', border: '1px solid #fbbf24',
                       display: 'flex', alignItems: 'flex-start', gap: '8px',
                     }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      <span style={{ fontSize: '13px', color: '#92400e', lineHeight: 1.4 }}>{booking.notes}</span>
+                      <span style={{ fontSize: '13px', color: '#92400e', lineHeight: 1.4 }}>{card.notes}</span>
                     </div>
                   )}
 
                   <p style={{ margin: '10px 0 0', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.4 }}>
-                    {fmtBookingDate(booking.createdAt)}
+                    {fmtBookingDate(card.createdAt)}
                   </p>
                 </div>
-              )
-            })}
-          </div>
-        )}
+              ))}
+            </div>
+          )
+        })()}
       </div>
 
       {/* Summary stats */}

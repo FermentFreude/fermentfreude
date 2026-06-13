@@ -43,7 +43,7 @@ export const WorkshopBookings: CollectionConfig = {
       label: 'Appointment ID',
       admin: {
         position: 'sidebar',
-        description: 'ID of the WorkshopAppointment. Auto-populated for online bookings. Leave blank for phone bookings.',
+        description: 'ID of the WorkshopAppointment. Auto-populated for online bookings. For phone bookings: copy the ID from the correct appointment in the Workshop Appointments list — this is required for the booking to appear in the Roster dashboard.',
       },
     },
     {
