@@ -129,8 +129,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 3. Build workshop title from cart items for the voucher record
+    // 3. Build workshop title from cart items + collect slugs for booking confirmation
     const productTitles: string[] = []
+    const workshopItems: { workshopSlug: string; guestCount: number }[] = []
     for (const item of cartItems) {
       try {
         const product = await payload.findByID({
@@ -140,6 +141,10 @@ export async function POST(request: NextRequest) {
           overrideAccess: true,
         })
         if (product?.title) productTitles.push(product.title)
+        const slug = (product as unknown as { slug?: string })?.slug ?? ''
+        if (slug.startsWith('workshop-')) {
+          workshopItems.push({ workshopSlug: slug.replace(/^workshop-/, ''), guestCount: item.quantity ?? 1 })
+        }
       } catch {
         // ignore
       }
@@ -167,6 +172,90 @@ export async function POST(request: NextRequest) {
       },
       overrideAccess: true,
     })
+
+    // 4b. Explicitly confirm workshop bookings and stamp orderId.
+    // confirmWorkshopBookings (afterChange hook) runs above but may miss bookings
+    // when there is no Stripe transaction (= no cartId) and the booking email
+    // differs from the checkout email. We run a targeted confirmation here as a
+    // reliable fallback. Sequential writes only (Atlas M0 — no Promise.all).
+    for (const { workshopSlug, guestCount } of workshopItems) {
+      try {
+        // Primary: match by email + workshopSlug + guestCount
+        let bookingResult = customerEmail
+          ? await payload.find({
+              collection: 'workshop-bookings',
+              where: {
+                and: [
+                  { workshopSlug: { equals: workshopSlug } },
+                  { status: { equals: 'pending' } },
+                  { guestCount: { equals: guestCount } },
+                  { email: { equals: customerEmail } },
+                ],
+              },
+              sort: '-createdAt',
+              limit: 1,
+              overrideAccess: true,
+            })
+          : null
+
+        // Fallback: any pending booking for this workshop + guest count
+        if (!bookingResult?.totalDocs) {
+          bookingResult = await payload.find({
+            collection: 'workshop-bookings',
+            where: {
+              and: [
+                { workshopSlug: { equals: workshopSlug } },
+                { status: { equals: 'pending' } },
+                { guestCount: { equals: guestCount } },
+              ],
+            },
+            sort: '-createdAt',
+            limit: 1,
+            overrideAccess: true,
+          })
+        }
+
+        // Last resort: any pending booking for this workshop
+        if (!bookingResult?.totalDocs) {
+          bookingResult = await payload.find({
+            collection: 'workshop-bookings',
+            where: {
+              and: [
+                { workshopSlug: { equals: workshopSlug } },
+                { status: { equals: 'pending' } },
+              ],
+            },
+            sort: '-createdAt',
+            limit: 1,
+            overrideAccess: true,
+          })
+        }
+
+        if (bookingResult?.totalDocs && bookingResult.docs[0]) {
+          const booking = bookingResult.docs[0]
+          const updateData: Record<string, unknown> = {
+            status: 'confirmed',
+            orderId: String(order.id),
+          }
+          // Copy customer info if not already on the booking
+          if (!booking.email && customerEmail) updateData.email = customerEmail
+          if (!booking.firstName && typeof customerName === 'string' && customerName.trim()) {
+            const parts = customerName.trim().split(/\s+/)
+            updateData.firstName = parts[0]
+            if (!booking.lastName && parts.length > 1) updateData.lastName = parts.slice(1).join(' ')
+          }
+          await payload.update({
+            collection: 'workshop-bookings',
+            id: booking.id,
+            data: updateData,
+            overrideAccess: true,
+          })
+        }
+      } catch (bookingErr) {
+        console.error('[place-order] Failed to confirm booking for', workshopSlug, bookingErr)
+        // Non-fatal: order is still valid, tickets page will use fallback lookup
+      }
+    }
 
     // 5. Redeem the voucher
     await payload.update({
