@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FermentFreude — System Overview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f4f0;
+    color: #1a1a1a;
+    padding: 40px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #111;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 32px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #444;
+  }
+
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* Main layout */
+  .diagram {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    max-width: 1000px;
+  }
+
+  /* Columns */
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .col-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  /* Cards */
+  .card {
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1.5px solid transparent;
+    position: relative;
+  }
+
+  .card-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: #555;
+    line-height: 1.45;
+  }
+
+  .card-owner {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* Color variants */
+  .theirs {
+    background: #edf7f0;
+    border-color: #a8d9b8;
+  }
+  .theirs .card-owner {
+    background: #c8ecd4;
+    color: #2a7a47;
+  }
+
+  .mine {
+    background: #eef2fb;
+    border-color: #b0c4ef;
+  }
+  .mine .card-owner {
+    background: #d0dcf7;
+    color: #2a4aa0;
+  }
+
+  .action {
+    background: #fef9ec;
+    border-color: #f0d98a;
+  }
+  .action .card-owner {
+    background: #fdedb8;
+    color: #8a6200;
+  }
+  .action-badge {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #b87800;
+    background: #fdedb8;
+    border-radius: 4px;
+    padding: 2px 6px;
+  }
+
+  .auto {
+    background: #f3f3f3;
+    border-color: #d0d0d0;
+  }
+  .auto .card-owner {
+    background: #e4e4e4;
+    color: #555;
+  }
+
+  /* Flow arrows between columns */
+  .flow-row {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr 40px 1fr;
+    align-items: start;
+    gap: 0;
+    max-width: 1000px;
+    margin-top: 0;
+  }
+
+  .arrow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 48px;
+  }
+
+  .arrow {
+    font-size: 18px;
+    color: #bbb;
+    line-height: 1;
+  }
+
+  .arrow-label {
+    font-size: 10px;
+    color: #aaa;
+    text-align: center;
+    line-height: 1.3;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
+
+  /* Flow section below */
+  .flow-section {
+    margin-top: 36px;
+    max-width: 1000px;
+  }
+
+  .flow-section h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #999;
+    margin-bottom: 16px;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .flow-bubble {
+    background: white;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 100px;
+    line-height: 1.3;
+  }
+
+  .flow-caption {
+    font-size: 10px;
+    color: #999;
+    text-align: center;
+    max-width: 90px;
+    line-height: 1.3;
+  }
+
+  .flow-arrow {
+    font-size: 20px;
+    color: #ccc;
+    padding: 0 4px;
+    margin-top: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Notes section */
+  .notes {
+    margin-top: 32px;
+    max-width: 1000px;
+    background: white;
+    border-radius: 10px;
+    padding: 20px 24px;
+    border: 1.5px solid #e0e0e0;
+  }
+
+  .notes h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #999;
+    margin-bottom: 14px;
+  }
+
+  .notes ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .notes li {
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .notes li::before {
+    content: '→';
+    color: #bbb;
+    flex-shrink: 0;
+    margin-top: 0px;
+  }
+
+  @media print {
+    body { background: white; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>FermentFreude — System Overview</h1>
+<p class="subtitle">All systems, who manages them, and how they connect — July 2026</p>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#a8d9b8; border: 1.5px solid #a8d9b8;"></div>
+    Founders own &amp; manage
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#b0c4ef; border: 1.5px solid #b0c4ef;"></div>
+    Rafaela manages (as developer)
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#f0d98a; border: 1.5px solid #f0d98a;"></div>
+    Action needed — transfer ownership
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#d0d0d0; border: 1.5px solid #d0d0d0;"></div>
+    Automatic / runs itself
+  </div>
+</div>
+
+<!-- Three columns -->
+<div class="diagram">
+
+  <!-- Col 1: Their stuff -->
+  <div class="col">
+    <div class="col-label">Owned by Founders</div>
+
+    <div class="card theirs">
+      <div class="card-name">Domain (EasyName)</div>
+      <div class="card-desc">fermentfreude.at — registered and paid for by David. Points visitors to the website.</div>
+      <span class="card-owner">David &amp; Marcel</span>
+    </div>
+
+    <div class="card theirs">
+      <div class="card-name">Stripe</div>
+      <div class="card-desc">Payment processing. All customer payments and workshop bookings go through here. Founders log in to see revenue, refund customers, manage payouts.</div>
+      <span class="card-owner">David &amp; Marcel</span>
+    </div>
+
+    <div class="card theirs">
+      <div class="card-name">Brevo</div>
+      <div class="card-desc">Sends all automated emails — booking confirmations, vouchers, invoices, welcome emails. Founders log in to check delivery, edit templates, manage contacts.</div>
+      <span class="card-owner">David &amp; Marcel</span>
+    </div>
+
+    <div class="card theirs">
+      <div class="card-name">Google Tag Manager &amp; GA4</div>
+      <div class="card-desc">Website analytics. Tracks bookings, purchases, and visitor behaviour. Founders log in to see reports and configure what gets tracked.</div>
+      <span class="card-owner">David &amp; Marcel</span>
+    </div>
+  </div>
+
+  <!-- Col 2: The website itself -->
+  <div class="col">
+    <div class="col-label">The Website</div>
+
+    <div class="card mine">
+      <div class="card-name">GitHub</div>
+      <div class="card-desc">Where the website code lives. Every code change goes here first, then automatically deploys to Vercel. Organised under the FermentFreude organisation.</div>
+      <span class="card-owner">Rafaela (developer)</span>
+    </div>
+
+    <div class="card mine">
+      <div class="card-name">Vercel (Hosting)</div>
+      <div class="card-desc">Runs the website 24/7. Automatically picks up new code from GitHub and deploys it. Rafaela manages this — founders have access but don't need to touch it.</div>
+      <span class="card-owner">Rafaela (developer)</span>
+    </div>
+
+    <div class="card mine">
+      <div class="card-name">Payload CMS (Admin)</div>
+      <div class="card-desc">The dashboard at fermentfreude.at/admin. David &amp; Marcel use this every day to edit content, manage workshops, create appointment slots, handle bookings. Lives inside Vercel — no separate account.</div>
+      <span class="card-owner">Rafaela built it · Founders use it</span>
+    </div>
+
+  </div>
+
+  <!-- Col 3: Infrastructure -->
+  <div class="col">
+    <div class="col-label">Infrastructure — Action Needed</div>
+
+    <div class="card action">
+      <span class="action-badge">⚠ Transfer</span>
+      <div class="card-name">MongoDB Atlas</div>
+      <div class="card-desc">The database. Stores all website content, workshop bookings, user accounts, and orders. Currently registered under Rafaela's account — David has access and should be made account owner.</div>
+      <span class="card-owner">Move to: David</span>
+    </div>
+
+    <div class="card action">
+      <span class="action-badge">⚠ Transfer</span>
+      <div class="card-name">Cloudflare R2</div>
+      <div class="card-desc">Stores all images and media files uploaded via the admin. Currently under Rafaela's account — David should be added as owner or the project moved to a FermentFreude account.</div>
+      <span class="card-owner">Move to: David</span>
+    </div>
+
+    <div class="card auto">
+      <div class="card-name">DeepL (Auto-translation)</div>
+      <div class="card-desc">Automatically translates German content to English whenever something is saved in the admin. Runs silently in the background — no action needed.</div>
+      <span class="card-owner">Automatic</span>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- How a booking flows -->
+<div class="flow-section">
+  <h2>How a customer booking works — step by step</h2>
+  <div class="flow-steps">
+
+    <div class="flow-step">
+      <div class="flow-bubble">Customer visits website</div>
+      <div class="flow-caption">via fermentfreude.at</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="flow-bubble">Browses workshops, selects date &amp; seats</div>
+      <div class="flow-caption">Payload CMS + MongoDB serve the data</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="flow-bubble">Adds to cart &amp; checks out</div>
+      <div class="flow-caption">Cart stored in MongoDB</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="flow-bubble">Pays by card</div>
+      <div class="flow-caption">Stripe processes payment</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="flow-bubble">Stripe confirms payment</div>
+      <div class="flow-caption">Webhook sent to website</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="flow-bubble">Booking confirmed &amp; email sent</div>
+      <div class="flow-caption">Brevo sends confirmation + invoice</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="flow-bubble">David sees booking in /admin</div>
+      <div class="flow-caption">Payload CMS dashboard</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Summary notes -->
+<div class="notes">
+  <h2>Key things to know</h2>
+  <ul>
+    <li>The website and all its systems were built and set up under FermentFreude — not under personal names.</li>
+    <li>David &amp; Marcel own and manage the things that matter most: payments (Stripe), emails (Brevo), analytics (GA4), and the domain.</li>
+    <li>Only two things need a one-time transfer: MongoDB Atlas and Cloudflare R2 (account ownership, 10 minutes).</li>
+    <li>David &amp; Marcel can already create new workshop types, dates, and manage bookings — no developer needed for day-to-day operations.</li>
+    <li>For code changes, new features, or bugs: that's developer work and is agreed and paid separately.</li>
+  </ul>
+</div>
+
+</body>
+</html>

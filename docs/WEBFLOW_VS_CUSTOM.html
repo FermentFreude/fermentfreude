@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FermentFreude — Webflow vs. Custom Build</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f4f0;
+    color: #1a1a1a;
+    padding: 40px;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 36px;
+  }
+
+  /* Two column comparison */
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 900px;
+    margin-bottom: 28px;
+  }
+
+  .col-card {
+    background: white;
+    border-radius: 12px;
+    border: 1.5px solid #e0e0e0;
+    overflow: hidden;
+  }
+
+  .col-header {
+    padding: 16px 20px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .col-header.webflow {
+    background: #f0f4ff;
+    border-bottom: 1.5px solid #d0daff;
+    color: #2a45c2;
+  }
+
+  .col-header.custom {
+    background: #edf7f0;
+    border-bottom: 1.5px solid #a8d9b8;
+    color: #2a7a47;
+  }
+
+  .col-header .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .col-header.webflow .tag { background: #d0daff; color: #2a45c2; }
+  .col-header.custom .tag { background: #c8ecd4; color: #2a7a47; }
+
+  .col-body { padding: 0; }
+
+  .line-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 12px;
+  }
+
+  .line-item:last-child { border-bottom: none; }
+
+  .line-label {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.4;
+  }
+
+  .line-sublabel {
+    font-size: 11px;
+    color: #999;
+    margin-top: 2px;
+  }
+
+  .line-price {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    color: #111;
+    text-align: right;
+  }
+
+  .line-price.free { color: #2a7a47; }
+  .line-price.na { color: #aaa; font-weight: 400; font-style: italic; }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #fafafa;
+    border-top: 2px solid #e8e8e8;
+  }
+
+  .total-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111;
+  }
+
+  .total-price {
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .total-price.webflow { color: #2a45c2; }
+  .total-price.custom { color: #2a7a47; }
+
+  .total-yearly {
+    font-size: 11px;
+    color: #888;
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  /* Cannot do section */
+  .cannot-do {
+    max-width: 900px;
+    background: #fff8f0;
+    border: 1.5px solid #f0c88a;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .cannot-do h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #b86000;
+    margin-bottom: 14px;
+  }
+
+  .cannot-do ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cannot-do li {
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.45;
+  }
+
+  .cannot-do li::before {
+    content: '✗';
+    color: #e07800;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Breakeven */
+  .breakeven {
+    max-width: 900px;
+    background: white;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .breakeven h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #999;
+    margin-bottom: 14px;
+  }
+
+  .breakeven-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .be-step {
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .be-box {
+    background: #f5f4f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 120px;
+    line-height: 1.4;
+  }
+
+  .be-sub {
+    font-size: 11px;
+    color: #888;
+    font-weight: 400;
+    margin-top: 3px;
+  }
+
+  .be-arrow {
+    font-size: 20px;
+    color: #ccc;
+    padding: 0 10px;
+    flex-shrink: 0;
+  }
+
+  .be-highlight {
+    background: #edf7f0;
+    border: 1.5px solid #a8d9b8;
+    color: #2a7a47;
+  }
+
+  /* Summary */
+  .summary {
+    max-width: 900px;
+    background: #111;
+    border-radius: 12px;
+    padding: 20px 24px;
+    color: white;
+  }
+
+  .summary h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+    margin-bottom: 14px;
+  }
+
+  .summary ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .summary li {
+    font-size: 13px;
+    color: #ddd;
+    display: flex;
+    gap: 10px;
+    line-height: 1.45;
+  }
+
+  .summary li::before {
+    content: '→';
+    color: #555;
+    flex-shrink: 0;
+  }
+
+  @media print {
+    body { background: white; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Webflow vs. Custom Build — Cost Comparison</h1>
+<p class="subtitle">What would the FermentFreude website cost if built on Webflow instead? — July 2026</p>
+
+<!-- Comparison columns -->
+<div class="comparison">
+
+  <!-- Webflow -->
+  <div class="col-card">
+    <div class="col-header webflow">
+      Webflow stack
+      <span class="tag">Hypothetical</span>
+    </div>
+    <div class="col-body">
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Webflow E-commerce Plus</div>
+          <div class="line-sublabel">Hosting + CMS + shop</div>
+        </div>
+        <div>
+          <div class="line-price">€80/mo</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Weglot (DE/EN translation)</div>
+          <div class="line-sublabel">Multi-language support</div>
+        </div>
+        <div>
+          <div class="line-price">€100/mo</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Memberstack or Outseta</div>
+          <div class="line-sublabel">User accounts + login</div>
+        </div>
+        <div>
+          <div class="line-price">€40/mo</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Acuity / Calendly Business</div>
+          <div class="line-sublabel">Workshop booking</div>
+        </div>
+        <div>
+          <div class="line-price">€40/mo</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Brevo (emails)</div>
+          <div class="line-sublabel">Booking confirmations, vouchers</div>
+        </div>
+        <div>
+          <div class="line-price">€25/mo</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Webflow developer</div>
+          <div class="line-sublabel">To connect all the tools + custom logic</div>
+        </div>
+        <div>
+          <div class="line-price">+ one-time</div>
+        </div>
+      </div>
+
+      <div class="total-row">
+        <div>
+          <div class="total-label">Monthly total</div>
+          <div class="total-yearly">€3,420/year — and rising</div>
+        </div>
+        <div>
+          <div class="total-price webflow">~€285/mo</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Custom build -->
+  <div class="col-card">
+    <div class="col-header custom">
+      Current custom build
+      <span class="tag">What exists now</span>
+    </div>
+    <div class="col-body">
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Vercel (hosting)</div>
+          <div class="line-sublabel">Included in maintenance</div>
+        </div>
+        <div>
+          <div class="line-price free">€0–20/mo</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">DE/EN translation built in</div>
+          <div class="line-sublabel">Via DeepL + Payload CMS</div>
+        </div>
+        <div>
+          <div class="line-price free">€0</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">User accounts built in</div>
+          <div class="line-sublabel">No third-party tool needed</div>
+        </div>
+        <div>
+          <div class="line-price free">€0</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Custom booking system built in</div>
+          <div class="line-sublabel">Seat selection, availability, admin panel</div>
+        </div>
+        <div>
+          <div class="line-price free">€0</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Brevo (emails)</div>
+          <div class="line-sublabel">Booking confirmations, vouchers</div>
+        </div>
+        <div>
+          <div class="line-price free">€0–25/mo</div>
+        </div>
+      </div>
+
+      <div class="line-item">
+        <div>
+          <div class="line-label">Developer maintenance</div>
+          <div class="line-sublabel">Bug fixes, updates, new features</div>
+        </div>
+        <div>
+          <div class="line-price">TBD</div>
+        </div>
+      </div>
+
+      <div class="total-row">
+        <div>
+          <div class="total-label">Monthly total</div>
+          <div class="total-yearly">SaaS tools only — ownership stays yours</div>
+        </div>
+        <div>
+          <div class="total-price custom">€20–45/mo</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- What Webflow can't do -->
+<div class="cannot-do">
+  <h2>What Webflow still couldn't do — even with all those tools</h2>
+  <ul>
+    <li>Custom seat selection per booking date (e.g. "2 of 8 spots left — book 2")</li>
+    <li>Workshop appointment management directly in the admin — no Webflow tool replicates this exactly</li>
+    <li>Voucher system with unique codes, redemption flow, and booking link</li>
+    <li>One cart for workshops + shop products in a single checkout</li>
+    <li>Custom admin dashboard tailored to David and Marcel's workflow</li>
+    <li>Full control over design, fonts, animations — no Webflow template constraints</li>
+  </ul>
+  <p style="margin-top:14px; font-size:13px; color:#777;">These features would require a Webflow developer to build custom workarounds — additional one-time cost on top of the monthly subscriptions.</p>
+</div>
+
+<!-- Breakeven -->
+<div class="breakeven">
+  <h2>When does the custom build pay off?</h2>
+  <div class="breakeven-row">
+
+    <div class="be-step">
+      <div class="be-box">Webflow stack<div class="be-sub">~€285/month</div></div>
+    </div>
+    <div class="be-arrow">vs.</div>
+    <div class="be-step">
+      <div class="be-box">Custom maintenance<div class="be-sub">retainer TBD</div></div>
+    </div>
+    <div class="be-arrow">→</div>
+    <div class="be-step">
+      <div class="be-box be-highlight">Break-even<div class="be-sub">12–18 months</div></div>
+    </div>
+    <div class="be-arrow">→</div>
+    <div class="be-step">
+      <div class="be-box">Savings after year 2<div class="be-sub">€3,000+/year</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="summary">
+  <h2>Bottom line</h2>
+  <ul>
+    <li>A comparable Webflow setup would cost ~€285/month — €3,420/year — and still wouldn't match all current features.</li>
+    <li>The custom build has almost no recurring SaaS costs. The main cost going forward is developer time for maintenance and new features.</li>
+    <li>A developer retainer significantly below €285/month already makes the custom build the better financial decision — and the product is better.</li>
+    <li>The website, code, and all content are owned by FermentFreude. There is no platform lock-in — unlike Webflow, where leaving means rebuilding from scratch.</li>
+  </ul>
+</div>
+
+</body>
+</html>

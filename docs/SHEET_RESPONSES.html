@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FermentFreude — Response to Website Sheet</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f4f0;
+    color: #1a1a1a;
+    padding: 40px;
+  }
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 28px; }
+
+  /* Summary bar */
+  .summary-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    max-width: 960px;
+  }
+
+  .summary-pill {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: opacity 0.15s;
+    user-select: none;
+  }
+  .summary-pill:hover { opacity: 0.8; }
+  .summary-pill.active { border-color: #333; }
+
+  .pill-done     { background: #edf7f0; color: #2a7a47; }
+  .pill-fix      { background: #fff0f0; color: #c0392b; }
+  .pill-theirs   { background: #eef2fb; color: #2a45c2; }
+  .pill-together { background: #fef9ec; color: #8a6200; }
+  .pill-future   { background: #f3f3f3; color: #555; }
+  .pill-all      { background: #111; color: white; }
+
+  /* Table */
+  .table-wrap {
+    max-width: 960px;
+    background: white;
+    border-radius: 12px;
+    border: 1.5px solid #e0e0e0;
+    overflow: hidden;
+  }
+
+  .table-head {
+    display: grid;
+    grid-template-columns: 80px 1fr 160px 140px;
+    gap: 0;
+    background: #fafafa;
+    border-bottom: 1.5px solid #e8e8e8;
+  }
+
+  .th {
+    padding: 11px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #999;
+  }
+
+  /* Rows */
+  .row {
+    display: grid;
+    grid-template-columns: 80px 1fr 160px 140px;
+    gap: 0;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.1s;
+  }
+
+  .row:last-child { border-bottom: none; }
+  .row:hover { background: #fafafa; }
+
+  .row.hidden { display: none; }
+
+  .cell {
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    vertical-align: top;
+    align-self: start;
+  }
+
+  .cell-id {
+    font-size: 11px;
+    font-weight: 700;
+    color: #aaa;
+    padding-top: 16px;
+  }
+
+  .cell-content .title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #111;
+    margin-bottom: 5px;
+  }
+
+  .cell-content .response {
+    font-size: 12.5px;
+    color: #444;
+    line-height: 1.55;
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .badge-done     { background: #edf7f0; color: #2a7a47; }
+  .badge-fix      { background: #fff0f0; color: #c0392b; }
+  .badge-theirs   { background: #eef2fb; color: #2a45c2; }
+  .badge-together { background: #fef9ec; color: #8a6200; }
+  .badge-future   { background: #f3f3f3; color: #777; }
+  .badge-tomorrow { background: #f5eefb; color: #6a2a9a; }
+
+  /* Owner */
+  .owner {
+    font-size: 12px;
+    color: #666;
+    padding-top: 16px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    max-width: 960px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<h1>Response to Website Sheet — WEB-001 to WEB-032</h1>
+<p class="subtitle">Status of each item from David's roadmap, based on what's actually built — July 2026</p>
+
+<!-- Filter pills -->
+<div class="summary-bar">
+  <div class="summary-pill pill-all active" onclick="filter('all')">All 32 items</div>
+  <div class="summary-pill pill-done" onclick="filter('done')">✓ Done / In place</div>
+  <div class="summary-pill pill-tomorrow" onclick="filter('tomorrow')" style="background:#f5eefb;color:#6a2a9a;">★ Meeting tomorrow</div>
+  <div class="summary-pill pill-fix" onclick="filter('fix')">⚡ Quick developer fix</div>
+  <div class="summary-pill pill-theirs" onclick="filter('theirs')">→ Their action / decision</div>
+  <div class="summary-pill pill-together" onclick="filter('together')">↔ Review together</div>
+  <div class="summary-pill pill-future" onclick="filter('future')">◦ Future / Parked</div>
+</div>
+
+<div class="table-wrap">
+  <div class="table-head">
+    <div class="th">ID</div>
+    <div class="th">Item + Response</div>
+    <div class="th">Status</div>
+    <div class="th">Who acts</div>
+  </div>
+
+  <!-- WEB-001 -->
+  <div class="row" data-status="tomorrow">
+    <div class="cell cell-id">WEB-001</div>
+    <div class="cell cell-content">
+      <div class="title">Transfer ownership of production systems</div>
+      <div class="response">Almost everything was already set up under FermentFreude from day one — Stripe, Brevo, and the domain are all theirs. Two things need a quick account transfer: MongoDB Atlas and Cloudflare R2 are currently on Rafaela's account. We sort this in the meeting tomorrow morning — 10 minutes each.</div>
+    </div>
+    <div class="cell"><span class="badge badge-tomorrow">Meeting tomorrow</span></div>
+    <div class="cell owner">Rafaela + David</div>
+  </div>
+
+  <!-- WEB-002 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-002</div>
+    <div class="cell cell-content">
+      <div class="title">Document system architecture</div>
+      <div class="response">Done. There are 30+ documentation files in the project covering every system. A one-page visual diagram (SYSTEM_OVERVIEW.html) has been created showing all systems, who owns what, and how a customer booking flows through the site. Sharing this before the call.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Done</span></div>
+    <div class="cell owner">Complete</div>
+  </div>
+
+  <!-- WEB-003 -->
+  <div class="row" data-status="together">
+    <div class="cell cell-id">WEB-003</div>
+    <div class="cell cell-content">
+      <div class="title">CMS / dashboard onboarding session</div>
+      <div class="response">Written guides for founders already exist: booking system guide, Brevo operations guide, workshop setup guide, dashboard quick reference. The live walkthrough session still needs to be scheduled. A recorded Google Meet session would be the most useful format.</div>
+    </div>
+    <div class="cell"><span class="badge badge-together">Schedule session</span></div>
+    <div class="cell owner">Schedule together</div>
+  </div>
+
+  <!-- WEB-004 -->
+  <div class="row" data-status="together">
+    <div class="cell cell-id">WEB-004</div>
+    <div class="cell cell-content">
+      <div class="title">Full route QA and stability check</div>
+      <div class="response">Not yet done as a formal pass. This is worth running together — David/Marcel know which routes matter most to customers and can flag language issues along the way. Developer checks for broken redirects, 404s and maintenance screens in parallel.</div>
+    </div>
+    <div class="cell"><span class="badge badge-together">Review together</span></div>
+    <div class="cell owner">All three</div>
+  </div>
+
+  <!-- WEB-005 -->
+  <div class="row" data-status="theirs">
+    <div class="cell cell-id">WEB-005</div>
+    <div class="cell cell-content">
+      <div class="title">Remove placeholder phone number</div>
+      <div class="response">The placeholder +43 664 1234567 was put in the CMS as a temporary value during setup. David can fix this himself directly in the admin: /admin → Globals → Business Info → Phone. No code change or developer needed.</div>
+    </div>
+    <div class="cell"><span class="badge badge-theirs">David in /admin</span></div>
+    <div class="cell owner">David</div>
+  </div>
+
+  <!-- WEB-006 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-006</div>
+    <div class="cell cell-content">
+      <div class="title">Remove public "Edit page in Admin" button</div>
+      <div class="response">✓ Fixed. Removed from Gastronomy and Fermentation pages. The button no longer appears for public visitors.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Fixed</span></div>
+    <div class="cell owner">Done</div>
+  </div>
+
+  <!-- WEB-007 -->
+  <div class="row" data-status="together">
+    <div class="cell cell-id">WEB-007</div>
+    <div class="cell cell-content">
+      <div class="title">Clean up German / English language mix</div>
+      <div class="response">Some content mixing is in the CMS (David/Marcel can fix directly in /admin), some is in code. The most useful step: David and Ala'a go through the site on both /de and /en and create a list of specific pages + sentences that are wrong. Then we know exactly what to fix and where.</div>
+    </div>
+    <div class="cell"><span class="badge badge-together">Review + fix</span></div>
+    <div class="cell owner">David / Ala'a flag → Rafaela fixes code parts</div>
+  </div>
+
+  <!-- WEB-008 -->
+  <div class="row" data-status="theirs">
+    <div class="cell cell-id">WEB-008</div>
+    <div class="cell cell-content">
+      <div class="title">Align cancellation and voucher terms</div>
+      <div class="response">This is a business + legal decision, not a technical one. David needs to decide: what are the cancellation rules? What is the voucher validity? Once the rules are written, the text gets updated across the AGB, FAQ, workshop pages and voucher page. Decision first, then developer updates.</div>
+    </div>
+    <div class="cell"><span class="badge badge-theirs">David decides</span></div>
+    <div class="cell owner">David decides → Rafaela updates</div>
+  </div>
+
+  <!-- WEB-009 -->
+  <div class="row" data-status="theirs">
+    <div class="cell cell-id">WEB-009</div>
+    <div class="cell cell-content">
+      <div class="title">Privacy policy and tracking setup audit</div>
+      <div class="response">GTM is wired up in the code. All GA4 e-commerce events (add to cart, checkout, purchase) are implemented. The privacy policy text and what tools are declared in it is a legal question — needs an external legal review or a lawyer familiar with Austrian/EU data law. Developer can't make that call.</div>
+    </div>
+    <div class="cell"><span class="badge badge-theirs">Legal review needed</span></div>
+    <div class="cell owner">David + legal advisor</div>
+  </div>
+
+  <!-- WEB-010 -->
+  <div class="row" data-status="theirs">
+    <div class="cell cell-id">WEB-010</div>
+    <div class="cell cell-content">
+      <div class="title">Review health claims and probiotic wording</div>
+      <div class="response">Content and legal decision. EU food law restricts what can be claimed about health benefits of fermented foods. David should review this with a food/legal expert. Once safe wording is agreed, developer updates the text. Not something a developer can or should decide.</div>
+    </div>
+    <div class="cell"><span class="badge badge-theirs">David + expert</span></div>
+    <div class="cell owner">David + food/legal expert</div>
+  </div>
+
+  <!-- WEB-011 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-011</div>
+    <div class="cell cell-content">
+      <div class="title">Fix newsletter block</div>
+      <div class="response">Done. The newsletter form is connected to Brevo via a dedicated API route (/api/newsletter/subscribe). Signups go into Brevo automatically. Double-opt-in and list management are handled inside the Brevo dashboard — David manages that part.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Done</span></div>
+    <div class="cell owner">Complete</div>
+  </div>
+
+  <!-- WEB-012 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-012</div>
+    <div class="cell cell-content">
+      <div class="title">Fix shop template remnants</div>
+      <div class="response">✓ Fixed. "Payload Ecommerce Template" replaced with "FermentFreude" in all shop page titles and browser tab metadata.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Fixed</span></div>
+    <div class="cell owner">Done</div>
+  </div>
+
+  <!-- WEB-013 -->
+  <div class="row" data-status="theirs">
+    <div class="cell cell-id">WEB-013</div>
+    <div class="cell cell-content">
+      <div class="title">Review product page information</div>
+      <div class="response">Content review — David needs to verify that shelf life, storage instructions, quantity, and food labelling info are correct and complete for each product. This is managed in the CMS under Products. No code change needed, David updates directly in /admin.</div>
+    </div>
+    <div class="cell"><span class="badge badge-theirs">David in /admin</span></div>
+    <div class="cell owner">David</div>
+  </div>
+
+  <!-- WEB-014 -->
+  <div class="row" data-status="together">
+    <div class="cell cell-id">WEB-014</div>
+    <div class="cell cell-content">
+      <div class="title">Workshop page QA</div>
+      <div class="response">David and Ala'a go through each workshop page (Lakto, Kombucha, Tempeh, Basics) and check: correct dates, correct FAQs, correct pricing, correct cancellation text, language consistency. Most content is in the CMS and can be fixed by David directly. Code-level issues get flagged to Rafaela.</div>
+    </div>
+    <div class="cell"><span class="badge badge-together">Review together</span></div>
+    <div class="cell owner">David / Ala'a + Rafaela</div>
+  </div>
+
+  <!-- WEB-015 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-015</div>
+    <div class="cell cell-content">
+      <div class="title">Analytics and conversion tracking</div>
+      <div class="response">Code side: done. GTM is integrated, and all key GA4 e-commerce events are implemented — view item, add to cart, begin checkout, purchase, remove from cart. What happens inside the GTM container (setting up the GA4 tag, Clarity, Meta Pixel) is David's responsibility via the GTM dashboard. That's marketing tool setup, not developer work.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Code done</span></div>
+    <div class="cell owner">GTM container → David</div>
+  </div>
+
+  <!-- WEB-016 -->
+  <div class="row" data-status="together">
+    <div class="cell cell-id">WEB-016</div>
+    <div class="cell cell-content">
+      <div class="title">Performance and speed audit</div>
+      <div class="response">Not run yet as a formal pass. Images are optimised through the CMS pipeline (WebP, resized on upload). Fonts and caching are set up correctly. A Lighthouse run makes sense once the main content bugs and QA items are resolved — no point benchmarking a page that still has placeholder content.</div>
+    </div>
+    <div class="cell"><span class="badge badge-together">After content QA</span></div>
+    <div class="cell owner">Rafaela runs Lighthouse</div>
+  </div>
+
+  <!-- WEB-017 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-017</div>
+    <div class="cell cell-content">
+      <div class="title">SEO basics audit</div>
+      <div class="response">Infrastructure is done: dynamic sitemap (/sitemap.xml), robots.txt, OpenGraph meta tags, canonical URLs, Payload SEO plugin for per-page titles and descriptions. /admin and /api are blocked from crawlers. Content-level SEO (writing good titles and descriptions for each page) is done in the CMS by David.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Infrastructure done</span></div>
+    <div class="cell owner">Content titles → David in /admin</div>
+  </div>
+
+  <!-- WEB-018 -->
+  <div class="row" data-status="together">
+    <div class="cell cell-id">WEB-018</div>
+    <div class="cell cell-content">
+      <div class="title">Mobile QA</div>
+      <div class="response">Not done as a formal pass. Ala'a and David should test on real phones — Android and iPhone. Most layout is responsive by design but real-device testing always surfaces things that browser emulation misses. Flag specific pages and issues and Rafaela fixes the code ones.</div>
+    </div>
+    <div class="cell"><span class="badge badge-together">Test on real devices</span></div>
+    <div class="cell owner">Ala'a / David test → Rafaela fixes</div>
+  </div>
+
+  <!-- WEB-019 -->
+  <div class="row" data-status="theirs">
+    <div class="cell cell-id">WEB-019</div>
+    <div class="cell cell-content">
+      <div class="title">Fix online course communication</div>
+      <div class="response">Business decision. Are online courses available now, or coming soon? Once David decides, the banner text and navigation get updated — most of this is in the CMS. If something is in code, quick fix. Decision first.</div>
+    </div>
+    <div class="cell"><span class="badge badge-theirs">David decides</span></div>
+    <div class="cell owner">David decides → update CMS or code</div>
+  </div>
+
+  <!-- WEB-020 -->
+  <div class="row" data-status="theirs">
+    <div class="cell cell-id">WEB-020</div>
+    <div class="cell cell-content">
+      <div class="title">Finish or hide Help / FAQ page</div>
+      <div class="response">Content decision. If the page isn't ready, it should be hidden from navigation and footer until it has real answers. David decides: finish the content now, or hide the link for now. Either option is a 5-minute change.</div>
+    </div>
+    <div class="cell"><span class="badge badge-theirs">David decides</span></div>
+    <div class="cell owner">David decides → quick update</div>
+  </div>
+
+  <!-- WEB-021 -->
+  <div class="row" data-status="theirs">
+    <div class="cell cell-id">WEB-021</div>
+    <div class="cell cell-content">
+      <div class="title">Check footer and social links</div>
+      <div class="response">Manual click test — David or Ala'a goes through every footer link and social icon. The social URLs are managed in the CMS (Footer global in /admin), so any wrong link David can fix himself immediately. No developer needed unless a link is hardcoded in the code.</div>
+    </div>
+    <div class="cell"><span class="badge badge-theirs">David / Ala'a test</span></div>
+    <div class="cell owner">David / Ala'a</div>
+  </div>
+
+  <!-- WEB-022 -->
+  <div class="row" data-status="together">
+    <div class="cell cell-id">WEB-022</div>
+    <div class="cell cell-content">
+      <div class="title">Fix image alt text and names</div>
+      <div class="response">Alt text is set when images are uploaded in the CMS. David/Marcel can update alt text directly in /admin → Media for any image. If specific images have wrong names or descriptions, flag them and update in the Media library. Developer only needed if something is hardcoded.</div>
+    </div>
+    <div class="cell"><span class="badge badge-together">Mostly CMS</span></div>
+    <div class="cell owner">David in /admin → Media</div>
+  </div>
+
+  <!-- WEB-023 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-023</div>
+    <div class="cell cell-content">
+      <div class="title">Self-service creation of new workshop types</div>
+      <div class="response">Done. David and Marcel can already create new workshop appointment slots, set dates, times, locations, and available spots directly in /admin → Workshop Appointments. Changes go live immediately. A full founders guide exists (BOOKING_SYSTEM_FOR_FOUNDERS.md). No developer needed for day-to-day workshop management.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Done</span></div>
+    <div class="cell owner">Complete — David uses /admin</div>
+  </div>
+
+  <!-- WEB-024 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-024</div>
+    <div class="cell cell-content">
+      <div class="title">Workshop booking overview in dashboard</div>
+      <div class="response">Done. Bookings and workshop appointments are visible in the Payload admin. If specific columns or views need to be adjusted (e.g. a cleaner summary view), that's a quick improvement — flag what's missing and it gets added.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Done</span></div>
+    <div class="cell owner">Complete</div>
+  </div>
+
+  <!-- WEB-025 -->
+  <div class="row" data-status="future">
+    <div class="cell cell-id">WEB-025</div>
+    <div class="cell cell-content">
+      <div class="title">Individual voucher personalization</div>
+      <div class="response">Future feature. Custom names, messages or designs on vouchers requires additional development. Scope and quote when the time comes — good to do before a gift season (Christmas, Valentine's).</div>
+    </div>
+    <div class="cell"><span class="badge badge-future">Future</span></div>
+    <div class="cell owner">Future paid development</div>
+  </div>
+
+  <!-- WEB-026 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-026</div>
+    <div class="cell cell-content">
+      <div class="title">Transactional email audit</div>
+      <div class="response">Done. All automated emails are set up in Brevo: booking confirmation, invoice, voucher delivery, welcome email, password reset. Triggers come from Stripe webhooks and Payload hooks. Brevo handoff guides for founders exist. David monitors delivery via the Brevo dashboard.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Done</span></div>
+    <div class="cell owner">David monitors via Brevo</div>
+  </div>
+
+  <!-- WEB-027 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-027</div>
+    <div class="cell cell-content">
+      <div class="title">Backup strategy</div>
+      <div class="response">Code: backed up on GitHub (full history). Deployment: Vercel keeps all deployment snapshots — instant rollback available. Database: MongoDB Atlas M0 includes automatic daily backups. Media (R2): no automatic backup — this is the one gap. Should be documented clearly and a manual backup schedule agreed.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Mostly covered</span></div>
+    <div class="cell owner">R2 backup gap → document</div>
+  </div>
+
+  <!-- WEB-028 -->
+  <div class="row" data-status="done">
+    <div class="cell cell-id">WEB-028</div>
+    <div class="cell cell-content">
+      <div class="title">Rollback / deployment recovery process</div>
+      <div class="response">Built into Vercel. Every deployment is saved and can be instantly re-activated with one click from the Vercel dashboard — no terminal, no code needed. If a deployment breaks something, rollback takes under 60 seconds. Worth documenting in a one-page guide so David knows where to click.</div>
+    </div>
+    <div class="cell"><span class="badge badge-done">Built into Vercel</span></div>
+    <div class="cell owner">Document the steps</div>
+  </div>
+
+  <!-- WEB-029 -->
+  <div class="row" data-status="theirs">
+    <div class="cell cell-id">WEB-029</div>
+    <div class="cell cell-content">
+      <div class="title">Access rights and 2FA audit</div>
+      <div class="response">Each person needs to review their own accounts. David and Marcel should enable 2FA on Stripe, Brevo, Google (GTM/GA4), and EasyName. Rafaela handles Vercel, GitHub, MongoDB, and Cloudflare R2. Nobody can manage another person's account security — everyone does their own part.</div>
+    </div>
+    <div class="cell"><span class="badge badge-theirs">Each person their own</span></div>
+    <div class="cell owner">David + Marcel + Rafaela</div>
+  </div>
+
+  <!-- WEB-030 -->
+  <div class="row" data-status="future">
+    <div class="cell cell-id">WEB-030</div>
+    <div class="cell cell-content">
+      <div class="title">Knowledge hub / blog roadmap</div>
+      <div class="response">Parked. Strong SEO potential but not the right time to build it. The CMS is ready to support a blog when the decision is made — it's an additive feature, not a rebuild.</div>
+    </div>
+    <div class="cell"><span class="badge badge-future">Parked</span></div>
+    <div class="cell owner">Future — David decides when</div>
+  </div>
+
+  <!-- WEB-031 -->
+  <div class="row" data-status="future">
+    <div class="cell cell-id">WEB-031</div>
+    <div class="cell cell-content">
+      <div class="title">Online course platform strategy</div>
+      <div class="response">Parked. Needs a business model decision before any development. Specialist course platforms (Teachable, Kajabi) vs. building inside this system are very different paths — scope properly when the product is ready.</div>
+    </div>
+    <div class="cell"><span class="badge badge-future">Parked</span></div>
+    <div class="cell owner">David decides direction first</div>
+  </div>
+
+  <!-- WEB-032 -->
+  <div class="row" data-status="future">
+    <div class="cell cell-id">WEB-032</div>
+    <div class="cell cell-content">
+      <div class="title">B2B order area</div>
+      <div class="response">Parked. A full B2B ordering system is a significant build. Makes sense when recurring B2B sales are happening at volume and the manual process becomes a bottleneck. Not urgent.</div>
+    </div>
+    <div class="cell"><span class="badge badge-future">Parked</span></div>
+    <div class="cell owner">Future — when B2B scales</div>
+  </div>
+
+  <!-- WEB-033 -->
+  <div class="row" data-status="together">
+    <div class="cell cell-id">WEB-033</div>
+    <div class="cell cell-content">
+      <div class="title">Cancellation of workshops and individual bookings</div>
+      <div class="response">Valid and important feature — not yet built. Two separate things: (1) David cancels an entire workshop session and all attendees get an automated cancellation email; (2) David cancels an individual customer booking and that customer gets an email. Both require new logic in the admin, a Brevo cancellation email template, and Stripe refund handling. Needs to be scoped and quoted as paid development work.</div>
+    </div>
+    <div class="cell"><span class="badge badge-together">Scope + quote</span></div>
+    <div class="cell owner">Paid development — scope together</div>
+  </div>
+
+</div>
+
+<script>
+  function filter(status) {
+    const rows = document.querySelectorAll('.row');
+    rows.forEach(row => {
+      if (status === 'all' || row.dataset.status === status) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+    document.querySelectorAll('.summary-pill').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
