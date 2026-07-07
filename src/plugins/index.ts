@@ -34,7 +34,7 @@ import { mediaFixR2UrlAfterReadPlugin } from '@/plugins/mediaFixR2UrlAfterRead'
 import { getServerSideURL } from '@/utilities/getURL'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
+  return doc?.title ? `${doc.title} | FermentFreude` : 'FermentFreude'
 }
 
 const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
