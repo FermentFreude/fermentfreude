@@ -4,7 +4,6 @@ import { DangerAccordion } from '@/app/(app)/fermentation/DangerAccordion'
 import { FaqAccordion } from '@/app/(app)/fermentation/FaqAccordion'
 import { PracticeAccordion } from '@/app/(app)/fermentation/PracticeAccordion'
 import { WhySection } from '@/app/(app)/fermentation/WhySection'
-import { EditPageLink } from '@/components/EditPageLink'
 import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
 import { OnlineCoursePopupCta } from '@/components/OnlineCoursePopupCta'
@@ -1028,9 +1027,6 @@ export default async function FermentationPage({ searchParams }: FermentationPag
         />
       </FadeIn>
 
-      {page?.id && (
-        <EditPageLink collection="pages" id={String(page.id)} label="Edit page in Admin" />
-      )}
     </article>
   )
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
 import { ContactBlockComponent } from '@/blocks/ContactBlock/Component'
-import { EditPageLink } from '@/components/EditPageLink'
 import { GastronomyOfferCards } from '@/components/gastronomy/GastronomyOfferCards'
 import { GastronomyProductSlider } from '@/components/gastronomy/GastronomyProductSlider'
 import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
@@ -642,9 +641,6 @@ export default async function GastronomyPage() {
         locale={locale as 'de' | 'en'}
       />
 
-      {page?.id && (
-        <EditPageLink collection="pages" id={String(page.id)} label="Edit page in Admin" />
-      )}
     </article>
   )
 }
