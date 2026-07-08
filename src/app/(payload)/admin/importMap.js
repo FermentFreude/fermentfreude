@@ -27,8 +27,10 @@ import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f
 import { Icon as Icon_dfe4008080d895d460898c3a6155e9ba } from '../../../components/admin/Icon'
 import { Logo as Logo_91a09b539d3c86b0aebf520e7564ce08 } from '../../../components/admin/Logo'
 import { WorkshopRosterNavLink as WorkshopRosterNavLink_cc7fad2a16d4f683158ac3c68ebaa6f4 } from '../../../components/admin/WorkshopRosterNavLink'
+import { AnalyticsNavLink as AnalyticsNavLink_29fa5c324cecba6cafb11381cbfac962 } from '../../../components/admin/AnalyticsNavLink'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { WorkshopRosterView as WorkshopRosterView_b3728385e2666ef74641233e5f8bae70 } from '../../../components/admin/WorkshopRosterView'
+import { AnalyticsView as AnalyticsView_e3b35b44f6b14d102431def2313ebb66 } from '../../../components/admin/AnalyticsView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -61,7 +63,9 @@ export const importMap = {
   "/components/admin/Icon#Icon": Icon_dfe4008080d895d460898c3a6155e9ba,
   "/components/admin/Logo#Logo": Logo_91a09b539d3c86b0aebf520e7564ce08,
   "/components/admin/WorkshopRosterNavLink#WorkshopRosterNavLink": WorkshopRosterNavLink_cc7fad2a16d4f683158ac3c68ebaa6f4,
+  "/components/admin/AnalyticsNavLink#AnalyticsNavLink": AnalyticsNavLink_29fa5c324cecba6cafb11381cbfac962,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "/components/admin/WorkshopRosterView#WorkshopRosterView": WorkshopRosterView_b3728385e2666ef74641233e5f8bae70,
+  "/components/admin/AnalyticsView#AnalyticsView": AnalyticsView_e3b35b44f6b14d102431def2313ebb66,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

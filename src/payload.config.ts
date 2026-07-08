@@ -101,11 +101,18 @@ export default buildConfig({
         Logo: '/components/admin/Logo#Logo',
         Icon: '/components/admin/Icon#Icon',
       },
-      beforeNavLinks: ['/components/admin/WorkshopRosterNavLink#WorkshopRosterNavLink'],
+      beforeNavLinks: [
+        '/components/admin/WorkshopRosterNavLink#WorkshopRosterNavLink',
+        '/components/admin/AnalyticsNavLink#AnalyticsNavLink',
+      ],
       views: {
         workshopRoster: {
           Component: '/components/admin/WorkshopRosterView#WorkshopRosterView',
           path: '/workshop-roster',
+        },
+        analytics: {
+          Component: '/components/admin/AnalyticsView#AnalyticsView',
+          path: '/analytics',
         },
       },
     },
