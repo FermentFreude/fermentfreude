@@ -189,6 +189,6 @@ To deploy: open a PR from `staging` into `main` and merge it. Vercel builds and 
 | Role | Person |
 |---|---|
 | Developer | Rafaela |
-| Co-developer | Ala'a |
+| Developer | Ala'a |
 | Founder / content | David |
 | Founder / content | Marcel |
