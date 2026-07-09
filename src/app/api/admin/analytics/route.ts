@@ -38,7 +38,7 @@ export async function GET() {
   // Admin-only
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers: await headers() })
-  if (!user || (user as any).role !== 'admin') {
+  if (!user || !(user as any).roles?.includes('admin')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
