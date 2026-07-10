@@ -1,7 +1,33 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm generate:types)"
+      "Bash(pnpm generate:types)",
+      "Bash(git stash *)",
+      "Bash(gh deployment *)",
+      "Bash(gh api *)",
+      "Bash(gh run *)",
+      "Bash(git fetch *)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude diff origin/main...origin/staging -- src/lib/stripe.ts src/app/api/voucher/checkout/route.ts src/app/api/voucher/confirm/route.ts src/collections/Vouchers.ts)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude log --oneline origin/main..origin/staging)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude log --oneline HEAD..origin/staging)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude log --oneline origin/staging..HEAD)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude log --oneline -10)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude branch -a)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude log --oneline -5 origin/main)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude log --oneline -5 origin/staging)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude show HEAD:src/app/api/voucher/checkout/route.ts)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude log --oneline --all)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude diff --stat)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude add src/app/api/checkout/attach-customer-name/route.ts src/components/checkout/ConfirmOrder.tsx)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude commit -m ' *)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude push origin staging)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude checkout main)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude merge staging)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude push origin main)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude checkout feature/workshop-roster-dashboard)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude show HEAD:src/components/checkout/ConfirmOrder.tsx)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude show origin/main:src/components/checkout/ConfirmOrder.tsx)",
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude add src/app/api/voucher/place-order/route.ts src/app/api/orders/[orderId]/receipt/route.ts)"
     ]
   }
 }

@@ -15,6 +15,7 @@ import {
 import path from 'path'
 import { buildConfig } from 'payload'
 
+import { BacklogItems } from '@/collections/BacklogItems'
 import { BrevoEmailTemplates } from '@/collections/BrevoEmailTemplates'
 import { BrevoTemplates } from '@/collections/BrevoTemplates'
 import { CancellationRequests } from '@/collections/CancellationRequests'
@@ -103,12 +104,17 @@ export default buildConfig({
       },
       beforeNavLinks: [
         '/components/admin/WorkshopRosterNavLink#WorkshopRosterNavLink',
+        '/components/admin/BacklogNavLink#BacklogNavLink',
         '/components/admin/AnalyticsNavLink#AnalyticsNavLink',
       ],
       views: {
         workshopRoster: {
           Component: '/components/admin/WorkshopRosterView#WorkshopRosterView',
           path: '/workshop-roster',
+        },
+        backlog: {
+          Component: '/components/admin/BacklogView#BacklogView',
+          path: '/backlog',
         },
         analytics: {
           Component: '/components/admin/AnalyticsView#AnalyticsView',
@@ -156,6 +162,7 @@ export default buildConfig({
   },
   collections: [
     Users,
+    BacklogItems,
     Pages,
     Categories,
     CourseProgress,

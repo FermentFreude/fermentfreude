@@ -73,6 +73,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    'backlog-items': BacklogItem;
     pages: Page;
     categories: Category;
     'course-progress': CourseProgress;
@@ -121,6 +122,7 @@ export interface Config {
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    'backlog-items': BacklogItemsSelect<false> | BacklogItemsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'course-progress': CourseProgressSelect<false> | CourseProgressSelect<true>;
@@ -4173,6 +4175,58 @@ export interface Address {
   createdAt: string;
 }
 /**
+ * Internal team backlog — bugs, features, decisions and next steps. Managed via the Backlog board (sidebar), not this default admin form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "backlog-items".
+ */
+export interface BacklogItem {
+  id: string;
+  /**
+   * e.g. WEB-001, CASE-01, DEC-01
+   */
+  itemId: string;
+  board: 'current' | 'new';
+  title: string;
+  category: 'bug' | 'feature' | 'content' | 'legal' | 'org' | 'performance' | 'design' | 'decision';
+  priority: 'critical' | 'must' | 'should' | 'nice';
+  status: 'open' | 'partial' | 'their-action' | 'blocked' | 'done' | 'future';
+  effort: 'XS' | 'S' | 'M' | 'L' | 'XL';
+  owners?: ('dev' | 'alaa' | 'david' | 'marcel')[] | null;
+  /**
+   * Where on the site this relates to, without leading slash
+   */
+  slug?: string | null;
+  /**
+   * e.g. WEB-033 — links this item to another one on the board
+   */
+  related?: string | null;
+  description?: string | null;
+  response?: string | null;
+  notes?: string | null;
+  todos?:
+    | {
+        text: string;
+        done?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Only used for category=decision items. Edited via the Backlog board decision widget.
+   */
+  decision?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4659,6 +4713,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'backlog-items';
+        value: string | BacklogItem;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -4840,6 +4898,35 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "backlog-items_select".
+ */
+export interface BacklogItemsSelect<T extends boolean = true> {
+  itemId?: T;
+  board?: T;
+  title?: T;
+  category?: T;
+  priority?: T;
+  status?: T;
+  effort?: T;
+  owners?: T;
+  slug?: T;
+  related?: T;
+  description?: T;
+  response?: T;
+  notes?: T;
+  todos?:
+    | T
+    | {
+        text?: T;
+        done?: T;
+        id?: T;
+      };
+  decision?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
