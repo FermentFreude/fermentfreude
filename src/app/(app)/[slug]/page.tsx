@@ -57,16 +57,18 @@ export default async function Page({ params }: Args) {
     hero.type === 'heroCarousel' ||
     hero.type === 'heroGrid' ||
     hero.type === 'heroSplit' ||
+    hero.type === 'heroPress' ||
     hero.type === 'foodPresentationSlider' ||
     hero.type === 'highImpact'
   const isLegalPage = LEGAL_SLUGS.includes(slug)
+  const skipTopPadding = isFullBleedHero
 
   return (
     <article
-      className={isFullBleedHero ? 'pb-24' : `pt-16 pb-24${isLegalPage ? ' page-legal' : ''}`}
+      className={skipTopPadding ? 'pb-24' : `pt-16 pb-24${isLegalPage ? ' page-legal' : ''}`}
     >
       <RenderHero {...hero} locale={locale} />
-      <RenderBlocks blocks={enrichedLayout} slug={slug} />
+      <RenderBlocks blocks={enrichedLayout} slug={slug} locale={locale} />
       {slug === 'home' && !enrichedLayout.some((b) => b?.blockType === 'testimonials') && (
         <TestimonialsGlobalWrapper id="testimonials" />
       )}
@@ -88,17 +90,17 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
 
 const queryPageBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' | 'en' }) => {
   const { isEnabled: draft } = await draftMode()
+  const resolvedLocale = locale ?? 'de'
 
-  if (draft) {
-    // Draft mode: bypass cache, always fetch live content for editors
+  const fetchLivePage = async () => {
     const payload = await getPayload({ config: configPromise })
     const result = await payload.find({
       collection: 'pages',
       depth: 5,
-      draft: true,
+      draft: draft,
       limit: 1,
-      locale,
-      overrideAccess: true,
+      locale: resolvedLocale,
+      overrideAccess: draft,
       pagination: false,
       where: {
         and: [
@@ -107,14 +109,19 @@ const queryPageBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' |
               equals: slug,
             },
           },
+          ...(draft ? [] : [{ _status: { equals: 'published' as const } }]),
         ],
       },
     })
     return result.docs?.[0] || null
   }
 
-  // Regular visitors: use cached query result (busted by revalidatePage hook on CMS save)
-  return getCachedPage(slug, locale ?? 'de')
+  // Dev + draft: always fetch live (avoids stale 404 after seeding)
+  if (draft || process.env.NODE_ENV === 'development') {
+    return fetchLivePage()
+  }
+
+  return getCachedPage(slug, resolvedLocale)
 }
 
 const getCachedPage = unstable_cache(

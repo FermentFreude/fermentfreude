@@ -5,24 +5,48 @@ import React, { useEffect, useRef } from 'react'
 
 import type { Props as MediaProps } from '../types'
 
+function resolveMediaSrc(resource: NonNullable<MediaProps['resource']>): string | null {
+  if (typeof resource !== 'object' || resource === null) return null
+
+  const { filename, url } = resource
+  const base = (process.env.NEXT_PUBLIC_SERVER_URL || '').replace(/\/$/, '')
+
+  if (url && typeof url === 'string') {
+    return url.startsWith('http') || url.startsWith('/')
+      ? url
+      : base
+        ? `${base}/${url.replace(/^\//, '')}`
+        : url.startsWith('/')
+          ? url
+          : `/${url}`
+  }
+
+  if (filename) {
+    return base ? `${base}/media/${filename}` : `/media/${filename}`
+  }
+
+  return null
+}
+
 export const Video: React.FC<MediaProps> = (props) => {
-  const { onClick, resource, videoClassName } = props
+  const { onClick, onVideoCanPlay, resource, videoClassName, videoMuted = true, videoPoster } = props
 
   const videoRef = useRef<HTMLVideoElement>(null)
-  // const [showFallback] = useState<boolean>()
 
   useEffect(() => {
-    const { current: video } = videoRef
-    if (video) {
-      video.addEventListener('suspend', () => {
-        // setShowFallback(true);
-        // console.warn('Video was suspended, rendering fallback image.')
-      })
+    const video = videoRef.current
+    if (!video) return
+    video.muted = videoMuted
+    if (!videoMuted) {
+      void video.play().catch(() => undefined)
     }
-  }, [])
+  }, [videoMuted])
 
   if (resource && typeof resource === 'object') {
-    const { filename } = resource
+    const { mimeType } = resource
+    const src = resolveMediaSrc(resource)
+
+    if (!src) return null
 
     return (
       <video
@@ -30,12 +54,15 @@ export const Video: React.FC<MediaProps> = (props) => {
         className={cn(videoClassName)}
         controls={false}
         loop
-        muted
+        muted={videoMuted}
+        onCanPlay={() => onVideoCanPlay?.()}
         onClick={onClick}
         playsInline
+        poster={videoPoster}
+        preload="auto"
         ref={videoRef}
       >
-        <source src={`${process.env.NEXT_PUBLIC_SERVER_URL}/media/${filename}`} />
+        <source src={src} type={mimeType ?? undefined} />
       </video>
     )
   }

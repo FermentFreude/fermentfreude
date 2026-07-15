@@ -13,11 +13,14 @@ export interface Props {
   imgStyle?: React.CSSProperties
   onClick?: () => void
   onLoad?: () => void
+  onVideoCanPlay?: () => void
   priority?: boolean // for NextImage only
   ref?: Ref<HTMLImageElement | HTMLVideoElement | null>
   resource?: MediaType | string | number // for Payload media
   size?: string // for NextImage only
   src?: StaticImageData // for static media
   videoClassName?: string
+  videoMuted?: boolean
+  videoPoster?: string
   width?: number
 }

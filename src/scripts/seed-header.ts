@@ -64,6 +64,7 @@ const deNavItems = [
     dropdownItems: [
       { label: 'Über uns', href: '/about', description: 'Unser Team & unsere Mission' },
       { label: 'Fermentation', href: '/fermentation', description: 'Was ist Fermentation?' },
+      { label: 'Presse & Medien', href: '/presse', description: 'Artikel, TV & Auszeichnungen' },
       { label: 'Kontakt', href: '/contact', description: 'Schreib uns' },
     ],
   },
@@ -71,7 +72,7 @@ const deNavItems = [
 
 const enDropdownRemap: Record<number, string[]> = {
   1: ['All Workshops', 'Lacto Vegetables', 'Tempeh', 'Kombucha', 'Online Courses', 'Gift Voucher'],
-  4: ['About Us', 'Fermentation', 'Contact'],
+  4: ['About Us', 'Fermentation', 'Press & Media', 'Contact'],
 }
 
 const enDescriptions: Record<number, Record<number, string>> = {
@@ -82,7 +83,8 @@ const enDescriptions: Record<number, Record<number, string>> = {
   4: {
     0: 'Our Team & Mission',
     1: 'What is Fermentation?',
-    2: 'Get in touch',
+    2: 'Articles, TV & Awards',
+    3: 'Get in touch',
   },
 }
 

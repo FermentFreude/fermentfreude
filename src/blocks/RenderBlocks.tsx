@@ -15,6 +15,7 @@ import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Componen
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { OnlineCourseSliderBlock } from '@/blocks/OnlineCourseSlider/Component'
 import { OurStoryBlock } from '@/blocks/OurStory/Component'
+import { PressMediaAwardsBlock } from '@/blocks/PressMediaAwards/Component'
 import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { ReadyToLearnCTABlock } from '@/blocks/ReadyToLearnCTA/Component'
 import { ShopHeroComponent } from '@/blocks/ShopHero/Component'
@@ -50,6 +51,7 @@ const blockComponents = {
   heroBanner: HeroBannerBlock,
   mediaBlock: MediaBlock,
   ourStory: OurStoryBlock,
+  pressMediaAwards: PressMediaAwardsBlock,
   readyToLearnCta: ReadyToLearnCTABlock,
   sponsorsBar: SponsorsBarBlock,
   teamCards: TeamCardsBlock,
@@ -97,18 +99,22 @@ const globalWrappers: Record<
 export const RenderBlocks: React.FC<{
   blocks: NonNullable<Page['layout']>
   slug?: string
+  locale?: 'de' | 'en'
 }> = (props) => {
-  const { blocks, slug } = props
+  const { blocks, slug, locale } = props
   const blockList = blocks ?? []
   const isAbout = slug === 'about'
   const isShop = slug === 'shop'
   const isProductDetail = slug === 'product-detail'
   const isLegalPage = slug === 'agb' || slug === 'datenschutz' || slug === 'impressum'
+  const isPresse = slug === 'presse'
   const gapClass = isAbout
     ? 'mb-12 last:mb-0' // increased margin between sections on About
     : isShop
       ? 'first:mt-0 last:mb-0' // shop: no extra margin between blocks (each block handles its own padding)
-      : 'my-[var(--space-section-md)] first:mt-0 last:mb-0'
+      : isPresse
+        ? 'first:mt-0 last:mb-0'
+        : 'my-[var(--space-section-md)] first:mt-0 last:mb-0'
 
   const hasBlocks = blockList.length > 0
 
@@ -161,6 +167,7 @@ export const RenderBlocks: React.FC<{
                   <Block
                     {...block}
                     id={blockId}
+                    locale={locale}
                     className={
                       isLegalContentBlock
                         ? 'legal-content-block'

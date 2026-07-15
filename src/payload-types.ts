@@ -747,6 +747,7 @@ export interface Page {
       | 'highImpact'
       | 'lowImpact'
       | 'heroSplit'
+      | 'heroPress'
       | 'heroCarousel'
       | 'heroGrid'
       | 'foodPresentationSlider'
@@ -845,9 +846,25 @@ export interface Page {
      */
     splitCtaUrl?: string | null;
     /**
-     * Large image on the right side
+     * Photo on the right side of the hero (Split layout only).
      */
     splitMedia?: (string | null) | Media;
+    /**
+     * Upload an MP4 — this is the moving background visitors see. To replace: Remove the current file, upload a new MP4, Save.
+     */
+    splitHeroVideo?: (string | null) | Media;
+    /**
+     * Optional. Shown only for visitors with “reduce motion” enabled — not the main hero background.
+     */
+    splitMediaPoster?: (string | null) | Media;
+    /**
+     * Used only when no MP4 is uploaded above. e.g. https://www.youtube.com/watch?v=…
+     */
+    splitYoutubeUrl?: string | null;
+    /**
+     * Start time in seconds (e.g. 395 = 6:35).
+     */
+    splitYoutubeStart?: number | null;
     richTextLowImpact?: {
       root: {
         type: string;
@@ -889,6 +906,7 @@ export interface Page {
         | ArchiveBlock
         | CarouselBlock
         | OurStoryBlock
+        | PressMediaAwardsBlock
         | OnlineCourseSliderBlock
         | ProductSliderBlock
         | FeaturedProductCardsBlock
@@ -2899,6 +2917,160 @@ export interface OurStoryBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'ourStory';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PressMediaAwardsBlock".
+ */
+export interface PressMediaAwardsBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Heading above additional (non-featured) entries. Shown only when at least one featured entry exists.
+   */
+  moreCoverageHeading?: string | null;
+  /**
+   * Intro text before secondary links on a card (e.g. "Weitere Berichte:").
+   */
+  secondaryLinksPrefix?: string | null;
+  /**
+   * Short tags shown above each card date (e.g. "Presse", "TV"). Leave empty to use built-in defaults.
+   */
+  typeLabels?: {
+    press?: string | null;
+    tv?: string | null;
+    award?: string | null;
+    expert?: string | null;
+    origin?: string | null;
+  };
+  /**
+   * Top hero section — headline and intro text for the press page.
+   */
+  intro: {
+    /**
+     * Small label above the H1 (e.g. "PRESSE").
+     */
+    label?: string | null;
+    heading: string;
+    /**
+     * Intro paragraph below the heading.
+     */
+    description?: string | null;
+    /**
+     * Poster / fallback image while the video loads, or static hero if no video is set.
+     */
+    bannerImage?: (string | null) | Media;
+    /**
+     * Optional looped background video (MP4/WebM). Upload in Media — shown muted, autoplay, no controls.
+     */
+    bannerVideo?: (string | null) | Media;
+    /**
+     * Alternative: path to a video in /public (e.g. /assets/videos/fermentation-cta.mp4). Used when no uploaded video is set.
+     */
+    bannerVideoUrl?: string | null;
+  };
+  /**
+   * Articles, TV features, awards, and expert appearances. Drag to reorder — newest first.
+   */
+  items?:
+    | {
+        /**
+         * Highlight this entry visually (e.g. Kleine Zeitung, Kanal 3).
+         */
+        featured?: boolean | null;
+        type: 'press' | 'tv' | 'award' | 'expert' | 'origin';
+        /**
+         * One main photo or video still per entry (~1200 px wide, WebP). Alt text is set on the Media item.
+         */
+        image?: (string | null) | Media;
+        /**
+         * Shown directly below the image (e.g. "Bild: © Fermentfreude").
+         */
+        imageCredit?: string | null;
+        /**
+         * Use if a TV watermark or outlet logo is still visible in the photo. Best fix: upload a clean photo without baked-in logos.
+         */
+        imageCrop?: ('auto' | 'top' | 'center' | 'upper-center') | null;
+        /**
+         * Optional outlet logo shown in the masthead strip above the photo. Use official brand assets when available.
+         */
+        logo?: (string | null) | Media;
+        /**
+         * Publication, TV channel, or institution (e.g. "Kleine Zeitung", "kanal3").
+         */
+        outlet: string;
+        /**
+         * Human-readable date as shown on the site (e.g. "27. September 2025", "März 2026").
+         */
+        dateLabel?: string | null;
+        /**
+         * Optional accent-colored line before the main headline (e.g. "Von der Masterclass zum Markt:"). Leave empty to show only the headline below.
+         */
+        titleHighlight?: string | null;
+        /**
+         * Color for the highlight line. Only applies when Highlight Text is filled in.
+         */
+        titleHighlightColor?: ('gold' | 'near-black' | 'olive') | null;
+        /**
+         * Main card headline (H2). If you use a highlight line above, put the rest of the title here.
+         */
+        title: string;
+        /**
+         * Short paragraph describing the coverage or award.
+         */
+        description: string;
+        /**
+         * Button text (e.g. "Originalartikel lesen", "TV-Beitrag ansehen").
+         */
+        ctaLabel?: string | null;
+        /**
+         * External link — opens in a new tab with an external-link icon.
+         */
+        url?: string | null;
+        /**
+         * Optional smaller links below the primary CTA (e.g. additional press coverage).
+         */
+        secondaryLinks?:
+          | {
+              label: string;
+              url: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Conversion section below the press entries.
+   */
+  footerCta?: {
+    enabled?: boolean | null;
+    /**
+     * Small gold label above the footer CTA heading (e.g. "Mehr entdecken").
+     */
+    eyebrow?: string | null;
+    heading?: string | null;
+    description?: string | null;
+    primaryButton?: {
+      label?: string | null;
+      /**
+       * Internal path (e.g. /workshops) or full URL.
+       */
+      href?: string | null;
+    };
+    secondaryButton?: {
+      label?: string | null;
+      /**
+       * Internal path (e.g. /gastronomy) or full URL.
+       */
+      href?: string | null;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pressMediaAwards';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5054,6 +5226,10 @@ export interface PagesSelect<T extends boolean = true> {
         splitCtaLabel?: T;
         splitCtaUrl?: T;
         splitMedia?: T;
+        splitHeroVideo?: T;
+        splitMediaPoster?: T;
+        splitYoutubeUrl?: T;
+        splitYoutubeStart?: T;
         richTextLowImpact?: T;
         slides?:
           | T
@@ -5079,6 +5255,7 @@ export interface PagesSelect<T extends boolean = true> {
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         ourStory?: T | OurStoryBlockSelect<T>;
+        pressMediaAwards?: T | PressMediaAwardsBlockSelect<T>;
         onlineCourseSlider?: T | OnlineCourseSliderBlockSelect<T>;
         productSlider?: T | ProductSliderBlockSelect<T>;
         featuredProductCards?: T | FeaturedProductCardsBlockSelect<T>;
@@ -5859,6 +6036,82 @@ export interface OurStoryBlockSelect<T extends boolean = true> {
         text?: T;
         image?: T;
         id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PressMediaAwardsBlock_select".
+ */
+export interface PressMediaAwardsBlockSelect<T extends boolean = true> {
+  visible?: T;
+  moreCoverageHeading?: T;
+  secondaryLinksPrefix?: T;
+  typeLabels?:
+    | T
+    | {
+        press?: T;
+        tv?: T;
+        award?: T;
+        expert?: T;
+        origin?: T;
+      };
+  intro?:
+    | T
+    | {
+        label?: T;
+        heading?: T;
+        description?: T;
+        bannerImage?: T;
+        bannerVideo?: T;
+        bannerVideoUrl?: T;
+      };
+  items?:
+    | T
+    | {
+        featured?: T;
+        type?: T;
+        image?: T;
+        imageCredit?: T;
+        imageCrop?: T;
+        logo?: T;
+        outlet?: T;
+        dateLabel?: T;
+        titleHighlight?: T;
+        titleHighlightColor?: T;
+        title?: T;
+        description?: T;
+        ctaLabel?: T;
+        url?: T;
+        secondaryLinks?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  footerCta?:
+    | T
+    | {
+        enabled?: T;
+        eyebrow?: T;
+        heading?: T;
+        description?: T;
+        primaryButton?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
+        secondaryButton?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
       };
   id?: T;
   blockName?: T;

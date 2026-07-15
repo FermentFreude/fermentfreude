@@ -120,6 +120,44 @@ export async function optimizedFile(
 }
 
 /**
+ * Rasterize SVG logos to PNG for reliable <img> rendering in browsers.
+ * SVGs with <text> often fail silently when used as img src.
+ */
+export async function rasterizeLogoFile(filePath: string): Promise<{
+  name: string
+  data: Buffer
+  mimetype: string
+  size: number
+}> {
+  const ext = path.extname(filePath).slice(1).toLowerCase()
+  const baseName = path.basename(filePath, path.extname(filePath))
+
+  if (ext !== 'svg') {
+    return optimizedFile(filePath, IMAGE_PRESETS.logo)
+  }
+
+  const inputBuffer = fs.readFileSync(filePath)
+  const { maxWidth = IMAGE_PRESETS.logo.maxWidth } = IMAGE_PRESETS.logo
+  const outputBuffer = await sharp(inputBuffer, { density: 300 })
+    .resize({ width: maxWidth, withoutEnlargement: true })
+    .png()
+    .toBuffer()
+
+  const originalKB = (inputBuffer.byteLength / 1024).toFixed(0)
+  const outputKB = (outputBuffer.byteLength / 1024).toFixed(0)
+  console.log(
+    `   🏷️  ${path.basename(filePath)}: SVG → ${baseName}.png (${originalKB}KB → ${outputKB}KB)`,
+  )
+
+  return {
+    name: `${baseName}.png`,
+    data: outputBuffer,
+    mimetype: 'image/png',
+    size: outputBuffer.byteLength,
+  }
+}
+
+/**
  * Read a local file without optimization — for SVGs, already-optimized files,
  * or any file that shouldn't be converted.
  */
@@ -138,6 +176,8 @@ export function readLocalFile(filePath: string): {
     webp: 'image/webp',
     svg: 'image/svg+xml',
     gif: 'image/gif',
+    mp4: 'video/mp4',
+    webm: 'video/webm',
   }
   return {
     name: path.basename(filePath),

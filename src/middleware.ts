@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 export function middleware(request: NextRequest) {
   const previewPassword = process.env.PREVIEW_PASSWORD
 
+  // Local dev: no preview gate (set PREVIEW_PASSWORD only on staging/production)
+  if (process.env.NODE_ENV === 'development') return NextResponse.next()
+
   // If no password is set, site is public — skip gate
   if (!previewPassword) return NextResponse.next()
 

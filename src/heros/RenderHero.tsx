@@ -7,6 +7,7 @@ import { FoodPresentationSlider } from '@/heros/FoodPresentationSlider'
 import { HeroCarousel } from '@/heros/HeroCarousel'
 import { HeroGrid } from '@/heros/HeroGrid'
 import { HeroSlider } from '@/heros/HeroSlider'
+import { HeroPress } from '@/heros/HeroPress'
 import { HeroSplit } from '@/heros/HeroSplit'
 import { HighImpactHero } from '@/heros/HighImpact'
 import { LowImpactHero } from '@/heros/LowImpact'
@@ -17,6 +18,7 @@ const heroes = {
   heroCarousel: HeroCarousel,
   heroGrid: HeroGrid,
   heroSplit: HeroSplit,
+  heroPress: HeroPress,
   highImpact: HighImpactHero,
   heroSlider: HeroSlider,
   lowImpact: LowImpactHero,

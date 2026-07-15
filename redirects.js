@@ -1,6 +1,11 @@
 const redirects = async () => {
   return [
     {
+      source: '/press',
+      destination: '/presse',
+      permanent: true,
+    },
+    {
       source: '/products',
       destination: '/shop',
       permanent: true,

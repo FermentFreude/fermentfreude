@@ -16,6 +16,7 @@
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation next lint --fix",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "seed": "npx tsx src/scripts/seed-all.ts",
+    "postinstall": "node scripts/patch-payload-body-hydration.mjs",
     "patch:email-visuals": "npx tsx src/scripts/patch-brevo-email-visuals.ts",
     "upload:email-icons": "node --env-file=.env scripts/upload-email-icons-to-r2.mjs",
     "upload:email-icons:dry": "node scripts/upload-email-icons-to-r2.mjs --dry-run",

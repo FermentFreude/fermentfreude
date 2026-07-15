@@ -7,6 +7,17 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
+/** Resolve hero `type` inside nested collapsibles (siblingData may omit group-level fields). */
+function isHeroType(
+  data: Record<string, unknown>,
+  siblingData: Record<string, unknown> | undefined,
+  ...types: string[]
+): boolean {
+  const hero = data?.hero as { type?: string } | undefined
+  const t = siblingData?.type ?? hero?.type
+  return typeof t === 'string' && types.includes(t)
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
  * HERO FIELD CONFIGURATION
  * Clean, editor-friendly admin interface
@@ -38,6 +49,7 @@ export const hero: Field = {
         { label: '📷 Full Image Banner', value: 'highImpact' },
         { label: '📄 Simple Title', value: 'lowImpact' },
         { label: '⬜ Split (Text + Image)', value: 'heroSplit' },
+        { label: '📰 Press / Media Banner', value: 'heroPress' },
         { label: '🎠 Photo Carousel', value: 'heroCarousel' },
         { label: '▦ Offerings Grid', value: 'heroGrid' },
         { label: '🍽️ Food Presentation', value: 'foodPresentationSlider' },
@@ -335,11 +347,12 @@ export const hero: Field = {
      * ═══════════════════════════════════════════════════════════════════════ */
     {
       type: 'collapsible',
-      label: '⬜ Split Content',
+      label: '⬜ Split / Press Content',
       admin: {
-        condition: (_, { type } = {}) => type === 'heroSplit',
+        condition: (_, { type } = {}) => type === 'heroSplit' || type === 'heroPress',
         initCollapsed: false,
-        description: 'Label, heading, description, and link on the left. Image on the right.',
+        description:
+          'Label, heading, description, and image. Split = text left / image right. Press = full-width cinematic banner.',
       },
       fields: [
         {
@@ -394,8 +407,60 @@ export const hero: Field = {
           relationTo: 'media',
           label: 'Image',
           admin: {
-            description: 'Large image on the right side',
+            condition: (data, siblingData) => isHeroType(data, siblingData, 'heroSplit'),
+            description: 'Photo on the right side of the hero (Split layout only).',
           },
+        },
+        {
+          name: 'splitHeroVideo',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Hero background video',
+          admin: {
+            condition: (data, siblingData) => isHeroType(data, siblingData, 'heroPress'),
+            description:
+              'Upload an MP4 — this is the moving background visitors see. To replace: Remove the current file, upload a new MP4, Save.',
+          },
+        },
+        {
+          name: 'splitMediaPoster',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Poster image (accessibility only)',
+          admin: {
+            condition: (data, siblingData) => isHeroType(data, siblingData, 'heroPress'),
+            description:
+              'Optional. Shown only for visitors with “reduce motion” enabled — not the main hero background.',
+          },
+        },
+        {
+          type: 'collapsible',
+          label: '⚙️ Or use YouTube instead',
+          admin: {
+            condition: (data, siblingData) => isHeroType(data, siblingData, 'heroPress'),
+            initCollapsed: true,
+            description:
+              'Optional. Paste a YouTube link instead of uploading MP4. MP4 upload above is recommended — it plays more reliably.',
+          },
+          fields: [
+            {
+              name: 'splitYoutubeUrl',
+              type: 'text',
+              label: 'YouTube URL',
+              admin: {
+                description: 'Used only when no MP4 is uploaded above. e.g. https://www.youtube.com/watch?v=…',
+              },
+            },
+            {
+              name: 'splitYoutubeStart',
+              type: 'number',
+              label: 'Start at (seconds)',
+              admin: {
+                width: '50%',
+                description: 'Start time in seconds (e.g. 395 = 6:35).',
+              },
+            },
+          ],
         },
       ],
     },

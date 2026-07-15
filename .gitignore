@@ -44,6 +44,9 @@ seed-assets/
 
 public/media
 
+# Large YouTube source downloads (trimmed loop is committed)
+public/assets/videos/presse-kanal3-hero-source.mp4
+
 # Cursor AI - ignore local settings but keep shared rules
 .cursor/mcp.json
 .cursor/settings.json
