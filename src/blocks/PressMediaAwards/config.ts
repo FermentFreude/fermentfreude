@@ -37,47 +37,6 @@ export const PressMediaAwards: Block = {
       },
     },
     {
-      name: 'typeLabels',
-      type: 'group',
-      label: 'Category Labels',
-      admin: {
-        description:
-          'Short tags shown above each card date (e.g. "Presse", "TV"). Leave empty to use built-in defaults.',
-      },
-      fields: [
-        {
-          name: 'press',
-          type: 'text',
-          localized: true,
-          label: 'Press',
-        },
-        {
-          name: 'tv',
-          type: 'text',
-          localized: true,
-          label: 'TV / Video',
-        },
-        {
-          name: 'award',
-          type: 'text',
-          localized: true,
-          label: 'Award',
-        },
-        {
-          name: 'expert',
-          type: 'text',
-          localized: true,
-          label: 'Expert appearance',
-        },
-        {
-          name: 'origin',
-          type: 'text',
-          localized: true,
-          label: 'Our beginnings',
-        },
-      ],
-    },
-    {
       name: 'intro',
       type: 'group',
       label: 'Page Intro (Hero)',
@@ -140,12 +99,19 @@ export const PressMediaAwards: Block = {
     {
       name: 'items',
       type: 'array',
-      label: 'Press & Media Entries',
+      label: 'Coverage Entries',
       minRows: 0,
-      maxRows: 30,
       admin: {
+        initCollapsed: false,
         description:
-          'Articles, TV features, awards, and expert appearances. Drag to reorder — newest first.',
+          'Add as many entries as you like — press, TV, podcasts, awards, events, or anything else. Click “Add Entry”, fill in the fields, and drag rows to reorder (newest first).',
+        components: {
+          RowLabel: '@/blocks/PressMediaAwards/pressItemRowLabel.tsx#PressItemRowLabel',
+        },
+      },
+      labels: {
+        singular: 'Entry',
+        plural: 'Entries',
       },
       fields: [
         {
@@ -154,21 +120,36 @@ export const PressMediaAwards: Block = {
           label: 'Featured entry',
           defaultValue: false,
           admin: {
-            description: 'Highlight this entry visually (e.g. Kleine Zeitung, Kanal 3).',
+            description:
+              'Show this entry in the large two-column row at the top. Use for your most important coverage (max 2 recommended).',
+          },
+        },
+        {
+          name: 'categoryLabel',
+          type: 'text',
+          required: true,
+          localized: true,
+          label: 'Category tag',
+          admin: {
+            description:
+              'Short label shown above the date — any text you like (e.g. “Presse”, “TV”, “Podcast”, “Auszeichnung”, “Event”).',
           },
         },
         {
           name: 'type',
           type: 'select',
-          required: true,
           defaultValue: 'press',
-          label: 'Category',
+          label: 'Photo layout preset',
+          admin: {
+            description:
+              'Optional. Only affects automatic photo cropping when “Photo Crop” is set to Automatic. Does not limit what you can add.',
+          },
           options: [
-            { label: 'Presse / Press', value: 'press' },
-            { label: 'TV / Video', value: 'tv' },
-            { label: 'Auszeichnung / Award', value: 'award' },
-            { label: 'Fachauftritt / Expert appearance', value: 'expert' },
-            { label: 'Unsere Anfänge / Our beginnings', value: 'origin' },
+            { label: 'Press / article photo', value: 'press' },
+            { label: 'TV / video still', value: 'tv' },
+            { label: 'Award / event photo', value: 'award' },
+            { label: 'Expert / conference', value: 'expert' },
+            { label: 'Origin / story photo', value: 'origin' },
           ],
         },
         {
@@ -303,9 +284,12 @@ export const PressMediaAwards: Block = {
           name: 'secondaryLinks',
           type: 'array',
           label: 'Secondary Links',
-          maxRows: 4,
           admin: {
             description: 'Optional smaller links below the primary CTA (e.g. additional press coverage).',
+          },
+          labels: {
+            singular: 'Link',
+            plural: 'Links',
           },
           fields: [
             {
@@ -322,6 +306,84 @@ export const PressMediaAwards: Block = {
               label: 'URL',
             },
           ],
+        },
+      ],
+    },
+    {
+      name: 'pressContact',
+      type: 'group',
+      label: 'Press Contact',
+      admin: {
+        description:
+          'Shown below the press entries for journalists (interviews / media inquiries). Toggle off to hide.',
+      },
+      fields: [
+        {
+          name: 'enabled',
+          type: 'checkbox',
+          label: 'Show press contact',
+          defaultValue: true,
+        },
+        {
+          name: 'eyebrow',
+          type: 'text',
+          localized: true,
+          label: 'Eyebrow Label',
+          admin: {
+            description: 'Small label above the heading (e.g. "Press contact").',
+          },
+        },
+        {
+          name: 'heading',
+          type: 'text',
+          localized: true,
+          label: 'Heading',
+          admin: {
+            description: 'Main line (e.g. "For interviews and media inquiries").',
+          },
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          localized: true,
+          label: 'Short description',
+          admin: {
+            description: 'Optional supporting sentence under the heading.',
+          },
+        },
+        {
+          name: 'name',
+          type: 'text',
+          localized: true,
+          label: 'Contact name',
+          admin: {
+            description: 'Person or people journalists should address (e.g. "David Haider & Marcel Rauminger").',
+          },
+        },
+        {
+          name: 'email',
+          type: 'text',
+          label: 'Email',
+          admin: {
+            description: 'Press email shown as a clickable mailto link (e.g. kontakt@fermentfreude.at).',
+          },
+        },
+        {
+          name: 'linkLabel',
+          type: 'text',
+          localized: true,
+          label: 'Optional page link label',
+          admin: {
+            description: 'Optional. e.g. "General contact". Leave empty to hide the link.',
+          },
+        },
+        {
+          name: 'linkHref',
+          type: 'text',
+          label: 'Optional page link URL',
+          admin: {
+            description: 'Internal path (e.g. /contact). Only used when link label is set.',
+          },
         },
       ],
     },

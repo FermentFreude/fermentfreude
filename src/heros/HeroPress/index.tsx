@@ -142,12 +142,13 @@ export const HeroPress: React.FC<HeroPressProps> = (props) => {
           <div className="absolute inset-0 bg-ff-near-black" aria-hidden />
         )}
 
+        {/* Soft scrim only — keeps white text readable without washing the video in black */}
         <div
-          className="absolute inset-0 bg-linear-to-t from-black/90 via-black/55 to-black/20"
+          className="absolute inset-0 bg-linear-to-t from-black/55 via-black/20 to-black/10"
           aria-hidden
         />
         <div
-          className="absolute inset-0 bg-linear-to-r from-black/70 via-black/25 to-transparent lg:from-black/80"
+          className="absolute inset-0 bg-linear-to-r from-black/40 via-black/10 to-transparent"
           aria-hidden
         />
 

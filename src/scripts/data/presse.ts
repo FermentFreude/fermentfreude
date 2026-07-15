@@ -55,6 +55,7 @@ export const presseHeroEN = (args: PresseHeroArgs = {}) => ({
 
 type PressItemSeed = {
   featured?: boolean
+  categoryLabel: string
   type: 'press' | 'tv' | 'award' | 'expert' | 'origin'
   image?: string
   imageCredit?: string
@@ -74,6 +75,7 @@ type PressItemSeed = {
 const PRESS_ITEMS_DE: PressItemSeed[] = [
   {
     featured: true,
+    categoryLabel: 'Presse',
     type: 'press',
     imageCrop: 'top',
     imageCredit: 'Bild: © Fermentfreude',
@@ -89,6 +91,7 @@ const PRESS_ITEMS_DE: PressItemSeed[] = [
   },
   {
     featured: true,
+    categoryLabel: 'TV',
     type: 'tv',
     imageCrop: 'top',
     imageCredit: 'Video: kanal3 Regionalfernseh GmbH · Redaktion: Michael Forstner · Kamera & Schnitt: Franziska Ettl',
@@ -103,6 +106,7 @@ const PRESS_ITEMS_DE: PressItemSeed[] = [
     url: 'https://www.kanal3.tv/?cid=15&vid=13957',
   },
   {
+    categoryLabel: 'Auszeichnung',
     type: 'award',
     imageCrop: 'top',
     imageCredit: 'Foto: © Christof Hütter Fotografie',
@@ -125,6 +129,7 @@ const PRESS_ITEMS_DE: PressItemSeed[] = [
     ],
   },
   {
+    categoryLabel: 'Fachauftritt',
     type: 'expert',
     imageCrop: 'top',
     imageCredit: 'Bild: © SFG / Rene Strasser',
@@ -137,6 +142,7 @@ const PRESS_ITEMS_DE: PressItemSeed[] = [
     url: 'https://www.sfg.at/styrian-food-hub/bundeskongress-fermentation/',
   },
   {
+    categoryLabel: 'Unsere Anfänge',
     type: 'origin',
     imageCrop: 'top',
     imageCredit: 'Bild: © KLZ / Cornelia Lehner',
@@ -153,6 +159,7 @@ const PRESS_ITEMS_DE: PressItemSeed[] = [
 const PRESS_ITEMS_EN: PressItemSeed[] = [
   {
     featured: true,
+    categoryLabel: 'Press',
     type: 'press',
     imageCrop: 'top',
     imageCredit: 'Photo: © FermentFreude',
@@ -168,6 +175,7 @@ const PRESS_ITEMS_EN: PressItemSeed[] = [
   },
   {
     featured: true,
+    categoryLabel: 'TV',
     type: 'tv',
     imageCrop: 'top',
     imageCredit: 'Video: kanal3 Regionalfernseh GmbH · Editor: Michael Forstner · Camera & edit: Franziska Ettl',
@@ -182,6 +190,7 @@ const PRESS_ITEMS_EN: PressItemSeed[] = [
     url: 'https://www.kanal3.tv/?cid=15&vid=13957',
   },
   {
+    categoryLabel: 'Award',
     type: 'award',
     imageCrop: 'top',
     imageCredit: 'Photo: © Christof Hütter Fotografie',
@@ -204,6 +213,7 @@ const PRESS_ITEMS_EN: PressItemSeed[] = [
     ],
   },
   {
+    categoryLabel: 'Expert appearance',
     type: 'expert',
     imageCrop: 'top',
     imageCredit: 'Photo: © SFG / Rene Strasser',
@@ -216,6 +226,7 @@ const PRESS_ITEMS_EN: PressItemSeed[] = [
     url: 'https://www.sfg.at/styrian-food-hub/bundeskongress-fermentation/',
   },
   {
+    categoryLabel: 'Our beginnings',
     type: 'origin',
     imageCrop: 'top',
     imageCredit: 'Photo: © KLZ / Cornelia Lehner',
@@ -235,13 +246,6 @@ export const pressMediaAwardsDE = () => ({
   visible: true,
   moreCoverageHeading: 'Weitere Erwähnungen',
   secondaryLinksPrefix: 'Weitere Berichte:',
-  typeLabels: {
-    press: 'Presse',
-    tv: 'TV',
-    award: 'Auszeichnung',
-    expert: 'Fachauftritt',
-    origin: 'Unsere Anfänge',
-  },
   intro: {
     label: 'PRESSE',
     heading: 'Fermentfreude in den Medien',
@@ -249,6 +253,17 @@ export const pressMediaAwardsDE = () => ({
       'Fermentfreude bringt Fermentation in die Öffentlichkeit – mit innovativen Lebensmitteln, fundiertem Fachwissen und praxisnahen Workshops. Berichte in Presse und TV, Auszeichnungen und Auftritte bei Fachveranstaltungen zeigen, dass unsere Arbeit rund um Käferbohnen-Tempeh, regionale Rohstoffe und Fermentationswissen Aufmerksamkeit erhält.',
   },
   items: PRESS_ITEMS_DE,
+  pressContact: {
+    enabled: true,
+    eyebrow: 'Pressekontakt',
+    heading: 'Interviews und Medienanfragen',
+    description:
+      'Für Pressegespräche, Interviewanfragen und Bildmaterial schreiben Sie uns gerne.',
+    name: 'David Haider & Marcel Rauminger',
+    email: 'kontakt@fermentfreude.at',
+    linkLabel: 'Allgemeiner Kontakt',
+    linkHref: '/contact',
+  },
   footerCta: {
     enabled: true,
     eyebrow: 'Mehr entdecken',
@@ -266,13 +281,6 @@ export const pressMediaAwardsEN = () => ({
   visible: true,
   moreCoverageHeading: 'More coverage',
   secondaryLinksPrefix: 'More coverage:',
-  typeLabels: {
-    press: 'Press',
-    tv: 'TV',
-    award: 'Award',
-    expert: 'Expert appearance',
-    origin: 'Our beginnings',
-  },
   intro: {
     label: 'PRESS',
     heading: 'FermentFreude in the Media',
@@ -280,6 +288,16 @@ export const pressMediaAwardsEN = () => ({
       'FermentFreude brings fermentation into the public eye — with innovative foods, expert knowledge, and hands-on workshops. Press and TV coverage, awards, and appearances at industry events show that our work on field-bean tempeh and regional ingredients is gaining attention.',
   },
   items: PRESS_ITEMS_EN,
+  pressContact: {
+    enabled: true,
+    eyebrow: 'Press contact',
+    heading: 'For interviews and media inquiries',
+    description: 'For press interviews, media requests, and image material, get in touch.',
+    name: 'David Haider & Marcel Rauminger',
+    email: 'kontakt@fermentfreude.at',
+    linkLabel: 'General contact',
+    linkHref: '/contact',
+  },
   footerCta: {
     enabled: true,
     eyebrow: 'Discover more',

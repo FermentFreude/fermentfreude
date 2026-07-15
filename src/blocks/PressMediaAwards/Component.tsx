@@ -4,7 +4,7 @@ import { Media } from '@/components/Media'
 import { FadeIn } from '@/components/FadeIn'
 import type { Media as MediaType, PressMediaAwardsBlock as PressMediaAwardsBlockType } from '@/payload-types'
 import { useLocale, type Locale } from '@/providers/Locale'
-import { ExternalLink } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, ExternalLink, Mail, UtensilsCrossed, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -66,6 +66,15 @@ const DEFAULTS: Record<
       primary: { label: string; href: string }
       secondary: { label: string; href: string }
     }
+    pressContact: {
+      eyebrow: string
+      heading: string
+      description: string
+      name: string
+      email: string
+      linkLabel: string
+      linkHref: string
+    }
   }
 > = {
   de: {
@@ -94,6 +103,15 @@ const DEFAULTS: Record<
       primary: { label: 'Workshops entdecken', href: '/workshops' },
       secondary: { label: 'B2B & Kooperationen', href: '/gastronomy' },
     },
+    pressContact: {
+      eyebrow: 'PresseKontakt',
+      heading: 'Interviews und Medienanfragen',
+      description: 'Für Pressegespräche, Interviewanfragen und Bildmaterial schreiben Sie uns gerne.',
+      name: 'David Haider & Marcel Rauminger',
+      email: 'kontakt@fermentfreude.at',
+      linkLabel: 'Allgemeiner Kontakt',
+      linkHref: '/contact',
+    },
   },
   en: {
     moreCoverageHeading: 'More coverage',
@@ -121,11 +139,20 @@ const DEFAULTS: Record<
       primary: { label: 'Explore workshops', href: '/workshops' },
       secondary: { label: 'B2B & partnerships', href: '/gastronomy' },
     },
+    pressContact: {
+      eyebrow: 'Press contact',
+      heading: 'For interviews and media inquiries',
+      description: 'For press interviews, media requests, and image material, get in touch.',
+      name: 'David Haider & Marcel Rauminger',
+      email: 'kontakt@fermentfreude.at',
+      linkLabel: 'General contact',
+      linkHref: '/contact',
+    },
   },
 }
 
 const BTN_PRIMARY =
-  'inline-flex items-center justify-center rounded-full bg-ff-near-black px-6 py-2.5 font-display text-base font-bold leading-none text-white transition-all hover:scale-[1.03] hover:bg-transparent hover:text-ff-near-black hover:shadow-[inset_0_0_0_2px_var(--ff-near-black)] active:scale-[0.97] whitespace-nowrap'
+  'inline-flex items-center justify-center rounded-full bg-ff-charcoal px-6 py-2.5 font-display text-base font-bold leading-none text-white transition-all hover:scale-[1.03] hover:bg-transparent hover:text-ff-charcoal hover:shadow-[inset_0_0_0_2px_var(--ff-charcoal)] active:scale-[0.97] whitespace-nowrap'
 
 function PressCtaLink({
   href,
@@ -150,9 +177,6 @@ function PressCtaLink({
     </a>
   )
 }
-
-const BTN_SECONDARY =
-  'inline-flex items-center justify-center rounded-full border-2 border-ff-near-black bg-transparent px-6 py-2.5 font-display text-base font-bold leading-none text-ff-near-black transition-all hover:scale-[1.03] hover:bg-ff-near-black hover:text-white active:scale-[0.97] whitespace-nowrap w-fit'
 
 type PressItem = NonNullable<PressMediaAwardsBlockType['items']>[number]
 
@@ -185,13 +209,11 @@ function buildMarqueeOutlets(items: PressItem[]): MarqueeOutlet[] {
 
 type Props = PressMediaAwardsBlockType & { id?: string; locale?: Locale }
 
-function resolveTypeLabel(
-  itemType: ItemType,
-  typeLabels: PressMediaAwardsBlockType['typeLabels'],
-  locale: Locale,
-): string {
-  const fromCms = typeLabels?.[itemType]?.trim()
-  if (fromCms) return fromCms
+function resolveCategoryLabel(item: PressItem, locale: Locale): string {
+  const fromItem = item.categoryLabel?.trim()
+  if (fromItem) return fromItem
+
+  const itemType = (item.type ?? 'press') as ItemType
   return DEFAULTS[locale].typeLabels[itemType] ?? itemType
 }
 
@@ -200,7 +222,7 @@ export const PressMediaAwardsBlock: React.FC<Props> = ({
   items,
   moreCoverageHeading,
   secondaryLinksPrefix,
-  typeLabels,
+  pressContact,
   footerCta,
   id,
   locale: localeProp,
@@ -237,7 +259,6 @@ export const PressMediaAwardsBlock: React.FC<Props> = ({
                       index={index}
                       locale={locale}
                       layout="featured"
-                      typeLabels={typeLabels}
                       secondaryLinksPrefix={resolvedSecondaryLinksPrefix}
                     />
                   ))}
@@ -269,7 +290,6 @@ export const PressMediaAwardsBlock: React.FC<Props> = ({
                       index={featuredItems.length + index}
                       locale={locale}
                       layout="full"
-                      typeLabels={typeLabels}
                       secondaryLinksPrefix={resolvedSecondaryLinksPrefix}
                     />
                   ))}
@@ -278,6 +298,10 @@ export const PressMediaAwardsBlock: React.FC<Props> = ({
             ) : null}
           </div>
         </section>
+      ) : null}
+
+      {pressContact?.enabled !== false ? (
+        <PressContactSection pressContact={pressContact} locale={locale} />
       ) : null}
 
       {footerCta?.enabled !== false ? (
@@ -477,19 +501,17 @@ function PressCard({
   index,
   locale,
   layout = 'full',
-  typeLabels,
   secondaryLinksPrefix,
 }: {
   item: PressItem
   index: number
   locale: Locale
   layout?: 'featured' | 'full'
-  typeLabels?: PressMediaAwardsBlockType['typeLabels']
   secondaryLinksPrefix: string
 }) {
   const defaults = DEFAULTS[locale]
   const itemType = (item.type ?? 'press') as ItemType
-  const typeLabel = resolveTypeLabel(itemType, typeLabels, locale)
+  const typeLabel = resolveCategoryLabel(item, locale)
   const hasUrl = Boolean(item.url?.trim())
   const ctaLabel =
     item.ctaLabel?.trim() || defaults.ctaByType[itemType] || defaults.ctaFallback
@@ -578,6 +600,102 @@ function PressCard({
   )
 }
 
+function PressContactSection({
+  pressContact,
+  locale,
+}: {
+  pressContact: PressMediaAwardsBlockType['pressContact']
+  locale: Locale
+}) {
+  const defaults = DEFAULTS[locale].pressContact
+  const eyebrow = pressContact?.eyebrow?.trim() || defaults.eyebrow
+  const heading = pressContact?.heading?.trim() || defaults.heading
+  const description = pressContact?.description?.trim() || defaults.description
+  const name = pressContact?.name?.trim() || defaults.name
+  const email = pressContact?.email?.trim() || defaults.email
+  const linkLabel = pressContact?.linkLabel?.trim() || defaults.linkLabel
+  const linkHref = pressContact?.linkHref?.trim() || defaults.linkHref
+
+  if (!heading && !email) return null
+
+  return (
+    <section className="relative overflow-hidden bg-ff-near-black">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, white 1px, transparent 0)',
+          backgroundSize: '24px 24px',
+        }}
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -right-20 top-1/2 size-64 -translate-y-1/2 rounded-full bg-ff-gold-accent/20 blur-3xl"
+        aria-hidden
+      />
+
+      <div className="container relative mx-auto container-padding section-padding-sm">
+        <FadeIn delay={60} duration={1} from="bottom">
+          <div className="content-wide mx-auto grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-center lg:gap-16">
+            <div>
+              {eyebrow ? (
+                <span className="text-eyebrow font-display font-semibold tracking-[0.28em] text-ff-gold-accent">
+                  {eyebrow.toUpperCase()}
+                </span>
+              ) : null}
+              {heading ? (
+                <h2 className="text-section-heading mt-4 max-w-xl font-display font-bold leading-tight text-white">
+                  {heading}
+                </h2>
+              ) : null}
+              {description ? (
+                <p className="mt-5 max-w-lg font-sans text-body-lg leading-relaxed text-white/70">
+                  {description}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="flex flex-col gap-5 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm md:p-8">
+              {name ? (
+                <div>
+                  <p className="font-sans text-caption uppercase tracking-[0.18em] text-white/45">
+                    {locale === 'de' ? 'Ansprechpartner' : 'Contact'}
+                  </p>
+                  <p className="mt-2 font-display text-body-lg font-bold text-white">{name}</p>
+                </div>
+              ) : null}
+
+              {email ? (
+                <a
+                  href={`mailto:${email}`}
+                  className="group inline-flex w-full items-center justify-between gap-3 rounded-full bg-ff-gold-accent px-5 py-3.5 font-display text-body font-bold text-ff-near-black transition-all hover:scale-[1.02] hover:bg-ff-gold-accent-dark active:scale-[0.98] sm:w-fit"
+                >
+                  <span className="inline-flex min-w-0 items-center gap-2.5">
+                    <Mail className="size-4 shrink-0" aria-hidden />
+                    <span className="truncate">{email}</span>
+                  </span>
+                  <ArrowUpRight
+                    className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    aria-hidden
+                  />
+                </a>
+              ) : null}
+
+              {linkLabel && linkHref ? (
+                <Link
+                  href={linkHref}
+                  className="w-fit font-sans text-body-sm font-medium text-white/55 underline-offset-4 transition-colors hover:text-white hover:underline"
+                >
+                  {linkLabel}
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  )
+}
+
 function PressFooterCta({
   footerCta,
   locale,
@@ -599,7 +717,7 @@ function PressFooterCta({
   }
 
   return (
-    <section className="section-padding-md bg-[#F8F8F8] pt-0">
+    <section className="section-padding-md bg-[#F8F8F8]">
       <div className="container mx-auto container-padding">
         <FadeIn delay={80} duration={1.05} from="bottom">
           <div className="content-medium relative mx-auto md:pl-2.5">
@@ -623,12 +741,37 @@ function PressFooterCta({
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
-                  <Link href={primary.href ?? '/workshops'} className={`${BTN_PRIMARY} w-fit`}>
-                    {primary.label}
+                <div className="flex flex-col gap-3">
+                  <Link
+                    href={primary.href ?? '/workshops'}
+                    className="group flex items-center gap-4 rounded-2xl border border-ff-border-light bg-[#FAFAFA] px-4 py-3.5 transition-all hover:-translate-y-0.5 hover:border-ff-near-black/20 hover:bg-white hover:shadow-sm"
+                  >
+                    <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-ff-charcoal text-white transition-colors group-hover:bg-ff-gold-accent group-hover:text-ff-near-black">
+                      <Users className="size-5" aria-hidden />
+                    </span>
+                    <span className="min-w-0 flex-1 font-display text-body font-bold text-ff-near-black">
+                      {primary.label}
+                    </span>
+                    <ArrowRight
+                      className="size-4 shrink-0 text-ff-gray-15 transition-transform group-hover:translate-x-0.5 group-hover:text-ff-near-black"
+                      aria-hidden
+                    />
                   </Link>
-                  <Link href={secondary.href ?? '/gastronomy'} className={BTN_SECONDARY}>
-                    {secondary.label}
+
+                  <Link
+                    href={secondary.href ?? '/gastronomy'}
+                    className="group flex items-center gap-4 rounded-2xl border border-ff-border-light bg-[#FAFAFA] px-4 py-3.5 transition-all hover:-translate-y-0.5 hover:border-ff-near-black/20 hover:bg-white hover:shadow-sm"
+                  >
+                    <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-ff-gold-accent text-ff-near-black transition-colors group-hover:bg-ff-charcoal group-hover:text-white">
+                      <UtensilsCrossed className="size-5" aria-hidden />
+                    </span>
+                    <span className="min-w-0 flex-1 font-display text-body font-bold text-ff-near-black">
+                      {secondary.label}
+                    </span>
+                    <ArrowRight
+                      className="size-4 shrink-0 text-ff-gray-15 transition-transform group-hover:translate-x-0.5 group-hover:text-ff-near-black"
+                      aria-hidden
+                    />
                   </Link>
                 </div>
               </div>

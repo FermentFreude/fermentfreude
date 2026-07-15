@@ -2936,16 +2936,6 @@ export interface PressMediaAwardsBlock {
    */
   secondaryLinksPrefix?: string | null;
   /**
-   * Short tags shown above each card date (e.g. "Presse", "TV"). Leave empty to use built-in defaults.
-   */
-  typeLabels?: {
-    press?: string | null;
-    tv?: string | null;
-    award?: string | null;
-    expert?: string | null;
-    origin?: string | null;
-  };
-  /**
    * Top hero section — headline and intro text for the press page.
    */
   intro: {
@@ -2972,15 +2962,22 @@ export interface PressMediaAwardsBlock {
     bannerVideoUrl?: string | null;
   };
   /**
-   * Articles, TV features, awards, and expert appearances. Drag to reorder — newest first.
+   * Add as many entries as you like — press, TV, podcasts, awards, events, or anything else. Click “Add Entry”, fill in the fields, and drag rows to reorder (newest first).
    */
   items?:
     | {
         /**
-         * Highlight this entry visually (e.g. Kleine Zeitung, Kanal 3).
+         * Show this entry in the large two-column row at the top. Use for your most important coverage (max 2 recommended).
          */
         featured?: boolean | null;
-        type: 'press' | 'tv' | 'award' | 'expert' | 'origin';
+        /**
+         * Short label shown above the date — any text you like (e.g. “Presse”, “TV”, “Podcast”, “Auszeichnung”, “Event”).
+         */
+        categoryLabel: string;
+        /**
+         * Optional. Only affects automatic photo cropping when “Photo Crop” is set to Automatic. Does not limit what you can add.
+         */
+        type?: ('press' | 'tv' | 'award' | 'expert' | 'origin') | null;
         /**
          * One main photo or video still per entry (~1200 px wide, WebP). Alt text is set on the Media item.
          */
@@ -3042,6 +3039,40 @@ export interface PressMediaAwardsBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Shown below the press entries for journalists (interviews / media inquiries). Toggle off to hide.
+   */
+  pressContact?: {
+    enabled?: boolean | null;
+    /**
+     * Small label above the heading (e.g. "Press contact").
+     */
+    eyebrow?: string | null;
+    /**
+     * Main line (e.g. "For interviews and media inquiries").
+     */
+    heading?: string | null;
+    /**
+     * Optional supporting sentence under the heading.
+     */
+    description?: string | null;
+    /**
+     * Person or people journalists should address (e.g. "David Haider & Marcel Rauminger").
+     */
+    name?: string | null;
+    /**
+     * Press email shown as a clickable mailto link (e.g. kontakt@fermentfreude.at).
+     */
+    email?: string | null;
+    /**
+     * Optional. e.g. "General contact". Leave empty to hide the link.
+     */
+    linkLabel?: string | null;
+    /**
+     * Internal path (e.g. /contact). Only used when link label is set.
+     */
+    linkHref?: string | null;
+  };
   /**
    * Conversion section below the press entries.
    */
@@ -6048,15 +6079,6 @@ export interface PressMediaAwardsBlockSelect<T extends boolean = true> {
   visible?: T;
   moreCoverageHeading?: T;
   secondaryLinksPrefix?: T;
-  typeLabels?:
-    | T
-    | {
-        press?: T;
-        tv?: T;
-        award?: T;
-        expert?: T;
-        origin?: T;
-      };
   intro?:
     | T
     | {
@@ -6071,6 +6093,7 @@ export interface PressMediaAwardsBlockSelect<T extends boolean = true> {
     | T
     | {
         featured?: T;
+        categoryLabel?: T;
         type?: T;
         image?: T;
         imageCredit?: T;
@@ -6092,6 +6115,18 @@ export interface PressMediaAwardsBlockSelect<T extends boolean = true> {
               id?: T;
             };
         id?: T;
+      };
+  pressContact?:
+    | T
+    | {
+        enabled?: T;
+        eyebrow?: T;
+        heading?: T;
+        description?: T;
+        name?: T;
+        email?: T;
+        linkLabel?: T;
+        linkHref?: T;
       };
   footerCta?:
     | T
