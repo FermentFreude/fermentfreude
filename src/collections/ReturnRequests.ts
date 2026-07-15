@@ -1,7 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
+import { adminOnly } from '@/access/adminOnly'
+
 export const ReturnRequests: CollectionConfig = {
   slug: 'return-requests',
+  access: {
+    create: adminOnly,
+    read: adminOnly,
+    update: adminOnly,
+    delete: adminOnly,
+  },
   admin: {
     useAsTitle: 'id',
     group: 'Shop',

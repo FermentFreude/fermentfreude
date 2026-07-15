@@ -4183,26 +4183,76 @@ export interface Address {
 export interface BacklogItem {
   id: string;
   /**
-   * e.g. WEB-001, CASE-01, DEC-01
+   * e.g. WEB-001
    */
   itemId: string;
-  board: 'current' | 'new';
+  board: 'roadmap' | 'backlog' | 'features';
   title: string;
-  category: 'bug' | 'feature' | 'content' | 'legal' | 'org' | 'performance' | 'design' | 'decision';
+  /**
+   * Only used when this item acts as a folder in the Features/Backlog folder view (i.e. it has 2+ children) — a broader, friendlier name for the whole initiative (e.g. "Refund & Cancellation Architecture"). Leave blank to just use the title above. Never overrides the title itself, so a Roadmap item stays an exact match to the spreadsheet.
+   */
+  folderLabel?: string | null;
+  category:
+    | 'org'
+    | 'bug'
+    | 'content'
+    | 'legal'
+    | 'crm'
+    | 'shop'
+    | 'analytics'
+    | 'performance'
+    | 'seo'
+    | 'design'
+    | 'dashboard'
+    | 'security'
+    | 'feature'
+    | 'future';
   priority: 'critical' | 'must' | 'should' | 'nice';
   status: 'open' | 'partial' | 'their-action' | 'blocked' | 'done' | 'future';
-  effort: 'XS' | 'S' | 'M' | 'L' | 'XL';
-  owners?: ('dev' | 'alaa' | 'david' | 'marcel')[] | null;
+  effort: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'Unknown';
+  /**
+   * From the roadmap spreadsheet — how much this matters to the business, separate from build effort
+   */
+  businessValue?: ('critical' | 'high' | 'medium' | 'low') | null;
+  /**
+   * Is this covered by the monthly retainer, or does it need a separate agreement/billing with David & Marcel?
+   */
+  billingScope: 'included' | 'extra';
+  owners?: ('dev' | 'admin')[] | null;
   /**
    * Where on the site this relates to, without leading slash
    */
   slug?: string | null;
   /**
-   * e.g. WEB-033 — links this item to another one on the board
+   * e.g. WEB-033 — a loose "see also" pointer. For real parent/child structure, use Parent item below instead.
    */
   related?: string | null;
+  /**
+   * Structural parent — e.g. a Case breakdown (New Features) belongs under its Main Roadmap epic. Drives the sub-items rollup shown on the parent.
+   */
+  parent?: (string | null) | BacklogItem;
+  /**
+   * Which week/month this is committed for, e.g. "Week of Jul 14" or "August batch" — leave blank if not yet scheduled.
+   */
+  plannedFor?: string | null;
   description?: string | null;
   response?: string | null;
+  /**
+   * From the roadmap spreadsheet — which systems or pages this touches
+   */
+  area?: string | null;
+  /**
+   * From the roadmap spreadsheet — why this item exists
+   */
+  sourceContext?: string | null;
+  /**
+   * From the roadmap spreadsheet — what this needs before it can be built
+   */
+  dependencies?: string | null;
+  /**
+   * From the roadmap spreadsheet — the immediate next step
+   */
+  nextActionText?: string | null;
   notes?: string | null;
   todos?:
     | {
@@ -4212,7 +4262,17 @@ export interface BacklogItem {
       }[]
     | null;
   /**
-   * Only used for category=decision items. Edited via the Backlog board decision widget.
+   * Reference links only — Google Drive, Figma, Notion, screenshots, docs. Not uploaded files. Add as many as needed.
+   */
+  links?:
+    | {
+        label?: string | null;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional — attach an open architecture decision to this item (question + options + recommended pick). Edited via the Backlog board decision widget.
    */
   decision?:
     | {
@@ -4907,21 +4967,37 @@ export interface BacklogItemsSelect<T extends boolean = true> {
   itemId?: T;
   board?: T;
   title?: T;
+  folderLabel?: T;
   category?: T;
   priority?: T;
   status?: T;
   effort?: T;
+  businessValue?: T;
+  billingScope?: T;
   owners?: T;
   slug?: T;
   related?: T;
+  parent?: T;
+  plannedFor?: T;
   description?: T;
   response?: T;
+  area?: T;
+  sourceContext?: T;
+  dependencies?: T;
+  nextActionText?: T;
   notes?: T;
   todos?:
     | T
     | {
         text?: T;
         done?: T;
+        id?: T;
+      };
+  links?:
+    | T
+    | {
+        label?: T;
+        url?: T;
         id?: T;
       };
   decision?: T;

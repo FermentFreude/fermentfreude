@@ -1,19 +1,28 @@
-export type Owner = 'dev' | 'alaa' | 'david' | 'marcel'
+export type Owner = 'dev' | 'admin'
 export type Category =
+  | 'org'
   | 'bug'
-  | 'feature'
   | 'content'
   | 'legal'
-  | 'org'
+  | 'crm'
+  | 'shop'
+  | 'analytics'
   | 'performance'
+  | 'seo'
   | 'design'
-  | 'decision'
+  | 'dashboard'
+  | 'security'
+  | 'feature'
+  | 'future'
 export type Priority = 'critical' | 'must' | 'should' | 'nice'
+export type BusinessValue = 'critical' | 'high' | 'medium' | 'low'
 export type Status = 'open' | 'partial' | 'their-action' | 'blocked' | 'done' | 'future'
-export type Effort = 'XS' | 'S' | 'M' | 'L' | 'XL'
-export type Board = 'current' | 'new'
+export type Effort = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'Unknown'
+export type Board = 'roadmap' | 'backlog' | 'features'
+export type BillingScope = 'included' | 'extra'
 
 export type Todo = { id?: string; text: string; done: boolean }
+export type ItemLink = { id?: string; label?: string; url: string }
 
 export type DecisionOption = { label: string; desc: string; recommended?: boolean }
 export type Decision = {
@@ -28,28 +37,47 @@ export type BacklogItem = {
   itemId: string
   board: Board
   title: string
+  folderLabel?: string
   category: Category
   priority: Priority
+  businessValue?: BusinessValue
   status: Status
   effort: Effort
+  billingScope: BillingScope
   owners: Owner[]
   slug?: string
   related?: string
+  parent?: string | null
+  plannedFor?: string
   description?: string
   response?: string
+  area?: string
+  sourceContext?: string
+  dependencies?: string
+  nextActionText?: string
   notes?: string
   todos?: Todo[]
+  links?: ItemLink[]
   decision?: Decision | null
 }
 
 export const PRI_ORDER: Record<Priority, number> = { critical: 0, must: 1, should: 2, nice: 3 }
-export const EFF_ORDER: Record<Effort, number> = { XS: 0, S: 1, M: 2, L: 3, XL: 4 }
+export const EFF_ORDER: Record<Effort, number> = { XS: 0, S: 1, M: 2, L: 3, XL: 4, Unknown: 5 }
+
+// ── Brand palette: black / gold / grey only. Gold is the single accent — used for
+// critical priority, primary actions, active states, and "needs attention" markers.
+// Everything else is differentiated by weight and fill, not hue. ──────────────────
+export const ACCENT = '#E6BE68' // ff-gold
+export const INK = '#1A1A1A' // ff-near-black
+export const INK_SOFT = '#4B4B4B' // ff-charcoal
+export const MUTED = '#767671' // muted grey text
+export const BORDER = '#E3DFD4' // warm hairline border
 
 export const PRI_COLORS: Record<Priority, string> = {
-  critical: '#B91C1C',
-  must: '#B45309',
-  should: '#1D4ED8',
-  nice: '#9CA3AF',
+  critical: ACCENT,
+  must: INK,
+  should: INK_SOFT,
+  nice: MUTED,
 }
 export const PRI_LABELS: Record<Priority, string> = {
   critical: 'Critical',
@@ -61,53 +89,86 @@ export const PRI_LABELS: Record<Priority, string> = {
 export const STATUS_LABELS: Record<Status, string> = {
   open: 'Open',
   partial: 'In Progress',
-  'their-action': 'Their Action',
-  blocked: 'Blocked',
+  'their-action': 'Need Decision',
+  blocked: 'Parked',
   done: 'Done',
-  future: 'Parked',
+  future: 'Future',
 }
+// dot fill only — solid black (active), solid gold (needs attention), grey outline (settled)
 export const STATUS_COLORS: Record<Status, string> = {
-  open: '#3B82F6',
-  partial: '#F59E0B',
-  'their-action': '#8B5CF6',
-  blocked: '#EF4444',
-  done: '#22C55E',
-  future: '#94A3B8',
+  open: INK,
+  partial: INK_SOFT,
+  'their-action': ACCENT,
+  blocked: INK,
+  done: MUTED,
+  future: MUTED,
 }
 
 export const OWNER_LABELS: Record<Owner, string> = {
   dev: 'Dev',
-  alaa: "Ala'a",
-  david: 'David',
-  marcel: 'Marcel',
+  admin: 'Admin',
 }
 
-export const CATEGORY_COLORS: Record<Category, { bg: string; ink: string; br: string }> = {
-  bug: { bg: '#FEF2F2', ink: '#991B1B', br: '#FECACA' },
-  feature: { bg: '#EFF6FF', ink: '#1E40AF', br: '#BFDBFE' },
-  content: { bg: '#F9FAFB', ink: '#374151', br: '#D1D5DB' },
-  performance: { bg: '#FFF7ED', ink: '#C2410C', br: '#FED7AA' },
-  design: { bg: '#FAF5FF', ink: '#7C3AED', br: '#DDD6FE' },
-  org: { bg: '#F0F9FF', ink: '#075985', br: '#BAE6FD' },
-  legal: { bg: '#FFF1F2', ink: '#881337', br: '#FECDD3' },
-  decision: { bg: '#ECFEFF', ink: '#0E7490', br: '#A5F3FC' },
+export const CATEGORY_LABELS: Record<Category, string> = {
+  org: 'Organization',
+  bug: 'Bug Fix',
+  content: 'Content',
+  legal: 'Legal',
+  crm: 'CRM / Brevo',
+  shop: 'Shop',
+  analytics: 'Analytics / Tracking',
+  performance: 'Performance',
+  seo: 'SEO',
+  design: 'UX / Design',
+  dashboard: 'Dashboard / CMS',
+  security: 'Security',
+  feature: 'Feature',
+  future: 'Future Feature',
 }
 
 export const CATEGORY_OPTIONS: Category[] = [
+  'org',
   'bug',
-  'feature',
   'content',
   'legal',
-  'org',
+  'crm',
+  'shop',
+  'analytics',
   'performance',
+  'seo',
   'design',
+  'dashboard',
+  'security',
+  'feature',
+  'future',
 ]
+export const BUSINESS_VALUE_LABELS: Record<BusinessValue, string> = {
+  critical: 'Critical',
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
+}
+export const BILLING_SCOPE_LABELS: Record<BillingScope, string> = {
+  included: 'Included — retainer',
+  extra: 'Extra — outside scope',
+}
+export const BILLING_SCOPE_OPTIONS: BillingScope[] = ['included', 'extra']
+
 export const STATUS_OPTIONS: Status[] = ['open', 'partial', 'their-action', 'blocked', 'done', 'future']
 export const PRIORITY_OPTIONS: Priority[] = ['critical', 'must', 'should', 'nice']
-export const EFFORT_OPTIONS: Effort[] = ['XS', 'S', 'M', 'L', 'XL']
-export const OWNER_OPTIONS: Owner[] = ['dev', 'alaa', 'david', 'marcel']
+export const EFFORT_OPTIONS: Effort[] = ['XS', 'S', 'M', 'L', 'XL', 'Unknown']
+export const OWNER_OPTIONS: Owner[] = ['dev', 'admin']
 
-export const ACCENT = '#B91C1C'
+export const BOARD_LABELS: Record<Board, string> = {
+  roadmap: 'Main Roadmap',
+  backlog: 'Backlog',
+  features: 'New Features',
+}
+export const BOARD_SUBTITLES: Record<Board, string> = {
+  roadmap: 'Mirrors the Fermentfreude Website Roadmap & Operations spreadsheet — the single source of truth.',
+  backlog: 'Bugs, small issues and maintenance — kept separate from big feature builds.',
+  features: "New dashboard capabilities, expanded from David's operational use-case brief.",
+}
 
 export type FilterId =
   | 'all'
@@ -122,27 +183,22 @@ export type FilterId =
   | 'done'
   | 'future'
   | 'decisions'
-  | 'dev'
-  | 'founders'
 
 export const FNAV: { id: FilterId; label: string; dot?: string; sep?: boolean }[] = [
   { id: 'all', label: 'All items' },
   { id: 'all', label: '', sep: true },
-  { id: 'critical', label: '★ Critical', dot: '#B91C1C' },
-  { id: 'must', label: 'Must-have', dot: '#B45309' },
-  { id: 'should', label: 'Should-have', dot: '#1D4ED8' },
-  { id: 'nice', label: 'Nice to have', dot: '#9CA3AF' },
+  { id: 'critical', label: 'Critical', dot: ACCENT },
+  { id: 'must', label: 'Must-have', dot: INK },
+  { id: 'should', label: 'Should-have', dot: INK_SOFT },
+  { id: 'nice', label: 'Nice to have', dot: MUTED },
   { id: 'all', label: '', sep: true },
-  { id: 'open', label: 'Open', dot: '#3B82F6' },
-  { id: 'partial', label: 'In Progress', dot: '#F59E0B' },
-  { id: 'their-action', label: 'Their Action', dot: '#8B5CF6' },
-  { id: 'done', label: 'Done', dot: '#22C55E' },
-  { id: 'future', label: 'Parked', dot: '#94A3B8' },
+  { id: 'open', label: 'Open', dot: INK },
+  { id: 'partial', label: 'In Progress', dot: INK_SOFT },
+  { id: 'their-action', label: 'Need Decision', dot: ACCENT },
+  { id: 'done', label: 'Done', dot: MUTED },
+  { id: 'future', label: 'Future', dot: MUTED },
   { id: 'all', label: '', sep: true },
-  { id: 'decisions', label: '❖ Decisions', dot: '#0E7490' },
-  { id: 'all', label: '', sep: true },
-  { id: 'dev', label: 'Dev work' },
-  { id: 'founders', label: "Founders' work" },
+  { id: 'decisions', label: 'Decisions', dot: ACCENT },
 ]
 
 export function matchesFilter(item: BacklogItem, fid: FilterId): boolean {
@@ -150,7 +206,7 @@ export function matchesFilter(item: BacklogItem, fid: FilterId): boolean {
     case 'all':
       return true
     case 'critical':
-      return item.priority === 'critical' && item.status !== 'done'
+      return (item.priority === 'critical' || item.businessValue === 'critical') && item.status !== 'done'
     case 'must':
       return item.priority === 'must'
     case 'should':
@@ -170,11 +226,7 @@ export function matchesFilter(item: BacklogItem, fid: FilterId): boolean {
     case 'future':
       return item.status === 'future'
     case 'decisions':
-      return item.category === 'decision'
-    case 'dev':
-      return item.owners?.some((o) => o === 'dev' || o === 'alaa')
-    case 'founders':
-      return item.owners?.some((o) => o === 'david' || o === 'marcel')
+      return Boolean(item.decision)
     default:
       return true
   }
