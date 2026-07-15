@@ -20,6 +20,7 @@
   --c-design-bg:#FAF5FF; --c-design-ink:#7C3AED; --c-design-br:#DDD6FE;
   --c-org-bg:#F0F9FF; --c-org-ink:#075985; --c-org-br:#BAE6FD;
   --c-legal-bg:#FFF1F2; --c-legal-ink:#881337; --c-legal-br:#FECDD3;
+  --c-decision-bg:#ECFEFF; --c-decision-ink:#0E7490; --c-decision-br:#A5F3FC;
   --sidebar-w:216px; --detail-w:376px; --radius:8px;
   --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
   --shadow-lg:0 8px 24px rgba(0,0,0,.12);
@@ -40,6 +41,7 @@
     --c-design-bg:#2E1065; --c-design-ink:#C4B5FD; --c-design-br:#4C1D95;
     --c-org-bg:#082F49; --c-org-ink:#7DD3FC; --c-org-br:#075985;
     --c-legal-bg:#4C0519; --c-legal-ink:#FDA4AF; --c-legal-br:#881337;
+    --c-decision-bg:#083344; --c-decision-ink:#67E8F9; --c-decision-br:#155E75;
   }
 }
 :root[data-theme="light"] {
@@ -56,6 +58,7 @@
   --c-design-bg:#FAF5FF; --c-design-ink:#7C3AED; --c-design-br:#DDD6FE;
   --c-org-bg:#F0F9FF; --c-org-ink:#075985; --c-org-br:#BAE6FD;
   --c-legal-bg:#FFF1F2; --c-legal-ink:#881337; --c-legal-br:#FECDD3;
+  --c-decision-bg:#ECFEFF; --c-decision-ink:#0E7490; --c-decision-br:#A5F3FC;
 }
 :root[data-theme="dark"] {
   --bg:#111113; --surface:#1C1C1F; --ink:#F4F4F5; --ink-muted:#A1A1AA; --ink-faint:#52525B;
@@ -71,6 +74,7 @@
   --c-design-bg:#2E1065; --c-design-ink:#C4B5FD; --c-design-br:#4C1D95;
   --c-org-bg:#082F49; --c-org-ink:#7DD3FC; --c-org-br:#075985;
   --c-legal-bg:#4C0519; --c-legal-ink:#FDA4AF; --c-legal-br:#881337;
+  --c-decision-bg:#083344; --c-decision-ink:#67E8F9; --c-decision-br:#155E75;
 }
 
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--ink);overflow:hidden;}
@@ -82,6 +86,11 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sy
 .sidebar-logo{width:30px;height:30px;background:#B91C1C;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
 .sidebar-brand-name{font-size:13px;font-weight:600;color:var(--sidebar-ink);}
 .sidebar-brand-sub{font-size:10px;color:var(--sidebar-muted);margin-top:1px;letter-spacing:.04em;text-transform:uppercase;}
+
+#board-toggle{display:flex;flex-direction:column;gap:5px;padding:12px 12px 2px;}
+.board-btn{width:100%;text-align:left;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--sidebar-muted);font-size:12px;font-weight:600;cursor:pointer;transition:background .12s,color .12s,border-color .12s;font-family:inherit;}
+.board-btn:hover{background:rgba(255,255,255,.08);color:var(--sidebar-ink);}
+.board-btn.active{background:rgba(185,28,28,.22);border-color:rgba(185,28,28,.45);color:#fff;}
 
 #stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin:12px;background:rgba(255,255,255,.07);border-radius:8px;overflow:hidden;}
 .stat-cell{background:rgba(255,255,255,.03);padding:10px 10px 8px;cursor:pointer;transition:background .15s;}
@@ -139,6 +148,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sy
 .cbadge.design{background:var(--c-design-bg);color:var(--c-design-ink);border-color:var(--c-design-br);}
 .cbadge.org{background:var(--c-org-bg);color:var(--c-org-ink);border-color:var(--c-org-br);}
 .cbadge.legal{background:var(--c-legal-bg);color:var(--c-legal-ink);border-color:var(--c-legal-br);}
+.cbadge.decision{background:var(--c-decision-bg);color:var(--c-decision-ink);border-color:var(--c-decision-br);}
 
 .etag{font-size:10px;font-weight:700;color:var(--ink-muted);background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:0 5px;height:18px;display:inline-flex;align-items:center;letter-spacing:.04em;}
 .ochip{font-size:10px;color:var(--ink-muted);background:var(--bg);border:1px solid var(--border);border-radius:100px;padding:0 6px;height:18px;display:inline-flex;align-items:center;}
@@ -219,6 +229,18 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sy
 .slug-pre{position:absolute;left:10px;color:var(--ink-faint);font-family:'SF Mono','Fira Code',monospace;font-size:13px;pointer-events:none;}
 .fi.slug{padding-left:18px;font-family:'SF Mono','Fira Code',monospace;font-size:12px;}
 
+/* DECISION OPTIONS */
+.dec-options{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.dec-opt{display:flex;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color .12s,background .12s;}
+.dec-opt:hover{border-color:var(--border-strong);}
+.dec-opt.sel{border-color:var(--c-decision-ink);background:var(--c-decision-bg);}
+.dec-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border-strong);flex-shrink:0;margin-top:2px;position:relative;}
+.dec-opt.sel .dec-dot{border-color:var(--c-decision-ink);}
+.dec-opt.sel .dec-dot::after{content:'';position:absolute;inset:2px;border-radius:50%;background:var(--c-decision-ink);}
+.dec-name{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.dec-rec{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--c-decision-ink);background:var(--c-decision-bg);padding:1px 6px;border-radius:100px;}
+.dec-desc{font-size:12px;color:var(--ink-muted);line-height:1.5;margin-top:2px;}
+
 /* TODOS */
 .todo-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:8px;}
 .todo-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--border);background:var(--surface);}
@@ -248,6 +270,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sy
       <div class="sidebar-logo">FF</div>
       <div><div class="sidebar-brand-name">FermentFreude</div><div class="sidebar-brand-sub">Backlog</div></div>
     </div>
+    <div id="board-toggle"></div>
     <div id="stats-grid"></div>
     <nav id="filter-nav"></nav>
   </aside>
@@ -263,6 +286,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sy
         <option value="org">Organization</option>
         <option value="performance">Performance</option>
         <option value="design">Design</option>
+        <option value="decision">Decision</option>
       </select>
       <select class="t-select" id="sort-sel" onchange="onSort()">
         <option value="priority">Sort: Priority</option>
@@ -405,24 +429,87 @@ const SEED=[
   {id:'WEB-032',title:'B2B order area',category:'feature',priority:'nice',status:'future',effort:'XL',owners:['david','marcel','dev'],slug:'',description:'Long-term idea: gastronomy customers can order products directly via a B2B area.',response:'Parked. A full B2B ordering system is a significant build. Makes sense when recurring B2B sales are happening at volume and the manual process becomes a real bottleneck.',notes:''},
   {id:'WEB-033',title:'Cancellation of workshops and individual bookings',category:'feature',priority:'critical',status:'open',effort:'XL',owners:['dev','david'],slug:'workshops',description:'Cancel a workshop and have all customers get an automated email. Also cancel individual customer bookings from the dashboard with Stripe refunds.',response:'Valid and important — not yet built. Two separate things: (1) David cancels entire workshop session, all attendees automatically get a cancellation email; (2) David cancels individual customer booking, that specific customer gets an email. Both require new admin logic, Brevo cancellation email template, and Stripe refund handling. Needs scope + quote as paid development work.',notes:''},
 ]
+SEED.forEach(i=>i.board='current')
 
-let items=[],activeFilter='all',searchQ='',catFilter='',sortBy='priority',selectedId=null,editingId=null,mPriority='must',mEffort='M',mOwners=[],toastTimer=null
+// New items from David's operational use-case brief (2026-07-09), broken out of WEB-033
+const NEW_CASES=[
+  {id:'CASE-01',title:'Case 1: Cancel a full workshop date',category:'feature',priority:'critical',status:'open',effort:'L',owners:['dev','david'],slug:'workshops',related:'WEB-033',description:'A workshop date has paid bookings but can\'t run (illness, too few sign-ups, scheduling conflict). Need to cancel the date, notify everyone automatically, and offer a way to move to another date without losing their payment.',response:'Depends on Decision 1 (how customers reclaim their booking). Once decided: David marks the appointment cancelled with a reason, every affected booking gets emailed automatically via Brevo, and gets a way to rebook. Admin can still move anyone manually as a fallback.',notes:''},
+  {id:'CASE-02',title:'Case 2: Individual customer rebooking',category:'feature',priority:'critical',status:'open',effort:'M',owners:['dev','david'],slug:'workshops',related:'WEB-033',description:'The workshop still happens, but one customer can\'t make it and wants to move their paid booking to a different date instead of cancelling.',response:'Two parts: (1) an admin "move this booking" action in the dashboard — build regardless of other decisions. (2) customer self-service, which depends on Decision 1.',notes:''},
+  {id:'CASE-03',title:'Case 3: Customer cancellation — refund or credit',category:'feature',priority:'critical',status:'open',effort:'L',owners:['dev','david'],slug:'workshops',related:'WEB-033',description:'A customer wants to cancel entirely. Need a dashboard flow to cancel the booking, decide refund vs. credit vs. nothing per our cancellation terms, and trigger the right Stripe/Brevo actions.',response:'Also the first time the system would ever trigger a real Stripe refund itself — today that only happens by hand in the Stripe dashboard. Depends on Decision 1 (credit mechanism) and Decision 3 (how automated the refund should be).',notes:''},
+  {id:'CASE-04',title:'Case 4: Partial cancellation of multi-seat bookings',category:'feature',priority:'must',status:'open',effort:'M',owners:['dev','david'],slug:'workshops',related:'WEB-033',description:'When one seat out of a 2-3 seat booking cancels, the other seats should stay booked. Today a booking has a flat headcount with no per-seat status, so this isn\'t possible without cancelling the whole thing.',response:'Depends on Decision 2 (giving each seat its own status). Once done, this becomes the same "cancel" operation as the other cases, just scoped to one seat.',notes:''},
+  {id:'CASE-05',title:'Case 5: Flexible workshop/event creation workflow',category:'feature',priority:'must',status:'partial',effort:'M',owners:['dev','david'],slug:'admin',related:'',description:'Creating a new workshop type or one-off partner event should work reliably end to end — website visibility, booking, Stripe, Brevo — without a developer, with the Product vs. Workshop vs. Appointment distinction documented clearly.',response:'Mostly hardening + documentation, not a rebuild — the product/workshop/appointment model already supports this (see WEB-023, done). Main gaps: the Product → Workshop link exists in the schema but isn\'t actually used by the booking code yet (it matches by slug text instead), and there\'s no "duplicate workshop" shortcut.',notes:''},
+  {id:'CASE-06',title:'Case 6: Press, Media & Awards section',category:'content',priority:'should',status:'open',effort:'M',owners:['dev','david'],slug:'press',related:'',description:'Fermentfreude is getting media coverage, awards and features. Needs a CMS section David/Marcel can manage themselves — articles, TV, awards, links — without a developer.',response:'Recommend a page under About (About → Press & Media) plus a small "As seen in" teaser on the homepage linking to the full page. Clean, additive CMS work — no conflicts with the rest of the system.',notes:''},
+  {id:'CASE-07',title:'Mini-Case 7: PDF voucher doesn\'t show the real value',category:'bug',priority:'must',status:'open',effort:'S',owners:['dev'],slug:'voucher',related:'',description:'Vouchers can be issued for any value (€20, €50, €99...), and the email shows it correctly, but the downloadable PDF always shows the same fixed amount regardless of what was actually purchased.',response:'Confirmed bug. The PDF generator only stamps the voucher code onto a static template — the euro amount visible is baked into the template artwork, not read from the voucher record. Fix: look up the voucher\'s real value and draw it dynamically, same way the code already gets drawn. Small, contained fix.',notes:''},
+  {id:'CASE-08',title:'Future Case 8: Discounts & special pricing',category:'feature',priority:'nice',status:'future',effort:'L',owners:['dev','david'],slug:'',related:'',description:'Early bird, student, partner or promo-code pricing for workshops. Not urgent, but checkout/pricing should be built so this doesn\'t require a rebuild later.',response:'Parked. Price is already calculated in one place at booking time — a future discount layer plugs into that single spot rather than scattering pricing logic. Revisit when there\'s an actual campaign to run.',notes:''},
+  {id:'CASE-09',title:'Future Case 9: Multi-session workshops / course series',category:'feature',priority:'nice',status:'future',effort:'XL',owners:['dev','david'],slug:'',related:'',description:'A course where one booking covers multiple dates (e.g. a 3-part fermentation course), instead of today\'s one-booking-per-date model.',response:'Parked. Being kept in mind while doing the Stage 1 foundation work (Decisions 1 & 2) so the booking model doesn\'t get hard-coded any deeper into "one booking = one date" than it already is.',notes:''},
+  {id:'CASE-10',title:'Booking edge cases to keep in mind',category:'feature',priority:'nice',status:'future',effort:'M',owners:['dev'],slug:'',related:'',description:'Payment succeeds but booking/email fails, wrong date booked, no-shows, refund status tracking, waitlists when a sold-out workshop frees up a seat.',response:'None of these need a full feature now. Flagged so the Stage 1 foundation (booking credit, seat status, refund action) doesn\'t accidentally block building them later.',notes:''},
+  {id:'DEC-01',title:'Decision 1: How should customers reclaim money from a cancelled/changed booking?',category:'decision',priority:'critical',status:'open',effort:'S',owners:['david','marcel'],slug:'',related:'WEB-033',description:'Covers Case 1 (we cancel a date), Case 2 (customer wants a new date) and Case 3 (customer cancels). Underneath rebooking code, magic link and internal credit is the same idea: a credit tied to the original payment. Pick the approach before this gets built.',response:'Your call — see the options below, pick one and add notes if useful.',notes:'',
+    decision:{question:'How should a customer reclaim money from a cancelled or changed booking?',choice:null,notes:'',options:{
+      'unified':{label:'One booking credit, two doors in',recommended:true,desc:'Reuse the existing gift-voucher system as a single credit mechanism — customers redeem it with a code or a personal link. Fastest to build well, most reuse of existing working code.'},
+      'three-systems':{label:'Three separate systems',desc:'Build rebooking code, magic link and account-based credit as genuinely distinct features. More flexible in theory, three times the work to build and maintain.'},
+      'admin-only':{label:'Admin-only for now',desc:'Skip customer self-service entirely. David/Marcel move bookings manually; doesn\'t reduce support workload.'}
+    }}},
+  {id:'DEC-02',title:'Decision 2: Should each seat in a group booking get its own status now?',category:'decision',priority:'critical',status:'open',effort:'S',owners:['david','marcel'],slug:'',related:'WEB-033',description:'Covers Case 4 — one of three friends cancels, the rest stay booked.',response:'Your call — see the options below, pick one and add notes if useful.',notes:'',
+    decision:{question:'Should we track each seat in a group booking individually, starting now?',choice:null,notes:'',options:{
+      'upgrade-now':{label:'Give every seat its own status now',recommended:true,desc:'Real but contained schema work now. Becomes the shared foundation Cases 1–4 all sit on.'},
+      'defer':{label:'Keep it simple, handle by hand for now',desc:'No new schema work now, but partial cancellations stay a manual, error-prone workaround indefinitely.'}
+    }}},
+  {id:'DEC-03',title:'Decision 3: How automated should the Case 3 refund be?',category:'decision',priority:'critical',status:'open',effort:'S',owners:['david','marcel'],slug:'',related:'WEB-033',description:'This is the first time the system would ever trigger a real Stripe refund itself — today that only happens by hand in the Stripe dashboard.',response:'Your call — see the options below, pick one and add notes if useful.',notes:'',
+    decision:{question:'How much should a cancellation refund happen on its own, versus wait for a human?',choice:null,notes:'',options:{
+      'semi-auto':{label:'System suggests, you confirm',recommended:true,desc:'Dashboard calculates a suggested refund per your cancellation policy; nothing happens to the customer\'s money until David or Marcel confirms.'},
+      'manual':{label:'Fully manual',desc:'Dashboard just records the decision — refund, credit, or nothing — amount typed in by hand each time.'},
+      'auto':{label:'Fully automatic',desc:'System applies the policy and issues the refund/credit with no human in the loop.'}
+    }}},
+]
+NEW_CASES.forEach(i=>i.board='new')
+const ALL_SEED=[...SEED,...NEW_CASES]
+
+let items=[],activeBoard='current',activeFilter='all',searchQ='',catFilter='',sortBy='priority',selectedId=null,editingId=null,mPriority='must',mEffort='M',mOwners=[],toastTimer=null
 
 function init(){
-  try{const s=localStorage.getItem('ff-backlog-v1');items=s?JSON.parse(s):clone(SEED)}catch(e){items=clone(SEED)}
+  try{const s=localStorage.getItem('ff-backlog-v2');items=s?JSON.parse(s):clone(ALL_SEED)}catch(e){items=clone(ALL_SEED)}
   renderAll()
   document.addEventListener('keydown',onKey)
 }
 function clone(x){return JSON.parse(JSON.stringify(x))}
-function persist(){localStorage.setItem('ff-backlog-v1',JSON.stringify(items))}
+function persist(){localStorage.setItem('ff-backlog-v2',JSON.stringify(items))}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function renderAll(){renderStats();renderFilters();renderList();if(selectedId)renderDetail()}
+function renderAll(){renderBoardToggle();renderStats();renderFilters();renderList();if(selectedId)renderDetail()}
+
+function renderBoardToggle(){
+  const newCount=items.filter(i=>i.board==='new').length
+  document.getElementById('board-toggle').innerHTML=`
+    <button class="board-btn ${activeBoard==='current'?'active':''}" onclick="setBoard('current')">Current Backlog</button>
+    <button class="board-btn ${activeBoard==='new'?'active':''}" onclick="setBoard('new')">New — David's Brief (${newCount})</button>`
+}
+function setBoard(b){
+  if(activeBoard===b)return
+  activeBoard=b;activeFilter='all';searchQ='';catFilter=''
+  const s=document.getElementById('search');if(s)s.value=''
+  const c=document.getElementById('cat-filter');if(c)c.value=''
+  selectedId=null
+  document.getElementById('detail-panel').classList.remove('open')
+  renderAll()
+}
+function boardItems(){return items.filter(i=>i.board===activeBoard)}
 
 function renderStats(){
-  const crit=items.filter(i=>i.priority==='critical'&&i.status!=='done').length
-  const open=items.filter(i=>i.status==='open').length
-  const done=items.filter(i=>i.status==='done').length
-  const their=items.filter(i=>i.status==='their-action').length
+  const scoped=boardItems()
+  if(activeBoard==='new'){
+    const decisions=scoped.filter(i=>i.category==='decision')
+    const answered=decisions.filter(i=>i.decision&&i.decision.choice).length
+    const crit=scoped.filter(i=>i.priority==='critical'&&i.status!=='done').length
+    document.getElementById('stats-grid').innerHTML=`
+      <div class="stat-cell" onclick="setFilter('decisions')"><div class="stat-num ${answered<decisions.length?'red':''}">${answered}/${decisions.length}</div><div class="stat-label">Decisions answered</div></div>
+      <div class="stat-cell" onclick="setFilter('critical')"><div class="stat-num red">${crit}</div><div class="stat-label">Critical</div></div>
+      <div class="stat-cell" onclick="setFilter('all')"><div class="stat-num">${scoped.length}</div><div class="stat-label">Total items</div></div>
+      <div class="stat-cell" onclick="setFilter('open')"><div class="stat-num">${scoped.filter(i=>i.status==='open').length}</div><div class="stat-label">Open</div></div>`
+    return
+  }
+  const crit=scoped.filter(i=>i.priority==='critical'&&i.status!=='done').length
+  const open=scoped.filter(i=>i.status==='open').length
+  const done=scoped.filter(i=>i.status==='done').length
+  const their=scoped.filter(i=>i.status==='their-action').length
   document.getElementById('stats-grid').innerHTML=`
     <div class="stat-cell" onclick="setFilter('critical')"><div class="stat-num red">${crit}</div><div class="stat-label">Critical</div></div>
     <div class="stat-cell" onclick="setFilter('open')"><div class="stat-num">${open}</div><div class="stat-label">Open</div></div>
@@ -444,12 +531,14 @@ const FNAV=[
   {id:'done',label:'Done',dot:'#22C55E'},
   {id:'future',label:'Parked',dot:'#94A3B8'},
   {sep:true},
+  {id:'decisions',label:'\u2756 Decisions',dot:'#0E7490'},
+  {sep:true},
   {id:'dev',label:'Dev work'},
   {id:'founders',label:"Founders' work"},
 ]
 
 function itemsFor(fid){
-  return items.filter(i=>{
+  return boardItems().filter(i=>{
     if(fid==='all')return true
     if(fid==='critical')return i.priority==='critical'&&i.status!=='done'
     if(fid==='must')return i.priority==='must'
@@ -461,6 +550,7 @@ function itemsFor(fid){
     if(fid==='blocked')return i.status==='blocked'
     if(fid==='done')return i.status==='done'
     if(fid==='future')return i.status==='future'
+    if(fid==='decisions')return i.category==='decision'
     if(fid==='dev')return i.owners.some(o=>o==='dev'||o==='alaa')
     if(fid==='founders')return i.owners.some(o=>o==='david'||o==='marcel')
     return true
@@ -493,14 +583,17 @@ function visibleItems(){
 function renderList(){
   const list=visibleItems(),el=document.getElementById('item-list')
   if(!list.length){el.innerHTML='<div class="empty-msg"><strong>No items found</strong>Try a different filter or search.</div>';return}
-  el.innerHTML=list.map(item=>`
+  el.innerHTML=list.map(item=>{
+    const decMark=item.decision?(item.decision.choice?'<span title="Answered" style="color:#22C55E;font-size:10px">\u25CF</span>':'<span title="Needs an answer" style="color:#B91C1C;font-size:10px">\u25CF</span>'):''
+    return`
     <div class="item-card ${item.id===selectedId?'sel':''}" onclick="selectItem('${item.id}')">
       <div class="prail" style="background:${PRI_COLORS[item.priority]}"></div>
       <div class="cbody">
         <span class="cid">${item.id}</span>
+        ${decMark}
         <span class="ctitle">${esc(item.title)}</span>
       </div>
-    </div>`).join('')
+    </div>`}).join('')
 }
 
 function selectItem(id){selectedId=id;document.getElementById('detail-panel').classList.add('open');renderList();renderDetail()}
@@ -516,15 +609,35 @@ function renderDetail(){
   document.getElementById('detail-hd').style.borderLeft=`3px solid ${pc}`
   const owners=item.owners.map(o=>`<span class="ochip">${OWNER_LABELS[o]||o}</span>`).join('')
   const slugRow=item.slug?`<div><div class="dm-label">Page</div><div class="dm-value" style="font-family:monospace;font-size:12px">/${esc(item.slug)}</div></div>`:''
+  const relatedRow=item.related?`<div><div class="dm-label">Related</div><div class="dm-value" style="color:#1D4ED8;cursor:pointer;font-weight:600" onclick="jumpTo('${item.related}')">${esc(item.related)} \u2192</div></div>`:''
+  const decisionSection=item.decision?`
+    <div class="d-section">
+      <div class="d-block-label">Decision needed</div>
+      <div class="d-text" style="margin-bottom:10px">${esc(item.decision.question)}</div>
+      <div class="dec-options">
+        ${Object.entries(item.decision.options).map(([key,o])=>`
+          <div class="dec-opt ${item.decision.choice===key?'sel':''}" onclick="pickDecision('${item.id}','${key}')">
+            <div class="dec-dot"></div>
+            <div>
+              <div class="dec-name">${esc(o.label)}${o.recommended?'<span class="dec-rec">Recommended</span>':''}</div>
+              <div class="dec-desc">${esc(o.desc)}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <textarea id="dec-notes" class="d-textarea" placeholder="Notes on this decision…" style="min-height:60px">${esc(item.decision.notes||'')}</textarea>
+      <button class="btn btn-red" style="margin-top:8px" onclick="saveDecisionNotes('${item.id}')">Save decision notes</button>
+    </div>`:''
   document.getElementById('detail-body').innerHTML=`
     <div class="dmeta-grid">
       <div><div class="dm-label">Priority</div><div class="dm-value" style="color:${pc};font-weight:600">${PRI_LABELS[item.priority]}</div></div>
       <div><div class="dm-label">Effort</div><div class="dm-value"><span class="etag">${item.effort}</span></div></div>
       <div><div class="dm-label">Owner</div><div class="dm-value">${owners}</div></div>
       ${slugRow}
+      ${relatedRow}
     </div>
     ${item.description?`<div class="d-section"><div class="d-block-label">Description</div><div class="d-text">${esc(item.description)}</div></div>`:''}
     ${item.response?`<div class="d-section"><div class="d-block-label">Response / Plan</div><div class="d-text-box">${esc(item.response)}</div></div>`:''}
+    ${decisionSection}
     <div class="d-section">
       <div class="d-block-label">Next Steps</div>
       ${(item.todos||[]).length ? `<div class="todo-list">${(item.todos||[]).map(t=>`
@@ -548,6 +661,28 @@ function saveNotes(){
   const item=items.find(i=>i.id===selectedId),el=document.getElementById('detail-notes')
   if(!item||!el)return
   item.notes=el.value;persist();showToast('Notes saved')
+}
+
+function pickDecision(itemId,key){
+  const item=items.find(i=>i.id===itemId)
+  if(!item||!item.decision)return
+  item.decision.choice=key
+  persist();renderDetail();renderStats();renderList()
+}
+function saveDecisionNotes(id){
+  const item=items.find(i=>i.id===id),el=document.getElementById('dec-notes')
+  if(!item||!item.decision||!el)return
+  item.decision.notes=el.value;persist();showToast('Decision notes saved')
+}
+function jumpTo(id){
+  const it=items.find(i=>i.id===id)
+  if(!it)return
+  activeBoard=it.board;activeFilter='all';searchQ='';catFilter=''
+  const s=document.getElementById('search');if(s)s.value=''
+  const c=document.getElementById('cat-filter');if(c)c.value=''
+  selectedId=id
+  document.getElementById('detail-panel').classList.add('open')
+  renderAll()
 }
 
 function openModal(id){
@@ -583,14 +718,21 @@ function selEffort(e){mEffort=e;updEffUI()}
 function updEffUI(){document.querySelectorAll('.eopt').forEach(el=>el.classList.toggle('sel',el.dataset.e===mEffort))}
 function togOwner(o){mOwners.includes(o)?mOwners=mOwners.filter(x=>x!==o):mOwners.push(o);updOwnUI()}
 function updOwnUI(){document.querySelectorAll('.oopt').forEach(el=>el.classList.toggle('sel',mOwners.includes(el.dataset.o)))}
-function nextId(){const nums=items.map(i=>parseInt(i.id.replace('WEB-',''),10)).filter(n=>!isNaN(n));return'WEB-'+String((nums.length?Math.max(...nums):0)+1).padStart(3,'0')}
+function nextId(){
+  if(activeBoard==='current'){
+    const nums=items.filter(i=>i.board==='current').map(i=>parseInt(i.id.replace('WEB-',''),10)).filter(n=>!isNaN(n))
+    return'WEB-'+String((nums.length?Math.max(...nums):0)+1).padStart(3,'0')
+  }
+  const nums=items.filter(i=>i.board==='new'&&/^CASE-\d+$/.test(i.id)).map(i=>parseInt(i.id.replace('CASE-',''),10)).filter(n=>!isNaN(n))
+  return'CASE-'+String((nums.length?Math.max(...nums):0)+1).padStart(2,'0')
+}
 function saveModal(){
   const title=document.getElementById('m-title').value.trim()
   if(!title){document.getElementById('m-title').focus();return}
   if(!mOwners.length)mOwners=['dev']
   const data={title,category:document.getElementById('m-cat').value,status:document.getElementById('m-status').value,priority:mPriority,effort:mEffort,owners:mOwners,slug:document.getElementById('m-slug').value.replace(/^\/+/,'').trim(),description:document.getElementById('m-desc').value.trim(),response:document.getElementById('m-resp').value.trim()}
   if(editingId){const idx=items.findIndex(i=>i.id===editingId);items[idx]={...items[idx],...data};showToast('Saved');if(selectedId===editingId)renderDetail()}
-  else{items.push({id:nextId(),notes:'',...data});showToast('Item created')}
+  else{items.push({id:nextId(),notes:'',board:activeBoard,...data});showToast('Item created')}
   persist();closeModal();renderAll()
 }
 function deleteCurrentModal(){if(editingId)deleteItem(editingId)}
