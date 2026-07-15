@@ -54,3 +54,4 @@ public/media
 .env*.local
 # Migration runner state (per-environment, not committed)
 src/scripts/migrations/.completed.json
+studio-softspace/
