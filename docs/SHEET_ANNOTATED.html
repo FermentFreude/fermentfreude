@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FermentFreude — Website Roadmap: Annotated</title>
+<style>
+/* ── Tokens ──────────────────────────────────────────────── */
+:root {
+  --bg:        #F0EDE7;
+  --surface:   #FFFFFF;
+  --sheet-bg:  #E9E5DF;
+  --border:    #D8D3CB;
+  --text:      #1E1E1B;
+  --text-mid:  #5C5950;
+  --text-soft: #8C8880;
+
+  --done:      #2D6A4F;
+  --done-bg:   #EAF4EE;
+  --done-pill: #C2DFD0;
+
+  --crit:      #B83232;
+  --crit-bg:   #FBF0F0;
+  --crit-pill: #F0C4C4;
+
+  --blue:      #2A4A8A;
+  --blue-bg:   #EEF1FA;
+  --blue-pill: #C4CEED;
+
+  --amber:     #7A5500;
+  --amber-bg:  #FBF6EA;
+  --amber-pill:#EDD898;
+
+  --grey:      #555450;
+  --grey-bg:   #F4F3F0;
+  --grey-pill: #D8D6D2;
+
+  --purple:    #5A2D82;
+  --purple-bg: #F5EEF8;
+  --purple-pill:#D9BFEF;
+
+  --radius:    10px;
+  --rail:      4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #18181520;
+    --surface:   #232320;
+    --sheet-bg:  #1C1C19;
+    --border:    #38372F;
+    --text:      #EDEAE3;
+    --text-mid:  #A8A49A;
+    --text-soft: #6A6860;
+
+    --done-bg:   #1A2E24;
+    --done-pill: #2D4D3A;
+    --crit-bg:   #2E1818;
+    --crit-pill: #4A2020;
+    --blue-bg:   #182038;
+    --blue-pill: #243260;
+    --amber-bg:  #2A2010;
+    --amber-pill:#4A3610;
+    --grey-bg:   #202020;
+    --grey-pill: #303030;
+    --purple-bg: #20102E;
+    --purple-pill:#361A50;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg:        #181815;
+  --surface:   #232320;
+  --sheet-bg:  #1C1C19;
+  --border:    #38372F;
+  --text:      #EDEAE3;
+  --text-mid:  #A8A49A;
+  --text-soft: #6A6860;
+  --done-bg:   #1A2E24;  --done-pill: #2D4D3A;
+  --crit-bg:   #2E1818;  --crit-pill: #4A2020;
+  --blue-bg:   #182038;  --blue-pill: #243260;
+  --amber-bg:  #2A2010;  --amber-pill:#4A3610;
+  --grey-bg:   #202020;  --grey-pill: #303030;
+  --purple-bg: #20102E;  --purple-pill:#361A50;
+}
+
+:root[data-theme="light"] {
+  --bg:        #F0EDE7;
+  --surface:   #FFFFFF;
+  --sheet-bg:  #E9E5DF;
+  --border:    #D8D3CB;
+  --text:      #1E1E1B;
+  --text-mid:  #5C5950;
+  --text-soft: #8C8880;
+  --done-bg:   #EAF4EE;  --done-pill: #C2DFD0;
+  --crit-bg:   #FBF0F0;  --crit-pill: #F0C4C4;
+  --blue-bg:   #EEF1FA;  --blue-pill: #C4CEED;
+  --amber-bg:  #FBF6EA;  --amber-pill:#EDD898;
+  --grey-bg:   #F4F3F0;  --grey-pill: #D8D6D2;
+  --purple-bg: #F5EEF8;  --purple-pill:#D9BFEF;
+}
+
+/* ── Reset ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 48px 24px 80px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page header ─────────────────────────────────────────── */
+.page-header {
+  max-width: 780px;
+  margin: 0 auto 40px;
+}
+
+.page-header h1 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-bottom: 10px;
+}
+
+.page-header p {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  max-width: 540px;
+  text-wrap: balance;
+  margin-bottom: 6px;
+}
+
+.page-header .meta {
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+/* ── Priority legend ─────────────────────────────────────── */
+.legend {
+  max-width: 780px;
+  margin: 0 auto 16px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.legend-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-right: 4px;
+}
+
+/* ── Filter bar ──────────────────────────────────────────── */
+.filters {
+  max-width: 780px;
+  margin: 0 auto 28px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 6px 13px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-mid);
+  transition: all 0.12s;
+  user-select: none;
+}
+
+.filter-btn:hover { border-color: var(--text-mid); color: var(--text); }
+.filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+/* ── Cards ───────────────────────────────────────────────── */
+.cards {
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  position: relative;
+}
+
+.card.hidden { display: none; }
+
+/* Priority rail */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: var(--rail);
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.card[data-priority="critical"]::before { background: var(--crit); }
+.card[data-priority="must"]::before     { background: var(--amber); }
+.card[data-priority="should"]::before   { background: var(--done); }
+.card[data-priority="nice"]::before     { background: var(--grey-pill); }
+
+/* ── Card: their section ─────────────────────────────────── */
+.card-sheet {
+  background: var(--sheet-bg);
+  padding: 18px 20px 16px 26px;
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.card-id {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-soft);
+  white-space: nowrap;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.card-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.badge-critical { background: var(--crit-bg);   color: var(--crit);   }
+.badge-must     { background: var(--amber-bg);   color: var(--amber);  }
+.badge-should   { background: var(--done-bg);    color: var(--done);   }
+.badge-nice     { background: var(--grey-bg);    color: var(--grey);   }
+.badge-cat      { background: var(--blue-bg);    color: var(--blue);   }
+.badge-effort   { background: var(--grey-bg);    color: var(--grey);   font-weight: 500; }
+.badge-owner    { background: transparent;       color: var(--text-soft); font-weight: 500; border: 1px solid var(--border); }
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 8px;
+  text-wrap: balance;
+}
+
+.critical-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--crit);
+  margin-bottom: 6px;
+}
+
+.critical-flag svg { width: 10px; height: 10px; }
+
+.card-desc {
+  font-size: 12.5px;
+  color: var(--text-mid);
+  line-height: 1.55;
+  border-left: 2px solid var(--border);
+  padding-left: 10px;
+  font-style: italic;
+}
+
+.card-meta {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* ── Card: our response ──────────────────────────────────── */
+.card-response {
+  background: var(--surface);
+  padding: 16px 20px 16px 26px;
+  border-top: 1px solid var(--border);
+}
+
+.response-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-bottom: 7px;
+}
+
+.response-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.status-done     { background: var(--done-bg);   color: var(--done);   }
+.status-fix      { background: var(--crit-bg);   color: var(--crit);   }
+.status-theirs   { background: var(--blue-bg);   color: var(--blue);   }
+.status-together { background: var(--amber-bg);  color: var(--amber);  }
+.status-future   { background: var(--grey-bg);   color: var(--grey);   }
+.status-tomorrow { background: var(--purple-bg); color: var(--purple); }
+.status-fixed    { background: var(--done-bg);   color: var(--done);   }
+
+.who-acts {
+  font-size: 11.5px;
+  color: var(--text-soft);
+}
+
+/* ── Editable response ───────────────────────────────────── */
+.response-text[contenteditable] {
+  outline: none;
+  border-radius: 5px;
+  padding: 5px;
+  margin: -5px;
+  cursor: text;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.response-text[contenteditable]:hover {
+  background: rgba(0,0,0,0.03);
+}
+.response-text[contenteditable]:focus {
+  background: rgba(0,0,0,0.04);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.09);
+}
+.response-text[contenteditable].edited::after {
+  content: ' ✎';
+  font-size: 10px;
+  color: var(--text-soft);
+  font-style: normal;
+}
+
+/* ── Notes section ───────────────────────────────────────── */
+.notes-section {
+  border-top: 1.5px dashed var(--border);
+  margin-top: 14px;
+  padding-top: 12px;
+}
+.notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+.notes-header-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.notes-clear {
+  font-size: 11px;
+  color: var(--text-soft);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 7px;
+  border-radius: 4px;
+  transition: background 0.1s, color 0.1s;
+}
+.notes-clear:hover { background: var(--grey-bg); color: var(--text); }
+
+.notes-input {
+  min-height: 38px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  line-height: 1.6;
+  outline: none;
+  padding: 9px 11px;
+  border-radius: 6px;
+  background: var(--amber-bg);
+  border: 1.5px solid var(--amber-pill);
+  cursor: text;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  width: 100%;
+}
+.notes-input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(122,85,0,0.1);
+}
+.notes-input:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-soft);
+  pointer-events: none;
+  font-style: italic;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+.toolbar {
+  max-width: 780px;
+  margin: -12px auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.toolbar-hint {
+  font-size: 11.5px;
+  color: var(--text-soft);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.edit-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--done);
+  display: inline-block;
+}
+.toolbar-actions {
+  display: flex;
+  gap: 6px;
+}
+.toolbar-btn {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.toolbar-btn:hover { border-color: var(--text-mid); color: var(--text); }
+.toolbar-btn.danger:hover { border-color: var(--crit); color: var(--crit); background: var(--crit-bg); }
+
+/* ── Save indicator ──────────────────────────────────────── */
+#save-indicator {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  z-index: 200;
+}
+#save-indicator.visible { opacity: 1; transform: translateY(0); }
+
+@media print {
+  body { background: white; padding: 20px; }
+  .filters, .toolbar, #save-indicator { display: none; }
+  .card.hidden { display: block; }
+  .notes-input:empty { display: none; }
+  .notes-section { border-top: 1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Fermentfreude — Website Roadmap</h1>
+  <p>Annotated responses to every item in the backlog</p>
+  <div class="meta">33 items · July 2026 · Left rail: ■ Critical &nbsp;■ Must Have &nbsp;■ Should Have &nbsp;■ Nice to Have</div>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-hint">
+    <span class="edit-dot"></span>
+    Responses are editable — notes auto-save in this browser
+  </div>
+  <div class="toolbar-actions">
+    <button class="toolbar-btn" onclick="window.print()">Print / PDF</button>
+    <button class="toolbar-btn danger" onclick="clearAllNotes()">Clear all notes</button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <button class="filter-btn active" onclick="filter('all', this)">All 33</button>
+  <button class="filter-btn" onclick="filter('critical', this)">★ Critical priority</button>
+  <button class="filter-btn" onclick="filter('done', this)">Done / Fixed</button>
+  <button class="filter-btn" onclick="filter('tomorrow', this)">Meeting tomorrow</button>
+  <button class="filter-btn" onclick="filter('fix', this)">Developer fix</button>
+  <button class="filter-btn" onclick="filter('theirs', this)">Their action</button>
+  <button class="filter-btn" onclick="filter('together', this)">Review together</button>
+  <button class="filter-btn" onclick="filter('future', this)">Parked / Future</button>
+</div>
+
+<div class="cards">
+
+<!-- WEB-001 -->
+<div class="card" data-status="tomorrow" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-001</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Organization</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Transfer ownership of production systems to Fermentfreude</div>
+    <div class="card-desc">Move all production-critical systems from personal/developer ownership to Fermentfreude ownership while keeping Rafaela as developer/admin where needed.</div>
+    <div class="card-meta">
+      <span class="badge badge-owner">Owner: Rafaela / David</span>
+    </div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Almost everything was set up under FermentFreude from day one. Stripe, Brevo, and the domain are already theirs. Two things need a quick account transfer: MongoDB Atlas and Cloudflare R2 are currently on Rafaela's account. Everything else is correct. This gets sorted in the meeting tomorrow morning — 10 minutes each.</div>
+    <div class="card-footer">
+      <span class="status-badge status-tomorrow">★ Meeting tomorrow</span>
+      <span class="who-acts">Rafaela + David — tomorrow morning</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-002 -->
+<div class="card" data-status="done" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-002</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Organization</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Document system architecture</div>
+    <div class="card-desc">Create a simple overview of all systems and how they work together: Next.js, Payload, Vercel, MongoDB, R2, Stripe, Brevo, GA4/GTM.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Done. 30+ documentation files exist covering every system. A one-page visual diagram (SYSTEM_OVERVIEW.html) has been created showing all systems, who owns what, and how a customer booking flows end to end. Ready to share before the call.</div>
+    <div class="card-footer">
+      <span class="status-badge status-done">✓ Done</span>
+      <span class="who-acts">Complete — diagram ready to share</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-003 -->
+<div class="card" data-status="together" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-003</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">Organization</span>
+        <span class="badge badge-effort">Effort: Small</span>
+      </div>
+    </div>
+    <div class="card-title">Dashboard / CMS onboarding session</div>
+    <div class="card-desc">Walk David and Marcel through the CMS/dashboard: content edits, workshops, images, products, users, bookings, common mistakes.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela / David / Marcel</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Written guides already exist: booking system founders guide, Brevo operations guide, workshop setup guide, dashboard quick reference. The live walkthrough still needs to be scheduled. A recorded Google Meet session would be most useful so they can refer back to it.</div>
+    <div class="card-footer">
+      <span class="status-badge status-together">↔ Schedule session</span>
+      <span class="who-acts">Schedule together — record it</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-004 -->
+<div class="card" data-status="together" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-004</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Bug Fix</span>
+        <span class="badge badge-effort">Effort: Unknown</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Full route QA and stability check</div>
+    <div class="card-desc">Check all public routes for maintenance screens, timeout states, 404s, broken redirects, wrong language or inconsistent page states.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Not yet done as a formal pass. Most useful when done together — David and Marcel know which routes matter most to customers and can flag language issues along the way. Developer checks for broken redirects, 404s, and maintenance screens in parallel. Worth scheduling as a shared session.</div>
+    <div class="card-footer">
+      <span class="status-badge status-together">↔ Review together</span>
+      <span class="who-acts">All three — divide by area</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-005 -->
+<div class="card" data-status="theirs" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-005</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">Bug Fix</span>
+        <span class="badge badge-effort">Effort: Small</span>
+      </div>
+    </div>
+    <div class="card-title">Remove placeholder phone number</div>
+    <div class="card-desc">Replace placeholder phone number +43 664 1234567 with the correct Fermentfreude number everywhere.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">The placeholder was seeded as a temporary value during initial setup. David can fix this himself directly in the admin — no developer needed. Go to: /admin → Globals → Business Info → Phone. Update the number and save. Done.</div>
+    <div class="card-footer">
+      <span class="status-badge status-theirs">→ David in /admin</span>
+      <span class="who-acts">David — /admin → Business Info → Phone</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-006 -->
+<div class="card" data-status="done" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-006</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">Bug Fix</span>
+        <span class="badge badge-effort">Effort: Small</span>
+      </div>
+    </div>
+    <div class="card-title">Remove public "Edit page in Admin" text</div>
+    <div class="card-desc">Remove visible admin/template text from public pages.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">✓ Fixed and deployed. The floating "Edit in Admin" button was showing for all public visitors on the Gastronomy and Fermentation pages. Removed from both pages, deployed to production via feature → staging → main.</div>
+    <div class="card-footer">
+      <span class="status-badge status-fixed">✓ Fixed — live</span>
+      <span class="who-acts">Done — deployed to production</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-007 -->
+<div class="card" data-status="together" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-007</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">Content</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">Clean up German / English language mix</div>
+    <div class="card-desc">Ensure German pages are fully German and English pages are fully English. Remove template fragments. Especially FAQ, voucher, create-account and workshop modules.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela / Ala'a</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Some mixing is in the CMS — David can fix directly in /admin by switching the language toggle and editing the field. Some is in code. The most useful step: David and Ala'a go through the site on /de and /en and create a specific list of pages and sentences that are wrong. That list tells us exactly where and what to fix.</div>
+    <div class="card-footer">
+      <span class="status-badge status-together">↔ Flag then fix</span>
+      <span class="who-acts">David / Ala'a flag → Rafaela fixes code parts</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-008 -->
+<div class="card" data-status="theirs" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-008</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Legal</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Align cancellation and voucher terms</div>
+    <div class="card-desc">Workshop pages, FAQ, voucher page and AGB must use the same cancellation and voucher validity rules. Current wording appears contradictory.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">This is a business and legal decision, not a technical one. David needs to decide: what are the actual cancellation rules? What is the voucher validity period? Once the rules are written down clearly, Rafaela updates the text across AGB, FAQ, workshop pages, and voucher page. Decision must come first.</div>
+    <div class="card-footer">
+      <span class="status-badge status-theirs">→ David decides first</span>
+      <span class="who-acts">David decides rules → Rafaela updates text</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-009 -->
+<div class="card" data-status="theirs" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-009</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Legal</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Privacy policy and tracking setup audit</div>
+    <div class="card-desc">Check whether privacy policy, cookie consent and actual tracking tools match: GA4, GTM, Clarity, Meta Pixel if active.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / external legal / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">GTM is integrated in the code and all GA4 e-commerce events are implemented. The privacy policy text and which tools are declared in it is a legal question — needs external legal review by someone familiar with Austrian/EU data law. Developer cannot make that call. What tools David wants to use (Clarity, Meta Pixel) is also David's decision.</div>
+    <div class="card-footer">
+      <span class="status-badge status-theirs">→ Legal review needed</span>
+      <span class="who-acts">David + legal advisor</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-010 -->
+<div class="card" data-status="theirs" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-010</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Legal</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Review health claims and probiotic wording</div>
+    <div class="card-desc">Check all health-related statements around probiotic, microbiome, immune system, digestion, gut-brain axis and balance wording.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Content and legal decision. EU food law restricts what can be claimed about health benefits of fermented foods. David should review with a food or legal expert. Once safe wording is agreed and written, Rafaela updates the text. Not something a developer can or should decide.</div>
+    <div class="card-footer">
+      <span class="status-badge status-theirs">→ David + food/legal expert</span>
+      <span class="who-acts">David decides wording → Rafaela updates</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-011 -->
+<div class="card" data-status="done" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-011</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">CRM / Brevo</span>
+        <span class="badge badge-effort">Effort: Small</span>
+      </div>
+    </div>
+    <div class="card-title">Fix newsletter block</div>
+    <div class="card-desc">Check whether the newsletter form is visible, understandable, connected to Brevo and Double-Opt-in works. Legal aspect of using email addresses — visible in Dashboard/Brevo.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela / David</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Done. The newsletter form is connected to Brevo via a dedicated API route. Signups go into Brevo automatically. Double-opt-in and list management are handled inside the Brevo dashboard — David manages that side. All newsletter subscribers are visible in the Brevo contacts list.</div>
+    <div class="card-footer">
+      <span class="status-badge status-done">✓ Done</span>
+      <span class="who-acts">David monitors via Brevo dashboard</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-012 -->
+<div class="card" data-status="done" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-012</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">Shop</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">Fix shop template remnants</div>
+    <div class="card-desc">Remove 'Payload Ecommerce Template' and other template/default remnants from shop titles, metadata and UI.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">✓ Fixed and deployed. "Payload Ecommerce Template" was appearing in shop page titles and browser tabs. Replaced with "FermentFreude" across all shop and product page metadata. Deployed to production today.</div>
+    <div class="card-footer">
+      <span class="status-badge status-fixed">✓ Fixed — live</span>
+      <span class="who-acts">Done — deployed to production</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-013 -->
+<div class="card" data-status="theirs" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-013</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Shop</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Review product page information</div>
+    <div class="card-desc">Check product page for consistent price formatting, shelf life, storage, quantity UI, product availability and mandatory food information.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Content review — David needs to verify that shelf life, storage instructions, quantity, and food labelling info are correct and complete for each product. All of this is managed in the CMS under Products. David can update directly in /admin — no code change needed. Flag anything that looks wrong.</div>
+    <div class="card-footer">
+      <span class="status-badge status-theirs">→ David in /admin</span>
+      <span class="who-acts">David reviews and updates product fields</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-014 -->
+<div class="card" data-status="together" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-014</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">Content</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">Workshop page QA</div>
+    <div class="card-desc">Review all workshop pages for max participants, dates, FAQs, CTAs, pricing, cancellation text and language consistency.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela / Ala'a</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">David and Ala'a go through each workshop page (Lakto, Kombucha, Tempeh, Basics) and check: correct dates, correct FAQs, correct pricing, cancellation text, language consistency. Most content is in the CMS — David can fix it directly. Code-level issues get flagged to Rafaela.</div>
+    <div class="card-footer">
+      <span class="status-badge status-together">↔ Review together</span>
+      <span class="who-acts">David / Ala'a review → flag code issues to Rafaela</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-015 -->
+<div class="card" data-status="done" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-015</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Analytics / Tracking</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Analytics and conversion tracking audit</div>
+    <div class="card-desc">Verify GA4, GTM and Clarity setup; confirm events for booking, voucher purchase, shop order, newsletter signup and contact form.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Code side: done. GTM is integrated, and all key GA4 e-commerce events are implemented — view item, add to cart, begin checkout, purchase, remove from cart. What lives inside the GTM container (GA4 tag, Clarity, Meta Pixel configuration) is David's responsibility via the GTM dashboard. That is marketing tool setup, not developer work.</div>
+    <div class="card-footer">
+      <span class="status-badge status-done">✓ Code done</span>
+      <span class="who-acts">GTM container setup → David</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-016 -->
+<div class="card" data-status="together" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-016</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">Performance</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">Performance and speed audit</div>
+    <div class="card-desc">Check loading times, Lighthouse, image sizes, fonts, caching, unnecessary requests and mobile performance.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela / Ala'a</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Images are optimised through the CMS pipeline (WebP, resized on upload). Fonts and caching are set up correctly. A formal Lighthouse pass makes sense once the main content QA items are resolved — no point benchmarking a page that still has placeholder content or language issues.</div>
+    <div class="card-footer">
+      <span class="status-badge status-together">↔ After content QA</span>
+      <span class="who-acts">Rafaela runs Lighthouse — after WEB-007 / WEB-014</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-017 -->
+<div class="card" data-status="done" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-017</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">SEO</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">SEO basics audit</div>
+    <div class="card-desc">Check titles, meta descriptions, H1s, canonicals, sitemap, robots.txt, OpenGraph, structured data and slugs.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Infrastructure is done: dynamic sitemap (/sitemap.xml), robots.txt, OpenGraph meta tags, canonical URLs, Payload SEO plugin for per-page titles and descriptions. /admin and /api are blocked from crawlers. Content-level SEO — writing good titles and descriptions for each page — is done in the CMS by David directly in /admin.</div>
+    <div class="card-footer">
+      <span class="status-badge status-done">✓ Infrastructure done</span>
+      <span class="who-acts">Content titles/descriptions → David in /admin</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-018 -->
+<div class="card" data-status="together" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-018</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">UX / Design</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">Mobile QA</div>
+    <div class="card-desc">Manually test every important page on mobile: layout, menus, CTAs, checkout, forms, text overflow and image cropping.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Ala'a / Rafaela / David</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Not done as a formal pass. Ala'a and David should test on real phones — both Android and iPhone. Browser emulation misses things real devices surface. Flag specific pages and issues; Rafaela fixes the code ones. Most layout is responsive by design but real-device testing is always the final check.</div>
+    <div class="card-footer">
+      <span class="status-badge status-together">↔ Test on real devices</span>
+      <span class="who-acts">Ala'a / David test → Rafaela fixes code issues</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-019 -->
+<div class="card" data-status="theirs" data-priority="should">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-019</span>
+      <div class="card-badges">
+        <span class="badge badge-should">Should Have · Medium</span>
+        <span class="badge badge-cat">Content</span>
+        <span class="badge badge-effort">Effort: Small</span>
+      </div>
+    </div>
+    <div class="card-title">Fix online course communication</div>
+    <div class="card-desc">Clarify whether online courses are available or coming soon. Banner and menu must not contradict each other.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Business decision. Are online courses available now, or coming soon? Once David decides the message, the banner text and navigation get updated — most of this is in the CMS. If something is in code, it's a quick fix. Decision first, then update.</div>
+    <div class="card-footer">
+      <span class="status-badge status-theirs">→ David decides</span>
+      <span class="who-acts">David decides → update CMS or code</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-020 -->
+<div class="card" data-status="theirs" data-priority="should">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-020</span>
+      <div class="card-badges">
+        <span class="badge badge-should">Should Have · Medium</span>
+        <span class="badge badge-cat">Content</span>
+        <span class="badge badge-effort">Effort: Small</span>
+      </div>
+    </div>
+    <div class="card-title">Finish or hide Help / FAQ page</div>
+    <div class="card-desc">The Help page should either contain useful answers or be removed from navigation/footer until ready.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Content decision. If the page isn't ready, it should be hidden from navigation and footer until it has real answers — an empty help page reduces trust. David decides: finish the content now, or hide the link. Either option is a 5-minute change.</div>
+    <div class="card-footer">
+      <span class="status-badge status-theirs">→ David decides</span>
+      <span class="who-acts">David decides → quick update</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-021 -->
+<div class="card" data-status="theirs" data-priority="should">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-021</span>
+      <div class="card-badges">
+        <span class="badge badge-should">Should Have · Medium</span>
+        <span class="badge badge-cat">Bug Fix</span>
+        <span class="badge badge-effort">Effort: Small</span>
+      </div>
+    </div>
+    <div class="card-title">Check footer and social links</div>
+    <div class="card-desc">Manually test Instagram, Facebook, LinkedIn and all footer links. Fix suspicious/wrong URLs.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Ala'a</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Manual click test — David or Ala'a goes through every footer link and social icon. Social URLs are managed in the CMS (Footer global in /admin), so any wrong link David can fix himself immediately. Only needs a developer if a link is hardcoded in the code.</div>
+    <div class="card-footer">
+      <span class="status-badge status-theirs">→ David / Ala'a test</span>
+      <span class="who-acts">David / Ala'a — fix in /admin if needed</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-022 -->
+<div class="card" data-status="together" data-priority="should">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-022</span>
+      <div class="card-badges">
+        <span class="badge badge-should">Should Have · Medium</span>
+        <span class="badge badge-cat">SEO</span>
+        <span class="badge badge-effort">Effort: Small</span>
+      </div>
+    </div>
+    <div class="card-title">Fix image alt text and names</div>
+    <div class="card-desc">Correct misspelled names or irrelevant alt text such as David Heider / Marcel Rauminger if present.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Alt text is set when images are uploaded in the CMS. David can update alt text directly in /admin → Media for any image. If specific images have wrong descriptions, flag them and update in the Media library. Developer only needed if something is hardcoded in the code.</div>
+    <div class="card-footer">
+      <span class="status-badge status-together">↔ Mostly CMS</span>
+      <span class="who-acts">David in /admin → Media library</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-023 -->
+<div class="card" data-status="done" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-023</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Dashboard / CMS</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Self-service creation of new workshop types and special workshops</div>
+    <div class="card-desc">David/Marcel need to be able to create one-off partner workshops and new workshop types without code changes, including title, date, location, capacity, price, description, images, FAQ, booking/checkout and automated emails.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela / David</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Done. David and Marcel can already create new workshop appointment slots, set dates, times, locations, and available spots directly in /admin → Workshop Appointments. Changes go live immediately on the website. A full founders guide exists (BOOKING_SYSTEM_FOR_FOUNDERS.md). No developer needed for day-to-day workshop management.</div>
+    <div class="card-footer">
+      <span class="status-badge status-done">✓ Done</span>
+      <span class="who-acts">Complete — David uses /admin → Workshop Appointments</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-024 -->
+<div class="card" data-status="done" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-024</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">Dashboard / CMS</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">Workshop booking overview in dashboard</div>
+    <div class="card-desc">Show bookings clearly in the dashboard: name, date, product/workshop, payment status, email status, notes.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Done. Bookings and workshop appointments are visible in the Payload admin. If specific columns or views need to be adjusted — for example a cleaner summary view — that's a quick improvement. Flag what's missing and it gets added.</div>
+    <div class="card-footer">
+      <span class="status-badge status-done">✓ Done</span>
+      <span class="who-acts">Complete — flag any missing view adjustments</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-025 -->
+<div class="card" data-status="future" data-priority="should">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-025</span>
+      <div class="card-badges">
+        <span class="badge badge-should">Should Have · Medium</span>
+        <span class="badge badge-cat">Dashboard / CMS</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">Individual voucher personalization</div>
+    <div class="card-desc">Allow customer name, recipient name, message or voucher design customization if feasible.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela / David</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Future feature. Custom names, messages, or designs on vouchers requires additional development. Scope and quote when the time comes — good to do before a gift season (Christmas, Valentine's).</div>
+    <div class="card-footer">
+      <span class="status-badge status-future">◦ Future</span>
+      <span class="who-acts">Future paid development — scope before gift seasons</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-026 -->
+<div class="card" data-status="done" data-priority="must">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-026</span>
+      <div class="card-badges">
+        <span class="badge badge-must">Must Have · High</span>
+        <span class="badge badge-cat">CRM / Brevo</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">Transactional email audit</div>
+    <div class="card-desc">Check all automated emails: booking confirmation, invoice, voucher delivery, reminder, cancellation/reschedule if needed.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela / David</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Done. All automated emails are set up in Brevo: booking confirmation, invoice, voucher delivery, welcome email, password reset. Triggers come from Stripe webhooks and Payload hooks. Brevo handoff guides for founders exist. David monitors delivery via the Brevo dashboard. Cancellation email is listed separately as WEB-033.</div>
+    <div class="card-footer">
+      <span class="status-badge status-done">✓ Done</span>
+      <span class="who-acts">David monitors via Brevo dashboard</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-027 -->
+<div class="card" data-status="done" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-027</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Organization</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Backup strategy</div>
+    <div class="card-desc">Clarify automatic backups for MongoDB, R2 assets, code, CMS content and recovery process.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Mostly covered. Code: backed up on GitHub with full history. Deployment: Vercel keeps all snapshots — instant rollback. Database: MongoDB Atlas includes automatic daily backups. Media (Cloudflare R2): no automatic backup — this is the one gap. A manual backup schedule should be agreed and documented clearly.</div>
+    <div class="card-footer">
+      <span class="status-badge status-done">✓ Mostly covered</span>
+      <span class="who-acts">R2 backup gap — agree a schedule together</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-028 -->
+<div class="card" data-status="done" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-028</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Organization</span>
+        <span class="badge badge-effort">Effort: Small</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Rollback / deployment recovery process</div>
+    <div class="card-desc">Document how to rollback if a deployment breaks the website.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Built into Vercel. Every deployment is saved and can be instantly re-activated with one click from the Vercel dashboard — no terminal or code needed. If a deployment breaks something, rollback takes under 60 seconds. A one-page guide showing David exactly where to click is worth adding to the docs.</div>
+    <div class="card-footer">
+      <span class="status-badge status-done">✓ Built into Vercel</span>
+      <span class="who-acts">Add one-page guide for David — steps to rollback</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-029 -->
+<div class="card" data-status="theirs" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-029</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Security</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical
+    </div>
+    <div class="card-title">Access rights and 2FA audit</div>
+    <div class="card-desc">Check admin rights, least privilege, two-factor authentication and backup admins for all critical systems.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Each person reviews and secures their own accounts — nobody can manage another person's account security. David and Marcel should enable 2FA on Stripe, Brevo, Google (GTM/GA4), and EasyName. Rafaela handles Vercel, GitHub, MongoDB, and Cloudflare R2. Can review the list together in the meeting tomorrow.</div>
+    <div class="card-footer">
+      <span class="status-badge status-theirs">→ Each person their own</span>
+      <span class="who-acts">David + Marcel + Rafaela — each secures their accounts</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-030 -->
+<div class="card" data-status="future" data-priority="nice">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-030</span>
+      <div class="card-badges">
+        <span class="badge badge-nice">Nice to Have · Medium</span>
+        <span class="badge badge-cat">Future Feature</span>
+        <span class="badge badge-effort">Effort: Medium</span>
+      </div>
+    </div>
+    <div class="card-title">Knowledge hub / blog roadmap</div>
+    <div class="card-desc">Plan future content structure for fermentation knowledge, recipes and SEO without overloading current launch phase.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Parked. Strong SEO potential but not the right time to build it. The CMS is already capable of supporting a blog when the decision is made — it's an additive feature, not a rebuild. Define content pillars when the rest of the site is stable.</div>
+    <div class="card-footer">
+      <span class="status-badge status-future">◦ Parked</span>
+      <span class="who-acts">David decides when — CMS is ready for it</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-031 -->
+<div class="card" data-status="future" data-priority="nice">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-031</span>
+      <div class="card-badges">
+        <span class="badge badge-nice">Nice to Have · High</span>
+        <span class="badge badge-cat">Future Feature</span>
+        <span class="badge badge-effort">Effort: Large</span>
+      </div>
+    </div>
+    <div class="card-title">Online course platform</div>
+    <div class="card-desc">Online courses directly on the website.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Parked. Needs a business model decision before any development. Specialist course platforms (Teachable, Kajabi) vs. building inside this system are very different paths with very different costs. Scope properly when the product is ready and the direction is decided.</div>
+    <div class="card-footer">
+      <span class="status-badge status-future">◦ Parked</span>
+      <span class="who-acts">David decides direction first — then scope and quote</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-032 -->
+<div class="card" data-status="future" data-priority="nice">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-032</span>
+      <div class="card-badges">
+        <span class="badge badge-nice">Nice to Have · High</span>
+        <span class="badge badge-cat">Future Feature</span>
+        <span class="badge badge-effort">Effort: Large</span>
+      </div>
+    </div>
+    <div class="card-title">B2B order area</div>
+    <div class="card-desc">Long-term idea: gastronomy customers can order products directly via a B2B area.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: David / Marcel / Rafaela</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Parked. A full B2B ordering system is a significant build. Makes sense when recurring B2B sales are happening at volume and the manual process becomes a real bottleneck. Not urgent — park until B2B scales to the point where it's needed.</div>
+    <div class="card-footer">
+      <span class="status-badge status-future">◦ Parked</span>
+      <span class="who-acts">Future — when B2B volume justifies the build</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEB-033 -->
+<div class="card" data-status="together" data-priority="critical">
+  <div class="card-sheet">
+    <div class="card-top">
+      <span class="card-id">WEB-033</span>
+      <div class="card-badges">
+        <span class="badge badge-critical">★ Must Have · Critical</span>
+        <span class="badge badge-cat">Dashboard / CMS</span>
+      </div>
+    </div>
+    <div class="critical-flag">
+      <svg viewBox="0 0 10 10" fill="currentColor"><path d="M5 0L6.12 3.45H9.76L6.88 5.58L8 9.03L5 6.9L2 9.03L3.12 5.58L0.24 3.45H3.88Z"/></svg>
+      Critical — new item
+    </div>
+    <div class="card-title">Cancellation of workshops and individual bookings</div>
+    <div class="card-desc">It needs to be possible to cancel a workshop and have customers get an automated email (e.g. workshop cancelled due to reasons). Also need to be able to cancel individual customer bookings from the dashboard.</div>
+    <div class="card-meta"><span class="badge badge-owner">Owner: Rafaela / David</span></div>
+  </div>
+  <div class="card-response">
+    <div class="response-label">Response</div>
+    <div class="response-text">Valid and important — not yet built. Two separate things: (1) David cancels an entire workshop session and all attendees automatically get a cancellation email; (2) David cancels an individual customer booking and that specific customer gets an email. Both require new admin logic, a Brevo cancellation email template, and Stripe refund handling. Needs to be scoped and quoted as paid development work.</div>
+    <div class="card-footer">
+      <span class="status-badge status-together">↔ Scope + quote</span>
+      <span class="who-acts">Paid development — scope together, then quote</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /cards -->
+
+<div id="save-indicator">Saved ✓</div>
+
+<script>
+/* ── Filter ──────────────────────────────────────────────── */
+function filter(val, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.card').forEach(card => {
+    if (val === 'all') { card.classList.remove('hidden'); return; }
+    if (val === 'critical') {
+      card.classList.toggle('hidden', card.dataset.priority !== 'critical');
+    } else {
+      card.classList.toggle('hidden', card.dataset.status !== val);
+    }
+  });
+}
+
+/* ── Helpers ─────────────────────────────────────────────── */
+function debounce(fn, ms) {
+  let t;
+  return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+function showSaved() {
+  const el = document.getElementById('save-indicator');
+  el.classList.add('visible');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('visible'), 1800);
+}
+
+/* ── Per-card notes clear ────────────────────────────────── */
+function clearNotes(id) {
+  if (!confirm('Clear notes for ' + id + '?')) return;
+  localStorage.removeItem('ff-' + id + '-notes');
+  const el = document.querySelector('[data-notes-id="' + id + '"]');
+  if (el) el.innerHTML = '';
+}
+
+/* ── Clear all ───────────────────────────────────────────── */
+function clearAllNotes() {
+  if (!confirm('Clear ALL notes and edits? This cannot be undone.')) return;
+  Object.keys(localStorage)
+    .filter(k => k.startsWith('ff-'))
+    .forEach(k => localStorage.removeItem(k));
+  // Restore original response text from data-original
+  document.querySelectorAll('.response-text[contenteditable]').forEach(el => {
+    if (el.dataset.original) el.innerHTML = el.dataset.original;
+    el.classList.remove('edited');
+  });
+  document.querySelectorAll('[data-notes-id]').forEach(el => el.innerHTML = '');
+  showSaved();
+}
+
+/* ── Init ────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.card').forEach(card => {
+    const idEl = card.querySelector('.card-id');
+    if (!idEl) return;
+    const id = idEl.textContent.trim();
+
+    /* Make response editable */
+    const responseEl = card.querySelector('.response-text');
+    if (responseEl) {
+      responseEl.dataset.original = responseEl.innerHTML;
+      responseEl.contentEditable = 'true';
+      responseEl.setAttribute('spellcheck', 'false');
+
+      const savedResponse = localStorage.getItem('ff-' + id + '-response');
+      if (savedResponse) {
+        responseEl.innerHTML = savedResponse;
+        responseEl.classList.add('edited');
+      }
+
+      responseEl.addEventListener('input', debounce(() => {
+        localStorage.setItem('ff-' + id + '-response', responseEl.innerHTML);
+        responseEl.classList.add('edited');
+        showSaved();
+      }, 500));
+    }
+
+    /* Inject notes section */
+    const cardResponse = card.querySelector('.card-response');
+    if (!cardResponse) return;
+
+    const notesSection = document.createElement('div');
+    notesSection.className = 'notes-section';
+    notesSection.innerHTML =
+      '<div class="notes-header">' +
+        '<span class="notes-header-label">My notes</span>' +
+        '<button class="notes-clear" onclick="clearNotes(\'' + id + '\')">Clear</button>' +
+      '</div>' +
+      '<div class="notes-input" contenteditable="true" spellcheck="false" ' +
+           'data-notes-id="' + id + '" ' +
+           'data-placeholder="Add meeting notes, decisions, open questions…"></div>';
+    cardResponse.appendChild(notesSection);
+
+    const notesInput = notesSection.querySelector('.notes-input');
+    const savedNotes = localStorage.getItem('ff-' + id + '-notes');
+    if (savedNotes) notesInput.innerHTML = savedNotes;
+
+    notesInput.addEventListener('input', debounce(() => {
+      localStorage.setItem('ff-' + id + '-notes', notesInput.innerHTML);
+      showSaved();
+    }, 500));
+  });
+});
+</script>
+</body>
+</html>

@@ -73,6 +73,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    'backlog-items': BacklogItem;
     pages: Page;
     categories: Category;
     'course-progress': CourseProgress;
@@ -121,6 +122,7 @@ export interface Config {
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    'backlog-items': BacklogItemsSelect<false> | BacklogItemsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'course-progress': CourseProgressSelect<false> | CourseProgressSelect<true>;
@@ -4173,6 +4175,118 @@ export interface Address {
   createdAt: string;
 }
 /**
+ * Internal team backlog — bugs, features, decisions and next steps. Managed via the Backlog board (sidebar), not this default admin form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "backlog-items".
+ */
+export interface BacklogItem {
+  id: string;
+  /**
+   * e.g. WEB-001
+   */
+  itemId: string;
+  board: 'roadmap' | 'backlog' | 'features';
+  title: string;
+  /**
+   * Only used when this item acts as a folder in the Features/Backlog folder view (i.e. it has 2+ children) — a broader, friendlier name for the whole initiative (e.g. "Refund & Cancellation Architecture"). Leave blank to just use the title above. Never overrides the title itself, so a Roadmap item stays an exact match to the spreadsheet.
+   */
+  folderLabel?: string | null;
+  category:
+    | 'org'
+    | 'bug'
+    | 'content'
+    | 'legal'
+    | 'crm'
+    | 'shop'
+    | 'analytics'
+    | 'performance'
+    | 'seo'
+    | 'design'
+    | 'dashboard'
+    | 'security'
+    | 'feature'
+    | 'future';
+  priority: 'critical' | 'must' | 'should' | 'nice';
+  status: 'open' | 'partial' | 'their-action' | 'blocked' | 'done' | 'future';
+  effort: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'Unknown';
+  /**
+   * From the roadmap spreadsheet — how much this matters to the business, separate from build effort
+   */
+  businessValue?: ('critical' | 'high' | 'medium' | 'low') | null;
+  /**
+   * Is this covered by the monthly retainer, or does it need a separate agreement/billing with David & Marcel?
+   */
+  billingScope: 'included' | 'extra';
+  owners?: ('dev' | 'admin')[] | null;
+  /**
+   * Where on the site this relates to, without leading slash
+   */
+  slug?: string | null;
+  /**
+   * e.g. WEB-033 — a loose "see also" pointer. For real parent/child structure, use Parent item below instead.
+   */
+  related?: string | null;
+  /**
+   * Structural parent — e.g. a Case breakdown (New Features) belongs under its Main Roadmap epic. Drives the sub-items rollup shown on the parent.
+   */
+  parent?: (string | null) | BacklogItem;
+  /**
+   * Which week/month this is committed for, e.g. "Week of Jul 14" or "August batch" — leave blank if not yet scheduled.
+   */
+  plannedFor?: string | null;
+  description?: string | null;
+  response?: string | null;
+  /**
+   * From the roadmap spreadsheet — which systems or pages this touches
+   */
+  area?: string | null;
+  /**
+   * From the roadmap spreadsheet — why this item exists
+   */
+  sourceContext?: string | null;
+  /**
+   * From the roadmap spreadsheet — what this needs before it can be built
+   */
+  dependencies?: string | null;
+  /**
+   * From the roadmap spreadsheet — the immediate next step
+   */
+  nextActionText?: string | null;
+  notes?: string | null;
+  todos?:
+    | {
+        text: string;
+        done?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Reference links only — Google Drive, Figma, Notion, screenshots, docs. Not uploaded files. Add as many as needed.
+   */
+  links?:
+    | {
+        label?: string | null;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional — attach an open architecture decision to this item (question + options + recommended pick). Edited via the Backlog board decision widget.
+   */
+  decision?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4300,7 +4414,7 @@ export interface WorkshopBooking {
    */
   status: 'pending' | 'confirmed' | 'cancelled' | 'refunded';
   /**
-   * ID of the WorkshopAppointment. Auto-populated for online bookings. Leave blank for phone bookings.
+   * ID of the WorkshopAppointment. Auto-populated for online bookings. For phone bookings: copy the ID from the correct appointment in the Workshop Appointments list — this is required for the booking to appear in the Roster dashboard.
    */
   appointmentId?: string | null;
   /**
@@ -4659,6 +4773,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'backlog-items';
+        value: string | BacklogItem;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -4840,6 +4958,51 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "backlog-items_select".
+ */
+export interface BacklogItemsSelect<T extends boolean = true> {
+  itemId?: T;
+  board?: T;
+  title?: T;
+  folderLabel?: T;
+  category?: T;
+  priority?: T;
+  status?: T;
+  effort?: T;
+  businessValue?: T;
+  billingScope?: T;
+  owners?: T;
+  slug?: T;
+  related?: T;
+  parent?: T;
+  plannedFor?: T;
+  description?: T;
+  response?: T;
+  area?: T;
+  sourceContext?: T;
+  dependencies?: T;
+  nextActionText?: T;
+  notes?: T;
+  todos?:
+    | T
+    | {
+        text?: T;
+        done?: T;
+        id?: T;
+      };
+  links?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  decision?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

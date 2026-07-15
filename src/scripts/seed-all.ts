@@ -35,6 +35,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const scripts: Record<string, { name: string; file: string }> = {
+  backlog: { name: 'Backlog board (internal team tool)', file: 'seed-backlog.ts' },
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },

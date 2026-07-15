@@ -1,0 +1,438 @@
+
+<title>FermentFreude — System Architecture</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #EDF0F5;
+  --surface: #FFFFFF;
+  --border: #D4D9E4;
+  --ink: #18181B;
+  --ink2: #4B5468;
+  --ink3: #8E96A8;
+  --svgbg: #F1F4F9;
+  --dot: rgba(0,0,0,0.07);
+  --vercel-fill: #F6F8FC;
+  --vercel-stroke: #C2CAD8;
+  --shadow-color: rgba(0,0,0,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0D1117; --surface: #161B22; --border: #2D333B;
+    --ink: #CDD9E5; --ink2: #909DAB; --ink3: #545D68;
+    --svgbg: #0D1117; --dot: rgba(255,255,255,0.04);
+    --vercel-fill: #1C2128; --vercel-stroke: #373E47; --shadow-color: rgba(0,0,0,0.4);
+  }
+}
+:root[data-theme="light"] {
+  --bg: #EDF0F5; --surface: #FFFFFF; --border: #D4D9E4;
+  --ink: #18181B; --ink2: #4B5468; --ink3: #8E96A8;
+  --svgbg: #F1F4F9; --dot: rgba(0,0,0,0.07);
+  --vercel-fill: #F6F8FC; --vercel-stroke: #C2CAD8; --shadow-color: rgba(0,0,0,0.10);
+}
+:root[data-theme="dark"] {
+  --bg: #0D1117; --surface: #161B22; --border: #2D333B;
+  --ink: #CDD9E5; --ink2: #909DAB; --ink3: #545D68;
+  --svgbg: #0D1117; --dot: rgba(255,255,255,0.04);
+  --vercel-fill: #1C2128; --vercel-stroke: #373E47; --shadow-color: rgba(0,0,0,0.4);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  padding: 36px 24px 56px;
+}
+
+.page { max-width: 1060px; margin: 0 auto; }
+
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+.eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 5px;
+}
+h1 {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -.025em;
+  margin-bottom: 3px;
+}
+.subtitle {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.55;
+  max-width: 440px;
+}
+.theme-toggle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--ink2);
+  font-size: 11.5px;
+  padding: 7px 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: background .15s;
+}
+.theme-toggle:hover { background: var(--border); }
+
+.diagram-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px var(--shadow-color);
+}
+
+#diagram { display: block; width: 100%; height: auto; }
+
+.legend-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--svgbg);
+  align-items: center;
+}
+.legend-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-right: 4px;
+}
+.li { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink2); }
+.li-line {
+  width: 26px; height: 2px; flex-shrink: 0; border-radius: 2px;
+}
+
+footer {
+  margin-top: 18px;
+  font-size: 11px;
+  color: var(--ink3);
+  display: flex;
+  justify-content: space-between;
+}
+</style>
+
+<div class="page">
+  <header>
+    <div>
+      <p class="eyebrow">FermentFreude · July 2026</p>
+      <h1>System Architecture</h1>
+      <p class="subtitle">How every service connects — from a customer visit to a confirmed booking and confirmation email</p>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle theme</button>
+  </header>
+
+  <div class="diagram-card">
+    <svg id="diagram" viewBox="0 0 1000 578" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="legend-bar">
+      <span class="legend-label">Key</span>
+      <span class="li"><span class="li-line" style="background:#8B949E"></span>visit / serve</span>
+      <span class="li"><span class="li-line" style="background:#3B82F6"></span>API / data</span>
+      <span class="li"><span class="li-line" style="background:#F59E0B;background-image:repeating-linear-gradient(to right,#F59E0B 0,#F59E0B 5px,transparent 5px,transparent 9px)"></span>media</span>
+      <span class="li"><span class="li-line" style="background-image:repeating-linear-gradient(to right,#635BFF 0,#635BFF 5px,transparent 5px,transparent 9px);background-color:transparent"></span>webhook</span>
+      <span class="li"><span class="li-line" style="background:#0B996E"></span>email</span>
+      <span class="li"><span class="li-line" style="background-image:repeating-linear-gradient(to right,#E37400 0,#E37400 5px,transparent 5px,transparent 9px);background-color:transparent"></span>analytics</span>
+      <span class="li" style="margin-left:auto">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3B82F6;opacity:.7;margin-right:2px"></span>Rafaela
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1D4ED8;opacity:.7;margin-left:8px;margin-right:2px"></span>David
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#D97706;opacity:.7;margin-left:8px;margin-right:2px"></span>⚠ Transfer
+      </span>
+    </div>
+  </div>
+
+  <footer>
+    <span>FermentFreude · Stack overview</span>
+    <span>Next.js 15 · Payload CMS · MongoDB Atlas · Cloudflare R2 · Stripe · Brevo · GA4/GTM</span>
+  </footer>
+</div>
+
+<script>
+function toggleTheme() {
+  const r = document.documentElement;
+  const dm = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const cur = r.dataset.theme || (dm ? 'dark' : 'light');
+  r.dataset.theme = cur === 'dark' ? 'light' : 'dark';
+  render();
+}
+
+// ── Node definitions ──────────────────────────────────────────────
+const NODES = [
+  {
+    id: 'visitor', cx: 498, cy: 52,
+    label: 'Website Visitor', sub: 'Browser / customer',
+    role: 'USER', color: '#6366F1',
+    owner: null,
+    icon: `
+      <rect x="3" y="7" width="34" height="26" rx="3.5" fill="rgba(255,255,255,0.12)"/>
+      <rect x="3" y="7" width="34" height="10" rx="3.5" fill="rgba(255,255,255,0.2)"/>
+      <circle cx="9.5" cy="12" r="2.2" fill="#EF4444"/>
+      <circle cx="15.5" cy="12" r="2.2" fill="#FCD34D"/>
+      <circle cx="21.5" cy="12" r="2.2" fill="#4ADE80"/>
+      <rect x="7" y="22" width="22" height="2.5" rx="1.2" fill="rgba(255,255,255,0.38)"/>
+      <rect x="7" y="27" width="16" height="2.5" rx="1.2" fill="rgba(255,255,255,0.26)"/>
+    `
+  },
+  {
+    id: 'nextjs', cx: 255, cy: 230,
+    label: 'Next.js 15', sub: 'Frontend · App Router',
+    role: 'FRONTEND', color: '#111111',
+    owner: 'Rafaela',
+    icon: `
+      <path d="M 9 31 L 9 10 L 14.5 10 L 27.5 26 L 27.5 10 L 31.5 10 L 31.5 31 L 26.5 31 L 13.5 15.5 L 13.5 31 Z" fill="white"/>
+    `
+  },
+  {
+    id: 'payload', cx: 722, cy: 230,
+    label: 'Payload CMS', sub: 'Admin · API · Hooks',
+    role: 'CMS', color: '#0F172A',
+    owner: 'Rafaela',
+    icon: `
+      <rect x="9" y="7" width="7" height="26" rx="2.5" fill="white"/>
+      <path d="M 16 7 Q 33 7 33 19 Q 33 31 16 31" stroke="white" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+    `
+  },
+  {
+    id: 'mongo', cx: 355, cy: 390,
+    label: 'MongoDB Atlas', sub: 'Database · M0 cluster',
+    role: 'DATABASE', color: '#023430',
+    owner: '⚠ Transfer',
+    ownerWarn: true,
+    icon: `
+      <path d="M 20 4 C 20 4 31 12 31 22 C 31 28.5 26.5 33.5 20 36 C 13.5 33.5 9 28.5 9 22 C 9 12 20 4 20 4 Z" fill="#00ED64"/>
+      <rect x="18.5" y="30.5" width="3" height="6" fill="#016849"/>
+    `
+  },
+  {
+    id: 'r2', cx: 662, cy: 390,
+    label: 'Cloudflare R2', sub: 'Media storage · CDN',
+    role: 'STORAGE', color: '#C35200',
+    owner: '⚠ Transfer',
+    ownerWarn: true,
+    icon: `
+      <path d="M 7 27 C 6.5 27 5 25.5 5 23 C 5 19.5 7.5 17 11 17 C 11.5 13.5 15 11 19.5 11 C 23 11 26 13 27.5 16 C 29 15.5 32.5 17 32.5 20.5 C 34 21.5 35 24 34 27 C 33 29 30 29 27.5 29 L 11 29 C 9 29 7 28.5 7 27 Z" fill="rgba(255,255,255,0.86)"/>
+      <text x="20" y="39" text-anchor="middle" fill="white" font-size="8" font-weight="800" font-family="monospace" letter-spacing=".04em">R2</text>
+    `
+  },
+  {
+    id: 'ga4', cx: 118, cy: 510,
+    label: 'GA4 / GTM', sub: 'Analytics · Tracking',
+    role: 'ANALYTICS', color: '#C05621',
+    owner: 'David',
+    icon: `
+      <rect x="7" y="23" width="7" height="12" rx="2" fill="rgba(255,255,255,0.88)"/>
+      <rect x="17" y="16" width="7" height="19" rx="2" fill="rgba(255,255,255,0.88)"/>
+      <rect x="27" y="9" width="7" height="26" rx="2" fill="rgba(255,255,255,0.88)"/>
+    `
+  },
+  {
+    id: 'stripe', cx: 415, cy: 510,
+    label: 'Stripe', sub: 'Payments · Webhooks',
+    role: 'PAYMENTS', color: '#4F47E5',
+    owner: 'David',
+    icon: `
+      <path d="M 12 20 C 12 15.5 16.5 13.5 21 15 C 25 16.5 25 21 21 22.5 C 16.5 24 12 26.5 12 31 C 12 35.5 17 35 21.5 33.5" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+    `
+  },
+  {
+    id: 'brevo', cx: 762, cy: 510,
+    label: 'Brevo', sub: 'Email · CRM',
+    role: 'EMAIL', color: '#0B7A5A',
+    owner: 'David',
+    icon: `
+      <rect x="4" y="10" width="32" height="22" rx="3.5" fill="rgba(255,255,255,0.88)"/>
+      <path d="M 4 14 L 20 23.5 L 36 14" stroke="#0B7A5A" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    `
+  }
+];
+
+// ── Connection definitions ────────────────────────────────────────
+// Each connection: from, to, path (SVG d attr), markerColor, dashed, label, lx, ly, lrot
+const CONNS = [
+  {
+    path: 'M 458,93 C 410,146 274,154 258,189',
+    color: '#8B949E', marker: 'gray', dashed: false,
+    label: 'visits website', lx: 338, ly: 143, lrot: -28
+  },
+  {
+    path: 'M 538,93 C 586,146 710,154 722,189',
+    color: '#8B949E', marker: 'gray', dashed: false,
+    label: 'visits /admin', lx: 657, ly: 143, lrot: 28
+  },
+  {
+    path: 'M 337,223 L 640,223',
+    color: '#3B82F6', marker: 'blue', dashed: false,
+    label: 'content API', lx: 488, ly: 215, lrot: 0
+  },
+  {
+    path: 'M 640,237 L 337,237',
+    color: '#3B82F6', marker: 'blue', dashed: false,
+    label: '', lx: 0, ly: 0
+  },
+  {
+    path: 'M 694,271 C 688,325 462,342 438,349',
+    color: '#3B82F6', marker: 'blue', dashed: false,
+    label: 'reads / writes', lx: 546, ly: 315, lrot: 0
+  },
+  {
+    path: 'M 756,271 C 776,328 752,348 752,349',
+    color: '#F59E0B', marker: 'amber', dashed: false,
+    label: 'uploads', lx: 788, ly: 316, lrot: 0
+  },
+  {
+    path: 'M 580,376 C 510,332 356,295 295,271',
+    color: '#F59E0B', marker: 'amber', dashed: true,
+    label: 'serves media', lx: 430, ly: 316, lrot: 0
+  },
+  {
+    path: 'M 207,271 C 182,384 130,435 125,469',
+    color: '#E37400', marker: 'orange', dashed: true,
+    label: 'events', lx: 148, ly: 395, lrot: -78
+  },
+  {
+    path: 'M 270,271 C 278,386 370,442 376,469',
+    color: '#635BFF', marker: 'purple', dashed: false,
+    label: 'checkout', lx: 302, ly: 398, lrot: 72
+  },
+  {
+    path: 'M 455,469 C 498,408 658,362 668,271',
+    color: '#635BFF', marker: 'purple', dashed: true,
+    label: 'webhook', lx: 578, ly: 397, lrot: 0
+  },
+  {
+    path: 'M 800,271 C 824,392 816,446 814,469',
+    color: '#0B996E', marker: 'green', dashed: false,
+    label: 'send emails', lx: 840, ly: 392, lrot: 82
+  }
+];
+
+// ── Icon background colors (same as node.color) ───────────────────
+function nodeById(id) { return NODES.find(n => n.id === id); }
+
+// ── Build SVG ────────────────────────────────────────────────────
+function render() {
+  const svg = document.getElementById('diagram');
+  svg.innerHTML = buildSVG();
+}
+
+function buildSVG() {
+  return [
+    buildDefs(),
+    buildBg(),
+    buildVercelBox(),
+    buildConns(),
+    ...NODES.map(buildNode),
+    buildConnLabels()
+  ].join('\n');
+}
+
+function buildDefs() {
+  const arr = (id, color) =>
+    `<marker id="arr-${id}" markerWidth="8" markerHeight="8" refX="6" refY="3.2" orient="auto">
+      <path d="M 0 0.5 L 0 5.8 L 7 3.2 Z" fill="${color}"/>
+    </marker>`;
+  return `<defs>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="var(--shadow-color)"/>
+    </filter>
+    <pattern id="dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="11" cy="11" r="0.6" fill="var(--dot)"/>
+    </pattern>
+    ${arr('gray','#8B949E')}
+    ${arr('blue','#3B82F6')}
+    ${arr('amber','#F59E0B')}
+    ${arr('orange','#E37400')}
+    ${arr('purple','#635BFF')}
+    ${arr('green','#0B996E')}
+  </defs>`;
+}
+
+function buildBg() {
+  return `
+  <rect width="1000" height="578" fill="var(--svgbg)"/>
+  <rect width="1000" height="578" fill="url(#dots)"/>`;
+}
+
+function buildVercelBox() {
+  return `
+  <rect x="106" y="162" width="790" height="146" rx="14" fill="var(--vercel-fill)" stroke="var(--vercel-stroke)" stroke-width="1.5" stroke-dasharray="7,4"/>
+  <rect x="118" y="150" width="168" height="20" rx="5" fill="#1E293B"/>
+  <text x="123" y="164" fill="white" font-size="10.5" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, sans-serif" letter-spacing=".06em">▲ VERCEL — HOSTING</text>`;
+}
+
+function buildConns() {
+  return CONNS.map(c => {
+    const dash = c.dashed ? `stroke-dasharray="5,3"` : '';
+    return `<path d="${c.path}" stroke="${c.color}" stroke-width="1.6" fill="none" ${dash} marker-end="url(#arr-${c.marker})"/>`;
+  }).join('\n');
+}
+
+function buildConnLabels() {
+  return CONNS.filter(c => c.label).map(c => {
+    const rot = c.lrot ? ` transform="rotate(${c.lrot},${c.lx},${c.ly})"` : '';
+    return `<text x="${c.lx}" y="${c.ly}" text-anchor="middle" fill="${c.color}" font-size="9.5" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="500" opacity=".9"${rot}>${c.label}</text>`;
+  }).join('\n');
+}
+
+function buildNode(n) {
+  const W = 164, H = 82;
+  const x = n.cx - W / 2, y = n.cy - H / 2;
+  const ix = x + 12, iy = y + 11;  // icon top-left
+  const tx = ix + 50, ty1 = y + 27, ty2 = y + 41;
+
+  // Role pill
+  const roleW = n.role.length * 6.8 + 14;
+  const rolePillX = x + 12;
+  const rolePillCx = rolePillX + roleW / 2;
+  const rolePillY = y + 58;
+
+  // Owner chip
+  let ownerHtml = '';
+  if (n.owner) {
+    const owW = n.owner.length * 5.6 + 14;
+    const owX = x + W - 12 - owW;
+    const owCx = owX + owW / 2;
+    const owColor = n.ownerWarn ? '#D97706' : (n.owner === 'Rafaela' ? '#3B82F6' : '#1D4ED8');
+    const owBg = n.ownerWarn ? 'rgba(217,119,6,0.15)' : (n.owner === 'Rafaela' ? 'rgba(59,130,246,0.13)' : 'rgba(29,78,216,0.13)');
+    ownerHtml = `
+      <rect x="${owX}" y="${rolePillY}" width="${owW}" height="16" rx="8" fill="${owBg}"/>
+      <text x="${owCx}" y="${rolePillY + 11}" text-anchor="middle" fill="${owColor}" font-size="8.5" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, sans-serif">${n.owner}</text>`;
+  }
+
+  // Icon background uses node color; for node 'r2' use the brand orange
+  const iconBg = n.color;
+
+  return `
+  <g>
+    <rect x="${x}" y="${y}" width="${W}" height="${H}" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="${x}" y="${y}" width="${W}" height="4.5" rx="8" fill="${n.color}"/>
+    <rect x="${ix}" y="${iy}" width="40" height="40" rx="8" fill="${iconBg}"/>
+    <g transform="translate(${ix},${iy})">${n.icon}</g>
+    <text x="${tx}" y="${ty1}" fill="var(--ink)" font-size="12.5" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, sans-serif">${n.label}</text>
+    <text x="${tx}" y="${ty2}" fill="var(--ink3)" font-size="9.5" font-family="-apple-system, BlinkMacSystemFont, sans-serif">${n.sub}</text>
+    <rect x="${rolePillX}" y="${rolePillY}" width="${roleW}" height="16" rx="8" fill="${n.color}" fill-opacity=".12"/>
+    <text x="${rolePillCx}" y="${rolePillY + 11}" text-anchor="middle" fill="${n.color}" font-size="8.5" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, sans-serif" letter-spacing=".04em">${n.role}</text>
+    ${ownerHtml}
+  </g>`;
+}
+
+document.addEventListener('DOMContentLoaded', render);
+</script>

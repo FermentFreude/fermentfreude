@@ -1,6 +1,6 @@
-# CLAUDE.md — FermentFreude
+# AGENTS.md — FermentFreude
 
-> This file is auto-read by Claude Code at session start. It is the single-file context for the entire project.
+> This file is auto-read by Codex at session start. It is the single-file context for the entire project.
 
 ## Stack
 
@@ -219,12 +219,12 @@ src/
 11. **Seed scripts:** one per page (`seed-<page>.ts`), registered in `seed-all.ts`. **Non-destructive by default** — skips pages that already have content. Use `--force` to overwrite.
 12. **No per-page route files.** Dynamic `[slug]/page.tsx` renders all CMS pages.
 
-## Working With Claude — Session Efficiency
+## Working With Codex — Session Efficiency
 
 Usage limits get burned fastest by session *habits*, not by the size of the actual task. Default to the cheaper option unless the task genuinely needs more:
 
 1. **Scope tool calls narrowly.** Ask for the specific file(s) or question first ("check these 3 files") rather than a broad sweep ("audit everything" / read-all-files). Widen only if the narrow pass wasn't enough — every file read/grep result stays in context for the rest of the session.
-2. **Don't paste large transcripts.** If bringing context from another session or tool, paste a short summary or the relevant lines only. Point Claude at a file or URL instead of pasting long output inline.
+2. **Don't paste large transcripts.** If bringing context from another session or tool, paste a short summary or the relevant lines only. Point Codex at a file or URL instead of pasting long output inline.
 3. **One thread per task.** Start a fresh session per distinct task instead of continuing one long-running conversation across unrelated topics — long history resends more tokens every turn even before new work happens.
 4. **Use subagents deliberately.** Only delegate to a subagent (Explore, general-purpose, etc.) for genuinely broad/parallel searches — each one carries its own token cost on top of the main conversation. A direct grep is cheaper for "where is X defined."
 5. **Match model tier to the task.** Default to Sonnet for regular coding work; reserve Opus for hard problems (tricky bugs, architecture decisions). Check the active model if a session feels like it's burning quota unusually fast.
@@ -236,7 +236,7 @@ Beyond the always-available `/project:fix`, `/project:debug`, `/project:new-feat
 - **`/project:imprint`** — after building any new UI component. Captures the pattern to `docs/UI_PATTERNS.md` while the decision is fresh.
 - **`/project:review`** — before a demo, or when something feels off but isn't a specific known bug. Spot-checks against the 12 Non-Negotiable Rules and does a real browser pass.
 - **`/project:recover`** — the same problem persists after one corrective attempt. Stop, re-read from source, form a genuinely new diagnosis instead of a third guess.
-- **`/project:remember save`** — a feature spans multiple sessions and work is pausing. Writes handoff state to `.claude/memory/<feature-slug>.md`.
+- **`/project:remember save`** — a feature spans multiple sessions and work is pausing. Writes handoff state to `.Codex/memory/<feature-slug>.md`.
 - **`/project:remember restore`** — returning to a feature with saved state. Verifies it's still accurate before continuing from it.
 
 `/project:new-feature` already covers the "think before building, plan, wait for approval" step for complex features — there's no separate `/architect` command.
