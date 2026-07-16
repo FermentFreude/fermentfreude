@@ -15,7 +15,10 @@ import config from '@payload-config'
 import path from 'path'
 import { getPayload } from 'payload'
 
-import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
+import { buildPressBannerDE, buildPressBannerEN } from '@/blocks/PressBanner/seed'
+import { PRESS_LOGO_ALTS_DE } from './data/presse'
+import { IMAGE_PRESETS, optimizedFile, rasterizeLogoFile } from './seed-image-utils'
+import fs from 'fs'
 
 interface WithId {
   id?: string
@@ -34,6 +37,7 @@ interface BlockItem extends WithId {
   members?: WithId[]
   testimonials?: WithId[]
   sponsors?: WithId[]
+  slides?: WithId[]
   links?: WithId[]
 }
 
@@ -238,6 +242,31 @@ async function seedHome() {
     data: { alt: 'Sponsor logo 4' },
     file: await optimizedFile(path.join(imagesDir, 'sponsor-logo-4.png'), IMAGE_PRESETS.logo),
   })
+
+  // Press Banner outlet logos (reuse presse SVGs when present)
+  const presseLogosDir = path.resolve(process.cwd(), 'seed-assets/images/presse/logos')
+  const pressLogoFiles = [
+    'logo-kleine-zeitung.svg',
+    'logo-kanal3.svg',
+    'logo-junge-wirtschaft.svg',
+  ] as const
+  const pressLogoIds: string[] = []
+  for (let i = 0; i < pressLogoFiles.length; i++) {
+    const filePath = path.join(presseLogosDir, pressLogoFiles[i]!)
+    if (!fs.existsSync(filePath)) {
+      payload.logger.warn(`Missing press logo: ${pressLogoFiles[i]}`)
+      continue
+    }
+    const created = await payload.create({
+      collection: 'media',
+      context: { skipAutoTranslate: true, skipRevalidate: true },
+      data: {
+        alt: `presse-logo-${i + 1} ${PRESS_LOGO_ALTS_DE[i] ?? 'Outlet logo'}`,
+      },
+      file: await rasterizeLogoFile(filePath),
+    })
+    pressLogoIds.push(created.id)
+  }
 
   payload.logger.info('✅ All images uploaded to Media collection.')
 
@@ -973,6 +1002,14 @@ async function seedHome() {
     ],
   }
 
+  const pressBannerLogos = {
+    kleineZeitung: pressLogoIds[0],
+    kanal3: pressLogoIds[1],
+    jungeWirtschaft: pressLogoIds[2],
+  }
+  const pressBannerDE = buildPressBannerDE(pressBannerLogos)
+  const pressBannerEN = buildPressBannerEN(pressBannerLogos)
+
   // ============================================================
   // 3. Find or create home page
   // ============================================================
@@ -1017,6 +1054,7 @@ async function seedHome() {
     featureCardsDE,
     teamPreviewDE,
     testimonialsDE,
+    pressBannerDE,
     sponsorsBarDE,
   ]
 
@@ -1068,6 +1106,7 @@ async function seedHome() {
   const fcBlock = findBlock('featureCards')
   const tpBlock = findBlock('teamPreview')
   const tmBlock = findBlock('testimonials')
+  const pbBlock = findBlock('pressBanner')
   const sbBlock = findBlock('sponsorsBar')
 
   if (!wsBlock) {
@@ -1148,6 +1187,15 @@ async function seedHome() {
     })),
   }
 
+  const pressBannerEN_withIds = {
+    ...pressBannerEN,
+    id: pbBlock?.id,
+    slides: pressBannerEN.slides.map((s, i) => ({
+      ...s,
+      id: pbBlock?.slides?.[i]?.id,
+    })),
+  }
+
   const sponsorsBarEN_withIds = {
     ...sponsorsBarEN,
     id: sbBlock?.id,
@@ -1164,6 +1212,7 @@ async function seedHome() {
     featureCardsEN_withIds,
     teamPreviewEN_withIds,
     testimonialsEN_withIds,
+    pressBannerEN_withIds,
     sponsorsBarEN_withIds,
   ]
 
@@ -1200,6 +1249,7 @@ async function seedHome() {
   payload.logger.info('   • Feature Cards (why fermentation)')
   payload.logger.info('   • Team Preview (David & Marcel)')
   payload.logger.info('   • Testimonials (4 reviews)')
+  payload.logger.info('   • Press Banner (side slider before partners)')
   payload.logger.info('   • Sponsors Bar (4 logos)')
   payload.logger.info('   All images uploaded to Media (Cloudflare R2).')
   payload.logger.info('   Switch locale in admin to verify both languages.')

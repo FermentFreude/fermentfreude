@@ -15,6 +15,7 @@ import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Componen
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { OnlineCourseSliderBlock } from '@/blocks/OnlineCourseSlider/Component'
 import { OurStoryBlock } from '@/blocks/OurStory/Component'
+import { PressBannerBlock } from '@/blocks/PressBanner/Component'
 import { PressMediaAwardsBlock } from '@/blocks/PressMediaAwards/Component'
 import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { ReadyToLearnCTABlock } from '@/blocks/ReadyToLearnCTA/Component'
@@ -51,6 +52,7 @@ const blockComponents = {
   heroBanner: HeroBannerBlock,
   mediaBlock: MediaBlock,
   ourStory: OurStoryBlock,
+  pressBanner: PressBannerBlock,
   pressMediaAwards: PressMediaAwardsBlock,
   readyToLearnCta: ReadyToLearnCTABlock,
   sponsorsBar: SponsorsBarBlock,

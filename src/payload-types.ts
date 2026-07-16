@@ -906,6 +906,7 @@ export interface Page {
         | ArchiveBlock
         | CarouselBlock
         | OurStoryBlock
+        | PressBannerBlock
         | PressMediaAwardsBlock
         | OnlineCourseSliderBlock
         | ProductSliderBlock
@@ -2917,6 +2918,71 @@ export interface OurStoryBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'ourStory';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PressBannerBlock".
+ */
+export interface PressBannerBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Small uppercase line above the heading (e.g. "PRESSE & MEDIEN").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main section heading (e.g. "Bekannt aus Presse & TV").
+   */
+  heading?: string | null;
+  /**
+   * Optional short supporting text under the heading (1–2 sentences).
+   */
+  description?: string | null;
+  /**
+   * Button text linking to the full press page (e.g. "Alle Berichte").
+   */
+  ctaLabel?: string | null;
+  /**
+   * URL for the CTA button. Usually "/presse".
+   */
+  ctaLink?: string | null;
+  /**
+   * When on, slides advance automatically every few seconds.
+   */
+  autoplay?: boolean | null;
+  /**
+   * Each slide shows one press / TV / award mention. Keep quotes short — one or two lines.
+   */
+  slides?:
+    | {
+        /**
+         * Media outlet or award name (e.g. "Kleine Zeitung", "kanal3").
+         */
+        outlet: string;
+        /**
+         * Short pull-quote or teaser shown on the slide (1–2 sentences).
+         */
+        quote: string;
+        /**
+         * Optional logo for this outlet. Falls back to a soft placeholder if empty.
+         */
+        logo?: (string | null) | Media;
+        /**
+         * Optional link to the original article, TV segment, or award page.
+         */
+        url?: string | null;
+        /**
+         * Optional text for the slide link (e.g. "Artikel lesen").
+         */
+        linkLabel?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pressBanner';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5286,6 +5352,7 @@ export interface PagesSelect<T extends boolean = true> {
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         ourStory?: T | OurStoryBlockSelect<T>;
+        pressBanner?: T | PressBannerBlockSelect<T>;
         pressMediaAwards?: T | PressMediaAwardsBlockSelect<T>;
         onlineCourseSlider?: T | OnlineCourseSliderBlockSelect<T>;
         productSlider?: T | ProductSliderBlockSelect<T>;
@@ -6066,6 +6133,31 @@ export interface OurStoryBlockSelect<T extends boolean = true> {
     | {
         text?: T;
         image?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PressBannerBlock_select".
+ */
+export interface PressBannerBlockSelect<T extends boolean = true> {
+  visible?: T;
+  eyebrow?: T;
+  heading?: T;
+  description?: T;
+  ctaLabel?: T;
+  ctaLink?: T;
+  autoplay?: T;
+  slides?:
+    | T
+    | {
+        outlet?: T;
+        quote?: T;
+        logo?: T;
+        url?: T;
+        linkLabel?: T;
         id?: T;
       };
   id?: T;

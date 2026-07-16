@@ -41,7 +41,12 @@ const scripts: Record<string, { name: string; file: string }> = {
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
   presse: { name: 'Presse / Press page', file: 'seed-presse.ts' },
+  'press-banner': {
+    name: 'Home Press Banner (before partners)',
+    file: 'seed-press-banner.ts',
+  },
   help: { name: 'Help & FAQ page', file: 'seed-help.ts' },
+
   legal: { name: 'Legal pages (datenschutz, agb, impressum)', file: 'seed-legal-pages.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
   kombucha: { name: 'Kombucha workshop (experienceCards)', file: 'seed-kombucha.ts' },
@@ -61,6 +66,7 @@ const allOrder = [
   'about',
   'contact',
   'presse',
+  'press-banner',
   'help',
   'legal',
   'voucher',
@@ -83,7 +89,8 @@ function runSeed(key: string, extraArgs: string[] = []): boolean {
     stdio: 'inherit',
     env: process.env,
     cwd: process.cwd(),
-    shell: true,
+    // Keep shell:false so paths with spaces (e.g. "new ferment") are not re-split.
+    shell: false,
   })
 
   if (result.status !== 0) {

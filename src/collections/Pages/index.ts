@@ -19,6 +19,7 @@ import { LaktoVoucherCtaBlock } from '@/blocks/LaktoVoucherCta/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { OnlineCourseSlider } from '@/blocks/OnlineCourseSlider/config'
 import { OurStory } from '@/blocks/OurStory/config'
+import { PressBanner } from '@/blocks/PressBanner/config'
 import { PressMediaAwards } from '@/blocks/PressMediaAwards/config'
 import { ProductSlider } from '@/blocks/ProductSlider/config'
 import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
@@ -126,6 +127,7 @@ export const Pages: CollectionConfig = {
                 Archive,
                 Carousel,
                 OurStory,
+                PressBanner,
                 PressMediaAwards,
                 OnlineCourseSlider,
                 ProductSlider,
