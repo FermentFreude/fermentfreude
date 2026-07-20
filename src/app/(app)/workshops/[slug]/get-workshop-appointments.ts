@@ -24,6 +24,8 @@ export async function getWorkshopAppointments(workshopSlug: string): Promise<Wor
     // Page: /workshops/lakto-gemuese → Workshop collection: slug='lakto'
     const slugMap: Record<string, string> = {
       'lakto-gemuese': 'lakto',
+      // Own workshop + appointments (Marktgarten) — no longer shares Lakto/Ginery slots
+      'vom-feld-ins-glas': 'vom-feld-ins-glas',
       kombucha: 'kombucha',
       tempeh: 'tempeh',
     }

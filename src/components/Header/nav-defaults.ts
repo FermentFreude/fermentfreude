@@ -35,6 +35,7 @@ export const defaultNavItemsEn: DefaultNavItem[] = [
       { label: 'Lacto Vegetables', href: '/workshops/lakto-gemuese', isSmall: true },
       { label: 'Tempeh', href: '/workshops/tempeh', isSmall: true },
       { label: 'Kombucha', href: '/workshops/kombucha', isSmall: true },
+      { label: 'From Field to Jar', href: '/workshops/vom-feld-ins-glas', isSmall: true },
       {
         label: 'Online Courses',
         href: '/courses',
@@ -78,6 +79,7 @@ export const defaultNavItemsDe: DefaultNavItem[] = [
       { label: 'Lakto-Gemüse', href: '/workshops/lakto-gemuese', isSmall: true },
       { label: 'Tempeh', href: '/workshops/tempeh', isSmall: true },
       { label: 'Kombucha', href: '/workshops/kombucha', isSmall: true },
+      { label: 'Vom Feld ins Glas', href: '/workshops/vom-feld-ins-glas', isSmall: true },
       {
         label: 'Online-Kurse',
         href: '/courses',

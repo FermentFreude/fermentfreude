@@ -19,7 +19,7 @@ type Args = {
   }>
 }
 
-const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
+const WORKSHOP_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha', 'vom-feld-ins-glas']
 const LEGAL_SLUGS = ['agb', 'datenschutz', 'impressum']
 
 export default async function Page({ params }: Args) {

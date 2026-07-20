@@ -5,11 +5,13 @@ import { gtmRemoveFromCart } from '@/lib/gtm'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
 import { XIcon } from 'lucide-react'
-import React from 'react'
+import React, { useRef, useState } from 'react'
 
 export function DeleteItemButton({ item }: { item: CartItem }) {
-  const { isLoading, removeItem } = useCart()
+  const { cart, isLoading, removeItem, refreshCart } = useCart()
   const itemId = item.id
+  const [isRemoving, setIsRemoving] = useState(false)
+  const removingRef = useRef(false)
 
   const releaseWorkshopSpotsIfNeeded = async () => {
     const product =
@@ -55,6 +57,8 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
     }
   }
 
+  const busy = !itemId || isLoading || isRemoving
+
   return (
     <form>
       <button
@@ -62,13 +66,18 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
         className={clsx(
           'ease hover:cursor-pointer flex h-4.25 w-4.25 items-center justify-center rounded-full bg-neutral-500 transition-all duration-200',
           {
-            'cursor-not-allowed px-0': !itemId || isLoading,
+            'cursor-not-allowed px-0': busy,
           },
         )}
-        disabled={!itemId || isLoading}
+        disabled={busy}
         onClick={async (e: React.FormEvent<HTMLButtonElement>) => {
           e.preventDefault()
-          if (itemId) {
+          if (!itemId || removingRef.current) return
+
+          removingRef.current = true
+          setIsRemoving(true)
+
+          try {
             const product =
               typeof item.product === 'object' && item.product !== null ? item.product : null
             gtmRemoveFromCart({
@@ -81,8 +90,32 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
               quantity: item.quantity ?? 1,
               price: (product as Record<string, unknown> | null)?.priceInEUR as number | undefined,
             })
+
             await releaseWorkshopSpotsIfNeeded()
-            removeItem(itemId)
+
+            // Item may already be gone (double-click / another tab cleared the cart).
+            const stillInCart = cart?.items?.some((cartItem) => cartItem.id === itemId)
+            if (stillInCart) {
+              await removeItem(itemId)
+            }
+
+            // Plugin does not refresh cart when remove returns 4xx ("not found").
+            // Sync so ghost rows disappear.
+            await refreshCart()
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            // Plugin returns 4xx when the row ID is already absent — treat as done.
+            if (!message.includes('not found in cart')) {
+              console.error('[DeleteItemButton] Failed to remove item:', error)
+            }
+            try {
+              await refreshCart()
+            } catch {
+              // ignore refresh errors
+            }
+          } finally {
+            removingRef.current = false
+            setIsRemoving(false)
           }
         }}
         type="button"

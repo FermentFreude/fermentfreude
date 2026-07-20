@@ -908,6 +908,7 @@ export interface Page {
         | OurStoryBlock
         | PressBannerBlock
         | PressMediaAwardsBlock
+        | SpecialWorkshopBannerBlock
         | OnlineCourseSliderBlock
         | ProductSliderBlock
         | FeaturedProductCardsBlock
@@ -1833,7 +1834,7 @@ export interface Page {
       | null;
   };
   /**
-   * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.
+   * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, kombucha, and vom-feld-ins-glas.
    */
   workshopDetail?: {
     /**
@@ -3168,6 +3169,47 @@ export interface PressMediaAwardsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'pressMediaAwards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SpecialWorkshopBannerBlock".
+ */
+export interface SpecialWorkshopBannerBlock {
+  /**
+   * Toggle off to hide this banner without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Small line above the title (e.g. "Spezial-Workshop").
+   */
+  eyebrow?: string | null;
+  /**
+   * Main title (e.g. "Vom Feld ins Glas").
+   */
+  title?: string | null;
+  /**
+   * Partner / place line (e.g. Marktgarten „Unser Bauerngarten“).
+   */
+  subtitle?: string | null;
+  /**
+   * Shown next to the price (e.g. "€ 99" or "99 Euro").
+   */
+  priceLabel?: string | null;
+  /**
+   * Button text (e.g. "Mehr Infos & Buchen").
+   */
+  ctaLabel?: string | null;
+  /**
+   * Where the button goes (e.g. "/workshops/vom-feld-ins-glas").
+   */
+  ctaLink?: string | null;
+  /**
+   * Optional image. If empty, a garden-toned placeholder is used.
+   */
+  image?: (string | null) | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'specialWorkshopBanner';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5358,6 +5400,7 @@ export interface PagesSelect<T extends boolean = true> {
         ourStory?: T | OurStoryBlockSelect<T>;
         pressBanner?: T | PressBannerBlockSelect<T>;
         pressMediaAwards?: T | PressMediaAwardsBlockSelect<T>;
+        specialWorkshopBanner?: T | SpecialWorkshopBannerBlockSelect<T>;
         onlineCourseSlider?: T | OnlineCourseSliderBlockSelect<T>;
         productSlider?: T | ProductSliderBlockSelect<T>;
         featuredProductCards?: T | FeaturedProductCardsBlockSelect<T>;
@@ -6244,6 +6287,22 @@ export interface PressMediaAwardsBlockSelect<T extends boolean = true> {
               href?: T;
             };
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SpecialWorkshopBannerBlock_select".
+ */
+export interface SpecialWorkshopBannerBlockSelect<T extends boolean = true> {
+  visible?: T;
+  eyebrow?: T;
+  title?: T;
+  subtitle?: T;
+  priceLabel?: T;
+  ctaLabel?: T;
+  ctaLink?: T;
+  image?: T;
   id?: T;
   blockName?: T;
 }

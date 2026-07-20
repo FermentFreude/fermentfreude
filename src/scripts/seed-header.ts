@@ -40,6 +40,11 @@ const deNavItems = [
         isSmall: true,
       },
       {
+        label: 'Vom Feld ins Glas',
+        href: '/workshops/vom-feld-ins-glas',
+        isSmall: true,
+      },
+      {
         label: 'Online Kurse',
         href: '/courses',
         description: 'Lerne in deinem eigenen Tempo',
@@ -71,14 +76,22 @@ const deNavItems = [
 ] satisfies Array<Partial<HeaderNavItem>>
 
 const enDropdownRemap: Record<number, string[]> = {
-  1: ['All Workshops', 'Lacto Vegetables', 'Tempeh', 'Kombucha', 'Online Courses', 'Gift Voucher'],
+  1: [
+    'All Workshops',
+    'Lacto Vegetables',
+    'Tempeh',
+    'Kombucha',
+    'From Field to Jar',
+    'Online Courses',
+    'Gift Voucher',
+  ],
   4: ['About Us', 'Fermentation', 'Press & Media', 'Contact'],
 }
 
 const enDescriptions: Record<number, Record<number, string>> = {
   1: {
     0: 'Browse all in-person workshops',
-    4: 'Coming soon',
+    5: 'Coming soon',
   },
   4: {
     0: 'Our Team & Mission',

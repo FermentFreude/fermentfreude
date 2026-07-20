@@ -17,6 +17,7 @@ import { WorkshopBookingSection } from '@/components/workshops/WorkshopBookingSe
 import { WorkshopTermineSection } from '@/components/workshops/WorkshopTermineSection'
 import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
 import { getLatestPosts } from '@/utilities/getLatestPosts'
+import { getPostsBySlugs } from '@/utilities/getPostsBySlugs'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import { getVoucherCtaGlobal } from '@/utilities/getVoucherCtaGlobal'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
@@ -38,6 +39,19 @@ import { TempehBookingCard } from './TempehBookingCard'
 import { TempehFAQ } from './TempehFAQ'
 import { TempehHero } from './TempehHero'
 import { TempehVoucherCta } from './TempehVoucherCta'
+import { FeldInsGlasExperience } from './FeldInsGlas/Experience'
+import { FeldInsGlasHero } from './FeldInsGlas/Hero'
+import { FeldInsGlasFAQ } from './FeldInsGlas/FAQ'
+import { FeldInsGlasHowTos } from './FeldInsGlas/HowTos'
+import { FeldInsGlasVoucher } from './FeldInsGlas/Voucher'
+import { FeldInsGlasMoreWorkshops } from './FeldInsGlas/MoreWorkshops'
+import {
+  FELD_INS_GLAS_COPY,
+  FELD_INS_GLAS_HOWTO_SLUGS,
+  FELD_INS_GLAS_SLUG,
+  getFeldInsGlasWorkshop,
+} from './FeldInsGlas/data'
+import { getFeldInsGlasImages } from './FeldInsGlas/images'
 import { getWorkshopBySlug } from './workshop-data'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -229,6 +243,16 @@ type Args = { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug } = await params
   const locale = await getLocale()
+
+  // Special Marktgarten workshop metadata
+  if (slug === FELD_INS_GLAS_SLUG) {
+    const copy = FELD_INS_GLAS_COPY[locale === 'en' ? 'en' : 'de']
+    return {
+      title: `${copy.title} | Fermentfreude`,
+      description: copy.partnerLine,
+    }
+  }
+
   const workshop = await findWorkshopBySlug(slug, locale)
 
   if (!workshop) return { title: 'Workshop | Fermentfreude' }
@@ -257,7 +281,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
   const { slug } = await params
   const locale = await getLocale()
   const { isEnabled: draft } = await draftMode()
-  const WORKSHOP_PAGE_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha']
+  const WORKSHOP_PAGE_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha', 'vom-feld-ins-glas']
 
   // Fetch workshop appointments from database
   const workshopAppointments = await getWorkshopAppointments(slug)
@@ -430,6 +454,161 @@ export default async function WorkshopDetailPage({ params }: Args) {
         }> | null
       }
     | undefined
+
+  /* ══════════════════════════════════════════════════════════════
+   *  Vom Feld ins Glas — Marktgarten special workshop
+   *  Hero → Experience → Booking → Calendar → HowTos → FAQ (special) → Slider → Voucher
+   * ══════════════════════════════════════════════════════════════ */
+  if (slug === FELD_INS_GLAS_SLUG) {
+    const isDe = locale === 'de'
+    const copy = FELD_INS_GLAS_COPY[isDe ? 'de' : 'en']
+    const workshopData = getFeldInsGlasWorkshop(isDe ? 'de' : 'en')
+    const images = await getFeldInsGlasImages()
+    const localeKey = isDe ? 'de' : 'en'
+
+    const similarWorkshops = allWorkshops.filter((w) => {
+      const s = getSlugFromCtaLink(w.ctaLink)
+      return s && s !== slug
+    })
+    const workshopTypesHeading =
+      detail?.sliderHeading ??
+      (isDe ? 'Entdecke weitere Workshops.' : 'Discover more workshops.')
+
+    const howToForFeld =
+      perPageHowToArticles.length > 0
+        ? howToArticles
+        : await (async () => {
+            const curated = await getPostsBySlugs(localeKey, [...FELD_INS_GLAS_HOWTO_SLUGS])
+            return curated.length >= 4 ? curated : howToArticles
+          })()
+
+    return (
+      <article className="bg-white">
+        <FeldInsGlasHero copy={copy} image={images.hero} />
+        <FeldInsGlasExperience
+          copy={copy}
+          locale={isDe ? 'de' : 'en'}
+          images={{
+            hero: images.hero,
+            hands: images.hands,
+            jars: images.jars,
+            konzept: images.konzept,
+            feld: images.feld,
+            kueche: images.kueche,
+            glas: images.glas,
+          }}
+        />
+
+        <div id="buchen" className="bg-white">
+          <LaktoBookingCard
+            className="pt-0 [padding-block-start:0]"
+            accentColor="#1A1A1A"
+            workshop={workshopData}
+            cartOverrides={{
+              workshopSlug: FELD_INS_GLAS_SLUG,
+              workshopTitle: copy.title,
+              pageSlug: FELD_INS_GLAS_SLUG,
+              locationName: isDe
+                ? 'Marktgarten „Unser Bauerngarten“'
+                : 'Marktgarten “Unser Bauerngarten”',
+              locationAddress: isDe
+                ? 'Hochfeldweg, Graz (nicht Grabenstraße)'
+                : 'Hochfeldweg, Graz (not Grabenstraße)',
+            }}
+            cms={{
+              bookingEyebrow:
+                detail?.bookingEyebrow ?? (isDe ? 'Fermentations-Workshop' : 'Fermentation Workshop'),
+              bookingTitle: detail?.bookingTitle ?? copy.title,
+              bookingPrice: detail?.bookingPrice ?? copy.price,
+              bookingPriceSuffix: detail?.bookingPriceSuffix ?? copy.priceLabel,
+              bookingCurrency: detail?.bookingCurrency ?? copy.currency,
+              bookingImage: images.jars ?? images.hands ?? images.hero,
+              bookingAttributes:
+                detail?.bookingAttributes ?? copy.attributes.map((text) => ({ text })),
+              bookingViewDatesLabel: detail?.bookingViewDatesLabel ?? workshopData.viewDatesLabel,
+              bookingHideDatesLabel: detail?.bookingHideDatesLabel ?? workshopData.hideDatesLabel,
+              bookingMoreDetailsLabel:
+                detail?.bookingMoreDetailsLabel ?? workshopData.moreInfoLabel,
+              bookingBookLabel: detail?.bookingBookLabel ?? workshopData.bookLabel,
+              bookingSpotsLabel: detail?.bookingSpotsLabel ?? workshopData.spotsLabel,
+              aboutHeading: detail?.aboutHeading ?? workshopData.aboutHeading,
+              aboutText: detail?.aboutText ?? workshopData.aboutText,
+              scheduleHeading: detail?.scheduleHeading ?? workshopData.scheduleHeading,
+              schedule: detail?.schedule ?? workshopData.schedule,
+              includedHeading: detail?.includedHeading ?? workshopData.includedHeading,
+              includedItems: detail?.includedItems ?? workshopData.includedItems,
+              whyHeading: detail?.whyHeading ?? workshopData.whyHeading,
+              whyPoints: detail?.whyPoints ?? workshopData.whyPoints,
+              experienceCards: [],
+              datesHeading: detail?.datesHeading ?? workshopData.datesHeading,
+              dates: workshopAppointments,
+              modalConfirmHeading: detail?.modalConfirmHeading ?? workshopData.confirmHeading,
+              modalConfirmSubheading:
+                detail?.modalConfirmSubheading ?? workshopData.confirmSubheading,
+              modalWorkshopLabel: detail?.modalWorkshopLabel ?? workshopData.workshopLabel,
+              modalDateLabel: detail?.modalDateLabel ?? workshopData.dateLabel,
+              modalTimeLabel: detail?.modalTimeLabel ?? workshopData.timeLabel,
+              modalTotalLabel: detail?.modalTotalLabel ?? workshopData.totalLabel,
+              modalCancelLabel: detail?.modalCancelLabel ?? workshopData.cancelLabel,
+              modalConfirmLabel: detail?.modalConfirmLabel ?? workshopData.confirmLabel,
+            }}
+          />
+        </div>
+
+        <LaktoCalendar
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.calendarEyebrow,
+                  title: detail.calendarTitle,
+                  description: detail.calendarDescription,
+                  months: detail.calendarMonths,
+                }
+              : undefined
+          }
+        />
+
+        <FeldInsGlasHowTos
+          locale={localeKey}
+          eyebrow={detail?.howToEyebrow ?? (isDe ? 'Wissen' : 'Knowledge')}
+          title={detail?.howToTitle ?? (isDe ? 'Tipps & Guides.' : 'Tips & Guides.')}
+          articles={howToForFeld.map((post) => ({
+            id: String(post.id),
+            slug: post.slug,
+            title: post.title,
+            summary: post.summary,
+            readTime: post.readTime,
+            heroImage: post.heroImage,
+          }))}
+        />
+
+        <FeldInsGlasFAQ
+          cms={
+            detail
+              ? {
+                  eyebrow: detail.faqEyebrow,
+                  title: detail.faqTitle,
+                  description: detail.faqDescription,
+                  items: detail.faqItems,
+                }
+              : undefined
+          }
+        />
+
+        <FeldInsGlasVoucher
+          cms={voucherCms}
+          locale={localeKey}
+          image={images.feld ?? images.konzept ?? images.jars}
+        />
+
+        <FeldInsGlasMoreWorkshops
+          workshops={similarWorkshops}
+          locale={localeKey}
+          heading={workshopTypesHeading}
+        />
+      </article>
+    )
+  }
 
   if (!workshop) return notFound()
 

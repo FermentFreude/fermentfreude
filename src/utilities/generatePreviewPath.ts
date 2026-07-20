@@ -11,6 +11,7 @@ const pageSlugRouteMap: Record<string, string> = {
   tempeh: '/workshops/tempeh',
   'lakto-gemuese': '/workshops/lakto-gemuese',
   kombucha: '/workshops/kombucha',
+  'vom-feld-ins-glas': '/workshops/vom-feld-ins-glas',
 }
 
 type Props = {

@@ -29,6 +29,7 @@ type WorkshopBooking = {
   appointmentId: string
   bookingId?: string | null
   workshopSlug: string
+  pageSlug?: string
   workshopTitle: string
   guestCount: number
   date: string
@@ -219,7 +220,7 @@ export function CartModal() {
                         className="z-30 flex flex-row space-x-4"
                         href={
                           isWorkshopBooking
-                            ? `/workshops/${product.slug.replace('workshop-', '')}`
+                            ? `/workshops/${matchedBooking?.pageSlug ?? (product.slug.replace('workshop-', '') === 'lakto' ? 'lakto-gemuese' : product.slug.replace('workshop-', ''))}`
                             : `/products/${(item.product as Product)?.slug}`
                         }
                       >
@@ -236,7 +237,9 @@ export function CartModal() {
                         </div>
 
                         <div className="flex flex-1 flex-col text-base">
-                          <span className="leading-tight">{product?.title}</span>
+                          <span className="leading-tight">
+                            {matchedBooking?.workshopTitle ?? product?.title}
+                          </span>
                           {isWorkshopBooking ? (
                             // For workshop bookings, display full booking details from localStorage
                             (() => {

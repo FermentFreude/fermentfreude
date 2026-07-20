@@ -26,6 +26,7 @@ import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
 import { ShopHero } from '@/blocks/ShopHero/config'
 import { ShopProductGrid } from '@/blocks/ShopProductGrid/config'
 import { ShopProductList } from '@/blocks/ShopProductList/config'
+import { SpecialWorkshopBanner } from '@/blocks/SpecialWorkshopBanner/config'
 import { SponsorsBar } from '@/blocks/SponsorsBar/config'
 import { TeamCards } from '@/blocks/TeamCards/config'
 import { TeamPreview } from '@/blocks/TeamPreview/config'
@@ -129,6 +130,7 @@ export const Pages: CollectionConfig = {
                 OurStory,
                 PressBanner,
                 PressMediaAwards,
+                SpecialWorkshopBanner,
                 OnlineCourseSlider,
                 ProductSlider,
                 FeaturedProductCards,
@@ -2228,11 +2230,16 @@ export const Pages: CollectionConfig = {
           label: 'Workshop Detail',
           admin: {
             description:
-              'All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, and kombucha.',
+              'All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, kombucha, and vom-feld-ins-glas.',
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
               const slug = data?.slug ?? siblingData?.slug
-              return slug === 'lakto-gemuese' || slug === 'tempeh' || slug === 'kombucha'
+              return (
+                slug === 'lakto-gemuese' ||
+                slug === 'tempeh' ||
+                slug === 'kombucha' ||
+                slug === 'vom-feld-ins-glas'
+              )
             },
           },
           fields: workshopDetailFields,

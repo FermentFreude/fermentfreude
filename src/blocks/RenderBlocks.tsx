@@ -22,6 +22,7 @@ import { ReadyToLearnCTABlock } from '@/blocks/ReadyToLearnCTA/Component'
 import { ShopHeroComponent } from '@/blocks/ShopHero/Component'
 import { ShopProductGridComponent } from '@/blocks/ShopProductGrid/Component'
 import { ShopProductListComponent } from '@/blocks/ShopProductList/Component'
+import { SpecialWorkshopBannerBlock } from '@/blocks/SpecialWorkshopBanner/Component'
 import { SponsorsBarBlock } from '@/blocks/SponsorsBar/Component'
 import { TeamCardsBlock } from '@/blocks/TeamCards/Component'
 import { TeamPreviewBlock } from '@/blocks/TeamPreview/Component'
@@ -54,6 +55,7 @@ const blockComponents = {
   ourStory: OurStoryBlock,
   pressBanner: PressBannerBlock,
   pressMediaAwards: PressMediaAwardsBlock,
+  specialWorkshopBanner: SpecialWorkshopBannerBlock,
   readyToLearnCta: ReadyToLearnCTABlock,
   sponsorsBar: SponsorsBarBlock,
   teamCards: TeamCardsBlock,

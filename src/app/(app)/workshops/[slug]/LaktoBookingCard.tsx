@@ -2,6 +2,7 @@
 
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import { cn } from '@/utilities/cn'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { useLocale } from '@/providers/Locale'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -136,9 +137,29 @@ const EXPERIENCE_CARDS = [
 export function LaktoBookingCard({
   workshop,
   cms,
+  className,
+  /** Header + primary CTA color. Default is Lakto olive-gray; Feld ins Glas uses page near-black. */
+  accentColor = '#555954',
+  /**
+   * Cart / booking identity overrides.
+   * Feld ins Glas shares the lakto product + appointments but needs its own title & location in the cart.
+   */
+  cartOverrides,
 }: {
   workshop: WorkshopDetailData
   cms?: LaktoBookingCMS
+  className?: string
+  accentColor?: string
+  cartOverrides?: {
+    /** DB / product slug for /api/cart/add-workshop (e.g. vom-feld-ins-glas) */
+    workshopSlug?: string
+    /** Display title in cart (defaults to workshop.title) */
+    workshopTitle?: string
+    /** Page slug for cart item links (e.g. vom-feld-ins-glas) */
+    pageSlug?: string
+    locationName?: string | null
+    locationAddress?: string | null
+  }
 }) {
   // ── CMS values → fallback to workshop-data.ts defaults ──
   const bookingEyebrow = cms?.bookingEyebrow ?? workshop.subtitle.toUpperCase()
@@ -179,9 +200,10 @@ export function LaktoBookingCard({
 
   const experienceEyebrow = cms?.experienceEyebrow ?? 'WAS DICH ERWARTET'
   const experienceTitle = cms?.experienceTitle ?? 'Dein Workshop-Erlebnis'
+  // Explicit empty array = hide section. Undefined = use hardcoded defaults.
   const experienceCardsData =
-    (cms?.experienceCards?.length ?? 0) > 0
-      ? cms!.experienceCards!.map((c) => ({
+    cms?.experienceCards != null
+      ? cms.experienceCards.map((c) => ({
           image: c.image,
           eyebrow: c.eyebrow ?? '',
           title: c.title ?? '',
@@ -282,7 +304,11 @@ export function LaktoBookingCard({
 
   return (
     <>
-      <section ref={sectionRef} id="booking" className="section-padding-lg bg-white">
+      <section
+        ref={sectionRef}
+        id="booking"
+        className={cn('bg-white section-padding-lg', className)}
+      >
         <div className="container mx-auto container-padding">
           {/* ────────────────────────────────────────────
            *  BOOKING CARD — Gold header + actions
@@ -294,7 +320,7 @@ export function LaktoBookingCard({
           >
             <div className="overflow-hidden rounded-3xl shadow-lg">
               {/* ── Dark Header ─────────────────────── */}
-              <div className="px-8 py-8 sm:px-12 sm:py-10" style={{ backgroundColor: '#555954' }}>
+              <div className="px-8 py-8 sm:px-12 sm:py-10" style={{ backgroundColor: accentColor }}>
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
                   {/* Left — title + subtitle */}
                   <div>
@@ -342,7 +368,10 @@ export function LaktoBookingCard({
                   <Media resource={bookingImage as MediaType} fill imgClassName="object-cover" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="font-display text-sm font-bold uppercase tracking-[0.2em] text-[#555954]/20">
+                    <span
+                      className="font-display text-sm font-bold uppercase tracking-[0.2em] opacity-20"
+                      style={{ color: accentColor }}
+                    >
                       Workshop Impression
                     </span>
                   </div>
@@ -355,7 +384,7 @@ export function LaktoBookingCard({
                   <button
                     onClick={handleToggleDates}
                     className="inline-flex flex-1 items-center justify-center gap-2.5 rounded-full px-8 py-4 font-display text-sm font-bold uppercase tracking-wider text-white transition-all duration-300 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
-                    style={{ backgroundColor: '#555954' }}
+                    style={{ backgroundColor: accentColor }}
                   >
                     <CalendarIcon />
                     {showDates ? hideDatesLabel : viewDatesLabel}
@@ -363,7 +392,7 @@ export function LaktoBookingCard({
                   <button
                     onClick={handleToggleInfo}
                     className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border-2 px-8 py-4 font-display text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:opacity-80 hover:scale-[1.02] active:scale-[0.98]"
-                    style={{ borderColor: '#555954', color: '#555954' }}
+                    style={{ borderColor: accentColor, color: accentColor }}
                   >
                     {moreDetailsLabel}
                     <ChevronDown open={showInfo} />
@@ -419,7 +448,7 @@ export function LaktoBookingCard({
                       className={`relative rounded-lg p-4 sm:p-5 transition-all duration-300 ${
                         isSoldOut
                           ? 'bg-[#ECEAE5] border border-[#d8d4cc] opacity-60'
-                          : 'bg-[#f9f7f3] border border-[#e8e4d9] hover:border-[#555954]'
+                          : 'bg-[#f9f7f3] border border-[#e8e4d9]'
                       }`}
                     >
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-start sm:items-center">
@@ -438,7 +467,10 @@ export function LaktoBookingCard({
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
                             Zeit
                           </p>
-                          <div className="flex items-center gap-2 text-sm text-[#555954]">
+                          <div
+                            className="flex items-center gap-2 text-sm"
+                            style={{ color: accentColor }}
+                          >
                             <svg
                               className="w-4 h-4"
                               fill="none"
@@ -476,8 +508,9 @@ export function LaktoBookingCard({
                             className={`inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
                               isSoldOut
                                 ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
-                                : 'bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954]'
+                                : 'text-white hover:opacity-90'
                             }`}
+                            style={isSoldOut ? undefined : { backgroundColor: accentColor }}
                           >
                             {isSoldOut ? 'Ausgebucht' : '→ Buchen'}
                           </button>
@@ -614,6 +647,7 @@ export function LaktoBookingCard({
           {/* ────────────────────────────────────────────
            *  WAS DICH ERWARTET — Alternating Image Cards
            * ──────────────────────────────────────────── */}
+          {experienceCardsData.length > 0 ? (
           <div className="mx-auto mt-24 max-w-6xl">
             {/* Section header */}
             <div
@@ -684,6 +718,7 @@ export function LaktoBookingCard({
               })}
             </div>
           </div>
+          ) : null}
         </div>
       </section>
 
@@ -700,10 +735,16 @@ export function LaktoBookingCard({
                 addItemAction: addItem,
                 clearCart,
                 appointmentId: bookingDate.appointmentId ?? bookingDate.id,
-                workshopSlug: 'lakto',
-                workshopTitle: 'Lakto-fermentiertes Gemüse Workshop',
+                workshopSlug: cartOverrides?.workshopSlug ?? 'lakto',
+                workshopTitle:
+                  cartOverrides?.workshopTitle ??
+                  bookingTitle ??
+                  'Lakto-fermentiertes Gemüse Workshop',
                 guestCount,
                 locale,
+                pageSlug: cartOverrides?.pageSlug,
+                locationName: cartOverrides?.locationName,
+                locationAddress: cartOverrides?.locationAddress,
               })
               setBookingDate(null)
               router.refresh()

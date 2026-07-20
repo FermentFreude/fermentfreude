@@ -9,6 +9,7 @@ const WORKSHOP_SLUG_TO_HREF: Record<string, string> = {
   'lakto-gemuese': '/workshops/lakto-gemuese',
   kombucha: '/workshops/kombucha',
   tempeh: '/workshops/tempeh',
+  'vom-feld-ins-glas': '/workshops/vom-feld-ins-glas',
 }
 
 function formatUpcomingDate(dateValue: string, locale: SupportedLocale): string {

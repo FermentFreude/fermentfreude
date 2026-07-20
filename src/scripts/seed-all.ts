@@ -45,6 +45,10 @@ const scripts: Record<string, { name: string; file: string }> = {
     name: 'Home Press Banner (before partners)',
     file: 'seed-press-banner.ts',
   },
+  'special-workshop-banner': {
+    name: 'Home Special Workshop Banner (Vom Feld ins Glas)',
+    file: 'seed-special-workshop-banner.ts',
+  },
   help: { name: 'Help & FAQ page', file: 'seed-help.ts' },
 
   legal: { name: 'Legal pages (datenschutz, agb, impressum)', file: 'seed-legal-pages.ts' },
@@ -58,6 +62,18 @@ const scripts: Record<string, { name: string; file: string }> = {
     name: 'Kombucha phases block (WorkshopPhases)',
     file: 'seed-kombucha-phases.ts',
   },
+  'feld-ins-glas-posts': {
+    name: 'Vom Feld ins Glas Tipps articles (Posts)',
+    file: 'seed-feld-ins-glas-posts.ts',
+  },
+  'feld-ins-glas-workshop': {
+    name: 'Vom Feld ins Glas workshop + product + test appointments',
+    file: 'seed-feld-ins-glas-workshop.ts',
+  },
+  'feld-ins-glas-page': {
+    name: 'Vom Feld ins Glas CMS page + nav + home slider',
+    file: 'seed-feld-ins-glas-page.ts',
+  },
 }
 
 const allOrder = [
@@ -67,6 +83,7 @@ const allOrder = [
   'contact',
   'presse',
   'press-banner',
+  'special-workshop-banner',
   'help',
   'legal',
   'voucher',

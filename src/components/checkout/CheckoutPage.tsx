@@ -194,7 +194,7 @@ export const CheckoutPage: React.FC = () => {
   const { locale } = useLocale()
   const isDe = locale === 'de'
   const router = useRouter()
-  const { cart, clearCart, removeItem } = useCart()
+  const { cart, clearCart, removeItem, refreshCart } = useCart()
   const [error, setError] = useState<null | string>(null)
   /**
    * State to manage the email input for guest checkout.
@@ -257,6 +257,7 @@ export const CheckoutPage: React.FC = () => {
         appointmentId: string
         bookingId?: string | null
         workshopSlug: string
+        pageSlug?: string
         workshopTitle?: string
         date: string
         time: string
@@ -270,6 +271,19 @@ export const CheckoutPage: React.FC = () => {
   >({})
   const handleRemoveItem = useCallback(
     async (item: { id?: string | null; product: unknown }) => {
+      if (!item.id) return
+
+      // Skip remove API if already gone (stale UI / double-click), but refresh to sync.
+      const stillInCart = cart?.items?.some((cartItem) => cartItem.id === item.id)
+      if (!stillInCart) {
+        try {
+          await refreshCart()
+        } catch {
+          // ignore
+        }
+        return
+      }
+
       const product =
         typeof item.product === 'object' && item.product !== null
           ? (item.product as { slug?: string })
@@ -316,11 +330,23 @@ export const CheckoutPage: React.FC = () => {
           console.error('[CheckoutPage] Failed to release workshop spots:', err)
         }
       }
-      if (item.id) {
-        removeItem(item.id)
+
+      try {
+        await removeItem(item.id)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        if (!message.includes('not found in cart')) {
+          console.error('[CheckoutPage] Failed to remove item:', err)
+        }
+      } finally {
+        try {
+          await refreshCart()
+        } catch {
+          // ignore
+        }
       }
     },
-    [removeItem],
+    [cart?.items, removeItem, refreshCart],
   )
 
   const checkoutEmail = email || user?.email || ''
@@ -1191,7 +1217,7 @@ export const CheckoutPage: React.FC = () => {
                       <div key={idx} className="flex flex-col gap-3">
                         <div>
                           <p className="font-display text-body font-bold text-ff-near-black">
-                            {product.title ?? booking.workshopTitle ?? workshopSlug}
+                            {booking.workshopTitle ?? product.title ?? workshopSlug}
                           </p>
                           <p className="text-body-sm text-ff-gray-text-light">
                             {booking.date} ·{' '}
@@ -1386,7 +1412,17 @@ export const CheckoutPage: React.FC = () => {
                       <div className="flex grow items-center justify-between gap-2">
                         <div className="flex flex-col gap-0.5">
                           <p className="font-display text-body-sm font-bold leading-snug text-ff-near-black">
-                            {title}
+                            {(() => {
+                              const isWorkshopBooking =
+                                typeof product.slug === 'string' &&
+                                product.slug.startsWith('workshop-')
+                              if (!isWorkshopBooking) return title
+                              const workshopSlug = product.slug!.replace('workshop-', '')
+                              const booking = Object.values(bookingMetadata).find(
+                                (b) => b.workshopSlug === workshopSlug,
+                              )
+                              return booking?.workshopTitle ?? title
+                            })()}
                           </p>
                           {variant && typeof variant === 'object' && (
                             <p className="text-caption text-ff-gray-text-light">

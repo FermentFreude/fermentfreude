@@ -17,10 +17,16 @@ type AddWorkshopToCartParams = {
   addItemAction: (item: { product: string; variant?: string }, quantity?: number) => Promise<void>
   clearCart?: () => Promise<void>
   appointmentId: string
+  /** DB / product slug (e.g. "lakto") — used by /api/cart/add-workshop */
   workshopSlug: string
   workshopTitle: string
   guestCount: number
   locale?: 'de' | 'en'
+  /** Frontend page slug for cart links (e.g. "vom-feld-ins-glas") */
+  pageSlug?: string
+  /** Optional location override (Marktgarten vs studio) */
+  locationName?: string | null
+  locationAddress?: string | null
 }
 
 /** Verifies that a product ID exists in the Payload ecommerce cart. */
@@ -71,6 +77,9 @@ export async function addWorkshopToCart({
   workshopTitle,
   guestCount,
   locale = 'de',
+  pageSlug,
+  locationName,
+  locationAddress,
 }: AddWorkshopToCartParams) {
   const t = locale === 'en' ? TOASTS_EN : TOASTS_DE
   try {
@@ -101,14 +110,15 @@ export async function addWorkshopToCart({
       appointmentId,
       bookingId: (data.bookingId as string | null) ?? null,
       workshopSlug,
+      pageSlug: pageSlug ?? workshopSlug,
       workshopTitle,
       guestCount,
       date: data.cartItem.metadata.date,
       time: data.cartItem.metadata.time,
       pricePerPerson: data.cartItem.metadata.pricePerPerson,
       totalPrice: data.cartItem.metadata.totalPrice,
-      locationName: data.cartItem.metadata.locationName ?? null,
-      locationAddress: data.cartItem.metadata.locationAddress ?? null,
+      locationName: locationName ?? data.cartItem.metadata.locationName ?? null,
+      locationAddress: locationAddress ?? data.cartItem.metadata.locationAddress ?? null,
       timestamp: Date.now(),
     }
     const existingBookings = JSON.parse(localStorage.getItem('workshopBookings') || '{}')

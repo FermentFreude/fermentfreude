@@ -57,6 +57,7 @@ const WORKSHOP_LINKS_DE = [
   { label: 'Lakto-Gemüse', href: '/workshops/lakto-gemuese' },
   { label: 'Tempeh', href: '/workshops/tempeh' },
   { label: 'Kombucha', href: '/workshops/kombucha' },
+  { label: 'Vom Feld ins Glas', href: '/workshops/vom-feld-ins-glas' },
   { label: 'Gutschein', href: '/workshops/voucher' },
 ]
 
@@ -64,6 +65,7 @@ const WORKSHOP_LINKS_EN = [
   { label: 'Lacto Vegetables', href: '/workshops/lakto-gemuese' },
   { label: 'Tempeh', href: '/workshops/tempeh' },
   { label: 'Kombucha', href: '/workshops/kombucha' },
+  { label: 'From Field to Jar', href: '/workshops/vom-feld-ins-glas' },
   { label: 'Gift Voucher', href: '/workshops/voucher' },
 ]
 

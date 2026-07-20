@@ -1,7 +1,8 @@
+import { FELD_INS_GLAS_HOWTO_SLUGS } from '@/app/(app)/workshops/[slug]/FeldInsGlas/data'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
-import { getPayload } from 'payload'
+import { getPayload, type Where } from 'payload'
 
 import { ArticleDetailClient } from './ArticleDetailClient'
 
@@ -70,10 +71,27 @@ export default async function TippsArticlePage({ params }: { params: Params }) {
   const post = result.docs[0]
   if (!post) notFound()
 
-  // Fetch up to 3 related articles (exclude current)
+  // Prefer related articles from the same series (Feld ins Glas / workshop type)
+  const isFeldInsGlas = (FELD_INS_GLAS_HOWTO_SLUGS as readonly string[]).includes(slug)
+  const relatedWhere: Where = isFeldInsGlas
+    ? {
+        and: [
+          { slug: { not_equals: slug } },
+          { slug: { in: [...FELD_INS_GLAS_HOWTO_SLUGS] } },
+        ],
+      }
+    : post.workshopType
+      ? {
+          and: [
+            { slug: { not_equals: slug } },
+            { workshopType: { equals: post.workshopType } },
+          ],
+        }
+      : { slug: { not_equals: slug } }
+
   const relatedResult = await payload.find({
     collection: 'posts',
-    where: { slug: { not_equals: slug } },
+    where: relatedWhere,
     limit: 3,
     depth: 1,
     locale,

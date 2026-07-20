@@ -1,5 +1,6 @@
 'use client'
 
+import { FELD_INS_GLAS_ARTICLES } from '@/app/(app)/tipps/feld-ins-glas-articles'
 import { Media as MediaComponent } from '@/components/Media'
 import { RichText } from '@/components/RichText'
 import type { Media as MediaType } from '@/payload-types'
@@ -12,11 +13,13 @@ import Link from 'next/link'
  *  Clean reading experience for fermentation how-to articles.
  *  Content comes from the Posts CMS collection (richText field).
  *
- *  - Back navigation to lakto workshop
+ *  - Back navigation to the matching workshop
  *  - Hero image from CMS (or warm-gray placeholder)
  *  - RichText body rendered with Payload Lexical converter
  *  - Related articles at bottom (fetched by server component)
  * ═══════════════════════════════════════════════════════════════ */
+
+const FELD_INS_GLAS_SLUGS = new Set(FELD_INS_GLAS_ARTICLES.map((a) => a.slug))
 
 // Minimal subset of Post fields used by this component.
 // Mirrors the generated `Post` type from @/payload-types — safe
@@ -28,8 +31,51 @@ export type PostData = {
   title: string
   summary?: string | null
   readTime?: string | null
+  workshopType?: 'lakto' | 'tempeh' | 'kombucha' | null
   heroImage?: MediaType | string | null
   content?: SerializedEditorState | null
+}
+
+type WorkshopCta = {
+  href: string
+  title: string
+  description: string
+}
+
+function getWorkshopCta(post: PostData): WorkshopCta {
+  if (FELD_INS_GLAS_SLUGS.has(post.slug)) {
+    return {
+      href: '/workshops/vom-feld-ins-glas',
+      title: 'Komm zum Marktgarten-Workshop',
+      description:
+        'Beim Spezial-Workshop „Vom Feld ins Glas“ erntest du frisches Gemüse und bereitest drei Lakto-Fermente zu — direkt im Marktgarten „Unser Bauerngarten“.',
+    }
+  }
+
+  if (post.workshopType === 'tempeh') {
+    return {
+      href: '/workshops/tempeh',
+      title: 'Lerne Tempeh in unserem Workshop',
+      description:
+        'In unserem Tempeh-Workshop zeigen wir dir Schritt für Schritt, wie du dein erstes Tempeh ansetzt — mit frischen Zutaten, Profi-Tipps und ganz viel Spaß.',
+    }
+  }
+
+  if (post.workshopType === 'kombucha') {
+    return {
+      href: '/workshops/kombucha',
+      title: 'Lerne Kombucha in unserem Workshop',
+      description:
+        'In unserem Kombucha-Workshop brauen wir gemeinsam deinen ersten Ansatz — mit frischen Zutaten, Profi-Tipps und ganz viel Spaß.',
+    }
+  }
+
+  return {
+    href: '/workshops/lakto-gemuese',
+    title: 'Lerne Fermentieren in unserem Workshop',
+    description:
+      'In unserem Lakto-Gemüse-Workshop zeigen wir dir Schritt für Schritt, wie du dein erstes Ferment ansetzt — mit frischen Zutaten, Profi-Tipps und ganz viel Spaß.',
+  }
 }
 
 function ArrowLeftIcon({ className = 'size-5' }: { className?: string }) {
@@ -75,13 +121,15 @@ export function ArticleDetailClient({
   post: PostData
   relatedPosts?: PostData[]
 }) {
+  const workshop = getWorkshopCta(post)
+
   return (
     <main className="min-h-screen bg-ff-cream">
       <div className="container mx-auto container-padding">
         {/* ─── Back Navigation ─── */}
         <div className="pt-8">
           <Link
-            href="/workshops/lakto-gemuese"
+            href={workshop.href}
             className="group inline-flex items-center gap-2 font-display text-body-sm font-medium text-ff-gray-text transition-colors hover:text-ff-near-black"
           >
             <ArrowLeftIcon className="size-4 transition-transform group-hover:-translate-x-1" />
@@ -147,14 +195,11 @@ export function ArticleDetailClient({
               Jetzt ausprobieren
             </p>
             <h3 className="mb-4 font-display text-subheading font-bold text-ff-near-black">
-              Lerne Fermentieren in unserem Workshop
+              {workshop.title}
             </h3>
-            <p className="mb-8 text-body leading-relaxed text-ff-gray-text">
-              In unserem Lakto-Gemüse-Workshop zeigen wir dir Schritt für Schritt, wie du dein
-              erstes Ferment ansetzt — mit frischen Zutaten, Profi-Tipps und ganz viel Spaß.
-            </p>
+            <p className="mb-8 text-body leading-relaxed text-ff-gray-text">{workshop.description}</p>
             <Link
-              href="/workshops/lakto-gemuese"
+              href={workshop.href}
               className="inline-flex items-center gap-2 rounded-(--radius-pill) bg-ff-near-black px-8 py-3 font-display text-body-sm font-semibold text-white transition-all duration-300 hover:bg-ff-charcoal"
             >
               Zum Workshop
