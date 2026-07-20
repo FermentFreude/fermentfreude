@@ -201,7 +201,10 @@ export async function sendTemplateEmail({
 
     if (!response.ok) {
       const error = await response.text()
-      console.error(`[Brevo] Email send failed (template ${templateId}):`, error)
+      console.error(
+        `[Brevo] Email send failed (template ${templateId}, HTTP ${response.status}) to ${to[0]?.email}:`,
+        error,
+      )
       return { success: false }
     }
 
@@ -209,7 +212,10 @@ export async function sendTemplateEmail({
     console.log(`[Brevo] Email sent (template ${templateId}) to ${to[0]?.email}`)
     return { success: true, messageId: data.messageId }
   } catch (error) {
-    console.error('[Brevo] Email send error:', error)
+    console.error(
+      `[Brevo] Email send error (template ${templateId}) to ${to[0]?.email}:`,
+      error instanceof Error ? error.message : error,
+    )
     return { success: false }
   }
 }

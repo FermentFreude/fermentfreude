@@ -203,6 +203,17 @@ export const Vouchers: CollectionConfig = {
         description: 'Internal notes about this voucher',
       },
     },
+    {
+      name: 'emailDeliveryFailed',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description:
+          'Set automatically if the Brevo confirmation email failed to send. Check Vercel logs for the [Brevo] error and resend the voucher manually if needed.',
+      },
+    },
   ],
   hooks: {
     beforeValidate: [

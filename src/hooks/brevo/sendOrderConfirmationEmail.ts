@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
-import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 
 /**
  * Send order confirmation email via Brevo after a new order is created.
@@ -13,6 +13,10 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
   req,
 }) => {
   if (operation !== 'create') return doc
+  // Set by callers that already send their own customer + admin notification
+  // for this order (e.g. voucher purchases — see sendVoucherPurchaseEmail.ts)
+  // to avoid double-emailing the customer and double-pinging the admin.
+  if (req?.context?.skipOrderConfirmationEmail) return doc
 
   const customerId = typeof doc.customer === 'object' ? doc.customer?.id : doc.customer
 
@@ -409,11 +413,47 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       emailParams.TOTAL_PRICE = workshopPrice
     }
 
-    await sendTemplateEmail({
+    const result = await sendTemplateEmail({
       to: [{ email: recipientEmail, name: recipientName }],
       templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION,
       params: emailParams,
     })
+    const customerSendFailed = !result.success
+    if (customerSendFailed) {
+      req.payload.logger.error(
+        `[Brevo] Order confirmation email FAILED to send for order ${doc.id} (${recipientEmail}) — see prior [Brevo] log line for the API error.`,
+      )
+    }
+
+    // ─── Admin notification — always sent, success or failure ───────
+    try {
+      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'kontakt@fermentfreude.at'
+      const warningBlock = customerSendFailed
+        ? `<p style="font-family:sans-serif;background:#FEF3C7;color:#92400E;padding:12px 16px;border-radius:8px;margin:0 0 16px">
+             ⚠️ Die Bestellbestätigung an den/die Kund:in konnte NICHT gesendet werden (Brevo-Fehler). Bitte manuell nachfassen.
+           </p>`
+        : ''
+      const htmlContent = `
+${warningBlock}
+<h2 style="font-family:sans-serif;margin-bottom:16px">Neue Bestellung: ${orderNumber}</h2>
+<table style="font-family:sans-serif;border-collapse:collapse;font-size:14px">
+  <tr><td style="padding:4px 12px 4px 0;color:#555;white-space:nowrap">Betrag</td><td style="padding:4px 0"><strong>${orderTotalNum !== null ? fmtMoney(orderTotalNum) : ''}</strong></td></tr>
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Kund:in</td><td style="padding:4px 0">${recipientName || ''} <a href="mailto:${recipientEmail}">${recipientEmail}</a></td></tr>
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Artikel</td><td style="padding:4px 0">${safeOrderItemsSummary || '—'}</td></tr>
+  <tr><td style="padding:16px 12px 4px 0;color:#555;border-top:1px solid #eee">Bestell-ID</td><td style="padding:16px 0 4px;border-top:1px solid #eee;font-family:monospace">${orderNumber}</td></tr>
+</table>`
+
+      await sendTransactionalEmail({
+        to: [{ email: adminEmail, name: 'FermentFreude Admin' }],
+        subject: `Neue Bestellung: ${orderNumber}${orderTotalNum !== null ? ` · ${fmtMoney(orderTotalNum)}` : ''}`,
+        htmlContent,
+      })
+      req.payload.logger.info(`[Brevo] Sent admin notification email for order ${doc.id}`)
+    } catch (adminError) {
+      req.payload.logger.error(
+        `[Brevo] Failed to send admin notification for order ${doc.id}: ${adminError instanceof Error ? adminError.message : String(adminError)}`,
+      )
+    }
   } catch (error) {
     req.payload.logger.error(
       `[Brevo] Order confirmation email FAILED for order ${doc.id}: ${error instanceof Error ? error.message : String(error)}`,
