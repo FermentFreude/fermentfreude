@@ -397,6 +397,7 @@ async function seedFeldInsGlasPage() {
         title: 'Vom Feld ins Glas',
         slug: SLUG,
         _status: 'published',
+        hero: { type: 'none' as const },
       },
       context: ctx,
     })
