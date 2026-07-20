@@ -4825,6 +4825,10 @@ export interface Voucher {
    * Internal notes about this voucher
    */
   notes?: string | null;
+  /**
+   * Set automatically if the Brevo confirmation email failed to send. Check Vercel logs for the [Brevo] error and resend the voucher manually if needed.
+   */
+  emailDeliveryFailed?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -6937,6 +6941,7 @@ export interface VouchersSelect<T extends boolean = true> {
   redeemedBy?: T;
   invoiceNumber?: T;
   notes?: T;
+  emailDeliveryFailed?: T;
   updatedAt?: T;
   createdAt?: T;
 }

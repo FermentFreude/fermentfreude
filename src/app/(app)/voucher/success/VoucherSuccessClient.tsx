@@ -149,6 +149,8 @@ const SUCCESS_DE = {
   deliveredByEmail: 'Per E-Mail zugestellt',
   emailTo: (email: string) => `An: ${email}`,
   confirmationSent: 'Eine Best\u00E4tigung wurde auch an deine E-Mail-Adresse gesendet.',
+  emailFailedWarning:
+    'Deine Zahlung wurde erfolgreich verarbeitet und dein Gutschein ist g\u00FCltig \u2014 wir hatten allerdings ein tempor\u00E4res Problem beim Versand der Best\u00E4tigungs-E-Mail. Unser Team wurde automatisch informiert und meldet sich bei dir. Du kannst deinen Code oben jetzt schon kopieren oder als PDF herunterladen.',
   readyForPickup: 'Zur Abholung bereit',
   pickupAddress: 'Grabenstra\u00DFe 15, 8010 Graz',
   pickupNotification: 'Wir informieren dich per E-Mail, sobald der Gutschein abholbereit ist.',
@@ -186,6 +188,8 @@ const SUCCESS_EN = {
   deliveredByEmail: 'Delivered by email',
   emailTo: (email: string) => `To: ${email}`,
   confirmationSent: 'A confirmation has also been sent to your email address.',
+  emailFailedWarning:
+    'Your payment was processed successfully and your voucher is valid — however, we hit a temporary issue sending the confirmation email. Our team has been notified automatically and will follow up with you. You can already copy your code above or download it as a PDF.',
   readyForPickup: 'Ready for pickup',
   pickupAddress: 'Grabenstra\u00DFe 15, 8010 Graz',
   pickupNotification: 'We will notify you by email once the voucher is ready for pickup.',
@@ -211,6 +215,7 @@ type VoucherResult = {
   value: number
   deliveryMethod: string
   recipientEmail: string | null
+  emailWarning?: boolean
 }
 
 export function VoucherSuccessClient() {
@@ -369,6 +374,13 @@ export function VoucherSuccessClient() {
           </div>
         </div>
 
+        {/* Email delivery warning — shown only if the confirmation email failed to send */}
+        {voucher.emailWarning && (
+          <div className="rounded-xl bg-amber-50 border border-amber-200 p-5 mb-8 text-left">
+            <p className="font-sans text-body-sm text-amber-800">{t.emailFailedWarning}</p>
+          </div>
+        )}
+
         {/* Delivery Info */}
         <div className="rounded-xl bg-ff-cream border border-ff-border-light p-5 mb-8 text-left">
           {voucher.deliveryMethod !== 'pickup' ? (
@@ -394,9 +406,11 @@ export function VoucherSuccessClient() {
                     {t.emailTo(voucher.recipientEmail)}
                   </p>
                 )}
-                <p className="font-sans text-body-sm text-ff-gray-text mt-1">
-                  {t.confirmationSent}
-                </p>
+                {!voucher.emailWarning && (
+                  <p className="font-sans text-body-sm text-ff-gray-text mt-1">
+                    {t.confirmationSent}
+                  </p>
+                )}
               </div>
             </div>
           ) : (

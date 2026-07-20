@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
     let meta: Record<string, string> = {}
     let _paymentStatus: string = ''
     let idempotencyKey: string = ''
+    let amountCents: number | null = null
 
     if (sessionId) {
       // ─── Verify via Stripe Checkout Session ─────────────────────
@@ -62,6 +63,7 @@ export async function GET(request: NextRequest) {
       meta = session.metadata as Record<string, string>
       _paymentStatus = session.payment_status
       idempotencyKey = sessionId
+      amountCents = typeof session.amount_total === 'number' ? session.amount_total : null
     } else {
       // ─── Verify via Stripe PaymentIntent ────────────────────────
 
@@ -92,6 +94,7 @@ export async function GET(request: NextRequest) {
       meta = paymentIntent.metadata as Record<string, string>
       _paymentStatus = paymentIntent.status
       idempotencyKey = paymentIntentId!
+      amountCents = typeof paymentIntent.amount === 'number' ? paymentIntent.amount : null
     }
 
     // ─── Idempotency: Check if voucher already exists ────────────
@@ -114,6 +117,7 @@ export async function GET(request: NextRequest) {
           value: existingVoucher.value,
           deliveryMethod: existingVoucher.deliveryMethod,
           recipientEmail: existingVoucher.recipientEmail || null,
+          emailWarning: Boolean(existingVoucher.emailDeliveryFailed),
         },
       })
     }
@@ -146,7 +150,37 @@ export async function GET(request: NextRequest) {
       `[voucher/confirm] Created voucher ${voucher.code} for key ${idempotencyKey}`,
     )
 
-    // ─── Email will be sent automatically via afterChange hook ─────
+    // ─── Email + admin notification sent automatically via afterChange hook ─
+
+    // ─── Create matching Orders record so the purchase shows up in the CMS ──
+    // Non-fatal: the voucher itself (and its confirmation email) is already
+    // done above — a failure here must not affect the customer-facing result.
+    // skipOrderConfirmationEmail: sendVoucherPurchaseEmail already emailed the
+    // customer and pinged the admin for this purchase — avoid double-sending.
+    try {
+      await payload.create({
+        collection: 'orders',
+        overrideAccess: true,
+        data: {
+          items: [],
+          customerEmail: meta.purchaserEmail,
+          customerName: meta.purchaserName || undefined,
+          status: 'completed',
+          amount: amountCents ?? Math.round(Number(meta.amount) * 100),
+          currency: 'EUR',
+        },
+        context: {
+          skipOrderConfirmationEmail: true,
+          skipRevalidate: true,
+          skipAutoTranslate: true,
+        },
+      })
+      payload.logger.info(`[voucher/confirm] Created order record for voucher ${voucher.code}`)
+    } catch (orderError) {
+      payload.logger.error(
+        `[voucher/confirm] Failed to create order record for voucher ${voucher.code}: ${orderError instanceof Error ? orderError.message : String(orderError)}`,
+      )
+    }
 
     return NextResponse.json({
       success: true,
@@ -155,6 +189,7 @@ export async function GET(request: NextRequest) {
         value: Number(meta.amount),
         deliveryMethod: voucher.deliveryMethod,
         recipientEmail: voucher.recipientEmail || null,
+        emailWarning: Boolean(voucher.emailDeliveryFailed),
       },
     })
   } catch (error) {
