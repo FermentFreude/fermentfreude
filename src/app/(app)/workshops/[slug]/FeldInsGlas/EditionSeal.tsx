@@ -2,24 +2,42 @@
 
 /**
  * FeldInsGlas — rotating circular seal (Figma Make stamp).
- * Ring text spins; center FER / MEN stays fixed.
+ * Ring text spins; center word stays fixed (e.g. FERM / ENTATION).
  */
 
 import { useId } from 'react'
 
 type Props = {
   ringText?: string
+  /** Single label from copy (e.g. FERMENTATION) — split for two-line stamp */
+  centerText?: string
   centerLines?: [string, string]
   className?: string
   size?: number
 }
 
+function splitCenterText(text: string): [string, string] {
+  const t = text.trim().toUpperCase()
+  if (t === 'FERMENTATION') return ['FERM', 'ENTATION']
+  if (t === 'FERMENT') return ['FER', 'MENT']
+  if (t.includes(' · ')) {
+    const [a, b] = t.split(' · ')
+    if (a && b) return [a.trim(), b.trim()]
+  }
+  if (t.length <= 5) return [t, '']
+  const mid = Math.ceil(t.length / 2)
+  return [t.slice(0, mid), t.slice(mid)]
+}
+
 export function EditionSeal({
   ringText = 'EINMALIGE VERANSTALTUNG',
-  centerLines = ['FER', 'MEN'],
+  centerText,
+  centerLines,
   className = '',
   size = 140,
 }: Props) {
+  const lines: [string, string] =
+    centerLines ?? (centerText ? splitCenterText(centerText) : ['FERM', 'ENTATION'])
   const gold = '#F2E2B8'
   const pathId = useId().replace(/:/g, '')
   const ringLabel = ` · ${ringText} · ${ringText} · `
@@ -57,16 +75,18 @@ export function EditionSeal({
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <span
           className="font-display font-bold uppercase leading-none tracking-[0.28em] text-[#F2E2B8]"
-          style={{ fontSize: Math.max(11, size * 0.095) }}
+          style={{ fontSize: Math.max(9, size * 0.082) }}
         >
-          {centerLines[0]}
+          {lines[0]}
         </span>
+        {lines[1] ? (
         <span
           className="mt-0.5 font-display font-bold uppercase leading-none tracking-[0.28em] text-[#F2E2B8]"
-          style={{ fontSize: Math.max(11, size * 0.095) }}
+          style={{ fontSize: Math.max(9, size * 0.082) }}
         >
-          {centerLines[1]}
+          {lines[1]}
         </span>
+        ) : null}
       </div>
     </div>
   )
