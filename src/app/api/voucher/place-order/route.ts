@@ -171,6 +171,9 @@ export async function POST(request: NextRequest) {
         amount: 0,
         currency: 'EUR',
       },
+      // Read by sendOrderConfirmationEmail's admin notification so a €0,00
+      // order reads as "paid with voucher FF-GIFT-XXXX" instead of a mistake.
+      context: { paidByVoucher: sanitizedCode },
       overrideAccess: true,
     })
 

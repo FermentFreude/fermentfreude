@@ -425,7 +425,14 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       )
     }
 
-    // ─── Admin notification — always sent, success or failure ───────
+    // ─── Admin notification — the ONE notification for this order ─────────
+    // Every order, regardless of how it was created (Stripe checkout, or a
+    // voucher redeemed via voucher/place-order with no Stripe transaction at
+    // all), passes through this hook exactly once — so this is the single
+    // place that pings admin, describing what actually happened rather than
+    // a generic "order created". confirmWorkshopBookings (which runs earlier
+    // in this same afterChange chain) intentionally does NOT send its own
+    // admin email anymore, to avoid double-notifying for one purchase.
     try {
       const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'kontakt@fermentfreude.at'
       const warningBlock = customerSendFailed
@@ -433,11 +440,50 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
              ⚠️ Die Bestellbestätigung an den/die Kund:in konnte NICHT gesendet werden (Brevo-Fehler). Bitte manuell nachfassen.
            </p>`
         : ''
+
+      const isWorkshopOrder = Boolean(workshopDate)
+      // Set by voucher/place-order when the order was paid entirely with a
+      // redeemed voucher (amount = 0) — without this, a €0,00 order reads
+      // like a mistake instead of what it actually is.
+      const paidByVoucher =
+        typeof req.context?.paidByVoucher === 'string' ? (req.context.paidByVoucher as string) : null
+
+      const workshopTitle = resolvedItems[0]?.title || 'Workshop'
+      const headingLabel = isWorkshopOrder
+        ? `Neue Buchung: ${workshopTitle}`
+        : `Neue Bestellung: ${orderNumber}`
+      const subjectSuffix = paidByVoucher
+        ? ` · bezahlt mit Gutschein ${paidByVoucher}`
+        : orderTotalNum !== null
+          ? ` · ${fmtMoney(orderTotalNum)}`
+          : ''
+      const amountDisplay = paidByVoucher
+        ? `Gutschein ${paidByVoucher}`
+        : orderTotalNum !== null
+          ? fmtMoney(orderTotalNum)
+          : ''
+
+      const customerPhone =
+        typeof doc.customerPhone === 'string' && doc.customerPhone.trim() ? doc.customerPhone.trim() : ''
+      const customerDietSpecs =
+        typeof doc.customerDietSpecs === 'string' && doc.customerDietSpecs.trim()
+          ? doc.customerDietSpecs.trim()
+          : ''
+
+      const workshopRows = isWorkshopOrder
+        ? `
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Datum</td><td style="padding:4px 0">${workshopDate}${workshopTime ? ` · ${workshopTime}` : ''}</td></tr>
+  ${workshopLocation ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Ort</td><td style="padding:4px 0">${workshopLocation}</td></tr>` : ''}
+  ${guestCount > 0 ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Gäste</td><td style="padding:4px 0">${guestCount}</td></tr>` : ''}
+  ${customerPhone ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Telefon</td><td style="padding:4px 0">${customerPhone}</td></tr>` : ''}
+  ${customerDietSpecs ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Ernährungshinweise</td><td style="padding:4px 0">${customerDietSpecs}</td></tr>` : ''}`
+        : ''
+
       const htmlContent = `
 ${warningBlock}
-<h2 style="font-family:sans-serif;margin-bottom:16px">Neue Bestellung: ${orderNumber}</h2>
+<h2 style="font-family:sans-serif;margin-bottom:16px">${headingLabel}</h2>
 <table style="font-family:sans-serif;border-collapse:collapse;font-size:14px">
-  <tr><td style="padding:4px 12px 4px 0;color:#555;white-space:nowrap">Betrag</td><td style="padding:4px 0"><strong>${orderTotalNum !== null ? fmtMoney(orderTotalNum) : ''}</strong></td></tr>
+  <tr><td style="padding:4px 12px 4px 0;color:#555;white-space:nowrap">Betrag</td><td style="padding:4px 0"><strong>${amountDisplay}</strong></td></tr>${workshopRows}
   <tr><td style="padding:4px 12px 4px 0;color:#555">Kund:in</td><td style="padding:4px 0">${recipientName || ''} <a href="mailto:${recipientEmail}">${recipientEmail}</a></td></tr>
   <tr><td style="padding:4px 12px 4px 0;color:#555">Artikel</td><td style="padding:4px 0">${safeOrderItemsSummary || '—'}</td></tr>
   <tr><td style="padding:16px 12px 4px 0;color:#555;border-top:1px solid #eee">Bestell-ID</td><td style="padding:16px 0 4px;border-top:1px solid #eee;font-family:monospace">${orderNumber}</td></tr>
@@ -445,7 +491,7 @@ ${warningBlock}
 
       await sendTransactionalEmail({
         to: [{ email: adminEmail, name: 'FermentFreude Admin' }],
-        subject: `Neue Bestellung: ${orderNumber}${orderTotalNum !== null ? ` · ${fmtMoney(orderTotalNum)}` : ''}`,
+        subject: `${headingLabel}${subjectSuffix}`,
         htmlContent,
       })
       req.payload.logger.info(`[Brevo] Sent admin notification email for order ${doc.id}`)
