@@ -1,135 +1,11 @@
 'use client'
 
-import { jsPDF } from 'jspdf'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useLocale } from '@/providers/Locale'
-
-async function generateVoucherPDFInBrowser(code: string): Promise<Blob> {
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-  const width = pdf.internal.pageSize.getWidth()
-  const height = pdf.internal.pageSize.getHeight()
-
-  pdf.setFillColor(255, 251, 247)
-  pdf.rect(0, 0, width, height, 'F')
-
-  // Try to load the submark logo from CDN
-  try {
-    const imgRes = await fetch(
-      'https://pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev/media/email/submark-dark.png',
-    )
-    if (imgRes.ok) {
-      const imgBlob = await imgRes.blob()
-      const reader = new FileReader()
-      const base64 = await new Promise<string>((resolve) => {
-        reader.onloadend = () => resolve(reader.result as string)
-        reader.readAsDataURL(imgBlob)
-      })
-      const logoSize = 42
-      pdf.addImage(base64, 'PNG', (width - logoSize) / 2, 10, logoSize, logoSize)
-    }
-  } catch {
-    // fallback: gold box
-    const logoSize = 42
-    pdf.setFillColor(212, 165, 116)
-    pdf.rect((width - logoSize) / 2, 10, logoSize, logoSize, 'F')
-    pdf.setFontSize(24)
-    pdf.setFont('helvetica', 'bold')
-    pdf.setTextColor(255, 251, 247)
-    pdf.text('FH', width / 2, 10 + logoSize / 2 + 4, { align: 'center' })
-  }
-
-  pdf.setTextColor(26, 22, 18)
-  pdf.setFontSize(20)
-  pdf.setFont('helvetica', 'bold')
-  pdf.text('FERMENTFREUDE', width / 2, 60, { align: 'center' })
-
-  pdf.setDrawColor(212, 165, 116)
-  pdf.setLineWidth(0.5)
-  pdf.line(30, 68, width - 30, 68)
-
-  pdf.setFontSize(18)
-  pdf.setFont('helvetica', 'bold')
-  pdf.setTextColor(26, 22, 18)
-  pdf.text('Workshop-Erlebnis Gutschein', width / 2, 80, { align: 'center' })
-
-  const boxX = 20
-  const boxY = 90
-  const boxWidth = width - 40
-  const boxHeight = 48
-  pdf.setDrawColor(212, 165, 116)
-  pdf.setLineWidth(2)
-  pdf.rect(boxX, boxY, boxWidth, boxHeight)
-  pdf.setFillColor(244, 238, 230)
-  pdf.rect(boxX, boxY, boxWidth, boxHeight, 'F')
-  pdf.setFontSize(9)
-  pdf.setFont('helvetica', 'normal')
-  pdf.setTextColor(90, 84, 80)
-  pdf.text('GUTSCHEIN-CODE', width / 2, boxY + 10, { align: 'center' })
-  pdf.setFontSize(20)
-  pdf.setFont('courier', 'bold')
-  pdf.setTextColor(26, 22, 18)
-  pdf.text(code, width / 2, boxY + 28, { align: 'center' })
-
-  const infoY = boxY + boxHeight + 18
-  const lineHeight = 7
-  pdf.setFontSize(11)
-  pdf.setFont('helvetica', 'bold')
-  pdf.setTextColor(212, 165, 116)
-  pdf.text('Details:', 20, infoY)
-  pdf.setFontSize(10)
-  pdf.setFont('helvetica', 'normal')
-  pdf.setTextColor(26, 22, 18)
-  const detailsLines = [
-    '• Gültig für ein Workshop-Erlebnis',
-    '• Kurs kann online auf www.fermentfreude.at ausgewählt werden',
-    '• Nach Erwerb wird der Gutschein per E-Mail zugestellt',
-    '• Der Gutschein ist 12 Monate gültig',
-  ]
-  let currentY = infoY + 8
-  detailsLines.forEach((line) => {
-    pdf.text(line, 25, currentY)
-    currentY += lineHeight
-  })
-
-  const redeemY = currentY + 10
-  pdf.setFontSize(11)
-  pdf.setFont('helvetica', 'bold')
-  pdf.setTextColor(212, 165, 116)
-  pdf.text('So löst du deinen Gutschein ein:', 20, redeemY)
-  pdf.setFontSize(10)
-  pdf.setFont('helvetica', 'normal')
-  pdf.setTextColor(26, 22, 18)
-  const redeemSteps = [
-    '1. Besuche www.fermentfreude.at/workshops',
-    '2. Wähle einen Workshop und lege ihn in den Warenkorb',
-    '3. Beim Checkout: Gib deinen Code ein – die Gebühr wird direkt abgezogen',
-  ]
-  let currentRedeemY = redeemY + 8
-  redeemSteps.forEach((step) => {
-    pdf.text(step, 25, currentRedeemY)
-    currentRedeemY += lineHeight
-  })
-
-  const footerY = height - 20
-  pdf.setFontSize(9)
-  pdf.setFont('helvetica', 'normal')
-  pdf.setTextColor(90, 84, 80)
-  pdf.text(
-    'Fragen? Kontaktiere uns unter kontakt@fermentfreude.at oder besuche www.fermentfreude.at',
-    width / 2,
-    footerY,
-    { align: 'center' },
-  )
-  pdf.text(`Erstellt: ${new Date().toLocaleDateString('de-AT')}`, width / 2, footerY + 7, {
-    align: 'center',
-  })
-
-  return new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' })
-}
 
 const SUCCESS_DE = {
   loading: 'Gutschein wird erstellt\u2026',
@@ -263,7 +139,9 @@ export function VoucherSuccessClient() {
 
     setPdfLoading(true)
     try {
-      const blob = await generateVoucherPDFInBrowser(voucher.code)
+      const res = await fetch(`/api/voucher/generate-pdf?code=${encodeURIComponent(voucher.code)}`)
+      if (!res.ok) throw new Error('PDF request failed')
+      const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
