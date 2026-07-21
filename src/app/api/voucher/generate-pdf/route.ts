@@ -185,8 +185,12 @@ export async function GET(request: NextRequest) {
     let pdfBuffer: Buffer
     try {
       pdfBuffer = await buildVoucherPDFFromTemplate(sanitizedCode)
-    } catch {
+    } catch (templateError) {
       // Fall back to programmatic PDF if template is unavailable
+      console.error(
+        '[voucher/generate-pdf] Template PDF failed, falling back to generic layout:',
+        templateError instanceof Error ? templateError.message : templateError,
+      )
       const pdf = buildVoucherPDF(sanitizedCode)
       pdfBuffer = Buffer.from(new Uint8Array(pdf.output('arraybuffer')))
     }
@@ -222,7 +226,11 @@ export async function POST(request: NextRequest) {
     let pdfBuffer: Buffer
     try {
       pdfBuffer = await buildVoucherPDFFromTemplate(sanitizedCode)
-    } catch {
+    } catch (templateError) {
+      console.error(
+        '[voucher/generate-pdf POST] Template PDF failed, falling back to generic layout:',
+        templateError instanceof Error ? templateError.message : templateError,
+      )
       const pdf = buildVoucherPDF(sanitizedCode)
       pdfBuffer = Buffer.from(new Uint8Array(pdf.output('arraybuffer')))
     }
