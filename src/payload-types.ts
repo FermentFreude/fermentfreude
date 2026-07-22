@@ -1838,9 +1838,68 @@ export interface Page {
    */
   workshopDetail?: {
     /**
+     * Drag these blocks to change order on the website (e.g. move Booking above Recipe Plan). Same drag handles as the Content tab. Folders below only edit text — they do not control order.
+     */
+    pageSections?:
+      | (
+          | {
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'hero';
+            }
+          | {
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'experience';
+            }
+          | {
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'booking';
+            }
+          | {
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'recipePlan';
+            }
+          | {
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'howTo';
+            }
+          | {
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'faq';
+            }
+          | {
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'voucher';
+            }
+          | {
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'moreWorkshops';
+            }
+        )[]
+      | null;
+    /**
      * Enable this to show the seasonal calendar section on this workshop page. Disable to hide all calendar fields from the admin.
      */
     showSeasonalCalendar?: boolean | null;
+    /**
+     * Legacy toggle. Prefer enabling Tipps in Page Sections above. Usually off for Vom Feld ins Glas.
+     */
+    showHowToGuides?: boolean | null;
     /**
      * Small text above the title (e.g. "Workshop Experience").
      */
@@ -1854,7 +1913,7 @@ export interface Page {
      */
     heroDescription?: string | null;
     /**
-     * Image shown on the left side of the hero (portrait or square, min 800px tall). When empty, decorative jar illustrations are shown instead.
+     * Hero background image (full-bleed). For Vom Feld ins Glas this is the wheat field photo. When empty, a fallback media file is used.
      */
     heroImage?: (string | null) | Media;
     /**
@@ -1863,6 +1922,38 @@ export interface Page {
     heroAttributes?:
       | {
           text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Text repeated around the circle (e.g. "SPEZIAL-WORKSHOP" / "SPECIAL WORKSHOP"). Leave empty to use the default.
+     */
+    sealRingText?: string | null;
+    /**
+     * Middle of the stamp. Use exactly: FERMENT · freude  → shows as two lines (FERMENT / freude). Change DE and EN separately.
+     */
+    sealCenterText?: string | null;
+    /**
+     * e.g. "Im Workshop" / "In the workshop"
+     */
+    recipePlanEyebrow?: string | null;
+    /**
+     * e.g. "Das fermentieren wir." / "What we will ferment."
+     */
+    recipePlanTitle?: string | null;
+    /**
+     * Short explanation under the title — why this isn’t a monthly calendar.
+     */
+    recipePlanDescription?: string | null;
+    /**
+     * Usually 2 recipes per workshop. Add or remove as needed — order = display order.
+     */
+    recipePlanRecipes?:
+      | {
+          /**
+           * e.g. "Zucchini-Pickels"
+           */
+          name: string;
           id?: string | null;
         }[]
       | null;
@@ -1931,10 +2022,13 @@ export interface Page {
      * e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"
      */
     scheduleHeading?: string | null;
+    /**
+     * Drag ⋮⋮ to reorder steps 01, 02, 03… inside the booking card.
+     */
     schedule?:
       | {
           /**
-           * e.g. "45 Min" / "45 minutes"
+           * e.g. "01", "02"
            */
           duration: string;
           title: string;
@@ -5828,7 +5922,68 @@ export interface PagesSelect<T extends boolean = true> {
   workshopDetail?:
     | T
     | {
+        pageSections?:
+          | T
+          | {
+              hero?:
+                | T
+                | {
+                    enabled?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              experience?:
+                | T
+                | {
+                    enabled?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              booking?:
+                | T
+                | {
+                    enabled?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              recipePlan?:
+                | T
+                | {
+                    enabled?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              howTo?:
+                | T
+                | {
+                    enabled?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              faq?:
+                | T
+                | {
+                    enabled?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              voucher?:
+                | T
+                | {
+                    enabled?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              moreWorkshops?:
+                | T
+                | {
+                    enabled?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
         showSeasonalCalendar?: T;
+        showHowToGuides?: T;
         heroEyebrow?: T;
         heroTitle?: T;
         heroDescription?: T;
@@ -5837,6 +5992,17 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              id?: T;
+            };
+        sealRingText?: T;
+        sealCenterText?: T;
+        recipePlanEyebrow?: T;
+        recipePlanTitle?: T;
+        recipePlanDescription?: T;
+        recipePlanRecipes?:
+          | T
+          | {
+              name?: T;
               id?: T;
             };
         bookingEyebrow?: T;

@@ -8,7 +8,81 @@ import type { Field } from 'payload'
  * Collapsible groups map 1:1 to page sections for easy admin editing.
  */
 export const workshopDetailFields: Field[] = [
-  // ── Calendar Toggle ──────────────────────────────────────
+  // ── Page Sections — DRAG THESE (same as Content tab) ─────
+  {
+    name: 'pageSections',
+    type: 'blocks',
+    label: 'Page Sections — drag to reorder',
+    labels: {
+      singular: 'Section',
+      plural: 'Sections',
+    },
+    admin: {
+      description:
+        'Drag these blocks to change order on the website (e.g. move Booking above Recipe Plan). Same drag handles as the Content tab. Folders below only edit text — they do not control order.',
+      initCollapsed: false,
+    },
+    blocks: [
+      {
+        slug: 'hero',
+        labels: { singular: '1. Hero', plural: 'Hero' },
+        fields: [
+          { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+        ],
+      },
+      {
+        slug: 'experience',
+        labels: { singular: 'Konzept / Feld · Küche · Glas', plural: 'Experience' },
+        fields: [
+          { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+        ],
+      },
+      {
+        slug: 'booking',
+        labels: { singular: '2. Booking', plural: 'Booking' },
+        fields: [
+          { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+        ],
+      },
+      {
+        slug: 'recipePlan',
+        labels: { singular: 'Recipe Plan', plural: 'Recipe Plan' },
+        fields: [
+          { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+        ],
+      },
+      {
+        slug: 'howTo',
+        labels: { singular: 'Tipps & Guides', plural: 'Tipps & Guides' },
+        fields: [
+          { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: false },
+        ],
+      },
+      {
+        slug: 'faq',
+        labels: { singular: 'FAQ', plural: 'FAQ' },
+        fields: [
+          { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+        ],
+      },
+      {
+        slug: 'voucher',
+        labels: { singular: 'Voucher / Gift', plural: 'Voucher' },
+        fields: [
+          { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+        ],
+      },
+      {
+        slug: 'moreWorkshops',
+        labels: { singular: 'More Workshops', plural: 'More Workshops' },
+        fields: [
+          { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+        ],
+      },
+    ],
+  },
+
+  // ── Visibility toggles ───────────────────────────────────
   {
     type: 'checkbox',
     name: 'showSeasonalCalendar',
@@ -19,15 +93,25 @@ export const workshopDetailFields: Field[] = [
     },
     defaultValue: true,
   },
+  {
+    type: 'checkbox',
+    name: 'showHowToGuides',
+    label: 'Show Tipps & Guides?',
+    admin: {
+      description:
+        'Legacy toggle. Prefer enabling Tipps in Page Sections above. Usually off for Vom Feld ins Glas.',
+    },
+    defaultValue: true,
+  },
 
-  // ── 1. Hero ──────────────────────────────────────────────
+  // ── 1. Hero (edit content — not for reordering) ──────────
   {
     type: 'collapsible',
-    label: '1. Hero',
+    label: 'Edit: 1. Hero',
     admin: {
-      initCollapsed: false,
+      initCollapsed: true,
       description:
-        'Full-viewport hero with panel + text. Jar silhouettes are decorative (code-only).',
+        'Edit hero text & image here. To move Hero on the page, use “Page Sections” above.',
     },
     fields: [
       {
@@ -61,7 +145,7 @@ export const workshopDetailFields: Field[] = [
         label: 'Hero Image',
         admin: {
           description:
-            'Image shown on the left side of the hero (portrait or square, min 800px tall). When empty, decorative jar illustrations are shown instead.',
+            'Hero background image (full-bleed). For Vom Feld ins Glas this is the wheat field photo. When empty, a fallback media file is used.',
         },
       },
       {
@@ -78,14 +162,106 @@ export const workshopDetailFields: Field[] = [
     ],
   },
 
+  // ── 1b. Hero Seal (Vom Feld ins Glas only) ───────────────
+  {
+    type: 'collapsible',
+    label: '1b. Hero Seal (Vom Feld ins Glas)',
+    admin: {
+      initCollapsed: false,
+      description:
+        'Rotating stamp on the hero (top right). Used on /workshops/vom-feld-ins-glas. Safe to leave empty on other workshop pages.',
+    },
+    fields: [
+      {
+        name: 'sealRingText',
+        type: 'text',
+        localized: true,
+        label: 'Ring Text',
+        admin: {
+          description:
+            'Text repeated around the circle (e.g. "SPEZIAL-WORKSHOP" / "SPECIAL WORKSHOP"). Leave empty to use the default.',
+        },
+      },
+      {
+        name: 'sealCenterText',
+        type: 'text',
+        localized: true,
+        label: 'Center Text (brand)',
+        admin: {
+          description:
+            'Middle of the stamp. Use exactly: FERMENT · freude  → shows as two lines (FERMENT / freude). Change DE and EN separately.',
+        },
+      },
+    ],
+  },
+
+  // ── 1c. Recipe Plan (Vom Feld ins Glas only) ─────────────
+  {
+    type: 'collapsible',
+    label: '1c. Recipe Plan (Vom Feld ins Glas)',
+    admin: {
+      initCollapsed: false,
+      description:
+        'Replaces the Fermentkalender on /workshops/vom-feld-ins-glas. List what participants will ferment (usually 2 recipes). Safe to leave empty on other workshop pages.',
+    },
+    fields: [
+      {
+        name: 'recipePlanEyebrow',
+        type: 'text',
+        localized: true,
+        label: 'Eyebrow',
+        admin: { description: 'e.g. "Im Workshop" / "In the workshop"' },
+      },
+      {
+        name: 'recipePlanTitle',
+        type: 'text',
+        localized: true,
+        label: 'Title',
+        admin: {
+          description: 'e.g. "Das fermentieren wir." / "What we will ferment."',
+        },
+      },
+      {
+        name: 'recipePlanDescription',
+        type: 'textarea',
+        localized: true,
+        label: 'Description',
+        admin: {
+          description: 'Short explanation under the title — why this isn’t a monthly calendar.',
+        },
+      },
+      {
+        name: 'recipePlanRecipes',
+        type: 'array',
+        label: 'Recipes',
+        minRows: 1,
+        maxRows: 4,
+        admin: {
+          description:
+            'Usually 2 recipes per workshop. Add or remove as needed — order = display order.',
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+            required: true,
+            localized: true,
+            label: 'Recipe name',
+            admin: { description: 'e.g. "Zucchini-Pickels"' },
+          },
+        ],
+      },
+    ],
+  },
+
   // ── 2. Booking Card ──────────────────────────────────────
   {
     type: 'collapsible',
     label: '2. Booking Card',
     admin: {
-      initCollapsed: true,
+      initCollapsed: false,
       description:
-        'Complete booking experience: header, about, schedule, included items, why, experience cards, and dates.',
+        'Complete booking experience: header, about, schedule (drag to reorder steps), included items, why, experience cards, and dates.',
     },
     fields: [
       // ── Header ────────────────────────────────────────────
@@ -222,14 +398,19 @@ export const workshopDetailFields: Field[] = [
         type: 'array',
         label: 'Schedule Items',
         maxRows: 6,
+        labels: { singular: 'Step', plural: 'Steps' },
+        admin: {
+          description: 'Drag ⋮⋮ to reorder steps 01, 02, 03… inside the booking card.',
+          initCollapsed: false,
+        },
         fields: [
           {
             name: 'duration',
             type: 'text',
             required: true,
             localized: true,
-            label: 'Duration',
-            admin: { description: 'e.g. "45 Min" / "45 minutes"' },
+            label: 'Number',
+            admin: { description: 'e.g. "01", "02"' },
           },
           {
             name: 'title',

@@ -26,7 +26,18 @@ const calendarDE = getFeldInsGlasCalendar('de')
 const calendarEN = getFeldInsGlasCalendar('en')
 
 const workshopDetailDE = {
-  showSeasonalCalendar: true,
+  pageSections: [
+    { blockType: 'hero', enabled: true },
+    { blockType: 'experience', enabled: true },
+    { blockType: 'booking', enabled: true },
+    { blockType: 'recipePlan', enabled: true },
+    { blockType: 'howTo', enabled: false },
+    { blockType: 'faq', enabled: true },
+    { blockType: 'voucher', enabled: true },
+    { blockType: 'moreWorkshops', enabled: true },
+  ],
+  showSeasonalCalendar: false,
+  showHowToGuides: false,
   heroEyebrow: 'Spezial-Workshop',
   heroTitle: 'Vom Feld ins Glas',
   heroDescription:
@@ -36,6 +47,16 @@ const workshopDetailDE = {
     { text: 'Hands-on' },
     { text: 'Marktgarten' },
     { text: 'Max. 12 Personen' },
+  ],
+  sealRingText: 'SPEZIAL-WORKSHOP',
+  sealCenterText: 'FERMENT · freude',
+  recipePlanEyebrow: 'Im Workshop',
+  recipePlanTitle: 'Das fermentieren wir.',
+  recipePlanDescription:
+    'Statt eines Monatskalenders siehst du hier die Rezepte, die du an diesem Tag zubereitest und mitnimmst. Meist zwei Fermente pro Termin.',
+  recipePlanRecipes: [
+    { name: 'Zucchini-Pickles' },
+    { name: 'Gurken-Relish' },
   ],
   bookingEyebrow: 'Fermentations-Workshop',
   bookingTitle: 'Vom Feld ins Glas',
@@ -71,7 +92,7 @@ const workshopDetailDE = {
     {
       duration: '03',
       title: 'Praxis',
-      description: 'Drei Lakto-Fermente: Zucchini-Pickels, Gurken-Relish und Karfiol-Kimchi. Alle Gläser nimmst du mit.',
+      description: 'Drei Lakto-Fermente: Zucchini-Pickles, Gurken-Relish und Karfiol-Kimchi. Alle Gläser nimmst du mit.',
     },
     {
       duration: '04',
@@ -91,7 +112,7 @@ const workshopDetailDE = {
     { bold: 'Dauer: ', rest: 'ca. 4 Stunden' },
     {
       bold: 'Für wen: ',
-      rest: 'Für alle, vom Neuling bis zur Fermentier-Profi.',
+      rest: 'Für alle, vom Neuling bis zum Profi.',
     },
     {
       bold: 'Mitbringen: ',
@@ -109,24 +130,30 @@ const workshopDetailDE = {
   calendarTitle: calendarDE.title,
   calendarDescription: calendarDE.description,
   calendarMonths: calendarDE.months,
-  voucherEyebrow: 'GUTSCHEIN',
-  voucherTitle: 'Verschenke FermentFreude',
+  useGlobalVoucherData: false,
+  voucherEyebrow: 'Geschenk',
+  voucherTitle: 'Verschenke Fermentation als Erlebnis.',
   voucherDescription:
-    'Der perfekte Moment für jemanden, der Herkunft, Handwerk und Geschmack verbinden will — auch für diesen Marktgarten-Workshop.',
-  voucherPrimaryLabel: 'Gutschein kaufen',
+    'Ein Fermentfreude-Gutschein für „Vom Feld ins Glas“, für Menschen, die mehr suchen als ein Kochbuch. Schöner verpackt, per Post oder digital, mit persönlicher Widmung.',
+  voucherPrimaryLabel: 'Gutschein bestellen',
   voucherPrimaryHref: '/workshops/voucher',
-  voucherSecondaryLabel: 'Mehr erfahren',
-  voucherSecondaryHref: '/workshops/voucher',
-  voucherPills: [{ text: 'Für alle Workshops' }, { text: 'Digital oder gedruckt' }],
-  faqEyebrow: 'HÄUFIGE FRAGEN',
+  voucherSecondaryLabel: 'Zum Shop',
+  voucherSecondaryHref: '/shop',
+  voucherPills: [
+    { text: 'Einlösbar für alle Termine 2025' },
+    { text: 'Kostenloser Versand (gedruckt)' },
+    { text: 'Mit persönlicher Botschaft' },
+    { text: 'Auch als PDF zum Sofortversand' },
+  ],
+  faqEyebrow: 'Häufige Fragen',
   faqTitle: 'Gut zu wissen',
   faqDescription:
-    'Alles rund um den Marktgarten-Workshop — von Kleidung bis Anfahrt.',
+    'Alles rund um den Marktgarten-Workshop, von Kleidung bis Anfahrt.',
   faqItems: [
     {
       question: 'Wo findet der Workshop statt?',
       answer:
-        'Beim Marktgarten „Unser Bauerngarten“ am Hochfeldweg in Graz — nicht in unserem Studio an der Grabenstraße. Die genaue Adresse und Anfahrt schicken wir dir mit der Buchungsbestätigung.',
+        'Beim Marktgarten „Unser Bauerngarten“ am Hochfeldweg in Graz, nicht in unserem Studio an der Grabenstraße. Die genaue Adresse und Anfahrt schicken wir dir mit der Buchungsbestätigung.',
     },
     {
       question: 'Was muss ich mitbringen?',
@@ -141,12 +168,12 @@ const workshopDetailDE = {
     {
       question: 'Ist der Workshop für Anfänger geeignet?',
       answer:
-        'Ja. Vom Neuling bis zur Fermentier-Profi — Vorkenntnisse sind nicht nötig.',
+        'Ja. Vom Neuling bis zum Profi. Vorkenntnisse sind nicht nötig.',
     },
     {
       question: 'Was nehme ich mit nach Hause?',
       answer:
-        'Drei eigene Lakto-Fermente inkl. Gärgefäße (Zucchini-Pickels, Gurken-Relish, Karfiol-Kimchi) und ein Skript mit allen Rezepten.',
+        'Drei eigene Lakto-Fermente inkl. Gärgefäße (Zucchini-Pickles, Gurken-Relish, Karfiol-Kimchi) und ein Skript mit allen Rezepten.',
     },
     {
       question: 'Wie kann ich stornieren oder umbuchen?',
@@ -176,7 +203,18 @@ const workshopDetailDE = {
 }
 
 const workshopDetailEN = {
-  showSeasonalCalendar: true,
+  pageSections: [
+    { blockType: 'hero', enabled: true },
+    { blockType: 'experience', enabled: true },
+    { blockType: 'booking', enabled: true },
+    { blockType: 'recipePlan', enabled: true },
+    { blockType: 'howTo', enabled: false },
+    { blockType: 'faq', enabled: true },
+    { blockType: 'voucher', enabled: true },
+    { blockType: 'moreWorkshops', enabled: true },
+  ],
+  showSeasonalCalendar: false,
+  showHowToGuides: false,
   heroEyebrow: 'Special Workshop',
   heroTitle: 'From Field to Jar',
   heroDescription:
@@ -186,6 +224,16 @@ const workshopDetailEN = {
     { text: 'Hands-on' },
     { text: 'Market garden' },
     { text: 'Max. 12 people' },
+  ],
+  sealRingText: 'SPECIAL WORKSHOP',
+  sealCenterText: 'FERMENT · freude',
+  recipePlanEyebrow: 'In the workshop',
+  recipePlanTitle: 'What we will ferment.',
+  recipePlanDescription:
+    'Instead of a monthly calendar, you see the recipes you will make and take home that day. Usually two ferments per date.',
+  recipePlanRecipes: [
+    { name: 'Zucchini pickles' },
+    { name: 'Cucumber relish' },
   ],
   bookingEyebrow: 'Fermentation Workshop',
   bookingTitle: 'From Field to Jar',
@@ -205,7 +253,7 @@ const workshopDetailEN = {
   bookingSpotsLabel: 'spots left',
   aboutHeading: 'About this special workshop',
   aboutText:
-    'You learn how fermentation works and where ingredients come from — outdoors at Marktgarten “Unser Bauerngarten”, not on Grabenstraße.',
+    'You learn how fermentation works and where ingredients come from, outdoors at Marktgarten “Unser Bauerngarten”, not on Grabenstraße.',
   scheduleHeading: 'Workshop content',
   schedule: [
     {
@@ -257,23 +305,28 @@ const workshopDetailEN = {
   calendarTitle: calendarEN.title,
   calendarDescription: calendarEN.description,
   calendarMonths: calendarEN.months,
-  voucherEyebrow: 'VOUCHER',
-  voucherTitle: 'Gift FermentFreude',
+  voucherEyebrow: 'Gift',
+  voucherTitle: 'Gift fermentation as an experience.',
   voucherDescription:
-    'The perfect gift for anyone who wants to connect origin, craft and flavour — including this market-garden workshop.',
-  voucherPrimaryLabel: 'Buy voucher',
+    'A Fermentfreude voucher for “Vom Feld ins Glas”, for people who want more than a cookbook. Beautifully packed, by post or digital, with a personal dedication.',
+  voucherPrimaryLabel: 'Order voucher',
   voucherPrimaryHref: '/workshops/voucher',
-  voucherSecondaryLabel: 'Learn more',
-  voucherSecondaryHref: '/workshops/voucher',
-  voucherPills: [{ text: 'For all workshops' }, { text: 'Digital or printed' }],
+  voucherSecondaryLabel: 'To the shop',
+  voucherSecondaryHref: '/shop',
+  voucherPills: [
+    { text: 'Valid for all 2025 dates' },
+    { text: 'Free shipping (printed)' },
+    { text: 'With a personal message' },
+    { text: 'Also as PDF for instant delivery' },
+  ],
   faqEyebrow: 'FAQ',
   faqTitle: 'Good to know',
-  faqDescription: 'Everything about the market-garden workshop — from clothing to getting there.',
+  faqDescription: 'Everything about the market-garden workshop, from clothing to getting there.',
   faqItems: [
     {
       question: 'Where does the workshop take place?',
       answer:
-        'At Marktgarten “Unser Bauerngarten” on Hochfeldweg in Graz — not at our Grabenstraße studio. Exact address and directions come with your confirmation email.',
+        'At Marktgarten “Unser Bauerngarten” on Hochfeldweg in Graz, not at our Grabenstraße studio. Exact address and directions come with your confirmation email.',
     },
     {
       question: 'What should I bring?',
@@ -287,7 +340,7 @@ const workshopDetailEN = {
     },
     {
       question: 'Is it suitable for beginners?',
-      answer: 'Yes. From beginners to fermentation pros — no prior knowledge needed.',
+      answer: 'Yes. From beginners to fermentation pros. No prior knowledge needed.',
     },
     {
       question: 'What do I take home?',
@@ -326,6 +379,7 @@ function mergeArrayIds(
   enData: Record<string, unknown>,
 ) {
   const arrayFields = [
+    'pageSections',
     'heroAttributes',
     'bookingAttributes',
     'schedule',
@@ -334,6 +388,7 @@ function mergeArrayIds(
     'experienceCards',
     'dates',
     'calendarMonths',
+    'recipePlanRecipes',
     'voucherPills',
     'faqItems',
   ] as const
@@ -360,6 +415,19 @@ function mergeArrayIds(
   }
 }
 
+async function findMediaIdByAlt(
+  payload: Awaited<ReturnType<typeof getPayload>>,
+  altFragment: string,
+): Promise<string | undefined> {
+  const found = await payload.find({
+    collection: 'media',
+    where: { alt: { contains: altFragment } },
+    limit: 1,
+    depth: 0,
+  })
+  return found.docs[0]?.id
+}
+
 async function seedFeldInsGlasPage() {
   const payload = await getPayload({ config })
   payload.logger.info(`Seeding CMS page "${SLUG}"...`)
@@ -376,6 +444,19 @@ async function seedFeldInsGlasPage() {
     if (found.docs[0]) postIds.push(found.docs[0].id)
   }
   payload.logger.info(`  · linked ${postIds.length}/${FELD_INS_GLAS_HOWTO_SLUGS.length} Tipps posts`)
+
+  // ── Resolve page images (already on R2 via image seed scripts) ──
+  const heroImageId =
+    (await findMediaIdByAlt(payload, 'feld-ins-glas-hero-wheat')) ??
+    (await findMediaIdByAlt(payload, 'feld-ins-glas-hero-v2')) ??
+    (await findMediaIdByAlt(payload, 'feld-ins-glas-hero'))
+  const voucherBgId =
+    (await findMediaIdByAlt(payload, 'feld-ins-glas-feld')) ??
+    (await findMediaIdByAlt(payload, 'feld-ins-glas-konzept')) ??
+    (await findMediaIdByAlt(payload, 'feld-ins-glas-jars-v2'))
+  payload.logger.info(
+    `  · images: hero=${heroImageId ?? 'missing'} voucherBg=${voucherBgId ?? 'missing'}`,
+  )
 
   // ── Ensure page exists ────────────────────────────────────
   let page = (
@@ -417,7 +498,12 @@ async function seedFeldInsGlasPage() {
   if (detail?.heroTitle && !isForce) {
     payload.logger.info('  ⏭️  workshopDetail already set — use --force to overwrite text')
   } else {
-    const deData = { ...workshopDetailDE, howToArticles: postIds }
+    const deData = {
+      ...workshopDetailDE,
+      howToArticles: postIds,
+      ...(heroImageId ? { heroImage: heroImageId } : {}),
+      ...(voucherBgId ? { voucherBackgroundImage: voucherBgId } : {}),
+    }
     await payload.update({
       collection: 'pages',
       id: page.id,
@@ -434,7 +520,12 @@ async function seedFeldInsGlasPage() {
     })
     const savedDetail = (saved as unknown as { workshopDetail?: Record<string, unknown> })
       .workshopDetail
-    const enData = { ...workshopDetailEN, howToArticles: postIds } as Record<string, unknown>
+    const enData = {
+      ...workshopDetailEN,
+      howToArticles: postIds,
+      ...(heroImageId ? { heroImage: heroImageId } : {}),
+      ...(voucherBgId ? { voucherBackgroundImage: voucherBgId } : {}),
+    } as Record<string, unknown>
     mergeArrayIds(savedDetail, enData)
 
     await payload.update({
@@ -447,7 +538,7 @@ async function seedFeldInsGlasPage() {
       } as never,
       context: ctx,
     })
-    payload.logger.info('  ✓ workshopDetail DE + EN saved')
+    payload.logger.info('  ✓ workshopDetail DE + EN saved (incl. hero + voucher images)')
   }
 
   // ── Header nav ────────────────────────────────────────────
@@ -573,12 +664,12 @@ async function seedFeldInsGlasPage() {
         audienceTag: 'Marktgarten Edition',
         theme: 'light' as const,
         description:
-          'Ernte am Feld, Fermentation in der Praxis, drei Gläser zum Mitnehmen — im Marktgarten „Unser Bauerngarten“.',
+          'Ernte am Feld, Fermentation in der Praxis, drei Gläser zum Mitnehmen, im Marktgarten „Unser Bauerngarten“.',
         features: [
           { text: 'Dauer: ca. 4 Stunden' },
-          { text: 'Nicht im Studio — draußen im Marktgarten' },
+          { text: 'Nicht im Studio, draußen im Marktgarten' },
           { text: 'Drei Fermente inkl. Gläser zum Mitnehmen' },
-          { text: 'Für alle — vom Anfänger bis zum Profi' },
+          { text: 'Für alle, vom Anfänger bis zum Profi' },
         ],
         ...(imageId ? { image: imageId } : {}),
         ...(image2Id ? { image2: image2Id } : {}),
@@ -624,12 +715,12 @@ async function seedFeldInsGlasPage() {
         title: 'From Field to Jar',
         audienceTag: 'Market Garden Edition',
         description:
-          'Harvest in the field, hands-on fermentation, three jars to take home — at Marktgarten “Unser Bauerngarten”.',
+          'Harvest in the field, hands-on fermentation, three jars to take home, at Marktgarten “Unser Bauerngarten”.',
         features: [
           { text: 'Duration: approx. 4 hours' },
-          { text: 'Not in the studio — outdoors at the market garden' },
+          { text: 'Not in the studio, outdoors at the market garden' },
           { text: 'Three ferments incl. jars to take home' },
-          { text: 'For everyone — from beginner to pro' },
+          { text: 'For everyone, from beginner to pro' },
         ],
         detailsButtonLabel: 'Workshop Details',
       }
