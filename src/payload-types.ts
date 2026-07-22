@@ -1838,193 +1838,389 @@ export interface Page {
    */
   workshopDetail?: {
     /**
+     * Drag to reorder. Expand a section to edit its content.
+     */
+    pageSections?:
+      | (
+          | {
+              enabled?: boolean | null;
+              /**
+               * Small text above the title (e.g. "Workshop Experience").
+               */
+              heroEyebrow?: string | null;
+              /**
+               * Main heading. Use a line break for two lines (e.g. "Die Kunst der\nLakto-Fermentation").
+               */
+              heroTitle?: string | null;
+              /**
+               * Short paragraph below the title.
+               */
+              heroDescription?: string | null;
+              /**
+               * Hero background image (full-bleed). For Vom Feld ins Glas this is the wheat field photo. When empty, a fallback media file is used.
+               */
+              heroImage?: (string | null) | Media;
+              /**
+               * Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").
+               */
+              heroAttributes?:
+                | {
+                    text: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              /**
+               * Text repeated around the hero stamp circle (e.g. "SPEZIAL-WORKSHOP" / "SPECIAL WORKSHOP"). Leave empty to use the default.
+               */
+              sealRingText?: string | null;
+              /**
+               * Middle of the stamp. Use exactly: FERMENT · freude  → shows as two lines (FERMENT / freude). Change DE and EN separately.
+               */
+              sealCenterText?: string | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'hero';
+            }
+          | {
+              /**
+               * No CMS content fields yet for this section — story copy currently comes from code defaults.
+               */
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'experience';
+            }
+          | {
+              enabled?: boolean | null;
+              /**
+               * e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"
+               */
+              bookingEyebrow?: string | null;
+              /**
+               * Main title shown on the dark booking header (e.g. "Lakto-Fermentiertes Gemüse" / "Lacto-Fermented Vegetables", "Tempeh", "Kombucha"). Set both German and English values.
+               */
+              bookingTitle?: string | null;
+              /**
+               * e.g. "99"
+               */
+              bookingPrice?: number | null;
+              /**
+               * e.g. "pro Person" / "per person"
+               */
+              bookingPriceSuffix?: string | null;
+              /**
+               * e.g. "€"
+               */
+              bookingCurrency?: string | null;
+              /**
+               * Optional background image for the booking card header.
+               */
+              bookingImage?: (string | null) | Media;
+              /**
+               * Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").
+               */
+              bookingAttributes?:
+                | {
+                    text: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              /**
+               * e.g. "Termine & Buchen" / "View Dates & Book"
+               */
+              bookingViewDatesLabel?: string | null;
+              /**
+               * e.g. "Termine ausblenden" / "Hide Dates"
+               */
+              bookingHideDatesLabel?: string | null;
+              /**
+               * e.g. "Mehr Informationen" / "Learn More"
+               */
+              bookingMoreDetailsLabel?: string | null;
+              /**
+               * e.g. "Buchen" / "Book"
+               */
+              bookingBookLabel?: string | null;
+              /**
+               * e.g. "Plätze frei" / "spots available"
+               */
+              bookingSpotsLabel?: string | null;
+              /**
+               * e.g. "Über den Workshop" / "About this Workshop"
+               */
+              aboutHeading?: string | null;
+              /**
+               * Long prose description of what the workshop is about.
+               */
+              aboutText?: string | null;
+              /**
+               * e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"
+               */
+              scheduleHeading?: string | null;
+              /**
+               * Drag ⋮⋮ to reorder steps 01, 02, 03… inside the booking card.
+               */
+              schedule?:
+                | {
+                    /**
+                     * e.g. "01", "02"
+                     */
+                    duration: string;
+                    title: string;
+                    description: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              /**
+               * e.g. "Im Preis enthalten (€99)" / "Included in the Price (€99)"
+               */
+              includedHeading?: string | null;
+              /**
+               * List of items/benefits included in the workshop.
+               */
+              includedItems?:
+                | {
+                    text: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              /**
+               * e.g. "Warum dieser Workshop?" / "Why This Workshop?"
+               */
+              whyHeading?: string | null;
+              whyPoints?:
+                | {
+                    /**
+                     * The bolded title of this point (e.g. "Darmgesundheit:")
+                     */
+                    bold: string;
+                    /**
+                     * The explanatory text that follows the bold title.
+                     */
+                    rest: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              /**
+               * e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"
+               */
+              experienceEyebrow?: string | null;
+              /**
+               * Main heading for the experience section.
+               */
+              experienceTitle?: string | null;
+              experienceCards?:
+                | {
+                    /**
+                     * e.g. "THEORIE" / "THEORY"
+                     */
+                    eyebrow: string;
+                    title: string;
+                    description: string;
+                    image?: (string | null) | Media;
+                    id?: string | null;
+                  }[]
+                | null;
+              /**
+               * e.g. "Nächste Workshops" / "Upcoming Workshops"
+               */
+              datesHeading?: string | null;
+              /**
+               * e.g. "Reservierung bestätigen" / "Confirm Reservation"
+               */
+              modalConfirmHeading?: string | null;
+              modalConfirmSubheading?: string | null;
+              /**
+               * e.g. "Workshop"
+               */
+              modalWorkshopLabel?: string | null;
+              /**
+               * e.g. "Datum"
+               */
+              modalDateLabel?: string | null;
+              /**
+               * e.g. "Uhrzeit"
+               */
+              modalTimeLabel?: string | null;
+              /**
+               * e.g. "Gesamtbetrag"
+               */
+              modalTotalLabel?: string | null;
+              /**
+               * e.g. "Abbrechen" / "Cancel"
+               */
+              modalCancelLabel?: string | null;
+              /**
+               * e.g. "Bestätigen" / "Confirm"
+               */
+              modalConfirmLabel?: string | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'booking';
+            }
+          | {
+              enabled?: boolean | null;
+              /**
+               * e.g. "Im Workshop" / "In the workshop"
+               */
+              recipePlanEyebrow?: string | null;
+              /**
+               * e.g. "Das fermentieren wir." / "What we will ferment."
+               */
+              recipePlanTitle?: string | null;
+              /**
+               * Short explanation under the title — why this isn’t a monthly calendar.
+               */
+              recipePlanDescription?: string | null;
+              /**
+               * Usually 2 recipes per workshop. Add or remove as needed — order = display order.
+               */
+              recipePlanRecipes?:
+                | {
+                    /**
+                     * e.g. "Zucchini-Pickels"
+                     */
+                    name: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'recipePlan';
+            }
+          | {
+              enabled?: boolean | null;
+              /**
+               * Small label above the heading (e.g. "TIPPS & GUIDES").
+               */
+              howToEyebrow?: string | null;
+              /**
+               * Main heading (e.g. "Lerne fermentieren.").
+               */
+              howToTitle?: string | null;
+              /**
+               * Short paragraph below the heading.
+               */
+              howToDescription?: string | null;
+              /**
+               * Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article's title, image and content is edited directly inside the Posts collection.
+               */
+              howToArticles?: (string | Post)[] | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'howTo';
+            }
+          | {
+              enabled?: boolean | null;
+              /**
+               * e.g. "HÄUFIGE FRAGEN" / "FAQ"
+               */
+              faqEyebrow?: string | null;
+              /**
+               * e.g. "Gut zu wissen" / "Good to Know"
+               */
+              faqTitle?: string | null;
+              faqDescription?: string | null;
+              faqItems?:
+                | {
+                    question: string;
+                    answer: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              /**
+               * Email shown at bottom (e.g. "kontakt@fermentfreude.at").
+               */
+              faqContactEmail?: string | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'faq';
+            }
+          | {
+              enabled?: boolean | null;
+              /**
+               * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
+               * ❌ OFF = Use custom content just for this workshop page.
+               */
+              useGlobalVoucherData?: boolean | null;
+              /**
+               * e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"
+               */
+              voucherEyebrow?: string | null;
+              /**
+               * e.g. "Go with a friend."
+               */
+              voucherTitle?: string | null;
+              voucherDescription?: string | null;
+              /**
+               * Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.
+               */
+              voucherBackgroundImage?: (string | null) | Media;
+              /**
+               * e.g. "Gutschein kaufen" / "Buy Voucher"
+               */
+              voucherPrimaryLabel?: string | null;
+              /**
+               * e.g. "/voucher"
+               */
+              voucherPrimaryHref?: string | null;
+              /**
+               * e.g. "Zum Shop" / "Visit Shop"
+               */
+              voucherSecondaryLabel?: string | null;
+              /**
+               * e.g. "/shop"
+               */
+              voucherSecondaryHref?: string | null;
+              /**
+               * Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").
+               */
+              voucherPills?:
+                | {
+                    text: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'voucher';
+            }
+          | {
+              enabled?: boolean | null;
+              /**
+               * e.g. "Entdecke weitere Workshops" / "Discover Other Workshops".
+               */
+              sliderHeading?: string | null;
+              /**
+               * Short paragraph below the heading.
+               */
+              sliderSubtitle?: string | null;
+              /**
+               * Small pill/badge text (e.g. "Workshop" / "Workshop").
+               */
+              sliderPillLabel?: string | null;
+              /**
+               * e.g. "Buchen" / "Book Now".
+               */
+              sliderBuyLabel?: string | null;
+              /**
+               * e.g. "Mehr erfahren" / "Learn More".
+               */
+              sliderMoreInfoLabel?: string | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'moreWorkshops';
+            }
+        )[]
+      | null;
+    /**
      * Enable this to show the seasonal calendar section on this workshop page. Disable to hide all calendar fields from the admin.
      */
     showSeasonalCalendar?: boolean | null;
     /**
-     * Small text above the title (e.g. "Workshop Experience").
+     * Legacy toggle. Prefer enabling Tipps in Page Sections above. Usually off for Vom Feld ins Glas.
      */
-    heroEyebrow?: string | null;
-    /**
-     * Main heading. Use a line break for two lines (e.g. "Die Kunst der\nLakto-Fermentation").
-     */
-    heroTitle?: string | null;
-    /**
-     * Short paragraph below the title.
-     */
-    heroDescription?: string | null;
-    /**
-     * Image shown on the left side of the hero (portrait or square, min 800px tall). When empty, decorative jar illustrations are shown instead.
-     */
-    heroImage?: (string | null) | Media;
-    /**
-     * Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").
-     */
-    heroAttributes?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"
-     */
-    bookingEyebrow?: string | null;
-    /**
-     * Main title shown on the dark booking header (e.g. "Lakto-Fermentiertes Gemüse" / "Lacto-Fermented Vegetables", "Tempeh", "Kombucha"). Set both German and English values.
-     */
-    bookingTitle?: string | null;
-    /**
-     * e.g. "99"
-     */
-    bookingPrice?: number | null;
-    /**
-     * e.g. "pro Person" / "per person"
-     */
-    bookingPriceSuffix?: string | null;
-    /**
-     * e.g. "€"
-     */
-    bookingCurrency?: string | null;
-    /**
-     * Optional background image for the booking card header.
-     */
-    bookingImage?: (string | null) | Media;
-    /**
-     * Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").
-     */
-    bookingAttributes?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Termine & Buchen" / "View Dates & Book"
-     */
-    bookingViewDatesLabel?: string | null;
-    /**
-     * e.g. "Termine ausblenden" / "Hide Dates"
-     */
-    bookingHideDatesLabel?: string | null;
-    /**
-     * e.g. "Mehr Informationen" / "Learn More"
-     */
-    bookingMoreDetailsLabel?: string | null;
-    /**
-     * e.g. "Buchen" / "Book"
-     */
-    bookingBookLabel?: string | null;
-    /**
-     * e.g. "Plätze frei" / "spots available"
-     */
-    bookingSpotsLabel?: string | null;
-    /**
-     * e.g. "Über den Workshop" / "About this Workshop"
-     */
-    aboutHeading?: string | null;
-    /**
-     * Long prose description of what the workshop is about.
-     */
-    aboutText?: string | null;
-    /**
-     * e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"
-     */
-    scheduleHeading?: string | null;
-    schedule?:
-      | {
-          /**
-           * e.g. "45 Min" / "45 minutes"
-           */
-          duration: string;
-          title: string;
-          description: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Im Preis enthalten (€99)" / "Included in the Price (€99)"
-     */
-    includedHeading?: string | null;
-    /**
-     * List of items/benefits included in the workshop.
-     */
-    includedItems?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Warum dieser Workshop?" / "Why This Workshop?"
-     */
-    whyHeading?: string | null;
-    whyPoints?:
-      | {
-          /**
-           * The bolded title of this point (e.g. "Darmgesundheit:")
-           */
-          bold: string;
-          /**
-           * The explanatory text that follows the bold title.
-           */
-          rest: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"
-     */
-    experienceEyebrow?: string | null;
-    /**
-     * Main heading for the experience section.
-     */
-    experienceTitle?: string | null;
-    experienceCards?:
-      | {
-          /**
-           * e.g. "THEORIE" / "THEORY"
-           */
-          eyebrow: string;
-          title: string;
-          description: string;
-          image?: (string | null) | Media;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "Nächste Workshops" / "Upcoming Workshops"
-     */
-    datesHeading?: string | null;
-    /**
-     * e.g. "Reservierung bestätigen" / "Confirm Reservation"
-     */
-    modalConfirmHeading?: string | null;
-    modalConfirmSubheading?: string | null;
-    /**
-     * e.g. "Workshop"
-     */
-    modalWorkshopLabel?: string | null;
-    /**
-     * e.g. "Datum"
-     */
-    modalDateLabel?: string | null;
-    /**
-     * e.g. "Uhrzeit"
-     */
-    modalTimeLabel?: string | null;
-    /**
-     * e.g. "Gesamtbetrag"
-     */
-    modalTotalLabel?: string | null;
-    /**
-     * e.g. "Abbrechen" / "Cancel"
-     */
-    modalCancelLabel?: string | null;
-    /**
-     * e.g. "Bestätigen" / "Confirm"
-     */
-    modalConfirmLabel?: string | null;
+    showHowToGuides?: boolean | null;
     /**
      * e.g. "SAISONALE REZEPTE" / "SEASONAL RECIPES"
      */
@@ -2065,105 +2261,6 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
-    /**
-     * ✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).
-     * ❌ OFF = Use custom content just for this workshop page.
-     */
-    useGlobalVoucherData?: boolean | null;
-    /**
-     * e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"
-     */
-    voucherEyebrow?: string | null;
-    /**
-     * e.g. "Go with a friend."
-     */
-    voucherTitle?: string | null;
-    voucherDescription?: string | null;
-    /**
-     * Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.
-     */
-    voucherBackgroundImage?: (string | null) | Media;
-    /**
-     * e.g. "Gutschein kaufen" / "Buy Voucher"
-     */
-    voucherPrimaryLabel?: string | null;
-    /**
-     * e.g. "/voucher"
-     */
-    voucherPrimaryHref?: string | null;
-    /**
-     * e.g. "Zum Shop" / "Visit Shop"
-     */
-    voucherSecondaryLabel?: string | null;
-    /**
-     * e.g. "/shop"
-     */
-    voucherSecondaryHref?: string | null;
-    /**
-     * Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").
-     */
-    voucherPills?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * e.g. "HÄUFIGE FRAGEN" / "FAQ"
-     */
-    faqEyebrow?: string | null;
-    /**
-     * e.g. "Gut zu wissen" / "Good to Know"
-     */
-    faqTitle?: string | null;
-    faqDescription?: string | null;
-    faqItems?:
-      | {
-          question: string;
-          answer: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Email shown at bottom (e.g. "kontakt@fermentfreude.at").
-     */
-    faqContactEmail?: string | null;
-    /**
-     * Small label above the heading (e.g. "TIPPS & GUIDES").
-     */
-    howToEyebrow?: string | null;
-    /**
-     * Main heading (e.g. "Lerne fermentieren.").
-     */
-    howToTitle?: string | null;
-    /**
-     * Short paragraph below the heading.
-     */
-    howToDescription?: string | null;
-    /**
-     * Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article's title, image and content is edited directly inside the Posts collection.
-     */
-    howToArticles?: (string | Post)[] | null;
-    /**
-     * e.g. "Entdecke weitere Workshops" / "Discover Other Workshops".
-     */
-    sliderHeading?: string | null;
-    /**
-     * Short paragraph below the heading.
-     */
-    sliderSubtitle?: string | null;
-    /**
-     * Small pill/badge text (e.g. "Workshop" / "Workshop").
-     */
-    sliderPillLabel?: string | null;
-    /**
-     * e.g. "Buchen" / "Book Now".
-     */
-    sliderBuyLabel?: string | null;
-    /**
-     * e.g. "Mehr erfahren" / "Learn More".
-     */
-    sliderMoreInfoLabel?: string | null;
   };
   meta?: {
     title?: string | null;
@@ -5828,80 +5925,187 @@ export interface PagesSelect<T extends boolean = true> {
   workshopDetail?:
     | T
     | {
+        pageSections?:
+          | T
+          | {
+              hero?:
+                | T
+                | {
+                    enabled?: T;
+                    heroEyebrow?: T;
+                    heroTitle?: T;
+                    heroDescription?: T;
+                    heroImage?: T;
+                    heroAttributes?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    sealRingText?: T;
+                    sealCenterText?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              experience?:
+                | T
+                | {
+                    enabled?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              booking?:
+                | T
+                | {
+                    enabled?: T;
+                    bookingEyebrow?: T;
+                    bookingTitle?: T;
+                    bookingPrice?: T;
+                    bookingPriceSuffix?: T;
+                    bookingCurrency?: T;
+                    bookingImage?: T;
+                    bookingAttributes?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    bookingViewDatesLabel?: T;
+                    bookingHideDatesLabel?: T;
+                    bookingMoreDetailsLabel?: T;
+                    bookingBookLabel?: T;
+                    bookingSpotsLabel?: T;
+                    aboutHeading?: T;
+                    aboutText?: T;
+                    scheduleHeading?: T;
+                    schedule?:
+                      | T
+                      | {
+                          duration?: T;
+                          title?: T;
+                          description?: T;
+                          id?: T;
+                        };
+                    includedHeading?: T;
+                    includedItems?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    whyHeading?: T;
+                    whyPoints?:
+                      | T
+                      | {
+                          bold?: T;
+                          rest?: T;
+                          id?: T;
+                        };
+                    experienceEyebrow?: T;
+                    experienceTitle?: T;
+                    experienceCards?:
+                      | T
+                      | {
+                          eyebrow?: T;
+                          title?: T;
+                          description?: T;
+                          image?: T;
+                          id?: T;
+                        };
+                    datesHeading?: T;
+                    modalConfirmHeading?: T;
+                    modalConfirmSubheading?: T;
+                    modalWorkshopLabel?: T;
+                    modalDateLabel?: T;
+                    modalTimeLabel?: T;
+                    modalTotalLabel?: T;
+                    modalCancelLabel?: T;
+                    modalConfirmLabel?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              recipePlan?:
+                | T
+                | {
+                    enabled?: T;
+                    recipePlanEyebrow?: T;
+                    recipePlanTitle?: T;
+                    recipePlanDescription?: T;
+                    recipePlanRecipes?:
+                      | T
+                      | {
+                          name?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              howTo?:
+                | T
+                | {
+                    enabled?: T;
+                    howToEyebrow?: T;
+                    howToTitle?: T;
+                    howToDescription?: T;
+                    howToArticles?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              faq?:
+                | T
+                | {
+                    enabled?: T;
+                    faqEyebrow?: T;
+                    faqTitle?: T;
+                    faqDescription?: T;
+                    faqItems?:
+                      | T
+                      | {
+                          question?: T;
+                          answer?: T;
+                          id?: T;
+                        };
+                    faqContactEmail?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              voucher?:
+                | T
+                | {
+                    enabled?: T;
+                    useGlobalVoucherData?: T;
+                    voucherEyebrow?: T;
+                    voucherTitle?: T;
+                    voucherDescription?: T;
+                    voucherBackgroundImage?: T;
+                    voucherPrimaryLabel?: T;
+                    voucherPrimaryHref?: T;
+                    voucherSecondaryLabel?: T;
+                    voucherSecondaryHref?: T;
+                    voucherPills?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              moreWorkshops?:
+                | T
+                | {
+                    enabled?: T;
+                    sliderHeading?: T;
+                    sliderSubtitle?: T;
+                    sliderPillLabel?: T;
+                    sliderBuyLabel?: T;
+                    sliderMoreInfoLabel?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
         showSeasonalCalendar?: T;
-        heroEyebrow?: T;
-        heroTitle?: T;
-        heroDescription?: T;
-        heroImage?: T;
-        heroAttributes?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        bookingEyebrow?: T;
-        bookingTitle?: T;
-        bookingPrice?: T;
-        bookingPriceSuffix?: T;
-        bookingCurrency?: T;
-        bookingImage?: T;
-        bookingAttributes?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        bookingViewDatesLabel?: T;
-        bookingHideDatesLabel?: T;
-        bookingMoreDetailsLabel?: T;
-        bookingBookLabel?: T;
-        bookingSpotsLabel?: T;
-        aboutHeading?: T;
-        aboutText?: T;
-        scheduleHeading?: T;
-        schedule?:
-          | T
-          | {
-              duration?: T;
-              title?: T;
-              description?: T;
-              id?: T;
-            };
-        includedHeading?: T;
-        includedItems?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        whyHeading?: T;
-        whyPoints?:
-          | T
-          | {
-              bold?: T;
-              rest?: T;
-              id?: T;
-            };
-        experienceEyebrow?: T;
-        experienceTitle?: T;
-        experienceCards?:
-          | T
-          | {
-              eyebrow?: T;
-              title?: T;
-              description?: T;
-              image?: T;
-              id?: T;
-            };
-        datesHeading?: T;
-        modalConfirmHeading?: T;
-        modalConfirmSubheading?: T;
-        modalWorkshopLabel?: T;
-        modalDateLabel?: T;
-        modalTimeLabel?: T;
-        modalTotalLabel?: T;
-        modalCancelLabel?: T;
-        modalConfirmLabel?: T;
+        showHowToGuides?: T;
         calendarEyebrow?: T;
         calendarTitle?: T;
         calendarDescription?: T;
@@ -5921,41 +6125,6 @@ export interface PagesSelect<T extends boolean = true> {
                   };
               id?: T;
             };
-        useGlobalVoucherData?: T;
-        voucherEyebrow?: T;
-        voucherTitle?: T;
-        voucherDescription?: T;
-        voucherBackgroundImage?: T;
-        voucherPrimaryLabel?: T;
-        voucherPrimaryHref?: T;
-        voucherSecondaryLabel?: T;
-        voucherSecondaryHref?: T;
-        voucherPills?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        faqEyebrow?: T;
-        faqTitle?: T;
-        faqDescription?: T;
-        faqItems?:
-          | T
-          | {
-              question?: T;
-              answer?: T;
-              id?: T;
-            };
-        faqContactEmail?: T;
-        howToEyebrow?: T;
-        howToTitle?: T;
-        howToDescription?: T;
-        howToArticles?: T;
-        sliderHeading?: T;
-        sliderSubtitle?: T;
-        sliderPillLabel?: T;
-        sliderBuyLabel?: T;
-        sliderMoreInfoLabel?: T;
       };
   meta?:
     | T

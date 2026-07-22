@@ -87,13 +87,13 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
       'Ein ganzer Tag im Marktgarten von der Ernte bis ins fermentierte Glas.',
     journeyHint: 'Feld · Küche · Glas',
     editionLabel: 'Marktgarten Edition',
-    sealRingText: 'EINMALIGE VERANSTALTUNG',
-    sealCenterText: 'FERMENTATION',
+    sealRingText: 'SPEZIAL-WORKSHOP',
+    sealCenterText: 'FERMENT · freude',
     notStudioLabel: 'Nicht im Studio',
     notStudioText:
       'Dieser Workshop findet nicht in der Grabenstraße statt, sondern im Freien beim Marktgarten „Unser Bauerngarten“.',
     fermentsHeading: 'Drei Fermente zum Mitnehmen',
-    ferments: ['Zucchini-Pickels', 'Gurken-Relish', 'Karfiol-Kimchi'],
+    ferments: ['Zucchini-Pickles', 'Gurken-Relish', 'Karfiol-Kimchi'],
     description:
       'Fermentation beginnt nicht erst in der Küche, sondern bereits am Feld. Gemeinsam ernten wir frisches, saisonales Gemüse und verwandeln es in köstliche Lakto-Fermente.',
     ctaLabel: 'Jetzt buchen',
@@ -105,9 +105,9 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
     storyEyebrow: 'Das Konzept',
     storyTitle: 'Der kürzeste Weg vom Feld ins Glas.',
     storyQuote:
-      'Fermentation beginnt dort, wo die Ernte endet — nicht in der Fabrik, sondern in der eigenen Hand.',
+      'Fermentation beginnt dort, wo die Ernte endet, nicht in der Fabrik, sondern in der eigenen Hand.',
     storyText:
-      'Gemeinsam besuchen wir den Marktgarten „Unser Bauerngarten“ in Graz, ernten saisonal, was der Tag gibt, und verwandeln es noch vor Ort in lebendige, haltbare Fermente. Du lernst nicht aus einem Buch — sondern mit Erde an den Fingern.',
+      'Gemeinsam besuchen wir den Marktgarten „Unser Bauerngarten“ in Graz, ernten saisonal, was der Tag gibt, und verwandeln es noch vor Ort in lebendige, haltbare Fermente. Du lernst nicht aus einem Buch, sondern mit Erde an den Fingern.',
     storyTextSecondary:
       'Der Workshop ist einmalig: kein Studio, keine Kursküche. Nur ein Garten, eine Gemeinschaft und das Handwerk der Fermentation in seiner reinsten Form.',
     storySupport:
@@ -136,23 +136,23 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
           'Theorie und Praxis am Ort der Ernte: Wie Fermentation funktioniert, welche Vorteile sie hat, und unter Anleitung bereitest du drei Lakto-Gemüse-Fermente zu.',
         bullets: [
           'Grundlagen der milchsauren Fermentation',
-          'Drei Fermente: Zucchini-Pickels, Gurken-Relish, Karfiol-Kimchi',
+          'Drei Fermente: Zucchini-Pickles, Gurken-Relish, Karfiol-Kimchi',
           'Salz, Zeit und Gefühl statt starre Rezepte',
           'Hygiene und Sicherheit im offenen Garten',
         ],
-        detail: 'Zucchini-Pickels · Gurken-Relish · Karfiol-Kimchi',
+        detail: 'Zucchini-Pickles · Gurken-Relish · Karfiol-Kimchi',
       },
       {
         label: '03',
         name: 'Glas',
         title: 'Dein Ferment, deine Signatur',
         description:
-          'Am Ende des Tages gehst du nicht mit leeren Händen. Jedes Glas, das du befüllt hast, trägt deine Handschrift — die Auswahl, den Rhythmus, den Geschmack des Tages.',
+          'Am Ende des Tages gehst du nicht mit leeren Händen. Jedes Glas, das du befüllt hast, trägt deine Handschrift: die Auswahl, den Rhythmus, den Geschmack des Tages.',
         bullets: [
           'Bis zu 3 verschiedene Fermente zum Mitnehmen',
           'Etikettierung & Lagertipps für zu Hause',
           'Rezeptkarte für jedes Ferment',
-          'Zugang zum FermentFreude Online-Archiv',
+          'Zugang zum Fermentfreude Online-Archiv',
         ],
       },
     ],
@@ -176,7 +176,7 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
         title: 'Praxis',
         description:
           'Unter Schritt-für-Schritt-Anleitung bereitest du drei Lakto-Gemüse-Fermente zu. Alle Gläser nimmst du mit nach Hause.',
-        detail: 'Zucchini-Pickels · Gurken-Relish · Karfiol-Kimchi',
+        detail: 'Zucchini-Pickles · Gurken-Relish · Karfiol-Kimchi',
       },
       {
         label: '04',
@@ -197,7 +197,7 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
       { label: 'Dauer', text: 'ca. 4 Stunden' },
       {
         label: 'Für wen',
-        text: 'Für alle, vom Neuling bis zur Fermentier-Profi. Ideal, wenn du Herkunft und Handwerk verbinden willst.',
+        text: 'Für alle, vom Neuling bis zum Profi. Ideal, wenn du Herkunft und Handwerk verbinden willst.',
       },
       {
         label: 'Mitbringen',
@@ -215,7 +215,7 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
       },
       {
         title: 'Drei Fermente',
-        text: 'Zucchini-Pickels, Gurken-Relish und Karfiol-Kimchi, zum Mitnehmen.',
+        text: 'Zucchini-Pickles, Gurken-Relish und Karfiol-Kimchi, zum Mitnehmen.',
       },
       {
         title: 'Vom Acker bis zum Glas',
@@ -237,8 +237,8 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
       'A full day at the market garden from harvest to the fermented jar.',
     journeyHint: 'Field · Kitchen · Jar',
     editionLabel: 'Market Garden Edition',
-    sealRingText: 'ONE-TIME EVENT',
-    sealCenterText: 'FERMENTATION',
+    sealRingText: 'SPECIAL WORKSHOP',
+    sealCenterText: 'FERMENT · freude',
     notStudioLabel: 'Not in the studio',
     notStudioText:
       'This workshop isn’t at Grabenstraße. It’s outdoors at Marktgarten “Unser Bauerngarten”.',
@@ -255,9 +255,9 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
     storyEyebrow: 'The concept',
     storyTitle: 'The shortest path from field to jar.',
     storyQuote:
-      'Fermentation begins where the harvest ends — not in a factory, but in your own hands.',
+      'Fermentation begins where the harvest ends, not in a factory, but in your own hands.',
     storyText:
-      'Together we visit Marktgarten “Unser Bauerngarten” in Graz, harvest what the day offers, and turn it into living, lasting ferments on site. You don’t learn from a book — you learn with soil on your fingers.',
+      'Together we visit Marktgarten “Unser Bauerngarten” in Graz, harvest what the day offers, and turn it into living, lasting ferments on site. You don’t learn from a book, you learn with soil on your fingers.',
     storyTextSecondary:
       'This workshop is unique: no studio, no teaching kitchen. Just a garden, a community, and the craft of fermentation in its purest form.',
     storySupport:
@@ -297,12 +297,12 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
         name: 'Jar',
         title: 'Your ferment, your signature',
         description:
-          'At the end of the day you don’t leave empty-handed. Every jar you fill carries your handwriting — the selection, the rhythm, the taste of the day.',
+          'At the end of the day you don’t leave empty-handed. Every jar you fill carries your handwriting: the selection, the rhythm, the taste of the day.',
         bullets: [
           'Up to 3 different ferments to take home',
           'Labelling & storage tips for home',
           'A recipe card for every ferment',
-          'Access to the FermentFreude online archive',
+          'Access to the Fermentfreude online archive',
         ],
       },
     ],
@@ -475,7 +475,7 @@ export function getFeldInsGlasCalendar(locale: 'de' | 'en') {
             season: 'SOMMER',
             accent: '#2d6a4f',
             recipes: [
-              { name: 'Milchsaure Zucchini-Pickels' },
+              { name: 'Milchsaure Zucchini-Pickles' },
               { name: 'Fermentierte Gurken-Relish' },
               { name: 'Karfiol-Kimchi' },
             ],

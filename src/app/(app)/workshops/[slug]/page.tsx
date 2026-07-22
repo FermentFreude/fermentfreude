@@ -1,5 +1,6 @@
 import type { Media as MediaType, Page as PageType } from '@/payload-types'
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 
 import { Media } from '@/components/Media'
 import { getLocale } from '@/utilities/getLocale'
@@ -17,8 +18,8 @@ import { WorkshopBookingSection } from '@/components/workshops/WorkshopBookingSe
 import { WorkshopTermineSection } from '@/components/workshops/WorkshopTermineSection'
 import { WorkshopTypesSlider } from '@/components/workshops/WorkshopTypesSlider'
 import { getLatestPosts } from '@/utilities/getLatestPosts'
-import { getPostsBySlugs } from '@/utilities/getPostsBySlugs'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
+import { getPostsBySlugs } from '@/utilities/getPostsBySlugs'
 import { getVoucherCtaGlobal } from '@/utilities/getVoucherCtaGlobal'
 import type { WorkshopItem } from '@/utilities/getWorkshops'
 import { findWorkshopBySlug, getAllWorkshops } from '@/utilities/getWorkshops'
@@ -43,6 +44,7 @@ import { FeldInsGlasExperience } from './FeldInsGlas/Experience'
 import { FeldInsGlasHero } from './FeldInsGlas/Hero'
 import { FeldInsGlasFAQ } from './FeldInsGlas/FAQ'
 import { FeldInsGlasHowTos } from './FeldInsGlas/HowTos'
+import { FeldInsGlasRecipePlan } from './FeldInsGlas/RecipePlan'
 import { FeldInsGlasVoucher } from './FeldInsGlas/Voucher'
 import { FeldInsGlasMoreWorkshops } from './FeldInsGlas/MoreWorkshops'
 import {
@@ -328,7 +330,32 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
   const workshopPage = workshopPageResult.docs[0] as PageType | undefined
 
-  const detail = workshopPage?.workshopDetail
+  const detailRaw = workshopPage?.workshopDetail as Record<string, unknown> | undefined
+  const sectionBlock = (type: string) =>
+    (Array.isArray(detailRaw?.pageSections)
+      ? (detailRaw!.pageSections as Array<Record<string, unknown>>).find((b) => b.blockType === type)
+      : undefined) ?? {}
+  // Content now lives inside pageSections blocks — flatten onto detail so all
+  // workshop pages (Feld, Lakto, Tempeh, Kombucha) keep reading detail.heroTitle etc.
+  const detail = detailRaw
+    ? ({
+        ...detailRaw,
+        ...sectionBlock('hero'),
+        ...sectionBlock('booking'),
+        ...sectionBlock('recipePlan'),
+        ...sectionBlock('howTo'),
+        ...sectionBlock('faq'),
+        ...sectionBlock('voucher'),
+        ...sectionBlock('moreWorkshops'),
+        pageSections: detailRaw.pageSections,
+        showSeasonalCalendar: detailRaw.showSeasonalCalendar,
+        showHowToGuides: detailRaw.showHowToGuides,
+        calendarEyebrow: detailRaw.calendarEyebrow,
+        calendarTitle: detailRaw.calendarTitle,
+        calendarDescription: detailRaw.calendarDescription,
+        calendarMonths: detailRaw.calendarMonths,
+      } as NonNullable<PageType['workshopDetail']>)
+    : undefined
 
   // How-To Articles: per-page `howToArticles` relationship wins when set,
   // otherwise fall back to the latest 6 published posts so editors only
@@ -457,13 +484,52 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
   /* ══════════════════════════════════════════════════════════════
    *  Vom Feld ins Glas — Marktgarten special workshop
-   *  Hero → Experience → Booking → Calendar → HowTos → FAQ (special) → Slider → Voucher
+   *  Hero → Experience → Booking → Recipe plan → FAQ → Voucher → More workshops
    * ══════════════════════════════════════════════════════════════ */
   if (slug === FELD_INS_GLAS_SLUG) {
     const isDe = locale === 'de'
-    const copy = FELD_INS_GLAS_COPY[isDe ? 'de' : 'en']
+    const baseCopy = FELD_INS_GLAS_COPY[isDe ? 'de' : 'en']
+    const cmsHeroTitle = detail?.heroTitle?.trim()
+    const cmsHeroDescription = detail?.heroDescription?.trim()
+    const cmsHeroEyebrow = detail?.heroEyebrow?.trim()
+    const titleLinesFromCms = (() => {
+      if (!cmsHeroTitle) return baseCopy.titleLines
+      if (cmsHeroTitle.includes('\n')) {
+        return cmsHeroTitle
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean)
+      }
+      // Keep designed two-line split for the default titles
+      if (cmsHeroTitle === 'Vom Feld ins Glas') return ['Vom Feld', 'ins Glas']
+      if (cmsHeroTitle === 'From Field to Jar') return ['From Field', 'to Jar']
+      return [cmsHeroTitle]
+    })()
+    const copy: typeof baseCopy = {
+      ...baseCopy,
+      eyebrow: cmsHeroEyebrow || baseCopy.eyebrow,
+      title: cmsHeroTitle || baseCopy.title,
+      titleLines: titleLinesFromCms,
+      heroSubline: cmsHeroDescription || baseCopy.heroSubline,
+      description: cmsHeroDescription || baseCopy.description,
+      sealRingText: detail?.sealRingText?.trim() || baseCopy.sealRingText,
+      sealCenterText: detail?.sealCenterText?.trim() || baseCopy.sealCenterText,
+    }
     const workshopData = getFeldInsGlasWorkshop(isDe ? 'de' : 'en')
     const images = await getFeldInsGlasImages()
+    const cmsHeroImage =
+      detail?.heroImage && typeof detail.heroImage === 'object' && detail.heroImage !== null
+        ? (detail.heroImage as MediaType)
+        : null
+    const heroImage = cmsHeroImage ?? images.hero
+    const cmsVoucherImage =
+      voucherCms?.backgroundImage &&
+      typeof voucherCms.backgroundImage === 'object' &&
+      voucherCms.backgroundImage !== null
+        ? (voucherCms.backgroundImage as MediaType)
+        : null
+    const voucherImage =
+      cmsVoucherImage ?? images.feld ?? images.konzept ?? images.jars
     const localeKey = isDe ? 'de' : 'en'
 
     const similarWorkshops = allWorkshops.filter((w) => {
@@ -474,22 +540,74 @@ export default async function WorkshopDetailPage({ params }: Args) {
       detail?.sliderHeading ??
       (isDe ? 'Entdecke weitere Workshops.' : 'Discover more workshops.')
 
-    const howToForFeld =
-      perPageHowToArticles.length > 0
+    type FeldSectionId =
+      | 'hero'
+      | 'experience'
+      | 'booking'
+      | 'recipePlan'
+      | 'howTo'
+      | 'faq'
+      | 'voucher'
+      | 'moreWorkshops'
+
+    const DEFAULT_FELD_SECTIONS: Array<{ section: FeldSectionId; enabled: boolean }> = [
+      { section: 'hero', enabled: true },
+      { section: 'experience', enabled: true },
+      { section: 'booking', enabled: true },
+      { section: 'recipePlan', enabled: true },
+      { section: 'howTo', enabled: false },
+      { section: 'faq', enabled: true },
+      { section: 'voucher', enabled: true },
+      { section: 'moreWorkshops', enabled: true },
+    ]
+
+    const cmsSections = Array.isArray(detail?.pageSections) ? detail.pageSections : []
+    const orderedSections: Array<{ section: FeldSectionId; enabled: boolean }> =
+      cmsSections.length > 0
+        ? cmsSections
+            .map((row) => {
+              // blocks use blockType; older array format used section
+              const section = ((row as { blockType?: string; section?: string }).blockType ??
+                (row as { section?: string }).section) as FeldSectionId
+              return {
+                section,
+                enabled: (row as { enabled?: boolean | null }).enabled !== false,
+              }
+            })
+            .filter((row) =>
+              [
+                'hero',
+                'experience',
+                'booking',
+                'recipePlan',
+                'howTo',
+                'faq',
+                'voucher',
+                'moreWorkshops',
+              ].includes(row.section),
+            )
+        : DEFAULT_FELD_SECTIONS
+
+    const howToRowEnabled = orderedSections.some((s) => s.section === 'howTo' && s.enabled)
+    const showHowToGuides = howToRowEnabled || detail?.showHowToGuides === true
+    const howToForFeld = showHowToGuides
+      ? perPageHowToArticles.length > 0
         ? howToArticles
         : await (async () => {
             const curated = await getPostsBySlugs(localeKey, [...FELD_INS_GLAS_HOWTO_SLUGS])
             return curated.length >= 4 ? curated : howToArticles
           })()
+      : []
 
-    return (
-      <article className="bg-white">
-        <FeldInsGlasHero copy={copy} image={images.hero} />
+    const sectionNodes: Partial<Record<FeldSectionId, ReactNode>> = {
+      hero: <FeldInsGlasHero key="hero" copy={copy} image={heroImage} />,
+      experience: (
         <FeldInsGlasExperience
+          key="experience"
           copy={copy}
           locale={isDe ? 'de' : 'en'}
           images={{
-            hero: images.hero,
+            hero: heroImage,
             hands: images.hands,
             jars: images.jars,
             konzept: images.konzept,
@@ -498,8 +616,9 @@ export default async function WorkshopDetailPage({ params }: Args) {
             glas: images.glas,
           }}
         />
-
-        <div id="buchen" className="bg-white">
+      ),
+      booking: (
+        <div key="booking" id="buchen" className="bg-white">
           <LaktoBookingCard
             className="pt-0 [padding-block-start:0]"
             accentColor="#1A1A1A"
@@ -522,7 +641,15 @@ export default async function WorkshopDetailPage({ params }: Args) {
               bookingPrice: detail?.bookingPrice ?? copy.price,
               bookingPriceSuffix: detail?.bookingPriceSuffix ?? copy.priceLabel,
               bookingCurrency: detail?.bookingCurrency ?? copy.currency,
-              bookingImage: images.jars ?? images.hands ?? images.hero,
+              bookingImage:
+                (detail?.bookingImage &&
+                typeof detail.bookingImage === 'object' &&
+                detail.bookingImage !== null
+                  ? (detail.bookingImage as MediaType)
+                  : null) ??
+                images.jars ??
+                images.hands ??
+                heroImage,
               bookingAttributes:
                 detail?.bookingAttributes ?? copy.attributes.map((text) => ({ text })),
               bookingViewDatesLabel: detail?.bookingViewDatesLabel ?? workshopData.viewDatesLabel,
@@ -554,21 +681,22 @@ export default async function WorkshopDetailPage({ params }: Args) {
             }}
           />
         </div>
-
-        <LaktoCalendar
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.calendarEyebrow,
-                  title: detail.calendarTitle,
-                  description: detail.calendarDescription,
-                  months: detail.calendarMonths,
-                }
-              : undefined
-          }
+      ),
+      recipePlan: (
+        <FeldInsGlasRecipePlan
+          key="recipePlan"
+          locale={localeKey}
+          cms={{
+            eyebrow: detail?.recipePlanEyebrow,
+            title: detail?.recipePlanTitle,
+            description: detail?.recipePlanDescription,
+            recipes: detail?.recipePlanRecipes,
+          }}
         />
-
+      ),
+      howTo: showHowToGuides ? (
         <FeldInsGlasHowTos
+          key="howTo"
           locale={localeKey}
           eyebrow={detail?.howToEyebrow ?? (isDe ? 'Wissen' : 'Knowledge')}
           title={detail?.howToTitle ?? (isDe ? 'Tipps & Guides.' : 'Tips & Guides.')}
@@ -581,8 +709,11 @@ export default async function WorkshopDetailPage({ params }: Args) {
             heroImage: post.heroImage,
           }))}
         />
-
+      ) : null,
+      faq: (
         <FeldInsGlasFAQ
+          key="faq"
+          locale={localeKey}
           cms={
             detail
               ? {
@@ -594,18 +725,30 @@ export default async function WorkshopDetailPage({ params }: Args) {
               : undefined
           }
         />
-
+      ),
+      voucher: (
         <FeldInsGlasVoucher
+          key="voucher"
           cms={voucherCms}
           locale={localeKey}
-          image={images.feld ?? images.konzept ?? images.jars}
+          image={voucherImage}
         />
-
+      ),
+      moreWorkshops: (
         <FeldInsGlasMoreWorkshops
+          key="moreWorkshops"
           workshops={similarWorkshops}
           locale={localeKey}
           heading={workshopTypesHeading}
         />
+      ),
+    }
+
+    return (
+      <article className="bg-white">
+        {orderedSections
+          .filter((row) => row.enabled)
+          .map((row) => sectionNodes[row.section] ?? null)}
       </article>
     )
   }

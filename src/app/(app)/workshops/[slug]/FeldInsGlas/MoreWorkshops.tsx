@@ -94,7 +94,7 @@ export function FeldInsGlasMoreWorkshops({
             {eyebrow}
           </p>
           <h2
-            className="mt-4 font-display font-medium tracking-[-0.03em] text-[#1A1A1A]"
+            className="mt-4 font-display font-bold tracking-[-0.03em] text-[#1A1A1A]"
             style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)', lineHeight: 1.1 }}
           >
             {heading}
@@ -146,7 +146,7 @@ export function FeldInsGlasMoreWorkshops({
                 <p className="mt-4 font-display text-[10px] font-bold uppercase tracking-[0.22em] text-[#E6BE68]">
                   {meta}
                 </p>
-                <h3 className="mt-2 font-display text-[1.25rem] font-medium leading-snug tracking-tight text-[#1A1A1A] transition-colors group-hover:text-[#E6BE68]">
+                <h3 className="mt-2 font-display text-[1.25rem] font-bold leading-snug tracking-tight text-[#1A1A1A] transition-colors group-hover:text-[#E6BE68]">
                   {w.title}
                 </h3>
                 <div className="mt-3 flex items-baseline justify-between gap-4">

@@ -9,7 +9,13 @@ import type { LaktoFAQCMS } from '../LaktoFAQ'
 
 type Item = { question: string; answer: string }
 
-export function FeldInsGlasFAQ({ cms }: { cms?: LaktoFAQCMS }) {
+export function FeldInsGlasFAQ({
+  cms,
+  locale = 'de',
+}: {
+  cms?: LaktoFAQCMS
+  locale?: 'de' | 'en'
+}) {
   const sectionRef = useRef<HTMLElement>(null)
   const [visible, setVisible] = useState(false)
   const [open, setOpen] = useState<number | null>(0)
@@ -30,8 +36,8 @@ export function FeldInsGlasFAQ({ cms }: { cms?: LaktoFAQCMS }) {
     return () => obs.disconnect()
   }, [])
 
-  const eyebrow = cms?.eyebrow ?? 'Häufige Fragen'
-  const title = cms?.title ?? 'Gut zu wissen'
+  const eyebrow = cms?.eyebrow ?? (locale === 'de' ? 'Häufige Fragen' : 'FAQ')
+  const title = cms?.title ?? (locale === 'de' ? 'Gut zu wissen' : 'Good to know')
   const description = cms?.description ?? ''
   const items: Item[] =
     (cms?.items?.length ?? 0) > 0
