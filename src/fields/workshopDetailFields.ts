@@ -5,43 +5,477 @@ import type { Field } from 'payload'
  * Currently used by /workshops/lakto-gemuese, expandable to other workshops.
  *
  * Every text field is localized (de + en).
- * Collapsible groups map 1:1 to page sections for easy admin editing.
+ * Content for each page section lives directly inside its block in `pageSections` —
+ * expand a block to edit its copy. There is no separate "Edit text & images" area.
  */
 export const workshopDetailFields: Field[] = [
-  // ── Page Sections — DRAG THESE (same as Content tab) ─────
+  // ── Page Sections — drag to reorder, expand to edit content ──
   {
     name: 'pageSections',
     type: 'blocks',
-    label: 'Page Sections — drag to reorder',
+    label: 'Page Sections',
     labels: {
       singular: 'Section',
       plural: 'Sections',
     },
     admin: {
-      description:
-        'Drag these blocks to change order on the website (e.g. move Booking above Recipe Plan). Same drag handles as the Content tab. Folders below only edit text — they do not control order.',
+      description: 'Drag to reorder. Expand a section to edit its content.',
       initCollapsed: false,
     },
     blocks: [
       {
         slug: 'hero',
-        labels: { singular: '1. Hero', plural: 'Hero' },
+        labels: { singular: 'Hero', plural: 'Hero' },
         fields: [
           { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+          {
+            name: 'heroEyebrow',
+            type: 'text',
+            localized: true,
+            label: 'Eyebrow',
+            admin: { description: 'Small text above the title (e.g. "Workshop Experience").' },
+          },
+          {
+            name: 'heroTitle',
+            type: 'textarea',
+            localized: true,
+            label: 'Title',
+            admin: {
+              description:
+                'Main heading. Use a line break for two lines (e.g. "Die Kunst der\\nLakto-Fermentation").',
+            },
+          },
+          {
+            name: 'heroDescription',
+            type: 'textarea',
+            localized: true,
+            label: 'Description',
+            admin: { description: 'Short paragraph below the title.' },
+          },
+          {
+            name: 'heroImage',
+            type: 'upload',
+            relationTo: 'media',
+            label: 'Hero Image',
+            admin: {
+              description:
+                'Hero background image (full-bleed). For Vom Feld ins Glas this is the wheat field photo. When empty, a fallback media file is used.',
+            },
+          },
+          {
+            name: 'heroAttributes',
+            type: 'array',
+            label: 'Attribute Pills',
+            maxRows: 6,
+            admin: {
+              description:
+                'Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").',
+            },
+            fields: [
+              { name: 'text', type: 'text', required: true, localized: true, label: 'Text' },
+            ],
+          },
+          {
+            name: 'sealRingText',
+            type: 'text',
+            localized: true,
+            label: 'Seal Ring Text',
+            admin: {
+              description:
+                'Text repeated around the hero stamp circle (e.g. "SPEZIAL-WORKSHOP" / "SPECIAL WORKSHOP"). Leave empty to use the default.',
+            },
+          },
+          {
+            name: 'sealCenterText',
+            type: 'text',
+            localized: true,
+            label: 'Seal Center Text (brand)',
+            admin: {
+              description:
+                'Middle of the stamp. Use exactly: FERMENT · freude  → shows as two lines (FERMENT / freude). Change DE and EN separately.',
+            },
+          },
         ],
       },
       {
         slug: 'experience',
         labels: { singular: 'Konzept / Feld · Küche · Glas', plural: 'Experience' },
         fields: [
-          { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+          {
+            name: 'enabled',
+            type: 'checkbox',
+            label: 'Show on page',
+            defaultValue: true,
+            admin: {
+              description:
+                'No CMS content fields yet for this section — story copy currently comes from code defaults.',
+            },
+          },
         ],
       },
       {
         slug: 'booking',
-        labels: { singular: '2. Booking', plural: 'Booking' },
+        labels: { singular: 'Booking', plural: 'Booking' },
         fields: [
           { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+
+          // ── Header ────────────────────────────────────────────
+          {
+            name: 'bookingEyebrow',
+            type: 'text',
+            localized: true,
+            label: 'Header Eyebrow',
+            admin: {
+              description: 'e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"',
+            },
+          },
+          {
+            name: 'bookingTitle',
+            type: 'text',
+            localized: true,
+            label: 'Booking Card Title',
+            admin: {
+              description:
+                'Main title shown on the dark booking header (e.g. "Lakto-Fermentiertes Gemüse" / "Lacto-Fermented Vegetables", "Tempeh", "Kombucha"). Set both German and English values.',
+            },
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'bookingPrice',
+                type: 'number',
+                label: 'Price (€)',
+                admin: { description: 'e.g. "99"' },
+              },
+              {
+                name: 'bookingPriceSuffix',
+                type: 'text',
+                localized: true,
+                label: 'Price Suffix',
+                admin: { description: 'e.g. "pro Person" / "per person"' },
+              },
+            ],
+          },
+          {
+            name: 'bookingCurrency',
+            type: 'text',
+            label: 'Currency Symbol',
+            admin: { description: 'e.g. "€"' },
+          },
+          {
+            name: 'bookingImage',
+            type: 'upload',
+            relationTo: 'media',
+            label: 'Header Background Image',
+            admin: { description: 'Optional background image for the booking card header.' },
+          },
+          {
+            name: 'bookingAttributes',
+            type: 'array',
+            label: 'Attribute Pills',
+            maxRows: 6,
+            admin: {
+              description: 'Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").',
+            },
+            fields: [
+              { name: 'text', type: 'text', required: true, localized: true, label: 'Text' },
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'bookingViewDatesLabel',
+                type: 'text',
+                localized: true,
+                label: 'Show Dates Button',
+                admin: { description: 'e.g. "Termine & Buchen" / "View Dates & Book"' },
+              },
+              {
+                name: 'bookingHideDatesLabel',
+                type: 'text',
+                localized: true,
+                label: 'Hide Dates Button',
+                admin: { description: 'e.g. "Termine ausblenden" / "Hide Dates"' },
+              },
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'bookingMoreDetailsLabel',
+                type: 'text',
+                localized: true,
+                label: 'More Details Button',
+                admin: { description: 'e.g. "Mehr Informationen" / "Learn More"' },
+              },
+              {
+                name: 'bookingBookLabel',
+                type: 'text',
+                localized: true,
+                label: 'Book Button',
+                admin: { description: 'e.g. "Buchen" / "Book"' },
+              },
+            ],
+          },
+          {
+            name: 'bookingSpotsLabel',
+            type: 'text',
+            localized: true,
+            label: 'Spots Available Label',
+            admin: { description: 'e.g. "Plätze frei" / "spots available"' },
+          },
+
+          // ── About Section ─────────────────────────────────────
+          {
+            name: 'aboutHeading',
+            type: 'text',
+            localized: true,
+            label: 'About Heading',
+            admin: { description: 'e.g. "Über den Workshop" / "About this Workshop"' },
+          },
+          {
+            name: 'aboutText',
+            type: 'textarea',
+            localized: true,
+            label: 'About Text',
+            admin: { description: 'Long prose description of what the workshop is about.' },
+          },
+
+          // ── Schedule Section ──────────────────────────────────
+          {
+            name: 'scheduleHeading',
+            type: 'text',
+            localized: true,
+            label: 'Schedule Heading',
+            admin: { description: 'e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"' },
+          },
+          {
+            name: 'schedule',
+            type: 'array',
+            label: 'Schedule Items',
+            maxRows: 6,
+            labels: { singular: 'Step', plural: 'Steps' },
+            admin: {
+              description: 'Drag ⋮⋮ to reorder steps 01, 02, 03… inside the booking card.',
+              initCollapsed: false,
+            },
+            fields: [
+              {
+                name: 'duration',
+                type: 'text',
+                required: true,
+                localized: true,
+                label: 'Number',
+                admin: { description: 'e.g. "01", "02"' },
+              },
+              {
+                name: 'title',
+                type: 'textarea',
+                required: true,
+                localized: true,
+                label: 'Title',
+              },
+              {
+                name: 'description',
+                type: 'textarea',
+                required: true,
+                localized: true,
+                label: 'Description',
+              },
+            ],
+          },
+
+          // ── Included Items ────────────────────────────────────
+          {
+            name: 'includedHeading',
+            type: 'text',
+            localized: true,
+            label: 'Included Heading',
+            admin: {
+              description: 'e.g. "Im Preis enthalten (€99)" / "Included in the Price (€99)"',
+            },
+          },
+          {
+            name: 'includedItems',
+            type: 'array',
+            label: 'Included Items',
+            maxRows: 12,
+            admin: { description: 'List of items/benefits included in the workshop.' },
+            fields: [
+              { name: 'text', type: 'text', required: true, localized: true, label: 'Item' },
+            ],
+          },
+
+          // ── Why Section ───────────────────────────────────────
+          {
+            name: 'whyHeading',
+            type: 'text',
+            localized: true,
+            label: 'Why This Workshop Heading',
+            admin: { description: 'e.g. "Warum dieser Workshop?" / "Why This Workshop?"' },
+          },
+          {
+            name: 'whyPoints',
+            type: 'array',
+            label: 'Why Points',
+            maxRows: 6,
+            fields: [
+              {
+                name: 'bold',
+                type: 'text',
+                required: true,
+                localized: true,
+                label: 'Bold Text',
+                admin: { description: 'The bolded title of this point (e.g. "Darmgesundheit:")' },
+              },
+              {
+                name: 'rest',
+                type: 'textarea',
+                required: true,
+                localized: true,
+                label: 'Description',
+                admin: { description: 'The explanatory text that follows the bold title.' },
+              },
+            ],
+          },
+
+          // ── Experience Cards ──────────────────────────────────
+          {
+            name: 'experienceEyebrow',
+            type: 'text',
+            localized: true,
+            label: 'Experience Cards Eyebrow',
+            admin: { description: 'e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"' },
+          },
+          {
+            name: 'experienceTitle',
+            type: 'text',
+            localized: true,
+            label: 'Experience Cards Title',
+            admin: { description: 'Main heading for the experience section.' },
+          },
+          {
+            name: 'experienceCards',
+            type: 'array',
+            label: 'Experience Cards',
+            maxRows: 6,
+            fields: [
+              {
+                name: 'eyebrow',
+                type: 'text',
+                required: true,
+                localized: true,
+                label: 'Card Eyebrow',
+                admin: { description: 'e.g. "THEORIE" / "THEORY"' },
+              },
+              {
+                name: 'title',
+                type: 'textarea',
+                required: true,
+                localized: true,
+                label: 'Card Title',
+              },
+              {
+                name: 'description',
+                type: 'textarea',
+                required: true,
+                localized: true,
+                label: 'Card Description',
+              },
+              {
+                name: 'image',
+                type: 'upload',
+                relationTo: 'media',
+                label: 'Card Image (optional)',
+              },
+            ],
+          },
+
+          // ── Upcoming Dates ────────────────────────────────────
+          {
+            name: 'datesHeading',
+            type: 'text',
+            localized: true,
+            label: 'Dates Heading',
+            admin: { description: 'e.g. "Nächste Workshops" / "Upcoming Workshops"' },
+          },
+          // Dates are fetched automatically from Workshop Appointments collection.
+          // No manual date entry needed here — create appointments in Workshops → Workshop Appointments.
+
+          // ── Booking Modal Labels ──────────────────────────────
+          {
+            name: 'modalConfirmHeading',
+            type: 'text',
+            localized: true,
+            label: 'Modal Confirmation Heading',
+            admin: { description: 'e.g. "Reservierung bestätigen" / "Confirm Reservation"' },
+          },
+          {
+            name: 'modalConfirmSubheading',
+            type: 'text',
+            localized: true,
+            label: 'Modal Confirmation Subheading',
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'modalWorkshopLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Workshop Label',
+                admin: { description: 'e.g. "Workshop"' },
+              },
+              {
+                name: 'modalDateLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Date Label',
+                admin: { description: 'e.g. "Datum"' },
+              },
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'modalTimeLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Time Label',
+                admin: { description: 'e.g. "Uhrzeit"' },
+              },
+              {
+                name: 'modalTotalLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Total Label',
+                admin: { description: 'e.g. "Gesamtbetrag"' },
+              },
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'modalCancelLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Cancel Button',
+                admin: { description: 'e.g. "Abbrechen" / "Cancel"' },
+              },
+              {
+                name: 'modalConfirmLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Confirm Button',
+                admin: { description: 'e.g. "Bestätigen" / "Confirm"' },
+              },
+            ],
+          },
         ],
       },
       {
@@ -49,6 +483,53 @@ export const workshopDetailFields: Field[] = [
         labels: { singular: 'Recipe Plan', plural: 'Recipe Plan' },
         fields: [
           { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+          {
+            name: 'recipePlanEyebrow',
+            type: 'text',
+            localized: true,
+            label: 'Eyebrow',
+            admin: { description: 'e.g. "Im Workshop" / "In the workshop"' },
+          },
+          {
+            name: 'recipePlanTitle',
+            type: 'text',
+            localized: true,
+            label: 'Title',
+            admin: {
+              description: 'e.g. "Das fermentieren wir." / "What we will ferment."',
+            },
+          },
+          {
+            name: 'recipePlanDescription',
+            type: 'textarea',
+            localized: true,
+            label: 'Description',
+            admin: {
+              description:
+                'Short explanation under the title — why this isn’t a monthly calendar.',
+            },
+          },
+          {
+            name: 'recipePlanRecipes',
+            type: 'array',
+            label: 'Recipes',
+            minRows: 1,
+            maxRows: 4,
+            admin: {
+              description:
+                'Usually 2 recipes per workshop. Add or remove as needed — order = display order.',
+            },
+            fields: [
+              {
+                name: 'name',
+                type: 'text',
+                required: true,
+                localized: true,
+                label: 'Recipe name',
+                admin: { description: 'e.g. "Zucchini-Pickels"' },
+              },
+            ],
+          },
         ],
       },
       {
@@ -56,6 +537,39 @@ export const workshopDetailFields: Field[] = [
         labels: { singular: 'Tipps & Guides', plural: 'Tipps & Guides' },
         fields: [
           { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: false },
+          {
+            name: 'howToEyebrow',
+            type: 'text',
+            localized: true,
+            label: 'Eyebrow',
+            admin: { description: 'Small label above the heading (e.g. "TIPPS & GUIDES").' },
+          },
+          {
+            name: 'howToTitle',
+            type: 'text',
+            localized: true,
+            label: 'Section Title',
+            admin: { description: 'Main heading (e.g. "Lerne fermentieren.").' },
+          },
+          {
+            name: 'howToDescription',
+            type: 'textarea',
+            localized: true,
+            label: 'Section Description',
+            admin: { description: 'Short paragraph below the heading.' },
+          },
+          {
+            name: 'howToArticles',
+            type: 'relationship',
+            relationTo: 'posts',
+            hasMany: true,
+            label: 'Articles (pick 6)',
+            admin: {
+              description:
+                "Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article's title, image and content is edited directly inside the Posts collection.",
+              allowCreate: false,
+            },
+          },
         ],
       },
       {
@@ -63,6 +577,54 @@ export const workshopDetailFields: Field[] = [
         labels: { singular: 'FAQ', plural: 'FAQ' },
         fields: [
           { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+          {
+            name: 'faqEyebrow',
+            type: 'text',
+            localized: true,
+            label: 'Eyebrow',
+            admin: { description: 'e.g. "HÄUFIGE FRAGEN" / "FAQ"' },
+          },
+          {
+            name: 'faqTitle',
+            type: 'text',
+            localized: true,
+            label: 'Title',
+            admin: { description: 'e.g. "Gut zu wissen" / "Good to Know"' },
+          },
+          {
+            name: 'faqDescription',
+            type: 'textarea',
+            localized: true,
+            label: 'Description',
+          },
+          {
+            name: 'faqItems',
+            type: 'array',
+            label: 'FAQ Items',
+            maxRows: 12,
+            fields: [
+              {
+                name: 'question',
+                type: 'text',
+                required: true,
+                localized: true,
+                label: 'Question',
+              },
+              {
+                name: 'answer',
+                type: 'textarea',
+                required: true,
+                localized: true,
+                label: 'Answer',
+              },
+            ],
+          },
+          {
+            name: 'faqContactEmail',
+            type: 'text',
+            label: 'Contact Email',
+            admin: { description: 'Email shown at bottom (e.g. "kontakt@fermentfreude.at").' },
+          },
         ],
       },
       {
@@ -70,6 +632,112 @@ export const workshopDetailFields: Field[] = [
         labels: { singular: 'Voucher / Gift', plural: 'Voucher' },
         fields: [
           { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+          {
+            name: 'useGlobalVoucherData',
+            type: 'checkbox',
+            label: 'Use global Voucher CTA content',
+            defaultValue: true,
+            admin: {
+              description:
+                '✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).\n❌ OFF = Use custom content just for this workshop page.',
+            },
+          },
+          {
+            name: 'voucherEyebrow',
+            type: 'text',
+            localized: true,
+            label: 'Eyebrow',
+            admin: {
+              description: 'e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"',
+              condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+            },
+          },
+          {
+            name: 'voucherTitle',
+            type: 'text',
+            localized: true,
+            label: 'Title',
+            admin: {
+              description: 'e.g. "Go with a friend."',
+              condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+            },
+          },
+          {
+            name: 'voucherDescription',
+            type: 'textarea',
+            localized: true,
+            label: 'Description',
+            admin: {
+              condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+            },
+          },
+          {
+            name: 'voucherBackgroundImage',
+            type: 'upload',
+            relationTo: 'media',
+            label: 'Background Image',
+            admin: {
+              description:
+                'Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.',
+              condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+            },
+          },
+          {
+            type: 'row',
+            admin: {
+              condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+            },
+            fields: [
+              {
+                name: 'voucherPrimaryLabel',
+                type: 'text',
+                localized: true,
+                label: 'Primary Button',
+                admin: { description: 'e.g. "Gutschein kaufen" / "Buy Voucher"' },
+              },
+              {
+                name: 'voucherPrimaryHref',
+                type: 'text',
+                label: 'Primary URL',
+                admin: { description: 'e.g. "/voucher"' },
+              },
+            ],
+          },
+          {
+            type: 'row',
+            admin: {
+              condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+            },
+            fields: [
+              {
+                name: 'voucherSecondaryLabel',
+                type: 'text',
+                localized: true,
+                label: 'Secondary Button',
+                admin: { description: 'e.g. "Zum Shop" / "Visit Shop"' },
+              },
+              {
+                name: 'voucherSecondaryHref',
+                type: 'text',
+                label: 'Secondary URL',
+                admin: { description: 'e.g. "/shop"' },
+              },
+            ],
+          },
+          {
+            name: 'voucherPills',
+            type: 'array',
+            label: 'Feature Pills',
+            maxRows: 6,
+            admin: {
+              description:
+                'Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").',
+              condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
+            },
+            fields: [
+              { name: 'text', type: 'text', required: true, localized: true, label: 'Text' },
+            ],
+          },
         ],
       },
       {
@@ -77,6 +745,43 @@ export const workshopDetailFields: Field[] = [
         labels: { singular: 'More Workshops', plural: 'More Workshops' },
         fields: [
           { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
+          {
+            name: 'sliderHeading',
+            type: 'text',
+            localized: true,
+            label: 'Heading',
+            admin: {
+              description: 'e.g. "Entdecke weitere Workshops" / "Discover Other Workshops".',
+            },
+          },
+          {
+            name: 'sliderSubtitle',
+            type: 'textarea',
+            localized: true,
+            label: 'Subtitle',
+            admin: { description: 'Short paragraph below the heading.' },
+          },
+          {
+            name: 'sliderPillLabel',
+            type: 'text',
+            localized: true,
+            label: 'Pill Label',
+            admin: { description: 'Small pill/badge text (e.g. "Workshop" / "Workshop").' },
+          },
+          {
+            name: 'sliderBuyLabel',
+            type: 'text',
+            localized: true,
+            label: 'Buy Button Label',
+            admin: { description: 'e.g. "Buchen" / "Book Now".' },
+          },
+          {
+            name: 'sliderMoreInfoLabel',
+            type: 'text',
+            localized: true,
+            label: 'More Info Label',
+            admin: { description: 'e.g. "Mehr erfahren" / "Learn More".' },
+          },
         ],
       },
     ],
@@ -104,525 +809,13 @@ export const workshopDetailFields: Field[] = [
     defaultValue: true,
   },
 
-  // ── 1. Hero (edit content — not for reordering) ──────────
+  // ── Seasonal Calendar (not part of Page Sections) ────────
   {
     type: 'collapsible',
-    label: 'Edit: 1. Hero',
+    label: 'Seasonal calendar — months',
     admin: {
       initCollapsed: true,
-      description:
-        'Edit hero text & image here. To move Hero on the page, use “Page Sections” above.',
-    },
-    fields: [
-      {
-        name: 'heroEyebrow',
-        type: 'text',
-        localized: true,
-        label: 'Eyebrow',
-        admin: { description: 'Small text above the title (e.g. "Workshop Experience").' },
-      },
-      {
-        name: 'heroTitle',
-        type: 'textarea',
-        localized: true,
-        label: 'Title',
-        admin: {
-          description:
-            'Main heading. Use a line break for two lines (e.g. "Die Kunst der\\nLakto-Fermentation").',
-        },
-      },
-      {
-        name: 'heroDescription',
-        type: 'textarea',
-        localized: true,
-        label: 'Description',
-        admin: { description: 'Short paragraph below the title.' },
-      },
-      {
-        name: 'heroImage',
-        type: 'upload',
-        relationTo: 'media',
-        label: 'Hero Image',
-        admin: {
-          description:
-            'Hero background image (full-bleed). For Vom Feld ins Glas this is the wheat field photo. When empty, a fallback media file is used.',
-        },
-      },
-      {
-        name: 'heroAttributes',
-        type: 'array',
-        label: 'Attribute Pills',
-        maxRows: 6,
-        admin: {
-          description:
-            'Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").',
-        },
-        fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
-      },
-    ],
-  },
-
-  // ── 1b. Hero Seal (Vom Feld ins Glas only) ───────────────
-  {
-    type: 'collapsible',
-    label: '1b. Hero Seal (Vom Feld ins Glas)',
-    admin: {
-      initCollapsed: false,
-      description:
-        'Rotating stamp on the hero (top right). Used on /workshops/vom-feld-ins-glas. Safe to leave empty on other workshop pages.',
-    },
-    fields: [
-      {
-        name: 'sealRingText',
-        type: 'text',
-        localized: true,
-        label: 'Ring Text',
-        admin: {
-          description:
-            'Text repeated around the circle (e.g. "SPEZIAL-WORKSHOP" / "SPECIAL WORKSHOP"). Leave empty to use the default.',
-        },
-      },
-      {
-        name: 'sealCenterText',
-        type: 'text',
-        localized: true,
-        label: 'Center Text (brand)',
-        admin: {
-          description:
-            'Middle of the stamp. Use exactly: FERMENT · freude  → shows as two lines (FERMENT / freude). Change DE and EN separately.',
-        },
-      },
-    ],
-  },
-
-  // ── 1c. Recipe Plan (Vom Feld ins Glas only) ─────────────
-  {
-    type: 'collapsible',
-    label: '1c. Recipe Plan (Vom Feld ins Glas)',
-    admin: {
-      initCollapsed: false,
-      description:
-        'Replaces the Fermentkalender on /workshops/vom-feld-ins-glas. List what participants will ferment (usually 2 recipes). Safe to leave empty on other workshop pages.',
-    },
-    fields: [
-      {
-        name: 'recipePlanEyebrow',
-        type: 'text',
-        localized: true,
-        label: 'Eyebrow',
-        admin: { description: 'e.g. "Im Workshop" / "In the workshop"' },
-      },
-      {
-        name: 'recipePlanTitle',
-        type: 'text',
-        localized: true,
-        label: 'Title',
-        admin: {
-          description: 'e.g. "Das fermentieren wir." / "What we will ferment."',
-        },
-      },
-      {
-        name: 'recipePlanDescription',
-        type: 'textarea',
-        localized: true,
-        label: 'Description',
-        admin: {
-          description: 'Short explanation under the title — why this isn’t a monthly calendar.',
-        },
-      },
-      {
-        name: 'recipePlanRecipes',
-        type: 'array',
-        label: 'Recipes',
-        minRows: 1,
-        maxRows: 4,
-        admin: {
-          description:
-            'Usually 2 recipes per workshop. Add or remove as needed — order = display order.',
-        },
-        fields: [
-          {
-            name: 'name',
-            type: 'text',
-            required: true,
-            localized: true,
-            label: 'Recipe name',
-            admin: { description: 'e.g. "Zucchini-Pickels"' },
-          },
-        ],
-      },
-    ],
-  },
-
-  // ── 2. Booking Card ──────────────────────────────────────
-  {
-    type: 'collapsible',
-    label: '2. Booking Card',
-    admin: {
-      initCollapsed: false,
-      description:
-        'Complete booking experience: header, about, schedule (drag to reorder steps), included items, why, experience cards, and dates.',
-    },
-    fields: [
-      // ── Header ────────────────────────────────────────────
-      {
-        name: 'bookingEyebrow',
-        type: 'text',
-        localized: true,
-        label: 'Header Eyebrow',
-        admin: { description: 'e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"' },
-      },
-      {
-        name: 'bookingTitle',
-        type: 'text',
-        localized: true,
-        label: 'Booking Card Title',
-        admin: {
-          description:
-            'Main title shown on the dark booking header (e.g. "Lakto-Fermentiertes Gemüse" / "Lacto-Fermented Vegetables", "Tempeh", "Kombucha"). Set both German and English values.',
-        },
-      },
-      {
-        type: 'row',
-        fields: [
-          {
-            name: 'bookingPrice',
-            type: 'number',
-            label: 'Price (€)',
-            admin: { description: 'e.g. "99"' },
-          },
-          {
-            name: 'bookingPriceSuffix',
-            type: 'text',
-            localized: true,
-            label: 'Price Suffix',
-            admin: { description: 'e.g. "pro Person" / "per person"' },
-          },
-        ],
-      },
-      {
-        name: 'bookingCurrency',
-        type: 'text',
-        label: 'Currency Symbol',
-        admin: { description: 'e.g. "€"' },
-      },
-      {
-        name: 'bookingImage',
-        type: 'upload',
-        relationTo: 'media',
-        label: 'Header Background Image',
-        admin: { description: 'Optional background image for the booking card header.' },
-      },
-      {
-        name: 'bookingAttributes',
-        type: 'array',
-        label: 'Attribute Pills',
-        maxRows: 6,
-        admin: {
-          description: 'Small attribute pills (e.g. "3 Stunden", "Hands-on", "Experience").',
-        },
-        fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
-      },
-      {
-        type: 'row',
-        fields: [
-          {
-            name: 'bookingViewDatesLabel',
-            type: 'text',
-            localized: true,
-            label: 'Show Dates Button',
-            admin: { description: 'e.g. "Termine & Buchen" / "View Dates & Book"' },
-          },
-          {
-            name: 'bookingHideDatesLabel',
-            type: 'text',
-            localized: true,
-            label: 'Hide Dates Button',
-            admin: { description: 'e.g. "Termine ausblenden" / "Hide Dates"' },
-          },
-        ],
-      },
-      {
-        type: 'row',
-        fields: [
-          {
-            name: 'bookingMoreDetailsLabel',
-            type: 'text',
-            localized: true,
-            label: 'More Details Button',
-            admin: { description: 'e.g. "Mehr Informationen" / "Learn More"' },
-          },
-          {
-            name: 'bookingBookLabel',
-            type: 'text',
-            localized: true,
-            label: 'Book Button',
-            admin: { description: 'e.g. "Buchen" / "Book"' },
-          },
-        ],
-      },
-      {
-        name: 'bookingSpotsLabel',
-        type: 'text',
-        localized: true,
-        label: 'Spots Available Label',
-        admin: { description: 'e.g. "Plätze frei" / "spots available"' },
-      },
-
-      // ── About Section ─────────────────────────────────────
-      {
-        name: 'aboutHeading',
-        type: 'text',
-        localized: true,
-        label: 'About Heading',
-        admin: { description: 'e.g. "Über den Workshop" / "About this Workshop"' },
-      },
-      {
-        name: 'aboutText',
-        type: 'textarea',
-        localized: true,
-        label: 'About Text',
-        admin: { description: 'Long prose description of what the workshop is about.' },
-      },
-
-      // ── Schedule Section ──────────────────────────────────
-      {
-        name: 'scheduleHeading',
-        type: 'text',
-        localized: true,
-        label: 'Schedule Heading',
-        admin: { description: 'e.g. "Ablauf (3 Stunden)" / "Schedule (3 Hours)"' },
-      },
-      {
-        name: 'schedule',
-        type: 'array',
-        label: 'Schedule Items',
-        maxRows: 6,
-        labels: { singular: 'Step', plural: 'Steps' },
-        admin: {
-          description: 'Drag ⋮⋮ to reorder steps 01, 02, 03… inside the booking card.',
-          initCollapsed: false,
-        },
-        fields: [
-          {
-            name: 'duration',
-            type: 'text',
-            required: true,
-            localized: true,
-            label: 'Number',
-            admin: { description: 'e.g. "01", "02"' },
-          },
-          {
-            name: 'title',
-            type: 'textarea',
-            required: true,
-            localized: true,
-            label: 'Title',
-          },
-          {
-            name: 'description',
-            type: 'textarea',
-            required: true,
-            localized: true,
-            label: 'Description',
-          },
-        ],
-      },
-
-      // ── Included Items ────────────────────────────────────
-      {
-        name: 'includedHeading',
-        type: 'text',
-        localized: true,
-        label: 'Included Heading',
-        admin: { description: 'e.g. "Im Preis enthalten (€99)" / "Included in the Price (€99)"' },
-      },
-      {
-        name: 'includedItems',
-        type: 'array',
-        label: 'Included Items',
-        maxRows: 12,
-        admin: { description: 'List of items/benefits included in the workshop.' },
-        fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Item' }],
-      },
-
-      // ── Why Section ───────────────────────────────────────
-      {
-        name: 'whyHeading',
-        type: 'text',
-        localized: true,
-        label: 'Why This Workshop Heading',
-        admin: { description: 'e.g. "Warum dieser Workshop?" / "Why This Workshop?"' },
-      },
-      {
-        name: 'whyPoints',
-        type: 'array',
-        label: 'Why Points',
-        maxRows: 6,
-        fields: [
-          {
-            name: 'bold',
-            type: 'text',
-            required: true,
-            localized: true,
-            label: 'Bold Text',
-            admin: { description: 'The bolded title of this point (e.g. "Darmgesundheit:")' },
-          },
-          {
-            name: 'rest',
-            type: 'textarea',
-            required: true,
-            localized: true,
-            label: 'Description',
-            admin: { description: 'The explanatory text that follows the bold title.' },
-          },
-        ],
-      },
-
-      // ── Experience Cards ──────────────────────────────────
-      {
-        name: 'experienceEyebrow',
-        type: 'text',
-        localized: true,
-        label: 'Experience Cards Eyebrow',
-        admin: { description: 'e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"' },
-      },
-      {
-        name: 'experienceTitle',
-        type: 'text',
-        localized: true,
-        label: 'Experience Cards Title',
-        admin: { description: 'Main heading for the experience section.' },
-      },
-      {
-        name: 'experienceCards',
-        type: 'array',
-        label: 'Experience Cards',
-        maxRows: 6,
-        fields: [
-          {
-            name: 'eyebrow',
-            type: 'text',
-            required: true,
-            localized: true,
-            label: 'Card Eyebrow',
-            admin: { description: 'e.g. "THEORIE" / "THEORY"' },
-          },
-          {
-            name: 'title',
-            type: 'textarea',
-            required: true,
-            localized: true,
-            label: 'Card Title',
-          },
-          {
-            name: 'description',
-            type: 'textarea',
-            required: true,
-            localized: true,
-            label: 'Card Description',
-          },
-          {
-            name: 'image',
-            type: 'upload',
-            relationTo: 'media',
-            label: 'Card Image (optional)',
-          },
-        ],
-      },
-
-      // ── Upcoming Dates ────────────────────────────────────
-      {
-        name: 'datesHeading',
-        type: 'text',
-        localized: true,
-        label: 'Dates Heading',
-        admin: { description: 'e.g. "Nächste Workshops" / "Upcoming Workshops"' },
-      },
-      // Dates are fetched automatically from Workshop Appointments collection.
-      // No manual date entry needed here — create appointments in Workshops → Workshop Appointments.
-
-      // ── Booking Modal Labels ──────────────────────────────
-      {
-        name: 'modalConfirmHeading',
-        type: 'text',
-        localized: true,
-        label: 'Modal Confirmation Heading',
-        admin: { description: 'e.g. "Reservierung bestätigen" / "Confirm Reservation"' },
-      },
-      {
-        name: 'modalConfirmSubheading',
-        type: 'text',
-        localized: true,
-        label: 'Modal Confirmation Subheading',
-      },
-      {
-        type: 'row',
-        fields: [
-          {
-            name: 'modalWorkshopLabel',
-            type: 'text',
-            localized: true,
-            label: 'Modal Workshop Label',
-            admin: { description: 'e.g. "Workshop"' },
-          },
-          {
-            name: 'modalDateLabel',
-            type: 'text',
-            localized: true,
-            label: 'Modal Date Label',
-            admin: { description: 'e.g. "Datum"' },
-          },
-        ],
-      },
-      {
-        type: 'row',
-        fields: [
-          {
-            name: 'modalTimeLabel',
-            type: 'text',
-            localized: true,
-            label: 'Modal Time Label',
-            admin: { description: 'e.g. "Uhrzeit"' },
-          },
-          {
-            name: 'modalTotalLabel',
-            type: 'text',
-            localized: true,
-            label: 'Modal Total Label',
-            admin: { description: 'e.g. "Gesamtbetrag"' },
-          },
-        ],
-      },
-      {
-        type: 'row',
-        fields: [
-          {
-            name: 'modalCancelLabel',
-            type: 'text',
-            localized: true,
-            label: 'Modal Cancel Button',
-            admin: { description: 'e.g. "Abbrechen" / "Cancel"' },
-          },
-          {
-            name: 'modalConfirmLabel',
-            type: 'text',
-            localized: true,
-            label: 'Modal Confirm Button',
-            admin: { description: 'e.g. "Bestätigen" / "Confirm"' },
-          },
-        ],
-      },
-    ],
-  },
-
-  // ── 3. Seasonal Calendar ─────────────────────────────────
-  {
-    type: 'collapsible',
-    label: '3. Seasonal Calendar',
-    admin: {
-      initCollapsed: true,
-      description: 'Horizontal timeline with seasonal months and recipes.',
+      description: 'Only used when “Show Seasonal Calendar?” is on (usually off for Feld).',
     },
     fields: [
       {
@@ -707,275 +900,6 @@ export const workshopDetailFields: Field[] = [
             ],
           },
         ],
-      },
-    ],
-  },
-
-  // ── 4. Voucher CTA ──────────────────────────────────────
-  {
-    type: 'collapsible',
-    label: '4. Voucher CTA',
-    admin: {
-      initCollapsed: true,
-      description: '"Go with a friend" voucher section.',
-    },
-    fields: [
-      {
-        name: 'useGlobalVoucherData',
-        type: 'checkbox',
-        label: 'Use global Voucher CTA content',
-        defaultValue: true,
-        admin: {
-          description:
-            '✅ ON = Uses shared content from Website → Voucher CTA (edit once, applies everywhere).\n❌ OFF = Use custom content just for this workshop page.',
-        },
-      },
-      {
-        name: 'voucherEyebrow',
-        type: 'text',
-        localized: true,
-        label: 'Eyebrow',
-        admin: {
-          description: 'e.g. "GEMEINSAM FERMENTIEREN" / "FERMENT TOGETHER"',
-          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
-        },
-      },
-      {
-        name: 'voucherTitle',
-        type: 'text',
-        localized: true,
-        label: 'Title',
-        admin: {
-          description: 'e.g. "Go with a friend."',
-          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
-        },
-      },
-      {
-        name: 'voucherDescription',
-        type: 'textarea',
-        localized: true,
-        label: 'Description',
-        admin: {
-          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
-        },
-      },
-      {
-        name: 'voucherBackgroundImage',
-        type: 'upload',
-        relationTo: 'media',
-        label: 'Background Image',
-        admin: {
-          description:
-            'Optional background image. If provided, text will be white with a dark overlay. If empty, cream background with dark text will be used.',
-          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
-        },
-      },
-      {
-        type: 'row',
-        admin: {
-          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
-        },
-        fields: [
-          {
-            name: 'voucherPrimaryLabel',
-            type: 'text',
-            localized: true,
-            label: 'Primary Button',
-            admin: { description: 'e.g. "Gutschein kaufen" / "Buy Voucher"' },
-          },
-          {
-            name: 'voucherPrimaryHref',
-            type: 'text',
-            label: 'Primary URL',
-            admin: { description: 'e.g. "/voucher"' },
-          },
-        ],
-      },
-      {
-        type: 'row',
-        admin: {
-          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
-        },
-        fields: [
-          {
-            name: 'voucherSecondaryLabel',
-            type: 'text',
-            localized: true,
-            label: 'Secondary Button',
-            admin: { description: 'e.g. "Zum Shop" / "Visit Shop"' },
-          },
-          {
-            name: 'voucherSecondaryHref',
-            type: 'text',
-            label: 'Secondary URL',
-            admin: { description: 'e.g. "/shop"' },
-          },
-        ],
-      },
-      {
-        name: 'voucherPills',
-        type: 'array',
-        label: 'Feature Pills',
-        maxRows: 6,
-        admin: {
-          description: 'Small tags below buttons (e.g. "Sofort einlösbar", "Für alle Workshops").',
-          condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
-        },
-        fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
-      },
-    ],
-  },
-
-  // ── 5. FAQ ──────────────────────────────────────────────
-  {
-    type: 'collapsible',
-    label: '5. FAQ',
-    admin: {
-      initCollapsed: true,
-      description: 'Booking-specific FAQ accordion.',
-    },
-    fields: [
-      {
-        name: 'faqEyebrow',
-        type: 'text',
-        localized: true,
-        label: 'Eyebrow',
-        admin: { description: 'e.g. "HÄUFIGE FRAGEN" / "FAQ"' },
-      },
-      {
-        name: 'faqTitle',
-        type: 'text',
-        localized: true,
-        label: 'Title',
-        admin: { description: 'e.g. "Gut zu wissen" / "Good to Know"' },
-      },
-      {
-        name: 'faqDescription',
-        type: 'textarea',
-        localized: true,
-        label: 'Description',
-      },
-      {
-        name: 'faqItems',
-        type: 'array',
-        label: 'FAQ Items',
-        maxRows: 12,
-        fields: [
-          {
-            name: 'question',
-            type: 'text',
-            required: true,
-            localized: true,
-            label: 'Question',
-          },
-          {
-            name: 'answer',
-            type: 'textarea',
-            required: true,
-            localized: true,
-            label: 'Answer',
-          },
-        ],
-      },
-      {
-        name: 'faqContactEmail',
-        type: 'text',
-        label: 'Contact Email',
-        admin: { description: 'Email shown at bottom (e.g. "kontakt@fermentfreude.at").' },
-      },
-    ],
-  },
-
-  // ── 6. How-To Articles ──────────────────────────────
-  {
-    type: 'collapsible',
-    label: '6. How-To Articles',
-    admin: {
-      initCollapsed: true,
-      description:
-        "6 educational article cards shown below the Fermentation Calendar. Edit the section heading and each article's title, description, read time, link and cover image.",
-    },
-    fields: [
-      {
-        name: 'howToEyebrow',
-        type: 'text',
-        localized: true,
-        label: 'Eyebrow',
-        admin: { description: 'Small label above the heading (e.g. "TIPPS & GUIDES").' },
-      },
-      {
-        name: 'howToTitle',
-        type: 'text',
-        localized: true,
-        label: 'Section Title',
-        admin: { description: 'Main heading (e.g. "Lerne fermentieren.").' },
-      },
-      {
-        name: 'howToDescription',
-        type: 'textarea',
-        localized: true,
-        label: 'Section Description',
-        admin: { description: 'Short paragraph below the heading.' },
-      },
-      {
-        name: 'howToArticles',
-        type: 'relationship',
-        relationTo: 'posts',
-        hasMany: true,
-        label: 'Articles (pick 6)',
-        admin: {
-          description:
-            "Select the 6 how-to articles to show as cards. Order matters — drag to reorder. Each article's title, image and content is edited directly inside the Posts collection.",
-          allowCreate: false,
-        },
-      },
-    ],
-  },
-
-  // ── 7. Other Workshops Slider ──────────────────────────
-  {
-    type: 'collapsible',
-    label: '7. Other Workshops Slider',
-    admin: {
-      initCollapsed: true,
-      description:
-        'Labels for the "Discover other workshops" slider that appears at the bottom of every detail page.',
-    },
-    fields: [
-      {
-        name: 'sliderHeading',
-        type: 'text',
-        localized: true,
-        label: 'Heading',
-        admin: { description: 'e.g. "Entdecke weitere Workshops" / "Discover Other Workshops".' },
-      },
-      {
-        name: 'sliderSubtitle',
-        type: 'textarea',
-        localized: true,
-        label: 'Subtitle',
-        admin: { description: 'Short paragraph below the heading.' },
-      },
-      {
-        name: 'sliderPillLabel',
-        type: 'text',
-        localized: true,
-        label: 'Pill Label',
-        admin: { description: 'Small pill/badge text (e.g. "Workshop" / "Workshop").' },
-      },
-      {
-        name: 'sliderBuyLabel',
-        type: 'text',
-        localized: true,
-        label: 'Buy Button Label',
-        admin: { description: 'e.g. "Buchen" / "Book Now".' },
-      },
-      {
-        name: 'sliderMoreInfoLabel',
-        type: 'text',
-        localized: true,
-        label: 'More Info Label',
-        admin: { description: 'e.g. "Mehr erfahren" / "Learn More".' },
       },
     ],
   },

@@ -330,7 +330,32 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
   const workshopPage = workshopPageResult.docs[0] as PageType | undefined
 
-  const detail = workshopPage?.workshopDetail
+  const detailRaw = workshopPage?.workshopDetail as Record<string, unknown> | undefined
+  const sectionBlock = (type: string) =>
+    (Array.isArray(detailRaw?.pageSections)
+      ? (detailRaw!.pageSections as Array<Record<string, unknown>>).find((b) => b.blockType === type)
+      : undefined) ?? {}
+  // Content now lives inside pageSections blocks — flatten onto detail so all
+  // workshop pages (Feld, Lakto, Tempeh, Kombucha) keep reading detail.heroTitle etc.
+  const detail = detailRaw
+    ? ({
+        ...detailRaw,
+        ...sectionBlock('hero'),
+        ...sectionBlock('booking'),
+        ...sectionBlock('recipePlan'),
+        ...sectionBlock('howTo'),
+        ...sectionBlock('faq'),
+        ...sectionBlock('voucher'),
+        ...sectionBlock('moreWorkshops'),
+        pageSections: detailRaw.pageSections,
+        showSeasonalCalendar: detailRaw.showSeasonalCalendar,
+        showHowToGuides: detailRaw.showHowToGuides,
+        calendarEyebrow: detailRaw.calendarEyebrow,
+        calendarTitle: detailRaw.calendarTitle,
+        calendarDescription: detailRaw.calendarDescription,
+        calendarMonths: detailRaw.calendarMonths,
+      } as NonNullable<PageType['workshopDetail']>)
+    : undefined
 
   // How-To Articles: per-page `howToArticles` relationship wins when set,
   // otherwise fall back to the latest 6 published posts so editors only
