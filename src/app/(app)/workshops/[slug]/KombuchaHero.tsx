@@ -1,6 +1,7 @@
 'use client'
 
 import { Media } from '@/components/Media'
+import { resolveAnyLocalizedText } from '@/utilities/resolveLocalizedString'
 import type { Media as MediaType } from '@/payload-types'
 import { useEffect, useRef, useState } from 'react'
 
@@ -48,14 +49,17 @@ export type KombuchaHeroCMS = {
 export function KombuchaHero({ cms }: { cms?: KombuchaHeroCMS }) {
   // CMS values with English defaults
   const eyebrow = cms?.eyebrow ?? 'Workshop Experience'
-  const titleRaw = cms?.title ?? 'Die Kunst der\nKombucha-Fermentation'
+  const titleRaw =
+    typeof cms?.title === 'string' && cms.title.trim()
+      ? cms.title
+      : 'Die Kunst der\nKombucha-Fermentation'
   const titleLines = titleRaw.split('\n')
   const description =
     cms?.description ??
     'Lerne Schritt für Schritt, wie du probiotisches Kombucha brauten kannst — mit schwarzem Tee, Zucker und deiner SCOBY.'
   const attributes =
     (cms?.attributes?.length ?? 0) > 0
-      ? cms!.attributes!.map((a) => a.text ?? '').filter(Boolean)
+      ? cms!.attributes!.map((a) => resolveAnyLocalizedText(a.text)).filter(Boolean)
       : ['3 Stunden', 'Hands-on', 'Experience']
 
   const heroImage =
@@ -173,7 +177,7 @@ export function KombuchaHero({ cms }: { cms?: KombuchaHeroCMS }) {
             style={{ transitionDelay: '750ms' }}
           >
             {attributes.map((attr, i) => (
-              <span key={attr} className="flex items-center gap-4">
+              <span key={`hero-attr-${i}`} className="flex items-center gap-4">
                 <span className="font-display text-[9px] font-semibold uppercase tracking-widest text-white/90">
                   {attr}
                 </span>
@@ -268,7 +272,7 @@ export function KombuchaHero({ cms }: { cms?: KombuchaHeroCMS }) {
             <div className="h-px w-full bg-white/20" />
             <div className="mt-4 flex items-center justify-between px-2">
               {attributes.map((attr, i) => (
-                <span key={attr} className="flex items-center gap-4">
+                <span key={`hero-attr-${i}`} className="flex items-center gap-4">
                   <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-white/90 xl:text-xs">
                     {attr}
                   </span>

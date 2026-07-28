@@ -20,13 +20,16 @@ import { MagneticElement } from './MagneticElement'
 import { NavDropdown } from './NavDropdown'
 import { UserMenu } from './UserMenu'
 import { getDefaultDropdownKey, getDefaultDropdowns, getDefaultNavItems } from './nav-defaults'
+import type { NavWorkshopItem } from '@/utilities/mergeWorkshopNavDropdown'
+import { withDynamicWorkshopLinks } from '@/utilities/mergeWorkshopNavDropdown'
 
 type Props = {
   header: Header
   locale: 'de' | 'en'
+  navWorkshops: NavWorkshopItem[]
 }
 
-export function HeaderClient({ header, locale }: Props) {
+export function HeaderClient({ header, locale, navWorkshops }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
@@ -159,7 +162,7 @@ export function HeaderClient({ header, locale }: Props) {
         const cmsDropdownItems = item.dropdownItems
         const defaultKey = getDefaultDropdownKey(label, url)
 
-        const dropdownItems =
+        const dropdownItems = withDynamicWorkshopLinks(
           cmsDropdownItems && cmsDropdownItems.length > 0
             ? cmsDropdownItems.map((dropdownItem) => ({
                 ...dropdownItem,
@@ -167,7 +170,10 @@ export function HeaderClient({ header, locale }: Props) {
               }))
             : defaultKey
               ? defaultDropdowns[defaultKey]
-              : null
+              : null,
+          navWorkshops,
+          defaultKey,
+        )
 
         return { id: item.id, label, url, link: item.link, dropdownItems, defaultKey }
       })
@@ -176,7 +182,11 @@ export function HeaderClient({ header, locale }: Props) {
         label: item.label,
         url: item.url,
         link: null,
-        dropdownItems: item.dropdownItems || null,
+        dropdownItems: withDynamicWorkshopLinks(
+          item.dropdownItems || null,
+          navWorkshops,
+          item.dropdownKey || null,
+        ),
         defaultKey: item.dropdownKey || null,
       }))
 
@@ -329,6 +339,7 @@ export function HeaderClient({ header, locale }: Props) {
           setIsActive={setIsMenuActive}
           headerHeight={headerHeight}
           locale={locale}
+          navWorkshops={navWorkshops}
         />
       </Suspense>
     </>

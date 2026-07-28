@@ -1,6 +1,7 @@
 'use client'
 
 import { Media } from '@/components/Media'
+import { resolveAnyLocalizedText } from '@/utilities/resolveLocalizedString'
 import type { Media as MediaType } from '@/payload-types'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { useLocale } from '@/providers/Locale'
@@ -9,6 +10,11 @@ import { useEffect, useRef, useState } from 'react'
 import { BookingModal } from './BookingModal'
 import { addWorkshopToCart } from './add-to-cart-utils'
 import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
+import {
+  mergeWorkshopForModal,
+  resolveBookingUILabels,
+  type WorkshopBookingUILabelsCMS,
+} from './workshop-booking-labels'
 
 /* ═══════════════════════════════════════════════════════════════
  *  KombuchaBookingCard — Modern booking experience
@@ -19,7 +25,7 @@ import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
 
 // ─── CMS Props Type ─────────────────────────────────────────
 
-export type KombuchaBookingCMS = {
+export type KombuchaBookingCMS = WorkshopBookingUILabelsCMS & {
   bookingEyebrow?: string | null
   bookingTitle?: string | null
   bookingPrice?: number | null
@@ -67,6 +73,7 @@ export type KombuchaBookingCMS = {
   modalTotalLabel?: string | null
   modalCancelLabel?: string | null
   modalConfirmLabel?: string | null
+  showExperienceSection?: boolean | null
 }
 
 function isResolvedMedia(img: unknown): img is MediaType {
@@ -140,6 +147,9 @@ export function KombuchaBookingCard({
   _workshop?: WorkshopDetailData
   cms?: KombuchaBookingCMS
 }) {
+  const { locale } = useLocale()
+  const localeKey = locale === 'en' ? 'en' : 'de'
+
   // ── CMS values with Kombucha defaults ──
   const bookingEyebrow = cms?.bookingEyebrow ?? '3-STUNDEN WORKSHOP'
   const bookingTitle = cms?.bookingTitle ?? 'Kombucha'
@@ -149,7 +159,7 @@ export function KombuchaBookingCard({
   const bookingImage = cms?.bookingImage
   const bookingAttributes =
     (cms?.bookingAttributes?.length ?? 0) > 0
-      ? cms!.bookingAttributes!.map((a) => a.text ?? '').filter(Boolean)
+      ? cms!.bookingAttributes!.map((a) => resolveAnyLocalizedText(a.text)).filter(Boolean)
       : ['3 Stunden', 'Hands-on', 'Experience', 'Max. 12 Personen']
   const viewDatesLabel = cms?.bookingViewDatesLabel ?? 'Termine & Buchung'
   const hideDatesLabel = cms?.bookingHideDatesLabel ?? 'Termine ausblenden'
@@ -224,6 +234,14 @@ export function KombuchaBookingCard({
           },
         ]
 
+  const ui = resolveBookingUILabels(cms, localeKey, {
+    aboutHeading,
+    scheduleHeading,
+    includedHeading,
+    whyHeading,
+  })
+  const showExperienceSection = cms?.showExperienceSection !== false
+
   const experienceEyebrow = cms?.experienceEyebrow ?? 'WAS DICH ERWARTET'
   const experienceTitle = cms?.experienceTitle ?? 'Dein Workshop-Erlebnis'
   const experienceCardsData =
@@ -249,8 +267,7 @@ export function KombuchaBookingCard({
         }))
       : []
 
-  // Build merged workshop for BookingModal
-  const mergedWorkshop: WorkshopDetailData = {
+  const baseWorkshop: WorkshopDetailData = {
     slug: 'kombucha',
     workshopType: 'kombucha',
     title: bookingTitle,
@@ -287,6 +304,8 @@ export function KombuchaBookingCard({
     confirmLabel: cms?.modalConfirmLabel ?? 'Buchung bestätigen',
   }
 
+  const mergedWorkshop = mergeWorkshopForModal(baseWorkshop, cms, localeKey)
+
   const [showDates, setShowDates] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
   const [bookingDate, setBookingDate] = useState<WorkshopDate | null>(null)
@@ -295,7 +314,6 @@ export function KombuchaBookingCard({
   const datesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
   const { addItem, clearCart } = useCart()
-  const { locale } = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -394,9 +412,9 @@ export function KombuchaBookingCard({
 
                 {/* Attributes strip */}
                 <div className="mt-6 flex flex-wrap items-center gap-3">
-                  {bookingAttributes.map((attr) => (
+                  {bookingAttributes.map((attr, i) => (
                     <span
-                      key={attr}
+                      key={`booking-attr-${i}`}
                       className="rounded-full border border-white/20 px-4 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest text-white/80"
                     >
                       {attr}
@@ -412,7 +430,7 @@ export function KombuchaBookingCard({
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="font-display text-sm font-bold uppercase tracking-[0.2em] text-[#555954]/20">
-                      Workshop Impression
+                      {ui.bookingImagePlaceholder}
                     </span>
                   </div>
                 )}
@@ -459,7 +477,7 @@ export function KombuchaBookingCard({
                 <button
                   onClick={() => setShowDates(false)}
                   className="rounded-full p-2 text-[#9a9a9a] transition-colors hover:bg-[#f5f1e8] hover:text-[#1a1a1a]"
-                  aria-label="Termine schließen"
+                  aria-label={ui.closeDatesLabel}
                 >
                   <svg
                     className="size-5"
@@ -476,7 +494,7 @@ export function KombuchaBookingCard({
               <div className="space-y-3 sm:space-y-4">
                 {cmsDates.length === 0 ? (
                   <p className="py-8 text-center font-display text-sm text-[#9a9a9a]">
-                    Aktuell keine Termine geplant — schau bald wieder vorbei.
+                    {ui.noDatesMessage}
                   </p>
                 ) : (
                   cmsDates.map((d) => {
@@ -495,7 +513,7 @@ export function KombuchaBookingCard({
                         {/* Date */}
                         <div>
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                            Datum
+                            {ui.dateColumn}
                           </p>
                           <p className="font-display font-bold text-base text-[#1a1a1a]">
                             {d.date}
@@ -505,7 +523,7 @@ export function KombuchaBookingCard({
                         {/* Time */}
                         <div>
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                            Zeit
+                            {ui.timeColumn}
                           </p>
                           <div className="flex items-center gap-2 text-sm text-[#555954]">
                             <svg
@@ -528,10 +546,10 @@ export function KombuchaBookingCard({
                         {/* Availability */}
                         <div>
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                            Plätze frei
+                            {ui.spotsColumn}
                           </p>
                           <p className="font-display font-bold text-base text-[#1a1a1a]">
-                            {isSoldOut ? 'Ausgebucht' : `${d.spotsLeft} Plätze`}
+                            {isSoldOut ? ui.soldOutLabel : `${d.spotsLeft} ${ui.spotsLabel}`}
                           </p>
                         </div>
 
@@ -541,14 +559,14 @@ export function KombuchaBookingCard({
                             type="button"
                             onClick={() => !isSoldOut && setBookingDate(d)}
                             disabled={isSoldOut}
-                            aria-label={isSoldOut ? 'Ausgebucht' : '→ Buchen'}
+                            aria-label={isSoldOut ? ui.soldOutLabel : `→ ${ui.bookLabel}`}
                             className={`inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
                               isSoldOut
                                 ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
                                 : 'bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954]'
                             }`}
                           >
-                            {isSoldOut ? 'Ausgebucht' : '→ Buchen'}
+                            {isSoldOut ? ui.soldOutLabel : `→ ${ui.bookLabel}`}
                           </button>
                         </div>
                       </div>
@@ -573,7 +591,7 @@ export function KombuchaBookingCard({
               {/* About */}
               <div>
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  ÜBER DEN WORKSHOP
+                  {ui.detailsAboutEyebrow}
                 </p>
                 <h3 className="mb-4 font-display text-subheading font-bold text-ff-near-black">
                   {aboutHeading}
@@ -586,7 +604,7 @@ export function KombuchaBookingCard({
               {/* Schedule */}
               <div>
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  ABLAUF
+                  {ui.detailsScheduleEyebrow}
                 </p>
                 <h3 className="mb-8 font-display text-subheading font-bold text-ff-near-black">
                   {scheduleHeading}
@@ -625,7 +643,7 @@ export function KombuchaBookingCard({
               {/* Included */}
               <div>
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  IM PREIS ENTHALTEN
+                  {ui.detailsIncludedEyebrow}
                 </p>
                 <h3 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
                   {includedHeading}
@@ -653,7 +671,7 @@ export function KombuchaBookingCard({
                 style={{ backgroundColor: '#F6F0E8' }}
               >
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  DARUM DIESER WORKSHOP
+                  {ui.detailsWhyEyebrow}
                 </p>
                 <h3 className="mb-8 font-display text-subheading font-bold text-ff-near-black">
                   {whyHeading}
@@ -674,7 +692,7 @@ export function KombuchaBookingCard({
                   onClick={() => setShowInfo(false)}
                   className="rounded-full border-2 border-ff-border-light px-8 py-3 font-display text-body-sm font-semibold text-ff-gray-text transition-all duration-200 hover:bg-ff-warm-gray hover:text-ff-near-black"
                 >
-                  Details schließen
+                  {ui.closeDetailsLabel}
                 </button>
               </div>
             </div>

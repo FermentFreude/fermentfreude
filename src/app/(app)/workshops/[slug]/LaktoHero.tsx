@@ -1,6 +1,7 @@
 'use client'
 
 import { Media } from '@/components/Media'
+import { resolveAnyLocalizedText } from '@/utilities/resolveLocalizedString'
 import type { Media as MediaType } from '@/payload-types'
 import { useEffect, useRef, useState } from 'react'
 
@@ -46,14 +47,17 @@ export type LaktoHeroCMS = {
 export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
   // CMS values with English defaults
   const eyebrow = cms?.eyebrow ?? 'Workshop Experience'
-  const titleRaw = cms?.title ?? 'Die Kunst der\nLakto-Fermentation'
+  const titleRaw =
+    typeof cms?.title === 'string' && cms.title.trim()
+      ? cms.title
+      : 'Die Kunst der\nLakto-Fermentation'
   const titleLines = titleRaw.split('\n')
   const description =
     cms?.description ??
     'Verwandle frisches Gemüse in probiotische Köstlichkeiten — mit Salz, Zeit und der Magie nützlicher Bakterien.'
   const attributes =
     (cms?.attributes?.length ?? 0) > 0
-      ? cms!.attributes!.map((a) => a.text ?? '').filter(Boolean)
+      ? cms!.attributes!.map((a) => resolveAnyLocalizedText(a.text)).filter(Boolean)
       : ['3 Stunden', 'Hands-on', 'Experience']
 
   const heroImage =
@@ -171,7 +175,7 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
             style={{ transitionDelay: '750ms' }}
           >
             {attributes.map((attr, i) => (
-              <span key={attr} className="flex items-center gap-4">
+              <span key={`hero-attr-${i}`} className="flex items-center gap-4">
                 <span className="font-display text-[9px] font-semibold uppercase tracking-widest text-white/90">
                   {attr}
                 </span>
@@ -266,7 +270,7 @@ export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
             <div className="h-px w-full bg-white/20" />
             <div className="mt-4 flex items-center justify-between px-2">
               {attributes.map((attr, i) => (
-                <span key={attr} className="flex items-center gap-4">
+                <span key={`hero-attr-${i}`} className="flex items-center gap-4">
                   <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-white/90 xl:text-xs">
                     {attr}
                   </span>

@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
+import { useLocale } from '@/providers/Locale'
+
 /* ═══════════════════════════════════════════════════════════════
  *  LaktoFAQ — Booking-specific FAQ accordion
  *
@@ -17,6 +19,10 @@ export type LaktoFAQCMS = {
   title?: string | null
   description?: string | null
   items?: Array<{ question?: string | null; answer?: string | null }> | null
+  faqContactEmail?: string | null
+  faqContactPrompt?: string | null
+  faqContactLinkLabel?: string | null
+  faqContactHref?: string | null
 }
 
 type FAQItem = {
@@ -130,6 +136,9 @@ function AccordionItem({
 // ─── Main Component ─────────────────────────────────────────
 
 export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
+  const { locale } = useLocale()
+  const isDe = locale === 'de'
+
   // ── CMS values → fallback to hardcoded defaults ──
   const eyebrow = cms?.eyebrow ?? 'HÄUFIGE FRAGEN'
   const title = cms?.title ?? 'Gut zu wissen'
@@ -140,6 +149,12 @@ export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
     (cms?.items?.length ?? 0) > 0
       ? cms!.items!.map((item) => ({ question: item.question ?? '', answer: item.answer ?? '' }))
       : BOOKING_FAQ
+
+  const contactPrompt = cms?.faqContactPrompt ?? (isDe ? 'Noch Fragen?' : 'Still have questions?')
+  const contactLinkLabel = cms?.faqContactLinkLabel ?? (isDe ? 'Schreib uns' : 'Get in touch')
+  const contactHref =
+    cms?.faqContactHref ??
+    (cms?.faqContactEmail ? `mailto:${cms.faqContactEmail}` : '/contact')
 
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -204,12 +219,12 @@ export function LaktoFAQ({ cms }: { cms?: LaktoFAQCMS }) {
             style={{ transitionDelay: '500ms' }}
           >
             <p className="text-body text-ff-gray-text-light">
-              Noch Fragen?{' '}
+              {contactPrompt}{' '}
               <Link
-                href="/contact"
+                href={contactHref}
                 className="font-medium text-[#e6be68] underline decoration-[#e6be68]/30 underline-offset-4 transition-colors hover:text-ff-near-black hover:decoration-ff-near-black"
               >
-                Schreib uns
+                {contactLinkLabel}
               </Link>
             </p>
           </div>

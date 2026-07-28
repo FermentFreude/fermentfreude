@@ -11,6 +11,8 @@ import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import { getPayload, type TypedLocale } from 'payload'
 
+import { isWorkshopDetailPageKind } from '@/utilities/workshopPageUtils'
+
 import { notFound } from 'next/navigation'
 
 type Args = {
@@ -26,14 +28,17 @@ export default async function Page({ params }: Args) {
   const { slug = 'home' } = await params
   const locale = await getLocale()
 
-  if (WORKSHOP_SLUGS.includes(slug)) {
-    return notFound()
-  }
-
   const page = await queryPageBySlug({
     slug,
     locale,
   })
+
+  if (
+    WORKSHOP_SLUGS.includes(slug) ||
+    isWorkshopDetailPageKind(page?.pageKind)
+  ) {
+    return notFound()
+  }
 
   if (!page) {
     return notFound()

@@ -15,21 +15,11 @@ function getErrorMessage(error: unknown): string {
  *  date (soonest first). Returns formatted dates for booking cards.
  * ═══════════════════════════════════════════════════════════════ */
 
-export async function getWorkshopAppointments(workshopSlug: string): Promise<WorkshopDate[]> {
+/** @param dbSlug — slug in the `workshops` collection (e.g. lakto, tempeh, tst) */
+export async function getWorkshopAppointments(dbSlug: string): Promise<WorkshopDate[]> {
   try {
     const config = await configPromise
     const payload = await getPayload({ config })
-
-    // Map page slugs to workshop collection slugs
-    // Page: /workshops/lakto-gemuese → Workshop collection: slug='lakto'
-    const slugMap: Record<string, string> = {
-      'lakto-gemuese': 'lakto',
-      // Own workshop + appointments (Marktgarten) — no longer shares Lakto/Ginery slots
-      'vom-feld-ins-glas': 'vom-feld-ins-glas',
-      kombucha: 'kombucha',
-      tempeh: 'tempeh',
-    }
-    const dbSlug = slugMap[workshopSlug] || workshopSlug
 
     // First, find the workshop by slug
     const workshopResult = await payload.find({
@@ -41,7 +31,7 @@ export async function getWorkshopAppointments(workshopSlug: string): Promise<Wor
     })
 
     if (!workshopResult.docs.length) {
-      console.warn(`Workshop not found: ${workshopSlug} (mapped to: ${dbSlug})`)
+      console.warn(`Workshop not found for appointments: ${dbSlug}`)
       return []
     }
 
@@ -62,9 +52,7 @@ export async function getWorkshopAppointments(workshopSlug: string): Promise<Wor
       depth: 1, // Populate workshop relation
     })
 
-    console.log(
-      `✓ Found ${appointmentsResult.docs.length} appointments for ${workshopSlug} (DB slug: ${dbSlug})`,
-    )
+    console.log(`✓ Found ${appointmentsResult.docs.length} appointments for ${dbSlug}`)
 
     // ─── Lazy cleanup: cancel stale pending bookings ──────────────────────
     // Restores spots for users who abandoned their cart (tab close, etc.)
@@ -161,7 +149,7 @@ export async function getWorkshopAppointments(workshopSlug: string): Promise<Wor
       }
     })
   } catch (error) {
-    console.warn(`Skipping appointments for ${workshopSlug}: ${getErrorMessage(error)}`)
+    console.warn(`Skipping appointments for ${dbSlug}: ${getErrorMessage(error)}`)
     return []
   }
 }

@@ -8,6 +8,8 @@
  *       pnpm seed kombucha --force   (overwrite existing content)
  */
 import config from '@payload-config'
+import type { Page } from '@/payload-types'
+import type { FlattenedWorkshopDetail } from '@/utilities/workshopPageUtils'
 import { getPayload } from 'payload'
 
 const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
@@ -293,9 +295,11 @@ async function seedKombucha() {
 
     const page = existing.docs[0]
 
+    const pageDetail = page.workshopDetail as FlattenedWorkshopDetail | undefined
+
     // Check if workshopDetail already exists
     if (!isForce && page.workshopDetail) {
-      const hasExperienceCards = page.workshopDetail.experienceCards?.length ?? 0
+      const hasExperienceCards = pageDetail?.experienceCards?.length ?? 0
       if (hasExperienceCards > 0) {
         payload.logger.info(
           '⏭️  Page already has experienceCards. Skipping. Use --force to overwrite.',
@@ -321,7 +325,7 @@ async function seedKombucha() {
       collection: 'pages',
       id: pageId,
       locale: 'de',
-      data: { workshopDetail: deSaveData },
+      data: { workshopDetail: deSaveData as unknown as Page['workshopDetail'] },
       context: ctx,
     })
 
@@ -337,8 +341,17 @@ async function seedKombucha() {
       depth: 0,
     })
 
+    type ExperienceCardSeed = {
+      image?: string | null
+      eyebrow?: string
+      title?: string
+      description?: string
+      id?: string
+    }
+
     const deExperienceCardsWithIds: Array<Record<string, unknown>> = []
-    for (const card of deDoc.workshopDetail?.experienceCards ?? []) {
+    const deDetail = deDoc.workshopDetail as FlattenedWorkshopDetail | undefined
+    for (const card of (deDetail?.experienceCards ?? []) as ExperienceCardSeed[]) {
       let mediaId = null
 
       if (card.image === 'FF-Vorschau-90') {
@@ -376,7 +389,7 @@ async function seedKombucha() {
       collection: 'pages',
       id: pageId,
       locale: 'de',
-      data: { workshopDetail: deFullData },
+      data: { workshopDetail: deFullData as unknown as Page['workshopDetail'] },
       context: ctx,
     })
 
@@ -397,7 +410,7 @@ async function seedKombucha() {
       collection: 'pages',
       id: pageId,
       locale: 'en',
-      data: { workshopDetail: enSaveData },
+      data: { workshopDetail: enSaveData as unknown as Page['workshopDetail'] },
       context: ctx,
     })
 

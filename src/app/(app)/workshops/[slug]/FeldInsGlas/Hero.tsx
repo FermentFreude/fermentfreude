@@ -66,7 +66,11 @@ export function FeldInsGlasHero({
         } transition-all duration-700`}
         style={{ transitionDelay: '380ms' }}
       >
-        <EditionSeal ringText={copy.sealRingText} size={148} />
+        <EditionSeal
+          ringText={copy.sealRingText}
+          centerText={copy.sealCenterText}
+          size={148}
+        />
       </div>
 
       <div className="relative z-10 max-w-3xl px-6 pb-16 pt-32 sm:px-10 lg:px-16 lg:pb-24 xl:px-24">
