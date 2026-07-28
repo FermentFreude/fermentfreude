@@ -107,6 +107,22 @@ export const Pages: CollectionConfig = {
     /** Slug before tabs so tab conditions and editors reliably see it (sidebar row). */
     slugField(),
     {
+      name: 'pageKind',
+      type: 'select',
+      defaultValue: 'content',
+      options: [
+        { label: 'Regular CMS Page', value: 'content' },
+        { label: 'Workshops Overview (/workshops)', value: 'workshop-overview' },
+        { label: 'Workshop Detail (Standard UI)', value: 'workshop-detail' },
+        { label: 'Special Workshop (Custom UI)', value: 'special-workshop' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description:
+          'Set to “Workshop Detail” when creating a new bookable workshop page. Controls which tabs appear and routes the page to /workshops/[slug].',
+      },
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -2220,7 +2236,8 @@ export const Pages: CollectionConfig = {
               'Content for the Workshops overview page (/workshops). Only applies when slug is "workshops". Each shared section defaults to its Website global — toggle "Customize" to override for this page only.',
             condition: (data, siblingData) => {
               const slug = data?.slug ?? siblingData?.slug
-              return slug === 'workshops'
+              const pageKind = data?.pageKind ?? siblingData?.pageKind
+              return slug === 'workshops' || pageKind === 'workshop-overview'
             },
           },
           fields: workshopOverviewFields,
@@ -2230,11 +2247,14 @@ export const Pages: CollectionConfig = {
           label: 'Workshop Detail',
           admin: {
             description:
-              'All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, kombucha, and vom-feld-ins-glas.',
+              'Editable content for /workshops/[slug]: hero, booking, calendar, FAQ, voucher. Set Page Kind to “Workshop Detail” for new workshops.',
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_WORKSHOP_CONDITION === '1') return false
               const slug = data?.slug ?? siblingData?.slug
+              const pageKind = data?.pageKind ?? siblingData?.pageKind
               return (
+                pageKind === 'workshop-detail' ||
+                pageKind === 'special-workshop' ||
                 slug === 'lakto-gemuese' ||
                 slug === 'tempeh' ||
                 slug === 'kombucha' ||

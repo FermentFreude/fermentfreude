@@ -9,6 +9,53 @@ import type { Field } from 'payload'
  * expand a block to edit its copy. There is no separate "Edit text & images" area.
  */
 export const workshopDetailFields: Field[] = [
+  // ── Template settings ─────────────────────────────────────
+  {
+    name: 'layoutTemplate',
+    type: 'select',
+    label: 'Page Template',
+    defaultValue: 'standard',
+    options: [
+      {
+        label: 'Standard (Lakto / Tempeh / Kombucha layout)',
+        value: 'standard',
+      },
+      {
+        label: 'Special (Custom editorial — e.g. Vom Feld ins Glas)',
+        value: 'special',
+      },
+    ],
+    admin: {
+      description:
+        'Standard = reusable workshop layout with booking, FAQ, voucher. Special = fully custom editorial layout (developer-only).',
+    },
+  },
+  {
+    name: 'heroStyle',
+    type: 'select',
+    label: 'Hero Style',
+    defaultValue: 'default',
+    options: [
+      { label: 'Default (neutral)', value: 'default' },
+      { label: 'Lakto (sage green)', value: 'lakto' },
+      { label: 'Tempeh (warm cream)', value: 'tempeh' },
+      { label: 'Kombucha (cool teal)', value: 'kombucha' },
+    ],
+    admin: {
+      condition: (_data, siblingData) => siblingData?.layoutTemplate !== 'special',
+      description: 'Visual theme for the hero section. Default works for new workshops.',
+    },
+  },
+  {
+    name: 'workshopDbSlug',
+    type: 'text',
+    label: 'Booking Slug (database)',
+    admin: {
+      condition: (_data, siblingData) => siblingData?.layoutTemplate !== 'special',
+      description:
+        'Slug in Workshops collection for appointments & cart. Leave empty if same as page slug (e.g. lakto-gemuese → "lakto" is automatic). Only set for new workshop pages when the page slug differs from the Workshops record.',
+    },
+  },
   // ── Page Sections — drag to reorder, expand to edit content ──
   {
     name: 'pageSections',
@@ -529,6 +576,22 @@ export const workshopDetailFields: Field[] = [
                 admin: { description: 'e.g. "Zucchini-Pickels"' },
               },
             ],
+          },
+        ],
+      },
+      {
+        slug: 'calendar',
+        labels: { singular: 'Seasonal Calendar', plural: 'Seasonal Calendar' },
+        fields: [
+          {
+            name: 'enabled',
+            type: 'checkbox',
+            label: 'Show on page',
+            defaultValue: false,
+            admin: {
+              description:
+                'Shows the seasonal Fermentkalender. Month/recipe content is edited in “Seasonal calendar — months” below.',
+            },
           },
         ],
       },

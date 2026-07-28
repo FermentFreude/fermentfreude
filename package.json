@@ -21,6 +21,7 @@
     "upload:email-icons": "node --env-file=.env scripts/upload-email-icons-to-r2.mjs",
     "upload:email-icons:dry": "node scripts/upload-email-icons-to-r2.mjs --dry-run",
     "seed:placeholders": "npx tsx src/scripts/generate-placeholder-images.ts",
+    "sync-prod": "bash scripts/sync-prod-to-staging.sh",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "stripe-webhooks": "stripe listen --forward-to localhost:3000/api/stripe/webhooks",

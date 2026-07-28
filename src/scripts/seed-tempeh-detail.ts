@@ -14,6 +14,8 @@
  *       pnpm seed tempeh-detail --force   (overwrite existing text content)
  */
 import config from '@payload-config'
+import type { Page } from '@/payload-types'
+import type { FlattenedWorkshopDetail } from '@/utilities/workshopPageUtils'
 import { getPayload } from 'payload'
 
 const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
@@ -517,7 +519,7 @@ async function seedTempehDetail() {
       collection: 'pages',
       id: pageId,
       locale: 'de',
-      data: { workshopDetail: workshopDetailDE },
+      data: { workshopDetail: workshopDetailDE as unknown as Page['workshopDetail'] },
       context: ctx,
     })
 
@@ -529,21 +531,23 @@ async function seedTempehDetail() {
       depth: 0,
     })
 
+    const deDetail = dePage.workshopDetail as FlattenedWorkshopDetail | undefined
+
     // STEP 3: Merge English data (reuse any IDs from German)
     const mergedEN = {
       ...workshopDetailEN,
       // Preserve any generated IDs from German arrays
-      heroAttributes: dePage.workshopDetail?.heroAttributes?.map((attr, i) => ({
+      heroAttributes: deDetail?.heroAttributes?.map((attr, i) => ({
         ...workshopDetailEN.heroAttributes?.[i],
-        id: attr.id,
+        id: (attr as { id?: string }).id,
       })),
-      voucherPills: dePage.workshopDetail?.voucherPills?.map((pill, i) => ({
+      voucherPills: deDetail?.voucherPills?.map((pill, i) => ({
         ...workshopDetailEN.voucherPills?.[i],
-        id: pill.id,
+        id: (pill as { id?: string }).id,
       })),
-      faqItems: dePage.workshopDetail?.faqItems?.map((item, i) => ({
+      faqItems: deDetail?.faqItems?.map((item, i) => ({
         ...workshopDetailEN.faqItems?.[i],
-        id: item.id,
+        id: (item as { id?: string }).id,
       })),
     }
 
@@ -553,7 +557,7 @@ async function seedTempehDetail() {
       collection: 'pages',
       id: pageId,
       locale: 'en',
-      data: { workshopDetail: mergedEN },
+      data: { workshopDetail: mergedEN as unknown as Page['workshopDetail'] },
       context: ctx,
     })
 
@@ -565,10 +569,11 @@ async function seedTempehDetail() {
       depth: 0,
     })
 
+    const currentDetail = currentPage.workshopDetail as FlattenedWorkshopDetail | undefined
     const hasHowToArticles =
-      currentPage.workshopDetail?.howToArticles &&
-      Array.isArray(currentPage.workshopDetail.howToArticles) &&
-      currentPage.workshopDetail.howToArticles.length > 0
+      currentDetail?.howToArticles &&
+      Array.isArray(currentDetail.howToArticles) &&
+      currentDetail.howToArticles.length > 0
 
     if (!hasHowToArticles) {
       console.log(`[${new Date().toLocaleTimeString()}] Linking tempeh articles...`)
@@ -590,7 +595,12 @@ async function seedTempehDetail() {
           collection: 'pages',
           id: pageId,
           locale: 'de',
-          data: { workshopDetail: { ...workshopDetailDE, howToArticles: postIds } },
+          data: {
+            workshopDetail: {
+              ...workshopDetailDE,
+              howToArticles: postIds,
+            } as unknown as Page['workshopDetail'],
+          },
           context: ctx,
         })
 
@@ -598,7 +608,9 @@ async function seedTempehDetail() {
           collection: 'pages',
           id: pageId,
           locale: 'en',
-          data: { workshopDetail: { ...mergedEN, howToArticles: postIds } },
+          data: {
+            workshopDetail: { ...mergedEN, howToArticles: postIds } as unknown as Page['workshopDetail'],
+          },
           context: ctx,
         })
 

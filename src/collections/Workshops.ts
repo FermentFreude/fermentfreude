@@ -2,6 +2,12 @@ import { adminOnly } from '@/access/adminOnly'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import type { CollectionConfig } from 'payload'
 
+import {
+  revalidateWorkshopsNav,
+  revalidateWorkshopsNavAfterDelete,
+} from './Workshops/hooks/revalidateWorkshopsNav'
+import { provisionWorkshopOnSave } from './Workshops/hooks/provisionWorkshopOnSave'
+
 export const Workshops: CollectionConfig = {
   slug: 'workshops',
   access: {
@@ -11,15 +17,26 @@ export const Workshops: CollectionConfig = {
     delete: adminOnly,
   },
   hooks: {
-    afterChange: [autoTranslateCollection],
+    afterChange: [provisionWorkshopOnSave, autoTranslateCollection, revalidateWorkshopsNav],
+    afterDelete: [revalidateWorkshopsNavAfterDelete],
   },
   admin: {
     useAsTitle: 'title',
     group: 'Workshops',
     defaultColumns: ['title', 'basePrice', 'maxCapacityPerSlot', 'isActive'],
-    description: 'Define workshop metadata. Price and capacity apply to all dates and locations.',
+    description:
+      'Create a workshop here — saving automatically creates the shop product and public page. Then add appointment dates and customize content on the page.',
   },
   fields: [
+    {
+      name: 'setupChecklist',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/admin/WorkshopSetupChecklist#WorkshopSetupChecklist',
+        },
+      },
+    },
     {
       name: 'slug',
       type: 'text',

@@ -736,6 +736,10 @@ export interface Page {
   generateSlug?: boolean | null;
   slug: string;
   /**
+   * Set to “Workshop Detail” when creating a new bookable workshop page. Controls which tabs appear and routes the page to /workshops/[slug].
+   */
+  pageKind?: ('content' | 'workshop-overview' | 'workshop-detail' | 'special-workshop') | null;
+  /**
    * The large banner at the top of the page.
    */
   hero: {
@@ -1834,9 +1838,21 @@ export interface Page {
       | null;
   };
   /**
-   * All editable content for the workshop detail page (Hero, Calendar, Voucher, FAQ, How-To Articles). Available for lakto-gemuese, tempeh, kombucha, and vom-feld-ins-glas.
+   * Editable content for /workshops/[slug]: hero, booking, calendar, FAQ, voucher. Set Page Kind to “Workshop Detail” for new workshops.
    */
   workshopDetail?: {
+    /**
+     * Standard = reusable workshop layout with booking, FAQ, voucher. Special = fully custom editorial layout (developer-only).
+     */
+    layoutTemplate?: ('standard' | 'special') | null;
+    /**
+     * Visual theme for the hero section. Default works for new workshops.
+     */
+    heroStyle?: ('default' | 'lakto' | 'tempeh' | 'kombucha') | null;
+    /**
+     * Slug in Workshops collection for appointments & cart. Leave empty if same as page slug (e.g. lakto-gemuese → enter "lakto").
+     */
+    workshopDbSlug?: string | null;
     /**
      * Drag to reorder. Expand a section to edit its content.
      */
@@ -2087,6 +2103,15 @@ export interface Page {
               id?: string | null;
               blockName?: string | null;
               blockType: 'recipePlan';
+            }
+          | {
+              /**
+               * Shows the seasonal Fermentkalender. Month/recipe content is edited in “Seasonal calendar — months” below.
+               */
+              enabled?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'calendar';
             }
           | {
               enabled?: boolean | null;
@@ -4352,7 +4377,7 @@ export interface Post {
   createdAt: string;
 }
 /**
- * Define workshop metadata. Price and capacity apply to all dates and locations.
+ * Create a workshop here — saving automatically creates the shop product and public page. Then add appointment dates and customize content on the page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "workshops".
@@ -5425,6 +5450,7 @@ export interface PagesSelect<T extends boolean = true> {
   publishedOn?: T;
   generateSlug?: T;
   slug?: T;
+  pageKind?: T;
   hero?:
     | T
     | {
@@ -5925,6 +5951,9 @@ export interface PagesSelect<T extends boolean = true> {
   workshopDetail?:
     | T
     | {
+        layoutTemplate?: T;
+        heroStyle?: T;
+        workshopDbSlug?: T;
         pageSections?:
           | T
           | {
@@ -6037,6 +6066,13 @@ export interface PagesSelect<T extends boolean = true> {
                           name?: T;
                           id?: T;
                         };
+                    id?: T;
+                    blockName?: T;
+                  };
+              calendar?:
+                | T
+                | {
+                    enabled?: T;
                     id?: T;
                     blockName?: T;
                   };

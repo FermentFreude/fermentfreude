@@ -16,6 +16,8 @@ import {
   dropdownItemIsInactive,
   getDefaultDropdownKey,
 } from './nav-defaults'
+import type { NavWorkshopItem } from '@/utilities/mergeWorkshopNavDropdown'
+import { withDynamicWorkshopLinks } from '@/utilities/mergeWorkshopNavDropdown'
 
 const MOBILE_AUTH = {
   de: {
@@ -38,6 +40,7 @@ interface Props {
   setIsActive: (v: boolean) => void
   headerHeight?: number
   locale: 'de' | 'en'
+  navWorkshops: NavWorkshopItem[]
 }
 
 interface NavOverlayItem {
@@ -57,7 +60,14 @@ interface NavOverlayItem {
  * - Per-character reveal animations
  * - Smooth transitions
  */
-export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, locale }: Props) {
+export function MobileMenu({
+  menu,
+  isActive,
+  setIsActive,
+  headerHeight = 0,
+  locale,
+  navWorkshops,
+}: Props) {
   const { user } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
@@ -85,7 +95,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, loca
   const auth = locale === 'de' ? MOBILE_AUTH.de : MOBILE_AUTH.en
 
   // Build nav items list
-  const navItemsList = buildNavItems(menu, !!hasRealCMSItems, locale)
+  const navItemsList = buildNavItems(menu, !!hasRealCMSItems, locale, navWorkshops)
 
   // Close on route change
   useEffect(() => {
@@ -551,6 +561,7 @@ function buildNavItems(
   menu: Header['navItems'] | null,
   hasRealCMSItems: boolean,
   locale: 'de' | 'en',
+  navWorkshops: NavWorkshopItem[],
 ): NavOverlayItem[] {
   const items: NavOverlayItem[] = []
   const defaultDropdowns = getDefaultDropdowns(locale)
@@ -573,7 +584,7 @@ function buildNavItems(
       const cmsDropdownItems = item.dropdownItems
       const defaultKey = getDefaultDropdownKey(label, url)
 
-      const dropdownItems =
+      const dropdownItems = withDynamicWorkshopLinks(
         cmsDropdownItems && cmsDropdownItems.length > 0
           ? cmsDropdownItems.map((dropdownItem) => ({
               ...dropdownItem,
@@ -581,7 +592,10 @@ function buildNavItems(
             }))
           : defaultKey
             ? defaultDropdowns[defaultKey]
-            : null
+            : null,
+        navWorkshops,
+        defaultKey,
+      )
 
       const parentItem: NavOverlayItem = { id: String(item.id), label, href: url }
 
@@ -603,7 +617,12 @@ function buildNavItems(
       const parentItem: NavOverlayItem = { id: item.url, label: item.label, href: item.url }
 
       if (item.dropdownItems && item.dropdownItems.length > 0) {
-        parentItem.children = item.dropdownItems.map((sub) => ({
+        const merged = withDynamicWorkshopLinks(
+          item.dropdownItems,
+          navWorkshops,
+          item.dropdownKey || null,
+        )
+        parentItem.children = (merged ?? item.dropdownItems).map((sub) => ({
           id: `${item.url}-${sub.href}`,
           label: sub.label,
           href: sub.href,

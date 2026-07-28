@@ -3,6 +3,7 @@
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { cn } from '@/utilities/cn'
+import { resolveLocalizedString } from '@/utilities/resolveLocalizedString'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { useLocale } from '@/providers/Locale'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -161,57 +162,65 @@ export function LaktoBookingCard({
     locationAddress?: string | null
   }
 }) {
+  const { locale } = useLocale()
+  const localeKey = locale === 'en' ? 'en' : 'de'
+  const asText = (value: unknown, fallback: string) =>
+    resolveLocalizedString(value, localeKey) ?? fallback
+
   // ── CMS values → fallback to workshop-data.ts defaults ──
-  const bookingEyebrow = cms?.bookingEyebrow ?? workshop.subtitle.toUpperCase()
-  const bookingTitle = cms?.bookingTitle ?? workshop.title
+  const bookingEyebrow = asText(cms?.bookingEyebrow, workshop.subtitle.toUpperCase())
+  const bookingTitle = asText(cms?.bookingTitle, workshop.title)
   const price = cms?.bookingPrice ?? workshop.price
-  const priceSuffix = cms?.bookingPriceSuffix ?? workshop.priceSuffix
-  const currency = cms?.bookingCurrency ?? workshop.currency
+  const priceSuffix = asText(cms?.bookingPriceSuffix, workshop.priceSuffix)
+  const currency = asText(cms?.bookingCurrency, workshop.currency)
   const bookingImage = cms?.bookingImage
   const bookingAttributes =
     (cms?.bookingAttributes?.length ?? 0) > 0
-      ? cms!.bookingAttributes!.map((a) => a.text ?? '').filter(Boolean)
+      ? cms!.bookingAttributes!.map((a) => asText(a.text, '')).filter(Boolean)
       : ['3 Stunden', 'Hands-on', 'Experience', 'Max. 12 Personen']
-  const viewDatesLabel = cms?.bookingViewDatesLabel ?? workshop.viewDatesLabel
-  const hideDatesLabel = cms?.bookingHideDatesLabel ?? workshop.hideDatesLabel
-  const moreDetailsLabel = cms?.bookingMoreDetailsLabel ?? workshop.moreInfoLabel
+  const viewDatesLabel = asText(cms?.bookingViewDatesLabel, workshop.viewDatesLabel)
+  const hideDatesLabel = asText(cms?.bookingHideDatesLabel, workshop.hideDatesLabel)
+  const moreDetailsLabel = asText(cms?.bookingMoreDetailsLabel, workshop.moreInfoLabel)
 
-  const aboutHeading = cms?.aboutHeading ?? workshop.aboutHeading
-  const aboutText = cms?.aboutText ?? workshop.aboutText
-  const scheduleHeading = cms?.scheduleHeading ?? workshop.scheduleHeading
+  const aboutHeading = asText(cms?.aboutHeading, workshop.aboutHeading)
+  const aboutText = asText(cms?.aboutText, workshop.aboutText)
+  const scheduleHeading = asText(cms?.scheduleHeading, workshop.scheduleHeading)
   const scheduleItems =
     (cms?.schedule?.length ?? 0) > 0
       ? cms!.schedule!.map((s) => ({
-          duration: s.duration ?? '',
-          title: s.title ?? '',
-          description: s.description ?? '',
+          duration: asText(s.duration, ''),
+          title: asText(s.title, ''),
+          description: asText(s.description, ''),
         }))
       : workshop.schedule
-  const includedHeading = cms?.includedHeading ?? workshop.includedHeading
+  const includedHeading = asText(cms?.includedHeading, workshop.includedHeading)
   const includedItems =
     (cms?.includedItems?.length ?? 0) > 0
-      ? cms!.includedItems!.map((item) => ({ text: item.text ?? '' }))
+      ? cms!.includedItems!.map((item) => ({ text: asText(item.text, '') }))
       : workshop.includedItems
-  const whyHeading = cms?.whyHeading ?? workshop.whyHeading
+  const whyHeading = asText(cms?.whyHeading, workshop.whyHeading)
   const whyPoints =
     (cms?.whyPoints?.length ?? 0) > 0
-      ? cms!.whyPoints!.map((p) => ({ bold: p.bold ?? '', rest: p.rest ?? '' }))
+      ? cms!.whyPoints!.map((p) => ({
+          bold: asText(p.bold, ''),
+          rest: asText(p.rest, ''),
+        }))
       : workshop.whyPoints
 
-  const experienceEyebrow = cms?.experienceEyebrow ?? 'WAS DICH ERWARTET'
-  const experienceTitle = cms?.experienceTitle ?? 'Dein Workshop-Erlebnis'
+  const experienceEyebrow = asText(cms?.experienceEyebrow, 'WAS DICH ERWARTET')
+  const experienceTitle = asText(cms?.experienceTitle, 'Dein Workshop-Erlebnis')
   // Explicit empty array = hide section. Undefined = use hardcoded defaults.
   const experienceCardsData =
     cms?.experienceCards != null
       ? cms.experienceCards.map((c) => ({
           image: c.image,
-          eyebrow: c.eyebrow ?? '',
-          title: c.title ?? '',
-          description: c.description ?? '',
+          eyebrow: asText(c.eyebrow, ''),
+          title: asText(c.title, ''),
+          description: asText(c.description, ''),
         }))
       : EXPERIENCE_CARDS.map((c) => ({ ...c, image: undefined as unknown }))
 
-  const datesHeading = cms?.datesHeading ?? workshop.datesHeading
+  const datesHeading = asText(cms?.datesHeading, workshop.datesHeading)
   const cmsDates: WorkshopDate[] =
     (cms?.dates?.length ?? 0) > 0
       ? cms!.dates!.map((d, i) => ({
@@ -230,14 +239,14 @@ export function LaktoBookingCard({
     title: bookingTitle,
     price,
     currency,
-    confirmHeading: cms?.modalConfirmHeading ?? workshop.confirmHeading,
-    confirmSubheading: cms?.modalConfirmSubheading ?? workshop.confirmSubheading,
-    workshopLabel: cms?.modalWorkshopLabel ?? workshop.workshopLabel,
-    dateLabel: cms?.modalDateLabel ?? workshop.dateLabel,
-    timeLabel: cms?.modalTimeLabel ?? workshop.timeLabel,
-    totalLabel: cms?.modalTotalLabel ?? workshop.totalLabel,
-    cancelLabel: cms?.modalCancelLabel ?? workshop.cancelLabel,
-    confirmLabel: cms?.modalConfirmLabel ?? workshop.confirmLabel,
+    confirmHeading: asText(cms?.modalConfirmHeading, workshop.confirmHeading),
+    confirmSubheading: asText(cms?.modalConfirmSubheading, workshop.confirmSubheading),
+    workshopLabel: asText(cms?.modalWorkshopLabel, workshop.workshopLabel),
+    dateLabel: asText(cms?.modalDateLabel, workshop.dateLabel),
+    timeLabel: asText(cms?.modalTimeLabel, workshop.timeLabel),
+    totalLabel: asText(cms?.modalTotalLabel, workshop.totalLabel),
+    cancelLabel: asText(cms?.modalCancelLabel, workshop.cancelLabel),
+    confirmLabel: asText(cms?.modalConfirmLabel, workshop.confirmLabel),
   }
 
   const [showDates, setShowDates] = useState(false)
@@ -248,7 +257,6 @@ export function LaktoBookingCard({
   const datesRef = useRef<HTMLDivElement>(null)
   const infoRef = useRef<HTMLDivElement>(null)
   const { addItem, clearCart } = useCart()
-  const { locale } = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
 

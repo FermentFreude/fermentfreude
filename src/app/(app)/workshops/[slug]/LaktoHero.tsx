@@ -46,7 +46,10 @@ export type LaktoHeroCMS = {
 export function LaktoHero({ cms }: { cms?: LaktoHeroCMS }) {
   // CMS values with English defaults
   const eyebrow = cms?.eyebrow ?? 'Workshop Experience'
-  const titleRaw = cms?.title ?? 'Die Kunst der\nLakto-Fermentation'
+  const titleRaw =
+    typeof cms?.title === 'string' && cms.title.trim()
+      ? cms.title
+      : 'Die Kunst der\nLakto-Fermentation'
   const titleLines = titleRaw.split('\n')
   const description =
     cms?.description ??
