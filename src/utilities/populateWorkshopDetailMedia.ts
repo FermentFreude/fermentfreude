@@ -1,17 +1,17 @@
 import type { Media } from '@/payload-types'
 
 import { getMediaByIds } from '@/utilities/getMediaByIds'
-import { filterValidObjectIds, isValidObjectId } from '@/utilities/isValidObjectId'
+import { filterValidObjectIds, objectIdToString } from '@/utilities/isValidObjectId'
 
 function getMediaId(value: unknown): string | null {
-  if (isValidObjectId(value)) return value
+  const direct = objectIdToString(value)
+  if (direct) return direct
   if (
     typeof value === 'object' &&
     value !== null &&
-    'id' in value &&
-    isValidObjectId((value as { id: unknown }).id)
+    'id' in value
   ) {
-    return (value as { id: string }).id
+    return objectIdToString((value as { id: unknown }).id)
   }
   return null
 }

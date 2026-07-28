@@ -413,7 +413,8 @@ const workshopDetailEN = {
 // so Payload updates existing rows instead of creating duplicates.
 const BLOCK_ARRAY_FIELDS: Record<string, string[]> = {
   hero: ['heroAttributes'],
-  booking: ['bookingAttributes', 'schedule', 'includedItems', 'whyPoints', 'experienceCards'],
+  whatToExpect: ['experienceCards'],
+  booking: ['bookingAttributes', 'schedule', 'includedItems', 'whyPoints'],
   recipePlan: ['recipePlanRecipes'],
   faq: ['faqItems'],
   voucher: ['voucherPills'],

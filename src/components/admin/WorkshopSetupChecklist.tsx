@@ -148,7 +148,7 @@ export function WorkshopSetupChecklist() {
             ok={status.hasPage}
             label={`Public page (${status.publicUrl})`}
             href={status.pageAdminUrl}
-            hint="Standard workshop UI — edit hero, FAQ, booking text here"
+            hint="Standard workshop UI — edit Hero image, What to Expect cards, booking text & FAQ here"
           />
           <StatusRow
             ok={status.hasAppointments}

@@ -11,6 +11,12 @@ import { useEffect, useRef, useState } from 'react'
 import { BookingModal } from './BookingModal'
 import { addWorkshopToCart } from './add-to-cart-utils'
 import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
+import {
+  formatTemplate,
+  mergeWorkshopForModal,
+  resolveBookingUILabels,
+  type WorkshopBookingUILabelsCMS,
+} from './workshop-booking-labels'
 
 /* ═══════════════════════════════════════════════════════════════
  *  LaktoBookingCard — Modern booking experience
@@ -21,7 +27,7 @@ import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
 
 // ─── CMS Props Type ─────────────────────────────────────────
 
-export type LaktoBookingCMS = {
+export type LaktoBookingCMS = WorkshopBookingUILabelsCMS & {
   bookingEyebrow?: string | null
   bookingTitle?: string | null
   bookingPrice?: number | null
@@ -69,6 +75,7 @@ export type LaktoBookingCMS = {
   modalTotalLabel?: string | null
   modalCancelLabel?: string | null
   modalConfirmLabel?: string | null
+  showExperienceSection?: boolean | null
 }
 
 function isResolvedMedia(img: unknown): img is MediaType {
@@ -207,6 +214,13 @@ export function LaktoBookingCard({
         }))
       : workshop.whyPoints
 
+  const ui = resolveBookingUILabels(cms, localeKey, {
+    aboutHeading,
+    scheduleHeading,
+    includedHeading,
+    whyHeading,
+  })
+
   const experienceEyebrow = asText(cms?.experienceEyebrow, 'WAS DICH ERWARTET')
   const experienceTitle = asText(cms?.experienceTitle, 'Dein Workshop-Erlebnis')
   // Explicit empty array = hide section. Undefined = use hardcoded defaults.
@@ -233,20 +247,14 @@ export function LaktoBookingCard({
         }))
       : []
 
+  const showExperienceSection = cms?.showExperienceSection !== false
+
   // Build merged workshop for BookingModal
-  const mergedWorkshop: WorkshopDetailData = {
-    ...workshop,
+  const mergedWorkshop = {
+    ...mergeWorkshopForModal(workshop, cms, localeKey),
     title: bookingTitle,
     price,
     currency,
-    confirmHeading: asText(cms?.modalConfirmHeading, workshop.confirmHeading),
-    confirmSubheading: asText(cms?.modalConfirmSubheading, workshop.confirmSubheading),
-    workshopLabel: asText(cms?.modalWorkshopLabel, workshop.workshopLabel),
-    dateLabel: asText(cms?.modalDateLabel, workshop.dateLabel),
-    timeLabel: asText(cms?.modalTimeLabel, workshop.timeLabel),
-    totalLabel: asText(cms?.modalTotalLabel, workshop.totalLabel),
-    cancelLabel: asText(cms?.modalCancelLabel, workshop.cancelLabel),
-    confirmLabel: asText(cms?.modalConfirmLabel, workshop.confirmLabel),
   }
 
   const [showDates, setShowDates] = useState(false)
@@ -359,9 +367,9 @@ export function LaktoBookingCard({
 
                 {/* Attributes strip */}
                 <div className="mt-6 flex flex-wrap items-center gap-3">
-                  {bookingAttributes.map((attr) => (
+                  {bookingAttributes.map((attr, i) => (
                     <span
-                      key={attr}
+                      key={`booking-attr-${i}`}
                       className="rounded-full border border-white/20 px-4 py-1.5 font-display text-[10px] font-bold uppercase tracking-widest text-white/80"
                     >
                       {attr}
@@ -380,7 +388,7 @@ export function LaktoBookingCard({
                       className="font-display text-sm font-bold uppercase tracking-[0.2em] opacity-20"
                       style={{ color: accentColor }}
                     >
-                      Workshop Impression
+                      {ui.bookingImagePlaceholder}
                     </span>
                   </div>
                 )}
@@ -427,7 +435,7 @@ export function LaktoBookingCard({
                 <button
                   onClick={() => setShowDates(false)}
                   className="rounded-full p-2 text-[#9a9a9a] transition-colors hover:bg-[#f5f1e8] hover:text-[#1a1a1a]"
-                  aria-label="Termine schließen"
+                  aria-label={ui.closeDatesLabel}
                 >
                   <svg
                     className="size-5"
@@ -444,7 +452,7 @@ export function LaktoBookingCard({
               <div className="space-y-3 sm:space-y-4">
                 {cmsDates.length === 0 ? (
                   <p className="py-8 text-center font-display text-sm text-[#9a9a9a]">
-                    Aktuell keine Termine geplant — schau bald wieder vorbei.
+                    {ui.noDatesMessage}
                   </p>
                 ) : (
                   cmsDates.map((d) => {
@@ -463,7 +471,7 @@ export function LaktoBookingCard({
                         {/* Date */}
                         <div>
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                            Datum
+                            {ui.dateColumn}
                           </p>
                           <p className="font-display font-bold text-base text-[#1a1a1a]">
                             {d.date}
@@ -473,7 +481,7 @@ export function LaktoBookingCard({
                         {/* Time */}
                         <div>
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                            Zeit
+                            {ui.timeColumn}
                           </p>
                           <div
                             className="flex items-center gap-2 text-sm"
@@ -499,10 +507,10 @@ export function LaktoBookingCard({
                         {/* Availability */}
                         <div>
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                            Plätze frei
+                            {ui.spotsColumn}
                           </p>
                           <p className="font-display font-bold text-base text-[#1a1a1a]">
-                            {isSoldOut ? 'Ausgebucht' : `${d.spotsLeft} Plätze`}
+                            {isSoldOut ? ui.soldOutLabel : `${d.spotsLeft} ${ui.spotsLabel}`}
                           </p>
                         </div>
 
@@ -512,7 +520,7 @@ export function LaktoBookingCard({
                             type="button"
                             onClick={() => !isSoldOut && setBookingDate(d)}
                             disabled={isSoldOut}
-                            aria-label={isSoldOut ? 'Ausgebucht' : '→ Buchen'}
+                            aria-label={isSoldOut ? ui.soldOutLabel : `→ ${ui.bookLabel}`}
                             className={`inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
                               isSoldOut
                                 ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
@@ -520,7 +528,7 @@ export function LaktoBookingCard({
                             }`}
                             style={isSoldOut ? undefined : { backgroundColor: accentColor }}
                           >
-                            {isSoldOut ? 'Ausgebucht' : '→ Buchen'}
+                            {isSoldOut ? ui.soldOutLabel : `→ ${ui.bookLabel}`}
                           </button>
                         </div>
                       </div>
@@ -545,7 +553,7 @@ export function LaktoBookingCard({
               {/* About */}
               <div>
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  ÜBER DEN WORKSHOP
+                  {ui.detailsAboutEyebrow}
                 </p>
                 <h3 className="mb-4 font-display text-subheading font-bold text-ff-near-black">
                   {aboutHeading}
@@ -558,7 +566,7 @@ export function LaktoBookingCard({
               {/* Schedule */}
               <div>
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  ABLAUF
+                  {ui.detailsScheduleEyebrow}
                 </p>
                 <h3 className="mb-8 font-display text-subheading font-bold text-ff-near-black">
                   {scheduleHeading}
@@ -597,7 +605,7 @@ export function LaktoBookingCard({
               {/* Included */}
               <div>
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  IM PREIS ENTHALTEN
+                  {ui.detailsIncludedEyebrow}
                 </p>
                 <h3 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
                   {includedHeading}
@@ -625,7 +633,7 @@ export function LaktoBookingCard({
                 style={{ backgroundColor: '#F6F0E8' }}
               >
                 <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  DARUM DIESER WORKSHOP
+                  {ui.detailsWhyEyebrow}
                 </p>
                 <h3 className="mb-8 font-display text-subheading font-bold text-ff-near-black">
                   {whyHeading}
@@ -646,7 +654,7 @@ export function LaktoBookingCard({
                   onClick={() => setShowInfo(false)}
                   className="rounded-full border-2 border-ff-border-light px-8 py-3 font-display text-body-sm font-semibold text-ff-gray-text transition-all duration-200 hover:bg-ff-warm-gray hover:text-ff-near-black"
                 >
-                  Details schließen
+                  {ui.closeDetailsLabel}
                 </button>
               </div>
             </div>
@@ -655,7 +663,7 @@ export function LaktoBookingCard({
           {/* ────────────────────────────────────────────
            *  WAS DICH ERWARTET — Alternating Image Cards
            * ──────────────────────────────────────────── */}
-          {experienceCardsData.length > 0 ? (
+          {showExperienceSection && experienceCardsData.length > 0 ? (
           <div className="mx-auto mt-24 max-w-6xl">
             {/* Section header */}
             <div

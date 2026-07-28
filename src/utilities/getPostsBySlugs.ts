@@ -2,6 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { Post } from '@/payload-types'
+import { rewriteMediaUrlsForR2 } from '@/utilities/mediaR2Url'
 
 /**
  * Fetch published Posts by slug, preserving the order of `slugs`.
@@ -24,7 +25,22 @@ export async function getPostsBySlugs(
     })
 
     const bySlug = new Map(result.docs.map((doc) => [doc.slug, doc as Post]))
-    return slugs.map((slug) => bySlug.get(slug)).filter((doc): doc is Post => Boolean(doc))
+    return slugs
+      .map((slug) => bySlug.get(slug))
+      .filter((doc): doc is Post => Boolean(doc))
+      .map((doc) => {
+        const next = { ...doc }
+        if (
+          next.heroImage &&
+          typeof next.heroImage === 'object' &&
+          'filename' in next.heroImage
+        ) {
+          next.heroImage = rewriteMediaUrlsForR2(
+            next.heroImage as unknown as Record<string, unknown>,
+          ) as unknown as Post['heroImage']
+        }
+        return next
+      })
   } catch (err) {
     console.error('[getPostsBySlugs] failed', err)
     return []

@@ -1,5 +1,7 @@
 import type { Page as PageType, Post } from '@/payload-types'
 
+import { objectIdToString } from '@/utilities/isValidObjectId'
+
 /** Page URL slug → workshops collection slug (when they differ). */
 export const PAGE_TO_DB_SLUG: Record<string, string> = {
   'lakto-gemuese': 'lakto',
@@ -70,6 +72,27 @@ export type FlattenedWorkshopDetail = WorkshopDetailBase & {
   modalTotalLabel?: string | null
   modalCancelLabel?: string | null
   modalConfirmLabel?: string | null
+  modalGuestCountLabel?: string | null
+  modalAvailableSpotsPrefix?: string | null
+  modalSpotsUnit?: string | null
+  modalCapacityWarning?: string | null
+  modalReduceGuestsLabel?: string | null
+  modalChooseDifferentDateLabel?: string | null
+  modalAddToCartLabel?: string | null
+  modalAddingLabel?: string | null
+  modalCloseLabel?: string | null
+  datesDateColumnLabel?: string | null
+  datesTimeColumnLabel?: string | null
+  datesSpotsColumnLabel?: string | null
+  soldOutLabel?: string | null
+  noDatesMessage?: string | null
+  closeDatesLabel?: string | null
+  closeDetailsLabel?: string | null
+  bookingImagePlaceholderLabel?: string | null
+  detailsAboutEyebrow?: string | null
+  detailsScheduleEyebrow?: string | null
+  detailsIncludedEyebrow?: string | null
+  detailsWhyEyebrow?: string | null
   howToEyebrow?: string | null
   howToTitle?: string | null
   howToDescription?: string | null
@@ -79,6 +102,9 @@ export type FlattenedWorkshopDetail = WorkshopDetailBase & {
   faqDescription?: string | null
   faqItems?: Array<{ question?: string | null; answer?: string | null }> | null
   faqContactEmail?: string | null
+  faqContactPrompt?: string | null
+  faqContactLinkLabel?: string | null
+  faqContactHref?: string | null
   useGlobalVoucherData?: boolean | null
   voucherEyebrow?: string | null
   voucherTitle?: string | null
@@ -366,6 +392,7 @@ export function flattenWorkshopDetail(
     mergeWorkshopSectionFields(detailRaw, block, preferLegacyTopLevel)
 
   const heroFields = mergeFields(sectionBlock('hero'))
+  const whatToExpectFields = mergeFields(sectionBlock('whatToExpect'))
   const bookingFields = mergeFields(sectionBlock('booking'))
   const recipePlanFields = mergeFields(sectionBlock('recipePlan'))
   const howToFields = mergeFields(sectionBlock('howTo'))
@@ -377,6 +404,7 @@ export function flattenWorkshopDetail(
     ...detailRaw,
     ...heroFields,
     ...bookingFields,
+    ...whatToExpectFields,
     ...recipePlanFields,
     ...howToFields,
     ...faqFields,
@@ -452,6 +480,7 @@ export function isWorkshopDetailPageKind(pageKind?: string | null): boolean {
 
 function isMeaningfulWorkshopValue(value: unknown): boolean {
   if (value == null) return false
+  if (objectIdToString(value)) return true
   if (typeof value === 'string') {
     if (!value.trim()) return false
     // Bare media ID counts as meaningful — populateWorkshopDetailMedia resolves it later.

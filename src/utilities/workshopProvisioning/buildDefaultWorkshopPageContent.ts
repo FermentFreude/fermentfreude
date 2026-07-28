@@ -31,6 +31,34 @@ type LocaleCopy = {
   howToEyebrow: string
   howToTitle: string
   howToDescription: string
+  experienceEyebrow: string
+  experienceTitle: string
+  experienceCards: Array<{
+    eyebrow: string
+    title: string
+    description: string
+  }>
+  scheduleSteps: Array<{ duration: string; title: string; description: string }>
+  includedItemsDefault: string[]
+  whyPointsDefault: Array<{ bold: string; rest: string }>
+  sliderHeading: string
+  sliderSubtitle: string
+  sliderPillLabel: string
+  sliderBuyLabel: string
+  sliderMoreInfoLabel: string
+  faqContactPrompt: string
+  faqContactLinkLabel: string
+  faqContactEmail: string
+  soldOutLabel: string
+  noDatesMessage: string
+  modalGuestCountLabel: string
+  modalAvailableSpotsPrefix: string
+  modalSpotsUnit: string
+  modalCapacityWarning: string
+  modalReduceGuestsLabel: string
+  modalChooseDifferentDateLabel: string
+  modalAddToCartLabel: string
+  modalAddingLabel: string
 }
 
 const DE: LocaleCopy = {
@@ -81,6 +109,85 @@ const DE: LocaleCopy = {
   howToEyebrow: 'Anleitungen',
   howToTitle: 'So startest du',
   howToDescription: 'Tipps und Anleitungen rund ums Fermentieren.',
+  experienceEyebrow: 'WAS DICH ERWARTET',
+  experienceTitle: 'Dein Workshop-Erlebnis',
+  experienceCards: [
+    {
+      eyebrow: 'THEORIE',
+      title: 'Grundlagen der Fermentation',
+      description:
+        'Verstehe die Wissenschaft hinter dem Prozess — Mikroorganismen, Sicherheit und warum Fermentation so gut schmeckt.',
+    },
+    {
+      eyebrow: 'PRAXIS',
+      title: 'Hands-on am Tisch',
+      description:
+        'Unter Anleitung stellst du dein eigenes Ferment her und nimmst alles Wissen direkt mit nach Hause.',
+    },
+    {
+      eyebrow: 'VERKOSTUNG',
+      title: 'Probieren & Genießen',
+      description:
+        'Am Ende verkosten wir gemeinsam — du erlebst den Unterschied frisch fermentierter Aromen.',
+    },
+  ],
+  scheduleSteps: [
+    {
+      duration: '01',
+      title: 'Willkommen & Theorie',
+      description: 'Kurzer Überblick: Wie funktioniert Fermentation? Welche Utensilien brauchst du?',
+    },
+    {
+      duration: '02',
+      title: 'Praxis',
+      description: 'Schritt für Schritt stellst du dein Ferment her — mit Tipps von erfahrenen Guides.',
+    },
+    {
+      duration: '03',
+      title: 'Verkostung & Abschluss',
+      description: 'Gemeinsames Probieren, Fragen beantworten und mit deinem Ferment nach Hause gehen.',
+    },
+  ],
+  includedItemsDefault: [
+    'Alle Zutaten & Materialien',
+    'Dein Ferment zum Mitnehmen',
+    'Ausführliches Skript mit Rezepten',
+    'Getränke während des Workshops',
+  ],
+  whyPointsDefault: [
+    {
+      bold: 'Für Einsteiger:',
+      rest: ' Keine Vorkenntnisse nötig — wir führen dich Schritt für Schritt.',
+    },
+    {
+      bold: 'Hands-on:',
+      rest: ' Du arbeitest selbst und nimmst dein Ferment mit nach Hause.',
+    },
+    {
+      bold: 'Kleine Gruppe:',
+      rest: ' Maximal 12 Personen — persönliche Betreuung inklusive.',
+    },
+  ],
+  sliderHeading: 'Entdecke weitere Workshops',
+  sliderSubtitle:
+    'Wähle deinen Weg in die Welt der Mikroorganismen. Jeder Workshop ist für Einsteiger und Enthusiasten konzipiert.',
+  sliderPillLabel: 'WORKSHOP-ART',
+  sliderBuyLabel: 'Buchen',
+  sliderMoreInfoLabel: 'Mehr erfahren',
+  faqContactPrompt: 'Noch Fragen?',
+  faqContactLinkLabel: 'Schreib uns',
+  faqContactEmail: 'kontakt@fermentfreude.at',
+  soldOutLabel: 'Ausgebucht',
+  noDatesMessage: 'Aktuell keine Termine geplant — schau bald wieder vorbei.',
+  modalGuestCountLabel: 'Anzahl Personen',
+  modalAvailableSpotsPrefix: 'Verfügbar für dieses Datum:',
+  modalSpotsUnit: 'Plätze',
+  modalCapacityWarning:
+    'Sie möchten {requested} Plätze buchen, aber nur {available} sind verfügbar.',
+  modalReduceGuestsLabel: 'Auf {count} reduzieren',
+  modalChooseDifferentDateLabel: 'Anderes Datum wählen',
+  modalAddToCartLabel: 'In den Warenkorb',
+  modalAddingLabel: 'Wird hinzugefügt...',
 }
 
 const EN: LocaleCopy = {
@@ -131,6 +238,85 @@ const EN: LocaleCopy = {
   howToEyebrow: 'Guides',
   howToTitle: 'How to Get Started',
   howToDescription: 'Tips and guides for fermentation at home.',
+  experienceEyebrow: 'WHAT TO EXPECT',
+  experienceTitle: 'Your Workshop Experience',
+  experienceCards: [
+    {
+      eyebrow: 'THEORY',
+      title: 'Fermentation fundamentals',
+      description:
+        'Understand the science behind the process — microorganisms, safety, and why fermentation tastes so good.',
+    },
+    {
+      eyebrow: 'PRACTICE',
+      title: 'Hands-on at the table',
+      description:
+        'Under guidance you make your own ferment and take everything you learn straight home with you.',
+    },
+    {
+      eyebrow: 'TASTING',
+      title: 'Taste & enjoy',
+      description:
+        'We finish with a shared tasting — experience the difference of freshly fermented flavours.',
+    },
+  ],
+  scheduleSteps: [
+    {
+      duration: '01',
+      title: 'Welcome & theory',
+      description: 'A quick overview: how does fermentation work? What tools do you need?',
+    },
+    {
+      duration: '02',
+      title: 'Hands-on practice',
+      description: 'Step by step you make your ferment — with tips from experienced guides.',
+    },
+    {
+      duration: '03',
+      title: 'Tasting & wrap-up',
+      description: 'Shared tasting, Q&A, and take your ferment home with you.',
+    },
+  ],
+  includedItemsDefault: [
+    'All ingredients & materials',
+    'Your ferment to take home',
+    'Detailed script with recipes',
+    'Drinks during the workshop',
+  ],
+  whyPointsDefault: [
+    {
+      bold: 'For beginners:',
+      rest: ' No prior experience needed — we guide you step by step.',
+    },
+    {
+      bold: 'Hands-on:',
+      rest: ' You work yourself and take your ferment home with you.',
+    },
+    {
+      bold: 'Small groups:',
+      rest: ' Maximum 12 people — personal guidance included.',
+    },
+  ],
+  sliderHeading: 'Discover Other Workshops',
+  sliderSubtitle:
+    'Choose your path into the world of microorganisms. Each workshop is designed for beginners and enthusiasts alike.',
+  sliderPillLabel: 'WORKSHOP TYPE',
+  sliderBuyLabel: 'Book',
+  sliderMoreInfoLabel: 'Learn more',
+  faqContactPrompt: 'Still have questions?',
+  faqContactLinkLabel: 'Get in touch',
+  faqContactEmail: 'kontakt@fermentfreude.at',
+  soldOutLabel: 'Sold out',
+  noDatesMessage: 'No dates scheduled yet — check back soon.',
+  modalGuestCountLabel: 'Number of guests',
+  modalAvailableSpotsPrefix: 'Available for this date:',
+  modalSpotsUnit: 'spots',
+  modalCapacityWarning:
+    'You want to book {requested} spots but only {available} are available.',
+  modalReduceGuestsLabel: 'Reduce to {count}',
+  modalChooseDifferentDateLabel: 'Choose a different date',
+  modalAddToCartLabel: 'Add to cart',
+  modalAddingLabel: 'Adding...',
 }
 
 function buildPageSections(title: string, price: number, copy: LocaleCopy) {
@@ -146,6 +332,13 @@ function buildPageSections(title: string, price: number, copy: LocaleCopy) {
         { text: copy.attrHandsOn },
         { text: copy.attrExperience },
       ],
+    },
+    {
+      blockType: 'whatToExpect' as const,
+      enabled: true,
+      experienceEyebrow: copy.experienceEyebrow,
+      experienceTitle: copy.experienceTitle,
+      experienceCards: copy.experienceCards,
     },
     {
       blockType: 'booking' as const,
@@ -169,12 +362,14 @@ function buildPageSections(title: string, price: number, copy: LocaleCopy) {
       aboutHeading: copy.aboutHeading,
       aboutText: copy.aboutText,
       scheduleHeading: copy.scheduleHeading,
-      schedule: [],
+      schedule: copy.scheduleSteps,
       includedHeading: copy.includedHeading(price),
-      includedItems: [],
+      includedItems: copy.includedItemsDefault.map((text) => ({ text })),
       whyHeading: copy.whyHeading,
-      whyPoints: [],
+      whyPoints: copy.whyPointsDefault,
       datesHeading: copy.datesHeading,
+      soldOutLabel: copy.soldOutLabel,
+      noDatesMessage: copy.noDatesMessage,
       modalConfirmHeading: copy.modalConfirmHeading,
       modalConfirmSubheading: copy.modalConfirmSubheading,
       modalWorkshopLabel: 'Workshop',
@@ -183,6 +378,14 @@ function buildPageSections(title: string, price: number, copy: LocaleCopy) {
       modalTotalLabel: copy.modalTotalLabel,
       modalCancelLabel: copy.modalCancelLabel,
       modalConfirmLabel: copy.modalConfirmLabel,
+      modalGuestCountLabel: copy.modalGuestCountLabel,
+      modalAvailableSpotsPrefix: copy.modalAvailableSpotsPrefix,
+      modalSpotsUnit: copy.modalSpotsUnit,
+      modalCapacityWarning: copy.modalCapacityWarning,
+      modalReduceGuestsLabel: copy.modalReduceGuestsLabel,
+      modalChooseDifferentDateLabel: copy.modalChooseDifferentDateLabel,
+      modalAddToCartLabel: copy.modalAddToCartLabel,
+      modalAddingLabel: copy.modalAddingLabel,
     },
     {
       blockType: 'howTo' as const,
@@ -198,10 +401,19 @@ function buildPageSections(title: string, price: number, copy: LocaleCopy) {
       faqTitle: copy.faqTitle,
       faqDescription: copy.faqDescription,
       faqItems: copy.faqItems,
+      faqContactEmail: copy.faqContactEmail,
+      faqContactPrompt: copy.faqContactPrompt,
+      faqContactLinkLabel: copy.faqContactLinkLabel,
+      faqContactHref: '/contact',
     },
     {
       blockType: 'moreWorkshops' as const,
       enabled: true,
+      sliderHeading: copy.sliderHeading,
+      sliderSubtitle: copy.sliderSubtitle,
+      sliderPillLabel: copy.sliderPillLabel,
+      sliderBuyLabel: copy.sliderBuyLabel,
+      sliderMoreInfoLabel: copy.sliderMoreInfoLabel,
     },
     {
       blockType: 'voucher' as const,

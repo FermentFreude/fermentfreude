@@ -1,6 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
+
+import { useLocale } from '@/providers/Locale'
 
 /* ═══════════════════════════════════════════════════════════════
  *  KombuchaFAQ — Accordion with gold styling
@@ -19,9 +22,10 @@ export type KombuchaFAQCMS = {
     question?: string | null
     answer?: string | null
   }> | null
-  faqContactLabel?: string | null
-  faqContactText?: string | null
   faqContactEmail?: string | null
+  faqContactPrompt?: string | null
+  faqContactLinkLabel?: string | null
+  faqContactHref?: string | null
 }
 
 // ─── FAQ Items Data ─────────────────────────────────────────
@@ -118,6 +122,9 @@ function FAQAccordion({
 // ─── Main Component ─────────────────────────────────────────
 
 export function KombuchaFAQ({ cms }: { cms?: KombuchaFAQCMS }) {
+  const { locale } = useLocale()
+  const isDe = locale === 'de'
+
   const faqEyebrow = cms?.faqEyebrow ?? 'HÄUFIG GESTELLT'
   const faqTitle = cms?.faqTitle ?? 'Deine Fragen beantwortet'
   const _faqDescription =
@@ -130,6 +137,12 @@ export function KombuchaFAQ({ cms }: { cms?: KombuchaFAQCMS }) {
           answer: item.answer ?? '',
         }))
       : BOOKING_FAQ
+
+  const contactPrompt = cms?.faqContactPrompt ?? (isDe ? 'Noch Fragen?' : 'Still have questions?')
+  const contactLinkLabel = cms?.faqContactLinkLabel ?? (isDe ? 'Schreib uns' : 'Get in touch')
+  const contactHref =
+    cms?.faqContactHref ??
+    (cms?.faqContactEmail ? `mailto:${cms.faqContactEmail}` : '/contact')
 
   return (
     <section id="faq" className="section-padding-lg bg-white">
@@ -153,6 +166,18 @@ export function KombuchaFAQ({ cms }: { cms?: KombuchaFAQCMS }) {
             {faqItems.map((item, i) => (
               <FAQAccordion key={i} question={item.question} answer={item.answer} _index={i} />
             ))}
+          </div>
+
+          <div className="text-center">
+            <p className="text-body text-ff-gray-text-light">
+              {contactPrompt}{' '}
+              <Link
+                href={contactHref}
+                className="font-medium text-[#e6be68] underline decoration-[#e6be68]/30 underline-offset-4 transition-colors hover:text-ff-near-black hover:decoration-ff-near-black"
+              >
+                {contactLinkLabel}
+              </Link>
+            </p>
           </div>
         </div>
       </div>

@@ -168,6 +168,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
   const howToArticles = await resolveHowToArticles(
     localeKey,
     workshopPage?.workshopDetail as Record<string, unknown> | undefined,
+    slug,
   )
   const hasCuratedHowToArticles =
     extractHowToArticleIds(workshopPage?.workshopDetail as Record<string, unknown> | undefined)

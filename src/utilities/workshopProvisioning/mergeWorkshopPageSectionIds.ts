@@ -1,7 +1,8 @@
 /** Reuse Payload block + nested array IDs when saving EN locale for workshop pages. */
 const BLOCK_ARRAY_FIELDS: Record<string, string[]> = {
   hero: ['heroAttributes'],
-  booking: ['bookingAttributes', 'schedule', 'includedItems', 'whyPoints', 'experienceCards'],
+  whatToExpect: ['experienceCards'],
+  booking: ['bookingAttributes', 'schedule', 'includedItems', 'whyPoints'],
   faq: ['faqItems'],
   voucher: ['voucherPills'],
 }

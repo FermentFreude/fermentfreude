@@ -1,6 +1,7 @@
 'use client'
 
 import { Media } from '@/components/Media'
+import { resolveAnyLocalizedText } from '@/utilities/resolveLocalizedString'
 import type { Media as MediaType } from '@/payload-types'
 import { useEffect, useRef, useState } from 'react'
 
@@ -37,7 +38,7 @@ export function WorkshopHero({ cms }: { cms?: WorkshopHeroCMS }) {
     'Join us for a hands-on fermentation workshop — learn, create, and take home your own ferments.'
   const attributes =
     (cms?.attributes?.length ?? 0) > 0
-      ? cms!.attributes!.map((a) => a.text ?? '').filter(Boolean)
+      ? cms!.attributes!.map((a) => resolveAnyLocalizedText(a.text)).filter(Boolean)
       : ['3 Stunden', 'Hands-on', 'Experience']
 
   const heroImage =
@@ -142,7 +143,7 @@ export function WorkshopHero({ cms }: { cms?: WorkshopHeroCMS }) {
             style={{ transitionDelay: '750ms' }}
           >
             {attributes.map((attr, i) => (
-              <span key={attr} className="flex items-center gap-4">
+              <span key={`hero-attr-${i}`} className="flex items-center gap-4">
                 <span className="font-display text-[9px] font-semibold uppercase tracking-widest text-white/90">
                   {attr}
                 </span>
@@ -221,7 +222,7 @@ export function WorkshopHero({ cms }: { cms?: WorkshopHeroCMS }) {
             style={{ transitionDelay: '600ms' }}
           >
             {attributes.map((attr, i) => (
-              <span key={attr} className="flex items-center gap-4">
+              <span key={`hero-attr-${i}`} className="flex items-center gap-4">
                 <span className="font-display text-[9px] font-semibold uppercase tracking-widest text-white/90">
                   {attr}
                 </span>

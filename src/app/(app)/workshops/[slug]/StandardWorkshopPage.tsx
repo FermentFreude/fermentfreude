@@ -172,6 +172,9 @@ export function StandardWorkshopPage({
     detail?.showSeasonalCalendar,
   ).filter((row) => row.enabled)
 
+  const whatToExpectEnabled =
+    pageSections?.some((s) => s.blockType === 'whatToExpect' && s.enabled !== false) ?? true
+
   const bookingCms = serializeForClient({
     ...(detail
       ? {
@@ -198,7 +201,20 @@ export function StandardWorkshopPage({
           experienceEyebrow: detail.experienceEyebrow,
           experienceTitle: detail.experienceTitle,
           experienceCards: detail.experienceCards,
+          showExperienceSection: whatToExpectEnabled,
           datesHeading: detail.datesHeading,
+          datesDateColumnLabel: detail.datesDateColumnLabel,
+          datesTimeColumnLabel: detail.datesTimeColumnLabel,
+          datesSpotsColumnLabel: detail.datesSpotsColumnLabel,
+          soldOutLabel: detail.soldOutLabel,
+          noDatesMessage: detail.noDatesMessage,
+          closeDatesLabel: detail.closeDatesLabel,
+          closeDetailsLabel: detail.closeDetailsLabel,
+          bookingImagePlaceholderLabel: detail.bookingImagePlaceholderLabel,
+          detailsAboutEyebrow: detail.detailsAboutEyebrow,
+          detailsScheduleEyebrow: detail.detailsScheduleEyebrow,
+          detailsIncludedEyebrow: detail.detailsIncludedEyebrow,
+          detailsWhyEyebrow: detail.detailsWhyEyebrow,
           modalConfirmHeading: detail.modalConfirmHeading,
           modalConfirmSubheading: detail.modalConfirmSubheading,
           modalWorkshopLabel: detail.modalWorkshopLabel,
@@ -207,6 +223,15 @@ export function StandardWorkshopPage({
           modalTotalLabel: detail.modalTotalLabel,
           modalCancelLabel: detail.modalCancelLabel,
           modalConfirmLabel: detail.modalConfirmLabel,
+          modalGuestCountLabel: detail.modalGuestCountLabel,
+          modalAvailableSpotsPrefix: detail.modalAvailableSpotsPrefix,
+          modalSpotsUnit: detail.modalSpotsUnit,
+          modalCapacityWarning: detail.modalCapacityWarning,
+          modalReduceGuestsLabel: detail.modalReduceGuestsLabel,
+          modalChooseDifferentDateLabel: detail.modalChooseDifferentDateLabel,
+          modalAddToCartLabel: detail.modalAddToCartLabel,
+          modalAddingLabel: detail.modalAddingLabel,
+          modalCloseLabel: detail.modalCloseLabel,
         }
       : {}),
     dates: workshopAppointments,
@@ -219,6 +244,10 @@ export function StandardWorkshopPage({
         faqDescription: detail.faqDescription,
         faqItems: detail.faqItems,
         items: detail.faqItems,
+        faqContactEmail: detail.faqContactEmail,
+        faqContactPrompt: detail.faqContactPrompt,
+        faqContactLinkLabel: detail.faqContactLinkLabel,
+        faqContactHref: detail.faqContactHref,
       })
     : undefined
 

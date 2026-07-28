@@ -2,7 +2,8 @@ import type { Media } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import { filterValidObjectIds } from '@/utilities/isValidObjectId'
+import { filterValidObjectIds, objectIdToString } from '@/utilities/isValidObjectId'
+import { rewriteMediaUrlsForR2 } from '@/utilities/mediaR2Url'
 
 /** Batch-fetch media docs by ID (invalid IDs are skipped). */
 export async function getMediaByIds(ids: string[]): Promise<Map<string, Media>> {
@@ -17,7 +18,12 @@ export async function getMediaByIds(ids: string[]): Promise<Map<string, Media>> 
       limit: validIds.length,
       depth: 0,
     })
-    return new Map(result.docs.map((doc) => [doc.id, doc as Media]))
+    return new Map(
+      result.docs.map((doc) => [
+        doc.id,
+        rewriteMediaUrlsForR2(doc as unknown as Record<string, unknown>) as unknown as Media,
+      ]),
+    )
   } catch (error) {
     console.error('[getMediaByIds] failed:', error)
     return new Map()

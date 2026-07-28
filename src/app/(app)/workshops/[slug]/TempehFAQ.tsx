@@ -3,12 +3,11 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
-export type TempehFAQCMS = {
-  eyebrow?: string | null
-  title?: string | null
-  description?: string | null
-  items?: Array<{ question?: string | null; answer?: string | null }> | null
-}
+import { useLocale } from '@/providers/Locale'
+
+import type { LaktoFAQCMS } from './LaktoFAQ'
+
+export type TempehFAQCMS = LaktoFAQCMS
 
 type FAQItem = {
   question: string
@@ -119,6 +118,9 @@ function AccordionItem({
 }
 
 export function TempehFAQ({ cms }: { cms?: TempehFAQCMS }) {
+  const { locale } = useLocale()
+  const isDe = locale === 'de'
+
   const eyebrow = cms?.eyebrow ?? 'HÄUFIGE FRAGEN'
   const title = cms?.title ?? 'Gut zu wissen'
   const description =
@@ -128,6 +130,12 @@ export function TempehFAQ({ cms }: { cms?: TempehFAQCMS }) {
     (cms?.items?.length ?? 0) > 0
       ? cms!.items!.map((item) => ({ question: item.question ?? '', answer: item.answer ?? '' }))
       : BOOKING_FAQ
+
+  const contactPrompt = cms?.faqContactPrompt ?? (isDe ? 'Noch Fragen?' : 'Still have questions?')
+  const contactLinkLabel = cms?.faqContactLinkLabel ?? (isDe ? 'Schreib uns' : 'Get in touch')
+  const contactHref =
+    cms?.faqContactHref ??
+    (cms?.faqContactEmail ? `mailto:${cms.faqContactEmail}` : '/contact')
 
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -192,12 +200,12 @@ export function TempehFAQ({ cms }: { cms?: TempehFAQCMS }) {
             style={{ transitionDelay: '500ms' }}
           >
             <p className="text-body text-ff-gray-text-light">
-              Noch Fragen?{' '}
+              {contactPrompt}{' '}
               <Link
-                href="/contact"
+                href={contactHref}
                 className="font-medium text-[#e6be68] underline decoration-[#e6be68]/30 underline-offset-4 transition-colors hover:text-ff-near-black hover:decoration-ff-near-black"
               >
-                Schreib uns
+                {contactLinkLabel}
               </Link>
             </p>
           </div>

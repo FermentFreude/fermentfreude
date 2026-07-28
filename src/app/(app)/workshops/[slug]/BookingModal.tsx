@@ -1,7 +1,29 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
+import type { WorkshopDate } from './workshop-data'
+import { formatTemplate } from './workshop-booking-labels'
+
+type BookingModalWorkshop = {
+  title: string
+  price: number
+  confirmHeading: string
+  confirmSubheading: string
+  workshopLabel: string
+  dateLabel: string
+  timeLabel: string
+  totalLabel: string
+  cancelLabel: string
+  guestCountLabel?: string
+  availableSpotsPrefix?: string
+  spotsUnit?: string
+  capacityWarning?: string
+  reduceGuestsLabel?: string
+  chooseDifferentDateLabel?: string
+  addToCartLabel?: string
+  addingLabel?: string
+  closeLabelAria?: string
+}
 
 /* ═══════════════════════════════════════════════════════════════
  *  Booking Confirmation Modal
@@ -19,7 +41,7 @@ export function BookingModal({
   onConfirm,
   onSelectDifferentDate,
 }: {
-  workshop: WorkshopDetailData
+  workshop: BookingModalWorkshop
   selectedDate: WorkshopDate
   maxCapacity?: number
   onClose: () => void
@@ -33,6 +55,18 @@ export function BookingModal({
   const availableSpots = selectedDate.availableSpots ?? selectedDate.spotsLeft
   const canBook = guestCount <= availableSpots
 
+  const guestCountLabel = workshop.guestCountLabel ?? 'Anzahl Personen'
+  const availableSpotsPrefix = workshop.availableSpotsPrefix ?? 'Verfügbar für dieses Datum:'
+  const spotsUnit = workshop.spotsUnit ?? 'Plätze'
+  const capacityWarning =
+    workshop.capacityWarning ??
+    'Sie möchten {requested} Plätze buchen, aber nur {available} sind verfügbar.'
+  const reduceGuestsLabel = workshop.reduceGuestsLabel ?? 'Auf {count} reduzieren'
+  const chooseDifferentDateLabel = workshop.chooseDifferentDateLabel ?? 'Anderes Datum wählen'
+  const addToCartLabel = workshop.addToCartLabel ?? 'In den Warenkorb'
+  const addingLabel = workshop.addingLabel ?? 'Wird hinzugefügt...'
+  const closeLabelAria = workshop.closeLabelAria ?? 'Schließen'
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -42,7 +76,6 @@ export function BookingModal({
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown)
-    // Prevent body scroll
     document.body.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
@@ -53,13 +86,7 @@ export function BookingModal({
   const handleGuestCountChange = (newCount: number) => {
     const clamped = Math.max(1, Math.min(newCount, maxCapacity))
     setGuestCount(clamped)
-
-    // Show warning if trying to book more than available
-    if (clamped > availableSpots) {
-      setShowWarning(true)
-    } else {
-      setShowWarning(false)
-    }
+    setShowWarning(clamped > availableSpots)
   }
 
   const handleReduceToAvailable = () => {
@@ -81,30 +108,27 @@ export function BookingModal({
     } catch (error) {
       console.error('Failed to add to cart:', error)
       setIsSubmitting(false)
-      // Keep modal open on error so user can retry
     }
   }
 
   const totalPrice = workshop.price * guestCount
   const formattedTotal = `€${totalPrice}.00`
+  const remainingSpots = Math.max(0, availableSpots - guestCount)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
 
-      {/* Modal */}
       <div
         className="relative mx-4 w-full max-w-152 rounded-2xl border border-ff-border-light bg-ff-cream p-8 shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="booking-modal-title"
       >
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute right-5 top-5 rounded-sm p-1 text-ff-near-black/70 transition-colors hover:text-ff-near-black"
-          aria-label="Close"
+          aria-label={closeLabelAria}
         >
           <svg
             className="size-5"
@@ -120,7 +144,6 @@ export function BookingModal({
           </svg>
         </button>
 
-        {/* Header */}
         <div className="mb-6 space-y-1">
           <h2
             id="booking-modal-title"
@@ -133,17 +156,15 @@ export function BookingModal({
           </p>
         </div>
 
-        {/* Booking details card */}
         <div className="mb-4 space-y-3 rounded-xl bg-[#f5f1e8] px-6 py-6 sm:px-8">
           <DetailRow label={workshop.workshopLabel} value={workshop.title} />
           <DetailRow label={workshop.dateLabel} value={selectedDate.date} />
           <DetailRow label={workshop.timeLabel} value={selectedDate.time} />
 
-          {/* Guest count selector */}
           <div className="border-t border-ff-border-light pt-5">
             <div className="mb-2">
               <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#9a9a9a]">
-                Anzahl Personen
+                {guestCountLabel}
               </label>
               <div className="flex items-center justify-center gap-4 rounded-lg bg-white p-4">
                 <button
@@ -185,15 +206,14 @@ export function BookingModal({
                 </button>
               </div>
               <p className="mt-2 text-center text-sm font-bold text-[#9a9a9a]">
-                Verfügbar für dieses Datum:{' '}
+                {availableSpotsPrefix}{' '}
                 <span className="font-bold text-[#555954]">
-                  {availableSpots - guestCount} Plätze
+                  {remainingSpots} {spotsUnit}
                 </span>
               </p>
             </div>
           </div>
 
-          {/* Total price */}
           <div className="border-t border-ff-border-light pt-4">
             <div className="flex items-center justify-between">
               <span className="font-display text-body-lg font-bold text-ff-near-black">
@@ -206,32 +226,34 @@ export function BookingModal({
           </div>
         </div>
 
-        {/* Warning if trying to book more than available */}
-        {showWarning && (
+        {showWarning ? (
           <div className="mb-6 rounded-xl border-2 border-yellow-500/30 bg-yellow-50 px-5 py-4">
             <p className="mb-3 text-body font-bold text-ff-near-black">
-              ⚠️ Sie möchten {guestCount} Plätze buchen, aber nur {availableSpots} sind verfügbar.
+              ⚠️{' '}
+              {formatTemplate(capacityWarning, {
+                requested: guestCount,
+                available: availableSpots,
+              })}
             </p>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleReduceToAvailable}
                 className="rounded-full bg-ff-near-black px-5 py-2 font-display text-body-sm font-bold text-white transition-colors hover:bg-ff-near-black/80"
               >
-                Auf {availableSpots} reduzieren
+                {formatTemplate(reduceGuestsLabel, { count: availableSpots })}
               </button>
-              {onSelectDifferentDate && (
+              {onSelectDifferentDate ? (
                 <button
                   onClick={handleChooseDifferentDate}
                   className="rounded-full border border-ff-border-light px-5 py-2 font-display text-body-sm font-bold text-ff-near-black transition-colors hover:bg-ff-warm-gray"
                 >
-                  Anderes Datum wählen
+                  {chooseDifferentDateLabel}
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Actions */}
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
@@ -245,15 +267,13 @@ export function BookingModal({
             disabled={!canBook || isSubmitting}
             className="rounded-(--radius-pill) bg-[#c1c1c1] px-8 py-3 font-display text-body font-bold text-ff-near-black transition-colors hover:bg-[#b3b3b3] disabled:opacity-50 disabled:hover:bg-[#c1c1c1]"
           >
-            {isSubmitting ? 'Wird hinzugefügt...' : 'In den Warenkorb'}
+            {isSubmitting ? addingLabel : addToCartLabel}
           </button>
         </div>
       </div>
     </div>
   )
 }
-
-// ─── Detail Row ─────────────────────────────────────────────
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (

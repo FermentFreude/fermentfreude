@@ -1850,11 +1850,11 @@ export interface Page {
      */
     heroStyle?: ('default' | 'lakto' | 'tempeh' | 'kombucha') | null;
     /**
-     * Slug in Workshops collection for appointments & cart. Leave empty if same as page slug (e.g. lakto-gemuese → enter "lakto").
+     * Slug in Workshops collection for appointments & cart. Leave empty if same as page slug (e.g. lakto-gemuese → "lakto" is automatic). Only set for new workshop pages when the page slug differs from the Workshops record.
      */
     workshopDbSlug?: string | null;
     /**
-     * Drag to reorder. Expand a section to edit its content.
+     * Drag to reorder. Expand a section to edit its content. Upload images in Hero, What to Expect, and Booking → header image.
      */
     pageSections?:
       | (
@@ -1899,7 +1899,42 @@ export interface Page {
             }
           | {
               /**
-               * No CMS content fields yet for this section — story copy currently comes from code defaults.
+               * Three image cards inside the booking area (Theory · Practice · Tasting). Upload hero-style photos here.
+               */
+              enabled?: boolean | null;
+              /**
+               * e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"
+               */
+              experienceEyebrow?: string | null;
+              /**
+               * Main heading for the experience cards (e.g. "Dein Workshop-Erlebnis").
+               */
+              experienceTitle?: string | null;
+              /**
+               * Three cards with images work best (Theory · Practice · Tasting). Upload one image per card.
+               */
+              experienceCards?:
+                | {
+                    /**
+                     * e.g. "THEORIE" / "THEORY"
+                     */
+                    eyebrow: string;
+                    title: string;
+                    description: string;
+                    /**
+                     * Photo for this step — shown on the workshop page.
+                     */
+                    image?: (string | null) | Media;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'whatToExpect';
+            }
+          | {
+              /**
+               * Only for “Special” template (e.g. Vom Feld ins Glas). Toggle the editorial Feld · Küche · Glas story — detailed copy is still partly code-driven.
                */
               enabled?: boolean | null;
               id?: string | null;
@@ -2018,29 +2053,57 @@ export interface Page {
                   }[]
                 | null;
               /**
-               * e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"
-               */
-              experienceEyebrow?: string | null;
-              /**
-               * Main heading for the experience section.
-               */
-              experienceTitle?: string | null;
-              experienceCards?:
-                | {
-                    /**
-                     * e.g. "THEORIE" / "THEORY"
-                     */
-                    eyebrow: string;
-                    title: string;
-                    description: string;
-                    image?: (string | null) | Media;
-                    id?: string | null;
-                  }[]
-                | null;
-              /**
                * e.g. "Nächste Workshops" / "Upcoming Workshops"
                */
               datesHeading?: string | null;
+              /**
+               * e.g. "Datum" / "Date"
+               */
+              datesDateColumnLabel?: string | null;
+              /**
+               * e.g. "Zeit" / "Time"
+               */
+              datesTimeColumnLabel?: string | null;
+              /**
+               * e.g. "Plätze frei" / "Spots available"
+               */
+              datesSpotsColumnLabel?: string | null;
+              /**
+               * e.g. "Ausgebucht" / "Sold out"
+               */
+              soldOutLabel?: string | null;
+              /**
+               * Shown when no appointment dates exist yet.
+               */
+              noDatesMessage?: string | null;
+              /**
+               * e.g. "Termine schließen" / "Close dates"
+               */
+              closeDatesLabel?: string | null;
+              /**
+               * e.g. "Details schließen" / "Close details"
+               */
+              closeDetailsLabel?: string | null;
+              /**
+               * Text shown when no booking header image is uploaded.
+               */
+              bookingImagePlaceholderLabel?: string | null;
+              /**
+               * Optional. Defaults to the About heading in uppercase.
+               */
+              detailsAboutEyebrow?: string | null;
+              /**
+               * Optional. Defaults to the Schedule heading in uppercase.
+               */
+              detailsScheduleEyebrow?: string | null;
+              /**
+               * Optional. Defaults to the Included heading in uppercase.
+               */
+              detailsIncludedEyebrow?: string | null;
+              /**
+               * Optional. Defaults to the Why heading in uppercase.
+               */
+              detailsWhyEyebrow?: string | null;
               /**
                * e.g. "Reservierung bestätigen" / "Confirm Reservation"
                */
@@ -2070,6 +2133,42 @@ export interface Page {
                * e.g. "Bestätigen" / "Confirm"
                */
               modalConfirmLabel?: string | null;
+              /**
+               * e.g. "Anzahl Personen" / "Number of guests"
+               */
+              modalGuestCountLabel?: string | null;
+              /**
+               * e.g. "Verfügbar für dieses Datum:" / "Available for this date:"
+               */
+              modalAvailableSpotsPrefix?: string | null;
+              /**
+               * Word after the count (e.g. "Plätze" / "spots")
+               */
+              modalSpotsUnit?: string | null;
+              /**
+               * Use {requested} and {available} as placeholders. e.g. "Sie möchten {requested} Plätze buchen, aber nur {available} sind verfügbar."
+               */
+              modalCapacityWarning?: string | null;
+              /**
+               * Use {count}. e.g. "Auf {count} reduzieren"
+               */
+              modalReduceGuestsLabel?: string | null;
+              /**
+               * e.g. "Anderes Datum wählen" / "Choose a different date"
+               */
+              modalChooseDifferentDateLabel?: string | null;
+              /**
+               * e.g. "In den Warenkorb" / "Add to cart"
+               */
+              modalAddToCartLabel?: string | null;
+              /**
+               * Shown while adding to cart (e.g. "Wird hinzugefügt...")
+               */
+              modalAddingLabel?: string | null;
+              /**
+               * e.g. "Schließen" / "Close"
+               */
+              modalCloseLabel?: string | null;
               id?: string | null;
               blockName?: string | null;
               blockType: 'booking';
@@ -2154,9 +2253,21 @@ export interface Page {
                   }[]
                 | null;
               /**
-               * Email shown at bottom (e.g. "kontakt@fermentfreude.at").
+               * Optional mailto link at the bottom. e.g. kontakt@fermentfreude.at — leave empty to link to /contact only.
                */
               faqContactEmail?: string | null;
+              /**
+               * e.g. "Noch Fragen?" / "Still have questions?"
+               */
+              faqContactPrompt?: string | null;
+              /**
+               * e.g. "Schreib uns" / "Get in touch"
+               */
+              faqContactLinkLabel?: string | null;
+              /**
+               * Default /contact. Use mailto:kontakt@fermentfreude.at to open email directly.
+               */
+              faqContactHref?: string | null;
               id?: string | null;
               blockName?: string | null;
               blockType: 'faq';
@@ -5976,6 +6087,24 @@ export interface PagesSelect<T extends boolean = true> {
                     id?: T;
                     blockName?: T;
                   };
+              whatToExpect?:
+                | T
+                | {
+                    enabled?: T;
+                    experienceEyebrow?: T;
+                    experienceTitle?: T;
+                    experienceCards?:
+                      | T
+                      | {
+                          eyebrow?: T;
+                          title?: T;
+                          description?: T;
+                          image?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
               experience?:
                 | T
                 | {
@@ -6030,18 +6159,19 @@ export interface PagesSelect<T extends boolean = true> {
                           rest?: T;
                           id?: T;
                         };
-                    experienceEyebrow?: T;
-                    experienceTitle?: T;
-                    experienceCards?:
-                      | T
-                      | {
-                          eyebrow?: T;
-                          title?: T;
-                          description?: T;
-                          image?: T;
-                          id?: T;
-                        };
                     datesHeading?: T;
+                    datesDateColumnLabel?: T;
+                    datesTimeColumnLabel?: T;
+                    datesSpotsColumnLabel?: T;
+                    soldOutLabel?: T;
+                    noDatesMessage?: T;
+                    closeDatesLabel?: T;
+                    closeDetailsLabel?: T;
+                    bookingImagePlaceholderLabel?: T;
+                    detailsAboutEyebrow?: T;
+                    detailsScheduleEyebrow?: T;
+                    detailsIncludedEyebrow?: T;
+                    detailsWhyEyebrow?: T;
                     modalConfirmHeading?: T;
                     modalConfirmSubheading?: T;
                     modalWorkshopLabel?: T;
@@ -6050,6 +6180,15 @@ export interface PagesSelect<T extends boolean = true> {
                     modalTotalLabel?: T;
                     modalCancelLabel?: T;
                     modalConfirmLabel?: T;
+                    modalGuestCountLabel?: T;
+                    modalAvailableSpotsPrefix?: T;
+                    modalSpotsUnit?: T;
+                    modalCapacityWarning?: T;
+                    modalReduceGuestsLabel?: T;
+                    modalChooseDifferentDateLabel?: T;
+                    modalAddToCartLabel?: T;
+                    modalAddingLabel?: T;
+                    modalCloseLabel?: T;
                     id?: T;
                     blockName?: T;
                   };
@@ -6102,6 +6241,9 @@ export interface PagesSelect<T extends boolean = true> {
                           id?: T;
                         };
                     faqContactEmail?: T;
+                    faqContactPrompt?: T;
+                    faqContactLinkLabel?: T;
+                    faqContactHref?: T;
                     id?: T;
                     blockName?: T;
                   };

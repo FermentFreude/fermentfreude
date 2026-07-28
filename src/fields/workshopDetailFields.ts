@@ -1,5 +1,65 @@
 import type { Field } from 'payload'
 
+/** Shared “What to expect” cards — shown inside the booking section on the live page. */
+const whatToExpectCardFields: Field[] = [
+  {
+    name: 'experienceEyebrow',
+    type: 'text',
+    localized: true,
+    label: 'Section Eyebrow',
+    admin: { description: 'e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"' },
+  },
+  {
+    name: 'experienceTitle',
+    type: 'text',
+    localized: true,
+    label: 'Section Title',
+    admin: { description: 'Main heading for the experience cards (e.g. "Dein Workshop-Erlebnis").' },
+  },
+  {
+    name: 'experienceCards',
+    type: 'array',
+    label: 'Experience Cards',
+    maxRows: 6,
+    admin: {
+      description:
+        'Three cards with images work best (Theory · Practice · Tasting). Upload one image per card.',
+      initCollapsed: false,
+    },
+    fields: [
+      {
+        name: 'eyebrow',
+        type: 'text',
+        required: true,
+        localized: true,
+        label: 'Card Eyebrow',
+        admin: { description: 'e.g. "THEORIE" / "THEORY"' },
+      },
+      {
+        name: 'title',
+        type: 'textarea',
+        required: true,
+        localized: true,
+        label: 'Card Title',
+      },
+      {
+        name: 'description',
+        type: 'textarea',
+        required: true,
+        localized: true,
+        label: 'Card Description',
+      },
+      {
+        name: 'image',
+        type: 'upload',
+        relationTo: 'media',
+        label: 'Card Image',
+        admin: { description: 'Photo for this step — shown on the workshop page.' },
+      },
+    ],
+  },
+]
+
 /**
  * Workshop Detail fields — editable content for the dedicated workshop detail page.
  * Currently used by /workshops/lakto-gemuese, expandable to other workshops.
@@ -66,7 +126,7 @@ export const workshopDetailFields: Field[] = [
       plural: 'Sections',
     },
     admin: {
-      description: 'Drag to reorder. Expand a section to edit its content.',
+      description: 'Drag to reorder. Expand a section to edit its content. Upload images in Hero, What to Expect, and Booking → header image.',
       initCollapsed: false,
     },
     blocks: [
@@ -145,8 +205,8 @@ export const workshopDetailFields: Field[] = [
         ],
       },
       {
-        slug: 'experience',
-        labels: { singular: 'Konzept / Feld · Küche · Glas', plural: 'Experience' },
+        slug: 'whatToExpect',
+        labels: { singular: 'What to Expect (images)', plural: 'What to Expect' },
         fields: [
           {
             name: 'enabled',
@@ -155,7 +215,24 @@ export const workshopDetailFields: Field[] = [
             defaultValue: true,
             admin: {
               description:
-                'No CMS content fields yet for this section — story copy currently comes from code defaults.',
+                'Three image cards inside the booking area (Theory · Practice · Tasting). Upload hero-style photos here.',
+            },
+          },
+          ...whatToExpectCardFields,
+        ],
+      },
+      {
+        slug: 'experience',
+        labels: { singular: 'Konzept (Special pages only)', plural: 'Konzept' },
+        fields: [
+          {
+            name: 'enabled',
+            type: 'checkbox',
+            label: 'Show on page',
+            defaultValue: true,
+            admin: {
+              description:
+                'Only for “Special” template (e.g. Vom Feld ins Glas). Toggle the editorial Feld · Küche · Glas story — detailed copy is still partly code-driven.',
             },
           },
         ],
@@ -166,7 +243,11 @@ export const workshopDetailFields: Field[] = [
         fields: [
           { name: 'enabled', type: 'checkbox', label: 'Show on page', defaultValue: true },
 
-          // ── Header ────────────────────────────────────────────
+          {
+            type: 'collapsible',
+            label: '1. Header, price & card image',
+            admin: { initCollapsed: false },
+            fields: [
           {
             name: 'bookingEyebrow',
             type: 'text',
@@ -274,8 +355,14 @@ export const workshopDetailFields: Field[] = [
             label: 'Spots Available Label',
             admin: { description: 'e.g. "Plätze frei" / "spots available"' },
           },
+            ],
+          },
 
-          // ── About Section ─────────────────────────────────────
+          {
+            type: 'collapsible',
+            label: '2. About the workshop',
+            admin: { initCollapsed: true },
+            fields: [
           {
             name: 'aboutHeading',
             type: 'text',
@@ -290,8 +377,14 @@ export const workshopDetailFields: Field[] = [
             label: 'About Text',
             admin: { description: 'Long prose description of what the workshop is about.' },
           },
+            ],
+          },
 
-          // ── Schedule Section ──────────────────────────────────
+          {
+            type: 'collapsible',
+            label: '3. Schedule (step-by-step)',
+            admin: { initCollapsed: true },
+            fields: [
           {
             name: 'scheduleHeading',
             type: 'text',
@@ -334,8 +427,14 @@ export const workshopDetailFields: Field[] = [
               },
             ],
           },
+            ],
+          },
 
-          // ── Included Items ────────────────────────────────────
+          {
+            type: 'collapsible',
+            label: '4. Included in the price',
+            admin: { initCollapsed: true },
+            fields: [
           {
             name: 'includedHeading',
             type: 'text',
@@ -355,8 +454,14 @@ export const workshopDetailFields: Field[] = [
               { name: 'text', type: 'text', required: true, localized: true, label: 'Item' },
             ],
           },
+            ],
+          },
 
-          // ── Why Section ───────────────────────────────────────
+          {
+            type: 'collapsible',
+            label: '5. Why this workshop',
+            admin: { initCollapsed: true },
+            fields: [
           {
             name: 'whyHeading',
             type: 'text',
@@ -388,66 +493,133 @@ export const workshopDetailFields: Field[] = [
               },
             ],
           },
-
-          // ── Experience Cards ──────────────────────────────────
-          {
-            name: 'experienceEyebrow',
-            type: 'text',
-            localized: true,
-            label: 'Experience Cards Eyebrow',
-            admin: { description: 'e.g. "WAS DICH ERWARTET" / "WHAT TO EXPECT"' },
-          },
-          {
-            name: 'experienceTitle',
-            type: 'text',
-            localized: true,
-            label: 'Experience Cards Title',
-            admin: { description: 'Main heading for the experience section.' },
-          },
-          {
-            name: 'experienceCards',
-            type: 'array',
-            label: 'Experience Cards',
-            maxRows: 6,
-            fields: [
-              {
-                name: 'eyebrow',
-                type: 'text',
-                required: true,
-                localized: true,
-                label: 'Card Eyebrow',
-                admin: { description: 'e.g. "THEORIE" / "THEORY"' },
-              },
-              {
-                name: 'title',
-                type: 'textarea',
-                required: true,
-                localized: true,
-                label: 'Card Title',
-              },
-              {
-                name: 'description',
-                type: 'textarea',
-                required: true,
-                localized: true,
-                label: 'Card Description',
-              },
-              {
-                name: 'image',
-                type: 'upload',
-                relationTo: 'media',
-                label: 'Card Image (optional)',
-              },
             ],
           },
 
-          // ── Upcoming Dates ────────────────────────────────────
+          {
+            type: 'collapsible',
+            label: '6. Dates & booking modal labels',
+            admin: { initCollapsed: true },
+            fields: [
           {
             name: 'datesHeading',
             type: 'text',
             localized: true,
             label: 'Dates Heading',
             admin: { description: 'e.g. "Nächste Workshops" / "Upcoming Workshops"' },
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'datesDateColumnLabel',
+                type: 'text',
+                localized: true,
+                label: 'Date Column Header',
+                admin: { description: 'e.g. "Datum" / "Date"' },
+              },
+              {
+                name: 'datesTimeColumnLabel',
+                type: 'text',
+                localized: true,
+                label: 'Time Column Header',
+                admin: { description: 'e.g. "Zeit" / "Time"' },
+              },
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'datesSpotsColumnLabel',
+                type: 'text',
+                localized: true,
+                label: 'Spots Column Header',
+                admin: { description: 'e.g. "Plätze frei" / "Spots available"' },
+              },
+              {
+                name: 'soldOutLabel',
+                type: 'text',
+                localized: true,
+                label: 'Sold Out Label',
+                admin: { description: 'e.g. "Ausgebucht" / "Sold out"' },
+              },
+            ],
+          },
+          {
+            name: 'noDatesMessage',
+            type: 'textarea',
+            localized: true,
+            label: 'No Dates Message',
+            admin: {
+              description: 'Shown when no appointment dates exist yet.',
+            },
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'closeDatesLabel',
+                type: 'text',
+                localized: true,
+                label: 'Close Dates (accessibility)',
+                admin: { description: 'e.g. "Termine schließen" / "Close dates"' },
+              },
+              {
+                name: 'closeDetailsLabel',
+                type: 'text',
+                localized: true,
+                label: 'Close Details Button',
+                admin: { description: 'e.g. "Details schließen" / "Close details"' },
+              },
+            ],
+          },
+          {
+            name: 'bookingImagePlaceholderLabel',
+            type: 'text',
+            localized: true,
+            label: 'Booking Image Placeholder',
+            admin: {
+              description: 'Text shown when no booking header image is uploaded.',
+            },
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'detailsAboutEyebrow',
+                type: 'text',
+                localized: true,
+                label: 'Details — About Eyebrow',
+                admin: { description: 'Optional. Defaults to the About heading in uppercase.' },
+              },
+              {
+                name: 'detailsScheduleEyebrow',
+                type: 'text',
+                localized: true,
+                label: 'Details — Schedule Eyebrow',
+                admin: { description: 'Optional. Defaults to the Schedule heading in uppercase.' },
+              },
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'detailsIncludedEyebrow',
+                type: 'text',
+                localized: true,
+                label: 'Details — Included Eyebrow',
+                admin: { description: 'Optional. Defaults to the Included heading in uppercase.' },
+              },
+              {
+                name: 'detailsWhyEyebrow',
+                type: 'text',
+                localized: true,
+                label: 'Details — Why Eyebrow',
+                admin: { description: 'Optional. Defaults to the Why heading in uppercase.' },
+              },
+            ],
           },
           // Dates are fetched automatically from Workshop Appointments collection.
           // No manual date entry needed here — create appointments in Workshops → Workshop Appointments.
@@ -521,6 +693,84 @@ export const workshopDetailFields: Field[] = [
                 label: 'Modal Confirm Button',
                 admin: { description: 'e.g. "Bestätigen" / "Confirm"' },
               },
+            ],
+          },
+          {
+            name: 'modalGuestCountLabel',
+            type: 'text',
+            localized: true,
+            label: 'Modal Guest Count Label',
+            admin: { description: 'e.g. "Anzahl Personen" / "Number of guests"' },
+          },
+          {
+            name: 'modalAvailableSpotsPrefix',
+            type: 'text',
+            localized: true,
+            label: 'Modal Available Spots Prefix',
+            admin: { description: 'e.g. "Verfügbar für dieses Datum:" / "Available for this date:"' },
+          },
+          {
+            name: 'modalSpotsUnit',
+            type: 'text',
+            localized: true,
+            label: 'Modal Spots Unit',
+            admin: { description: 'Word after the count (e.g. "Plätze" / "spots")' },
+          },
+          {
+            name: 'modalCapacityWarning',
+            type: 'textarea',
+            localized: true,
+            label: 'Modal Capacity Warning',
+            admin: {
+              description:
+                'Use {requested} and {available} as placeholders. e.g. "Sie möchten {requested} Plätze buchen, aber nur {available} sind verfügbar."',
+            },
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'modalReduceGuestsLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Reduce Guests Button',
+                admin: { description: 'Use {count}. e.g. "Auf {count} reduzieren"' },
+              },
+              {
+                name: 'modalChooseDifferentDateLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Choose Date Button',
+                admin: { description: 'e.g. "Anderes Datum wählen" / "Choose a different date"' },
+              },
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'modalAddToCartLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Add to Cart Button',
+                admin: { description: 'e.g. "In den Warenkorb" / "Add to cart"' },
+              },
+              {
+                name: 'modalAddingLabel',
+                type: 'text',
+                localized: true,
+                label: 'Modal Adding Label',
+                admin: { description: 'Shown while adding to cart (e.g. "Wird hinzugefügt...")' },
+              },
+            ],
+          },
+          {
+            name: 'modalCloseLabel',
+            type: 'text',
+            localized: true,
+            label: 'Modal Close (accessibility)',
+            admin: { description: 'e.g. "Schließen" / "Close"' },
+          },
             ],
           },
         ],
@@ -686,7 +936,33 @@ export const workshopDetailFields: Field[] = [
             name: 'faqContactEmail',
             type: 'text',
             label: 'Contact Email',
-            admin: { description: 'Email shown at bottom (e.g. "kontakt@fermentfreude.at").' },
+            admin: {
+              description:
+                'Optional mailto link at the bottom. e.g. kontakt@fermentfreude.at — leave empty to link to /contact only.',
+            },
+          },
+          {
+            name: 'faqContactPrompt',
+            type: 'text',
+            localized: true,
+            label: 'Contact Prompt',
+            admin: { description: 'e.g. "Noch Fragen?" / "Still have questions?"' },
+          },
+          {
+            name: 'faqContactLinkLabel',
+            type: 'text',
+            localized: true,
+            label: 'Contact Link Label',
+            admin: { description: 'e.g. "Schreib uns" / "Get in touch"' },
+          },
+          {
+            name: 'faqContactHref',
+            type: 'text',
+            label: 'Contact Link URL',
+            admin: {
+              description:
+                'Default /contact. Use mailto:kontakt@fermentfreude.at to open email directly.',
+            },
           },
         ],
       },

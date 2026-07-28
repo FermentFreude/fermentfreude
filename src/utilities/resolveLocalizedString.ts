@@ -1,3 +1,5 @@
+import { isObjectIdRef } from '@/utilities/isValidObjectId'
+
 export type AppLocale = 'de' | 'en'
 
 /** Payload localized text stored as { de, en } when locale flattening did not run. */
@@ -28,6 +30,13 @@ export function resolveLocalizedString(
   return undefined
 }
 
+/** Resolve text for client props when locale was already applied server-side, with fallback. */
+export function resolveAnyLocalizedText(value: unknown): string {
+  if (typeof value === 'string') return value
+  if (value == null) return ''
+  return resolveLocalizedString(value, 'de') ?? resolveLocalizedString(value, 'en') ?? ''
+}
+
 /** Deep-resolve { de, en } objects inside workshop detail before client render. */
 export function localizeWorkshopDetail(
   detail: Record<string, unknown> | null | undefined,
@@ -37,12 +46,15 @@ export function localizeWorkshopDetail(
 
   const visit = (value: unknown): unknown => {
     if (value == null) return value
+    if (isObjectIdRef(value)) return value
     if (isLocalizedStringObject(value)) return resolveLocalizedString(value, locale)
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
       return value
     }
     if (Array.isArray(value)) return value.map(visit)
     if (typeof value === 'object') {
+      // Populated upload / relationship docs — do not recurse
+      if ('url' in (value as Record<string, unknown>)) return value
       const next: Record<string, unknown> = {}
       for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
         next[key] = visit(entry)

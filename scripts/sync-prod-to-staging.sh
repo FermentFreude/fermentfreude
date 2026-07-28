@@ -61,6 +61,9 @@ missing=()
 [[ -z "${DATABASE_URL:-}" ]]       && missing+=("DATABASE_URL (staging — normal .env)")
 [[ -z "${PROD_DATABASE_URL:-}" ]]  && missing+=("PROD_DATABASE_URL — production MongoDB URI")
 [[ -z "${PROD_R2_BUCKET:-}" ]]     && missing+=("PROD_R2_BUCKET — e.g. fermentfreude-media")
+[[ -z "${R2_ACCESS_KEY_ID:-}" ]]   && missing+=("R2_ACCESS_KEY_ID")
+[[ -z "${R2_SECRET_ACCESS_KEY:-}" ]] && missing+=("R2_SECRET_ACCESS_KEY")
+[[ -z "${R2_ENDPOINT:-}" ]]        && missing+=("R2_ENDPOINT")
 
 if [[ ${#missing[@]} -gt 0 ]]; then
   echo -e "${RED}❌  Missing env vars in .env:${NC}"
@@ -71,9 +74,32 @@ fi
 for tool in mongoexport mongoimport rclone; do
   if ! command -v "$tool" &>/dev/null; then
     echo -e "${RED}❌  '$tool' not found.${NC}"
+    case "$tool" in
+      mongoexport|mongoimport)
+        echo "   Install: brew tap mongodb/brew && brew trust mongodb/brew && brew install mongodb-database-tools"
+        ;;
+      rclone) echo "   Install: brew install rclone" ;;
+    esac
     exit 1
   fi
 done
+
+# rclone: named remotes OR temp config from .env R2_* vars (endpoint URLs break inline syntax)
+write_temp_rclone_config() {
+  local cfg="$1"
+  cat > "$cfg" <<EOF
+[r2env]
+type = s3
+provider = Cloudflare
+access_key_id = ${R2_ACCESS_KEY_ID}
+secret_access_key = ${R2_SECRET_ACCESS_KEY}
+endpoint = ${R2_ENDPOINT}
+acl = private
+no_check_bucket = true
+EOF
+}
+
+use_rclone_remotes=false
 
 STAGING_URI="$DATABASE_URL"
 PROD_URI="$PROD_DATABASE_URL"
@@ -81,7 +107,12 @@ STAGING_DB=$(echo "$STAGING_URI" | sed 's|.*\/||' | sed 's|\?.*||')
 PROD_DB=$(echo "$PROD_URI"       | sed 's|.*\/||' | sed 's|\?.*||')
 STAGING_R2_REMOTE="${STAGING_R2_REMOTE:-r2-staging}"
 PROD_R2_REMOTE="${PROD_R2_REMOTE:-r2-prod}"
-STAGING_R2_BUCKET="${R2_BUCKET:-fermentfreude-media-staging}"
+STAGING_R2_BUCKET="${STAGING_R2_BUCKET:-fermentfreude-media-staging}"
+RCLONE_ENV_CONFIG=""
+
+if rclone listremotes 2>/dev/null | grep -q "^${PROD_R2_REMOTE}:$"; then
+  use_rclone_remotes=true
+fi
 
 if [[ "$PROD_DB" == *"staging"* ]]; then
   echo -e "${RED}❌  PROD_DATABASE_URL contains 'staging' — check your .env${NC}"
@@ -107,6 +138,11 @@ echo -e "  Target staging : ${GREEN}$STAGING_DB${NC}"
 echo ""
 echo -e "  Pages (upsert by slug): ${PAGE_SLUGS[*]}"
 echo -e "  Media: full collection upsert + R2 copy (additive)"
+if $use_rclone_remotes; then
+  echo -e "  R2 via remotes: ${PROD_R2_REMOTE} → ${STAGING_R2_REMOTE}"
+else
+  echo -e "  R2 via .env: ${PROD_R2_BUCKET} → ${STAGING_R2_BUCKET:-$R2_BUCKET}"
+fi
 echo ""
 
 if $DRY_RUN; then
@@ -119,6 +155,10 @@ fi
 
 echo ""
 mkdir -p "$TMPDIR_WORK"
+if ! $use_rclone_remotes; then
+  RCLONE_ENV_CONFIG="$TMPDIR_WORK/rclone.env.conf"
+  write_temp_rclone_config "$RCLONE_ENV_CONFIG"
+fi
 trap 'rm -rf "$TMPDIR_WORK"' EXIT
 
 run() {
@@ -141,19 +181,31 @@ run mongoexport \
   --uri="$PROD_URI" --db="$PROD_DB" --collection=media \
   --out="$TMPDIR_WORK/media.json" --quiet
 
+run mongoexport \
+  --uri="$PROD_URI" --db="$PROD_DB" --collection=posts \
+  --out="$TMPDIR_WORK/posts.json" --quiet
+
 if ! $DRY_RUN; then
   echo "  ✔ pages: $(wc -l < "$TMPDIR_WORK/pages.json" | tr -d ' ') docs"
   echo "  ✔ media: $(wc -l < "$TMPDIR_WORK/media.json" | tr -d ' ') docs"
+  echo "  ✔ posts: $(wc -l < "$TMPDIR_WORK/posts.json" | tr -d ' ') docs"
 fi
 
 # ── Step 2: R2 prod → staging (additive) ─────────────────────────────────────
 echo ""
 echo -e "${CYAN}▶ Step 2/3  R2 copy: production → staging (no deletes)...${NC}"
 
-run rclone copy \
-  "${PROD_R2_REMOTE}:${PROD_R2_BUCKET}/media/" \
-  "${STAGING_R2_REMOTE}:${STAGING_R2_BUCKET}/media/" \
-  --progress
+if $use_rclone_remotes; then
+  run rclone copy \
+    "${PROD_R2_REMOTE}:${PROD_R2_BUCKET}/media/" \
+    "${STAGING_R2_REMOTE}:${STAGING_R2_BUCKET}/media/" \
+    --progress
+else
+  run rclone --config "$RCLONE_ENV_CONFIG" copy \
+    "r2env:${PROD_R2_BUCKET}/media/" \
+    "r2env:${STAGING_R2_BUCKET}/media/" \
+    --progress
+fi
 
 echo "  ✔ R2 media copied."
 
@@ -165,6 +217,11 @@ run mongoimport \
   --uri="$STAGING_URI" --db="$STAGING_DB" --collection=media \
   --mode=upsert --file="$TMPDIR_WORK/media.json" --quiet
 echo "  ✔ media upserted"
+
+run mongoimport \
+  --uri="$STAGING_URI" --db="$STAGING_DB" --collection=posts \
+  --mode=upsert --file="$TMPDIR_WORK/posts.json" --quiet
+echo "  ✔ posts upserted"
 
 run mongoimport \
   --uri="$STAGING_URI" --db="$STAGING_DB" --collection=pages \

@@ -38,6 +38,34 @@ type VoucherCms = {
 
 export type LegacyWorkshopSlug = 'lakto-gemuese' | 'tempeh' | 'kombucha'
 
+function buildFaqCms(detail?: FlattenedWorkshopDetail) {
+  if (!detail) return undefined
+  return serializeForClient({
+    eyebrow: detail.faqEyebrow,
+    title: detail.faqTitle,
+    description: detail.faqDescription,
+    items: detail.faqItems,
+    faqContactEmail: detail.faqContactEmail,
+    faqContactPrompt: detail.faqContactPrompt,
+    faqContactLinkLabel: detail.faqContactLinkLabel,
+    faqContactHref: detail.faqContactHref,
+  })
+}
+
+function buildKombuchaFaqCms(detail?: FlattenedWorkshopDetail) {
+  if (!detail) return undefined
+  return serializeForClient({
+    faqEyebrow: detail.faqEyebrow,
+    faqTitle: detail.faqTitle,
+    faqDescription: detail.faqDescription,
+    faqItems: detail.faqItems,
+    faqContactEmail: detail.faqContactEmail,
+    faqContactPrompt: detail.faqContactPrompt,
+    faqContactLinkLabel: detail.faqContactLinkLabel,
+    faqContactHref: detail.faqContactHref,
+  })
+}
+
 export type LegacyWorkshopPageProps = {
   slug: LegacyWorkshopSlug
   locale: 'de' | 'en'
@@ -78,6 +106,12 @@ function buildBookingCms(
   detail: FlattenedWorkshopDetail | undefined,
   workshopAppointments: WorkshopDate[],
 ) {
+  const pageSections = Array.isArray(detail?.pageSections)
+    ? (detail.pageSections as Array<{ blockType?: string; enabled?: boolean | null }>)
+    : undefined
+  const whatToExpectEnabled =
+    pageSections?.some((s) => s.blockType === 'whatToExpect' && s.enabled !== false) ?? true
+
   return serializeForClient({
     ...(detail
       ? {
@@ -104,7 +138,20 @@ function buildBookingCms(
           experienceEyebrow: detail.experienceEyebrow,
           experienceTitle: detail.experienceTitle,
           experienceCards: detail.experienceCards,
+          showExperienceSection: whatToExpectEnabled,
           datesHeading: detail.datesHeading,
+          datesDateColumnLabel: detail.datesDateColumnLabel,
+          datesTimeColumnLabel: detail.datesTimeColumnLabel,
+          datesSpotsColumnLabel: detail.datesSpotsColumnLabel,
+          soldOutLabel: detail.soldOutLabel,
+          noDatesMessage: detail.noDatesMessage,
+          closeDatesLabel: detail.closeDatesLabel,
+          closeDetailsLabel: detail.closeDetailsLabel,
+          bookingImagePlaceholderLabel: detail.bookingImagePlaceholderLabel,
+          detailsAboutEyebrow: detail.detailsAboutEyebrow,
+          detailsScheduleEyebrow: detail.detailsScheduleEyebrow,
+          detailsIncludedEyebrow: detail.detailsIncludedEyebrow,
+          detailsWhyEyebrow: detail.detailsWhyEyebrow,
           modalConfirmHeading: detail.modalConfirmHeading,
           modalConfirmSubheading: detail.modalConfirmSubheading,
           modalWorkshopLabel: detail.modalWorkshopLabel,
@@ -113,6 +160,15 @@ function buildBookingCms(
           modalTotalLabel: detail.modalTotalLabel,
           modalCancelLabel: detail.modalCancelLabel,
           modalConfirmLabel: detail.modalConfirmLabel,
+          modalGuestCountLabel: detail.modalGuestCountLabel,
+          modalAvailableSpotsPrefix: detail.modalAvailableSpotsPrefix,
+          modalSpotsUnit: detail.modalSpotsUnit,
+          modalCapacityWarning: detail.modalCapacityWarning,
+          modalReduceGuestsLabel: detail.modalReduceGuestsLabel,
+          modalChooseDifferentDateLabel: detail.modalChooseDifferentDateLabel,
+          modalAddToCartLabel: detail.modalAddToCartLabel,
+          modalAddingLabel: detail.modalAddingLabel,
+          modalCloseLabel: detail.modalCloseLabel,
         }
       : {}),
     dates: workshopAppointments,
@@ -194,18 +250,7 @@ export function LegacyWorkshopPage({
         <FermentedVegHowTos workshopType="lakto" cms={howToCms} />
         {slider}
         <LaktoVoucherCta cms={serializedVoucher} />
-        <LaktoFAQ
-          cms={
-            detail
-              ? serializeForClient({
-                  eyebrow: detail.faqEyebrow,
-                  title: detail.faqTitle,
-                  description: detail.faqDescription,
-                  items: detail.faqItems,
-                })
-              : undefined
-          }
-        />
+        <LaktoFAQ cms={buildFaqCms(detail)} />
       </article>
     )
   }
@@ -221,18 +266,7 @@ export function LegacyWorkshopPage({
         {slider}
         <TempehVoucherCta cms={serializedVoucher} />
         <FermentedVegHowTos workshopType="tempeh" cms={howToCms} />
-        <TempehFAQ
-          cms={
-            detail
-              ? serializeForClient({
-                  eyebrow: detail.faqEyebrow,
-                  title: detail.faqTitle,
-                  description: detail.faqDescription,
-                  items: detail.faqItems,
-                })
-              : undefined
-          }
-        />
+        <TempehFAQ cms={buildFaqCms(detail)} />
       </article>
     )
   }
@@ -244,19 +278,7 @@ export function LegacyWorkshopPage({
       {slider}
       <KombuchaVoucherCta cms={serializedVoucher} />
       <FermentedVegHowTos workshopType="kombucha" cms={howToCms} />
-      <KombuchaFAQ
-        cms={
-          detail
-            ? serializeForClient({
-                faqEyebrow: detail.faqEyebrow,
-                faqTitle: detail.faqTitle,
-                faqDescription: detail.faqDescription,
-                faqItems: detail.faqItems,
-                faqContactEmail: detail.faqContactEmail,
-              })
-            : undefined
-        }
-      />
+      <KombuchaFAQ cms={buildKombuchaFaqCms(detail)} />
     </article>
   )
 }
