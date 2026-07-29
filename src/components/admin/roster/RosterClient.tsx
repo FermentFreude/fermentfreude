@@ -2,15 +2,25 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { ActivityView } from './ActivityView'
 import { DashboardView } from './DashboardView'
 import { ParticipantsView } from './ParticipantsView'
 import { PickupsView } from './PickupsView'
+import { RefundsView } from './RefundsView'
 import type { RosterData } from './types'
 import { VouchersView } from './VouchersView'
 import { WorkshopDetailView } from './WorkshopDetailView'
 import { WorkshopsView } from './WorkshopsView'
 
-type Section = 'dashboard' | 'workshops' | 'detail' | 'participants' | 'pickups' | 'vouchers'
+type Section =
+  | 'dashboard'
+  | 'workshops'
+  | 'detail'
+  | 'participants'
+  | 'pickups'
+  | 'vouchers'
+  | 'refunds'
+  | 'activity'
 
 const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
   {
@@ -70,6 +80,28 @@ const SHOP_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
   },
 ]
 
+const REFUNDS_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
+  {
+    id: 'refunds',
+    label: 'Rückerstattungen',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </svg>
+    ),
+  },
+  {
+    id: 'activity',
+    label: 'Aktivität',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+      </svg>
+    ),
+  },
+]
+
 const navItemStyle = (active: boolean): React.CSSProperties => ({
   display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '6px',
   fontSize: '14px', fontWeight: active ? 600 : 400, cursor: 'pointer', border: 'none',
@@ -93,6 +125,11 @@ const s: Record<string, React.CSSProperties> = {
   sidebarSub: { fontSize: '12px', color: 'var(--theme-text)', opacity: 0.5, margin: '2px 0 0' },
   navSection: { padding: '16px 12px 8px' },
   navLabel: { fontSize: '11px', fontWeight: 600, color: 'var(--theme-text)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.07em', padding: '0 8px 6px' },
+  navBadge: {
+    marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+    minWidth: '18px', height: '18px', padding: '0 5px', borderRadius: '999px',
+    background: '#ef4444', color: '#fff', fontSize: '11px', fontWeight: 700, lineHeight: 1,
+  },
   liveIndicator: {
     display: 'flex', alignItems: 'center', gap: '6px', padding: '16px 20px 0',
     marginTop: 'auto', fontSize: '11px', color: 'var(--theme-text)', opacity: 0.4,
@@ -123,6 +160,17 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
     } finally {
       refreshingRef.current = false
     }
+  }, [])
+
+  // One eager refresh on mount — the server-rendered initialData has no
+  // authenticated user context (fetchRosterData() was called without one),
+  // so it conservatively marks every activity event as unread. This first
+  // client-side refresh (which does have the session cookie, so the API
+  // route can resolve the real user) corrects the unread badge within a
+  // fraction of a second instead of waiting for the 30s poll.
+  useEffect(() => {
+    refresh()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Poll every 30 seconds
@@ -179,6 +227,25 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
           ))}
         </div>
 
+        <div style={s.navSection}>
+          <p style={s.navLabel}>Refunds & Rebooking</p>
+          {REFUNDS_NAV.map((item) => {
+            const badgeCount =
+              item.id === 'refunds'
+                ? data.refundRequests.filter((r) => r.status === 'requested').length
+                : item.id === 'activity'
+                  ? data.activityUnreadCount
+                  : 0
+            return (
+              <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
+                <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
+                {item.label}
+                {badgeCount > 0 && <span style={s.navBadge}>{badgeCount > 99 ? '99+' : badgeCount}</span>}
+              </button>
+            )
+          })}
+        </div>
+
         <div style={s.liveIndicator}>
           <span style={s.liveDot} />
           Live · {timeStr}
@@ -206,6 +273,12 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
         )}
         {section === 'vouchers' && (
           <VouchersView vouchers={data.vouchers} onRefresh={refresh} />
+        )}
+        {section === 'refunds' && (
+          <RefundsView refundRequests={data.refundRequests} onRefresh={refresh} />
+        )}
+        {section === 'activity' && (
+          <ActivityView activityEvents={data.activityEvents} onRefresh={refresh} />
         )}
       </main>
     </div>

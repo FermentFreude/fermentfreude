@@ -19,7 +19,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const data = await fetchRosterData()
+    const data = await fetchRosterData(String(user.id))
     return NextResponse.json(data)
   } catch (err) {
     console.error('[roster/route] Error:', err)

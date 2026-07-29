@@ -1,5 +1,6 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
+import { getAdminRecipients } from '@/lib/adminNotification'
 import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 import { getServerSideURL } from '@/utilities/getURL'
 
@@ -176,7 +177,6 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
 
     // ─── Admin notification — always sent, success or failure ───────
     try {
-      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'kontakt@fermentfreude.at'
       const recipientLine = doc.recipientEmail
         ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Empfänger:in</td><td style="padding:4px 0">${recipientNameValue || ''} ${doc.recipientEmail ? `&lt;${doc.recipientEmail}&gt;` : ''}</td></tr>`
         : ''
@@ -197,7 +197,7 @@ ${warningBlock}
 </table>`
 
       await sendTransactionalEmail({
-        to: [{ email: adminEmail, name: 'FermentFreude Admin' }],
+        to: getAdminRecipients(),
         subject: `Neuer Gutschein-Kauf: €${String(doc.value ?? 99)} · ${String(doc.code ?? '')}`,
         htmlContent,
       })

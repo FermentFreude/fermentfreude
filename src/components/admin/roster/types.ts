@@ -85,6 +85,30 @@ export type VoucherRow = {
   createdAt: string
 }
 
+export type RefundRequestRow = {
+  id: string
+  customerName: string
+  customerEmail: string
+  workshopTitle: string
+  workshopDate: string
+  seatIndex: number
+  amount: number // cents
+  status: 'requested' | 'acknowledged' | 'processing' | 'completed' | 'failed'
+  stripePaymentIntentId: string
+  requestedAt: string
+  completedAt: string
+  daysPending: number
+}
+
+export type ActivityEventRow = {
+  id: string
+  type: string
+  refId: string
+  summary: string
+  createdAt: string
+  isUnread: boolean
+}
+
 export type RosterData = {
   stats: RosterStats
   appointments: AppointmentRow[]
@@ -92,4 +116,7 @@ export type RosterData = {
   participants: ParticipantRow[]
   pickupOrders: PickupOrderRow[]
   vouchers: VoucherRow[]
+  refundRequests: RefundRequestRow[]
+  activityEvents: ActivityEventRow[]
+  activityUnreadCount: number
 }

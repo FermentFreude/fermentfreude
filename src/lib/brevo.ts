@@ -122,6 +122,16 @@ export const BREVO_TEMPLATES = {
 
   // Custom — V2
   VOUCHER_PURCHASED: 73, // V2 (was 45)
+
+  // Refund / Rebooking system (docs/REFUND_REBOOKING_SYSTEM_PLAN.md §9)
+  // Created for real via Brevo's Templates API (Stage 7) — HTML source of
+  // truth lives in public/email-templates/v2/, pushed with
+  // scripts/push-brevo-templates.mjs, same as every other V2 template.
+  CUSTOMER_REBOOKED: 95, // "rebook now" completed
+  VOUCHER_CODE_ISSUED: 96, // "rebook later via code" completed (deferred rebooking, NOT a paid gift card)
+  CUSTOMER_CANCELLED_NO_REFUND: 97, // <14-day self-service cancellation confirmed
+  REFUND_INITIATED: 98, // refund request created
+  ORGANISER_CANCELLED: 99, // admin cancels an appointment
 } as const
 
 type BrevoRecipient = {

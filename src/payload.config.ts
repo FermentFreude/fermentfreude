@@ -15,7 +15,9 @@ import {
 import path from 'path'
 import { buildConfig } from 'payload'
 
+import { ActivityEvents } from '@/collections/ActivityEvents'
 import { BacklogItems } from '@/collections/BacklogItems'
+import { BookingMagicLinks } from '@/collections/BookingMagicLinks'
 import { BrevoEmailTemplates } from '@/collections/BrevoEmailTemplates'
 import { BrevoTemplates } from '@/collections/BrevoTemplates'
 import { CancellationRequests } from '@/collections/CancellationRequests'
@@ -27,6 +29,7 @@ import { Media } from '@/collections/Media'
 import { OnlineCourses } from '@/collections/OnlineCourses'
 import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
+import { RefundRequests } from '@/collections/RefundRequests'
 import { ReturnRequests } from '@/collections/ReturnRequests'
 import { Reviews } from '@/collections/Reviews'
 import { Users } from '@/collections/Users'
@@ -179,6 +182,9 @@ export default buildConfig({
     Reviews,
     ReturnRequests,
     CancellationRequests,
+    BookingMagicLinks,
+    RefundRequests,
+    ActivityEvents,
     BrevoEmailTemplates,
     BrevoTemplates,
   ],

@@ -18,6 +18,20 @@ export const ConfirmOrder: React.FC = () => {
   const router = useRouter()
   const isConfirming = useRef(false)
   const [confirmError, setConfirmError] = useState<string | null>(null)
+  const [cartGracePeriodOver, setCartGracePeriodOver] = useState(false)
+
+  // The ecommerce provider restores its cart from localStorage via an async
+  // fetch on mount, so `cart` can still be undefined for a moment after this
+  // page loads even when a real cart exists — a fast Stripe redirect (typical
+  // for test cards with no 3DS) reliably wins that race otherwise, and
+  // confirmOrder() throws "Cart is empty" immediately (it checks cartID
+  // synchronously, before any network call) even though the cart was about
+  // to load a moment later. This grace period gives that restore a window to
+  // finish before we treat the cart as genuinely absent.
+  useEffect(() => {
+    const timer = setTimeout(() => setCartGracePeriodOver(true), 2000)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     const paymentIntentID = searchParams.get('payment_intent')
@@ -31,10 +45,15 @@ export const ConfirmOrder: React.FC = () => {
 
     // Don't attempt until we know whether the user session is ready.
     // `user` is undefined while the Auth provider is hydrating — wait one cycle.
-    // But don't wait forever for the cart: on redirect-based payments (iDEAL,
+    // Don't attempt until the cart has either loaded or the grace period above
+    // has elapsed. But don't wait forever: on redirect-based payments (iDEAL,
     // Klarna) the Stripe webhook may have already created the Order and cleared
-    // the cart before the browser lands here, so we proceed even with an empty
-    // cart and let the ecommerce plugin resolve the order by payment intent ID.
+    // the cart before the browser lands here, so once the grace period is over
+    // we proceed even with an empty cart and let the ecommerce plugin resolve
+    // the order by payment intent ID.
+    if (!cart && !cartGracePeriodOver) {
+      return
+    }
 
     if (!isConfirming.current) {
       isConfirming.current = true
@@ -151,7 +170,7 @@ export const ConfirmOrder: React.FC = () => {
           )
         })
     }
-  }, [searchParams, confirmOrder, router, clearCart, user, cart, locale])
+  }, [searchParams, confirmOrder, router, clearCart, user, cart, locale, cartGracePeriodOver])
 
   if (confirmError) {
     return (

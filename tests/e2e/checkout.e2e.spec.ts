@@ -160,12 +160,28 @@ async function stubCheckoutApi(
 
 }
 
+// The site defaults to German. The CLIENT-side locale (which controls the
+// "Go to payment" / "Zur Zahlung" label inside the 'use client' CheckoutPage)
+// comes from `localStorage.fermentfreude-locale`, read on mount by
+// LocaleProvider (src/providers/Locale/index.tsx) — NOT from the
+// `fermentfreude-locale` cookie, which only exists for server components to
+// read (getLocale()) and is written FROM localStorage, never the reverse.
+// These tests assert on English labels, so localStorage must be seeded
+// before the page that reads it mounts.
+async function setEnglishLocale(page: import('@playwright/test').Page) {
+  await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' })
+  await page.evaluate(() => {
+    window.localStorage.setItem('fermentfreude-locale', 'en')
+  })
+}
+
 async function seedGuestCart(page: import('@playwright/test').Page, cart: MockCart) {
   await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' })
   await page.evaluate(
     ({ cartId, cartSecret }) => {
       window.localStorage.setItem('cart', cartId)
       window.localStorage.setItem('cart_secret', cartSecret)
+      window.localStorage.setItem('fermentfreude-locale', 'en')
     },
     { cartId: cart.id, cartSecret: cart.secret },
   )
@@ -188,8 +204,12 @@ test.describe('Checkout purchase flows', () => {
     await expect(page.locator('#main-content').getByText('Fermentation Basics Course')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Go to payment' })).toBeVisible()
 
+    // Note: there is no longer a separate "Continue as guest" confirmation
+    // step — filling the guest email directly enables "Go to payment". The
+    // `continueAsGuest` label in CheckoutPage.tsx is dead/unused (checked:
+    // it's defined but never referenced in JSX), a leftover from an earlier
+    // UI iteration; this test previously assumed that older two-step flow.
     await page.getByLabel('Email Address').fill('guest@example.com')
-    await page.getByRole('button', { name: 'Continue as guest' }).click()
 
     await page.getByRole('button', { name: 'Go to payment' }).click()
 
@@ -218,6 +238,7 @@ test.describe('Checkout purchase flows', () => {
         id: 'user_checkout_1',
       },
     })
+    await setEnglishLocale(page)
 
     await page.goto('http://localhost:3000/checkout', { waitUntil: 'domcontentloaded' })
     await expect(page.getByRole('button', { name: 'Go to payment' })).toBeVisible()
@@ -236,5 +257,64 @@ test.describe('Checkout purchase flows', () => {
 
     await expect(page.getByRole('heading', { name: 'Payment' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Cancel payment' })).toBeVisible()
+  })
+})
+
+test.describe('Order confirmation — cart-restore race', () => {
+  test('waits for a slow cart restore instead of failing with "Cart is empty"', async ({ page }) => {
+    test.setTimeout(60_000)
+    // Reproduces a real bug: on landing back from Stripe with ?payment_intent=,
+    // ConfirmOrder used to call confirmOrder() immediately — before the
+    // ecommerce provider's own async cart-restore-from-localStorage fetch had
+    // resolved — and confirmOrder() throws "Cart is empty" synchronously if
+    // its internal cartID isn't set yet. A fast redirect (typical for a test
+    // card with no 3DS) reliably lost that race. Delaying the cart fetch here
+    // simulates exactly that window; the fix (a bounded grace period before
+    // calling confirmOrder) must wait it out instead of failing.
+    const cart = createDigitalCourseCart({ id: 'cart_race_1', secret: 'cart_secret_race_1' })
+    const confirmOrderBodies: Array<Record<string, unknown>> = []
+
+    await page.route('**/api/users/me**', async (route) => {
+      await route.fulfill({
+        body: JSON.stringify({ user: null }),
+        contentType: 'application/json',
+        status: 200,
+      })
+    })
+
+    await page.route('**/api/carts/**', async (route) => {
+      // Artificial delay well under the grace period, well over "instant" —
+      // proves the fix waits rather than merely being lucky on a fast network.
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      await route.fulfill({
+        body: JSON.stringify(cart),
+        contentType: 'application/json',
+        status: 200,
+      })
+    })
+
+    await page.route('**/api/payments/stripe/confirm-order', async (route) => {
+      confirmOrderBodies.push(route.request().postDataJSON() as Record<string, unknown>)
+      await route.fulfill({
+        body: JSON.stringify({ orderID: 'order_race_1' }),
+        contentType: 'application/json',
+        status: 200,
+      })
+    })
+
+    await seedGuestCart(page, cart)
+
+    await page.goto(
+      'http://localhost:3000/checkout/confirm-order?payment_intent=pi_test_race_1&email=guest%40example.com',
+      { waitUntil: 'domcontentloaded' },
+    )
+
+    // Must NOT show the error screen at any point while waiting.
+    await expect(page.getByText('Etwas ist schiefgelaufen')).toHaveCount(0)
+
+    await page.waitForURL(/\/checkout\/order-confirmation\?orderId=order_race_1/, { timeout: 15_000 })
+
+    await expect.poll(() => confirmOrderBodies.length).toBeGreaterThan(0)
+    expect(confirmOrderBodies[0]).toMatchObject({ cartID: 'cart_race_1' })
   })
 })

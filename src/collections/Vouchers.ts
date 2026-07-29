@@ -66,6 +66,21 @@ export const Vouchers: CollectionConfig = {
         description: 'Voucher value in EUR (default €99 for workshop experience)',
       },
     },
+    {
+      name: 'origin',
+      type: 'select',
+      defaultValue: 'gift-purchase',
+      options: [
+        { label: 'Gift purchase', value: 'gift-purchase' },
+        { label: 'Cancellation — deferred rebooking', value: 'cancellation-self-service' },
+        { label: 'Admin goodwill', value: 'admin-goodwill' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description:
+          'How this voucher came to exist. "Cancellation — deferred rebooking" is issued automatically when a customer picks "rebook later via code" instead of a paid gift card.',
+      },
+    },
 
     /* ── Purchaser Details ── */
     {

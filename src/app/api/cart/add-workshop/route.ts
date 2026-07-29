@@ -1,3 +1,4 @@
+import { reserveSpotsAtomic } from '@/lib/atomicSpots'
 import type { WorkshopAppointment } from '@/payload-types'
 import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
@@ -269,17 +270,25 @@ export async function POST(request: NextRequest) {
 
     const actualProductId = foundProduct.id
 
-    // ─── Decrement Available Spots ──────────────────────────────
-    // Spots are reserved immediately to prevent overbooking.
+    // ─── Decrement Available Spots (atomic) ─────────────────────
+    // Spots are reserved immediately to prevent overbooking. The check above
+    // (guestCount > appointment.availableSpots) is a fast-path UX check only —
+    // this atomic $inc-with-guard is the actual authority, since two requests
+    // can both pass the check above for the last spot before either writes.
     // Restored via POST /api/cart/release-spots if payment fails or cart is abandoned.
-    await payload.update({
-      collection: 'workshop-appointments',
-      id: appointmentId,
-      data: {
-        availableSpots: appointment.availableSpots - guestCount,
-      },
-      overrideAccess: true,
-    })
+    const reserveResult = await reserveSpotsAtomic(payload, appointmentId, guestCount)
+    if (!reserveResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Not enough spots',
+          message: `Only ${reserveResult.availableSpots} spot${reserveResult.availableSpots === 1 ? '' : 's'} available, but you requested ${guestCount}.`,
+          availableSpots: reserveResult.availableSpots,
+          requestedGuests: guestCount,
+        },
+        { status: 409 },
+      )
+    }
 
     // ─── Create Pending Booking Record ──────────────────────────
     // pending → confirmed via Stripe webhook, or cancelled via release-spots.

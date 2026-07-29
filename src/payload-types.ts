@@ -90,6 +90,9 @@ export interface Config {
     reviews: Review;
     'return-requests': ReturnRequest;
     'cancellation-requests': CancellationRequest;
+    'booking-magic-links': BookingMagicLink;
+    'refund-requests': RefundRequest;
+    'activity-events': ActivityEvent;
     'brevo-email-templates': BrevoEmailTemplate;
     'brevo-templates': BrevoTemplate;
     forms: Form;
@@ -139,6 +142,9 @@ export interface Config {
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'return-requests': ReturnRequestsSelect<false> | ReturnRequestsSelect<true>;
     'cancellation-requests': CancellationRequestsSelect<false> | CancellationRequestsSelect<true>;
+    'booking-magic-links': BookingMagicLinksSelect<false> | BookingMagicLinksSelect<true>;
+    'refund-requests': RefundRequestsSelect<false> | RefundRequestsSelect<true>;
+    'activity-events': ActivityEventsSelect<false> | ActivityEventsSelect<true>;
     'brevo-email-templates': BrevoEmailTemplatesSelect<false> | BrevoEmailTemplatesSelect<true>;
     'brevo-templates': BrevoTemplatesSelect<false> | BrevoTemplatesSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -4412,6 +4418,10 @@ export interface Cart {
         product?: (string | null) | Product;
         variant?: (string | null) | Variant;
         quantity: number;
+        /**
+         * Last 6 hex chars of the workshop-appointments ID this line is for (workshop items only). Kept deliberately short — see the `carts` config comment in src/plugins/index.ts for why: Stripe metadata has a hard 500-char-per-value limit and every character here is multiplied by cart size.
+         */
+        a?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -4711,6 +4721,19 @@ export interface WorkshopAppointment {
    * Internal notes (not visible to customers)
    */
   notes?: string | null;
+  /**
+   * ⚠️ Auf "Abgesagt" setzen benachrichtigt automatisch JEDE Person mit einer bestätigten Buchung auf diesen Termin per E-Mail, mit einem Link zur Auswahl: Ersatztermin oder volle Rückerstattung. Der Termin wird dabei auch automatisch von der Website genommen (unpublished). Das kann nicht einfach rückgängig gemacht werden — nur für echte Absagen verwenden.
+   */
+  cancellationStatus?: ('scheduled' | 'cancelled_by_organiser') | null;
+  /**
+   * Grund, der den Kund:innen in der Absage-E-Mail angezeigt wird (z.B. "Krankheitsbedingt").
+   */
+  cancellationReason?: string | null;
+  /**
+   * Nur intern sichtbar — nicht Teil der Kunden-E-Mail.
+   */
+  cancellationInternalNote?: string | null;
+  cancelledAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4786,6 +4809,56 @@ export interface WorkshopBooking {
          * Dietary requirements, allergies, or accessibility needs for this guest.
          */
         giftNote?: string | null;
+        /**
+         * Lifecycle status of this individual seat — every seat resolves independently. Set automatically by the manage-booking flow; the booking-level Status field above is the order/payment state, not this.
+         */
+        seatStatus?:
+          | (
+              | 'active'
+              | 'cancelled_no_refund'
+              | 'rebooking_pending'
+              | 'rebooked'
+              | 'refund_requested'
+              | 'refunded'
+              | 'voucher_issued'
+              | 'organiser_cancelled_pending'
+              | 'no_show'
+            )
+          | null;
+        /**
+         * True once this seat has used its one-time rebooking right (AGB §4.6) — either rebook-now or rebook-later-via-code. No further self-service rebooking or refund is offered after this.
+         */
+        selfRebookingUsed?: boolean | null;
+        /**
+         * When this seat was cancelled or its rebooking right exercised.
+         */
+        cancelledAt?: string | null;
+        /**
+         * Reason the customer selected when cancelling/rebooking this seat.
+         */
+        cancelledReason?:
+          | ('cannot_attend' | 'personal_health' | 'wrong_workshop' | 'workshop_cancelled' | 'other')
+          | null;
+        /**
+         * Set when seatStatus = voucher_issued — the deferred-rebooking code issued for this seat.
+         */
+        linkedVoucherId?: (string | null) | Voucher;
+        /**
+         * Set when a refund was requested for this seat.
+         */
+        linkedRefundRequestId?: (string | null) | RefundRequest;
+        /**
+         * Traceability — the new WorkshopBooking created when this seat was rebooked (rebook-now).
+         */
+        rebookedToBookingId?: string | null;
+        /**
+         * Traceability — the original WorkshopBooking this seat was rebooked from, if this booking exists because of a rebooking.
+         */
+        rebookedFromBookingId?: string | null;
+        /**
+         * Traceability — the specific seat index on the original booking this seat was rebooked from. Paired with rebookedFromBookingId so rebook-now can detect an interrupted request (new booking created but the original seat never got marked resolved) and resume instead of creating a duplicate.
+         */
+        rebookedFromSeatIndex?: number | null;
         isGift?: boolean | null;
         recipientEmail?: string | null;
         giftEmailSentAt?: string | null;
@@ -4815,6 +4888,10 @@ export interface Voucher {
    * Voucher value in EUR (default €99 for workshop experience)
    */
   value: number;
+  /**
+   * How this voucher came to exist. "Cancellation — deferred rebooking" is issued automatically when a customer picks "rebook later via code" instead of a paid gift card.
+   */
+  origin?: ('gift-purchase' | 'cancellation-self-service' | 'admin-goodwill') | null;
   /**
    * Full name of the buyer (used in greeting of confirmation email). Optional for legacy vouchers.
    */
@@ -4871,6 +4948,59 @@ export interface Voucher {
    * Set automatically if the Brevo confirmation email failed to send. Check Vercel logs for the [Brevo] error and resend the voucher manually if needed.
    */
   emailDeliveryFailed?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Refund requests created by customers (self-service) or admins (organiser cancellation, goodwill). No refund is issued automatically — a founder actions it in Stripe's dashboard using the PaymentIntent ID here; the charge.refunded webhook then marks this row completed.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "refund-requests".
+ */
+export interface RefundRequest {
+  id: string;
+  booking: string | WorkshopBooking;
+  /**
+   * 0-based index into the booking's seats[] array — identifies exactly which seat this request is for.
+   */
+  seatIndex: number;
+  /**
+   * The seats[] array item's own Payload-generated id, for a lookup that survives array reordering.
+   */
+  seatId?: string | null;
+  /**
+   * Which policy-engine outcome produced this row — see docs/REFUND_REBOOKING_SYSTEM_PLAN.md §5.
+   */
+  policyResult:
+    | 'full_refund'
+    | 'rebook_now'
+    | 'rebook_later_voucher'
+    | 'no_entitlement'
+    | 'organiser_cancellation_refund'
+    | 'organiser_cancellation_rebook'
+    | 'goodwill';
+  /**
+   * Calculated from the seat's actually-paid components — never the current list price (matters if a price-adjusted rebooking already happened on this seat).
+   */
+  requestedAmount?: number | null;
+  paymentSource?: ('card' | 'purchased_voucher' | 'mixed') | null;
+  /**
+   * "Completed" is set automatically by the charge.refunded webhook once Stripe confirms the refund — founders don't need to set this manually.
+   */
+  status: 'requested' | 'acknowledged' | 'processing' | 'completed' | 'failed';
+  initiatedBy: 'customer' | 'admin';
+  /**
+   * For founders' manual Stripe lookup — included in the admin alert email.
+   */
+  stripePaymentIntentId?: string | null;
+  /**
+   * Filled once the charge.refunded webhook reconciles this row.
+   */
+  stripeRefundId?: string | null;
+  requestedAt?: string | null;
+  acknowledgedAt?: string | null;
+  completedAt?: string | null;
+  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4966,6 +5096,63 @@ export interface CancellationRequest {
    */
   refundAmount?: number | null;
   processedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Tokens behind the "Buchung verwalten" links sent to customers. The underlying entitlement never expires — only the link does; an expired link is reissued (new row, same bookingId), never edited in place.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "booking-magic-links".
+ */
+export interface BookingMagicLink {
+  id: string;
+  /**
+   * Auto-generated unique token (UUID) — the credential in the manage-booking link.
+   */
+  token: string;
+  bookingId: string | WorkshopBooking;
+  /**
+   * Which branch of seatActionOptions() this link resolves to — organiser-cancellation links are only valid while the appointment is CANCELLED_BY_ORGANISER.
+   */
+  scope: 'self-service' | 'organiser-cancellation';
+  issuedAt: string;
+  /**
+   * Nullable — leave empty for no expiry. When set and passed, the route rejects the token and the customer must be issued a new link (via the confirmation email's "resend" path or an admin action) — the underlying entitlement is untouched.
+   */
+  expiresAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Audit trail powering the Roster dashboard's Activity feed. Written by hooks — not intended for manual editing.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity-events".
+ */
+export interface ActivityEvent {
+  id: string;
+  type:
+    | 'order_placed'
+    | 'voucher_purchased'
+    | 'voucher_redeemed'
+    | 'booking_rebooked'
+    | 'booking_cancelled_no_refund'
+    | 'refund_requested'
+    | 'refund_completed'
+    | 'appointment_cancelled_by_organiser';
+  /**
+   * The order / booking / voucher / refund-request id this event is about.
+   */
+  refId?: string | null;
+  /**
+   * Human-readable one-liner, e.g. "Thomas Huber — Kombucha 12.9., €99 refund requested".
+   */
+  summary: string;
+  /**
+   * Admin users who have seen this event — drives the unread-count badge on the Roster nav item.
+   */
+  readBy?: (string | User)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -5154,6 +5341,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'cancellation-requests';
         value: string | CancellationRequest;
+      } | null)
+    | ({
+        relationTo: 'booking-magic-links';
+        value: string | BookingMagicLink;
+      } | null)
+    | ({
+        relationTo: 'refund-requests';
+        value: string | RefundRequest;
+      } | null)
+    | ({
+        relationTo: 'activity-events';
+        value: string | ActivityEvent;
       } | null)
     | ({
         relationTo: 'brevo-email-templates';
@@ -6941,6 +7140,10 @@ export interface WorkshopAppointmentsSelect<T extends boolean = true> {
   availableSpots?: T;
   isPublished?: T;
   notes?: T;
+  cancellationStatus?: T;
+  cancellationReason?: T;
+  cancellationInternalNote?: T;
+  cancelledAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -6971,6 +7174,15 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
     | {
         recipientName?: T;
         giftNote?: T;
+        seatStatus?: T;
+        selfRebookingUsed?: T;
+        cancelledAt?: T;
+        cancelledReason?: T;
+        linkedVoucherId?: T;
+        linkedRefundRequestId?: T;
+        rebookedToBookingId?: T;
+        rebookedFromBookingId?: T;
+        rebookedFromSeatIndex?: T;
         isGift?: T;
         recipientEmail?: T;
         giftEmailSentAt?: T;
@@ -6987,6 +7199,7 @@ export interface VouchersSelect<T extends boolean = true> {
   code?: T;
   status?: T;
   value?: T;
+  origin?: T;
   purchaserName?: T;
   purchaserEmail?: T;
   recipientName?: T;
@@ -7066,6 +7279,53 @@ export interface CancellationRequestsSelect<T extends boolean = true> {
   stripeRefundId?: T;
   refundAmount?: T;
   processedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "booking-magic-links_select".
+ */
+export interface BookingMagicLinksSelect<T extends boolean = true> {
+  token?: T;
+  bookingId?: T;
+  scope?: T;
+  issuedAt?: T;
+  expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "refund-requests_select".
+ */
+export interface RefundRequestsSelect<T extends boolean = true> {
+  booking?: T;
+  seatIndex?: T;
+  seatId?: T;
+  policyResult?: T;
+  requestedAmount?: T;
+  paymentSource?: T;
+  status?: T;
+  initiatedBy?: T;
+  stripePaymentIntentId?: T;
+  stripeRefundId?: T;
+  requestedAt?: T;
+  acknowledgedAt?: T;
+  completedAt?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity-events_select".
+ */
+export interface ActivityEventsSelect<T extends boolean = true> {
+  type?: T;
+  refId?: T;
+  summary?: T;
+  readBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -7406,6 +7666,7 @@ export interface CartsSelect<T extends boolean = true> {
         product?: T;
         variant?: T;
         quantity?: T;
+        a?: T;
         id?: T;
       };
   secret?: T;

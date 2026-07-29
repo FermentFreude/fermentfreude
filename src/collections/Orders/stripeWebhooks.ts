@@ -1,3 +1,5 @@
+import { releaseSpotsAtomic } from '@/lib/atomicSpots'
+import { logActivityEvent } from '@/lib/manageBooking'
 import type { PayloadRequest } from 'payload'
 import type Stripe from 'stripe'
 
@@ -85,17 +87,7 @@ export async function handlePaymentFailed({
             ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
             : 12
 
-        const restoredSpots = Math.min(
-          appointment.availableSpots + (booking.guestCount ?? 1),
-          maxCapacity,
-        )
-
-        await payload.update({
-          collection: 'workshop-appointments',
-          id: booking.appointmentId,
-          data: { availableSpots: restoredSpots },
-          overrideAccess: true,
-        })
+        await releaseSpotsAtomic(payload, booking.appointmentId, booking.guestCount ?? 1, maxCapacity)
 
         payload.logger.info(
           `[stripe:payment_failed] Restored ${booking.guestCount} spot(s) on appointment ${booking.appointmentId}`,
@@ -128,6 +120,7 @@ export async function handlePaymentFailed({
 export async function handleChargeRefunded({
   event,
   req,
+  stripe,
 }: {
   event: Stripe.Event
   req: PayloadRequest
@@ -148,6 +141,137 @@ export async function handleChargeRefunded({
     `[stripe:charge_refunded] Charge ${charge.id} refunded (PI: ${paymentIntentId})`,
   )
 
+  // ─── Seat-scoped reconciliation (refund/rebooking system, plan §8) ──────
+  // If this PaymentIntent has ANY refund-requests row — pending or already
+  // completed — it belongs to the new self-service system, and this event
+  // is reconciling that, not the whole order. Deliberately NOT filtering by
+  // status in this first query: Stripe delivers webhooks at-least-once, and
+  // a redelivered event for an already-completed row must no-op here, not
+  // fall through to the legacy whole-booking fallback below (which would
+  // incorrectly mark the entire order/every seat as refunded on a replay —
+  // a duplicate delivery is routine, not an edge case, and "ownership" of a
+  // PaymentIntent by this system must not depend on reconciliation status).
+  const allRequestsForPI = await payload.find({
+    collection: 'refund-requests',
+    where: { stripePaymentIntentId: { equals: paymentIntentId } },
+    depth: 0,
+    limit: 20,
+    overrideAccess: true,
+  })
+
+  if (allRequestsForPI.totalDocs > 0) {
+    const pendingRequests = allRequestsForPI.docs.filter((rr) =>
+      ['requested', 'acknowledged', 'processing'].includes(rr.status),
+    )
+
+    if (pendingRequests.length === 0) {
+      payload.logger.info(
+        `[stripe:charge_refunded] All refund-requests for PI ${paymentIntentId} already reconciled — duplicate webhook delivery, no-op`,
+      )
+      return
+    }
+
+    // Disambiguate which row(s) this specific event is for when a
+    // PaymentIntent has multiple pending requests (e.g. two seats in the
+    // same order both refunded, possibly as separate Stripe refunds) by
+    // matching the latest refund's exact amount. `charge.refunds` on the
+    // webhook payload's embedded Charge object is NOT populated by Stripe
+    // (confirmed live during Stage 10's real test-mode dry run — it comes
+    // back `null` on every real charge.refunded event, not just sometimes),
+    // so the list must be fetched fresh via the API. If that fetch fails,
+    // fall back to reconciling every pending row for this PaymentIntent —
+    // matches the precision the legacy path already had (no per-seat
+    // disambiguation at all).
+    let latestRefund: Stripe.Refund | undefined
+    try {
+      const refundsList = await stripe.refunds.list({ payment_intent: paymentIntentId, limit: 10 })
+      latestRefund = refundsList.data.slice().sort((a, b) => b.created - a.created)[0]
+    } catch (err) {
+      payload.logger.error(
+        `[stripe:charge_refunded] Failed to fetch refunds list for PI ${paymentIntentId}: ${err instanceof Error ? err.message : String(err)}`,
+      )
+    }
+
+    for (const rr of pendingRequests) {
+      if (latestRefund && rr.requestedAmount !== latestRefund.amount) continue
+
+      await payload.update({
+        collection: 'refund-requests',
+        id: rr.id,
+        data: {
+          status: 'completed',
+          completedAt: new Date().toISOString(),
+          stripeRefundId: latestRefund?.id ?? '',
+        },
+        overrideAccess: true,
+      })
+
+      const bookingId = typeof rr.booking === 'object' ? rr.booking.id : rr.booking
+      let booking
+      try {
+        booking = await payload.findByID({
+          collection: 'workshop-bookings',
+          id: bookingId,
+          overrideAccess: true,
+        })
+      } catch {
+        payload.logger.error(
+          `[stripe:charge_refunded] refund-request ${rr.id} points at a missing booking ${bookingId} — skipping seat update`,
+        )
+        continue
+      }
+
+      const seats = [...(booking.seats ?? [])]
+      if (seats[rr.seatIndex]) {
+        seats[rr.seatIndex] = { ...seats[rr.seatIndex], seatStatus: 'refunded' }
+        await payload.update({
+          collection: 'workshop-bookings',
+          id: booking.id,
+          data: { seats },
+          overrideAccess: true,
+        })
+      }
+
+      if (booking.appointmentId) {
+        try {
+          const appointment = await payload.findByID({
+            collection: 'workshop-appointments',
+            id: booking.appointmentId,
+            depth: 1,
+            overrideAccess: true,
+          })
+          const maxCapacity =
+            typeof appointment.workshop === 'object'
+              ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
+              : 12
+          await releaseSpotsAtomic(payload, booking.appointmentId, 1, maxCapacity)
+        } catch (err) {
+          payload.logger.error(
+            `[stripe:charge_refunded] Failed to restore capacity for refund-request ${rr.id}: ${err}`,
+          )
+        }
+      }
+
+      const requestedAmountCents = rr.requestedAmount ?? 0
+      await logActivityEvent(
+        payload,
+        'refund_completed',
+        String(rr.id),
+        `${booking.firstName ?? 'Gast'} ${booking.lastName ?? ''} — ${booking.workshopTitle}, €${(requestedAmountCents / 100).toFixed(2)} Rückerstattung abgeschlossen (Platz ${rr.seatIndex + 1})`,
+      )
+
+      payload.logger.info(
+        `[stripe:charge_refunded] Seat-scoped: reconciled refund-request ${rr.id} (seat ${rr.seatIndex} of booking ${booking.id})`,
+      )
+    }
+
+    return
+  }
+
+  // ─── Legacy whole-order fallback ─────────────────────────────────────────
+  // For refunds issued entirely outside this system (e.g. an ad-hoc admin
+  // refund in Stripe with no refund-requests row behind it) — preserves the
+  // pre-existing behavior exactly.
   // Find the order by its transaction reference (payment intent ID stored in transactions)
   const orders = await payload.find({
     collection: 'orders',
@@ -234,17 +358,7 @@ export async function handleChargeRefunded({
             ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
             : 12
 
-        const restoredSpots = Math.min(
-          appointment.availableSpots + (booking.guestCount ?? 1),
-          maxCapacity,
-        )
-
-        await payload.update({
-          collection: 'workshop-appointments',
-          id: booking.appointmentId,
-          data: { availableSpots: restoredSpots },
-          overrideAccess: true,
-        })
+        await releaseSpotsAtomic(payload, booking.appointmentId, booking.guestCount ?? 1, maxCapacity)
 
         payload.logger.info(
           `[stripe:charge_refunded] Restored ${booking.guestCount} spot(s) for refunded booking ${booking.id}`,
