@@ -1,3 +1,4 @@
+import { releaseSpotsAtomic } from '@/lib/atomicSpots'
 import type { CollectionAfterDeleteHook } from 'payload'
 
 /**
@@ -81,17 +82,12 @@ export const restoreWorkshopSpotsOnDelete: CollectionAfterDeleteHook = async ({ 
                 ?.maxCapacityPerSlot as number) ?? 12
             : 12
 
-        const restoredSpots = Math.min(
-          appointment.availableSpots + (booking.guestCount ?? 1),
+        const { availableSpots: restoredSpots } = await releaseSpotsAtomic(
+          payload,
+          booking.appointmentId,
+          booking.guestCount ?? 1,
           maxCapacity,
         )
-
-        await payload.update({
-          collection: 'workshop-appointments',
-          id: booking.appointmentId,
-          data: { availableSpots: restoredSpots },
-          overrideAccess: true,
-        })
 
         payload.logger.info(
           `[order:afterDelete] Restored ${booking.guestCount} spot(s) on appointment ${booking.appointmentId} (now ${restoredSpots})`,

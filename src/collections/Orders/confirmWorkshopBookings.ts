@@ -58,6 +58,31 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     quantity?: number
   }[] = doc.items ?? []
 
+  // Fetch the real cart record (not the Stripe-metadata-snapshotted items on
+  // the order) so each item can be matched to its exact appointment via `a`
+  // (the appointment-ID suffix), unambiguously. The cart's own `items` array
+  // still exists at this point (purchase stamps `purchasedAt`, it never
+  // deletes the cart) and isn't subject to Stripe's metadata size limit that
+  // `a` was deliberately shortened for (see the `carts` config in
+  // src/plugins/index.ts). Positional correspondence with `doc.items` holds
+  // because the snapshot was built via a straight 1:1 `cart.items.map(...)`
+  // with no reordering — see @payloadcms/plugin-ecommerce's stripe
+  // initiatePayment.js.
+  let cartItemsByPosition: { a?: string | null }[] = []
+  if (cartId) {
+    try {
+      const cartDoc = await payload.findByID({
+        collection: 'carts',
+        id: cartId,
+        depth: 0,
+        overrideAccess: true,
+      })
+      cartItemsByPosition = Array.isArray(cartDoc?.items) ? cartDoc.items : []
+    } catch {
+      // Non-fatal — falls back to the heuristic matching strategies below.
+    }
+  }
+
   // Resolve customer fields — from order or fallback to user record
   const customerId = typeof doc.customer === 'object' ? doc.customer?.id : doc.customer
   let customerEmail: string | undefined = doc.customerEmail || undefined
@@ -104,7 +129,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     customerDietSpecs = doc.customerDietSpecs.trim()
   }
 
-  for (const item of items) {
+  for (const [itemIndex, item] of items.entries()) {
     const productRef = item?.product
     if (!productRef) continue
 
@@ -132,14 +157,43 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     const workshopSlug = productSlug.replace('workshop-', '')
     const guestCount = item.quantity ?? 1
 
+    // ── Strategy 0: exact match via the cart's own appointment ID ──
+    // Unambiguous — no reliance on guestCount/email heuristics that break
+    // when a customer books multiple DIFFERENT appointments of the SAME
+    // workshop type in one order (each order item looks identical to the
+    // heuristics below: same workshopSlug, same guestCount). This is the
+    // only strategy that correctly distinguishes them.
+    let booking = null
+    const cartItemAidSuffix = cartItemsByPosition[itemIndex]?.a
+    if (cartItemAidSuffix) {
+      // `a` is only the last 6 hex chars (Stripe metadata size constraint —
+      // see comment above), so this can't be a DB-level `equals` — fetch the
+      // small candidate set for this workshop and match the suffix in JS
+      // against each booking's full `appointmentId`.
+      const candidates = await payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [
+            { workshopSlug: { equals: workshopSlug } },
+            { status: { in: ['pending', 'confirmed'] } },
+          ],
+        },
+        sort: '-createdAt',
+        limit: 50,
+        overrideAccess: true,
+      })
+      booking =
+        candidates.docs.find(
+          (b) => typeof b.appointmentId === 'string' && b.appointmentId.endsWith(cartItemAidSuffix),
+        ) ?? null
+    }
+
     // ── Strategy 1: match by cart ID + workshop + guest count ──
     // Also matches already-confirmed bookings (status may be 'confirmed' if
     // the charge.succeeded webhook fired before this hook ran — race condition
     // on Stripe event ordering). orderId is always stamped here so the receipt
     // route can look up bookings by orderId reliably.
-    let booking = null
-
-    if (cartId) {
+    if (!booking && cartId) {
       const byCart = await payload.find({
         collection: 'workshop-bookings',
         where: {
@@ -247,6 +301,28 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         `[confirmWorkshopBookings] Failed to confirm booking ${booking.id}: ${error instanceof Error ? error.message : String(error)}`,
       )
       continue
+    }
+
+    // Mint the manage-booking magic link — same "Buchung verwalten" link the
+    // confirmation email includes below. Best-effort: a failed link means no
+    // self-service link in this email, not a failed booking confirmation.
+    let manageBookingToken = ''
+    try {
+      const link = await payload.create({
+        collection: 'booking-magic-links',
+        data: {
+          token: randomUUID(),
+          bookingId: booking.id,
+          scope: 'self-service',
+          issuedAt: new Date().toISOString(),
+        },
+        overrideAccess: true,
+      })
+      manageBookingToken = String(link.token)
+    } catch (linkError) {
+      payload.logger.error(
+        `[confirmWorkshopBookings] Failed to create magic link for booking ${booking.id}: ${linkError instanceof Error ? linkError.message : String(linkError)}`,
+      )
     }
 
     // Send workshop booking confirmation email now that customer info is available
@@ -427,6 +503,11 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             WHAT_TO_BRING: whatToBring,
             PRIVACY_URL: `${SERVER_URL}/datenschutz`,
             AGB_URL: `${SERVER_URL}/agb`,
+            MANAGE_BOOKING_URL: manageBookingToken
+              ? `${SERVER_URL}/manage-booking/${manageBookingToken}`
+              : `${SERVER_URL}/account/orders`,
+            POLICY_SUMMARY:
+              'Kostenlose Stornierung oder Umbuchung bis 30 Tage vor dem Workshop — Details über "Buchung verwalten".',
           },
           attachments: icsAttachment ? [icsAttachment] : undefined,
         })

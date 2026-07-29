@@ -14,7 +14,10 @@ import { toast } from 'sonner'
  * ═══════════════════════════════════════════════════════════════ */
 
 type AddWorkshopToCartParams = {
-  addItemAction: (item: { product: string; variant?: string }, quantity?: number) => Promise<void>
+  addItemAction: (
+    item: { product: string; variant?: string; a?: string },
+    quantity?: number,
+  ) => Promise<void>
   clearCart?: () => Promise<void>
   appointmentId: string
   /** DB / product slug (e.g. "lakto") — used by /api/cart/add-workshop */
@@ -127,10 +130,16 @@ export async function addWorkshopToCart({
 
     // Step 4: Add to cart with correct quantity (guestCount)
     // This ensures Payload cart calculates: basePrice × quantity = totalPrice
+    // `a` (last 6 hex chars of the appointment ID) is required here —
+    // without it, two different appointments of the same workshop type
+    // share the same product and get silently merged into one cart line by
+    // the default cart-item matcher, and only one of them ever gets
+    // confirmed after payment. Deliberately short — see the `carts` config
+    // in src/plugins/index.ts for why (Stripe metadata's 500-char limit).
     // NOTE: addItem from the ecommerce plugin silently swallows errors — it never
     // throws. We verify success by fetching the cart and checking for the product.
     await addItemAction(
-      { product: data.cartItem.productId },
+      { product: data.cartItem.productId, a: appointmentId.slice(-6) },
       guestCount, // Pass quantity as second argument, not inside item object
     )
 

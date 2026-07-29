@@ -15,6 +15,18 @@ Source-of-truth HTML for the 8 founder-edited Brevo V2 transactional templates.
 | `72-order-confirmation.html` | 72 | `sendOrderConfirmationEmail.ts` |
 | `73-voucher-purchased.html` | 73 | `sendVoucherPurchaseEmail.ts` |
 
+Refund / rebooking system (`docs/REFUND_REBOOKING_SYSTEM_PLAN.md` §9), created Stage 7 of `docs/REFUND_REBOOKING_BUILD_LOG.md`:
+
+| File | Brevo ID | Backend trigger |
+| ---- | -------- | ---------------- |
+| `customer-rebooked.html` | 95 | `rebook-now/route.ts` |
+| `rebooking-voucher-issued.html` | 96 | `rebook-later/route.ts` |
+| `cancelled-no-refund.html` | 97 | `cancel-no-refund/route.ts` |
+| `refund-initiated.html` | 98 | `request-refund/route.ts` |
+| `organiser-cancelled.html` | 99 | `handleOrganiserCancellation.ts` |
+
+Note: ID 94 is intentionally skipped — `BREVO_TEMPLATES.ADMIN_WORKSHOP_NOTIFICATION` in `src/lib/brevo.ts` already claims 94 but has zero call sites anywhere in the codebase and no template ever existed in Brevo for it (confirmed while creating the templates above — a POST create landed on 94 first, proving the ID was free). Left as pre-existing dead code, out of scope for Stage 7; flagged in the build log.
+
 ## Design system
 
 - Width: 600px max, single column, fluid on mobile.

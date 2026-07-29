@@ -1,3 +1,4 @@
+import { releaseSpotsAtomic } from '@/lib/atomicSpots'
 import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
@@ -62,14 +63,12 @@ export async function POST(request: NextRequest) {
         ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
         : 12
 
-    const restoredSpots = Math.min(appointment.availableSpots + guestCount, maxCapacity)
-
-    await payload.update({
-      collection: 'workshop-appointments',
-      id: appointmentId,
-      data: { availableSpots: restoredSpots },
-      overrideAccess: true,
-    })
+    const { availableSpots: restoredSpots } = await releaseSpotsAtomic(
+      payload,
+      appointmentId,
+      guestCount,
+      maxCapacity,
+    )
 
     // ─── Cancel Pending Booking Record ─────────────────────────
     // Non-fatal: if bookingId is missing or already cancelled, skip.

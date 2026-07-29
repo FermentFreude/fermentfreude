@@ -1,4 +1,5 @@
 import configPromise from '@payload-config'
+import type { Payload } from 'payload'
 import { getPayload } from 'payload'
 import type { WorkshopDate } from './workshop-data'
 
@@ -6,6 +7,77 @@ function getErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) return error.message
   if (typeof error === 'string' && error.trim() !== '') return error
   return 'Unknown appointments fetch error'
+}
+
+/**
+ * Lazy cleanup: cancel stale pending bookings (abandoned cart, tab closed,
+ * etc. — restores their reserved spots. Stale = pending for > 60 minutes.
+ *
+ * Deliberately NOT awaited by the caller (see getWorkshopAppointments below)
+ * — this used to run synchronously on every single workshop-page view,
+ * meaning every visitor paid the latency cost of up to 10 stale bookings ×
+ * up to 3 sequential DB round-trips each (find → cancel → find appointment
+ * → restore spots) before the page could even start rendering. That was the
+ * actual cause of workshop pages "taking forever" to load. Writes inside
+ * stay sequential (MongoDB Atlas M0 has no multi-document transactions —
+ * see CLAUDE.md) — only the fact that the PAGE waits for this to finish is
+ * what's being removed.
+ */
+async function cleanupStaleBookings(payload: Payload, dbSlug: string): Promise<void> {
+  const sixtyMinutesAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+  try {
+    const staleBookings = await payload.find({
+      collection: 'workshop-bookings',
+      where: {
+        and: [
+          { workshopSlug: { equals: dbSlug } },
+          { status: { equals: 'pending' } },
+          { createdAt: { less_than: sixtyMinutesAgo } },
+        ],
+      },
+      limit: 10,
+      overrideAccess: true,
+    })
+
+    for (const booking of staleBookings.docs) {
+      // Cancel booking first — idempotent if two requests race
+      await payload.update({
+        collection: 'workshop-bookings',
+        id: booking.id,
+        data: { status: 'cancelled' },
+        overrideAccess: true,
+      })
+      // Restore spots on the appointment (capped at maxCapacity)
+      if (booking.appointmentId && booking.guestCount) {
+        try {
+          const appt = await payload.findByID({
+            collection: 'workshop-appointments',
+            id: booking.appointmentId,
+            depth: 1,
+          })
+          const maxCapacity =
+            typeof appt.workshop === 'object' ? (appt.workshop?.maxCapacityPerSlot ?? 12) : 12
+          await payload.update({
+            collection: 'workshop-appointments',
+            id: booking.appointmentId,
+            data: {
+              availableSpots: Math.min(appt.availableSpots + booking.guestCount, maxCapacity),
+            },
+            overrideAccess: true,
+          })
+        } catch {
+          // Appointment may have been deleted — skip
+        }
+      }
+    }
+
+    if (staleBookings.docs.length > 0) {
+      payload.logger.info(`✓ Cleaned up ${staleBookings.docs.length} stale pending bookings for ${dbSlug}`)
+    }
+  } catch (err) {
+    // Non-fatal — cleanup errors must never break the page
+    payload.logger.error(`Stale booking cleanup failed for ${dbSlug}: ${getErrorMessage(err)}`)
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -66,64 +138,9 @@ export async function getWorkshopAppointments(workshopSlug: string): Promise<Wor
       `✓ Found ${appointmentsResult.docs.length} appointments for ${workshopSlug} (DB slug: ${dbSlug})`,
     )
 
-    // ─── Lazy cleanup: cancel stale pending bookings ──────────────────────
-    // Restores spots for users who abandoned their cart (tab close, etc.)
-    // Runs on each page load. Stale = pending for > 60 minutes.
-    const sixtyMinutesAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-    try {
-      const staleBookings = await payload.find({
-        collection: 'workshop-bookings',
-        where: {
-          and: [
-            { workshopSlug: { equals: dbSlug } },
-            { status: { equals: 'pending' } },
-            { createdAt: { less_than: sixtyMinutesAgo } },
-          ],
-        },
-        limit: 10,
-        overrideAccess: true,
-      })
-
-      for (const booking of staleBookings.docs) {
-        // Cancel booking first — idempotent if two requests race
-        await payload.update({
-          collection: 'workshop-bookings',
-          id: booking.id,
-          data: { status: 'cancelled' },
-          overrideAccess: true,
-        })
-        // Restore spots on the appointment (capped at maxCapacity)
-        if (booking.appointmentId && booking.guestCount) {
-          try {
-            const appt = await payload.findByID({
-              collection: 'workshop-appointments',
-              id: booking.appointmentId,
-              depth: 1,
-            })
-            const maxCapacity =
-              typeof appt.workshop === 'object' ? (appt.workshop?.maxCapacityPerSlot ?? 12) : 12
-            await payload.update({
-              collection: 'workshop-appointments',
-              id: booking.appointmentId,
-              data: {
-                availableSpots: Math.min(appt.availableSpots + booking.guestCount, maxCapacity),
-              },
-              overrideAccess: true,
-            })
-          } catch {
-            // Appointment may have been deleted — skip
-          }
-        }
-      }
-
-      if (staleBookings.docs.length > 0) {
-        console.log(
-          `✓ Cleaned up ${staleBookings.docs.length} stale pending bookings for ${dbSlug}`,
-        )
-      }
-    } catch {
-      // Non-fatal — cleanup errors must never break the page
-    }
+    // Fire-and-forget — see cleanupStaleBookings' docstring above for why
+    // this must never block the page response.
+    void cleanupStaleBookings(payload, dbSlug)
 
     // Format appointments to WorkshopDate format
     return appointmentsResult.docs.map((appointment) => {

@@ -145,6 +145,72 @@ export const plugins: Plugin[] = [
     customers: {
       slug: 'users',
     },
+    carts: {
+      // Real, severe bug this closes: the default matcher only compares
+      // product + variant. Every workshop appointment of the same TYPE (e.g.
+      // two different Kombucha dates) resolves to the SAME product
+      // (`workshop-${slug}`, no variant) — so without this, adding a second
+      // different appointment of the same workshop to the cart silently
+      // MERGES it into the first line item's quantity instead of creating a
+      // second line. confirmWorkshopBookings.ts then can't tell which
+      // specific pending booking the merged quantity belongs to and only
+      // ever confirms one of them — the other stays 'pending' forever, never
+      // emailed, never given a ticket, despite being paid for.
+      //
+      // Field is named `a` and stores only the LAST 6 hex chars of the real
+      // appointment ID (not the full 24) — deliberately, not stylistically:
+      // @payloadcms/plugin-ecommerce's Stripe initiatePayment.js copies
+      // EVERY custom cart-item field verbatim into a JSON snapshot stored as
+      // Stripe PaymentIntent metadata, which has a hard 500-character-per-
+      // value limit. Verified empirically: 5 real workshop items with a
+      // full-length field already exceeded it (586 chars) and hard-failed
+      // checkout with a Stripe API error — a 6-char suffix is the difference
+      // between 5 items fitting and not. confirmWorkshopBookings.ts matches
+      // by this same suffix against the full appointmentId stored on the
+      // booking, which is unambiguous for realistic concurrent-appointment
+      // counts (16.7M possible suffixes).
+      cartItemMatcher: ({ existingItem, newItem }) => {
+        const existingProductID =
+          typeof existingItem.product === 'object' ? existingItem.product.id : existingItem.product
+        const productMatches = existingProductID === newItem.product
+        const existingVariantID =
+          existingItem.variant && typeof existingItem.variant === 'object'
+            ? existingItem.variant.id
+            : existingItem.variant
+        const variantMatches = newItem.variant
+          ? existingVariantID === newItem.variant
+          : !existingVariantID
+        const existingAid = existingItem.a
+        const newAid = newItem.a
+        const aidMatches = existingAid || newAid ? existingAid === newAid : true
+        return productMatches && variantMatches && aidMatches
+      },
+      cartsCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: defaultCollection.fields.map((field) => {
+          if ('name' in field && field.name === 'items' && field.type === 'array') {
+            return {
+              ...field,
+              fields: [
+                ...field.fields,
+                {
+                  name: 'a',
+                  type: 'text',
+                  label: 'Appointment suffix',
+                  maxLength: 6,
+                  admin: {
+                    description:
+                      'Last 6 hex chars of the workshop-appointments ID this line is for (workshop items only). Kept deliberately short — see the `carts` config comment in src/plugins/index.ts for why: Stripe metadata has a hard 500-char-per-value limit and every character here is multiplied by cart size.',
+                    readOnly: true,
+                  },
+                },
+              ],
+            }
+          }
+          return field
+        }),
+      }),
+    },
     payments: {
       paymentMethods: [
         stripeAdapter({

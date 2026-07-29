@@ -283,48 +283,62 @@ export default async function WorkshopDetailPage({ params }: Args) {
   const { isEnabled: draft } = await draftMode()
   const WORKSHOP_PAGE_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha', 'vom-feld-ins-glas']
 
-  // Fetch workshop appointments from database
-  const workshopAppointments = await getWorkshopAppointments(slug)
-  // Fetch next-bookable-appointment map so the "Other workshops" slider can
-  // render a Sold Out badge + disable the buy button on workshops that have
-  // no future appointment with available spots (e.g. Kombucha right now).
-  const nextDatesByHref = await getNextWorkshopDatesByHref(locale)
+  // All of these are independent reads (none depends on another's result),
+  // so they run concurrently instead of one-after-another — this page used
+  // to await getWorkshopAppointments and getNextWorkshopDatesByHref
+  // sequentially, fully in series, BEFORE even starting the queries below,
+  // needlessly stacking their latencies on top of each other. Each query
+  // against this MongoDB Atlas M0 cluster costs on the order of 150ms–1s on
+  // its own; running them in parallel means the page waits for the SLOWEST
+  // one, not the SUM of all of them.
+  const [
+    workshopAppointments,
+    nextDatesByHref,
+    workshop,
+    allWorkshops,
+    termins,
+    gastronomyResult,
+    workshopPageResult,
+  ] = await Promise.all([
+    // Fetch workshop appointments from database
+    getWorkshopAppointments(slug),
+    // Fetch next-bookable-appointment map so the "Other workshops" slider can
+    // render a Sold Out badge + disable the buy button on workshops that have
+    // no future appointment with available spots (e.g. Kombucha right now).
+    getNextWorkshopDatesByHref(locale),
+    findWorkshopBySlug(slug, locale),
+    getAllWorkshops(locale),
+    getWorkshopTermine(locale),
+    getPayload({ config: configPromise }).then((p) =>
+      p.find({
+        collection: 'pages',
+        where: { slug: { equals: 'gastronomy' } },
+        limit: 1,
+        depth: 20,
+        locale,
+      }),
+    ),
+    WORKSHOP_PAGE_SLUGS.includes(slug)
+      ? getPayload({ config: configPromise }).then((p) =>
+          p.find({
+            collection: 'pages',
+            draft,
+            where: {
+              slug: { equals: slug },
+              ...(draft ? {} : { _status: { equals: 'published' } }),
+            },
+            limit: 1,
+            depth: 10,
+            locale,
+            overrideAccess: true,
+          }),
+        )
+      : Promise.resolve({ docs: [] }),
+  ])
   const soldOutByHref: Record<string, boolean> = Object.fromEntries(
     Object.entries(nextDatesByHref).map(([href, info]) => [href, Boolean(info.soldOut)]),
   )
   const soldOutLabel = locale === 'en' ? 'Sold Out' : 'Ausgebucht'
-  const [workshop, allWorkshops, termins, gastronomyResult, workshopPageResult] = await Promise.all(
-    [
-      findWorkshopBySlug(slug, locale),
-      getAllWorkshops(locale),
-      getWorkshopTermine(locale),
-      getPayload({ config: configPromise }).then((p) =>
-        p.find({
-          collection: 'pages',
-          where: { slug: { equals: 'gastronomy' } },
-          limit: 1,
-          depth: 20,
-          locale,
-        }),
-      ),
-      WORKSHOP_PAGE_SLUGS.includes(slug)
-        ? getPayload({ config: configPromise }).then((p) =>
-            p.find({
-              collection: 'pages',
-              draft,
-              where: {
-                slug: { equals: slug },
-                ...(draft ? {} : { _status: { equals: 'published' } }),
-              },
-              limit: 1,
-              depth: 10,
-              locale,
-              overrideAccess: true,
-            }),
-          )
-        : Promise.resolve({ docs: [] }),
-    ],
-  )
 
   const workshopPage = workshopPageResult.docs[0] as PageType | undefined
 
@@ -349,12 +363,15 @@ export default async function WorkshopDetailPage({ params }: Args) {
   // once and it appears on all three pages automatically.
   // Per-page `workshopDetail.howToArticles` still wins when set, so editors
   // can override the list for a specific workshop later.
-  const howToArticles =
-    perPageHowToArticles.length > 0 ? perPageHowToArticles : await getLatestPosts(locale, 6)
-
   // Voucher CTA: use global data when toggled on, otherwise use inline detail fields
   const useGlobalVoucher = detail?.useGlobalVoucherData !== false
-  const voucherGlobal = useGlobalVoucher ? await getVoucherCtaGlobal(locale) : null
+
+  // Neither of these depends on the other — run together instead of in series.
+  const [fetchedHowToArticles, voucherGlobal] = await Promise.all([
+    perPageHowToArticles.length > 0 ? Promise.resolve(null) : getLatestPosts(locale, 6),
+    useGlobalVoucher ? getVoucherCtaGlobal(locale) : Promise.resolve(null),
+  ])
+  const howToArticles = perPageHowToArticles.length > 0 ? perPageHowToArticles : fetchedHowToArticles!
   const voucherCms =
     voucherGlobal && (voucherGlobal.eyebrow || voucherGlobal.title)
       ? {

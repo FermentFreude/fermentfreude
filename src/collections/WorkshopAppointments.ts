@@ -1,4 +1,5 @@
 import { adminOnly } from '@/access/adminOnly'
+import { handleOrganiserCancellation } from '@/hooks/handleOrganiserCancellation'
 import type { CollectionConfig } from 'payload'
 
 export const WorkshopAppointments: CollectionConfig = {
@@ -81,6 +82,48 @@ export const WorkshopAppointments: CollectionConfig = {
         description: 'Internal notes (not visible to customers)',
       },
     },
+    // ── Organiser cancellation (refund/rebooking system, plan §7) ────────
+    {
+      name: 'cancellationStatus',
+      type: 'select',
+      defaultValue: 'scheduled',
+      options: [
+        { label: 'Geplant', value: 'scheduled' },
+        { label: 'Abgesagt (von uns)', value: 'cancelled_by_organiser' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description:
+          '⚠️ Auf "Abgesagt" setzen benachrichtigt automatisch JEDE Person mit einer bestätigten Buchung auf diesen Termin per E-Mail, mit einem Link zur Auswahl: Ersatztermin oder volle Rückerstattung. Der Termin wird dabei auch automatisch von der Website genommen (unpublished). Das kann nicht einfach rückgängig gemacht werden — nur für echte Absagen verwenden.',
+      },
+    },
+    {
+      name: 'cancellationReason',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        condition: (_data, siblingData) => siblingData?.cancellationStatus === 'cancelled_by_organiser',
+        description: 'Grund, der den Kund:innen in der Absage-E-Mail angezeigt wird (z.B. "Krankheitsbedingt").',
+      },
+    },
+    {
+      name: 'cancellationInternalNote',
+      type: 'textarea',
+      admin: {
+        position: 'sidebar',
+        condition: (_data, siblingData) => siblingData?.cancellationStatus === 'cancelled_by_organiser',
+        description: 'Nur intern sichtbar — nicht Teil der Kunden-E-Mail.',
+      },
+    },
+    {
+      name: 'cancelledAt',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        condition: (_data, siblingData) => siblingData?.cancellationStatus === 'cancelled_by_organiser',
+      },
+    },
   ],
   hooks: {
     beforeValidate: [
@@ -102,6 +145,23 @@ export const WorkshopAppointments: CollectionConfig = {
         return data
       },
     ],
+    beforeChange: [
+      ({ data, originalDoc }) => {
+        // Cancelling always takes the appointment off the public site too —
+        // "notify existing bookings" and "stop taking new ones" are the same
+        // decision from an admin's perspective, no reason to make it two
+        // separate steps that could be left half-done.
+        const isNewlyCancelled =
+          data?.cancellationStatus === 'cancelled_by_organiser' &&
+          originalDoc?.cancellationStatus !== 'cancelled_by_organiser'
+        if (isNewlyCancelled) {
+          data.isPublished = false
+          data.cancelledAt = new Date().toISOString()
+        }
+        return data
+      },
+    ],
+    afterChange: [handleOrganiserCancellation],
   },
   // TODO: Add unique index on (workshop, location, dateTime) — requires MongoDB setup
   // This prevents duplicate appointments

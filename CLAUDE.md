@@ -38,6 +38,16 @@ DEEPL_API_KEY                        # Auto-translation DE→EN
 
 **CRITICAL:** `NEXT_PUBLIC_*` vars are baked in at **build time**. Changing them in Vercel requires a full redeploy **without cache**.
 
+**Setting or changing an env var on staging/production:** Claude has no Vercel dashboard or CLI access in this environment (unless a session confirms an authenticated `vercel` CLI is actually present — check, don't assume). Never report a Vercel env var change as done without one of those. Default to giving Rafaela these exact steps instead:
+
+1. vercel.com → the FermentFreude project → **Settings → Environment Variables**
+2. Add or edit the variable name and value
+3. Select the correct environment(s) — Production (`main`), Preview (`staging`), and/or Development — a var only set on Production won't exist on staging and vice versa
+4. Save
+5. If it's a `NEXT_PUBLIC_*` var, trigger a full redeploy **without cache** (see CRITICAL above); other vars take effect on the next normal deploy
+
+**Setting or changing an env var locally:** just do it. Local `.env` is gitignored and local-only — edit it directly with no need to ask first. See Security below for why this doesn't conflict with the "never include values" rule.
+
 ## Environments & Branches
 
 | Environment    | Database                | R2 Bucket                     | R2 Public URL             | Branch      | Deploys to                                                 | Who uses it     |
@@ -329,9 +339,10 @@ npx tsc --noEmit            # Must pass with zero errors
 
 ## Security
 
-- **Never** include `.env` values in any file, commit, or comment
-- Reference env vars by name only
+- **Never** include `.env` **values** in any file, commit, code comment, or chat output — reference env vars by name only. This rule is about not leaking secret *values* — it does NOT mean avoid touching `.env`.
+- **The local `.env` file itself is always safe to edit directly.** It's gitignored and never leaves this machine — add, change, or remove keys in it freely, without asking first. (Past mistake to not repeat: treating "never include values" as "never touch the file" and leaving a needed local config change undone — the file is fair game, only the values-in-other-places rule is off-limits.)
 - `.env` is gitignored — keep it that way
+- For staging/production env vars (Vercel, not local `.env`), see "Setting or changing an env var on staging/production" under Environment Variables above — different mechanism, different rule.
 - Use `overrideAccess: false` when passing `user` to Local API
 - Always pass `req` to nested operations in hooks
 - Validate all incoming data

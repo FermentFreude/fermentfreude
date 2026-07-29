@@ -2,11 +2,13 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type {
+  ActivityEventRow,
   AppointmentRow,
   BookingRow,
   PickupItem,
   PickupOrderRow,
   ParticipantRow,
+  RefundRequestRow,
   RosterData,
   RosterStats,
   SeatEntry,
@@ -43,7 +45,7 @@ function fmtTime(iso: string): string {
   })
 }
 
-export async function fetchRosterData(): Promise<RosterData> {
+export async function fetchRosterData(currentUserId?: string): Promise<RosterData> {
   const payload = await getPayload({ config: configPromise })
   const now = new Date()
   const since = new Date()
@@ -277,6 +279,74 @@ export async function fetchRosterData(): Promise<RosterData> {
     } satisfies VoucherRow
   })
 
+  // ── 5b. Refund requests (plan §10 — Refunds panel) ──────────────────────────
+  const refundRequestsResult = await payload.find({
+    collection: 'refund-requests',
+    sort: 'requestedAt',
+    limit: 200,
+    depth: 1,
+    overrideAccess: true,
+  })
+
+  const refundRequests: RefundRequestRow[] = refundRequestsResult.docs.map((rr) => {
+    const bookingDoc = typeof rr.booking === 'object' && rr.booking !== null ? rr.booking : null
+    const requestedAtMs = rr.requestedAt ? new Date(rr.requestedAt).getTime() : now.getTime()
+    const daysPending = rr.status === 'completed' || rr.status === 'failed'
+      ? 0
+      : Math.max(0, Math.floor((now.getTime() - requestedAtMs) / (1000 * 60 * 60 * 24)))
+
+    return {
+      id: String(rr.id),
+      customerName: [bookingDoc?.firstName, bookingDoc?.lastName].filter(Boolean).join(' '),
+      customerEmail: bookingDoc?.email ?? '',
+      workshopTitle: bookingDoc?.workshopTitle ?? '',
+      workshopDate: bookingDoc?.date ?? '',
+      seatIndex: rr.seatIndex ?? 0,
+      amount: rr.requestedAmount ?? 0,
+      status: (rr.status as RefundRequestRow['status']) ?? 'requested',
+      stripePaymentIntentId: rr.stripePaymentIntentId ?? '',
+      requestedAt: rr.requestedAt
+        ? new Date(rr.requestedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
+        : '',
+      completedAt: rr.completedAt
+        ? new Date(rr.completedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
+        : '',
+      daysPending,
+    } satisfies RefundRequestRow
+  })
+
+  // ── 5c. Activity feed (plan §10 — Activity / Benachrichtigungen) ────────────
+  const activityEventsResult = await payload.find({
+    collection: 'activity-events',
+    sort: '-createdAt',
+    limit: 200,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const activityEvents: ActivityEventRow[] = activityEventsResult.docs.map((ev) => {
+    const readByIds = (Array.isArray(ev.readBy) ? ev.readBy : []).map((r) =>
+      typeof r === 'object' && r !== null ? r.id : r,
+    )
+    // With no known current user (e.g. the very first server-rendered paint
+    // before the client's authenticated refresh lands), treat as unread — an
+    // overstated badge for a fraction of a second is the safe direction, a
+    // missed notification is not.
+    const isUnread = currentUserId ? !readByIds.includes(currentUserId) : true
+
+    return {
+      id: String(ev.id),
+      type: ev.type,
+      refId: ev.refId ?? '',
+      summary: ev.summary,
+      createdAt: ev.createdAt
+        ? new Date(ev.createdAt).toLocaleString('de-DE', { timeZone: 'Europe/Vienna' })
+        : '',
+      isUnread,
+    } satisfies ActivityEventRow
+  })
+  const activityUnreadCount = activityEvents.filter((e) => e.isUnread).length
+
   // ── 6. Stats ───────────────────────────────────────────────────────────────
   const upcomingWorkshops = appointments.filter((a) => !a.isPast).length
   const totalParticipants = Object.values(bookingsByAppointment).reduce(
@@ -299,5 +369,15 @@ export async function fetchRosterData(): Promise<RosterData> {
     workshopRevenue,
   }
 
-  return { stats, appointments, bookingsByAppointment, participants, pickupOrders, vouchers }
+  return {
+    stats,
+    appointments,
+    bookingsByAppointment,
+    participants,
+    pickupOrders,
+    vouchers,
+    refundRequests,
+    activityEvents,
+    activityUnreadCount,
+  }
 }

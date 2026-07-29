@@ -49,6 +49,11 @@ const V2_TEMPLATES = [
   { id: 72, slug: 'order-confirmation' },
   { id: 73, slug: 'voucher-purchased' },
   { id: 93, slug: 'workshop-gift' },
+  { id: 95, slug: 'customer-rebooked' },
+  { id: 96, slug: 'rebooking-voucher-issued' },
+  { id: 97, slug: 'cancelled-no-refund' },
+  { id: 98, slug: 'refund-initiated' },
+  { id: 99, slug: 'organiser-cancelled' },
 ]
 
 // Mock params per template for test sends
@@ -225,6 +230,44 @@ const MOCK = {
     SHOP_URL: 'https://www.fermentfreude.at/workshops',
     PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
     AGB_URL: 'https://www.fermentfreude.at/agb',
+  },
+  95: {
+    FIRST_NAME: 'Max',
+    WORKSHOP_TITLE: 'Kombucha Basics',
+    OLD_WORKSHOP_TITLE: 'Kombucha Basics',
+    NEW_WORKSHOP_TITLE: 'Tempeh Basics',
+    OLD_DATE: 'Sa, 6. Juni 2026',
+    OLD_TIME: '10:00 – 14:00',
+    NEW_DATE: 'Sa, 20. Juni 2026',
+    NEW_TIME: '10:00 – 14:00',
+    MANAGE_URL: 'https://www.fermentfreude.at/manage-booking/test-token',
+  },
+  96: {
+    FIRST_NAME: 'Max',
+    VOUCHER_CODE: 'RBK-TEST123',
+    VOUCHER_AMOUNT: '89',
+    VOUCHER_EXPIRY: '28. Juli 2027',
+    WORKSHOP_TITLE: 'Lakto-Gemüse',
+  },
+  97: {
+    FIRST_NAME: 'Max',
+    WORKSHOP_TITLE: 'Tempeh Basics',
+    WORKSHOP_DATE: 'Sa, 1. August 2026',
+    WORKSHOP_TIME: '10:00 – 14:00',
+    REASON: 'Ich kann leider nicht teilnehmen',
+  },
+  98: {
+    FIRST_NAME: 'Max',
+    WORKSHOP_TITLE: 'Kombucha Basics',
+    AMOUNT: '€89,00',
+  },
+  99: {
+    FIRST_NAME: 'Max',
+    WORKSHOP_TITLE: 'Vom Feld ins Glas',
+    WORKSHOP_DATE: 'Sa, 15. August 2026',
+    WORKSHOP_TIME: '10:00 – 14:00',
+    REASON: 'Der Termin musste leider abgesagt werden.',
+    MANAGE_BOOKING_URL: 'https://www.fermentfreude.at/manage-booking/test-token',
   },
 }
 

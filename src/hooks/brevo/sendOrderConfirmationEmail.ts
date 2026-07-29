@@ -1,5 +1,6 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
+import { getAdminRecipients } from '@/lib/adminNotification'
 import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 
 /**
@@ -434,7 +435,6 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
     // in this same afterChange chain) intentionally does NOT send its own
     // admin email anymore, to avoid double-notifying for one purchase.
     try {
-      const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'kontakt@fermentfreude.at'
       const warningBlock = customerSendFailed
         ? `<p style="font-family:sans-serif;background:#FEF3C7;color:#92400E;padding:12px 16px;border-radius:8px;margin:0 0 16px">
              ⚠️ Die Bestellbestätigung an den/die Kund:in konnte NICHT gesendet werden (Brevo-Fehler). Bitte manuell nachfassen.
@@ -490,7 +490,7 @@ ${warningBlock}
 </table>`
 
       await sendTransactionalEmail({
-        to: [{ email: adminEmail, name: 'FermentFreude Admin' }],
+        to: getAdminRecipients(),
         subject: `${headingLabel}${subjectSuffix}`,
         htmlContent,
       })
