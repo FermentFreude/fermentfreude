@@ -42,18 +42,32 @@ export async function getAllWorkshopAppointments(): Promise<WorkshopCalendarDate
 
     console.log(`✓ Found ${appointmentsResult.docs.length} total upcoming appointments`)
 
-    // Format appointments to WorkshopCalendarDate format
-    return appointmentsResult.docs.map((appointment) => {
-      const workshop = appointment.workshop as Workshop
-      const date = new Date(appointment.dateTime)
+    // Map workshop slugs to types for WorkshopCalendar — this calendar is
+    // hardcoded to exactly these 3 cards (see WorkshopCalendar.tsx), it was
+    // never meant to include other workshops (e.g. "Vom Feld ins Glas",
+    // which has its own dedicated page). A previous version of this
+    // function defaulted anything outside this map to 'lakto' instead of
+    // excluding it — that silently mislabeled every non-canonical
+    // appointment as a Lakto-Gemüse date on this calendar. Confirmed live:
+    // a customer could pick what looked like a Lakto-Gemüse date here that
+    // was actually a different workshop's appointment underneath, and
+    // adding it to the cart then failed with "Workshop mismatch" (the
+    // add-to-cart endpoint correctly catches the inconsistency, but the
+    // calendar should never have offered it as a Lakto-Gemüse date at all).
+    const slugToType: Record<string, 'lakto' | 'kombucha' | 'tempeh'> = {
+      lakto: 'lakto',
+      kombucha: 'kombucha',
+      tempeh: 'tempeh',
+    }
 
-      // Map workshop slugs to types for WorkshopCalendar
-      const slugToType: Record<string, 'lakto' | 'kombucha' | 'tempeh'> = {
-        lakto: 'lakto',
-        kombucha: 'kombucha',
-        tempeh: 'tempeh',
-      }
-      const workshopType = slugToType[workshop.slug as string] || 'lakto'
+    // Format appointments to WorkshopCalendarDate format — skip (don't
+    // mislabel) any workshop outside the 3 canonical types this calendar
+    // supports.
+    return appointmentsResult.docs.flatMap((appointment) => {
+      const workshop = appointment.workshop as Workshop
+      const workshopType = slugToType[workshop.slug as string]
+      if (!workshopType) return []
+      const date = new Date(appointment.dateTime)
 
       // Format date: "26. März 2026"
       const dateOptions: Intl.DateTimeFormatOptions = {
