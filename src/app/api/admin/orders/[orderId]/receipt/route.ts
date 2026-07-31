@@ -5,17 +5,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
 /* ═══════════════════════════════════════════════════════════════
- *  GET /api/orders/[orderId]/receipt?token=<downloadToken>
+ *  GET /api/admin/orders/[orderId]/receipt
  *
- *  Token-secured endpoint: returns a PDF receipt for a paid order.
- *  No authentication cookie required — the downloadToken (UUID stored
- *  on the order) acts as the credential. Works for guests and users.
+ *  Session-authenticated endpoint for founders/admins: returns the same
+ *  invoice PDF as the customer-facing token route, but with no status
+ *  restriction — works for cancelled/refunded orders too, since founders
+ *  need a record for every order for accounting purposes.
  *
  *  Security:
- *  - Token must match the stored downloadToken exactly
- *  - Returns 401 for missing/invalid token
+ *  - Requires an authenticated admin session (Payload admin cookie)
+ *  - Returns 401 if not authenticated, 403 if authenticated but not admin
  *  - Returns 404 for unknown orderId
- *  - Returns 403 if order is not paid
  * ═══════════════════════════════════════════════════════════════ */
 
 export async function GET(
@@ -24,27 +24,36 @@ export async function GET(
 ) {
   try {
     const { orderId } = await params
-    const token = request.nextUrl.searchParams.get('token')
 
-    // ── Input validation ──────────────────────────────────────────────────
     if (!orderId || typeof orderId !== 'string' || orderId.trim().length === 0) {
       return NextResponse.json({ error: 'Order ID is required.' }, { status: 400 })
     }
 
-    if (!token || typeof token !== 'string' || token.trim().length === 0) {
-      return NextResponse.json({ error: 'Download token is required.' }, { status: 401 })
-    }
-
     const payload = await getPayload({ config: await configPromise })
 
-    // ── Fetch order ────────────────────────────────────────────────────────
+    // ── Auth: must be a logged-in admin ────────────────────────────────────
+    const { user } = await payload.auth({ headers: request.headers })
+    const userAny = user as { role?: string; roles?: string[] } | null
+    const isAdmin =
+      userAny?.role === 'admin' ||
+      userAny?.roles?.includes('admin') ||
+      (user as Record<string, unknown> | null)?.['admin'] === true
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // ── Fetch order — no status restriction (founders need every order) ───
     let order: Record<string, unknown> | null = null
     try {
       order = (await payload.findByID({
         collection: 'orders',
         id: orderId,
         depth: 1,
-        overrideAccess: true, // token is the auth — no cookie required
+        overrideAccess: true,
       })) as unknown as Record<string, unknown> | null
     } catch {
       return NextResponse.json({ error: 'Order not found.' }, { status: 404 })
@@ -52,28 +61,6 @@ export async function GET(
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found.' }, { status: 404 })
-    }
-
-    // ── Token validation ───────────────────────────────────────────────────
-    const storedToken = order.downloadToken as string | undefined | null
-    if (!storedToken || storedToken !== token) {
-      return NextResponse.json({ error: 'Invalid or expired download token.' }, { status: 401 })
-    }
-
-    // ── Status check ───────────────────────────────────────────────────────
-    // Ecommerce plugin sets the status field. Accept any non-cancelled/refunded status.
-    // 'processing' is the initial status assigned at order creation — Stripe redirects the
-    // buyer to the confirmation page immediately after payment while the webhook (which
-    // transitions the order to 'completed') may still be in transit. Blocking 'processing'
-    // would cause a race condition where the download fails right after checkout.
-    const status = (order.orderstatus ?? order.status ?? order.paymentStatus) as string | undefined
-    const isRejected = status === 'cancelled' || status === 'refunded' || status === 'failed'
-
-    if (isRejected) {
-      return NextResponse.json(
-        { error: 'Receipt is not available for cancelled or refunded orders.' },
-        { status: 403 },
-      )
     }
 
     // ── Assemble receipt data + generate PDF ───────────────────────────────
@@ -94,7 +81,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('[order-receipt] Unexpected error:', error)
+    console.error('[admin-order-receipt] Unexpected error:', error)
     return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 })
   }
 }

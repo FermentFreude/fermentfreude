@@ -100,6 +100,17 @@ export type RefundRequestRow = {
   daysPending: number
 }
 
+export type OrderRow = {
+  id: string
+  invoiceNumber: string
+  customerName: string
+  customerEmail: string
+  amount: number // cents
+  status: 'processing' | 'completed' | 'cancelled' | 'refunded' | ''
+  itemsSummary: string
+  createdAt: string
+}
+
 export type ActivityEventRow = {
   id: string
   type: string
@@ -115,6 +126,7 @@ export type RosterData = {
   bookingsByAppointment: Record<string, BookingRow[]>
   participants: ParticipantRow[]
   pickupOrders: PickupOrderRow[]
+  orders: OrderRow[]
   vouchers: VoucherRow[]
   refundRequests: RefundRequestRow[]
   activityEvents: ActivityEventRow[]

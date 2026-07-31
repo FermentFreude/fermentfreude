@@ -235,6 +235,7 @@ export const plugins: Plugin[] = [
         admin: {
           ...defaultCollection?.admin,
           group: 'Shop',
+          defaultColumns: ['createdAt', 'customerEmail', 'status', 'amount', 'invoiceNumber'],
         },
         fields: [
           ...(defaultCollection?.fields ?? []),
@@ -367,6 +368,18 @@ export const plugins: Plugin[] = [
               position: 'sidebar',
               readOnly: true,
               date: { pickerAppearance: 'dayAndTime' },
+            },
+          },
+          {
+            name: 'downloadInvoice',
+            type: 'ui',
+            label: 'Invoice PDF',
+            admin: {
+              position: 'sidebar',
+              description: 'Download this order\'s invoice — works for every status, including cancelled/refunded.',
+              components: {
+                Field: '@/components/admin/OrderInvoiceDownloadButton#OrderInvoiceDownloadButton',
+              },
             },
           },
         ],

@@ -5,6 +5,7 @@ import type {
   ActivityEventRow,
   AppointmentRow,
   BookingRow,
+  OrderRow,
   PickupItem,
   PickupOrderRow,
   ParticipantRow,
@@ -233,6 +234,54 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       } satisfies PickupOrderRow
     })
 
+  // ── 4b. All orders (Bestellungen — every order, every status, for invoices) ─
+  const ordersResult = await payload.find({
+    collection: 'orders',
+    sort: '-createdAt',
+    limit: 500,
+    depth: 1,
+    overrideAccess: true,
+  })
+
+  const orders: OrderRow[] = ordersResult.docs.map((o) => {
+    const od = o as unknown as {
+      invoiceNumber?: string
+      createdAt?: string
+      customerFirstName?: string
+      customerLastName?: string
+      customerName?: string
+      customerEmail?: string
+      items?: Array<{ product?: unknown; quantity?: number }>
+      amount?: number
+      status?: string
+    }
+
+    const customerName =
+      [od.customerFirstName, od.customerLastName].filter(Boolean).join(' ') || od.customerName || ''
+
+    const itemsSummary = (od.items ?? [])
+      .map((item) => {
+        const product = item.product as Record<string, unknown> | null | undefined
+        const title = typeof product === 'object' && product ? String(product.title ?? 'Produkt') : 'Produkt'
+        const qty = item.quantity ?? 1
+        return qty > 1 ? `${title} ×${qty}` : title
+      })
+      .join(', ')
+
+    return {
+      id: String(o.id),
+      invoiceNumber: od.invoiceNumber ?? String(o.id).slice(-8).toUpperCase(),
+      customerName,
+      customerEmail: od.customerEmail ?? '',
+      amount: od.amount ?? 0,
+      status: (od.status as OrderRow['status']) ?? '',
+      itemsSummary,
+      createdAt: od.createdAt
+        ? new Date(od.createdAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
+        : '',
+    } satisfies OrderRow
+  })
+
   // ── 5. Vouchers ────────────────────────────────────────────────────────────
   const voucherResult = await payload.find({
     collection: 'vouchers',
@@ -375,6 +424,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     bookingsByAppointment,
     participants,
     pickupOrders,
+    orders,
     vouchers,
     refundRequests,
     activityEvents,

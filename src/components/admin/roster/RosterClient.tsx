@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ActivityView } from './ActivityView'
 import { DashboardView } from './DashboardView'
+import { OrdersView } from './OrdersView'
 import { ParticipantsView } from './ParticipantsView'
 import { PickupsView } from './PickupsView'
 import { RefundsView } from './RefundsView'
@@ -19,6 +20,7 @@ type Section =
   | 'participants'
   | 'pickups'
   | 'vouchers'
+  | 'orders'
   | 'refunds'
   | 'activity'
 
@@ -75,6 +77,20 @@ const SHOP_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
         <path d="M12 22V7" />
         <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
         <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+      </svg>
+    ),
+  },
+]
+
+const ORDERS_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
+  {
+    id: 'orders',
+    label: 'Bestellungen',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 2 6 7v13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7l-3-5" />
+        <path d="M6 7h12" />
+        <path d="M9 12a3 3 0 0 0 6 0" />
       </svg>
     ),
   },
@@ -228,6 +244,16 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
         </div>
 
         <div style={s.navSection}>
+          <p style={s.navLabel}>Buchhaltung</p>
+          {ORDERS_NAV.map((item) => (
+            <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
+              <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={s.navSection}>
           <p style={s.navLabel}>Refunds & Rebooking</p>
           {REFUNDS_NAV.map((item) => {
             const badgeCount =
@@ -274,6 +300,7 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
         {section === 'vouchers' && (
           <VouchersView vouchers={data.vouchers} onRefresh={refresh} />
         )}
+        {section === 'orders' && <OrdersView orders={data.orders} />}
         {section === 'refunds' && (
           <RefundsView refundRequests={data.refundRequests} onRefresh={refresh} />
         )}
