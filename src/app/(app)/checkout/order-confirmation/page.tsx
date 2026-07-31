@@ -52,6 +52,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
   let pickupLocationAddress = 'Grabenstraße 15, 8010 Graz, Austria'
 
   let downloadToken: string | null = null
+  const manageBookingLinks: { workshopTitle: string; url: string }[] = []
 
   if (orderId) {
     try {
@@ -92,6 +93,46 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           if (loc?.address) pickupLocationAddress = loc.address
         } catch {
           // ignore — fallback used
+        }
+      }
+
+      // Resolve the manage-booking magic link(s) for workshop bookings on this
+      // order — the same self-service "cancel or reschedule" link the
+      // confirmation email includes. Best-effort: no link resolves just
+      // means the CTA doesn't render, not a broken page.
+      if (isWorkshop) {
+        try {
+          const bookings = await payload.find({
+            collection: 'workshop-bookings',
+            where: { and: [{ orderId: { equals: orderId } }, { status: { equals: 'confirmed' } }] },
+            limit: 10,
+            depth: 0,
+            overrideAccess: true,
+          })
+
+          for (const booking of bookings.docs) {
+            try {
+              const links = await payload.find({
+                collection: 'booking-magic-links',
+                where: { bookingId: { equals: booking.id } },
+                sort: '-issuedAt',
+                limit: 1,
+                depth: 0,
+                overrideAccess: true,
+              })
+              const token = links.docs[0]?.token
+              if (token) {
+                manageBookingLinks.push({
+                  workshopTitle: String((booking as { workshopTitle?: string }).workshopTitle ?? 'Workshop'),
+                  url: `/manage-booking/${token}`,
+                })
+              }
+            } catch {
+              // ignore — this booking just won't get a manage link
+            }
+          }
+        } catch {
+          // ignore — manage-booking links are best-effort
         }
       }
     } catch (error) {
@@ -396,6 +437,28 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             </div>
           ) : null}
         </Card>
+
+        {/* Manage booking — cancel or reschedule */}
+        {manageBookingLinks.length > 0 && (
+          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+            <h3 className="font-display font-semibold text-ff-near-black mb-2">
+              {t.manageBookingTitle}
+            </h3>
+            <p className="text-body-sm text-ff-text-muted mb-4">{t.manageBookingDesc}</p>
+            <div className="flex flex-col gap-2">
+              {manageBookingLinks.map((link) => (
+                <Link
+                  key={link.url}
+                  href={link.url}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-ff-gold text-ff-gold rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-sm"
+                >
+                  {t.manageBookingCta}
+                  {manageBookingLinks.length > 1 ? ` — ${link.workshopTitle}` : ''}
+                </Link>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Action Buttons — Workshop */}
         <div className="flex flex-col sm:flex-row gap-3">

@@ -192,6 +192,9 @@ export const accountI18n = {
     viewTickets: 'Tickets ansehen & drucken',
     printTickets: 'Tickets drucken',
     questionsDescWorkshop: 'Fragen zum Workshop? Unser Team hilft dir gerne weiter.',
+    manageBookingTitle: 'Musst du absagen oder verschieben?',
+    manageBookingDesc: 'Du kannst deine Buchung jederzeit selbst verwalten.',
+    manageBookingCta: 'Buchung verwalten',
 
     // Layout
     loginRequired: 'Bitte melde dich an, um auf dein Konto zuzugreifen.',
@@ -414,6 +417,9 @@ export const accountI18n = {
     viewTickets: 'View & Print Tickets',
     printTickets: 'Print Tickets',
     questionsDescWorkshop: 'Questions about your workshop? Our team is happy to help.',
+    manageBookingTitle: 'Need to cancel or reschedule?',
+    manageBookingDesc: 'You can manage your booking yourself, anytime.',
+    manageBookingCta: 'Manage Booking',
 
     // Layout
     loginRequired: 'Please log in to access your account.',

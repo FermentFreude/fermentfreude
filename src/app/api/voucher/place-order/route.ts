@@ -1,5 +1,6 @@
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 import configPromise from '@payload-config'
+import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
@@ -268,6 +269,27 @@ export async function POST(request: NextRequest) {
                 ? `€${booking.totalPrice.toFixed(2).replace('.', ',')}`
                 : String(booking.totalPrice ?? '')
 
+              // Mint the manage-booking magic link — same self-service link the
+              // paid-order confirmation email includes (confirmWorkshopBookings.ts).
+              // Best-effort: a failed link means no self-service link in this
+              // email, not a failed booking confirmation.
+              let manageBookingToken = ''
+              try {
+                const link = await payload.create({
+                  collection: 'booking-magic-links',
+                  data: {
+                    token: randomUUID(),
+                    bookingId: booking.id,
+                    scope: 'self-service',
+                    issuedAt: new Date().toISOString(),
+                  },
+                  overrideAccess: true,
+                })
+                manageBookingToken = String(link.token)
+              } catch (linkError) {
+                console.error('[place-order] Failed to create magic link for booking', booking.id, linkError)
+              }
+
               await sendTemplateEmail({
                 to: [{ email: recipientEmail, name: firstName }],
                 templateId: BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION,
@@ -288,6 +310,9 @@ export async function POST(request: NextRequest) {
                   WHAT_TO_BRING: '',
                   PRIVACY_URL: `${SERVER_URL}/datenschutz`,
                   AGB_URL: `${SERVER_URL}/agb`,
+                  MANAGE_BOOKING_URL: manageBookingToken
+                    ? `${SERVER_URL}/manage-booking/${manageBookingToken}`
+                    : `${SERVER_URL}/account/orders`,
                 },
               })
             } catch (emailErr) {
