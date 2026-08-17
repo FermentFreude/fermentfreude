@@ -195,6 +195,16 @@ export const accountI18n = {
     manageBookingTitle: 'Musst du absagen oder verschieben?',
     manageBookingDesc: 'Du kannst deine Buchung jederzeit selbst verwalten.',
     manageBookingCta: 'Buchung verwalten',
+    bookingSummaryTitle: 'Deine Buchung',
+    labelDate: 'Datum',
+    labelTime: 'Uhrzeit',
+    labelLocation: 'Ort',
+    labelGuests: 'Teilnehmer',
+    goToProfile: 'Zu meinem Konto',
+    createAccountPrompt: 'Konto erstellen',
+    createAccountDesc: 'Erstelle ein Konto, um alle deine Buchungen jederzeit im Überblick zu haben.',
+    exploreOtherWorkshops: 'Entdecke weitere Workshops',
+    learnMore: 'Mehr erfahren',
 
     // Layout
     loginRequired: 'Bitte melde dich an, um auf dein Konto zuzugreifen.',
@@ -420,6 +430,16 @@ export const accountI18n = {
     manageBookingTitle: 'Need to cancel or reschedule?',
     manageBookingDesc: 'You can manage your booking yourself, anytime.',
     manageBookingCta: 'Manage Booking',
+    bookingSummaryTitle: 'Your Booking',
+    labelDate: 'Date',
+    labelTime: 'Time',
+    labelLocation: 'Location',
+    labelGuests: 'Guests',
+    goToProfile: 'Go to My Account',
+    createAccountPrompt: 'Create an Account',
+    createAccountDesc: 'Create an account to keep track of all your bookings in one place.',
+    exploreOtherWorkshops: 'Explore More Workshops',
+    learnMore: 'Learn More',
 
     // Layout
     loginRequired: 'Please log in to access your account.',

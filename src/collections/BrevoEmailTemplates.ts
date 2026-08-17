@@ -1,3 +1,4 @@
+import { adminOnly } from '@/access/adminOnly'
 import type { CollectionConfig } from 'payload'
 
 export const BrevoEmailTemplates: CollectionConfig = {
@@ -9,9 +10,9 @@ export const BrevoEmailTemplates: CollectionConfig = {
     defaultColumns: ['brevoTemplateId', 'templateName', 'syncStatus'],
   },
   access: {
-    read: async () => true,
-    create: async () => true,
-    update: async () => true,
+    read: adminOnly,
+    create: adminOnly,
+    update: adminOnly,
     delete: async () => false, // Never delete templates
   },
   fields: [

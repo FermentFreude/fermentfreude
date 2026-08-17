@@ -15,7 +15,6 @@ export default function HubLayout({ children }: { children: ReactNode }) {
       <style>{`
         #site-header,
         #site-footer,
-        #site-admin-bar,
         #site-splash,
         #site-cursor { display: none !important; }
         #main-content { margin-top: 0 !important; padding-top: 0 !important; }

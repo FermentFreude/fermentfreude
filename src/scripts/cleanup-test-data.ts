@@ -9,10 +9,26 @@
  * Safe to run against staging only — never run against production.
  */
 
+import 'dotenv/config'
+
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
+function assertStagingDatabase() {
+  const dbUrl = process.env.DATABASE_URL ?? ''
+  if (!dbUrl.includes('-staging')) {
+    console.error(
+      '\n🚫 REFUSING TO RUN: DATABASE_URL does not look like the staging database.\n' +
+        '   This script deletes ALL orders, bookings, transactions, and carts — it must never run against production.\n' +
+        '   If this really is staging, its connection string must contain "-staging".\n',
+    )
+    process.exit(1)
+  }
+}
+
 async function main() {
+  assertStagingDatabase()
+
   const payload = await getPayload({ config: await configPromise })
 
   console.log('🧹 Starting test data cleanup...\n')

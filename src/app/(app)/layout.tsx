@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 
-import { AdminBar } from '@/components/AdminBar'
 import { ElasticCursor } from '@/components/ElasticCursor'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
@@ -67,9 +66,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </div>
           <div id="site-splash" style={{ display: 'contents' }}>
             <SplashScreen />
-          </div>
-          <div id="site-admin-bar" style={{ display: 'contents' }}>
-            <AdminBar />
           </div>
           <LivePreviewListener />
 

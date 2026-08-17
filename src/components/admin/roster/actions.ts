@@ -2,13 +2,35 @@
 
 import { headers as getHeaders } from 'next/headers.js'
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { getPayload, type Payload } from 'payload'
+
+/**
+ * Server Actions are network-callable independent of which page rendered
+ * them — the Roster admin view being gated doesn't protect the action
+ * itself once its client bundle has shipped. Same check as
+ * /api/admin/roster/route.ts, enforced again here at the point of mutation.
+ */
+async function requireAdmin(payload: Payload) {
+  const { user } = await payload.auth({ headers: await getHeaders() })
+  const userAny = user as { role?: string; roles?: string[] } | null
+  const isAdmin =
+    userAny?.role === 'admin' ||
+    userAny?.roles?.includes('admin') ||
+    (user as Record<string, unknown> | null)?.['admin'] === true
+
+  if (!user || !isAdmin) {
+    throw new Error('Unauthorized')
+  }
+
+  return user
+}
 
 export async function updatePickupStatus(
   orderId: string,
   status: 'pending' | 'ready' | 'collected',
 ): Promise<void> {
   const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
   await payload.update({
     collection: 'orders',
     id: orderId,
@@ -19,6 +41,7 @@ export async function updatePickupStatus(
 
 export async function deleteVoucher(voucherId: string): Promise<void> {
   const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
   await payload.delete({
     collection: 'vouchers',
     id: voucherId,
@@ -34,6 +57,7 @@ export async function createVoucher(params: {
   personalNote?: string
 }): Promise<{ code: string; id: string }> {
   const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
   const created = await payload.create({
     collection: 'vouchers',
     draft: false,
@@ -64,6 +88,7 @@ export async function createVoucher(params: {
  */
 export async function acknowledgeRefundRequest(refundRequestId: string): Promise<void> {
   const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
   await payload.update({
     collection: 'refund-requests',
     id: refundRequestId,
@@ -76,8 +101,7 @@ export async function acknowledgeRefundRequest(refundRequestId: string): Promise
 export async function markActivityEventsRead(eventIds: string[]): Promise<void> {
   if (eventIds.length === 0) return
   const payload = await getPayload({ config: configPromise })
-  const { user } = await payload.auth({ headers: await getHeaders() })
-  if (!user) return
+  const user = await requireAdmin(payload)
 
   // Sequential — MongoDB Atlas M0 has no multi-document transactions.
   for (const id of eventIds) {
@@ -98,8 +122,7 @@ export async function markActivityEventsRead(eventIds: string[]): Promise<void> 
 /** Marks every currently-unread activity-event as read by the current admin user. */
 export async function markAllActivityEventsRead(): Promise<void> {
   const payload = await getPayload({ config: configPromise })
-  const { user } = await payload.auth({ headers: await getHeaders() })
-  if (!user) return
+  const user = await requireAdmin(payload)
 
   const recent = await payload.find({
     collection: 'activity-events',

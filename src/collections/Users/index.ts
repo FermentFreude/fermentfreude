@@ -10,6 +10,7 @@ import { sendAccountCreationEmail } from '@/hooks/brevo/sendAccountCreationEmail
 import { sendLoginNotificationEmail } from '@/hooks/brevo/sendLoginNotificationEmail'
 import { syncUserToBrevo } from '@/hooks/brevo/syncUserToBrevo'
 
+import { enforcePasswordStrength } from './hooks/enforcePasswordStrength'
 import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 
 export const Users: CollectionConfig = {
@@ -28,6 +29,11 @@ export const Users: CollectionConfig = {
   },
   auth: {
     tokenExpiration: 1209600,
+    // Lock an account out after repeated failed logins — Payload persists
+    // this per-user in the DB, so it holds across serverless instances
+    // (unlike an in-memory rate limiter, which wouldn't on Vercel).
+    maxLoginAttempts: 10,
+    lockTime: 10 * 60 * 1000, // 10 minutes
     forgotPassword: {
       generateEmailHTML: forgotPasswordEmailHTML,
       generateEmailSubject: forgotPasswordEmailSubject,
@@ -45,6 +51,7 @@ export const Users: CollectionConfig = {
     verify: false,
   },
   hooks: {
+    beforeOperation: [enforcePasswordStrength],
     afterChange: [sendAccountCreationEmail, syncUserToBrevo],
     afterLogin: [sendLoginNotificationEmail],
   },

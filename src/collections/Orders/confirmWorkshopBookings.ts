@@ -462,6 +462,9 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       const ticketsUrl = orderDownloadToken
         ? `${SERVER_URL}/orders/${doc.id}/tickets?token=${orderDownloadToken}`
         : `${SERVER_URL}/account/orders`
+      const receiptUrl = orderDownloadToken
+        ? `${SERVER_URL}/api/orders/${doc.id}/receipt?token=${orderDownloadToken}`
+        : ''
 
       try {
         await sendTemplateEmail({
@@ -500,6 +503,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
             SEATS: seatsArray,
             TICKETS_URL: ticketsUrl,
+            RECEIPT_URL: receiptUrl,
             WHAT_TO_BRING: whatToBring,
             PRIVACY_URL: `${SERVER_URL}/datenschutz`,
             AGB_URL: `${SERVER_URL}/agb`,

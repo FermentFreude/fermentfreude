@@ -414,15 +414,27 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       emailParams.TOTAL_PRICE = workshopPrice
     }
 
-    const result = await sendTemplateEmail({
-      to: [{ email: recipientEmail, name: recipientName }],
-      templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION,
-      params: emailParams,
-    })
-    const customerSendFailed = !result.success
-    if (customerSendFailed) {
-      req.payload.logger.error(
-        `[Brevo] Order confirmation email FAILED to send for order ${doc.id} (${recipientEmail}) — see prior [Brevo] log line for the API error.`,
+    // Workshop orders already got their confirmation email — with the same
+    // invoice-download button — from confirmWorkshopBookings (runs earlier in
+    // this same afterChange chain). Sending this one too would double-email
+    // the customer for one purchase. The admin notification below still runs
+    // unconditionally — it's the one place that pings admin for every order.
+    let customerSendFailed = false
+    if (!workshopDate) {
+      const result = await sendTemplateEmail({
+        to: [{ email: recipientEmail, name: recipientName }],
+        templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION,
+        params: emailParams,
+      })
+      customerSendFailed = !result.success
+      if (customerSendFailed) {
+        req.payload.logger.error(
+          `[Brevo] Order confirmation email FAILED to send for order ${doc.id} (${recipientEmail}) — see prior [Brevo] log line for the API error.`,
+        )
+      }
+    } else {
+      req.payload.logger.info(
+        `[Brevo] Skipping duplicate order-confirmation email for order ${doc.id} — workshop booking confirmation already covers this.`,
       )
     }
 
