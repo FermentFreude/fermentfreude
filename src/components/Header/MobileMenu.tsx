@@ -71,7 +71,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, loca
   const animTimeline = useRef<gsap.core.Timeline | null>(null)
   const detailRef = useRef<HTMLDivElement>(null)
 
-  // Measure where the header actually ends on screen (accounts for AdminBar above)
+  // Measure where the header actually ends on screen
   const [menuTop, setMenuTop] = useState(headerHeight)
   useEffect(() => {
     if (!isActive) return

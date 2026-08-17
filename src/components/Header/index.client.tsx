@@ -30,6 +30,9 @@ export function HeaderClient({ header, locale }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
+  // Dashboard-style routes act like a persistent app, not a scrolling
+  // marketing page — the nav must stay put instead of sliding away.
+  const isDashboardRoute = pathname.startsWith('/account')
   const { headerTheme } = useHeaderTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -79,14 +82,14 @@ export function HeaderClient({ header, locale }: Props) {
     const y = window.scrollY
     setIsAtTop(y < 10)
     // Only hide after scrolling past 80px so the header doesn't flicker at the very top
-    // Don't hide when menu or cart is active
-    if (!isMenuActive && !isCartOpen && y > 80 && y > lastScrollY.current) {
+    // Don't hide when menu or cart is active, or on dashboard-style routes
+    if (!isDashboardRoute && !isMenuActive && !isCartOpen && y > 80 && y > lastScrollY.current) {
       setHidden(true)
     } else {
       setHidden(false)
     }
     lastScrollY.current = y
-  }, [isMenuActive, isCartOpen])
+  }, [isDashboardRoute, isMenuActive, isCartOpen])
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -201,13 +204,13 @@ export function HeaderClient({ header, locale }: Props) {
         <nav
           className={cn(
             'relative border-b transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
-            hidden && !isMenuActive && !isCartOpen && '-translate-y-full',
+            hidden && !isDashboardRoute && !isMenuActive && !isCartOpen && '-translate-y-full',
             isTransparent && !isCartOpen
               ? 'bg-transparent backdrop-blur-none border-transparent dark:bg-transparent dark:backdrop-blur-none dark:border-transparent'
               : 'nav-glass border-white/30 dark:border-white/6',
           )}
         >
-          <div className="container flex items-center justify-between py-3 lg:py-4">
+          <div className="w-full max-w-440 mx-auto px-6 md:px-10 lg:px-14 flex items-center justify-between py-3 lg:py-4">
             {/* Logo with magnetic effect */}
             <MagneticElement strength={0.2}>
               <Link href="/" className="shrink-0 block cursor-can-hover">
