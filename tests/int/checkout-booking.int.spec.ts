@@ -147,7 +147,7 @@ describe('checkout booking integration', () => {
       expect.objectContaining({
         params: expect.objectContaining({
           BOOKING_ID: 'booking_1',
-          CUSTOMER_NAME: 'Buyer Example',
+          FIRST_NAME: 'Buyer Example',
           GUEST_COUNT: '2',
           WORKSHOP_TITLE: 'Kombucha Workshop',
           WORKSHOP_DATE: expect.any(String),
