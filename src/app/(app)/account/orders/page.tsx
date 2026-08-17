@@ -88,7 +88,12 @@ export default async function OrdersPage() {
       limit: 100,
       depth: 2,
       overrideAccess: true,
-      where: { customer: { equals: user.id } },
+      where: {
+        or: [
+          { customer: { equals: user.id } },
+          { customerEmail: { equals: user.email } },
+        ],
+      },
     })
     orders = result?.docs || []
   } catch (error) {

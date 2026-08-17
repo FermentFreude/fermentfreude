@@ -27,7 +27,16 @@
       "Bash(git -C /Users/rafaela/Desktop/FermentFreude checkout feature/workshop-roster-dashboard)",
       "Bash(git -C /Users/rafaela/Desktop/FermentFreude show HEAD:src/components/checkout/ConfirmOrder.tsx)",
       "Bash(git -C /Users/rafaela/Desktop/FermentFreude show origin/main:src/components/checkout/ConfirmOrder.tsx)",
-      "Bash(git -C /Users/rafaela/Desktop/FermentFreude add src/app/api/voucher/place-order/route.ts src/app/api/orders/[orderId]/receipt/route.ts)"
+      "Bash(git -C /Users/rafaela/Desktop/FermentFreude add src/app/api/voucher/place-order/route.ts src/app/api/orders/[orderId]/receipt/route.ts)",
+      "Bash(pnpm add *)",
+      "Bash(vercel whoami *)",
+      "Bash(vercel --version)",
+      "Bash(git check-ignore *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(curl -s http://localhost:3000/recover-password)",
+      "Bash(curl -s \"http://localhost:3000/recover-password?token=faketoken123\")",
+      "Bash(DATABASE_URL=\"mongodb+srv://user:pass@cluster.mongodb.net/fermentfreude?retryWrites=true\" pnpm tsx src/scripts/cleanup-test-data.ts)",
+      "Bash(pnpm tsx *)"
     ]
   }
 }

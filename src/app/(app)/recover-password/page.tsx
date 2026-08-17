@@ -8,12 +8,18 @@ import { headers as getHeaders } from 'next/headers'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { ForgotPasswordForm } from '@/components/forms/ForgotPasswordForm'
+import { ResetPasswordForm } from '@/components/forms/ResetPasswordForm'
 import { redirect } from 'next/navigation'
 
-export default async function RecoverPassword() {
+type PageProps = {
+  searchParams: Promise<{ token?: string }>
+}
+
+export default async function RecoverPassword({ searchParams }: PageProps) {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+  const { token } = await searchParams
 
   const loginHeroImageUrl = `${process.env.R2_PUBLIC_URL}/media/image%2054.webp`
 
@@ -30,7 +36,7 @@ export default async function RecoverPassword() {
           <div className="grid gap-16 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-start">
             <section className="flex flex-col space-y-10">
               <div className="space-y-7">
-                <ForgotPasswordForm />
+                {token ? <ResetPasswordForm token={token} /> : <ForgotPasswordForm />}
               </div>
             </section>
 

@@ -21,13 +21,15 @@ interface OrderStats {
   recent: Order[]
 }
 
-async function getOrderStats(userId: string): Promise<OrderStats> {
+async function getOrderStats(userId: string, userEmail: string): Promise<OrderStats> {
   try {
     const payload = await getPayload({ config: configPromise })
     const orders = await payload.find({
       collection: 'orders',
       overrideAccess: true,
-      where: { customer: { equals: userId } },
+      where: {
+        or: [{ customer: { equals: userId } }, { customerEmail: { equals: userEmail } }],
+      },
       limit: 5,
       sort: '-createdAt',
     })
@@ -43,7 +45,7 @@ async function getOrderStats(userId: string): Promise<OrderStats> {
 }
 
 function StatusDot({ status, t }: { status: string; t: AccountTranslations }) {
-  if (status === 'succeeded')
+  if (status === 'completed')
     return (
       <span className="inline-flex items-center gap-1.5 text-[12px] text-green-700 font-medium">
         <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
@@ -74,7 +76,7 @@ export default async function DashboardPage() {
 
   if (!user) return null
 
-  const stats = await getOrderStats(user.id)
+  const stats = await getOrderStats(user.id, user.email)
   const firstName = user.name?.split(' ')[0] ?? 'there'
 
   // Fetch enrollments for My Learning widget

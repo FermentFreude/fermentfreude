@@ -10,12 +10,28 @@
  *   pnpm tsx src/scripts/cleanup-test-orders.ts --force  ← actually delete
  */
 
+import 'dotenv/config'
+
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
 const DRY_RUN = !process.argv.includes('--force')
 
+function assertStagingDatabase() {
+  const dbUrl = process.env.DATABASE_URL ?? ''
+  if (!dbUrl.includes('-staging')) {
+    console.error(
+      '\n🚫 REFUSING TO RUN: DATABASE_URL does not look like the staging database.\n' +
+        '   This script deletes orders and bookings — it must never run against production.\n' +
+        '   If this really is staging, its connection string must contain "-staging".\n',
+    )
+    process.exit(1)
+  }
+}
+
 async function run() {
+  assertStagingDatabase()
+
   const payload = await getPayload({ config })
 
   if (DRY_RUN) {
