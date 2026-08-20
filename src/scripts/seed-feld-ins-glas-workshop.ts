@@ -31,7 +31,6 @@ const LOCATION_ADDRESS = 'Hochfeldweg, Graz'
 
 /** Marktgarten appointments (must be future — hook rejects past dates) */
 const TEST_APPOINTMENTS = [
-  { date: '2026-08-01', time: '10:00', spots: 12 },
   { date: '2026-08-22', time: '10:00', spots: 12 },
   { date: '2026-09-12', time: '10:00', spots: 12 },
   { date: '2026-09-20', time: '10:00', spots: 12 },
