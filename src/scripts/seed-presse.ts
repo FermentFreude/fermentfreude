@@ -63,14 +63,36 @@ async function seedPresse() {
     }
   }
 
+  // Filenames we may reuse via findByFilename() below — never delete these,
+  // even though their alt text matches the cleanup patterns above.
+  const reusableFilenames = [
+    'card-1-kleine-zeitung.webp',
+    'card-1-kleine-zeitung-1.webp',
+    'card-2-kanal3.webp',
+    'card-2-kanal3-1.webp',
+    'card-3-elevator-pitch.webp',
+    'card-4-fermentationskongress.webp',
+    'card-5-food-masterclass.webp',
+    'logo-kleine-zeitung.webp',
+    'logo-kanal3.webp',
+    'logo-junge-wirtschaft.webp',
+    'logo-sfg.webp',
+    'logo-food-masterclass.webp',
+  ]
+
   await payload
     .delete({
       collection: 'media',
       where: {
-        or: [
-          { alt: { contains: 'presse-' } },
-          { alt: { contains: 'presse-logo-' } },
-          { alt: { contains: 'presse-hero-video' } },
+        and: [
+          {
+            or: [
+              { alt: { contains: 'presse-' } },
+              { alt: { contains: 'presse-logo-' } },
+              { alt: { contains: 'presse-hero-video' } },
+            ],
+          },
+          { filename: { not_in: reusableFilenames } },
         ],
       },
     })
@@ -89,6 +111,20 @@ async function seedPresse() {
   let heroPoster: Media | undefined
   let heroVideo: Media | undefined
 
+  // Reuse an already-uploaded Media doc by exact filename before falling back
+  // to a local seed-assets upload — lets this run in environments (e.g. a
+  // freshly synced production DB) that have the processed images but not the
+  // raw local source files.
+  async function findByFilename(filename: string): Promise<Media | undefined> {
+    const result = await payload.find({
+      collection: 'media',
+      where: { filename: { equals: filename } },
+      limit: 1,
+      depth: 0,
+    })
+    return result.docs[0] as Media | undefined
+  }
+
   const heroVideoPath = path.resolve(
     process.cwd(),
     'public/assets/videos/presse-kanal3-hero-loop.mp4',
@@ -105,33 +141,58 @@ async function seedPresse() {
     console.log(`  🎬 Hero video (Kanal 3 MP4): ${heroVideo.id}`)
   }
 
-  const bannerPath = path.join(presseImagesDir, 'card-1-kleine-zeitung.png')
-  if (fs.existsSync(bannerPath)) {
-    bannerImage = (await payload.create({
-      collection: 'media',
-      data: {
-        alt: 'presse-hero – Die Fermentfreude-Gründer mit Käferbohnen-Tempeh und fermentiertem Gemüse',
-      },
-      file: await optimizedFile(bannerPath, IMAGE_PRESETS.hero),
-      context: { skipAutoTranslate: true },
-    })) as Media
-    console.log(`  📸 Hero banner: ${bannerImage.id}`)
+  bannerImage = await findByFilename('card-1-kleine-zeitung.webp')
+  if (bannerImage) {
+    console.log(`  · reuse hero banner ${bannerImage.id}`)
+  } else {
+    const bannerPath = path.join(presseImagesDir, 'card-1-kleine-zeitung.png')
+    if (fs.existsSync(bannerPath)) {
+      bannerImage = (await payload.create({
+        collection: 'media',
+        data: {
+          alt: 'presse-hero – Die Fermentfreude-Gründer mit Käferbohnen-Tempeh und fermentiertem Gemüse',
+        },
+        file: await optimizedFile(bannerPath, IMAGE_PRESETS.hero),
+        context: { skipAutoTranslate: true },
+      })) as Media
+      console.log(`  📸 Hero banner: ${bannerImage.id}`)
+    }
   }
 
-  const heroPosterPath = path.join(presseImagesDir, 'card-2-kanal3.png')
-  if (fs.existsSync(heroPosterPath)) {
-    heroPoster = (await payload.create({
-      collection: 'media',
-      data: {
-        alt: 'presse-hero-poster – Kanal 3 TV-Beitrag über Fermentation mit Fermentfreude',
-      },
-      file: await optimizedFile(heroPosterPath, IMAGE_PRESETS.hero),
-      context: { skipAutoTranslate: true },
-    })) as Media
-    console.log(`  📸 Hero poster (Kanal 3): ${heroPoster.id}`)
+  heroPoster = await findByFilename('card-2-kanal3.webp')
+  if (heroPoster) {
+    console.log(`  · reuse hero poster ${heroPoster.id}`)
+  } else {
+    const heroPosterPath = path.join(presseImagesDir, 'card-2-kanal3.png')
+    if (fs.existsSync(heroPosterPath)) {
+      heroPoster = (await payload.create({
+        collection: 'media',
+        data: {
+          alt: 'presse-hero-poster – Kanal 3 TV-Beitrag über Fermentation mit Fermentfreude',
+        },
+        file: await optimizedFile(heroPosterPath, IMAGE_PRESETS.hero),
+        context: { skipAutoTranslate: true },
+      })) as Media
+      console.log(`  📸 Hero poster (Kanal 3): ${heroPoster.id}`)
+    }
   }
 
+  // Cards 1 and 2 got re-uploaded a second time for the grid (distinct from
+  // the hero/poster above), so R2/Payload suffixed those with "-1".
+  const gridFilenames = [
+    'card-1-kleine-zeitung-1.webp',
+    'card-2-kanal3-1.webp',
+    'card-3-elevator-pitch.webp',
+    'card-4-fermentationskongress.webp',
+    'card-5-food-masterclass.webp',
+  ]
   for (let i = 0; i < PRESS_CARD_FILES.length; i++) {
+    const existing = await findByFilename(gridFilenames[i]!)
+    if (existing) {
+      pressImages.push(existing)
+      console.log(`  · reuse card ${i + 1} ${existing.id}`)
+      continue
+    }
     const filePath = path.join(presseImagesDir, PRESS_CARD_FILES[i]!)
     if (!fs.existsSync(filePath)) {
       console.log(`  ⚠️  Missing: ${PRESS_CARD_FILES[i]}`)
@@ -147,7 +208,20 @@ async function seedPresse() {
     console.log(`  📸 Card ${i + 1}: ${created.id}`)
   }
 
+  const logoFilenames = [
+    'logo-kleine-zeitung.webp',
+    'logo-kanal3.webp',
+    'logo-junge-wirtschaft.webp',
+    'logo-sfg.webp',
+    'logo-food-masterclass.webp',
+  ]
   for (let i = 0; i < PRESS_LOGO_FILES.length; i++) {
+    const existing = await findByFilename(logoFilenames[i]!)
+    if (existing) {
+      pressLogos.push(existing)
+      console.log(`  · reuse logo ${i + 1} ${existing.id}`)
+      continue
+    }
     const filePath = path.join(presseLogosDir, PRESS_LOGO_FILES[i]!)
     if (!fs.existsSync(filePath)) {
       console.log(`  ⚠️  Missing logo: ${PRESS_LOGO_FILES[i]}`)
