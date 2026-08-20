@@ -221,7 +221,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     <div
       ref={outerRef}
       id={id ?? undefined}
-      className="cursor-normal-zone relative w-full bg-white lg:min-h-svh"
+      className="relative w-full bg-white lg:min-h-svh"
     >
       {/* ── Viewport: sticky on desktop, native horizontal scroll on mobile */}
       <section

@@ -213,7 +213,7 @@ export function HeaderClient({ header, locale }: Props) {
           <div className="w-full max-w-440 mx-auto px-6 md:px-10 lg:px-14 flex items-center justify-between py-3 lg:py-4">
             {/* Logo with magnetic effect */}
             <MagneticElement strength={0.2}>
-              <Link href="/" className="shrink-0 block cursor-can-hover">
+              <Link href="/" className="shrink-0 block">
                 <Image
                   src="/primary-logo.svg"
                   alt="Fermentfreude"
@@ -280,7 +280,7 @@ export function HeaderClient({ header, locale }: Props) {
             </ul>
 
             {/* Right side */}
-            <div className="flex items-center gap-2 lg:gap-3 cursor-normal-zone">
+            <div className="flex items-center gap-2 lg:gap-3">
               {/* User icon with dropdown (desktop) */}
               <div className="hidden lg:block">
                 <UserMenu />

@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 
-import { ElasticCursor } from '@/components/ElasticCursor'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -61,9 +60,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
 
         <Providers>
-          <div id="site-cursor" style={{ display: 'contents' }}>
-            <ElasticCursor />
-          </div>
           <div id="site-splash" style={{ display: 'contents' }}>
             <SplashScreen />
           </div>

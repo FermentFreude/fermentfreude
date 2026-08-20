@@ -190,7 +190,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
   return (
     <section className="relative w-full overflow-hidden bg-white min-h-dvh md:h-dvh">
       {/* ── Gold blob ── */}
-      <div className="blob-interactive absolute top-[14%] left-[36%] z-3 hidden md:block pointer-events-auto w-14 h-14">
+      <div className="absolute top-[14%] left-[36%] z-3 hidden md:block pointer-events-auto w-14 h-14">
         <BlobCanvas
           color="#E6BE68"
           radius={20}
@@ -200,7 +200,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
       </div>
 
       {/* ── Dark blob ── */}
-      <div className="blob-interactive absolute top-[8%] right-[6%] z-5 hidden md:block pointer-events-auto w-12 h-12">
+      <div className="absolute top-[8%] right-[6%] z-5 hidden md:block pointer-events-auto w-12 h-12">
         <BlobCanvas
           color="#1a1a1a"
           radius={16}

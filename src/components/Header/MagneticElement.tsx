@@ -5,7 +5,7 @@ import React, { useCallback, useRef } from 'react'
 
 /**
  * MagneticElement — wraps any element to give it a magnetic "pull" effect
- * on mouse hover, inspired by the ElasticCursor from rafaela-studio.
+ * on mouse hover.
  *
  * On hover the child shifts toward the cursor with a spring ease.
  * On leave it springs back to its original position.

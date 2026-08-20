@@ -11,15 +11,12 @@ export const metadata = {
 export default function HubLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      {/* Hide site header, footer & chrome on hub pages + restore cursor */}
+      {/* Hide site header, footer & chrome on hub pages */}
       <style>{`
         #site-header,
         #site-footer,
-        #site-splash,
-        #site-cursor { display: none !important; }
+        #site-splash { display: none !important; }
         #main-content { margin-top: 0 !important; padding-top: 0 !important; }
-        .hub-shell, .hub-shell * { cursor: auto !important; }
-        .hub-shell a, .hub-shell button, .hub-shell [role="button"] { cursor: pointer !important; }
       `}</style>
       <HubLocaleProvider>
         {children}
