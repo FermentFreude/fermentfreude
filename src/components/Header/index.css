@@ -139,46 +139,5 @@ header[data-header-theme='dark'] .navLink:hover {
 }
 
 header[data-header-theme='dark'] .navLink::after {
-  background-color: var(--ff-gold);
-}
-
-/* ── Hide default cursor when elastic cursor is active ─────── */
-@media (hover: hover) and (pointer: fine) and (min-width: 768px) {
-  * {
-    cursor: none !important;
-  }
-
-  a,
-  a *,
-  button,
-  button *,
-  [data-slot='button'],
-  [data-slot='button'] *,
-  [role='button'],
-  [role='button'] *,
-  input,
-  select,
-  textarea,
-  .dropdown-glass,
-  .dropdown-glass *,
-  .cursor-normal-zone,
-  .cursor-normal-zone *,
-  img,
-  picture,
-  picture *,
-  video,
-  figure,
-  figure * {
-    cursor: pointer !important;
-  }
-
-  .cursor-can-hover,
-  .cursor-can-hover * {
-    cursor: none !important;
-  }
-
-  .blob-interactive,
-  .blob-interactive * {
-    cursor: default !important;
-  }
+  background-color: white;
 }
