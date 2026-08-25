@@ -18,12 +18,32 @@ export const FeaturedProductCards: Block = {
       },
     },
     {
+      name: 'bannerProduct',
+      type: 'relationship',
+      relationTo: 'products',
+      hasMany: false,
+      label: 'Hero Product',
+      admin: {
+        description:
+          'Shown first and largest — FermentFreude hero product (Käferbohnentempeh).',
+      },
+    },
+    {
+      name: 'bannerColor',
+      type: 'text',
+      label: 'Hero Background Color',
+      admin: {
+        description: 'Hero card accent color. Default: #403c39.',
+      },
+    },
+    {
       name: 'heading',
       type: 'textarea',
       localized: true,
       label: 'Section Heading',
       admin: {
-        description: 'Main heading above the cards (e.g. "Unsere Bestseller" / "Our Bestsellers").',
+        description:
+          'Optional heading above products (e.g. "Weitere Produkte"). Avoid "Bestseller" — Käfer is already the hero above, so this section is only the other products.',
       },
     },
     {
@@ -32,7 +52,7 @@ export const FeaturedProductCards: Block = {
       localized: true,
       label: 'Section Subheading',
       admin: {
-        description: 'Short intro text below the heading.',
+        description: 'Short intro text below the heading. Leave empty to keep the layout calm.',
       },
     },
     {
@@ -40,52 +60,33 @@ export const FeaturedProductCards: Block = {
       type: 'relationship',
       relationTo: 'products',
       hasMany: true,
-      minRows: 1,
+      minRows: 0,
       maxRows: 3,
-      required: true,
-      label: 'Featured Products (max 3)',
+      required: false,
+      label: 'Supporting Products (max 2–3)',
       admin: {
         description:
-          'Select up to 3 products to display as large feature cards. These appear in a 3-column row.',
+          'Berglinsentempeh + Kimchi (seasonal). If the hero product is also selected here, it is shown only once in the hero. Prefer 2 supporting products when a hero is set.',
       },
     },
     {
       name: 'cardColors',
       type: 'array',
-      label: 'Card Background Colors',
+      label: 'Supporting Card Colors',
       minRows: 0,
       maxRows: 3,
       admin: {
         description:
-          'Optional accent colors for each card. Leave empty for defaults (olive-green, warm-gold, earthy-brown).',
+          'Optional accent colors for each supporting card. Leave empty for defaults.',
       },
       fields: [
         {
           name: 'color',
           type: 'text',
           label: 'Background Color (hex)',
-          admin: { description: 'e.g. #4b6043, #b8860b, #8b4513' },
+          admin: { description: 'e.g. #4b6043, #403c39' },
         },
       ],
-    },
-    {
-      name: 'bannerProduct',
-      type: 'relationship',
-      relationTo: 'products',
-      hasMany: false,
-      label: 'Banner Product (full width)',
-      admin: {
-        description:
-          'A single product shown as a wide banner card below the 3-column row (e.g. Tempeh).',
-      },
-    },
-    {
-      name: 'bannerColor',
-      type: 'text',
-      label: 'Banner Background Color',
-      admin: {
-        description: 'Banner card accent color. Default: #555954 (muted olive).',
-      },
     },
     {
       name: 'ctaLabel',

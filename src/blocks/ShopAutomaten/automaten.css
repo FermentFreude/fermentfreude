@@ -1,0 +1,45 @@
+.automaten-editorial {
+  isolation: isolate;
+}
+
+.automaten-loc-card {
+  animation: automaten-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.automaten-loc-card:nth-of-type(2),
+li:nth-child(2) .automaten-loc-card {
+  animation-delay: 0.1s;
+}
+
+.automaten-loc-card--active {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px rgba(26, 26, 26, 0.1);
+  border-color: rgba(64, 60, 57, 0.18);
+}
+
+.automaten-featured:hover .automaten-featured-img {
+  transform: scale(1.04);
+}
+
+@keyframes automaten-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .automaten-loc-card,
+  .automaten-featured-img {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .automaten-loc-card--active {
+    transform: none;
+  }
+}

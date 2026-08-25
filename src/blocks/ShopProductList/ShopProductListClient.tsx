@@ -59,7 +59,7 @@ export const ShopProductListClient: React.FC<Props> = ({ products, heading, cate
   const totalCount = products.length
 
   return (
-    <section id="products" className="py-8 md:py-10 lg:py-12 bg-ff-cream">
+    <section id="product-catalog" className="py-8 md:py-10 lg:py-12 bg-ff-cream">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Heading */}
         {heading && (

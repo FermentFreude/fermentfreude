@@ -19,6 +19,7 @@ import { PressBannerBlock } from '@/blocks/PressBanner/Component'
 import { PressMediaAwardsBlock } from '@/blocks/PressMediaAwards/Component'
 import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { ReadyToLearnCTABlock } from '@/blocks/ReadyToLearnCTA/Component'
+import { ShopAutomatenComponent } from '@/blocks/ShopAutomaten/Component'
 import { ShopHeroComponent } from '@/blocks/ShopHero/Component'
 import { ShopProductGridComponent } from '@/blocks/ShopProductGrid/Component'
 import { ShopProductListComponent } from '@/blocks/ShopProductList/Component'
@@ -64,6 +65,7 @@ const blockComponents = {
   threeItemGrid: ThreeItemGridBlock,
   productSlider: ProductSliderBlock,
   featuredProductCards: FeaturedProductCardsComponent,
+  shopAutomaten: ShopAutomatenComponent,
   shopHero: ShopHeroComponent,
   shopProductGrid: ShopProductGridComponent,
   shopProductList: ShopProductListComponent,

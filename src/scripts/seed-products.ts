@@ -139,6 +139,13 @@ const PRODUCTS: Array<{
   alt: string
   descriptionDe: string
   descriptionEn: string
+  isSeasonal?: boolean
+  unitSizeDe?: string
+  unitSizeEn?: string
+  ingredientsDe?: string
+  ingredientsEn?: string
+  shortDescriptionDe?: string
+  shortDescriptionEn?: string
 }> = [
   // ── Staging products (workshop-based) ──────────────────────────────────────
   {
@@ -373,6 +380,15 @@ const PRODUCTS: Array<{
       'Classic Kimchi. Zutaten: Chinakohl, Karotten, Rettich, Apfel, Lauch, Reisstärke, Ingwer, Knoblauch, unjodiertes Salz, Gochugaru, Zucker, Miso (Wasser, Sojabohnen, Reis, Speisesalz). 260g.',
     descriptionEn:
       'Classic Kimchi. Ingredients: Napa cabbage, carrots, radish, apple, leek, rice starch, ginger, garlic, non-iodised salt, gochugaru, sugar, miso (water, soybeans, rice, salt). 260g.',
+    isSeasonal: true,
+    unitSizeDe: '260g Glas',
+    unitSizeEn: '260g jar',
+    shortDescriptionDe: 'Saisonales Kimchi — Titel und Zutaten werden je nach Variante aktualisiert.',
+    shortDescriptionEn: 'Seasonal kimchi — title and ingredients are updated with each variant.',
+    ingredientsDe:
+      'Chinakohl, Karotten, Rettich, Apfel, Lauch, Reisstärke, Ingwer, Knoblauch, unjodiertes Salz, Gochugaru, Zucker, Miso (Wasser, Sojabohnen, Reis, Speisesalz).',
+    ingredientsEn:
+      'Napa cabbage, carrots, radish, apple, leek, rice starch, ginger, garlic, non-iodised salt, gochugaru, sugar, miso (water, soybeans, rice, salt).',
   },
   {
     titleDe: 'Käferbohnen-Tempeh',
@@ -385,6 +401,28 @@ const PRODUCTS: Array<{
       'Käferbohnen-Tempeh aus österreichischen Käferbohnen. Zutaten: Käferbohnen aus Österreich gekocht (97%), Apfelessig, Starterkultur (Rhizopus oligosporus). 180g.',
     descriptionEn:
       'Runner bean tempeh made from Austrian runner beans. Ingredients: Cooked Austrian runner beans (97%), apple cider vinegar, starter culture (Rhizopus oligosporus). 180g.',
+  },
+  {
+    titleDe: 'Berglinsen-Tempeh',
+    titleEn: 'Mountain Lentil Tempeh',
+    slug: 'berglinsen-tempeh',
+    priceInEUR: 7.9,
+    imagePath: 'images/placeholder.png',
+    alt: 'Berglinsen-Tempeh – 180g',
+    descriptionDe:
+      'Berglinsen-Tempeh aus österreichischen Berglinsen. Zutaten: Berglinsen aus Österreich gekocht (97%), Apfelessig, Starterkultur (Rhizopus oligosporus). 180g.',
+    descriptionEn:
+      'Mountain lentil tempeh made from Austrian mountain lentils. Ingredients: Cooked Austrian mountain lentils (97%), apple cider vinegar, starter culture (Rhizopus oligosporus). 180g.',
+    unitSizeDe: '185g Frischpackung',
+    unitSizeEn: '185g fresh pack',
+    shortDescriptionDe:
+      'Tempeh aus österreichischen Berglinsen — nussig, proteinreich, handgemacht.',
+    shortDescriptionEn:
+      'Tempeh from Austrian mountain lentils — nutty, protein-rich, handmade.',
+    ingredientsDe:
+      'Berglinsen aus Österreich gekocht (97%), Apfelessig, Starterkultur (Rhizopus oligosporus).',
+    ingredientsEn:
+      'Cooked Austrian mountain lentils (97%), apple cider vinegar, starter culture (Rhizopus oligosporus).',
   },
 ]
 
@@ -479,9 +517,31 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
             description: buildDescription(product.descriptionDe),
             relatedProducts,
             ...(benefits ? { benefits } : {}),
+            ...(product.isSeasonal != null ? { isSeasonal: product.isSeasonal } : {}),
+            ...(product.unitSizeDe ? { unitSize: product.unitSizeDe } : {}),
+            ...(product.ingredientsDe ? { ingredients: product.ingredientsDe } : {}),
+            ...(product.shortDescriptionDe
+              ? { shortDescription: product.shortDescriptionDe }
+              : {}),
           },
           context: ctx,
         })
+        if (product.unitSizeEn || product.ingredientsEn || product.shortDescriptionEn) {
+          await payload.update({
+            collection: 'products',
+            id: doc.id,
+            locale: 'en',
+            data: {
+              title: product.titleEn,
+              ...(product.unitSizeEn ? { unitSize: product.unitSizeEn } : {}),
+              ...(product.ingredientsEn ? { ingredients: product.ingredientsEn } : {}),
+              ...(product.shortDescriptionEn
+                ? { shortDescription: product.shortDescriptionEn }
+                : {}),
+            },
+            context: ctx,
+          })
+        }
       }
       continue
     }
@@ -501,6 +561,12 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
           priceInEUR: product.priceInEUR,
           inventory: 50,
           _status: 'published',
+          ...(product.isSeasonal != null ? { isSeasonal: product.isSeasonal } : {}),
+          ...(product.unitSizeDe ? { unitSize: product.unitSizeDe } : {}),
+          ...(product.ingredientsDe ? { ingredients: product.ingredientsDe } : {}),
+          ...(product.shortDescriptionDe
+            ? { shortDescription: product.shortDescriptionDe }
+            : {}),
         },
       })
       productIds.push(String(created.id))

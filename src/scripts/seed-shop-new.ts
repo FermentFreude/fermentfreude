@@ -153,41 +153,54 @@ async function seedShopNew() {
   // 1. Build DE block data
   // ════════════════════════════════════════════════════════════════════════
 
-  // Block 1: ShopHero
+  // Resolve the three shop products (hero + supporting)
+  const findProductId = async (slug: string): Promise<string | null> => {
+    const found = await payload.find({
+      collection: 'products',
+      where: { slug: { equals: slug } },
+      limit: 1,
+      depth: 0,
+    })
+    return found.docs[0]?.id ? String(found.docs[0].id) : null
+  }
+
+  const kaferId = await findProductId('kaeferbohnen-tempeh')
+  const berglinsenId = await findProductId('berglinsen-tempeh')
+  const kimchiId = await findProductId('classic-kimchi')
+
+  // Block 1: ShopHero — Käfer as visual hero product
   const shopHeroDE = {
     blockType: 'shopHero' as const,
     blockName: 'Shop Hero',
+    ...(kaferId ? { heroProduct: kaferId } : {}),
+    heroPanelColor: '#403c39',
     heroTitle: 'Unsere handgemachten Produkte aus unserem Pick-Up Shop.',
     ctaPrimaryLabel: 'Jetzt bestellen',
-    ctaPrimaryUrl: '/shop#bestsellers',
-    ctaSecondaryLabel: 'Mehr erfahren',
-    ctaSecondaryUrl: '/fermentation',
-    slides: [
-      {
-        categoryLabel: 'Tempeh',
-        detailUrl: '/products/kaeferbohnen-tempeh',
-        ...(existingSlideImages[0] ? { image: existingSlideImages[0] } : {}),
-      },
-      {
-        categoryLabel: 'Kimchi',
-        detailUrl: '/products/classic-kimchi',
-        ...(existingSlideImages[1] ? { image: existingSlideImages[1] } : {}),
-      },
-      {
-        categoryLabel: 'Miso',
-        detailUrl: '/products/fermentierte-rote-rueben',
-        ...(existingSlideImages[2] ? { image: existingSlideImages[2] } : {}),
-      },
-    ],
+    ctaPrimaryUrl: '/products/kaeferbohnen-tempeh',
+    slides: [],
     bottomTagline: 'Fermentierte Lebensmittel, mit Sorgfalt hergestellt.',
     bottomSubtitle: 'Abholung in Graz — jede Woche frisch.',
     bottomDisclaimer: 'Wir arbeiten an einem Lieferservice — f\u00fcr garantierte Frische.',
   }
 
-  // Block 2: ShopProductList
+  // Block 2: Supporting products only (Berglinsen + Kimchi)
+  const featuredCardsDE = {
+    blockType: 'featuredProductCards' as const,
+    blockName: 'Shop Products',
+    visible: true,
+    heading: 'Weitere Produkte',
+    subheading: 'Berglinsen-Tempeh und saisonales Kimchi.',
+    products: [berglinsenId, kimchiId].filter(Boolean),
+    cardColors: [{ color: '#4b4f4a' }, { color: '#555954' }],
+    bannerProduct: null,
+    ctaLabel: 'Jetzt bestellen',
+  }
+
+  // Block 3: ShopProductList — hidden to avoid repeating the same 3 products
   const shopProductListDE = {
     blockType: 'shopProductList' as const,
     blockName: 'Produkt-Anzeige',
+    visible: false,
     heading: 'Unsere Produkte',
   }
 
@@ -235,6 +248,7 @@ async function seedShopNew() {
 
   const deLayout = [
     shopHeroDE,
+    featuredCardsDE,
     shopProductListDE,
     laktoVoucherDE,
     workshopData.de,
@@ -297,6 +311,7 @@ async function seedShopNew() {
   // ════════════════════════════════════════════════════════════════════════
 
   const shopHeroBlock = savedBlocks.find((b) => b.blockType === 'shopHero')!
+  const featuredCardsBlock = savedBlocks.find((b) => b.blockType === 'featuredProductCards')!
   const productListBlock = savedBlocks.find((b) => b.blockType === 'shopProductList')!
   const voucherBlock = savedBlocks.find((b) => b.blockType === 'laktoVoucherCta')!
   const workshopBlock = savedBlocks.find((b) => b.blockType === 'workshopSlider')!
@@ -307,26 +322,25 @@ async function seedShopNew() {
     // ShopHero EN
     {
       ...shopHeroBlock,
-      heroTitle: 'Our Handmade Products From Our Pick-Up Shop.',
+      heroTitle: 'Our handmade products from our pick-up shop.',
       ctaPrimaryLabel: 'Order Now',
-      ctaPrimaryUrl: '/shop#bestsellers',
-      ctaSecondaryLabel: 'Learn More',
-      ctaSecondaryUrl: '/fermentation',
-      slides: (shopHeroBlock.slides ?? []).map((slide, i) => {
-        const enSlides = [
-          { categoryLabel: 'Tempeh', detailUrl: '/products/kaeferbohnen-tempeh' },
-          { categoryLabel: 'Kimchi', detailUrl: '/products/classic-kimchi' },
-          { categoryLabel: 'Miso', detailUrl: '/products/fermentierte-rote-rueben' },
-        ]
-        return { ...slide, ...(enSlides[i] ?? {}) }
-      }),
+      ctaPrimaryUrl: '/products/kaeferbohnen-tempeh',
+      slides: [],
       bottomTagline: 'Fermented foods, crafted with care.',
       bottomSubtitle: 'Pickup in Graz — freshly made every week.',
       bottomDisclaimer: 'Delivery coming soon — to ensure the freshest quality.',
     },
-    // ShopProductList EN
+    // FeaturedProductCards EN
+    {
+      ...featuredCardsBlock,
+      heading: 'More products',
+      subheading: 'Mountain lentil tempeh and seasonal kimchi.',
+      ctaLabel: 'Order Now',
+    },
+    // ShopProductList EN (kept hidden — avoids repeating the same 3 products)
     {
       ...productListBlock,
+      visible: false,
       heading: 'Our Products',
     },
     // LaktoVoucherCta EN
