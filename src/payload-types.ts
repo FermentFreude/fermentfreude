@@ -86,6 +86,8 @@ export interface Config {
     'workshop-appointments': WorkshopAppointment;
     'workshop-bookings': WorkshopBooking;
     vouchers: Voucher;
+    quotes: Quote;
+    'cancellation-invoices': CancellationInvoice;
     downloads: Download;
     reviews: Review;
     'return-requests': ReturnRequest;
@@ -138,6 +140,8 @@ export interface Config {
     'workshop-appointments': WorkshopAppointmentsSelect<false> | WorkshopAppointmentsSelect<true>;
     'workshop-bookings': WorkshopBookingsSelect<false> | WorkshopBookingsSelect<true>;
     vouchers: VouchersSelect<false> | VouchersSelect<true>;
+    quotes: QuotesSelect<false> | QuotesSelect<true>;
+    'cancellation-invoices': CancellationInvoicesSelect<false> | CancellationInvoicesSelect<true>;
     downloads: DownloadsSelect<false> | DownloadsSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'return-requests': ReturnRequestsSelect<false> | ReturnRequestsSelect<true>;
@@ -336,6 +340,14 @@ export interface Order {
    * Dietary restrictions and specifications provided by the buyer at checkout.
    */
   customerDietSpecs?: string | null;
+  /**
+   * Determines the invoice series: stripe orders get WEB-YYYY-NNNN, manually-created orders get MAN-YYYY-NNNN.
+   */
+  paymentMethod?: ('stripe' | 'manual') | null;
+  /**
+   * Freeform reference for manually-created orders (e.g. "Firmenevent August"). Shown as REFERENZ / BESTELLNUMMER on the Rechnung MAN PDF.
+   */
+  referenceNote?: string | null;
   /**
    * Date chosen by buyer for in-store pickup (e.g. "14.05.2026"). Auto-set from checkout.
    */
@@ -4999,6 +5011,97 @@ export interface RefundRequest {
   createdAt: string;
 }
 /**
+ * Angebote (Kostenvoranschläge) für Sonder-, Partner- oder Firmenveranstaltungen.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotes".
+ */
+export interface Quote {
+  id: string;
+  /**
+   * Auto-generated, e.g. ANG-2026-0001.
+   */
+  quoteNumber?: string | null;
+  issueDate?: string | null;
+  /**
+   * Rein informativ. Wird ein Angebot angenommen, erstellt ein Admin die reale Bestellung/Rechnung separat.
+   */
+  status: 'open' | 'accepted' | 'expired';
+  /**
+   * Gültig bis — standardmäßig 14 Tage ab Angebotsdatum.
+   */
+  validUntil: string;
+  clientName: string;
+  contactPersonName?: string | null;
+  /**
+   * Straße, PLZ Ort — eine Zeile pro Adressbestandteil.
+   */
+  clientAddress?: string | null;
+  projectName: string;
+  clientReference?: string | null;
+  items: {
+    title: string;
+    note?: string | null;
+    quantity: number;
+    /**
+     * In Cent, z.B. 45000 = € 450,00.
+     */
+    unitPriceCents: number;
+    id?: string | null;
+  }[];
+  /**
+   * Freitext, z.B. "voraussichtlich Oktober 2026".
+   */
+  eventDateText?: string | null;
+  eventLocationText?: string | null;
+  participantCountText?: string | null;
+  /**
+   * Standardmäßig "individuelle Vereinbarung" wenn leer.
+   */
+  cancellationTermsText?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Stornorechnungen — stornieren die referenzierte Bestellung vollständig.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cancellation-invoices".
+ */
+export interface CancellationInvoice {
+  id: string;
+  /**
+   * Auto-generated, erbt die Serie der Originalrechnung (MAN/WEB).
+   */
+  cancellationNumber?: string | null;
+  issueDate?: string | null;
+  order: string | Order;
+  originalInvoiceNumber: string;
+  originalSeries: 'MAN' | 'WEB';
+  originalIssueDate: string;
+  reason?: string | null;
+  clientName: string;
+  clientAddress?: string | null;
+  items: {
+    title: string;
+    quantity: number;
+    unitPriceCents: number;
+    id?: string | null;
+  }[];
+  /**
+   * Positive Cent-Summe — wird auf der PDF negativ dargestellt.
+   */
+  totalCents: number;
+  /**
+   * Rein informativ — die tatsächliche Rückerstattung erfolgt manuell im Stripe-Dashboard bzw. per Überweisung.
+   */
+  refundStatus: 'offen' | 'erstattet' | 'verrechnet';
+  refundDate?: string | null;
+  refundMethodOrReference?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Digitale Downloads für Kunden nach dem Kauf
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5319,6 +5422,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'vouchers';
         value: string | Voucher;
+      } | null)
+    | ({
+        relationTo: 'quotes';
+        value: string | Quote;
+      } | null)
+    | ({
+        relationTo: 'cancellation-invoices';
+        value: string | CancellationInvoice;
       } | null)
     | ({
         relationTo: 'downloads';
@@ -7213,6 +7324,65 @@ export interface VouchersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotes_select".
+ */
+export interface QuotesSelect<T extends boolean = true> {
+  quoteNumber?: T;
+  issueDate?: T;
+  status?: T;
+  validUntil?: T;
+  clientName?: T;
+  contactPersonName?: T;
+  clientAddress?: T;
+  projectName?: T;
+  clientReference?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        note?: T;
+        quantity?: T;
+        unitPriceCents?: T;
+        id?: T;
+      };
+  eventDateText?: T;
+  eventLocationText?: T;
+  participantCountText?: T;
+  cancellationTermsText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cancellation-invoices_select".
+ */
+export interface CancellationInvoicesSelect<T extends boolean = true> {
+  cancellationNumber?: T;
+  issueDate?: T;
+  order?: T;
+  originalInvoiceNumber?: T;
+  originalSeries?: T;
+  originalIssueDate?: T;
+  reason?: T;
+  clientName?: T;
+  clientAddress?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        quantity?: T;
+        unitPriceCents?: T;
+        id?: T;
+      };
+  totalCents?: T;
+  refundStatus?: T;
+  refundDate?: T;
+  refundMethodOrReference?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "downloads_select".
  */
 export interface DownloadsSelect<T extends boolean = true> {
@@ -7711,6 +7881,8 @@ export interface OrdersSelect<T extends boolean = true> {
   customerName?: T;
   customerPhone?: T;
   customerDietSpecs?: T;
+  paymentMethod?: T;
+  referenceNote?: T;
   pickupDate?: T;
   pickupTime?: T;
   pickupLocation?: T;
@@ -8051,7 +8223,7 @@ export interface BusinessInfo {
   createdAt?: string | null;
 }
 /**
- * Auto-managed sequential invoice counter. Do not edit manually.
+ * Auto-managed sequential invoice counters. Do not edit manually.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invoice-counter".
@@ -8059,13 +8231,37 @@ export interface BusinessInfo {
 export interface InvoiceCounter {
   id: string;
   /**
-   * Year of the last issued invoice.
+   * Legacy series (FF-YYYY-NNNN) — year of the last issued number.
    */
   lastYear?: number | null;
   /**
-   * Last sequential number issued in lastYear.
+   * Legacy series (FF-YYYY-NNNN) — last sequential number issued in lastYear.
    */
   lastNumber?: number | null;
+  /**
+   * ANG series — year of the last issued number.
+   */
+  angLastYear?: number | null;
+  /**
+   * ANG series — last sequential number issued in angLastYear.
+   */
+  angLastNumber?: number | null;
+  /**
+   * MAN series — year of the last issued number.
+   */
+  manLastYear?: number | null;
+  /**
+   * MAN series — last sequential number issued in manLastYear.
+   */
+  manLastNumber?: number | null;
+  /**
+   * WEB series — year of the last issued number.
+   */
+  webLastYear?: number | null;
+  /**
+   * WEB series — last sequential number issued in webLastYear.
+   */
+  webLastNumber?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -8520,6 +8716,12 @@ export interface BusinessInfoSelect<T extends boolean = true> {
 export interface InvoiceCounterSelect<T extends boolean = true> {
   lastYear?: T;
   lastNumber?: T;
+  angLastYear?: T;
+  angLastNumber?: T;
+  manLastYear?: T;
+  manLastNumber?: T;
+  webLastYear?: T;
+  webLastNumber?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
