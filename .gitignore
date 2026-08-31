@@ -53,6 +53,9 @@ public/assets/videos/presse-kanal3-hero-source-hq.mp4
 .cursor/settings.json
 .cursorrules
 
+# Claude Code - local MCP server config (contains personal API tokens)
+.mcp.json
+
 *.log
 *.backup
 .env*.local
