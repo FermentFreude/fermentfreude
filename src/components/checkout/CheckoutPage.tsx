@@ -699,19 +699,59 @@ export const CheckoutPage: React.FC = () => {
             : shippingAddress
         }
 
-        const paymentData = (await initiatePayment(paymentID, {
-          additionalData,
-        })) as Record<string, unknown>
+        let paymentData: Record<string, unknown> | null = null
+
+        // A voucher that only PARTIALLY covers the cart still needs a real
+        // Stripe charge for the remainder. The plugin's own initiatePayment
+        // has no concept of a voucher and would charge the full cart total —
+        // route this case through our own endpoint instead, which charges
+        // cart total minus voucher value and marks the voucher for
+        // redemption once the resulting order is created. (A voucher that
+        // fully covers the cart never reaches this function at all — see
+        // handleVoucherOrder.)
+        if (voucherApplied && !voucherCoversAll && cart?.id) {
+          const res = await fetch('/api/voucher/initiate-discounted-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              voucherCode: voucherApplied.code,
+              cartID: cart.id,
+              userId: user?.id,
+              ...additionalData,
+            }),
+          })
+          const data = await res.json()
+          if (!res.ok || data?.success === false) {
+            throw new Error(data?.error || t.orderFailed)
+          }
+          paymentData = data
+        } else {
+          paymentData = (await initiatePayment(paymentID, {
+            additionalData,
+          })) as Record<string, unknown>
+        }
 
         if (paymentData) {
           setPaymentData(paymentData)
         }
       } catch (error) {
-        const errorData = error instanceof Error ? JSON.parse(error.message) : {}
+        // initiatePayment (plugin) throws Errors whose .message is a JSON
+        // string; our own fetch above throws a plain string message — handle
+        // both without letting a JSON.parse failure crash this handler.
+        let errorData: Record<string, unknown> = {}
+        try {
+          errorData = error instanceof Error ? JSON.parse(error.message) : {}
+        } catch {
+          // not JSON — fall through to the plain-message branches below
+        }
         let errorMessage = 'An error occurred while initiating payment.'
 
-        if (errorData?.cause?.code === 'OutOfStock') {
+        if (errorData?.cause && (errorData.cause as { code?: string })?.code === 'OutOfStock') {
           errorMessage = 'One or more items in your cart are out of stock.'
+        } else if (typeof errorData?.message === 'string' && errorData.message) {
+          errorMessage = errorData.message
+        } else if (error instanceof Error && error.message) {
+          errorMessage = error.message
         }
 
         setError(errorMessage)
@@ -730,6 +770,11 @@ export const CheckoutPage: React.FC = () => {
       isAllPhysicalPickup,
       pickupDate,
       pickupTime,
+      voucherApplied,
+      voucherCoversAll,
+      cart?.id,
+      user?.id,
+      t.orderFailed,
     ],
   )
 

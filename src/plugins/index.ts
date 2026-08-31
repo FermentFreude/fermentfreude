@@ -19,6 +19,7 @@ import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBoo
 import { copyCustomerNameFromTransaction } from '@/collections/Orders/copyCustomerNameFromTransaction'
 import { decrementInventory } from '@/collections/Orders/decrementInventory'
 import { generateDownloadToken } from '@/collections/Orders/generateDownloadToken'
+import { redeemVoucherOnOrderComplete } from '@/collections/Orders/redeemVoucherOnOrderComplete'
 import { restoreWorkshopSpotsOnDelete } from '@/collections/Orders/restoreWorkshopSpotsOnDelete'
 import { setInvoiceIssuedAt } from '@/collections/Orders/setInvoiceIssuedAt'
 import {
@@ -423,6 +424,7 @@ export const plugins: Plugin[] = [
             decrementInventory,
             autoEnrollOnPurchase,
             confirmWorkshopBookings,
+            redeemVoucherOnOrderComplete,
             sendOrderConfirmationEmail,
             autoCompleteDigitalOrders,
           ],
@@ -486,6 +488,23 @@ export const plugins: Plugin[] = [
             type: 'text',
             label: 'Pickup Address',
             admin: { description: 'Full address of the pickup location.' },
+          },
+          {
+            name: 'voucherCode',
+            type: 'text',
+            label: 'Voucher Code',
+            admin: {
+              description:
+                'Voucher applied as a partial discount at checkout (cart total exceeded the voucher value, so the remainder was paid via Stripe). Read by redeemVoucherOnOrderComplete to mark the voucher redeemed once the Order is created.',
+            },
+          },
+          {
+            name: 'voucherDiscountAmount',
+            type: 'number',
+            label: 'Voucher Discount (cents)',
+            admin: {
+              description: 'Amount (in cents) deducted from the cart subtotal via the voucher above.',
+            },
           },
         ],
       }),
