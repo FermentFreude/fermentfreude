@@ -74,6 +74,10 @@ const scripts: Record<string, { name: string; file: string }> = {
     name: 'Vom Feld ins Glas CMS page + nav + home slider',
     file: 'seed-feld-ins-glas-page.ts',
   },
+  'feld-ins-glas-drive-images': {
+    name: 'Vom Feld ins Glas — Google Drive photos → CMS',
+    file: 'seed-feld-ins-glas-drive-images.ts',
+  },
 }
 
 const allOrder = [

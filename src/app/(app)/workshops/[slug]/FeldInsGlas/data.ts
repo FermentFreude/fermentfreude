@@ -1,12 +1,151 @@
 /**
  * Vom Feld ins Glas — Marktgarten special workshop
  * Copy aligned with: ferment-freude.at/service-page/vom-feld-ins-glas
- * CMS: pages → vom-feld-ins-glas → Workshop Detail (FAQ, voucher, howTo, calendar, slider)
+ * CMS: pages → vom-feld-ins-glas → Workshop Detail (all sections)
  */
 
+import type { Media, Page } from '@/payload-types'
 import type { WorkshopDetailData } from '../workshop-data'
+import configPromise from '@payload-config'
+import { getPayload } from 'payload'
+import { getFeldInsGlasImages, type FeldInsGlasImages } from './images'
 
 export const FELD_INS_GLAS_SLUG = 'vom-feld-ins-glas'
+
+type WorkshopDetail = NonNullable<Page['workshopDetail']>
+
+function isResolvedMedia(img: unknown): img is Media {
+  return typeof img === 'object' && img !== null && 'url' in img
+}
+
+async function coalesceMedia(
+  value: unknown,
+  fallback: Media | null,
+  payload: Awaited<ReturnType<typeof getPayload>>,
+): Promise<Media | null> {
+  if (isResolvedMedia(value)) return value
+  if (typeof value === 'string' && value) {
+    try {
+      const doc = await payload.findByID({
+        collection: 'media',
+        id: value,
+        depth: 0,
+        overrideAccess: true,
+      })
+      if (isResolvedMedia(doc)) return doc
+    } catch {
+      /* stale relationship id */
+    }
+  }
+  return fallback
+}
+
+function splitTitleLines(title: string, fallback: string[]): string[] {
+  if (title.includes('\n')) return title.split('\n').map((l) => l.trim()).filter(Boolean)
+  if (title.includes('|')) return title.split('|').map((l) => l.trim()).filter(Boolean)
+  const t = title.trim()
+  if (/^Vom Feld ins Glas$/i.test(t)) return ['Vom Feld', 'ins Glas']
+  if (/^From Field to Jar$/i.test(t)) return ['From Field', 'to Jar']
+  return fallback
+}
+
+function mapJourneySections(
+  detail: WorkshopDetail | null | undefined,
+  defaults: FeldInsGlasPhase[],
+): FeldInsGlasPhase[] {
+  const cms = detail?.journeySections
+  if (!cms?.length) return defaults
+
+  return cms.map((section, i) => ({
+    label: section.label ?? defaults[i]?.label ?? String(i + 1).padStart(2, '0'),
+    name: section.name ?? defaults[i]?.name,
+    title: section.title ?? defaults[i]?.title ?? '',
+    description: section.description ?? defaults[i]?.description ?? '',
+    bullets:
+      (section.bullets?.length ?? 0) > 0
+        ? section.bullets!.map((b) => b.text ?? '').filter(Boolean)
+        : defaults[i]?.bullets,
+  }))
+}
+
+/** Merge CMS workshopDetail with English/German hardcoded fallbacks. */
+export function buildFeldInsGlasCopy(
+  locale: 'de' | 'en',
+  detail?: WorkshopDetail | null,
+): FeldInsGlasCopy {
+  const defaults = FELD_INS_GLAS_COPY[locale]
+  if (!detail) return defaults
+
+  const titleRaw = detail.heroTitle?.trim() || defaults.title
+  const titleLines = splitTitleLines(titleRaw, defaults.titleLines)
+
+  return {
+    ...defaults,
+    eyebrow: detail.heroEyebrow ?? defaults.eyebrow,
+    title: titleLines.join(' '),
+    titleLines,
+    heroSubline: detail.heroDescription ?? defaults.heroSubline,
+    ctaLabel: detail.heroPrimaryCtaLabel ?? defaults.ctaLabel,
+    secondaryCtaLabel: detail.heroSecondaryCtaLabel ?? defaults.secondaryCtaLabel,
+    sealRingText: detail.heroSealRingText ?? defaults.sealRingText,
+    sealCenterLines: [
+      detail.heroSealCenterLine1 ?? defaults.sealCenterLines[0],
+      detail.heroSealCenterLine2 ?? defaults.sealCenterLines[1],
+    ],
+    attributes:
+      (detail.heroAttributes?.length ?? 0) > 0
+        ? detail.heroAttributes!.map((a) => a.text ?? '').filter(Boolean)
+        : defaults.attributes,
+    storyEyebrow: detail.conceptEyebrow ?? defaults.storyEyebrow,
+    storyTitle: detail.conceptTitle ?? defaults.storyTitle,
+    storyQuote: detail.conceptQuote ?? defaults.storyQuote,
+    storyText: detail.conceptText ?? defaults.storyText,
+    storyTextSecondary: detail.conceptTextSecondary ?? defaults.storyTextSecondary,
+    storySeasonMonths: detail.conceptSeasonMonths ?? defaults.storySeasonMonths,
+    storySeasonLabel: detail.conceptSeasonLabel ?? defaults.storySeasonLabel,
+    journeySections: mapJourneySections(detail, defaults.journeySections),
+    howToEyebrow: detail.howToEyebrow ?? defaults.howToEyebrow,
+    howToTitle: detail.howToTitle ?? defaults.howToTitle,
+    howToDescription: detail.howToDescription ?? defaults.howToDescription,
+  }
+}
+
+/** CMS images first, then alt-text lookup fallbacks from Media. */
+export async function resolveFeldInsGlasImages(
+  detail?: WorkshopDetail | null,
+): Promise<FeldInsGlasImages> {
+  const payload = await getPayload({ config: configPromise })
+  const fallbacks = await getFeldInsGlasImages()
+  const journey = detail?.journeySections ?? []
+
+  const hero = await coalesceMedia(detail?.heroImage, fallbacks.hero, payload)
+  const konzept = await coalesceMedia(detail?.conceptImage, fallbacks.konzept, payload)
+  const feld = await coalesceMedia(journey[0]?.image, fallbacks.feld, payload)
+  const kueche = await coalesceMedia(journey[1]?.image, fallbacks.kueche, payload)
+  const glas = await coalesceMedia(journey[2]?.image, fallbacks.glas, payload)
+  const booking = await coalesceMedia(
+    detail?.bookingImage,
+    fallbacks.booking ?? fallbacks.hands ?? fallbacks.jars,
+    payload,
+  )
+  const voucher = await coalesceMedia(
+    detail?.voucherBackgroundImage,
+    fallbacks.voucher ?? feld ?? konzept ?? fallbacks.jars,
+    payload,
+  )
+
+  return {
+    hero,
+    konzept,
+    feld,
+    kueche,
+    glas,
+    booking,
+    voucher,
+    hands: fallbacks.hands,
+    jars: fallbacks.jars,
+  }
+}
 
 export type FeldInsGlasPhase = {
   label: string
@@ -30,6 +169,7 @@ export type FeldInsGlasCopy = {
   journeyHint: string
   editionLabel: string
   sealRingText: string
+  sealCenterLines: [string, string]
   sealCenterText: string
   notStudioLabel: string
   notStudioText: string
@@ -88,6 +228,7 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
     journeyHint: 'Feld · Küche · Glas',
     editionLabel: 'Marktgarten Edition',
     sealRingText: 'EINMALIGE VERANSTALTUNG',
+    sealCenterLines: ['FER', 'MEN'],
     sealCenterText: 'FERMENTATION',
     notStudioLabel: 'Nicht im Studio',
     notStudioText:
@@ -238,6 +379,7 @@ export const FELD_INS_GLAS_COPY: Record<'de' | 'en', FeldInsGlasCopy> = {
     journeyHint: 'Field · Kitchen · Jar',
     editionLabel: 'Market Garden Edition',
     sealRingText: 'ONE-TIME EVENT',
+    sealCenterLines: ['FER', 'MEN'],
     sealCenterText: 'FERMENTATION',
     notStudioLabel: 'Not in the studio',
     notStudioText:
