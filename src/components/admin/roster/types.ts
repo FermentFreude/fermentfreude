@@ -109,6 +109,19 @@ export type OrderRow = {
   status: 'processing' | 'completed' | 'cancelled' | 'refunded' | ''
   itemsSummary: string
   createdAt: string
+  cancellationInvoiceId: string | null
+  cancellationNumber: string | null
+}
+
+export type QuoteRow = {
+  id: string
+  quoteNumber: string
+  clientName: string
+  projectName: string
+  status: 'open' | 'accepted' | 'expired'
+  totalAmount: number // cents
+  validUntil: string
+  createdAt: string
 }
 
 export type ActivityEventRow = {
@@ -127,6 +140,7 @@ export type RosterData = {
   participants: ParticipantRow[]
   pickupOrders: PickupOrderRow[]
   orders: OrderRow[]
+  quotes: QuoteRow[]
   vouchers: VoucherRow[]
   refundRequests: RefundRequestRow[]
   activityEvents: ActivityEventRow[]

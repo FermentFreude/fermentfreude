@@ -7,6 +7,7 @@ import { DashboardView } from './DashboardView'
 import { OrdersView } from './OrdersView'
 import { ParticipantsView } from './ParticipantsView'
 import { PickupsView } from './PickupsView'
+import { QuotesView } from './QuotesView'
 import { RefundsView } from './RefundsView'
 import type { RosterData } from './types'
 import { VouchersView } from './VouchersView'
@@ -21,6 +22,7 @@ type Section =
   | 'pickups'
   | 'vouchers'
   | 'orders'
+  | 'quotes'
   | 'refunds'
   | 'activity'
 
@@ -91,6 +93,17 @@ const ORDERS_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
         <path d="M9 2 6 7v13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7l-3-5" />
         <path d="M6 7h12" />
         <path d="M9 12a3 3 0 0 0 6 0" />
+      </svg>
+    ),
+  },
+  {
+    id: 'quotes',
+    label: 'Angebote',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="M9 15h6" /><path d="M9 11h1" />
       </svg>
     ),
   },
@@ -300,7 +313,8 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
         {section === 'vouchers' && (
           <VouchersView vouchers={data.vouchers} onRefresh={refresh} />
         )}
-        {section === 'orders' && <OrdersView orders={data.orders} />}
+        {section === 'orders' && <OrdersView orders={data.orders} onRefresh={refresh} />}
+        {section === 'quotes' && <QuotesView quotes={data.quotes} onRefresh={refresh} />}
         {section === 'refunds' && (
           <RefundsView refundRequests={data.refundRequests} onRefresh={refresh} />
         )}

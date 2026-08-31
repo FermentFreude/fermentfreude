@@ -288,6 +288,32 @@ export const plugins: Plugin[] = [
             },
           },
           {
+            name: 'paymentMethod',
+            type: 'select',
+            label: 'Payment Method',
+            defaultValue: 'stripe',
+            options: [
+              { label: 'Stripe (online checkout)', value: 'stripe' },
+              { label: 'Manuell (Banküberweisung, telefonisch, etc.)', value: 'manual' },
+            ],
+            admin: {
+              description:
+                'Determines the invoice series: stripe orders get WEB-YYYY-NNNN, manually-created orders get MAN-YYYY-NNNN.',
+              position: 'sidebar',
+            },
+          },
+          {
+            name: 'referenceNote',
+            type: 'text',
+            label: 'Reference Note',
+            admin: {
+              description:
+                'Freeform reference for manually-created orders (e.g. "Firmenevent August"). Shown as REFERENZ / BESTELLNUMMER on the Rechnung MAN PDF.',
+              position: 'sidebar',
+              condition: (data) => data?.paymentMethod === 'manual',
+            },
+          },
+          {
             name: 'pickupDate',
             type: 'text',
             label: 'Pickup Date',
