@@ -8,6 +8,7 @@
  *
  * Run: pnpm patch:shop-sync
  */
+// @ts-expect-error — dotenv types not resolved via package.json exports
 import { config as dotenvConfig } from 'dotenv'
 dotenvConfig()
 

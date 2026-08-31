@@ -19,16 +19,13 @@ import { LanguageToggle } from './LanguageToggle'
 import { NavDropdown } from './NavDropdown'
 import { UserMenu } from './UserMenu'
 import { getDefaultDropdownKey, getDefaultDropdowns, getDefaultNavItems } from './nav-defaults'
-import type { NavWorkshopItem } from '@/utilities/mergeWorkshopNavDropdown'
-import { withDynamicWorkshopLinks } from '@/utilities/mergeWorkshopNavDropdown'
 
 type Props = {
   header: Header
   locale: 'de' | 'en'
-  navWorkshops: NavWorkshopItem[]
 }
 
-export function HeaderClient({ header, locale, navWorkshops }: Props) {
+export function HeaderClient({ header, locale }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
@@ -152,7 +149,7 @@ export function HeaderClient({ header, locale, navWorkshops }: Props) {
         const cmsDropdownItems = item.dropdownItems
         const defaultKey = getDefaultDropdownKey(label, url)
 
-        const dropdownItems = withDynamicWorkshopLinks(
+        const dropdownItems =
           cmsDropdownItems && cmsDropdownItems.length > 0
             ? cmsDropdownItems.map((dropdownItem) => ({
                 ...dropdownItem,
@@ -160,10 +157,7 @@ export function HeaderClient({ header, locale, navWorkshops }: Props) {
               }))
             : defaultKey
               ? defaultDropdowns[defaultKey]
-              : null,
-          navWorkshops,
-          defaultKey,
-        )
+              : null
 
         return { id: item.id, label, url, link: item.link, dropdownItems, defaultKey }
       })
@@ -172,11 +166,7 @@ export function HeaderClient({ header, locale, navWorkshops }: Props) {
         label: item.label,
         url: item.url,
         link: null,
-        dropdownItems: withDynamicWorkshopLinks(
-          item.dropdownItems || null,
-          navWorkshops,
-          item.dropdownKey || null,
-        ),
+        dropdownItems: item.dropdownItems || null,
         defaultKey: item.dropdownKey || null,
       }))
 
@@ -326,7 +316,6 @@ export function HeaderClient({ header, locale, navWorkshops }: Props) {
           setIsActive={setIsMenuActive}
           headerHeight={headerHeight}
           locale={locale}
-          navWorkshops={navWorkshops}
         />
       </Suspense>
     </>

@@ -4,6 +4,7 @@
  *
  * Run: pnpm patch:shop-images
  */
+// @ts-expect-error — dotenv types not resolved via package.json exports
 import { config as dotenvConfig } from 'dotenv'
 dotenvConfig()
 

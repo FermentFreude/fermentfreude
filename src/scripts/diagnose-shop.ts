@@ -1,6 +1,7 @@
 /**
  * Diagnose shop page CMS state — run: pnpm tsx src/scripts/diagnose-shop.ts
  */
+// @ts-expect-error — dotenv types not resolved via package.json exports
 import { config as dotenvConfig } from 'dotenv'
 dotenvConfig()
 
@@ -56,7 +57,7 @@ async function main() {
   console.log('page id', doc.id, 'layout length', doc.layout?.length)
 
   for (const b of doc.layout || []) {
-    const block = b as Record<string, unknown>
+    const block = b as unknown as Record<string, unknown>
     if (!['shopHero', 'featuredProductCards', 'shopProductList'].includes(String(block.blockType))) {
       continue
     }

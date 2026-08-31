@@ -2,6 +2,7 @@
  * Force-fix Berglinsen (+ Käfer packaging) galleries and verify R2 URLs.
  * Run: pnpm exec tsx src/scripts/diagnose-shop-images.ts
  */
+// @ts-expect-error — dotenv types not resolved via package.json exports
 import { config as dotenvConfig } from 'dotenv'
 dotenvConfig()
 
