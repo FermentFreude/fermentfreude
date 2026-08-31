@@ -104,7 +104,7 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
               label: 'Kurzbeschreibung / Short Description',
               admin: {
                 description:
-                  'Ein kurzer Satz für die Produktseite unter dem Titel (max. 2–3 Zeilen). / A short sentence displayed below the title on the product page.',
+                  'Kurzer Text unter dem Titel (max. 2–3 Zeilen). Bei saisonalem Kimchi: hier oder im Titel die aktuelle Variante nennen. / Short text under the title. For seasonal Kimchi, name the current variant here or in the title.',
               },
             },
             {
@@ -340,7 +340,18 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
               localized: true,
               label: 'Zutaten / Ingredients',
               admin: {
-                description: 'Zutatenliste für das Etikett und die Produktseite.',
+                description:
+                  'Zutatenliste für Etikett und Shop. Für saisonales Kimchi: bei jeder neuen Variante Titel + diese Zutatenliste aktualisieren (gleiches Produkt, neuer Name). / Ingredient list for label and shop. For seasonal Kimchi: update title + this list whenever the variant changes (same product record, new name).',
+              },
+            },
+            {
+              name: 'isSeasonal',
+              type: 'checkbox',
+              label: 'Saisonale Variante / Seasonal Variant',
+              defaultValue: false,
+              admin: {
+                description:
+                  'Aktivieren für Kimchi (und ähnliche Produkte). Zeigt die Zutatenliste prominent im Shop und erinnert daran, Titel + Zutaten bei jeder neuen Charge zu aktualisieren. Das Produktbild darf als Beispielbild bleiben. / Enable for Kimchi. Shows ingredients prominently in the shop and reminds editors to update title + ingredients each batch. Keep the image as a typical example if needed.',
               },
             },
             {

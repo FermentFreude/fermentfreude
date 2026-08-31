@@ -395,7 +395,7 @@ export interface Product {
    */
   productType: 'jarred' | 'fresh' | 'bottled' | 'workshop' | 'digital-course';
   /**
-   * Ein kurzer Satz für die Produktseite unter dem Titel (max. 2–3 Zeilen). / A short sentence displayed below the title on the product page.
+   * Kurzer Text unter dem Titel (max. 2–3 Zeilen). Bei saisonalem Kimchi: hier oder im Titel die aktuelle Variante nennen. / Short text under the title. For seasonal Kimchi, name the current variant here or in the title.
    */
   shortDescription?: string | null;
   /**
@@ -519,9 +519,13 @@ export interface Product {
    */
   unitSize?: string | null;
   /**
-   * Zutatenliste für das Etikett und die Produktseite.
+   * Zutatenliste für Etikett und Shop. Für saisonales Kimchi: bei jeder neuen Variante Titel + diese Zutatenliste aktualisieren (gleiches Produkt, neuer Name). / Ingredient list for label and shop. For seasonal Kimchi: update title + this list whenever the variant changes (same product record, new name).
    */
   ingredients?: string | null;
+  /**
+   * Aktivieren für Kimchi (und ähnliche Produkte). Zeigt die Zutatenliste prominent im Shop und erinnert daran, Titel + Zutaten bei jeder neuen Charge zu aktualisieren. Das Produktbild darf als Beispielbild bleiben. / Enable for Kimchi. Shows ingredients prominently in the shop and reminds editors to update title + ingredients each batch. Keep the image as a typical example if needed.
+   */
+  isSeasonal?: boolean | null;
   /**
    * z.B. "Enthält Soja" / "Contains soy"
    */
@@ -933,6 +937,7 @@ export interface Page {
         | OnlineCourseSliderBlock
         | ProductSliderBlock
         | FeaturedProductCardsBlock
+        | ShopAutomatenBlock
         | ShopHeroBlock
         | ShopProductGridBlock
         | ShopProductListBlock
@@ -3312,37 +3317,37 @@ export interface FeaturedProductCardsBlock {
    */
   visible?: boolean | null;
   /**
-   * Main heading above the cards (e.g. "Unsere Bestseller" / "Our Bestsellers").
+   * Shown first and largest — FermentFreude hero product (Käferbohnentempeh).
+   */
+  bannerProduct?: (string | null) | Product;
+  /**
+   * Hero card accent color. Default: #403c39.
+   */
+  bannerColor?: string | null;
+  /**
+   * Optional heading above products (e.g. "Weitere Produkte"). Avoid "Bestseller" — Käfer is already the hero above, so this section is only the other products.
    */
   heading?: string | null;
   /**
-   * Short intro text below the heading.
+   * Short intro text below the heading. Leave empty to keep the layout calm.
    */
   subheading?: string | null;
   /**
-   * Select up to 3 products to display as large feature cards. These appear in a 3-column row.
+   * Berglinsentempeh + Kimchi (seasonal). If the hero product is also selected here, it is shown only once in the hero. Prefer 2 supporting products when a hero is set.
    */
-  products: (string | Product)[];
+  products?: (string | Product)[] | null;
   /**
-   * Optional accent colors for each card. Leave empty for defaults (olive-green, warm-gold, earthy-brown).
+   * Optional accent colors for each supporting card. Leave empty for defaults.
    */
   cardColors?:
     | {
         /**
-         * e.g. #4b6043, #b8860b, #8b4513
+         * e.g. #4b6043, #403c39
          */
         color?: string | null;
         id?: string | null;
       }[]
     | null;
-  /**
-   * A single product shown as a wide banner card below the 3-column row (e.g. Tempeh).
-   */
-  bannerProduct?: (string | null) | Product;
-  /**
-   * Banner card accent color. Default: #555954 (muted olive).
-   */
-  bannerColor?: string | null;
   /**
    * Button text on each card (e.g. "Jetzt bestellen" / "Order Now").
    */
@@ -3350,6 +3355,118 @@ export interface FeaturedProductCardsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'featuredProductCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopAutomatenBlock".
+ */
+export interface ShopAutomatenBlock {
+  /**
+   * Toggle off to hide this section without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * e.g. "GRAZ · AVAILABLE 24/7"
+   */
+  eyebrow?: string | null;
+  /**
+   * e.g. "Find our products — anytime."
+   */
+  heading?: string | null;
+  /**
+   * Optional short line under the headline.
+   */
+  body?: string | null;
+  /**
+   * Large editorial photo on desktop (Automat, product, Graz mood). Soft rounded corners on the front.
+   */
+  featuredImage?: (string | null) | Media;
+  /**
+   * Add each Automat as a row (Graz now; more across Styria later). Order = display order (01, 02, …).
+   */
+  locations?:
+    | {
+        /**
+         * Photo of this Automat / location (preferred). Product pack is fine until you have a location photo.
+         */
+        image?: (string | null) | Media;
+        /**
+         * e.g. "Graz", "Leibnitz", "Südsteiermark". Shown above the name.
+         */
+        city?: string | null;
+        /**
+         * e.g. "Automat Pölzl Gemüse & Freunde"
+         */
+        name: string;
+        address: string;
+        /**
+         * Short line of what is in this Automat, e.g. "Käfer · Berglinsen". Leave empty if same everywhere.
+         */
+        products?: string | null;
+        description?: string | null;
+        /**
+         * Shown as badge. Default: "24/7 Vending Machine".
+         */
+        accessInfo?: string | null;
+        mapsUrl: string;
+        /**
+         * e.g. https://poelzl.at/ — leave empty to hide the website link.
+         */
+        websiteUrl?: string | null;
+        /**
+         * Kept for older content. Automaten section uses Automat only.
+         */
+        kind?: ('automat' | 'restaurant') | null;
+        /**
+         * Fallback if description is empty.
+         */
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. "Open in Maps" / "In Maps öffnen"
+   */
+  mapsLabel?: string | null;
+  /**
+   * e.g. "Route teilen" / "Share route"
+   */
+  shareLabel?: string | null;
+  /**
+   * e.g. "Zur Website" / "Visit website"
+   */
+  websiteLabel?: string | null;
+  /**
+   * Toggle off to hide the Wildmoser / restaurant tip without deleting the text.
+   */
+  tipVisible?: boolean | null;
+  /**
+   * Photo of the restaurant (e.g. Wildmoser facade). Optional.
+   */
+  tipImage?: (string | null) | Media;
+  /**
+   * e.g. "Wildmoser"
+   */
+  tipName?: string | null;
+  /**
+   * Subtle note under the cards (e.g. Wildmoser). Leave empty to hide. Only restaurants / extras — not Automaten.
+   */
+  tipText?: string | null;
+  /**
+   * Optional link for the insider tip (e.g. Wildmoser).
+   */
+  tipMapsUrl?: string | null;
+  /**
+   * e.g. https://www.wildmoser-graz.at/
+   */
+  tipWebsiteUrl?: string | null;
+  pullQuote?: string | null;
+  locationName?: string | null;
+  locationAddress?: string | null;
+  mapsUrl?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'shopAutomaten';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3361,61 +3478,68 @@ export interface ShopHeroBlock {
    */
   visible?: boolean | null;
   /**
-   * Single main headline for the hero section (e.g. "Unsere handgemachten Produkte aus unserem Pick-Up Shop").
+   * Hero product at the top of /shop. Title, price, description and sold-out come from this product. Packaging shots belong on the product detail page.
    */
-  heroTitle: string;
+  heroProduct?: (string | null) | Product;
   /**
-   * Price shown below the title (e.g. "ab €8,50"). Leave empty to hide.
+   * Full-bleed plated photo behind the hero. Leave empty to use the default Käfer photo. Prefer a prepared/plated shot (not packaging).
    */
-  heroPrice?: string | null;
+  heroImage?: (string | null) | Media;
   /**
-   * e.g. "Jetzt bestellen"
+   * Legacy field — kept for older layouts. Default: #403c39.
    */
-  ctaPrimaryLabel?: string | null;
+  heroPanelColor?: string | null;
   /**
-   * e.g. "/shop#products"
+   * Three short highlights under the hero (icons + text). Leave empty to show the default Graz / pickup / fresh lines.
    */
-  ctaPrimaryUrl?: string | null;
-  /**
-   * e.g. "Mehr erfahren"
-   */
-  ctaSecondaryLabel?: string | null;
-  /**
-   * e.g. "/fermentation"
-   */
-  ctaSecondaryUrl?: string | null;
-  /**
-   * Product cards for the scrolling carousel. Each card has an image, category label, and link to product detail.
-   */
-  slides?:
+  trustItems?:
     | {
         /**
-         * Product photo (portrait ratio, ~860×1044px).
+         * Icon shown in the gold circle.
          */
-        image?: (string | null) | Media;
+        icon: 'hand' | 'mapPin' | 'leaf';
         /**
-         * Label shown vertically on the card (e.g. "Tempeh", "Kimchi").
+         * e.g. "Handgemacht in Graz" / "Handmade in Graz"
          */
-        categoryLabel: string;
-        /**
-         * URL the arrow button links to (e.g. "/shop/tempeh").
-         */
-        detailUrl?: string | null;
+        label: string;
         id?: string | null;
       }[]
     | null;
   /**
-   * Small bold text at the bottom (e.g. "Fermentierte Lebensmittel, mit Sorgfalt hergestellt.").
+   * Small line above the hero product (e.g. pickup shop intro). Leave empty to keep focus on the product.
+   */
+  heroTitle?: string | null;
+  /**
+   * Overrides product CTA (e.g. "Jetzt bestellen")
+   */
+  ctaPrimaryLabel?: string | null;
+  /**
+   * Leave empty to link to the hero product page.
+   */
+  ctaPrimaryUrl?: string | null;
+  /**
+   * e.g. "Fermentierte Lebensmittel, mit Sorgfalt hergestellt."
    */
   bottomTagline?: string | null;
   /**
-   * Secondary line below the tagline (e.g. "Abholung in Berlin — jede Woche frisch.").
+   * e.g. "Abholung in Graz — jede Woche frisch."
    */
   bottomSubtitle?: string | null;
   /**
-   * Optional note about delivery plans (e.g. "Lieferung in Planung — für garantierte Frische.").
+   * Optional delivery note under the pickup lines.
    */
   bottomDisclaimer?: string | null;
+  /**
+   * Legacy jar slider — unused. Leave empty.
+   */
+  slides?:
+    | {
+        image?: (string | null) | Media;
+        categoryLabel?: string | null;
+        detailUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'shopHero';
@@ -5708,6 +5832,7 @@ export interface PagesSelect<T extends boolean = true> {
         onlineCourseSlider?: T | OnlineCourseSliderBlockSelect<T>;
         productSlider?: T | ProductSliderBlockSelect<T>;
         featuredProductCards?: T | FeaturedProductCardsBlockSelect<T>;
+        shopAutomaten?: T | ShopAutomatenBlockSelect<T>;
         shopHero?: T | ShopHeroBlockSelect<T>;
         shopProductGrid?: T | ShopProductGridBlockSelect<T>;
         shopProductList?: T | ShopProductListBlockSelect<T>;
@@ -6647,6 +6772,8 @@ export interface ProductSliderBlockSelect<T extends boolean = true> {
  */
 export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
   visible?: T;
+  bannerProduct?: T;
+  bannerColor?: T;
   heading?: T;
   subheading?: T;
   products?: T;
@@ -6656,9 +6783,49 @@ export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
         color?: T;
         id?: T;
       };
-  bannerProduct?: T;
-  bannerColor?: T;
   ctaLabel?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopAutomatenBlock_select".
+ */
+export interface ShopAutomatenBlockSelect<T extends boolean = true> {
+  visible?: T;
+  eyebrow?: T;
+  heading?: T;
+  body?: T;
+  featuredImage?: T;
+  locations?:
+    | T
+    | {
+        image?: T;
+        city?: T;
+        name?: T;
+        address?: T;
+        products?: T;
+        description?: T;
+        accessInfo?: T;
+        mapsUrl?: T;
+        websiteUrl?: T;
+        kind?: T;
+        note?: T;
+        id?: T;
+      };
+  mapsLabel?: T;
+  shareLabel?: T;
+  websiteLabel?: T;
+  tipVisible?: T;
+  tipImage?: T;
+  tipName?: T;
+  tipText?: T;
+  tipMapsUrl?: T;
+  tipWebsiteUrl?: T;
+  pullQuote?: T;
+  locationName?: T;
+  locationAddress?: T;
+  mapsUrl?: T;
   id?: T;
   blockName?: T;
 }
@@ -6668,12 +6835,22 @@ export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
  */
 export interface ShopHeroBlockSelect<T extends boolean = true> {
   visible?: T;
+  heroProduct?: T;
+  heroImage?: T;
+  heroPanelColor?: T;
+  trustItems?:
+    | T
+    | {
+        icon?: T;
+        label?: T;
+        id?: T;
+      };
   heroTitle?: T;
-  heroPrice?: T;
   ctaPrimaryLabel?: T;
   ctaPrimaryUrl?: T;
-  ctaSecondaryLabel?: T;
-  ctaSecondaryUrl?: T;
+  bottomTagline?: T;
+  bottomSubtitle?: T;
+  bottomDisclaimer?: T;
   slides?:
     | T
     | {
@@ -6682,9 +6859,6 @@ export interface ShopHeroBlockSelect<T extends boolean = true> {
         detailUrl?: T;
         id?: T;
       };
-  bottomTagline?: T;
-  bottomSubtitle?: T;
-  bottomDisclaimer?: T;
   id?: T;
   blockName?: T;
 }
@@ -7783,6 +7957,7 @@ export interface ProductsSelect<T extends boolean = true> {
   userInstructions?: T;
   unitSize?: T;
   ingredients?: T;
+  isSeasonal?: T;
   allergens?: T;
   storageInstructions?: T;
   shelfLife?: T;

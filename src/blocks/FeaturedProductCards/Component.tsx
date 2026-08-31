@@ -8,19 +8,15 @@ import React from 'react'
 
 import type { FeaturedProductCardsBlock, Media as MediaType, Product } from '@/payload-types'
 
-/* ── Helpers ────────────────────────────────────────────── */
+const DEFAULT_CARD_COLORS = ['#5C6B54', '#403c39']
 
 function isMediaObject(val: unknown): val is MediaType {
   return typeof val === 'object' && val !== null && 'url' in val
 }
 
-function getFirstImage(product: Product): MediaType | null {
-  const gallery = product.gallery
-  if (gallery?.length) {
-    const first = gallery[0]?.image
-    if (isMediaObject(first)) return first
-  }
-  return null
+function getProductImage(product: Product): MediaType | null {
+  const first = product.gallery?.[0]?.image
+  return isMediaObject(first) ? first : null
 }
 
 function formatPrice(price: number | null | undefined): string {
@@ -28,71 +24,34 @@ function formatPrice(price: number | null | undefined): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(price / 100)
 }
 
-function getPrimaryBadge(product: Product): { label: string; icon: string } | null {
-  const badges = product.badges
-  if (badges && badges.length > 0) {
-    const badgeMap: Record<string, { label: string; icon: string }> = {
-      vegan: { label: 'Vegan', icon: '🌱' },
-      vegetarian: { label: 'Vegetarisch', icon: '🥬' },
-      handmade: { label: 'Handmade', icon: '✋' },
-      organic: { label: 'Bio', icon: '🌿' },
-      'gluten-free': { label: 'Glutenfrei', icon: '🌾' },
-      probiotic: { label: 'Probiotisch', icon: '🦠' },
-      fermented: { label: 'Fermentiert', icon: '⚗️' },
-      'no-additives': { label: 'Ohne Zusätze', icon: '✅' },
-      refrigerated: { label: 'Kühlware', icon: '❄️' },
-    }
-    const first = badges[0]
-    if (first && badgeMap[first]) return badgeMap[first]
-  }
-  return null
-}
-
-/* ── Localization helper ──────────────────────────────────────── */
-function t(key: string, locale: 'de' | 'en'): string {
-  const translations: Record<string, Record<'de' | 'en', string>> = {
-    'Sold Out': { de: 'Ausverkauft', en: 'Sold Out' },
-    'Order Now': { de: 'Jetzt bestellen', en: 'Order Now' },
-  }
-  return translations[key]?.[locale] || key
-}
-
-/* ── Brand-tone card colors ─────────────────────────────── */
-const DEFAULT_COLORS = [
-  'var(--ff-olive, #4b4f4a)',
-  'var(--ff-charcoal-dark, #403c39)',
-  'var(--ff-near-black, #1a1a1a)',
-]
-const DEFAULT_BANNER_COLOR = 'var(--ff-olive-dark, #3a3e3a)'
-
-/* ── Component ──────────────────────────────────────────── */
-
+/**
+ * Supporting products only (Berglinsen + Kimchi) — colored card style.
+ * Käfer stays in the shop hero so this section is not repetitive.
+ */
 export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> = async (props) => {
-  const {
-    visible,
-    heading,
-    subheading,
-    products: selectedProducts,
-    cardColors,
-    bannerProduct: bannerRef,
-    bannerColor,
-    ctaLabel,
-  } = props
-
+  const { visible, products: selectedProducts, ctaLabel, heading, subheading, cardColors } = props
   if (visible === false) return null
 
   const locale = (await getLocale()) as 'de' | 'en'
-  const rawCta = ctaLabel?.trim()
-  const normalizedCta = rawCta?.toLowerCase()
-  const resolvedCta =
-    locale === 'de' && (!rawCta || normalizedCta === 'order now' || normalizedCta === 'order')
-      ? t('Order Now', locale)
-      : rawCta || t('Order Now', locale)
   const payload = await getPayload({ config: configPromise })
 
-  /* Fetch the 3 card products */
+  const resolvedHeading =
+    heading?.trim() || (locale === 'de' ? 'Weitere Produkte' : 'More products')
+  const resolvedSubheading =
+    subheading?.trim() ||
+    (locale === 'de'
+      ? 'Handgemachte Fermente – natürlich, voller Leben und Geschmack'
+      : 'Handmade ferments – natural, full of life and flavour')
+
+  const rawCta = ctaLabel?.trim()
+  const resolvedCta =
+    locale === 'de' &&
+    (!rawCta || rawCta.toLowerCase() === 'order now' || rawCta.toLowerCase() === 'order')
+      ? 'Jetzt bestellen'
+      : rawCta || (locale === 'de' ? 'Jetzt bestellen' : 'Order now')
+
   let products: Product[] = []
-  if (selectedProducts && Array.isArray(selectedProducts) && selectedProducts.length > 0) {
+  if (selectedProducts?.length) {
     const ids = selectedProducts.map((p) => (typeof p === 'object' && p !== null ? p.id : p))
     const result = await payload.find({
       collection: 'products',
@@ -105,260 +64,116 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
     products = ids.map((id) => result.docs.find((d) => d.id === id)).filter(Boolean) as Product[]
   }
 
-  /* Fetch banner product */
-  let banner: Product | null = null
-  if (bannerRef) {
-    const bannerId = typeof bannerRef === 'object' ? bannerRef.id : bannerRef
-    const result = await payload.findByID({
+  if (products.length === 0) {
+    const fallback = await payload.find({
       collection: 'products',
-      id: bannerId,
+      where: {
+        slug: { in: ['berglinsen-tempeh', 'classic-kimchi'] },
+        _status: { equals: 'published' },
+      },
       locale,
       depth: 2,
+      limit: 2,
       overrideAccess: true,
     })
-    if (result) banner = result as Product
+    const bySlug = new Map(fallback.docs.map((d) => [d.slug, d]))
+    products = ['berglinsen-tempeh', 'classic-kimchi']
+      .map((s) => bySlug.get(s))
+      .filter(Boolean) as Product[]
   }
 
-  if (products.length === 0 && !banner) return null
+  products = products.filter((p) => p.slug !== 'kaeferbohnen-tempeh').slice(0, 2)
+  if (products.length === 0) return null
+
+  const colors = products.map((_, i) => {
+    const fromCms = cardColors?.[i]?.color?.trim()
+    return fromCms || DEFAULT_CARD_COLORS[i % DEFAULT_CARD_COLORS.length]
+  })
 
   return (
-    <section
-      id="bestsellers"
-      className="section-padding-md"
-      style={{ backgroundColor: 'var(--ff-cream, #fffef9)' }}
-    >
+    <section id="products" className="bg-white section-padding-md">
       <div className="container mx-auto container-padding">
-        {/* Section header */}
-        {(heading || subheading) && (
-          <div className="text-center mb-1">
-            {heading && (
-              <h2
-                className="font-display text-section-heading font-bold tracking-tight"
-                style={{ color: 'var(--ff-near-black)' }}
+        <div className="mb-12 md:mb-14 mx-auto max-w-2xl text-center">
+          <h2 className="font-display text-section-heading font-bold text-ff-near-black tracking-tight">
+            {resolvedHeading}
+          </h2>
+          {resolvedSubheading && (
+            <p className="mt-3 text-body text-ff-gray-text leading-relaxed">{resolvedSubheading}</p>
+          )}
+        </div>
+
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 md:grid-cols-2 md:gap-8 lg:gap-12">
+          {products.map((product, index) => {
+            const image = getProductImage(product)
+            const soldOut = isProductSoldOut(product)
+            const isSeasonal = Boolean(product.isSeasonal)
+            const bg = colors[index]
+
+            return (
+              <Link
+                key={product.id}
+                href={`/products/${product.slug}`}
+                className="group relative flex flex-col no-underline pt-10 sm:pt-12"
               >
-                {heading}
-              </h2>
-            )}
-            {subheading && (
-              <p
-                className="mt-3 text-base max-w-xl mx-auto"
-                style={{ color: 'var(--ff-gray-text)' }}
-              >
-                {subheading}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* 3-column product cards — compact with half-image overflow */}
-        {products.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
-            {products.map((product, i) => {
-              const image = getFirstImage(product)
-              const price = product.priceInEUR
-              const _badge = getPrimaryBadge(product)
-              const cardColor = cardColors?.[i]?.color || DEFAULT_COLORS[i % DEFAULT_COLORS.length]
-              const isTempeh =
-                product.slug?.toLowerCase().includes('tempeh') ||
-                String(product.title).toLowerCase().includes('tempeh')
-
-              return (
-                <Link
-                  key={product.id}
-                  href={`/products/${product.slug}`}
-                  className="group relative flex flex-col no-underline transition-transform duration-300 hover:-translate-y-1"
-                >
-                  {/* Sold Out Badge */}
-                  {isProductSoldOut(product) && (
-                    <div className="absolute top-3 right-3 z-20">
-                      <span className="inline-block bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
-                        {t('Sold Out', locale)}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Floating image — half above the card */}
-                  <div className="relative z-10 flex justify-center -mb-28 md:-mb-32">
-                    {image ? (
-                      <div
-                        className={
-                          isTempeh
-                            ? 'w-64 h-64 md:w-80 md:h-80 relative'
-                            : 'w-56 h-56 md:w-64 md:h-64 relative'
-                        }
-                      >
-                        <Media
-                          resource={image}
-                          imgClassName="w-full h-full object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-105"
-                          className="w-full h-full"
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className={
-                          isTempeh
-                            ? 'w-64 h-64 md:w-80 md:h-80 rounded-2xl bg-white/10'
-                            : 'w-56 h-56 md:w-64 md:h-64 rounded-2xl bg-white/10'
-                        }
-                      />
-                    )}
-                  </div>
-
-                  {/* Card body */}
-                  <div
-                    className="flex flex-col flex-1 rounded-2xl pt-32 md:pt-36 px-5 pb-5"
-                    style={{ backgroundColor: cardColor }}
-                  >
-                    {/* Unit size */}
-                    {product.unitSize && (
-                      <span className="text-caption font-medium text-white italic mb-1">
-                        {product.unitSize}
-                      </span>
-                    )}
-
-                    {/* Title */}
-                    <h3 className="font-display text-lg md:text-xl font-bold text-white leading-tight mb-1.5">
-                      {product.title}
-                    </h3>
-
-                    {/* Short description */}
-                    {product.shortDescription && (
-                      <p className="text-caption font-medium text-white leading-relaxed mb-4 line-clamp-2">
-                        {product.shortDescription}
-                      </p>
-                    )}
-
-                    {/* Price + CTA at bottom */}
-                    <div className="mt-auto flex items-center justify-between pt-3 border-t border-white/15">
-                      {price != null && price > 0 && (
-                        <span className="text-lg font-bold text-white font-display">
-                          {formatPrice(price)}
-                        </span>
-                      )}
-                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                        {resolvedCta}
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Banner card */}
-        {banner && (
-          <div className="mt-12 lg:mt-16">
-            <Link
-              href={`/products/${banner.slug}`}
-              className="group relative flex flex-col md:flex-row rounded-2xl overflow-visible no-underline transition-transform duration-300 hover:-translate-y-1"
-              style={{ backgroundColor: bannerColor || DEFAULT_BANNER_COLOR }}
-            >
-              {/* Banner image */}
-              <div className="relative w-full md:w-2/5 flex items-center justify-center p-6 md:p-10">
-                {(() => {
-                  const bannerBadge = getPrimaryBadge(banner)
-                  return bannerBadge ? (
-                    <div className="absolute top-4 left-4 z-10 w-11 h-11 rounded-full bg-white shadow-md flex flex-col items-center justify-center">
-                      <span className="text-sm leading-none">{bannerBadge.icon}</span>
-                      <span
-                        className="text-[6px] font-bold uppercase tracking-wide mt-0.5"
-                        style={{ color: 'var(--ff-near-black)' }}
-                      >
-                        {bannerBadge.label}
-                      </span>
-                    </div>
-                  ) : null
-                })()}
-
-                {(() => {
-                  const bannerImage = getFirstImage(banner)
-                  return bannerImage ? (
-                    <div className="w-48 h-48 md:w-60 md:h-60 relative md:-mt-12">
-                      <Media
-                        resource={bannerImage}
-                        imgClassName="w-full h-full object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-105"
-                        className="w-full h-full"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-48 h-48 md:w-60 md:h-60 rounded-2xl bg-white/10" />
-                  )
-                })()}
-              </div>
-
-              {/* Banner text content */}
-              <div className="flex flex-col justify-center flex-1 px-6 md:px-10 pb-6 md:py-8">
-                {banner.unitSize && (
-                  <span className="text-caption font-medium text-white/50 italic mb-1">
-                    {banner.unitSize}
-                  </span>
-                )}
-
-                <h3 className="font-display text-subheading font-bold text-white leading-tight mb-2">
-                  {banner.title}
-                </h3>
-
-                {banner.shortDescription && (
-                  <p className="text-body-sm text-white/70 leading-relaxed mb-4 max-w-md">
-                    {banner.shortDescription}
-                  </p>
-                )}
-
-                {/* Benefits as pills */}
-                {banner.benefits && banner.benefits.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mb-5">
-                    {banner.benefits.map((b, i) => (
-                      <span
-                        key={b.id || i}
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-white/15 text-white/85"
-                      >
-                        <span className="w-1 h-1 rounded-full bg-white/50" />
-                        {b.label}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Price + CTA */}
-                <div className="flex items-center gap-5">
-                  {banner.priceInEUR != null && banner.priceInEUR > 0 && (
-                    <span className="text-xl md:text-2xl font-bold text-white font-display">
-                      {formatPrice(banner.priceInEUR)}
+                {/* Pack floats above the colored card — same layout as the founder mock */}
+                <div className="relative z-10 mx-auto -mb-12 h-48 w-[72%] max-w-[280px] sm:h-56 sm:w-[68%]">
+                  {soldOut && (
+                    <span className="absolute top-0 right-0 z-20 rounded-full bg-ff-near-black px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                      {locale === 'de' ? 'Ausverkauft' : 'Sold out'}
                     </span>
                   )}
-                  <span className="inline-flex items-center gap-1.5 border border-white/30 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-white transition-all duration-300 group-hover:bg-white group-hover:text-ff-near-black">
-                    {resolvedCta}
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </span>
+                  {isSeasonal && !soldOut && (
+                    <span className="absolute top-0 right-0 z-20 rounded-full bg-ff-gold px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-ff-near-black">
+                      {locale === 'de' ? 'Saisonal' : 'Seasonal'}
+                    </span>
+                  )}
+                  {image ? (
+                    <Media
+                      fill
+                      resource={image}
+                      imgClassName="object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.32)] transition-transform duration-500 group-hover:scale-[1.03]"
+                      className="absolute inset-0"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 rounded-lg bg-ff-warm-gray" />
+                  )}
                 </div>
-              </div>
-            </Link>
-          </div>
-        )}
+
+                <div
+                  className="flex flex-1 flex-col rounded-2xl px-6 pb-7 pt-16 sm:px-8 sm:pb-8 sm:pt-[4.5rem]"
+                  style={{ backgroundColor: bg }}
+                >
+                  {product.unitSize && (
+                    <span className="mb-2 text-caption font-medium text-white/75">
+                      {product.unitSize}
+                    </span>
+                  )}
+                  <h3 className="mb-3 font-display text-subheading font-bold leading-snug text-white">
+                    {product.title}
+                  </h3>
+                  {product.shortDescription && (
+                    <p className="mb-6 line-clamp-2 text-body-sm leading-relaxed text-white/80">
+                      {product.shortDescription}
+                    </p>
+                  )}
+
+                  <div className="mt-auto flex items-end justify-between gap-4 pt-2">
+                    {product.priceInEUR != null && product.priceInEUR > 0 ? (
+                      <span className="font-display text-xl font-bold tabular-nums text-white">
+                        {formatPrice(product.priceInEUR)}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
+                    <span className="font-display text-[11px] font-bold uppercase tracking-[0.12em] text-white/95 transition-opacity group-hover:opacity-80">
+                      {resolvedCta} →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
       </div>
     </section>
   )

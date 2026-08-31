@@ -19,29 +19,25 @@ import type { Payload } from 'payload'
 import { appendBlockToPage, findProductBySlug } from './_helpers'
 
 // ── CONFIGURE THESE ───────────────────────────────────────────────────────────
-// Product slugs for the 3 featured cards (column grid, left → right)
-const CARD_SLUGS = [
-  'fermentierte-curryzwiebel', // Card 1 (left)
-  'classic-kimchi', // Card 2 (middle)
-  'fermentierte-rote-rueben', // Card 3 (right)
-]
-// Product slug for the wide banner below the cards (e.g. Tempeh)
+// Hero product (Käferbohnentempeh) — shown first / largest
 const BANNER_SLUG = 'kaeferbohnen-tempeh'
-
-// Card accent colors (hex). Leave empty string to use defaults.
-const CARD_COLORS = [
-  '#4b4f4a', // Card 1 — olive
-  '#403c39', // Card 2 — charcoal
-  '#1a1a1a', // Card 3 — near-black
+// Supporting products only (Berglinsentempeh + seasonal Kimchi)
+const CARD_SLUGS = [
+  'berglinsen-tempeh', // supporting 1
+  'classic-kimchi', // supporting 2 — title/ingredients stay editable in admin
 ]
-const BANNER_COLOR = '#3a3e3a' // muted olive
+
+const CARD_COLORS = [
+  '#4b4f4a', // olive
+  '#555954', // muted olive
+]
+const BANNER_COLOR = '#403c39'
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function migrate(payload: Payload): Promise<void> {
   payload.logger.info('📦 Finding products by slug...')
 
-  // Look up all product IDs by slug (works on any DB — staging or production)
-  const [card1Id, card2Id, card3Id] = await Promise.all(
+  const [card1Id, card2Id] = await Promise.all(
     CARD_SLUGS.map((slug) => findProductBySlug(payload, slug)),
   )
   const bannerId = await findProductBySlug(payload, BANNER_SLUG)
@@ -50,9 +46,9 @@ export async function migrate(payload: Payload): Promise<void> {
 
   const blockDE = {
     visible: true,
-    heading: 'Unsere Bestseller',
-    subheading: 'Handgemacht, fermentiert, voller Leben.',
-    products: [card1Id, card2Id, card3Id].filter(Boolean),
+    heading: 'Unsere Produkte',
+    subheading: 'Drei handgemachte Fermente — frisch aus Graz.',
+    products: [card1Id, card2Id].filter(Boolean),
     cardColors: cardColorArray,
     bannerProduct: bannerId,
     bannerColor: BANNER_COLOR,
@@ -61,8 +57,8 @@ export async function migrate(payload: Payload): Promise<void> {
 
   const blockEN = {
     ...blockDE,
-    heading: 'Our Bestsellers',
-    subheading: 'Handcrafted, fermented, full of life.',
+    heading: 'Our Products',
+    subheading: 'Three handcrafted ferments — fresh from Graz.',
     ctaLabel: 'Order Now',
   }
 

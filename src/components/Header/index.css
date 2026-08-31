@@ -1,71 +1,82 @@
-/* ── Glassmorphism nav bar ──────────────────────────────────── */
+/* ── Calm brand nav bar ─────────────────────────────────────── */
 .nav-glass {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 [data-theme='dark'] .nav-glass {
-  background: rgba(26, 26, 26, 0.7);
+  background: rgba(26, 26, 26, 0.88);
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* ── Glassmorphism dropdown panel ──────────────────────────── */
+/* ── Dropdown panel ─────────────────────────────────────────── */
 .dropdown-glass {
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: #ffffff;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 12px 40px rgba(26, 26, 26, 0.08);
 }
 
 [data-theme='dark'] .dropdown-glass {
-  background: rgba(23, 23, 23, 0.97);
+  background: rgba(30, 30, 30, 0.97);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.25),
-    0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
 .navLink {
-  overflow: hidden;
+  overflow: visible;
   border-radius: unset;
-  padding: 0;
-  letter-spacing: 0.01em;
+  padding: 0.35rem 0;
+  letter-spacing: 0.04em;
   text-decoration: none;
+  color: var(--ff-charcoal);
+  transition: color 0.2s ease;
 
   &::after {
     content: '';
     position: absolute;
-    bottom: -2px;
-    left: 50%;
+    bottom: 0;
+    left: 0;
     width: 0;
-    height: 2px;
-    background-color: var(--ff-charcoal);
+    height: 1.5px;
+    background-color: var(--ff-gold);
+    transition: width 0.25s ease;
+  }
+
+  [data-theme='dark'] & {
+    color: #e5e5e5;
   }
 
   [data-theme='dark'] &::after {
-    background-color: #e5e5e5;
-    transition:
-      width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-      left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    background-color: var(--ff-gold);
   }
 
   &:hover {
     text-decoration: none;
+    color: var(--ff-near-black);
 
     &::after {
-      left: 0;
       width: 100%;
     }
   }
 
+  [data-theme='dark'] &:hover {
+    color: white;
+  }
+
   &.active {
+    color: var(--ff-near-black);
+
     &::after {
-      left: 0;
       width: 100%;
     }
+  }
+
+  [data-theme='dark'] &.active {
+    color: white;
   }
 }
 
@@ -100,14 +111,13 @@
 }
 
 /* ── Transparent header on home page ────────────────────────── */
-/* Dark mode: full white treatment on transparent */
 [data-theme='dark'] header[data-transparent] .navLink,
 [data-theme='dark'] header[data-transparent] .navLink:hover {
   color: white;
 }
 
 [data-theme='dark'] header[data-transparent] .navLink::after {
-  background-color: white;
+  background-color: var(--ff-gold);
 }
 
 [data-theme='dark'] header[data-transparent] nav button,
@@ -115,7 +125,6 @@
   color: white;
 }
 
-/* Logo — invert to white in dark mode only */
 [data-theme='dark'] header[data-transparent] nav img {
   filter: brightness(0) invert(1);
 }
@@ -124,7 +133,6 @@
   color: white;
 }
 
-/* Hero-requested dark theme: ONLY middle nav links go white */
 header[data-header-theme='dark'] .navLink,
 header[data-header-theme='dark'] .navLink:hover {
   color: white;
@@ -133,4 +141,3 @@ header[data-header-theme='dark'] .navLink:hover {
 header[data-header-theme='dark'] .navLink::after {
   background-color: white;
 }
-

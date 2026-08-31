@@ -1,402 +1,186 @@
-'use client'
+import { getLocale } from '@/utilities/getLocale'
+import { isProductSoldOut } from '@/utilities/productStock'
+import configPromise from '@payload-config'
+import Image from 'next/image'
+import { getPayload } from 'payload'
+import React from 'react'
 
-import { Media } from '@/components/Media'
-import { useLocale } from '@/providers/Locale'
-import dynamic from 'next/dynamic'
-import Link from 'next/link'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import type { Media, Product, ShopHeroBlock } from '@/payload-types'
 
-import type { Media as MediaType, ShopHeroBlock } from '@/payload-types'
+import { ShopHeroActions } from './ShopHeroActions'
+import './shop-hero.css'
 
-const BlobCanvas = dynamic(
-  () => import('@/blocks/FeatureCards/BlobCanvas').then((m) => m.BlobCanvas),
-  { ssr: false },
-)
+/** Fallback plated Käfer hero — used when CMS heroImage is empty */
+const HERO_BG_FALLBACK = '/shop/hero-kaefer.webp'
 
-type Slide = NonNullable<ShopHeroBlock['slides']>[number]
-
-/* ── Translations ──────────────────────────────────────────────── */
-const TRANSLATIONS: Record<string, Record<'de' | 'en', string>> = {
-  scroll: { de: 'Scrollen', en: 'scroll' },
-  'Order Now': { de: 'Jetzt bestellen', en: 'Order Now' },
-  'Learn More': { de: 'Mehr erfahren', en: 'Learn More' },
-}
-
-function t(key: string, locale: 'de' | 'en'): string {
-  return TRANSLATIONS[key]?.[locale] || key
-}
-
-function resolveLocalizedLabel(raw: string | null | undefined, locale: 'de' | 'en', key: string): string {
-  const base = (raw ?? '').trim()
-  if (!base) return t(key, locale)
-
-  const normalized = base.toLowerCase()
-  if (locale === 'de') {
-    if (key === 'Order Now' && (normalized === 'order now' || normalized === 'order')) {
-      return t('Order Now', locale)
-    }
-    if (key === 'Learn More' && normalized === 'learn more') {
-      return t('Learn More', locale)
-    }
-  }
-
-  return base
-}
-
-const DEFAULT_SLIDES: Slide[] = [
-  { id: 'default-1', categoryLabel: 'Tempeh', detailUrl: '/products/kaeferbohnen-tempeh' },
-  { id: 'default-2', categoryLabel: 'Kimchi', detailUrl: '/products/classic-kimchi' },
-  { id: 'default-3', categoryLabel: 'Miso', detailUrl: '/products/fermentierte-rote-rueben' },
-]
-
-function isMediaObject(val: unknown): val is MediaType {
+function isMedia(val: unknown): val is Media {
   return typeof val === 'object' && val !== null && 'url' in val
 }
 
-/* ═══════════════════════════════════════════════════════════════
- *  CardWithButton SVG — identical to ProductSlider
- *  Card background with cutout + gold circular arrow button
- * ═══════════════════════════════════════════════════════════════ */
-function CardWithButton({
-  className,
-  btnHovered,
-  onBtnEnter,
-  onBtnLeave,
-  ariaLabel,
-}: {
-  className?: string
-  btnHovered?: boolean
-  onBtnEnter?: () => void
-  onBtnLeave?: () => void
-  ariaLabel?: string
-}) {
-  const btnColor = btnHovered ? '#E5B765' : '#1a1a1a'
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 328 440"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="none"
-    >
-      {/* Card background with cutout — yellow fill, shadow, no border */}
-      <defs>
-        <filter id="cardShadow" x="-4%" y="-2%" width="110%" height="110%">
-          <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#000000" floodOpacity="0.10" />
-        </filter>
-      </defs>
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M327.018 17.588C327.018 7.874 319.144 0 309.43 0H17.588C7.874 0 0 7.874 0 17.588V421.964C0 431.678 7.874 439.552 17.588 439.552H251.689C257.932 439.552 262.052 432.503 261.028 426.344L259.404 416.564C255.047 390.346 277.37 367.427 303.693 371.089C313.197 372.411 327.018 365.987 327.018 356.392V17.588Z"
-        fill="#e8e8e8"
-        stroke="none"
-        filter="url(#cardShadow)"
-      />
-      {/* Button circle + arrow icon */}
-      <g
-        role="button"
-        aria-label={ariaLabel}
-        style={{ cursor: 'pointer' }}
-        onMouseEnter={onBtnEnter}
-        onMouseLeave={onBtnLeave}
-      >
-        <circle
-          cx="298.44"
-          cy="410.97"
-          r="28.58"
-          fill={btnColor}
-          className="transition-colors duration-200"
-        />
-        <path
-          d="M290 411H307M307 411L300 404M307 411L300 418"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </g>
-    </svg>
-  )
+async function loadKafer(
+  payload: Awaited<ReturnType<typeof getPayload>>,
+  locale: 'de' | 'en',
+  heroRef?: ShopHeroBlock['heroProduct'],
+): Promise<Product | null> {
+  const bySlug = await payload.find({
+    collection: 'products',
+    where: { slug: { equals: 'kaeferbohnen-tempeh' } },
+    locale,
+    depth: 1,
+    limit: 1,
+    overrideAccess: true,
+  })
+  if (bySlug.docs[0]) return bySlug.docs[0] as Product
+
+  if (heroRef) {
+    const id = typeof heroRef === 'object' && heroRef !== null ? heroRef.id : heroRef
+    try {
+      return (await payload.findByID({
+        collection: 'products',
+        id: String(id),
+        locale,
+        depth: 1,
+        overrideAccess: true,
+      })) as Product
+    } catch {
+      return null
+    }
+  }
+  return null
 }
 
-export const ShopHeroComponent: React.FC<ShopHeroBlock> = (props) => {
-  const { locale: currentLocale } = useLocale()
-  const locale = (currentLocale || 'de') as 'de' | 'en'
-  const {
-    visible,
-    heroTitle,
-    heroPrice,
-    ctaPrimaryLabel,
-    ctaPrimaryUrl,
-    ctaSecondaryLabel,
-    ctaSecondaryUrl,
-    slides: cmsSlides,
-    bottomTagline,
-    bottomSubtitle,
-    bottomDisclaimer,
-  } = props
+/**
+ * Shop hero — photo as full background, copy left.
+ * Product fields + heroImage + pickup lines come from CMS.
+ */
+export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
+  if (props.visible === false) return null
 
-  const title = heroTitle ?? 'Our Handmade Products From Our Pick-Up Shop.'
-  const _price = heroPrice ?? 'from €8.50'
-  const primaryLabel = resolveLocalizedLabel(ctaPrimaryLabel, locale, 'Order Now')
-  const primaryUrl = ctaPrimaryUrl ?? '/shop#bestsellers'
-  const secondaryLabel = resolveLocalizedLabel(ctaSecondaryLabel, locale, 'Learn More')
-  const secondaryUrl = ctaSecondaryUrl ?? '/fermentation'
-  const tagline = bottomTagline ?? 'Fermented foods, crafted with care.'
-  const subtitle = bottomSubtitle ?? 'Pickup in Graz — freshly made every week.'
-  const disclaimer = bottomDisclaimer ?? 'Delivery coming soon — to ensure the freshest quality.'
+  const locale = (await getLocale()) as 'de' | 'en'
+  const payload = await getPayload({ config: configPromise })
+  const product = await loadKafer(payload, locale, props.heroProduct)
 
-  const slides = cmsSlides && cmsSlides.length >= 2 ? cmsSlides : DEFAULT_SLIDES
+  const ctaLabel =
+    props.ctaPrimaryLabel?.trim() || (locale === 'de' ? 'Jetzt bestellen' : 'Order now')
+  const pickup =
+    props.bottomSubtitle?.trim() ||
+    (locale === 'de' ? 'Abholung in Graz, jede Woche frisch' : 'Pickup in Graz, fresh every week')
 
-  /* ── Infinite scroll: triple the slides for seamless looping ── */
-  const loopSlides = [...slides, ...slides, ...slides]
+  const title = product?.title || (locale === 'de' ? 'Käferbohnen-Tempeh' : 'Runner Bean Tempeh')
+  const unit = product?.unitSize || (locale === 'de' ? '185g Frischpackung' : '185g fresh pack')
+  const blurb =
+    product?.shortDescription ||
+    (locale === 'de'
+      ? 'Unser Signature-Tempeh aus österreichischen Käferbohnen, handgemacht in Graz.'
+      : 'Our signature tempeh from Austrian runner beans, handmade in Graz.')
+  const price = product?.priceInEUR
+  const href =
+    props.ctaPrimaryUrl?.trim() ||
+    (product?.slug ? `/products/${product.slug}` : '/products/kaeferbohnen-tempeh')
+  const soldOut = product ? isProductSoldOut(product) : false
 
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const isResetting = useRef(false)
-
-  /* Jump to middle set on mount so we can scroll in both directions */
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-    const oneSetWidth = el.scrollWidth / 3
-    el.scrollLeft = oneSetWidth
-  }, [])
-
-  /* On scroll end, silently snap to the middle set for infinite loop */
-  const handleScroll = useCallback(() => {
-    const el = scrollRef.current
-    if (!el || isResetting.current) return
-
-    const oneSetWidth = el.scrollWidth / 3
-
-    if (el.scrollLeft <= 0) {
-      isResetting.current = true
-      el.style.scrollBehavior = 'auto'
-      el.scrollLeft = oneSetWidth
-      el.style.scrollBehavior = ''
-      isResetting.current = false
-    } else if (el.scrollLeft >= oneSetWidth * 2) {
-      isResetting.current = true
-      el.style.scrollBehavior = 'auto'
-      el.scrollLeft = oneSetWidth
-      el.style.scrollBehavior = ''
-      isResetting.current = false
-    }
-  }, [])
-
-  if (visible === false) return null
+  const cmsHero = isMedia(props.heroImage) ? props.heroImage : null
+  const heroSrc = cmsHero?.url?.trim() || HERO_BG_FALLBACK
+  const heroAlt = cmsHero?.alt?.trim() || title
 
   return (
-    <section className="relative w-full overflow-hidden bg-white min-h-dvh md:h-dvh">
-      {/* ── Gold blob ── */}
-      <div className="absolute top-[14%] left-[36%] z-3 hidden md:block pointer-events-auto w-14 h-14">
-        <BlobCanvas
-          color="#E6BE68"
-          radius={20}
-          numPoints={24}
-          className="absolute inset-0 w-full h-full"
+    <section id="shop-hero" className="shop-hero relative w-full overflow-hidden bg-ff-near-black">
+      <div className="relative min-h-[78vh] md:min-h-[85vh]">
+        {/* Full-bleed background photo */}
+        <div className="absolute inset-0">
+          <Image
+            src={heroSrc}
+            alt={heroAlt}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[50%_75%] md:object-[48%_70%]"
+            unoptimized={heroSrc.startsWith('http')}
+          />
+        </div>
+
+        {/* Soft veil — product in center stays visible */}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(90deg, rgba(18,16,15,0.7) 0%, rgba(18,16,15,0.35) 42%, rgba(18,16,15,0.2) 100%)',
+          }}
         />
-      </div>
-
-      {/* ── Dark blob ── */}
-      <div className="absolute top-[8%] right-[6%] z-5 hidden md:block pointer-events-auto w-12 h-12">
-        <BlobCanvas
-          color="#1a1a1a"
-          radius={16}
-          numPoints={20}
-          className="absolute inset-0 w-full h-full"
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[28%] md:h-[24%]"
+          style={{
+            background:
+              'linear-gradient(180deg, transparent 0%, rgba(18,16,15,0.25) 45%, rgba(18,16,15,0.78) 100%)',
+          }}
         />
-      </div>
 
-      <div className="flex flex-col md:flex-row h-full">
-        {/* ── Left: Text content ── */}
-        <div className="w-full md:w-[38%] flex flex-col justify-between px-4 sm:px-6 md:px-10 pt-20 sm:pt-24 md:pt-24 pb-2 md:pb-3 relative z-2 min-h-0">
-          <div>
-            <h1
-              className="font-display font-bold text-[#1a1a1a] mb-2 md:mb-4 max-w-[95%] md:max-w-[95%]"
-              style={{
-                fontSize: 'clamp(1.3rem, 2.8vw, 2.5rem)',
-                lineHeight: 1.1,
-              }}
-            >
-              {title}
-            </h1>
-
-            {/* Price removed per user request */}
-
-            {/* Buttons */}
-            <div className="flex flex-row gap-2 mb-4 md:mb-0">
-              {primaryLabel && primaryUrl && (
-                <Link
-                  href={primaryUrl}
-                  className="inline-flex items-center justify-center rounded-full bg-[#1a1a1a] px-4 md:px-5 py-2 md:py-2.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider text-white transition-colors duration-300 hover:bg-[#333]"
-                >
-                  {primaryLabel}
-                </Link>
-              )}
-              {secondaryLabel && secondaryUrl && (
-                <Link
-                  href={secondaryUrl}
-                  className="inline-flex items-center justify-center rounded-full border border-[#1a1a1a] px-4 md:px-5 py-2 md:py-2.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider text-[#1a1a1a] transition-colors duration-300 hover:bg-[#1a1a1a] hover:text-white"
-                >
-                  {secondaryLabel}
-                </Link>
-              )}
+        {/* Signature — top right */}
+        <div className="absolute top-[calc(var(--header-height,5rem)+1rem)] right-[var(--space-container-x)] z-10 flex items-start gap-2">
+          {soldOut && (
+            <span className="rounded-full border border-white/35 bg-black/40 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+              {locale === 'de' ? 'Ausverkauft' : 'Sold out'}
+            </span>
+          )}
+          <div
+            className="flex items-center gap-3 rounded-2xl border border-ff-gold/45 bg-ff-near-black/75 py-3 pl-4 pr-3 shadow-[0_10px_28px_rgba(0,0,0,0.35)] backdrop-blur-md"
+            aria-label={locale === 'de' ? 'Signature-Produkt' : 'Signature product'}
+          >
+            <div className="flex flex-col items-end leading-none text-right">
+              <span className="font-display text-[9px] font-bold uppercase tracking-[0.24em] text-ff-gold/90">
+                FermentFreude
+              </span>
+              <span className="mt-1.5 font-display text-sm font-extrabold uppercase tracking-[0.12em] text-white">
+                Signature
+              </span>
+              <span className="mt-1.5 text-[10px] font-medium text-white/65">
+                {locale === 'de' ? 'Handgemacht in Graz' : 'Handmade in Graz'}
+              </span>
             </div>
-          </div>
-
-          {/* ── Footer text ── */}
-          <div className="flex items-start gap-2.5">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 76 76"
-              fill="none"
-              className="shrink-0 mt-0.5 hidden sm:block"
-              aria-hidden="true"
+            <div
+              className="relative flex size-11 shrink-0 items-center justify-center rounded-full bg-ff-gold/15"
+              aria-hidden
             >
-              <path
-                d="M52.6617 37.6496L58.7381 40.0325L75.0609 49.0874L66.6016 63.7422L49.9214 54.6872L45.1557 50.7554L46.1088 57.1892V75.18H28.952V57.1892L30.0243 50.5171L24.9011 54.6872L8.45924 63.7422L0 49.0874L16.3228 39.7942L22.3991 37.6496L16.3228 35.1475L0 26.2117L8.45924 11.557L25.1394 20.4928L30.0243 24.6629L28.952 18.3482V0H46.1088V18.3482L45.1557 24.4246L49.9214 20.4928L66.6016 11.557L75.0609 26.2117L58.7381 35.3858L52.6617 37.6496Z"
-                fill="#1a1a1a"
-              />
-            </svg>
-            <div className="leading-tight">
-              <p className="text-[10px] md:text-[11px] font-bold text-[#1a1a1a] m-0">{tagline}</p>
-              <p className="text-[10px] md:text-[11px] font-medium text-[#1a1a1a] m-0 mt-0.5">
-                {subtitle}
-              </p>
-              {disclaimer && (
-                <p className="text-[9px] md:text-[10px] text-[#999] mt-0.5 m-0 italic">
-                  {disclaimer}
-                </p>
-              )}
+              <span className="absolute inset-[2px] rounded-full border border-ff-gold/75" />
+              <span className="relative flex flex-col items-center leading-none">
+                <span className="font-display text-[7px] font-bold uppercase tracking-wider text-ff-gold">
+                  No
+                </span>
+                <span className="font-display text-sm font-extrabold tabular-nums text-ff-gold">
+                  01
+                </span>
+              </span>
             </div>
           </div>
         </div>
 
-        {/* ── Right: Infinite card slider ── */}
-        <div className="w-full md:w-[62%] flex flex-col justify-end relative z-1 pb-2 md:pb-3 pt-2 md:pt-16 min-h-0 overflow-visible">
-          {/* Scrollable cards */}
-          <div
-            ref={scrollRef}
-            onScroll={handleScroll}
-            data-shop-slider
-            className="flex gap-6 md:gap-8 overflow-x-auto pb-2 snap-x snap-mandatory pl-6 md:pl-10 pr-4 md:pr-8 items-center"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-              touchAction: 'pan-x',
-            }}
-          >
-            <style>{`[data-shop-slider]::-webkit-scrollbar { display: none; }`}</style>
-            {loopSlides.map((slide, i) => (
-              <ShopCard key={`${slide.id || slide.categoryLabel}-${i}`} slide={slide} />
-            ))}
-          </div>
+        {/* Copy — left */}
+        <div className="absolute inset-x-0 bottom-0 z-10 pb-10 md:pb-14">
+          <div className="container mx-auto container-padding">
+            <div className="flex w-full max-w-xl flex-col items-start text-left">
+              <p className="shop-hero-copy mb-2.5 text-caption font-medium text-white/85">{unit}</p>
+              <h1 className="shop-hero-copy mb-4 font-display font-bold text-hero text-white tracking-tight leading-[1.08]">
+                {title}
+              </h1>
+              <p className="shop-hero-copy mb-8 max-w-md text-body-lg text-white/90 leading-relaxed">
+                {blurb}
+              </p>
 
-          {/* "SCROLL →" indicator */}
-          <div className="flex justify-end items-center mt-2 md:mt-3 px-4 md:pr-8">
-            <span
-              className="font-display uppercase tracking-[0.25em] text-[#999] select-none"
-              style={{ fontSize: '0.75rem' }}
-            >
-              {t('scroll', locale)}{' '}
-              <span className="inline-block ml-1" aria-hidden="true">
-                &rarr;
-              </span>
-            </span>
+              <ShopHeroActions
+                product={product}
+                price={price}
+                href={href}
+                soldOut={soldOut}
+                ctaLabel={ctaLabel}
+                pickup={pickup}
+                align="left"
+              />
+            </div>
           </div>
         </div>
       </div>
     </section>
-  )
-}
-
-/* ═══════════════════════════════════════════════════════════════
- *  Shop Card — ProductSlider SVG frame with integrated button
- *  + vertical category label on the card
- * ═══════════════════════════════════════════════════════════════ */
-function ShopCard({ slide }: { slide: Slide }) {
-  const [btnHovered, setBtnHovered] = useState(false)
-  const hasImage = isMediaObject(slide.image)
-  const labelText = (slide.categoryLabel ?? '').trim()
-  const isTempeh = labelText.toLowerCase() === 'tempeh'
-
-  const labelWords = labelText.split(/\s+/).filter(Boolean)
-  const isMultiWord = labelWords.length >= 2
-
-  const labelLines = React.useMemo(() => {
-    if (!isMultiWord) return [labelText]
-    const midpoint = Math.ceil(labelWords.length / 2)
-    return [labelWords.slice(0, midpoint).join(' '), labelWords.slice(midpoint).join(' ')]
-  }, [isMultiWord, labelText, labelWords])
-
-  return (
-    <div data-shop-card className="shrink-0 snap-start flex flex-row items-center">
-      {/* Label — normal flex child to the left of the card, never clipped */}
-      {slide.categoryLabel && (
-        <div className="shrink-0 flex items-center justify-center self-stretch px-2">
-          <span
-            className="leading-none uppercase font-black tracking-wider text-[#1a1a1a] select-none pointer-events-none"
-            style={{
-              writingMode: 'vertical-rl',
-              transform: 'rotate(180deg)',
-              fontSize: isMultiWord ? 'clamp(1.7rem, 3vw, 2.6rem)' : 'clamp(2rem, 3.5vw, 3rem)',
-              display: 'block',
-              lineHeight: 1,
-            }}
-          >
-            {labelLines.map((line, index) => (
-              <React.Fragment key={`${line}-${index}`}>
-                {line}
-                {index < labelLines.length - 1 ? <br /> : null}
-              </React.Fragment>
-            ))}
-          </span>
-        </div>
-      )}
-
-      {/* Card */}
-      <div
-        className="relative shrink-0"
-        style={{ height: 'clamp(240px, 50vh, 440px)', aspectRatio: '328 / 440' }}
-      >
-        <Link href={slide.detailUrl || '/shop'} className="group block h-full">
-          <div className="relative h-full">
-            <CardWithButton
-              className="absolute inset-0 w-full h-full"
-              btnHovered={btnHovered}
-              onBtnEnter={() => setBtnHovered(true)}
-              onBtnLeave={() => setBtnHovered(false)}
-              ariaLabel={`View ${slide.categoryLabel || 'product'} details`}
-            />
-
-            {/* Product image — overflows the card frame */}
-            <div
-              className="absolute pointer-events-none flex items-center justify-center"
-              style={{
-                top: isTempeh ? '-19%' : '-16%',
-                left: isTempeh ? '-12%' : '-10%',
-                right: isTempeh ? '-12%' : '-10%',
-                bottom: '1%',
-              }}
-            >
-              {hasImage ? (
-                <Media
-                  resource={slide.image as MediaType}
-                  className="w-full h-full"
-                  imgClassName={`w-full h-full object-contain transition-transform duration-300 ${isTempeh ? 'scale-105 group-hover:scale-[1.14]' : 'group-hover:scale-110'} drop-shadow-2xl`}
-                />
-              ) : (
-                <div className="w-full h-full bg-[#ECE5DE] rounded-lg" />
-              )}
-            </div>
-          </div>
-        </Link>
-      </div>
-    </div>
   )
 }

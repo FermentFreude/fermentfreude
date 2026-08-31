@@ -74,13 +74,14 @@ export function UserMenu() {
       onMouseLeave={handleMouseLeave}
     >
       <button
+        type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="relative p-1.5 text-ff-gray-15 dark:text-neutral-300 hover:text-ff-charcoal dark:hover:text-white transition-colors hover:cursor-pointer"
+        className="relative flex items-center justify-center size-10 text-ff-charcoal dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
         aria-label={t.accountMenu}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <User className="w-5 h-5" />
+        <User className="w-[18px] h-[18px]" strokeWidth={1.75} />
       </button>
 
       <div

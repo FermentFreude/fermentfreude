@@ -59,3 +59,6 @@ public/assets/videos/presse-kanal3-hero-source-hq.mp4
 # Migration runner state (per-environment, not committed)
 src/scripts/migrations/.completed.json
 studio-softspace/
+# Local download / preview scratch
+tmp/
+

@@ -1,6 +1,6 @@
 'use client'
 
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingBag } from 'lucide-react'
 import React from 'react'
 
 export function CartIconButton({
@@ -11,13 +11,14 @@ export function CartIconButton({
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
-      className="relative p-1.5 text-ff-gray-15 dark:text-neutral-300 hover:text-ff-charcoal dark:hover:text-white transition-colors hover:cursor-pointer"
+      type="button"
+      className="relative flex items-center justify-center size-10 text-ff-charcoal dark:text-neutral-300 hover:text-ff-near-black dark:hover:text-white transition-colors"
       aria-label={`Cart${quantity ? ` (${quantity} items)` : ''}`}
       {...rest}
     >
-      <ShoppingCart className="w-5 h-5" />
+      <ShoppingBag className="w-[18px] h-[18px]" strokeWidth={1.75} />
       {quantity ? (
-        <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-ff-charcoal dark:bg-white text-[10px] font-bold text-white dark:text-ff-near-black leading-none">
+        <span className="absolute top-1.5 right-1.5 flex h-3.5 min-w-3.5 px-0.5 items-center justify-center rounded-full bg-ff-charcoal dark:bg-white text-[9px] font-bold text-white dark:text-ff-near-black leading-none">
           {quantity > 9 ? '9+' : quantity}
         </span>
       ) : null}

@@ -18,24 +18,81 @@ export const ShopHero: Block = {
       },
     },
     {
-      name: 'heroTitle',
-      type: 'textarea',
-      required: true,
-      localized: true,
-      label: 'Hero Title',
+      name: 'heroProduct',
+      type: 'relationship',
+      relationTo: 'products',
+      hasMany: false,
+      label: 'Hero Product (Käferbohnentempeh)',
       admin: {
         description:
-          'Single main headline for the hero section (e.g. "Unsere handgemachten Produkte aus unserem Pick-Up Shop").',
+          'Hero product at the top of /shop. Title, price, description and sold-out come from this product. Packaging shots belong on the product detail page.',
       },
     },
     {
-      name: 'heroPrice',
+      name: 'heroImage',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Hero Background Image',
+      admin: {
+        description:
+          'Full-bleed plated photo behind the hero. Leave empty to use the default Käfer photo. Prefer a prepared/plated shot (not packaging).',
+      },
+    },
+    {
+      name: 'heroPanelColor',
       type: 'text',
+      label: 'Hero Panel Color',
+      defaultValue: '#403c39',
+      admin: {
+        description: 'Legacy field — kept for older layouts. Default: #403c39.',
+      },
+    },
+    {
+      name: 'trustItems',
+      type: 'array',
+      label: 'Trust Row (below hero)',
+      minRows: 0,
+      maxRows: 3,
+      labels: { singular: 'Trust Item', plural: 'Trust Items' },
+      admin: {
+        description:
+          'Three short highlights under the hero (icons + text). Leave empty to show the default Graz / pickup / fresh lines.',
+      },
+      fields: [
+        {
+          name: 'icon',
+          type: 'select',
+          label: 'Icon',
+          required: true,
+          defaultValue: 'hand',
+          options: [
+            { label: 'Hand (handmade)', value: 'hand' },
+            { label: 'Map pin (pickup)', value: 'mapPin' },
+            { label: 'Leaf (fresh)', value: 'leaf' },
+          ],
+          admin: { description: 'Icon shown in the gold circle.' },
+        },
+        {
+          name: 'label',
+          type: 'text',
+          required: true,
+          localized: true,
+          label: 'Label',
+          admin: {
+            description: 'e.g. "Handgemacht in Graz" / "Handmade in Graz"',
+          },
+        },
+      ],
+    },
+    {
+      name: 'heroTitle',
+      type: 'textarea',
       required: false,
       localized: true,
-      label: 'Price Display',
+      label: 'Intro Line (optional)',
       admin: {
-        description: 'Price shown below the title (e.g. "ab €8,50"). Leave empty to hide.',
+        description:
+          'Small line above the hero product (e.g. pickup shop intro). Leave empty to keep focus on the product.',
       },
     },
     {
@@ -47,71 +104,16 @@ export const ShopHero: Block = {
           required: false,
           localized: true,
           label: 'Primary Button Label',
-          admin: { width: '25%', description: 'e.g. "Jetzt bestellen"' },
+          admin: { width: '50%', description: 'Overrides product CTA (e.g. "Jetzt bestellen")' },
         },
         {
           name: 'ctaPrimaryUrl',
           type: 'text',
           required: false,
           label: 'Primary Button URL',
-          admin: { width: '25%', description: 'e.g. "/shop#products"' },
-        },
-        {
-          name: 'ctaSecondaryLabel',
-          type: 'text',
-          required: false,
-          localized: true,
-          label: 'Secondary Button Label',
-          admin: { width: '25%', description: 'e.g. "Mehr erfahren"' },
-        },
-        {
-          name: 'ctaSecondaryUrl',
-          type: 'text',
-          required: false,
-          label: 'Secondary Button URL',
-          admin: { width: '25%', description: 'e.g. "/fermentation"' },
-        },
-      ],
-    },
-    {
-      name: 'slides',
-      type: 'array',
-      label: 'Product Cards',
-      minRows: 2,
-      maxRows: 6,
-      admin: {
-        description:
-          'Product cards for the scrolling carousel. Each card has an image, category label, and link to product detail.',
-        initCollapsed: false,
-      },
-      fields: [
-        {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-          required: false,
-          label: 'Product Image',
           admin: {
-            description: 'Product photo (portrait ratio, ~860×1044px).',
-          },
-        },
-        {
-          name: 'categoryLabel',
-          type: 'text',
-          required: true,
-          localized: true,
-          label: 'Card Label',
-          admin: {
-            description: 'Label shown vertically on the card (e.g. "Tempeh", "Kimchi").',
-          },
-        },
-        {
-          name: 'detailUrl',
-          type: 'text',
-          required: false,
-          label: 'Detail Link',
-          admin: {
-            description: 'URL the arrow button links to (e.g. "/shop/tempeh").',
+            width: '50%',
+            description: 'Leave empty to link to the hero product page.',
           },
         },
       ],
@@ -121,10 +123,9 @@ export const ShopHero: Block = {
       type: 'text',
       required: false,
       localized: true,
-      label: 'Bottom Tagline',
+      label: 'Pickup Tagline',
       admin: {
-        description:
-          'Small bold text at the bottom (e.g. "Fermentierte Lebensmittel, mit Sorgfalt hergestellt.").',
+        description: 'e.g. "Fermentierte Lebensmittel, mit Sorgfalt hergestellt."',
       },
     },
     {
@@ -132,10 +133,9 @@ export const ShopHero: Block = {
       type: 'textarea',
       required: false,
       localized: true,
-      label: 'Bottom Subtitle',
+      label: 'Pickup Subtitle',
       admin: {
-        description:
-          'Secondary line below the tagline (e.g. "Abholung in Berlin — jede Woche frisch.").',
+        description: 'e.g. "Abholung in Graz — jede Woche frisch."',
       },
     },
     {
@@ -145,9 +145,41 @@ export const ShopHero: Block = {
       localized: true,
       label: 'Delivery Note',
       admin: {
-        description:
-          'Optional note about delivery plans (e.g. "Lieferung in Planung — für garantierte Frische.").',
+        description: 'Optional delivery note under the pickup lines.',
       },
+    },
+    {
+      name: 'slides',
+      type: 'array',
+      label: 'Product Cards (legacy — unused)',
+      minRows: 0,
+      maxRows: 6,
+      admin: {
+        description: 'Legacy jar slider — unused. Leave empty.',
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: false,
+          label: 'Product Image',
+        },
+        {
+          name: 'categoryLabel',
+          type: 'text',
+          required: false,
+          localized: true,
+          label: 'Card Label',
+        },
+        {
+          name: 'detailUrl',
+          type: 'text',
+          required: false,
+          label: 'Detail Link',
+        },
+      ],
     },
   ],
 }
