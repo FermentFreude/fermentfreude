@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
           expired: 'This voucher has expired.',
           emailRequired: 'A valid customer email is required.',
           cartNotFound: 'Cart not found or empty.',
+          alreadyPaid: 'This cart has already been paid for.',
           coversAll: 'This voucher fully covers your cart — no online payment is needed.',
           tooSmall:
             'The remaining amount after the voucher is too small to charge online. Please contact us.',
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
           expired: 'Dieser Gutschein ist abgelaufen.',
           emailRequired: 'Eine gültige E-Mail-Adresse ist erforderlich.',
           cartNotFound: 'Warenkorb nicht gefunden oder leer.',
+          alreadyPaid: 'Dieser Warenkorb wurde bereits bezahlt.',
           coversAll: 'Dieser Gutschein deckt deinen Warenkorb bereits vollständig ab.',
           tooSmall:
             'Der Restbetrag nach Abzug des Gutscheins ist zu gering für eine Online-Zahlung. Bitte kontaktiere uns.',
@@ -139,6 +141,16 @@ export async function POST(request: NextRequest) {
 
     if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
       return NextResponse.json({ success: false, error: ERR.cartNotFound }, { status: 404 })
+    }
+
+    // 2b. Refuse a second payment for a cart that's already been paid for.
+    // The Transactions beforeValidate hook (preventDuplicatePayment.ts) is
+    // the universal safety net for this — it also covers the plugin's own
+    // /api/payments/stripe/initiate — but checking it here too avoids a
+    // wasted Stripe API call and lets us return a clear, localized message
+    // instead of the hook's generic one.
+    if (cart.status === 'purchased') {
+      return NextResponse.json({ success: false, error: ERR.alreadyPaid }, { status: 409 })
     }
 
     // 3. Compute the discounted amount

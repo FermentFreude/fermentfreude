@@ -19,6 +19,7 @@ import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBoo
 import { copyCustomerNameFromTransaction } from '@/collections/Orders/copyCustomerNameFromTransaction'
 import { decrementInventory } from '@/collections/Orders/decrementInventory'
 import { generateDownloadToken } from '@/collections/Orders/generateDownloadToken'
+import { markCartPurchased } from '@/collections/Orders/markCartPurchased'
 import { redeemVoucherOnOrderComplete } from '@/collections/Orders/redeemVoucherOnOrderComplete'
 import { restoreWorkshopSpotsOnDelete } from '@/collections/Orders/restoreWorkshopSpotsOnDelete'
 import { setInvoiceIssuedAt } from '@/collections/Orders/setInvoiceIssuedAt'
@@ -28,6 +29,7 @@ import {
   handlePaymentFailed,
 } from '@/collections/Orders/stripeWebhooks'
 import { ProductsCollection } from '@/collections/Products'
+import { preventDuplicatePayment } from '@/collections/Transactions/preventDuplicatePayment'
 import { assignInvoiceNumber } from '@/hooks/assignInvoiceNumber'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
@@ -421,6 +423,7 @@ export const plugins: Plugin[] = [
           afterChange: [
             ...(defaultCollection?.hooks?.afterChange ?? []),
             setInvoiceIssuedAt,
+            markCartPurchased,
             decrementInventory,
             autoEnrollOnPurchase,
             confirmWorkshopBookings,
@@ -507,6 +510,13 @@ export const plugins: Plugin[] = [
             },
           },
         ],
+        hooks: {
+          ...defaultCollection?.hooks,
+          beforeValidate: [
+            ...(defaultCollection?.hooks?.beforeValidate ?? []),
+            preventDuplicatePayment,
+          ],
+        },
       }),
     },
   }),

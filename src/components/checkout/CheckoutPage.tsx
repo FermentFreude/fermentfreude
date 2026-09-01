@@ -75,6 +75,8 @@ const CHECKOUT_DE = {
   tryAgain: 'Erneut versuchen',
   yourCart: 'Warenkorb',
   orderFailed: 'Bestellung fehlgeschlagen.',
+  cartAlreadyPurchased:
+    'Dieser Warenkorb wurde bereits erfolgreich bezahlt. Bitte lade die Seite neu, um eine neue Bestellung zu starten.',
   connectionError: 'Verbindungsfehler. Bitte versuche es erneut.',
   or: 'oder',
   total: 'Gesamt',
@@ -143,6 +145,8 @@ const CHECKOUT_EN = {
   tryAgain: 'Try again',
   yourCart: 'Your cart',
   orderFailed: 'Order failed.',
+  cartAlreadyPurchased:
+    'This cart has already been paid for successfully. Please reload the page to start a new order.',
   connectionError: 'Connection error. Please try again.',
   or: 'or',
   total: 'Total',
@@ -643,6 +647,20 @@ export const CheckoutPage: React.FC = () => {
   const initiatePaymentIntent = useCallback(
     async (paymentID: string) => {
       try {
+        // Guard against retrying a payment for a cart that already
+        // completed successfully — e.g. a client-side crash right after a
+        // real charge went through, followed by a reload/retry. The actual
+        // safety net is server-side (preventDuplicatePayment.ts on
+        // Transactions, and the explicit check in the discounted-payment
+        // route); this just gives a clear message instead of a confusing
+        // generic error or, worse, a second real charge slipping through
+        // before the server-side check is reached.
+        if (cart?.status === 'purchased') {
+          setError(t.cartAlreadyPurchased)
+          toast.error(t.cartAlreadyPurchased)
+          return
+        }
+
         const additionalData: Record<string, unknown> = {
           ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
           ...(firstName.trim() ? { customerFirstName: firstName.trim() } : {}),
@@ -740,8 +758,10 @@ export const CheckoutPage: React.FC = () => {
       voucherApplied,
       voucherCoversAll,
       cart?.id,
+      cart?.status,
       user?.id,
       t.orderFailed,
+      t.cartAlreadyPurchased,
     ],
   )
 
