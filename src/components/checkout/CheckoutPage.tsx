@@ -25,7 +25,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { cssVariables } from '@/cssVariables'
 import { gtmBeginCheckout } from '@/lib/gtm'
 import { Address } from '@/payload-types'
-import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
+import {
+  useAddresses,
+  useCart,
+  useEcommerce,
+  usePayments,
+} from '@payloadcms/plugin-ecommerce/client/react'
 import { toast } from 'sonner'
 
 const CHECKOUT_DE = {
@@ -199,6 +204,9 @@ export const CheckoutPage: React.FC = () => {
   const isDe = locale === 'de'
   const router = useRouter()
   const { cart, clearCart, removeItem, refreshCart } = useCart()
+  // Only for onLogin — the plugin's own guest-cart-to-user transfer, which
+  // neither useCart() nor usePayments() re-exposes (see maybeCreateAccount).
+  const { onLogin: onEcommerceLogin } = useEcommerce()
   const [error, setError] = useState<null | string>(null)
   /**
    * State to manage the email input for guest checkout.
@@ -787,8 +795,24 @@ export const CheckoutPage: React.FC = () => {
       }
       try {
         await login({ email, password: accountPassword })
+        // Transfer the guest cart to the newly authenticated user. Without
+        // this, the cart's `customer` field stays null while every
+        // subsequent request is now authenticated — Carts' access control
+        // grants read/update either to the document owner (customer field
+        // match) or via a matching guest secret, and a same-page checkout
+        // still has the guest secret in memory so it limped along, but a
+        // redirect-based payment (3DS, PayPal — a full page reload through
+        // return_url) re-initializes cart state from scratch and can lose
+        // that secret, leaving the cart unreachable by the now-logged-in
+        // customer who just paid for it. onLogin (from the ecommerce
+        // plugin) is the documented fix for exactly this — merges/transfers
+        // the guest cart to the user's account. Neither useCart() nor
+        // usePayments() re-exposes it, hence the separate useEcommerce()
+        // above.
+        await onEcommerceLogin()
       } catch {
-        // Login failed after create — still proceed as guest
+        // Login (or the cart transfer) failed after create — still proceed
+        // as guest rather than block checkout entirely.
       }
     } catch {
       setCreateAccountError(t.createAccountNetworkError)
@@ -797,7 +821,7 @@ export const CheckoutPage: React.FC = () => {
     }
     setIsCreatingAccount(false)
     return true
-  }, [createAccountOpt, accountPassword, user, email, customerName, login, t])
+  }, [createAccountOpt, accountPassword, user, email, customerName, login, onEcommerceLogin, t])
 
   if (!stripe) return null
 
