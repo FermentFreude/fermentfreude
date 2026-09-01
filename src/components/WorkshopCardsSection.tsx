@@ -86,7 +86,7 @@ export function WorkshopCardsSection({
             )}
           </div>
         )}
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 xl:grid-cols-4">
           {cards.map((card, i) => (
             <div
               key={card.id ?? i}

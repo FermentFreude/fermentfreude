@@ -19,6 +19,7 @@ loadDotenv()
 
 import type { Media } from '@/payload-types'
 import { IMAGE_PRESETS, optimizedFile, readLocalFile } from '@/scripts/seed-image-utils'
+import { getWorkshopHeroImageIdsByHref } from '@/utilities/workshopHeroImages'
 import fs from 'fs'
 import path from 'path'
 
@@ -68,12 +69,12 @@ type FermentationMedia = {
   heroIcon2?: Media
   heroIcon3?: Media
   heroIcon4?: Media
-  workshop1?: Media
-  workshop2?: Media
-  workshop3?: Media
 }
 
-function fermentationDataDE(media: FermentationMedia) {
+function fermentationDataDE(
+  media: FermentationMedia,
+  workshopHeroIds: Record<string, string | null>,
+) {
   return {
     fermentationHeroTitle: 'Innovation trifft Tradition',
     fermentationHeroDescription:
@@ -190,7 +191,7 @@ function fermentationDataDE(media: FermentationMedia) {
     fermentationWorkshopNextDateLabel: 'Nächster Termin:',
     fermentationWorkshopCards: [
       {
-        image: media.workshop1?.id ?? null,
+        image: workshopHeroIds['/workshops/lakto-gemuese'] ?? null,
         title: 'Lakto-Gemüse',
         description:
           'Gemüse fermentieren, Aromen erleben – jeden Monat anders. Live online Session.',
@@ -201,7 +202,7 @@ function fermentationDataDE(media: FermentationMedia) {
         nextDate: '15. Februar 2026',
       },
       {
-        image: media.workshop2?.id ?? null,
+        image: workshopHeroIds['/workshops/kombucha'] ?? null,
         title: 'Kombucha',
         description:
           'Tauche ein in die Welt des fermentierten Tees – voller Charakter und Aromen. Interaktiv online.',
@@ -212,7 +213,7 @@ function fermentationDataDE(media: FermentationMedia) {
         nextDate: '18. Februar 2026',
       },
       {
-        image: media.workshop3?.id ?? null,
+        image: workshopHeroIds['/workshops/tempeh'] ?? null,
         title: 'Tempeh',
         description:
           'Entdecke eine pflanzliche Proteinquelle neu – mild, nussig und vielseitig. Online-Meisterklasse.',
@@ -221,6 +222,17 @@ function fermentationDataDE(media: FermentationMedia) {
         buttonLabel: 'Mehr Infos & Buchen',
         buttonUrl: '/workshops/tempeh',
         nextDate: '20. Februar 2026',
+      },
+      {
+        image: workshopHeroIds['/workshops/vom-feld-ins-glas'] ?? null,
+        title: 'Vom Feld ins Glas',
+        description:
+          'Fermentation beginnt am Feld. Ernte, Handwerk und drei Lakto-Fermente im Marktgarten „Unser Bauerngarten“.',
+        price: '€99',
+        priceSuffix: 'pro Person',
+        buttonLabel: 'Mehr Infos & Buchen',
+        buttonUrl: '/workshops/vom-feld-ins-glas',
+        nextDate: '',
       },
     ],
     fermentationFaqTitle: 'Häufig gestellte Fragen',
@@ -266,7 +278,10 @@ function fermentationDataDE(media: FermentationMedia) {
   }
 }
 
-function fermentationDataEN(media: FermentationMedia) {
+function fermentationDataEN(
+  media: FermentationMedia,
+  workshopHeroIds: Record<string, string | null>,
+) {
   return {
     fermentationHeroTitle: 'Innovation meets Tradition',
     fermentationHeroDescription:
@@ -382,7 +397,7 @@ function fermentationDataEN(media: FermentationMedia) {
     fermentationWorkshopNextDateLabel: 'Next Date:',
     fermentationWorkshopCards: [
       {
-        image: media.workshop1?.id ?? null,
+        image: workshopHeroIds['/workshops/lakto-gemuese'] ?? null,
         title: 'Lakto-Gemüse',
         description:
           'Ferment vegetables, experience flavours – different every month. Live online session.',
@@ -393,7 +408,7 @@ function fermentationDataEN(media: FermentationMedia) {
         nextDate: 'February 15, 2026',
       },
       {
-        image: media.workshop2?.id ?? null,
+        image: workshopHeroIds['/workshops/kombucha'] ?? null,
         title: 'Kombucha',
         description:
           'Dive into the world of fermented tea – full of character and aromas. Interactive online.',
@@ -404,7 +419,7 @@ function fermentationDataEN(media: FermentationMedia) {
         nextDate: 'February 18, 2026',
       },
       {
-        image: media.workshop3?.id ?? null,
+        image: workshopHeroIds['/workshops/tempeh'] ?? null,
         title: 'Tempeh',
         description:
           'Rediscover a plant-based protein source – mild, nutty and versatile. Online masterclass.',
@@ -413,6 +428,17 @@ function fermentationDataEN(media: FermentationMedia) {
         buttonLabel: 'More Info & Book',
         buttonUrl: '/workshops/tempeh',
         nextDate: 'February 20, 2026',
+      },
+      {
+        image: workshopHeroIds['/workshops/vom-feld-ins-glas'] ?? null,
+        title: 'Vom Feld ins Glas',
+        description:
+          'Fermentation starts in the field. Harvest, craft, and three lacto-ferments at the “Unser Bauerngarten” market garden.',
+        price: '€99',
+        priceSuffix: 'per person',
+        buttonLabel: 'More Info & Book',
+        buttonUrl: '/workshops/vom-feld-ins-glas',
+        nextDate: '',
       },
     ],
     fermentationFaqTitle: 'Frequently Asked Questions',
@@ -478,12 +504,9 @@ async function seedFermentation() {
     heroIcon2: 'icons/taste.svg',
     heroIcon3: 'icons/nutrients.svg',
     heroIcon4: 'icons/probiotics.svg',
-    workshop1: 'gastronomy/gastronomy-slide-fermentation-jars.png',
-    workshop2: 'gastronomy/gastronomy-slide-flatlay-fermentation.png',
-    workshop3: 'gastronomy/gastronomy-slide-01-cutting-board.png',
   }
 
-  const altTexts: Record<keyof FermentationMedia, string> = {
+  const altTexts: Record<Exclude<keyof FermentationMedia, never>, string> = {
     hero: 'Fermentation hero – founders at workshop',
     guide: 'Fermentation guide – jars and process',
     what: 'What is fermentation – flatlay',
@@ -494,9 +517,6 @@ async function seedFermentation() {
     heroIcon2: 'Unique flavours icon',
     heroIcon3: 'Simple processes icon',
     heroIcon4: 'Learn & share icon',
-    workshop1: 'Lakto-Gemüse workshop',
-    workshop2: 'Kombucha workshop',
-    workshop3: 'Tempeh workshop',
   }
 
   try {
@@ -524,6 +544,8 @@ async function seedFermentation() {
   } catch {
     payload.logger.warn('Image upload skipped. Seeding text only.')
   }
+
+  const workshopHeroIds = await getWorkshopHeroImageIdsByHref(payload)
 
   const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
   const _seedEnv = { ...process.env, PAYLOAD_SKIP_FERMENTATION_CONDITION: '1' }
@@ -562,7 +584,7 @@ async function seedFermentation() {
             description:
               'Entdecke die Kunst der Fermentation. Leitfaden zu Lakto-Fermentation, Kombucha und Tempeh.',
           },
-          fermentation: fermentationDataDE(media),
+          fermentation: fermentationDataDE(media, workshopHeroIds),
         },
       })
 
@@ -582,28 +604,28 @@ async function seedFermentation() {
       const faqItemsDE = (fermentationDE.fermentationFaqItems as Array<{ id?: string }>) ?? []
 
       const dataENWithIds = {
-        ...fermentationDataEN(media),
-        fermentationHeroBlocks: fermentationDataEN(media).fermentationHeroBlocks.map((b, i) => ({
+        ...fermentationDataEN(media, workshopHeroIds),
+        fermentationHeroBlocks: fermentationDataEN(media, workshopHeroIds).fermentationHeroBlocks.map((b, i) => ({
           ...b,
           id: heroBlocksDE[i]?.id,
         })),
-        fermentationWorkshopCards: fermentationDataEN(media).fermentationWorkshopCards.map(
+        fermentationWorkshopCards: fermentationDataEN(media, workshopHeroIds).fermentationWorkshopCards.map(
           (c, i) => ({
             ...c,
             id: workshopCardsDE[i]?.id,
           }),
         ),
-        fermentationWhyItems: fermentationDataEN(media).fermentationWhyItems.map((item, i) => ({
+        fermentationWhyItems: fermentationDataEN(media, workshopHeroIds).fermentationWhyItems.map((item, i) => ({
           ...item,
           id: whyItemsDE[i]?.id,
         })),
-        fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map(
+        fermentationDangerConcerns: fermentationDataEN(media, workshopHeroIds).fermentationDangerConcerns.map(
           (item, i) => ({
             ...item,
             id: dangerConcernsDE[i]?.id,
           }),
         ),
-        fermentationFaqItems: fermentationDataEN(media).fermentationFaqItems.map((item, i) => ({
+        fermentationFaqItems: fermentationDataEN(media, workshopHeroIds).fermentationFaqItems.map((item, i) => ({
           ...item,
           id: faqItemsDE[i]?.id,
         })),
@@ -654,7 +676,7 @@ async function seedFermentation() {
         description:
           'Entdecke die Kunst der Fermentation. Leitfaden zu Lakto-Fermentation, Kombucha und Tempeh.',
       },
-      fermentation: fermentationDataDE(media),
+      fermentation: fermentationDataDE(media, workshopHeroIds),
     },
   })
 
@@ -673,26 +695,26 @@ async function seedFermentation() {
   const faqItemsDE = (fermentationDE.fermentationFaqItems as Array<{ id?: string }>) ?? []
 
   const dataENWithIds = {
-    ...fermentationDataEN(media),
-    fermentationHeroBlocks: fermentationDataEN(media).fermentationHeroBlocks.map((b, i) => ({
+    ...fermentationDataEN(media, workshopHeroIds),
+    fermentationHeroBlocks: fermentationDataEN(media, workshopHeroIds).fermentationHeroBlocks.map((b, i) => ({
       ...b,
       id: heroBlocksDE[i]?.id,
     })),
-    fermentationWorkshopCards: fermentationDataEN(media).fermentationWorkshopCards.map((c, i) => ({
+    fermentationWorkshopCards: fermentationDataEN(media, workshopHeroIds).fermentationWorkshopCards.map((c, i) => ({
       ...c,
       id: workshopCardsDE[i]?.id,
     })),
-    fermentationWhyItems: fermentationDataEN(media).fermentationWhyItems.map((item, i) => ({
+    fermentationWhyItems: fermentationDataEN(media, workshopHeroIds).fermentationWhyItems.map((item, i) => ({
       ...item,
       id: whyItemsDE[i]?.id,
     })),
-    fermentationDangerConcerns: fermentationDataEN(media).fermentationDangerConcerns.map(
+    fermentationDangerConcerns: fermentationDataEN(media, workshopHeroIds).fermentationDangerConcerns.map(
       (item, i) => ({
         ...item,
         id: dangerConcernsDE[i]?.id,
       }),
     ),
-    fermentationFaqItems: fermentationDataEN(media).fermentationFaqItems.map((item, i) => ({
+    fermentationFaqItems: fermentationDataEN(media, workshopHeroIds).fermentationFaqItems.map((item, i) => ({
       ...item,
       id: faqItemsDE[i]?.id,
     })),

@@ -1,19 +1,26 @@
 /**
  * Seed the Gastronomy page in the Pages collection with all sections.
  * Seeds both DE and EN locales. Content is under Pages → Gastronomy page.
- * Uploads images to Payload Media (R2) for offer cards, workshop cards, and contact section when seed-assets exist.
+ * Uploads images to Payload Media (R2) for offer cards and contact section when seed-assets exist.
+ * Workshop card images come from each workshop page hero (see workshopHeroImages utility).
  *
  * Run: pnpm seed gastronomy
+ *      npx tsx src/scripts/seed-gastronomy.ts
  */
+process.env.PAYLOAD_SEED = 'true'
+
 // @ts-expect-error — dotenv types not resolved via package.json exports
 import { config as loadEnv } from 'dotenv'
-import type { Media } from '@/payload-types'
-import config from '@payload-config'
-
-loadEnv()
 import fs from 'fs'
 import path from 'path'
-import { getPayload } from 'payload'
+
+import type { Media } from '@/payload-types'
+
+loadEnv({ path: path.resolve(process.cwd(), '.env') })
+
+const { getWorkshopHeroImageIdsByHref } = await import('@/utilities/workshopHeroImages')
+const { default: config } = await import('@payload-config')
+const { getPayload } = await import('payload')
 
 function readLocalFile(filePath: string) {
   const data = fs.readFileSync(filePath)
@@ -64,15 +71,15 @@ const LEXICAL_ROOT_WITH_PARAGRAPH = {
   },
 }
 
-function gastronomyDataDE(media: {
+function gastronomyDataDE(
+  media: {
   offer1?: Media
   offer2?: Media
   offer3?: Media
-  workshop1?: Media
-  workshop2?: Media
-  workshop3?: Media
   contact?: Media
-}) {
+},
+  workshopHeroIds: Record<string, string | null>,
+) {
   return {
     gastronomyHeroCtaLabel: 'Entdecken',
     gastronomyHeroCtaUrl: '#offer',
@@ -122,7 +129,7 @@ function gastronomyDataDE(media: {
     gastronomyWorkshopNextDateLabel: 'Nächster Termin:',
     gastronomyWorkshopCards: [
       {
-        image: media.workshop1?.id ?? null,
+        image: workshopHeroIds['/workshops/lakto-gemuese'] ?? null,
         title: 'Lakto-Gemüse',
         description:
           'Gemüse fermentieren, Aromen erleben – jeden Monat anders. Live online Session.',
@@ -134,7 +141,7 @@ function gastronomyDataDE(media: {
         nextDate: '15. Februar 2026',
       },
       {
-        image: media.workshop2?.id ?? null,
+        image: workshopHeroIds['/workshops/kombucha'] ?? null,
         title: 'Kombucha',
         description: 'Lernen Sie, zu Hause köstlichen und gesunden Kombucha zu brauen.',
         price: '€99',
@@ -145,7 +152,7 @@ function gastronomyDataDE(media: {
         nextDate: '22. Februar 2026',
       },
       {
-        image: media.workshop3?.id ?? null,
+        image: workshopHeroIds['/workshops/tempeh'] ?? null,
         title: 'Tempeh',
         description:
           'Entdecken Sie die Vielseitigkeit von Tempeh und wie Sie es in Ihre Küche integrieren.',
@@ -155,6 +162,18 @@ function gastronomyDataDE(media: {
         buttonUrl: '/workshops/tempeh',
         duration: '2-tägiger Workshop',
         nextDate: '1. März 2026',
+      },
+      {
+        image: workshopHeroIds['/workshops/vom-feld-ins-glas'] ?? null,
+        title: 'Vom Feld ins Glas',
+        description:
+          'Fermentation beginnt am Feld. Ernte, Handwerk und drei Lakto-Fermente im Marktgarten „Unser Bauerngarten“.',
+        price: '€99',
+        priceSuffix: 'pro Person',
+        buttonLabel: 'Mehr Infos & Buchen',
+        buttonUrl: '/workshops/vom-feld-ins-glas',
+        duration: 'ca. 4 Std',
+        nextDate: '',
       },
     ],
     gastronomyOfferDetailsTitle: 'Was wir anbieten',
@@ -276,15 +295,15 @@ function gastronomyDataDE(media: {
   }
 }
 
-function gastronomyDataEN(media: {
+function gastronomyDataEN(
+  media: {
   offer1?: Media
   offer2?: Media
   offer3?: Media
-  workshop1?: Media
-  workshop2?: Media
-  workshop3?: Media
   contact?: Media
-}) {
+},
+  workshopHeroIds: Record<string, string | null>,
+) {
   return {
     gastronomyHeroCtaLabel: 'Take a look',
     gastronomyHeroCtaUrl: '#offer',
@@ -331,7 +350,7 @@ function gastronomyDataEN(media: {
     gastronomyWorkshopNextDateLabel: 'Next Appointment:',
     gastronomyWorkshopCards: [
       {
-        image: media.workshop1?.id ?? null,
+        image: workshopHeroIds['/workshops/lakto-gemuese'] ?? null,
         title: 'Lakto-Gemüse',
         description:
           'Ferment vegetables, experience aromas – different every month. Live online session.',
@@ -343,7 +362,7 @@ function gastronomyDataEN(media: {
         nextDate: 'February 15, 2026',
       },
       {
-        image: media.workshop2?.id ?? null,
+        image: workshopHeroIds['/workshops/kombucha'] ?? null,
         title: 'Kombucha',
         description: 'Learn to brew delicious and healthy kombucha at home.',
         price: '€99',
@@ -354,7 +373,7 @@ function gastronomyDataEN(media: {
         nextDate: 'February 22, 2026',
       },
       {
-        image: media.workshop3?.id ?? null,
+        image: workshopHeroIds['/workshops/tempeh'] ?? null,
         title: 'Tempeh',
         description:
           'Discover the versatility of tempeh and how to incorporate it into your cooking.',
@@ -364,6 +383,18 @@ function gastronomyDataEN(media: {
         buttonUrl: '/workshops/tempeh',
         duration: '2-day workshop',
         nextDate: 'March 1, 2026',
+      },
+      {
+        image: workshopHeroIds['/workshops/vom-feld-ins-glas'] ?? null,
+        title: 'Vom Feld ins Glas',
+        description:
+          'Fermentation starts in the field. Harvest, craft, and three lacto-ferments at the “Unser Bauerngarten” market garden.',
+        price: '€99',
+        priceSuffix: 'per Person',
+        buttonLabel: 'More Info & Book',
+        buttonUrl: '/workshops/vom-feld-ins-glas',
+        duration: 'approx. 4 hrs',
+        nextDate: '',
       },
     ],
     gastronomyOfferDetailsTitle: 'What We Offer',
@@ -497,9 +528,6 @@ async function seedGastronomy() {
     offer1?: Media
     offer2?: Media
     offer3?: Media
-    workshop1?: Media
-    workshop2?: Media
-    workshop3?: Media
     contact?: Media
   } = {}
 
@@ -508,18 +536,12 @@ async function seedGastronomy() {
     'gastronomy-slide-corporate-events.png',
     'gastronomy-slide-menu-development.png',
   ]
-  const workshopPaths = [
-    'gastronomy-slide-fermentation-jars.png',
-    'gastronomy-slide-flatlay-fermentation.png',
-    'gastronomy-slide-01-cutting-board.png',
-  ]
   const altTexts = {
     offer: [
       'Professional training – fermentation workshop',
       'Corporate events – team fermentation',
       'Menu development – fermented products',
     ],
-    workshop: ['Lakto fermentation workshop', 'Kombucha workshop', 'Tempeh workshop'],
   }
 
   try {
@@ -537,20 +559,6 @@ async function seedGastronomy() {
         payload.logger.warn(`Offer image not found: ${p}`)
       }
     }
-    for (let i = 0; i < 3; i++) {
-      const p = path.join(imagesDir, workshopPaths[i])
-      if (fs.existsSync(p)) {
-        const created = await payload.create({
-          collection: 'media',
-          data: { alt: altTexts.workshop[i] },
-          file: readLocalFile(p),
-          context: { skipAutoTranslate: true },
-        })
-        ;(media as Record<string, Media>)[`workshop${i + 1}`] = created as Media
-      } else {
-        payload.logger.warn(`Workshop image not found: ${p}`)
-      }
-    }
     const contactPath = path.join(imagesDir, 'gastronomy-slide-01-cutting-board.png')
     if (fs.existsSync(contactPath)) {
       const created = await payload.create({
@@ -566,6 +574,11 @@ async function seedGastronomy() {
   } catch (_err) {
     payload.logger.warn('Image upload skipped (e.g. Vercel Blob suspended). Seeding text only.')
   }
+
+  const workshopHeroIds = await getWorkshopHeroImageIdsByHref(payload)
+  payload.logger.info(
+    `Workshop card images linked from workshop page heroes (${Object.values(workshopHeroIds).filter(Boolean).length}/4 found)`,
+  )
 
   const existing = await payload.find({
     collection: 'pages',
@@ -597,7 +610,7 @@ async function seedGastronomy() {
           title: 'Gastronomie | Fermentfreude',
           description: 'Fermentierte Produkte für Restaurants, Hotels und Catering.',
         },
-        gastronomy: gastronomyDataDE(media),
+        gastronomy: gastronomyDataDE(media, workshopHeroIds),
       },
     })
 
@@ -626,7 +639,7 @@ async function seedGastronomy() {
     const trustedByBadgesDE =
       (gastronomyDE.gastronomyTrustedByBadges as Array<{ id?: string }>) ?? []
 
-    const enGastronomy = gastronomyDataEN(media)
+    const enGastronomy = gastronomyDataEN(media, workshopHeroIds)
     const dataENWithIds = {
       ...enGastronomy,
       gastronomyOfferCards: enGastronomy.gastronomyOfferCards.map((c, i) => ({
@@ -713,7 +726,7 @@ async function seedGastronomy() {
         title: 'Gastronomie | Fermentfreude',
         description: 'Fermentierte Produkte für Restaurants, Hotels und Catering.',
       },
-      gastronomy: gastronomyDataDE(media),
+      gastronomy: gastronomyDataDE(media, workshopHeroIds),
     },
   })
 
@@ -739,7 +752,7 @@ async function seedGastronomy() {
   const trustedByBadgesDE =
     (gastronomyDE.gastronomyTrustedByBadges as Array<{ id?: string }>) ?? []
 
-  const enGastronomy = gastronomyDataEN(media)
+  const enGastronomy = gastronomyDataEN(media, workshopHeroIds)
   const dataENWithIds = {
     ...enGastronomy,
     gastronomyOfferCards: enGastronomy.gastronomyOfferCards.map((c, i) => ({

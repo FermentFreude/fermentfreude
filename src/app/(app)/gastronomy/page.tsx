@@ -7,6 +7,21 @@ import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
+import {
+  GASTRONOMY_FAQ_EN,
+  GASTRONOMY_OUTCOMES_EN,
+  GASTRONOMY_PROCESS_STEPS_EN,
+  GASTRONOMY_TESTIMONIALS_EN,
+  GASTRONOMY_TRUST_BADGES_EN,
+  isGermanBeforeAfterLabel,
+  looksGerman,
+  resolveLocalizedRows,
+  resolveLocalizedText,
+  resolveTrustBadges,
+  resolveTrustedByHeading,
+} from '@/utilities/gastronomyLocaleContent'
+import { buildSyncedWorkshopCards } from '@/utilities/gastronomyWorkshopCards'
+import { getWorkshopPageCardDataByHref } from '@/utilities/workshopHeroImages'
 import configPromise from '@payload-config'
 import { unstable_cache } from 'next/cache'
 import Link from 'next/link'
@@ -43,36 +58,60 @@ const FALLBACK_TRUST_BADGES_DE = [
   'Hotels',
   'Catering',
   'Feinkost',
-  'Food Concept Stores',
-] as const
-const FALLBACK_TRUST_BADGES_EN = [
-  'Restaurants',
-  'Hotels',
-  'Catering',
-  'Delis',
-  'Food Concept Stores',
+  'Gemeinschaftsverpflegung',
 ] as const
 
-const getCachedGastronomyPage = unstable_cache(
-  async (locale: string) => {
-    const payload = await getPayload({ config: configPromise })
-    const isEn = locale === 'en'
-    // English locale must not inherit German copy from Payload's localization fallback,
-    // or localized blocks (e.g. outcomes) stay DE on /? with EN toggle. Empty EN fields
-    // then use the fallbacks below instead.
-    const result = await payload.find({
-      collection: 'pages',
-      where: { slug: { equals: 'gastronomy' } },
-      limit: 1,
-      depth: 4,
-      locale: locale as 'de' | 'en',
-      ...(isEn ? { fallbackLocale: false } : {}),
-    })
-    return (result.docs[0] as PageType | undefined) ?? null
-  },
+function isGermanSliderPrevLabel(value: string | null | undefined): boolean {
+  const trimmed = value?.trim()
+  if (!trimmed) return false
+  return /^zurück$|^zurueck$/i.test(trimmed)
+}
+
+function isGermanSliderNextLabel(value: string | null | undefined): boolean {
+  const trimmed = value?.trim()
+  if (!trimmed) return false
+  return /^vor$|^weiter$/i.test(trimmed)
+}
+
+function resolveSliderNavLabel(
+  cmsValue: string | null | undefined,
+  locale: 'de' | 'en',
+  deDefault: string,
+  enDefault: string,
+  isGermanBleed: (value: string | null | undefined) => boolean,
+): string {
+  const trimmed = cmsValue?.trim()
+  if (locale === 'en' && (!trimmed || isGermanBleed(trimmed))) {
+    return enDefault
+  }
+  return trimmed || (locale === 'de' ? deDefault : enDefault)
+}
+
+async function fetchGastronomyPage(locale: string) {
+  const payload = await getPayload({ config: configPromise })
+  const result = await payload.find({
+    collection: 'pages',
+    where: { slug: { equals: 'gastronomy' } },
+    limit: 1,
+    depth: 4,
+    locale: locale as 'de' | 'en',
+    fallbackLocale: false,
+  })
+  return (result.docs[0] as PageType | undefined) ?? null
+}
+
+const getCachedGastronomyPageProd = unstable_cache(
+  fetchGastronomyPage,
   ['gastronomy-page'],
   { revalidate: 3600, tags: ['pages'] },
 )
+
+async function getCachedGastronomyPage(locale: string) {
+  if (process.env.NODE_ENV === 'development') {
+    return fetchGastronomyPage(locale)
+  }
+  return getCachedGastronomyPageProd(locale)
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -90,82 +129,140 @@ export default async function GastronomyPage() {
   const page = await getCachedGastronomyPage(locale)
   const g = page?.gastronomy
 
-  const heroCtaLabel =
-    g?.gastronomyHeroCtaLabel ??
-    (locale === 'de' ? DEFAULT_HERO_CTA_DE : DEFAULT_HERO_CTA_EN)
+  const localeKey = locale as 'de' | 'en'
+  const heroCtaLabel = resolveLocalizedText(
+    g?.gastronomyHeroCtaLabel,
+    localeKey,
+    DEFAULT_HERO_CTA_DE,
+    DEFAULT_HERO_CTA_EN,
+  )
   const heroCtaUrl = g?.gastronomyHeroCtaUrl ?? '#offer'
   const detailsTitle = g?.gastronomyOfferDetailsTitle?.trim()
   const sectionTitleFallback = g?.gastronomyOfferSectionTitle?.trim()
-  const offerGridTitle =
+  const offerGridTitleRaw =
     (detailsTitle && detailsTitle.length > 0 ? detailsTitle : null) ??
-    (sectionTitleFallback && sectionTitleFallback.length > 0 ? sectionTitleFallback : null) ??
-    (locale === 'de' ? DEFAULT_OFFER_TITLE_DE : DEFAULT_OFFER_TITLE_EN)
-  const offerCards = g?.gastronomyOfferCards ?? []
+    (sectionTitleFallback && sectionTitleFallback.length > 0 ? sectionTitleFallback : null)
+  const offerGridTitle = resolveLocalizedText(
+    offerGridTitleRaw,
+    locale as 'de' | 'en',
+    DEFAULT_OFFER_TITLE_DE,
+    DEFAULT_OFFER_TITLE_EN,
+  )
+  const offerCardsFromCms = (g?.gastronomyOfferCards ?? []).filter(
+    (card) => card?.title?.trim() && card?.description?.trim(),
+  )
+  const offerCards =
+    localeKey === 'en' &&
+    offerCardsFromCms.length > 0 &&
+    looksGerman(
+      offerCardsFromCms.map((card) => `${card.title} ${card.description}`).join(' '),
+    )
+      ? []
+      : (g?.gastronomyOfferCards ?? [])
 
   const cta = g?.gastronomyCtaBanner
-  const ctaHeading =
-    cta?.heading?.trim() ||
-    (locale === 'de' ? DEFAULT_CTA_HEADING_DE : DEFAULT_CTA_HEADING_EN)
-  const ctaSubline =
-    cta?.description?.trim() ||
-    (locale === 'de' ? DEFAULT_CTA_SUBLINE_DE : DEFAULT_CTA_SUBLINE_EN)
-  const ctaButtonLabel =
-    cta?.buttonLabel?.trim() ||
-    (locale === 'de' ? DEFAULT_CTA_BUTTON_DE : DEFAULT_CTA_BUTTON_EN)
+  const ctaHeading = resolveLocalizedText(
+    cta?.heading,
+    localeKey,
+    DEFAULT_CTA_HEADING_DE,
+    DEFAULT_CTA_HEADING_EN,
+  )
+  const ctaSubline = resolveLocalizedText(
+    cta?.description,
+    localeKey,
+    DEFAULT_CTA_SUBLINE_DE,
+    DEFAULT_CTA_SUBLINE_EN,
+  )
+  const ctaButtonLabel = resolveLocalizedText(
+    cta?.buttonLabel,
+    localeKey,
+    DEFAULT_CTA_BUTTON_DE,
+    DEFAULT_CTA_BUTTON_EN,
+  )
   const ctaButtonHref = cta?.buttonHref?.trim() || '#contact'
 
-  const workshopSectionTitle =
-    g?.gastronomyWorkshopSectionTitle ??
-    (locale === 'de' ? DEFAULT_WORKSHOP_TITLE_DE : DEFAULT_WORKSHOP_TITLE_EN)
-  const workshopSectionSubtitle =
-    g?.gastronomyWorkshopSectionSubtitle ??
-    (locale === 'de' ? DEFAULT_WORKSHOP_SUBTITLE_DE : DEFAULT_WORKSHOP_SUBTITLE_EN)
-  const workshopClarification = g?.gastronomyWorkshopClarification ?? null
-  const workshopNextDateLabel =
-    g?.gastronomyWorkshopNextDateLabel ??
-    (locale === 'de' ? DEFAULT_WORKSHOP_NEXT_DATE_LABEL_DE : DEFAULT_WORKSHOP_NEXT_DATE_LABEL_EN)
-  const nextDates = await getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de')
-  const workshopCards = (g?.gastronomyWorkshopCards ?? []).map((c) => {
-    const nextDateData = c.buttonUrl ? nextDates[c.buttonUrl] : undefined
-    if (nextDateData) {
-      // Workshop is known to the live appointment system — its data is the
-      // single source of truth (ignore manually-typed admin date).
-      return {
-        ...c,
-        nextDate: nextDateData.date ?? undefined,
-        availableSpots: nextDateData.soldOut ? 0 : nextDateData.availableSpots,
-      }
-    }
-    // Unknown workshop (no slug mapping) — fall back to manual admin fields.
-    return {
-      ...c,
-      nextDate: c.nextDate || undefined,
-      availableSpots: undefined,
-    }
-  })
-  const offerDetails = g?.gastronomyOfferDetails ?? []
+  const workshopSectionTitle = resolveLocalizedText(
+    g?.gastronomyWorkshopSectionTitle,
+    localeKey,
+    DEFAULT_WORKSHOP_TITLE_DE,
+    DEFAULT_WORKSHOP_TITLE_EN,
+  )
+  const workshopSectionSubtitle = resolveLocalizedText(
+    g?.gastronomyWorkshopSectionSubtitle,
+    localeKey,
+    DEFAULT_WORKSHOP_SUBTITLE_DE,
+    DEFAULT_WORKSHOP_SUBTITLE_EN,
+  )
+  const workshopClarification =
+    localeKey === 'en' &&
+    g?.gastronomyWorkshopClarification?.trim() &&
+    looksGerman(g.gastronomyWorkshopClarification)
+      ? null
+      : (g?.gastronomyWorkshopClarification ?? null)
+  const workshopNextDateLabel = resolveLocalizedText(
+    g?.gastronomyWorkshopNextDateLabel,
+    localeKey,
+    DEFAULT_WORKSHOP_NEXT_DATE_LABEL_DE,
+    DEFAULT_WORKSHOP_NEXT_DATE_LABEL_EN,
+  )
+  const [nextDates, workshopPageData] = await Promise.all([
+    getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de'),
+    getWorkshopPageCardDataByHref(locale as 'de' | 'en'),
+  ])
+  const workshopCards = buildSyncedWorkshopCards(
+    g?.gastronomyWorkshopCards ?? [],
+    workshopPageData,
+    locale as 'de' | 'en',
+    nextDates,
+  )
+  const offerDetailsFromCms = (g?.gastronomyOfferDetails ?? [])
+    .filter((item) => item?.title?.trim() && item?.description?.trim())
+    .map((item) => ({
+      id: item.id,
+      title: item.title!.trim(),
+      description: item.description!.trim(),
+      icon: item.icon,
+    }))
+  const offerDetails =
+    offerDetailsFromCms.length > 0 &&
+    !(locale === 'en' &&
+      looksGerman(
+        offerDetailsFromCms.map((item) => `${item.title} ${item.description}`).join(' '),
+      ))
+      ? offerDetailsFromCms
+      : []
 
   const trustedByHeadingRaw = g?.gastronomyTrustedByHeading?.trim()
-  const trustedByHeading =
-    locale === 'de' && trustedByHeadingRaw?.toLocaleLowerCase('de-DE') === 'vertraut von'
-      ? TRUSTED_BY_DEFAULT_DE
-      : trustedByHeadingRaw || (locale === 'de' ? TRUSTED_BY_DEFAULT_DE : TRUSTED_BY_DEFAULT)
+  const trustedByHeading = resolveTrustedByHeading(
+    trustedByHeadingRaw,
+    locale as 'de' | 'en',
+    TRUSTED_BY_DEFAULT_DE,
+    TRUSTED_BY_DEFAULT,
+  )
   const trustBadgesFromCms = (g?.gastronomyTrustedByBadges ?? [])
     .map((b) => b?.label?.trim())
     .filter((x): x is string => Boolean(x))
-  const trustBadges =
-    trustBadgesFromCms.length > 0
-      ? trustBadgesFromCms
-      : locale === 'de'
-        ? [...FALLBACK_TRUST_BADGES_DE]
-        : [...FALLBACK_TRUST_BADGES_EN]
+  const trustBadges = resolveTrustBadges(
+    trustBadgesFromCms,
+    locale as 'de' | 'en',
+    FALLBACK_TRUST_BADGES_DE,
+    GASTRONOMY_TRUST_BADGES_EN,
+  )
 
-  const sliderPrevLabel =
-    g?.gastronomyHeroSliderPrevLabel ??
-    (locale === 'de' ? DEFAULT_SLIDER_PREV_DE : DEFAULT_SLIDER_PREV_EN)
-  const sliderNextLabel =
-    g?.gastronomyHeroSliderNextLabel ??
-    (locale === 'de' ? DEFAULT_SLIDER_NEXT_DE : DEFAULT_SLIDER_NEXT_EN)
+  const sliderPrevLabel = resolveSliderNavLabel(
+    g?.gastronomyHeroSliderPrevLabel,
+    locale as 'de' | 'en',
+    DEFAULT_SLIDER_PREV_DE,
+    DEFAULT_SLIDER_PREV_EN,
+    isGermanSliderPrevLabel,
+  )
+  const sliderNextLabel = resolveSliderNavLabel(
+    g?.gastronomyHeroSliderNextLabel,
+    locale as 'de' | 'en',
+    DEFAULT_SLIDER_NEXT_DE,
+    DEFAULT_SLIDER_NEXT_EN,
+    isGermanSliderNextLabel,
+  )
   const sliderAutoplayMs =
     typeof g?.gastronomyHeroSliderAutoplayMs === 'number' &&
     Number.isFinite(g.gastronomyHeroSliderAutoplayMs) &&
@@ -175,205 +272,203 @@ export default async function GastronomyPage() {
 
   const fallbackOutcomesDE = [
     {
-      before: 'Kein klares Ferment-Angebot',
-      after: 'Signature-Komponenten mit Wiedererkennungswert',
+      before: 'Vegetarische Optionen ohne Substanz',
+      after: 'Tempeh als eigenständiges, pflanzliches Hauptgericht',
     },
-    { before: 'Unsichere Team-Abläufe', after: 'Klare Standards für Produktion und Service' },
     {
-      before: 'Standard-Menüs ohne Differenzierung',
-      after: 'Markante Aromen mit eigener Handschrift',
+      before: 'Stark verarbeitete Fleischalternativen auf der Karte',
+      after: 'Fermentierte Produkte auf Basis echter, regionaler Zutaten',
+    },
+    {
+      before: 'Austauschbare Gerichte ohne Profil',
+      after: 'Gerichte mit eigener Handschrift und Wiedererkennungswert',
     },
   ]
-  const fallbackOutcomesEN = [
-    {
-      before: 'Vegetarian options without enough substance',
-      after: 'Tempeh as a stand-alone, plant-based main course',
-    },
-    {
-      before: 'Highly processed meat alternatives on the menu',
-      after: 'Fermented products built on real, regional ingredients',
-    },
-    {
-      before: 'Interchangeable dishes with no clear identity',
-      after: 'Dishes with a distinct signature and real recognition value',
-    },
-  ]
-  const cmsOutcomeRows = (g?.gastronomyOutcomesItems ?? []).filter(
-    (row) => row?.before?.trim() && row?.after?.trim(),
+  const cmsOutcomeRows = (g?.gastronomyOutcomesItems ?? [])
+    .filter((row) => row?.before?.trim() && row?.after?.trim())
+    .map((row) => ({
+      before: row.before!.trim(),
+      after: row.after!.trim(),
+    }))
+  const outcomes = resolveLocalizedRows(
+    cmsOutcomeRows,
+    locale as 'de' | 'en',
+    fallbackOutcomesDE,
+    GASTRONOMY_OUTCOMES_EN,
+    (rows) => rows.map((row) => `${row.before} ${row.after}`).join(' '),
   )
-  const outcomes =
-    cmsOutcomeRows.length > 0
-      ? cmsOutcomeRows.map((row) => ({
-          before: row.before!.trim(),
-          after: row.after!.trim(),
-        }))
-      : locale === 'de'
-        ? fallbackOutcomesDE
-        : fallbackOutcomesEN
-  const outcomeLabel =
-    g?.gastronomyOutcomesEyebrow?.trim() ||
-    (locale === 'de' ? 'Ergebnisse' : 'The situation in many kitchens')
-  const outcomeTitle =
-    g?.gastronomyOutcomesTitle?.trim() ||
-    (locale === 'de'
-      ? 'Vorher / Nachher in der Küche'
-      : 'How fermentation transforms your kitchen')
-  const outcomeBeforeLabel =
-    g?.gastronomyOutcomesBeforeLabel?.trim() || (locale === 'de' ? 'Vorher' : 'Before')
-  const outcomeAfterLabel =
-    g?.gastronomyOutcomesAfterLabel?.trim() || (locale === 'de' ? 'Nachher' : 'After')
+  const outcomeLabel = resolveLocalizedText(
+    g?.gastronomyOutcomesEyebrow,
+    locale as 'de' | 'en',
+    'Ausgangssituation in vielen Küchen',
+    'The situation in many kitchens',
+  )
+  const outcomeTitle = resolveLocalizedText(
+    g?.gastronomyOutcomesTitle,
+    locale as 'de' | 'en',
+    'So verändert Fermentation Ihre Küche',
+    'How fermentation transforms your kitchen',
+  )
+  const outcomeBeforeLabel = resolveLocalizedText(
+    g?.gastronomyOutcomesBeforeLabel,
+    locale as 'de' | 'en',
+    'Vorher',
+    'Before',
+    isGermanBeforeAfterLabel,
+  )
+  const outcomeAfterLabel = resolveLocalizedText(
+    g?.gastronomyOutcomesAfterLabel,
+    locale as 'de' | 'en',
+    'Nachher',
+    'After',
+    isGermanBeforeAfterLabel,
+  )
 
   const fallbackProcessDE = [
     {
-      title: 'Analyse',
+      title: 'Tempeh & Co.',
       description:
-        'Wir prüfen Ihr Konzept, Ihre Küche und Ihr Team-Setup, um die beste Ferment-Strategie zu definieren.',
+        'Für den Einsatz in Ihrer Küche – wir zeigen Ihnen, wie Fermente in Ihre Gerichte passen',
     },
     {
-      title: 'Team Workshop',
+      title: 'Schulungen für Küchenteams',
       description:
-        'Praxisnahes Training vor Ort oder hybrid, mit sofort einsetzbaren Techniken für Ihren Alltag.',
+        'Praxisnahes Wissen, um Fermente im Betrieb herzustellen und sinnvoll einzusetzen.',
     },
     {
-      title: 'Menü-Integration',
+      title: 'Teambuilding-Events für Unternehmen',
       description:
-        'Wir begleiten die Umsetzung in Ihre Karte, inklusive Prozesse, Qualität und geschmacklicher Linie.',
+        'Gemeinsam fermentieren und erleben – als kulinarisches Format für Ihr Team.',
     },
   ]
-  const fallbackProcessEN = [
-    {
-      title: 'Assessment',
-      description:
-        'We review your concept, kitchen setup, and team workflow to define the right fermentation strategy.',
-    },
-    {
-      title: 'Team Workshop',
-      description:
-        'Hands-on training on-site or hybrid, with techniques your team can use immediately.',
-    },
-    {
-      title: 'Menu Integration',
-      description:
-        'We support implementation into your menu, including process, quality, and flavor direction.',
-    },
-  ]
-  const cmsProcessSteps = (g?.gastronomyProcessSteps ?? []).filter(
-    (row) => row?.title?.trim() && row?.description?.trim(),
+  const cmsProcessSteps = (g?.gastronomyProcessSteps ?? [])
+    .filter((row) => row?.title?.trim() && row?.description?.trim())
+    .map((row) => ({
+      title: row.title!.trim(),
+      description: row.description!.trim(),
+    }))
+  const processSteps = resolveLocalizedRows(
+    cmsProcessSteps,
+    locale as 'de' | 'en',
+    fallbackProcessDE,
+    GASTRONOMY_PROCESS_STEPS_EN,
+    (rows) => rows.map((row) => `${row.title} ${row.description}`).join(' '),
   )
-  const processSteps =
-    cmsProcessSteps.length > 0
-      ? cmsProcessSteps.map((row) => ({
-          title: row.title!.trim(),
-          description: row.description!.trim(),
-        }))
-      : locale === 'de'
-        ? fallbackProcessDE
-        : fallbackProcessEN
-  const processLabel =
-    g?.gastronomyProcessEyebrow?.trim() || (locale === 'de' ? 'Ablauf' : 'Process')
-  const processTitle =
-    g?.gastronomyProcessTitle?.trim() ||
-    (locale === 'de' ? 'So arbeiten wir mit Ihrem Team' : 'How We Work With Your Team')
+  const processLabel = resolveLocalizedText(
+    g?.gastronomyProcessEyebrow,
+    locale as 'de' | 'en',
+    'Interesse geweckt?',
+    'Interested?',
+  )
+  const processTitle = resolveLocalizedText(
+    g?.gastronomyProcessTitle,
+    locale as 'de' | 'en',
+    'Einfach anfragen und ausprobieren',
+    'Just ask and give it a try',
+  )
 
   const fallbackTestimonialsDE = [
     {
       quote:
-        'Die Zusammenarbeit hat unsere Speisekarte klar aufgewertet. Die Fermentfreude-Ideen waren sofort umsetzbar.',
-      author: 'Küchenleitung, Boutique-Hotel',
+        'Der Käferbohnen-Tempeh von Fermentfreude überzeugt durch seinen mild-nussigen Geschmack und vielseitige Einsetzbarkeit. Eine echte Bereicherung für die steirische Küche.',
+      author: 'Michael Wankerl, Gerüchteküche',
     },
     {
       quote:
-        'Das Teamtraining war strukturiert, praxisnah und inspirierend. Genau das, was wir für unsere Küche gebraucht haben.',
-      author: 'Head Chef, Fine Dining Restaurant',
+        'Die Zusammenarbeit unterstreicht genau das, wofür wir stehen: saisonales Gemüse, handwerkliches Wissen und echte Wertschätzung für Lebensmittel. Die Workshops sind praxisnah, inspirierend und passen perfekt in unseren Marktgarten-Alltag.',
+      author: 'Johanna & Bernhard Steinhauszer, Unser Bauerngarten',
     },
     {
       quote:
-        'Unsere Gäste reagieren begeistert auf die neuen Ferment-Komponenten. Geschmacklich ein echter Unterschied.',
-      author: 'Operations Lead, Catering Company',
+        'Der SVS-Kulmland-Gesundheitstag wurde durch die Workshops von Fermentfreude fachlich und praktisch bereichert. Die Zusammenarbeit war professionell und die Rückmeldungen der Teilnehmer:innen sehr positiv.',
+      author: 'Mag. Robert Matzer, Kulmland',
     },
   ]
-  const fallbackTestimonialsEN = [
-    {
-      quote:
-        'The collaboration elevated our menu immediately. Fermentfreude delivered practical ideas we could execute fast.',
-      author: 'Kitchen Lead, Boutique Hotel',
-    },
-    {
-      quote:
-        'The team workshop was clear, hands-on, and inspiring. Exactly what we needed for our kitchen operations.',
-      author: 'Head Chef, Fine Dining Restaurant',
-    },
-    {
-      quote:
-        'Our guests love the new fermented elements. It made a visible difference in flavor and identity.',
-      author: 'Operations Lead, Catering Company',
-    },
-  ]
-  const cmsTestimonials = (g?.gastronomyTestimonialsItems ?? []).filter(
-    (row) => row?.quote?.trim() && row?.author?.trim(),
+  const cmsTestimonials = (g?.gastronomyTestimonialsItems ?? [])
+    .filter((row) => row?.quote?.trim() && row?.author?.trim())
+    .map((row) => ({
+      quote: row.quote!.trim(),
+      author: row.author!.trim(),
+    }))
+  const testimonials = resolveLocalizedRows(
+    cmsTestimonials,
+    locale as 'de' | 'en',
+    fallbackTestimonialsDE,
+    GASTRONOMY_TESTIMONIALS_EN,
+    (rows) => rows.map((row) => `${row.quote} ${row.author}`).join(' '),
   )
-  const testimonials =
-    cmsTestimonials.length > 0
-      ? cmsTestimonials.map((row) => ({
-          quote: row.quote!.trim(),
-          author: row.author!.trim(),
-        }))
-      : locale === 'de'
-        ? fallbackTestimonialsDE
-        : fallbackTestimonialsEN
-  const testimonialLabel =
-    g?.gastronomyTestimonialsEyebrow?.trim() || (locale === 'de' ? 'Referenzen' : 'Testimonials')
-  const testimonialTitle =
-    g?.gastronomyTestimonialsTitle?.trim() ||
-    (locale === 'de' ? 'Was Gastronomie-Profis sagen' : 'What Culinary Teams Say')
+  const testimonialLabel = resolveLocalizedText(
+    g?.gastronomyTestimonialsEyebrow,
+    locale as 'de' | 'en',
+    'Referenzen',
+    'References',
+  )
+  const testimonialTitle = resolveLocalizedText(
+    g?.gastronomyTestimonialsTitle,
+    locale as 'de' | 'en',
+    'Das sagen Gastro-Profis, Betriebe und Unternehmer:innen',
+    'What gastro professionals, businesses and entrepreneurs say',
+  )
 
   const fallbackFaqDE = [
     {
-      q: 'Für welche Teamgröße ist das geeignet?',
-      a: 'Unsere Formate funktionieren für kleine Küchen-Teams ebenso wie für größere Hotel- oder Catering-Strukturen.',
+      q: 'Wie aufwendig ist der Einsatz von Tempeh im Betrieb?',
+      a: 'Der Einsatz ist unkompliziert. Tempeh kommt als Block (ca. 200g) und kann wie andere Komponenten gebraten, mariniert oder weiterverarbeitet werden und lässt sich ohne große Umstellungen in bestehende Abläufe integrieren',
     },
     {
-      q: 'Wie schnell können wir starten?',
-      a: 'Je nach Verfügbarkeit meist innerhalb weniger Wochen, inklusive klarer Vorbereitungsschritte.',
+      q: 'Muss ich meine Gerichte oder Abläufe anpassen?',
+      a: 'Nein. Tempeh lässt sich in bestehende Gerichte integrieren oder als neue Komponente einsetzen – ohne dass die Küche grundlegend umgestellt werden muss.',
     },
     {
-      q: 'Geht das auch bei uns vor Ort?',
-      a: 'Ja, wir bieten On-Site Workshops und begleiten die Implementierung direkt in Ihrer Küche.',
+      q: 'Ist Tempeh ein Ersatzprodukt für Fleisch?',
+      a: 'Nein. Tempeh ist zwar sehr proteinreich aber ein eigenständiges Lebensmittel auf Basis von Hülsenfrüchte mit eigener Textur und Aromatik – kein klassischer Fleischersatz.',
+    },
+    {
+      q: 'Ist Tempeh vegan?',
+      a: 'Ja, bei Tempeh handelt es sich um ein veganes und glutenfreies Produkt.',
+    },
+    {
+      q: 'Braucht mein Team Erfahrung mit Fermentation?',
+      a: 'Nein. Wir zeigen praxisnah, wie Tempeh und andere Fermente im Betrieb eingesetzt oder selbst hergestellt werden können – abgestimmt auf Ihren Küchenalltag.',
+    },
+    {
+      q: 'Wie wird Tempeh gelagert und wie lange ist er haltbar?',
+      a: 'Tempeh wird gekühlt gelagert und ist bei richtiger Lagerung mehrere Wochen haltbar. Er lässt sich gut in bestehende Kühlketten integrieren.',
+    },
+    {
+      q: 'Wie erfolgt die Lieferung?',
+      a: 'Wir liefern vorerst im Großraum Graz und in der Steiermark direkt aus. Der Versand innerhalb Österreichs ist in Planung und wird schrittweise aufgebaut.',
+    },
+    {
+      q: 'Bieten Sie neben Tempeh auch andere Produkte an?',
+      a: 'Ja. Neben Käferbohnen-Tempeh bieten wir ausgewählte fermentierte Produkte wie Kimchi oder andere Lakto-Fermente an.',
     },
   ]
-  const fallbackFaqEN = [
-    {
-      q: 'What team size is this suitable for?',
-      a: 'Our formats work for small kitchen teams as well as larger hotel and catering operations.',
-    },
-    {
-      q: 'How quickly can we start?',
-      a: 'Depending on availability, usually within a few weeks including clear preparation steps.',
-    },
-    {
-      q: 'Can this be delivered on-site?',
-      a: 'Yes. We offer on-site workshops and support implementation directly in your kitchen.',
-    },
-  ]
-  const cmsFaqItems = (g?.gastronomyFaqItems ?? []).filter(
-    (row) => row?.question?.trim() && row?.answer?.trim(),
+  const cmsFaqItems = (g?.gastronomyFaqItems ?? [])
+    .filter((row) => row?.question?.trim() && row?.answer?.trim())
+    .map((row) => ({
+      q: row.question!.trim(),
+      a: row.answer!.trim(),
+    }))
+  const faqMiniItems = resolveLocalizedRows(
+    cmsFaqItems,
+    locale as 'de' | 'en',
+    fallbackFaqDE,
+    GASTRONOMY_FAQ_EN,
+    (rows) => rows.map((row) => `${row.q} ${row.a}`).join(' '),
   )
-  const faqMiniItems =
-    cmsFaqItems.length > 0
-      ? cmsFaqItems.map((row) => ({
-          q: row.question!.trim(),
-          a: row.answer!.trim(),
-        }))
-      : locale === 'de'
-        ? fallbackFaqDE
-        : fallbackFaqEN
-  const faqMiniLabel =
-    g?.gastronomyFaqEyebrow?.trim() || (locale === 'de' ? 'B2B-FAQ' : 'B2B FAQ')
-  const faqMiniTitle =
-    g?.gastronomyFaqTitle?.trim() ||
-    (locale === 'de'
-      ? 'Häufige Fragen von Gastronomiebetrieben'
-      : 'Common Questions From Hospitality Teams')
+  const faqMiniLabel = resolveLocalizedText(
+    g?.gastronomyFaqEyebrow,
+    locale as 'de' | 'en',
+    'FAQ',
+    'FAQ',
+  )
+  const faqMiniTitle = resolveLocalizedText(
+    g?.gastronomyFaqTitle,
+    locale as 'de' | 'en',
+    'Häufige Fragen',
+    'Common questions',
+  )
 
   const formPlaceholders = g?.gastronomyFormPlaceholders as
     | { firstName?: string; lastName?: string; email?: string; message?: string }
@@ -381,8 +476,12 @@ export default async function GastronomyPage() {
   const subjectOptions = g?.gastronomySubjectOptions as
     | { default?: string; options?: Array<{ label?: string }> }
     | undefined
-  const contactFormHeading =
-    g?.gastronomyContactFormHeading ?? (locale === 'de' ? 'Frag uns alles' : 'Ask About Anything')
+  const contactFormHeading = resolveLocalizedText(
+    g?.gastronomyContactFormHeading,
+    localeKey,
+    'Frag uns alles',
+    'Ask About Anything',
+  )
 
   const contactHeadingFallback =
     locale === 'de' ? 'Kontakt' : 'Contact'
@@ -410,8 +509,18 @@ export default async function GastronomyPage() {
     },
     contactImage: g?.gastronomyContactImage ?? null,
     contact: {
-      heading: g?.gastronomyContactTitle ?? contactHeadingFallback,
-      description: g?.gastronomyContactDescription ?? contactDescriptionFallback,
+      heading: resolveLocalizedText(
+        g?.gastronomyContactTitle,
+        localeKey,
+        contactHeadingFallback,
+        contactHeadingFallback,
+      ),
+      description: resolveLocalizedText(
+        g?.gastronomyContactDescription,
+        localeKey,
+        contactDescriptionFallback,
+        contactDescriptionFallback,
+      ),
       address: g?.gastronomyContactAddress ?? undefined,
       phone: g?.gastronomyContactPhone ?? undefined,
       email: g?.gastronomyContactEmail ?? undefined,
@@ -419,22 +528,35 @@ export default async function GastronomyPage() {
     contactForm: {
       formHeading: contactFormHeading,
       placeholders: {
-        firstName:
-          formPlaceholders?.firstName ?? (locale === 'de' ? 'Vorname' : 'First Name'),
-        lastName:
-          formPlaceholders?.lastName ?? (locale === 'de' ? 'Nachname' : 'Last Name'),
-        email: formPlaceholders?.email ?? (locale === 'de' ? 'E-Mail' : 'Email'),
-        message: formPlaceholders?.message ?? (locale === 'de' ? 'Nachricht' : 'Message'),
+        firstName: resolveLocalizedText(
+          formPlaceholders?.firstName,
+          localeKey,
+          'Vorname',
+          'First Name',
+        ),
+        lastName: resolveLocalizedText(
+          formPlaceholders?.lastName,
+          localeKey,
+          'Nachname',
+          'Last Name',
+        ),
+        email: resolveLocalizedText(formPlaceholders?.email, localeKey, 'E-Mail', 'Email'),
+        message: resolveLocalizedText(formPlaceholders?.message, localeKey, 'Nachricht', 'Message'),
       },
       subjectOptions: {
-        default:
-          subjectOptions?.default ?? (locale === 'de' ? 'Betreff' : 'Subject'),
+        default: resolveLocalizedText(subjectOptions?.default, localeKey, 'Betreff', 'Subject'),
         options:
-          subjectOptionLabels.length > 0 ? subjectOptionLabels : defaultSubjectOptions,
+          subjectOptionLabels.length > 0 &&
+          !(localeKey === 'en' && looksGerman(subjectOptionLabels.join(' ')))
+            ? subjectOptionLabels
+            : defaultSubjectOptions,
       },
-      submitButton:
-        g?.gastronomySubmitButtonLabel ??
-        (locale === 'de' ? 'Nachricht senden' : 'Send message'),
+      submitButton: resolveLocalizedText(
+        g?.gastronomySubmitButtonLabel,
+        localeKey,
+        'Nachricht senden',
+        'Send message',
+      ),
     },
     ctaBanner: {
       heading: '',

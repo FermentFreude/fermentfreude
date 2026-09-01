@@ -7,7 +7,8 @@ import type {
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
 import Link from 'next/link'
-import React, { useEffect, useRef } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
  *  HARDCODED DEFAULTS  (English — CMS data always wins)
@@ -94,11 +95,14 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 }) => {
   /* ── refs ──────────────────────────────────────────────────── */
   const outerRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const workshopGroupRefs = useRef<(HTMLDivElement | null)[]>([])
   const imgInnerRefs = useRef<(HTMLDivElement | null)[]>([])
   const scrollRef = useRef({ current: 0, target: 0, limit: 0 })
   const rafRef = useRef<number>(0)
   const isActiveRef = useRef(false)
+  const [activeWorkshopIndex, setActiveWorkshopIndex] = useState(0)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
   const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
@@ -208,6 +212,50 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     }
   }, [])
 
+  const workshopCount = resolvedWorkshops.length
+
+  const goToWorkshop = useCallback((index: number) => {
+    const clamped = Math.max(0, Math.min(workshopCount - 1, index))
+    const el = workshopGroupRefs.current[clamped]
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' })
+    setActiveWorkshopIndex(clamped)
+  }, [workshopCount])
+
+  /* Mobile: sync dot indicator while user swipes */
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track || workshopCount === 0) return
+
+    const syncActiveIndex = () => {
+      if (window.innerWidth >= 1024) return
+
+      const trackRect = track.getBoundingClientRect()
+      let closest = 0
+      let minDistance = Number.POSITIVE_INFINITY
+
+      workshopGroupRefs.current.forEach((group, index) => {
+        if (!group) return
+        const distance = Math.abs(group.getBoundingClientRect().left - trackRect.left)
+        if (distance < minDistance) {
+          minDistance = distance
+          closest = index
+        }
+      })
+
+      setActiveWorkshopIndex(closest)
+    }
+
+    syncActiveIndex()
+    track.addEventListener('scroll', syncActiveIndex, { passive: true })
+    window.addEventListener('resize', syncActiveIndex)
+
+    return () => {
+      track.removeEventListener('scroll', syncActiveIndex)
+      window.removeEventListener('resize', syncActiveIndex)
+    }
+  }, [workshopCount])
+
   if (visible === false) return null
 
   /* ═══════════════════════════════════════════════════════════ */
@@ -225,6 +273,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     >
       {/* ── Viewport: sticky on desktop, native horizontal scroll on mobile */}
       <section
+        ref={trackRef}
         className="relative w-full bg-white overflow-x-auto overflow-y-hidden lg:sticky lg:top-0 lg:overflow-hidden h-auto lg:h-svh py-10 lg:py-0"
         style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
       >
@@ -250,10 +299,20 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               const secondImg = workshop.image2 ?? workshop.image
 
               return (
-                <React.Fragment key={wIdx}>
+                <div
+                  key={wIdx}
+                  ref={(el) => {
+                    workshopGroupRefs.current[wIdx] = el
+                  }}
+                  className="flex shrink-0 items-center snap-start lg:snap-none"
+                  style={{
+                    gap: 'clamp(0.75rem, 2vw, 1.5rem)',
+                    marginRight: wIdx < resolvedWorkshops.length - 1 ? 'clamp(1rem, 4vw, 4vw)' : undefined,
+                  }}
+                >
                   {/* ── LEFT COLUMN — title on top, small image below ── */}
                   <div
-                    className="shrink-0 flex flex-col self-center snap-start lg:snap-none w-[80vw] sm:w-[20rem] md:w-88 lg:w-85"
+                    className="shrink-0 flex flex-col self-center w-[80vw] sm:w-[20rem] md:w-88 lg:w-85"
                     style={{ height: 'clamp(62svh, 74svh, 78vh)' }}
                   >
                     <div className="shrink-0 pb-4 md:pb-5 w-full">
@@ -383,17 +442,63 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                       </Link>
                     </div>
                   </div>
-
-                  {/* ── Gap between workshop groups ─────────────────── */}
-                  {wIdx < resolvedWorkshops.length - 1 && (
-                    <div className="shrink-0" style={{ width: 'clamp(1rem, 4vw, 4vw)' }} />
-                  )}
-                </React.Fragment>
+                </div>
               )
             })}
           </div>
         </div>
       </section>
+
+      {/* Mobile carousel controls — hidden on desktop sticky scene */}
+      {workshopCount > 1 ? (
+        <div className="lg:hidden flex justify-center px-6 pt-2 pb-6">
+          <div
+            className="inline-flex items-center gap-4"
+            role="group"
+            aria-label="Workshop navigation"
+          >
+            <button
+              type="button"
+              onClick={() => goToWorkshop(activeWorkshopIndex - 1)}
+              disabled={activeWorkshopIndex === 0}
+              className="flex items-center justify-center text-[#555954] transition-opacity disabled:opacity-25"
+              aria-label="Previous workshop"
+            >
+              <ChevronLeft className="size-5" strokeWidth={1.75} />
+            </button>
+
+            <div className="flex items-center gap-2.5">
+              {resolvedWorkshops.map((workshop, index) => {
+                const isActive = index === activeWorkshopIndex
+                return (
+                  <button
+                    key={workshop.ctaLink ?? index}
+                    type="button"
+                    onClick={() => goToWorkshop(index)}
+                    className={`rounded-full transition-all duration-200 ${
+                      isActive
+                        ? 'size-2.5 bg-[#E6BE68]'
+                        : 'size-1.5 bg-[#555954]/30 hover:bg-[#555954]/45'
+                    }`}
+                    aria-label={`${workshop.title}${isActive ? ' (current)' : ''}`}
+                    aria-current={isActive ? 'true' : undefined}
+                  />
+                )
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => goToWorkshop(activeWorkshopIndex + 1)}
+              disabled={activeWorkshopIndex >= workshopCount - 1}
+              className="flex items-center justify-center text-[#555954] transition-opacity disabled:opacity-25"
+              aria-label="Next workshop"
+            >
+              <ChevronRight className="size-5" strokeWidth={1.75} />
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

@@ -16,6 +16,8 @@ interface FadeInProps {
   from?: 'bottom' | 'left' | 'right'
   /** Animation duration in seconds (default 0.9) */
   duration?: number
+  /** Animate on mount (for above-the-fold heroes) instead of on scroll */
+  immediate?: boolean
 }
 
 export const FadeIn: React.FC<FadeInProps> = ({
@@ -24,6 +26,7 @@ export const FadeIn: React.FC<FadeInProps> = ({
   delay = 0,
   from = 'bottom',
   duration = 1.4,
+  immediate = false,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -44,6 +47,23 @@ export const FadeIn: React.FC<FadeInProps> = ({
       }
 
       const { y, x, skewY } = initial[from]
+
+      if (immediate) {
+        gsap.fromTo(
+          ref.current,
+          { y, x, opacity: 0, skewY },
+          {
+            y: 0,
+            x: 0,
+            opacity: 1,
+            skewY: 0,
+            duration,
+            delay: delay / 1000,
+            ease: 'power2.out',
+          },
+        )
+        return
+      }
 
       gsap.set(ref.current, { y, x, opacity: 0, skewY })
 
