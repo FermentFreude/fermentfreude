@@ -19,6 +19,8 @@ import { confirmWorkshopBookings } from '@/collections/Orders/confirmWorkshopBoo
 import { copyCustomerNameFromTransaction } from '@/collections/Orders/copyCustomerNameFromTransaction'
 import { decrementInventory } from '@/collections/Orders/decrementInventory'
 import { generateDownloadToken } from '@/collections/Orders/generateDownloadToken'
+import { markCartPurchased } from '@/collections/Orders/markCartPurchased'
+import { redeemVoucherOnOrderComplete } from '@/collections/Orders/redeemVoucherOnOrderComplete'
 import { restoreWorkshopSpotsOnDelete } from '@/collections/Orders/restoreWorkshopSpotsOnDelete'
 import { setInvoiceIssuedAt } from '@/collections/Orders/setInvoiceIssuedAt'
 import {
@@ -27,6 +29,7 @@ import {
   handlePaymentFailed,
 } from '@/collections/Orders/stripeWebhooks'
 import { ProductsCollection } from '@/collections/Products'
+import { preventDuplicatePayment } from '@/collections/Transactions/preventDuplicatePayment'
 import { assignInvoiceNumber } from '@/hooks/assignInvoiceNumber'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
@@ -420,9 +423,11 @@ export const plugins: Plugin[] = [
           afterChange: [
             ...(defaultCollection?.hooks?.afterChange ?? []),
             setInvoiceIssuedAt,
+            markCartPurchased,
             decrementInventory,
             autoEnrollOnPurchase,
             confirmWorkshopBookings,
+            redeemVoucherOnOrderComplete,
             sendOrderConfirmationEmail,
             autoCompleteDigitalOrders,
           ],
@@ -487,7 +492,31 @@ export const plugins: Plugin[] = [
             label: 'Pickup Address',
             admin: { description: 'Full address of the pickup location.' },
           },
+          {
+            name: 'voucherCode',
+            type: 'text',
+            label: 'Voucher Code',
+            admin: {
+              description:
+                'Voucher applied as a partial discount at checkout (cart total exceeded the voucher value, so the remainder was paid via Stripe). Read by redeemVoucherOnOrderComplete to mark the voucher redeemed once the Order is created.',
+            },
+          },
+          {
+            name: 'voucherDiscountAmount',
+            type: 'number',
+            label: 'Voucher Discount (cents)',
+            admin: {
+              description: 'Amount (in cents) deducted from the cart subtotal via the voucher above.',
+            },
+          },
         ],
+        hooks: {
+          ...defaultCollection?.hooks,
+          beforeValidate: [
+            ...(defaultCollection?.hooks?.beforeValidate ?? []),
+            preventDuplicatePayment,
+          ],
+        },
       }),
     },
   }),

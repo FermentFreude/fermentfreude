@@ -25,7 +25,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { cssVariables } from '@/cssVariables'
 import { gtmBeginCheckout } from '@/lib/gtm'
 import { Address } from '@/payload-types'
-import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
+import {
+  useAddresses,
+  useCart,
+  useEcommerce,
+  usePayments,
+} from '@payloadcms/plugin-ecommerce/client/react'
 import { toast } from 'sonner'
 
 const CHECKOUT_DE = {
@@ -75,6 +80,8 @@ const CHECKOUT_DE = {
   tryAgain: 'Erneut versuchen',
   yourCart: 'Warenkorb',
   orderFailed: 'Bestellung fehlgeschlagen.',
+  cartAlreadyPurchased:
+    'Dieser Warenkorb wurde bereits erfolgreich bezahlt. Bitte lade die Seite neu, um eine neue Bestellung zu starten.',
   connectionError: 'Verbindungsfehler. Bitte versuche es erneut.',
   or: 'oder',
   total: 'Gesamt',
@@ -143,6 +150,8 @@ const CHECKOUT_EN = {
   tryAgain: 'Try again',
   yourCart: 'Your cart',
   orderFailed: 'Order failed.',
+  cartAlreadyPurchased:
+    'This cart has already been paid for successfully. Please reload the page to start a new order.',
   connectionError: 'Connection error. Please try again.',
   or: 'or',
   total: 'Total',
@@ -195,6 +204,9 @@ export const CheckoutPage: React.FC = () => {
   const isDe = locale === 'de'
   const router = useRouter()
   const { cart, clearCart, removeItem, refreshCart } = useCart()
+  // Only for onLogin — the plugin's own guest-cart-to-user transfer, which
+  // neither useCart() nor usePayments() re-exposes (see maybeCreateAccount).
+  const { onLogin: onEcommerceLogin } = useEcommerce()
   const [error, setError] = useState<null | string>(null)
   /**
    * State to manage the email input for guest checkout.
@@ -363,39 +375,6 @@ export const CheckoutPage: React.FC = () => {
       console.error('Failed to parse workshop bookings from localStorage:', error)
     }
   }, [])
-
-  // Fetch the active pickup location from the workshop-locations collection.
-  // Falls back to DEFAULT_PICKUP_LOCATION on any error / empty result.
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const res = await fetch(
-          `/api/workshop-locations?where[isActive][equals]=true&limit=1&depth=0&locale=${locale}`,
-          { cache: 'no-store' },
-        )
-        if (!res.ok) return
-        const json = (await res.json()) as {
-          docs?: { id: string; name?: string; address?: string }[]
-        }
-        const loc = json?.docs?.[0]
-        if (!cancelled && loc?.name && loc?.address) {
-          setPickupLocation({
-            ...DEFAULT_PICKUP_LOCATION,
-            id: loc.id,
-            name: loc.name,
-            address: loc.address,
-            mapLink: buildMapLink(loc.name, loc.address),
-          })
-        }
-      } catch {
-        // ignore — fallback used
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [locale])
 
   // Fetch the active pickup location from the workshop-locations collection.
   // Falls back to DEFAULT_PICKUP_LOCATION on any error / empty result.
@@ -676,6 +655,20 @@ export const CheckoutPage: React.FC = () => {
   const initiatePaymentIntent = useCallback(
     async (paymentID: string) => {
       try {
+        // Guard against retrying a payment for a cart that already
+        // completed successfully — e.g. a client-side crash right after a
+        // real charge went through, followed by a reload/retry. The actual
+        // safety net is server-side (preventDuplicatePayment.ts on
+        // Transactions, and the explicit check in the discounted-payment
+        // route); this just gives a clear message instead of a confusing
+        // generic error or, worse, a second real charge slipping through
+        // before the server-side check is reached.
+        if (cart?.status === 'purchased') {
+          setError(t.cartAlreadyPurchased)
+          toast.error(t.cartAlreadyPurchased)
+          return
+        }
+
         const additionalData: Record<string, unknown> = {
           ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
           ...(firstName.trim() ? { customerFirstName: firstName.trim() } : {}),
@@ -699,19 +692,59 @@ export const CheckoutPage: React.FC = () => {
             : shippingAddress
         }
 
-        const paymentData = (await initiatePayment(paymentID, {
-          additionalData,
-        })) as Record<string, unknown>
+        let paymentData: Record<string, unknown> | null = null
+
+        // A voucher that only PARTIALLY covers the cart still needs a real
+        // Stripe charge for the remainder. The plugin's own initiatePayment
+        // has no concept of a voucher and would charge the full cart total —
+        // route this case through our own endpoint instead, which charges
+        // cart total minus voucher value and marks the voucher for
+        // redemption once the resulting order is created. (A voucher that
+        // fully covers the cart never reaches this function at all — see
+        // handleVoucherOrder.)
+        if (voucherApplied && !voucherCoversAll && cart?.id) {
+          const res = await fetch('/api/voucher/initiate-discounted-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              voucherCode: voucherApplied.code,
+              cartID: cart.id,
+              userId: user?.id,
+              ...additionalData,
+            }),
+          })
+          const data = await res.json()
+          if (!res.ok || data?.success === false) {
+            throw new Error(data?.error || t.orderFailed)
+          }
+          paymentData = data
+        } else {
+          paymentData = (await initiatePayment(paymentID, {
+            additionalData,
+          })) as Record<string, unknown>
+        }
 
         if (paymentData) {
           setPaymentData(paymentData)
         }
       } catch (error) {
-        const errorData = error instanceof Error ? JSON.parse(error.message) : {}
+        // initiatePayment (plugin) throws Errors whose .message is a JSON
+        // string; our own fetch above throws a plain string message — handle
+        // both without letting a JSON.parse failure crash this handler.
+        let errorData: Record<string, unknown> = {}
+        try {
+          errorData = error instanceof Error ? JSON.parse(error.message) : {}
+        } catch {
+          // not JSON — fall through to the plain-message branches below
+        }
         let errorMessage = 'An error occurred while initiating payment.'
 
-        if (errorData?.cause?.code === 'OutOfStock') {
+        if (errorData?.cause && (errorData.cause as { code?: string })?.code === 'OutOfStock') {
           errorMessage = 'One or more items in your cart are out of stock.'
+        } else if (typeof errorData?.message === 'string' && errorData.message) {
+          errorMessage = errorData.message
+        } else if (error instanceof Error && error.message) {
+          errorMessage = error.message
         }
 
         setError(errorMessage)
@@ -730,6 +763,13 @@ export const CheckoutPage: React.FC = () => {
       isAllPhysicalPickup,
       pickupDate,
       pickupTime,
+      voucherApplied,
+      voucherCoversAll,
+      cart?.id,
+      cart?.status,
+      user?.id,
+      t.orderFailed,
+      t.cartAlreadyPurchased,
     ],
   )
 
@@ -755,8 +795,24 @@ export const CheckoutPage: React.FC = () => {
       }
       try {
         await login({ email, password: accountPassword })
+        // Transfer the guest cart to the newly authenticated user. Without
+        // this, the cart's `customer` field stays null while every
+        // subsequent request is now authenticated — Carts' access control
+        // grants read/update either to the document owner (customer field
+        // match) or via a matching guest secret, and a same-page checkout
+        // still has the guest secret in memory so it limped along, but a
+        // redirect-based payment (3DS, PayPal — a full page reload through
+        // return_url) re-initializes cart state from scratch and can lose
+        // that secret, leaving the cart unreachable by the now-logged-in
+        // customer who just paid for it. onLogin (from the ecommerce
+        // plugin) is the documented fix for exactly this — merges/transfers
+        // the guest cart to the user's account. Neither useCart() nor
+        // usePayments() re-exposes it, hence the separate useEcommerce()
+        // above.
+        await onEcommerceLogin()
       } catch {
-        // Login failed after create — still proceed as guest
+        // Login (or the cart transfer) failed after create — still proceed
+        // as guest rather than block checkout entirely.
       }
     } catch {
       setCreateAccountError(t.createAccountNetworkError)
@@ -765,7 +821,7 @@ export const CheckoutPage: React.FC = () => {
     }
     setIsCreatingAccount(false)
     return true
-  }, [createAccountOpt, accountPassword, user, email, customerName, login, t])
+  }, [createAccountOpt, accountPassword, user, email, customerName, login, onEcommerceLogin, t])
 
   if (!stripe) return null
 

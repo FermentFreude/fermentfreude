@@ -4612,6 +4612,14 @@ export interface Transaction {
    * Full address of the pickup location.
    */
   pickupAddress?: string | null;
+  /**
+   * Voucher applied as a partial discount at checkout (cart total exceeded the voucher value, so the remainder was paid via Stripe). Read by redeemVoucherOnOrderComplete to mark the voucher redeemed once the Order is created.
+   */
+  voucherCode?: string | null;
+  /**
+   * Amount (in cents) deducted from the cart subtotal via the voucher above.
+   */
+  voucherDiscountAmount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -8226,6 +8234,8 @@ export interface TransactionsSelect<T extends boolean = true> {
   pickupTime?: T;
   pickupLocation?: T;
   pickupAddress?: T;
+  voucherCode?: T;
+  voucherDiscountAmount?: T;
   updatedAt?: T;
   createdAt?: T;
 }

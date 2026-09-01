@@ -70,7 +70,15 @@ export const CheckoutForm: React.FC<Props> = ({
 
       if (stripe && elements) {
         try {
-          const returnUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''}`
+          // Built from the browser's actual origin, not NEXT_PUBLIC_SERVER_URL —
+          // that env var is baked in at build time, so it can silently drift
+          // from whatever URL this deployment is actually being served at
+          // (e.g. a preview/staging alias domain). A mismatch here breaks
+          // every redirect-based payment method (PayPal, iDEAL, Klarna...)
+          // with a 400 from Stripe, since card payments never redirect and
+          // never hit this path. Matches the pattern already used in
+          // VoucherCheckoutClient.tsx for the same reason.
+          const returnUrl = `${window.location.origin}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''}`
 
           // Stash the buyer name so the redirect-based ConfirmOrder fallback
           // (Klarna, iDEAL, etc.) can attach it to the transaction too.
