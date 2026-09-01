@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import type { Page } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
+import { normalizeAppLocale, strictLocaleQuery } from '@/utilities/payloadLocaleQuery'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
@@ -16,11 +17,12 @@ const configPromise = Promise.resolve(config)
 
 async function getVoucherDocument(locale?: 'de' | 'en') {
   const payload = await getPayload({ config: configPromise })
+  const cmsLocale = normalizeAppLocale(locale)
   const result = await payload.find({
     collection: 'pages',
     depth: 4,
     limit: 1,
-    locale: locale ?? 'de',
+    ...strictLocaleQuery(cmsLocale),
     where: {
       and: [{ slug: { equals: 'voucher' } }, { _status: { equals: 'published' } }],
     },

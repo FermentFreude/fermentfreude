@@ -1,6 +1,7 @@
 import { Media as MediaComponent } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
+import { strictLocaleQuery, normalizeAppLocale } from '@/utilities/payloadLocaleQuery'
 import configPromise from '@payload-config'
 import Link from 'next/link'
 import { getPayload } from 'payload'
@@ -24,14 +25,15 @@ export async function generateMetadata() {
 
 export default async function TippsIndexPage() {
   const locale = await getLocale()
-  const isDe = locale === 'de'
+  const cmsLocale = normalizeAppLocale(locale)
+  const isDe = cmsLocale === 'de'
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
     collection: 'posts',
     limit: 100,
     depth: 1,
-    locale,
+    ...strictLocaleQuery(cmsLocale),
     sort: '-updatedAt',
   })
 

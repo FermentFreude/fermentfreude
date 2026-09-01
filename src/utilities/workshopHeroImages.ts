@@ -4,6 +4,7 @@ import type { Payload } from 'payload'
 import { getPayload } from 'payload'
 
 import type { NextWorkshopDateInfo } from '@/utilities/getNextWorkshopDatesByHref'
+import { strictLocaleQuery } from '@/utilities/payloadLocaleQuery'
 
 /** Maps workshop card button URLs to Pages collection slugs. */
 export const WORKSHOP_HREF_TO_PAGE_SLUG: Record<string, string> = {
@@ -106,7 +107,7 @@ async function loadWorkshopPages(
     collection: 'pages',
     where: { slug: { in: slugs } },
     limit: slugs.length,
-    locale,
+    ...strictLocaleQuery(locale),
     depth,
   })
 
