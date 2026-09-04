@@ -1,5 +1,6 @@
 import type { Media as MediaType, Page as PageType, WorkshopSliderBlock } from '@/payload-types'
 import configPromise from '@payload-config'
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 
 export type WorkshopItem = {
@@ -28,8 +29,11 @@ export type WorkshopItem = {
 
 /**
  * Extract all workshops from WorkshopSlider blocks and HeroSlider hero across pages.
+ *
+ * Uncached — always hits Payload/MongoDB directly. Exported only for the
+ * cached wrapper below; page code should import `getAllWorkshops`, not this.
  */
-export async function getAllWorkshops(locale: 'de' | 'en'): Promise<WorkshopItem[]> {
+async function getAllWorkshopsUncached(locale: 'de' | 'en'): Promise<WorkshopItem[]> {
   const payload = await getPayload({ config: configPromise })
   const pages = await payload.find({
     collection: 'pages',
@@ -138,6 +142,19 @@ export async function getAllWorkshops(locale: 'de' | 'en'): Promise<WorkshopItem
 
   return workshops
 }
+
+/**
+ * Cached entry point every page/route should use. Every workshop detail page
+ * load previously hit MongoDB directly for this (fetches up to 100 Pages
+ * docs at depth 3) with no caching at all — a real cost under a traffic
+ * spike on Atlas M0. Reuses the 'pages' cache tag so it's invalidated by the
+ * exact same Pages save hook that already revalidates `getCachedPage` in
+ * `[slug]/page.tsx` — no separate revalidation wiring needed.
+ */
+export const getAllWorkshops = unstable_cache(getAllWorkshopsUncached, ['all-workshops'], {
+  revalidate: 3600,
+  tags: ['pages'],
+})
 
 /**
  * Find workshop by slug (from ctaLink) and return it with full data.
