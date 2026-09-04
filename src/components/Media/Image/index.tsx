@@ -34,6 +34,7 @@ export const Image: React.FC<MediaProps> = (props) => {
     height: heightFromProps,
     imgClassName,
     onClick,
+    onError: onErrorFromProps,
     onLoad: onLoadFromProps,
     priority,
     resource,
@@ -95,6 +96,11 @@ export const Image: React.FC<MediaProps> = (props) => {
       fill={fill}
       height={!fill ? height || heightFromProps : undefined}
       onClick={onClick}
+      onError={() => {
+        if (typeof onErrorFromProps === 'function') {
+          onErrorFromProps()
+        }
+      }}
       onLoad={() => {
         setIsLoading(false)
         if (typeof onLoadFromProps === 'function') {

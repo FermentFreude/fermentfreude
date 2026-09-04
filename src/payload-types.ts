@@ -551,7 +551,63 @@ export interface Product {
    */
   weightGrams?: number | null;
   /**
-   * z.B. "3 Tage nach Kauf" / "3 days after purchase"
+   * Für „Auf einen Blick“ auf der Produktseite, z. B. „Österreich“.
+   */
+  productOrigin?: string | null;
+  /**
+   * Für „Auf einen Blick“, z. B. „Graz“.
+   */
+  madeIn?: string | null;
+  /**
+   * Kurze Zeile unter dem Titel, z. B. „Nussig-aromatisch. Herzhaft. Voller Umami.“
+   */
+  pdpTagline?: string | null;
+  /**
+   * Überschrift im Geschmacks-Abschnitt, z. B. „Nussig · Herzhaft · Umami“
+   */
+  pdpTasteHeadline?: string | null;
+  /**
+   * Erster Absatz im Geschmacks-Abschnitt (unter der Überschrift).
+   */
+  pdpStoryIntro?: string | null;
+  /**
+   * Absatz unter der Geschmacks-Leiste (z. B. Anbraten, Marinaden).
+   */
+  pdpStoryDetail?: string | null;
+  /**
+   * Werden als horizontale Leiste angezeigt, z. B. NUSSIG → HERZHAFT → UMAMI.
+   */
+  pdpFlavorNotes?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Kleine Trust-Zeilen unter dem Warenkorb-Button.
+   */
+  pdpTrustPoints?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Drei Schritte, z. B. Schneiden → Anbraten → Genießen.
+   */
+  pdpUsageSteps?:
+    | {
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Überschrift über den Zubereitungsschritten, z. B. „So wird dein Tempeh richtig gut“.
+   */
+  pdpUsageSectionTitle?: string | null;
+  /**
+   * z.B. "6 Wochen" / "6 weeks" — wird auf der Produktseite als MHD angezeigt.
    */
   bestBefore?: string | null;
   /**
@@ -3388,7 +3444,7 @@ export interface ShopAutomatenBlock {
    */
   eyebrow?: string | null;
   /**
-   * e.g. "Find our products — anytime."
+   * e.g. "Find our products, anytime."
    */
   heading?: string | null;
   /**
@@ -3540,7 +3596,7 @@ export interface ShopHeroBlock {
    */
   bottomTagline?: string | null;
   /**
-   * e.g. "Abholung in Graz — jede Woche frisch."
+   * e.g. "Abholung in Graz, jede Woche frisch."
    */
   bottomSubtitle?: string | null;
   /**
@@ -7993,6 +8049,32 @@ export interface ProductsSelect<T extends boolean = true> {
   volumeML?: T;
   alcoholContent?: T;
   weightGrams?: T;
+  productOrigin?: T;
+  madeIn?: T;
+  pdpTagline?: T;
+  pdpTasteHeadline?: T;
+  pdpStoryIntro?: T;
+  pdpStoryDetail?: T;
+  pdpFlavorNotes?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  pdpTrustPoints?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  pdpUsageSteps?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  pdpUsageSectionTitle?: T;
   bestBefore?: T;
   workshopRef?: T;
   courseSlug?: T;
@@ -8762,20 +8844,64 @@ export interface WorkshopCardsGlobal {
   createdAt?: string | null;
 }
 /**
- * Localized labels for product detail headings and notices.
+ * Texte & Überschriften der Produktdetailseite (alle Lebensmittelprodukte). / Labels and section titles for the food product detail page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "product-detail-labels-global".
  */
 export interface ProductDetailLabelsGlobal {
   id: string;
+  /**
+   * Link oben auf der Produktseite.
+   */
+  backToShopLabel?: string | null;
+  addToCartLabel?: string | null;
+  soldOutLabel?: string | null;
+  seasonalBadgeLabel?: string | null;
+  /**
+   * Kleine Zeile unter dem Warenkorb-Button, z. B. Abholung in Graz.
+   */
+  deliveryNotice?: string | null;
+  navDetailsLabel?: string | null;
+  navTastePrepLabel?: string | null;
+  navStorageLabel?: string | null;
+  groupDetailsTitle?: string | null;
+  groupDetailsDescription?: string | null;
+  glanceTitle?: string | null;
+  weightLabel?: string | null;
+  portionLabel?: string | null;
+  originLabel?: string | null;
+  madeInLabel?: string | null;
   ingredientsLabel?: string | null;
   allergensLabel?: string | null;
+  /**
+   * Kleiner Hinweis unter der Zutatenliste (Etikett gilt).
+   */
+  ingredientsDisclaimer?: string | null;
+  groupTasteTitle?: string | null;
+  groupTasteDescription?: string | null;
+  /**
+   * z. B. „So schmeckt er“
+   */
+  tasteSectionLabel?: string | null;
+  /**
+   * z. B. „So schmeckt es“ für Kimchi
+   */
+  tasteSectionLabelNeutral?: string | null;
+  groupStorageTitle?: string | null;
+  groupStorageDescription?: string | null;
   storageShelfLifeLabel?: string | null;
   shelfLifeLabel?: string | null;
+  bestBeforeLabel?: string | null;
   howToUseLabel?: string | null;
   instructionsBeforeUseLabel?: string | null;
-  deliveryNotice?: string | null;
+  /**
+   * z. B. „Das könnte dir auch schmecken“
+   */
+  relatedTitle?: string | null;
+  shopFooterTitle?: string | null;
+  shopFooterDescription?: string | null;
+  shopFooterCta?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -9071,13 +9197,39 @@ export interface WorkshopCardsGlobalSelect<T extends boolean = true> {
  * via the `definition` "product-detail-labels-global_select".
  */
 export interface ProductDetailLabelsGlobalSelect<T extends boolean = true> {
+  backToShopLabel?: T;
+  addToCartLabel?: T;
+  soldOutLabel?: T;
+  seasonalBadgeLabel?: T;
+  deliveryNotice?: T;
+  navDetailsLabel?: T;
+  navTastePrepLabel?: T;
+  navStorageLabel?: T;
+  groupDetailsTitle?: T;
+  groupDetailsDescription?: T;
+  glanceTitle?: T;
+  weightLabel?: T;
+  portionLabel?: T;
+  originLabel?: T;
+  madeInLabel?: T;
   ingredientsLabel?: T;
   allergensLabel?: T;
+  ingredientsDisclaimer?: T;
+  groupTasteTitle?: T;
+  groupTasteDescription?: T;
+  tasteSectionLabel?: T;
+  tasteSectionLabelNeutral?: T;
+  groupStorageTitle?: T;
+  groupStorageDescription?: T;
   storageShelfLifeLabel?: T;
   shelfLifeLabel?: T;
+  bestBeforeLabel?: T;
   howToUseLabel?: T;
   instructionsBeforeUseLabel?: T;
-  deliveryNotice?: T;
+  relatedTitle?: T;
+  shopFooterTitle?: T;
+  shopFooterDescription?: T;
+  shopFooterCta?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

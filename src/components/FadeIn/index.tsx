@@ -16,7 +16,10 @@ interface FadeInProps {
   from?: 'bottom' | 'left' | 'right'
   /** Animation duration in seconds (default 0.9) */
   duration?: number
-  /** Animate on mount (for above-the-fold heroes) instead of on scroll */
+  /**
+   * Above-the-fold: animate on mount (no ScrollTrigger) and stay visible
+   * if GSAP fails to run (no initial opacity: 0).
+   */
   immediate?: boolean
 }
 
@@ -75,18 +78,23 @@ export const FadeIn: React.FC<FadeInProps> = ({
         duration,
         delay: delay / 1000, // convert ms to seconds for backwards compat
         ease: 'power2.out',
-        scrollTrigger: {
-          trigger: ref.current,
-          start: 'top 82%',
-          once: true,
-        },
+        ...(immediate
+          ? {}
+          : {
+              scrollTrigger: {
+                trigger: ref.current,
+                start: 'top 82%',
+                once: true,
+              },
+            }),
       })
     },
-    { scope: ref },
+    { scope: ref, dependencies: [delay, from, duration, immediate] },
   )
 
+  // Above-the-fold heroes must stay visible if GSAP fails to run (e.g. client bundle error).
   return (
-    <div ref={ref} className={className} style={{ opacity: 0 }}>
+    <div ref={ref} className={className} style={immediate ? undefined : { opacity: 0 }}>
       {children}
     </div>
   )

@@ -145,8 +145,7 @@ export function AutomatenEditorial({
   tipImageAlt,
 }: Props) {
   const [active, setActive] = useState(0)
-  const tipIndex = locations.length // 03 after Automaten cards
-  const tipNum = String(tipIndex + 1).padStart(2, '0')
+  const tipIndex = locations.length
   const showTip = Boolean(tipText && tipMapsUrl)
 
   return (
@@ -156,7 +155,7 @@ export function AutomatenEditorial({
           <p className="font-display text-[11px] font-bold uppercase tracking-[0.22em] text-ff-gold">
             {eyebrow}
           </p>
-          <h2 className="mt-4 whitespace-nowrap font-display text-[1.85rem] font-bold leading-[1.08] tracking-tight text-ff-near-black sm:text-[2.1rem] md:text-[2.85rem] lg:text-[3.15rem]">
+          <h2 className="mt-4 font-display text-[1.85rem] font-bold leading-[1.08] tracking-tight text-ff-near-black sm:text-[2.1rem] md:text-[2.85rem] lg:text-[3.15rem]">
             {heading}
           </h2>
           {body && (
@@ -185,7 +184,7 @@ export function AutomatenEditorial({
                 className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"
               />
               <p className="absolute bottom-5 left-5 right-5 z-10 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-white/90">
-                Graz · 24/7
+                {eyebrow}
               </p>
             </div>
           </div>
@@ -193,26 +192,16 @@ export function AutomatenEditorial({
           {/* Right cards */}
           <div className="lg:col-span-7">
             <ol className="relative m-0 list-none space-y-0 p-0">
-              <span
-                aria-hidden
-                className="pointer-events-none absolute bottom-8 left-[1.15rem] top-8 hidden w-px bg-ff-border-light md:left-[1.35rem] md:block"
-              />
-
               {locations.map((loc, i) => {
-                const num = String(i + 1).padStart(2, '0')
                 return (
                   <li key={`${loc.name}-${i}`} className="relative pb-6 last:pb-0 md:pb-8">
                     <article
                       onMouseEnter={() => setActive(i)}
                       onFocus={() => setActive(i)}
-                      className={`automaten-loc-card group relative grid min-h-[10rem] overflow-hidden rounded-[1.5rem] border border-ff-border-light bg-[#FDFBF8] shadow-[0_10px_30px_rgba(26,26,26,0.05)] transition-all duration-500 md:grid-cols-[13rem_1fr] ${
+                      className={`automaten-loc-card group relative grid min-h-[10rem] overflow-hidden rounded-[1.5rem] bg-[#FDFBF8] shadow-[0_10px_30px_rgba(26,26,26,0.05)] transition-all duration-500 md:grid-cols-[13rem_1fr] ${
                         active === i ? 'automaten-loc-card--active' : ''
                       }`}
                     >
-                      <span className="absolute left-3 top-4 z-20 flex size-8 items-center justify-center rounded-full bg-ff-near-black font-display text-[10px] font-bold text-ff-ivory md:left-4 md:top-5 md:size-9 md:text-[11px]">
-                        {num}
-                      </span>
-
                       <div className="relative aspect-[4/3] overflow-hidden bg-[#ECE5DE] md:aspect-auto md:min-h-[10rem] md:h-full">
                         {loc.imageUrl ? (
                           <Image
@@ -228,7 +217,7 @@ export function AutomatenEditorial({
                         )}
                       </div>
 
-                      <div className="flex flex-col p-5 pl-12 md:p-6 md:pl-7">
+                      <div className="flex flex-col p-5 md:p-6">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="inline-flex w-fit items-center rounded-full bg-[#ECE5DE] px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.12em] text-ff-charcoal">
                             {loc.badge}
@@ -270,20 +259,16 @@ export function AutomatenEditorial({
 
               {showTip && (
                 <li className="relative pb-0 md:pb-0">
-                  <p className="mb-3 pl-12 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold md:pl-0">
+                  <p className="mb-3 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold">
                     {tipLabel} · Restaurant
                   </p>
                   <article
                     onMouseEnter={() => setActive(tipIndex)}
                     onFocus={() => setActive(tipIndex)}
-                    className={`automaten-loc-card group relative grid min-h-[10rem] overflow-hidden rounded-[1.5rem] border border-ff-border-light bg-[#FDFBF8] shadow-[0_10px_30px_rgba(26,26,26,0.05)] transition-all duration-500 md:grid-cols-[13rem_1fr] ${
+                    className={`automaten-loc-card group relative grid min-h-[10rem] overflow-hidden rounded-[1.5rem] bg-[#FDFBF8] shadow-[0_10px_30px_rgba(26,26,26,0.05)] transition-all duration-500 md:grid-cols-[13rem_1fr] ${
                       active === tipIndex ? 'automaten-loc-card--active' : ''
                     }`}
                   >
-                    <span className="absolute left-3 top-4 z-20 flex size-8 items-center justify-center rounded-full bg-ff-near-black font-display text-[10px] font-bold text-ff-ivory md:left-4 md:top-5 md:size-9 md:text-[11px]">
-                      {tipNum}
-                    </span>
-
                     <div className="relative aspect-[4/3] overflow-hidden bg-[#ECE5DE] md:aspect-auto md:min-h-[10rem] md:h-full">
                       {tipImageUrl ? (
                         <Image
@@ -299,7 +284,7 @@ export function AutomatenEditorial({
                       )}
                     </div>
 
-                    <div className="flex flex-col p-5 pl-12 md:p-6 md:pl-7">
+                    <div className="flex flex-col p-5 md:p-6">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="inline-flex w-fit items-center rounded-full bg-[#ECE5DE] px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.12em] text-ff-charcoal">
                           Restaurant
