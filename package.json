@@ -16,7 +16,7 @@
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation next lint --fix",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "seed": "npx tsx src/scripts/seed-all.ts",
-    "postinstall": "node scripts/patch-payload-body-hydration.mjs && node scripts/patch-ecommerce-inventory-decrement.mjs",
+    "postinstall": "node scripts/patch-payload-body-hydration.mjs && node scripts/patch-ecommerce-inventory-decrement.mjs && node scripts/patch-ecommerce-purchased-cart.mjs",
     "patch:email-visuals": "npx tsx src/scripts/patch-brevo-email-visuals.ts",
     "patch:shop": "npx tsx src/scripts/patch-shop-three-products.ts",
     "patch:shop-images": "npx tsx src/scripts/patch-shop-product-images.ts",
