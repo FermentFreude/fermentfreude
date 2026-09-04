@@ -218,18 +218,11 @@ export function FeldInsGlasExperience({
     glas?: MediaType | null
   }
 }) {
-  const sectionImages = [
-    images.feld ?? images.hands,
-    images.kueche ?? images.hands ?? images.konzept,
-    images.glas ?? images.jars,
-  ]
+  const sectionImages = [images.feld, images.kueche, images.glas]
 
   return (
     <>
-      <ConceptSection
-        copy={copy}
-        image={images.konzept ?? images.hands ?? images.jars}
-      />
+      <ConceptSection copy={copy} image={images.konzept} />
 
       <JourneyPath copy={copy} />
 

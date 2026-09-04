@@ -46,12 +46,12 @@ import { FeldInsGlasHowTos } from './FeldInsGlas/HowTos'
 import { FeldInsGlasVoucher } from './FeldInsGlas/Voucher'
 import { FeldInsGlasMoreWorkshops } from './FeldInsGlas/MoreWorkshops'
 import {
-  FELD_INS_GLAS_COPY,
   FELD_INS_GLAS_HOWTO_SLUGS,
   FELD_INS_GLAS_SLUG,
+  buildFeldInsGlasCopy,
   getFeldInsGlasWorkshop,
+  resolveFeldInsGlasImages,
 } from './FeldInsGlas/data'
-import { getFeldInsGlasImages } from './FeldInsGlas/images'
 import { getWorkshopBySlug } from './workshop-data'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -246,10 +246,19 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
 
   // Special Marktgarten workshop metadata
   if (slug === FELD_INS_GLAS_SLUG) {
-    const copy = FELD_INS_GLAS_COPY[locale === 'en' ? 'en' : 'de']
+    const localeKey = locale === 'en' ? 'en' : 'de'
+    const payload = await getPayload({ config: configPromise })
+    const pageResult = await payload.find({
+      collection: 'pages',
+      where: { slug: { equals: slug }, _status: { equals: 'published' } },
+      limit: 1,
+      depth: 0,
+      locale: localeKey,
+    })
+    const copy = buildFeldInsGlasCopy(localeKey, pageResult.docs[0]?.workshopDetail)
     return {
       title: `${copy.title} | Fermentfreude`,
-      description: copy.partnerLine,
+      description: copy.heroSubline,
     }
   }
 
@@ -478,10 +487,10 @@ export default async function WorkshopDetailPage({ params }: Args) {
    * ══════════════════════════════════════════════════════════════ */
   if (slug === FELD_INS_GLAS_SLUG) {
     const isDe = locale === 'de'
-    const copy = FELD_INS_GLAS_COPY[isDe ? 'de' : 'en']
-    const workshopData = getFeldInsGlasWorkshop(isDe ? 'de' : 'en')
-    const images = await getFeldInsGlasImages()
     const localeKey = isDe ? 'de' : 'en'
+    const copy = buildFeldInsGlasCopy(localeKey, detail)
+    const workshopData = getFeldInsGlasWorkshop(localeKey)
+    const images = await resolveFeldInsGlasImages(detail)
 
     const similarWorkshops = allWorkshops.filter((w) => {
       const s = getSlugFromCtaLink(w.ctaLink)
@@ -539,7 +548,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
               bookingPrice: detail?.bookingPrice ?? copy.price,
               bookingPriceSuffix: detail?.bookingPriceSuffix ?? copy.priceLabel,
               bookingCurrency: detail?.bookingCurrency ?? copy.currency,
-              bookingImage: images.jars ?? images.hands ?? images.hero,
+              bookingImage: images.booking ?? images.hero,
               bookingAttributes:
                 detail?.bookingAttributes ?? copy.attributes.map((text) => ({ text })),
               bookingViewDatesLabel: detail?.bookingViewDatesLabel ?? workshopData.viewDatesLabel,
@@ -572,23 +581,26 @@ export default async function WorkshopDetailPage({ params }: Args) {
           />
         </div>
 
-        <LaktoCalendar
-          cms={
-            detail
-              ? {
-                  eyebrow: detail.calendarEyebrow,
-                  title: detail.calendarTitle,
-                  description: detail.calendarDescription,
-                  months: detail.calendarMonths,
-                }
-              : undefined
-          }
-        />
+        {detail?.showSeasonalCalendar !== false ? (
+          <LaktoCalendar
+            cms={
+              detail
+                ? {
+                    eyebrow: detail.calendarEyebrow,
+                    title: detail.calendarTitle,
+                    description: detail.calendarDescription,
+                    months: detail.calendarMonths,
+                  }
+                : undefined
+            }
+          />
+        ) : null}
 
         <FeldInsGlasHowTos
           locale={localeKey}
-          eyebrow={detail?.howToEyebrow ?? (isDe ? 'Wissen' : 'Knowledge')}
-          title={detail?.howToTitle ?? (isDe ? 'Tipps & Guides.' : 'Tips & Guides.')}
+          eyebrow={detail?.howToEyebrow ?? copy.howToEyebrow}
+          title={detail?.howToTitle ?? copy.howToTitle}
+          description={detail?.howToDescription ?? copy.howToDescription}
           articles={howToForFeld.map((post) => ({
             id: String(post.id),
             slug: post.slug,
@@ -613,15 +625,24 @@ export default async function WorkshopDetailPage({ params }: Args) {
         />
 
         <FeldInsGlasVoucher
-          cms={voucherCms}
+          cms={
+            voucherCms
+              ? {
+                  ...voucherCms,
+                  imageQuote: detail?.voucherImageQuote,
+                }
+              : undefined
+          }
           locale={localeKey}
-          image={images.feld ?? images.konzept ?? images.jars}
+          image={images.voucher ?? images.feld ?? images.konzept}
         />
 
         <FeldInsGlasMoreWorkshops
           workshops={similarWorkshops}
           locale={localeKey}
+          eyebrow={detail?.sliderPillLabel ?? (isDe ? 'Mehr entdecken' : 'Discover more')}
           heading={workshopTypesHeading}
+          subtitle={detail?.sliderSubtitle}
         />
       </article>
     )

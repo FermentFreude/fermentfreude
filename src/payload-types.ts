@@ -1958,6 +1958,74 @@ export interface Page {
         }[]
       | null;
     /**
+     * e.g. "Jetzt buchen" / "Book now". Vom Feld ins Glas only.
+     */
+    heroPrimaryCtaLabel?: string | null;
+    /**
+     * e.g. "Mehr erfahren" / "Learn more". Vom Feld ins Glas only.
+     */
+    heroSecondaryCtaLabel?: string | null;
+    /**
+     * Circular badge text (e.g. "EINMALIGE VERANSTALTUNG"). Vom Feld ins Glas only.
+     */
+    heroSealRingText?: string | null;
+    /**
+     * Top word in the spinning seal (e.g. "FER").
+     */
+    heroSealCenterLine1?: string | null;
+    /**
+     * Bottom word in the spinning seal (e.g. "MEN").
+     */
+    heroSealCenterLine2?: string | null;
+    /**
+     * e.g. "Das Konzept" / "The concept".
+     */
+    conceptEyebrow?: string | null;
+    conceptTitle?: string | null;
+    /**
+     * Pull quote shown with gold left border.
+     */
+    conceptQuote?: string | null;
+    conceptText?: string | null;
+    conceptTextSecondary?: string | null;
+    /**
+     * e.g. "Aug – Okt" / "Aug – Oct".
+     */
+    conceptSeasonMonths?: string | null;
+    /**
+     * e.g. "Saison 2025" / "Season 2025".
+     */
+    conceptSeasonLabel?: string | null;
+    /**
+     * Portrait image beside the concept copy (4:5 crop).
+     */
+    conceptImage?: (string | null) | Media;
+    /**
+     * Exactly 3 steps: Feld (01), Küche (02), Glas (03). Order matters.
+     */
+    journeySections?:
+      | {
+          /**
+           * e.g. "01", "02", "03".
+           */
+          label: string;
+          /**
+           * Nav label (e.g. "Feld" / "Field").
+           */
+          name: string;
+          title: string;
+          description: string;
+          bullets?:
+            | {
+                text: string;
+                id?: string | null;
+              }[]
+            | null;
+          image?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+    /**
      * e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"
      */
     bookingEyebrow?: string | null;
@@ -2199,6 +2267,10 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Quote overlaid on the voucher background photo. Vom Feld ins Glas only.
+     */
+    voucherImageQuote?: string | null;
     /**
      * e.g. "HÄUFIGE FRAGEN" / "FAQ"
      */
@@ -6350,6 +6422,35 @@ export interface PagesSelect<T extends boolean = true> {
               text?: T;
               id?: T;
             };
+        heroPrimaryCtaLabel?: T;
+        heroSecondaryCtaLabel?: T;
+        heroSealRingText?: T;
+        heroSealCenterLine1?: T;
+        heroSealCenterLine2?: T;
+        conceptEyebrow?: T;
+        conceptTitle?: T;
+        conceptQuote?: T;
+        conceptText?: T;
+        conceptTextSecondary?: T;
+        conceptSeasonMonths?: T;
+        conceptSeasonLabel?: T;
+        conceptImage?: T;
+        journeySections?:
+          | T
+          | {
+              label?: T;
+              name?: T;
+              title?: T;
+              description?: T;
+              bullets?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              image?: T;
+              id?: T;
+            };
         bookingEyebrow?: T;
         bookingTitle?: T;
         bookingPrice?: T;
@@ -6447,6 +6548,7 @@ export interface PagesSelect<T extends boolean = true> {
               text?: T;
               id?: T;
             };
+        voucherImageQuote?: T;
         faqEyebrow?: T;
         faqTitle?: T;
         faqDescription?: T;

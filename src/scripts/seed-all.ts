@@ -78,6 +78,10 @@ const scripts: Record<string, { name: string; file: string }> = {
     name: 'Gastronomy page (B2B + workshop cards)',
     file: 'seed-gastronomy.ts',
   },
+  'feld-ins-glas-drive-images': {
+    name: 'Vom Feld ins Glas — Google Drive photos → CMS',
+    file: 'seed-feld-ins-glas-drive-images.ts',
+  },
 }
 
 const allOrder = [

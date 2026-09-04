@@ -68,17 +68,27 @@ export function FeldInsGlasHero({
       >
         <EditionSeal
           ringText={copy.sealRingText}
-          centerText={copy.sealCenterText}
+          centerLines={copy.sealCenterLines}
           size={148}
         />
       </div>
 
       <div className="relative z-10 max-w-3xl px-6 pb-16 pt-32 sm:px-10 lg:px-16 lg:pb-24 xl:px-24">
+        {copy.eyebrow ? (
+          <p
+            className={`font-display text-[11px] font-bold uppercase tracking-[0.35em] text-[#E6BE68] transition-all duration-700 ${
+              on ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            }`}
+            style={{ transitionDelay: '40ms' }}
+          >
+            {copy.eyebrow}
+          </p>
+        ) : null}
         {/* Two-line title — medium weight like Figma, not heavy black */}
         <h1
           className={`font-display font-medium tracking-[-0.035em] text-white transition-all duration-700 ${
             on ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'
-          }`}
+          } ${copy.eyebrow ? 'mt-4' : ''}`}
           style={{
             fontSize: 'clamp(2.75rem, 7.5vw, 5.5rem)',
             lineHeight: 1.02,
@@ -100,6 +110,24 @@ export function FeldInsGlasHero({
         >
           {copy.heroSubline}
         </p>
+
+        {copy.attributes.length > 0 ? (
+          <ul
+            className={`mt-6 flex flex-wrap gap-2 transition-all duration-700 ${
+              on ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            }`}
+            style={{ transitionDelay: '220ms' }}
+          >
+            {copy.attributes.map((attr) => (
+              <li
+                key={attr}
+                className="rounded-full border border-white/25 px-3 py-1 font-display text-[10px] font-bold uppercase tracking-[0.16em] text-white/90"
+              >
+                {attr}
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
         <div
           className={`mt-10 flex flex-col items-start gap-4 transition-all duration-700 sm:flex-row sm:items-center sm:gap-8 ${

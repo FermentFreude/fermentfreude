@@ -58,11 +58,13 @@ export function FeldInsGlasHowTos({
   locale = 'de',
   eyebrow,
   title,
+  description,
 }: {
   articles: Article[]
   locale?: 'de' | 'en'
   eyebrow?: string | null
   title?: string | null
+  description?: string | null
 }) {
   const sectionRef = useRef<HTMLElement>(null)
   // Start visible so SSR/no-JS links stay usable; animate only after mount.
@@ -109,6 +111,11 @@ export function FeldInsGlasHowTos({
 
   const resolvedEyebrow = eyebrow ?? (locale === 'de' ? 'Wissen' : 'Knowledge')
   const resolvedTitle = title ?? (locale === 'de' ? 'Tipps & Guides.' : 'Tips & Guides.')
+  const resolvedDescription =
+    description ??
+    (locale === 'de'
+      ? 'Anleitungen, Rezepte und praktische Tipps rund um den Marktgarten-Workshop.'
+      : 'Guides, recipes and practical tips for the market-garden workshop.')
 
   return (
     <section ref={sectionRef} className="bg-[#FFFEF9]">
@@ -127,6 +134,11 @@ export function FeldInsGlasHowTos({
           >
             {resolvedTitle}
           </h2>
+          {resolvedDescription ? (
+            <p className="mt-4 max-w-2xl text-body leading-relaxed text-[#4B4B4B]">
+              {resolvedDescription}
+            </p>
+          ) : null}
         </div>
 
         <div

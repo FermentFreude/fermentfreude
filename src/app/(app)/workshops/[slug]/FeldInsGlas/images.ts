@@ -27,6 +27,8 @@ export type FeldInsGlasImages = {
   feld: Media | null
   kueche: Media | null
   glas: Media | null
+  booking: Media | null
+  voucher: Media | null
 }
 
 /** Read-only: for page render. Does not upload. */
@@ -54,5 +56,7 @@ export async function getFeldInsGlasImages(): Promise<FeldInsGlasImages> {
     feld: feld ?? hands ?? (await findByAlt(payload, 'feld-ins-glas-produce')),
     kueche: kueche ?? hands ?? (await findByAlt(payload, 'feld-ins-glas-produce')),
     glas: glas ?? jars ?? (await findByAlt(payload, 'feld-ins-glas-ferment')),
+    booking: hands ?? jars ?? heroWheat ?? hero,
+    voucher: feld ?? konzept ?? jars ?? hands,
   }
 }
