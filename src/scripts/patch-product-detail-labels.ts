@@ -3,6 +3,7 @@
  * Run: pnpm exec tsx src/scripts/patch-product-detail-labels.ts
  */
 import path from 'path'
+// @ts-expect-error — dotenv types not resolved via package.json exports
 import { config as dotenvConfig } from 'dotenv'
 dotenvConfig({ path: path.resolve(process.cwd(), '.env') })
 

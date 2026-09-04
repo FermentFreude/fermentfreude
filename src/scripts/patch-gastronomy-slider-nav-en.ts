@@ -42,7 +42,7 @@ async function patch() {
     depth: 0,
   })
 
-  const g = enDoc.gastronomy ?? {}
+  const g = enDoc.gastronomy ?? ({} as NonNullable<typeof enDoc.gastronomy>)
   const prev = g.gastronomyHeroSliderPrevLabel?.trim()
   const next = g.gastronomyHeroSliderNextLabel?.trim()
 
