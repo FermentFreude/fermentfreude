@@ -6,6 +6,7 @@ import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
+import { strictLocaleQuery } from '@/utilities/payloadLocaleQuery'
 import configPromise from '@payload-config'
 import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
@@ -99,7 +100,7 @@ const queryPageBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' |
       depth: 5,
       draft: draft,
       limit: 1,
-      locale: resolvedLocale,
+      ...strictLocaleQuery(resolvedLocale),
       overrideAccess: draft,
       pagination: false,
       where: {
@@ -132,7 +133,7 @@ const getCachedPage = unstable_cache(
       depth: 5,
       draft: false,
       limit: 1,
-      locale,
+      ...strictLocaleQuery(locale),
       overrideAccess: false,
       pagination: false,
       where: {

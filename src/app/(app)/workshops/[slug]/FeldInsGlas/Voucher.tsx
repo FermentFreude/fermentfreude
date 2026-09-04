@@ -11,6 +11,10 @@ import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import type { LaktoVoucherCMS } from '../LaktoVoucherCta'
 
+export type FeldInsGlasVoucherCMS = LaktoVoucherCMS & {
+  imageQuote?: string | null
+}
+
 function isResolvedMedia(img: unknown): img is MediaType {
   return typeof img === 'object' && img !== null && 'url' in img
 }
@@ -53,7 +57,7 @@ export function FeldInsGlasVoucher({
   locale = 'de',
   image,
 }: {
-  cms?: LaktoVoucherCMS
+  cms?: FeldInsGlasVoucherCMS
   locale?: 'de' | 'en'
   image?: MediaType | string | null
 }) {
@@ -77,10 +81,25 @@ export function FeldInsGlasVoucher({
     return () => obs.disconnect()
   }, [])
 
+  const eyebrow = cms?.eyebrow ?? defaults.eyebrow
+  const title = cms?.title ?? defaults.title
+  const description = cms?.description ?? defaults.description
+  const primaryLabel = cms?.primaryLabel ?? defaults.primaryLabel
+  const secondaryLabel = cms?.secondaryLabel ?? defaults.secondaryLabel
+  const imageQuote = cms?.imageQuote ?? defaults.imageQuote
+  const bullets =
+    (cms?.pills?.length ?? 0) > 0
+      ? cms!.pills!.map((p) => p.text ?? '').filter(Boolean)
+      : defaults.bullets
+
   const primaryHref =
     cms?.primaryHref === '/voucher'
       ? '/workshops/voucher'
       : (cms?.primaryHref ?? '/workshops/voucher')
+  const secondaryHref =
+    cms?.secondaryHref === '/voucher'
+      ? '/workshops/voucher'
+      : (cms?.secondaryHref ?? '/shop')
 
   const photo = isResolvedMedia(image)
     ? image
@@ -109,7 +128,7 @@ export function FeldInsGlasVoucher({
       {/* Quote on the photo (right / bottom area on desktop) */}
       <div className="pointer-events-none absolute bottom-8 right-6 z-[1] hidden max-w-xs lg:bottom-12 lg:right-12 lg:block xl:right-16">
         <p className="font-display text-[1.15rem] font-medium leading-snug text-white">
-          {defaults.imageQuote}
+          {imageQuote}
         </p>
         <span className="mt-3 block h-px w-10 bg-[#E6BE68]" aria-hidden />
       </div>
@@ -122,19 +141,19 @@ export function FeldInsGlasVoucher({
           }`}
         >
           <p className="font-display text-[11px] font-bold uppercase tracking-[0.35em] text-[#E6BE68]">
-            {defaults.eyebrow}
+            {eyebrow}
           </p>
           <h2
             className="mt-4 font-display font-medium tracking-[-0.03em] text-[#1A1A1A]"
             style={{ fontSize: 'clamp(1.55rem, 2.6vw, 2.15rem)', lineHeight: 1.15 }}
           >
-            {defaults.title}
+            {title}
           </h2>
 
-          <p className="mt-5 text-body leading-relaxed text-[#4B4B4B]">{defaults.description}</p>
+          <p className="mt-5 text-body leading-relaxed text-[#4B4B4B]">{description}</p>
 
           <ul className="mt-7 space-y-3.5">
-            {defaults.bullets.map((bullet) => (
+            {bullets.map((bullet) => (
               <li key={bullet} className="flex items-center gap-4">
                 <span className="h-px w-6 shrink-0 bg-[#E6BE68]" aria-hidden />
                 <span className="text-body-sm leading-snug text-[#1A1A1A]">{bullet}</span>
@@ -147,14 +166,14 @@ export function FeldInsGlasVoucher({
               href={primaryHref}
               className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A] px-8 py-3.5 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#E6BE68] hover:text-[#1A1A1A]"
             >
-              {defaults.primaryLabel}
+              {primaryLabel}
               <span aria-hidden>→</span>
             </Link>
             <Link
-              href="/shop"
+              href={secondaryHref}
               className="font-display text-[11px] font-bold uppercase tracking-[0.18em] text-[#1A1A1A]/55 underline decoration-[#E6BE68]/50 underline-offset-6 transition-colors hover:text-[#1A1A1A] hover:decoration-[#E6BE68]"
             >
-              {defaults.secondaryLabel}
+              {secondaryLabel}
             </Link>
           </div>
         </div>
@@ -163,7 +182,7 @@ export function FeldInsGlasVoucher({
       {/* Mobile quote under the card */}
       <div className="relative z-10 px-6 pb-10 lg:hidden">
         <p className="max-w-xs font-display text-[1.05rem] font-medium leading-snug text-white">
-          {defaults.imageQuote}
+          {imageQuote}
         </p>
         <span className="mt-3 block h-px w-10 bg-[#E6BE68]" aria-hidden />
       </div>

@@ -4,7 +4,7 @@ import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Address } from '@/payload-types'
 import { useLocale } from '@/providers/Locale'
-import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
+import { useEcommerce, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
 import React, { FormEvent, useCallback } from 'react'
@@ -58,7 +58,17 @@ export const CheckoutForm: React.FC<Props> = ({
   const [error, setError] = React.useState<null | string>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const router = useRouter()
-  const { clearCart } = useCart()
+  // clearSession, not useCart()'s clearCart(): clearCart() only empties the
+  // SAME cart's items via a network round trip and leaves cartID pointed at
+  // it — if that call hiccups, the stale, now-purchased cart stays live for
+  // the rest of the browser session and the next checkout attempt 409s with
+  // "This cart has already been paid for." clearSession() is synchronous,
+  // has no network dependency, and is guaranteed to detach us from this
+  // cart. It also resets the ecommerce provider's own internal user/
+  // addresses state, but nothing in this app's UI reads those — the real
+  // "am I logged in" state comes from the separate AuthProvider — so that
+  // reset is invisible here.
+  const { clearSession } = useEcommerce()
   const { confirmOrder } = usePayments()
   const t = locale === 'de' ? FORM_DE : FORM_EN
 
@@ -70,7 +80,15 @@ export const CheckoutForm: React.FC<Props> = ({
 
       if (stripe && elements) {
         try {
-          const returnUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''}`
+          // Built from the browser's actual origin, not NEXT_PUBLIC_SERVER_URL —
+          // that env var is baked in at build time, so it can silently drift
+          // from whatever URL this deployment is actually being served at
+          // (e.g. a preview/staging alias domain). A mismatch here breaks
+          // every redirect-based payment method (PayPal, iDEAL, Klarna...)
+          // with a 400 from Stripe, since card payments never redirect and
+          // never hit this path. Matches the pattern already used in
+          // VoucherCheckoutClient.tsx for the same reason.
+          const returnUrl = `${window.location.origin}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''}`
 
           // Stash the buyer name so the redirect-based ConfirmOrder fallback
           // (Klarna, iDEAL, etc.) can attach it to the transaction too.
@@ -157,7 +175,7 @@ export const CheckoutForm: React.FC<Props> = ({
                 'orderID' in confirmResult &&
                 confirmResult.orderID
               ) {
-                clearCart()
+                clearSession()
 
                 const emailParam = customerEmail
                   ? `&email=${encodeURIComponent(customerEmail)}`
@@ -203,7 +221,7 @@ export const CheckoutForm: React.FC<Props> = ({
       billingAddress?.postalCode,
       billingAddress?.country,
       confirmOrder,
-      clearCart,
+      clearSession,
       router,
       isAllDigital,
       hasWorkshop,

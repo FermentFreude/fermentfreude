@@ -1,5 +1,6 @@
 import { buildOrderReceiptData } from '@/lib/buildOrderReceiptData'
-import { generateOrderReceiptPDF } from '@/lib/generateOrderReceiptPDF'
+import { generateRechnungManPDF } from '@/lib/pdf/generateRechnungManPDF'
+import { generateRechnungWebPDF } from '@/lib/pdf/generateRechnungWebPDF'
 import configPromise from '@payload-config'
 import JSZip from 'jszip'
 import { NextRequest, NextResponse } from 'next/server'
@@ -67,7 +68,10 @@ export async function GET(request: NextRequest) {
       const orderRecord = order as unknown as Record<string, unknown>
       try {
         const receiptData = await buildOrderReceiptData(payload, orderRecord)
-        const pdfBuffer = await generateOrderReceiptPDF(receiptData)
+        const pdfBuffer =
+          orderRecord.paymentMethod === 'manual'
+            ? await generateRechnungManPDF(receiptData)
+            : await generateRechnungWebPDF(receiptData)
 
         let filename = `fermentfreude-bestellung-${receiptData.orderNumber}.pdf`
         if (usedNames.has(filename)) {

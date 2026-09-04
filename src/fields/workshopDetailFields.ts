@@ -1,5 +1,9 @@
 import type { Field } from 'payload'
 
+/** Only show Vom Feld ins Glas–specific fields on that workshop page. */
+const isFeldInsGlasPage = (data: { slug?: string | null } | undefined) =>
+  data?.slug === 'vom-feld-ins-glas'
+
 /**
  * Workshop Detail fields — editable content for the dedicated workshop detail page.
  * Currently used by /workshops/lakto-gemuese, expandable to other workshops.
@@ -74,6 +78,203 @@ export const workshopDetailFields: Field[] = [
             'Small pills below the divider (e.g. "3 Stunden", "Hands-on", "Experience").',
         },
         fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
+      },
+      {
+        name: 'heroPrimaryCtaLabel',
+        type: 'text',
+        localized: true,
+        label: 'Primary CTA Button',
+        admin: {
+          description: 'e.g. "Jetzt buchen" / "Book now". Vom Feld ins Glas only.',
+          condition: isFeldInsGlasPage,
+        },
+      },
+      {
+        name: 'heroSecondaryCtaLabel',
+        type: 'text',
+        localized: true,
+        label: 'Secondary CTA Link',
+        admin: {
+          description: 'e.g. "Mehr erfahren" / "Learn more". Vom Feld ins Glas only.',
+          condition: isFeldInsGlasPage,
+        },
+      },
+      {
+        name: 'heroSealRingText',
+        type: 'text',
+        localized: true,
+        label: 'Spinning Seal Text',
+        admin: {
+          description: 'Circular badge text (e.g. "EINMALIGE VERANSTALTUNG"). Vom Feld ins Glas only.',
+          condition: isFeldInsGlasPage,
+        },
+      },
+      {
+        type: 'row',
+        admin: { condition: isFeldInsGlasPage },
+        fields: [
+          {
+            name: 'heroSealCenterLine1',
+            type: 'text',
+            localized: true,
+            label: 'Seal Center — Line 1',
+            admin: { description: 'Top word in the spinning seal (e.g. "FER").' },
+          },
+          {
+            name: 'heroSealCenterLine2',
+            type: 'text',
+            localized: true,
+            label: 'Seal Center — Line 2',
+            admin: { description: 'Bottom word in the spinning seal (e.g. "MEN").' },
+          },
+        ],
+      },
+    ],
+  },
+
+  // ── 1b. Concept Story (Vom Feld ins Glas) ─────────────────
+  {
+    type: 'collapsible',
+    label: '1b. Concept Story',
+    admin: {
+      initCollapsed: true,
+      description:
+        '“Das Konzept” section — quote, body copy and season badge. Vom Feld ins Glas only.',
+      condition: isFeldInsGlasPage,
+    },
+    fields: [
+      {
+        name: 'conceptEyebrow',
+        type: 'text',
+        localized: true,
+        label: 'Eyebrow',
+        admin: { description: 'e.g. "Das Konzept" / "The concept".' },
+      },
+      {
+        name: 'conceptTitle',
+        type: 'text',
+        localized: true,
+        label: 'Title',
+      },
+      {
+        name: 'conceptQuote',
+        type: 'textarea',
+        localized: true,
+        label: 'Quote',
+        admin: { description: 'Pull quote shown with gold left border.' },
+      },
+      {
+        name: 'conceptText',
+        type: 'textarea',
+        localized: true,
+        label: 'Body Paragraph 1',
+      },
+      {
+        name: 'conceptTextSecondary',
+        type: 'textarea',
+        localized: true,
+        label: 'Body Paragraph 2',
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            name: 'conceptSeasonMonths',
+            type: 'text',
+            localized: true,
+            label: 'Season Badge — Months',
+            admin: { description: 'e.g. "Aug – Okt" / "Aug – Oct".' },
+          },
+          {
+            name: 'conceptSeasonLabel',
+            type: 'text',
+            localized: true,
+            label: 'Season Badge — Label',
+            admin: { description: 'e.g. "Saison 2025" / "Season 2025".' },
+          },
+        ],
+      },
+      {
+        name: 'conceptImage',
+        type: 'upload',
+        relationTo: 'media',
+        label: 'Concept Image',
+        admin: { description: 'Portrait image beside the concept copy (4:5 crop).' },
+      },
+    ],
+  },
+
+  // ── 1c. Journey — Feld · Küche · Glas ─────────────────────
+  {
+    type: 'collapsible',
+    label: '1c. Journey (Feld · Küche · Glas)',
+    admin: {
+      initCollapsed: true,
+      description:
+        'Three alternating image + text sections after the concept. Vom Feld ins Glas only.',
+      condition: isFeldInsGlasPage,
+    },
+    fields: [
+      {
+        name: 'journeySections',
+        type: 'array',
+        label: 'Journey Steps',
+        maxRows: 3,
+        admin: {
+          description: 'Exactly 3 steps: Feld (01), Küche (02), Glas (03). Order matters.',
+        },
+        fields: [
+          {
+            name: 'label',
+            type: 'text',
+            required: true,
+            label: 'Step Number',
+            admin: { description: 'e.g. "01", "02", "03".' },
+          },
+          {
+            name: 'name',
+            type: 'text',
+            required: true,
+            localized: true,
+            label: 'Short Name',
+            admin: { description: 'Nav label (e.g. "Feld" / "Field").' },
+          },
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+            localized: true,
+            label: 'Section Title',
+          },
+          {
+            name: 'description',
+            type: 'textarea',
+            required: true,
+            localized: true,
+            label: 'Description',
+          },
+          {
+            name: 'bullets',
+            type: 'array',
+            label: 'Bullet Points',
+            maxRows: 8,
+            fields: [
+              {
+                name: 'text',
+                type: 'text',
+                required: true,
+                localized: true,
+                label: 'Bullet',
+              },
+            ],
+          },
+          {
+            name: 'image',
+            type: 'upload',
+            relationTo: 'media',
+            label: 'Section Image',
+          },
+        ],
       },
     ],
   },
@@ -641,6 +842,19 @@ export const workshopDetailFields: Field[] = [
           condition: (_data, siblingData) => siblingData?.useGlobalVoucherData === false,
         },
         fields: [{ name: 'text', type: 'text', required: true, localized: true, label: 'Text' }],
+      },
+      {
+        name: 'voucherImageQuote',
+        type: 'text',
+        localized: true,
+        label: 'Photo Quote',
+        admin: {
+          description:
+            'Quote overlaid on the voucher background photo. Vom Feld ins Glas only.',
+          condition: (data, siblingData) =>
+            isFeldInsGlasPage(data as { slug?: string | null }) &&
+            siblingData?.useGlobalVoucherData === false,
+        },
       },
     ],
   },

@@ -229,6 +229,7 @@ export function WorkshopSeatsEditor({
                 onChange={(e) => updateSeat(0, { recipientName: e.target.value.slice(0, 120) })}
                 placeholder={t.guestNamePlaceholder}
                 maxLength={120}
+                autoComplete="off"
                 className="w-full rounded-md border border-ff-border-light bg-white px-3 py-2 text-body-sm text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-near-black focus:outline-none"
               />
             </label>
@@ -242,6 +243,7 @@ export function WorkshopSeatsEditor({
                 onChange={(e) => updateSeat(0, { giftNote: e.target.value.slice(0, 200) })}
                 placeholder={t.guestNotePlaceholder}
                 maxLength={200}
+                autoComplete="off"
                 className="w-full rounded-md border border-ff-border-light bg-white px-3 py-2 text-body-sm text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-near-black focus:outline-none"
               />
               <span className="mt-1 block text-right text-caption text-ff-gray-text-light">
@@ -275,6 +277,7 @@ export function WorkshopSeatsEditor({
                   onChange={(e) => updateSeat(idx, { recipientName: e.target.value.slice(0, 120) })}
                   placeholder={t.guestNamePlaceholder}
                   maxLength={120}
+                  autoComplete="off"
                   className="w-full rounded-md border border-ff-border-light bg-white px-3 py-2 text-body-sm text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-near-black focus:outline-none"
                 />
               </label>
@@ -288,6 +291,7 @@ export function WorkshopSeatsEditor({
                   onChange={(e) => updateSeat(idx, { giftNote: e.target.value.slice(0, 200) })}
                   placeholder={t.guestNotePlaceholder}
                   maxLength={200}
+                  autoComplete="off"
                   className="w-full rounded-md border border-ff-border-light bg-white px-3 py-2 text-body-sm text-ff-near-black placeholder:text-ff-gray-text-light focus:border-ff-near-black focus:outline-none"
                 />
                 <span className="mt-1 block text-right text-caption text-ff-gray-text-light">

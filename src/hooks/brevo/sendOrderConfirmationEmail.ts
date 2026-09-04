@@ -170,20 +170,31 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
     // Try to find workshop bookings associated with this order
     try {
-      // Get transaction for this order to find cart ID
-      const transactions = await req.payload.find({
-        collection: 'transactions',
-        where: {
-          order: {
-            equals: doc.id,
-          },
-        },
-        limit: 1,
-        overrideAccess: true,
-      })
+      // Read the transaction off doc.transactions (already populated — it's
+      // part of the `data` the ecommerce plugin's confirmOrder passes into
+      // payload.create()) rather than querying transactions by `order: {equals:
+      // doc.id}`. That reverse link is written in a SEPARATE payload.update()
+      // call the plugin makes only AFTER payload.create() (and therefore every
+      // Order afterChange hook, this one included) has already finished — so
+      // querying by it here always returns zero results, workshopDate never
+      // gets populated, and the skip-guard below never fires. Confirmed via
+      // @payloadcms/plugin-ecommerce's stripe/confirmOrder.js. Same pattern
+      // confirmWorkshopBookings.ts and redeemVoucherOnOrderComplete.ts already
+      // use correctly for this exact reason.
+      const transactionRef = Array.isArray(doc.transactions) ? doc.transactions[0] : undefined
+      const transactionId =
+        transactionRef && typeof transactionRef === 'object' ? transactionRef.id : transactionRef
 
-      if (transactions.totalDocs > 0) {
-        const transaction = transactions.docs[0]
+      const transaction = transactionId
+        ? await req.payload.findByID({
+            collection: 'transactions',
+            id: String(transactionId),
+            depth: 0,
+            overrideAccess: true,
+          })
+        : null
+
+      if (transaction) {
         const cartId =
           typeof transaction.cart === 'object' ? transaction.cart?.id : transaction.cart
 

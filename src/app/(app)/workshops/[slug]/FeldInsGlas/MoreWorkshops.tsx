@@ -41,6 +41,7 @@ type Props = {
   locale?: 'de' | 'en'
   eyebrow?: string
   heading?: string
+  subtitle?: string | null
 }
 
 export function FeldInsGlasMoreWorkshops({
@@ -48,6 +49,7 @@ export function FeldInsGlasMoreWorkshops({
   locale = 'de',
   eyebrow = locale === 'de' ? 'Mehr entdecken' : 'Discover more',
   heading = locale === 'de' ? 'Entdecke weitere Workshops.' : 'Discover more workshops.',
+  subtitle,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -99,6 +101,9 @@ export function FeldInsGlasMoreWorkshops({
           >
             {heading}
           </h2>
+          {subtitle ? (
+            <p className="mt-4 max-w-2xl text-body leading-relaxed text-[#4B4B4B]">{subtitle}</p>
+          ) : null}
         </div>
       </div>
 

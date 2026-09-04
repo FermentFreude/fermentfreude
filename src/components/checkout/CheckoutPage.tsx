@@ -25,7 +25,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { cssVariables } from '@/cssVariables'
 import { gtmBeginCheckout } from '@/lib/gtm'
 import { Address } from '@/payload-types'
-import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
+import {
+  useAddresses,
+  useCart,
+  useEcommerce,
+  usePayments,
+} from '@payloadcms/plugin-ecommerce/client/react'
 import { toast } from 'sonner'
 
 const CHECKOUT_DE = {
@@ -75,6 +80,8 @@ const CHECKOUT_DE = {
   tryAgain: 'Erneut versuchen',
   yourCart: 'Warenkorb',
   orderFailed: 'Bestellung fehlgeschlagen.',
+  cartAlreadyPurchased:
+    'Dieser Warenkorb wurde bereits erfolgreich bezahlt. Bitte lade die Seite neu, um eine neue Bestellung zu starten.',
   connectionError: 'Verbindungsfehler. Bitte versuche es erneut.',
   or: 'oder',
   total: 'Gesamt',
@@ -143,6 +150,8 @@ const CHECKOUT_EN = {
   tryAgain: 'Try again',
   yourCart: 'Your cart',
   orderFailed: 'Order failed.',
+  cartAlreadyPurchased:
+    'This cart has already been paid for successfully. Please reload the page to start a new order.',
   connectionError: 'Connection error. Please try again.',
   or: 'or',
   total: 'Total',
@@ -194,7 +203,21 @@ export const CheckoutPage: React.FC = () => {
   const { locale } = useLocale()
   const isDe = locale === 'de'
   const router = useRouter()
-  const { cart, clearCart, removeItem, refreshCart } = useCart()
+  const { cart, removeItem, refreshCart } = useCart()
+  // onLogin: the plugin's own guest-cart-to-user transfer, which neither
+  // useCart() nor usePayments() re-exposes (see maybeCreateAccount).
+  // clearSession: used instead of useCart()'s clearCart() once a voucher
+  // fully covers an order (see the voucher-covers-cart success handler
+  // below) — clearCart() only empties the SAME cart's items via a network
+  // round trip and leaves cartID pointed at it; if that call hiccups the
+  // stale, now-purchased cart stays live for the rest of the browser
+  // session and the next checkout attempt 409s with "This cart has already
+  // been paid for." clearSession() is synchronous, has no network
+  // dependency, and is guaranteed to detach us from this cart. It also
+  // resets the ecommerce provider's own internal user/addresses state, but
+  // nothing in this app's UI reads those — the real "am I logged in" state
+  // comes from the separate AuthProvider — so that reset is invisible here.
+  const { onLogin: onEcommerceLogin, clearSession } = useEcommerce()
   const [error, setError] = useState<null | string>(null)
   /**
    * State to manage the email input for guest checkout.
@@ -397,39 +420,6 @@ export const CheckoutPage: React.FC = () => {
     }
   }, [locale])
 
-  // Fetch the active pickup location from the workshop-locations collection.
-  // Falls back to DEFAULT_PICKUP_LOCATION on any error / empty result.
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const res = await fetch(
-          `/api/workshop-locations?where[isActive][equals]=true&limit=1&depth=0&locale=${locale}`,
-          { cache: 'no-store' },
-        )
-        if (!res.ok) return
-        const json = (await res.json()) as {
-          docs?: { id: string; name?: string; address?: string }[]
-        }
-        const loc = json?.docs?.[0]
-        if (!cancelled && loc?.name && loc?.address) {
-          setPickupLocation({
-            ...DEFAULT_PICKUP_LOCATION,
-            id: loc.id,
-            name: loc.name,
-            address: loc.address,
-            mapLink: buildMapLink(loc.name, loc.address),
-          })
-        }
-      } catch {
-        // ignore — fallback used
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [locale])
-
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
   // Digital products (courses) and workshops don't need a shipping address.
@@ -577,41 +567,6 @@ export const CheckoutPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // intentionally empty — fire only on mount
 
-  /* ── Voucher Handlers ── */
-  const handleApplyVoucher = useCallback(async () => {
-    setVoucherError(null)
-    const trimmed = voucherCode.trim()
-    if (!trimmed) {
-      setVoucherError(t.voucherEmptyError)
-      return
-    }
-    setVoucherLoading(true)
-    try {
-      const res = await fetch('/api/voucher/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: trimmed }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.success) {
-        setVoucherError(data.error || t.voucherInvalidError)
-        return
-      }
-      setVoucherApplied({ code: data.voucher.code, value: data.voucher.value })
-      toast.success(t.voucherApplied(data.voucher.value))
-    } catch (_err) {
-      setVoucherError(t.voucherNetworkError)
-    } finally {
-      setVoucherLoading(false)
-    }
-  }, [voucherCode, t])
-
-  const handleRemoveVoucher = useCallback(() => {
-    setVoucherApplied(null)
-    setVoucherCode('')
-    setVoucherError(null)
-  }, [])
-
   /* ── Computed: voucher covers the full amount? ── */
   // cart.subtotal is in cents; voucher.value is in euros — multiply by 100 to match units
   const discountedTotal = Math.max(0, (cart?.subtotal || 0) - (voucherApplied?.value || 0) * 100)
@@ -658,8 +613,8 @@ export const CheckoutPage: React.FC = () => {
         return
       }
 
-      // Clear cart client-side
-      clearCart()
+      // Detach from this now-purchased cart client-side
+      clearSession()
 
       const type = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
       const emailParam = email ? `&email=${encodeURIComponent(email)}` : ''
@@ -671,11 +626,53 @@ export const CheckoutPage: React.FC = () => {
       setError(t.connectionError)
       setProcessingPayment(false)
     }
-  }, [voucherApplied, email, customerName, user, clearCart, router, hasWorkshop, isAllDigital, t])
+  }, [voucherApplied, email, customerName, user, clearSession, router, hasWorkshop, isAllDigital, t])
 
   const initiatePaymentIntent = useCallback(
-    async (paymentID: string) => {
+    async (
+      paymentID: string,
+      // Explicit voucher state to charge against, bypassing the component's
+      // `voucherApplied` state entirely. Required for regenerating an
+      // already-created PaymentIntent right after apply/remove — reading
+      // `voucherApplied` there would be stale (setState hasn't re-rendered
+      // yet), so callers pass the just-resolved value directly instead.
+      // `undefined` (the default, used by the original "Go to Payment"
+      // click) falls back to whatever is currently applied.
+      voucherOverride?: { code: string; value: number } | null,
+    ) => {
       try {
+        // Guard against retrying a payment for a cart that already
+        // completed successfully — e.g. a client-side crash right after a
+        // real charge went through, followed by a reload/retry. The actual
+        // safety net is server-side (preventDuplicatePayment.ts on
+        // Transactions, and the explicit check in the discounted-payment
+        // route); this just gives a clear message instead of a confusing
+        // generic error or, worse, a second real charge slipping through
+        // before the server-side check is reached.
+        if (cart?.status === 'purchased') {
+          setError(t.cartAlreadyPurchased)
+          toast.error(t.cartAlreadyPurchased)
+          return
+        }
+
+        const effectiveVoucher = voucherOverride !== undefined ? voucherOverride : voucherApplied
+        const effectiveDiscountedTotal = Math.max(
+          0,
+          (cart?.subtotal || 0) - (effectiveVoucher?.value || 0) * 100,
+        )
+        const effectiveCoversAll = Boolean(effectiveVoucher && effectiveDiscountedTotal === 0)
+
+        // A voucher applied/changed while the payment form is already open
+        // can turn out to fully cover the cart — that case never goes
+        // through Stripe (see handleVoucherOrder), so tear down any
+        // existing payment step and let the UI fall back to the "Pay with
+        // Voucher" button instead of calling the discounted-payment
+        // endpoint (which would reject a €0 remainder anyway).
+        if (effectiveCoversAll) {
+          setPaymentData(null)
+          return
+        }
+
         const additionalData: Record<string, unknown> = {
           ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
           ...(firstName.trim() ? { customerFirstName: firstName.trim() } : {}),
@@ -699,19 +696,59 @@ export const CheckoutPage: React.FC = () => {
             : shippingAddress
         }
 
-        const paymentData = (await initiatePayment(paymentID, {
-          additionalData,
-        })) as Record<string, unknown>
+        let paymentData: Record<string, unknown> | null = null
+
+        // A voucher that only PARTIALLY covers the cart still needs a real
+        // Stripe charge for the remainder. The plugin's own initiatePayment
+        // has no concept of a voucher and would charge the full cart total —
+        // route this case through our own endpoint instead, which charges
+        // cart total minus voucher value and marks the voucher for
+        // redemption once the resulting order is created. (A voucher that
+        // fully covers the cart never reaches this function at all — see
+        // handleVoucherOrder.)
+        if (effectiveVoucher && !effectiveCoversAll && cart?.id) {
+          const res = await fetch('/api/voucher/initiate-discounted-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              voucherCode: effectiveVoucher.code,
+              cartID: cart.id,
+              userId: user?.id,
+              ...additionalData,
+            }),
+          })
+          const data = await res.json()
+          if (!res.ok || data?.success === false) {
+            throw new Error(data?.error || t.orderFailed)
+          }
+          paymentData = data
+        } else {
+          paymentData = (await initiatePayment(paymentID, {
+            additionalData,
+          })) as Record<string, unknown>
+        }
 
         if (paymentData) {
           setPaymentData(paymentData)
         }
       } catch (error) {
-        const errorData = error instanceof Error ? JSON.parse(error.message) : {}
+        // initiatePayment (plugin) throws Errors whose .message is a JSON
+        // string; our own fetch above throws a plain string message — handle
+        // both without letting a JSON.parse failure crash this handler.
+        let errorData: Record<string, unknown> = {}
+        try {
+          errorData = error instanceof Error ? JSON.parse(error.message) : {}
+        } catch {
+          // not JSON — fall through to the plain-message branches below
+        }
         let errorMessage = 'An error occurred while initiating payment.'
 
-        if (errorData?.cause?.code === 'OutOfStock') {
+        if (errorData?.cause && (errorData.cause as { code?: string })?.code === 'OutOfStock') {
           errorMessage = 'One or more items in your cart are out of stock.'
+        } else if (typeof errorData?.message === 'string' && errorData.message) {
+          errorMessage = errorData.message
+        } else if (error instanceof Error && error.message) {
+          errorMessage = error.message
         }
 
         setError(errorMessage)
@@ -730,8 +767,73 @@ export const CheckoutPage: React.FC = () => {
       isAllPhysicalPickup,
       pickupDate,
       pickupTime,
+      voucherApplied,
+      voucherCoversAll,
+      cart?.id,
+      cart?.status,
+      user?.id,
+      t.orderFailed,
+      t.cartAlreadyPurchased,
     ],
   )
+
+  /* ── Voucher Handlers ── */
+  const handleApplyVoucher = useCallback(async () => {
+    setVoucherError(null)
+    const trimmed = voucherCode.trim()
+    if (!trimmed) {
+      setVoucherError(t.voucherEmptyError)
+      return
+    }
+    setVoucherLoading(true)
+    try {
+      const res = await fetch('/api/voucher/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: trimmed }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setVoucherError(data.error || t.voucherInvalidError)
+        return
+      }
+      const appliedVoucher = { code: data.voucher.code, value: data.voucher.value }
+      setVoucherApplied(appliedVoucher)
+      toast.success(t.voucherApplied(data.voucher.value))
+
+      // The Stripe payment step is created once, at the moment "Go to
+      // Payment" is first clicked, and never automatically updates after
+      // that — applying a voucher here would otherwise silently have zero
+      // effect on what actually gets charged. If that step is already
+      // showing, regenerate it now against the newly-applied voucher
+      // (passed explicitly — `voucherApplied` state hasn't re-rendered yet
+      // at this point, so reading it would still see the old value).
+      if (paymentData) {
+        setPaymentData(null)
+        await initiatePaymentIntent('stripe', appliedVoucher)
+      }
+    } catch (_err) {
+      setVoucherError(t.voucherNetworkError)
+    } finally {
+      setVoucherLoading(false)
+    }
+  }, [voucherCode, t, paymentData, initiatePaymentIntent])
+
+  const handleRemoveVoucher = useCallback(() => {
+    const hadPaymentData = Boolean(paymentData)
+    setVoucherApplied(null)
+    setVoucherCode('')
+    setVoucherError(null)
+
+    // Same reasoning as handleApplyVoucher: removing a voucher after the
+    // payment step is already showing must regenerate it at full price,
+    // otherwise the customer could remove a voucher from the UI while the
+    // discounted charge underneath stays exactly as it was.
+    if (hadPaymentData) {
+      setPaymentData(null)
+      void initiatePaymentIntent('stripe', null)
+    }
+  }, [paymentData, initiatePaymentIntent])
 
   /* ── Account creation — runs transparently before payment ── */
   const maybeCreateAccount = useCallback(async (): Promise<boolean> => {
@@ -755,8 +857,24 @@ export const CheckoutPage: React.FC = () => {
       }
       try {
         await login({ email, password: accountPassword })
+        // Transfer the guest cart to the newly authenticated user. Without
+        // this, the cart's `customer` field stays null while every
+        // subsequent request is now authenticated — Carts' access control
+        // grants read/update either to the document owner (customer field
+        // match) or via a matching guest secret, and a same-page checkout
+        // still has the guest secret in memory so it limped along, but a
+        // redirect-based payment (3DS, PayPal — a full page reload through
+        // return_url) re-initializes cart state from scratch and can lose
+        // that secret, leaving the cart unreachable by the now-logged-in
+        // customer who just paid for it. onLogin (from the ecommerce
+        // plugin) is the documented fix for exactly this — merges/transfers
+        // the guest cart to the user's account. Neither useCart() nor
+        // usePayments() re-exposes it, hence the separate useEcommerce()
+        // above.
+        await onEcommerceLogin()
       } catch {
-        // Login failed after create — still proceed as guest
+        // Login (or the cart transfer) failed after create — still proceed
+        // as guest rather than block checkout entirely.
       }
     } catch {
       setCreateAccountError(t.createAccountNetworkError)
@@ -765,7 +883,7 @@ export const CheckoutPage: React.FC = () => {
     }
     setIsCreatingAccount(false)
     return true
-  }, [createAccountOpt, accountPassword, user, email, customerName, login, t])
+  }, [createAccountOpt, accountPassword, user, email, customerName, login, onEcommerceLogin, t])
 
   if (!stripe) return null
 
@@ -1294,6 +1412,13 @@ export const CheckoutPage: React.FC = () => {
                 <p className="mb-4 text-body-sm text-red-600">{`${t.errorPrefix}: ${error}`}</p>
               )}
               <Elements
+                // Stripe's Elements provider does not react to a changed
+                // `clientSecret` on its own — keying on it forces React to
+                // tear down and remount when the PaymentIntent is
+                // regenerated (voucher applied/removed after this step was
+                // already showing), so the card form always matches the
+                // PaymentIntent that will actually be charged.
+                key={paymentData['clientSecret'] as string}
                 options={{
                   appearance: {
                     theme: 'stripe',

@@ -1,10 +1,11 @@
 import type { Payload } from 'payload'
 
-import type { OrderReceiptData } from '@/lib/generateOrderReceiptPDF'
+import type { OrderDocumentData } from '@/lib/pdf/primitives'
 
 /* ═══════════════════════════════════════════════════════════════
- *  buildOrderReceiptData — Assembles the OrderReceiptData needed by
- *  generateOrderReceiptPDF() from a raw order document.
+ *  buildOrderReceiptData — Assembles the OrderDocumentData needed by
+ *  generateRechnungWebPDF() / generateRechnungManPDF() from a raw order
+ *  document.
  *
  *  Shared by the customer-facing token route
  *  (/api/orders/[orderId]/receipt) and the admin-only session route
@@ -27,7 +28,7 @@ function bookingToReceiptItem(b: Record<string, unknown>): ReceiptItem {
 export async function buildOrderReceiptData(
   payload: Payload,
   order: Record<string, unknown>,
-): Promise<OrderReceiptData> {
+): Promise<OrderDocumentData> {
   // ── Resolve customer info ──────────────────────────────────────────────
   let customerFirstName = ''
   let customerLastName = ''
@@ -72,6 +73,7 @@ export async function buildOrderReceiptData(
   // because pricing lives on the workshop-booking, not the product.
   // Look up confirmed bookings by orderId — the direct, precise link.
   let receiptItems: ReceiptItem[] = []
+  let hasWorkshopItems = false
 
   try {
     const bookings = await payload.find({
@@ -86,6 +88,7 @@ export async function buildOrderReceiptData(
 
     if (bookings.totalDocs > 0) {
       receiptItems = bookings.docs.map((b) => bookingToReceiptItem(b as unknown as Record<string, unknown>))
+      hasWorkshopItems = true
     }
   } catch {
     // Non-fatal — try fallback below
@@ -135,6 +138,7 @@ export async function buildOrderReceiptData(
         })
         if (fallback.totalDocs > 0) {
           receiptItems = fallback.docs.map((b) => bookingToReceiptItem(b as unknown as Record<string, unknown>))
+          hasWorkshopItems = true
         }
       }
     } catch {
@@ -142,30 +146,54 @@ export async function buildOrderReceiptData(
     }
   }
 
-  // Fall back to order.items for non-workshop purchases
+  // Fall back to order.items for non-workshop purchases. The ecommerce
+  // plugin's Orders.items schema has no per-item price field (only
+  // product/variant/quantity) — the current price is resolved live from the
+  // (depth >= 1 populated) product/variant, same as decrementInventory.ts.
   if (receiptItems.length === 0) {
     const rawItems = (order.items as Record<string, unknown>[] | undefined) ?? []
     receiptItems = rawItems.map((item) => {
       const productRef = item.product
+      const variantRef = item.variant
       let title = 'Product'
-      let sku: string | undefined
 
       if (productRef && typeof productRef === 'object') {
+        title = ((productRef as Record<string, unknown>).title as string | undefined) ?? title
+      }
+
+      let unitPrice = 0
+      if (variantRef && typeof variantRef === 'object') {
+        const v = variantRef as Record<string, unknown>
+        if (v.title) title = `${title} — ${v.title as string}`
+        unitPrice = typeof v.priceInEUR === 'number' ? v.priceInEUR : 0
+      } else if (productRef && typeof productRef === 'object') {
         const p = productRef as Record<string, unknown>
-        title = (p.title as string | undefined) ?? title
-        sku = (p.sku as string | undefined) ?? undefined
+        unitPrice = typeof p.priceInEUR === 'number' ? p.priceInEUR : 0
       }
 
       const qty = typeof item.quantity === 'number' ? item.quantity : 1
-      const unitPrice =
-        typeof item.price === 'number'
-          ? item.price
-          : typeof item.unitPrice === 'number'
-            ? item.unitPrice
-            : 0
 
-      return { title, sku, qty, unitPrice }
+      return { title, qty, unitPrice }
     })
+  }
+
+  // Collapse identical rows (same title + unit price) into one line with a
+  // summed quantity. Workshop bookings for the same appointment can exist as
+  // several separate records (see confirmWorkshopBookings.ts) — each is its
+  // own row here with qty 1, which would otherwise print as visually
+  // duplicate lines instead of one "2x" line.
+  if (receiptItems.length > 1) {
+    const merged = new Map<string, ReceiptItem>()
+    for (const item of receiptItems) {
+      const key = `${item.title}__${item.unitPrice}`
+      const existing = merged.get(key)
+      if (existing) {
+        existing.qty += item.qty
+      } else {
+        merged.set(key, { ...item })
+      }
+    }
+    receiptItems = Array.from(merged.values())
   }
 
   // ── Monetary totals ────────────────────────────────────────────────────
@@ -195,9 +223,29 @@ export async function buildOrderReceiptData(
       ? new Date(order.createdAt as string)
       : new Date()
   const orderNumber = String(order.id).slice(-8).toUpperCase()
+  const orderedAt = order.createdAt ? new Date(order.createdAt as string) : issueDate
+
+  const fulfilmentType = hasWorkshopItems
+    ? 'Workshop'
+    : order.pickupDate
+      ? 'Abholung'
+      : 'Versand'
+
+  const isManual = (order as { paymentMethod?: string }).paymentMethod === 'manual'
+  const referenceNote = (order as { referenceNote?: string | null }).referenceNote || undefined
+
+  // Populated only when the order was fetched with depth >= 1; falls back to
+  // the order number when transactions are unpopulated relationship IDs.
+  const firstTransaction = (order.transactions as unknown[] | undefined)?.[0]
+  let paymentReference = orderNumber
+  if (firstTransaction && typeof firstTransaction === 'object') {
+    const intentId = (firstTransaction as { stripe?: { paymentIntentID?: string | null } }).stripe
+      ?.paymentIntentID
+    if (intentId) paymentReference = intentId
+  }
 
   // ── Resolve live business info (single source of truth) ───────────────
-  let business: OrderReceiptData['business']
+  let business: OrderDocumentData['business']
   try {
     const biz = (await payload.findGlobal({
       slug: 'business-info' as never,
@@ -219,6 +267,9 @@ export async function buildOrderReceiptData(
         uid: (biz.uid as string | undefined) || null,
         fn: (biz.fn as string | undefined) || null,
         court: (biz.court as string | undefined) || null,
+        bankName: (biz.bankName as string | undefined) || null,
+        iban: (biz.iban as string | undefined) || null,
+        bic: (biz.bic as string | undefined) || null,
       }
     }
   } catch (bizErr) {
@@ -242,6 +293,11 @@ export async function buildOrderReceiptData(
     customerLastName,
     customerEmail,
     issueDate,
+    orderedAt,
+    paymentMethodLabel: isManual ? 'Überweisung' : 'Stripe',
+    paymentReference,
+    fulfilmentType,
+    referenceNote,
     locale: 'de',
     business,
   }

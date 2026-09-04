@@ -104,7 +104,7 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
               label: 'Kurzbeschreibung / Short Description',
               admin: {
                 description:
-                  'Ein kurzer Satz für die Produktseite unter dem Titel (max. 2–3 Zeilen). / A short sentence displayed below the title on the product page.',
+                  'Kurzer Text unter dem Titel (max. 2–3 Zeilen). Bei saisonalem Kimchi: hier oder im Titel die aktuelle Variante nennen. / Short text under the title. For seasonal Kimchi, name the current variant here or in the title.',
               },
             },
             {
@@ -340,7 +340,18 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
               localized: true,
               label: 'Zutaten / Ingredients',
               admin: {
-                description: 'Zutatenliste für das Etikett und die Produktseite.',
+                description:
+                  'Zutatenliste für Etikett und Shop. Für saisonales Kimchi: bei jeder neuen Variante Titel + diese Zutatenliste aktualisieren (gleiches Produkt, neuer Name). / Ingredient list for label and shop. For seasonal Kimchi: update title + this list whenever the variant changes (same product record, new name).',
+              },
+            },
+            {
+              name: 'isSeasonal',
+              type: 'checkbox',
+              label: 'Saisonale Variante / Seasonal Variant',
+              defaultValue: false,
+              admin: {
+                description:
+                  'Aktivieren für Kimchi (und ähnliche Produkte). Zeigt die Zutatenliste prominent im Shop und erinnert daran, Titel + Zutaten bei jeder neuen Charge zu aktualisieren. Das Produktbild darf als Beispielbild bleiben. / Enable for Kimchi. Shows ingredients prominently in the shop and reminds editors to update title + ingredients each batch. Keep the image as a typical example if needed.',
               },
             },
             {
@@ -429,13 +440,148 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
               },
             },
             {
+              name: 'productOrigin',
+              type: 'text',
+              localized: true,
+              label: 'Herkunft / Origin',
+              admin: {
+                condition: isFood,
+                description: 'Für „Auf einen Blick“ auf der Produktseite, z. B. „Österreich“.',
+              },
+            },
+            {
+              name: 'madeIn',
+              type: 'text',
+              localized: true,
+              label: 'Hergestellt in / Made in',
+              admin: {
+                condition: isFood,
+                description: 'Für „Auf einen Blick“, z. B. „Graz“.',
+              },
+            },
+            {
+              name: 'pdpTagline',
+              type: 'text',
+              localized: true,
+              label: 'PDP Tagline',
+              admin: {
+                condition: isFood,
+                description:
+                  'Kurze Zeile unter dem Titel, z. B. „Nussig-aromatisch. Herzhaft. Voller Umami.“',
+              },
+            },
+            {
+              name: 'pdpTasteHeadline',
+              type: 'text',
+              localized: true,
+              label: 'PDP Geschmack-Überschrift',
+              admin: {
+                condition: isFood,
+                description: 'Überschrift im Geschmacks-Abschnitt, z. B. „Nussig · Herzhaft · Umami“',
+              },
+            },
+            {
+              name: 'pdpStoryIntro',
+              type: 'textarea',
+              localized: true,
+              label: 'PDP Story — Intro',
+              admin: {
+                condition: isFood,
+                description: 'Erster Absatz im Geschmacks-Abschnitt (unter der Überschrift).',
+              },
+            },
+            {
+              name: 'pdpStoryDetail',
+              type: 'textarea',
+              localized: true,
+              label: 'PDP Story — Detail',
+              admin: {
+                condition: isFood,
+                description: 'Absatz unter der Geschmacks-Leiste (z. B. Anbraten, Marinaden).',
+              },
+            },
+            {
+              name: 'pdpFlavorNotes',
+              type: 'array',
+              label: 'PDP Geschmacks-Noten',
+              labels: { singular: 'Note', plural: 'Geschmacks-Noten' },
+              admin: {
+                condition: isFood,
+                description: 'Werden als horizontale Leiste angezeigt, z. B. NUSSIG → HERZHAFT → UMAMI.',
+              },
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Label',
+                },
+              ],
+            },
+            {
+              name: 'pdpTrustPoints',
+              type: 'array',
+              label: 'PDP Vertrauenspunkte',
+              labels: { singular: 'Punkt', plural: 'Vertrauenspunkte' },
+              admin: {
+                condition: isFood,
+                description: 'Kleine Trust-Zeilen unter dem Warenkorb-Button.',
+              },
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Text',
+                },
+              ],
+            },
+            {
+              name: 'pdpUsageSteps',
+              type: 'array',
+              label: 'PDP Zubereitungsschritte',
+              labels: { singular: 'Schritt', plural: 'Zubereitungsschritte' },
+              admin: {
+                condition: isFood,
+                description: 'Drei Schritte, z. B. Schneiden → Anbraten → Genießen.',
+              },
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Titel',
+                },
+                {
+                  name: 'description',
+                  type: 'text',
+                  localized: true,
+                  label: 'Beschreibung',
+                },
+              ],
+            },
+            {
+              name: 'pdpUsageSectionTitle',
+              type: 'text',
+              localized: true,
+              label: 'PDP Zubereitung Überschrift',
+              admin: {
+                condition: isFood,
+                description:
+                  'Überschrift über den Zubereitungsschritten, z. B. „So wird dein Tempeh richtig gut“.',
+              },
+            },
+            {
               name: 'bestBefore',
               type: 'text',
               localized: true,
               label: 'Mindesthaltbarkeit / Best Before',
               admin: {
-                condition: isFresh,
-                description: 'z.B. "3 Tage nach Kauf" / "3 days after purchase"',
+                condition: isFood,
+                description: 'z.B. "6 Wochen" / "6 weeks" — wird auf der Produktseite als MHD angezeigt.',
               },
             },
           ],

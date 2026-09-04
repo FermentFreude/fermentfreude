@@ -25,20 +25,21 @@ export function AnnouncementBar({ enabled, text, link }: AnnouncementBarProps) {
 
   return (
     <div className="w-full">
-      <div className="relative flex w-full items-center justify-center bg-ff-near-black dark:bg-white px-6 py-3">
+      <div className="relative flex w-full items-center justify-center bg-ff-charcoal dark:bg-ff-cream px-11 sm:px-14 py-1.5 md:py-2">
         <Link
           href={resolvedLink}
-          className="flex items-center gap-3 text-ff-ivory dark:text-ff-near-black font-display text-sm md:text-base font-normal transition-opacity hover:opacity-90"
+          className="flex max-w-[min(100%,42rem)] items-center justify-center gap-2 text-ff-ivory dark:text-ff-charcoal font-display text-[11px] md:text-xs font-medium tracking-wide transition-opacity hover:opacity-85"
         >
-          <span>{resolvedText}</span>
-          <ArrowRight className="w-5 h-5 shrink-0" />
+          <span className="text-center leading-snug line-clamp-2">{resolvedText}</span>
+          <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-80" aria-hidden />
         </Link>
         <button
+          type="button"
           onClick={() => setVisible(false)}
-          className="absolute right-3 text-ff-ivory/60 dark:text-ff-near-black/60 hover:text-ff-ivory dark:hover:text-ff-near-black transition-colors"
+          className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 flex size-8 items-center justify-center rounded-full text-ff-ivory/55 dark:text-ff-charcoal/50 hover:text-ff-ivory dark:hover:text-ff-charcoal hover:bg-white/10 dark:hover:bg-ff-charcoal/10 transition-colors"
           aria-label="Dismiss announcement"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

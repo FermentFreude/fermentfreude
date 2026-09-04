@@ -1,7 +1,9 @@
 import { WorkshopCardsSection } from '@/components/WorkshopCardsSection'
 import { getLocale } from '@/utilities/getLocale'
+import { buildSyncedWorkshopCards } from '@/utilities/gastronomyWorkshopCards'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
 import { getWorkshopCardsGlobal } from '@/utilities/getWorkshopCardsGlobal'
+import { getWorkshopPageCardDataByHref } from '@/utilities/workshopHeroImages'
 
 function coerceNextDate(value: unknown): string | null {
   if (typeof value === 'string') return value
@@ -29,26 +31,21 @@ export async function WorkshopCardsGlobalWrapper({
   layout = 'inline',
 }: WorkshopCardsGlobalWrapperProps) {
   const locale = await getLocale()
-  const [data, nextDates] = await Promise.all([
+  const [data, nextDates, workshopPageData] = await Promise.all([
     getWorkshopCardsGlobal(locale),
     getNextWorkshopDatesByHref(locale === 'en' ? 'en' : 'de'),
+    getWorkshopPageCardDataByHref(locale as 'de' | 'en'),
   ])
 
-  // Overlay dynamic dates from workshop-appointments onto each card.
-  // When a workshop has no bookable future appointment (every upcoming
-  // appointment is fully booked, e.g. Kombucha right now), mark the card as
-  // sold out (availableSpots: 0) so <WorkshopCardButton> renders the
-  // consistent "Ausgebucht" / "Sold Out" badge instead of a live "Buchen" CTA.
-  const cards = (data.cards ?? []).map((card) => {
-    const nextDateData = card.buttonUrl ? nextDates[card.buttonUrl] : undefined
-    const isKnownWorkshop = nextDateData !== undefined
-    const isSoldOut = isKnownWorkshop && nextDateData!.soldOut
-    return {
+  const cards = buildSyncedWorkshopCards(
+    (data.cards ?? []).map((card) => ({
       ...card,
-      nextDate: nextDateData?.date || coerceNextDate(card.nextDate) || null,
-      availableSpots: isSoldOut ? 0 : nextDateData?.availableSpots,
-    }
-  })
+      nextDate: coerceNextDate(card.nextDate),
+    })),
+    workshopPageData,
+    locale as 'de' | 'en',
+    nextDates,
+  )
 
   return (
     <WorkshopCardsSection

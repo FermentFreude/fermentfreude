@@ -28,14 +28,70 @@ const calendarEN = getFeldInsGlasCalendar('en')
 const workshopDetailDE = {
   showSeasonalCalendar: true,
   heroEyebrow: 'Spezial-Workshop',
-  heroTitle: 'Vom Feld ins Glas',
+  heroTitle: 'Vom Feld\nins Glas',
   heroDescription:
-    'Fermentation beginnt am Feld. Ernte, Handwerk und drei Lakto-Fermente im Marktgarten „Unser Bauerngarten“.',
+    'Ein ganzer Tag im Marktgarten von der Ernte bis ins fermentierte Glas.',
+  heroPrimaryCtaLabel: 'Jetzt buchen',
+  heroSecondaryCtaLabel: 'Mehr erfahren',
+  heroSealRingText: 'EINMALIGE VERANSTALTUNG',
+  heroSealCenterLine1: 'FER',
+  heroSealCenterLine2: 'MEN',
   heroAttributes: [
     { text: 'ca. 4 Std' },
     { text: 'Hands-on' },
     { text: 'Marktgarten' },
     { text: 'Max. 12 Personen' },
+  ],
+  conceptEyebrow: 'Das Konzept',
+  conceptTitle: 'Der kürzeste Weg vom Feld ins Glas.',
+  conceptQuote:
+    'Fermentation beginnt dort, wo die Ernte endet — nicht in der Fabrik, sondern in der eigenen Hand.',
+  conceptText:
+    'Gemeinsam besuchen wir den Marktgarten „Unser Bauerngarten“ in Graz, ernten saisonal, was der Tag gibt, und verwandeln es noch vor Ort in lebendige, haltbare Fermente. Du lernst nicht aus einem Buch — sondern mit Erde an den Fingern.',
+  conceptTextSecondary:
+    'Der Workshop ist einmalig: kein Studio, keine Kursküche. Nur ein Garten, eine Gemeinschaft und das Handwerk der Fermentation in seiner reinsten Form.',
+  conceptSeasonMonths: 'Aug – Okt',
+  conceptSeasonLabel: 'Saison 2025',
+  journeySections: [
+    {
+      label: '01',
+      name: 'Feld',
+      title: 'Der Garten als Ausgangspunkt',
+      description:
+        'Der Tag beginnt nicht in der Küche, sondern draußen. Du lernst, was reif ist, wie man erntet ohne zu beschädigen, und warum das Timing über die Qualität des Fermentes entscheidet.',
+      bullets: [
+        { text: 'Saisonale Ernte mit Anleitung im Marktgarten' },
+        { text: 'Sortenvielfalt & Bodenqualität als Geschmacksfaktor' },
+        { text: 'Biozertifiziertes Saatgut, keine Pestizide' },
+        { text: 'Direkter Kontakt zur landwirtschaftlichen Praxis' },
+      ],
+    },
+    {
+      label: '02',
+      name: 'Küche',
+      title: 'Handwerk statt Rezeptkarte',
+      description:
+        'Theorie und Praxis am Ort der Ernte: Wie Fermentation funktioniert, welche Vorteile sie hat, und unter Anleitung bereitest du drei Lakto-Gemüse-Fermente zu.',
+      bullets: [
+        { text: 'Grundlagen der milchsauren Fermentation' },
+        { text: 'Drei Fermente: Zucchini-Pickels, Gurken-Relish, Karfiol-Kimchi' },
+        { text: 'Salz, Zeit und Gefühl statt starre Rezepte' },
+        { text: 'Hygiene und Sicherheit im offenen Garten' },
+      ],
+    },
+    {
+      label: '03',
+      name: 'Glas',
+      title: 'Dein Ferment, deine Signatur',
+      description:
+        'Am Ende des Tages gehst du nicht mit leeren Händen. Jedes Glas, das du befüllt hast, trägt deine Handschrift — die Auswahl, den Rhythmus, den Geschmack des Tages.',
+      bullets: [
+        { text: 'Bis zu 3 verschiedene Fermente zum Mitnehmen' },
+        { text: 'Etikettierung & Lagertipps für zu Hause' },
+        { text: 'Rezeptkarte für jedes Ferment' },
+        { text: 'Zugang zum FermentFreude Online-Archiv' },
+      ],
+    },
   ],
   bookingEyebrow: 'Fermentations-Workshop',
   bookingTitle: 'Vom Feld ins Glas',
@@ -109,15 +165,22 @@ const workshopDetailDE = {
   calendarTitle: calendarDE.title,
   calendarDescription: calendarDE.description,
   calendarMonths: calendarDE.months,
-  voucherEyebrow: 'GUTSCHEIN',
-  voucherTitle: 'Verschenke FermentFreude',
+  useGlobalVoucherData: false,
+  voucherEyebrow: 'Geschenk',
+  voucherTitle: 'Verschenke Fermentation als Erlebnis.',
   voucherDescription:
-    'Der perfekte Moment für jemanden, der Herkunft, Handwerk und Geschmack verbinden will — auch für diesen Marktgarten-Workshop.',
-  voucherPrimaryLabel: 'Gutschein kaufen',
+    'Ein FermentFreude-Gutschein für „Vom Feld ins Glas“ — für Menschen, die mehr suchen als ein Kochbuch. Schöner verpackt, per Post oder digital, mit persönlicher Widmung.',
+  voucherPrimaryLabel: 'Gutschein bestellen',
   voucherPrimaryHref: '/workshops/voucher',
-  voucherSecondaryLabel: 'Mehr erfahren',
-  voucherSecondaryHref: '/workshops/voucher',
-  voucherPills: [{ text: 'Für alle Workshops' }, { text: 'Digital oder gedruckt' }],
+  voucherSecondaryLabel: 'Zum Shop',
+  voucherSecondaryHref: '/shop',
+  voucherImageQuote: '„Das schönste Geschenk ist Zeit — im Garten.“',
+  voucherPills: [
+    { text: 'Einlösbar für alle Termine 2025' },
+    { text: 'Kostenloser Versand (gedruckt)' },
+    { text: 'Mit persönlicher Botschaft' },
+    { text: 'Auch als PDF zum Sofortversand' },
+  ],
   faqEyebrow: 'HÄUFIGE FRAGEN',
   faqTitle: 'Gut zu wissen',
   faqDescription:
@@ -167,10 +230,10 @@ const workshopDetailDE = {
   modalTotalLabel: 'Gesamt',
   modalCancelLabel: 'Abbrechen',
   modalConfirmLabel: 'Buchung bestätigen',
-  sliderHeading: 'Entdecke weitere Workshops',
+  sliderHeading: 'Entdecke weitere Workshops.',
   sliderSubtitle:
     'Wähle deinen Weg in die Welt der Mikroorganismen. Jeder Workshop ist für Einsteiger und Enthusiasten konzipiert.',
-  sliderPillLabel: 'WORKSHOP-ART',
+  sliderPillLabel: 'Mehr entdecken',
   sliderBuyLabel: 'Jetzt buchen',
   sliderMoreInfoLabel: 'Mehr erfahren',
 }
@@ -178,14 +241,70 @@ const workshopDetailDE = {
 const workshopDetailEN = {
   showSeasonalCalendar: true,
   heroEyebrow: 'Special Workshop',
-  heroTitle: 'From Field to Jar',
+  heroTitle: 'From Field\nto Jar',
   heroDescription:
-    'Fermentation starts in the field. Harvest, craft and three lacto-ferments at Marktgarten “Unser Bauerngarten”.',
+    'A full day at the market garden from harvest to the fermented jar.',
+  heroPrimaryCtaLabel: 'Book now',
+  heroSecondaryCtaLabel: 'Learn more',
+  heroSealRingText: 'ONE-TIME EVENT',
+  heroSealCenterLine1: 'FER',
+  heroSealCenterLine2: 'MEN',
   heroAttributes: [
     { text: '~4 hrs' },
     { text: 'Hands-on' },
     { text: 'Market garden' },
     { text: 'Max. 12 people' },
+  ],
+  conceptEyebrow: 'The concept',
+  conceptTitle: 'The shortest path from field to jar.',
+  conceptQuote:
+    'Fermentation begins where the harvest ends — not in a factory, but in your own hands.',
+  conceptText:
+    'Together we visit Marktgarten “Unser Bauerngarten” in Graz, harvest what the day offers, and turn it into living, lasting ferments on site. You don’t learn from a book — you learn with soil on your fingers.',
+  conceptTextSecondary:
+    'This workshop is unique: no studio, no teaching kitchen. Just a garden, a community, and the craft of fermentation in its purest form.',
+  conceptSeasonMonths: 'Aug – Oct',
+  conceptSeasonLabel: 'Season 2025',
+  journeySections: [
+    {
+      label: '01',
+      name: 'Field',
+      title: 'The garden as starting point',
+      description:
+        'The day doesn’t start in the kitchen, it starts outdoors. You learn what is ripe, how to harvest without damage, and why timing decides the quality of the ferment.',
+      bullets: [
+        { text: 'Seasonal harvest with guidance in the market garden' },
+        { text: 'Variety and soil quality as flavour factors' },
+        { text: 'Certified organic seed, no pesticides' },
+        { text: 'Direct contact with agricultural practice' },
+      ],
+    },
+    {
+      label: '02',
+      name: 'Kitchen',
+      title: 'Craft instead of a recipe card',
+      description:
+        'Theory and practice where the harvest happens: how fermentation works, its benefits, and step by step you prepare three lacto-vegetable ferments.',
+      bullets: [
+        { text: 'Basics of lactic fermentation' },
+        { text: 'Three ferments: zucchini pickles, cucumber relish, cauliflower kimchi' },
+        { text: 'Salt, time and feel instead of rigid recipes' },
+        { text: 'Hygiene and safety in an open garden' },
+      ],
+    },
+    {
+      label: '03',
+      name: 'Jar',
+      title: 'Your ferment, your signature',
+      description:
+        'At the end of the day you don’t leave empty-handed. Every jar you fill carries your handwriting — the selection, the rhythm, the taste of the day.',
+      bullets: [
+        { text: 'Up to 3 different ferments to take home' },
+        { text: 'Labelling & storage tips for home' },
+        { text: 'A recipe card for every ferment' },
+        { text: 'Access to the FermentFreude online archive' },
+      ],
+    },
   ],
   bookingEyebrow: 'Fermentation Workshop',
   bookingTitle: 'From Field to Jar',
@@ -257,15 +376,22 @@ const workshopDetailEN = {
   calendarTitle: calendarEN.title,
   calendarDescription: calendarEN.description,
   calendarMonths: calendarEN.months,
-  voucherEyebrow: 'VOUCHER',
-  voucherTitle: 'Gift FermentFreude',
+  useGlobalVoucherData: false,
+  voucherEyebrow: 'Gift',
+  voucherTitle: 'Gift fermentation as an experience.',
   voucherDescription:
-    'The perfect gift for anyone who wants to connect origin, craft and flavour — including this market-garden workshop.',
-  voucherPrimaryLabel: 'Buy voucher',
+    'A FermentFreude voucher for “From Field to Jar” — for people who want more than a cookbook. Beautifully packed, by post or digital, with a personal dedication.',
+  voucherPrimaryLabel: 'Order voucher',
   voucherPrimaryHref: '/workshops/voucher',
-  voucherSecondaryLabel: 'Learn more',
-  voucherSecondaryHref: '/workshops/voucher',
-  voucherPills: [{ text: 'For all workshops' }, { text: 'Digital or printed' }],
+  voucherSecondaryLabel: 'To the shop',
+  voucherSecondaryHref: '/shop',
+  voucherImageQuote: '“The most beautiful gift is time — in the garden.”',
+  voucherPills: [
+    { text: 'Valid for all 2025 dates' },
+    { text: 'Free shipping (printed)' },
+    { text: 'With a personal message' },
+    { text: 'Also as PDF for instant delivery' },
+  ],
   faqEyebrow: 'FAQ',
   faqTitle: 'Good to know',
   faqDescription: 'Everything about the market-garden workshop — from clothing to getting there.',
@@ -313,10 +439,10 @@ const workshopDetailEN = {
   modalTotalLabel: 'Total',
   modalCancelLabel: 'Cancel',
   modalConfirmLabel: 'Confirm Booking',
-  sliderHeading: 'Discover more workshops',
+  sliderHeading: 'Discover more workshops.',
   sliderSubtitle:
     'Choose your path into the world of microorganisms. Every workshop is designed for beginners and enthusiasts.',
-  sliderPillLabel: 'WORKSHOP TYPE',
+  sliderPillLabel: 'Discover more',
   sliderBuyLabel: 'Book now',
   sliderMoreInfoLabel: 'Learn more',
 }
@@ -336,6 +462,7 @@ function mergeArrayIds(
     'calendarMonths',
     'voucherPills',
     'faqItems',
+    'journeySections',
   ] as const
 
   for (const field of arrayFields) {
@@ -357,6 +484,50 @@ function mergeArrayIds(
     for (let r = 0; r < Math.min(savedRecipes.length, enRecipes.length); r++) {
       if (savedRecipes[r]?.id) enRecipes[r].id = savedRecipes[r].id
     }
+  }
+
+  const savedJourney =
+    (savedDetail?.journeySections as Array<{ id?: string; bullets?: Array<{ id?: string }> }>) ??
+    []
+  const enJourney = (enData.journeySections as Array<Record<string, unknown>>) ?? []
+  for (let j = 0; j < Math.min(savedJourney.length, enJourney.length); j++) {
+    const savedBullets = savedJourney[j].bullets ?? []
+    const enBullets = (enJourney[j].bullets as Array<Record<string, unknown>>) ?? []
+    for (let b = 0; b < Math.min(savedBullets.length, enBullets.length); b++) {
+      if (savedBullets[b]?.id) enBullets[b].id = savedBullets[b].id
+    }
+  }
+}
+
+function preserveImageFields(
+  target: Record<string, unknown>,
+  existing?: Record<string, unknown> | null,
+) {
+  if (!existing) return
+  const keys = [
+    'heroImage',
+    'conceptImage',
+    'bookingImage',
+    'voucherBackgroundImage',
+    'useGlobalVoucherData',
+    'voucherImageQuote',
+  ] as const
+  for (const key of keys) {
+    if (existing[key] != null) target[key] = existing[key]
+  }
+  const existingJourney = existing.journeySections
+  if (Array.isArray(existingJourney) && Array.isArray(target.journeySections)) {
+    target.journeySections = (target.journeySections as Array<Record<string, unknown>>).map(
+      (row, i) => ({
+        ...row,
+        ...(existingJourney[i] && typeof existingJourney[i] === 'object'
+          ? {
+              id: (existingJourney[i] as { id?: string }).id,
+              image: (existingJourney[i] as { image?: unknown }).image,
+            }
+          : {}),
+      }),
+    )
   }
 }
 
@@ -417,7 +588,17 @@ async function seedFeldInsGlasPage() {
   if (detail?.heroTitle && !isForce) {
     payload.logger.info('  ⏭️  workshopDetail already set — use --force to overwrite text')
   } else {
-    const deData = { ...workshopDetailDE, howToArticles: postIds }
+    const existingDetail = (
+      await payload.findByID({
+        collection: 'pages',
+        id: page.id,
+        locale: 'de',
+        depth: 0,
+      })
+    ).workshopDetail as Record<string, unknown> | undefined
+
+    const deData = { ...workshopDetailDE, howToArticles: postIds } as Record<string, unknown>
+    preserveImageFields(deData, existingDetail)
     await payload.update({
       collection: 'pages',
       id: page.id,
@@ -436,6 +617,7 @@ async function seedFeldInsGlasPage() {
       .workshopDetail
     const enData = { ...workshopDetailEN, howToArticles: postIds } as Record<string, unknown>
     mergeArrayIds(savedDetail, enData)
+    preserveImageFields(enData, savedDetail)
 
     await payload.update({
       collection: 'pages',

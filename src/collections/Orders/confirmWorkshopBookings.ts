@@ -4,6 +4,7 @@ import type { CollectionAfterChangeHook } from 'payload'
 
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 import { generateBookingICS } from '@/lib/generateBookingICS'
+import type { WorkshopBooking } from '@/payload-types'
 
 /**
  * confirmWorkshopBookings — Orders afterChange hook.
@@ -157,15 +158,28 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     const workshopSlug = productSlug.replace('workshop-', '')
     const guestCount = item.quantity ?? 1
 
+    // ── Collect every booking that must be confirmed for this item ──
+    // Usually a single booking whose own guestCount already equals the
+    // item's quantity — but the same appointment can end up split across
+    // multiple separate pending bookings (e.g. the customer added the same
+    // appointment to the cart more than once, each add creating its own
+    // workshop-booking record while the cart itself just merges them into
+    // one line with a higher quantity). If that split isn't accounted for
+    // here, only the first booking gets confirmed and the rest sit pending
+    // forever — under-counted on the invoice and never emailed. So each
+    // strategy below keeps matching candidates (skipping ones already
+    // matched) until their combined guestCount covers what was paid for.
+    const matchedBookings: WorkshopBooking[] = []
+    let remainingGuests = guestCount
+
     // ── Strategy 0: exact match via the cart's own appointment ID ──
     // Unambiguous — no reliance on guestCount/email heuristics that break
     // when a customer books multiple DIFFERENT appointments of the SAME
     // workshop type in one order (each order item looks identical to the
     // heuristics below: same workshopSlug, same guestCount). This is the
     // only strategy that correctly distinguishes them.
-    let booking = null
     const cartItemAidSuffix = cartItemsByPosition[itemIndex]?.a
-    if (cartItemAidSuffix) {
+    if (cartItemAidSuffix && remainingGuests > 0) {
       // `a` is only the last 6 hex chars (Stripe metadata size constraint —
       // see comment above), so this can't be a DB-level `equals` — fetch the
       // small candidate set for this workshop and match the suffix in JS
@@ -182,18 +196,22 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         limit: 50,
         overrideAccess: true,
       })
-      booking =
-        candidates.docs.find(
-          (b) => typeof b.appointmentId === 'string' && b.appointmentId.endsWith(cartItemAidSuffix),
-        ) ?? null
+      const suffixMatches = candidates.docs.filter(
+        (b) => typeof b.appointmentId === 'string' && b.appointmentId.endsWith(cartItemAidSuffix),
+      )
+      for (const b of suffixMatches) {
+        if (remainingGuests <= 0) break
+        matchedBookings.push(b)
+        remainingGuests -= typeof b.guestCount === 'number' ? b.guestCount : 1
+      }
     }
 
-    // ── Strategy 1: match by cart ID + workshop + guest count ──
+    // ── Strategy 1: match by cart ID + workshop ──
     // Also matches already-confirmed bookings (status may be 'confirmed' if
     // the charge.succeeded webhook fired before this hook ran — race condition
     // on Stripe event ordering). orderId is always stamped here so the receipt
     // route can look up bookings by orderId reliably.
-    if (!booking && cartId) {
+    if (remainingGuests > 0 && cartId) {
       const byCart = await payload.find({
         collection: 'workshop-bookings',
         where: {
@@ -201,76 +219,101 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             { cartSlug: { equals: cartId } },
             { workshopSlug: { equals: workshopSlug } },
             { status: { in: ['pending', 'confirmed'] } },
-            { guestCount: { equals: guestCount } },
+            { id: { not_in: matchedBookings.map((b) => b.id) } },
           ],
         },
         sort: '-createdAt',
-        limit: 1,
+        limit: 10,
         overrideAccess: true,
       })
-      if (byCart.totalDocs > 0) booking = byCart.docs[0]
+      for (const b of byCart.docs) {
+        if (remainingGuests <= 0) break
+        matchedBookings.push(b)
+        remainingGuests -= typeof b.guestCount === 'number' ? b.guestCount : 1
+      }
     }
 
-    // ── Strategy 2: match by workshopSlug + guestCount + email ──
-
-    if (!booking && customerEmail) {
+    // ── Strategy 2: match by workshopSlug + email ──
+    if (remainingGuests > 0 && customerEmail) {
       const byEmail = await payload.find({
         collection: 'workshop-bookings',
         where: {
           and: [
             { workshopSlug: { equals: workshopSlug } },
             { status: { equals: 'pending' } },
-            { guestCount: { equals: guestCount } },
             { email: { equals: customerEmail } },
+            { id: { not_in: matchedBookings.map((b) => b.id) } },
           ],
         },
         sort: '-createdAt',
-        limit: 1,
+        limit: 10,
         overrideAccess: true,
       })
-      if (byEmail.totalDocs > 0) booking = byEmail.docs[0]
+      for (const b of byEmail.docs) {
+        if (remainingGuests <= 0) break
+        matchedBookings.push(b)
+        remainingGuests -= typeof b.guestCount === 'number' ? b.guestCount : 1
+      }
     }
 
-    // ── Strategy 3: match by workshopSlug + guestCount (no email on booking) ──
-    if (!booking) {
+    // ── Strategy 3: match by workshopSlug (no email on booking) ──
+    if (remainingGuests > 0) {
       const byCount = await payload.find({
         collection: 'workshop-bookings',
         where: {
           and: [
             { workshopSlug: { equals: workshopSlug } },
             { status: { equals: 'pending' } },
-            { guestCount: { equals: guestCount } },
             { email: { exists: false } },
+            { id: { not_in: matchedBookings.map((b) => b.id) } },
           ],
         },
         sort: '-createdAt',
-        limit: 1,
+        limit: 10,
         overrideAccess: true,
       })
-      if (byCount.totalDocs > 0) booking = byCount.docs[0]
+      for (const b of byCount.docs) {
+        if (remainingGuests <= 0) break
+        matchedBookings.push(b)
+        remainingGuests -= typeof b.guestCount === 'number' ? b.guestCount : 1
+      }
     }
 
     // ── Strategy 4: last resort — any pending booking for this workshop ──
-    if (!booking) {
+    if (remainingGuests > 0) {
       const bySlug = await payload.find({
         collection: 'workshop-bookings',
         where: {
-          and: [{ workshopSlug: { equals: workshopSlug } }, { status: { equals: 'pending' } }],
+          and: [
+            { workshopSlug: { equals: workshopSlug } },
+            { status: { equals: 'pending' } },
+            { id: { not_in: matchedBookings.map((b) => b.id) } },
+          ],
         },
         sort: '-createdAt',
-        limit: 1,
+        limit: 10,
         overrideAccess: true,
       })
-      if (bySlug.totalDocs > 0) booking = bySlug.docs[0]
+      for (const b of bySlug.docs) {
+        if (remainingGuests <= 0) break
+        matchedBookings.push(b)
+        remainingGuests -= typeof b.guestCount === 'number' ? b.guestCount : 1
+      }
     }
 
-    if (!booking) {
+    if (matchedBookings.length === 0) {
       payload.logger.warn(
         `[confirmWorkshopBookings] No pending booking found for workshop "${workshopSlug}" (order ${doc.id})`,
       )
       continue
     }
+    if (remainingGuests > 0) {
+      payload.logger.warn(
+        `[confirmWorkshopBookings] Matched bookings for workshop "${workshopSlug}" only cover ${guestCount - remainingGuests}/${guestCount} guests paid for (order ${doc.id})`,
+      )
+    }
 
+    for (const booking of matchedBookings) {
     // Confirm the booking and attach customer info
     const downloadToken = randomUUID()
     const updateData: Record<string, unknown> = {
@@ -544,6 +587,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       // commented-out reference in case this policy is revisited.
       //
       // for (const seat of seats) { … sendTemplateEmail to seat.recipientEmail … }
+    }
     }
   }
 

@@ -41,15 +41,17 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
       {/* Trigger button/link */}
       <div
         className={cn(
-          'relative navLink inline-flex items-center gap-1 text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors cursor-pointer',
+          'relative navLink inline-flex items-center gap-1.5 font-display font-bold text-[12px] xl:text-[13px] leading-none uppercase cursor-pointer',
           { active: isActive },
         )}
       >
         {href ? (
-          <Link href={href} className="flex items-center gap-1">
+          <Link href={href} className="flex items-center gap-1.5">
             {label}
             <ChevronDown
-              className={cn('w-3 h-3 transition-transform duration-300', { 'rotate-180': isOpen })}
+              className={cn('w-3 h-3 transition-transform duration-250 opacity-70', {
+                'rotate-180': isOpen,
+              })}
               aria-hidden="true"
             />
           </Link>
@@ -57,7 +59,9 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
           <>
             {label}
             <ChevronDown
-              className={cn('w-3 h-3 transition-transform duration-300', { 'rotate-180': isOpen })}
+              className={cn('w-3 h-3 transition-transform duration-250 opacity-70', {
+                'rotate-180': isOpen,
+              })}
               aria-hidden="true"
             />
           </>
@@ -71,13 +75,13 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
           isOpen ? 'opacity-100 visible' : 'opacity-0 invisible',
         )}
       >
-        <div className="w-60 rounded-2xl overflow-hidden shadow-lg bg-[#f5f2ed] dark:bg-[#f5f2ed]">
-          <div className="py-2">
+        <div className="w-56 rounded-xl overflow-hidden dropdown-glass">
+          <div className="py-1.5">
             {items.map((item, idx) =>
               dropdownItemIsInactive(item) ? (
                 <div
                   key={`${item.href}-${idx}`}
-                  className="block px-5 py-3 cursor-default select-none text-ff-gray-text opacity-70"
+                  className="block px-4 py-2.5 cursor-default select-none text-ff-gray-text opacity-70"
                   aria-disabled="true"
                 >
                   <span
@@ -89,28 +93,27 @@ export function NavDropdown({ label, href, items }: NavDropdownProps) {
                     {item.label}
                   </span>
                   {item.description && !item.isSmall && (
-                    <span className="block text-xs mt-0.5">{item.description}</span>
+                    <span className="block text-xs mt-0.5 font-sans font-normal opacity-80">
+                      {item.description}
+                    </span>
                   )}
                 </div>
               ) : (
                 <Link
                   key={`${item.href}-${idx}`}
                   href={item.href}
-                  className={cn(
-                    'block px-5 py-3 transition-colors duration-150 group',
-                    'text-ff-near-black hover:bg-ff-near-black hover:text-white',
-                  )}
+                  className="block px-4 py-2.5 text-ff-charcoal transition-colors duration-150 hover:bg-ff-charcoal hover:text-ff-ivory"
                 >
                   <span
                     className={cn(
-                      'block font-display font-bold transition-colors',
+                      'block font-display font-bold',
                       item.isSmall ? 'text-xs' : 'text-sm',
                     )}
                   >
                     {item.label}
                   </span>
                   {item.description && !item.isSmall && (
-                    <span className="block text-xs mt-0.5 transition-colors">
+                    <span className="block text-xs mt-0.5 font-sans font-normal opacity-75">
                       {item.description}
                     </span>
                   )}

@@ -23,6 +23,7 @@ import { PressBanner } from '@/blocks/PressBanner/config'
 import { PressMediaAwards } from '@/blocks/PressMediaAwards/config'
 import { ProductSlider } from '@/blocks/ProductSlider/config'
 import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
+import { ShopAutomaten } from '@/blocks/ShopAutomaten/config'
 import { ShopHero } from '@/blocks/ShopHero/config'
 import { ShopProductGrid } from '@/blocks/ShopProductGrid/config'
 import { ShopProductList } from '@/blocks/ShopProductList/config'
@@ -134,6 +135,7 @@ export const Pages: CollectionConfig = {
                 OnlineCourseSlider,
                 ProductSlider,
                 FeaturedProductCards,
+                ShopAutomaten,
                 ShopHero,
                 ShopProductGrid,
                 ShopProductList,
@@ -748,9 +750,12 @@ export const Pages: CollectionConfig = {
               type: 'array',
               required: false,
               minRows: 0,
-              maxRows: 3,
+              maxRows: 4,
               label: 'Next workshop — cards',
-              admin: { description: 'Up to three cards; last section on /gastronomy.' },
+              admin: {
+                description:
+                  'Four workshop cards for /gastronomy. Title, description, price and image sync from each workshop page (Pages → Workshop Detail). Fields here override only when filled.',
+              },
               fields: [
                 {
                   name: 'image',
@@ -758,16 +763,43 @@ export const Pages: CollectionConfig = {
                   relationTo: 'media',
                   required: false,
                   label: 'Image',
+                  admin: {
+                    description:
+                      'Optional override. By default the matching workshop page hero image is used.',
+                  },
                 },
-                { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                {
+                  name: 'title',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Title',
+                  admin: {
+                    description:
+                      'Optional override. Defaults to the workshop page hero title when empty.',
+                  },
+                },
                 {
                   name: 'description',
                   type: 'textarea',
                   required: true,
                   localized: true,
                   label: 'Description',
+                  admin: {
+                    description:
+                      'Optional override. Defaults to the workshop page hero description when empty.',
+                  },
                 },
-                { name: 'price', type: 'text', required: true, label: 'Price' },
+                {
+                  name: 'price',
+                  type: 'text',
+                  required: true,
+                  label: 'Price',
+                  admin: {
+                    description:
+                      'Optional override. Defaults to the workshop page booking price when empty.',
+                  },
+                },
                 {
                   name: 'priceSuffix',
                   type: 'text',

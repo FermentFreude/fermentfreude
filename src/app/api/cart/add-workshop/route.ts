@@ -1,8 +1,15 @@
 import { reserveSpotsAtomic } from '@/lib/atomicSpots'
-import type { WorkshopAppointment } from '@/payload-types'
+import type { WorkshopAppointment, WorkshopBooking } from '@/payload-types'
 import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
+
+type SeatInput = {
+  isGift?: boolean
+  recipientName?: string
+  recipientEmail?: string
+  giftNote?: string
+}
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/cart/add-workshop — Production Endpoint
@@ -17,15 +24,16 @@ import { getPayload } from 'payload'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { appointmentId, workshopSlug, guestCount: rawGuestCount, seats: rawSeats } = body
+    const {
+      appointmentId,
+      workshopSlug,
+      guestCount: rawGuestCount,
+      seats: rawSeats,
+      cartId: rawCartId,
+    } = body
+    const cartId = typeof rawCartId === 'string' && rawCartId.trim() ? rawCartId.trim() : null
 
     // ─── Sprint 3 — sanitize optional per-seat gift info ────────
-    type SeatInput = {
-      isGift?: boolean
-      recipientName?: string
-      recipientEmail?: string
-      giftNote?: string
-    }
     const sanitizedSeats: SeatInput[] = Array.isArray(rawSeats)
       ? (rawSeats as unknown[])
           .map((s) => {
@@ -270,12 +278,40 @@ export async function POST(request: NextRequest) {
 
     const actualProductId = foundProduct.id
 
+    // ─── Find an existing pending booking for this exact appointment,
+    // already in this cart ─────────────────────────────────────────────
+    // If the customer re-books the same appointment (e.g. adding a second
+    // guest after already adding one), merge into that booking instead of
+    // creating a second, separate one. Two separate documents for one cart
+    // line used to mean only the first ever got matched and confirmed after
+    // payment — the second sat "pending" forever: unconfirmed, unemailed,
+    // and missing from the invoice. See confirmWorkshopBookings.ts.
+    let existingBooking: WorkshopBooking | null = null
+    if (cartId) {
+      const existing = await payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [
+            { cartSlug: { equals: cartId } },
+            { appointmentId: { equals: appointmentId } },
+            { status: { equals: 'pending' } },
+          ],
+        },
+        limit: 1,
+        overrideAccess: true,
+      })
+      existingBooking = existing.docs[0] ?? null
+    }
+
     // ─── Decrement Available Spots (atomic) ─────────────────────
     // Spots are reserved immediately to prevent overbooking. The check above
     // (guestCount > appointment.availableSpots) is a fast-path UX check only —
     // this atomic $inc-with-guard is the actual authority, since two requests
     // can both pass the check above for the last spot before either writes.
     // Restored via POST /api/cart/release-spots if payment fails or cart is abandoned.
+    // Always the newly-requested guestCount, whether merging into an
+    // existing booking or creating a new one — spot reservation tracks new
+    // consumption only, never a cumulative total.
     const reserveResult = await reserveSpotsAtomic(payload, appointmentId, guestCount)
     if (!reserveResult.success) {
       return NextResponse.json(
@@ -290,31 +326,56 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // ─── Create Pending Booking Record ──────────────────────────
+    // ─── Create or merge into the Pending Booking Record ─────────
     // pending → confirmed via Stripe webhook, or cancelled via release-spots.
     let bookingId: string | null = null
+    let cumulativeGuestCount = guestCount
+    let cumulativeTotalPrice = totalPrice
     try {
-      const booking = await payload.create({
-        collection: 'workshop-bookings',
-        data: {
-          status: 'pending',
-          workshopSlug,
-          appointmentId,
-          workshopTitle: String(workshop.title ?? 'Workshop'),
-          date: dateDisplay,
-          time: timeDisplay,
-          guestCount,
-          pricePerPerson,
-          totalPrice,
-          ...(sanitizedSeats.length > 0 ? { seats: sanitizedSeats } : {}),
-        },
-        overrideAccess: true,
-      })
-      bookingId = String(booking.id)
+      if (existingBooking) {
+        cumulativeGuestCount = (existingBooking.guestCount ?? 0) + guestCount
+        cumulativeTotalPrice = pricePerPerson * cumulativeGuestCount
+        const mergedSeats = [...(existingBooking.seats ?? []), ...sanitizedSeats]
+        const updated = await payload.update({
+          collection: 'workshop-bookings',
+          id: existingBooking.id,
+          data: {
+            guestCount: cumulativeGuestCount,
+            totalPrice: cumulativeTotalPrice,
+            ...(mergedSeats.length > 0 ? { seats: mergedSeats } : {}),
+          },
+          overrideAccess: true,
+        })
+        bookingId = String(updated.id)
+      } else {
+        const booking = await payload.create({
+          collection: 'workshop-bookings',
+          data: {
+            status: 'pending',
+            workshopSlug,
+            appointmentId,
+            workshopTitle: String(workshop.title ?? 'Workshop'),
+            date: dateDisplay,
+            time: timeDisplay,
+            guestCount,
+            pricePerPerson,
+            totalPrice,
+            // Set immediately when already known (a re-add to a cart that
+            // already exists) rather than relying solely on the separate
+            // /api/cart/link-booking call after addItem — that call can
+            // fail silently and previously was the only way cartSlug ever
+            // got set, which is exactly what the merge lookup above needs.
+            ...(cartId ? { cartSlug: cartId } : {}),
+            ...(sanitizedSeats.length > 0 ? { seats: sanitizedSeats } : {}),
+          },
+          overrideAccess: true,
+        })
+        bookingId = String(booking.id)
+      }
     } catch (err) {
       // Non-fatal: spots are still decremented, cart add proceeds.
       // Stripe webhook will not find a booking to confirm — investigate in logs.
-      console.error('[add-workshop] Failed to create WorkshopBooking record:', err)
+      console.error('[add-workshop] Failed to create/update WorkshopBooking record:', err)
     }
 
     return NextResponse.json(
@@ -322,6 +383,12 @@ export async function POST(request: NextRequest) {
         success: true,
         message: `${guestCount} spot${guestCount === 1 ? '' : 's'} validated for ${workshop.title}`,
         bookingId,
+        // Tells the client whether `bookingId` is a pre-existing booking we
+        // just merged this request's guests into, vs. a brand-new one. If
+        // this specific request later fails to make it into the cart, the
+        // client must roll back ONLY the guests it just tried to add — not
+        // cancel a shared booking that also covers guests added earlier.
+        wasMerged: Boolean(existingBooking),
         cartItem: {
           productId: actualProductId, // ✅ Real database ID
           metadata: {
@@ -331,9 +398,12 @@ export async function POST(request: NextRequest) {
             workshopSlug,
             date: dateDisplay,
             time: timeDisplay,
-            guestCount,
+            // Cumulative totals for the booking record (localStorage
+            // bookkeeping / DeleteItemButton spot release needs the full
+            // amount, not just this request's delta).
+            guestCount: cumulativeGuestCount,
             pricePerPerson,
-            totalPrice,
+            totalPrice: cumulativeTotalPrice,
             locationName,
             locationAddress,
           },

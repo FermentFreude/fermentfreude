@@ -1,4 +1,5 @@
 import configPromise from '@payload-config'
+import { strictLocaleQuery } from '@/utilities/payloadLocaleQuery'
 import { getPayload } from 'payload'
 
 import type { Post } from '@/payload-types'
@@ -20,7 +21,7 @@ export async function getPostsBySlugs(
       where: { slug: { in: slugs } },
       limit: slugs.length,
       depth: 2,
-      locale,
+      ...strictLocaleQuery(locale),
     })
 
     const bySlug = new Map(result.docs.map((doc) => [doc.slug, doc as Post]))

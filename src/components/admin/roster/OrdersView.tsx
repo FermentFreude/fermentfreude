@@ -1,11 +1,14 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useTransition } from 'react'
 
+import { createCancellationInvoice } from './actions'
+import { CreateManualOrderForm } from './CreateManualOrderForm'
 import type { OrderRow } from './types'
 
 interface Props {
   orders: OrderRow[]
+  onRefresh: () => Promise<void>
 }
 
 type Tab = 'all' | 'completed' | 'processing' | 'cancelled' | 'refunded'
@@ -42,19 +45,117 @@ const TAB_LABELS: Record<Tab, string> = {
   refunded: 'Rückerstattet',
 }
 
-export function OrdersView({ orders }: Props) {
+export function OrdersView({ orders, onRefresh }: Props) {
   const [tab, setTab] = useState<Tab>('all')
+  const [showForm, setShowForm] = useState(false)
+  const [stornoTarget, setStornoTarget] = useState<{ id: string; invoiceNumber: string } | null>(null)
+  const [stornoReason, setStornoReason] = useState('')
+  const [isStorning, startStorno] = useTransition()
 
   const rows = tab === 'all' ? orders : orders.filter((o) => o.status === tab)
 
+  const handleStorno = () => {
+    if (!stornoTarget) return
+    startStorno(async () => {
+      await createCancellationInvoice(stornoTarget.id, stornoReason.trim() || undefined)
+      setStornoTarget(null)
+      setStornoReason('')
+      await onRefresh()
+    })
+  }
+
   return (
     <div style={{ padding: '32px 40px', maxWidth: '1200px' }}>
-      <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)', margin: '0 0 4px' }}>
-        Bestellungen
-      </h1>
+      {stornoTarget && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px',
+        }}>
+          <div style={{
+            background: 'var(--theme-elevation-0)', borderRadius: '14px',
+            padding: '28px 32px', maxWidth: '440px', width: '100%',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          }}>
+            <p style={{ margin: '0 0 6px', fontSize: '18px', fontWeight: 700, color: 'var(--theme-text)' }}>
+              Stornorechnung erstellen?
+            </p>
+            <p style={{ margin: '0 0 16px', fontSize: '14px', color: 'var(--theme-text)', opacity: 0.6, lineHeight: 1.5 }}>
+              Storniert Rechnung{' '}
+              <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--theme-text)', opacity: 1 }}>
+                {stornoTarget.invoiceNumber}
+              </span>{' '}
+              vollständig. Die Originalbestellung bleibt unverändert. Die tatsächliche Rückerstattung
+              erfolgt separat manuell in Stripe bzw. per Überweisung.
+            </p>
+            <textarea
+              placeholder="Stornoanlass (optional, kurz)"
+              value={stornoReason}
+              onChange={(e) => setStornoReason(e.target.value)}
+              rows={2}
+              style={{
+                width: '100%', padding: '10px 12px', borderRadius: '8px', fontSize: '14px',
+                border: '1px solid var(--theme-elevation-200)', background: 'var(--theme-elevation-0)',
+                color: 'var(--theme-text)', outline: 'none', resize: 'vertical', boxSizing: 'border-box',
+                fontFamily: 'inherit', marginBottom: '20px',
+              }}
+            />
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => { setStornoTarget(null); setStornoReason('') }}
+                disabled={isStorning}
+                style={{
+                  padding: '9px 18px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px',
+                  fontWeight: 500, background: 'transparent', border: '1px solid var(--theme-elevation-200)',
+                  color: 'var(--theme-text)', opacity: isStorning ? 0.5 : 1,
+                }}
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleStorno}
+                disabled={isStorning}
+                style={{
+                  padding: '9px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                  fontSize: '14px', fontWeight: 600, background: '#dc2626', color: '#fff',
+                  opacity: isStorning ? 0.5 : 1,
+                }}
+              >
+                {isStorning ? 'Wird erstellt…' : 'Stornorechnung erstellen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '4px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>
+          Bestellungen
+        </h1>
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
+            borderRadius: '8px', border: 'none', cursor: 'pointer',
+            background: '#111827', color: '#fff', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap',
+          }}
+        >
+          <span style={{ fontSize: '16px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>
+          {showForm ? 'Abbrechen' : 'Manuelle Bestellung erstellen'}
+        </button>
+      </div>
       <p style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.55, margin: '0 0 24px' }}>
         Alle Bestellungen mit Rechnung — inklusive stornierter und rückerstatteter, für die Buchhaltung.
       </p>
+
+      {showForm && (
+        <CreateManualOrderForm
+          onDone={() => {
+            setShowForm(false)
+            onRefresh()
+          }}
+        />
+      )}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '20px', borderBottom: '1px solid var(--theme-elevation-100)' }}>
         <div style={{ display: 'flex', gap: '4px' }}>
@@ -104,8 +205,8 @@ export function OrdersView({ orders }: Props) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ background: 'var(--theme-elevation-50)', textAlign: 'left' }}>
-                {['Rechnung #', 'Kund:in', 'Artikel', 'Betrag', 'Status', 'Datum', ''].map((h) => (
-                  <th key={h} style={{ padding: '10px 14px', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', opacity: 0.55 }}>
+                {['Rechnung #', 'Kund:in', 'Artikel', 'Betrag', 'Status', 'Datum', '', ''].map((h, i) => (
+                  <th key={`${h}-${i}`} style={{ padding: '10px 14px', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', opacity: 0.55 }}>
                     {h}
                   </th>
                 ))}
@@ -134,6 +235,25 @@ export function OrdersView({ orders }: Props) {
                     >
                       Rechnung ↓
                     </a>
+                  </td>
+                  <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
+                    {o.cancellationInvoiceId ? (
+                      <a
+                        href={`/api/admin/cancellations/${o.cancellationInvoiceId}/receipt`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: '12px', color: '#991b1b', opacity: 0.8 }}
+                      >
+                        Storno ↓
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() => setStornoTarget({ id: o.id, invoiceNumber: o.invoiceNumber })}
+                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.5 }}
+                      >
+                        Stornieren
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

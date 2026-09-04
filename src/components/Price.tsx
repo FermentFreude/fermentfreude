@@ -30,8 +30,8 @@ export const Price = ({
   highestAmount,
   lowestAmount,
   currencyCode: currencyCodeFromProps,
-  as = 'p',
-}: Props & React.ComponentProps<'p'>) => {
+  as = 'span',
+}: Props & React.ComponentProps<'span'>) => {
   const { formatCurrency, supportedCurrencies } = useCurrency()
 
   const Element = as

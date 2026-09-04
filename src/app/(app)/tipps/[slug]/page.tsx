@@ -1,5 +1,6 @@
 import { FELD_INS_GLAS_HOWTO_SLUGS } from '@/app/(app)/workshops/[slug]/FeldInsGlas/data'
 import { getLocale } from '@/utilities/getLocale'
+import { normalizeAppLocale, strictLocaleQuery } from '@/utilities/payloadLocaleQuery'
 import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
 import { getPayload, type Where } from 'payload'
@@ -35,13 +36,14 @@ export async function generateMetadata({ params }: { params: Params }) {
   try {
     const { slug } = await params
     const locale = await getLocale()
+    const cmsLocale = normalizeAppLocale(locale)
     const payload = await getPayload({ config: configPromise })
     const result = await payload.find({
       collection: 'posts',
       where: { slug: { equals: slug } },
       limit: 1,
       depth: 0,
-      locale,
+      ...strictLocaleQuery(cmsLocale),
     })
     const post = result.docs[0]
     if (!post) return {}
@@ -58,6 +60,7 @@ export async function generateMetadata({ params }: { params: Params }) {
 export default async function TippsArticlePage({ params }: { params: Params }) {
   const { slug } = await params
   const locale = await getLocale()
+  const cmsLocale = normalizeAppLocale(locale)
   const payload = await getPayload({ config: configPromise })
 
   // Fetch the requested article
@@ -66,7 +69,7 @@ export default async function TippsArticlePage({ params }: { params: Params }) {
     where: { slug: { equals: slug } },
     limit: 1,
     depth: 1,
-    locale,
+    ...strictLocaleQuery(cmsLocale),
   })
   const post = result.docs[0]
   if (!post) notFound()
@@ -94,7 +97,7 @@ export default async function TippsArticlePage({ params }: { params: Params }) {
     where: relatedWhere,
     limit: 3,
     depth: 1,
-    locale,
+    ...strictLocaleQuery(cmsLocale),
   })
 
   return <ArticleDetailClient post={post} relatedPosts={relatedResult.docs} />

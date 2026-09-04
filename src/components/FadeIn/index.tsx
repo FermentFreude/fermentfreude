@@ -16,6 +16,11 @@ interface FadeInProps {
   from?: 'bottom' | 'left' | 'right'
   /** Animation duration in seconds (default 0.9) */
   duration?: number
+  /**
+   * Above-the-fold: animate on mount (no ScrollTrigger) and stay visible
+   * if GSAP fails to run (no initial opacity: 0).
+   */
+  immediate?: boolean
 }
 
 export const FadeIn: React.FC<FadeInProps> = ({
@@ -24,6 +29,7 @@ export const FadeIn: React.FC<FadeInProps> = ({
   delay = 0,
   from = 'bottom',
   duration = 1.4,
+  immediate = false,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -45,6 +51,23 @@ export const FadeIn: React.FC<FadeInProps> = ({
 
       const { y, x, skewY } = initial[from]
 
+      if (immediate) {
+        gsap.fromTo(
+          ref.current,
+          { y, x, opacity: 0, skewY },
+          {
+            y: 0,
+            x: 0,
+            opacity: 1,
+            skewY: 0,
+            duration,
+            delay: delay / 1000,
+            ease: 'power2.out',
+          },
+        )
+        return
+      }
+
       gsap.set(ref.current, { y, x, opacity: 0, skewY })
 
       gsap.to(ref.current, {
@@ -55,18 +78,23 @@ export const FadeIn: React.FC<FadeInProps> = ({
         duration,
         delay: delay / 1000, // convert ms to seconds for backwards compat
         ease: 'power2.out',
-        scrollTrigger: {
-          trigger: ref.current,
-          start: 'top 82%',
-          once: true,
-        },
+        ...(immediate
+          ? {}
+          : {
+              scrollTrigger: {
+                trigger: ref.current,
+                start: 'top 82%',
+                once: true,
+              },
+            }),
       })
     },
-    { scope: ref },
+    { scope: ref, dependencies: [delay, from, duration, immediate] },
   )
 
+  // Above-the-fold heroes must stay visible if GSAP fails to run (e.g. client bundle error).
   return (
-    <div ref={ref} className={className} style={{ opacity: 0 }}>
+    <div ref={ref} className={className} style={immediate ? undefined : { opacity: 0 }}>
       {children}
     </div>
   )

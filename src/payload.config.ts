@@ -20,6 +20,7 @@ import { BacklogItems } from '@/collections/BacklogItems'
 import { BookingMagicLinks } from '@/collections/BookingMagicLinks'
 import { BrevoEmailTemplates } from '@/collections/BrevoEmailTemplates'
 import { BrevoTemplates } from '@/collections/BrevoTemplates'
+import { CancellationInvoices } from '@/collections/CancellationInvoices'
 import { CancellationRequests } from '@/collections/CancellationRequests'
 import { Categories } from '@/collections/Categories'
 import { CourseProgress } from '@/collections/CourseProgress'
@@ -29,6 +30,7 @@ import { Media } from '@/collections/Media'
 import { OnlineCourses } from '@/collections/OnlineCourses'
 import { Pages } from '@/collections/Pages'
 import { Posts } from '@/collections/Posts'
+import { Quotes } from '@/collections/Quotes'
 import { RefundRequests } from '@/collections/RefundRequests'
 import { ReturnRequests } from '@/collections/ReturnRequests'
 import { Reviews } from '@/collections/Reviews'
@@ -178,6 +180,8 @@ export default buildConfig({
     WorkshopAppointments,
     WorkshopBookings,
     Vouchers,
+    Quotes,
+    CancellationInvoices,
     Downloads,
     Reviews,
     ReturnRequests,

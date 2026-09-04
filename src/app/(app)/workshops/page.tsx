@@ -12,6 +12,7 @@ import { WorkshopCalendar } from '@/components/workshops/WorkshopCalendar'
 import type { Media, Page, Product } from '@/payload-types'
 import { getAllWorkshopAppointments } from '@/utilities/getAllWorkshopAppointments'
 import { getLocale } from '@/utilities/getLocale'
+import { strictLocaleQuery, normalizeAppLocale } from '@/utilities/payloadLocaleQuery'
 import configPromise from '@payload-config'
 import type { Metadata } from 'next'
 import { unstable_cache } from 'next/cache'
@@ -30,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function WorkshopsPage() {
   const locale = await getLocale()
+  const localeKey = normalizeAppLocale(locale)
   const { isEnabled: draft } = await draftMode()
 
   // Fetch all upcoming workshop appointments from database (cached 2 min)
@@ -37,8 +39,8 @@ export default async function WorkshopsPage() {
 
   // Get workshops page data (hero + calendar sections editable from admin)
   const workshopsPageData = draft
-    ? await queryPageBySlug({ slug: 'workshops', locale, draft: true })
-    : await getCachedWorkshopsPage(locale)
+    ? await queryPageBySlug({ slug: 'workshops', locale: localeKey, draft: true })
+    : await getCachedWorkshopsPage(localeKey)
 
   // Get CMS data for section titles/descriptions
   const workshopsData = workshopsPageData as Page | undefined
@@ -100,7 +102,7 @@ export default async function WorkshopsPage() {
         soldOutLabel={ws?.workshopsCalendarSoldOutLabel}
         bookLabel={ws?.workshopsCalendarBookLabel}
         emptyMessage={ws?.workshopsCalendarEmptyMessage}
-        comingSoonLabel={locale === 'en' ? 'New dates coming soon' : 'Bald neue Termine verfügbar'}
+        comingSoonLabel={localeKey === 'en' ? 'New dates coming soon' : 'Bald neue Termine verfügbar'}
       />
 
       {/* 3. Voucher CTA — page override or global */}
@@ -206,7 +208,7 @@ const queryPageBySlug = async ({
     depth: 20,
     draft,
     limit: 1,
-    locale,
+    ...(locale ? strictLocaleQuery(normalizeAppLocale(locale)) : strictLocaleQuery('de')),
     overrideAccess: true,
     pagination: false,
     where: {

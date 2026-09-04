@@ -9,6 +9,7 @@ import type {
   PickupItem,
   PickupOrderRow,
   ParticipantRow,
+  QuoteRow,
   RefundRequestRow,
   RosterData,
   RosterStats,
@@ -243,6 +244,26 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     overrideAccess: true,
   })
 
+  // Cross-reference existing Stornorechnungen so each order row can show
+  // "Storno ↓" instead of "Stornieren" once one has been issued.
+  const cancellationsResult = await payload.find({
+    collection: 'cancellation-invoices',
+    limit: 500,
+    depth: 0,
+    overrideAccess: true,
+  })
+  const cancellationByOrderId = new Map<string, { id: string; cancellationNumber: string }>()
+  for (const c of cancellationsResult.docs) {
+    const cd = c as unknown as { order?: unknown; cancellationNumber?: string }
+    const orderRefId = typeof cd.order === 'object' && cd.order !== null ? (cd.order as { id: string }).id : cd.order
+    if (orderRefId) {
+      cancellationByOrderId.set(String(orderRefId), {
+        id: String(c.id),
+        cancellationNumber: cd.cancellationNumber ?? '',
+      })
+    }
+  }
+
   const orders: OrderRow[] = ordersResult.docs.map((o) => {
     const od = o as unknown as {
       invoiceNumber?: string
@@ -268,6 +289,8 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       })
       .join(', ')
 
+    const cancellation = cancellationByOrderId.get(String(o.id)) ?? null
+
     return {
       id: String(o.id),
       invoiceNumber: od.invoiceNumber ?? String(o.id).slice(-8).toUpperCase(),
@@ -279,7 +302,48 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       createdAt: od.createdAt
         ? new Date(od.createdAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
         : '',
+      cancellationInvoiceId: cancellation?.id ?? null,
+      cancellationNumber: cancellation?.cancellationNumber ?? null,
     } satisfies OrderRow
+  })
+
+  // ── 4c. Quotes (Angebote) ────────────────────────────────────────────────
+  const quotesResult = await payload.find({
+    collection: 'quotes',
+    sort: '-createdAt',
+    limit: 200,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const quotes: QuoteRow[] = quotesResult.docs.map((q) => {
+    const qd = q as unknown as {
+      quoteNumber?: string
+      clientName?: string
+      projectName?: string
+      status?: string
+      items?: Array<{ quantity?: number; unitPriceCents?: number }>
+      validUntil?: string
+      createdAt?: string
+    }
+    const totalAmount = (qd.items ?? []).reduce(
+      (sum, item) => sum + (item.unitPriceCents ?? 0) * (item.quantity ?? 1),
+      0,
+    )
+    return {
+      id: String(q.id),
+      quoteNumber: qd.quoteNumber ?? '',
+      clientName: qd.clientName ?? '',
+      projectName: qd.projectName ?? '',
+      status: (qd.status as QuoteRow['status']) ?? 'open',
+      totalAmount,
+      validUntil: qd.validUntil
+        ? new Date(qd.validUntil).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
+        : '',
+      createdAt: qd.createdAt
+        ? new Date(qd.createdAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
+        : '',
+    } satisfies QuoteRow
   })
 
   // ── 5. Vouchers ────────────────────────────────────────────────────────────
@@ -425,6 +489,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     participants,
     pickupOrders,
     orders,
+    quotes,
     vouchers,
     refundRequests,
     activityEvents,

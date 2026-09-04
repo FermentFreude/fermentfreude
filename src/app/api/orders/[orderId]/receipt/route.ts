@@ -1,5 +1,6 @@
 import { buildOrderReceiptData } from '@/lib/buildOrderReceiptData'
-import { generateOrderReceiptPDF } from '@/lib/generateOrderReceiptPDF'
+import { generateRechnungManPDF } from '@/lib/pdf/generateRechnungManPDF'
+import { generateRechnungWebPDF } from '@/lib/pdf/generateRechnungWebPDF'
 import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
@@ -78,7 +79,10 @@ export async function GET(
 
     // ── Assemble receipt data + generate PDF ───────────────────────────────
     const receiptData = await buildOrderReceiptData(payload, order)
-    const pdfBuffer = await generateOrderReceiptPDF(receiptData)
+    const pdfBuffer =
+      order.paymentMethod === 'manual'
+        ? await generateRechnungManPDF(receiptData)
+        : await generateRechnungWebPDF(receiptData)
 
     // ── Stream PDF ─────────────────────────────────────────────────────────
     const filename = `fermentfreude-bestellung-${receiptData.orderNumber}.pdf`

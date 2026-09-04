@@ -139,6 +139,13 @@ const PRODUCTS: Array<{
   alt: string
   descriptionDe: string
   descriptionEn: string
+  isSeasonal?: boolean
+  unitSizeDe?: string
+  unitSizeEn?: string
+  ingredientsDe?: string
+  ingredientsEn?: string
+  shortDescriptionDe?: string
+  shortDescriptionEn?: string
 }> = [
   // ── Staging products (workshop-based) ──────────────────────────────────────
   {
@@ -363,28 +370,71 @@ const PRODUCTS: Array<{
       'Fermented curry onion. Ingredients: Onions, curry powder (turmeric, coriander, mustard seed, ginger, cinnamon, cumin, garlic), non-iodised salt, lime leaves. 260g.',
   },
   {
-    titleDe: 'Classic Kimchi',
-    titleEn: 'Classic Kimchi',
+    titleDe: 'Kimchi',
+    titleEn: 'Kimchi',
     slug: 'classic-kimchi',
-    priceInEUR: 9.9,
+    priceInEUR: 720,
     imagePath: 'images/placeholder.png',
-    alt: 'Classic Kimchi – 260g',
+    alt: 'Kimchi – 260g',
     descriptionDe:
-      'Classic Kimchi. Zutaten: Chinakohl, Karotten, Rettich, Apfel, Lauch, Reisstärke, Ingwer, Knoblauch, unjodiertes Salz, Gochugaru, Zucker, Miso (Wasser, Sojabohnen, Reis, Speisesalz). 260g.',
+      'Wir fermentieren das, was die Saison hergibt. Deshalb wechseln Gemüse und Würzung im Laufe des Jahres und jedes Kimchi schmeckt ein wenig anders. Würzig, angenehm säuerlich und vielseitig – als Beilage, Topping oder einfach direkt aus dem Glas.',
     descriptionEn:
-      'Classic Kimchi. Ingredients: Napa cabbage, carrots, radish, apple, leek, rice starch, ginger, garlic, non-iodised salt, gochugaru, sugar, miso (water, soybeans, rice, salt). 260g.',
+      'We ferment whatever the season provides. That is why vegetables and seasoning change throughout the year and every kimchi tastes a little different. Spicy, pleasantly sour and versatile — as a side dish, topping or straight from the jar.',
+    isSeasonal: true,
+    unitSizeDe: '1 Glas (260 g netto)',
+    unitSizeEn: '1 jar (260 g net)',
+    shortDescriptionDe:
+      'Unser Kimchi wird aus saisonal wechselndem Gemüse milchsauer fermentiert. Je nach Jahreszeit entstehen unterschiedliche Varianten mit ganz eigenem Charakter.',
+    shortDescriptionEn:
+      'Our kimchi is lactic-acid fermented from seasonally changing vegetables. Depending on the time of year, different variants with their own character are created.',
+    ingredientsDe:
+      'Saisonale Variante — Zutatenliste wird vor jeder Charge im CMS aktualisiert.',
+    ingredientsEn:
+      'Seasonal variant — ingredient list is updated in the CMS before each batch goes live.',
   },
   {
     titleDe: 'Käferbohnen-Tempeh',
     titleEn: 'Runner Bean Tempeh',
     slug: 'kaeferbohnen-tempeh',
-    priceInEUR: 7.9,
+    priceInEUR: 590,
     imagePath: 'images/placeholder.png',
-    alt: 'Käferbohnen-Tempeh – 180g',
+    alt: 'Käferbohnen-Tempeh – 185g',
     descriptionDe:
-      'Käferbohnen-Tempeh aus österreichischen Käferbohnen. Zutaten: Käferbohnen aus Österreich gekocht (97%), Apfelessig, Starterkultur (Rhizopus oligosporus). 180g.',
+      'Aus steirischen Käferbohnen fermentieren wir in Graz einen Tempeh mit nussig-aromatischem Geschmack, ausgeprägten Umami-Noten und saftigem Biss. Kräftig angebraten entwickelt er eine goldbraune Kruste und intensive Röstaromen. Er nimmt Marinaden hervorragend auf und lässt sich vielseitig kombinieren.',
     descriptionEn:
-      'Runner bean tempeh made from Austrian runner beans. Ingredients: Cooked Austrian runner beans (97%), apple cider vinegar, starter culture (Rhizopus oligosporus). 180g.',
+      'From Styrian runner beans we ferment a tempeh in Graz with a nutty-aromatic taste, pronounced umami notes and a juicy bite. Pan-fried vigorously, it develops a golden-brown crust and intense roasted aromas. It absorbs marinades excellently and combines well in many dishes.',
+    unitSizeDe: '1 Packung',
+    unitSizeEn: '1 pack',
+    shortDescriptionDe:
+      'Nussig-aromatisch, herzhaft und voller Umami – unser Tempeh aus steirischen Käferbohnen wird beim Anbraten außen goldbraun und bleibt innen schön saftig.',
+    shortDescriptionEn:
+      'Nutty-aromatic, hearty and full of umami — our tempeh made from Styrian runner beans turns golden brown on the outside when pan-fried while staying beautifully juicy inside.',
+    ingredientsDe:
+      'Käferbohnen aus Österreich gekocht (97 %), Apfelessig, Starterkultur (Rhizopus oligosporus)',
+    ingredientsEn:
+      'Cooked Austrian runner beans (97%), apple cider vinegar, starter culture (Rhizopus oligosporus)',
+  },
+  {
+    titleDe: 'Berglinsen-Tempeh',
+    titleEn: 'Mountain Lentil Tempeh',
+    slug: 'berglinsen-tempeh',
+    priceInEUR: 590,
+    imagePath: 'images/placeholder.png',
+    alt: 'Berglinsen-Tempeh – 185g',
+    descriptionDe:
+      'Österreichische Berglinsen werden durch Fermentation zu einem herzhaften Tempeh mit nussig-aromatischem Geschmack und viel Umami. In der Pfanne wird er außen schön knusprig, bleibt innen saftig und entwickelt kräftige Röstaromen. Pur angebraten, mariniert oder als Bestandteil verschiedenster Gerichte ist er unkompliziert und vielseitig einsetzbar.',
+    descriptionEn:
+      'Austrian mountain lentils are fermented into a hearty tempeh with a nutty-aromatic taste and plenty of umami. In the pan it becomes nicely crispy on the outside, stays juicy inside and develops bold roasted aromas. Pan-fried plain, marinated or as part of various dishes, it is uncomplicated and versatile.',
+    unitSizeDe: '1 Packung',
+    unitSizeEn: '1 pack',
+    shortDescriptionDe:
+      'Nussig-aromatisch, herzhaft und umamireich – unser Tempeh aus österreichischen Berglinsen wird beim Anbraten wunderbar knusprig und bleibt innen saftig.',
+    shortDescriptionEn:
+      'Nutty-aromatic, hearty and rich in umami — our tempeh made from Austrian mountain lentils becomes wonderfully crispy when pan-fried while staying juicy inside.',
+    ingredientsDe:
+      'Berglinsen aus Österreich gekocht (97 %), Apfelessig, Starterkultur (Rhizopus oligosporus)',
+    ingredientsEn:
+      'Cooked Austrian mountain lentils (97%), apple cider vinegar, starter culture (Rhizopus oligosporus)',
   },
 ]
 
@@ -479,9 +529,31 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
             description: buildDescription(product.descriptionDe),
             relatedProducts,
             ...(benefits ? { benefits } : {}),
+            ...(product.isSeasonal != null ? { isSeasonal: product.isSeasonal } : {}),
+            ...(product.unitSizeDe ? { unitSize: product.unitSizeDe } : {}),
+            ...(product.ingredientsDe ? { ingredients: product.ingredientsDe } : {}),
+            ...(product.shortDescriptionDe
+              ? { shortDescription: product.shortDescriptionDe }
+              : {}),
           },
           context: ctx,
         })
+        if (product.unitSizeEn || product.ingredientsEn || product.shortDescriptionEn) {
+          await payload.update({
+            collection: 'products',
+            id: doc.id,
+            locale: 'en',
+            data: {
+              title: product.titleEn,
+              ...(product.unitSizeEn ? { unitSize: product.unitSizeEn } : {}),
+              ...(product.ingredientsEn ? { ingredients: product.ingredientsEn } : {}),
+              ...(product.shortDescriptionEn
+                ? { shortDescription: product.shortDescriptionEn }
+                : {}),
+            },
+            context: ctx,
+          })
+        }
       }
       continue
     }
@@ -501,6 +573,12 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
           priceInEUR: product.priceInEUR,
           inventory: 50,
           _status: 'published',
+          ...(product.isSeasonal != null ? { isSeasonal: product.isSeasonal } : {}),
+          ...(product.unitSizeDe ? { unitSize: product.unitSizeDe } : {}),
+          ...(product.ingredientsDe ? { ingredients: product.ingredientsDe } : {}),
+          ...(product.shortDescriptionDe
+            ? { shortDescription: product.shortDescriptionDe }
+            : {}),
         },
       })
       productIds.push(String(created.id))

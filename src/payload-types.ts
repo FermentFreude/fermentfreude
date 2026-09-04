@@ -86,6 +86,8 @@ export interface Config {
     'workshop-appointments': WorkshopAppointment;
     'workshop-bookings': WorkshopBooking;
     vouchers: Voucher;
+    quotes: Quote;
+    'cancellation-invoices': CancellationInvoice;
     downloads: Download;
     reviews: Review;
     'return-requests': ReturnRequest;
@@ -138,6 +140,8 @@ export interface Config {
     'workshop-appointments': WorkshopAppointmentsSelect<false> | WorkshopAppointmentsSelect<true>;
     'workshop-bookings': WorkshopBookingsSelect<false> | WorkshopBookingsSelect<true>;
     vouchers: VouchersSelect<false> | VouchersSelect<true>;
+    quotes: QuotesSelect<false> | QuotesSelect<true>;
+    'cancellation-invoices': CancellationInvoicesSelect<false> | CancellationInvoicesSelect<true>;
     downloads: DownloadsSelect<false> | DownloadsSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'return-requests': ReturnRequestsSelect<false> | ReturnRequestsSelect<true>;
@@ -193,9 +197,6 @@ export interface Config {
     'product-detail-labels-global': ProductDetailLabelsGlobalSelect<false> | ProductDetailLabelsGlobalSelect<true>;
   };
   locale: 'de' | 'en';
-  widgets: {
-    collections: CollectionsWidget;
-  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -337,6 +338,14 @@ export interface Order {
    */
   customerDietSpecs?: string | null;
   /**
+   * Determines the invoice series: stripe orders get WEB-YYYY-NNNN, manually-created orders get MAN-YYYY-NNNN.
+   */
+  paymentMethod?: ('stripe' | 'manual') | null;
+  /**
+   * Freeform reference for manually-created orders (e.g. "Firmenevent August"). Shown as REFERENZ / BESTELLNUMMER on the Rechnung MAN PDF.
+   */
+  referenceNote?: string | null;
+  /**
    * Date chosen by buyer for in-store pickup (e.g. "14.05.2026"). Auto-set from checkout.
    */
   pickupDate?: string | null;
@@ -383,7 +392,7 @@ export interface Product {
    */
   productType: 'jarred' | 'fresh' | 'bottled' | 'workshop' | 'digital-course';
   /**
-   * Ein kurzer Satz für die Produktseite unter dem Titel (max. 2–3 Zeilen). / A short sentence displayed below the title on the product page.
+   * Kurzer Text unter dem Titel (max. 2–3 Zeilen). Bei saisonalem Kimchi: hier oder im Titel die aktuelle Variante nennen. / Short text under the title. For seasonal Kimchi, name the current variant here or in the title.
    */
   shortDescription?: string | null;
   /**
@@ -507,9 +516,13 @@ export interface Product {
    */
   unitSize?: string | null;
   /**
-   * Zutatenliste für das Etikett und die Produktseite.
+   * Zutatenliste für Etikett und Shop. Für saisonales Kimchi: bei jeder neuen Variante Titel + diese Zutatenliste aktualisieren (gleiches Produkt, neuer Name). / Ingredient list for label and shop. For seasonal Kimchi: update title + this list whenever the variant changes (same product record, new name).
    */
   ingredients?: string | null;
+  /**
+   * Aktivieren für Kimchi (und ähnliche Produkte). Zeigt die Zutatenliste prominent im Shop und erinnert daran, Titel + Zutaten bei jeder neuen Charge zu aktualisieren. Das Produktbild darf als Beispielbild bleiben. / Enable for Kimchi. Shows ingredients prominently in the shop and reminds editors to update title + ingredients each batch. Keep the image as a typical example if needed.
+   */
+  isSeasonal?: boolean | null;
   /**
    * z.B. "Enthält Soja" / "Contains soy"
    */
@@ -538,7 +551,63 @@ export interface Product {
    */
   weightGrams?: number | null;
   /**
-   * z.B. "3 Tage nach Kauf" / "3 days after purchase"
+   * Für „Auf einen Blick“ auf der Produktseite, z. B. „Österreich“.
+   */
+  productOrigin?: string | null;
+  /**
+   * Für „Auf einen Blick“, z. B. „Graz“.
+   */
+  madeIn?: string | null;
+  /**
+   * Kurze Zeile unter dem Titel, z. B. „Nussig-aromatisch. Herzhaft. Voller Umami.“
+   */
+  pdpTagline?: string | null;
+  /**
+   * Überschrift im Geschmacks-Abschnitt, z. B. „Nussig · Herzhaft · Umami“
+   */
+  pdpTasteHeadline?: string | null;
+  /**
+   * Erster Absatz im Geschmacks-Abschnitt (unter der Überschrift).
+   */
+  pdpStoryIntro?: string | null;
+  /**
+   * Absatz unter der Geschmacks-Leiste (z. B. Anbraten, Marinaden).
+   */
+  pdpStoryDetail?: string | null;
+  /**
+   * Werden als horizontale Leiste angezeigt, z. B. NUSSIG → HERZHAFT → UMAMI.
+   */
+  pdpFlavorNotes?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Kleine Trust-Zeilen unter dem Warenkorb-Button.
+   */
+  pdpTrustPoints?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Drei Schritte, z. B. Schneiden → Anbraten → Genießen.
+   */
+  pdpUsageSteps?:
+    | {
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Überschrift über den Zubereitungsschritten, z. B. „So wird dein Tempeh richtig gut“.
+   */
+  pdpUsageSectionTitle?: string | null;
+  /**
+   * z.B. "6 Wochen" / "6 weeks" — wird auf der Produktseite als MHD angezeigt.
    */
   bestBefore?: string | null;
   /**
@@ -921,6 +990,7 @@ export interface Page {
         | OnlineCourseSliderBlock
         | ProductSliderBlock
         | FeaturedProductCardsBlock
+        | ShopAutomatenBlock
         | ShopHeroBlock
         | ShopProductGridBlock
         | ShopProductListBlock
@@ -1116,13 +1186,25 @@ export interface Page {
      */
     gastronomyWorkshopNextDateLabel?: string | null;
     /**
-     * Up to three cards; last section on /gastronomy.
+     * Four workshop cards for /gastronomy. Title, description, price and image sync from each workshop page (Pages → Workshop Detail). Fields here override only when filled.
      */
     gastronomyWorkshopCards?:
       | {
+          /**
+           * Optional override. By default the matching workshop page hero image is used.
+           */
           image?: (string | null) | Media;
+          /**
+           * Optional override. Defaults to the workshop page hero title when empty.
+           */
           title: string;
+          /**
+           * Optional override. Defaults to the workshop page hero description when empty.
+           */
           description: string;
+          /**
+           * Optional override. Defaults to the workshop page booking price when empty.
+           */
           price: string;
           /**
            * e.g. "pro Person" / "per Person"
@@ -1876,6 +1958,74 @@ export interface Page {
         }[]
       | null;
     /**
+     * e.g. "Jetzt buchen" / "Book now". Vom Feld ins Glas only.
+     */
+    heroPrimaryCtaLabel?: string | null;
+    /**
+     * e.g. "Mehr erfahren" / "Learn more". Vom Feld ins Glas only.
+     */
+    heroSecondaryCtaLabel?: string | null;
+    /**
+     * Circular badge text (e.g. "EINMALIGE VERANSTALTUNG"). Vom Feld ins Glas only.
+     */
+    heroSealRingText?: string | null;
+    /**
+     * Top word in the spinning seal (e.g. "FER").
+     */
+    heroSealCenterLine1?: string | null;
+    /**
+     * Bottom word in the spinning seal (e.g. "MEN").
+     */
+    heroSealCenterLine2?: string | null;
+    /**
+     * e.g. "Das Konzept" / "The concept".
+     */
+    conceptEyebrow?: string | null;
+    conceptTitle?: string | null;
+    /**
+     * Pull quote shown with gold left border.
+     */
+    conceptQuote?: string | null;
+    conceptText?: string | null;
+    conceptTextSecondary?: string | null;
+    /**
+     * e.g. "Aug – Okt" / "Aug – Oct".
+     */
+    conceptSeasonMonths?: string | null;
+    /**
+     * e.g. "Saison 2025" / "Season 2025".
+     */
+    conceptSeasonLabel?: string | null;
+    /**
+     * Portrait image beside the concept copy (4:5 crop).
+     */
+    conceptImage?: (string | null) | Media;
+    /**
+     * Exactly 3 steps: Feld (01), Küche (02), Glas (03). Order matters.
+     */
+    journeySections?:
+      | {
+          /**
+           * e.g. "01", "02", "03".
+           */
+          label: string;
+          /**
+           * Nav label (e.g. "Feld" / "Field").
+           */
+          name: string;
+          title: string;
+          description: string;
+          bullets?:
+            | {
+                text: string;
+                id?: string | null;
+              }[]
+            | null;
+          image?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+    /**
      * e.g. "3-STUNDEN HANDS-ON WORKSHOP" / "3-HOUR HANDS-ON WORKSHOP"
      */
     bookingEyebrow?: string | null;
@@ -2117,6 +2267,10 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Quote overlaid on the voucher background photo. Vom Feld ins Glas only.
+     */
+    voucherImageQuote?: string | null;
     /**
      * e.g. "HÄUFIGE FRAGEN" / "FAQ"
      */
@@ -2456,6 +2610,9 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
+  /**
+   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
+   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -2475,6 +2632,9 @@ export interface Form {
   redirect?: {
     url: string;
   };
+  /**
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
+   */
   emails?:
     | {
         emailTo?: string | null;
@@ -2483,6 +2643,9 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
+        /**
+         * Enter the message that should be sent in this email.
+         */
         message?: {
           root: {
             type: string;
@@ -3300,37 +3463,37 @@ export interface FeaturedProductCardsBlock {
    */
   visible?: boolean | null;
   /**
-   * Main heading above the cards (e.g. "Unsere Bestseller" / "Our Bestsellers").
+   * Shown first and largest — FermentFreude hero product (Käferbohnentempeh).
+   */
+  bannerProduct?: (string | null) | Product;
+  /**
+   * Hero card accent color. Default: #403c39.
+   */
+  bannerColor?: string | null;
+  /**
+   * Optional heading above products (e.g. "Weitere Produkte"). Avoid "Bestseller" — Käfer is already the hero above, so this section is only the other products.
    */
   heading?: string | null;
   /**
-   * Short intro text below the heading.
+   * Short intro text below the heading. Leave empty to keep the layout calm.
    */
   subheading?: string | null;
   /**
-   * Select up to 3 products to display as large feature cards. These appear in a 3-column row.
+   * Berglinsentempeh + Kimchi (seasonal). If the hero product is also selected here, it is shown only once in the hero. Prefer 2 supporting products when a hero is set.
    */
-  products: (string | Product)[];
+  products?: (string | Product)[] | null;
   /**
-   * Optional accent colors for each card. Leave empty for defaults (olive-green, warm-gold, earthy-brown).
+   * Optional accent colors for each supporting card. Leave empty for defaults.
    */
   cardColors?:
     | {
         /**
-         * e.g. #4b6043, #b8860b, #8b4513
+         * e.g. #4b6043, #403c39
          */
         color?: string | null;
         id?: string | null;
       }[]
     | null;
-  /**
-   * A single product shown as a wide banner card below the 3-column row (e.g. Tempeh).
-   */
-  bannerProduct?: (string | null) | Product;
-  /**
-   * Banner card accent color. Default: #555954 (muted olive).
-   */
-  bannerColor?: string | null;
   /**
    * Button text on each card (e.g. "Jetzt bestellen" / "Order Now").
    */
@@ -3338,6 +3501,118 @@ export interface FeaturedProductCardsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'featuredProductCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopAutomatenBlock".
+ */
+export interface ShopAutomatenBlock {
+  /**
+   * Toggle off to hide this section without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * e.g. "GRAZ · AVAILABLE 24/7"
+   */
+  eyebrow?: string | null;
+  /**
+   * e.g. "Find our products, anytime."
+   */
+  heading?: string | null;
+  /**
+   * Optional short line under the headline.
+   */
+  body?: string | null;
+  /**
+   * Large editorial photo on desktop (Automat, product, Graz mood). Soft rounded corners on the front.
+   */
+  featuredImage?: (string | null) | Media;
+  /**
+   * Add each Automat as a row (Graz now; more across Styria later). Order = display order (01, 02, …).
+   */
+  locations?:
+    | {
+        /**
+         * Photo of this Automat / location (preferred). Product pack is fine until you have a location photo.
+         */
+        image?: (string | null) | Media;
+        /**
+         * e.g. "Graz", "Leibnitz", "Südsteiermark". Shown above the name.
+         */
+        city?: string | null;
+        /**
+         * e.g. "Automat Pölzl Gemüse & Freunde"
+         */
+        name: string;
+        address: string;
+        /**
+         * Short line of what is in this Automat, e.g. "Käfer · Berglinsen". Leave empty if same everywhere.
+         */
+        products?: string | null;
+        description?: string | null;
+        /**
+         * Shown as badge. Default: "24/7 Vending Machine".
+         */
+        accessInfo?: string | null;
+        mapsUrl: string;
+        /**
+         * e.g. https://poelzl.at/ — leave empty to hide the website link.
+         */
+        websiteUrl?: string | null;
+        /**
+         * Kept for older content. Automaten section uses Automat only.
+         */
+        kind?: ('automat' | 'restaurant') | null;
+        /**
+         * Fallback if description is empty.
+         */
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. "Open in Maps" / "In Maps öffnen"
+   */
+  mapsLabel?: string | null;
+  /**
+   * e.g. "Route teilen" / "Share route"
+   */
+  shareLabel?: string | null;
+  /**
+   * e.g. "Zur Website" / "Visit website"
+   */
+  websiteLabel?: string | null;
+  /**
+   * Toggle off to hide the Wildmoser / restaurant tip without deleting the text.
+   */
+  tipVisible?: boolean | null;
+  /**
+   * Photo of the restaurant (e.g. Wildmoser facade). Optional.
+   */
+  tipImage?: (string | null) | Media;
+  /**
+   * e.g. "Wildmoser"
+   */
+  tipName?: string | null;
+  /**
+   * Subtle note under the cards (e.g. Wildmoser). Leave empty to hide. Only restaurants / extras — not Automaten.
+   */
+  tipText?: string | null;
+  /**
+   * Optional link for the insider tip (e.g. Wildmoser).
+   */
+  tipMapsUrl?: string | null;
+  /**
+   * e.g. https://www.wildmoser-graz.at/
+   */
+  tipWebsiteUrl?: string | null;
+  pullQuote?: string | null;
+  locationName?: string | null;
+  locationAddress?: string | null;
+  mapsUrl?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'shopAutomaten';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3349,61 +3624,68 @@ export interface ShopHeroBlock {
    */
   visible?: boolean | null;
   /**
-   * Single main headline for the hero section (e.g. "Unsere handgemachten Produkte aus unserem Pick-Up Shop").
+   * Hero product at the top of /shop. Title, price, description and sold-out come from this product. Packaging shots belong on the product detail page.
    */
-  heroTitle: string;
+  heroProduct?: (string | null) | Product;
   /**
-   * Price shown below the title (e.g. "ab €8,50"). Leave empty to hide.
+   * Full-bleed plated photo behind the hero. Leave empty to use the default Käfer photo. Prefer a prepared/plated shot (not packaging).
    */
-  heroPrice?: string | null;
+  heroImage?: (string | null) | Media;
   /**
-   * e.g. "Jetzt bestellen"
+   * Legacy field — kept for older layouts. Default: #403c39.
    */
-  ctaPrimaryLabel?: string | null;
+  heroPanelColor?: string | null;
   /**
-   * e.g. "/shop#products"
+   * Three short highlights under the hero (icons + text). Leave empty to show the default Graz / pickup / fresh lines.
    */
-  ctaPrimaryUrl?: string | null;
-  /**
-   * e.g. "Mehr erfahren"
-   */
-  ctaSecondaryLabel?: string | null;
-  /**
-   * e.g. "/fermentation"
-   */
-  ctaSecondaryUrl?: string | null;
-  /**
-   * Product cards for the scrolling carousel. Each card has an image, category label, and link to product detail.
-   */
-  slides?:
+  trustItems?:
     | {
         /**
-         * Product photo (portrait ratio, ~860×1044px).
+         * Icon shown in the gold circle.
          */
-        image?: (string | null) | Media;
+        icon: 'hand' | 'mapPin' | 'leaf';
         /**
-         * Label shown vertically on the card (e.g. "Tempeh", "Kimchi").
+         * e.g. "Handgemacht in Graz" / "Handmade in Graz"
          */
-        categoryLabel: string;
-        /**
-         * URL the arrow button links to (e.g. "/shop/tempeh").
-         */
-        detailUrl?: string | null;
+        label: string;
         id?: string | null;
       }[]
     | null;
   /**
-   * Small bold text at the bottom (e.g. "Fermentierte Lebensmittel, mit Sorgfalt hergestellt.").
+   * Small line above the hero product (e.g. pickup shop intro). Leave empty to keep focus on the product.
+   */
+  heroTitle?: string | null;
+  /**
+   * Overrides product CTA (e.g. "Jetzt bestellen")
+   */
+  ctaPrimaryLabel?: string | null;
+  /**
+   * Leave empty to link to the hero product page.
+   */
+  ctaPrimaryUrl?: string | null;
+  /**
+   * e.g. "Fermentierte Lebensmittel, mit Sorgfalt hergestellt."
    */
   bottomTagline?: string | null;
   /**
-   * Secondary line below the tagline (e.g. "Abholung in Berlin — jede Woche frisch.").
+   * e.g. "Abholung in Graz, jede Woche frisch."
    */
   bottomSubtitle?: string | null;
   /**
-   * Optional note about delivery plans (e.g. "Lieferung in Planung — für garantierte Frische.").
+   * Optional delivery note under the pickup lines.
    */
   bottomDisclaimer?: string | null;
+  /**
+   * Legacy jar slider — unused. Leave empty.
+   */
+  slides?:
+    | {
+        image?: (string | null) | Media;
+        categoryLabel?: string | null;
+        detailUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'shopHero';
@@ -4398,6 +4680,14 @@ export interface Transaction {
    * Full address of the pickup location.
    */
   pickupAddress?: string | null;
+  /**
+   * Voucher applied as a partial discount at checkout (cart total exceeded the voucher value, so the remainder was paid via Stripe). Read by redeemVoucherOnOrderComplete to mark the voucher redeemed once the Order is created.
+   */
+  voucherCode?: string | null;
+  /**
+   * Amount (in cents) deducted from the cart subtotal via the voucher above.
+   */
+  voucherDiscountAmount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4999,6 +5289,97 @@ export interface RefundRequest {
   createdAt: string;
 }
 /**
+ * Angebote (Kostenvoranschläge) für Sonder-, Partner- oder Firmenveranstaltungen.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotes".
+ */
+export interface Quote {
+  id: string;
+  /**
+   * Auto-generated, e.g. ANG-2026-0001.
+   */
+  quoteNumber?: string | null;
+  issueDate?: string | null;
+  /**
+   * Rein informativ. Wird ein Angebot angenommen, erstellt ein Admin die reale Bestellung/Rechnung separat.
+   */
+  status: 'open' | 'accepted' | 'expired';
+  /**
+   * Gültig bis — standardmäßig 14 Tage ab Angebotsdatum.
+   */
+  validUntil: string;
+  clientName: string;
+  contactPersonName?: string | null;
+  /**
+   * Straße, PLZ Ort — eine Zeile pro Adressbestandteil.
+   */
+  clientAddress?: string | null;
+  projectName: string;
+  clientReference?: string | null;
+  items: {
+    title: string;
+    note?: string | null;
+    quantity: number;
+    /**
+     * In Cent, z.B. 45000 = € 450,00.
+     */
+    unitPriceCents: number;
+    id?: string | null;
+  }[];
+  /**
+   * Freitext, z.B. "voraussichtlich Oktober 2026".
+   */
+  eventDateText?: string | null;
+  eventLocationText?: string | null;
+  participantCountText?: string | null;
+  /**
+   * Standardmäßig "individuelle Vereinbarung" wenn leer.
+   */
+  cancellationTermsText?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Stornorechnungen — stornieren die referenzierte Bestellung vollständig.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cancellation-invoices".
+ */
+export interface CancellationInvoice {
+  id: string;
+  /**
+   * Auto-generated, erbt die Serie der Originalrechnung (MAN/WEB).
+   */
+  cancellationNumber?: string | null;
+  issueDate?: string | null;
+  order: string | Order;
+  originalInvoiceNumber: string;
+  originalSeries: 'MAN' | 'WEB';
+  originalIssueDate: string;
+  reason?: string | null;
+  clientName: string;
+  clientAddress?: string | null;
+  items: {
+    title: string;
+    quantity: number;
+    unitPriceCents: number;
+    id?: string | null;
+  }[];
+  /**
+   * Positive Cent-Summe — wird auf der PDF negativ dargestellt.
+   */
+  totalCents: number;
+  /**
+   * Rein informativ — die tatsächliche Rückerstattung erfolgt manuell im Stripe-Dashboard bzw. per Überweisung.
+   */
+  refundStatus: 'offen' | 'erstattet' | 'verrechnet';
+  refundDate?: string | null;
+  refundMethodOrReference?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Digitale Downloads für Kunden nach dem Kauf
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5321,6 +5702,14 @@ export interface PayloadLockedDocument {
         value: string | Voucher;
       } | null)
     | ({
+        relationTo: 'quotes';
+        value: string | Quote;
+      } | null)
+    | ({
+        relationTo: 'cancellation-invoices';
+        value: string | CancellationInvoice;
+      } | null)
+    | ({
         relationTo: 'downloads';
         value: string | Download;
       } | null)
@@ -5597,6 +5986,7 @@ export interface PagesSelect<T extends boolean = true> {
         onlineCourseSlider?: T | OnlineCourseSliderBlockSelect<T>;
         productSlider?: T | ProductSliderBlockSelect<T>;
         featuredProductCards?: T | FeaturedProductCardsBlockSelect<T>;
+        shopAutomaten?: T | ShopAutomatenBlockSelect<T>;
         shopHero?: T | ShopHeroBlockSelect<T>;
         shopProductGrid?: T | ShopProductGridBlockSelect<T>;
         shopProductList?: T | ShopProductListBlockSelect<T>;
@@ -6032,6 +6422,35 @@ export interface PagesSelect<T extends boolean = true> {
               text?: T;
               id?: T;
             };
+        heroPrimaryCtaLabel?: T;
+        heroSecondaryCtaLabel?: T;
+        heroSealRingText?: T;
+        heroSealCenterLine1?: T;
+        heroSealCenterLine2?: T;
+        conceptEyebrow?: T;
+        conceptTitle?: T;
+        conceptQuote?: T;
+        conceptText?: T;
+        conceptTextSecondary?: T;
+        conceptSeasonMonths?: T;
+        conceptSeasonLabel?: T;
+        conceptImage?: T;
+        journeySections?:
+          | T
+          | {
+              label?: T;
+              name?: T;
+              title?: T;
+              description?: T;
+              bullets?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              image?: T;
+              id?: T;
+            };
         bookingEyebrow?: T;
         bookingTitle?: T;
         bookingPrice?: T;
@@ -6129,6 +6548,7 @@ export interface PagesSelect<T extends boolean = true> {
               text?: T;
               id?: T;
             };
+        voucherImageQuote?: T;
         faqEyebrow?: T;
         faqTitle?: T;
         faqDescription?: T;
@@ -6536,6 +6956,8 @@ export interface ProductSliderBlockSelect<T extends boolean = true> {
  */
 export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
   visible?: T;
+  bannerProduct?: T;
+  bannerColor?: T;
   heading?: T;
   subheading?: T;
   products?: T;
@@ -6545,9 +6967,49 @@ export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
         color?: T;
         id?: T;
       };
-  bannerProduct?: T;
-  bannerColor?: T;
   ctaLabel?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ShopAutomatenBlock_select".
+ */
+export interface ShopAutomatenBlockSelect<T extends boolean = true> {
+  visible?: T;
+  eyebrow?: T;
+  heading?: T;
+  body?: T;
+  featuredImage?: T;
+  locations?:
+    | T
+    | {
+        image?: T;
+        city?: T;
+        name?: T;
+        address?: T;
+        products?: T;
+        description?: T;
+        accessInfo?: T;
+        mapsUrl?: T;
+        websiteUrl?: T;
+        kind?: T;
+        note?: T;
+        id?: T;
+      };
+  mapsLabel?: T;
+  shareLabel?: T;
+  websiteLabel?: T;
+  tipVisible?: T;
+  tipImage?: T;
+  tipName?: T;
+  tipText?: T;
+  tipMapsUrl?: T;
+  tipWebsiteUrl?: T;
+  pullQuote?: T;
+  locationName?: T;
+  locationAddress?: T;
+  mapsUrl?: T;
   id?: T;
   blockName?: T;
 }
@@ -6557,12 +7019,22 @@ export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
  */
 export interface ShopHeroBlockSelect<T extends boolean = true> {
   visible?: T;
+  heroProduct?: T;
+  heroImage?: T;
+  heroPanelColor?: T;
+  trustItems?:
+    | T
+    | {
+        icon?: T;
+        label?: T;
+        id?: T;
+      };
   heroTitle?: T;
-  heroPrice?: T;
   ctaPrimaryLabel?: T;
   ctaPrimaryUrl?: T;
-  ctaSecondaryLabel?: T;
-  ctaSecondaryUrl?: T;
+  bottomTagline?: T;
+  bottomSubtitle?: T;
+  bottomDisclaimer?: T;
   slides?:
     | T
     | {
@@ -6571,9 +7043,6 @@ export interface ShopHeroBlockSelect<T extends boolean = true> {
         detailUrl?: T;
         id?: T;
       };
-  bottomTagline?: T;
-  bottomSubtitle?: T;
-  bottomDisclaimer?: T;
   id?: T;
   blockName?: T;
 }
@@ -7213,6 +7682,65 @@ export interface VouchersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotes_select".
+ */
+export interface QuotesSelect<T extends boolean = true> {
+  quoteNumber?: T;
+  issueDate?: T;
+  status?: T;
+  validUntil?: T;
+  clientName?: T;
+  contactPersonName?: T;
+  clientAddress?: T;
+  projectName?: T;
+  clientReference?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        note?: T;
+        quantity?: T;
+        unitPriceCents?: T;
+        id?: T;
+      };
+  eventDateText?: T;
+  eventLocationText?: T;
+  participantCountText?: T;
+  cancellationTermsText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cancellation-invoices_select".
+ */
+export interface CancellationInvoicesSelect<T extends boolean = true> {
+  cancellationNumber?: T;
+  issueDate?: T;
+  order?: T;
+  originalInvoiceNumber?: T;
+  originalSeries?: T;
+  originalIssueDate?: T;
+  reason?: T;
+  clientName?: T;
+  clientAddress?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        quantity?: T;
+        unitPriceCents?: T;
+        id?: T;
+      };
+  totalCents?: T;
+  refundStatus?: T;
+  refundDate?: T;
+  refundMethodOrReference?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "downloads_select".
  */
 export interface DownloadsSelect<T extends boolean = true> {
@@ -7613,6 +8141,7 @@ export interface ProductsSelect<T extends boolean = true> {
   userInstructions?: T;
   unitSize?: T;
   ingredients?: T;
+  isSeasonal?: T;
   allergens?: T;
   storageInstructions?: T;
   shelfLife?: T;
@@ -7622,6 +8151,32 @@ export interface ProductsSelect<T extends boolean = true> {
   volumeML?: T;
   alcoholContent?: T;
   weightGrams?: T;
+  productOrigin?: T;
+  madeIn?: T;
+  pdpTagline?: T;
+  pdpTasteHeadline?: T;
+  pdpStoryIntro?: T;
+  pdpStoryDetail?: T;
+  pdpFlavorNotes?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  pdpTrustPoints?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  pdpUsageSteps?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  pdpUsageSectionTitle?: T;
   bestBefore?: T;
   workshopRef?: T;
   courseSlug?: T;
@@ -7711,6 +8266,8 @@ export interface OrdersSelect<T extends boolean = true> {
   customerName?: T;
   customerPhone?: T;
   customerDietSpecs?: T;
+  paymentMethod?: T;
+  referenceNote?: T;
   pickupDate?: T;
   pickupTime?: T;
   pickupLocation?: T;
@@ -7771,6 +8328,8 @@ export interface TransactionsSelect<T extends boolean = true> {
   pickupTime?: T;
   pickupLocation?: T;
   pickupAddress?: T;
+  voucherCode?: T;
+  voucherDiscountAmount?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -8051,7 +8610,7 @@ export interface BusinessInfo {
   createdAt?: string | null;
 }
 /**
- * Auto-managed sequential invoice counter. Do not edit manually.
+ * Auto-managed sequential invoice counters. Do not edit manually.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invoice-counter".
@@ -8059,13 +8618,37 @@ export interface BusinessInfo {
 export interface InvoiceCounter {
   id: string;
   /**
-   * Year of the last issued invoice.
+   * Legacy series (FF-YYYY-NNNN) — year of the last issued number.
    */
   lastYear?: number | null;
   /**
-   * Last sequential number issued in lastYear.
+   * Legacy series (FF-YYYY-NNNN) — last sequential number issued in lastYear.
    */
   lastNumber?: number | null;
+  /**
+   * ANG series — year of the last issued number.
+   */
+  angLastYear?: number | null;
+  /**
+   * ANG series — last sequential number issued in angLastYear.
+   */
+  angLastNumber?: number | null;
+  /**
+   * MAN series — year of the last issued number.
+   */
+  manLastYear?: number | null;
+  /**
+   * MAN series — last sequential number issued in manLastYear.
+   */
+  manLastNumber?: number | null;
+  /**
+   * WEB series — year of the last issued number.
+   */
+  webLastYear?: number | null;
+  /**
+   * WEB series — last sequential number issued in webLastYear.
+   */
+  webLastNumber?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -8363,20 +8946,64 @@ export interface WorkshopCardsGlobal {
   createdAt?: string | null;
 }
 /**
- * Localized labels for product detail headings and notices.
+ * Texte & Überschriften der Produktdetailseite (alle Lebensmittelprodukte). / Labels and section titles for the food product detail page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "product-detail-labels-global".
  */
 export interface ProductDetailLabelsGlobal {
   id: string;
+  /**
+   * Link oben auf der Produktseite.
+   */
+  backToShopLabel?: string | null;
+  addToCartLabel?: string | null;
+  soldOutLabel?: string | null;
+  seasonalBadgeLabel?: string | null;
+  /**
+   * Kleine Zeile unter dem Warenkorb-Button, z. B. Abholung in Graz.
+   */
+  deliveryNotice?: string | null;
+  navDetailsLabel?: string | null;
+  navTastePrepLabel?: string | null;
+  navStorageLabel?: string | null;
+  groupDetailsTitle?: string | null;
+  groupDetailsDescription?: string | null;
+  glanceTitle?: string | null;
+  weightLabel?: string | null;
+  portionLabel?: string | null;
+  originLabel?: string | null;
+  madeInLabel?: string | null;
   ingredientsLabel?: string | null;
   allergensLabel?: string | null;
+  /**
+   * Kleiner Hinweis unter der Zutatenliste (Etikett gilt).
+   */
+  ingredientsDisclaimer?: string | null;
+  groupTasteTitle?: string | null;
+  groupTasteDescription?: string | null;
+  /**
+   * z. B. „So schmeckt er“
+   */
+  tasteSectionLabel?: string | null;
+  /**
+   * z. B. „So schmeckt es“ für Kimchi
+   */
+  tasteSectionLabelNeutral?: string | null;
+  groupStorageTitle?: string | null;
+  groupStorageDescription?: string | null;
   storageShelfLifeLabel?: string | null;
   shelfLifeLabel?: string | null;
+  bestBeforeLabel?: string | null;
   howToUseLabel?: string | null;
   instructionsBeforeUseLabel?: string | null;
-  deliveryNotice?: string | null;
+  /**
+   * z. B. „Das könnte dir auch schmecken“
+   */
+  relatedTitle?: string | null;
+  shopFooterTitle?: string | null;
+  shopFooterDescription?: string | null;
+  shopFooterCta?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -8520,6 +9147,12 @@ export interface BusinessInfoSelect<T extends boolean = true> {
 export interface InvoiceCounterSelect<T extends boolean = true> {
   lastYear?: T;
   lastNumber?: T;
+  angLastYear?: T;
+  angLastNumber?: T;
+  manLastYear?: T;
+  manLastNumber?: T;
+  webLastYear?: T;
+  webLastNumber?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -8666,26 +9299,42 @@ export interface WorkshopCardsGlobalSelect<T extends boolean = true> {
  * via the `definition` "product-detail-labels-global_select".
  */
 export interface ProductDetailLabelsGlobalSelect<T extends boolean = true> {
+  backToShopLabel?: T;
+  addToCartLabel?: T;
+  soldOutLabel?: T;
+  seasonalBadgeLabel?: T;
+  deliveryNotice?: T;
+  navDetailsLabel?: T;
+  navTastePrepLabel?: T;
+  navStorageLabel?: T;
+  groupDetailsTitle?: T;
+  groupDetailsDescription?: T;
+  glanceTitle?: T;
+  weightLabel?: T;
+  portionLabel?: T;
+  originLabel?: T;
+  madeInLabel?: T;
   ingredientsLabel?: T;
   allergensLabel?: T;
+  ingredientsDisclaimer?: T;
+  groupTasteTitle?: T;
+  groupTasteDescription?: T;
+  tasteSectionLabel?: T;
+  tasteSectionLabelNeutral?: T;
+  groupStorageTitle?: T;
+  groupStorageDescription?: T;
   storageShelfLifeLabel?: T;
   shelfLifeLabel?: T;
+  bestBeforeLabel?: T;
   howToUseLabel?: T;
   instructionsBeforeUseLabel?: T;
-  deliveryNotice?: T;
+  relatedTitle?: T;
+  shopFooterTitle?: T;
+  shopFooterDescription?: T;
+  shopFooterCta?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_widget".
- */
-export interface CollectionsWidget {
-  data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

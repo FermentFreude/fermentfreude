@@ -16,6 +16,8 @@ import {
   dropdownItemIsInactive,
   getDefaultDropdownKey,
 } from './nav-defaults'
+import type { NavWorkshopItem } from '@/utilities/mergeWorkshopNavDropdown'
+import { withDynamicWorkshopLinks } from '@/utilities/mergeWorkshopNavDropdown'
 
 const MOBILE_AUTH = {
   de: {
@@ -38,6 +40,7 @@ interface Props {
   setIsActive: (v: boolean) => void
   headerHeight?: number
   locale: 'de' | 'en'
+  navWorkshops: NavWorkshopItem[]
 }
 
 interface NavOverlayItem {
@@ -57,7 +60,14 @@ interface NavOverlayItem {
  * - Per-character reveal animations
  * - Smooth transitions
  */
-export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, locale }: Props) {
+export function MobileMenu({
+  menu,
+  isActive,
+  setIsActive,
+  headerHeight = 0,
+  locale,
+  navWorkshops,
+}: Props) {
   const { user } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
@@ -85,7 +95,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, loca
   const auth = locale === 'de' ? MOBILE_AUTH.de : MOBILE_AUTH.en
 
   // Build nav items list
-  const navItemsList = buildNavItems(menu, !!hasRealCMSItems, locale)
+  const navItemsList = buildNavItems(menu, !!hasRealCMSItems, locale, navWorkshops)
 
   // Close on route change
   useEffect(() => {
@@ -266,13 +276,13 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, loca
       style={{ opacity: 0, top: menuTop }}
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-[#ECE5DE]/95 dark:bg-ff-near-black/97 backdrop-blur-xl" />
+      <div className="absolute inset-0 bg-white/97 dark:bg-ff-near-black/97 backdrop-blur-xl" />
 
       {/* Content — fills remaining viewport below header */}
       <div className="relative h-full flex flex-col overflow-hidden">
         {/* Nav items list - scrollable */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8 pt-4">
-          <nav className="pb-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 sm:px-8 md:px-10 pt-6">
+          <nav className="pb-8">
             {navItemsList.map((item, idx) => {
               const isExpanded = expandedItems.has(item.id)
               const hasChildren = item.children && item.children.length > 0
@@ -287,7 +297,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, loca
                 isWorkshops || isOnlineCourses || isAbout ? isDetailViewOpen : isExpanded
 
               return (
-                <div key={item.id} className="mb-2 sm:mb-3">
+                <div key={item.id} className="mb-1 sm:mb-1.5">
                   {/* Main item button */}
                   <button
                     onClick={() => {
@@ -305,13 +315,13 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, loca
                       }
                     }}
                     className={cn(
-                      'w-full flex items-center justify-between py-3 sm:py-4 px-3 sm:px-4 rounded-lg transition-colors text-left group cursor-pointer gap-2',
-                      'hover:bg-ff-near-black dark:hover:bg-white',
+                      'w-full flex items-center justify-between py-3.5 sm:py-4 px-3 sm:px-4 rounded-xl transition-colors text-left group cursor-pointer gap-3',
+                      'text-ff-charcoal dark:text-neutral-200 hover:bg-ff-charcoal hover:text-ff-ivory dark:hover:bg-white dark:hover:text-ff-near-black',
                     )}
                   >
                     {/* Label with character animation and optional badge */}
                     <div className="flex flex-col gap-1 flex-1 min-w-0">
-                      <span className="flex overflow-hidden group-hover:text-white dark:group-hover:text-ff-near-black transition-colors text-base sm:text-lg wrap-break-word">
+                      <span className="flex overflow-hidden font-display font-bold text-lg sm:text-xl wrap-break-word transition-colors">
                         {item.label.split('').map((char, charIdx) => (
                           <span
                             key={`${idx}-${charIdx}`}
@@ -324,7 +334,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, loca
                         ))}
                       </span>
                       {isOnlineCourses && (
-                        <span className="text-xs font-bold text-ff-gray-text dark:text-neutral-400 group-hover:text-white dark:group-hover:text-white transition-colors">
+                        <span className="text-xs font-medium text-ff-gray-text dark:text-neutral-400 group-hover:text-ff-ivory/80 dark:group-hover:text-ff-near-black/70 transition-colors">
                           Coming Soon
                         </span>
                       )}
@@ -334,7 +344,7 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, loca
                     {hasChildren && (
                       <ChevronDown
                         className={cn(
-                          'w-4 h-4 sm:w-5 sm:h-5 shrink-0 transition-transform duration-300 group-hover:text-white dark:group-hover:text-ff-near-black',
+                          'w-4 h-4 sm:w-5 sm:h-5 shrink-0 transition-transform duration-300 opacity-60',
                           isChevronOpen && 'rotate-180',
                         )}
                       />
@@ -400,9 +410,9 @@ export function MobileMenu({ menu, isActive, setIsActive, headerHeight = 0, loca
             />
 
             {/* Modal Card - Constrained Width */}
-            <div className="relative bg-[#f5f2ed] dark:bg-ff-near-black rounded-2xl sm:rounded-3xl shadow-2xl w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-md max-h-[80vh] sm:max-h-[85vh] pointer-events-auto overflow-hidden border border-ff-warm-gray/20 dark:border-white/10 mx-auto">
+            <div className="relative bg-white dark:bg-ff-near-black rounded-2xl sm:rounded-3xl shadow-2xl w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-md max-h-[80vh] sm:max-h-[85vh] pointer-events-auto overflow-hidden border border-black/6 dark:border-white/10 mx-auto">
               {/* Header with Close */}
-              <div className="sticky top-0 bg-[#f5f2ed]/95 dark:bg-ff-near-black/95 backdrop-blur-sm border-b border-ff-warm-gray/20 dark:border-white/10 px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between gap-3 md:hidden">
+              <div className="sticky top-0 bg-white/95 dark:bg-ff-near-black/95 backdrop-blur-sm border-b border-black/6 dark:border-white/10 px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between gap-3 md:hidden">
                 <h2 className="text-xl sm:text-3xl font-display font-bold text-ff-near-black dark:text-white flex-1 line-clamp-2">
                   {navItemsList.find((i) => i.id === detailViewItem)?.label}
                 </h2>
@@ -551,6 +561,7 @@ function buildNavItems(
   menu: Header['navItems'] | null,
   hasRealCMSItems: boolean,
   locale: 'de' | 'en',
+  navWorkshops: NavWorkshopItem[],
 ): NavOverlayItem[] {
   const items: NavOverlayItem[] = []
   const defaultDropdowns = getDefaultDropdowns(locale)
@@ -573,7 +584,7 @@ function buildNavItems(
       const cmsDropdownItems = item.dropdownItems
       const defaultKey = getDefaultDropdownKey(label, url)
 
-      const dropdownItems =
+      const dropdownItems = withDynamicWorkshopLinks(
         cmsDropdownItems && cmsDropdownItems.length > 0
           ? cmsDropdownItems.map((dropdownItem) => ({
               ...dropdownItem,
@@ -581,7 +592,10 @@ function buildNavItems(
             }))
           : defaultKey
             ? defaultDropdowns[defaultKey]
-            : null
+            : null,
+        navWorkshops,
+        defaultKey,
+      )
 
       const parentItem: NavOverlayItem = { id: String(item.id), label, href: url }
 
@@ -603,7 +617,12 @@ function buildNavItems(
       const parentItem: NavOverlayItem = { id: item.url, label: item.label, href: item.url }
 
       if (item.dropdownItems && item.dropdownItems.length > 0) {
-        parentItem.children = item.dropdownItems.map((sub) => ({
+        const merged = withDynamicWorkshopLinks(
+          item.dropdownItems,
+          navWorkshops,
+          item.dropdownKey || null,
+        )
+        parentItem.children = (merged ?? item.dropdownItems).map((sub) => ({
           id: `${item.url}-${sub.href}`,
           label: sub.label,
           href: sub.href,

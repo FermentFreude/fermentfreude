@@ -16,23 +16,22 @@ import { cn } from '@/utilities/cn'
 import { usePathname } from 'next/navigation'
 import { CartIconButton } from './CartIconButton'
 import { LanguageToggle } from './LanguageToggle'
-import { MagneticElement } from './MagneticElement'
 import { NavDropdown } from './NavDropdown'
 import { UserMenu } from './UserMenu'
+import type { NavWorkshopItem } from '@/utilities/mergeWorkshopNavDropdown'
+import { withDynamicWorkshopLinks } from '@/utilities/mergeWorkshopNavDropdown'
 import { getDefaultDropdownKey, getDefaultDropdowns, getDefaultNavItems } from './nav-defaults'
 
 type Props = {
   header: Header
   locale: 'de' | 'en'
+  navWorkshops?: NavWorkshopItem[]
 }
 
-export function HeaderClient({ header, locale }: Props) {
+export function HeaderClient({ header, locale, navWorkshops = [] }: Props) {
   const cmsItems = header.navItems || []
   const pathname = usePathname()
   const isHomePage = pathname === '/'
-  // Dashboard-style routes act like a persistent app, not a scrolling
-  // marketing page — the nav must stay put instead of sliding away.
-  const isDashboardRoute = pathname.startsWith('/account')
   const { headerTheme } = useHeaderTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -82,14 +81,14 @@ export function HeaderClient({ header, locale }: Props) {
     const y = window.scrollY
     setIsAtTop(y < 10)
     // Only hide after scrolling past 80px so the header doesn't flicker at the very top
-    // Don't hide when menu or cart is active, or on dashboard-style routes
-    if (!isDashboardRoute && !isMenuActive && !isCartOpen && y > 80 && y > lastScrollY.current) {
+    // Don't hide when menu or cart is active
+    if (!isMenuActive && !isCartOpen && y > 80 && y > lastScrollY.current) {
       setHidden(true)
     } else {
       setHidden(false)
     }
     lastScrollY.current = y
-  }, [isDashboardRoute, isMenuActive, isCartOpen])
+  }, [isMenuActive, isCartOpen])
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -101,35 +100,26 @@ export function HeaderClient({ header, locale }: Props) {
     if (isCartOpen) setHidden(false)
   }, [isCartOpen])
 
-  // Apply blur/focus effect to sibling nav items
+  // Soften sibling nav hover — opacity only, no blur (calmer)
   useEffect(() => {
     if (!navLinksRef.current) return
     const items = navLinksRef.current.querySelectorAll<HTMLElement>('.nav-link-item')
 
     if (hoveredIndex === null) {
       gsap.to(items, {
-        filter: 'blur(0px)',
         opacity: 1,
-        duration: 0.3,
+        duration: 0.2,
         ease: 'power2.out',
+        overwrite: true,
       })
     } else {
       items.forEach((item, i) => {
-        if (i === hoveredIndex) {
-          gsap.to(item, {
-            filter: 'blur(0px)',
-            opacity: 1,
-            duration: 0.3,
-            ease: 'power2.out',
-          })
-        } else {
-          gsap.to(item, {
-            filter: 'blur(1px)',
-            opacity: 0.72,
-            duration: 0.3,
-            ease: 'power2.out',
-          })
-        }
+        gsap.to(item, {
+          opacity: i === hoveredIndex ? 1 : 0.45,
+          duration: 0.2,
+          ease: 'power2.out',
+          overwrite: true,
+        })
       })
     }
   }, [hoveredIndex])
@@ -162,7 +152,7 @@ export function HeaderClient({ header, locale }: Props) {
         const cmsDropdownItems = item.dropdownItems
         const defaultKey = getDefaultDropdownKey(label, url)
 
-        const dropdownItems =
+        const dropdownItems = withDynamicWorkshopLinks(
           cmsDropdownItems && cmsDropdownItems.length > 0
             ? cmsDropdownItems.map((dropdownItem) => ({
                 ...dropdownItem,
@@ -170,7 +160,10 @@ export function HeaderClient({ header, locale }: Props) {
               }))
             : defaultKey
               ? defaultDropdowns[defaultKey]
-              : null
+              : null,
+          navWorkshops,
+          defaultKey,
+        )
 
         return { id: item.id, label, url, link: item.link, dropdownItems, defaultKey }
       })
@@ -179,7 +172,11 @@ export function HeaderClient({ header, locale }: Props) {
         label: item.label,
         url: item.url,
         link: null,
-        dropdownItems: item.dropdownItems || null,
+        dropdownItems: withDynamicWorkshopLinks(
+          item.dropdownItems || null,
+          navWorkshops,
+          item.dropdownKey || null,
+        ),
         defaultKey: item.dropdownKey || null,
       }))
 
@@ -204,32 +201,34 @@ export function HeaderClient({ header, locale }: Props) {
         <nav
           className={cn(
             'relative border-b transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]',
-            hidden && !isDashboardRoute && !isMenuActive && !isCartOpen && '-translate-y-full',
+            hidden && !isMenuActive && !isCartOpen && '-translate-y-full',
             isTransparent && !isCartOpen
               ? 'bg-transparent backdrop-blur-none border-transparent dark:bg-transparent dark:backdrop-blur-none dark:border-transparent'
-              : 'nav-glass border-white/30 dark:border-white/6',
+              : 'nav-glass border-black/6 dark:border-white/8',
           )}
         >
-          <div className="w-full max-w-440 mx-auto px-6 md:px-10 lg:px-14 flex items-center justify-between py-3 lg:py-4">
-            {/* Logo with magnetic effect */}
-            <MagneticElement strength={0.2}>
-              <Link href="/" className="shrink-0 block">
-                <Image
-                  src="/primary-logo.svg"
-                  alt="Fermentfreude"
-                  width={200}
-                  height={28}
-                  className="h-4 md:h-5 lg:h-5 w-auto dark:invert"
-                  style={{ width: 'auto' }}
-                  priority
-                />
-              </Link>
-            </MagneticElement>
+          <div className="container container-padding grid grid-cols-[1fr_auto] lg:grid-cols-[auto_1fr_auto] items-center gap-4 h-14 md:h-[3.75rem]">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="shrink-0 flex items-center h-full justify-self-start"
+              aria-label="FermentFreude Home"
+            >
+              <Image
+                src="/primary-logo.svg"
+                alt="Fermentfreude"
+                width={200}
+                height={28}
+                className="h-[15px] md:h-[17px] w-auto dark:invert"
+                style={{ width: 'auto' }}
+                priority
+              />
+            </Link>
 
-            {/* Desktop Nav Links with blur effect */}
+            {/* Desktop Nav — centered */}
             <ul
               ref={navLinksRef}
-              className="hidden lg:flex items-center gap-6 xl:gap-8"
+              className="hidden lg:flex items-center justify-center gap-8 xl:gap-10"
               onMouseLeave={() => setHoveredIndex(null)}
             >
               {navItems.map((item, index) => {
@@ -243,7 +242,7 @@ export function HeaderClient({ header, locale }: Props) {
                   return (
                     <li
                       key={item.id}
-                      className="nav-link-item"
+                      className="nav-link-item flex items-center"
                       onMouseEnter={() => setHoveredIndex(index)}
                     >
                       <NavDropdown label={label} href={url || undefined} items={dropdownItems} />
@@ -252,7 +251,7 @@ export function HeaderClient({ header, locale }: Props) {
                 }
 
                 const linkClassName = cn(
-                  'relative navLink text-ff-gray-15 dark:text-neutral-300 font-display font-bold text-sm leading-none hover:text-ff-near-black dark:hover:text-white transition-colors',
+                  'relative navLink font-display font-bold text-[12px] xl:text-[13px] leading-none uppercase',
                   {
                     active:
                       url && url !== '/' ? pathname.includes(url) : pathname === '/' && url === '/',
@@ -262,42 +261,38 @@ export function HeaderClient({ header, locale }: Props) {
                 return (
                   <li
                     key={item.id}
-                    className="nav-link-item"
+                    className="nav-link-item flex items-center"
                     onMouseEnter={() => setHoveredIndex(index)}
                   >
-                    <MagneticElement strength={0.3}>
-                      {item.link ? (
-                        <CMSLink {...item.link} className={linkClassName} appearance="inline" />
-                      ) : (
-                        <Link href={url || '/'} className={linkClassName}>
-                          {label}
-                        </Link>
-                      )}
-                    </MagneticElement>
+                    {item.link ? (
+                      <CMSLink {...item.link} className={linkClassName} appearance="inline" />
+                    ) : (
+                      <Link href={url || '/'} className={linkClassName}>
+                        {label}
+                      </Link>
+                    )}
                   </li>
                 )
               })}
             </ul>
 
-            {/* Right side */}
-            <div className="flex items-center gap-2 lg:gap-3">
-              {/* User icon with dropdown (desktop) */}
-              <div className="hidden lg:block">
+            {/* Actions — right aligned, equal touch targets */}
+            <div className="flex items-center justify-end gap-0.5 sm:gap-1 cursor-normal-zone h-full justify-self-end">
+              <div className="hidden lg:flex items-center">
                 <UserMenu />
               </div>
 
-              {/* Cart icon */}
               <Suspense fallback={<CartIconButton />}>
                 <Cart />
               </Suspense>
 
-              {/* Language toggle - always visible */}
-              <LanguageToggle />
+              <div className="pl-1 pr-0.5">
+                <LanguageToggle />
+              </div>
 
-              {/* Menu / Close toggle icon - only on tablet & mobile */}
               <button
                 onClick={() => setIsMenuActive(!isMenuActive)}
-                className="lg:hidden flex items-center justify-center h-10 px-1 text-ff-gray-15 dark:text-neutral-300 transition-colors hover:text-ff-near-black dark:hover:text-white"
+                className="lg:hidden flex items-center justify-center size-10 text-ff-charcoal dark:text-neutral-300 transition-colors hover:text-ff-near-black dark:hover:text-white"
                 aria-label={
                   isMenuActive
                     ? locale === 'de'
@@ -308,15 +303,14 @@ export function HeaderClient({ header, locale }: Props) {
                       : 'Open navigation menu'
                 }
               >
-                {/* Burger bars → X */}
                 <div
                   className={cn(
-                    'burger-icon relative w-6.5 pointer-events-none',
+                    'burger-icon relative w-5 pointer-events-none',
                     isMenuActive && 'burger-active',
                   )}
                 >
-                  <span className="burger-bar burger-bar-top block h-px w-full bg-current relative transition-all duration-1000 ease-[cubic-bezier(0.76,0,0.24,1)]" />
-                  <span className="burger-bar burger-bar-bottom block h-px w-full bg-current relative transition-all duration-1000 ease-[cubic-bezier(0.76,0,0.24,1)]" />
+                  <span className="burger-bar burger-bar-top block h-px w-full bg-current relative transition-all duration-500 ease-out" />
+                  <span className="burger-bar burger-bar-bottom block h-px w-full bg-current relative transition-all duration-500 ease-out" />
                 </div>
               </button>
             </div>
@@ -332,6 +326,7 @@ export function HeaderClient({ header, locale }: Props) {
           setIsActive={setIsMenuActive}
           headerHeight={headerHeight}
           locale={locale}
+          navWorkshops={navWorkshops}
         />
       </Suspense>
     </>
