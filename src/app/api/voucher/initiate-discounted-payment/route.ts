@@ -200,8 +200,18 @@ export async function POST(request: NextRequest) {
       metadata: {
         cartID: cart.id,
         cartItemsSnapshot: JSON.stringify(flattenedCart),
-        shippingAddress: JSON.stringify(shippingAddress ?? null),
         voucherCode: voucher.code,
+        // Only set when present — matching the plugin's own initiatePayment,
+        // which serializes `data.shippingAddress` directly (undefined when
+        // absent, so Stripe drops the key). Writing the literal string
+        // "null" here would make confirmOrder's `metadata.shippingAddress ?
+        // JSON.parse(...) : undefined` take the parse branch and pass a real
+        // `null` into payload.create — Payload's own beforeValidate then
+        // crashes descending into the shippingAddress group's children with
+        // a null siblingDoc ("Cannot read properties of null (reading
+        // 'title')"), since the group's undefined-only fallback never fires
+        // for an explicit null.
+        ...(shippingAddress ? { shippingAddress: JSON.stringify(shippingAddress) } : {}),
       },
     })
 
