@@ -87,6 +87,13 @@ export async function addWorkshopToCart({
   const t = locale === 'en' ? TOASTS_EN : TOASTS_DE
   try {
     // Step 1: Validate server-side (prevents race conditions)
+    // Pass the existing cart ID (if this browser already has a cart, e.g.
+    // re-booking the same appointment to add another guest) so the server
+    // can merge into the pending booking it already created for it, rather
+    // than creating a second, separate booking record for the same seat
+    // purchase — see the comment in add-workshop/route.ts for why that
+    // used to leave one of the two unconfirmed and off the invoice.
+    const existingCartId = localStorage.getItem('cart')
     const response = await fetch('/api/cart/add-workshop', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -94,6 +101,7 @@ export async function addWorkshopToCart({
         appointmentId,
         workshopSlug,
         guestCount,
+        ...(existingCartId ? { cartId: existingCartId } : {}),
       }),
     })
 
@@ -109,13 +117,20 @@ export async function addWorkshopToCart({
     // Step 3: Store booking metadata in localStorage for CartModal display
     // (Payload ecommerce plugin doesn't have a custom metadata field,
     //  so we store appointment details separately for retrieval when showing cart)
+    // `guestCount`/`totalPrice` here are the CUMULATIVE totals the server
+    // returned for this booking (data.cartItem.metadata.guestCount) — not
+    // this call's own delta — since re-adding the same appointment merges
+    // into the same booking/bookingId server-side. Storing the cumulative
+    // state (rather than overwriting with just this call's partial amount)
+    // is what lets DeleteItemButton release the FULL reserved amount when
+    // the merged cart line is removed.
     const bookingMetadata = {
       appointmentId,
       bookingId: (data.bookingId as string | null) ?? null,
       workshopSlug,
       pageSlug: pageSlug ?? workshopSlug,
       workshopTitle,
-      guestCount,
+      guestCount: data.cartItem.metadata.guestCount,
       date: data.cartItem.metadata.date,
       time: data.cartItem.metadata.time,
       pricePerPerson: data.cartItem.metadata.pricePerPerson,
@@ -157,13 +172,19 @@ export async function addWorkshopToCart({
         '[addWorkshopToCart] addItem verification failed — releasing spots and clearing stale cart',
       )
 
+      // Only pass bookingId when this request created a brand-new booking —
+      // release-spots cancels the booking it's given. If this request
+      // merged into an existing booking (re-adding the same appointment for
+      // another guest), that booking also covers guests added successfully
+      // earlier; cancelling it would wrongly wipe out their reservation too.
+      // Omitting bookingId still releases this request's own spots back.
       await fetch('/api/cart/release-spots', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           appointmentId,
           guestCount,
-          bookingId: data.bookingId,
+          ...(data.wasMerged ? {} : { bookingId: data.bookingId }),
         }),
       }).catch((err) => console.error('[addWorkshopToCart] release-spots failed:', err))
 
