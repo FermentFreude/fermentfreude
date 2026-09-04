@@ -2,6 +2,19 @@
   isolation: isolate;
 }
 
+.automaten-editorial ol,
+.automaten-editorial li {
+  list-style: none;
+}
+
+.automaten-editorial ol::before,
+.automaten-editorial ol::after,
+.automaten-editorial li::before,
+.automaten-editorial li::after {
+  content: none !important;
+  display: none !important;
+}
+
 .automaten-loc-card {
   animation: automaten-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -14,7 +27,6 @@ li:nth-child(2) .automaten-loc-card {
 .automaten-loc-card--active {
   transform: translateY(-3px);
   box-shadow: 0 18px 44px rgba(26, 26, 26, 0.1);
-  border-color: rgba(64, 60, 57, 0.18);
 }
 
 .automaten-featured:hover .automaten-featured-img {

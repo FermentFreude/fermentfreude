@@ -32,7 +32,7 @@ export const ShopAutomaten: Block = {
       localized: true,
       label: 'Heading',
       admin: {
-        description: 'e.g. "Find our products — anytime."',
+        description: 'e.g. "Find our products, anytime."',
       },
     },
     {

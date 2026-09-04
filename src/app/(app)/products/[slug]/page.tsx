@@ -6,13 +6,14 @@ import { CourseProductPage } from '@/components/product/CourseProductPage'
 import { ProductDetailPage } from '@/components/product/ProductDetailPage'
 import { getProductDetailLabelsGlobal } from '@/utilities/getProductDetailLabelsGlobal'
 import { getLocale } from '@/utilities/getLocale'
+import { withMongoRetry } from '@/utilities/mongoRetry'
 import configPromise from '@payload-config'
 import { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
-import React from 'react'
+import React, { cache } from 'react'
 
 type Args = {
   params: Promise<{
@@ -101,8 +102,41 @@ export default async function ProductPage({ params }: Args) {
     },
   }
 
-  const relatedProducts =
-    product.relatedProducts?.filter((relatedProduct) => typeof relatedProduct === 'object') ?? []
+  let foodRelatedProducts =
+    product.relatedProducts?.filter(
+      (relatedProduct): relatedProduct is Product => typeof relatedProduct === 'object',
+    ) ?? []
+
+  if (
+    ['jarred', 'fresh', 'bottled'].includes(product.productType || '') &&
+    foodRelatedProducts.length === 0
+  ) {
+    try {
+      const payload = await getPayload({ config: configPromise })
+      const siblings = await withMongoRetry(() =>
+        payload.find({
+          collection: 'products',
+          where: {
+            slug: {
+              in: ['kaeferbohnen-tempeh', 'berglinsen-tempeh', 'classic-kimchi'].filter(
+                (s) => s !== slug,
+              ),
+            },
+            _status: { equals: 'published' },
+          },
+          locale,
+          depth: 3,
+          limit: 3,
+          overrideAccess: true,
+        }),
+      )
+      foodRelatedProducts = siblings.docs as Product[]
+    } catch (error) {
+      console.warn('Failed to fetch related shop products:', error)
+    }
+  }
+
+  const relatedProducts = foodRelatedProducts
 
   // Course products get a dedicated landing page layout
   if (product.courseSlug) {
@@ -118,11 +152,16 @@ export default async function ProductPage({ params }: Args) {
         type="application/ld+json"
       />
 
-      <ProductDetailPage product={product} productDetailLabels={productDetailLabels} />
+      <ProductDetailPage
+        product={product}
+        productDetailLabels={productDetailLabels}
+        relatedProducts={foodRelatedProducts}
+      />
 
       {product.layout?.length ? <RenderBlocks blocks={product.layout} slug="product-detail" /> : <></>}
 
-      {relatedProducts.length ? (
+      {relatedProducts.length &&
+      !['jarred', 'fresh', 'bottled'].includes(product.productType || '') ? (
         <div className="container">
           <RelatedProducts products={relatedProducts as Product[]} />
         </div>
@@ -161,38 +200,40 @@ function RelatedProducts({ products }: { products: Product[] }) {
   )
 }
 
-const queryProductBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' | 'en' }) => {
+const queryProductBySlug = cache(async ({ slug, locale }: { slug: string; locale?: 'de' | 'en' }) => {
   const { isEnabled: draft } = await draftMode()
 
   const payload = await getPayload({ config: configPromise })
 
-  const result = await payload.find({
-    collection: 'products',
-    depth: 3,
-    draft,
-    limit: 1,
-    locale,
-    overrideAccess: draft,
-    pagination: false,
-    where: {
-      and: [
-        {
-          slug: {
-            equals: slug,
+  const result = await withMongoRetry(() =>
+    payload.find({
+      collection: 'products',
+      depth: 3,
+      draft,
+      limit: 1,
+      locale,
+      overrideAccess: draft,
+      pagination: false,
+      where: {
+        and: [
+          {
+            slug: {
+              equals: slug,
+            },
           },
-        },
-        ...(draft ? [] : [{ _status: { equals: 'published' } }]),
-      ],
-    },
-    populate: {
-      variants: {
-        title: true,
-        priceInEUR: true,
-        inventory: true,
-        options: true,
+          ...(draft ? [] : [{ _status: { equals: 'published' } }]),
+        ],
       },
-    },
-  })
+      populate: {
+        variants: {
+          title: true,
+          priceInEUR: true,
+          inventory: true,
+          options: true,
+        },
+      },
+    }),
+  )
 
   return result.docs?.[0] || null
-}
+})

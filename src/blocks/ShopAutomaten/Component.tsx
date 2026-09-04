@@ -1,6 +1,4 @@
 import { getLocale } from '@/utilities/getLocale'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import React from 'react'
 
 import type { Media as MediaType, ShopAutomatenBlock } from '@/payload-types'
@@ -12,17 +10,24 @@ import {
 
 const ACCENTS = ['#5C6B54', '#403c39', '#C4A35A']
 
+/** Instant local fallbacks — no network probes on the request path */
+const LOCAL_FALLBACKS = {
+  featured: '/shop/hero-kaefer-plate.webp',
+  loc1: '/shop/automaten-loc-poelzl-sign.webp',
+  loc2: '/shop/automaten-loc-poelzl-storefront-wide.webp',
+  tip: '/shop/automaten-tip-wildmoser.webp',
+} as const
+
 const DEFAULTS = {
   de: {
-    eyebrow: 'Graz · Rund um die Uhr',
-    heading: 'Unsere Produkte jederzeit.',
-    body: 'Zwei Automaten in Graz. Frisches Käferbohnen-Tempeh, wann immer du Lust hast.',
+    eyebrow: 'Graz · Entdecken',
+    heading: 'Tempeh, wann immer du Lust hast',
+    body: 'Zwei versteckte Spots in Graz: Automaten-Abholung rund um die Uhr und Käferbohnen-Tempeh auf dem Teller.',
     mapsLabel: 'In Maps öffnen',
     shareLabel: 'Route teilen',
     websiteLabel: 'Zur Website',
     tipLabel: 'Insider',
-    tipText:
-      'Hier steht unser Käferbohnen-Tempeh regelmäßig auf der Speisekarte.',
+    tipText: 'Hier steht unser Käferbohnen-Tempeh regelmäßig auf der Speisekarte.',
     tipMapsUrl: 'https://maps.app.goo.gl/yrLi4rHiVozjCbzo6',
     tipWebsiteUrl: 'https://www.wildmoser-graz.at/',
     tipAddress: 'Grüne Gasse 17, 8020 Graz',
@@ -39,7 +44,7 @@ const DEFAULTS = {
         mapsUrl:
           'https://www.google.com/maps/search/?api=1&query=Leonhardplatz+12+8010+Graz+P%C3%B6lzl+Automat',
         websiteUrl: 'https://poelzl.at/' as string | null,
-        imageUrl: null as string | null,
+        imageUrl: LOCAL_FALLBACKS.loc1 as string | null,
         imageAlt: 'Leonhardplatz Automat',
         accent: ACCENTS[0],
       },
@@ -53,22 +58,21 @@ const DEFAULTS = {
         mapsUrl:
           'https://www.google.com/maps/search/?api=1&query=P%C3%B6lzl+Gem%C3%BCse+Waltendorfer+Hauptstra%C3%9Fe+19+Graz',
         websiteUrl: 'https://poelzl.at/' as string | null,
-        imageUrl: null as string | null,
+        imageUrl: LOCAL_FALLBACKS.loc2 as string | null,
         imageAlt: 'Waltendorf Automat',
         accent: ACCENTS[1],
       },
     ] satisfies AutomatenEditorialLocation[],
   },
   en: {
-    eyebrow: 'Graz · Available 24/7',
-    heading: 'Find our products anytime.',
-    body: 'Two Automaten in Graz. Fresh runner bean tempeh, whenever you need it.',
+    eyebrow: 'Graz · Discover',
+    heading: 'Tempeh, whenever you want it',
+    body: 'Two hidden spots in Graz: 24/7 Automat pickup and Käferbohnen Tempeh on the plate.',
     mapsLabel: 'Open in Maps',
     shareLabel: 'Share route',
     websiteLabel: 'Visit website',
     tipLabel: 'Insider tip',
-    tipText:
-      'Our Käferbohnen Tempeh is regularly on the menu here.',
+    tipText: 'Our Käferbohnen Tempeh is regularly on the menu here.',
     tipMapsUrl: 'https://maps.app.goo.gl/yrLi4rHiVozjCbzo6',
     tipWebsiteUrl: 'https://www.wildmoser-graz.at/',
     tipAddress: 'Grüne Gasse 17, 8020 Graz',
@@ -85,7 +89,7 @@ const DEFAULTS = {
         mapsUrl:
           'https://www.google.com/maps/search/?api=1&query=Leonhardplatz+12+8010+Graz+P%C3%B6lzl+Automat',
         websiteUrl: 'https://poelzl.at/' as string | null,
-        imageUrl: null as string | null,
+        imageUrl: LOCAL_FALLBACKS.loc1 as string | null,
         imageAlt: 'Leonhardplatz Automat',
         accent: ACCENTS[0],
       },
@@ -99,7 +103,7 @@ const DEFAULTS = {
         mapsUrl:
           'https://www.google.com/maps/search/?api=1&query=P%C3%B6lzl+Gem%C3%BCse+Waltendorfer+Hauptstra%C3%9Fe+19+Graz',
         websiteUrl: 'https://poelzl.at/' as string | null,
-        imageUrl: null as string | null,
+        imageUrl: LOCAL_FALLBACKS.loc2 as string | null,
         imageAlt: 'Waltendorf Automat',
         accent: ACCENTS[1],
       },
@@ -107,140 +111,33 @@ const DEFAULTS = {
   },
 } as const
 
-function mediaId(val: unknown): string | null {
-  if (typeof val === 'string' && val.trim()) return val
-  if (typeof val === 'object' && val !== null && 'id' in val) {
-    const id = (val as { id?: unknown }).id
-    if (typeof id === 'string' || typeof id === 'number') return String(id)
-  }
-  return null
-}
-
-function mediaUrl(val: unknown): string | null {
-  if (typeof val === 'object' && val !== null && 'url' in val) {
-    const url = (val as MediaType).url
-    return typeof url === 'string' && url.trim() ? url : null
-  }
-  return null
-}
-
-function mediaAlt(val: unknown, fallback: string): string {
-  if (typeof val === 'object' && val !== null && 'alt' in val) {
-    const alt = (val as MediaType).alt
-    if (typeof alt === 'string' && alt.trim()) return alt
-  }
-  return fallback
-}
-
-async function urlIsReachable(url: string | null): Promise<string | null> {
-  if (!url) return null
-  // Skip known broken R2 uploads from the Automaten sync (HEAD 404)
-  if (/david-auto-loc[12]-/i.test(url)) return null
-  try {
-    const head = await fetch(url, { method: 'HEAD' })
-    return head.ok ? url : null
-  } catch {
-    return null
-  }
-}
-
-async function resolveMediaUrl(
-  payload: Awaited<ReturnType<typeof getPayload>>,
-  val: unknown,
-): Promise<{ url: string | null; alt: string }> {
-  const alt = mediaAlt(val, '')
-  const direct = await urlIsReachable(mediaUrl(val))
-  if (direct) return { url: direct, alt }
-
-  const id = mediaId(val)
-  if (!id) return { url: null, alt }
-
-  try {
-    const doc = await payload.findByID({
-      collection: 'media',
-      id,
-      depth: 0,
-      overrideAccess: true,
-    })
-    const url = await urlIsReachable(typeof doc.url === 'string' ? doc.url : null)
-    return {
-      url,
-      alt: typeof doc.alt === 'string' && doc.alt.trim() ? doc.alt : alt,
-    }
-  } catch {
-    return { url: null, alt }
-  }
-}
-
-async function findFallbackUrls(payload: Awaited<ReturnType<typeof getPayload>>) {
-  // Match editorial layout: plated featured; card 01 = circular pack label
-  const picks = [
-    { contains: 'shop-hero-kaefer-plated', key: 'featured' as const },
-    { contains: 'shop-hero-kaefer', key: 'featured' as const },
-    { contains: 'automaten-poelzl-sign', key: 'loc1' as const },
-    { contains: 'david-pack-auto', key: 'loc1' as const },
-    { contains: 'david-pack-card', key: 'loc1' as const },
-    { contains: 'david-auto-feat', key: 'loc1' as const },
-    { contains: 'kaefer-packaging-drive', key: 'loc1' as const },
-    { contains: 'automaten-poelzl-shop-hi', key: 'loc2' as const },
-    { contains: 'automaten-poelzl-shop', key: 'loc2' as const },
-    { contains: 'berglinsen-plated', key: 'loc2' as const },
-    { contains: 'david-auto-feat', key: 'loc2' as const },
-  ]
-  const out: Record<'featured' | 'loc1' | 'loc2', string | null> = {
-    featured: null,
-    loc1: null,
-    loc2: null,
-  }
-
-  for (const pick of picks) {
-    if (out[pick.key]) continue
-    const res = await payload.find({
-      collection: 'media',
-      where: { filename: { contains: pick.contains } },
-      limit: 5,
-      sort: '-createdAt',
-      overrideAccess: true,
-    })
-    for (const doc of res.docs) {
-      if (typeof doc.url !== 'string' || !doc.url) continue
-      if (/david-auto-loc[12]-/i.test(doc.url)) continue
-      const ok = await urlIsReachable(doc.url)
-      if (ok) {
-        out[pick.key] = ok
-        break
-      }
+function resolveMedia(val: unknown, fallbackUrl: string, fallbackAlt: string): {
+  url: string
+  alt: string
+} {
+  if (typeof val === 'object' && val !== null) {
+    const media = val as MediaType
+    const url = typeof media.url === 'string' && media.url.trim() ? media.url.trim() : null
+    // Skip known-broken Automaten uploads from an earlier sync
+    if (url && !/david-auto-loc[12]-/i.test(url)) {
+      const alt =
+        typeof media.alt === 'string' && media.alt.trim() ? media.alt.trim() : fallbackAlt
+      return { url, alt }
     }
   }
-  return out
+  return { url: fallbackUrl, alt: fallbackAlt }
 }
 
+/**
+ * Shop Automaten section — CMS copy + media when present, local fallbacks otherwise.
+ * Intentionally does NOT probe R2 with HEAD requests (that blocked /shop for many seconds).
+ */
 export const ShopAutomatenComponent: React.FC<ShopAutomatenBlock> = async (props) => {
   if (props.visible === false) return null
 
   const locale = (await getLocale()) as 'de' | 'en'
   const d = DEFAULTS[locale === 'de' ? 'de' : 'en']
-  const payload = await getPayload({ config: configPromise })
-
-  // Re-read live shop block so tip image/text stay in sync with CMS (drafts / HMR)
-  let block: ShopAutomatenBlock = props
-  try {
-    const pageRes = await payload.find({
-      collection: 'pages',
-      where: { slug: { equals: 'shop' } },
-      locale,
-      depth: 2,
-      limit: 1,
-      overrideAccess: true,
-      draft: false,
-    })
-    const live = (pageRes.docs[0]?.layout as ShopAutomatenBlock[] | undefined)?.find(
-      (b) => b?.blockType === 'shopAutomaten',
-    )
-    if (live) block = { ...props, ...live }
-  } catch {
-    // keep props
-  }
+  const block = props
 
   const eyebrow = block.eyebrow?.trim() || d.eyebrow
   const heading = block.heading?.trim() || d.heading
@@ -255,29 +152,16 @@ export const ShopAutomatenComponent: React.FC<ShopAutomatenBlock> = async (props
     ? block.tipWebsiteUrl?.trim() || d.tipWebsiteUrl
     : null
   const tipName = tipVisible ? block.tipName?.trim() || 'Wildmoser' : null
-  let tipResolved = tipVisible
-    ? await resolveMediaUrl(payload, block.tipImage)
+
+  const tipResolved = tipVisible
+    ? resolveMedia(block.tipImage, LOCAL_FALLBACKS.tip, tipName || 'Wildmoser')
     : { url: null as string | null, alt: '' }
 
-  if (tipVisible && !tipResolved.url) {
-    const tipMedia = await payload.find({
-      collection: 'media',
-      where: { filename: { contains: 'automaten-wildmoser' } },
-      limit: 3,
-      sort: '-createdAt',
-      overrideAccess: true,
-    })
-    for (const doc of tipMedia.docs) {
-      const ok = await urlIsReachable(typeof doc.url === 'string' ? doc.url : null)
-      if (ok) {
-        tipResolved = { url: ok, alt: typeof doc.alt === 'string' ? doc.alt : tipName || '' }
-        break
-      }
-    }
-  }
-
-  const featuredResolved = await resolveMediaUrl(payload, block.featuredImage)
-  const fallbacks = await findFallbackUrls(payload)
+  const featuredResolved = resolveMedia(
+    block.featuredImage,
+    LOCAL_FALLBACKS.featured,
+    heading,
+  )
 
   const cmsLocs = block.locations ?? []
   let locations: AutomatenEditorialLocation[] = []
@@ -290,8 +174,9 @@ export const ShopAutomatenComponent: React.FC<ShopAutomatenBlock> = async (props
       const mapsUrl = loc?.mapsUrl?.trim()
       if (!name || !address || !mapsUrl) continue
 
-      const resolved = await resolveMediaUrl(payload, loc.image)
-      const fallbackUrl = i === 0 ? fallbacks.loc1 : fallbacks.loc2
+      const fallbackUrl = i === 0 ? LOCAL_FALLBACKS.loc1 : LOCAL_FALLBACKS.loc2
+      const resolved = resolveMedia(loc.image, fallbackUrl, name)
+
       locations.push({
         city: loc.city?.trim() || '',
         name,
@@ -300,23 +185,20 @@ export const ShopAutomatenComponent: React.FC<ShopAutomatenBlock> = async (props
         description: loc.description?.trim() || loc.note?.trim() || '',
         badge: loc.accessInfo?.trim() || d.badge,
         mapsUrl,
-        websiteUrl: loc.websiteUrl?.trim() || d.locations[Math.min(i, d.locations.length - 1)]?.websiteUrl || null,
-        imageUrl: resolved.url || fallbackUrl,
-        imageAlt: resolved.alt || name,
+        websiteUrl:
+          loc.websiteUrl?.trim() ||
+          d.locations[Math.min(i, d.locations.length - 1)]?.websiteUrl ||
+          null,
+        imageUrl: resolved.url,
+        imageAlt: resolved.alt,
         accent: ACCENTS[i % ACCENTS.length],
       })
     }
   }
 
   if (locations.length === 0) {
-    locations = d.locations.map((loc, i) => ({
-      ...loc,
-      imageUrl: i === 0 ? fallbacks.loc1 : fallbacks.loc2,
-    }))
+    locations = d.locations.map((loc) => ({ ...loc }))
   }
-
-  const featuredImageUrl = featuredResolved.url || fallbacks.featured || locations[0]?.imageUrl || null
-  const featuredImageAlt = featuredResolved.alt || heading
 
   return (
     <AutomatenEditorial
@@ -326,8 +208,8 @@ export const ShopAutomatenComponent: React.FC<ShopAutomatenBlock> = async (props
       mapsLabel={mapsLabel}
       shareLabel={shareLabel}
       websiteLabel={websiteLabel}
-      featuredImageUrl={featuredImageUrl}
-      featuredImageAlt={featuredImageAlt}
+      featuredImageUrl={featuredResolved.url}
+      featuredImageAlt={featuredResolved.alt}
       locations={locations}
       tipText={tipText}
       tipMapsUrl={tipMapsUrl}

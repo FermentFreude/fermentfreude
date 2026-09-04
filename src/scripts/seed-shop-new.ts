@@ -179,8 +179,8 @@ async function seedShopNew() {
     ctaPrimaryUrl: '/products/kaeferbohnen-tempeh',
     slides: [],
     bottomTagline: 'Fermentierte Lebensmittel, mit Sorgfalt hergestellt.',
-    bottomSubtitle: 'Abholung in Graz — jede Woche frisch.',
-    bottomDisclaimer: 'Wir arbeiten an einem Lieferservice — f\u00fcr garantierte Frische.',
+    bottomSubtitle: 'Abholung in Graz, jede Woche frisch.',
+    bottomDisclaimer: 'Wir arbeiten an einem Lieferservice, f\u00fcr garantierte Frische.',
   }
 
   // Block 2: Supporting products only (Berglinsen + Kimchi)
@@ -211,7 +211,7 @@ async function seedShopNew() {
     eyebrow: 'GEMEINSAM FERMENTIEREN',
     title: 'Go with a friend.',
     description:
-      'Schenke jemandem ein besonderes Erlebnis — unsere Gutscheine sind das perfekte Geschenk für Feinschmecker und neugierige Köpfe.',
+      'Schenke jemandem ein besonderes Erlebnis. Unsere Gutscheine sind das perfekte Geschenk für Feinschmecker und neugierige Köpfe.',
     primaryLabel: 'Gutschein kaufen',
     primaryHref: '/voucher',
     secondaryLabel: 'Zum Shop',
@@ -327,8 +327,8 @@ async function seedShopNew() {
       ctaPrimaryUrl: '/products/kaeferbohnen-tempeh',
       slides: [],
       bottomTagline: 'Fermented foods, crafted with care.',
-      bottomSubtitle: 'Pickup in Graz — freshly made every week.',
-      bottomDisclaimer: 'Delivery coming soon — to ensure the freshest quality.',
+      bottomSubtitle: 'Pickup in Graz, freshly made every week.',
+      bottomDisclaimer: 'Delivery coming soon, to ensure the freshest quality.',
     },
     // FeaturedProductCards EN
     {
@@ -349,7 +349,7 @@ async function seedShopNew() {
       eyebrow: 'FERMENT TOGETHER',
       title: 'Go with a friend.',
       description:
-        'Give someone a special experience — our vouchers are the perfect gift for foodies and curious minds.',
+        'Give someone a special experience. Our vouchers are the perfect gift for foodies and curious minds.',
       primaryLabel: 'Buy Voucher',
       primaryHref: '/voucher',
       secondaryLabel: 'Visit Shop',

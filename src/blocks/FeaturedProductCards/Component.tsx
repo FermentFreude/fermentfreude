@@ -1,23 +1,15 @@
-import { Media } from '@/components/Media'
 import { getLocale } from '@/utilities/getLocale'
 import { isProductSoldOut } from '@/utilities/productStock'
 import configPromise from '@payload-config'
-import Link from 'next/link'
 import { getPayload } from 'payload'
 import React from 'react'
 
-import type { FeaturedProductCardsBlock, Media as MediaType, Product } from '@/payload-types'
+import type { FeaturedProductCardsBlock, Product } from '@/payload-types'
+
+import { FeaturedProductCardActions } from './FeaturedProductCardActions'
+import { FeaturedProductCardImage } from './FeaturedProductCardImage'
 
 const DEFAULT_CARD_COLORS = ['#5C6B54', '#403c39']
-
-function isMediaObject(val: unknown): val is MediaType {
-  return typeof val === 'object' && val !== null && 'url' in val
-}
-
-function getProductImage(product: Product): MediaType | null {
-  const first = product.gallery?.[0]?.image
-  return isMediaObject(first) ? first : null
-}
 
 function formatPrice(price: number | null | undefined): string {
   if (price == null) return ''
@@ -52,16 +44,24 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
 
   let products: Product[] = []
   if (selectedProducts?.length) {
-    const ids = selectedProducts.map((p) => (typeof p === 'object' && p !== null ? p.id : p))
-    const result = await payload.find({
-      collection: 'products',
-      where: { id: { in: ids }, _status: { equals: 'published' } },
-      locale,
-      depth: 2,
-      limit: 3,
-      overrideAccess: true,
-    })
-    products = ids.map((id) => result.docs.find((d) => d.id === id)).filter(Boolean) as Product[]
+    // Prefer already-populated relationships from the shop page query (no extra round-trip)
+    const populated = selectedProducts.filter(
+      (p): p is Product => typeof p === 'object' && p !== null && 'id' in p && 'title' in p,
+    )
+    if (populated.length === selectedProducts.length) {
+      products = populated
+    } else {
+      const ids = selectedProducts.map((p) => (typeof p === 'object' && p !== null ? p.id : p))
+      const result = await payload.find({
+        collection: 'products',
+        where: { id: { in: ids }, _status: { equals: 'published' } },
+        locale,
+        depth: 2,
+        limit: 3,
+        overrideAccess: true,
+      })
+      products = ids.map((id) => result.docs.find((d) => d.id === id)).filter(Boolean) as Product[]
+    }
   }
 
   if (products.length === 0) {
@@ -104,16 +104,16 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
 
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 md:grid-cols-2 md:gap-8 lg:gap-12">
           {products.map((product, index) => {
-            const image = getProductImage(product)
             const soldOut = isProductSoldOut(product)
             const isSeasonal = Boolean(product.isSeasonal)
             const bg = colors[index]
 
+            const detailsHref = `/products/${product.slug}`
+
             return (
-              <Link
+              <article
                 key={product.id}
-                href={`/products/${product.slug}`}
-                className="group relative flex flex-col no-underline pt-10 sm:pt-12"
+                className="group relative flex flex-col pt-10 sm:pt-12"
               >
                 {/* Pack floats above the colored card — same layout as the founder mock */}
                 <div className="relative z-10 mx-auto -mb-12 h-48 w-[72%] max-w-[280px] sm:h-56 sm:w-[68%]">
@@ -127,16 +127,7 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
                       {locale === 'de' ? 'Saisonal' : 'Seasonal'}
                     </span>
                   )}
-                  {image ? (
-                    <Media
-                      fill
-                      resource={image}
-                      imgClassName="object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.32)] transition-transform duration-500 group-hover:scale-[1.03]"
-                      className="absolute inset-0"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 rounded-lg bg-ff-warm-gray" />
-                  )}
+                  <FeaturedProductCardImage product={product} />
                 </div>
 
                 <div
@@ -157,20 +148,22 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
                     </p>
                   )}
 
-                  <div className="mt-auto flex items-end justify-between gap-4 pt-2">
+                  <div className="mt-auto flex flex-col gap-4 pt-2">
                     {product.priceInEUR != null && product.priceInEUR > 0 ? (
                       <span className="font-display text-xl font-bold tabular-nums text-white">
                         {formatPrice(product.priceInEUR)}
                       </span>
-                    ) : (
-                      <span />
-                    )}
-                    <span className="font-display text-[11px] font-bold uppercase tracking-[0.12em] text-white/95 transition-opacity group-hover:opacity-80">
-                      {resolvedCta} →
-                    </span>
+                    ) : null}
+
+                    <FeaturedProductCardActions
+                      product={product}
+                      detailsHref={detailsHref}
+                      soldOut={soldOut}
+                      orderLabel={resolvedCta}
+                    />
                   </div>
                 </div>
-              </Link>
+              </article>
             )
           })}
         </div>

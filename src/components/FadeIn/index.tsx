@@ -65,8 +65,9 @@ export const FadeIn: React.FC<FadeInProps> = ({
     { scope: ref },
   )
 
+  // Above-the-fold heroes must stay visible if GSAP fails to run (e.g. client bundle error).
   return (
-    <div ref={ref} className={className} style={{ opacity: 0 }}>
+    <div ref={ref} className={className} style={immediate ? undefined : { opacity: 0 }}>
       {children}
     </div>
   )
