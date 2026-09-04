@@ -177,6 +177,25 @@ export async function buildOrderReceiptData(
     })
   }
 
+  // Collapse identical rows (same title + unit price) into one line with a
+  // summed quantity. Workshop bookings for the same appointment can exist as
+  // several separate records (see confirmWorkshopBookings.ts) — each is its
+  // own row here with qty 1, which would otherwise print as visually
+  // duplicate lines instead of one "2x" line.
+  if (receiptItems.length > 1) {
+    const merged = new Map<string, ReceiptItem>()
+    for (const item of receiptItems) {
+      const key = `${item.title}__${item.unitPrice}`
+      const existing = merged.get(key)
+      if (existing) {
+        existing.qty += item.qty
+      } else {
+        merged.set(key, { ...item })
+      }
+    }
+    receiptItems = Array.from(merged.values())
+  }
+
   // ── Monetary totals ────────────────────────────────────────────────────
   const totalCents = typeof order.amount === 'number' ? order.amount : 0
   const shippingCents =
