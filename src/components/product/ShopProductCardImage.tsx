@@ -36,11 +36,12 @@ export function ShopProductCardImage({
   const cmsUrl = cmsMedia?.url?.trim() || null
   const [imageFailed, setImageFailed] = useState(false)
 
-  // Known shop SKUs: prefer local /public/shop assets (always available in dev + prod build).
-  // CMS/R2 URLs are used only when no local fallback is mapped for this slug/index.
-  const preferLocal = Boolean(fallbackSrc)
-  const showLocal = preferLocal || ((!cmsUrl || imageFailed) && Boolean(fallbackSrc))
-  const showCms = Boolean(cmsUrl) && !imageFailed && !preferLocal
+  // CMS/gallery image takes priority whenever one exists and hasn't failed to
+  // load — editors managing images through /admin expect their upload to
+  // actually render. The local /public/shop asset is a true fallback only:
+  // used when there's no CMS image yet, or the CMS URL 404s.
+  const showCms = Boolean(cmsUrl) && !imageFailed
+  const showLocal = !showCms && Boolean(fallbackSrc)
 
   return (
     <div className={cn('relative', className)}>
