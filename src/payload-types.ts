@@ -197,9 +197,6 @@ export interface Config {
     'product-detail-labels-global': ProductDetailLabelsGlobalSelect<false> | ProductDetailLabelsGlobalSelect<true>;
   };
   locale: 'de' | 'en';
-  widgets: {
-    collections: CollectionsWidget;
-  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -1133,13 +1130,25 @@ export interface Page {
      */
     gastronomyWorkshopNextDateLabel?: string | null;
     /**
-     * Up to three cards; last section on /gastronomy.
+     * Four workshop cards for /gastronomy. Title, description, price and image sync from each workshop page (Pages → Workshop Detail). Fields here override only when filled.
      */
     gastronomyWorkshopCards?:
       | {
+          /**
+           * Optional override. By default the matching workshop page hero image is used.
+           */
           image?: (string | null) | Media;
+          /**
+           * Optional override. Defaults to the workshop page hero title when empty.
+           */
           title: string;
+          /**
+           * Optional override. Defaults to the workshop page hero description when empty.
+           */
           description: string;
+          /**
+           * Optional override. Defaults to the workshop page booking price when empty.
+           */
           price: string;
           /**
            * e.g. "pro Person" / "per Person"
@@ -2473,6 +2482,9 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
+  /**
+   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
+   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -2492,6 +2504,9 @@ export interface Form {
   redirect?: {
     url: string;
   };
+  /**
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
+   */
   emails?:
     | {
         emailTo?: string | null;
@@ -2500,6 +2515,9 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
+        /**
+         * Enter the message that should be sent in this email.
+         */
         message?: {
           root: {
             type: string;
@@ -9063,16 +9081,6 @@ export interface ProductDetailLabelsGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_widget".
- */
-export interface CollectionsWidget {
-  data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -6,6 +6,7 @@ import { CourseProductPage } from '@/components/product/CourseProductPage'
 import { ProductDetailPage } from '@/components/product/ProductDetailPage'
 import { getProductDetailLabelsGlobal } from '@/utilities/getProductDetailLabelsGlobal'
 import { getLocale } from '@/utilities/getLocale'
+import { normalizeAppLocale, strictLocaleQuery } from '@/utilities/payloadLocaleQuery'
 import configPromise from '@payload-config'
 import { Metadata } from 'next'
 import { draftMode } from 'next/headers'
@@ -163,6 +164,7 @@ function RelatedProducts({ products }: { products: Product[] }) {
 
 const queryProductBySlug = async ({ slug, locale }: { slug: string; locale?: 'de' | 'en' }) => {
   const { isEnabled: draft } = await draftMode()
+  const cmsLocale = normalizeAppLocale(locale)
 
   const payload = await getPayload({ config: configPromise })
 
@@ -171,7 +173,7 @@ const queryProductBySlug = async ({ slug, locale }: { slug: string; locale?: 'de
     depth: 3,
     draft,
     limit: 1,
-    locale,
+    ...strictLocaleQuery(cmsLocale),
     overrideAccess: draft,
     pagination: false,
     where: {

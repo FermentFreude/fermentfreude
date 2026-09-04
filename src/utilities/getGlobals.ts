@@ -1,8 +1,9 @@
 import configPromise from '@payload-config'
+import { strictLocaleQuery, type AppLocale } from '@/utilities/payloadLocaleQuery'
 import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 
-type SupportedLocale = 'de' | 'en'
+type SupportedLocale = AppLocale
 
 async function getGlobal(slug: string, depth = 0, locale?: SupportedLocale) {
   const payload = await getPayload({ config: configPromise })
@@ -12,7 +13,7 @@ async function getGlobal(slug: string, depth = 0, locale?: SupportedLocale) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     slug: slug as any,
     depth,
-    ...(locale ? { locale } : {}),
+    ...(locale ? strictLocaleQuery(locale) : {}),
   })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

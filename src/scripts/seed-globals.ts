@@ -24,6 +24,7 @@ import type {
   WorkshopSliderGlobal,
 } from '@/payload-types'
 import config from '@payload-config'
+import { getWorkshopHeroImageIdsByHref } from '@/utilities/workshopHeroImages'
 // @ts-expect-error — dotenv types not resolved via package.json exports
 import { config as loadEnv } from 'dotenv'
 import { getPayload } from 'payload'
@@ -805,20 +806,16 @@ async function seedWorkshopCards(payload: Awaited<ReturnType<typeof getPayload>>
 
   console.log('\n── Workshop Cards (DE) ──')
 
-  // Look for working workshop card images by specific filenames
-  const laktoCardImg =
-    (await findMedia(payload, 'lakto1-3.webp')) || (await findMedia(payload, 'lakto-2.webp'))
-  const kombuchaCardImg =
-    (await findMedia(payload, 'kombucha1-3.webp')) || (await findMedia(payload, 'kombucha-1.webp'))
-  const tempehCardImg =
-    (await findMedia(payload, 'tempeh1-10.webp')) || (await findMedia(payload, 'tempeh.webp'))
+  const workshopHeroIds = await getWorkshopHeroImageIdsByHref(payload)
 
   const deCards = [
     {
       title: 'Lakto-Gemüse',
       description:
         'Entdecke die Kunst der Milchsäerefermentation. Lerne, saisonales Gemüse in haltbare, probiotische Köstlichkeiten zu verwandeln.',
-      ...(laktoCardImg ? { image: laktoCardImg } : {}),
+      ...(workshopHeroIds['/workshops/lakto-gemuese']
+        ? { image: workshopHeroIds['/workshops/lakto-gemuese'] }
+        : {}),
       price: '€99',
       priceSuffix: 'pro Person',
       buttonLabel: 'Jetzt buchen',
@@ -829,7 +826,9 @@ async function seedWorkshopCards(payload: Awaited<ReturnType<typeof getPayload>>
       title: 'Kombucha',
       description:
         'Braue deinen eigenen Kombucha! Von der SCOBY-Pflege bis zur Zweitfermentation mit einzigartigen Geschmacksrichtungen.',
-      ...(kombuchaCardImg ? { image: kombuchaCardImg } : {}),
+      ...(workshopHeroIds['/workshops/kombucha']
+        ? { image: workshopHeroIds['/workshops/kombucha'] }
+        : {}),
       price: '€99',
       priceSuffix: 'pro Person',
       buttonLabel: 'Jetzt buchen',
@@ -840,11 +839,26 @@ async function seedWorkshopCards(payload: Awaited<ReturnType<typeof getPayload>>
       title: 'Tempeh',
       description:
         'Von der Bohne zum fertigen Tempeh. Erlerne die traditionelle indonesische Fermentationstechnik und kreiere dein eigenes Tempeh.',
-      ...(tempehCardImg ? { image: tempehCardImg } : {}),
+      ...(workshopHeroIds['/workshops/tempeh']
+        ? { image: workshopHeroIds['/workshops/tempeh'] }
+        : {}),
       price: '€99',
       priceSuffix: 'pro Person',
       buttonLabel: 'Jetzt buchen',
       buttonUrl: '/workshops/tempeh',
+      nextDate: '',
+    },
+    {
+      title: 'Vom Feld ins Glas',
+      description:
+        'Fermentation beginnt am Feld. Ernte, Handwerk und drei Lakto-Fermente im Marktgarten „Unser Bauerngarten“.',
+      ...(workshopHeroIds['/workshops/vom-feld-ins-glas']
+        ? { image: workshopHeroIds['/workshops/vom-feld-ins-glas'] }
+        : {}),
+      price: '€99',
+      priceSuffix: 'pro Person',
+      buttonLabel: 'Jetzt buchen',
+      buttonUrl: '/workshops/vom-feld-ins-glas',
       nextDate: '',
     },
   ]
@@ -881,7 +895,9 @@ async function seedWorkshopCards(payload: Awaited<ReturnType<typeof getPayload>>
       title: 'Lacto-Vegetables',
       description:
         'Discover the art of lactic acid fermentation. Learn to transform seasonal vegetables into preserved, probiotic delicacies.',
-      ...(laktoCardImg ? { image: laktoCardImg } : {}),
+      ...(workshopHeroIds['/workshops/lakto-gemuese']
+        ? { image: workshopHeroIds['/workshops/lakto-gemuese'] }
+        : {}),
       price: '€99',
       priceSuffix: 'per person',
       buttonLabel: 'Book Now',
@@ -893,7 +909,9 @@ async function seedWorkshopCards(payload: Awaited<ReturnType<typeof getPayload>>
       title: 'Kombucha',
       description:
         'Brew your own kombucha! From SCOBY care to second fermentation with unique flavours.',
-      ...(kombuchaCardImg ? { image: kombuchaCardImg } : {}),
+      ...(workshopHeroIds['/workshops/kombucha']
+        ? { image: workshopHeroIds['/workshops/kombucha'] }
+        : {}),
       price: '€99',
       priceSuffix: 'per person',
       buttonLabel: 'Book Now',
@@ -905,11 +923,27 @@ async function seedWorkshopCards(payload: Awaited<ReturnType<typeof getPayload>>
       title: 'Tempeh',
       description:
         'From beans to finished tempeh. Learn the traditional Indonesian fermentation technique and create your own tempeh.',
-      ...(tempehCardImg ? { image: tempehCardImg } : {}),
+      ...(workshopHeroIds['/workshops/tempeh']
+        ? { image: workshopHeroIds['/workshops/tempeh'] }
+        : {}),
       price: '€99',
       priceSuffix: 'per person',
       buttonLabel: 'Book Now',
       buttonUrl: '/workshops/tempeh',
+      nextDate: '',
+    },
+    {
+      id: cardIds[3],
+      title: 'Vom Feld ins Glas',
+      description:
+        'Fermentation starts in the field. Harvest, craft, and three lacto-ferments at the “Unser Bauerngarten” market garden.',
+      ...(workshopHeroIds['/workshops/vom-feld-ins-glas']
+        ? { image: workshopHeroIds['/workshops/vom-feld-ins-glas'] }
+        : {}),
+      price: '€99',
+      priceSuffix: 'per person',
+      buttonLabel: 'Book Now',
+      buttonUrl: '/workshops/vom-feld-ins-glas',
       nextDate: '',
     },
   ]
@@ -930,8 +964,8 @@ async function seedWorkshopCards(payload: Awaited<ReturnType<typeof getPayload>>
     },
   })
 
-  const imgCount = [laktoCardImg, kombuchaCardImg, tempehCardImg].filter(Boolean).length
-  console.log(`✅ Workshop Cards seeded (DE + EN) — 3 cards, ${imgCount} with images`)
+  const imgCount = Object.values(workshopHeroIds).filter(Boolean).length
+  console.log(`✅ Workshop Cards seeded (DE + EN) — 4 cards, ${imgCount} with workshop hero images`)
 }
 
 // ═══════════════════════════════════════════════════════════════════════

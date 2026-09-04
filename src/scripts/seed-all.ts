@@ -74,6 +74,10 @@ const scripts: Record<string, { name: string; file: string }> = {
     name: 'Vom Feld ins Glas CMS page + nav + home slider',
     file: 'seed-feld-ins-glas-page.ts',
   },
+  gastronomy: {
+    name: 'Gastronomy page (B2B + workshop cards)',
+    file: 'seed-gastronomy.ts',
+  },
 }
 
 const allOrder = [

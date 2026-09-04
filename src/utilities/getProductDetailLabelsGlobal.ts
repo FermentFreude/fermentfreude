@@ -1,3 +1,4 @@
+import { normalizeAppLocale, strictLocaleQuery } from '@/utilities/payloadLocaleQuery'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
@@ -16,9 +17,10 @@ export async function getProductDetailLabelsGlobal(
 ): Promise<ProductDetailLabelsGlobal> {
   try {
     const payload = await getPayload({ config })
+    const cmsLocale = normalizeAppLocale(locale)
     return (await payload.findGlobal({
       slug: 'product-detail-labels-global',
-      locale: locale === 'en' ? 'en' : 'de',
+      ...strictLocaleQuery(cmsLocale),
       depth: 0,
       draft: false,
     })) as ProductDetailLabelsGlobal

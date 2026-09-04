@@ -4,6 +4,7 @@ import { ShopHeroComponent } from '@/blocks/ShopHero/Component'
 import { ShopTrustRow, type TrustIconId, type TrustItem } from '@/components/shop/ShopTrustRow'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
+import { strictLocaleQuery } from '@/utilities/payloadLocaleQuery'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
@@ -19,7 +20,7 @@ async function queryShopPage(locale: 'de' | 'en'): Promise<Page | null> {
   const result = await payload.find({
     collection: 'pages',
     where: { slug: { equals: 'shop' } },
-    locale,
+    ...strictLocaleQuery(locale),
     depth: 3,
     limit: 1,
     // Blocks need populated products + gallery for the hero

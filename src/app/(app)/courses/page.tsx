@@ -5,6 +5,7 @@ import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrappe
 import { ContentSection } from '@/components/ui/ContentSection'
 import type { FeatureCardsBlock, Page as PageType } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
+import { strictLocaleQuery } from '@/utilities/payloadLocaleQuery'
 import configPromise from '@payload-config'
 import { Carrot, FlaskConical, Milk, Wheat, Wine, Wrench, type LucideIcon } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -52,7 +53,7 @@ async function queryCoursesPage(locale: TypedLocale, draft: boolean) {
     limit: 1,
     depth: 5,
     draft,
-    locale,
+    ...strictLocaleQuery(locale),
     overrideAccess: draft,
   })
   return (result.docs?.[0] as PageType | undefined) ?? null
