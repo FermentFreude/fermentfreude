@@ -1,6 +1,7 @@
 /**
- * Upload temporary product photos from /public and attach to the 3 shop products.
- * Also wires ShopHero → Käfer and supporting cards → Berglinsen + Kimchi.
+ * Upload selected shop product images to Payload/R2 and attach galleries.
+ *
+ * Image selection: src/data/shop-product-images.ts (from David's Drive folders)
  *
  * Run: pnpm patch:shop-images
  */
@@ -8,10 +9,12 @@
 import { config as dotenvConfig } from 'dotenv'
 dotenvConfig()
 
+import fs from 'fs'
 import path from 'path'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
+import { SHOP_PRODUCT_IMAGES } from '../data/shop-product-images'
 import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
 import {
   CTX,
@@ -19,52 +22,49 @@ import {
   findMediaByFilename,
   findProductBySlug,
   patchBlockInPage,
+  setProductGallery,
 } from './migrations/_helpers'
 
 const ROOT = process.cwd()
 
-const PRODUCT_IMAGES: Record<
-  string,
-  { localPath: string; altDe: string; altEn: string; filename: string }
-> = {
-  'kaeferbohnen-tempeh': {
-    // Packaging for product page; shop hero uses public/shop/hero-kaefer.webp separately
-    localPath: 'public/shop/kaefer-packaging.webp',
-    filename: 'kaefer-packaging-drive.webp',
-    altDe: 'Käferbohnen-Tempeh in Verpackung',
-    altEn: 'Runner bean tempeh in packaging',
-  },
-  'berglinsen-tempeh': {
-    // Temporary plated shot until packaged Berglinsen photo exists
-    localPath: 'public/shop/berglinsen-plated.webp',
-    filename: 'berglinsen-plated-drive.webp',
-    altDe: 'Berglinsen-Tempeh, angerichtet',
-    altEn: 'Mountain lentil tempeh, plated',
-  },
-  'classic-kimchi': {
-    localPath: 'public/courses-hero/kimchi.webp',
-    filename: `kimchi-shop-${Date.now()}.webp`,
-    altDe: 'Classic Kimchi im Glas',
-    altEn: 'Classic kimchi in a jar',
-  },
+function resolveLocalPath(localPath: string, fallbackPath?: string): string {
+  const primary = path.resolve(ROOT, localPath)
+  if (fs.existsSync(primary)) return primary
+  if (fallbackPath) {
+    const fallback = path.resolve(ROOT, fallbackPath)
+    if (fs.existsSync(fallback)) return fallback
+    throw new Error(`Missing image: ${localPath} (and fallback ${fallbackPath})`)
+  }
+  throw new Error(`Missing image: ${localPath}`)
 }
+
+const forceReupload = process.argv.includes('--force')
 
 async function uploadOrReuse(
   payload: Awaited<ReturnType<typeof getPayload>>,
-  localPath: string,
+  absPath: string,
   filename: string,
   altDe: string,
   altEn: string,
 ): Promise<string> {
   const existing = await findMediaByFilename(payload, filename)
-  if (existing) {
-    payload.logger.info(`  ↩ media exists: ${filename}`)
+
+  if (existing && forceReupload) {
+    await payload.delete({
+      collection: 'media',
+      id: existing,
+      context: CTX,
+      overrideAccess: true,
+    })
+    payload.logger.info(`  ✕ deleted stale media ${filename} — re-uploading`)
+  }
+
+  if (existing && !forceReupload) {
+    payload.logger.info(`  ↩ media exists: ${filename} (pass --force to re-upload to R2)`)
     return existing
   }
 
-  const abs = path.resolve(ROOT, localPath)
-  const file = await optimizedFile(abs, IMAGE_PRESETS.card)
-  // Force a stable filename so re-runs are idempotent
+  const file = await optimizedFile(absPath, IMAGE_PRESETS.card)
   file.name = filename
 
   const media = await payload.create({
@@ -89,98 +89,50 @@ async function uploadOrReuse(
   return String(media.id)
 }
 
-async function ensureBerglinsen(
-  payload: Awaited<ReturnType<typeof getPayload>>,
-): Promise<string> {
-  const existing = await findProductBySlug(payload, 'berglinsen-tempeh', false)
-  if (existing) return existing
-
-  payload.logger.info('  → Creating Berglinsen-Tempeh…')
-  const created = await payload.create({
-    collection: 'products',
-    locale: 'de',
-    data: {
-      title: 'Berglinsen-Tempeh',
-      slug: 'berglinsen-tempeh',
-      _status: 'published',
-      priceInEUR: 790,
-      inventory: 20,
-      productType: 'fresh',
-      unitSize: '185g Frischpackung',
-      shortDescription:
-        'Tempeh aus österreichischen Berglinsen — nussig, proteinreich, handgemacht.',
-      ingredients:
-        'Berglinsen aus Österreich gekocht (97%), Apfelessig, Starterkultur (Rhizopus oligosporus).',
-      gallery: [],
-    } as never,
-    context: CTX,
-    overrideAccess: true,
-  })
-
-  await payload.update({
-    collection: 'products',
-    id: created.id,
-    locale: 'en',
-    data: {
-      title: 'Mountain Lentil Tempeh',
-      unitSize: '185g fresh pack',
-      shortDescription:
-        'Tempeh from Austrian mountain lentils — nutty, protein-rich, handmade.',
-      ingredients:
-        'Cooked Austrian mountain lentils (97%), apple cider vinegar, starter culture (Rhizopus oligosporus).',
-    } as never,
-    context: CTX,
-    overrideAccess: true,
-  })
-
-  return String(created.id)
-}
-
 async function main() {
   const payload = await getPayload({ config })
-  payload.logger.info('🖼  Attaching temporary shop product images…')
+  payload.logger.info('🖼  Attaching selected shop product images (Drive → R2)…')
 
-  // Ensure Berglinsen exists
-  await ensureBerglinsen(payload)
+  for (const spec of SHOP_PRODUCT_IMAGES) {
+    payload.logger.info(`  → ${spec.slug}: ${spec.driveNote}`)
 
-  const mediaBySlug: Record<string, string> = {}
-
-  for (const [slug, spec] of Object.entries(PRODUCT_IMAGES)) {
-    mediaBySlug[slug] = await uploadOrReuse(
+    const primaryPath = resolveLocalPath(spec.primary.localPath, spec.primary.fallbackPath)
+    const primaryId = await uploadOrReuse(
       payload,
-      spec.localPath,
-      spec.filename,
-      spec.altDe,
-      spec.altEn,
+      primaryPath,
+      spec.primary.filename,
+      spec.primary.altDe,
+      spec.primary.altEn,
     )
-  }
 
-  // Attach gallery images (overwrite so placeholders always show)
-  for (const [slug, mediaId] of Object.entries(mediaBySlug)) {
-    const productId = await findProductBySlug(payload, slug, false)
-    if (!productId) {
-      payload.logger.warn(`  ⚠ product missing: ${slug}`)
-      continue
+    const galleryIds = [primaryId]
+
+    if (spec.secondary) {
+      const secondaryPath = resolveLocalPath(
+        spec.secondary.localPath,
+        spec.secondary.fallbackPath,
+      )
+      const secondaryId = await uploadOrReuse(
+        payload,
+        secondaryPath,
+        spec.secondary.filename,
+        spec.secondary.altDe,
+        spec.secondary.altEn,
+      )
+      galleryIds.push(secondaryId)
     }
 
-    await payload.update({
-      collection: 'products',
-      id: productId,
-      data: {
-        gallery: [{ image: mediaId }],
-        ...(slug === 'classic-kimchi' ? { isSeasonal: true } : {}),
-      } as never,
-      context: CTX,
-      overrideAccess: true,
-    })
-    payload.logger.info(`  ✔ ${slug} ← ${mediaId}`)
+    const productId = await findProductBySlug(payload, spec.slug, true)
+    if (!productId) continue
+
+    await setProductGallery(payload, productId, galleryIds)
+    payload.logger.info(`  ✔ ${spec.slug} gallery ← ${galleryIds.join(', ')}`)
   }
 
   const kaferId = await findProductBySlug(payload, 'kaeferbohnen-tempeh', true)
   const berglinsenId = await findProductBySlug(payload, 'berglinsen-tempeh', true)
   const kimchiId = await findProductBySlug(payload, 'classic-kimchi', true)
 
-  // Wire ShopHero → Käfer
   await patchBlockInPage(
     payload,
     'shop',
@@ -193,8 +145,8 @@ async function main() {
       ctaPrimaryUrl: '/products/kaeferbohnen-tempeh',
       slides: [],
       bottomTagline: 'Fermentierte Lebensmittel, mit Sorgfalt hergestellt.',
-      bottomSubtitle: 'Abholung in Graz — jede Woche frisch.',
-      bottomDisclaimer: 'Wir arbeiten an einem Lieferservice — für garantierte Frische.',
+      bottomSubtitle: 'Abholung in Graz, jede Woche frisch.',
+      bottomDisclaimer: 'Wir arbeiten an einem Lieferservice, für garantierte Frische.',
     },
     {
       heroProduct: kaferId,
@@ -204,8 +156,8 @@ async function main() {
       ctaPrimaryUrl: '/products/kaeferbohnen-tempeh',
       slides: [],
       bottomTagline: 'Fermented foods, crafted with care.',
-      bottomSubtitle: 'Pickup in Graz — freshly made every week.',
-      bottomDisclaimer: 'Delivery coming soon — to ensure the freshest quality.',
+      bottomSubtitle: 'Pickup in Graz, freshly made every week.',
+      bottomDisclaimer: 'Delivery coming soon, to ensure the freshest quality.',
     },
   )
 
@@ -238,9 +190,7 @@ async function main() {
     await appendBlockToPage(payload, 'shop', 'featuredProductCards', featuredDE, featuredEN)
   }
 
-  payload.logger.info('✅ Drive images attached. Hard-refresh /shop')
-  payload.logger.info('   Hero BG: public/shop/hero-kaefer.webp (plated cooked Käfer)')
-  payload.logger.info('   Käfer product: packaging · Berglinsen: plated (pack shot TBD)')
+  payload.logger.info('✅ Shop product images attached. Hard-refresh /shop and product pages.')
   process.exit(0)
 }
 

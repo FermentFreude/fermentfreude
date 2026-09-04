@@ -6,27 +6,26 @@ import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { cache } from 'react'
 
 import type { Page, ShopAutomatenBlock, ShopHeroBlock } from '@/payload-types'
 import type { Metadata } from 'next'
 
-// Always fetch fresh shop content while iterating on layout/images
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+// Cache CMS reads briefly so shop is fast after the first hit
+export const revalidate = 60
 
-async function queryShopPage(locale: 'de' | 'en'): Promise<Page | null> {
+const queryShopPage = cache(async (locale: 'de' | 'en'): Promise<Page | null> => {
   const payload = await getPayload({ config: configPromise })
   const result = await payload.find({
     collection: 'pages',
     where: { slug: { equals: 'shop' } },
     locale,
-    depth: 3,
+    depth: 2,
     limit: 1,
-    // Blocks need populated products + gallery for the hero
     overrideAccess: true,
   })
   return (result.docs?.[0] as Page) ?? null
-}
+})
 
 function trustItemsFromHero(block: ShopHeroBlock | undefined): TrustItem[] | null {
   const raw = block?.trustItems
@@ -60,7 +59,6 @@ export default async function ShopPage() {
 
   if (page) {
     const { layout } = page
-    // Guarantee Käfer hero at the top even if CMS block order/visibility is off
     const hasShopHero = (layout ?? []).some((b) => b.blockType === 'shopHero' && b.visible !== false)
     const shopHeroBlock = (layout ?? []).find((b) => b.blockType === 'shopHero') as
       | ShopHeroBlock
@@ -68,8 +66,6 @@ export default async function ShopPage() {
     const automatenBlock = (layout ?? []).find((b) => b.blockType === 'shopAutomaten') as
       | ShopAutomatenBlock
       | undefined
-    // Never render a second product catalog / bestsellers strip on /shop
-    // Automaten is rendered explicitly (after featured cards) so it always shows
     const rest = (layout ?? []).filter(
       (b) =>
         b.blockType !== 'shopHero' &&
@@ -78,7 +74,6 @@ export default async function ShopPage() {
     )
     const trustItems = trustItemsFromHero(shopHeroBlock)
 
-    // Split: featured cards first, then Automaten, then everything else
     const featured = rest.filter((b) => b.blockType === 'featuredProductCards')
     const afterFeatured = rest.filter((b) => b.blockType !== 'featuredProductCards')
 

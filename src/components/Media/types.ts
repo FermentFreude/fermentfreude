@@ -13,6 +13,7 @@ export interface Props {
   imgStyle?: React.CSSProperties
   onClick?: () => void
   onLoad?: () => void
+  onError?: () => void
   onVideoCanPlay?: () => void
   priority?: boolean // for NextImage only
   ref?: Ref<HTMLImageElement | HTMLVideoElement | null>

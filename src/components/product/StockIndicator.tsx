@@ -5,9 +5,10 @@ import { useMemo } from 'react'
 
 type Props = {
   product: Product
+  tone?: 'light' | 'dark'
 }
 
-export const StockIndicator: React.FC<Props> = ({ product }) => {
+export const StockIndicator: React.FC<Props> = ({ product, tone = 'light' }) => {
   const searchParams = useSearchParams()
 
   const selectedVariant = useMemo<Variant | undefined>(() => {
@@ -42,10 +43,20 @@ export const StockIndicator: React.FC<Props> = ({ product }) => {
     return null
   }
 
+  if (stockQuantity >= 10) {
+    return null
+  }
+
   return (
-    <div className="uppercase font-mono text-sm font-medium text-gray-500">
-      {stockQuantity < 10 && stockQuantity > 0 && <p>Only {stockQuantity} left in stock</p>}
-      {(stockQuantity === 0 || !stockQuantity) && <p>Out of stock</p>}
+    <div
+      className={`text-caption font-medium uppercase tracking-wide ${
+        tone === 'dark' ? 'text-white/70' : 'text-ff-gray-text'
+      }`}
+    >
+      {stockQuantity < 10 && stockQuantity > 0 && (
+        <span>Only {stockQuantity} left in stock</span>
+      )}
+      {(stockQuantity === 0 || !stockQuantity) && <span>Out of stock</span>}
     </div>
   )
 }

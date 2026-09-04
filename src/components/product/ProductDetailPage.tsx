@@ -10,6 +10,13 @@ import { gtmViewItem } from '@/lib/gtm'
 import { useLocale } from '@/providers/Locale'
 import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
 import {
+  getBadgeLabel,
+  getDisplayBadges,
+  getProductSpecs,
+  getSeasonalNotice,
+  type AppLocale,
+} from '@/utilities/productDetailDisplay'
+import {
   CheckIcon,
   ChevronLeftIcon,
   FlameIcon,
@@ -24,6 +31,7 @@ import {
 import Link from 'next/link'
 import React, { Suspense, useEffect, useState } from 'react'
 import { StockIndicator } from './StockIndicator'
+import { ShopStyleProductDetail } from './ShopStyleProductDetail'
 import { VariantSelector } from './VariantSelector'
 
 /* ── Helpers ── */
@@ -59,7 +67,7 @@ const BADGE_CONFIG: Record<
 /* Translations */
 const TRANSLATIONS: Record<string, Record<string, string>> = {
   de: {
-    'All products': 'Alle Produkte',
+    'Back to shop': 'Zurück zum Shop',
     Description: 'Beschreibung',
     'Health Benefits': 'Gesundheitliche Vorteile',
     'Size/Weight': 'Größe/Gewicht',
@@ -73,7 +81,7 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
       'Lieferung ist derzeit nicht verfuegbar. Wir arbeiten daran, die beste Lieferung fuer unsere frischen Produkte sicherzustellen. Aktuell ist nur lokale Abholung moeglich.',
   },
   en: {
-    'All products': 'All products',
+    'Back to shop': 'Back to shop',
     Description: 'Description',
     'Health Benefits': 'Health Benefits',
     'Size/Weight': 'Size/Weight',
@@ -92,28 +100,41 @@ function t(key: string, locale: string): string {
   return TRANSLATIONS[locale]?.[key] ?? TRANSLATIONS['en']?.[key] ?? key
 }
 
-const PRODUCT_TYPE_LABELS: Record<string, string> = {
-  jarred: 'Jarred',
-  fresh: 'Fresh',
-  bottled: 'Bottled',
-  workshop: 'Workshop',
-  'digital-course': 'Digital Course',
-}
+import type { ProductDetailLabelsGlobal } from '@/utilities/getProductDetailLabelsGlobal'
 
-type ProductDetailLabels = {
-  ingredientsLabel?: string | null
-  allergensLabel?: string | null
-  storageShelfLifeLabel?: string | null
-  shelfLifeLabel?: string | null
-  howToUseLabel?: string | null
-  instructionsBeforeUseLabel?: string | null
-  deliveryNotice?: string | null
-}
+type ProductDetailLabels = ProductDetailLabelsGlobal
 
 /* ═══════════════════════════════════════════════════════════
  *  Product Detail Page
  * ═══════════════════════════════════════════════════════════ */
 export function ProductDetailPage({
+  product,
+  productDetailLabels,
+  relatedProducts = [],
+}: {
+  product: Product
+  productDetailLabels?: ProductDetailLabels
+  relatedProducts?: Product[]
+}) {
+  const isFood = ['jarred', 'fresh', 'bottled'].includes(product.productType || '')
+
+  if (isFood) {
+    return (
+      <ShopStyleProductDetail
+        product={product}
+        productDetailLabels={productDetailLabels}
+        relatedProducts={relatedProducts}
+      />
+    )
+  }
+
+  return (
+    <LegacyProductDetailPage product={product} productDetailLabels={productDetailLabels} />
+  )
+}
+
+/* Legacy layout for workshops, courses, and other non-food products */
+function LegacyProductDetailPage({
   product,
   productDetailLabels,
 }: {
@@ -172,6 +193,7 @@ export function ProductDetailPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // intentionally empty — fire only on mount
 
+  const appLocale = (locale === 'de' ? 'de' : 'en') as AppLocale
   const isFood = ['jarred', 'fresh', 'bottled'].includes(product.productType || '')
   const isOutOfStock = !product.inventory || product.inventory === 0
   const labels = {
@@ -189,34 +211,14 @@ export function ProductDetailPage({
   const luxuryProseClass =
     'prose prose-sm sm:prose-base max-w-none leading-relaxed text-[#2b2722] prose-headings:font-display prose-headings:text-[#1f1a15] prose-headings:tracking-tight prose-headings:mb-3 prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-p:text-[#4f4941] prose-p:mb-3 prose-strong:text-[#1f1a15] prose-strong:font-semibold prose-ul:my-4 prose-ul:pl-5 prose-li:text-[#4f4941] prose-li:marker:text-[#d9be82] prose-li:mb-1.5 prose-hr:border-[#e5dccd]'
 
-  /* ── Specs — built from REAL existing data ── */
-  const specs: { label: string; value: string }[] = []
-
-  // Brand — use field if set, otherwise always show FermentFreude
-  specs.push({ label: 'Brand', value: product.brand || 'FermentFreude' })
-
-  // Flavour — use field if set
-  if (product.flavour) {
-    specs.push({ label: 'Flavour', value: product.flavour })
-  }
-
-  // Product type
-  if (product.productType) {
-    specs.push({
-      label: 'Type',
-      value: PRODUCT_TYPE_LABELS[product.productType] || product.productType,
-    })
-  }
-
-  // Weight / Unit size
-  if (product.unitSize) {
-    specs.push({ label: 'Weight', value: product.unitSize })
-  }
+  /* ── Specs — built from CMS data ── */
+  const specs = getProductSpecs(product, appLocale)
+  const displayBadges = getDisplayBadges(product)
 
   /* ── Tab content availability ── */
   const hasDescription =
     hasRichTextContent(product.description) ||
-    (isFood && (product.ingredients || product.storageInstructions || product.shelfLife)) ||
+    (isFood && (product.ingredients || product.allergens || product.storageInstructions || product.shelfLife)) ||
     hasRichTextContent(product.howToUse) ||
     hasRichTextContent(product.userInstructions)
   const hasAbout = hasRichTextContent(product.aboutProduct)
@@ -241,7 +243,7 @@ export function ProductDetailPage({
           className="inline-flex items-center gap-1.5 text-sm font-medium text-[#7a7a7a] hover:text-[#2b2b2d] transition-colors"
         >
           <ChevronLeftIcon className="w-4 h-4" />
-          {t('All products', locale)}
+          {t('Back to shop', locale)}
         </Link>
       </div>
 
@@ -344,39 +346,36 @@ export function ProductDetailPage({
               </div>
 
               {/* Badges + Benefits — combined visual section */}
-              {(product.badges?.length || (product.benefits && product.benefits.length > 0)) && (
+              {displayBadges.length > 0 && (
                 <div className="py-5 border-t border-[#e9e9e9]">
-                  {/* Badge icons — single line, responsive */}
-                  {product.badges && product.badges.length > 0 && (
-                    <div className="flex flex-row gap-3 mb-4 overflow-x-auto pb-2 -mx-1 px-1">
-                      {product.badges.map((badge) => {
-                        const config = BADGE_CONFIG[badge]
-                        if (!config) return null
-                        const Icon = config.icon
-                        return (
+                  <div className="flex flex-row gap-3 mb-4 overflow-x-auto pb-2 -mx-1 px-1">
+                    {displayBadges.map((badge) => {
+                      const config = BADGE_CONFIG[badge]
+                      if (!config) return null
+                      const Icon = config.icon
+                      return (
+                        <div
+                          key={badge}
+                          className="group flex flex-col items-center gap-1.5 shrink-0 transition-transform duration-200 hover:scale-105"
+                        >
                           <div
-                            key={badge}
-                            className="group flex flex-col items-center gap-1.5 shrink-0 transition-transform duration-200 hover:scale-105"
+                            className="w-11 h-11 rounded-full flex items-center justify-center shadow-sm transition-shadow duration-200 group-hover:shadow-md"
+                            style={{
+                              backgroundColor: `${config.color}14`,
+                              border: `1.5px solid ${config.color}40`,
+                            }}
                           >
-                            <div
-                              className="w-11 h-11 rounded-full flex items-center justify-center shadow-sm transition-shadow duration-200 group-hover:shadow-md"
-                              style={{
-                                backgroundColor: `${config.color}14`,
-                                border: `1.5px solid ${config.color}40`,
-                              }}
-                            >
-                              <span style={{ color: config.color }}>
-                                <Icon className="w-5 h-5" />
-                              </span>
-                            </div>
-                            <span className="text-[10px] font-semibold text-[#555] text-center leading-tight whitespace-nowrap">
-                              {config.label}
+                            <span style={{ color: config.color }}>
+                              <Icon className="w-5 h-5" />
                             </span>
                           </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                          <span className="text-[10px] font-semibold text-[#555] text-center leading-tight whitespace-nowrap">
+                            {getBadgeLabel(badge, appLocale)}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -439,6 +438,12 @@ export function ProductDetailPage({
             {labels.deliveryNotice}
           </p>
 
+          {product.isSeasonal && (
+            <p className="mt-4 text-sm leading-relaxed text-[#7a7a7a]">
+              {getSeasonalNotice(appLocale)}
+            </p>
+          )}
+
           {/* ═══════════════════════════════════════════
            *  SECTION 2 — Tabs (Description / Health Benefits / Packaging)
            * ═══════════════════════════════════════════ */}
@@ -476,16 +481,18 @@ export function ProductDetailPage({
                     )}
 
                     {/* Ingredients */}
-                    {isFood && product.ingredients && (
+                    {isFood && (product.ingredients || product.allergens) && (
                       <div className="rounded-xl border border-[#e7dfd2] bg-white/70 px-4 py-4 sm:px-5 sm:py-5">
                         <h3 className="mb-2 text-base font-display font-bold text-[#1f1a15] sm:text-lg">
                           {labels.ingredients}
                         </h3>
-                        <p className="whitespace-pre-line text-sm leading-relaxed text-[#5f5850]">
-                          {product.ingredients}
-                        </p>
+                        {product.ingredients && (
+                          <p className="whitespace-pre-line text-sm leading-relaxed text-[#5f5850]">
+                            {product.ingredients}
+                          </p>
+                        )}
                         {product.allergens && (
-                          <p className="mt-2 text-xs text-[#7f766b]">
+                          <p className={`text-xs text-[#7f766b] ${product.ingredients ? 'mt-2' : ''}`}>
                             <span className="font-semibold">{labels.allergens}:</span>{' '}
                             {product.allergens}
                           </p>

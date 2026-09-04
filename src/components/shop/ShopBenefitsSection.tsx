@@ -19,7 +19,7 @@ const DEFAULTS = {
     {
       title: 'Natural preservation',
       description:
-        'No additives needed—fermentation preserves food naturally with live cultures.',
+        'No additives needed. Fermentation preserves food naturally with live cultures.',
     },
   ],
 }

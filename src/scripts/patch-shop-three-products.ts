@@ -59,14 +59,15 @@ async function ensureBerglinsen(
       title: 'Berglinsen-Tempeh',
       slug: 'berglinsen-tempeh',
       _status: 'published',
-      priceInEUR: 790,
+      priceInEUR: 590,
       inventory: 20,
       productType: 'fresh',
-      unitSize: '185g Frischpackung',
+      unitSize: '1 Packung',
+      weightGrams: 185,
       shortDescription:
-        'Tempeh aus österreichischen Berglinsen — nussig, proteinreich, handgemacht.',
+        'Nussig-aromatisch, herzhaft und umamireich – unser Tempeh aus österreichischen Berglinsen wird beim Anbraten wunderbar knusprig und bleibt innen saftig.',
       ingredients:
-        'Berglinsen aus Österreich gekocht (97%), Apfelessig, Starterkultur (Rhizopus oligosporus).',
+        'Berglinsen aus Österreich gekocht (97 %), Apfelessig, Starterkultur (Rhizopus oligosporus)',
       gallery: galleryFromHero ? [{ image: galleryFromHero }] : [],
     } as never,
     context: CTX,
@@ -78,11 +79,11 @@ async function ensureBerglinsen(
     locale: 'en',
     data: {
       title: 'Mountain Lentil Tempeh',
-      unitSize: '185g fresh pack',
+      unitSize: '1 pack',
       shortDescription:
-        'Tempeh from Austrian mountain lentils — nutty, protein-rich, handmade.',
+        'Nutty-aromatic, hearty and rich in umami — our tempeh made from Austrian mountain lentils becomes wonderfully crispy when pan-fried while staying juicy inside.',
       ingredients:
-        'Cooked Austrian mountain lentils (97%), apple cider vinegar, starter culture (Rhizopus oligosporus).',
+        'Cooked Austrian mountain lentils (97%), apple cider vinegar, starter culture (Rhizopus oligosporus)',
     } as never,
     context: CTX,
   })

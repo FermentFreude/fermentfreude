@@ -22,6 +22,7 @@ import {
   appendBlockToPage,
   findProductBySlug,
   patchBlockInPage,
+  setProductGalleryPrimary,
 } from './migrations/_helpers'
 
 const ROOT = process.cwd()
@@ -86,43 +87,6 @@ async function uploadMedia(
   return String(media.id)
 }
 
-function galleryIds(doc: { gallery?: Array<{ image?: unknown }> | null }): string[] {
-  return (Array.isArray(doc.gallery) ? doc.gallery : [])
-    .map((g) => {
-      const img = g?.image
-      if (typeof img === 'string') return img
-      if (typeof img === 'object' && img !== null && 'id' in img) {
-        return String((img as { id: string }).id)
-      }
-      return null
-    })
-    .filter(Boolean) as string[]
-}
-
-async function setGalleryPrimary(
-  payload: Awaited<ReturnType<typeof getPayload>>,
-  productId: string,
-  primaryId: string,
-  keep = 2,
-) {
-  const existing = await payload.findByID({
-    collection: 'products',
-    id: productId,
-    depth: 0,
-    overrideAccess: true,
-  })
-  const rest = galleryIds(existing).filter((id) => id !== primaryId).slice(0, keep)
-  await payload.update({
-    collection: 'products',
-    id: productId,
-    data: {
-      gallery: [{ image: primaryId }, ...rest.map((image) => ({ image }))],
-    } as never,
-    context: CTX,
-    overrideAccess: true,
-  })
-}
-
 async function main() {
   const payload = await getPayload({ config })
   const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 5)}`
@@ -162,30 +126,9 @@ async function main() {
     'Runner bean tempeh packaging',
   )
 
-  await setGalleryPrimary(payload, bergId, bergMedia, 2)
-  await setGalleryPrimary(payload, kimchiId, kimchiMedia, 2)
-
-  // Käfer: keep existing first (plated/round) if any; insert pack as second
-  {
-    const existing = await payload.findByID({
-      collection: 'products',
-      id: kaferId,
-      depth: 0,
-      overrideAccess: true,
-    })
-    const prev = galleryIds(existing).filter((id) => id !== kaferPackMedia)
-    const gallery =
-      prev.length === 0
-        ? [{ image: kaferPackMedia }]
-        : [{ image: prev[0] }, { image: kaferPackMedia }, ...prev.slice(1, 2).map((image) => ({ image }))]
-    await payload.update({
-      collection: 'products',
-      id: kaferId,
-      data: { gallery } as never,
-      context: CTX,
-      overrideAccess: true,
-    })
-  }
+  await setProductGalleryPrimary(payload, bergId, bergMedia, 2)
+  await setProductGalleryPrimary(payload, kimchiId, kimchiMedia, 2)
+  await setProductGalleryPrimary(payload, kaferId, kaferPackMedia, 2)
   payload.logger.info('  ✔ product galleries updated')
 
   // ── Product text ─────────────────────────────────────────────────────

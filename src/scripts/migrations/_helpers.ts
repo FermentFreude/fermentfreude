@@ -380,3 +380,79 @@ export async function findProductBySlug(
   }
   return String(result.docs[0].id)
 }
+
+function productGalleryMediaIds(doc: { gallery?: Array<{ image?: unknown }> | null }): string[] {
+  return (Array.isArray(doc.gallery) ? doc.gallery : [])
+    .map((g) => {
+      const img = g?.image
+      if (typeof img === 'string') return img
+      if (typeof img === 'object' && img !== null && 'id' in img) {
+        return String((img as { id: string }).id)
+      }
+      return null
+    })
+    .filter(Boolean) as string[]
+}
+
+/**
+ * Set the primary gallery image without re-validating localized PDP array fields.
+ * Payload's update API validates the whole document; gallery-only patches can fail
+ * when nested localized rows exist only in one locale.
+ */
+export async function setProductGalleryPrimary(
+  payload: Payload,
+  productId: string,
+  primaryMediaId: string,
+  keepExtra = 2,
+): Promise<void> {
+  await setProductGallery(payload, productId, [primaryMediaId], keepExtra)
+}
+
+export async function setProductGallery(
+  payload: Payload,
+  productId: string,
+  mediaIds: string[],
+  keepExtra = 0,
+): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mongoose = (payload.db as any).connection.base
+  const { Types } = mongoose
+
+  const existing = await payload.findByID({
+    collection: 'products',
+    id: productId,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const rest = productGalleryMediaIds(existing)
+    .filter((id) => !mediaIds.includes(id))
+    .slice(0, keepExtra)
+
+  const existingGallery = Array.isArray(existing.gallery) ? existing.gallery : []
+
+  const rowForMedia = (mediaId: string) => {
+    const match = existingGallery.find((row) => {
+      const img = row?.image
+      const id =
+        typeof img === 'string'
+          ? img
+          : typeof img === 'object' && img !== null && 'id' in img
+            ? String((img as { id: string }).id)
+            : null
+      return id === mediaId
+    })
+
+    const base = { image: new Types.ObjectId(mediaId) }
+    if (match && typeof match === 'object' && 'id' in match && match.id) {
+      return { id: match.id, ...base }
+    }
+    return base
+  }
+
+  const gallery = [...mediaIds.map(rowForMedia), ...rest.map(rowForMedia)]
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const col = (payload.db as any).connection.collection('products')
+  await col.updateOne({ _id: new Types.ObjectId(productId) }, { $set: { gallery } })
+}

@@ -135,7 +135,7 @@ export const ShopHero: Block = {
       localized: true,
       label: 'Pickup Subtitle',
       admin: {
-        description: 'e.g. "Abholung in Graz — jede Woche frisch."',
+        description: 'e.g. "Abholung in Graz, jede Woche frisch."',
       },
     },
     {
