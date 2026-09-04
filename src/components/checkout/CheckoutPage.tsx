@@ -203,10 +203,21 @@ export const CheckoutPage: React.FC = () => {
   const { locale } = useLocale()
   const isDe = locale === 'de'
   const router = useRouter()
-  const { cart, clearCart, removeItem, refreshCart } = useCart()
-  // Only for onLogin — the plugin's own guest-cart-to-user transfer, which
-  // neither useCart() nor usePayments() re-exposes (see maybeCreateAccount).
-  const { onLogin: onEcommerceLogin } = useEcommerce()
+  const { cart, removeItem, refreshCart } = useCart()
+  // onLogin: the plugin's own guest-cart-to-user transfer, which neither
+  // useCart() nor usePayments() re-exposes (see maybeCreateAccount).
+  // clearSession: used instead of useCart()'s clearCart() once a voucher
+  // fully covers an order (see the voucher-covers-cart success handler
+  // below) — clearCart() only empties the SAME cart's items via a network
+  // round trip and leaves cartID pointed at it; if that call hiccups the
+  // stale, now-purchased cart stays live for the rest of the browser
+  // session and the next checkout attempt 409s with "This cart has already
+  // been paid for." clearSession() is synchronous, has no network
+  // dependency, and is guaranteed to detach us from this cart. It also
+  // resets the ecommerce provider's own internal user/addresses state, but
+  // nothing in this app's UI reads those — the real "am I logged in" state
+  // comes from the separate AuthProvider — so that reset is invisible here.
+  const { onLogin: onEcommerceLogin, clearSession } = useEcommerce()
   const [error, setError] = useState<null | string>(null)
   /**
    * State to manage the email input for guest checkout.
@@ -602,8 +613,8 @@ export const CheckoutPage: React.FC = () => {
         return
       }
 
-      // Clear cart client-side
-      clearCart()
+      // Detach from this now-purchased cart client-side
+      clearSession()
 
       const type = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
       const emailParam = email ? `&email=${encodeURIComponent(email)}` : ''
@@ -615,7 +626,7 @@ export const CheckoutPage: React.FC = () => {
       setError(t.connectionError)
       setProcessingPayment(false)
     }
-  }, [voucherApplied, email, customerName, user, clearCart, router, hasWorkshop, isAllDigital, t])
+  }, [voucherApplied, email, customerName, user, clearSession, router, hasWorkshop, isAllDigital, t])
 
   const initiatePaymentIntent = useCallback(
     async (

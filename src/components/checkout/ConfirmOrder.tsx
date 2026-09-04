@@ -4,14 +4,26 @@ import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { gtmPurchase } from '@/lib/gtm'
 import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
-import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
+import { useCart, useEcommerce, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
 export const ConfirmOrder: React.FC = () => {
   const { user } = useAuth()
   const { confirmOrder } = usePayments()
-  const { cart, clearCart } = useCart()
+  const { cart } = useCart()
+  // Not clearCart() — that just empties the SAME cart's items via a network
+  // round trip (POST .../clear, then a re-fetch) and leaves cartID pointed
+  // at it; if either call hiccups (this app has seen real M0 connection
+  // flakiness), the stale, now-purchased cart silently stays live for the
+  // rest of the browser session and every later checkout attempt 409s with
+  // "This cart has already been paid for." clearSession() is synchronous,
+  // has no network dependency, and is guaranteed to detach us from this
+  // cart. It also resets the ecommerce provider's own internal user/
+  // addresses state, but nothing in this app's UI ever reads those — the
+  // real "am I logged in" state comes from the separate AuthProvider — so
+  // that reset is invisible here.
+  const { clearSession } = useEcommerce()
   const { locale } = useLocale()
 
   const searchParams = useSearchParams()
@@ -122,7 +134,7 @@ export const ConfirmOrder: React.FC = () => {
               })
             }
 
-            clearCart()
+            clearSession()
 
             const hasWorkshop = cart?.items?.some((item) => {
               if (typeof item.product !== 'object' || item.product === null) return false
@@ -170,7 +182,7 @@ export const ConfirmOrder: React.FC = () => {
           )
         })
     }
-  }, [searchParams, confirmOrder, router, clearCart, user, cart, locale, cartGracePeriodOver])
+  }, [searchParams, confirmOrder, router, clearSession, user, cart, locale, cartGracePeriodOver])
 
   if (confirmError) {
     return (
