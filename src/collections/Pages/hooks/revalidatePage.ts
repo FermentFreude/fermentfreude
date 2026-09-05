@@ -1,8 +1,32 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath as nextRevalidatePath, revalidateTag as nextRevalidateTag } from 'next/cache'
 
 import type { Page } from '../../../payload-types'
+
+// A script that updates Pages via the Local API (no live Next.js request —
+// e.g. a one-off migration or fix script) has no static-generation store, and
+// revalidatePath/revalidateTag throw an Invariant in that case. That would
+// otherwise abort the whole afterChange chain and, depending on timing, part
+// of the write itself — for a cache-invalidation side effect that's meaningless
+// outside a real request anyway. Swallow it there; real admin edits (always a
+// live request) are unaffected. Use the site's own /api/revalidate-pages or
+// /api/revalidate-global as the manual fallback after a script-driven write.
+function revalidatePath(path: string) {
+  try {
+    nextRevalidatePath(path)
+  } catch {
+    // no static generation store — not a live request, nothing to revalidate
+  }
+}
+
+function revalidateTag(tag: string) {
+  try {
+    nextRevalidateTag(tag)
+  } catch {
+    // no static generation store — not a live request, nothing to revalidate
+  }
+}
 
 export const revalidatePage: CollectionAfterChangeHook<Page> = ({
   doc,
