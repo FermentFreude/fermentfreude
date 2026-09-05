@@ -596,20 +596,22 @@ export default async function WorkshopDetailPage({ params }: Args) {
           />
         ) : null}
 
-        <FeldInsGlasHowTos
-          locale={localeKey}
-          eyebrow={detail?.howToEyebrow ?? copy.howToEyebrow}
-          title={detail?.howToTitle ?? copy.howToTitle}
-          description={detail?.howToDescription ?? copy.howToDescription}
-          articles={howToForFeld.map((post) => ({
-            id: String(post.id),
-            slug: post.slug,
-            title: post.title,
-            summary: post.summary,
-            readTime: post.readTime,
-            heroImage: post.heroImage,
-          }))}
-        />
+        {detail?.showHowTo !== false ? (
+          <FeldInsGlasHowTos
+            locale={localeKey}
+            eyebrow={detail?.howToEyebrow ?? copy.howToEyebrow}
+            title={detail?.howToTitle ?? copy.howToTitle}
+            description={detail?.howToDescription ?? copy.howToDescription}
+            articles={howToForFeld.map((post) => ({
+              id: String(post.id),
+              slug: post.slug,
+              title: post.title,
+              summary: post.summary,
+              readTime: post.readTime,
+              heroImage: post.heroImage,
+            }))}
+          />
+        ) : null}
 
         <FeldInsGlasFAQ
           cms={

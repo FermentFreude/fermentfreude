@@ -930,6 +930,15 @@ export const workshopDetailFields: Field[] = [
     },
     fields: [
       {
+        type: 'checkbox',
+        name: 'showHowTo',
+        label: 'Show this section',
+        defaultValue: true,
+        admin: {
+          description: 'Toggle off to hide the How-To Articles section on the website.',
+        },
+      },
+      {
         name: 'howToEyebrow',
         type: 'text',
         localized: true,
