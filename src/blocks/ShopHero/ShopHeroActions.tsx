@@ -57,7 +57,7 @@ export function ShopHeroActions({
       {product && !soldOut ? (
         <AddToCart
           product={product}
-          className="!m-0 h-auto w-fit rounded-full border-0 bg-ff-charcoal px-7 py-3 font-display text-base font-bold text-ff-ivory shadow-none hover:bg-ff-charcoal-hover hover:text-ff-ivory"
+          className="m-0! h-auto w-fit rounded-full border-0 bg-ff-charcoal px-7 py-3 font-display text-base font-bold text-ff-ivory shadow-none hover:bg-ff-charcoal-hover hover:text-ff-ivory"
         >
           {addLabel}
         </AddToCart>

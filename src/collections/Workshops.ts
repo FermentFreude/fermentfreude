@@ -61,13 +61,12 @@ export const Workshops: CollectionConfig = {
       name: 'maxCapacityPerSlot',
       type: 'number',
       required: true,
-      defaultValue: 12,
+      defaultValue: 8,
       min: 1,
       max: 12,
       admin: {
-        readOnly: true,
         description:
-          'Maximum number of people per workshop session (locked at 12 for quality control)',
+          'Maximum number of people per workshop session. Keep this matched to your real room/class size — it controls how many spots show as available on the booking page.',
       },
     },
     {

@@ -4619,7 +4619,7 @@ export interface Workshop {
    */
   basePrice: number;
   /**
-   * Maximum number of people per workshop session (locked at 12 for quality control)
+   * Maximum number of people per workshop session. Keep this matched to your real room/class size — it controls how many spots show as available on the booking page.
    */
   maxCapacityPerSlot: number;
   /**
