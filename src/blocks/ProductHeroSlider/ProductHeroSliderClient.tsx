@@ -125,59 +125,55 @@ export function ProductHeroSliderClient({ slides }: Props) {
           </div>
         </div>
 
-        {/* Arrow controls */}
-        {slides.length > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={goPrev}
-              aria-label="Previous product"
-              className="absolute left-3 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-black/50 md:left-6 md:size-12"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="size-5" aria-hidden>
-                <path
-                  d="M15 6l-6 6 6 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={goNext}
-              aria-label="Next product"
-              className="absolute right-3 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-black/50 md:right-6 md:size-12"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="size-5" aria-hidden>
-                <path
-                  d="M9 6l6 6-6 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </>
-        )}
-
-        {/* Dots + progress */}
+        {/* Dots + arrows + progress — one control cluster, out of the way of the photo/copy */}
         {slides.length > 1 && (
           <div className="absolute bottom-5 left-0 right-0 z-20 flex flex-col items-center gap-2 md:bottom-7">
-            <div className="flex items-center gap-2">
-              {slides.map((s, i) => (
-                <button
-                  key={s.product.id}
-                  onClick={() => goToSlide(i)}
-                  aria-label={`Go to ${s.title}`}
-                  className={cn(
-                    'rounded-full transition-all duration-300',
-                    i === activeIndex ? 'w-2.5 h-2.5 bg-white' : 'w-2 h-2 bg-white/40 hover:bg-white/60',
-                  )}
-                />
-              ))}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={goPrev}
+                aria-label="Previous product"
+                className="flex size-6 items-center justify-center text-white/70 transition-colors hover:text-white"
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="size-4" aria-hidden>
+                  <path
+                    d="M15 6l-6 6 6 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              <div className="flex items-center gap-2">
+                {slides.map((s, i) => (
+                  <button
+                    key={s.product.id}
+                    onClick={() => goToSlide(i)}
+                    aria-label={`Go to ${s.title}`}
+                    className={cn(
+                      'rounded-full transition-all duration-300',
+                      i === activeIndex ? 'w-2.5 h-2.5 bg-white' : 'w-2 h-2 bg-white/40 hover:bg-white/60',
+                    )}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={goNext}
+                aria-label="Next product"
+                className="flex size-6 items-center justify-center text-white/70 transition-colors hover:text-white"
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="size-4" aria-hidden>
+                  <path
+                    d="M9 6l6 6-6 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
             </div>
             <div className="h-0.5 w-16 overflow-hidden rounded-full bg-white/20 sm:w-20">
               <div
