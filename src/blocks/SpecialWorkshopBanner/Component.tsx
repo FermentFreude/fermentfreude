@@ -55,6 +55,10 @@ export const SpecialWorkshopBannerBlock: React.FC<Props> = async (props) => {
   const imageSrc = resolvedImage?.url?.trim()
   const imageAlt = resolvedImage?.alt?.trim() || title
 
+  const partnerLogo = isMedia(props.partnerLogo) ? props.partnerLogo : null
+  const partnerLogoSrc = partnerLogo?.url?.trim()
+  const partnerLogoAlt = partnerLogo?.alt?.trim() || 'Partner logo'
+
   return (
     <section className="special-workshop-banner relative w-full overflow-hidden bg-ff-near-black">
       <div className="relative min-h-[60vh] md:min-h-[70vh]">
@@ -102,9 +106,19 @@ export const SpecialWorkshopBannerBlock: React.FC<Props> = async (props) => {
                 {title}
               </h2>
               {subtitle && (
-                <p className="shop-hero-copy mb-8 max-w-md text-body-lg text-white/90 leading-relaxed">
+                <p className="shop-hero-copy mb-4 max-w-md text-body-lg text-white/90 leading-relaxed">
                   {subtitle}
                 </p>
+              )}
+              {partnerLogoSrc && (
+                <Image
+                  src={partnerLogoSrc}
+                  alt={partnerLogoAlt}
+                  width={160}
+                  height={104}
+                  className="mb-4 h-12 w-auto object-contain md:h-14"
+                  unoptimized={partnerLogoSrc.startsWith('http')}
+                />
               )}
 
               <div className="flex flex-wrap items-center gap-4">
