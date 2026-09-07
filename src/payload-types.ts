@@ -3369,6 +3369,10 @@ export interface SpecialWorkshopBannerBlock {
    * Optional image. If empty, a garden-toned placeholder is used.
    */
   image?: (string | null) | Media;
+  /**
+   * Optional partner logo shown on the banner (e.g. Unser Bauerngarten) instead of naming the partner in the subtitle text. Use a light/white logo with a transparent background.
+   */
+  partnerLogo?: (string | null) | Media;
   id?: string | null;
   blockName?: string | null;
   blockType: 'specialWorkshopBanner';
@@ -6958,6 +6962,7 @@ export interface SpecialWorkshopBannerBlockSelect<T extends boolean = true> {
   ctaLabel?: T;
   ctaLink?: T;
   image?: T;
+  partnerLogo?: T;
   id?: T;
   blockName?: T;
 }
