@@ -82,7 +82,7 @@ export function ProductHeroSliderClient({ slides }: Props) {
 
         {/* Badge — top right */}
         {slide.badgeLabel && (
-          <div className="absolute top-[calc(var(--header-height,5rem)+1rem)] right-[var(--space-container-x)] z-10">
+          <div className="absolute top-[calc(var(--header-height,5rem)+1rem)] right-(--space-container-x) z-10">
             <div
               className="flex items-center gap-3 rounded-2xl border border-ff-gold/45 bg-ff-near-black/75 py-3 pl-4 pr-4 shadow-[0_10px_28px_rgba(0,0,0,0.35)] backdrop-blur-md"
               aria-label={slide.badgeLabel}

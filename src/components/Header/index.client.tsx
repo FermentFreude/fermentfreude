@@ -7,7 +7,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
-import type { Header } from 'src/payload-types'
+import type { Header } from '@/payload-types'
 import { AnnouncementBar } from './AnnouncementBar'
 import { MobileMenu } from './MobileMenu'
 
@@ -207,7 +207,7 @@ export function HeaderClient({ header, locale, navWorkshops = [] }: Props) {
               : 'nav-glass border-black/6 dark:border-white/8',
           )}
         >
-          <div className="container container-padding grid grid-cols-[1fr_auto] lg:grid-cols-[auto_1fr_auto] items-center gap-4 h-14 md:h-[3.75rem]">
+          <div className="container container-padding grid grid-cols-[1fr_auto] lg:grid-cols-[auto_1fr_auto] items-center gap-4 h-14 md:h-15">
             {/* Logo */}
             <Link
               href="/"
@@ -219,7 +219,7 @@ export function HeaderClient({ header, locale, navWorkshops = [] }: Props) {
                 alt="Fermentfreude"
                 width={200}
                 height={28}
-                className="h-[15px] md:h-[17px] w-auto dark:invert"
+                className="h-3.75 md:h-4.25 w-auto dark:invert"
                 style={{ width: 'auto' }}
                 priority
               />
