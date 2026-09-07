@@ -97,7 +97,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       (sum, b) => sum + (Number((b as unknown as { guestCount?: number }).guestCount) || 1),
       0,
     )
-    const capacity = totalBooked + (appt.availableSpots ?? 0)
+    const capacity = Number(workshopAny?.maxCapacityPerSlot ?? 12)
 
     appointments.push({
       id: String(appt.id),

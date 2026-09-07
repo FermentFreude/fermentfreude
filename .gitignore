@@ -65,3 +65,6 @@ studio-softspace/
 # Local download / preview scratch
 tmp/
 
+# Customer PII from one-off data imports (Wix export etc.) — never commit
+src/scripts/data/wix-bookings/
+

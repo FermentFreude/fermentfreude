@@ -530,7 +530,7 @@ export function ShopStyleProductDetail({
                       <AddToCart
                         product={product}
                         quantity={quantity}
-                        className="!m-0 inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full border border-ff-near-black bg-ff-near-black font-display text-body-sm font-medium tracking-wide text-white transition-all hover:bg-ff-charcoal-hover hover:shadow-md active:scale-[0.98]"
+                        className="m-0! inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full border border-ff-near-black bg-ff-near-black font-display text-body-sm font-medium tracking-wide text-white transition-all hover:bg-ff-charcoal-hover hover:shadow-md active:scale-[0.98]"
                       >
                         <ShoppingBag className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
                         {copy.addToCart}
