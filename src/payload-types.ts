@@ -992,6 +992,7 @@ export interface Page {
         | SpecialWorkshopBannerBlock
         | OnlineCourseSliderBlock
         | ProductSliderBlock
+        | ProductHeroSliderBlock
         | FeaturedProductCardsBlock
         | ShopAutomatenBlock
         | ShopHeroBlock
@@ -3450,6 +3451,47 @@ export interface ProductSliderBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'productSlider';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductHeroSliderBlock".
+ */
+export interface ProductHeroSliderBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * One slide per product. The slider auto-rotates through these in order.
+   */
+  slides?:
+    | {
+        /**
+         * Title, price, description and sold-out status come from this product.
+         */
+        product: string | Product;
+        /**
+         * Full-bleed photo behind this slide. Leave empty to show a plain placeholder.
+         */
+        image?: (string | null) | Media;
+        /**
+         * Optional small badge over the image (e.g. "Signature"). Leave empty to hide.
+         */
+        badgeLabel?: string | null;
+        /**
+         * Overrides the default "Order now" label.
+         */
+        ctaLabel?: string | null;
+        /**
+         * Leave empty to link to the product page.
+         */
+        ctaLink?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productHeroSlider';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5983,6 +6025,7 @@ export interface PagesSelect<T extends boolean = true> {
         specialWorkshopBanner?: T | SpecialWorkshopBannerBlockSelect<T>;
         onlineCourseSlider?: T | OnlineCourseSliderBlockSelect<T>;
         productSlider?: T | ProductSliderBlockSelect<T>;
+        productHeroSlider?: T | ProductHeroSliderBlockSelect<T>;
         featuredProductCards?: T | FeaturedProductCardsBlockSelect<T>;
         shopAutomaten?: T | ShopAutomatenBlockSelect<T>;
         shopHero?: T | ShopHeroBlockSelect<T>;
@@ -6946,6 +6989,25 @@ export interface ProductSliderBlockSelect<T extends boolean = true> {
   buttonLabel?: T;
   buttonLink?: T;
   products?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductHeroSliderBlock_select".
+ */
+export interface ProductHeroSliderBlockSelect<T extends boolean = true> {
+  visible?: T;
+  slides?:
+    | T
+    | {
+        product?: T;
+        image?: T;
+        badgeLabel?: T;
+        ctaLabel?: T;
+        ctaLink?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
