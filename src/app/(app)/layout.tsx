@@ -59,7 +59,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </noscript>
         )}
 
-        <Providers>
+        <Providers initialLocale={locale}>
           <div id="site-splash" style={{ display: 'contents' }}>
             <SplashScreen />
           </div>
