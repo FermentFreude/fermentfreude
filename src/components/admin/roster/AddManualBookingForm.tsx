@@ -51,10 +51,6 @@ export function AddManualBookingForm({
       setError('Bitte Vorname angeben.')
       return
     }
-    if (!notes.trim()) {
-      setError('Bitte einen Grund angeben (z. B. alter Gutschein, Sonderabsprache).')
-      return
-    }
     if (!Number.isInteger(guestCount) || guestCount < 1) {
       setError('Anzahl der Plätze muss mindestens 1 sein.')
       return
@@ -73,7 +69,7 @@ export function AddManualBookingForm({
           email: email.trim() || undefined,
           phone: phone.trim() || undefined,
           guestCount,
-          notes: notes.trim(),
+          notes: notes.trim() || undefined,
         })
         onDone()
       } catch (err) {
@@ -151,9 +147,9 @@ export function AddManualBookingForm({
       </div>
 
       <div style={{ marginBottom: '16px' }}>
-        <label style={labelStyle}>Grund *</label>
+        <label style={labelStyle}>Notizen (optional)</label>
         <textarea
-          placeholder="z. B. altes Wix-Gutschein-Code XY, Sonderabsprache mit David"
+          placeholder="Ernährungshinweise/Allergien, Grund für manuelle Buchung (alter Gutschein, Sonderabsprache), o. Ä."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={2}
