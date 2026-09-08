@@ -25,6 +25,16 @@ function fmtBookingDate(iso: string): string {
   })
 }
 
+// Extra guests on a booking rarely have their own name/order reference — pull
+// whatever order number the buyer's card has (either the real orderId, or the
+// "#..." embedded in an import note like "[Wix Import — Order #10301]") so an
+// unnamed guest can still be traced back to the order they belong to.
+function extractOrderRef(notes: string, orderId: string): string {
+  if (orderId) return orderId
+  const match = notes.match(/Order #([\w-]+)/)
+  return match ? match[1] : ''
+}
+
 export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
   const badge = statusBadgeLabel(appointment.totalBooked, appointment.capacity)
   const wc = workshopColor(appointment.workshopTitle)
@@ -98,20 +108,25 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
             notes: string
             createdAt: string
             isBuyer: boolean
+            guestOfName: string
+            orderRef: string
           }
           const cards: SeatCard[] = []
           let seatCounter = 0
 
           for (const booking of bookings) {
             const buyerName = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || booking.email || '—'
+            const orderRef = extractOrderRef(booking.notes, booking.orderId)
             const count = Math.max(booking.guestCount, 1)
 
             for (let si = 0; si < count; si++) {
               seatCounter++
               const seat = booking.seats[si]
               const isBuyer = si === 0
-              // Seat 0 = buyer (recipientName is empty when buyer attends themselves)
-              const seatName = seat?.recipientName || (isBuyer ? buyerName : `Gast ${si + 1}`)
+              // Seat 0 = buyer (recipientName is empty when buyer attends themselves).
+              // An unnamed extra guest is shown as "Gast von {buyer}" — never a bare
+              // "Gast N" — so it's always traceable back to who booked them in.
+              const seatName = seat?.recipientName || (isBuyer ? buyerName : `Gast von ${buyerName}`)
               const seatNotes = seat?.giftNote || (isBuyer ? booking.notes : '')
 
               cards.push({
@@ -123,6 +138,8 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
                 notes: seatNotes,
                 createdAt: booking.createdAt,
                 isBuyer,
+                guestOfName: !isBuyer && !seat?.recipientName ? buyerName : '',
+                orderRef: !isBuyer ? orderRef : '',
               })
             }
           }
@@ -172,6 +189,16 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, flexShrink: 0 }}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17v-.08z"/></svg>
                       <span style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.75 }}>{card.phone}</span>
+                    </div>
+                  )}
+
+                  {card.guestOfName && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, flexShrink: 0 }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                      <span style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.75 }}>
+                        Begleitung von {card.guestOfName}
+                        {card.orderRef && ` · Bestellung #${card.orderRef}`}
+                      </span>
                     </div>
                   )}
 
