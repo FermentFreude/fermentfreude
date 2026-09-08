@@ -5,6 +5,7 @@ import React, { useState } from 'react'
 import { updateQuoteStatus } from './actions'
 import { CreateQuoteForm } from './CreateQuoteForm'
 import type { QuoteRow } from './types'
+import { BRAND } from './rosterTheme'
 
 interface Props {
   quotes: QuoteRow[]
@@ -47,7 +48,7 @@ export function QuotesView({ quotes, onRefresh }: Props) {
           style={{
             display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
             borderRadius: '8px', border: 'none', cursor: 'pointer',
-            background: '#111827', color: '#fff', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap',
+            background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
           }}
         >
           <span style={{ fontSize: '16px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>

@@ -3,6 +3,7 @@
 import React from 'react'
 
 import type { RosterData } from './types'
+import { BRAND, PageHeader, StatCard, fillLevel, workshopColor } from './rosterTheme'
 
 type Section = 'dashboard' | 'workshops' | 'detail' | 'participants' | 'pickups'
 
@@ -12,99 +13,20 @@ interface Props {
   onNavigate: (section: Section) => void
 }
 
-const WORKSHOP_COLORS: Record<string, { accent: string; bg: string; icon: string }> = {
-  kombucha: { accent: '#0d9488', bg: '#ccfbf1', icon: '🫧' },
-  tempeh: { accent: '#b45309', bg: '#fef3c7', icon: '🫘' },
-  lakto: { accent: '#15803d', bg: '#dcfce7', icon: '🥬' },
-  'vom feld': { accent: '#c2410c', bg: '#ffedd5', icon: '🌾' },
-}
-
-function workshopColor(title: string) {
-  const key = title.toLowerCase()
-  const match = Object.keys(WORKSHOP_COLORS).find((k) => key.includes(k))
-  return match ? WORKSHOP_COLORS[match] : { accent: '#6366f1', bg: '#e0e7ff', icon: '🍽️' }
-}
-
-function fillLevel(booked: number, capacity: number) {
-  if (capacity <= 0) return { pct: 0, accent: '#94a3b8', bg: '#f1f5f9', label: '#475569' }
-  const pct = Math.min(100, Math.round((booked / capacity) * 100))
-  if (booked > capacity) return { pct: 100, accent: '#d97706', bg: '#fef3c7', label: '#92400e' } // overbooked
-  if (booked === capacity) return { pct: 100, accent: '#dc2626', bg: '#fee2e2', label: '#991b1b' } // full
-  if (pct >= 70) return { pct, accent: '#ea580c', bg: '#ffedd5', label: '#9a3412' } // filling up
-  if (pct > 0) return { pct, accent: '#16a34a', bg: '#dcfce7', label: '#166534' } // open, has bookings
-  return { pct, accent: '#94a3b8', bg: '#f1f5f9', label: '#475569' } // empty
-}
-
-function StatCard({
-  label,
-  value,
-  icon,
-  accent,
-  bg,
-}: {
-  label: string
-  value: string | number
-  icon: React.ReactNode
-  accent: string
-  bg: string
-}) {
-  return (
-    <div
-      style={{
-        background: 'var(--theme-elevation-0)',
-        borderRadius: '14px',
-        padding: '20px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '16px',
-        border: '1px solid var(--theme-elevation-100)',
-        borderTop: `3px solid ${accent}`,
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-      }}
-    >
-      <div>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--theme-text)', opacity: 0.6, fontWeight: 500 }}>{label}</p>
-        <p style={{ margin: '4px 0 0', fontSize: '28px', fontWeight: 700, color: 'var(--theme-text)' }}>{value}</p>
-      </div>
-      <div
-        style={{
-          width: '44px',
-          height: '44px',
-          borderRadius: '12px',
-          background: bg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
-        {icon}
-      </div>
-    </div>
-  )
-}
-
 export function DashboardView({ data, onSelectWorkshop, onNavigate }: Props) {
   const { stats, appointments } = data
   const upcoming = appointments.filter((a) => !a.isPast).slice(0, 8)
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px' }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>Dashboard</h1>
-        <p style={{ margin: '6px 0 0', fontSize: '14px', color: 'var(--theme-text)', opacity: 0.55 }}>
-          Willkommen zurück! Hier ist deine Übersicht.
-        </p>
-      </div>
+      <PageHeader title="Dashboard" subtitle="Willkommen zurück! Hier ist deine Übersicht." />
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
         <StatCard
           label="Kommende Workshops"
           value={stats.upcomingWorkshops}
-          accent="#4f46e5"
-          bg="#e0e7ff"
+          accentKey="indigo"
           icon={
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -117,8 +39,7 @@ export function DashboardView({ data, onSelectWorkshop, onNavigate }: Props) {
         <StatCard
           label="Teilnehmer Gesamt"
           value={stats.totalParticipants}
-          accent="#16a34a"
-          bg="#dcfce7"
+          accentKey="green"
           icon={
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -131,8 +52,7 @@ export function DashboardView({ data, onSelectWorkshop, onNavigate }: Props) {
         <StatCard
           label="Offene Abholungen"
           value={stats.openPickups}
-          accent="#ea580c"
-          bg="#ffedd5"
+          accentKey="orange"
           icon={
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -143,10 +63,9 @@ export function DashboardView({ data, onSelectWorkshop, onNavigate }: Props) {
         <StatCard
           label="Umsatz (Workshops)"
           value={`€ ${stats.workshopRevenue.toLocaleString('de-DE')}`}
-          accent="#c026d3"
-          bg="#fae8ff"
+          accentKey="gold"
           icon={
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c026d3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={BRAND.goldDark} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
               <polyline points="16 7 22 7 22 13" />
             </svg>
@@ -223,7 +142,7 @@ export function DashboardView({ data, onSelectWorkshop, onNavigate }: Props) {
                     fontSize: '12px',
                     fontWeight: 700,
                     background: fill.bg,
-                    color: fill.label,
+                    color: fill.color,
                     whiteSpace: 'nowrap',
                     flexShrink: 0,
                   }}
@@ -246,8 +165,8 @@ export function DashboardView({ data, onSelectWorkshop, onNavigate }: Props) {
               background: 'transparent',
               cursor: 'pointer',
               fontSize: '13px',
-              fontWeight: 600,
-              color: '#4f46e5',
+              fontWeight: 700,
+              color: BRAND.goldDark,
               textAlign: 'center',
             }}
           >

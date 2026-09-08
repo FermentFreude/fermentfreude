@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react'
 
 import { createVoucher, deleteVoucher } from './actions'
 import type { VoucherRow } from './types'
+import { BRAND, PageHeader, StatCard } from './rosterTheme'
 
 interface Props {
   vouchers: VoucherRow[]
@@ -173,25 +174,23 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
         </div>
       )}
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', gap: '16px', flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>Gutscheine</h1>
-          <p style={{ margin: '6px 0 0', fontSize: '14px', color: 'var(--theme-text)', opacity: 0.55 }}>
-            Gutscheine erstellen, drucken und verwalten
-          </p>
-        </div>
-        <button
-          onClick={() => { setShowForm(!showForm); setLastCreated(null) }}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px',
-            borderRadius: '8px', border: 'none', cursor: 'pointer',
-            background: '#111827', color: '#fff', fontSize: '14px', fontWeight: 600,
-          }}
-        >
-          <span style={{ fontSize: '18px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>
-          {showForm ? 'Abbrechen' : 'Neuen Gutschein erstellen'}
-        </button>
-      </div>
+      <PageHeader
+        title="Gutscheine"
+        subtitle="Gutscheine erstellen, drucken und verwalten"
+        action={
+          <button
+            onClick={() => { setShowForm(!showForm); setLastCreated(null) }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px',
+              borderRadius: '8px', border: 'none', cursor: 'pointer',
+              background: BRAND.gold, color: BRAND.nearBlack, fontSize: '14px', fontWeight: 700,
+            }}
+          >
+            <span style={{ fontSize: '18px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>
+            {showForm ? 'Abbrechen' : 'Neuen Gutschein erstellen'}
+          </button>
+        }
+      />
 
       {/* Success banner */}
       {lastCreated && (
@@ -330,7 +329,7 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
             disabled={isPending}
             style={{
               padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-              background: '#111827', color: '#fff', fontSize: '14px', fontWeight: 600,
+              background: BRAND.gold, color: BRAND.nearBlack, fontSize: '14px', fontWeight: 700,
               opacity: isPending ? 0.5 : 1,
             }}
           >
@@ -341,27 +340,10 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '28px' }}>
-        {[
-          { label: 'Gesamt Gutscheine', value: vouchers.length },
-          { label: 'Aktiv', value: active, accent: 'green' },
-          { label: 'Eingelöst', value: redeemed, accent: 'purple' },
-          { label: 'Gesamtwert verkauft', value: `€${totalValue}` },
-        ].map(({ label, value, accent }) => (
-          <div key={label} style={{
-            background: 'var(--theme-elevation-50)', border: '1px solid var(--theme-elevation-100)',
-            borderRadius: '10px', padding: '16px 18px',
-          }}>
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '8px', marginBottom: '10px',
-              background: accent === 'green' ? '#dcfce7' : accent === 'purple' ? '#ede9fe' : 'var(--theme-elevation-100)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px',
-            }}>
-              {accent === 'green' ? '✓' : accent === 'purple' ? '★' : '🎟'}
-            </div>
-            <p style={{ margin: '0 0 2px', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.55 }}>{label}</p>
-            <p style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)' }}>{value}</p>
-          </div>
-        ))}
+        <StatCard label="Gesamt Gutscheine" value={vouchers.length} accentKey="gold" icon={<span style={{ fontSize: '16px' }}>🎟</span>} />
+        <StatCard label="Aktiv" value={active} accentKey="green" icon={<span style={{ fontSize: '16px' }}>✓</span>} />
+        <StatCard label="Eingelöst" value={redeemed} accentKey="purple" icon={<span style={{ fontSize: '16px' }}>★</span>} />
+        <StatCard label="Gesamtwert verkauft" value={`€${totalValue}`} accentKey="blue" icon={<span style={{ fontSize: '14px', fontWeight: 700 }}>€</span>} />
       </div>
 
       {/* Filter + search */}

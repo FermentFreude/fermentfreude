@@ -5,6 +5,7 @@ import React, { useState, useTransition } from 'react'
 import { createCancellationInvoice } from './actions'
 import { CreateManualOrderForm } from './CreateManualOrderForm'
 import type { OrderRow } from './types'
+import { BRAND } from './rosterTheme'
 
 interface Props {
   orders: OrderRow[]
@@ -137,7 +138,7 @@ export function OrdersView({ orders, onRefresh }: Props) {
           style={{
             display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
             borderRadius: '8px', border: 'none', cursor: 'pointer',
-            background: '#111827', color: '#fff', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap',
+            background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
           }}
         >
           <span style={{ fontSize: '16px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>
@@ -169,7 +170,7 @@ export function OrdersView({ orders, onRefresh }: Props) {
                 padding: '10px 16px', border: 'none', background: 'transparent', cursor: 'pointer',
                 fontSize: '13px', fontWeight: tab === t ? 600 : 400,
                 color: 'var(--theme-text)', opacity: tab === t ? 1 : 0.55,
-                borderBottom: tab === t ? '2px solid var(--theme-text)' : '2px solid transparent',
+                borderBottom: tab === t ? `2px solid ${BRAND.gold}` : '2px solid transparent',
               }}
             >
               {TAB_LABELS[t]} ({count})
