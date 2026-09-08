@@ -229,7 +229,7 @@ export async function createManualWorkshopBooking(params: {
   email?: string
   phone?: string
   guestCount: number
-  notes: string
+  notes?: string
 }): Promise<{ id: string }> {
   const payload = await getPayload({ config: configPromise })
   await requireAdmin(payload)
@@ -239,9 +239,6 @@ export async function createManualWorkshopBooking(params: {
   }
   if (!params.firstName.trim()) {
     throw new Error('Bitte Vorname angeben.')
-  }
-  if (!params.notes.trim()) {
-    throw new Error('Bitte einen Grund angeben (z. B. alter Gutschein, Sonderabsprache).')
   }
   if (!Number.isInteger(params.guestCount) || params.guestCount < 1 || params.guestCount > 12) {
     throw new Error('Anzahl der Plätze muss zwischen 1 und 12 liegen.')
@@ -284,7 +281,7 @@ export async function createManualWorkshopBooking(params: {
         guestCount: params.guestCount,
         pricePerPerson: workshop.basePrice ?? 0,
         totalPrice: (workshop.basePrice ?? 0) * params.guestCount,
-        notes: params.notes.trim(),
+        ...(params.notes?.trim() ? { notes: params.notes.trim() } : {}),
         seats: Array.from({ length: params.guestCount }, () => ({ seatStatus: 'active' as const })),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
