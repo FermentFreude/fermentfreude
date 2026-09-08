@@ -3,6 +3,8 @@
 import React, { useState } from 'react'
 
 import { AddManualBookingForm } from './AddManualBookingForm'
+import { MoveBookingControl } from './MoveBookingControl'
+import { SendAlternateDateEmailBar } from './SendAlternateDateEmailBar'
 import type { AppointmentRow, BookingRow } from './types'
 import { BRAND, STATUS, workshopColor } from './rosterTheme'
 
@@ -41,7 +43,14 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
   const badge = statusBadgeLabel(appointment.totalBooked, appointment.capacity)
   const wc = workshopColor(appointment.workshopTitle)
   const [showForm, setShowForm] = useState(false)
+  const [selectedBookingIds, setSelectedBookingIds] = useState<string[]>([])
   const remainingSpots = Math.max(appointment.capacity - appointment.totalBooked, 0)
+
+  const toggleSelected = (bookingId: string) => {
+    setSelectedBookingIds((prev) =>
+      prev.includes(bookingId) ? prev.filter((id) => id !== bookingId) : [...prev, bookingId],
+    )
+  }
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px' }}>
@@ -123,12 +132,20 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
           />
         )}
 
+        <SendAlternateDateEmailBar
+          selectedBookingIds={selectedBookingIds}
+          currentAppointmentId={appointment.id}
+          onSent={() => setSelectedBookingIds([])}
+        />
+
         {bookings.length === 0 ? (
           <p style={{ color: 'var(--theme-text)', opacity: 0.5, margin: 0 }}>Noch keine bestätigten Buchungen.</p>
         ) : (() => {
           // Expand each booking into one card per seat so dietary notes are shown individually.
           type SeatCard = {
             key: string
+            bookingId: string
+            guestCount: number
             seatNumber: number
             name: string
             email: string
@@ -159,6 +176,8 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
 
               cards.push({
                 key: `${booking.id}-${si}`,
+                bookingId: booking.id,
+                guestCount: booking.guestCount,
                 seatNumber: seatCounter,
                 name: seatName,
                 email: isBuyer ? booking.email : '',
@@ -184,6 +203,15 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {card.isBuyer && (
+                        <input
+                          type="checkbox"
+                          checked={selectedBookingIds.includes(card.bookingId)}
+                          onChange={() => toggleSelected(card.bookingId)}
+                          aria-label="Für E-Mail-Versand auswählen"
+                          style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+                        />
+                      )}
                       <span style={{
                         width: '24px', height: '24px', borderRadius: '50%', background: wc.bg,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -244,6 +272,15 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                   <p style={{ margin: '10px 0 0', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.4 }}>
                     {fmtBookingDate(card.createdAt)}
                   </p>
+
+                  {card.isBuyer && (
+                    <MoveBookingControl
+                      bookingId={card.bookingId}
+                      guestCount={card.guestCount}
+                      currentAppointmentId={appointment.id}
+                      onDone={onRefresh}
+                    />
+                  )}
                 </div>
               ))}
             </div>
