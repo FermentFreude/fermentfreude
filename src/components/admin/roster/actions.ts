@@ -4,6 +4,9 @@ import { headers as getHeaders } from 'next/headers.js'
 import configPromise from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 
+import { releaseSpotsAtomic, reserveSpotsAtomic } from '@/lib/atomicSpots'
+import { fmtDate, fmtTime } from './fetchRosterData'
+
 /**
  * Server Actions are network-callable independent of which page rendered
  * them — the Roster admin view being gated doesn't protect the action
@@ -206,6 +209,94 @@ export async function createManualOrder(params: {
 
   const order = created as unknown as { id: string; invoiceNumber?: string | null }
   return { id: String(order.id), invoiceNumber: order.invoiceNumber ?? null }
+}
+
+/**
+ * Manually add a workshop seat from the roster dashboard — for customers
+ * with an old voucher or a special agreement, bypassing Stripe checkout
+ * entirely (mirrors what David does in Wix today by adding a placeholder
+ * booking). Must do BOTH of the following to behave exactly like a real
+ * booking: reserve the spot atomically (the same guard the live checkout
+ * route uses, so the public booking flow can't oversell), AND create a
+ * `confirmed` workshop-bookings doc (so it shows up in this roster's own
+ * participant list/capacity count, which is derived independently from
+ * availableSpots — see fetchRosterData.ts).
+ */
+export async function createManualWorkshopBooking(params: {
+  appointmentId: string
+  firstName: string
+  lastName: string
+  email?: string
+  phone?: string
+  guestCount: number
+  notes: string
+}): Promise<{ id: string }> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  if (!params.appointmentId) {
+    throw new Error('Kein Termin ausgewählt.')
+  }
+  if (!params.firstName.trim()) {
+    throw new Error('Bitte Vorname angeben.')
+  }
+  if (!params.notes.trim()) {
+    throw new Error('Bitte einen Grund angeben (z. B. alter Gutschein, Sonderabsprache).')
+  }
+  if (!Number.isInteger(params.guestCount) || params.guestCount < 1 || params.guestCount > 12) {
+    throw new Error('Anzahl der Plätze muss zwischen 1 und 12 liegen.')
+  }
+
+  // Re-fetch server-side for integrity — the client's AppointmentRow has no
+  // workshopSlug/basePrice, so it can't supply everything a booking needs.
+  const appointment = await payload.findByID({
+    collection: 'workshop-appointments',
+    id: params.appointmentId,
+    depth: 1,
+    overrideAccess: true,
+  })
+  const workshop = appointment.workshop
+  if (typeof workshop !== 'object' || workshop === null) {
+    throw new Error('Workshop-Daten konnten nicht geladen werden.')
+  }
+
+  const reserveResult = await reserveSpotsAtomic(payload, params.appointmentId, params.guestCount)
+  if (!reserveResult.success) {
+    throw new Error(`Nur noch ${reserveResult.availableSpots ?? 0} Platz/Plätze verfügbar.`)
+  }
+
+  const maxCapacity = Number(workshop.maxCapacityPerSlot ?? 12)
+  try {
+    const dateTimeStr = String(appointment.dateTime ?? '')
+    const created = await payload.create({
+      collection: 'workshop-bookings',
+      data: {
+        status: 'confirmed',
+        appointmentId: params.appointmentId,
+        workshopTitle: workshop.title,
+        workshopSlug: workshop.slug,
+        date: dateTimeStr ? fmtDate(dateTimeStr) : '',
+        time: dateTimeStr ? `${fmtTime(dateTimeStr)} Uhr` : '',
+        firstName: params.firstName.trim(),
+        lastName: params.lastName?.trim() ?? '',
+        ...(params.email?.trim() ? { email: params.email.trim() } : {}),
+        ...(params.phone?.trim() ? { phone: params.phone.trim() } : {}),
+        guestCount: params.guestCount,
+        pricePerPerson: workshop.basePrice ?? 0,
+        totalPrice: (workshop.basePrice ?? 0) * params.guestCount,
+        notes: params.notes.trim(),
+        seats: Array.from({ length: params.guestCount }, () => ({ seatStatus: 'active' as const })),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+      overrideAccess: true,
+    })
+    return { id: String(created.id) }
+  } catch (err) {
+    // Booking create failed AFTER the atomic reserve succeeded — release the
+    // spot back so it isn't silently lost.
+    await releaseSpotsAtomic(payload, params.appointmentId, params.guestCount, maxCapacity)
+    throw err
+  }
 }
 
 export interface CreateQuoteLineItem {
