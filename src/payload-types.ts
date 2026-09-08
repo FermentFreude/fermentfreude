@@ -197,9 +197,6 @@ export interface Config {
     'product-detail-labels-global': ProductDetailLabelsGlobalSelect<false> | ProductDetailLabelsGlobalSelect<true>;
   };
   locale: 'de' | 'en';
-  widgets: {
-    collections: CollectionsWidget;
-  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -2618,6 +2615,9 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
+  /**
+   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
+   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -2637,6 +2637,9 @@ export interface Form {
   redirect?: {
     url: string;
   };
+  /**
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
+   */
   emails?:
     | {
         emailTo?: string | null;
@@ -2645,6 +2648,9 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
+        /**
+         * Enter the message that should be sent in this email.
+         */
         message?: {
           root: {
             type: string;
@@ -3542,6 +3548,14 @@ export interface FeaturedProductCardsBlock {
    * Button text on each card (e.g. "Jetzt bestellen" / "Order Now").
    */
   ctaLabel?: string | null;
+  /**
+   * e.g. "Ausverkauft" / "Sold out"
+   */
+  soldOutLabel?: string | null;
+  /**
+   * e.g. "Saisonal" / "Seasonal"
+   */
+  seasonalLabel?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'featuredProductCards';
@@ -3571,6 +3585,10 @@ export interface ShopAutomatenBlock {
    * Large editorial photo on desktop (Automat, product, Graz mood). Soft rounded corners on the front.
    */
   featuredImage?: (string | null) | Media;
+  /**
+   * Small line on the large photo (e.g. "Graz · 24/7").
+   */
+  featuredOverlayLabel?: string | null;
   /**
    * Add each Automat as a row (Graz now; more across Styria later). Order = display order (01, 02, …).
    */
@@ -3635,9 +3653,29 @@ export interface ShopAutomatenBlock {
    */
   tipImage?: (string | null) | Media;
   /**
+   * e.g. "Insider" / "Insider tip"
+   */
+  tipLabel?: string | null;
+  /**
    * e.g. "Wildmoser"
    */
   tipName?: string | null;
+  /**
+   * e.g. "Restaurant"
+   */
+  tipKindLabel?: string | null;
+  /**
+   * e.g. "Graz"
+   */
+  tipCity?: string | null;
+  /**
+   * e.g. "Grüne Gasse 17, 8020 Graz"
+   */
+  tipAddress?: string | null;
+  /**
+   * e.g. "Käferbohnen-Tempeh"
+   */
+  tipProducts?: string | null;
   /**
    * Subtle note under the cards (e.g. Wildmoser). Leave empty to hide. Only restaurants / extras — not Automaten.
    */
@@ -3664,19 +3702,40 @@ export interface ShopAutomatenBlock {
  */
 export interface ShopHeroBlock {
   /**
-   * Toggle off to hide this section on the page without deleting it.
+   * Toggle off to hide the whole shop hero without deleting it.
    */
   visible?: boolean | null;
   /**
-   * Hero product at the top of /shop. Title, price, description and sold-out come from this product. Packaging shots belong on the product detail page.
+   * Small badge on the top-right of the shop hero. Uncheck “Show on shop” to hide it. Text stays saved.
+   */
+  signatureBadge?: {
+    /**
+     * Uncheck to hide the badge on /shop. Check again to show it.
+     */
+    show?: boolean | null;
+    /**
+     * e.g. FermentFreude
+     */
+    brand?: string | null;
+    /**
+     * e.g. Signature
+     */
+    title?: string | null;
+    /**
+     * e.g. Handgemacht in Graz / Handmade in Graz (switch DE/EN at the top)
+     */
+    subtitle?: string | null;
+  };
+  /**
+   * Product shown on /shop (title, price, description, sold-out). Packaging shots belong on the product detail page.
    */
   heroProduct?: (string | null) | Product;
   /**
-   * Full-bleed plated photo behind the hero. Leave empty to use the default Käfer photo. Prefer a prepared/plated shot (not packaging).
+   * Full-bleed plated photo behind the hero. Leave empty to use the default Käfer photo.
    */
   heroImage?: (string | null) | Media;
   /**
-   * Legacy field — kept for older layouts. Default: #403c39.
+   * Unused by the current layout. Default: #403c39.
    */
   heroPanelColor?: string | null;
   /**
@@ -3696,11 +3755,11 @@ export interface ShopHeroBlock {
       }[]
     | null;
   /**
-   * Small line above the hero product (e.g. pickup shop intro). Leave empty to keep focus on the product.
+   * Small line above the hero product. Leave empty to keep focus on the product.
    */
   heroTitle?: string | null;
   /**
-   * Overrides product CTA (e.g. "Jetzt bestellen")
+   * e.g. "Jetzt bestellen" / "Order now"
    */
   ctaPrimaryLabel?: string | null;
   /**
@@ -3712,15 +3771,35 @@ export interface ShopHeroBlock {
    */
   bottomTagline?: string | null;
   /**
-   * e.g. "Abholung in Graz, jede Woche frisch."
+   * Shown under the price/buttons. e.g. "Abholung in Graz, jede Woche frisch."
    */
   bottomSubtitle?: string | null;
   /**
-   * Optional delivery note under the pickup lines.
+   * Optional extra line under the pickup text.
    */
   bottomDisclaimer?: string | null;
   /**
-   * Legacy jar slider — unused. Leave empty.
+   * e.g. "Ausverkauft" / "Sold out"
+   */
+  soldOutLabel?: string | null;
+  /**
+   * e.g. "Preis" / "Price"
+   */
+  priceLabel?: string | null;
+  /**
+   * e.g. "In den Warenkorb" / "Add to cart"
+   */
+  addToCartLabel?: string | null;
+  /**
+   * e.g. "Produktdetails" / "Product details"
+   */
+  detailsLabel?: string | null;
+  /**
+   * Button text if the hero product is sold out.
+   */
+  viewDetailsLabel?: string | null;
+  /**
+   * Old jar slider. Leave empty. Hidden from the live shop.
    */
   slides?:
     | {
@@ -3730,6 +3809,10 @@ export interface ShopHeroBlock {
         id?: string | null;
       }[]
     | null;
+  showSignatureBadge?: boolean | null;
+  signatureBrand?: string | null;
+  signatureLabel?: string | null;
+  signatureSubtitle?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'shopHero';
@@ -7034,6 +7117,8 @@ export interface FeaturedProductCardsBlockSelect<T extends boolean = true> {
         id?: T;
       };
   ctaLabel?: T;
+  soldOutLabel?: T;
+  seasonalLabel?: T;
   id?: T;
   blockName?: T;
 }
@@ -7047,6 +7132,7 @@ export interface ShopAutomatenBlockSelect<T extends boolean = true> {
   heading?: T;
   body?: T;
   featuredImage?: T;
+  featuredOverlayLabel?: T;
   locations?:
     | T
     | {
@@ -7068,7 +7154,12 @@ export interface ShopAutomatenBlockSelect<T extends boolean = true> {
   websiteLabel?: T;
   tipVisible?: T;
   tipImage?: T;
+  tipLabel?: T;
   tipName?: T;
+  tipKindLabel?: T;
+  tipCity?: T;
+  tipAddress?: T;
+  tipProducts?: T;
   tipText?: T;
   tipMapsUrl?: T;
   tipWebsiteUrl?: T;
@@ -7085,6 +7176,14 @@ export interface ShopAutomatenBlockSelect<T extends boolean = true> {
  */
 export interface ShopHeroBlockSelect<T extends boolean = true> {
   visible?: T;
+  signatureBadge?:
+    | T
+    | {
+        show?: T;
+        brand?: T;
+        title?: T;
+        subtitle?: T;
+      };
   heroProduct?: T;
   heroImage?: T;
   heroPanelColor?: T;
@@ -7101,6 +7200,11 @@ export interface ShopHeroBlockSelect<T extends boolean = true> {
   bottomTagline?: T;
   bottomSubtitle?: T;
   bottomDisclaimer?: T;
+  soldOutLabel?: T;
+  priceLabel?: T;
+  addToCartLabel?: T;
+  detailsLabel?: T;
+  viewDetailsLabel?: T;
   slides?:
     | T
     | {
@@ -7109,6 +7213,10 @@ export interface ShopHeroBlockSelect<T extends boolean = true> {
         detailUrl?: T;
         id?: T;
       };
+  showSignatureBadge?: T;
+  signatureBrand?: T;
+  signatureLabel?: T;
+  signatureSubtitle?: T;
   id?: T;
   blockName?: T;
 }
@@ -9401,16 +9509,6 @@ export interface ProductDetailLabelsGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_widget".
- */
-export interface CollectionsWidget {
-  data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

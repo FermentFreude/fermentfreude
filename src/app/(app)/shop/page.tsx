@@ -94,14 +94,16 @@ export default async function ShopPage() {
           />
         )}
         <ShopTrustRow locale={locale} items={trustItems} />
-        {featured.length > 0 && <RenderBlocks blocks={featured} slug="shop" />}
+        {featured.length > 0 && <RenderBlocks blocks={featured} slug="shop" locale={locale} />}
         <ShopAutomatenComponent
           {...(automatenBlock ?? {
             blockType: 'shopAutomaten' as const,
             visible: true,
           })}
         />
-        {afterFeatured.length > 0 && <RenderBlocks blocks={afterFeatured} slug="shop" />}
+        {afterFeatured.length > 0 && (
+          <RenderBlocks blocks={afterFeatured} slug="shop" locale={locale} />
+        )}
       </article>
     )
   }

@@ -29,11 +29,14 @@ type Props = {
   websiteLabel: string
   featuredImageUrl: string | null
   featuredImageAlt: string
+  featuredOverlayLabel: string
   locations: AutomatenEditorialLocation[]
   tipText: string | null
   tipMapsUrl: string | null
   tipWebsiteUrl: string | null
   tipLabel: string
+  tipKindLabel: string
+  tipCity: string
   tipName: string | null
   tipAddress: string | null
   tipProducts: string | null
@@ -133,11 +136,14 @@ export function AutomatenEditorial({
   websiteLabel,
   featuredImageUrl,
   featuredImageAlt,
+  featuredOverlayLabel,
   locations,
   tipText,
   tipMapsUrl,
   tipWebsiteUrl,
   tipLabel,
+  tipKindLabel,
+  tipCity,
   tipName,
   tipAddress,
   tipProducts,
@@ -184,7 +190,7 @@ export function AutomatenEditorial({
                 className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"
               />
               <p className="absolute bottom-5 left-5 right-5 z-10 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-white/90">
-                {eyebrow}
+                {featuredOverlayLabel}
               </p>
             </div>
           </div>
@@ -260,7 +266,7 @@ export function AutomatenEditorial({
               {showTip && (
                 <li className="relative pb-0 md:pb-0">
                   <p className="mb-3 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold">
-                    {tipLabel} · Restaurant
+                    {tipLabel} · {tipKindLabel}
                   </p>
                   <article
                     onMouseEnter={() => setActive(tipIndex)}
@@ -287,10 +293,10 @@ export function AutomatenEditorial({
                     <div className="flex flex-col p-5 md:p-6">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="inline-flex w-fit items-center rounded-full bg-[#ECE5DE] px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.12em] text-ff-charcoal">
-                          Restaurant
+                          {tipKindLabel}
                         </span>
                         <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold">
-                          Graz
+                          {tipCity}
                         </span>
                       </div>
                       <h3 className="mt-3 font-display text-lg font-bold leading-snug tracking-tight text-ff-near-black md:text-xl">

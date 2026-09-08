@@ -1,4 +1,5 @@
 import type { Category, Product, ShopProductListBlock } from '@/payload-types'
+import { cmsLocaleQuery } from '@/utilities/cmsLocale'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -25,7 +26,7 @@ export const ShopProductListComponent: React.FC<ShopProductListBlock> = async (p
         id: { in: selectedIds },
         _status: { equals: 'published' },
       },
-      locale,
+      ...cmsLocaleQuery(locale),
       depth: 2,
       limit: selectedIds.length,
       overrideAccess: true,
@@ -37,7 +38,7 @@ export const ShopProductListComponent: React.FC<ShopProductListBlock> = async (p
     const result = await payload.find({
       collection: 'products',
       where: { _status: { equals: 'published' } },
-      locale,
+      ...cmsLocaleQuery(locale),
       depth: 2,
       limit: 50,
       sort: 'title',
@@ -51,7 +52,7 @@ export const ShopProductListComponent: React.FC<ShopProductListBlock> = async (p
   // Fetch all categories for filter chips
   const categoriesResult = await payload.find({
     collection: 'categories',
-    locale,
+    ...cmsLocaleQuery(locale),
     limit: 50,
     sort: 'title',
     overrideAccess: true,
