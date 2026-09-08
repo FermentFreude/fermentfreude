@@ -123,6 +123,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
         notes?: string
         seats?: Array<{ recipientName?: string; giftNote?: string }>
         createdAt?: string
+        orderId?: string
       }
       const seats: SeatEntry[] = (bk.seats ?? []).map((s) => ({
         recipientName: s.recipientName?.trim() ?? '',
@@ -138,6 +139,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
         notes: bk.notes?.trim() ?? '',
         seats,
         createdAt: bk.createdAt ?? '',
+        orderId: bk.orderId?.trim() ?? '',
       } satisfies BookingRow
     })
   }

@@ -34,6 +34,7 @@ export type BookingRow = {
   notes: string
   seats: SeatEntry[]
   createdAt: string
+  orderId: string
 }
 
 export type ParticipantRow = {
