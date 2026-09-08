@@ -3,7 +3,7 @@
  * with ShopHero, ShopProductList, VoucherCta, WorkshopSlider, Testimonials, and SponsorsBar blocks.
  *
  * Strategy:
- *   1. Non-destructive: skip if shop page already exists (use --force to overwrite)
+ *   1. Non-destructive: if shop exists, only fill EMPTY new labels (never overwrite copy)
  *   2. Seed DE locale first → read back IDs → seed EN with same IDs
  *   3. Sequential writes only (MongoDB M0 = no transactions)
  *   4. Reuse existing Media from DB for workshop/voucher/sponsor images
@@ -34,6 +34,206 @@ interface BlockItem extends WithId {
   sponsors?: WithId[]
 }
 
+const HERO_CHROME_DE = {
+  soldOutLabel: 'Ausverkauft',
+  signatureBrand: 'FermentFreude',
+  signatureLabel: 'Signature',
+  signatureSubtitle: 'Handgemacht in Graz',
+  priceLabel: 'Preis',
+  addToCartLabel: 'In den Warenkorb',
+  detailsLabel: 'Produktdetails',
+  viewDetailsLabel: 'Details ansehen',
+}
+const HERO_CHROME_EN = {
+  soldOutLabel: 'Sold out',
+  signatureBrand: 'FermentFreude',
+  signatureLabel: 'Signature',
+  signatureSubtitle: 'Handmade in Graz',
+  priceLabel: 'Price',
+  addToCartLabel: 'Add to cart',
+  detailsLabel: 'Product details',
+  viewDetailsLabel: 'View details',
+}
+const FEATURED_CHROME_DE = { soldOutLabel: 'Ausverkauft', seasonalLabel: 'Saisonal' }
+const FEATURED_CHROME_EN = { soldOutLabel: 'Sold out', seasonalLabel: 'Seasonal' }
+const AUTOMATEN_CHROME_DE = {
+  featuredOverlayLabel: 'Graz · 24/7',
+  tipLabel: 'Insider',
+  tipKindLabel: 'Restaurant',
+  tipCity: 'Graz',
+  tipAddress: 'Grüne Gasse 17, 8020 Graz',
+  tipProducts: 'Käferbohnen-Tempeh',
+}
+const AUTOMATEN_CHROME_EN = {
+  featuredOverlayLabel: 'Graz · 24/7',
+  tipLabel: 'Insider tip',
+  tipKindLabel: 'Restaurant',
+  tipCity: 'Graz',
+  tipAddress: 'Grüne Gasse 17, 8020 Graz',
+  tipProducts: 'Käferbohnen Tempeh',
+}
+
+function fillEmptyStrings(
+  block: Record<string, unknown>,
+  defaults: Record<string, string>,
+): { next: Record<string, unknown>; changed: boolean } {
+  let changed = false
+  const next = { ...block }
+  for (const [key, value] of Object.entries(defaults)) {
+    const current = next[key]
+    if (typeof current === 'string' && current.trim()) continue
+    next[key] = value
+    changed = true
+  }
+  return { next, changed }
+}
+
+function asTrimmed(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+function fillRequiredLocationNames(
+  targetLayout: BlockItem[],
+  sourceLayout: BlockItem[],
+): { next: BlockItem[]; changed: boolean } {
+  const sourceAuto = sourceLayout.find((b) => b.blockType === 'shopAutomaten') as
+    | (BlockItem & { locations?: Record<string, unknown>[] })
+    | undefined
+  const sourceLocs = sourceAuto?.locations ?? []
+  let changed = false
+  const next = targetLayout.map((block) => {
+    if (block.blockType !== 'shopAutomaten') return block
+    const targetLocs = ((block as BlockItem & { locations?: Record<string, unknown>[] }).locations ??
+      []) as Record<string, unknown>[]
+    const source = targetLocs.length > 0 ? targetLocs : sourceLocs
+    const locations = source.map((loc, i) => {
+      const fromOther = sourceLocs[i] ?? {}
+      const name = asTrimmed(loc.name) || asTrimmed(fromOther.name)
+      const address = asTrimmed(loc.address) || asTrimmed(fromOther.address)
+      if (name !== asTrimmed(loc.name) || address !== asTrimmed(loc.address)) changed = true
+      return { ...fromOther, ...loc, name, address }
+    })
+    return { ...block, locations }
+  })
+  return { next, changed }
+}
+
+/**
+ * Fill NEW empty chrome fields only. Never overwrites existing DE/EN copy.
+ */
+async function fillEmptyShopChrome(
+  payload: Awaited<ReturnType<typeof getPayload>>,
+  pageId: string,
+) {
+  const deDoc = await payload.findByID({
+    collection: 'pages',
+    id: pageId,
+    locale: 'de',
+    fallbackLocale: false,
+    depth: 0,
+  })
+  const enDoc = await payload.findByID({
+    collection: 'pages',
+    id: pageId,
+    locale: 'en',
+    fallbackLocale: false,
+    depth: 0,
+  })
+
+  const apply = (
+    layout: BlockItem[],
+    hero: Record<string, string>,
+    featured: Record<string, string>,
+    automaten: Record<string, string>,
+  ) => {
+    let changed = false
+    const next = layout.map((block) => {
+      if (block.blockType === 'shopHero') {
+        const filled = fillEmptyStrings(block, hero)
+        const existing =
+          typeof filled.next.signatureBadge === 'object' && filled.next.signatureBadge !== null
+            ? (filled.next.signatureBadge as Record<string, unknown>)
+            : {}
+        const subtitleDefault = hero.signatureSubtitle || ''
+        const nextBadge = {
+          ...existing,
+          show: typeof existing.show === 'boolean' ? existing.show : true,
+          brand:
+            asTrimmed(existing.brand) ||
+            asTrimmed(filled.next.signatureBrand) ||
+            'FermentFreude',
+          title:
+            asTrimmed(existing.title) || asTrimmed(filled.next.signatureLabel) || 'Signature',
+          subtitle:
+            asTrimmed(existing.subtitle) ||
+            asTrimmed(filled.next.signatureSubtitle) ||
+            subtitleDefault,
+        }
+        const badgeChanged =
+          asTrimmed(existing.brand) !== nextBadge.brand ||
+          asTrimmed(existing.title) !== nextBadge.title ||
+          asTrimmed(existing.subtitle) !== nextBadge.subtitle ||
+          existing.show !== nextBadge.show
+        if (badgeChanged) {
+          filled.next.signatureBadge = nextBadge
+          filled.changed = true
+        }
+        if (typeof filled.next.showSignatureBadge !== 'boolean') {
+          filled.next.showSignatureBadge = true
+          filled.changed = true
+        }
+        if (filled.changed) changed = true
+        return filled.next
+      }
+      if (block.blockType === 'featuredProductCards') {
+        const filled = fillEmptyStrings(block, featured)
+        if (filled.changed) changed = true
+        return filled.next
+      }
+      if (block.blockType === 'shopAutomaten') {
+        const filled = fillEmptyStrings(block, automaten)
+        if (filled.changed) changed = true
+        return filled.next
+      }
+      return block
+    })
+    return { next, changed }
+  }
+
+  const deLayout = (deDoc.layout ?? []) as BlockItem[]
+  const enLayout = (enDoc.layout ?? []) as BlockItem[]
+
+  const deLocs = fillRequiredLocationNames(deLayout, enLayout)
+  const deFilled = apply(deLocs.next, HERO_CHROME_DE, FEATURED_CHROME_DE, AUTOMATEN_CHROME_DE)
+  if (deFilled.changed || deLocs.changed) {
+    await payload.update({
+      collection: 'pages',
+      id: pageId,
+      locale: 'de',
+      data: { layout: deFilled.next as never },
+      context: ctx,
+    })
+    payload.logger.info('  ✓ Filled empty DE shop chrome labels (existing copy untouched)')
+  }
+
+  const enLocs = fillRequiredLocationNames(enLayout, deLayout)
+  const enFilled = apply(enLocs.next, HERO_CHROME_EN, FEATURED_CHROME_EN, AUTOMATEN_CHROME_EN)
+  if (enFilled.changed || enLocs.changed) {
+    await payload.update({
+      collection: 'pages',
+      id: pageId,
+      locale: 'en',
+      data: { layout: enFilled.next as never },
+      context: ctx,
+    })
+    payload.logger.info('  ✓ Filled empty EN shop chrome labels (existing copy untouched)')
+  }
+
+  if (!deFilled.changed && !enFilled.changed && !deLocs.changed && !enLocs.changed) {
+    payload.logger.info('  ✓ Shop chrome labels already populated — nothing overwritten')
+  }
+}
+
 async function seedShopNew() {
   const payload = await getPayload({ config })
   const forceRecreate = process.argv.includes('--force')
@@ -50,8 +250,9 @@ async function seedShopNew() {
 
   if (hasContent && !forceRecreate) {
     payload.logger.info(
-      '\u2705 Shop page already has block content — skipping. Use --force to overwrite.',
+      '\u2705 Shop page already has block content — filling empty new labels only (no overwrite).',
     )
+    await fillEmptyShopChrome(payload, String(existingPage.id))
     return
   }
 
@@ -181,6 +382,14 @@ async function seedShopNew() {
     bottomTagline: 'Fermentierte Lebensmittel, mit Sorgfalt hergestellt.',
     bottomSubtitle: 'Abholung in Graz, jede Woche frisch.',
     bottomDisclaimer: 'Wir arbeiten an einem Lieferservice, f\u00fcr garantierte Frische.',
+    showSignatureBadge: true,
+    signatureBadge: {
+      show: true,
+      brand: 'FermentFreude',
+      title: 'Signature',
+      subtitle: 'Handgemacht in Graz',
+    },
+    ...HERO_CHROME_DE,
   }
 
   // Block 2: Supporting products only (Berglinsen + Kimchi)
@@ -194,6 +403,7 @@ async function seedShopNew() {
     cardColors: [{ color: '#4b4f4a' }, { color: '#555954' }],
     bannerProduct: null,
     ctaLabel: 'Jetzt bestellen',
+    ...FEATURED_CHROME_DE,
   }
 
   // Block 3: ShopProductList — hidden to avoid repeating the same 3 products
@@ -329,6 +539,14 @@ async function seedShopNew() {
       bottomTagline: 'Fermented foods, crafted with care.',
       bottomSubtitle: 'Pickup in Graz, freshly made every week.',
       bottomDisclaimer: 'Delivery coming soon, to ensure the freshest quality.',
+      showSignatureBadge: true,
+      signatureBadge: {
+        show: true,
+        brand: 'FermentFreude',
+        title: 'Signature',
+        subtitle: 'Handmade in Graz',
+      },
+      ...HERO_CHROME_EN,
     },
     // FeaturedProductCards EN
     {
@@ -336,6 +554,7 @@ async function seedShopNew() {
       heading: 'More products',
       subheading: 'Mountain lentil tempeh and seasonal kimchi.',
       ctaLabel: 'Order Now',
+      ...FEATURED_CHROME_EN,
     },
     // ShopProductList EN (kept hidden — avoids repeating the same 3 products)
     {
@@ -385,9 +604,12 @@ async function seedShopNew() {
 
   payload.logger.info(`  \u2713 Saved EN content for shop page (${pageId})`)
   payload.logger.info('\u2705 Shop page seed complete!')
+  process.exit(0)
 }
 
-seedShopNew().catch((err) => {
-  console.error('\u274c Shop seed failed:', err)
-  process.exit(1)
-})
+seedShopNew()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error('\u274c Shop seed failed:', err)
+    process.exit(1)
+  })

@@ -1,3 +1,4 @@
+import { cmsLocaleQuery, cmsTextLocalized } from '@/utilities/cmsLocale'
 import { getLocale } from '@/utilities/getLocale'
 import { isProductSoldOut } from '@/utilities/productStock'
 import configPromise from '@payload-config'
@@ -10,6 +11,23 @@ import { FeaturedProductCardActions } from './FeaturedProductCardActions'
 import { FeaturedProductCardImage } from './FeaturedProductCardImage'
 
 const DEFAULT_CARD_COLORS = ['#5C6B54', '#403c39']
+
+const DEFAULTS = {
+  en: {
+    heading: 'More products',
+    subheading: 'Handmade ferments – natural, full of life and flavour',
+    cta: 'Order now',
+    soldOut: 'Sold out',
+    seasonal: 'Seasonal',
+  },
+  de: {
+    heading: 'Weitere Produkte',
+    subheading: 'Handgemachte Fermente – natürlich, voller Leben und Geschmack',
+    cta: 'Jetzt bestellen',
+    soldOut: 'Ausverkauft',
+    seasonal: 'Saisonal',
+  },
+} as const
 
 function formatPrice(price: number | null | undefined): string {
   if (price == null) return ''
@@ -25,26 +43,36 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
   if (visible === false) return null
 
   const locale = (await getLocale()) as 'de' | 'en'
+  const d = DEFAULTS[locale === 'de' ? 'de' : 'en']
   const payload = await getPayload({ config: configPromise })
 
-  const resolvedHeading =
-    heading?.trim() || (locale === 'de' ? 'Weitere Produkte' : 'More products')
-  const resolvedSubheading =
-    subheading?.trim() ||
-    (locale === 'de'
-      ? 'Handgemachte Fermente – natürlich, voller Leben und Geschmack'
-      : 'Handmade ferments – natural, full of life and flavour')
-
+  const resolvedHeading = cmsTextLocalized(heading, locale, DEFAULTS.en.heading, DEFAULTS.de.heading)
+  const resolvedSubheading = cmsTextLocalized(
+    subheading,
+    locale,
+    DEFAULTS.en.subheading,
+    DEFAULTS.de.subheading,
+  )
   const rawCta = ctaLabel?.trim()
   const resolvedCta =
-    locale === 'de' &&
-    (!rawCta || rawCta.toLowerCase() === 'order now' || rawCta.toLowerCase() === 'order')
-      ? 'Jetzt bestellen'
-      : rawCta || (locale === 'de' ? 'Jetzt bestellen' : 'Order now')
+    locale === 'de' && rawCta && /^(order now|order)$/i.test(rawCta)
+      ? d.cta
+      : rawCta || d.cta
+  const soldOutLabel = cmsTextLocalized(
+    props.soldOutLabel,
+    locale,
+    DEFAULTS.en.soldOut,
+    DEFAULTS.de.soldOut,
+  )
+  const seasonalLabel = cmsTextLocalized(
+    props.seasonalLabel,
+    locale,
+    DEFAULTS.en.seasonal,
+    DEFAULTS.de.seasonal,
+  )
 
   let products: Product[] = []
   if (selectedProducts?.length) {
-    // Prefer already-populated relationships from the shop page query (no extra round-trip)
     const populated = selectedProducts.filter(
       (p): p is Product => typeof p === 'object' && p !== null && 'id' in p && 'title' in p,
     )
@@ -55,7 +83,7 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
       const result = await payload.find({
         collection: 'products',
         where: { id: { in: ids }, _status: { equals: 'published' } },
-        locale,
+        ...cmsLocaleQuery(locale),
         depth: 2,
         limit: 3,
         overrideAccess: true,
@@ -71,7 +99,7 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
         slug: { in: ['berglinsen-tempeh', 'classic-kimchi'] },
         _status: { equals: 'published' },
       },
-      locale,
+      ...cmsLocaleQuery(locale),
       depth: 2,
       limit: 2,
       overrideAccess: true,
@@ -119,12 +147,12 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
                 <div className="relative z-10 mx-auto -mb-12 h-48 w-[72%] max-w-[280px] sm:h-56 sm:w-[68%]">
                   {soldOut && (
                     <span className="absolute top-0 right-0 z-20 rounded-full bg-ff-near-black px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                      {locale === 'de' ? 'Ausverkauft' : 'Sold out'}
+                      {soldOutLabel}
                     </span>
                   )}
                   {isSeasonal && !soldOut && (
                     <span className="absolute top-0 right-0 z-20 rounded-full bg-ff-gold px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-ff-near-black">
-                      {locale === 'de' ? 'Saisonal' : 'Seasonal'}
+                      {seasonalLabel}
                     </span>
                   )}
                   <FeaturedProductCardImage product={product} />

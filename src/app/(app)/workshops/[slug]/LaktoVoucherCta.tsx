@@ -2,6 +2,7 @@
 
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 import Link from 'next/link'
 import React from 'react'
 
@@ -17,27 +18,48 @@ export type LaktoVoucherCMS = {
   backgroundImage?: MediaType | string | null
 }
 
+const DEFAULTS = {
+  en: {
+    eyebrow: 'FERMENT TOGETHER',
+    title: 'Go with a friend.',
+    description:
+      'Give someone a special experience — our vouchers are the perfect gift for foodies and curious minds.',
+    primaryLabel: 'Buy Voucher',
+    secondaryLabel: 'Visit Shop',
+    pills: ['Instantly redeemable', 'For all workshops', 'Digital or printed'],
+  },
+  de: {
+    eyebrow: 'GEMEINSAM FERMENTIEREN',
+    title: 'Go with a friend.',
+    description:
+      'Schenke jemandem ein besonderes Erlebnis — unsere Gutscheine sind das perfekte Geschenk für Feinschmecker und neugierige Köpfe.',
+    primaryLabel: 'Gutschein kaufen',
+    secondaryLabel: 'Zum Shop',
+    pills: ['Sofort einlösbar', 'Für alle Workshops', 'Digital oder gedruckt'],
+  },
+} as const
+
 function isResolvedMedia(img: unknown): img is MediaType {
   return typeof img === 'object' && img !== null && 'url' in img
 }
 
 export function LaktoVoucherCta({ cms }: { cms?: LaktoVoucherCMS }) {
-  const eyebrow = cms?.eyebrow ?? 'GEMEINSAM FERMENTIEREN'
-  const title = cms?.title ?? 'Go with a friend.'
-  const description =
-    cms?.description ??
-    'Schenke jemandem ein besonderes Erlebnis — unsere Gutscheine sind das perfekte Geschenk für Feinschmecker und neugierige Köpfe.'
-  const primaryLabel = cms?.primaryLabel ?? 'Gutschein kaufen'
+  const { locale } = useLocale()
+  const d = DEFAULTS[locale === 'de' ? 'de' : 'en']
+  const eyebrow = cms?.eyebrow?.trim() || d.eyebrow
+  const title = cms?.title?.trim() || d.title
+  const description = cms?.description?.trim() || d.description
+  const primaryLabel = cms?.primaryLabel?.trim() || d.primaryLabel
   const primaryHref =
     cms?.primaryHref === '/voucher'
       ? '/workshops/voucher'
       : (cms?.primaryHref ?? '/workshops/voucher')
-  const secondaryLabel = cms?.secondaryLabel ?? 'Zum Shop'
+  const secondaryLabel = cms?.secondaryLabel?.trim() || d.secondaryLabel
   const secondaryHref = cms?.secondaryHref ?? '/shop'
   const pills =
     (cms?.pills?.length ?? 0) > 0
       ? cms!.pills!.map((p) => p.text ?? '').filter(Boolean)
-      : ['Sofort einlösbar', 'Für alle Workshops', 'Digital oder gedruckt']
+      : [...d.pills]
 
   const hasBackgroundImage = isResolvedMedia(cms?.backgroundImage)
 
