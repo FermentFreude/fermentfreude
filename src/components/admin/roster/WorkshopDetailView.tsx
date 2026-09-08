@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 
+import { AddManualBookingForm } from './AddManualBookingForm'
 import type { AppointmentRow, BookingRow } from './types'
 import { BRAND, STATUS, workshopColor } from './rosterTheme'
 
@@ -9,6 +10,7 @@ interface Props {
   appointment: AppointmentRow
   bookings: BookingRow[]
   onBack: () => void
+  onRefresh: () => void
 }
 
 function statusBadgeLabel(totalBooked: number, capacity: number): { label: string; bg: string; color: string } | null {
@@ -35,9 +37,11 @@ function extractOrderRef(notes: string, orderId: string): string {
   return match ? match[1] : ''
 }
 
-export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
+export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }: Props) {
   const badge = statusBadgeLabel(appointment.totalBooked, appointment.capacity)
   const wc = workshopColor(appointment.workshopTitle)
+  const [showForm, setShowForm] = useState(false)
+  const remainingSpots = Math.max(appointment.capacity - appointment.totalBooked, 0)
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px' }}>
@@ -87,13 +91,37 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
         background: 'var(--theme-elevation-50)', border: '1px solid var(--theme-elevation-100)',
         borderRadius: '12px', padding: '24px', marginBottom: '24px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
           <h2 style={{ margin: 0, fontSize: '17px', fontWeight: 600, color: 'var(--theme-text)' }}>Teilnehmerliste</h2>
-          <span style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.55, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
-            {bookings.length} bestätigt
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.55, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+              {bookings.length} bestätigt
+            </span>
+            <button
+              onClick={() => setShowForm((v) => !v)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
+                borderRadius: '8px', border: 'none', cursor: 'pointer',
+                background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
+              }}
+            >
+              <span style={{ fontSize: '16px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>
+              {showForm ? 'Abbrechen' : 'Sitzplatz manuell hinzufügen'}
+            </button>
+          </div>
         </div>
+
+        {showForm && (
+          <AddManualBookingForm
+            appointmentId={appointment.id}
+            remainingSpots={remainingSpots}
+            onDone={() => {
+              setShowForm(false)
+              onRefresh()
+            }}
+          />
+        )}
 
         {bookings.length === 0 ? (
           <p style={{ color: 'var(--theme-text)', opacity: 0.5, margin: 0 }}>Noch keine bestätigten Buchungen.</p>

@@ -29,7 +29,7 @@ function lexicalToPlainText(value: unknown): string {
   return ''
 }
 
-function fmtDate(iso: string): string {
+export function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString('de-DE', {
     weekday: 'long',
     day: 'numeric',
@@ -39,7 +39,7 @@ function fmtDate(iso: string): string {
   })
 }
 
-function fmtTime(iso: string): string {
+export function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
