@@ -1,3 +1,4 @@
+import { cmsTextLocalized } from '@/utilities/cmsLocale'
 import { getLocale } from '@/utilities/getLocale'
 import React from 'react'
 
@@ -139,19 +140,35 @@ export const ShopAutomatenComponent: React.FC<ShopAutomatenBlock> = async (props
   const d = DEFAULTS[locale === 'de' ? 'de' : 'en']
   const block = props
 
-  const eyebrow = block.eyebrow?.trim() || d.eyebrow
-  const heading = block.heading?.trim() || d.heading
-  const body = block.body?.trim() || d.body
-  const mapsLabel = block.mapsLabel?.trim() || d.mapsLabel
-  const shareLabel = block.shareLabel?.trim() || d.shareLabel
-  const websiteLabel = block.websiteLabel?.trim() || d.websiteLabel
+  const eyebrow = cmsTextLocalized(block.eyebrow, locale, DEFAULTS.en.eyebrow, DEFAULTS.de.eyebrow)
+  const heading = cmsTextLocalized(block.heading, locale, DEFAULTS.en.heading, DEFAULTS.de.heading)
+  const body = cmsTextLocalized(block.body, locale, DEFAULTS.en.body, DEFAULTS.de.body)
+  const mapsLabel = cmsTextLocalized(block.mapsLabel, locale, DEFAULTS.en.mapsLabel, DEFAULTS.de.mapsLabel)
+  const shareLabel = cmsTextLocalized(block.shareLabel, locale, DEFAULTS.en.shareLabel, DEFAULTS.de.shareLabel)
+  const websiteLabel = cmsTextLocalized(
+    block.websiteLabel,
+    locale,
+    DEFAULTS.en.websiteLabel,
+    DEFAULTS.de.websiteLabel,
+  )
+  const featuredOverlayLabel = cmsTextLocalized(
+    block.featuredOverlayLabel,
+    locale,
+    'Graz · 24/7',
+    'Graz · 24/7',
+  )
   const tipVisible = block.tipVisible !== false
-  const tipText = tipVisible ? block.tipText?.trim() || d.tipText : null
+  const tipText = tipVisible ? cmsTextLocalized(block.tipText, locale, DEFAULTS.en.tipText, DEFAULTS.de.tipText) : null
   const tipMapsUrl = tipVisible ? block.tipMapsUrl?.trim() || d.tipMapsUrl : null
   const tipWebsiteUrl = tipVisible
     ? block.tipWebsiteUrl?.trim() || d.tipWebsiteUrl
     : null
-  const tipName = tipVisible ? block.tipName?.trim() || 'Wildmoser' : null
+  const tipName = tipVisible ? cmsTextLocalized(block.tipName, locale, 'Wildmoser', 'Wildmoser') : null
+  const tipLabel = cmsTextLocalized(block.tipLabel, locale, DEFAULTS.en.tipLabel, DEFAULTS.de.tipLabel)
+  const tipKindLabel = cmsTextLocalized(block.tipKindLabel, locale, 'Restaurant', 'Restaurant')
+  const tipCity = cmsTextLocalized(block.tipCity, locale, 'Graz', 'Graz')
+  const tipAddress = cmsTextLocalized(block.tipAddress, locale, DEFAULTS.en.tipAddress, DEFAULTS.de.tipAddress)
+  const tipProducts = cmsTextLocalized(block.tipProducts, locale, DEFAULTS.en.tipProducts, DEFAULTS.de.tipProducts)
 
   const tipResolved = tipVisible
     ? resolveMedia(block.tipImage, LOCAL_FALLBACKS.tip, tipName || 'Wildmoser')
@@ -210,14 +227,17 @@ export const ShopAutomatenComponent: React.FC<ShopAutomatenBlock> = async (props
       websiteLabel={websiteLabel}
       featuredImageUrl={featuredResolved.url}
       featuredImageAlt={featuredResolved.alt}
+      featuredOverlayLabel={featuredOverlayLabel}
       locations={locations}
       tipText={tipText}
       tipMapsUrl={tipMapsUrl}
       tipWebsiteUrl={tipWebsiteUrl}
-      tipLabel={d.tipLabel}
+      tipLabel={tipLabel}
+      tipKindLabel={tipKindLabel}
+      tipCity={tipCity}
       tipName={tipName}
-      tipAddress={d.tipAddress}
-      tipProducts={d.tipProducts}
+      tipAddress={tipAddress}
+      tipProducts={tipProducts}
       tipImageUrl={tipResolved.url}
       tipImageAlt={tipResolved.alt || tipName || 'Restaurant'}
     />

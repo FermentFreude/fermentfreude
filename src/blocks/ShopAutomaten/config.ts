@@ -55,6 +55,15 @@ export const ShopAutomaten: Block = {
       },
     },
     {
+      name: 'featuredOverlayLabel',
+      type: 'text',
+      localized: true,
+      label: 'Featured image overlay',
+      admin: {
+        description: 'Small line on the large photo (e.g. "Graz · 24/7").',
+      },
+    },
+    {
       name: 'locations',
       type: 'array',
       label: 'Vending machine locations',
@@ -217,12 +226,62 @@ export const ShopAutomaten: Block = {
       },
     },
     {
+      name: 'tipLabel',
+      type: 'text',
+      localized: true,
+      label: 'Insider tip eyebrow',
+      admin: {
+        description: 'e.g. "Insider" / "Insider tip"',
+        condition: (_, siblingData) => siblingData?.tipVisible !== false,
+      },
+    },
+    {
       name: 'tipName',
       type: 'text',
       localized: true,
       label: 'Restaurant tip name',
       admin: {
         description: 'e.g. "Wildmoser"',
+        condition: (_, siblingData) => siblingData?.tipVisible !== false,
+      },
+    },
+    {
+      name: 'tipKindLabel',
+      type: 'text',
+      localized: true,
+      label: 'Tip type badge',
+      admin: {
+        description: 'e.g. "Restaurant"',
+        condition: (_, siblingData) => siblingData?.tipVisible !== false,
+      },
+    },
+    {
+      name: 'tipCity',
+      type: 'text',
+      localized: true,
+      label: 'Tip city',
+      admin: {
+        description: 'e.g. "Graz"',
+        condition: (_, siblingData) => siblingData?.tipVisible !== false,
+      },
+    },
+    {
+      name: 'tipAddress',
+      type: 'text',
+      localized: true,
+      label: 'Tip address',
+      admin: {
+        description: 'e.g. "Grüne Gasse 17, 8020 Graz"',
+        condition: (_, siblingData) => siblingData?.tipVisible !== false,
+      },
+    },
+    {
+      name: 'tipProducts',
+      type: 'text',
+      localized: true,
+      label: 'Tip products line',
+      admin: {
+        description: 'e.g. "Käferbohnen-Tempeh"',
         condition: (_, siblingData) => siblingData?.tipVisible !== false,
       },
     },
