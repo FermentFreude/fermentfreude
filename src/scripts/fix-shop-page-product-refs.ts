@@ -14,10 +14,20 @@
  * environments — this script only fixes the Shop page's own curated
  * product lists, nothing else.
  *
- *   shop page featuredProductCards.products: [OLD deleted Berglinsen id, Kimchi]
- *     -> [current Berglinsen id, Kimchi]  (matches production exactly)
- *   shop page shopProductList.products: [Käferbohnen, OLD deleted Curryzwiebel, OLD deleted Rote Rüben]
- *     -> [Kimchi, Käferbohnen]  (matches production exactly)
+ * IMPORTANT, discovered only after an earlier version of this script got
+ * this backwards: `src/app/(app)/shop/page.tsx` (a dedicated route file,
+ * not the generic [slug] renderer) has ALWAYS unconditionally excluded
+ * `shopProductList` from rendering on this page — see its own code comment,
+ * "Never render a second product catalog / bestsellers strip on /shop"
+ * (git blame: alaashaheen, 2026-08-25, long before today's session). Only
+ * `featuredProductCards` is ever rendered as the product section here. So:
+ *
+ *   shop page: ensure `featuredProductCards` exists with
+ *     products = [Berglinsen-Tempeh, Kimchi] (matches production) — this is
+ *     the ONLY block this page actually renders for products.
+ *   shop page: remove `shopProductList` entirely — confirmed dead code on
+ *     this specific page regardless of its content, and the actual source
+ *     of the "confusing duplicate section" in the CMS admin.
  *   home page productHeroSlider slide 3 `product`: OLD deleted Berglinsen id
  *     -> current Berglinsen id (this block doesn't exist on production yet —
  *        it's staging-only new content — so this one has no prod value to
@@ -44,7 +54,6 @@ if (!dbUrl.includes('staging')) {
 const OLD_STALE_BERGLINSEN_ID = '6a8824c3f6af04b208a112df'
 const CORRECT_BERGLINSEN_ID = '6a9af5c6047eee1587b17b3b'
 const KIMCHI_ID = '69bc80514889efa4f93c7ae0'
-const KAEFERBOHNEN_ID = '69bc80524889efa4f93c7ae9'
 
 async function run() {
   const { getPayload } = (await import('payload')) as { getPayload: typeof GetPayload }
@@ -67,19 +76,49 @@ async function run() {
   const shopLayout = (shopPage.layout ?? []) as unknown as Record<string, unknown>[]
   let shopChanged = false
 
-  const newShopLayout = shopLayout.map((block) => {
-    if (block.blockType === 'featuredProductCards') {
-      console.log('  featuredProductCards.products before:', block.products)
-      shopChanged = true
-      return { ...block, products: [CORRECT_BERGLINSEN_ID, KIMCHI_ID] }
-    }
+  // Remove shopProductList — confirmed dead code on this specific page's own
+  // route file (src/app/(app)/shop/page.tsx unconditionally filters it out),
+  // so its content is irrelevant here regardless of what it's set to.
+  const withoutProductList = shopLayout.filter((block) => {
     if (block.blockType === 'shopProductList') {
-      console.log('  shopProductList.products before:', block.products)
+      console.log('  removing shopProductList block (was:', block.products, ')')
       shopChanged = true
-      return { ...block, products: [KIMCHI_ID, KAEFERBOHNEN_ID] }
+      return false
     }
-    return block
+    return true
   })
+
+  // Ensure featuredProductCards exists with the right products — this is the
+  // ONLY block the shop page's route file actually renders for products.
+  const hasFeatured = withoutProductList.some((b) => b.blockType === 'featuredProductCards')
+  let newShopLayout: Record<string, unknown>[]
+  if (hasFeatured) {
+    newShopLayout = withoutProductList.map((block) => {
+      if (block.blockType === 'featuredProductCards') {
+        console.log('  featuredProductCards.products before:', block.products)
+        shopChanged = true
+        return { ...block, products: [CORRECT_BERGLINSEN_ID, KIMCHI_ID] }
+      }
+      return block
+    })
+  } else {
+    // No featuredProductCards block at all — insert one right after shopHero,
+    // matching production's block order.
+    console.log('  inserting a new featuredProductCards block')
+    shopChanged = true
+    const heroIndex = withoutProductList.findIndex((b) => b.blockType === 'shopHero')
+    const insertAt = heroIndex === -1 ? 0 : heroIndex + 1
+    newShopLayout = [
+      ...withoutProductList.slice(0, insertAt),
+      {
+        blockType: 'featuredProductCards',
+        visible: true,
+        bannerProduct: null,
+        products: [CORRECT_BERGLINSEN_ID, KIMCHI_ID],
+      },
+      ...withoutProductList.slice(insertAt),
+    ]
+  }
 
   if (shopChanged) {
     await payload.update({
@@ -140,6 +179,35 @@ async function run() {
     console.log('✅ Home page product-hero-slider reference fixed.')
   } else {
     console.log('Home page: nothing to change.')
+  }
+
+  // One of the synced media docs kept its production R2 URL instead of
+  // being rewritten to staging's bucket — the file itself was already
+  // copied to the staging bucket (confirmed via `rclone lsf`), just this
+  // doc's `url` field was never updated to point at it.
+  const staleMediaId = '69e1dc6d40fa3a821a8615a1'
+  const media = await payload.findByID({
+    collection: 'media',
+    id: staleMediaId,
+    depth: 0,
+    overrideAccess: true,
+  })
+  const currentUrl = typeof media.url === 'string' ? media.url : ''
+  if (currentUrl.includes('pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev')) {
+    const fixedUrl = currentUrl.replace(
+      'pub-c70f47169a1846d79fdab1a41ed2dc7f.r2.dev',
+      'pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev',
+    )
+    console.log('  media url before:', currentUrl)
+    await payload.update({
+      collection: 'media',
+      id: staleMediaId,
+      data: { url: fixedUrl } as never,
+      overrideAccess: true,
+    })
+    console.log('✅ Media URL repointed to staging bucket.')
+  } else {
+    console.log('Media URL: nothing to change.')
   }
 
   process.exit(0)
