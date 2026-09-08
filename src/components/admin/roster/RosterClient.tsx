@@ -309,6 +309,7 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
             appointment={data.appointments.find((a) => a.id === selectedApptId) ?? data.appointments[0]}
             bookings={data.bookingsByAppointment[selectedApptId] ?? []}
             onBack={() => navigate('workshops')}
+            onRefresh={refresh}
           />
         )}
         {section === 'participants' && <ParticipantsView participants={data.participants} stats={data.stats} />}
