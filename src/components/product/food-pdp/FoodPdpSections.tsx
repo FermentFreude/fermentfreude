@@ -41,7 +41,7 @@ export function FoodPdpCategoryRow({
       {categories.map((title) => (
         <span
           key={title}
-          className="rounded-full border border-ff-near-black/12 px-3 py-1 text-caption text-ff-gray-text"
+          className="rounded-full bg-ff-warm-gray px-3 py-1 text-caption font-medium uppercase tracking-wider text-ff-charcoal"
         >
           {title}
         </span>

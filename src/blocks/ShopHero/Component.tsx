@@ -181,36 +181,41 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
           }}
         />
 
-        <div className="absolute top-[calc(var(--header-height,5rem)+1rem)] right-[var(--space-container-x)] z-10 flex items-start gap-2">
+        <div className="absolute top-[calc(var(--header-height,5rem)+0.5rem)] right-[var(--space-container-x)] z-10 flex max-w-[min(78vw,20rem)] items-start gap-2 sm:max-w-none sm:top-[calc(var(--header-height,5rem)+1rem)]">
           {soldOut && (
-            <span className="rounded-full border border-white/35 bg-black/40 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+            <span className="rounded-full border border-white/35 bg-black/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm sm:px-3 sm:py-1 sm:text-[10px]">
               {soldOutLabel}
             </span>
           )}
           {showSignatureBadge && (
           <div
-            className="flex items-center gap-3 rounded-2xl border border-ff-gold/45 bg-ff-near-black/75 py-3 pl-4 pr-3 shadow-[0_10px_28px_rgba(0,0,0,0.35)] backdrop-blur-md"
+            className="flex items-center gap-2 rounded-xl border border-ff-gold/45 bg-ff-near-black/75 py-1.5 pl-2.5 pr-1.5 shadow-[0_10px_28px_rgba(0,0,0,0.35)] backdrop-blur-md sm:gap-3 sm:rounded-2xl sm:py-3 sm:pl-4 sm:pr-3"
             aria-label={d.signatureAria}
           >
             <div className="flex flex-col items-end leading-none text-right">
-              <span className="font-display text-[9px] font-bold uppercase tracking-[0.24em] text-ff-gold/90">
+              <span className="font-display text-[7px] font-bold uppercase tracking-[0.18em] text-ff-gold/90 sm:text-[9px] sm:tracking-[0.24em]">
                 {signatureBrand}
               </span>
-              <span className="mt-1.5 font-display text-sm font-extrabold uppercase tracking-[0.12em] text-white">
+              <span className="mt-1 font-display text-[11px] font-extrabold uppercase tracking-[0.08em] text-white sm:mt-1.5 sm:text-sm sm:tracking-[0.12em]">
                 {signatureLabel}
               </span>
-              <span className="mt-1.5 text-[10px] font-medium text-white/65">{signatureSubtitle}</span>
+              {/* Subtitle hidden below sm: — the badge's fixed top-right position collides
+                  with the hero title's wrapped text on narrow screens otherwise; keeping
+                  brand + label is enough to read as "Signature" on mobile. */}
+              <span className="mt-1.5 hidden text-[10px] font-medium text-white/65 sm:block">
+                {signatureSubtitle}
+              </span>
             </div>
             <div
-              className="relative flex size-11 shrink-0 items-center justify-center rounded-full bg-ff-gold/15"
+              className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-ff-gold/15 sm:size-11"
               aria-hidden
             >
               <span className="absolute inset-[2px] rounded-full border border-ff-gold/75" />
               <span className="relative flex flex-col items-center leading-none">
-                <span className="font-display text-[7px] font-bold uppercase tracking-wider text-ff-gold">
+                <span className="font-display text-[6px] font-bold uppercase tracking-wider text-ff-gold sm:text-[7px]">
                   No
                 </span>
-                <span className="font-display text-sm font-extrabold tabular-nums text-ff-gold">
+                <span className="font-display text-[11px] font-extrabold tabular-nums text-ff-gold sm:text-sm">
                   01
                 </span>
               </span>
