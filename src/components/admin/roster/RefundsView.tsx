@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react'
 
 import { acknowledgeRefundRequest } from './actions'
 import type { RefundRequestRow } from './types'
+import { BRAND } from './rosterTheme'
 
 interface Props {
   refundRequests: RefundRequestRow[]
@@ -102,7 +103,7 @@ export function RefundsView({ refundRequests, onRefresh }: Props) {
               padding: '10px 16px', border: 'none', background: 'transparent', cursor: 'pointer',
               fontSize: '13px', fontWeight: tab === t ? 600 : 400,
               color: 'var(--theme-text)', opacity: tab === t ? 1 : 0.55,
-              borderBottom: tab === t ? '2px solid var(--theme-text)' : '2px solid transparent',
+              borderBottom: tab === t ? `2px solid ${BRAND.gold}` : '2px solid transparent',
             }}
           >
             {t === 'queue' ? `Offen (${queue.length})` : `Abgeschlossen (${completed.length})`}

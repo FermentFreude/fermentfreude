@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 
 import type { ParticipantRow, RosterStats } from './types'
+import { BRAND, PageHeader, StatCard } from './rosterTheme'
 
 interface Props {
   participants: ParticipantRow[]
@@ -36,38 +37,13 @@ export function ParticipantsView({ participants, stats }: Props) {
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px' }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>Teilnehmer</h1>
-        <p style={{ margin: '6px 0 0', fontSize: '14px', color: 'var(--theme-text)', opacity: 0.55 }}>
-          Alle Kunden und Teilnehmer im Überblick
-        </p>
-      </div>
+      <PageHeader title="Teilnehmer" subtitle="Alle Kunden und Teilnehmer im Überblick" />
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-        {[
-          { label: 'Gesamt Kunden', value: participants.length, icon: '👤' },
-          { label: 'Bestätigte Buchungen', value: stats.totalParticipants, icon: '📅' },
-          { label: 'Ausstehende Buchungen', value: pending, icon: '🕐', accent: pending > 0 },
-        ].map(({ label, value, icon, accent }) => (
-          <div key={label} style={{
-            background: 'var(--theme-elevation-50)', borderRadius: '12px', padding: '18px 20px',
-            border: accent ? '1px solid #fbbf24' : '1px solid var(--theme-elevation-100)',
-            display: 'flex', alignItems: 'center', gap: '12px',
-          }}>
-            <div style={{
-              width: '40px', height: '40px', borderRadius: '8px',
-              background: accent ? '#fef3c7' : 'var(--theme-elevation-100)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
-            }}>
-              {icon}
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: '12px', color: 'var(--theme-text)', opacity: 0.55 }}>{label}</p>
-              <p style={{ margin: '2px 0 0', fontSize: '22px', fontWeight: 700, color: accent ? '#d97706' : 'var(--theme-text)' }}>{value}</p>
-            </div>
-          </div>
-        ))}
+        <StatCard label="Gesamt Kunden" value={participants.length} accentKey="gold" icon={<span style={{ fontSize: '18px' }}>👤</span>} />
+        <StatCard label="Bestätigte Buchungen" value={stats.totalParticipants} accentKey="green" icon={<span style={{ fontSize: '18px' }}>📅</span>} />
+        <StatCard label="Ausstehende Buchungen" value={pending} accentKey="orange" icon={<span style={{ fontSize: '18px' }}>🕐</span>} />
       </div>
 
       {/* Table card */}
@@ -117,9 +93,9 @@ export function ParticipantsView({ participants, stats }: Props) {
                   <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div style={{
-                        width: '32px', height: '32px', borderRadius: '50%', background: 'var(--theme-elevation-100)',
+                        width: '32px', height: '32px', borderRadius: '50%', background: BRAND.goldTint,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '11px', fontWeight: 700, color: 'var(--theme-text)', flexShrink: 0,
+                        fontSize: '11px', fontWeight: 700, color: BRAND.goldDark, flexShrink: 0,
                       }}>
                         {initials(p.name) || '?'}
                       </div>

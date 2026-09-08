@@ -3,6 +3,7 @@
 import React from 'react'
 
 import type { AppointmentRow } from './types'
+import { PageHeader, STATUS, workshopColor } from './rosterTheme'
 
 interface Props {
   appointments: AppointmentRow[]
@@ -11,16 +12,15 @@ interface Props {
 
 function progressBarColor(totalBooked: number, capacity: number): string {
   if (capacity === 0) return '#e5e7eb'
-  if (totalBooked > capacity) return '#f97316'
-  if (totalBooked >= capacity) return '#f97316'
-  return '#111827'
+  if (totalBooked >= capacity) return STATUS.danger.accent
+  return STATUS.success.accent
 }
 
 function statusBadge(totalBooked: number, capacity: number): { label: string; bg: string; color: string } | null {
   if (capacity === 0) return null
-  if (totalBooked > capacity) return { label: 'Überbucht', bg: '#fef3c7', color: '#92400e' }
-  if (totalBooked >= capacity) return { label: 'Ausgebucht', bg: '#fee2e2', color: '#991b1b' }
-  return { label: 'Verfügbar', bg: 'var(--theme-elevation-100)', color: 'var(--theme-text)' }
+  if (totalBooked > capacity) return { label: 'Überbucht', bg: STATUS.warning.bg, color: STATUS.warning.color }
+  if (totalBooked >= capacity) return { label: 'Ausgebucht', bg: STATUS.danger.bg, color: STATUS.danger.color }
+  return { label: 'Verfügbar', bg: STATUS.success.bg, color: STATUS.success.color }
 }
 
 function groupByDate(appointments: AppointmentRow[]): Map<string, AppointmentRow[]> {
@@ -40,17 +40,15 @@ export function WorkshopsView({ appointments, onSelectAppointment }: Props) {
 
   return (
     <div style={{ padding: '40px', maxWidth: '600px' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>Workshops</h1>
-          <p style={{ margin: '6px 0 0', fontSize: '14px', color: 'var(--theme-text)', opacity: 0.55 }}>
-            Verwalte alle Workshops und Buchungen
-          </p>
-        </div>
-        <span style={{ fontSize: '14px', color: 'var(--theme-text)', opacity: 0.55, whiteSpace: 'nowrap', paddingTop: '6px' }}>
-          {total} {total === 1 ? 'Workshop' : 'Workshops'} insgesamt
-        </span>
-      </div>
+      <PageHeader
+        title="Workshops"
+        subtitle="Verwalte alle Workshops und Buchungen"
+        action={
+          <span style={{ fontSize: '14px', color: 'var(--theme-text)', opacity: 0.55, whiteSpace: 'nowrap', paddingTop: '6px' }}>
+            {total} {total === 1 ? 'Workshop' : 'Workshops'} insgesamt
+          </span>
+        }
+      />
 
       {grouped.size === 0 && (
         <p style={{ color: 'var(--theme-text)', opacity: 0.5 }}>Keine kommenden Workshops.</p>
@@ -66,6 +64,7 @@ export function WorkshopsView({ appointments, onSelectAppointment }: Props) {
               const badge = statusBadge(appt.totalBooked, appt.capacity)
               const pct = appt.capacity > 0 ? Math.min((appt.totalBooked / appt.capacity) * 100, 100) : 0
               const barColor = progressBarColor(appt.totalBooked, appt.capacity)
+              const wc = workshopColor(appt.workshopTitle)
               const desc = appt.workshopDescription
                 ? appt.workshopDescription.replace(/<[^>]+>/g, '').slice(0, 80) + (appt.workshopDescription.length > 80 ? '…' : '')
                 : ''
@@ -76,15 +75,27 @@ export function WorkshopsView({ appointments, onSelectAppointment }: Props) {
                   onClick={() => onSelectAppointment(appt.id)}
                   style={{
                     background: 'var(--theme-elevation-0)', border: '1px solid var(--theme-elevation-100)',
+                    borderTop: `3px solid ${wc.accent}`,
                     borderRadius: '12px', padding: '20px', cursor: 'pointer', textAlign: 'left',
                     width: '100%', transition: 'box-shadow 0.15s',
                   }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)' }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none' }}
                 >
-                  <h3 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 700, color: 'var(--theme-text)' }}>
-                    {appt.workshopTitle}
-                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                    <span
+                      style={{
+                        width: '30px', height: '30px', borderRadius: '9px', background: wc.bg,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', flexShrink: 0,
+                      }}
+                      aria-hidden
+                    >
+                      {wc.icon}
+                    </span>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--theme-text)' }}>
+                      {appt.workshopTitle}
+                    </h3>
+                  </div>
                   {desc && (
                     <p style={{ margin: '0 0 14px', fontSize: '13px', color: 'var(--theme-text)', opacity: 0.6, lineHeight: 1.5 }}>
                       {desc}
