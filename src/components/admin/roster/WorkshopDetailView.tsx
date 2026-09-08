@@ -1,20 +1,25 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 
+import { AddManualBookingForm } from './AddManualBookingForm'
+import { MoveBookingControl } from './MoveBookingControl'
+import { SendAlternateDateEmailBar } from './SendAlternateDateEmailBar'
 import type { AppointmentRow, BookingRow } from './types'
+import { BRAND, STATUS, workshopColor } from './rosterTheme'
 
 interface Props {
   appointment: AppointmentRow
   bookings: BookingRow[]
   onBack: () => void
+  onRefresh: () => void
 }
 
 function statusBadgeLabel(totalBooked: number, capacity: number): { label: string; bg: string; color: string } | null {
   if (capacity === 0) return null
-  if (totalBooked > capacity) return { label: 'Überbucht', bg: '#fef3c7', color: '#92400e' }
-  if (totalBooked >= capacity) return { label: 'Ausgebucht', bg: '#fee2e2', color: '#991b1b' }
-  return { label: 'Verfügbar', bg: 'var(--theme-elevation-100)', color: 'var(--theme-text)' }
+  if (totalBooked > capacity) return { label: 'Überbucht', bg: STATUS.warning.bg, color: STATUS.warning.color }
+  if (totalBooked >= capacity) return { label: 'Ausgebucht', bg: STATUS.danger.bg, color: STATUS.danger.color }
+  return { label: 'Verfügbar', bg: STATUS.success.bg, color: STATUS.success.color }
 }
 
 function fmtBookingDate(iso: string): string {
@@ -34,8 +39,18 @@ function extractOrderRef(notes: string, orderId: string): string {
   return match ? match[1] : ''
 }
 
-export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
+export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }: Props) {
   const badge = statusBadgeLabel(appointment.totalBooked, appointment.capacity)
+  const wc = workshopColor(appointment.workshopTitle)
+  const [showForm, setShowForm] = useState(false)
+  const [selectedBookingIds, setSelectedBookingIds] = useState<string[]>([])
+  const remainingSpots = Math.max(appointment.capacity - appointment.totalBooked, 0)
+
+  const toggleSelected = (bookingId: string) => {
+    setSelectedBookingIds((prev) =>
+      prev.includes(bookingId) ? prev.filter((id) => id !== bookingId) : [...prev, bookingId],
+    )
+  }
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px' }}>
@@ -52,9 +67,20 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
           >
             ← Zurück
           </button>
-          <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>
-            {appointment.workshopTitle}
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span
+              style={{
+                width: '40px', height: '40px', borderRadius: '11px', background: wc.bg,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0,
+              }}
+              aria-hidden
+            >
+              {wc.icon}
+            </span>
+            <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>
+              {appointment.workshopTitle}
+            </h1>
+          </div>
           <p style={{ margin: '4px 0 0', fontSize: '14px', color: 'var(--theme-text)', opacity: 0.55 }}>
             {appointment.date}
           </p>
@@ -74,13 +100,43 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
         background: 'var(--theme-elevation-50)', border: '1px solid var(--theme-elevation-100)',
         borderRadius: '12px', padding: '24px', marginBottom: '24px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
           <h2 style={{ margin: 0, fontSize: '17px', fontWeight: 600, color: 'var(--theme-text)' }}>Teilnehmerliste</h2>
-          <span style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.55, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
-            {bookings.length} bestätigt
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.55, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+              {bookings.length} bestätigt
+            </span>
+            <button
+              onClick={() => setShowForm((v) => !v)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
+                borderRadius: '8px', border: 'none', cursor: 'pointer',
+                background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
+              }}
+            >
+              <span style={{ fontSize: '16px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>
+              {showForm ? 'Abbrechen' : 'Sitzplatz manuell hinzufügen'}
+            </button>
+          </div>
         </div>
+
+        {showForm && (
+          <AddManualBookingForm
+            appointmentId={appointment.id}
+            remainingSpots={remainingSpots}
+            onDone={() => {
+              setShowForm(false)
+              onRefresh()
+            }}
+          />
+        )}
+
+        <SendAlternateDateEmailBar
+          selectedBookingIds={selectedBookingIds}
+          currentAppointmentId={appointment.id}
+          onSent={() => setSelectedBookingIds([])}
+        />
 
         {bookings.length === 0 ? (
           <p style={{ color: 'var(--theme-text)', opacity: 0.5, margin: 0 }}>Noch keine bestätigten Buchungen.</p>
@@ -88,6 +144,8 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
           // Expand each booking into one card per seat so dietary notes are shown individually.
           type SeatCard = {
             key: string
+            bookingId: string
+            guestCount: number
             seatNumber: number
             name: string
             email: string
@@ -118,6 +176,8 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
 
               cards.push({
                 key: `${booking.id}-${si}`,
+                bookingId: booking.id,
+                guestCount: booking.guestCount,
                 seatNumber: seatCounter,
                 name: seatName,
                 email: isBuyer ? booking.email : '',
@@ -143,10 +203,19 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {card.isBuyer && (
+                        <input
+                          type="checkbox"
+                          checked={selectedBookingIds.includes(card.bookingId)}
+                          onChange={() => toggleSelected(card.bookingId)}
+                          aria-label="Für E-Mail-Versand auswählen"
+                          style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+                        />
+                      )}
                       <span style={{
-                        width: '24px', height: '24px', borderRadius: '50%', background: 'var(--theme-elevation-100)',
+                        width: '24px', height: '24px', borderRadius: '50%', background: wc.bg,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '11px', fontWeight: 700, color: 'var(--theme-text)', flexShrink: 0,
+                        fontSize: '11px', fontWeight: 700, color: wc.accent, flexShrink: 0,
                       }}>
                         {card.seatNumber}
                       </span>
@@ -154,7 +223,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
                     </div>
                     <span style={{
                       fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '999px',
-                      background: '#dcfce7', color: '#166534',
+                      background: STATUS.success.bg, color: STATUS.success.color,
                     }}>
                       Bestätigt
                     </span>
@@ -203,6 +272,15 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
                   <p style={{ margin: '10px 0 0', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.4 }}>
                     {fmtBookingDate(card.createdAt)}
                   </p>
+
+                  {card.isBuyer && (
+                    <MoveBookingControl
+                      bookingId={card.bookingId}
+                      guestCount={card.guestCount}
+                      currentAppointmentId={appointment.id}
+                      onDone={onRefresh}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -213,17 +291,17 @@ export function WorkshopDetailView({ appointment, bookings, onBack }: Props) {
       {/* Summary stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         {[
-          { label: 'Teilnehmer', value: `${appointment.totalBooked}/${appointment.capacity}`, icon: '👤' },
-          { label: 'Uhrzeit', value: appointment.time, icon: '🕐' },
-          { label: 'Preis', value: `€${appointment.pricePerPerson}`, icon: '€' },
-          { label: 'Ort', value: appointment.locationName, icon: '📍' },
-        ].map(({ label, value, icon }) => (
+          { label: 'Teilnehmer', value: `${appointment.totalBooked}/${appointment.capacity}`, icon: '👤', bg: badge?.bg ?? STATUS.success.bg },
+          { label: 'Uhrzeit', value: appointment.time, icon: '🕐', bg: STATUS.info.bg },
+          { label: 'Preis', value: `€${appointment.pricePerPerson}`, icon: '€', bg: BRAND.goldTint },
+          { label: 'Ort', value: appointment.locationName, icon: '📍', bg: wc.bg },
+        ].map(({ label, value, icon, bg }) => (
           <div key={label} style={{
             background: 'var(--theme-elevation-50)', border: '1px solid var(--theme-elevation-100)',
             borderRadius: '10px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px',
           }}>
             <div style={{
-              width: '40px', height: '40px', borderRadius: '8px', background: 'var(--theme-elevation-100)',
+              width: '40px', height: '40px', borderRadius: '8px', background: bg,
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0,
             }}>
               {icon}

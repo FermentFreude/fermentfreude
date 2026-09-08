@@ -4,6 +4,7 @@ import React, { useTransition } from 'react'
 
 import { markActivityEventsRead, markAllActivityEventsRead } from './actions'
 import type { ActivityEventRow } from './types'
+import { BRAND } from './rosterTheme'
 
 interface Props {
   activityEvents: ActivityEventRow[]
@@ -92,7 +93,7 @@ export function ActivityView({ activityEvents, onRefresh }: Props) {
             <span
               style={{
                 width: '7px', height: '7px', borderRadius: '50%', marginTop: '6px', flexShrink: 0,
-                background: event.isUnread ? '#3b82f6' : 'transparent',
+                background: event.isUnread ? BRAND.gold : 'transparent',
               }}
             />
             <div style={{ flex: 1, minWidth: 0 }}>

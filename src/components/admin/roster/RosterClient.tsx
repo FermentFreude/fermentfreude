@@ -13,6 +13,7 @@ import type { RosterData } from './types'
 import { VouchersView } from './VouchersView'
 import { WorkshopDetailView } from './WorkshopDetailView'
 import { WorkshopsView } from './WorkshopsView'
+import { BRAND } from './rosterTheme'
 
 type Section =
   | 'dashboard'
@@ -133,9 +134,10 @@ const REFUNDS_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
 
 const navItemStyle = (active: boolean): React.CSSProperties => ({
   display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '6px',
-  fontSize: '14px', fontWeight: active ? 600 : 400, cursor: 'pointer', border: 'none',
+  fontSize: '14px', fontWeight: active ? 600 : 400, cursor: 'pointer',
+  border: 'none', borderLeft: active ? `3px solid ${BRAND.gold}` : '3px solid transparent',
   background: active ? 'var(--theme-elevation-100)' : 'transparent',
-  color: 'var(--theme-text)', width: '100%', textAlign: 'left', transition: 'background 0.15s',
+  color: 'var(--theme-text)', width: '100%', textAlign: 'left', transition: 'background 0.15s, border-color 0.15s',
 })
 
 const s: Record<string, React.CSSProperties> = {
@@ -232,7 +234,10 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
       {/* Sidebar */}
       <aside style={s.sidebar}>
         <div style={s.sidebarHeader}>
-          <p style={s.sidebarTitle}>Fermentfreude</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: BRAND.gold, flexShrink: 0 }} />
+            <p style={s.sidebarTitle}>Fermentfreude</p>
+          </div>
           <p style={s.sidebarSub}>Admin Dashboard</p>
         </div>
 
@@ -304,6 +309,7 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
             appointment={data.appointments.find((a) => a.id === selectedApptId) ?? data.appointments[0]}
             bookings={data.bookingsByAppointment[selectedApptId] ?? []}
             onBack={() => navigate('workshops')}
+            onRefresh={refresh}
           />
         )}
         {section === 'participants' && <ParticipantsView participants={data.participants} stats={data.stats} />}

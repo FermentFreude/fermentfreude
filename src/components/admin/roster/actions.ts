@@ -4,6 +4,10 @@ import { headers as getHeaders } from 'next/headers.js'
 import configPromise from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 
+import { releaseSpotsAtomic, reserveSpotsAtomic } from '@/lib/atomicSpots'
+import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { fmtDate, fmtTime } from './fetchRosterData'
+
 /**
  * Server Actions are network-callable independent of which page rendered
  * them — the Roster admin view being gated doesn't protect the action
@@ -206,6 +210,325 @@ export async function createManualOrder(params: {
 
   const order = created as unknown as { id: string; invoiceNumber?: string | null }
   return { id: String(order.id), invoiceNumber: order.invoiceNumber ?? null }
+}
+
+/**
+ * Manually add a workshop seat from the roster dashboard — for customers
+ * with an old voucher or a special agreement, bypassing Stripe checkout
+ * entirely (mirrors what David does in Wix today by adding a placeholder
+ * booking). Must do BOTH of the following to behave exactly like a real
+ * booking: reserve the spot atomically (the same guard the live checkout
+ * route uses, so the public booking flow can't oversell), AND create a
+ * `confirmed` workshop-bookings doc (so it shows up in this roster's own
+ * participant list/capacity count, which is derived independently from
+ * availableSpots — see fetchRosterData.ts).
+ */
+export async function createManualWorkshopBooking(params: {
+  appointmentId: string
+  firstName: string
+  lastName: string
+  email?: string
+  phone?: string
+  guestCount: number
+  notes?: string
+}): Promise<{ id: string }> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  if (!params.appointmentId) {
+    throw new Error('Kein Termin ausgewählt.')
+  }
+  if (!params.firstName.trim()) {
+    throw new Error('Bitte Vorname angeben.')
+  }
+  if (!Number.isInteger(params.guestCount) || params.guestCount < 1 || params.guestCount > 12) {
+    throw new Error('Anzahl der Plätze muss zwischen 1 und 12 liegen.')
+  }
+
+  // Re-fetch server-side for integrity — the client's AppointmentRow has no
+  // workshopSlug/basePrice, so it can't supply everything a booking needs.
+  const appointment = await payload.findByID({
+    collection: 'workshop-appointments',
+    id: params.appointmentId,
+    depth: 1,
+    overrideAccess: true,
+  })
+  const workshop = appointment.workshop
+  if (typeof workshop !== 'object' || workshop === null) {
+    throw new Error('Workshop-Daten konnten nicht geladen werden.')
+  }
+
+  const reserveResult = await reserveSpotsAtomic(payload, params.appointmentId, params.guestCount)
+  if (!reserveResult.success) {
+    throw new Error(`Nur noch ${reserveResult.availableSpots ?? 0} Platz/Plätze verfügbar.`)
+  }
+
+  const maxCapacity = Number(workshop.maxCapacityPerSlot ?? 12)
+  try {
+    const dateTimeStr = String(appointment.dateTime ?? '')
+    const created = await payload.create({
+      collection: 'workshop-bookings',
+      data: {
+        status: 'confirmed',
+        appointmentId: params.appointmentId,
+        workshopTitle: workshop.title,
+        workshopSlug: workshop.slug,
+        date: dateTimeStr ? fmtDate(dateTimeStr) : '',
+        time: dateTimeStr ? `${fmtTime(dateTimeStr)} Uhr` : '',
+        firstName: params.firstName.trim(),
+        lastName: params.lastName?.trim() ?? '',
+        ...(params.email?.trim() ? { email: params.email.trim() } : {}),
+        ...(params.phone?.trim() ? { phone: params.phone.trim() } : {}),
+        guestCount: params.guestCount,
+        pricePerPerson: workshop.basePrice ?? 0,
+        totalPrice: (workshop.basePrice ?? 0) * params.guestCount,
+        ...(params.notes?.trim() ? { notes: params.notes.trim() } : {}),
+        seats: Array.from({ length: params.guestCount }, () => ({ seatStatus: 'active' as const })),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+      overrideAccess: true,
+    })
+    return { id: String(created.id) }
+  } catch (err) {
+    // Booking create failed AFTER the atomic reserve succeeded — release the
+    // spot back so it isn't silently lost.
+    await releaseSpotsAtomic(payload, params.appointmentId, params.guestCount, maxCapacity)
+    throw err
+  }
+}
+
+/**
+ * List other upcoming, published appointments for the same workshop as
+ * `excludeAppointmentId` — candidates to move an overbooked booking to.
+ * Shows real remaining capacity (derived from confirmed bookings, same way
+ * fetchRosterData.ts computes it — not `availableSpots`, which can drift).
+ */
+export async function getAlternateAppointments(
+  excludeAppointmentId: string,
+): Promise<{ id: string; date: string; time: string; totalBooked: number; capacity: number }[]> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  const current = await payload.findByID({
+    collection: 'workshop-appointments',
+    id: excludeAppointmentId,
+    depth: 1,
+    overrideAccess: true,
+  })
+  const workshopId =
+    typeof current.workshop === 'object' && current.workshop !== null ? current.workshop.id : current.workshop
+  const capacity =
+    typeof current.workshop === 'object' && current.workshop !== null
+      ? Number(current.workshop.maxCapacityPerSlot ?? 12)
+      : 12
+
+  const appointments = await payload.find({
+    collection: 'workshop-appointments',
+    where: {
+      and: [
+        { workshop: { equals: workshopId } },
+        { id: { not_equals: excludeAppointmentId } },
+        { isPublished: { equals: true } },
+        { dateTime: { greater_than: new Date().toISOString() } },
+      ],
+    },
+    limit: 50,
+    sort: 'dateTime',
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const results = []
+  for (const appt of appointments.docs) {
+    const bookings = await payload.find({
+      collection: 'workshop-bookings',
+      where: { and: [{ appointmentId: { equals: appt.id } }, { status: { equals: 'confirmed' } }] },
+      limit: 100,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const totalBooked = bookings.docs.reduce((sum, b) => sum + (b.guestCount || 0), 0)
+    results.push({
+      id: appt.id,
+      date: fmtDate(String(appt.dateTime)),
+      time: `${fmtTime(String(appt.dateTime))} Uhr`,
+      totalBooked,
+      capacity,
+    })
+  }
+  return results
+}
+
+/**
+ * Move an existing booking to a different appointment of the same workshop
+ * — for resolving overbooking by relocating a guest to a date with room.
+ * Reserves the new spot first (atomic, respects real capacity), then
+ * releases the old spot only after the booking doc itself is updated, so a
+ * failure partway through never leaves a guest's seat unaccounted for on
+ * both dates or neither.
+ */
+export async function moveWorkshopBooking(params: {
+  bookingId: string
+  newAppointmentId: string
+}): Promise<{ id: string }> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  const booking = await payload.findByID({
+    collection: 'workshop-bookings',
+    id: params.bookingId,
+    depth: 0,
+    overrideAccess: true,
+  })
+  const oldAppointmentId = booking.appointmentId
+  if (!oldAppointmentId) {
+    throw new Error('Diese Buchung hat keinen zugeordneten Termin.')
+  }
+  if (oldAppointmentId === params.newAppointmentId) {
+    throw new Error('Das ist bereits der aktuelle Termin.')
+  }
+
+  const newAppointment = await payload.findByID({
+    collection: 'workshop-appointments',
+    id: params.newAppointmentId,
+    depth: 1,
+    overrideAccess: true,
+  })
+  const workshop = newAppointment.workshop
+  if (typeof workshop !== 'object' || workshop === null) {
+    throw new Error('Workshop-Daten konnten nicht geladen werden.')
+  }
+  const maxCapacity = Number(workshop.maxCapacityPerSlot ?? 12)
+  const guestCount = booking.guestCount || 1
+
+  const reserveResult = await reserveSpotsAtomic(payload, params.newAppointmentId, guestCount)
+  if (!reserveResult.success) {
+    throw new Error(`Am neuen Termin sind nur noch ${reserveResult.availableSpots ?? 0} Platz/Plätze frei.`)
+  }
+
+  try {
+    const dateTimeStr = String(newAppointment.dateTime ?? '')
+    await payload.update({
+      collection: 'workshop-bookings',
+      id: params.bookingId,
+      data: {
+        appointmentId: params.newAppointmentId,
+        workshopTitle: workshop.title,
+        workshopSlug: workshop.slug,
+        date: dateTimeStr ? fmtDate(dateTimeStr) : booking.date,
+        time: dateTimeStr ? `${fmtTime(dateTimeStr)} Uhr` : booking.time,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+      overrideAccess: true,
+      context: { skipAutoTranslate: true },
+    })
+  } catch (err) {
+    // Booking update failed after the new spot was reserved — release it
+    // back so the new date isn't left short a spot for nothing.
+    await releaseSpotsAtomic(payload, params.newAppointmentId, guestCount, maxCapacity)
+    throw err
+  }
+
+  // Only release the old spot once the booking has actually moved — if this
+  // step fails, the guest is still correctly booked on the new date; the old
+  // appointment's availableSpots just needs a manual correction afterward,
+  // which is a much smaller problem than losing the booking entirely.
+  try {
+    const oldAppointment = await payload.findByID({
+      collection: 'workshop-appointments',
+      id: oldAppointmentId,
+      depth: 1,
+      overrideAccess: true,
+    })
+    const oldWorkshop = oldAppointment.workshop
+    const oldMaxCapacity =
+      typeof oldWorkshop === 'object' && oldWorkshop !== null ? Number(oldWorkshop.maxCapacityPerSlot ?? 12) : 12
+    await releaseSpotsAtomic(payload, oldAppointmentId, guestCount, oldMaxCapacity)
+  } catch (err) {
+    payload.logger.error(
+      `[moveWorkshopBooking] Booking ${params.bookingId} moved successfully, but releasing the old appointment's spot failed: ${err instanceof Error ? err.message : err}`,
+    )
+  }
+
+  return { id: params.bookingId }
+}
+
+/**
+ * Email selected bookings offering a different date for the same workshop —
+ * for resolving overbooking manually (guest replies by email; an admin then
+ * uses moveWorkshopBooking once they confirm). Sends one email per booking
+ * (not per seat) via the buyer's own email address; bookings with no email
+ * on file are skipped and reported back, not silently dropped.
+ */
+export async function sendAlternateDateEmail(params: {
+  bookingIds: string[]
+  newAppointmentId: string
+}): Promise<{ sent: string[]; skippedNoEmail: string[] }> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  if (params.bookingIds.length === 0) {
+    throw new Error('Keine Buchungen ausgewählt.')
+  }
+
+  const newAppointment = await payload.findByID({
+    collection: 'workshop-appointments',
+    id: params.newAppointmentId,
+    depth: 0,
+    overrideAccess: true,
+  })
+  const dateTimeStr = String(newAppointment.dateTime ?? '')
+  const newDate = dateTimeStr ? fmtDate(dateTimeStr) : ''
+  const newTime = dateTimeStr ? `${fmtTime(dateTimeStr)} Uhr` : ''
+
+  const sent: string[] = []
+  const skippedNoEmail: string[] = []
+
+  for (const bookingId of params.bookingIds) {
+    const booking = await payload.findByID({
+      collection: 'workshop-bookings',
+      id: bookingId,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const name = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || 'Kund:in'
+    if (!booking.email) {
+      skippedNoEmail.push(name)
+      continue
+    }
+
+    const result = await sendTemplateEmail({
+      to: [{ email: booking.email, name }],
+      templateId: BREVO_TEMPLATES.WORKSHOP_ALTERNATE_DATE_OFFER,
+      params: {
+        FIRST_NAME: booking.firstName || name,
+        WORKSHOP_TITLE: booking.workshopTitle || '',
+        ORIGINAL_DATE: `${booking.date || ''}${booking.time ? ` · ${booking.time}` : ''}`,
+        NEW_DATE: newDate,
+        NEW_TIME: newTime,
+      },
+    })
+
+    if (result.success) {
+      sent.push(name)
+      const contactedNote = `[Kontaktiert ${new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })} wegen Ausweichtermin]`
+      await payload.update({
+        collection: 'workshop-bookings',
+        id: bookingId,
+        data: {
+          notes: booking.notes ? `${booking.notes}\n${contactedNote}` : contactedNote,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+        overrideAccess: true,
+        context: { skipAutoTranslate: true },
+      })
+    } else {
+      payload.logger.error(`[sendAlternateDateEmail] Failed to send to booking ${bookingId} (${name})`)
+      skippedNoEmail.push(`${name} (Versand fehlgeschlagen)`)
+    }
+  }
+
+  return { sent, skippedNoEmail }
 }
 
 export interface CreateQuoteLineItem {

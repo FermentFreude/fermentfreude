@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from 'react'
 
 import { createQuote } from './actions'
+import { BRAND } from './rosterTheme'
 
 interface FormItem {
   key: string
@@ -179,7 +180,7 @@ export function CreateQuoteForm({ onDone }: { onDone: () => void }) {
         disabled={isCreating}
         style={{
           padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-          background: '#111827', color: '#fff', fontSize: '14px', fontWeight: 600,
+          background: BRAND.gold, color: BRAND.nearBlack, fontSize: '14px', fontWeight: 700,
           opacity: isCreating ? 0.5 : 1,
         }}
       >

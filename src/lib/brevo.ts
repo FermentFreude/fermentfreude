@@ -102,6 +102,7 @@ export const BREVO_TEMPLATES = {
   WORKSHOP_BOOKING_CONFIRMATION: 65, // V2 (was 31)
   WORKSHOP_GIFT_NOTIFICATION: 93, // V2 — Sprint 3, sent per gift seat (no price)
   ADMIN_WORKSHOP_NOTIFICATION: 94, // Admin notification for new workshop bookings
+  WORKSHOP_ALTERNATE_DATE_OFFER: 100, // Roster: offer an overbooked guest a different date, manual follow-up
   WORKSHOP_7DAY_REMINDER: 32,
   WORKSHOP_1DAY_REMINDER: 33,
   POST_WORKSHOP_FOLLOWUP: 34,

@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react'
 
 import { updatePickupStatus } from './actions'
 import type { PickupOrderRow } from './types'
+import { BRAND, PageHeader, StatCard } from './rosterTheme'
 
 interface Props {
   orders: PickupOrderRow[]
@@ -140,7 +141,7 @@ function OrderCard({ order, onRefresh }: { order: PickupOrderRow; onRefresh: () 
             disabled={isPending}
             style={{
               padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-              background: '#111827', color: '#fff', fontSize: '13px', fontWeight: 600,
+              background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700,
               opacity: isPending ? 0.5 : 1,
             }}
           >
@@ -153,7 +154,7 @@ function OrderCard({ order, onRefresh }: { order: PickupOrderRow; onRefresh: () 
             disabled={isPending}
             style={{
               padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-              background: '#111827', color: '#fff', fontSize: '13px', fontWeight: 600,
+              background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700,
               opacity: isPending ? 0.5 : 1,
             }}
           >
@@ -202,39 +203,14 @@ export function PickupsView({ orders, onRefresh }: Props) {
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px' }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>Abholbestellungen</h1>
-        <p style={{ margin: '6px 0 0', fontSize: '14px', color: 'var(--theme-text)', opacity: 0.55 }}>
-          Verwalte Produktbestellungen zur Abholung
-        </p>
-      </div>
+      <PageHeader title="Abholbestellungen" subtitle="Verwalte Produktbestellungen zur Abholung" />
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px', marginBottom: '32px' }}>
-        {[
-          { label: 'In Bearbeitung', value: inProgress, accent: 'orange' },
-          { label: 'Abholbereit', value: ready, accent: 'blue' },
-          { label: 'Abgeholt', value: collected, accent: 'green' },
-          { label: 'Umsatz (abgeholt)', value: `€${collectedRevenue.toFixed(2).replace('.', ',')}`, accent: 'none' },
-        ].map(({ label, value, accent }) => (
-          <div key={label} style={{
-            background: 'var(--theme-elevation-50)', border: '1px solid var(--theme-elevation-100)',
-            borderRadius: '10px', padding: '16px 18px',
-          }}>
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '8px', marginBottom: '10px',
-              background: accent === 'orange' ? '#fef3c7' : accent === 'blue' ? '#dbeafe' : accent === 'green' ? '#dcfce7' : 'var(--theme-elevation-100)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              {accent === 'orange' && <span style={{ fontSize: '16px' }}>🕐</span>}
-              {accent === 'blue' && <span style={{ fontSize: '16px' }}>📦</span>}
-              {accent === 'green' && <span style={{ fontSize: '16px' }}>✓</span>}
-              {accent === 'none' && <span style={{ fontSize: '14px', color: 'var(--theme-text)', fontWeight: 700 }}>€</span>}
-            </div>
-            <p style={{ margin: '0 0 2px', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.55 }}>{label}</p>
-            <p style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)' }}>{value}</p>
-          </div>
-        ))}
+        <StatCard label="In Bearbeitung" value={inProgress} accentKey="orange" icon={<span style={{ fontSize: '16px' }}>🕐</span>} />
+        <StatCard label="Abholbereit" value={ready} accentKey="blue" icon={<span style={{ fontSize: '16px' }}>📦</span>} />
+        <StatCard label="Abgeholt" value={collected} accentKey="green" icon={<span style={{ fontSize: '16px' }}>✓</span>} />
+        <StatCard label="Umsatz (abgeholt)" value={`€${collectedRevenue.toFixed(2).replace('.', ',')}`} accentKey="gold" icon={<span style={{ fontSize: '14px', fontWeight: 700 }}>€</span>} />
       </div>
 
       {/* Filter + search */}
