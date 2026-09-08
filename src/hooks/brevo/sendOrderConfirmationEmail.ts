@@ -312,11 +312,17 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
 
     // SHIPPING param: for pickup orders show "Abholung — {locationName}",
     // otherwise the formatted shipping cost (or €0,00 fallback).
+    // PICKUP_BOOKING_URL: only for a non-workshop pickup order (workshopDate
+    // empty) — the Google Appointment Schedule link the customer uses to
+    // book their exact pickup time. Workshop orders are unaffected — they
+    // keep their own appointment system.
     let shippingDisplay: string
+    let pickupBookingUrl = ''
+    let pickupLabel = ''
     if (isPickup) {
-      // Resolve a default pickup location from the WorkshopLocations global if booking didn't set one
-      let pickupLabel = workshopLocation
-      if (!pickupLabel) {
+      pickupLabel = workshopLocation
+      if (!pickupLabel && workshopDate) {
+        // Workshop order with no location resolved yet — unchanged fallback.
         try {
           const locations = await req.payload.find({
             collection: 'workshop-locations',
@@ -325,6 +331,20 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
           })
           const loc = locations.docs[0] as { name?: string } | undefined
           if (loc?.name) pickupLabel = loc.name
+        } catch {
+          // ignore
+        }
+      } else if (!workshopDate) {
+        // Physical-product order — the shop's own fixed pickup address, not
+        // a workshop venue.
+        try {
+          const settings = await req.payload.findGlobal({
+            slug: 'product-pickup-settings',
+            depth: 0,
+            overrideAccess: true,
+          })
+          if (settings?.locationName) pickupLabel = settings.locationName
+          if (settings?.googleScheduleUrl) pickupBookingUrl = settings.googleScheduleUrl
         } catch {
           // ignore
         }
@@ -397,11 +417,15 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       ITEMS: itemsArray,
       CUSTOMER_NAME: recipientName || recipientEmail,
       FIRST_NAME: recipientName?.split(' ')[0] || recipientName || recipientEmail,
-      ORDER_DATE: new Date().toLocaleDateString('de-DE'),
+      // Pinned to Europe/Vienna — without an explicit timeZone this reads the
+      // SERVER's local date (UTC on Vercel), which can format an evening
+      // Vienna order to the previous calendar day.
+      ORDER_DATE: new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' }),
       // ORDER_URL is only shown for registered users (template uses IS_REGISTERED_USER guard)
       ORDER_URL: `${siteUrl}/account/orders`,
       SHOP_URL: `${siteUrl}/workshops`,
       RECEIPT_URL,
+      ...(pickupBookingUrl ? { PICKUP_BOOKING_URL: pickupBookingUrl } : {}),
       // 1 = registered user, '' = guest — template uses this to conditionally show "View order" button
       IS_REGISTERED_USER: customerId ? '1' : '',
       PRIVACY_URL: `${siteUrl}/datenschutz`,
@@ -502,11 +526,24 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
   ${customerDietSpecs ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Ernährungshinweise</td><td style="padding:4px 0">${customerDietSpecs}</td></tr>` : ''}`
         : ''
 
+      // Product-pickup rows — previously missing entirely, so a plain
+      // product order's admin email showed no pickup info at all. Workshop
+      // orders are unaffected (they get workshopRows above instead).
+      const productPickupStatus =
+        typeof doc.pickupStatus === 'string' && doc.pickupStatus ? doc.pickupStatus : 'pending'
+      const pickupRows =
+        !isWorkshopOrder && isPickup
+          ? `
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Abholort</td><td style="padding:4px 0">${pickupLabel || (typeof doc.pickupLocation === 'string' && doc.pickupLocation) || '—'}</td></tr>
+  <tr><td style="padding:4px 12px 4px 0;color:#555">Abhol-Status</td><td style="padding:4px 0">${productPickupStatus}</td></tr>
+  ${customerPhone ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Telefon</td><td style="padding:4px 0">${customerPhone}</td></tr>` : ''}`
+          : ''
+
       const htmlContent = `
 ${warningBlock}
 <h2 style="font-family:sans-serif;margin-bottom:16px">${headingLabel}</h2>
 <table style="font-family:sans-serif;border-collapse:collapse;font-size:14px">
-  <tr><td style="padding:4px 12px 4px 0;color:#555;white-space:nowrap">Betrag</td><td style="padding:4px 0"><strong>${amountDisplay}</strong></td></tr>${workshopRows}
+  <tr><td style="padding:4px 12px 4px 0;color:#555;white-space:nowrap">Betrag</td><td style="padding:4px 0"><strong>${amountDisplay}</strong></td></tr>${workshopRows}${pickupRows}
   <tr><td style="padding:4px 12px 4px 0;color:#555">Kund:in</td><td style="padding:4px 0">${recipientName || ''} <a href="mailto:${recipientEmail}">${recipientEmail}</a></td></tr>
   <tr><td style="padding:4px 12px 4px 0;color:#555">Artikel</td><td style="padding:4px 0">${safeOrderItemsSummary || '—'}</td></tr>
   <tr><td style="padding:16px 12px 4px 0;color:#555;border-top:1px solid #eee">Bestell-ID</td><td style="padding:16px 0 4px;border-top:1px solid #eee;font-family:monospace">${orderNumber}</td></tr>

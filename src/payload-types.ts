@@ -182,6 +182,7 @@ export interface Config {
     'product-slider-global': ProductSliderGlobal;
     'workshop-cards-global': WorkshopCardsGlobal;
     'product-detail-labels-global': ProductDetailLabelsGlobal;
+    'product-pickup-settings': ProductPickupSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -195,8 +196,12 @@ export interface Config {
     'product-slider-global': ProductSliderGlobalSelect<false> | ProductSliderGlobalSelect<true>;
     'workshop-cards-global': WorkshopCardsGlobalSelect<false> | WorkshopCardsGlobalSelect<true>;
     'product-detail-labels-global': ProductDetailLabelsGlobalSelect<false> | ProductDetailLabelsGlobalSelect<true>;
+    'product-pickup-settings': ProductPickupSettingsSelect<false> | ProductPickupSettingsSelect<true>;
   };
   locale: 'de' | 'en';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -2615,9 +2620,6 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -2637,9 +2639,6 @@ export interface Form {
   redirect?: {
     url: string;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -2648,9 +2647,6 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: {
           root: {
             type: string;
@@ -9182,6 +9178,29 @@ export interface ProductDetailLabelsGlobal {
   createdAt?: string | null;
 }
 /**
+ * Wo Bestellungen (Gläser, frische & abgefüllte Produkte) abgeholt werden, und der Link, über den Kund:innen nach der Bezahlung ihre Abholzeit buchen. Gilt NICHT für Workshops oder Gutscheine.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-pickup-settings".
+ */
+export interface ProductPickupSetting {
+  id: string;
+  /**
+   * Wird Kund:innen vor und nach der Zahlung angezeigt (z. B. Geschäftsname).
+   */
+  locationName: string;
+  /**
+   * Feste Adresse unseres Geschäfts/Produktionsstandorts — wird bereits vor der Zahlung angezeigt, da sie sich nicht ändert.
+   */
+  locationAddress: string;
+  /**
+   * Der öffentliche Buchungslink aus Google Kalender (Termine erstellen → "Terminplan"), über den Kund:innen nach der Zahlung ihre Abholzeit wählen. Erscheint erst NACH der Zahlung (Bestellbestätigung + E-Mail) — nicht im Checkout. Leer lassen, bis ein echter Terminplan existiert.
+   */
+  googleScheduleUrl?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -9509,6 +9528,28 @@ export interface ProductDetailLabelsGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-pickup-settings_select".
+ */
+export interface ProductPickupSettingsSelect<T extends boolean = true> {
+  locationName?: T;
+  locationAddress?: T;
+  googleScheduleUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

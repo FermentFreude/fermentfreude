@@ -177,22 +177,14 @@ const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
 
 // Default pickup location — overridden at runtime by the first active
-// workshop-locations record (admin-managed). Kept here as a static fallback
-// in case the fetch fails or no locations are configured yet.
+// product-pickup-settings global (admin-managed) — the shop/manufacturing
+// address, fixed and permanent. Kept here as a static fallback in case the
+// fetch fails or the global hasn't been saved yet.
 const DEFAULT_PICKUP_LOCATION = {
-  id: 'the-ginery',
-  name: 'The Ginery',
+  id: 'product-pickup-settings',
+  name: 'Fermentfreude',
   address: 'Grabenstraße 15, 8010 Graz, Austria',
-  mapLink: 'https://www.google.com/maps/search/The+Ginery+Grabenstra%C3%9Fe+15+Graz/',
-  openingHours: {
-    monday: { open: '09:00', close: '18:00' },
-    tuesday: { open: '09:00', close: '18:00' },
-    wednesday: { open: '09:00', close: '18:00' },
-    thursday: { open: '09:00', close: '18:00' },
-    friday: { open: '09:00', close: '18:00' },
-    saturday: { open: '10:00', close: '16:00' },
-    sunday: { open: 'closed', close: 'closed' },
-  },
+  mapLink: 'https://www.google.com/maps/search/Fermentfreude+Grabenstra%C3%9Fe+15+Graz/',
 }
 
 const buildMapLink = (name: string, address: string) =>
@@ -229,8 +221,6 @@ export const CheckoutPage: React.FC = () => {
   const [phone, setPhone] = useState('')
   const [dietSpecs, setDietSpecs] = useState('')
   const [phoneError, setPhoneError] = useState<string | null>(null)
-  const [emailEditable, setEmailEditable] = useState(true)
-
   // Phone validation (optional field — only validates format if non-empty)
   const validatePhone = (phoneNumber: string): string | null => {
     const trimmed = phoneNumber.trim()
@@ -387,39 +377,6 @@ export const CheckoutPage: React.FC = () => {
     }
   }, [])
 
-  // Fetch the active pickup location from the workshop-locations collection.
-  // Falls back to DEFAULT_PICKUP_LOCATION on any error / empty result.
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const res = await fetch(
-          `/api/workshop-locations?where[isActive][equals]=true&limit=1&depth=0&locale=${locale}`,
-          { cache: 'no-store' },
-        )
-        if (!res.ok) return
-        const json = (await res.json()) as {
-          docs?: { id: string; name?: string; address?: string }[]
-        }
-        const loc = json?.docs?.[0]
-        if (!cancelled && loc?.name && loc?.address) {
-          setPickupLocation({
-            ...DEFAULT_PICKUP_LOCATION,
-            id: loc.id,
-            name: loc.name,
-            address: loc.address,
-            mapLink: buildMapLink(loc.name, loc.address),
-          })
-        }
-      } catch {
-        // ignore — fallback used
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [locale])
-
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
 
   // Digital products (courses) and workshops don't need a shipping address.
@@ -471,9 +428,69 @@ export const CheckoutPage: React.FC = () => {
     }),
   )
 
+  // Fetch the pickup location shown in checkout. A cart containing a
+  // workshop (pure workshop, or mixed workshop + product) keeps the
+  // existing workshop-locations lookup completely unchanged — workshops are
+  // out of scope for this change, bug and all. A physical-only cart instead
+  // reads the shop's own fixed address from product-pickup-settings, which
+  // is what's actually correct here (the workshop-locations query was
+  // grabbing whatever workshop venue happened to be marked active).
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        if (hasWorkshop) {
+          const res = await fetch(
+            `/api/workshop-locations?where[isActive][equals]=true&limit=1&depth=0&locale=${locale}`,
+            { cache: 'no-store' },
+          )
+          if (!res.ok) return
+          const json = (await res.json()) as {
+            docs?: { id: string; name?: string; address?: string }[]
+          }
+          const loc = json?.docs?.[0]
+          if (!cancelled && loc?.name && loc?.address) {
+            setPickupLocation({
+              id: loc.id,
+              name: loc.name,
+              address: loc.address,
+              mapLink: buildMapLink(loc.name, loc.address),
+            })
+          }
+        } else {
+          const res = await fetch(
+            `/api/globals/product-pickup-settings?depth=0&locale=${locale}`,
+            { cache: 'no-store' },
+          )
+          if (!res.ok) return
+          const json = (await res.json()) as {
+            locationName?: string
+            locationAddress?: string
+          }
+          if (!cancelled && json?.locationName && json?.locationAddress) {
+            setPickupLocation({
+              id: 'product-pickup-settings',
+              name: json.locationName,
+              address: json.locationAddress,
+              mapLink: buildMapLink(json.locationName, json.locationAddress),
+            })
+          }
+        }
+      } catch {
+        // ignore — DEFAULT_PICKUP_LOCATION fallback used
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [locale, hasWorkshop])
+
   // Button enable rules:
   //   - all-digital cart (workshops + online courses only): email is enough.
-  //   - any physical item: email + pickup date + pickup time.
+  //   - physical item + workshop mixed in the same cart (unchanged legacy
+  //     flow): email + pickup date + pickup time.
+  //   - physical-only cart: email is enough — exact pickup time is booked
+  //     after payment via the Google Appointment Schedule link, not here.
   //   - otherwise (legacy fallback): email + billing/shipping address.
   const canGoToPayment = Boolean(
     checkoutEmail &&
@@ -482,7 +499,9 @@ export const CheckoutPage: React.FC = () => {
     (isAllDigital
       ? true
       : hasPhysicalItem
-        ? pickupDate && pickupTime
+        ? hasWorkshop
+          ? pickupDate && pickupTime
+          : true
         : billingAddress && (billingAddressSameAsShipping || shippingAddress)),
   )
 
@@ -682,12 +701,18 @@ export const CheckoutPage: React.FC = () => {
           ...(dietSpecs.trim() ? { customerDietSpecs: dietSpecs.trim() } : {}),
         }
 
-        // For pickup orders, pass pickup info instead of addresses
+        // For pickup orders, pass pickup info instead of addresses. Date/time
+        // are only ever collected pre-payment for a mixed workshop+product
+        // cart (the unchanged legacy flow) — a physical-only cart books its
+        // exact time after payment via the Google Appointment Schedule link,
+        // so there's nothing to send here yet.
         if (isAllPhysicalPickup) {
           additionalData.pickupLocation = pickupLocation.name
-          additionalData.pickupDate = pickupDate
-          additionalData.pickupTime = pickupTime
           additionalData.pickupAddress = pickupLocation.address
+          if (hasWorkshop) {
+            additionalData.pickupDate = pickupDate
+            additionalData.pickupTime = pickupTime
+          }
         } else {
           // For shipped orders, include addresses
           additionalData.billingAddress = billingAddress
@@ -765,6 +790,7 @@ export const CheckoutPage: React.FC = () => {
       dietSpecs,
       initiatePayment,
       isAllPhysicalPickup,
+      hasWorkshop,
       pickupDate,
       pickupTime,
       voucherApplied,
@@ -1007,10 +1033,12 @@ export const CheckoutPage: React.FC = () => {
                   {t.emailLabel}
                 </Label>
                 <Input
-                  disabled={createAccountOpt && !emailEditable}
+                  disabled={false}
                   id="email"
                   name="email"
+                  autoComplete="email"
                   onChange={(e) => setEmail(e.target.value)}
+                  value={email}
                   required
                   type="email"
                   className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
@@ -1026,7 +1054,7 @@ export const CheckoutPage: React.FC = () => {
                   {t.phoneLabel}
                 </Label>
                 <Input
-                  disabled={createAccountOpt && !emailEditable}
+                  disabled={false}
                   id="phone"
                   name="phone"
                   autoComplete="tel"
@@ -1052,7 +1080,7 @@ export const CheckoutPage: React.FC = () => {
                   {t.dietLabel}
                 </Label>
                 <textarea
-                  disabled={createAccountOpt && !emailEditable}
+                  disabled={false}
                   id="dietSpecs"
                   name="dietSpecs"
                   onChange={(e) => {
@@ -1124,7 +1152,34 @@ export const CheckoutPage: React.FC = () => {
         </section>
 
         {/* ── Address/Pickup Section ── */}
-        {isAllDigital ? null : isAllPhysicalPickup ? (
+        {isAllDigital ? null : isAllPhysicalPickup && !hasWorkshop ? (
+          // Physical-only cart: location only, no date/time. The exact
+          // pickup slot is booked after payment via the Google Appointment
+          // Schedule link (order confirmation page + email) — deliberately
+          // not shown here.
+          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+            <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
+              {t.storePickup}
+            </h2>
+            <div className="rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
+              <h3 className="mb-3 font-display font-semibold text-ff-near-black">
+                {pickupLocation.name}
+              </h3>
+              <p className="mb-3 text-body-sm text-ff-gray-text-light">{pickupLocation.address}</p>
+              <a
+                href={pickupLocation.mapLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-body-sm text-ff-gold-accent underline hover:text-ff-near-black"
+              >
+                {t.viewOnMaps}
+              </a>
+            </div>
+          </section>
+        ) : isAllPhysicalPickup ? (
+          // Mixed workshop + product cart: unchanged legacy flow (date/time
+          // picker, workshop-locations lookup) — workshops are out of scope
+          // for this change.
           <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.storePickup}
@@ -1228,7 +1283,7 @@ export const CheckoutPage: React.FC = () => {
               <CheckoutAddresses heading={t.billingAddress} setAddress={setBillingAddress} />
             ) : (
               <CreateAddressModal
-                disabled={!email || Boolean(emailEditable)}
+                disabled={!email}
                 callback={(address) => {
                   setBillingAddress(address)
                 }}
@@ -1240,7 +1295,7 @@ export const CheckoutPage: React.FC = () => {
               <Checkbox
                 id="shippingTheSameAsBilling"
                 checked={billingAddressSameAsShipping}
-                disabled={Boolean(paymentData || (!user && (!email || Boolean(emailEditable))))}
+                disabled={Boolean(paymentData || (!user && !email))}
                 onCheckedChange={(state) => {
                   setBillingAddressSameAsShipping(state as boolean)
                 }}
@@ -1284,7 +1339,7 @@ export const CheckoutPage: React.FC = () => {
                     callback={(address) => {
                       setShippingAddress(address)
                     }}
-                    disabled={!email || Boolean(emailEditable)}
+                    disabled={!email}
                     skipSubmission={true}
                   />
                 )}

@@ -37,12 +37,14 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
   const locale = await getLocale()
   const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
-  // Fetch order data to check if it's a pickup order
-  let isPickupOrder = false
-  let pickupInfo: { date?: string; time?: string } = {}
-  // Resolve pickup location from the workshop-locations collection (admin-managed)
-  let pickupLocationName = 'The Ginery'
+  // A physical-product order (type === 'order', as opposed to 'workshop' or
+  // 'course') is always a pickup order — pickup is the only fulfillment
+  // method for products right now. Resolve pickup location + the
+  // post-payment Google Appointment Schedule link from product-pickup-settings.
+  const isPickupOrder = type === 'order'
+  let pickupLocationName = 'Fermentfreude'
   let pickupLocationAddress = 'Grabenstraße 15, 8010 Graz, Austria'
+  let pickupBookingUrl = ''
 
   let downloadToken: string | null = null
 
@@ -60,30 +62,20 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
       if (order && typeof order === 'object') {
         const orderData = order as unknown as Record<string, unknown>
         downloadToken = (orderData.downloadToken as string | null) ?? null
-
-        // Check if order has pickupDate and pickupTime (physical products for pickup)
-        if (type === 'order' && (orderData.pickupDate || orderData.pickupTime)) {
-          isPickupOrder = true
-          pickupInfo = {
-            date: orderData.pickupDate as string | undefined,
-            time: orderData.pickupTime as string | undefined,
-          }
-        }
       }
 
-      // Resolve current pickup location (first active record) — only for physical orders
-      if (type === 'order') {
+      // Resolve pickup location + the Google Appointment Schedule booking
+      // link — only for physical-product orders
+      if (isPickupOrder) {
         try {
-          const locations = await payload.find({
-            collection: 'workshop-locations',
-            where: { isActive: { equals: true } },
-            limit: 1,
+          const settings = await payload.findGlobal({
+            slug: 'product-pickup-settings',
             locale,
             depth: 0,
           })
-          const loc = locations.docs[0] as { name?: string; address?: string } | undefined
-          if (loc?.name) pickupLocationName = loc.name
-          if (loc?.address) pickupLocationAddress = loc.address
+          if (settings?.locationName) pickupLocationName = settings.locationName
+          if (settings?.locationAddress) pickupLocationAddress = settings.locationAddress
+          if (settings?.googleScheduleUrl) pickupBookingUrl = settings.googleScheduleUrl
         } catch {
           // ignore — fallback used
         }
@@ -152,25 +144,18 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <p className="text-body-sm text-ff-text-muted">{pickupLocationAddress}</p>
               </div>
             </div>
-            {pickupInfo.date && (
-              <div className="flex items-start gap-3">
-                <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
-                <div>
-                  <p className="text-body-sm font-semibold text-ff-near-black">{t.pickupDate}</p>
-                  <p className="text-body-sm text-ff-text-muted">{pickupInfo.date}</p>
-                </div>
-              </div>
-            )}
-            {pickupInfo.time && (
-              <div className="flex items-start gap-3">
-                <CalendarCheck className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
-                <div>
-                  <p className="text-body-sm font-semibold text-ff-near-black">{t.pickupTime}</p>
-                  <p className="text-body-sm text-ff-text-muted">{pickupInfo.time}</p>
-                </div>
-              </div>
-            )}
           </div>
+          {pickupBookingUrl && (
+            <a
+              href={pickupBookingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex items-center gap-2 rounded-[--radius-pill] bg-[#555954] px-5 py-2.5 font-display font-medium text-white transition-opacity hover:opacity-90"
+            >
+              <CalendarCheck className="h-4 w-4" />
+              {locale === 'de' ? 'Abholzeit buchen' : 'Book your pickup time'}
+            </a>
+          )}
         </Card>
 
         {/* Timeline */}
@@ -217,8 +202,8 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 </h3>
                 <p className="text-body-sm text-ff-text-muted">
                   {locale === 'de'
-                    ? 'Hole deine Artikel zu deiner gewählten Zeit und am gewählten Datum ab.'
-                    : 'Pick up your items at your selected time and date.'}
+                    ? 'Buche über den Link oben deine Abholzeit und hole deine Artikel dann ab.'
+                    : 'Book your pickup time using the link above, then collect your items.'}
                 </p>
               </div>
             </div>
