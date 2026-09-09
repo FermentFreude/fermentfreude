@@ -361,7 +361,9 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             </div>
             <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
               <span className="text-ff-gold font-bold">&bull;</span>
-              <p className="text-body-sm text-ff-text-muted">{t.visitDashboard}</p>
+              <p className="text-body-sm text-ff-text-muted">
+                {isLoggedIn ? t.visitDashboard : t.visitDashboardGuest}
+              </p>
             </div>
             <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
               <span className="text-ff-gold font-bold">&bull;</span>
@@ -373,10 +375,10 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
-            href="/account/orders"
+            href={isLoggedIn ? '/account/orders' : '/create-account'}
             className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
           >
-            {t.viewMyOrders}
+            {isLoggedIn ? t.viewMyOrders : t.createAccount}
           </Link>
           <Link
             href="/shop"
@@ -940,12 +942,20 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             </Link>
           </>
         ) : (
-          <Link
-            href="/shop"
-            className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
-          >
-            {t.continueShopping}
-          </Link>
+          <>
+            <Link
+              href="/create-account"
+              className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+            >
+              {t.createAccount}
+            </Link>
+            <Link
+              href="/shop"
+              className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
+            >
+              {t.continueShopping}
+            </Link>
+          </>
         )}
       </div>
 
