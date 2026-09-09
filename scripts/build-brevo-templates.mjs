@@ -345,6 +345,15 @@ ${intro({
 ${ctaRow(p('RESET_URL', SITE + '/forgot-password'), 'Neues Passwort setzen')}
 ${spacer(16)}
 ${card(`
+  <tr><td style="padding:18px 20px;">
+    <div style="${FONT}font-size:12px;line-height:1.3;color:${C.muted};text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:6px;">Falls der Button nicht funktioniert</div>
+    <div style="${FONT}font-size:13px;line-height:1.5;color:${C.body};word-break:break-all;">
+      <a href="${p('RESET_URL', SITE + '/forgot-password')}" style="color:${C.dark};text-decoration:underline;">${p('RESET_URL', SITE + '/forgot-password')}</a>
+    </div>
+  </td></tr>
+`)}
+${spacer(16)}
+${card(`
   ${detailRow({ icon: 'lock', label: 'Sicherheitshinweis', value: 'Wir werden dich niemals nach deinem Passwort fragen.' })}
   ${detailRow({ icon: 'clock', label: 'Gültigkeit', value: p('EXPIRY_TIME', '1 Stunde') + ' ab Versand dieser E-Mail' })}
 `)}
