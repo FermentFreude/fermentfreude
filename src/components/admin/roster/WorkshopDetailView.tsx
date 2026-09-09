@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 
 import { AddManualBookingForm } from './AddManualBookingForm'
 import { BookingDetailModal } from './BookingDetailModal'
+import { DeleteBookingControl } from './DeleteBookingControl'
 import { MoveBookingControl } from './MoveBookingControl'
 import { SendAlternateDateEmailBar } from './SendAlternateDateEmailBar'
 import type { AppointmentRow, BookingRow } from './types'
@@ -288,6 +289,9 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                         currentAppointmentId={appointment.id}
                         onDone={onRefresh}
                       />
+                      {!card.booking.orderId && (
+                        <DeleteBookingControl bookingId={card.bookingId} onDone={onRefresh} />
+                      )}
                     </div>
                   )}
                 </div>
