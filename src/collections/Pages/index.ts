@@ -1,9 +1,11 @@
-import type { CollectionConfig } from 'payload'
+import type { CheckboxField, CollectionBeforeChangeHook, CollectionConfig, Field } from 'payload'
+import { slugField } from 'payload'
 
 import { adminOnly } from '@/access/adminOnly'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
+import { gastronomySectionBlocks } from '@/blocks/GastronomySections/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
 import { CollectionGrid } from '@/blocks/CollectionGrid/config'
@@ -49,8 +51,91 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { slugField } from 'payload'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+
+function gastronomyShowSection(name: string): CheckboxField {
+  return {
+    name,
+    type: 'checkbox',
+    label: 'Show this section',
+    defaultValue: true,
+    admin: {
+      description:
+        'Turn off to hide this section on the website (German and English). The content stays saved.',
+    },
+  }
+}
+
+/** Keep unused gastronomy fields in the schema/API, but never show them in /admin. */
+function hideGastronomyLegacyFields(fields: Field[]): Field[] {
+  return fields.map((field) => ({
+    ...field,
+    required: false,
+    hidden: true,
+    admin: {
+      ...('admin' in field && field.admin ? field.admin : {}),
+      hidden: true,
+      disableListColumn: true,
+      condition: () => false,
+    },
+  })) as Field[]
+}
+
+const GASTRONOMY_HIDDEN_KEYS = [
+  'gastronomyHeroSliderAutoplayMs',
+  'gastronomyOfferCards',
+  'gastronomyProductQuote',
+  'gastronomyTrustedByBadges',
+  'gastronomyCtaBanner',
+  'gastronomyOfferDetailsTitle',
+  'gastronomyOfferSectionTitle',
+  'gastronomyOfferDetails',
+  'gastronomyOutcomesEyebrow',
+  'gastronomyOutcomesTitle',
+  'gastronomyOutcomesBeforeLabel',
+  'gastronomyOutcomesAfterLabel',
+  'gastronomyOutcomesItems',
+  'gastronomyProcessEyebrow',
+  'gastronomyProcessTitle',
+  'gastronomyProcessSteps',
+  'gastronomyTestimonialsEyebrow',
+  'gastronomyFaqEyebrow',
+  'gastronomyFaqTitle',
+  'gastronomyFaqItems',
+  'gastronomyContactImage',
+  'gastronomyContactTitle',
+  'gastronomyContactDescription',
+  'gastronomyContactAddress',
+  'gastronomyWorkshopSectionTitle',
+  'gastronomyWorkshopSectionSubtitle',
+  'gastronomyWorkshopClarification',
+  'gastronomyWorkshopNextDateLabel',
+  'gastronomyWorkshopCards',
+] as const
+
+const preserveHiddenGastronomyFields: CollectionBeforeChangeHook = ({
+  data,
+  originalDoc,
+  operation,
+}) => {
+  if (operation !== 'update') return data
+  const slug = data?.slug ?? originalDoc?.slug
+  if (slug !== 'gastronomy') return data
+  const incoming = data?.gastronomy as Record<string, unknown> | undefined
+  const existing = originalDoc?.gastronomy as Record<string, unknown> | undefined
+  if (!incoming || !existing) return data
+  for (const key of Object.keys(existing)) {
+    if (incoming[key] === undefined && existing[key] !== undefined) {
+      incoming[key] = existing[key]
+    }
+  }
+  for (const key of GASTRONOMY_HIDDEN_KEYS) {
+    if (incoming[key] === undefined && existing[key] !== undefined) {
+      incoming[key] = existing[key]
+    }
+  }
+  return data
+}
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -171,7 +256,7 @@ export const Pages: CollectionConfig = {
           label: 'Gastronomy Page',
           admin: {
             description:
-              'B2B /gastronomy. Slug oben setzen. Felder folgen der Seitenreihenfolge: Hero → Trusted by → CTA → What we offer → … → Kontakt → Next workshop. / Fields follow on-page order from top to bottom.',
+              'B2B sales page. Add, drag, and reorder sections the same way as other pages (like Help & FAQ). Click a section to edit it.',
             condition: (data, siblingData) => {
               if (process.env.PAYLOAD_SKIP_GASTRONOMY_CONDITION === '1') return false
               const slug = data?.slug ?? siblingData?.slug
@@ -180,260 +265,458 @@ export const Pages: CollectionConfig = {
           },
           fields: [
             {
-              type: 'row',
-              fields: [
-                {
-                  name: 'gastronomyHeroCtaLabel',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Hero — CTA button label',
-                  admin: {
-                    width: '50%',
-                    description: 'Primary button on the hero slider (e.g. “Take a look”).',
-                  },
-                },
-                {
-                  name: 'gastronomyHeroCtaUrl',
-                  type: 'text',
-                  required: false,
-                  label: 'Hero — CTA URL',
-                  admin: {
-                    width: '50%',
-                    description: 'Hero button target (e.g. #offer).',
-                  },
-                },
-              ],
-            },
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'gastronomyHeroSliderPrevLabel',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Hero slider — Previous label',
-                  admin: {
-                    description: 'Text on the previous-slide control (e.g. PREV, ZURÜCK).',
-                    width: '33%',
-                  },
-                },
-                {
-                  name: 'gastronomyHeroSliderNextLabel',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Hero slider — Next label',
-                  admin: {
-                    description: 'Text on the next-slide control (e.g. NEXT, WEITER).',
-                    width: '33%',
-                  },
-                },
-                {
-                  name: 'gastronomyHeroSliderAutoplayMs',
-                  type: 'number',
-                  required: false,
-                  label: 'Hero slider — autoplay (ms)',
-                  admin: {
-                    description:
-                      'Milliseconds between automatic slide changes. Leave empty for default (12000). Min 2000, max 120000.',
-                    width: '34%',
-                  },
-                  min: 2000,
-                  max: 120000,
-                },
-              ],
-            },
-            {
-              name: 'gastronomyOfferCards',
-              type: 'array',
+              name: 'gastronomyBlocks',
+              type: 'blocks',
+              label: 'Sections',
+              labels: { singular: 'Section', plural: 'Sections' },
+              blocks: gastronomySectionBlocks,
               required: false,
-              minRows: 0,
-              maxRows: 3,
-              label: 'Hero slider — slides (3 cards)',
               admin: {
                 description:
-                  'Images + text for the large hero carousel (same order as on the page, before Trusted by).',
+                  'Drag the handle to change the order on the website. Use Add Section to add Hero, Showcase, and the other gastronomy blocks. Toggle “Show this section” on a block to hide it without deleting it.',
+                initCollapsed: false,
+              },
+            },
+            {
+              type: 'collapsible',
+              label: 'Hero — full-bleed photo',
+              admin: {
+                initCollapsed: true,
+                condition: () => false,
+                description:
+                  'Shop-style immersive hero. Fried tempeh photo, short headline, primary inquiry CTA.',
               },
               fields: [
+                gastronomyShowSection('gastronomyShowHero'),
                 {
-                  name: 'image',
+                  name: 'gastronomyHeroImage',
                   type: 'upload',
                   relationTo: 'media',
                   required: false,
-                  label: 'Image',
-                },
-                { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
-                {
-                  name: 'description',
-                  type: 'textarea',
-                  required: true,
-                  localized: true,
-                  label: 'Description',
-                },
-              ],
-            },
-            {
-              name: 'gastronomyTrustedByHeading',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Partner section — heading (editable)',
-              admin: {
-                description:
-                  'Editable heading above the partner tags. Example DE: "Für Profiküchen". Example EN: "For professional kitchens".',
-              },
-            },
-            {
-              name: 'gastronomyTrustedByBadges',
-              type: 'array',
-              required: false,
-              minRows: 0,
-              maxRows: 12,
-              label: 'Partner section — tags (editable)',
-              admin: {
-                description:
-                  'Editable chips shown next to the heading (e.g. Restaurants, Hotels, Catering).',
-              },
-              fields: [
-                {
-                  name: 'label',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Chip text',
-                },
-              ],
-            },
-            {
-              name: 'gastronomyCtaBanner',
-              type: 'group',
-              label: 'CTA banner (dark block)',
-              admin: {
-                description:
-                  'Dark rounded block after Trusted by, before “What we offer”. Headline, subline, button.',
-              },
-              fields: [
-                {
-                  name: 'heading',
-                  type: 'textarea',
-                  required: false,
-                  localized: true,
-                  label: 'Heading',
-                },
-                {
-                  name: 'description',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Subline',
-                },
-                {
-                  name: 'buttonLabel',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Button label',
-                },
-                {
-                  name: 'buttonHref',
-                  type: 'text',
-                  required: false,
-                  label: 'Button URL',
-                  admin: { description: 'e.g. #contact or /contact' },
-                },
-              ],
-            },
-            {
-              name: 'gastronomyOfferDetailsTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'What we offer — section title',
-              admin: {
-                description:
-                  'Main heading above the icon cards. If empty, “Offer section title (fallback)” below is used.',
-              },
-            },
-            {
-              name: 'gastronomyOfferSectionTitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'What we offer — title fallback',
-              admin: {
-                description:
-                  'Used only if “What we offer — section title” is empty (legacy / short heading).',
-              },
-            },
-            {
-              name: 'gastronomyOfferDetails',
-              type: 'array',
-              required: false,
-              minRows: 0,
-              maxRows: 8,
-              label: 'Offer Details',
-              admin: {
-                description:
-                  'Cards under “What we offer”. Optional icon image per row; if empty, a default icon is used.',
-              },
-              fields: [
-                {
-                  name: 'icon',
-                  type: 'upload',
-                  relationTo: 'media',
-                  required: false,
-                  label: 'Icon (optional)',
+                  label: 'Hero photo',
                   admin: {
-                    description:
-                      'Small square icon (SVG/PNG/WebP). If empty, a built-in icon is used.',
+                    description: 'Plated / fried tempeh. Leave empty to use the default photo.',
                   },
                 },
-                { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
                 {
-                  name: 'description',
-                  type: 'textarea',
-                  required: true,
+                  name: 'gastronomyHeroEyebrow',
+                  type: 'text',
+                  required: false,
                   localized: true,
-                  label: 'Description',
+                  label: 'Eyebrow',
+                  admin: { description: 'Small line above the title. e.g. “Für Restaurants”.' },
+                },
+                {
+                  name: 'gastronomyHeroTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Title',
+                  admin: {
+                    description: 'Main headline. e.g. “Tempeh für Profiküchen.”',
+                  },
+                },
+                {
+                  name: 'gastronomyHeroTagline',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Tagline',
+                  admin: { description: 'One short line under the title. Keep it to 1–2 sentences.' },
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'gastronomyHeroCtaLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'CTA button label',
+                      admin: {
+                        width: '50%',
+                        description: 'e.g. “Für Gastronomie anfragen”.',
+                      },
+                    },
+                    {
+                      name: 'gastronomyHeroCtaUrl',
+                      type: 'text',
+                      required: false,
+                      label: 'CTA URL',
+                      admin: {
+                        width: '50%',
+                        description: 'Usually #contact.',
+                      },
+                    },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'gastronomyHeroCtaSecondaryLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Secondary CTA label',
+                      admin: {
+                        width: '50%',
+                        description: 'Optional. e.g. “Tempeh entdecken”.',
+                      },
+                    },
+                    {
+                      name: 'gastronomyHeroCtaSecondaryUrl',
+                      type: 'text',
+                      required: false,
+                      label: 'Secondary CTA URL',
+                      admin: {
+                        width: '50%',
+                        description: 'e.g. /products/kaeferbohnen-tempeh',
+                      },
+                    },
+                  ],
                 },
               ],
             },
             {
               type: 'collapsible',
-              label: 'Outcomes — Before / After',
-              admin: { initCollapsed: false },
+              label: 'Food showcase — Was kann man daraus machen?',
+              admin: {
+                initCollapsed: true,
+                condition: () => false,
+                description:
+                  'Horizontal slider of restaurant applications. Large photo, short title, one-line caption.',
+              },
               fields: [
+                gastronomyShowSection('gastronomyShowShowcase'),
+                {
+                  name: 'gastronomyShowcaseTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section title',
+                  admin: { description: 'e.g. “Was kann man daraus machen?”' },
+                },
+                {
+                  name: 'gastronomyUsageBanners',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 8,
+                  labels: { singular: 'Slide', plural: 'Slides' },
+                  admin: {
+                    description: 'Each slide: photo + title + one short line. Photography does the talking.',
+                  },
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Photo',
+                    },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Title',
+                      admin: { description: 'e.g. Tempeh als Hauptkomponente' },
+                    },
+                    {
+                      name: 'text',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Short line',
+                      admin: { description: 'One sentence max.' },
+                    },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'gastronomyHeroSliderPrevLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Previous slide label',
+                      admin: {
+                        width: '50%',
+                        description: 'Accessibility label for the food slider.',
+                      },
+                    },
+                    {
+                      name: 'gastronomyHeroSliderNextLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Next slide label',
+                      admin: {
+                        width: '50%',
+                        description: 'Accessibility label for the food slider.',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Why tempeh — 3–4 short benefits',
+              admin: {
+                initCollapsed: true,
+                condition: () => false,
+                description: 'Keep each benefit to a title + one line.',
+              },
+              fields: [
+                gastronomyShowSection('gastronomyShowBenefits'),
+                {
+                  name: 'gastronomyFactsTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section title',
+                  admin: { description: 'e.g. “Warum Tempeh für deine Küche?”' },
+                },
+                {
+                  name: 'gastronomyFacts',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 4,
+                  labels: { singular: 'Fact', plural: 'Facts' },
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Title',
+                    },
+                    {
+                      name: 'text',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Short text',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Product close-up',
+              admin: {
+                initCollapsed: true,
+                condition: () => false,
+                description: 'Raw tempeh block + one sentence. No prices here.',
+              },
+              fields: [
+                gastronomyShowSection('gastronomyShowProduct'),
+                {
+                  name: 'gastronomyProductImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Product photo',
+                  admin: {
+                    description: 'Packaging or raw block. Leave empty to use the default photo.',
+                  },
+                },
+                {
+                  name: 'gastronomyProductCaption',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Product section title',
+                  admin: { description: 'e.g. “Käferbohnen-Tempeh für deine Küche”.' },
+                },
+                {
+                  name: 'gastronomyProductCtaLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Product CTA label',
+                  admin: { description: 'Button under the facts. e.g. “Jetzt B2B-Anfrage senden”.' },
+                },
+                {
+                  name: 'gastronomyProductB2bLine',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Extra product fact',
+                  admin: { description: 'Optional last line, e.g. “B2B / größere Mengen”.' },
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Unused gastronomy fields',
+              admin: {
+                initCollapsed: true,
+                condition: () => false,
+              },
+              fields: hideGastronomyLegacyFields([
+                {
+                  name: 'gastronomyHeroSliderAutoplayMs',
+                  type: 'number',
+                  required: false,
+                  label: 'Hero slider — autoplay (ms)',
+                  min: 2000,
+                  max: 120000,
+                },
+                {
+                  name: 'gastronomyOfferCards',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 3,
+                  label: 'Old hero slider slides',
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Image',
+                    },
+                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: true,
+                      localized: true,
+                      label: 'Description',
+                    },
+                  ],
+                },
+                {
+                  name: 'gastronomyProductQuote',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Quote / product line',
+                },
+                {
+                  name: 'gastronomyTrustedByBadges',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 12,
+                  label: 'Old partner chips',
+                  fields: [
+                    {
+                      name: 'label',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Chip text',
+                    },
+                  ],
+                },
+                {
+                  name: 'gastronomyCtaBanner',
+                  type: 'group',
+                  label: 'Final CTA',
+                  fields: [
+                    {
+                      name: 'heading',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Heading',
+                    },
+                    {
+                      name: 'description',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Subline',
+                    },
+                    {
+                      name: 'buttonLabel',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Button label',
+                    },
+                    {
+                      name: 'buttonHref',
+                      type: 'text',
+                      required: false,
+                      label: 'Button URL',
+                    },
+                  ],
+                },
+                {
+                  name: 'gastronomyOfferDetailsTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'What we offer — section title',
+                },
+                {
+                  name: 'gastronomyOfferSectionTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'What we offer — title fallback',
+                },
+                {
+                  name: 'gastronomyOfferDetails',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 8,
+                  label: 'Offer Details',
+                  fields: [
+                    {
+                      name: 'icon',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Icon',
+                    },
+                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: true,
+                      localized: true,
+                      label: 'Description',
+                    },
+                  ],
+                },
                 {
                   name: 'gastronomyOutcomesEyebrow',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Eyebrow (e.g. ERGEBNISSE)',
+                  label: 'Outcomes eyebrow',
                 },
                 {
                   name: 'gastronomyOutcomesTitle',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Section title',
+                  label: 'Outcomes title',
                 },
                 {
                   name: 'gastronomyOutcomesBeforeLabel',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: '“Before” column label',
-                  admin: { description: 'e.g. VORHER / BEFORE' },
+                  label: 'Before label',
                 },
                 {
                   name: 'gastronomyOutcomesAfterLabel',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: '“After” column label',
-                  admin: { description: 'e.g. NACHHER / AFTER' },
+                  label: 'After label',
                 },
                 {
                   name: 'gastronomyOutcomesItems',
@@ -458,26 +741,19 @@ export const Pages: CollectionConfig = {
                     },
                   ],
                 },
-              ],
-            },
-            {
-              type: 'collapsible',
-              label: 'Process — How we work',
-              admin: { initCollapsed: false },
-              fields: [
                 {
                   name: 'gastronomyProcessEyebrow',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Eyebrow',
+                  label: 'Process eyebrow',
                 },
                 {
                   name: 'gastronomyProcessTitle',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Section title',
+                  label: 'Process title',
                 },
                 {
                   name: 'gastronomyProcessSteps',
@@ -502,77 +778,33 @@ export const Pages: CollectionConfig = {
                     },
                   ],
                 },
-              ],
-            },
-            {
-              type: 'collapsible',
-              label: 'Testimonials',
-              admin: { initCollapsed: false },
-              fields: [
                 {
                   name: 'gastronomyTestimonialsEyebrow',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Eyebrow',
+                  label: 'Testimonials eyebrow',
                 },
-                {
-                  name: 'gastronomyTestimonialsTitle',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Section title',
-                },
-                {
-                  name: 'gastronomyTestimonialsItems',
-                  type: 'array',
-                  required: false,
-                  maxRows: 6,
-                  label: 'Quotes',
-                  fields: [
-                    {
-                      name: 'quote',
-                      type: 'textarea',
-                      required: true,
-                      localized: true,
-                      label: 'Quote',
-                    },
-                    {
-                      name: 'author',
-                      type: 'text',
-                      required: true,
-                      localized: true,
-                      label: 'Attribution',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              type: 'collapsible',
-              label: 'B2B FAQ',
-              admin: { initCollapsed: false },
-              fields: [
                 {
                   name: 'gastronomyFaqEyebrow',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Eyebrow',
+                  label: 'FAQ eyebrow',
                 },
                 {
                   name: 'gastronomyFaqTitle',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Section title',
+                  label: 'FAQ title',
                 },
                 {
                   name: 'gastronomyFaqItems',
                   type: 'array',
                   required: false,
                   maxRows: 8,
-                  label: 'Questions',
+                  label: 'FAQ items',
                   fields: [
                     {
                       name: 'question',
@@ -590,72 +822,264 @@ export const Pages: CollectionConfig = {
                     },
                   ],
                 },
+                {
+                  name: 'gastronomyContactImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Contact image',
+                },
+                {
+                  name: 'gastronomyContactTitle',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Contact heading',
+                },
+                {
+                  name: 'gastronomyContactDescription',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Contact description',
+                },
+                {
+                  name: 'gastronomyContactAddress',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Contact address',
+                },
+                {
+                  name: 'gastronomyWorkshopSectionTitle',
+                  type: 'text',
+                  required: true,
+                  localized: true,
+                  label: 'Workshop section title',
+                },
+                {
+                  name: 'gastronomyWorkshopSectionSubtitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Workshop subtitle',
+                },
+                {
+                  name: 'gastronomyWorkshopClarification',
+                  type: 'textarea',
+                  required: false,
+                  localized: true,
+                  label: 'Workshop clarification',
+                },
+                {
+                  name: 'gastronomyWorkshopNextDateLabel',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Workshop date label',
+                },
+                {
+                  name: 'gastronomyWorkshopCards',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 4,
+                  label: 'Workshop cards',
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Image',
+                    },
+                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: true,
+                      localized: true,
+                      label: 'Description',
+                    },
+                    { name: 'price', type: 'text', required: true, label: 'Price' },
+                    {
+                      name: 'priceSuffix',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Price Suffix',
+                    },
+                    {
+                      name: 'buttonLabel',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Button Label',
+                    },
+                    { name: 'buttonUrl', type: 'text', required: true, label: 'Button URL' },
+                    { name: 'duration', type: 'text', required: false, label: 'Duration' },
+                    {
+                      name: 'nextDate',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Next Appointment',
+                    },
+                  ],
+                },
+              ]),
+            },
+            {
+              type: 'collapsible',
+              label: 'Audience — Restaurants, Hotels, Catering, Feinkost',
+              admin: {
+                initCollapsed: true,
+                condition: () => false,
+                description: 'Four photo cards. Title + one short line each.',
+              },
+              fields: [
+                gastronomyShowSection('gastronomyShowAudience'),
+                {
+                  name: 'gastronomyTrustedByHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Section heading',
+                  admin: {
+                    description:
+                      'e.g. “Für Restaurants, die mehr aus pflanzlicher Küche machen wollen.”',
+                  },
+                },
+                {
+                  name: 'gastronomyAudienceCards',
+                  type: 'array',
+                  required: false,
+                  minRows: 0,
+                  maxRows: 4,
+                  labels: { singular: 'Card', plural: 'Cards' },
+                  admin: {
+                    description: 'Photo, title and one short line. Leave photo empty to use the default.',
+                  },
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      required: false,
+                      label: 'Photo',
+                    },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Title',
+                      admin: { description: 'e.g. Restaurants' },
+                    },
+                    {
+                      name: 'text',
+                      type: 'textarea',
+                      required: false,
+                      localized: true,
+                      label: 'Short line',
+                    },
+                  ],
+                },
               ],
             },
             {
-              name: 'gastronomyContactImage',
-              type: 'upload',
-              relationTo: 'media',
-              required: false,
-              label: 'Contact Section Image',
-            },
-            {
-              name: 'gastronomyContactTitle',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Contact Form Heading',
-            },
-            {
-              name: 'gastronomyContactDescription',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: 'Contact Form Description',
-            },
-            {
-              name: 'gastronomyContactFormHeading',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Contact Form — right column heading',
+              type: 'collapsible',
+              label: 'Proof — kitchen quote',
               admin: {
-                description:
-                  'Heading above the form fields (e.g. "Frag uns alles" / "Ask About Anything").',
+                initCollapsed: true,
+                condition: () => false,
+                description: 'Full-bleed photo with one chef quote.',
               },
+              fields: [
+                gastronomyShowSection('gastronomyShowProof'),
+                {
+                  name: 'gastronomyProofImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: false,
+                  label: 'Background photo',
+                  admin: { description: 'Leave empty to use the default tempeh photo.' },
+                },
+                {
+                  name: 'gastronomyTestimonialsTitle',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Small label',
+                  admin: { description: 'e.g. “Aus der Küche”.' },
+                },
+                {
+                  name: 'gastronomyTestimonialsItems',
+                  type: 'array',
+                  required: false,
+                  maxRows: 1,
+                  label: 'Quote',
+                  fields: [
+                    {
+                      name: 'quote',
+                      type: 'textarea',
+                      required: true,
+                      localized: true,
+                      label: 'Quote',
+                    },
+                    {
+                      name: 'author',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Name, place',
+                    },
+                  ],
+                },
+              ],
             },
             {
-              name: 'gastronomyContactAddress',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: 'Contact Details — Address',
+              type: 'collapsible',
+              label: 'Inquiry form',
               admin: {
-                description: 'Address shown in the left contact details panel.',
+                initCollapsed: true,
+                condition: () => false,
+                description: 'B2B enquiry form. Email and phone are shown under the form.',
               },
-            },
-            {
-              name: 'gastronomyContactPhone',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Contact Details — Phone',
-              admin: {
-                description: 'Phone number shown in the left contact details panel.',
-              },
-            },
-            {
-              name: 'gastronomyContactEmail',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Contact Details — Email',
-              admin: {
-                description: 'Email address shown in the left contact details panel.',
-              },
-            },
-            {
-              name: 'gastronomyFormPlaceholders',
+              fields: [
+                gastronomyShowSection('gastronomyShowInquiry'),
+                {
+                  name: 'gastronomyContactFormHeading',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Form heading',
+                  admin: {
+                    description: 'e.g. “B2B-Anfrage” / “B2B enquiry”.',
+                  },
+                },
+                {
+                  name: 'gastronomyContactEmail',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Email',
+                  admin: {
+                    description: 'Shown under the form.',
+                  },
+                },
+                {
+                  name: 'gastronomyContactPhone',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Phone',
+                  admin: {
+                    description: 'Shown under the form.',
+                  },
+                },
+                {
+                  name: 'gastronomyFormPlaceholders',
               type: 'group',
               label: 'Form Placeholders',
               fields: [
@@ -664,16 +1088,30 @@ export const Pages: CollectionConfig = {
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'First Name',
+                  label: 'Name',
                 },
                 {
                   name: 'lastName',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Last Name',
+                  label: 'Restaurant / company',
                 },
                 { name: 'email', type: 'text', required: false, localized: true, label: 'Email' },
+                {
+                  name: 'phone',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Phone',
+                },
+                {
+                  name: 'quantity',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Quantity',
+                },
                 {
                   name: 'message',
                   type: 'text',
@@ -684,16 +1122,39 @@ export const Pages: CollectionConfig = {
               ],
             },
             {
-              name: 'gastronomySubjectOptions',
+              name: 'gastronomyBusinessTypeOptions',
               type: 'group',
-              label: 'Subject Dropdown',
+              label: 'Type of business dropdown',
               fields: [
                 {
                   name: 'default',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Default Option',
+                  label: 'Placeholder',
+                  admin: { description: 'e.g. “Art des Betriebs”.' },
+                },
+                {
+                  name: 'options',
+                  type: 'array',
+                  label: 'Options',
+                  minRows: 0,
+                  fields: [{ name: 'label', type: 'text', required: false, localized: true }],
+                },
+              ],
+            },
+            {
+              name: 'gastronomySubjectOptions',
+              type: 'group',
+              label: 'Interest dropdown',
+              fields: [
+                {
+                  name: 'default',
+                  type: 'text',
+                  required: false,
+                  localized: true,
+                  label: 'Placeholder',
+                  admin: { description: 'e.g. “Worum geht es?”.' },
                 },
                 {
                   name: 'options',
@@ -709,124 +1170,9 @@ export const Pages: CollectionConfig = {
               type: 'text',
               required: false,
               localized: true,
-              label: 'Submit Button Label',
+              label: 'Submit button',
+              admin: { description: 'e.g. “Anfrage senden” / “Send enquiry”.' },
             },
-            {
-              name: 'gastronomyWorkshopSectionTitle',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Next workshop — section title',
-              admin: {
-                description: 'Heading for the workshop cards at the bottom of the page.',
-              },
-            },
-            {
-              name: 'gastronomyWorkshopSectionSubtitle',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Next workshop — subtitle',
-            },
-            {
-              name: 'gastronomyWorkshopClarification',
-              type: 'textarea',
-              required: false,
-              localized: true,
-              label: 'Next workshop — clarification',
-              admin: {
-                description:
-                  'Optional note below the subtitle (e.g. chefs welcome, custom workshops).',
-              },
-            },
-            {
-              name: 'gastronomyWorkshopNextDateLabel',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Next workshop — date label',
-              admin: { description: 'e.g. “Nächster Termin:” / “Next Appointment:”' },
-            },
-            {
-              name: 'gastronomyWorkshopCards',
-              type: 'array',
-              required: false,
-              minRows: 0,
-              maxRows: 4,
-              label: 'Next workshop — cards',
-              admin: {
-                description:
-                  'Four workshop cards for /gastronomy. Title, description, price and image sync from each workshop page (Pages → Workshop Detail). Fields here override only when filled.',
-              },
-              fields: [
-                {
-                  name: 'image',
-                  type: 'upload',
-                  relationTo: 'media',
-                  required: false,
-                  label: 'Image',
-                  admin: {
-                    description:
-                      'Optional override. By default the matching workshop page hero image is used.',
-                  },
-                },
-                {
-                  name: 'title',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Title',
-                  admin: {
-                    description:
-                      'Optional override. Defaults to the workshop page hero title when empty.',
-                  },
-                },
-                {
-                  name: 'description',
-                  type: 'textarea',
-                  required: true,
-                  localized: true,
-                  label: 'Description',
-                  admin: {
-                    description:
-                      'Optional override. Defaults to the workshop page hero description when empty.',
-                  },
-                },
-                {
-                  name: 'price',
-                  type: 'text',
-                  required: true,
-                  label: 'Price',
-                  admin: {
-                    description:
-                      'Optional override. Defaults to the workshop page booking price when empty.',
-                  },
-                },
-                {
-                  name: 'priceSuffix',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Price Suffix',
-                  admin: { description: 'e.g. "pro Person" / "per Person"' },
-                },
-                {
-                  name: 'buttonLabel',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Button Label',
-                },
-                { name: 'buttonUrl', type: 'text', required: true, label: 'Button URL' },
-                { name: 'duration', type: 'text', required: false, label: 'Duration' },
-                {
-                  name: 'nextDate',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Next Appointment',
-                  admin: { description: 'e.g. "February 15, 2026"' },
-                },
               ],
             },
           ],
@@ -2309,6 +2655,7 @@ export const Pages: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeChange: [preserveHiddenGastronomyFields],
     afterChange: [revalidatePage, autoTranslateCollection],
     afterDelete: [revalidateDelete],
   },
