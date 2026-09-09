@@ -162,6 +162,11 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
     let workshopLocation = ''
     let guestCount = 0
     let workshopPrice = ''
+    // Display name per seat across all workshop bookings on this order — the
+    // admin notification lists these individually rather than just a count,
+    // same "Gast von {buyer}" fallback the roster dashboard uses for an
+    // unnamed extra seat, so every guest is traceable at a glance.
+    const guestNames: string[] = []
 
     // Cart-derived monetary breakdown
     let cartSubtotal: number | null = null
@@ -268,6 +273,20 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
                   ? `€${b.totalPrice.toFixed(2).replace('.', ',')}`
                   : ''
               const guestCountNum = typeof b.guestCount === 'number' ? b.guestCount : 1
+
+              const bBuyerName =
+                [b.firstName, b.lastName].filter(Boolean).join(' ') || b.email || '—'
+              const bSeats = Array.isArray(
+                (b as unknown as { seats?: Array<{ recipientName?: string }> }).seats,
+              )
+                ? (b as unknown as { seats?: Array<{ recipientName?: string }> }).seats!
+                : []
+              for (let si = 0; si < Math.max(guestCountNum, 1); si++) {
+                const isBuyerSeat = si === 0
+                const seatName = bSeats[si]?.recipientName?.trim()
+                guestNames.push(seatName || (isBuyerSeat ? bBuyerName : `Gast von ${bBuyerName}`))
+              }
+
               const titleParts = [
                 String(b.workshopTitle ?? 'Workshop'),
                 [String(b.date ?? ''), String(b.time ?? '')].filter((s) => s).join(' '),
@@ -517,37 +536,129 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
           ? doc.customerDietSpecs.trim()
           : ''
 
-      const workshopRows = isWorkshopOrder
-        ? `
-  <tr><td style="padding:4px 12px 4px 0;color:#555">Datum</td><td style="padding:4px 0">${workshopDate}${workshopTime ? ` · ${workshopTime}` : ''}</td></tr>
-  ${workshopLocation ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Ort</td><td style="padding:4px 0">${workshopLocation}</td></tr>` : ''}
-  ${guestCount > 0 ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Gäste</td><td style="padding:4px 0">${guestCount}</td></tr>` : ''}
-  ${customerPhone ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Telefon</td><td style="padding:4px 0">${customerPhone}</td></tr>` : ''}
-  ${customerDietSpecs ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Ernährungshinweise</td><td style="padding:4px 0">${customerDietSpecs}</td></tr>` : ''}`
-        : ''
-
-      // Product-pickup rows — previously missing entirely, so a plain
-      // product order's admin email showed no pickup info at all. Workshop
-      // orders are unaffected (they get workshopRows above instead).
       const productPickupStatus =
         typeof doc.pickupStatus === 'string' && doc.pickupStatus ? doc.pickupStatus : 'pending'
-      const pickupRows =
-        !isWorkshopOrder && isPickup
+
+      const orderPlacedAt =
+        typeof doc.createdAt === 'string' && doc.createdAt
+          ? `${new Date(doc.createdAt).toLocaleString('de-DE', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZone: 'Europe/Vienna',
+            })} Uhr`
+          : '—'
+
+      const paymentMethodDisplay = paidByVoucher
+        ? `Gutschein (${paidByVoucher})`
+        : doc.paymentMethod === 'manual'
+          ? 'Manuell erfasst'
+          : 'Online (Stripe)'
+
+      // Brand tokens — mirrors BRAND in rosterTheme.tsx (the roster
+      // dashboard's own palette), kept as a plain hex copy here since email
+      // HTML can't import from the app bundle.
+      const GOLD = '#E6BE68'
+      const GOLD_DARK = '#D4A654'
+      const NEAR_BLACK = '#1A1A1A'
+      const sectionTitle = (label: string) =>
+        `<h3 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:${GOLD_DARK};font-weight:700">${label}</h3>`
+      const row = (label: string, value: string) =>
+        `<tr><td style="padding:4px 12px 4px 0;color:#888;white-space:nowrap;vertical-align:top">${label}</td><td style="padding:4px 0;color:${NEAR_BLACK}">${value}</td></tr>`
+
+      // Itemized line-item table — itemsArray already includes both product
+      // lines AND workshop-booking lines (pushed in the loop above), so this
+      // one table covers everything purchased, with images where available.
+      const itemRowsHtml =
+        itemsArray.length > 0
+          ? itemsArray
+              .map((item) => {
+                const qtyDisplay = /^\d+$/.test(item.QUANTITY) ? `×${item.QUANTITY}` : item.QUANTITY
+                return `
+  <tr>
+    <td style="padding:8px 0;border-bottom:1px solid #f2f2f2;color:${NEAR_BLACK}">${
+      item.IMAGE_URL
+        ? `<img src="${item.IMAGE_URL}" width="32" height="32" style="border-radius:6px;vertical-align:middle;margin-right:10px;object-fit:cover" alt="" />`
+        : ''
+    }<span style="vertical-align:middle">${item.TITLE}</span></td>
+    <td style="padding:8px 0;border-bottom:1px solid #f2f2f2;text-align:center;color:#888;white-space:nowrap">${qtyDisplay}</td>
+    <td style="padding:8px 0;border-bottom:1px solid #f2f2f2;text-align:right;white-space:nowrap;font-weight:600;color:${NEAR_BLACK}">${item.PRICE}</td>
+  </tr>`
+              })
+              .join('')
+          : `<tr><td style="padding:8px 0;color:#888">${safeOrderItemsSummary || '—'}</td></tr>`
+
+      const guestsBlock =
+        guestNames.length > 0
           ? `
-  <tr><td style="padding:4px 12px 4px 0;color:#555">Abholort</td><td style="padding:4px 0">${pickupLabel || (typeof doc.pickupLocation === 'string' && doc.pickupLocation) || '—'}</td></tr>
-  <tr><td style="padding:4px 12px 4px 0;color:#555">Abhol-Status</td><td style="padding:4px 0">${productPickupStatus}</td></tr>
-  ${customerPhone ? `<tr><td style="padding:4px 12px 4px 0;color:#555">Telefon</td><td style="padding:4px 0">${customerPhone}</td></tr>` : ''}`
+${sectionTitle(`Gäste (${guestNames.length})`)}
+<p style="margin:0 0 24px;font-size:14px;color:${NEAR_BLACK};line-height:1.6">${guestNames.map((n) => `• ${n}`).join('<br/>')}</p>`
           : ''
 
-      const htmlContent = `
-${warningBlock}
-<h2 style="font-family:sans-serif;margin-bottom:16px">${headingLabel}</h2>
-<table style="font-family:sans-serif;border-collapse:collapse;font-size:14px">
-  <tr><td style="padding:4px 12px 4px 0;color:#555;white-space:nowrap">Betrag</td><td style="padding:4px 0"><strong>${amountDisplay}</strong></td></tr>${workshopRows}${pickupRows}
-  <tr><td style="padding:4px 12px 4px 0;color:#555">Kund:in</td><td style="padding:4px 0">${recipientName || ''} <a href="mailto:${recipientEmail}">${recipientEmail}</a></td></tr>
-  <tr><td style="padding:4px 12px 4px 0;color:#555">Artikel</td><td style="padding:4px 0">${safeOrderItemsSummary || '—'}</td></tr>
-  <tr><td style="padding:16px 12px 4px 0;color:#555;border-top:1px solid #eee">Bestell-ID</td><td style="padding:16px 0 4px;border-top:1px solid #eee;font-family:monospace">${orderNumber}</td></tr>
+      const workshopBlock = isWorkshopOrder
+        ? `
+${sectionTitle('Workshop-Termin')}
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
+  ${row('Datum', `${workshopDate}${workshopTime ? ` · ${workshopTime}` : ''}`)}
+  ${workshopLocation ? row('Ort', workshopLocation) : ''}
 </table>`
+        : ''
+
+      const pickupBlock =
+        !isWorkshopOrder && isPickup
+          ? `
+${sectionTitle('Abholung')}
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
+  ${row('Abholort', pickupLabel || (typeof doc.pickupLocation === 'string' && doc.pickupLocation) || '—')}
+  ${row('Status', productPickupStatus)}
+  ${pickupBookingUrl ? row('Terminlink', `<a href="${pickupBookingUrl}" style="color:${NEAR_BLACK}">Google-Terminplan öffnen</a>`) : ''}
+</table>`
+          : ''
+
+      const shippingBlock =
+        !isPickup && shippingAddressStr
+          ? `
+${sectionTitle('Lieferadresse')}
+<p style="margin:0 0 24px;font-size:14px;color:${NEAR_BLACK};line-height:1.5;white-space:pre-line">${shippingAddressStr}</p>`
+          : ''
+
+      const adminOrderUrl = `${siteUrl}/admin/collections/orders/${doc.id}`
+
+      const htmlContent = `
+<div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+${warningBlock}
+<div style="background:${NEAR_BLACK};padding:20px 28px;border-radius:12px 12px 0 0">
+  <p style="margin:0;color:${GOLD};font-size:11px;letter-spacing:0.08em;text-transform:uppercase;font-weight:700">Fermentfreude · Admin</p>
+  <h2 style="margin:6px 0 0;color:#fff;font-size:20px;font-weight:700">${headingLabel}</h2>
+</div>
+<div style="border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px;padding:24px 28px">
+
+${sectionTitle('Bestellübersicht')}
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
+  ${row('Bestell-ID', `<span style="font-family:monospace">${orderNumber}</span>`)}
+  ${row('Bestellt am', orderPlacedAt)}
+  ${row('Betrag', `<span style="font-weight:700;font-size:16px">${amountDisplay}</span>`)}
+  ${row('Zahlart', paymentMethodDisplay)}
+</table>
+
+${sectionTitle('Kund:in')}
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
+  ${row('Name', recipientName || '—')}
+  ${row('E-Mail', `<a href="mailto:${recipientEmail}" style="color:${NEAR_BLACK}">${recipientEmail}</a>`)}
+  ${customerPhone ? row('Telefon', customerPhone) : ''}
+  ${customerDietSpecs ? row('Ernährungshinweise', customerDietSpecs) : ''}
+</table>
+
+${sectionTitle('Artikel')}
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
+${itemRowsHtml}
+</table>
+${guestsBlock}${workshopBlock}${pickupBlock}${shippingBlock}
+<a href="${adminOrderUrl}" style="display:inline-block;margin-top:4px;padding:11px 22px;background:${GOLD};color:${NEAR_BLACK};text-decoration:none;border-radius:999px;font-weight:700;font-size:13px">Bestellung im Admin ansehen →</a>
+</div>
+</div>`
 
       await sendTransactionalEmail({
         to: getAdminRecipients(),
