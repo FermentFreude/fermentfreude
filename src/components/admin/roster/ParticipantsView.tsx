@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 
+import { BookingDetailModal } from './BookingDetailModal'
 import type { ParticipantRow, RosterStats } from './types'
 import { BRAND, PageHeader, StatCard } from './rosterTheme'
 
@@ -21,6 +22,7 @@ function initials(name: string): string {
 
 export function ParticipantsView({ participants, stats }: Props) {
   const [query, setQuery] = useState('')
+  const [selected, setSelected] = useState<ParticipantRow | null>(null)
 
   const filtered = query.trim()
     ? participants.filter((p) => {
@@ -34,6 +36,7 @@ export function ParticipantsView({ participants, stats }: Props) {
     : participants
 
   const pending = participants.filter((p) => p.status === 'pending').length
+  const customerCount = participants.filter((p) => p.isBuyer).length
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px' }}>
@@ -41,7 +44,7 @@ export function ParticipantsView({ participants, stats }: Props) {
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-        <StatCard label="Gesamt Kunden" value={participants.length} accentKey="gold" icon={<span style={{ fontSize: '18px' }}>👤</span>} />
+        <StatCard label="Gesamt Kunden" value={customerCount} accentKey="gold" icon={<span style={{ fontSize: '18px' }}>👤</span>} />
         <StatCard label="Bestätigte Buchungen" value={stats.totalParticipants} accentKey="green" icon={<span style={{ fontSize: '18px' }}>📅</span>} />
         <StatCard label="Ausstehende Buchungen" value={pending} accentKey="orange" icon={<span style={{ fontSize: '18px' }}>🕐</span>} />
       </div>
@@ -89,7 +92,13 @@ export function ParticipantsView({ participants, stats }: Props) {
             </thead>
             <tbody>
               {filtered.map((p, i) => (
-                <tr key={i} style={{ borderTop: '1px solid var(--theme-elevation-100)' }}>
+                <tr
+                  key={i}
+                  onClick={() => setSelected(p)}
+                  style={{ borderTop: '1px solid var(--theme-elevation-100)', cursor: 'pointer' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'var(--theme-elevation-50)' }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent' }}
+                >
                   <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div style={{
@@ -99,14 +108,22 @@ export function ParticipantsView({ participants, stats }: Props) {
                       }}>
                         {initials(p.name) || '?'}
                       </div>
-                      <span style={{ fontWeight: 500, color: 'var(--theme-text)' }}>{p.name}</span>
+                      <div>
+                        <div style={{ fontWeight: 500, color: 'var(--theme-text)' }}>{p.name}</div>
+                        {!p.isBuyer && (
+                          <div style={{ fontSize: '11px', color: 'var(--theme-text)', opacity: 0.5 }}>
+                            {p.guestOfName ? `Begleitung von ${p.guestOfName}` : 'Begleitung'}
+                            {p.orderRef && ` · Bestellung #${p.orderRef}`}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
                     {p.email ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.45, flexShrink: 0 }}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                        <a href={`mailto:${p.email}`} style={{ color: 'var(--theme-text)', opacity: 0.75, textDecoration: 'none', fontSize: '13px' }}>{p.email}</a>
+                        <a href={`mailto:${p.email}`} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--theme-text)', opacity: 0.75, textDecoration: 'none', fontSize: '13px' }}>{p.email}</a>
                       </div>
                     ) : <span style={{ opacity: 0.35 }}>—</span>}
                   </td>
@@ -128,6 +145,8 @@ export function ParticipantsView({ participants, stats }: Props) {
           </div>
         )}
       </div>
+
+      {selected && <BookingDetailModal booking={selected.booking} onClose={() => setSelected(null)} />}
     </div>
   )
 }
