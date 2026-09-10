@@ -76,7 +76,7 @@ const scripts: Record<string, { name: string; file: string }> = {
     file: 'seed-feld-ins-glas-page.ts',
   },
   gastronomy: {
-    name: 'Gastronomy page (B2B sales page)',
+    name: 'Gastronomy page (B2B + workshop cards)',
     file: 'seed-gastronomy.ts',
   },
   'feld-ins-glas-drive-images': {
