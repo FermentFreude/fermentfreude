@@ -84,15 +84,5 @@ export const SpecialWorkshopBanner: Block = {
         description: 'Optional image. If empty, a garden-toned placeholder is used.',
       },
     },
-    {
-      name: 'partnerLogo',
-      type: 'upload',
-      relationTo: 'media',
-      label: 'Partner Logo',
-      admin: {
-        description:
-          'Optional partner logo shown on the banner (e.g. Unser Bauerngarten) instead of naming the partner in the subtitle text. Use a light/white logo with a transparent background.',
-      },
-    },
   ],
 }

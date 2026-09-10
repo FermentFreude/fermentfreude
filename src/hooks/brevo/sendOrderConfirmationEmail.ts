@@ -536,9 +536,6 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
           ? doc.customerDietSpecs.trim()
           : ''
 
-      const productPickupStatus =
-        typeof doc.pickupStatus === 'string' && doc.pickupStatus ? doc.pickupStatus : 'pending'
-
       const orderPlacedAt =
         typeof doc.createdAt === 'string' && doc.createdAt
           ? `${new Date(doc.createdAt).toLocaleString('de-DE', {
@@ -606,17 +603,10 @@ ${sectionTitle('Workshop-Termin')}
 </table>`
         : ''
 
-      const pickupBlock =
-        !isWorkshopOrder && isPickup
-          ? `
-${sectionTitle('Abholung')}
-<table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
-  ${row('Abholort', pickupLabel || (typeof doc.pickupLocation === 'string' && doc.pickupLocation) || '—')}
-  ${row('Status', productPickupStatus)}
-  ${pickupBookingUrl ? row('Terminlink', `<a href="${pickupBookingUrl}" style="color:${NEAR_BLACK}">Google-Terminplan öffnen</a>`) : ''}
-</table>`
-          : ''
-
+      // Deliberately no pickup-location/time block in the admin email —
+      // product pickups are booked and managed entirely through Google
+      // Calendar now (see product-pickup-settings' googleScheduleUrl), so
+      // this would just be a second, redundant place to look.
       const shippingBlock =
         !isPickup && shippingAddressStr
           ? `
@@ -624,7 +614,11 @@ ${sectionTitle('Lieferadresse')}
 <p style="margin:0 0 24px;font-size:14px;color:${NEAR_BLACK};line-height:1.5;white-space:pre-line">${shippingAddressStr}</p>`
           : ''
 
-      const adminOrderUrl = `${siteUrl}/admin/collections/orders/${doc.id}`
+      // Roster dashboard's own home, not the raw CMS collection view — its
+      // Dashboard tab surfaces the latest website orders right at the top,
+      // so this is the more useful landing spot for a founder clicking in
+      // from this email.
+      const adminOrderUrl = `${siteUrl}/admin/workshop-roster`
 
       const htmlContent = `
 <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
@@ -655,8 +649,8 @@ ${sectionTitle('Artikel')}
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
 ${itemRowsHtml}
 </table>
-${guestsBlock}${workshopBlock}${pickupBlock}${shippingBlock}
-<a href="${adminOrderUrl}" style="display:inline-block;margin-top:4px;padding:11px 22px;background:${GOLD};color:${NEAR_BLACK};text-decoration:none;border-radius:999px;font-weight:700;font-size:13px">Bestellung im Admin ansehen →</a>
+${guestsBlock}${workshopBlock}${shippingBlock}
+<a href="${adminOrderUrl}" style="display:inline-block;margin-top:4px;padding:11px 22px;background:${GOLD};color:${NEAR_BLACK};text-decoration:none;border-radius:999px;font-weight:700;font-size:13px">Bestellung im Roster ansehen →</a>
 </div>
 </div>`
 
