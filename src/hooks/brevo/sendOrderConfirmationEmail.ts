@@ -563,25 +563,39 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       const sectionTitle = (label: string) =>
         `<h3 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:${GOLD_DARK};font-weight:700">${label}</h3>`
       const row = (label: string, value: string) =>
-        `<tr><td style="padding:4px 12px 4px 0;color:#888;white-space:nowrap;vertical-align:top">${label}</td><td style="padding:4px 0;color:${NEAR_BLACK}">${value}</td></tr>`
+        `<tr><td style="padding:6px 16px 6px 0;color:#888;white-space:nowrap;vertical-align:top">${label}</td><td style="padding:6px 0;color:${NEAR_BLACK}">${value}</td></tr>`
 
       // Itemized line-item table — itemsArray already includes both product
       // lines AND workshop-booking lines (pushed in the loop above), so this
       // one table covers everything purchased, with images where available.
+      //
+      // Workshop-booking titles are baked as "Name · Date · Location" for
+      // the customer-facing Brevo template's own item loop — but the admin
+      // email already has a dedicated "Workshop-Termin" section for date
+      // and location, so repeating it inside this row too just clutters the
+      // layout. Keep only the workshop name here for a workshop order.
       const itemRowsHtml =
         itemsArray.length > 0
           ? itemsArray
               .map((item) => {
                 const qtyDisplay = /^\d+$/.test(item.QUANTITY) ? `×${item.QUANTITY}` : item.QUANTITY
+                const displayTitle = isWorkshopOrder ? item.TITLE.split(' · ')[0] : item.TITLE
+                // Bulletproof icon+text pairing — a plain inline <img> next
+                // to a <span> relies on vertical-align being honoured
+                // consistently, which Gmail in particular does not always
+                // do, crowding the two together. A small fixed-width nested
+                // table keeps them cleanly side by side in every client.
+                const titleCell = item.IMAGE_URL
+                  ? `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>
+        <td style="width:36px;padding-right:10px;vertical-align:middle"><img src="${item.IMAGE_URL}" width="32" height="32" style="display:block;border-radius:6px;object-fit:cover" alt="" /></td>
+        <td style="vertical-align:middle;color:${NEAR_BLACK}">${displayTitle}</td>
+      </tr></table>`
+                  : `<span style="color:${NEAR_BLACK}">${displayTitle}</span>`
                 return `
   <tr>
-    <td style="padding:8px 0;border-bottom:1px solid #f2f2f2;color:${NEAR_BLACK}">${
-      item.IMAGE_URL
-        ? `<img src="${item.IMAGE_URL}" width="32" height="32" style="border-radius:6px;vertical-align:middle;margin-right:10px;object-fit:cover" alt="" />`
-        : ''
-    }<span style="vertical-align:middle">${item.TITLE}</span></td>
-    <td style="padding:8px 0;border-bottom:1px solid #f2f2f2;text-align:center;color:#888;white-space:nowrap">${qtyDisplay}</td>
-    <td style="padding:8px 0;border-bottom:1px solid #f2f2f2;text-align:right;white-space:nowrap;font-weight:600;color:${NEAR_BLACK}">${item.PRICE}</td>
+    <td style="padding:10px 8px 10px 0;border-bottom:1px solid #f2f2f2">${titleCell}</td>
+    <td style="padding:10px 0;border-bottom:1px solid #f2f2f2;text-align:center;color:#888;white-space:nowrap">${qtyDisplay}</td>
+    <td style="padding:10px 0;border-bottom:1px solid #f2f2f2;text-align:right;white-space:nowrap;font-weight:600;color:${NEAR_BLACK}">${item.PRICE}</td>
   </tr>`
               })
               .join('')
