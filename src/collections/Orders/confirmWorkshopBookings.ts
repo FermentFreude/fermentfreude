@@ -189,7 +189,24 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         where: {
           and: [
             { workshopSlug: { equals: workshopSlug } },
-            { status: { in: ['pending', 'confirmed'] } },
+            {
+              // A `confirmed` booking is only a legitimate match if it's
+              // ALREADY this exact order (the charge.succeeded webhook fired
+              // before this hook, re-processing the same order — see
+              // Strategy 1's comment). Without the orderId check here, this
+              // would match ANY confirmed booking for the appointment —
+              // including a manually-created placeholder with no cartSlug
+              // of its own — and silently attach a completely unrelated
+              // customer's real payment to it, inheriting its name/guest
+              // count. This is exactly what happened to the Barbara Schmidt
+              // placeholder on 2026-10-24: a real Stripe order for a
+              // different customer got attached to it because this filter
+              // only checked workshopSlug + appointmentId, not ownership.
+              or: [
+                { status: { equals: 'pending' } },
+                { and: [{ status: { equals: 'confirmed' } }, { orderId: { equals: String(doc.id) } }] },
+              ],
+            },
           ],
         },
         sort: '-createdAt',
@@ -197,7 +214,12 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         overrideAccess: true,
       })
       const suffixMatches = candidates.docs.filter(
-        (b) => typeof b.appointmentId === 'string' && b.appointmentId.endsWith(cartItemAidSuffix),
+        (b) =>
+          typeof b.appointmentId === 'string' &&
+          b.appointmentId.endsWith(cartItemAidSuffix) &&
+          // Redundant with the query above, kept as defense in depth: never
+          // claim a booking that's confirmed under a DIFFERENT order.
+          (b.status === 'pending' || String(b.orderId ?? '') === String(doc.id)),
       )
       for (const b of suffixMatches) {
         if (remainingGuests <= 0) break
@@ -218,7 +240,18 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
           and: [
             { cartSlug: { equals: cartId } },
             { workshopSlug: { equals: workshopSlug } },
-            { status: { in: ['pending', 'confirmed'] } },
+            // Same principle as Strategy 0: a confirmed match must already
+            // be THIS order (idempotent retry), never a different one.
+            // cartSlug equality already makes an unrelated placeholder
+            // match effectively impossible (a manual booking has no
+            // cartSlug), but this keeps the rule consistent everywhere
+            // rather than relying on that as the only guard.
+            {
+              or: [
+                { status: { equals: 'pending' } },
+                { and: [{ status: { equals: 'confirmed' } }, { orderId: { equals: String(doc.id) } }] },
+              ],
+            },
             { id: { not_in: matchedBookings.map((b) => b.id) } },
           ],
         },
