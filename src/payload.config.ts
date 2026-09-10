@@ -45,6 +45,7 @@ import { InvoiceCounterGlobal } from '@/globals/InvoiceCounter'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { ProductDetailLabelsGlobal } from '@/globals/ProductDetailLabels'
+import { ProductPickupSettingsGlobal } from '@/globals/ProductPickupSettings'
 import { ProductSliderGlobal } from '@/globals/ProductSlider'
 import { SponsorsBarGlobal } from '@/globals/SponsorsBar'
 import { TestimonialsGlobal } from '@/globals/Testimonials'
@@ -243,6 +244,7 @@ export default buildConfig({
     ProductSliderGlobal,
     WorkshopCardsGlobal,
     ProductDetailLabelsGlobal,
+    ProductPickupSettingsGlobal,
   ],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',

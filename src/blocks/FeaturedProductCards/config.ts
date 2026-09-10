@@ -97,5 +97,30 @@ export const FeaturedProductCards: Block = {
         description: 'Button text on each card (e.g. "Jetzt bestellen" / "Order Now").',
       },
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'soldOutLabel',
+          type: 'text',
+          localized: true,
+          label: 'Sold-out badge',
+          admin: {
+            width: '50%',
+            description: 'e.g. "Ausverkauft" / "Sold out"',
+          },
+        },
+        {
+          name: 'seasonalLabel',
+          type: 'text',
+          localized: true,
+          label: 'Seasonal badge',
+          admin: {
+            width: '50%',
+            description: 'e.g. "Saisonal" / "Seasonal"',
+          },
+        },
+      ],
+    },
   ],
 }

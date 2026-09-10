@@ -67,4 +67,6 @@ tmp/
 
 # Customer PII from one-off data imports (Wix export etc.) — never commit
 src/scripts/data/wix-bookings/
+src/scripts/data/prod-sync/
+src/scripts/data/prod-media-dump/
 

@@ -1,11 +1,9 @@
 /**
- * Seed the Gastronomy page in the Pages collection with all sections.
- * Seeds both DE and EN locales. Content is under Pages → Gastronomy page.
- * Uploads images to Payload Media (R2) for offer cards and contact section when seed-assets exist.
- * Workshop card images come from each workshop page hero (see workshopHeroImages utility).
+ * Seed the Gastronomy B2B page (DE + EN).
+ * Non-destructive: skips if the gastronomy page already exists. Use --force to overwrite.
  *
  * Run: pnpm seed gastronomy
- *      npx tsx src/scripts/seed-gastronomy.ts
+ *      pnpm seed gastronomy --force
  */
 process.env.PAYLOAD_SEED = 'true'
 
@@ -15,6 +13,8 @@ import fs from 'fs'
 import path from 'path'
 
 import type { Media } from '@/payload-types'
+import { defaultGastronomySectionOrderRows } from '@/fields/gastronomySections'
+import { IMAGE_PRESETS, optimizedFile } from '@/scripts/seed-image-utils'
 
 loadEnv({ path: path.resolve(process.cwd(), '.env') })
 
@@ -77,12 +77,37 @@ function gastronomyDataDE(
   offer2?: Media
   offer3?: Media
   contact?: Media
+  hero?: Media
+  fineDining?: Media
+  streetFood?: Media
+  traditional?: Media
+  product?: Media
 },
   workshopHeroIds: Record<string, string | null>,
 ) {
   return {
-    gastronomyHeroCtaLabel: 'Entdecken',
-    gastronomyHeroCtaUrl: '#offer',
+    gastronomySectionOrder: defaultGastronomySectionOrderRows(),
+    gastronomyHeroImage: media.hero?.id ?? null,
+    gastronomyHeroEyebrow: 'Für Restaurants',
+    gastronomyHeroTitle: 'Fermentierte steirische Käferbohnen',
+    gastronomyHeroTagline: 'Regional. Innovativ. Vielseitig.',
+    gastronomyHeroCtaLabel: 'Probe anfragen',
+    gastronomyHeroCtaUrl: '#contact',
+    gastronomyUsageBanners: [
+      { image: media.fineDining?.id ?? null, title: 'Fine Dining' },
+      { image: media.streetFood?.id ?? null, title: 'Street Food' },
+      { image: media.traditional?.id ?? null, title: 'Traditionell' },
+    ],
+    gastronomyFactsTitle: 'Für die Küche',
+    gastronomyFacts: [
+      { title: 'Zubereitung', text: 'In Scheiben schneiden, scharf anbraten bis goldbraun.' },
+      { title: 'Haltbarkeit', text: 'Vakuumiert und gekühlt — 6 Wochen haltbar.' },
+      { title: 'Zutaten', text: 'Nur 3 Zutaten. Regional und handwerklich.' },
+    ],
+    gastronomyProductImage: media.product?.id ?? null,
+    gastronomyProductQuote:
+      'Ein eigenständiges Premiumprodukt mit nussigem Aroma — für moderne Wirtshausküche, Fine Dining und pflanzliche Konzepte.',
+    gastronomyProductCaption: 'Handwerklich hergestellt in Graz',
     gastronomyOfferSectionTitle: 'Was wir anbieten',
     gastronomyOfferCards: [
       {
@@ -269,29 +294,29 @@ function gastronomyDataDE(
       },
     ],
     gastronomyContactImage: media.contact?.id ?? null,
-    gastronomyContactTitle: 'Kontakt',
+    gastronomyContactTitle: 'Für Küchen',
     gastronomyContactDescription:
-      'Du möchtest einen Workshop buchen oder hast Fragen zu Fermentation, Produkten oder B2B-Angeboten? Melde dich gerne bei uns.',
-    gastronomyContactFormHeading: 'Frag uns alles',
+      'Probe, Erstbestellung oder regelmäßige Lieferung — wir liefern Käferbohnen-Tempeh für Restaurants im Großraum Graz.',
+    gastronomyContactFormHeading: 'Großbestellung anfragen',
     gastronomyContactAddress: 'Grabenstraße 15, 8010 Graz, Österreich',
     gastronomyContactPhone: '+43 660 4943577',
     gastronomyContactEmail: 'kontakt@fermentfreude.at',
     gastronomyFormPlaceholders: {
       firstName: 'Vorname',
-      lastName: 'Nachname',
+      lastName: 'Restaurant / Betrieb',
       email: 'E-Mail',
-      message: 'Nachricht',
+      message: 'Menge (kg) und Lieferwunsch',
     },
     gastronomySubjectOptions: {
       default: 'Betreff',
       options: [
-        { label: 'Allgemeine Anfrage' },
-        { label: 'Workshop-Information' },
-        { label: 'Produktfrage' },
-        { label: 'Partnerschaft' },
+        { label: 'Probe anfragen' },
+        { label: 'Erstbestellung' },
+        { label: 'Regelmäßige Lieferung' },
+        { label: 'Frage' },
       ],
     },
-    gastronomySubmitButtonLabel: 'Nachricht senden',
+    gastronomySubmitButtonLabel: 'Anfrage senden',
   }
 }
 
@@ -301,12 +326,37 @@ function gastronomyDataEN(
   offer2?: Media
   offer3?: Media
   contact?: Media
+  hero?: Media
+  fineDining?: Media
+  streetFood?: Media
+  traditional?: Media
+  product?: Media
 },
   workshopHeroIds: Record<string, string | null>,
 ) {
   return {
-    gastronomyHeroCtaLabel: 'Take a look',
-    gastronomyHeroCtaUrl: '#offer',
+    gastronomySectionOrder: defaultGastronomySectionOrderRows(),
+    gastronomyHeroImage: media.hero?.id ?? null,
+    gastronomyHeroEyebrow: 'For restaurants',
+    gastronomyHeroTitle: 'Fermented Styrian runner bean tempeh',
+    gastronomyHeroTagline: 'Regional. Innovative. Versatile.',
+    gastronomyHeroCtaLabel: 'Request a sample',
+    gastronomyHeroCtaUrl: '#contact',
+    gastronomyUsageBanners: [
+      { image: media.fineDining?.id ?? null, title: 'Fine Dining' },
+      { image: media.streetFood?.id ?? null, title: 'Street Food' },
+      { image: media.traditional?.id ?? null, title: 'Traditional' },
+    ],
+    gastronomyFactsTitle: 'For the kitchen',
+    gastronomyFacts: [
+      { title: 'How to cook', text: 'Slice, then sear hot until golden brown.' },
+      { title: 'Shelf life', text: 'Vacuum-packed and chilled — 6 weeks.' },
+      { title: 'Ingredients', text: 'Just 3 ingredients. Regional and handmade.' },
+    ],
+    gastronomyProductImage: media.product?.id ?? null,
+    gastronomyProductQuote:
+      'A standalone premium product with a nutty aroma — for modern tavern cooking, fine dining, and plant-forward menus.',
+    gastronomyProductCaption: 'Handmade in Graz',
     gastronomyOfferSectionTitle: 'What we offer',
     gastronomyOfferCards: [
       {
@@ -491,29 +541,29 @@ function gastronomyDataEN(
       },
     ],
     gastronomyContactImage: media.contact?.id ?? null,
-    gastronomyContactTitle: 'Contact',
+    gastronomyContactTitle: 'For kitchens',
     gastronomyContactDescription:
-      'Would you like to book a workshop or have questions about fermentation, products or B2B offers? We look forward to hearing from you.',
-    gastronomyContactFormHeading: 'Ask About Anything',
+      'Sample, first order, or regular delivery — runner bean tempeh for restaurant kitchens in the Graz area.',
+    gastronomyContactFormHeading: 'Request a bulk order',
     gastronomyContactAddress: 'Grabenstraße 15, 8010 Graz, Austria',
     gastronomyContactPhone: '+43 660 4943577',
     gastronomyContactEmail: 'kontakt@fermentfreude.at',
     gastronomyFormPlaceholders: {
       firstName: 'First Name',
-      lastName: 'Last Name',
+      lastName: 'Restaurant / kitchen',
       email: 'Email',
-      message: 'Message',
+      message: 'Quantity (kg) and delivery notes',
     },
     gastronomySubjectOptions: {
       default: 'Subject',
       options: [
-        { label: 'General Inquiry' },
-        { label: 'Workshop Information' },
-        { label: 'Product Question' },
-        { label: 'Partnership' },
+        { label: 'Request a sample' },
+        { label: 'First order' },
+        { label: 'Regular delivery' },
+        { label: 'Question' },
       ],
     },
-    gastronomySubmitButtonLabel: 'Send Message',
+    gastronomySubmitButtonLabel: 'Send inquiry',
   }
 }
 
@@ -529,6 +579,11 @@ async function seedGastronomy() {
     offer2?: Media
     offer3?: Media
     contact?: Media
+    hero?: Media
+    fineDining?: Media
+    streetFood?: Media
+    traditional?: Media
+    product?: Media
   } = {}
 
   const offerPaths = [
@@ -571,6 +626,29 @@ async function seedGastronomy() {
     } else {
       payload.logger.warn(`Contact image not found: ${contactPath}`)
     }
+
+    const shopDir = path.resolve(process.cwd(), 'public/shop')
+    const shopUploads: Array<{ key: keyof typeof media; file: string; alt: string }> = [
+      { key: 'hero', file: 'hero-kaefer-plate.webp', alt: 'Plated fried Käferbohnen tempeh' },
+      { key: 'fineDining', file: 'hero-kaefer-alt.webp', alt: 'Käferbohnen tempeh — fine dining' },
+      { key: 'streetFood', file: 'hero-kaefer-v3.webp', alt: 'Käferbohnen tempeh — street food' },
+      { key: 'traditional', file: 'hero-kaefer-left.webp', alt: 'Käferbohnen tempeh — traditional' },
+      { key: 'product', file: 'hero-kaefer.webp', alt: 'Raw Käferbohnen tempeh block' },
+    ]
+    for (const item of shopUploads) {
+      const p = path.join(shopDir, item.file)
+      if (!fs.existsSync(p)) {
+        payload.logger.warn(`Gastronomy photo not found: ${p}`)
+        continue
+      }
+      const created = await payload.create({
+        collection: 'media',
+        data: { alt: item.alt },
+        file: await optimizedFile(p, IMAGE_PRESETS.hero),
+        context: { skipAutoTranslate: true },
+      })
+      media[item.key] = created as Media
+    }
   } catch (_err) {
     payload.logger.warn('Image upload skipped (e.g. Vercel Blob suspended). Seeding text only.')
   }
@@ -590,11 +668,16 @@ async function seedGastronomy() {
   const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
 
   if (existing.docs.length > 0) {
-    const pageId = existing.docs[0].id
-    const _forceRecreate = process.argv.includes('--force')
+    const forceRecreate = process.argv.includes('--force')
+    if (!forceRecreate) {
+      payload.logger.info(
+        '⏭️  Gastronomy page already has content. Skipping so live copy is not overwritten. Use --force only if you intend to replace it.',
+      )
+      process.exit(0)
+    }
+    payload.logger.info('🔄 --force: overwriting existing gastronomy page content.')
 
-    // Always update existing page (whether forceRecreate or not)
-    // Images are preserved by updating instead of deleting
+    const pageId = existing.docs[0].id
     await payload.update({
       collection: 'pages',
       id: pageId,
@@ -638,10 +721,19 @@ async function seedGastronomy() {
     const subjectItemsDE = subjectOpts?.options ?? []
     const trustedByBadgesDE =
       (gastronomyDE.gastronomyTrustedByBadges as Array<{ id?: string }>) ?? []
+    const usageBannersDE =
+      (gastronomyDE.gastronomyUsageBanners as Array<{ id?: string }>) ?? []
+    const factsDE = (gastronomyDE.gastronomyFacts as Array<{ id?: string }>) ?? []
+    const sectionOrderDE =
+      (gastronomyDE.gastronomySectionOrder as Array<{ id?: string }>) ?? []
 
     const enGastronomy = gastronomyDataEN(media, workshopHeroIds)
     const dataENWithIds = {
       ...enGastronomy,
+      gastronomySectionOrder: enGastronomy.gastronomySectionOrder.map((c, i) => ({
+        ...c,
+        id: sectionOrderDE[i]?.id,
+      })),
       gastronomyOfferCards: enGastronomy.gastronomyOfferCards.map((c, i) => ({
         ...c,
         id: offerCardsDE[i]?.id,
@@ -673,6 +765,14 @@ async function seedGastronomy() {
       gastronomyTrustedByBadges: enGastronomy.gastronomyTrustedByBadges.map((b, i) => ({
         ...b,
         id: trustedByBadgesDE[i]?.id,
+      })),
+      gastronomyUsageBanners: enGastronomy.gastronomyUsageBanners.map((b, i) => ({
+        ...b,
+        id: usageBannersDE[i]?.id,
+      })),
+      gastronomyFacts: enGastronomy.gastronomyFacts.map((b, i) => ({
+        ...b,
+        id: factsDE[i]?.id,
       })),
       gastronomySubjectOptions: {
         ...enGastronomy.gastronomySubjectOptions,
@@ -751,10 +851,19 @@ async function seedGastronomy() {
   const subjectItemsDE = subjectOpts?.options ?? []
   const trustedByBadgesDE =
     (gastronomyDE.gastronomyTrustedByBadges as Array<{ id?: string }>) ?? []
+  const usageBannersDE =
+    (gastronomyDE.gastronomyUsageBanners as Array<{ id?: string }>) ?? []
+  const factsDE = (gastronomyDE.gastronomyFacts as Array<{ id?: string }>) ?? []
+  const sectionOrderDE =
+    (gastronomyDE.gastronomySectionOrder as Array<{ id?: string }>) ?? []
 
   const enGastronomy = gastronomyDataEN(media, workshopHeroIds)
   const dataENWithIds = {
     ...enGastronomy,
+    gastronomySectionOrder: enGastronomy.gastronomySectionOrder.map((c, i) => ({
+      ...c,
+      id: sectionOrderDE[i]?.id,
+    })),
     gastronomyOfferCards: enGastronomy.gastronomyOfferCards.map((c, i) => ({
       ...c,
       id: offerCardsDE[i]?.id,
@@ -786,6 +895,14 @@ async function seedGastronomy() {
     gastronomyTrustedByBadges: enGastronomy.gastronomyTrustedByBadges.map((b, i) => ({
       ...b,
       id: trustedByBadgesDE[i]?.id,
+    })),
+    gastronomyUsageBanners: enGastronomy.gastronomyUsageBanners.map((b, i) => ({
+      ...b,
+      id: usageBannersDE[i]?.id,
+    })),
+    gastronomyFacts: enGastronomy.gastronomyFacts.map((b, i) => ({
+      ...b,
+      id: factsDE[i]?.id,
     })),
     gastronomySubjectOptions: {
       ...enGastronomy.gastronomySubjectOptions,

@@ -353,6 +353,70 @@ export async function deleteManualWorkshopBooking(bookingId: string): Promise<vo
 }
 
 /**
+ * Edits the name and dietary/notes text for one seat on a booking — the
+ * buyer (seatIndex 0, stored as firstName/lastName + notes on the booking
+ * itself) or a companion seat (seatIndex > 0, stored as recipientName +
+ * giftNote inside that seat's entry in the seats array).
+ *
+ * Deliberately name + notes ONLY — no guestCount, date, or anything with a
+ * capacity implication. Neither field affects the atomic spot counter, so
+ * this is safe on ANY booking, real order or manual placeholder alike,
+ * unlike delete which must stay restricted to manual-only bookings.
+ */
+export async function updateBookingSeatDetails(params: {
+  bookingId: string
+  seatIndex: number
+  name: string
+  notes: string
+}): Promise<void> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  const booking = await payload.findByID({
+    collection: 'workshop-bookings',
+    id: params.bookingId,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const name = params.name.trim()
+  const notes = params.notes.trim()
+
+  if (params.seatIndex === 0) {
+    const [firstName, ...rest] = name.split(' ')
+    await payload.update({
+      collection: 'workshop-bookings',
+      id: params.bookingId,
+      data: {
+        firstName: firstName ?? '',
+        lastName: rest.join(' '),
+        notes,
+      },
+      overrideAccess: true,
+    })
+    return
+  }
+
+  const seats = Array.isArray(booking.seats) ? [...booking.seats] : []
+  while (seats.length <= params.seatIndex) {
+    seats.push({ seatStatus: 'active' })
+  }
+  seats[params.seatIndex] = {
+    ...seats[params.seatIndex],
+    recipientName: name,
+    giftNote: notes,
+  }
+
+  await payload.update({
+    collection: 'workshop-bookings',
+    id: params.bookingId,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: { seats } as any,
+    overrideAccess: true,
+  })
+}
+
+/**
  * List other upcoming, published appointments for the same workshop as
  * `excludeAppointmentId` — candidates to move an overbooked booking to.
  * Shows real remaining capacity (derived from confirmed bookings, same way

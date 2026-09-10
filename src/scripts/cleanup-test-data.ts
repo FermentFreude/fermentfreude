@@ -1,8 +1,8 @@
 /**
  * cleanup-test-data.ts
  *
- * Deletes all test orders, bookings, transactions and carts from staging.
- * Resets all workshop appointment spots to their full capacity.
+ * Deletes all test orders, bookings, transactions, carts, and vouchers from
+ * staging. Resets all workshop appointment spots to their full capacity.
  *
  * Run: pnpm tsx src/scripts/cleanup-test-data.ts
  *
@@ -111,7 +111,26 @@ async function main() {
     console.log(`  ✓ Deleted cart ${cart.id}`)
   }
 
-  // ── 5. Reset all appointment spots to full capacity ─────────────────────────
+  // ── 5. Delete all vouchers ───────────────────────────────────────────────────
+  const vouchers = await payload.find({
+    collection: 'vouchers',
+    limit: 200,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  console.log(`\nFound ${vouchers.totalDocs} voucher(s) to delete.`)
+
+  for (const voucher of vouchers.docs) {
+    await payload.delete({
+      collection: 'vouchers',
+      id: voucher.id,
+      overrideAccess: true,
+    })
+    console.log(`  ✓ Deleted voucher ${voucher.code}`)
+  }
+
+  // ── 6. Reset all appointment spots to full capacity ─────────────────────────
   // Final safety pass — ensures every appointment has the correct available spots
   // regardless of whether the hook ran correctly for each order.
   const appointments = await payload.find({
@@ -139,7 +158,7 @@ async function main() {
     console.log(`  ✓ Reset appointment ${appointment.id} → ${maxCapacity} spots`)
   }
 
-  // ── 6. Reset invoice counter ─────────────────────────────────────────────────
+  // ── 7. Reset invoice counter ─────────────────────────────────────────────────
   await payload.updateGlobal({
     slug: 'invoice-counter' as never,
     data: { lastYear: 0 as unknown as undefined, lastNumber: 0 as unknown as undefined },

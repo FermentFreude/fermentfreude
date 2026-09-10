@@ -5,6 +5,7 @@ import React, { useState } from 'react'
 import { AddManualBookingForm } from './AddManualBookingForm'
 import { BookingDetailModal } from './BookingDetailModal'
 import { DeleteBookingControl } from './DeleteBookingControl'
+import { EditSeatControl } from './EditSeatControl'
 import { MoveBookingControl } from './MoveBookingControl'
 import { SendAlternateDateEmailBar } from './SendAlternateDateEmailBar'
 import type { AppointmentRow, BookingRow } from './types'
@@ -151,7 +152,9 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
             booking: BookingRow
             guestCount: number
             seatNumber: number
+            seatIndex: number
             name: string
+            editableName: string
             email: string
             phone: string
             notes: string
@@ -184,7 +187,9 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                 booking,
                 guestCount: booking.guestCount,
                 seatNumber: seatCounter,
+                seatIndex: si,
                 name: seatName,
+                editableName: seat?.recipientName || (isBuyer ? buyerName : ''),
                 email: isBuyer ? booking.email : '',
                 phone: isBuyer ? booking.phone : '',
                 notes: seatNotes,
@@ -280,6 +285,16 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                   <p style={{ margin: '10px 0 0', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.4 }}>
                     {fmtBookingDate(card.createdAt)}
                   </p>
+
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <EditSeatControl
+                      bookingId={card.bookingId}
+                      seatIndex={card.seatIndex}
+                      currentName={card.editableName}
+                      currentNotes={card.notes}
+                      onDone={onRefresh}
+                    />
+                  </div>
 
                   {card.isBuyer && (
                     <div onClick={(e) => e.stopPropagation()}>

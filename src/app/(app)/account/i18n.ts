@@ -172,8 +172,10 @@ export const accountI18n = {
     whatYouCanDo: 'Was du jetzt tun kannst',
     checkEmail: 'Prüfe deine E-Mail für eine Bestellbestätigung und Quittung',
     visitDashboard: 'Besuche dein Konto-Dashboard, um den Bestellstatus zu verfolgen',
+    visitDashboardGuest: 'Erstelle ein Konto, um deine Bestellungen jederzeit einsehen zu können',
     contactUs: 'Kontaktiere uns bei Fragen zu deiner Bestellung',
     viewMyOrders: 'Meine Bestellungen ansehen',
+    createAccount: 'Konto erstellen',
     continueShopping: 'Weiter einkaufen',
     questionsDescOrder: 'Unser Kundenservice ist für dich da. Melde dich jederzeit.',
 
@@ -408,8 +410,10 @@ export const accountI18n = {
     whatYouCanDo: 'What You Can Do Now',
     checkEmail: 'Check your email for an order confirmation and receipt',
     visitDashboard: 'Visit your account dashboard to track your order status',
+    visitDashboardGuest: 'Create an account to view your orders anytime',
     contactUs: 'Contact us if you have any questions about your order',
     viewMyOrders: 'View My Orders',
+    createAccount: 'Create Account',
     continueShopping: 'Continue Shopping',
     questionsDescOrder: 'Our customer support team is here to help. Reach out anytime.',
 

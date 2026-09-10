@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useState } from 'react'
 
 export type Locale = 'de' | 'en'
 
@@ -9,31 +9,31 @@ interface LocaleContextType {
   setLocale: (locale: Locale) => void
 }
 
-const localeStorageKey = 'fermentfreude-locale'
-
 const LocaleContext = createContext<LocaleContextType>({
   locale: 'de',
   setLocale: () => null,
 })
 
-export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('de')
+/**
+ * initialLocale comes from the server (RootLayout reads the
+ * `fermentfreude-locale` cookie via getLocale()) so the client's first
+ * render already matches what was server-rendered — no post-hydration
+ * flash of the wrong language.
+ */
+export function LocaleProvider({
+  children,
+  initialLocale,
+}: {
+  children: React.ReactNode
+  initialLocale: Locale
+}) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale)
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale)
-    window.localStorage.setItem(localeStorageKey, newLocale)
-    // Set cookie so server components can read it
     document.cookie = `fermentfreude-locale=${newLocale};path=/;max-age=31536000`
     // Refresh so server components re-fetch with the new locale
     window.location.reload()
-  }, [])
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(localeStorageKey)
-    if (stored === 'de' || stored === 'en') {
-      setLocaleState(stored)
-      document.cookie = `fermentfreude-locale=${stored};path=/;max-age=31536000`
-    }
   }, [])
 
   return <LocaleContext.Provider value={{ locale, setLocale }}>{children}</LocaleContext.Provider>

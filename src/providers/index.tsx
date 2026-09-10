@@ -1,5 +1,5 @@
 import { AuthProvider } from '@/providers/Auth'
-import { LocaleProvider } from '@/providers/Locale'
+import { LocaleProvider, type Locale } from '@/providers/Locale'
 import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/client/react'
 import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import React from 'react'
@@ -10,10 +10,11 @@ import { ThemeProvider } from './Theme'
 
 export const Providers: React.FC<{
   children: React.ReactNode
-}> = ({ children }) => {
+  initialLocale: Locale
+}> = ({ children, initialLocale }) => {
   return (
     <ThemeProvider>
-      <LocaleProvider>
+      <LocaleProvider initialLocale={initialLocale}>
         <AuthProvider>
           <HeaderThemeProvider>
             <SonnerProvider>

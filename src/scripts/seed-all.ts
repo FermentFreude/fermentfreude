@@ -53,6 +53,7 @@ const scripts: Record<string, { name: string; file: string }> = {
 
   legal: { name: 'Legal pages (datenschutz, agb, impressum)', file: 'seed-legal-pages.ts' },
   voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
+  'shop-new': { name: 'Shop page (hero, products, automaten)', file: 'seed-shop-new.ts' },
   kombucha: { name: 'Kombucha workshop (experienceCards)', file: 'seed-kombucha.ts' },
   'kombucha-detail': {
     name: 'Kombucha workshop detail (hero, booking, FAQ, how-to)',
@@ -75,7 +76,7 @@ const scripts: Record<string, { name: string; file: string }> = {
     file: 'seed-feld-ins-glas-page.ts',
   },
   gastronomy: {
-    name: 'Gastronomy page (B2B + workshop cards)',
+    name: 'Gastronomy page (B2B sales page)',
     file: 'seed-gastronomy.ts',
   },
   'feld-ins-glas-drive-images': {
@@ -95,6 +96,7 @@ const allOrder = [
   'help',
   'legal',
   'voucher',
+  'shop-new',
   'kombucha-detail',
   'kombucha-phases',
 ]
