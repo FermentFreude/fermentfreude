@@ -102,7 +102,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         FIRST_NAME: booking.firstName || 'Gast',
         VOUCHER_CODE: String(voucher.code ?? ''),
         VOUCHER_AMOUNT: String(pricePerPerson),
-        VOUCHER_EXPIRY: expiry.toLocaleDateString('de-AT'),
+        VOUCHER_EXPIRY: expiry.toLocaleDateString('de-AT', { timeZone: 'Europe/Vienna' }),
         WORKSHOP_TITLE: String(booking.workshopTitle ?? ''),
       },
     })
