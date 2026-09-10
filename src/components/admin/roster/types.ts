@@ -22,6 +22,9 @@ export type AppointmentRow = {
 export type SeatEntry = {
   recipientName: string
   giftNote: string
+  seatStatus?: string
+  cancelledAt?: string
+  cancelledReason?: string
 }
 
 export type BookingRow = {
@@ -35,6 +38,13 @@ export type BookingRow = {
   seats: SeatEntry[]
   createdAt: string
   orderId: string
+  workshopTitle: string
+  workshopSlug: string
+  date: string
+  time: string
+  pricePerPerson: number
+  totalPrice: number
+  status: string
 }
 
 export type ParticipantRow = {
@@ -44,6 +54,10 @@ export type ParticipantRow = {
   workshopTitle: string
   bookingDate: string
   status: 'confirmed' | 'pending' | 'cancelled'
+  isBuyer: boolean
+  guestOfName: string
+  orderRef: string
+  booking: BookingRow
 }
 
 export type PickupItem = {

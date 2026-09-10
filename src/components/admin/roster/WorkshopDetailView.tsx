@@ -3,6 +3,8 @@
 import React, { useState } from 'react'
 
 import { AddManualBookingForm } from './AddManualBookingForm'
+import { BookingDetailModal } from './BookingDetailModal'
+import { DeleteBookingControl } from './DeleteBookingControl'
 import { MoveBookingControl } from './MoveBookingControl'
 import { SendAlternateDateEmailBar } from './SendAlternateDateEmailBar'
 import type { AppointmentRow, BookingRow } from './types'
@@ -44,6 +46,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
   const wc = workshopColor(appointment.workshopTitle)
   const [showForm, setShowForm] = useState(false)
   const [selectedBookingIds, setSelectedBookingIds] = useState<string[]>([])
+  const [detailBooking, setDetailBooking] = useState<BookingRow | null>(null)
   const remainingSpots = Math.max(appointment.capacity - appointment.totalBooked, 0)
 
   const toggleSelected = (bookingId: string) => {
@@ -145,6 +148,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
           type SeatCard = {
             key: string
             bookingId: string
+            booking: BookingRow
             guestCount: number
             seatNumber: number
             name: string
@@ -177,6 +181,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
               cards.push({
                 key: `${booking.id}-${si}`,
                 bookingId: booking.id,
+                booking,
                 guestCount: booking.guestCount,
                 seatNumber: seatCounter,
                 name: seatName,
@@ -196,9 +201,10 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
               {cards.map((card) => (
                 <div
                   key={card.key}
+                  onClick={() => setDetailBooking(card.booking)}
                   style={{
                     background: 'var(--theme-elevation-0)', border: '1px solid var(--theme-elevation-100)',
-                    borderRadius: '10px', padding: '18px',
+                    borderRadius: '10px', padding: '18px', cursor: 'pointer',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -208,6 +214,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                           type="checkbox"
                           checked={selectedBookingIds.includes(card.bookingId)}
                           onChange={() => toggleSelected(card.bookingId)}
+                          onClick={(e) => e.stopPropagation()}
                           aria-label="Für E-Mail-Versand auswählen"
                           style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
                         />
@@ -233,6 +240,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, flexShrink: 0 }}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                       <a href={`mailto:${card.email}`} style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.75, textDecoration: 'none' }}
+                        onClick={(e) => e.stopPropagation()}
                         onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline' }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none' }}
                       >
@@ -248,11 +256,11 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                     </div>
                   )}
 
-                  {card.guestOfName && (
+                  {!card.isBuyer && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, flexShrink: 0 }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                       <span style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.75 }}>
-                        Begleitung von {card.guestOfName}
+                        {card.guestOfName ? `Begleitung von ${card.guestOfName}` : 'Begleitung'}
                         {card.orderRef && ` · Bestellung #${card.orderRef}`}
                       </span>
                     </div>
@@ -274,12 +282,17 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                   </p>
 
                   {card.isBuyer && (
-                    <MoveBookingControl
-                      bookingId={card.bookingId}
-                      guestCount={card.guestCount}
-                      currentAppointmentId={appointment.id}
-                      onDone={onRefresh}
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <MoveBookingControl
+                        bookingId={card.bookingId}
+                        guestCount={card.guestCount}
+                        currentAppointmentId={appointment.id}
+                        onDone={onRefresh}
+                      />
+                      {!card.booking.orderId && (
+                        <DeleteBookingControl bookingId={card.bookingId} onDone={onRefresh} />
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
@@ -326,6 +339,8 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
           </p>
         </div>
       )}
+
+      {detailBooking && <BookingDetailModal booking={detailBooking} onClose={() => setDetailBooking(null)} />}
     </div>
   )
 }

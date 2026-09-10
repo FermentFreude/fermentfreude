@@ -298,6 +298,61 @@ export async function createManualWorkshopBooking(params: {
 }
 
 /**
+ * Deletes a manually-created workshop booking (e.g. a placeholder seat held
+ * for someone deciding whether to rebook) and releases its atomic spot back
+ * — the exact counter this whole class of bug (see decrementInventory /
+ * moveWorkshopBooking comments) is about keeping in sync.
+ *
+ * Deliberately refuses to delete a booking with a real orderId/cartSlug —
+ * that's a paid order; deleting it here would destroy the customer's record
+ * of what they paid for with no refund, invoice, or email trail. Only
+ * bookings created through createManualWorkshopBooking above (no order
+ * behind them) ever qualify.
+ */
+export async function deleteManualWorkshopBooking(bookingId: string): Promise<void> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  const booking = await payload.findByID({
+    collection: 'workshop-bookings',
+    id: bookingId,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  if (booking.orderId || booking.cartSlug) {
+    throw new Error(
+      'Diese Buchung gehört zu einer echten Bestellung und kann hier nicht gelöscht werden.',
+    )
+  }
+
+  if (booking.appointmentId) {
+    try {
+      const appointment = await payload.findByID({
+        collection: 'workshop-appointments',
+        id: booking.appointmentId,
+        depth: 1,
+        overrideAccess: true,
+      })
+      const workshop = appointment.workshop
+      const maxCapacity =
+        typeof workshop === 'object' && workshop !== null ? Number(workshop.maxCapacityPerSlot ?? 12) : 12
+      await releaseSpotsAtomic(payload, booking.appointmentId, booking.guestCount || 1, maxCapacity)
+    } catch (err) {
+      payload.logger.error(
+        `[deleteManualWorkshopBooking] Booking ${bookingId} will be deleted, but releasing its spot failed: ${err instanceof Error ? err.message : err}`,
+      )
+    }
+  }
+
+  await payload.delete({
+    collection: 'workshop-bookings',
+    id: bookingId,
+    overrideAccess: true,
+  })
+}
+
+/**
  * List other upcoming, published appointments for the same workshop as
  * `excludeAppointmentId` — candidates to move an overbooked booking to.
  * Shows real remaining capacity (derived from confirmed bookings, same way

@@ -47,6 +47,54 @@ export function fmtTime(iso: string): string {
   })
 }
 
+/** Normalize a raw workshop-bookings doc into the shape the roster UI (list rows + detail modal) needs. */
+function toBookingRow(b: { id: string | number }): BookingRow {
+  const bk = b as unknown as {
+    firstName?: string
+    lastName?: string
+    email?: string
+    phone?: string
+    guestCount?: number
+    notes?: string
+    seats?: Array<{ recipientName?: string; giftNote?: string; seatStatus?: string; cancelledAt?: string; cancelledReason?: string }>
+    createdAt?: string
+    orderId?: string
+    workshopTitle?: string
+    workshopSlug?: string
+    date?: string
+    time?: string
+    pricePerPerson?: number
+    totalPrice?: number
+    status?: string
+  }
+  const seats: SeatEntry[] = (bk.seats ?? []).map((s) => ({
+    recipientName: s.recipientName?.trim() ?? '',
+    giftNote: s.giftNote?.trim() ?? '',
+    seatStatus: s.seatStatus ?? '',
+    cancelledAt: s.cancelledAt ?? '',
+    cancelledReason: s.cancelledReason ?? '',
+  }))
+  return {
+    id: String(b.id),
+    firstName: bk.firstName ?? '',
+    lastName: bk.lastName ?? '',
+    email: bk.email ?? '',
+    phone: bk.phone ?? '',
+    guestCount: bk.guestCount ?? 1,
+    notes: bk.notes?.trim() ?? '',
+    seats,
+    createdAt: bk.createdAt ?? '',
+    orderId: bk.orderId?.trim() ?? '',
+    workshopTitle: bk.workshopTitle ?? '',
+    workshopSlug: bk.workshopSlug ?? '',
+    date: bk.date ?? '',
+    time: bk.time ?? '',
+    pricePerPerson: bk.pricePerPerson ?? 0,
+    totalPrice: bk.totalPrice ?? 0,
+    status: bk.status ?? 'confirmed',
+  } satisfies BookingRow
+}
+
 export async function fetchRosterData(currentUserId?: string): Promise<RosterData> {
   const payload = await getPayload({ config: configPromise })
   const now = new Date()
@@ -113,35 +161,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       isPast,
     })
 
-    bookingsByAppointment[String(appt.id)] = bResult.docs.map((b) => {
-      const bk = b as unknown as {
-        firstName?: string
-        lastName?: string
-        email?: string
-        phone?: string
-        guestCount?: number
-        notes?: string
-        seats?: Array<{ recipientName?: string; giftNote?: string }>
-        createdAt?: string
-        orderId?: string
-      }
-      const seats: SeatEntry[] = (bk.seats ?? []).map((s) => ({
-        recipientName: s.recipientName?.trim() ?? '',
-        giftNote: s.giftNote?.trim() ?? '',
-      }))
-      return {
-        id: String(b.id),
-        firstName: bk.firstName ?? '',
-        lastName: bk.lastName ?? '',
-        email: bk.email ?? '',
-        phone: bk.phone ?? '',
-        guestCount: bk.guestCount ?? 1,
-        notes: bk.notes?.trim() ?? '',
-        seats,
-        createdAt: bk.createdAt ?? '',
-        orderId: bk.orderId?.trim() ?? '',
-      } satisfies BookingRow
-    })
+    bookingsByAppointment[String(appt.id)] = bResult.docs.map((b) => toBookingRow(b))
   }
 
   // ── 3. Participants (all confirmed bookings, recent first) ─────────────────
@@ -153,27 +173,35 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     overrideAccess: true,
   })
 
-  const participants: ParticipantRow[] = allBookings.docs.map((b) => {
-    const bk = b as unknown as {
-      firstName?: string
-      lastName?: string
-      email?: string
-      phone?: string
-      workshopTitle?: string
-      createdAt?: string
-      status?: string
+  const participants: ParticipantRow[] = allBookings.docs.flatMap((b) => {
+    const booking = toBookingRow(b)
+    const buyerName = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || booking.email || '—'
+    const bookingDate = booking.createdAt
+      ? new Date(booking.createdAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
+      : ''
+    // Extra guests rarely have their own name — pull whatever order number the
+    // buyer's card has so any guest can still be traced back to the order.
+    const orderRef = booking.orderId || booking.notes.match(/Order #([\w-]+)/)?.[1] || ''
+    const count = Math.max(booking.guestCount, 1)
+
+    const rows: ParticipantRow[] = []
+    for (let si = 0; si < count; si++) {
+      const isBuyer = si === 0
+      const seatName = booking.seats[si]?.recipientName
+      rows.push({
+        name: seatName || (isBuyer ? buyerName : `Gast von ${buyerName}`),
+        email: isBuyer ? booking.email : '',
+        phone: isBuyer ? booking.phone : '',
+        workshopTitle: booking.workshopTitle,
+        bookingDate,
+        status: (booking.status as ParticipantRow['status']) || 'confirmed',
+        isBuyer,
+        guestOfName: !isBuyer && !seatName ? buyerName : '',
+        orderRef: !isBuyer ? orderRef : '',
+        booking,
+      })
     }
-    const name = [bk.firstName, bk.lastName].filter(Boolean).join(' ') || bk.email || '—'
-    return {
-      name,
-      email: bk.email ?? '',
-      phone: bk.phone ?? '',
-      workshopTitle: bk.workshopTitle ?? '',
-      bookingDate: bk.createdAt
-        ? new Date(bk.createdAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
-        : '',
-      status: (bk.status as ParticipantRow['status']) ?? 'confirmed',
-    }
+    return rows
   })
 
   // ── 4. Pickup orders ───────────────────────────────────────────────────────
