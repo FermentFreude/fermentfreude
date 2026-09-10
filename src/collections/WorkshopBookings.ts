@@ -14,7 +14,15 @@ export const WorkshopBookings: CollectionConfig = {
   },
   access: {
     read: isAdmin,
-    create: isAdmin,
+    // Deliberately blocked, even for admins — every other write path here
+    // (real checkout, the roster dashboard's manual-seat tool) uses
+    // overrideAccess: true and is unaffected by this. Creating a booking
+    // straight in this raw collection view is exactly how it bypasses the
+    // atomic capacity counter (reserveSpotsAtomic/releaseSpotsAtomic in
+    // src/lib/atomicSpots.ts) and silently desyncs availableSpots from
+    // reality — see fix-workshop-capacity.ts's doc comment for the incident
+    // this caused. Add seats from the roster dashboard instead.
+    create: () => false,
     update: isAdmin,
     delete: isAdmin,
   },
