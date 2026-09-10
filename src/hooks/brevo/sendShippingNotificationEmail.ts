@@ -78,6 +78,7 @@ export const sendShippingNotificationEmail: CollectionAfterChangeHook = async ({
       const pickupTimeFormatted = pickupTime.toLocaleTimeString('de-DE', {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: 'Europe/Vienna',
       })
 
       await sendTemplateEmail({
@@ -134,6 +135,7 @@ export const sendShippingNotificationEmail: CollectionAfterChangeHook = async ({
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
+            timeZone: 'Europe/Vienna',
           }),
           TRACKING_URL: trackingUrl || `https://www.fermentfreude.at/track?order=${doc.id}`,
           PRIVACY_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/datenschutz`,

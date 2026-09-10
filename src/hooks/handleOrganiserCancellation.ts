@@ -124,7 +124,7 @@ export const handleOrganiserCancellation: CollectionAfterChangeHook = async ({
 
   const dateDisplay = (() => {
     try {
-      return new Date(doc.dateTime as string).toLocaleDateString('de-DE')
+      return new Date(doc.dateTime as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
     } catch {
       return String(doc.dateTime ?? '')
     }

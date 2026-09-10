@@ -103,10 +103,14 @@ export function formatCurrency(cents: number): string {
 }
 
 export function formatDate(date: Date, locale: 'de' | 'en'): string {
+  // Pinned to Europe/Vienna — every invoice/receipt PDF is for a Vienna-based
+  // business; without this the server's UTC clock can shift the printed
+  // date by a day near midnight.
   return date.toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-GB', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
+    timeZone: 'Europe/Vienna',
   })
 }
 
