@@ -34,7 +34,11 @@ STRIPE_SECRET_KEY                    # sk_test_ (dev) / sk_live_ (prod)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY   # pk_test_ (dev) / pk_live_ (prod)
 STRIPE_WEBHOOKS_SIGNING_SECRET       # whsec_
 DEEPL_API_KEY                        # Auto-translation DE→EN
+PROD_DATABASE_URL                    # Production MongoDB Atlas connection string — kept alongside the staging DATABASE_URL specifically so Claude can run selective staging→prod content copies (see below) without a separate credential hand-off each time
+PROD_R2_BUCKET                       # fermentfreude-media — production R2 bucket name, for the same purpose
 ```
+
+**Cross-environment DB/media copies:** `PROD_DATABASE_URL` / `PROD_R2_BUCKET` live in local `.env` on purpose (gitignored, local-only) so Claude can do selective staging→production content syncs (e.g. "bring page X from staging to main") without you re-pasting credentials each session. Only `DATABASE_URL`/`R2_BUCKET`/`R2_PUBLIC_URL` point at staging by default — the `PROD_*` vars are there specifically as the production target for these copies, not for routine local dev use. Both R2 buckets are addressable from the single `r2:` rclone remote (`r2:fermentfreude-media-staging/...` vs `r2:fermentfreude-media/...`) — no separate `r2-staging`/`r2-prod` remotes needed. **Payload media documents store absolute R2 URLs** (`url`, `sizes.*.url`, `thumbnailURL`) baked to whichever bucket's public domain was active at upload time — a raw copy across environments must rewrite these to the target's own `R2_PUBLIC_URL` domain (see the two hostnames whitelisted in `next.config.*` `remotePatterns`), or production ends up silently serving images from staging's CDN.
 
 **CRITICAL:** `NEXT_PUBLIC_*` vars are baked in at **build time**. Changing them in Vercel requires a full redeploy **without cache**.
 
