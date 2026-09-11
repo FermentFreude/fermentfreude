@@ -23,6 +23,7 @@ import { OnlineCourseSlider } from '@/blocks/OnlineCourseSlider/config'
 import { OurStory } from '@/blocks/OurStory/config'
 import { PressBanner } from '@/blocks/PressBanner/config'
 import { PressMediaAwards } from '@/blocks/PressMediaAwards/config'
+import { ProductHeroSlider } from '@/blocks/ProductHeroSlider/config'
 import { ProductSlider } from '@/blocks/ProductSlider/config'
 import { ReadyToLearnCTA } from '@/blocks/ReadyToLearnCTA/config'
 import { ShopAutomaten } from '@/blocks/ShopAutomaten/config'
@@ -219,6 +220,7 @@ export const Pages: CollectionConfig = {
                 SpecialWorkshopBanner,
                 OnlineCourseSlider,
                 ProductSlider,
+                ProductHeroSlider,
                 FeaturedProductCards,
                 ShopAutomaten,
                 ShopHero,
