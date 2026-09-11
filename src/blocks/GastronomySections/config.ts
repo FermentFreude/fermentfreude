@@ -13,9 +13,12 @@ const photoTitleText = [
   {
     name: 'title',
     type: 'text' as const,
-    required: false,
+    required: true,
     localized: true,
     label: 'Title',
+    admin: {
+      description: 'Required — a slide/card with no title is hidden on the live page, not shown blank.',
+    },
   },
   {
     name: 'text',
@@ -175,7 +178,16 @@ export const GastronomyBenefitsBlock: Block = {
             description: 'Shown in the gold circle above the title. Same icon in German and English.',
           },
         },
-        { name: 'title', type: 'text', required: false, localized: true, label: 'Title' },
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+          localized: true,
+          label: 'Title',
+          admin: {
+            description: 'Required — a benefit with no title is hidden on the live page, not shown blank.',
+          },
+        },
         { name: 'text', type: 'textarea', required: false, localized: true, label: 'Short text' },
       ],
     },

@@ -37,6 +37,7 @@ import { BacklogView as BacklogView_dd5410193a81ec05f402c2c0de35a116 } from '../
 import { AnalyticsView as AnalyticsView_e3b35b44f6b14d102431def2313ebb66 } from '../../../components/admin/AnalyticsView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "@payloadcms/next/client#SlugField": SlugField_2b8867833a34864a02ddf429b0728a40,
   "@/fields/heroSlideRowLabel.tsx#HeroSlideRowLabel": HeroSlideRowLabel_aefbc1f9a2565caa50af2d552e97aeae,
