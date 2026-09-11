@@ -145,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const forgotPassword = useCallback<ForgotPassword>(async (args) => {
     try {
-      const res = await fetch('/api/users/forgot-password', {
+      const res = await fetch('/api/auth/forgot-password', {
         body: JSON.stringify({
           email: args.email,
         }),
@@ -157,14 +157,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
 
       if (res.ok) {
-        const { data, errors } = await res.json()
-        if (errors) throw new Error(errors[0].message)
-        setUser(data?.loginUser?.user)
-      } else {
-        throw new Error('Invalid login')
+        const body = (await res.json()) as { error?: string; errors?: { message: string }[] }
+        if (body.errors?.length) throw new Error(body.errors[0].message)
+        if (body.error) throw new Error(body.error)
+        return
       }
+      throw new Error('Could not send password reset email')
     } catch (_e) {
-      throw new Error('An error occurred while attempting to login.')
+      throw new Error('An error occurred while attempting to send a password reset email.')
     }
   }, [])
 

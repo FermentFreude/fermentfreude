@@ -47,12 +47,20 @@ function parseEnvFileValue(content: string, key: string): string | undefined {
 /**
  * Read Brevo keys straight from `.env.local` / `.env` at the project root.
  * Next’s own env merge can skip vars for some API bundles; this path does not depend on that.
+ *
+ * Empty values (`BREVO_API_KEY=`) are treated as unset. Misses are not cached, so adding a
+ * key to `.env` is picked up on the next request without restarting the whole process.
  */
-let brevoEnvFilesRead = false
+function readNonEmptyEnv(value: string | undefined): string | undefined {
+  const trimmed = value?.trim()
+  return trimmed || undefined
+}
+
 function hydrateBrevoKeysFromEnvFiles(): void {
-  if (brevoEnvFilesRead || typeof window !== 'undefined') return
-  brevoEnvFilesRead = true
-  if (process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY) return
+  if (typeof window !== 'undefined') return
+  if (readNonEmptyEnv(process.env.BREVO_API_KEY) || readNonEmptyEnv(process.env.SENDINBLUE_API_KEY)) {
+    return
+  }
 
   const root = getNextProjectRoot()
   let brevo: string | undefined
@@ -68,14 +76,14 @@ function hydrateBrevoKeysFromEnvFiles(): void {
     if (b !== undefined) brevo = b
     if (l !== undefined) legacy = l
   }
-  if (brevo) process.env.BREVO_API_KEY = brevo
-  if (legacy) process.env.SENDINBLUE_API_KEY = legacy
+  if (readNonEmptyEnv(brevo)) process.env.BREVO_API_KEY = brevo
+  if (readNonEmptyEnv(legacy)) process.env.SENDINBLUE_API_KEY = legacy
 }
 
 /** Brevo accepts either env name; use the same key as in the Brevo dashboard (SMTP & API). */
 export function getBrevoApiKey(): string | undefined {
   hydrateBrevoKeysFromEnvFiles()
-  return process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY
+  return readNonEmptyEnv(process.env.BREVO_API_KEY) || readNonEmptyEnv(process.env.SENDINBLUE_API_KEY)
 }
 
 // Default sender — override with env vars
@@ -170,6 +178,8 @@ type SendTransactionalEmailParams = {
   to: BrevoRecipient[]
   subject: string
   htmlContent: string
+  /** Optional plaintext alternative — Gmail uses this when HTML is trimmed or blocked. */
+  textContent?: string
 }
 
 /**
@@ -239,6 +249,7 @@ export async function sendTransactionalEmail({
   to,
   subject,
   htmlContent,
+  textContent,
 }: SendTransactionalEmailParams): Promise<{ success: boolean; messageId?: string }> {
   const apiKey = getBrevoApiKey()
   if (!apiKey) {
@@ -259,6 +270,7 @@ export async function sendTransactionalEmail({
         to,
         subject,
         htmlContent,
+        ...(textContent ? { textContent } : {}),
       }),
     })
 

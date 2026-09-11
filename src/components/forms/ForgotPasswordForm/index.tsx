@@ -6,6 +6,7 @@ import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import Link from 'next/link'
 import React, { Fragment, useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -13,9 +14,19 @@ type FormData = {
   email: string
 }
 
+type ForgotPasswordResponse = {
+  ok?: boolean
+  emailSent?: boolean
+  resetUrl?: string
+  reason?: string
+  error?: string
+}
+
 export const ForgotPasswordForm: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [resetUrl, setResetUrl] = useState('')
+  const [emailSent, setEmailSent] = useState(false)
 
   const {
     formState: { errors },
@@ -24,7 +35,7 @@ export const ForgotPasswordForm: React.FC = () => {
   } = useForm<FormData>()
 
   const onSubmit = useCallback(async (data: FormData) => {
-    const response = await fetch(`/api/users/forgot-password`, {
+    const response = await fetch(`/api/auth/forgot-password`, {
       body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -32,14 +43,20 @@ export const ForgotPasswordForm: React.FC = () => {
       method: 'POST',
     })
 
+    const payload = (await response.json().catch(() => ({}))) as ForgotPasswordResponse
+
     if (response.ok) {
       setSuccess(true)
       setError('')
-    } else {
-      setError(
-        'There was a problem while attempting to send you a password reset email. Please try again.',
-      )
+      setEmailSent(payload.emailSent !== false)
+      setResetUrl(typeof payload.resetUrl === 'string' ? payload.resetUrl : '')
+      return
     }
+
+    setError(
+      payload.error ||
+        'There was a problem while attempting to send you a password reset email. Please try again.',
+    )
   }, [])
 
   return (
@@ -86,10 +103,27 @@ export const ForgotPasswordForm: React.FC = () => {
       )}
       {success && (
         <React.Fragment>
-          <h1 className="text-xl mb-4">Request submitted</h1>
-          <div className="prose dark:prose-invert">
-            <p>Check your email for a link that will allow you to securely reset your password.</p>
+          <h1 className="mb-4 text-xl">{emailSent ? 'Request submitted' : 'Reset link ready'}</h1>
+          <div className="prose max-w-lg dark:prose-invert">
+            {emailSent ? (
+              <p>Check your email for a link that will allow you to securely reset your password.</p>
+            ) : (
+              <p>
+                The reset email could not be sent from this machine (Brevo API key is missing). Use
+                the link below to set a new password:
+              </p>
+            )}
           </div>
+          {resetUrl ? (
+            <p className="mt-6">
+              <Link
+                href={resetUrl}
+                className="inline-flex h-12 items-center rounded-full bg-linear-to-b from-[#F8F4EB] to-[#EFE8DA] px-10 text-[13px] font-medium tracking-[0.18em] uppercase text-[#3D3933] shadow-[0_4px_10px_rgba(0,0,0,0.25)] border border-white/60"
+              >
+                Set new password
+              </Link>
+            </p>
+          ) : null}
         </React.Fragment>
       )}
     </Fragment>
