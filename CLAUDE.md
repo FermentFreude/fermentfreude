@@ -62,6 +62,8 @@ PROD_R2_BUCKET                       # fermentfreude-media — production R2 buc
 
 **Branch flow:** `feature/*` → PR into `staging` → test → merge `staging` → `main`
 
+**Default: keep `staging` and `main` in sync.** When code that's already confirmed/tested lands on one, bring it to the other too — don't leave a fix sitting on only one side indefinitely. Code-only fixes: create a branch off the target environment and `git cherry-pick` just the specific commit(s) onto it, PR into the target, merge — never merge a whole WIP branch just to carry one change over, since the source branch may carry unrelated unfinished work. This applies in both directions — a fix that only exists on `staging` should get promoted to `main` once it's confirmed, and vice versa if `main` gets a hotfix `staging` doesn't have yet.
+
 **Rules:**
 
 - **Never push directly to `main`.** Always: feature → staging → main
