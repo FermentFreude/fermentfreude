@@ -199,9 +199,6 @@ export interface Config {
     'product-pickup-settings': ProductPickupSettingsSelect<false> | ProductPickupSettingsSelect<true>;
   };
   locale: 'de' | 'en';
-  widgets: {
-    collections: CollectionsWidget;
-  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -1017,32 +1014,128 @@ export interface Page {
       )[]
     | null;
   /**
-   * B2B /gastronomy. Slug oben setzen. Felder folgen der Seitenreihenfolge: Hero → Trusted by → CTA → What we offer → … → Kontakt → Next workshop. / Fields follow on-page order from top to bottom.
+   * B2B sales page. Add, drag, and reorder sections the same way as other pages (like Help & FAQ). Click a section to edit it.
    */
   gastronomy?: {
     /**
-     * Primary button on the hero slider (e.g. “Take a look”).
+     * Drag the handle to change the order on the website. Use Add Section to add Hero, Showcase, and the other gastronomy blocks. Toggle “Show this section” on a block to hide it without deleting it.
      */
-    gastronomyHeroCtaLabel: string;
+    gastronomyBlocks?:
+      | (
+          | GastronomyHeroBlock
+          | GastronomyShowcaseBlock
+          | GastronomyBenefitsBlock
+          | GastronomyAudienceBlock
+          | GastronomyProductBlock
+          | GastronomyProofBlock
+          | GastronomyInquiryBlock
+        )[]
+      | null;
     /**
-     * Hero button target (e.g. #offer).
+     * Turn off to hide this section on the website (German and English). The content stays saved.
+     */
+    gastronomyShowHero?: boolean | null;
+    /**
+     * Plated / fried tempeh. Leave empty to use the default photo.
+     */
+    gastronomyHeroImage?: (string | null) | Media;
+    /**
+     * Small line above the title. e.g. “Für Restaurants”.
+     */
+    gastronomyHeroEyebrow?: string | null;
+    /**
+     * Main headline. e.g. “Tempeh für Profiküchen.”
+     */
+    gastronomyHeroTitle?: string | null;
+    /**
+     * One short line under the title. Keep it to 1–2 sentences.
+     */
+    gastronomyHeroTagline?: string | null;
+    /**
+     * e.g. “Für Gastronomie anfragen”.
+     */
+    gastronomyHeroCtaLabel?: string | null;
+    /**
+     * Usually #contact.
      */
     gastronomyHeroCtaUrl?: string | null;
     /**
-     * Text on the previous-slide control (e.g. PREV, ZURÜCK).
+     * Optional. e.g. “Tempeh entdecken”.
+     */
+    gastronomyHeroCtaSecondaryLabel?: string | null;
+    /**
+     * e.g. /products/kaeferbohnen-tempeh
+     */
+    gastronomyHeroCtaSecondaryUrl?: string | null;
+    /**
+     * Turn off to hide this section on the website (German and English). The content stays saved.
+     */
+    gastronomyShowShowcase?: boolean | null;
+    /**
+     * e.g. “Was kann man daraus machen?”
+     */
+    gastronomyShowcaseTitle?: string | null;
+    /**
+     * Each slide: photo + title + one short line. Photography does the talking.
+     */
+    gastronomyUsageBanners?:
+      | {
+          image?: (string | null) | Media;
+          /**
+           * e.g. Tempeh als Hauptkomponente
+           */
+          title?: string | null;
+          /**
+           * One sentence max.
+           */
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Accessibility label for the food slider.
      */
     gastronomyHeroSliderPrevLabel?: string | null;
     /**
-     * Text on the next-slide control (e.g. NEXT, WEITER).
+     * Accessibility label for the food slider.
      */
     gastronomyHeroSliderNextLabel?: string | null;
     /**
-     * Milliseconds between automatic slide changes. Leave empty for default (12000). Min 2000, max 120000.
+     * Turn off to hide this section on the website (German and English). The content stays saved.
      */
-    gastronomyHeroSliderAutoplayMs?: number | null;
+    gastronomyShowBenefits?: boolean | null;
     /**
-     * Images + text for the large hero carousel (same order as on the page, before Trusted by).
+     * e.g. “Warum Tempeh für deine Küche?”
      */
+    gastronomyFactsTitle?: string | null;
+    gastronomyFacts?:
+      | {
+          title?: string | null;
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Turn off to hide this section on the website (German and English). The content stays saved.
+     */
+    gastronomyShowProduct?: boolean | null;
+    /**
+     * Packaging or raw block. Leave empty to use the default photo.
+     */
+    gastronomyProductImage?: (string | null) | Media;
+    /**
+     * e.g. “Käferbohnen-Tempeh für deine Küche”.
+     */
+    gastronomyProductCaption?: string | null;
+    /**
+     * Button under the facts. e.g. “Jetzt B2B-Anfrage senden”.
+     */
+    gastronomyProductCtaLabel?: string | null;
+    /**
+     * Optional last line, e.g. “B2B / größere Mengen”.
+     */
+    gastronomyProductB2bLine?: string | null;
+    gastronomyHeroSliderAutoplayMs?: number | null;
     gastronomyOfferCards?:
       | {
           image?: (string | null) | Media;
@@ -1051,47 +1144,23 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
-    /**
-     * Editable heading above the partner tags. Example DE: "Für Profiküchen". Example EN: "For professional kitchens".
-     */
-    gastronomyTrustedByHeading?: string | null;
-    /**
-     * Editable chips shown next to the heading (e.g. Restaurants, Hotels, Catering).
-     */
+    gastronomyProductQuote?: string | null;
     gastronomyTrustedByBadges?:
       | {
           label: string;
           id?: string | null;
         }[]
       | null;
-    /**
-     * Dark rounded block after Trusted by, before “What we offer”. Headline, subline, button.
-     */
     gastronomyCtaBanner?: {
       heading?: string | null;
       description?: string | null;
       buttonLabel?: string | null;
-      /**
-       * e.g. #contact or /contact
-       */
       buttonHref?: string | null;
     };
-    /**
-     * Main heading above the icon cards. If empty, “Offer section title (fallback)” below is used.
-     */
     gastronomyOfferDetailsTitle?: string | null;
-    /**
-     * Used only if “What we offer — section title” is empty (legacy / short heading).
-     */
     gastronomyOfferSectionTitle?: string | null;
-    /**
-     * Cards under “What we offer”. Optional icon image per row; if empty, a default icon is used.
-     */
     gastronomyOfferDetails?:
       | {
-          /**
-           * Small square icon (SVG/PNG/WebP). If empty, a built-in icon is used.
-           */
           icon?: (string | null) | Media;
           title: string;
           description: string;
@@ -1100,13 +1169,7 @@ export interface Page {
       | null;
     gastronomyOutcomesEyebrow?: string | null;
     gastronomyOutcomesTitle?: string | null;
-    /**
-     * e.g. VORHER / BEFORE
-     */
     gastronomyOutcomesBeforeLabel?: string | null;
-    /**
-     * e.g. NACHHER / AFTER
-     */
     gastronomyOutcomesAfterLabel?: string | null;
     gastronomyOutcomesItems?:
       | {
@@ -1125,14 +1188,6 @@ export interface Page {
         }[]
       | null;
     gastronomyTestimonialsEyebrow?: string | null;
-    gastronomyTestimonialsTitle?: string | null;
-    gastronomyTestimonialsItems?:
-      | {
-          quote: string;
-          author: string;
-          id?: string | null;
-        }[]
-      | null;
     gastronomyFaqEyebrow?: string | null;
     gastronomyFaqTitle?: string | null;
     gastronomyFaqItems?:
@@ -1143,31 +1198,96 @@ export interface Page {
         }[]
       | null;
     gastronomyContactImage?: (string | null) | Media;
-    gastronomyContactTitle: string;
+    gastronomyContactTitle?: string | null;
     gastronomyContactDescription?: string | null;
+    gastronomyContactAddress?: string | null;
+    gastronomyWorkshopSectionTitle?: string | null;
+    gastronomyWorkshopSectionSubtitle?: string | null;
+    gastronomyWorkshopClarification?: string | null;
+    gastronomyWorkshopNextDateLabel?: string | null;
+    gastronomyWorkshopCards?:
+      | {
+          image?: (string | null) | Media;
+          title: string;
+          description: string;
+          price: string;
+          priceSuffix?: string | null;
+          buttonLabel: string;
+          buttonUrl: string;
+          duration?: string | null;
+          nextDate?: string | null;
+          id?: string | null;
+        }[]
+      | null;
     /**
-     * Heading above the form fields (e.g. "Frag uns alles" / "Ask About Anything").
+     * Turn off to hide this section on the website (German and English). The content stays saved.
+     */
+    gastronomyShowAudience?: boolean | null;
+    /**
+     * e.g. “Für Restaurants, die mehr aus pflanzlicher Küche machen wollen.”
+     */
+    gastronomyTrustedByHeading?: string | null;
+    /**
+     * Photo, title and one short line. Leave photo empty to use the default.
+     */
+    gastronomyAudienceCards?:
+      | {
+          image?: (string | null) | Media;
+          /**
+           * e.g. Restaurants
+           */
+          title?: string | null;
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Turn off to hide this section on the website (German and English). The content stays saved.
+     */
+    gastronomyShowProof?: boolean | null;
+    /**
+     * Leave empty to use the default tempeh photo.
+     */
+    gastronomyProofImage?: (string | null) | Media;
+    /**
+     * e.g. “Aus der Küche”.
+     */
+    gastronomyTestimonialsTitle?: string | null;
+    gastronomyTestimonialsItems?:
+      | {
+          quote: string;
+          author: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Turn off to hide this section on the website (German and English). The content stays saved.
+     */
+    gastronomyShowInquiry?: boolean | null;
+    /**
+     * e.g. “B2B-Anfrage” / “B2B enquiry”.
      */
     gastronomyContactFormHeading?: string | null;
     /**
-     * Address shown in the left contact details panel.
-     */
-    gastronomyContactAddress?: string | null;
-    /**
-     * Phone number shown in the left contact details panel.
-     */
-    gastronomyContactPhone?: string | null;
-    /**
-     * Email address shown in the left contact details panel.
+     * Shown under the form.
      */
     gastronomyContactEmail?: string | null;
+    /**
+     * Shown under the form.
+     */
+    gastronomyContactPhone?: string | null;
     gastronomyFormPlaceholders?: {
       firstName?: string | null;
       lastName?: string | null;
       email?: string | null;
+      phone?: string | null;
+      quantity?: string | null;
       message?: string | null;
     };
-    gastronomySubjectOptions?: {
+    gastronomyBusinessTypeOptions?: {
+      /**
+       * e.g. “Art des Betriebs”.
+       */
       default?: string | null;
       options?:
         | {
@@ -1176,55 +1296,22 @@ export interface Page {
           }[]
         | null;
     };
+    gastronomySubjectOptions?: {
+      /**
+       * e.g. “Worum geht es?”.
+       */
+      default?: string | null;
+      options?:
+        | {
+            label?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    /**
+     * e.g. “Anfrage senden” / “Send enquiry”.
+     */
     gastronomySubmitButtonLabel?: string | null;
-    /**
-     * Heading for the workshop cards at the bottom of the page.
-     */
-    gastronomyWorkshopSectionTitle: string;
-    gastronomyWorkshopSectionSubtitle?: string | null;
-    /**
-     * Optional note below the subtitle (e.g. chefs welcome, custom workshops).
-     */
-    gastronomyWorkshopClarification?: string | null;
-    /**
-     * e.g. “Nächster Termin:” / “Next Appointment:”
-     */
-    gastronomyWorkshopNextDateLabel?: string | null;
-    /**
-     * Four workshop cards for /gastronomy. Title, description, price and image sync from each workshop page (Pages → Workshop Detail). Fields here override only when filled.
-     */
-    gastronomyWorkshopCards?:
-      | {
-          /**
-           * Optional override. By default the matching workshop page hero image is used.
-           */
-          image?: (string | null) | Media;
-          /**
-           * Optional override. Defaults to the workshop page hero title when empty.
-           */
-          title: string;
-          /**
-           * Optional override. Defaults to the workshop page hero description when empty.
-           */
-          description: string;
-          /**
-           * Optional override. Defaults to the workshop page booking price when empty.
-           */
-          price: string;
-          /**
-           * e.g. "pro Person" / "per Person"
-           */
-          priceSuffix?: string | null;
-          buttonLabel: string;
-          buttonUrl: string;
-          duration?: string | null;
-          /**
-           * e.g. "February 15, 2026"
-           */
-          nextDate?: string | null;
-          id?: string | null;
-        }[]
-      | null;
   };
   /**
    * Content for the Fermentation page (/fermentation). Only applies when slug is "fermentation".
@@ -2619,6 +2706,9 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
+  /**
+   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
+   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -2638,6 +2728,9 @@ export interface Form {
   redirect?: {
     url: string;
   };
+  /**
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
+   */
   emails?:
     | {
         emailTo?: string | null;
@@ -2646,6 +2739,9 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
+        /**
+         * Enter the message that should be sent in this email.
+         */
         message?: {
           root: {
             type: string;
@@ -4561,6 +4657,221 @@ export interface WorkshopPhasesBlock {
   blockType: 'workshopPhases';
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyHeroBlock".
+ */
+export interface GastronomyHeroBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Plated / fried tempeh. Leave empty to use the default photo.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Small line above the title. e.g. “Für Restaurants”.
+   */
+  eyebrow?: string | null;
+  /**
+   * Main headline. e.g. “Tempeh für Profiküchen.”
+   */
+  title?: string | null;
+  /**
+   * One short line under the title.
+   */
+  tagline?: string | null;
+  /**
+   * e.g. “Für Gastronomie anfragen”.
+   */
+  ctaLabel?: string | null;
+  /**
+   * Usually #contact.
+   */
+  ctaUrl?: string | null;
+  secondaryLabel?: string | null;
+  secondaryUrl?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gastronomyHero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyShowcaseBlock".
+ */
+export interface GastronomyShowcaseBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  title?: string | null;
+  /**
+   * Drag slides to reorder. Each slide: photo + title + one short line.
+   */
+  slides?:
+    | {
+        image?: (string | null) | Media;
+        title?: string | null;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gastronomyShowcase';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyBenefitsBlock".
+ */
+export interface GastronomyBenefitsBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  title?: string | null;
+  /**
+   * Drag to reorder benefits.
+   */
+  items?:
+    | {
+        /**
+         * Shown in the gold circle above the title. Same icon in German and English.
+         */
+        icon?: ('utensils' | 'sparkles' | 'leaf' | 'chefHat' | 'flame' | 'wheat' | 'heart' | 'sprout') | null;
+        title?: string | null;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gastronomyBenefits';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyAudienceBlock".
+ */
+export interface GastronomyAudienceBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  title?: string | null;
+  /**
+   * Drag cards to reorder. Photo, title and one short line.
+   */
+  cards?:
+    | {
+        image?: (string | null) | Media;
+        title?: string | null;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gastronomyAudience';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyProductBlock".
+ */
+export interface GastronomyProductBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  image?: (string | null) | Media;
+  title?: string | null;
+  ctaLabel?: string | null;
+  /**
+   * Usually #contact.
+   */
+  ctaUrl?: string | null;
+  /**
+   * One line each — pack size, vegan, origin, B2B. Drag to reorder. This is what shows under the title.
+   */
+  facts?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional extra line if Facts is empty. Prefer adding it as a Fact above.
+   */
+  b2bLine?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gastronomyProduct';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyProofBlock".
+ */
+export interface GastronomyProofBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  image?: (string | null) | Media;
+  title?: string | null;
+  items?:
+    | {
+        quote: string;
+        author: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gastronomyProof';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyInquiryBlock".
+ */
+export interface GastronomyInquiryBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  heading?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  placeholders?: {
+    firstName?: string | null;
+    lastName?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    quantity?: string | null;
+    message?: string | null;
+  };
+  businessType?: {
+    default?: string | null;
+    options?:
+      | {
+          label?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  interest?: {
+    default?: string | null;
+    options?:
+      | {
+          label?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  submitLabel?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gastronomyInquiry';
+}
+/**
  * Educational how-to articles organized by workshop type (Lakto, Tempeh, Kombucha). Each article can be viewed at /tipps/[slug] and displayed on its workshop page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6086,10 +6397,52 @@ export interface PagesSelect<T extends boolean = true> {
   gastronomy?:
     | T
     | {
+        gastronomyBlocks?:
+          | T
+          | {
+              gastronomyHero?: T | GastronomyHeroBlockSelect<T>;
+              gastronomyShowcase?: T | GastronomyShowcaseBlockSelect<T>;
+              gastronomyBenefits?: T | GastronomyBenefitsBlockSelect<T>;
+              gastronomyAudience?: T | GastronomyAudienceBlockSelect<T>;
+              gastronomyProduct?: T | GastronomyProductBlockSelect<T>;
+              gastronomyProof?: T | GastronomyProofBlockSelect<T>;
+              gastronomyInquiry?: T | GastronomyInquiryBlockSelect<T>;
+            };
+        gastronomyShowHero?: T;
+        gastronomyHeroImage?: T;
+        gastronomyHeroEyebrow?: T;
+        gastronomyHeroTitle?: T;
+        gastronomyHeroTagline?: T;
         gastronomyHeroCtaLabel?: T;
         gastronomyHeroCtaUrl?: T;
+        gastronomyHeroCtaSecondaryLabel?: T;
+        gastronomyHeroCtaSecondaryUrl?: T;
+        gastronomyShowShowcase?: T;
+        gastronomyShowcaseTitle?: T;
+        gastronomyUsageBanners?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              text?: T;
+              id?: T;
+            };
         gastronomyHeroSliderPrevLabel?: T;
         gastronomyHeroSliderNextLabel?: T;
+        gastronomyShowBenefits?: T;
+        gastronomyFactsTitle?: T;
+        gastronomyFacts?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+        gastronomyShowProduct?: T;
+        gastronomyProductImage?: T;
+        gastronomyProductCaption?: T;
+        gastronomyProductCtaLabel?: T;
+        gastronomyProductB2bLine?: T;
         gastronomyHeroSliderAutoplayMs?: T;
         gastronomyOfferCards?:
           | T
@@ -6099,7 +6452,7 @@ export interface PagesSelect<T extends boolean = true> {
               description?: T;
               id?: T;
             };
-        gastronomyTrustedByHeading?: T;
+        gastronomyProductQuote?: T;
         gastronomyTrustedByBadges?:
           | T
           | {
@@ -6145,14 +6498,6 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         gastronomyTestimonialsEyebrow?: T;
-        gastronomyTestimonialsTitle?: T;
-        gastronomyTestimonialsItems?:
-          | T
-          | {
-              quote?: T;
-              author?: T;
-              id?: T;
-            };
         gastronomyFaqEyebrow?: T;
         gastronomyFaqTitle?: T;
         gastronomyFaqItems?:
@@ -6165,30 +6510,7 @@ export interface PagesSelect<T extends boolean = true> {
         gastronomyContactImage?: T;
         gastronomyContactTitle?: T;
         gastronomyContactDescription?: T;
-        gastronomyContactFormHeading?: T;
         gastronomyContactAddress?: T;
-        gastronomyContactPhone?: T;
-        gastronomyContactEmail?: T;
-        gastronomyFormPlaceholders?:
-          | T
-          | {
-              firstName?: T;
-              lastName?: T;
-              email?: T;
-              message?: T;
-            };
-        gastronomySubjectOptions?:
-          | T
-          | {
-              default?: T;
-              options?:
-                | T
-                | {
-                    label?: T;
-                    id?: T;
-                  };
-            };
-        gastronomySubmitButtonLabel?: T;
         gastronomyWorkshopSectionTitle?: T;
         gastronomyWorkshopSectionSubtitle?: T;
         gastronomyWorkshopClarification?: T;
@@ -6207,6 +6529,63 @@ export interface PagesSelect<T extends boolean = true> {
               nextDate?: T;
               id?: T;
             };
+        gastronomyShowAudience?: T;
+        gastronomyTrustedByHeading?: T;
+        gastronomyAudienceCards?:
+          | T
+          | {
+              image?: T;
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+        gastronomyShowProof?: T;
+        gastronomyProofImage?: T;
+        gastronomyTestimonialsTitle?: T;
+        gastronomyTestimonialsItems?:
+          | T
+          | {
+              quote?: T;
+              author?: T;
+              id?: T;
+            };
+        gastronomyShowInquiry?: T;
+        gastronomyContactFormHeading?: T;
+        gastronomyContactEmail?: T;
+        gastronomyContactPhone?: T;
+        gastronomyFormPlaceholders?:
+          | T
+          | {
+              firstName?: T;
+              lastName?: T;
+              email?: T;
+              phone?: T;
+              quantity?: T;
+              message?: T;
+            };
+        gastronomyBusinessTypeOptions?:
+          | T
+          | {
+              default?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+            };
+        gastronomySubjectOptions?:
+          | T
+          | {
+              default?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+            };
+        gastronomySubmitButtonLabel?: T;
       };
   fermentation?:
     | T
@@ -7502,6 +7881,160 @@ export interface WorkshopPhasesBlockSelect<T extends boolean = true> {
         image?: T;
         id?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyHeroBlock_select".
+ */
+export interface GastronomyHeroBlockSelect<T extends boolean = true> {
+  visible?: T;
+  image?: T;
+  eyebrow?: T;
+  title?: T;
+  tagline?: T;
+  ctaLabel?: T;
+  ctaUrl?: T;
+  secondaryLabel?: T;
+  secondaryUrl?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyShowcaseBlock_select".
+ */
+export interface GastronomyShowcaseBlockSelect<T extends boolean = true> {
+  visible?: T;
+  title?: T;
+  slides?:
+    | T
+    | {
+        image?: T;
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyBenefitsBlock_select".
+ */
+export interface GastronomyBenefitsBlockSelect<T extends boolean = true> {
+  visible?: T;
+  title?: T;
+  items?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyAudienceBlock_select".
+ */
+export interface GastronomyAudienceBlockSelect<T extends boolean = true> {
+  visible?: T;
+  title?: T;
+  cards?:
+    | T
+    | {
+        image?: T;
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyProductBlock_select".
+ */
+export interface GastronomyProductBlockSelect<T extends boolean = true> {
+  visible?: T;
+  image?: T;
+  title?: T;
+  ctaLabel?: T;
+  ctaUrl?: T;
+  facts?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  b2bLine?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyProofBlock_select".
+ */
+export interface GastronomyProofBlockSelect<T extends boolean = true> {
+  visible?: T;
+  image?: T;
+  title?: T;
+  items?:
+    | T
+    | {
+        quote?: T;
+        author?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GastronomyInquiryBlock_select".
+ */
+export interface GastronomyInquiryBlockSelect<T extends boolean = true> {
+  visible?: T;
+  heading?: T;
+  email?: T;
+  phone?: T;
+  placeholders?:
+    | T
+    | {
+        firstName?: T;
+        lastName?: T;
+        email?: T;
+        phone?: T;
+        quantity?: T;
+        message?: T;
+      };
+  businessType?:
+    | T
+    | {
+        default?: T;
+        options?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+      };
+  interest?:
+    | T
+    | {
+        default?: T;
+        options?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+      };
+  submitLabel?: T;
   id?: T;
   blockName?: T;
 }
@@ -9473,16 +10006,6 @@ export interface ProductPickupSettingsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_widget".
- */
-export interface CollectionsWidget {
-  data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
