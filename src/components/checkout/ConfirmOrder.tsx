@@ -155,8 +155,14 @@ export const ConfirmOrder: React.FC = () => {
 
             const type = hasCourse ? 'course' : hasWorkshop ? 'workshop' : 'order'
             const emailParam = checkoutEmail ? `&email=${encodeURIComponent(checkoutEmail)}` : ''
+            // Route by login status like CheckoutPage.tsx's voucher-covers-cart
+            // path already does — logged-in customers get the account
+            // confirmation page, guests get the (richer, no-account-link)
+            // checkout one. Previously this always went to /checkout/... even
+            // for logged-in customers paying by card.
+            const confirmationBase = user ? '/account' : '/checkout'
             router.push(
-              `/checkout/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
+              `${confirmationBase}/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
             )
           } else {
             // confirmOrder returned but without an orderID — surface a recoverable error
