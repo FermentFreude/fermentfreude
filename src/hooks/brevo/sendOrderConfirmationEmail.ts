@@ -440,13 +440,11 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
       // SERVER's local date (UTC on Vercel), which can format an evening
       // Vienna order to the previous calendar day.
       ORDER_DATE: new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' }),
-      // ORDER_URL is only shown for registered users (template uses IS_REGISTERED_USER guard)
       ORDER_URL: `${siteUrl}/account/orders`,
+      CREATE_ACCOUNT_URL: `${siteUrl}/create-account`,
       SHOP_URL: `${siteUrl}/workshops`,
       RECEIPT_URL,
       ...(pickupBookingUrl ? { PICKUP_BOOKING_URL: pickupBookingUrl } : {}),
-      // 1 = registered user, '' = guest — template uses this to conditionally show "View order" button
-      IS_REGISTERED_USER: customerId ? '1' : '',
       PRIVACY_URL: `${siteUrl}/datenschutz`,
       AGB_URL: `${siteUrl}/agb`,
     }
@@ -475,9 +473,14 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
     // unconditionally — it's the one place that pings admin for every order.
     let customerSendFailed = false
     if (!workshopDate) {
+      // Registered customers → the account-linking template; guests → a
+      // separate template with no account link (there's no account to view),
+      // ending in a "create an account" upsell instead.
       const result = await sendTemplateEmail({
         to: [{ email: recipientEmail, name: recipientName }],
-        templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION,
+        templateId: customerId
+          ? BREVO_TEMPLATES.ORDER_CONFIRMATION
+          : BREVO_TEMPLATES.ORDER_CONFIRMATION_GUEST,
         params: emailParams,
       })
       customerSendFailed = !result.success
