@@ -200,10 +200,17 @@ export function CartModal() {
                 }
 
                 // Pre-resolve booking metadata so we can render seats editor outside the <Link>
+                // Match by `item.a` (last 6 hex chars of the appointment ID) when present,
+                // not just workshopSlug — two different dates for the same workshop type
+                // can be in the cart at once, and slug-only matching would show this line
+                // the wrong date/seats.
                 const productSlugWithoutPrefix = product.slug?.replace('workshop-', '')
+                const itemAppointmentSuffix = item.a
                 const matchedBooking = isWorkshopBooking
                   ? (Object.values(bookingMetadata).find(
-                      (b) => b.workshopSlug === productSlugWithoutPrefix,
+                      (b) =>
+                        b.workshopSlug === productSlugWithoutPrefix &&
+                        (!itemAppointmentSuffix || b.appointmentId?.slice(-6) === itemAppointmentSuffix),
                     ) ?? null)
                   : null
                 const guestCountForBooking = matchedBooking

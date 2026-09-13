@@ -1,6 +1,7 @@
 import { reserveSpotsAtomic } from '@/lib/atomicSpots'
 import type { WorkshopAppointment, WorkshopBooking } from '@/payload-types'
 import configPromise from '@payload-config'
+import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
@@ -325,6 +326,11 @@ export async function POST(request: NextRequest) {
         { status: 409 },
       )
     }
+
+    // Bust the /workshops overview's cached appointment list — otherwise the
+    // decrement above is invisible there for up to 2 minutes (its own
+    // revalidate window), regardless of the client's router.refresh().
+    revalidateTag('workshop-appointments')
 
     // ─── Create or merge into the Pending Booking Record ─────────
     // pending → confirmed via Stripe webhook, or cancelled via release-spots.
