@@ -1,5 +1,6 @@
 import { releaseSpotsAtomic } from '@/lib/atomicSpots'
 import configPromise from '@payload-config'
+import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
@@ -69,6 +70,10 @@ export async function POST(request: NextRequest) {
       guestCount,
       maxCapacity,
     )
+
+    // Bust the /workshops overview's cached appointment list — see the same
+    // call in /api/cart/add-workshop for why.
+    revalidateTag('workshop-appointments')
 
     // ─── Cancel Pending Booking Record ─────────────────────────
     // Non-fatal: if bookingId is missing or already cancelled, skip.

@@ -34,7 +34,19 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
       >
 
       const workshopSlug = productSlug.replace('workshop-', '')
-      const entry = Object.entries(bookings).find(([, booking]) => booking.workshopSlug === workshopSlug)
+      // Match the exact cart line via `item.a` (last 6 hex chars of the
+      // appointment ID — see the `carts` config in src/plugins/index.ts),
+      // not just workshopSlug. Two different dates for the same workshop
+      // type can both be in the cart at once (e.g. switching dates without
+      // fully clearing state first); matching by slug alone would release
+      // spots for whichever entry happens to come first in the object,
+      // potentially releasing the wrong appointment while leaving the one
+      // actually being removed stuck holding its reserved spots forever.
+      const entry = Object.entries(bookings).find(
+        ([, booking]) =>
+          booking.workshopSlug === workshopSlug &&
+          (!item.a || booking.appointmentId?.slice(-6) === item.a),
+      )
       if (!entry) return
 
       const [bookingKey, booking] = entry
