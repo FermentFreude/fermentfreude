@@ -21,88 +21,93 @@ export type WorkshopCalendarDate = {
   appointmentId: string
 }
 
+/**
+ * Deliberately lets errors propagate (no internal try/catch) — this function
+ * is wrapped in `unstable_cache` by its caller with a 2-minute revalidate
+ * window. A transient DB error caught and turned into `[]` here would get
+ * cached as if it were a real "no workshops available" result and stick for
+ * up to 2 minutes regardless of the actual DB state. Letting it throw means
+ * unstable_cache does NOT cache the failure — the very next request just
+ * retries. The caller (the /workshops page) is responsible for catching this
+ * per-request and falling back to an empty list without caching that fallback.
+ */
 export async function getAllWorkshopAppointments(): Promise<WorkshopCalendarDate[]> {
-  try {
-    const config = await configPromise
-    const payload = await getPayload({ config })
+  const config = await configPromise
+  const payload = await getPayload({ config })
 
-    // Fetch all published future appointments
-    const appointmentsResult = await payload.find({
-      collection: 'workshop-appointments',
-      where: {
-        and: [
-          { isPublished: { equals: true } },
-          { dateTime: { greater_than: new Date().toISOString() } },
-        ],
-      },
-      sort: 'dateTime', // Soonest first
-      limit: 100,
-      depth: 2, // Populate workshop relation
-    })
+  // Fetch all published future appointments
+  const appointmentsResult = await payload.find({
+    collection: 'workshop-appointments',
+    where: {
+      and: [
+        { isPublished: { equals: true } },
+        { dateTime: { greater_than: new Date().toISOString() } },
+      ],
+    },
+    sort: 'dateTime', // Soonest first
+    limit: 100,
+    depth: 2, // Populate workshop relation
+  })
 
-    console.log(`✓ Found ${appointmentsResult.docs.length} total upcoming appointments`)
+  console.log(`✓ Found ${appointmentsResult.docs.length} total upcoming appointments`)
 
-    // Map workshop slugs to types for WorkshopCalendar — this calendar is
-    // hardcoded to exactly these 3 cards (see WorkshopCalendar.tsx), it was
-    // never meant to include other workshops (e.g. "Vom Feld ins Glas",
-    // which has its own dedicated page). A previous version of this
-    // function defaulted anything outside this map to 'lakto' instead of
-    // excluding it — that silently mislabeled every non-canonical
-    // appointment as a Lakto-Gemüse date on this calendar. Confirmed live:
-    // a customer could pick what looked like a Lakto-Gemüse date here that
-    // was actually a different workshop's appointment underneath, and
-    // adding it to the cart then failed with "Workshop mismatch" (the
-    // add-to-cart endpoint correctly catches the inconsistency, but the
-    // calendar should never have offered it as a Lakto-Gemüse date at all).
-    const slugToType: Record<string, 'lakto' | 'kombucha' | 'tempeh'> = {
-      lakto: 'lakto',
-      kombucha: 'kombucha',
-      tempeh: 'tempeh',
-    }
-
-    // Format appointments to WorkshopCalendarDate format — skip (don't
-    // mislabel) any workshop outside the 3 canonical types this calendar
-    // supports.
-    return appointmentsResult.docs.flatMap((appointment) => {
-      const workshop = appointment.workshop as Workshop
-      const workshopType = slugToType[workshop.slug as string]
-      if (!workshopType) return []
-      const date = new Date(appointment.dateTime)
-
-      // Format date: "26. März 2026"
-      const dateOptions: Intl.DateTimeFormatOptions = {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'Europe/Vienna',
-      }
-      const dateDisplay = date.toLocaleDateString('de-DE', dateOptions)
-
-      // Format time: "17:30 – 20:30" — always Europe/Vienna so calendar and cart match
-      const timeOpts: Intl.DateTimeFormatOptions = {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'Europe/Vienna',
-        hour12: false,
-      }
-      const endDate = new Date(date.getTime() + 3 * 60 * 60 * 1000) // +3 hours
-      const startTime = date.toLocaleTimeString('de-DE', timeOpts)
-      const endTime = endDate.toLocaleTimeString('de-DE', timeOpts)
-      const timeDisplay = `${startTime} – ${endTime}`
-
-      return {
-        id: appointment.id,
-        workshopType,
-        workshopTitle: workshop.title || 'Workshop',
-        date: dateDisplay,
-        time: timeDisplay,
-        availableSpots: appointment.availableSpots,
-        price: workshop.basePrice || 99,
-        appointmentId: appointment.id,
-      }
-    })
-  } catch (error) {
-    console.error('Error fetching all workshop appointments:', error)
-    return []
+  // Map workshop slugs to types for WorkshopCalendar — this calendar is
+  // hardcoded to exactly these 3 cards (see WorkshopCalendar.tsx), it was
+  // never meant to include other workshops (e.g. "Vom Feld ins Glas",
+  // which has its own dedicated page). A previous version of this
+  // function defaulted anything outside this map to 'lakto' instead of
+  // excluding it — that silently mislabeled every non-canonical
+  // appointment as a Lakto-Gemüse date on this calendar. Confirmed live:
+  // a customer could pick what looked like a Lakto-Gemüse date here that
+  // was actually a different workshop's appointment underneath, and
+  // adding it to the cart then failed with "Workshop mismatch" (the
+  // add-to-cart endpoint correctly catches the inconsistency, but the
+  // calendar should never have offered it as a Lakto-Gemüse date at all).
+  const slugToType: Record<string, 'lakto' | 'kombucha' | 'tempeh'> = {
+    lakto: 'lakto',
+    kombucha: 'kombucha',
+    tempeh: 'tempeh',
   }
+
+  // Format appointments to WorkshopCalendarDate format — skip (don't
+  // mislabel) any workshop outside the 3 canonical types this calendar
+  // supports.
+  return appointmentsResult.docs.flatMap((appointment) => {
+    const workshop = appointment.workshop as Workshop
+    const workshopType = slugToType[workshop.slug as string]
+    if (!workshopType) return []
+    const date = new Date(appointment.dateTime)
+
+    // Format date: "26. März 2026"
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'Europe/Vienna',
+    }
+    const dateDisplay = date.toLocaleDateString('de-DE', dateOptions)
+
+    // Format time: "17:30 – 20:30" — always Europe/Vienna so calendar and cart match
+    const timeOpts: Intl.DateTimeFormatOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Vienna',
+      hour12: false,
+    }
+    const endDate = new Date(date.getTime() + 3 * 60 * 60 * 1000) // +3 hours
+    const startTime = date.toLocaleTimeString('de-DE', timeOpts)
+    const endTime = endDate.toLocaleTimeString('de-DE', timeOpts)
+    const timeDisplay = `${startTime} – ${endTime}`
+
+    return {
+      id: appointment.id,
+      workshopType,
+      workshopTitle: workshop.title || 'Workshop',
+      date: dateDisplay,
+      time: timeDisplay,
+      availableSpots: appointment.availableSpots,
+      price: workshop.basePrice || 99,
+      appointmentId: appointment.id,
+    }
+  })
 }

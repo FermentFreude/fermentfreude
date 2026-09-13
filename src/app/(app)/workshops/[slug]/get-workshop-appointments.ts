@@ -1,4 +1,5 @@
 import configPromise from '@payload-config'
+import { revalidateTag } from 'next/cache'
 import type { Payload } from 'payload'
 import { getPayload } from 'payload'
 import type { WorkshopDate } from './workshop-data'
@@ -73,6 +74,9 @@ async function cleanupStaleBookings(payload: Payload, dbSlug: string): Promise<v
 
     if (staleBookings.docs.length > 0) {
       payload.logger.info(`✓ Cleaned up ${staleBookings.docs.length} stale pending bookings for ${dbSlug}`)
+      // Bust the /workshops overview's cached appointment list — otherwise
+      // these restored spots are invisible there for up to 2 minutes.
+      revalidateTag('workshop-appointments')
     }
   } catch (err) {
     // Non-fatal — cleanup errors must never break the page
