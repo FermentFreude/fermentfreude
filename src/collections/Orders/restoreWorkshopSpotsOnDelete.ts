@@ -1,4 +1,5 @@
 import { releaseSpotsAtomic } from '@/lib/atomicSpots'
+import { revalidateTag } from 'next/cache'
 import type { CollectionAfterDeleteHook } from 'payload'
 
 /**
@@ -107,4 +108,8 @@ export const restoreWorkshopSpotsOnDelete: CollectionAfterDeleteHook = async ({ 
 
     payload.logger.info(`[order:afterDelete] Deleted booking ${booking.id}`)
   }
+
+  // Bust the /workshops overview's cached appointment list — otherwise the
+  // restores above are invisible there for up to 2 minutes.
+  revalidateTag('workshop-appointments')
 }

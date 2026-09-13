@@ -34,8 +34,19 @@ export default async function WorkshopsPage() {
   const localeKey = normalizeAppLocale(locale)
   const { isEnabled: draft } = await draftMode()
 
-  // Fetch all upcoming workshop appointments from database (cached 2 min)
-  const upcomingAppointments = await getCachedWorkshopAppointments()
+  // Fetch all upcoming workshop appointments from database (cached 2 min).
+  // Caught here, per-request, rather than inside the cached function itself —
+  // a transient DB error caught inside would get cached as a legitimate
+  // "no appointments" result and stick for the full 2-minute window. Letting
+  // it throw out of the cache means only THIS request falls back to [],
+  // and the very next request gets a fresh attempt instead of a frozen dud.
+  let upcomingAppointments: Awaited<ReturnType<typeof getCachedWorkshopAppointments>>
+  try {
+    upcomingAppointments = await getCachedWorkshopAppointments()
+  } catch (error) {
+    console.error('Failed to load workshop appointments:', error)
+    upcomingAppointments = []
+  }
 
   // Get workshops page data (hero + calendar sections editable from admin)
   const workshopsPageData = draft
