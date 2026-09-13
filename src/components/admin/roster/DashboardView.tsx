@@ -5,7 +5,16 @@ import React from 'react'
 import type { RosterData } from './types'
 import { BRAND, PageHeader, StatCard, fillLevel, workshopColor } from './rosterTheme'
 
-type Section = 'dashboard' | 'workshops' | 'detail' | 'participants' | 'pickups'
+type Section = 'dashboard' | 'workshops' | 'detail' | 'participants' | 'pickups' | 'orders'
+
+const ORDER_STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
+  processing: { label: 'In Bearbeitung', bg: '#dbeafe', color: '#1e40af' },
+  completed: { label: 'Abgeschlossen', bg: '#dcfce7', color: '#166534' },
+  cancelled: { label: 'Storniert', bg: '#f3f4f6', color: '#374151' },
+  refunded: { label: 'Rückerstattet', bg: '#fee2e2', color: '#991b1b' },
+}
+
+const fmtOrderMoney = (cents: number) => `€${(cents / 100).toFixed(2).replace('.', ',')}`
 
 interface Props {
   data: RosterData
@@ -14,12 +23,76 @@ interface Props {
 }
 
 export function DashboardView({ data, onSelectWorkshop, onNavigate }: Props) {
-  const { stats, appointments } = data
+  const { stats, appointments, orders } = data
   const upcoming = appointments.filter((a) => !a.isPast).slice(0, 8)
+  const latestOrders = orders.slice(0, 5)
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px' }}>
       <PageHeader title="Dashboard" subtitle="Willkommen zurück! Hier ist deine Übersicht." />
+
+      {/* Latest orders from the website — first thing a founder sees, and
+          where the admin order-notification email's button now lands. */}
+      <div style={{
+        background: 'var(--theme-elevation-0)', borderRadius: '14px', border: '1px solid var(--theme-elevation-100)',
+        overflow: 'hidden', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', marginBottom: '24px',
+      }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--theme-elevation-100)' }}>
+          <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: 'var(--theme-text)' }}>Neueste Bestellungen</h2>
+        </div>
+        {latestOrders.length === 0 ? (
+          <p style={{ padding: '20px 24px', color: 'var(--theme-text)', opacity: 0.5, margin: 0 }}>Noch keine Bestellungen.</p>
+        ) : (
+          latestOrders.map((order, i) => {
+            const cfg = ORDER_STATUS_CONFIG[order.status]
+            return (
+              <button
+                key={order.id}
+                onClick={() => onNavigate('orders')}
+                style={{
+                  display: 'flex', alignItems: 'center', width: '100%', padding: '14px 24px',
+                  border: 'none', background: 'transparent', borderTop: i > 0 ? '1px solid var(--theme-elevation-100)' : 'none',
+                  cursor: 'pointer', textAlign: 'left', gap: '16px', transition: 'background 0.12s',
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--theme-elevation-50)' }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--theme-text)' }}>
+                    {order.customerName || order.customerEmail || '—'}
+                  </p>
+                  <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--theme-text)', opacity: 0.55, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {order.itemsSummary || '—'} · {order.createdAt}
+                  </p>
+                </div>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--theme-text)', flexShrink: 0 }}>
+                  {fmtOrderMoney(order.amount)}
+                </span>
+                {cfg && (
+                  <span style={{
+                    padding: '4px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 600,
+                    background: cfg.bg, color: cfg.color, whiteSpace: 'nowrap', flexShrink: 0,
+                  }}>
+                    {cfg.label}
+                  </span>
+                )}
+              </button>
+            )
+          })
+        )}
+        {latestOrders.length > 0 && (
+          <button
+            onClick={() => onNavigate('orders')}
+            style={{
+              display: 'block', width: '100%', padding: '14px 24px', border: 'none',
+              borderTop: '1px solid var(--theme-elevation-100)', background: 'transparent', cursor: 'pointer',
+              fontSize: '13px', fontWeight: 700, color: BRAND.goldDark, textAlign: 'center',
+            }}
+          >
+            Alle Bestellungen anzeigen →
+          </button>
+        )}
+      </div>
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
