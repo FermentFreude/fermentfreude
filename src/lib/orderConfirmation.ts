@@ -39,7 +39,36 @@ export type OrderConfirmationData = {
   items: OrderConfirmationItem[]
 }
 
-export async function getOrderConfirmationData({
+/**
+ * The confirmation page is reached by an immediate client-side redirect the
+ * instant Stripe confirms payment — but the workshop booking it's confirming
+ * (workshop-bookings row, its downloadToken, the manage-booking magic link)
+ * is written by the Orders `afterChange` hook chain for that same order,
+ * which for a redirect-based payment can still be finishing when this page's
+ * very first request lands. A guest hitting reload half a second later sees
+ * everything; the very first load can render a workshop confirmation with no
+ * date, time, image, tickets, or manage-booking link at all — which reads as
+ * "nothing happened," not "give it a second." Retry a few times with a short
+ * delay before giving up, rather than rendering that empty page once.
+ */
+export async function getOrderConfirmationData(args: {
+  payload: Payload
+  orderId?: string
+  type?: string
+  locale: 'de' | 'en'
+}): Promise<OrderConfirmationData> {
+  const isWorkshop = args.type === 'workshop'
+  const maxAttempts = isWorkshop ? 4 : 1
+
+  let data = await fetchOrderConfirmationData(args)
+  for (let attempt = 1; attempt < maxAttempts && !data.bookingSummary; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    data = await fetchOrderConfirmationData(args)
+  }
+  return data
+}
+
+async function fetchOrderConfirmationData({
   payload,
   orderId,
   type,
