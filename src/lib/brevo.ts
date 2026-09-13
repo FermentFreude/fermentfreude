@@ -99,7 +99,8 @@ export const BREVO_TEMPLATES = {
   LOGIN_NOTIFICATION: 71, // V2 (was 30)
 
   // Workshop (6) — booking confirmation V2; reminders & follow-ups still v1 (disabled in code)
-  WORKSHOP_BOOKING_CONFIRMATION: 65, // V2 (was 31)
+  WORKSHOP_BOOKING_CONFIRMATION: 65, // V2 (was 31) — registered customers: links into /account
+  WORKSHOP_BOOKING_CONFIRMATION_GUEST: 102, // Guest: manage-booking magic link instead of an account link, ends with a "create an account" upsell
   WORKSHOP_GIFT_NOTIFICATION: 93, // V2 — Sprint 3, sent per gift seat (no price)
   ADMIN_WORKSHOP_NOTIFICATION: 94, // Admin notification for new workshop bookings
   WORKSHOP_ALTERNATE_DATE_OFFER: 100, // Roster: offer an overbooked guest a different date, manual follow-up
@@ -109,7 +110,8 @@ export const BREVO_TEMPLATES = {
   FEEDBACK_REQUEST: 35,
 
   // E-commerce — order confirmation V2; others kept until V2 ships
-  ORDER_CONFIRMATION: 72, // V2 (was 36)
+  ORDER_CONFIRMATION: 72, // V2 (was 36) — registered customers: links into /account/orders
+  ORDER_CONFIRMATION_GUEST: 101, // Guest: no account link (there's no account), ends with a "create an account" upsell instead
   SHIPPING_NOTIFICATION: 37,
   REVIEW_REQUEST: 38,
   ABANDONED_CART: 39,

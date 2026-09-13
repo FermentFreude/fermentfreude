@@ -1,6 +1,8 @@
 import { accountI18n } from '@/app/(app)/account/i18n'
 import { Media } from '@/components/Media'
+import { ProductItem } from '@/components/ProductItem'
 import { Card } from '@/components/ui/card'
+import { getOrderConfirmationData } from '@/lib/orderConfirmation'
 import { formatDate } from '@/utilities/form/formatters'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
@@ -19,7 +21,6 @@ import {
 import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
 import { getPayload } from 'payload'
-import type { Media as MediaType } from '@/payload-types'
 
 export const metadata = {
   title: 'Order Confirmation - FermentFreude',
@@ -47,181 +48,18 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
   const { user } = await payload.auth({ headers: reqHeaders })
   const isLoggedIn = !!user
 
-  // A physical-product order (type === 'order', as opposed to 'workshop' or
-  // 'course') is always a pickup order — pickup is the only fulfillment
-  // method for products right now. Resolve pickup location + the
-  // post-payment Google Appointment Schedule link from product-pickup-settings.
-  const isPickupOrder = type === 'order'
-  let pickupLocationName = 'Fermentfreude'
-  let pickupLocationAddress = 'Grabenstraße 15, 8010 Graz, Austria'
-  let pickupBookingUrl = ''
-
-  let downloadToken: string | null = null
-  const manageBookingLinks: { workshopTitle: string; url: string }[] = []
-
-  type BookingSummary = {
-    workshopTitle: string
-    workshopSlug: string
-    date: string
-    time: string
-    guestCount: number
-    location: string
-  }
-  let bookingSummary: BookingSummary | null = null
-  let workshopImage: MediaType | string | null = null
-  let otherWorkshops: { slug: string; title: string; image: MediaType | string | null }[] = []
-
-  if (orderId) {
-    try {
-      const order = await payload.findByID({
-        collection: 'orders',
-        id: orderId,
-        depth: 0,
-        overrideAccess: true,
-      })
-
-      // Extract downloadToken for receipt download
-      if (order && typeof order === 'object') {
-        const orderData = order as unknown as Record<string, unknown>
-        downloadToken = (orderData.downloadToken as string | null) ?? null
-      }
-
-      // Resolve pickup location + the Google Appointment Schedule booking
-      // link — only for physical-product orders
-      if (isPickupOrder) {
-        try {
-          const settings = await payload.findGlobal({
-            slug: 'product-pickup-settings',
-            locale,
-            depth: 0,
-          })
-          if (settings?.locationName) pickupLocationName = settings.locationName
-          if (settings?.locationAddress) pickupLocationAddress = settings.locationAddress
-          if (settings?.googleScheduleUrl) pickupBookingUrl = settings.googleScheduleUrl
-        } catch {
-          // ignore — fallback used
-        }
-      }
-
-      // Resolve the manage-booking magic link(s) for workshop bookings on this
-      // order — the same self-service "cancel or reschedule" link the
-      // confirmation email includes. Best-effort: no link resolves just
-      // means the CTA doesn't render, not a broken page.
-      if (isWorkshop) {
-        try {
-          const bookings = await payload.find({
-            collection: 'workshop-bookings',
-            where: { and: [{ orderId: { equals: orderId } }, { status: { equals: 'confirmed' } }] },
-            limit: 10,
-            depth: 0,
-            overrideAccess: true,
-          })
-
-          for (const booking of bookings.docs) {
-            try {
-              const links = await payload.find({
-                collection: 'booking-magic-links',
-                where: { bookingId: { equals: booking.id } },
-                sort: '-issuedAt',
-                limit: 1,
-                depth: 0,
-                overrideAccess: true,
-              })
-              const token = links.docs[0]?.token
-              if (token) {
-                manageBookingLinks.push({
-                  workshopTitle: String((booking as { workshopTitle?: string }).workshopTitle ?? 'Workshop'),
-                  url: `/manage-booking/${token}`,
-                })
-              }
-            } catch {
-              // ignore — this booking just won't get a manage link
-            }
-          }
-
-          // Use the first confirmed booking to build the summary card + hero image.
-          const first = bookings.docs[0] as unknown as Record<string, unknown> | undefined
-          if (first) {
-            let location = ''
-            if (first.appointmentId) {
-              try {
-                const appointment = await payload.findByID({
-                  collection: 'workshop-appointments',
-                  id: first.appointmentId as string,
-                  depth: 1,
-                  overrideAccess: true,
-                })
-                const loc = (appointment as { location?: unknown } | null)?.location
-                if (typeof loc === 'object' && loc !== null) {
-                  const l = loc as { name?: string; address?: string }
-                  location = [l.name, l.address].filter(Boolean).join(', ')
-                } else if (typeof loc === 'string') {
-                  location = loc
-                }
-              } catch {
-                // ignore — location is best-effort
-              }
-            }
-
-            const workshopSlug = String(first.workshopSlug ?? '')
-            bookingSummary = {
-              workshopTitle: String(first.workshopTitle ?? 'Workshop'),
-              workshopSlug,
-              date: String(first.date ?? ''),
-              time: String(first.time ?? ''),
-              guestCount: typeof first.guestCount === 'number' ? first.guestCount : 1,
-              location,
-            }
-
-            if (workshopSlug) {
-              try {
-                const wsResult = await payload.find({
-                  collection: 'workshops',
-                  where: { slug: { equals: workshopSlug } },
-                  limit: 1,
-                  depth: 1,
-                  overrideAccess: true,
-                })
-                workshopImage = (wsResult.docs[0] as { image?: MediaType | string } | undefined)
-                  ?.image ?? null
-              } catch {
-                // ignore — falls back to no hero image
-              }
-            }
-          }
-        } catch {
-          // ignore — manage-booking links are best-effort
-        }
-
-        // A few other active workshops to explore next.
-        try {
-          const others = await payload.find({
-            collection: 'workshops',
-            where: {
-              and: [
-                { isActive: { equals: true } },
-                ...(bookingSummary?.workshopSlug
-                  ? [{ slug: { not_equals: bookingSummary.workshopSlug } }]
-                  : []),
-              ],
-            },
-            limit: 3,
-            depth: 1,
-            overrideAccess: true,
-          })
-          otherWorkshops = others.docs.map((w) => ({
-            slug: String((w as { slug?: string }).slug ?? ''),
-            title: String((w as { title?: string }).title ?? ''),
-            image: (w as { image?: MediaType | string }).image ?? null,
-          }))
-        } catch {
-          // ignore — the "explore more" section just won't render
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch order:', error)
-    }
-  }
+  const {
+    downloadToken,
+    isPickupOrder,
+    pickupLocationName,
+    pickupLocationAddress,
+    pickupBookingUrl,
+    bookingSummary,
+    workshopImage,
+    otherWorkshops,
+    manageBookingLinks,
+    items,
+  } = await getOrderConfirmationData({ payload, orderId, type, locale })
 
 
   // ─── Pickup order confirmation ─────────────────────────────
@@ -265,6 +103,22 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <span className="font-semibold text-[#555954]">{t.sentToInbox}</span>
               </div>
             </div>
+          </Card>
+        )}
+
+        {/* Items */}
+        {items.length > 0 && (
+          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+            <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
+              {t.items}
+            </h2>
+            <ul className="flex flex-col gap-6">
+              {items.map((item) => (
+                <li key={item.id}>
+                  <ProductItem product={item.product} quantity={item.quantity} variant={item.variant} />
+                </li>
+              ))}
+            </ul>
           </Card>
         )}
 
@@ -840,6 +694,22 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
         </Card>
       )}
 
+      {/* Items */}
+      {items.length > 0 && (
+        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
+            {t.items}
+          </h2>
+          <ul className="flex flex-col gap-6">
+            {items.map((item) => (
+              <li key={item.id}>
+                <ProductItem product={item.product} quantity={item.quantity} variant={item.variant} />
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
       {/* Timeline */}
       <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
         <h2 className="text-lg font-display font-semibold text-ff-near-black mb-6">
@@ -894,7 +764,9 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
           </div>
           <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
             <span className="text-ff-gold font-bold">&bull;</span>
-            <p className="text-body-sm text-ff-text-muted">{t.visitDashboard}</p>
+            <p className="text-body-sm text-ff-text-muted">
+              {isLoggedIn ? t.visitDashboard : t.visitDashboardGuest}
+            </p>
           </div>
           <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
             <span className="text-ff-gold font-bold">&bull;</span>

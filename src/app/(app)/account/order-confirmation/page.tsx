@@ -1,9 +1,13 @@
 import { accountI18n } from '@/app/(app)/account/i18n'
+import { Media } from '@/components/Media'
+import { ProductItem } from '@/components/ProductItem'
 import { Card } from '@/components/ui/card'
+import { getOrderConfirmationData } from '@/lib/orderConfirmation'
 import { formatDate } from '@/utilities/form/formatters'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import {
+  ArrowRight,
   BookOpen,
   CalendarCheck,
   CheckCircle,
@@ -37,53 +41,18 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
   const locale = await getLocale()
   const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
-  // A physical-product order (type === 'order', as opposed to 'workshop' or
-  // 'course') is always a pickup order — pickup is the only fulfillment
-  // method for products right now. Resolve pickup location + the
-  // post-payment Google Appointment Schedule link from product-pickup-settings.
-  const isPickupOrder = type === 'order'
-  let pickupLocationName = 'Fermentfreude'
-  let pickupLocationAddress = 'Grabenstraße 15, 8010 Graz, Austria'
-  let pickupBookingUrl = ''
-
-  let downloadToken: string | null = null
-
-  if (orderId) {
-    try {
-      const payload = await getPayload({ config: configPromise })
-      const order = await payload.findByID({
-        collection: 'orders',
-        id: orderId,
-        depth: 0,
-        overrideAccess: true,
-      })
-
-      // Extract downloadToken for receipt download
-      if (order && typeof order === 'object') {
-        const orderData = order as unknown as Record<string, unknown>
-        downloadToken = (orderData.downloadToken as string | null) ?? null
-      }
-
-      // Resolve pickup location + the Google Appointment Schedule booking
-      // link — only for physical-product orders
-      if (isPickupOrder) {
-        try {
-          const settings = await payload.findGlobal({
-            slug: 'product-pickup-settings',
-            locale,
-            depth: 0,
-          })
-          if (settings?.locationName) pickupLocationName = settings.locationName
-          if (settings?.locationAddress) pickupLocationAddress = settings.locationAddress
-          if (settings?.googleScheduleUrl) pickupBookingUrl = settings.googleScheduleUrl
-        } catch {
-          // ignore — fallback used
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch order:', error)
-    }
-  }
+  const payload = await getPayload({ config: configPromise })
+  const {
+    downloadToken,
+    isPickupOrder,
+    pickupLocationName,
+    pickupLocationAddress,
+    pickupBookingUrl,
+    bookingSummary,
+    workshopImage,
+    otherWorkshops,
+    items,
+  } = await getOrderConfirmationData({ payload, orderId, type, locale })
 
   // ─── Pickup order confirmation ─────────────────────────────
   if (isPickupOrder) {
@@ -126,6 +95,22 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <span className="font-semibold text-[#555954]">{t.sentToInbox}</span>
               </div>
             </div>
+          </Card>
+        )}
+
+        {/* Items */}
+        {items.length > 0 && (
+          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+            <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
+              {t.items}
+            </h2>
+            <ul className="flex flex-col gap-6">
+              {items.map((item) => (
+                <li key={item.id}>
+                  <ProductItem product={item.product} quantity={item.quantity} variant={item.variant} />
+                </li>
+              ))}
+            </ul>
           </Card>
         )}
 
@@ -271,17 +256,87 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
     return (
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Success Banner — Workshop */}
-        <Card className="p-8 border-0 shadow-sm bg-linear-to-br from-[#f6f3f0] to-[#ECE5DE]">
-          <div className="text-center">
-            <div className="w-20 h-20 rounded-full bg-[#555954] flex items-center justify-center mx-auto mb-5">
-              <CheckCircle className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-subheading font-display text-ff-near-black mb-2">
-              {t.workshopConfirmed}
-            </h1>
-            <p className="text-body-sm text-ff-text-muted">{t.workshopConfirmDesc}</p>
+        {workshopImage ? (
+          <div className="relative w-full aspect-21/9 rounded-[--radius-lg] overflow-hidden bg-ff-cream">
+            <Media resource={workshopImage} fill imgClassName="object-cover" priority />
+            <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/0 to-black/0" />
+            <span className="absolute bottom-5 left-5 inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full text-xs font-display font-bold uppercase tracking-wider text-ff-near-black">
+              <CheckCircle className="w-3.5 h-3.5" />
+              {locale === 'de' ? 'Bestätigt' : 'Confirmed'}
+            </span>
           </div>
-        </Card>
+        ) : (
+          <Card className="p-8 border-0 shadow-sm bg-linear-to-br from-[#f6f3f0] to-[#ECE5DE]">
+            <div className="text-center">
+              <div className="w-20 h-20 rounded-full bg-[#555954] flex items-center justify-center mx-auto mb-5">
+                <CheckCircle className="w-10 h-10 text-white" />
+              </div>
+            </div>
+          </Card>
+        )}
+        <div className="text-center space-y-2">
+          <h1 className="text-subheading font-display text-ff-near-black mb-2">
+            {t.workshopConfirmed}
+          </h1>
+          <p className="text-body-sm text-ff-text-muted">{t.workshopConfirmDesc}</p>
+        </div>
+
+        {/* Booking summary */}
+        {bookingSummary && (
+          <div className="border border-ff-border-light rounded-[--radius-lg] p-6 sm:p-8">
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <p className="text-xs font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1.5">
+                  {t.bookingSummaryTitle}
+                </p>
+                <h2 className="font-display font-bold text-2xl text-ff-near-black">
+                  {bookingSummary.workshopTitle}
+                </h2>
+              </div>
+              {orderId && (
+                <span className="shrink-0 font-mono text-xs text-ff-text-muted pt-1">
+                  #{orderId.slice(0, 8).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-5">
+              <div>
+                <p className="text-[11px] font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1">
+                  {t.labelDate}
+                </p>
+                <p className="font-display font-semibold text-ff-near-black">
+                  {bookingSummary.date}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1">
+                  {t.labelTime}
+                </p>
+                <p className="font-display font-semibold text-ff-near-black">
+                  {bookingSummary.time}
+                </p>
+              </div>
+              {bookingSummary.location && (
+                <div>
+                  <p className="text-[11px] font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1">
+                    {t.labelLocation}
+                  </p>
+                  <p className="font-display font-semibold text-ff-near-black">
+                    {bookingSummary.location}
+                  </p>
+                </div>
+              )}
+              <div>
+                <p className="text-[11px] font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1">
+                  {t.labelGuests}
+                </p>
+                <p className="font-display font-semibold text-ff-near-black">
+                  {bookingSummary.guestCount}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Order Info */}
         {orderId && (
@@ -398,6 +453,35 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
             {t.browseMoreWorkshops}
           </Link>
         </div>
+
+        {/* Explore other workshops */}
+        {otherWorkshops.length > 0 && (
+          <div>
+            <h2 className="font-display font-bold text-xl text-ff-near-black mb-6">
+              {t.exploreOtherWorkshops}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {otherWorkshops.map((w) => (
+                <Link key={w.slug} href={`/workshops/${w.slug}`} className="group block">
+                  <div className="relative aspect-4/3 rounded-[--radius-lg] overflow-hidden mb-3 bg-ff-cream">
+                    {w.image && (
+                      <Media
+                        resource={w.image}
+                        fill
+                        imgClassName="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    )}
+                  </div>
+                  <h3 className="font-display font-bold text-ff-near-black mb-1">{w.title}</h3>
+                  <span className="inline-flex items-center gap-1 text-sm font-display font-semibold text-ff-near-black underline decoration-ff-gold decoration-2 underline-offset-4">
+                    {t.learnMore}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Support */}
         <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-[--radius-lg]">

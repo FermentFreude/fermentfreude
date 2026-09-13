@@ -550,7 +550,12 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
               name: ((updateData.firstName as string) || booking.firstName) ?? undefined,
             },
           ],
-          templateId: BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION,
+          // Registered customers → the account-linking template; guests →
+          // the manage-booking-magic-link template (no account to view),
+          // ending in a "create an account" upsell instead.
+          templateId: customerId
+            ? BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION
+            : BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION_GUEST,
           params: {
             WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
             WORKSHOP_DATE: String(booking.date ?? ''),
@@ -583,6 +588,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
             WHAT_TO_BRING: whatToBring,
             PRIVACY_URL: `${SERVER_URL}/datenschutz`,
             AGB_URL: `${SERVER_URL}/agb`,
+            CREATE_ACCOUNT_URL: `${SERVER_URL}/create-account`,
             MANAGE_BOOKING_URL: manageBookingToken
               ? `${SERVER_URL}/manage-booking/${manageBookingToken}`
               : `${SERVER_URL}/account/orders`,

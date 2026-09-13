@@ -3,6 +3,7 @@
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Address } from '@/payload-types'
+import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { useEcommerce, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
@@ -53,6 +54,7 @@ export const CheckoutForm: React.FC<Props> = ({
   pickupTime,
 }) => {
   const { locale } = useLocale()
+  const { user } = useAuth()
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = React.useState<null | string>(null)
@@ -181,8 +183,13 @@ export const CheckoutForm: React.FC<Props> = ({
                   ? `&email=${encodeURIComponent(customerEmail)}`
                   : ''
                 const type = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
+                // Route by login status like CheckoutPage.tsx's voucher-covers-cart
+                // path already does — logged-in customers get the account
+                // confirmation page, guests get the (richer, no-account-link)
+                // checkout one.
+                const confirmationBase = user ? '/account' : '/checkout'
                 router.push(
-                  `/checkout/order-confirmation?orderId=${confirmResult.orderID}&type=${type}${emailParam}`,
+                  `${confirmationBase}/order-confirmation?orderId=${confirmResult.orderID}&type=${type}${emailParam}`,
                 )
               }
             } catch (err) {
@@ -223,6 +230,7 @@ export const CheckoutForm: React.FC<Props> = ({
       confirmOrder,
       clearSession,
       router,
+      user,
       isAllDigital,
       hasWorkshop,
       pickupDate,
