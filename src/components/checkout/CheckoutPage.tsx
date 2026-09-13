@@ -1132,6 +1132,7 @@ export const CheckoutPage: React.FC = () => {
                       id="accountPassword"
                       name="accountPassword"
                       type="password"
+                      autoComplete="new-password"
                       value={accountPassword}
                       onChange={(e) => setAccountPassword(e.target.value)}
                       disabled={false}
