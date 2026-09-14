@@ -195,6 +195,16 @@ export default buildConfig({
   ],
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
+    // Paid orders were being created, handed back to the browser, and then
+    // silently discarded: Payload wraps each request in a Mongo transaction,
+    // and when that transaction dies before commit the order insert is rolled
+    // back while writes issued afterwards (cart purchasedAt, transaction
+    // order/status) still land — leaving a transaction row pointing at an
+    // order document that does not exist, and a customer charged by Stripe
+    // with no order. This project is already written for non-transactional
+    // writes throughout (sequential writes only, single-document atomic ops
+    // in lib/atomicSpots.ts), so each operation commits on its own instead.
+    transactionOptions: false,
   }),
   editor: lexicalEditor({
     features: () => {
