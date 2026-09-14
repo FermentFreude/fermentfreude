@@ -1,5 +1,30 @@
 import type { Order, Product, Variant } from '@/payload-types'
-import type { CollectionAfterChangeHook } from 'payload'
+import type { CollectionAfterChangeHook, Payload } from 'payload'
+
+/**
+ * Decrement a stock counter with one atomic Mongo operation, clamped at zero.
+ *
+ * Not payload.update(): that revalidates the ENTIRE document, so a single
+ * unrelated empty required field anywhere on a product (an unfilled PDP field,
+ * say) throws on every purchase of it. Catching that error is not enough —
+ * Payload aborts the surrounding transaction before it surfaces, which
+ * silently rolled back the order that had just been created, leaving the
+ * customer charged with no order at all. Writing the one field through the
+ * Mongoose model runs no validation, touches nothing else, and is race-safe
+ * between concurrent orders. Same technique as reserveSpotsAtomic /
+ * releaseSpotsAtomic in src/lib/atomicSpots.ts.
+ */
+async function decrementStockAtomic(
+  payload: Payload,
+  collection: 'products' | 'variants',
+  id: string,
+  quantity: number,
+): Promise<void> {
+  const model = payload.db.collections[collection]
+  await model.updateOne({ _id: id }, [
+    { $set: { inventory: { $max: [0, { $subtract: ['$inventory', quantity] }] } } },
+  ])
+}
 
 /**
  * afterChange hook on Orders.
@@ -56,26 +81,12 @@ export const decrementInventory: CollectionAfterChangeHook<Order> = async ({
             : await req.payload.findByID({ collection: 'variants', id: variantId, depth: 0, req })
 
         if (variantDoc.inventory != null && variantDoc.inventory > 0) {
-          const newInventory = Math.max(0, variantDoc.inventory - quantity)
-          await req.payload.update({
-            collection: 'variants',
-            id: variantId,
-            data: { inventory: newInventory },
-            req,
-            context: { skipRevalidate: true, skipAutoTranslate: true },
-          })
+          await decrementStockAtomic(req.payload, 'variants', variantId, quantity)
         }
       } else {
         // No variant — decrement product-level inventory
         if (productDoc.inventory != null && productDoc.inventory > 0) {
-          const newInventory = Math.max(0, productDoc.inventory - quantity)
-          await req.payload.update({
-            collection: 'products',
-            id: productId,
-            data: { inventory: newInventory },
-            req,
-            context: { skipRevalidate: true, skipAutoTranslate: true },
-          })
+          await decrementStockAtomic(req.payload, 'products', productId, quantity)
         }
       }
     } catch (error) {
