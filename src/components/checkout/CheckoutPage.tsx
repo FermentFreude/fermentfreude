@@ -10,6 +10,7 @@ import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
+import { CalendarCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { Suspense, useCallback, useEffect, useState } from 'react'
@@ -52,6 +53,8 @@ const CHECKOUT_DE = {
   address: 'Adresse',
   noShipping: 'Workshop / digitales Produkt — keine Lieferadresse erforderlich.',
   storePickup: 'Abholung im Geschäft',
+  pickupAfterPaymentNote:
+    'Nach der Bezahlung kannst du direkt einen Termin buchen, um deine Bestellung abzuholen — du erhältst den Link auf der Bestätigungsseite und per E-Mail.',
   pickupWorkshopNote:
     'Dein Warenkorb enthält auch einen Workshop. Die Abholdetails gelten nur für die physischen Produkte — dein Workshop-Termin bleibt unverändert.',
   viewOnMaps: 'Auf Google Maps ansehen',
@@ -122,6 +125,8 @@ const CHECKOUT_EN = {
   address: 'Address',
   noShipping: 'Workshop / digital product — no shipping address required.',
   storePickup: 'Store Pickup',
+  pickupAfterPaymentNote:
+    'After payment you can book an appointment to collect your order — you will get the link on the confirmation page and by email.',
   pickupWorkshopNote:
     'Your cart also includes a workshop. The pickup details below apply to the physical products only — your workshop date stays as booked.',
   viewOnMaps: 'View on Google Maps',
@@ -1175,6 +1180,10 @@ export const CheckoutPage: React.FC = () => {
               >
                 {t.viewOnMaps}
               </a>
+            </div>
+            <div className="mt-4 flex items-start gap-3 rounded-lg bg-[#f5f1e8] px-5 py-4">
+              <CalendarCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#555954]" />
+              <p className="text-body-sm text-[#555954]">{t.pickupAfterPaymentNote}</p>
             </div>
           </section>
         ) : isAllPhysicalPickup ? (
