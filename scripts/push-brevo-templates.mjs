@@ -178,6 +178,9 @@ const MOCK = {
     TOTAL: '€ 59,90',
     SHIPPING_ADDRESS: 'Max Mustermann\nMusterstraße 1\n1010 Wien\nÖsterreich',
     RECEIPT_URL: 'https://www.fermentfreude.at/api/orders/order_abc123/receipt?token=test-token',
+    // Only set on physical-product pickup orders — present here so a test send
+    // actually renders the "Abholtermin buchen" block.
+    PICKUP_BOOKING_URL: 'https://calendar.app.google/oQ2zbpRbD4VcZGwE7',
     ITEMS: [
       {
         IMAGE_URL: 'https://pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev/media/email/shopping-cart-white.png', // Placeholder
@@ -282,6 +285,9 @@ const MOCK = {
     TOTAL: '€ 59,90',
     SHIPPING_ADDRESS: 'Max Mustermann\nMusterstraße 1\n1010 Wien\nÖsterreich',
     RECEIPT_URL: 'https://www.fermentfreude.at/api/orders/order_abc123/receipt?token=test-token',
+    // Only set on physical-product pickup orders — present here so a test send
+    // actually renders the "Abholtermin buchen" block.
+    PICKUP_BOOKING_URL: 'https://calendar.app.google/oQ2zbpRbD4VcZGwE7',
     ITEMS: [
       {
         IMAGE_URL: 'https://pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev/media/email/shopping-cart-white.png', // Placeholder

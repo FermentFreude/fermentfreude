@@ -131,6 +131,31 @@
 
 
 
+<!-- Pickup appointment — only for physical-product pickup orders, where the
+     customer still has to choose a collection slot. PICKUP_BOOKING_URL is set
+     by sendOrderConfirmationEmail.ts only when the order is a pickup that is
+     not a workshop (workshops carry their own appointment). Placed above the
+     "Bestellung ansehen" button: this is the one action still outstanding,
+     and the order is not fully arranged until it is done. -->
+{% if params.PICKUP_BOOKING_URL and params.PICKUP_BOOKING_URL != "" %}
+<tr><td class="ff-px" style="padding:0 32px 8px 32px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:#F5F1E8;border:1px solid #E5B765;border-radius:8px;">
+    <tr><td style="padding:20px;">
+      <div style="font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:15px;line-height:1.4;color:#1a1a1a;font-weight:700;margin-bottom:4px;">Abholtermin buchen</div>
+      <div style="font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:14px;line-height:1.5;color:#555251;margin-bottom:14px;">Bitte wähle noch deinen Abholtermin aus, damit wir deine Bestellung rechtzeitig für dich bereitstellen können.</div>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="ff-button" style="border-collapse:collapse;">
+        <tr>
+          <td align="center" bgcolor="#E5B765" style="border-radius:6px;background-color:#E5B765;">
+            <a href="{{ params.PICKUP_BOOKING_URL }}" target="_blank" rel="noopener" style="display:inline-block;padding:12px 28px;font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:14px;font-weight:700;letter-spacing:0.02em;color:#1a1a1a;text-decoration:none;border-radius:6px;">Abholtermin buchen</a>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</td></tr>
+<tr><td style="height:8px;line-height:8px;font-size:0;">&nbsp;</td></tr>
+{% endif %}
+
 <tr><td class="ff-px" align="center" style="padding:8px 32px 8px 32px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" class="ff-button" style="border-collapse:collapse;margin:0 auto;">
     <tr>
       <td align="center" bgcolor="#E5B765" style="border-radius:6px;background-color:#E5B765;">
