@@ -95,6 +95,27 @@ async function fetchOrderConfirmationData({
     items: [],
   }
 
+  // Pickup location + the Google Appointment Schedule booking link come from a
+  // global, not from the order — so they are resolved up front, before (and
+  // independently of) the order lookup below. Keeping this inside that lookup's
+  // try block meant a single failing order fetch also silently swallowed the
+  // booking link, leaving the customer on a confirmation page with no way to
+  // book their pickup slot at all.
+  if (isPickupOrder) {
+    try {
+      const settings = await payload.findGlobal({
+        slug: 'product-pickup-settings',
+        locale,
+        depth: 0,
+      })
+      if (settings?.locationName) data.pickupLocationName = settings.locationName
+      if (settings?.locationAddress) data.pickupLocationAddress = settings.locationAddress
+      if (settings?.googleScheduleUrl) data.pickupBookingUrl = settings.googleScheduleUrl
+    } catch {
+      // ignore — hardcoded fallbacks above are used
+    }
+  }
+
   if (!orderId) return data
 
   try {
@@ -124,23 +145,6 @@ async function fetchOrderConfirmationData({
           },
         ]
       })
-    }
-
-    // Resolve pickup location + the Google Appointment Schedule booking
-    // link — only for physical-product orders
-    if (isPickupOrder) {
-      try {
-        const settings = await payload.findGlobal({
-          slug: 'product-pickup-settings',
-          locale,
-          depth: 0,
-        })
-        if (settings?.locationName) data.pickupLocationName = settings.locationName
-        if (settings?.locationAddress) data.pickupLocationAddress = settings.locationAddress
-        if (settings?.googleScheduleUrl) data.pickupBookingUrl = settings.googleScheduleUrl
-      } catch {
-        // ignore — fallback used
-      }
     }
 
     // Resolve the manage-booking magic link(s) for workshop bookings on this
