@@ -276,7 +276,7 @@ export async function handleChargeRefunded({
   const orders = await payload.find({
     collection: 'orders',
     where: {
-      'transactions.stripePaymentIntentID': { equals: paymentIntentId },
+      'transactions.stripe.paymentIntentID': { equals: paymentIntentId },
     },
     limit: 1,
     overrideAccess: true,
@@ -412,7 +412,7 @@ export async function handleChargeSucceeded({
   const orders = await payload.find({
     collection: 'orders',
     where: {
-      'transactions.stripePaymentIntentID': { equals: paymentIntentId },
+      'transactions.stripe.paymentIntentID': { equals: paymentIntentId },
     },
     limit: 1,
     overrideAccess: true,
