@@ -19,13 +19,13 @@ export function PickupBookingCta({
   const t = locale === 'de' ? accountI18n.de : accountI18n.en
 
   return (
-    <div className="rounded-[--radius-lg] border-2 border-ff-gold bg-[#FDF8EF] p-6 sm:p-8 shadow-sm">
+    <div className="rounded-[--radius-lg] border-2 border-ff-gold bg-ff-ivory p-6 sm:p-8">
       <div className="flex flex-col items-center gap-4 text-center">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ff-gold">
-          <CalendarCheck className="h-7 w-7 text-white" />
+          <CalendarCheck className="h-7 w-7 text-ff-near-black" />
         </div>
         <h2 className="font-display text-2xl font-bold text-ff-near-black">{t.pickupCtaTitle}</h2>
-        <p className="max-w-md text-body-sm text-ff-text-muted">{t.pickupCtaBody}</p>
+        <p className="max-w-md text-body-sm text-ff-gray-text">{t.pickupCtaBody}</p>
         <a
           href={url}
           target="_blank"

@@ -168,7 +168,7 @@ export const accountI18n = {
     pickupCtaTitle: 'Jetzt Abholtermin buchen',
     pickupCtaBody:
       'Abholtermine sind in der Regel an jedem Werktag möglich — du findest sicher einen passenden Termin. Falls nicht, schreib uns einfach an kontakt@fermentfreude.at.',
-    pickupCtaButton: 'Abholtermin buchen',
+    pickupCtaButton: 'Freien Termin wählen',
     pickupModalDismiss: 'Später buchen',
     pickupStep1Desc: 'Deine Zahlung wurde verarbeitet — wir bereiten deine Bestellung vor.',
     pickupStep2Title: 'Abholtermin buchen',
@@ -417,7 +417,7 @@ export const accountI18n = {
     pickupCtaTitle: 'Book your pickup time now',
     pickupCtaBody:
       "Pickup times are usually available every working day — you'll find one that suits you. If you don't, just let us know at kontakt@fermentfreude.at.",
-    pickupCtaButton: 'Book pickup time',
+    pickupCtaButton: 'Choose a time',
     pickupModalDismiss: 'Book later',
     pickupStep1Desc: "Your payment has been processed — we're preparing your order.",
     pickupStep2Title: 'Book your pickup',

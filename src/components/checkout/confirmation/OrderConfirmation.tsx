@@ -31,6 +31,16 @@ import { PickupBookingModal } from './PickupBookingModal'
  * had to be made in both places. Both routes now render this one component and
  * differ only in the `isLoggedIn` they pass.
  */
+/**
+ * One card treatment and one button treatment for the whole screen. Gold is
+ * reserved for the single action the customer still has to take (booking a
+ * pickup slot) — everything else is outlined, so nothing competes with it.
+ */
+const CARD = 'rounded-[--radius-lg] border border-ff-border-light bg-ff-cream p-6'
+const CARD_TITLE = 'mb-4 font-display text-lg font-semibold text-ff-near-black'
+const BUTTON_SECONDARY =
+  'flex-1 rounded-[--radius-pill] border border-ff-near-black px-6 py-3 text-center font-display font-medium text-ff-near-black transition-colors hover:bg-ff-near-black hover:text-white'
+
 type Props = {
   data: OrderConfirmationData
   orderId?: string
@@ -60,202 +70,150 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
   // ─── Pickup order confirmation ─────────────────────────────
   if (isPickupOrder) {
     return (
-      <div className="max-w-2xl mx-auto space-y-8">
-        {/* Success Banner */}
-        <Card className="p-8 border-0 shadow-sm bg-linear-to-br from-[#f6f3f0] to-[#ECE5DE]">
-          <div className="text-center">
-            <div className="w-20 h-20 rounded-full bg-[#555954] flex items-center justify-center mx-auto mb-5">
-              <CheckCircle className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-subheading font-display text-ff-near-black mb-2">
-              {t.orderConfirmed}
-            </h1>
-            <p className="text-body-sm text-ff-text-muted">{t.orderConfirmedDesc}</p>
-          </div>
-        </Card>
-
+      <div className="max-w-2xl mx-auto space-y-6">
         {/* Booking the collection slot is the only thing left for the customer
-            to do, so it sits above the order details, and opens over the page
-            on arrival. */}
+            to do, so it opens over the page on arrival. */}
         {pickupBookingUrl && (
-          <>
-            <PickupBookingModal url={pickupBookingUrl} locale={locale} orderId={orderId} />
-            <PickupBookingCta url={pickupBookingUrl} locale={locale} />
-          </>
+          <PickupBookingModal url={pickupBookingUrl} locale={locale} orderId={orderId} />
         )}
 
-        {/* Order Info */}
+        {/* Confirmation */}
+        <div className="pt-2 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-ff-near-black">
+            <CheckCircle className="h-7 w-7 text-white" />
+          </div>
+          <h1 className="mb-2 font-display text-3xl font-bold text-ff-near-black">
+            {t.orderConfirmed}
+          </h1>
+          <p className="text-body-sm text-ff-gray-text">{t.orderConfirmedDesc}</p>
+        </div>
+
+        {/* The single outstanding action — deliberately the only place on this
+            page that offers to book, so it can't be mistaken for one of
+            several competing choices. */}
+        {pickupBookingUrl && <PickupBookingCta url={pickupBookingUrl} locale={locale} />}
+
+        {/* Order information */}
         {orderId && (
-          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
-            <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
-              {t.orderInfo}
-            </h2>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-ff-text-muted">{t.orderNumber}</span>
-                <span className="font-semibold text-ff-near-black">
+          <section className={CARD}>
+            <h2 className={CARD_TITLE}>{t.orderInfo}</h2>
+            <dl className="space-y-2.5 text-body-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-ff-text-muted">{t.orderNumber}</dt>
+                <dd className="font-display font-semibold text-ff-near-black">
                   #{orderId.slice(0, 8).toUpperCase()}
-                </span>
+                </dd>
               </div>
-              <div className="flex justify-between">
-                <span className="text-ff-text-muted">{t.orderDate}</span>
-                <span className="font-semibold text-ff-near-black">
+              <div className="flex justify-between gap-4">
+                <dt className="text-ff-text-muted">{t.orderDate}</dt>
+                <dd className="font-display font-semibold text-ff-near-black">
                   {formatDate(new Date().toISOString())}
-                </span>
+                </dd>
               </div>
-              <div className="flex justify-between">
-                <span className="text-ff-text-muted">{t.emailConfirmation}</span>
-                <span className="font-semibold text-[#555954]">{t.sentToInbox}</span>
+              <div className="flex justify-between gap-4">
+                <dt className="text-ff-text-muted">{t.emailConfirmation}</dt>
+                <dd className="font-display font-semibold text-ff-near-black">{t.sentToInbox}</dd>
               </div>
-            </div>
-          </Card>
+            </dl>
+          </section>
         )}
 
         {/* Items */}
         {items.length > 0 && (
-          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
-            <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
-              {t.items}
-            </h2>
+          <section className={CARD}>
+            <h2 className={CARD_TITLE}>{t.items}</h2>
             <ul className="flex flex-col gap-6">
               {items.map((item) => (
                 <li key={item.id}>
-                  <ProductItem product={item.product} quantity={item.quantity} variant={item.variant} />
+                  <ProductItem
+                    product={item.product}
+                    quantity={item.quantity}
+                    variant={item.variant}
+                  />
                 </li>
               ))}
             </ul>
-          </Card>
+          </section>
         )}
 
-        {/* Pickup Details */}
-        <Card className="p-6 border border-blue-200 shadow-sm rounded-[--radius-lg] bg-blue-50">
-          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
-            {t.pickupDetails}
-          </h2>
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <Store className="w-5 h-5 text-[#555954] mt-1 shrink-0" />
-              <div>
-                <p className="text-body-sm font-semibold text-ff-near-black">
-                  {pickupLocationName}
-                </p>
-                <p className="text-body-sm text-ff-text-muted">{pickupLocationAddress}</p>
-              </div>
+        {/* Where to collect — address only. Booking lives in the card above;
+            repeating the button here is what made this page feel like three
+            competing calls to action. */}
+        <section className={CARD}>
+          <h2 className={CARD_TITLE}>{t.pickupDetails}</h2>
+          <div className="flex items-start gap-3">
+            <Store className="mt-0.5 h-5 w-5 shrink-0 text-ff-gold" />
+            <div>
+              <p className="font-display font-semibold text-ff-near-black">{pickupLocationName}</p>
+              <p className="text-body-sm text-ff-gray-text">{pickupLocationAddress}</p>
             </div>
           </div>
-          {pickupBookingUrl && (
-            <a
-              href={pickupBookingUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-[--radius-pill] bg-[#555954] px-5 py-2.5 font-display font-medium text-white transition-opacity hover:opacity-90"
-            >
-              <CalendarCheck className="h-4 w-4" />
-              {locale === 'de' ? 'Abholzeit buchen' : 'Book your pickup time'}
-            </a>
-          )}
-        </Card>
+        </section>
 
-        {/* Timeline */}
-        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
-          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-6">
-            {t.whatsNext}
-          </h2>
-          <div className="space-y-6">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#555954] flex items-center justify-center shrink-0">
-                <CheckCircle className="w-6 h-6 text-white" />
-              </div>
+        {/* What happens next */}
+        <section className={CARD}>
+          <h2 className={CARD_TITLE}>{t.whatsNext}</h2>
+          <ol className="space-y-5">
+            <li className="flex gap-4">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ff-near-black">
+                <CheckCircle className="h-5 w-5 text-white" />
+              </span>
               <div>
-                <h3 className="font-display font-semibold text-ff-near-black mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black">
                   {t.orderConfirmed}
                 </h3>
-                <p className="text-body-sm text-ff-text-muted">{t.pickupStep1Desc}</p>
+                <p className="text-body-sm text-ff-gray-text">{t.pickupStep1Desc}</p>
               </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full border-2 border-ff-gold flex items-center justify-center shrink-0">
-                <CalendarCheck className="w-6 h-6 text-ff-gold" />
-              </div>
+            </li>
+            <li className="flex gap-4">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ff-gold">
+                <CalendarCheck className="h-5 w-5 text-ff-gold" />
+              </span>
               <div>
-                <h3 className="font-display font-semibold text-ff-near-black mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black">
                   {t.pickupStep2Title}
                 </h3>
-                <p className="text-body-sm text-ff-text-muted">{t.pickupStep2Desc}</p>
+                <p className="text-body-sm text-ff-gray-text">{t.pickupStep2Desc}</p>
               </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full border-2 border-ff-gold flex items-center justify-center shrink-0">
-                <Store className="w-6 h-6 text-ff-gold" />
-              </div>
+            </li>
+            <li className="flex gap-4">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ff-gold">
+                <Store className="h-5 w-5 text-ff-gold" />
+              </span>
               <div>
-                <h3 className="font-display font-semibold text-ff-near-black mb-1">
+                <h3 className="font-display font-semibold text-ff-near-black">
                   {t.readyForPickup}
                 </h3>
-                <p className="text-body-sm text-ff-text-muted">{t.pickupStep3Desc}</p>
+                <p className="text-body-sm text-ff-gray-text">{t.pickupStep3Desc}</p>
               </div>
-            </div>
-          </div>
-        </Card>
+            </li>
+          </ol>
+        </section>
 
-        {/* Next Steps */}
-        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
-          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
-            {t.whatYouCanDo}
-          </h2>
-          {/* Plain rows, not filled boxes — inset panels inside a card read as
-              form inputs waiting to be filled in. */}
-          <ul className="space-y-3">
-            <li className="flex items-start gap-3">
-              <span className="text-ff-gold font-bold leading-6">&bull;</span>
-              <p className="text-body-sm text-ff-text-muted">{t.checkEmail}</p>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-ff-gold font-bold leading-6">&bull;</span>
-              <p className="text-body-sm text-ff-text-muted">
-                {isLoggedIn ? t.visitDashboard : t.visitDashboardGuest}
-              </p>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-ff-gold font-bold leading-6">&bull;</span>
-              <p className="text-body-sm text-ff-text-muted">{t.contactUs}</p>
-            </li>
-          </ul>
-        </Card>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        {/* Secondary actions — never gold, so nothing competes with booking */}
+        <div className="flex flex-col gap-3 pt-1 sm:flex-row">
           <Link
             href={isLoggedIn ? '/account/orders' : '/create-account'}
-            className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+            className={BUTTON_SECONDARY}
           >
             {isLoggedIn ? t.viewMyOrders : t.createAccount}
           </Link>
-          <Link
-            href="/shop"
-            className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
-          >
+          <Link href="/shop" className={BUTTON_SECONDARY}>
             {t.continueShopping}
           </Link>
         </div>
 
-        {/* Support */}
-        <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-[--radius-lg]">
-          <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
-          <p className="text-body-sm text-ff-text-muted mb-4">
-            {locale === 'de'
-              ? 'Hast du Fragen zu deiner Bestellung?'
-              : 'Do you have questions about your order?'}
-          </p>
+        <p className="pt-2 text-center text-body-sm text-ff-text-muted">
+          {locale === 'de'
+            ? 'Hast du Fragen zu deiner Bestellung?'
+            : 'Do you have questions about your order?'}{' '}
           <a
             href="mailto:kontakt@fermentfreude.at"
-            className="text-ff-gold hover:opacity-80 font-display font-medium"
+            className="font-display font-semibold text-ff-near-black underline decoration-ff-gold decoration-2 underline-offset-4 transition-colors hover:decoration-ff-near-black"
           >
             {t.contactSupport}
           </a>
-        </Card>
+        </p>
       </div>
     )
   }
