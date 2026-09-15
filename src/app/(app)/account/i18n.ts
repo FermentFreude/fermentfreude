@@ -164,6 +164,16 @@ export const accountI18n = {
     pickupTime: 'Abholzeit',
     preparationPickup: 'Vorbereitung und Abholung',
     readyForPickup: 'Abholen',
+    // Pickup booking — the one action still outstanding after payment.
+    pickupCtaTitle: 'Jetzt Abholtermin buchen',
+    pickupCtaBody:
+      'Abholtermine sind in der Regel an jedem Werktag möglich — du findest sicher einen passenden Termin. Falls nicht, schreib uns einfach an kontakt@fermentfreude.at.',
+    pickupCtaButton: 'Abholtermin buchen',
+    pickupModalDismiss: 'Später buchen',
+    pickupStep1Desc: 'Deine Zahlung wurde verarbeitet — wir bereiten deine Bestellung vor.',
+    pickupStep2Title: 'Abholtermin buchen',
+    pickupStep2Desc: 'Bitte buche deinen Abholtermin — ganz einfach über den Button oben.',
+    pickupStep3Desc: 'Hol deine Bestellung zum vereinbarten Termin bei uns ab.',
     processingShipping: 'Verarbeitung & Versand',
     processingShippingDesc:
       'Wir bereiten deine Artikel vor und versenden innerhalb von 1-2 Werktagen',
@@ -403,6 +413,16 @@ export const accountI18n = {
     pickupTime: 'Pickup Time',
     preparationPickup: 'Preparation & Pickup',
     readyForPickup: 'Ready for Pickup',
+    // Pickup booking — the one action still outstanding after payment.
+    pickupCtaTitle: 'Book your pickup time now',
+    pickupCtaBody:
+      "Pickup times are usually available every working day — you'll find one that suits you. If you don't, just let us know at kontakt@fermentfreude.at.",
+    pickupCtaButton: 'Book pickup time',
+    pickupModalDismiss: 'Book later',
+    pickupStep1Desc: "Your payment has been processed — we're preparing your order.",
+    pickupStep2Title: 'Book your pickup',
+    pickupStep2Desc: 'Please book your pickup time — simply use the button above.',
+    pickupStep3Desc: 'Collect your order at the appointment you scheduled with us.',
     processingShipping: 'Processing & Shipping',
     processingShippingDesc: "We'll prepare your items and ship within 1-2 business days",
     onTheWay: 'On the Way',
