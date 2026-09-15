@@ -17,6 +17,8 @@ import {
   Truck,
 } from 'lucide-react'
 import Link from 'next/link'
+import { PickupBookingCta } from './PickupBookingCta'
+import { PickupBookingModal } from './PickupBookingModal'
 
 /**
  * The whole order-confirmation screen, for every order type and for both
@@ -71,6 +73,16 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
             <p className="text-body-sm text-ff-text-muted">{t.orderConfirmedDesc}</p>
           </div>
         </Card>
+
+        {/* Booking the collection slot is the only thing left for the customer
+            to do, so it sits above the order details, and opens over the page
+            on arrival. */}
+        {pickupBookingUrl && (
+          <>
+            <PickupBookingModal url={pickupBookingUrl} locale={locale} orderId={orderId} />
+            <PickupBookingCta url={pickupBookingUrl} locale={locale} />
+          </>
+        )}
 
         {/* Order Info */}
         {orderId && (
@@ -158,23 +170,19 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {t.orderConfirmed}
                 </h3>
-                <p className="text-body-sm text-ff-text-muted">{t.orderConfirmedDesc}</p>
+                <p className="text-body-sm text-ff-text-muted">{t.pickupStep1Desc}</p>
               </div>
             </div>
 
             <div className="flex gap-4">
               <div className="w-10 h-10 rounded-full border-2 border-ff-gold flex items-center justify-center shrink-0">
-                <Package className="w-6 h-6 text-ff-gold" />
+                <CalendarCheck className="w-6 h-6 text-ff-gold" />
               </div>
               <div>
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
-                  {t.preparationPickup}
+                  {t.pickupStep2Title}
                 </h3>
-                <p className="text-body-sm text-ff-text-muted">
-                  {locale === 'de'
-                    ? 'Wir bereiten deine Artikel vor und halten sie zur Abholung bereit.'
-                    : 'We will prepare your items and have them ready for pickup.'}
-                </p>
+                <p className="text-body-sm text-ff-text-muted">{t.pickupStep2Desc}</p>
               </div>
             </div>
 
@@ -186,11 +194,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
                 <h3 className="font-display font-semibold text-ff-near-black mb-1">
                   {t.readyForPickup}
                 </h3>
-                <p className="text-body-sm text-ff-text-muted">
-                  {locale === 'de'
-                    ? 'Buche über den Link oben deine Abholzeit und hole deine Artikel dann ab.'
-                    : 'Book your pickup time using the link above, then collect your items.'}
-                </p>
+                <p className="text-body-sm text-ff-text-muted">{t.pickupStep3Desc}</p>
               </div>
             </div>
           </div>
@@ -201,22 +205,24 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
           <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
             {t.whatYouCanDo}
           </h2>
-          <div className="space-y-3">
-            <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
-              <span className="text-ff-gold font-bold">&bull;</span>
+          {/* Plain rows, not filled boxes — inset panels inside a card read as
+              form inputs waiting to be filled in. */}
+          <ul className="space-y-3">
+            <li className="flex items-start gap-3">
+              <span className="text-ff-gold font-bold leading-6">&bull;</span>
               <p className="text-body-sm text-ff-text-muted">{t.checkEmail}</p>
-            </div>
-            <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
-              <span className="text-ff-gold font-bold">&bull;</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-ff-gold font-bold leading-6">&bull;</span>
               <p className="text-body-sm text-ff-text-muted">
                 {isLoggedIn ? t.visitDashboard : t.visitDashboardGuest}
               </p>
-            </div>
-            <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
-              <span className="text-ff-gold font-bold">&bull;</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-ff-gold font-bold leading-6">&bull;</span>
               <p className="text-body-sm text-ff-text-muted">{t.contactUs}</p>
-            </div>
-          </div>
+            </li>
+          </ul>
         </Card>
 
         {/* Action Buttons */}
@@ -302,11 +308,6 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
                   {bookingSummary.workshopTitle}
                 </h2>
               </div>
-              {orderId && (
-                <span className="shrink-0 font-mono text-xs text-ff-text-muted pt-1">
-                  #{orderId.slice(0, 8).toUpperCase()}
-                </span>
-              )}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-5">
               <div>
@@ -345,6 +346,34 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
               </div>
             </div>
           </div>
+        )}
+
+        {/* Order Info — shown for guests and account holders alike; only the
+            account CTA below differs between them. */}
+        {orderId && (
+          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+            <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
+              {t.orderInfo}
+            </h2>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-ff-text-muted">{t.orderNumber}</span>
+                <span className="font-semibold text-ff-near-black">
+                  #{orderId.slice(0, 8).toUpperCase()}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-ff-text-muted">{t.orderDate}</span>
+                <span className="font-semibold text-ff-near-black">
+                  {formatDate(new Date().toISOString())}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-ff-text-muted">{t.emailConfirmation}</span>
+                <span className="font-semibold text-[#555954]">{t.sentToInbox}</span>
+              </div>
+            </div>
+          </Card>
         )}
 
         {/* Primary actions */}
@@ -750,22 +779,24 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
         <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
           {t.whatYouCanDo}
         </h2>
-        <div className="space-y-3">
-          <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
-            <span className="text-ff-gold font-bold">&bull;</span>
+        {/* Plain rows, not filled boxes — inset panels inside a card read as
+            form inputs waiting to be filled in. */}
+        <ul className="space-y-3">
+          <li className="flex items-start gap-3">
+            <span className="text-ff-gold font-bold leading-6">&bull;</span>
             <p className="text-body-sm text-ff-text-muted">{t.checkEmail}</p>
-          </div>
-          <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
-            <span className="text-ff-gold font-bold">&bull;</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-ff-gold font-bold leading-6">&bull;</span>
             <p className="text-body-sm text-ff-text-muted">
               {isLoggedIn ? t.visitDashboard : t.visitDashboardGuest}
             </p>
-          </div>
-          <div className="flex items-start gap-3 p-3 bg-ff-cream rounded-[--radius-lg]">
-            <span className="text-ff-gold font-bold">&bull;</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-ff-gold font-bold leading-6">&bull;</span>
             <p className="text-body-sm text-ff-text-muted">{t.contactUs}</p>
-          </div>
-        </div>
+          </li>
+        </ul>
       </Card>
 
       {/* Receipt note */}
