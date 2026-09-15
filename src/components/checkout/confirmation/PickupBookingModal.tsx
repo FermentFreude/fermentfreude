@@ -88,7 +88,7 @@ export function PickupBookingModal({
 
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ff-gold">
-            <CalendarCheck className="h-7 w-7 text-white" />
+            <CalendarCheck className="h-7 w-7 text-ff-near-black" />
           </div>
           <h2
             id="pickup-modal-title"
@@ -96,7 +96,7 @@ export function PickupBookingModal({
           >
             {t.pickupCtaTitle}
           </h2>
-          <p className="text-body-sm text-ff-text-muted">{t.pickupCtaBody}</p>
+          <p className="text-body-sm text-ff-gray-text">{t.pickupCtaBody}</p>
           <a
             href={url}
             target="_blank"
