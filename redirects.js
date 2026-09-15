@@ -50,6 +50,11 @@ const redirects = async () => {
       permanent: true,
     },
     {
+      source: '/faq',
+      destination: '/help',
+      permanent: true,
+    },
+    {
       source: '/products',
       destination: '/shop',
       permanent: true,

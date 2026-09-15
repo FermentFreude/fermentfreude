@@ -4324,29 +4324,95 @@ export interface HelpFaqBlock {
    */
   visible?: boolean | null;
   /**
-   * Top of the Help page (eyebrow, title, intro).
+   * Full-bleed illustration behind the title and search. Leave empty for the charcoal gradient fallback.
+   */
+  heroBackground?: (string | null) | Media;
+  /**
+   * Top of the Help page: title and search field.
    */
   header: {
     /**
-     * Small label above the title (e.g. "HELP & SUPPORT").
+     * Optional small label above the title (e.g. "HELP & SUPPORT").
      */
-    eyebrow: string;
-    title: string;
-    intro: string;
+    eyebrow?: string | null;
     /**
-     * e.g. "Topics on this page".
+     * e.g. "Hello, how can we help?"
      */
-    tocLabel: string;
+    title: string;
+    /**
+     * Optional line under the title. Leave empty to hide.
+     */
+    intro?: string | null;
+    /**
+     * Placeholder inside the search field (e.g. "Search").
+     */
+    searchPlaceholder?: string | null;
+    /**
+     * Unused on the current hub layout (chips removed).
+     */
+    commonSearchesLabel?: string | null;
+    /**
+     * Unused on the current hub layout (chips removed).
+     */
+    commonSearches?:
+      | {
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Shown when a topic is open (e.g. "All topics").
+     */
+    backLabel?: string | null;
+    /**
+     * e.g. "Search results".
+     */
+    resultsLabel?: string | null;
+    /**
+     * Shown when a search has no matches.
+     */
+    emptyResultsLabel?: string | null;
+    /**
+     * Word after the number when there is 1 question (e.g. "Frage" / "question").
+     */
+    questionCountSingular?: string | null;
+    /**
+     * Word after the number when there are multiple questions (e.g. "Fragen" / "questions").
+     */
+    questionCountPlural?: string | null;
+    /**
+     * Kept for existing content. The hub layout uses category cards instead of a table of contents.
+     */
+    tocLabel?: string | null;
   };
   /**
-   * Each section becomes a card on the page and an entry in the table of contents. Add, reorder, or delete sections freely.
+   * Each topic becomes a card on the Help page. Clicking it opens that topic’s questions.
    */
   sections?:
     | {
         /**
-         * URL anchor for this section (lowercase, no spaces — e.g. "account", "workshops", "vouchers"). Used in the table-of-contents links. Same value for both languages.
+         * URL anchor for this topic (lowercase, no spaces — e.g. "account", "workshops"). Same value for both languages.
          */
         key: string;
+        /**
+         * Icon shown on the topic card.
+         */
+        icon?:
+          | (
+              | 'user'
+              | 'calendar'
+              | 'gift'
+              | 'shopping-bag'
+              | 'truck'
+              | 'credit-card'
+              | 'utensils'
+              | 'wrench'
+              | 'book-open'
+              | 'lock'
+              | 'star'
+              | 'help-circle'
+            )
+          | null;
         title: string;
         intro?: string | null;
         items?:
@@ -4360,16 +4426,29 @@ export interface HelpFaqBlock {
       }[]
     | null;
   /**
-   * Dark card at the bottom inviting visitors to email.
+   * Quiet line under the topic cards, e.g. "Schreib uns – wir helfen gerne. Kontakt".
    */
   contact: {
-    title: string;
+    /**
+     * Kept for existing content. Not shown on the current layout.
+     */
+    title?: string | null;
+    /**
+     * e.g. "Schreib uns – wir helfen gerne."
+     */
     body: string;
+    /**
+     * e.g. "Kontakt".
+     */
     ctaLabel: string;
     /**
-     * Email address shown next to the button and used for the mailto: link. Same for both languages.
+     * Where the link goes (e.g. "/contact"). Same for both languages. Use a full mailto: only if you want email instead.
      */
-    email: string;
+    link?: string | null;
+    /**
+     * Optional. Only used if Link URL is empty — then we fall back to mailto: this address.
+     */
+    email?: string | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -7735,18 +7814,33 @@ export interface FormBlockSelect<T extends boolean = true> {
  */
 export interface HelpFaqBlockSelect<T extends boolean = true> {
   visible?: T;
+  heroBackground?: T;
   header?:
     | T
     | {
         eyebrow?: T;
         title?: T;
         intro?: T;
+        searchPlaceholder?: T;
+        commonSearchesLabel?: T;
+        commonSearches?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+        backLabel?: T;
+        resultsLabel?: T;
+        emptyResultsLabel?: T;
+        questionCountSingular?: T;
+        questionCountPlural?: T;
         tocLabel?: T;
       };
   sections?:
     | T
     | {
         key?: T;
+        icon?: T;
         title?: T;
         intro?: T;
         items?:
@@ -7764,6 +7858,7 @@ export interface HelpFaqBlockSelect<T extends boolean = true> {
         title?: T;
         body?: T;
         ctaLabel?: T;
+        link?: T;
         email?: T;
       };
   id?: T;
