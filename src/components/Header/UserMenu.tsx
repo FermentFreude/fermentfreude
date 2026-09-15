@@ -180,7 +180,7 @@ export function UserMenu() {
         ) : (
           <>
             {/* Identity */}
-            <div className="relative overflow-hidden border-b border-[#e8e4d9] dark:border-neutral-700 bg-[#f7f4ef] dark:bg-neutral-900/60 px-4 py-4">
+            <div className="relative border-b border-[#e8e4d9] dark:border-neutral-700 bg-[#f7f4ef] dark:bg-neutral-900/60 px-4 py-4">
               <div
                 className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4cbc2] to-transparent dark:via-neutral-600"
                 aria-hidden
@@ -189,15 +189,15 @@ export function UserMenu() {
                 {t.signedInAs}
               </p>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ff-near-black dark:bg-white text-white dark:text-ff-near-black text-xs font-display font-bold tracking-wider shadow-sm">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ff-near-black dark:bg-white text-white dark:text-ff-near-black text-xs font-display font-bold tracking-wider shadow-sm">
                   {initials}
                 </div>
-                <div className="min-w-0">
-                  <p className="truncate text-[14px] font-display font-bold text-ff-near-black dark:text-white leading-tight">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-display font-bold text-ff-near-black dark:text-white leading-snug">
                     {user.name || user.email}
                   </p>
-                  {user.name && user.email && (
-                    <p className="truncate text-[11px] text-ff-gray-text dark:text-neutral-400 mt-0.5 leading-tight">
+                  {user.email && (
+                    <p className="truncate text-[11px] text-ff-gray-text dark:text-neutral-400 leading-snug">
                       {user.email}
                     </p>
                   )}
