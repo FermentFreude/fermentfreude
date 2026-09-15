@@ -49,22 +49,22 @@ const sectionsDE: SectionDE[] = [
       {
         question: 'Brauche ich ein Konto, um etwas zu kaufen?',
         answer:
-          'Nein, du kannst Workshops und Produkte auch als Gast bestellen. Mit einem Konto siehst du jedoch deine Bestellungen, gespeicherten Adressen und Workshop-Buchungen jederzeit unter „Mein Konto".',
+          'Nein, du kannst Workshops und Produkte auch als Gast bestellen. Mit einem Konto siehst du Bestellungen und Buchungen jederzeit unter „Mein Konto“.',
       },
       {
         question: 'Wie erstelle ich ein Konto?',
         answer:
-          'Klicke oben rechts auf das Personensymbol und wähle „Registrieren". Du brauchst nur eine E-Mail-Adresse und ein Passwort. Beim ersten Checkout kannst du dein Konto auch direkt erstellen.',
+          'Klicke oben rechts auf das Personensymbol und wähle „Registrieren“. Du brauchst eine E-Mail-Adresse und ein Passwort. Beim Checkout kannst du das Konto auch direkt anlegen.',
       },
       {
         question: 'Ich habe mein Passwort vergessen – was nun?',
         answer:
-          'Klicke auf der Login-Seite auf „Passwort vergessen". Du erhältst eine E-Mail mit einem Link zum Zurücksetzen. Schau bitte auch im Spam-Ordner nach.',
+          'Auf der Login-Seite auf „Passwort vergessen“ klicken. Du erhältst eine E-Mail mit Reset-Link — bitte auch den Spam-Ordner prüfen.',
       },
       {
-        question: 'Wie ändere ich meine E-Mail-Adresse oder mein Passwort?',
+        question: 'Wie ändere ich E-Mail oder Passwort?',
         answer:
-          'Logge dich ein und gehe zu „Mein Konto". Dort kannst du deine Kontodaten und dein Passwort selbst aktualisieren.',
+          'Einloggen und unter „Mein Konto“ Kontodaten und Passwort selbst aktualisieren.',
       },
     ],
   },
@@ -76,69 +76,126 @@ const sectionsDE: SectionDE[] = [
       {
         question: 'Wie buche ich einen Workshop?',
         answer:
-          'Gehe zu „Workshops", wähle einen Workshop und klicke auf „Platz sichern". Wähle Datum und Anzahl der Plätze, lege den Workshop in den Warenkorb und schließe die Bezahlung ab. Sobald die Zahlung erfolgreich ist, erhältst du eine Bestätigung per E-Mail.',
+          'Unter „Workshops“ Termin und Plätze wählen und die zahlungspflichtige Buchung absenden. Der Vertrag kommt erst zustande, wenn Fermentfreude die Buchung ausdrücklich bestätigt — eine bloße Zahlungs- oder Eingangsbestätigung reicht dafür nicht aus.',
       },
       {
-        question: 'Wann erhalte ich meine Buchungsbestätigung?',
+        question: 'Wann ist mein Platz verbindlich reserviert?',
         answer:
-          'Direkt nach erfolgreicher Zahlung schicken wir dir eine E-Mail mit allen Details: Datum, Uhrzeit, Adresse und allem, was du mitbringen sollst. Falls du innerhalb von 10 Minuten nichts erhalten hast, prüfe bitte deinen Spam-Ordner.',
+          'Erst nach Zustandekommen des Vertrags und erfolgreicher Zahlung. Die Zahlungsabwicklung allein garantiert keinen Platz, wenn der Workshop ausgebucht ist, die Kapazität überschritten wurde oder ein technischer Fehler vorliegt. Wird die Buchung nicht angenommen, erstatten wir einen bereits eingezogenen Betrag unverzüglich zurück.',
       },
       {
-        question: 'Was passiert, wenn ein Workshop ausgebucht ist?',
+        question: 'Gibt es ein 14-tägiges Rücktrittsrecht bei Workshops?',
         answer:
-          'Auf der Workshop-Übersicht siehst du eine „Ausgebucht"-Markierung und „Bald neue Termine verfügbar". Sobald wir neue Termine anlegen, kannst du sie wieder buchen.',
-      },
-      {
-        question: 'Kann ich meine Buchung stornieren oder verschieben?',
-        answer:
-          'Bis 14 Tage vor dem Termin ist eine kostenfreie Stornierung oder Umbuchung möglich. Schreib uns dafür kurz eine E-Mail an kontakt@fermentfreude.at mit deiner Bestellnummer.',
+          'Nein. Bei Workshops mit festem Termin besteht gemäß § 18 Abs. 1 Z 10 FAGG grundsätzlich kein gesetzliches 14-tägiges Rücktrittsrecht. Für Storno und Umbuchung gelten die vertraglichen Fristen in diesen FAQ bzw. in den AGB.',
       },
       {
         question: 'Kann ich mehrere Plätze auf einmal buchen?',
         answer:
-          'Ja. Wähle im Buchungsfenster einfach die gewünschte Anzahl an Plätzen aus, solange genug Plätze für diesen Termin verfügbar sind.',
+          'Ja. Du kannst mehrere Teilnahmeplätze gemeinsam buchen. Storno, Umbuchung und Ersatzpersonen gelten dann für jeden Platz einzeln.',
       },
       {
         question: 'Wo finden die Workshops statt?',
         answer:
-          'Unsere Workshops finden in Graz statt — in der Regel bei The Ginery, Grabenstraße 15, 8010 Graz. Die genaue Adresse und Anreisehinweise stehen in deiner Buchungsbestätigung.',
+          'In Graz, in der Regel Grabenstraße 15, 8010 Graz. Die genaue Adresse steht in deiner Buchungsbestätigung. Geringfügige Raumwechsel am selben oder nahegelegenen Ort sind nach AGB möglich; wesentliche Ortsänderungen geben dir Wahlrechte (Teilnahme, Umbuchung oder Rückerstattung).',
       },
       {
-        question: 'Was muss ich zum Workshop mitbringen?',
+        question: 'Was muss ich mitbringen — und was ist mit Allergien?',
         answer:
-          'Nur gute Laune! Wir stellen alle Zutaten, Werkzeuge, Schürzen und Gläser zum Mitnehmen bereit. Bequeme Kleidung wird empfohlen. Wenn du Allergien hast, gib uns bitte vorher Bescheid.',
+          'Wir stellen Zutaten und Werkzeuge bereit. Bitte informiere uns vorab über Allergien, Unverträglichkeiten oder gesundheitliche Einschränkungen. Eine vollständige Freiheit von Allergenspuren können wir in einer gemeinsamen Küche nicht garantieren, sofern nicht ausdrücklich zugesagt.',
       },
       {
-        question: 'Sind die Workshops für Anfänger geeignet?',
+        question: 'Dürfen Minderjährige teilnehmen?',
         answer:
-          'Ja. Unsere Workshops sind für Einsteiger konzipiert — du brauchst keine Vorkenntnisse. Wir erklären alles Schritt für Schritt.',
+          'Buchungen Minderjähriger brauchen die gesetzlich erforderliche Zustimmung der Erziehungsberechtigten. Die Teilnahme bedarf der vorherigen Abstimmung mit uns, sofern der Workshop nicht ausdrücklich für Minderjährige geeignet ist. Wir können eine volljährige Begleitperson verlangen.',
+      },
+      {
+        question: 'Was passiert bei zu wenigen Anmeldungen?',
+        answer:
+          'Grundsätzlich sind vier bezahlte Plätze vorgesehen. Wir können auch mit weniger starten. Eine Absage nur wegen Mindestteilnehmerzahl erfolgt spätestens 48 Stunden vor Beginn — dann kannst du umbuchen oder den bezahlten Betrag zurückerhalten.',
+      },
+    ],
+  },
+  {
+    key: 'cancellation',
+    icon: 'book-open',
+    title: 'Storno, Umbuchung & Ersatz',
+    items: [
+      {
+        question: 'Wie storniere ich meine Workshop-Buchung?',
+        answer:
+          'Über die vorgesehene Website-Funktion oder per E-Mail an kontakt@fermentfreude.at. Maßgeblich ist der Zeitpunkt des Eingangs. Fristen zählen rückwärts ab Workshopbeginn (Europe/Vienna): 30 Tage = 720 Stunden, 14 Tage = 336 Stunden.',
+      },
+      {
+        question: 'Welche Storno-Fristen gelten?',
+        answer:
+          'Mindestens 30 Tage vor Beginn: volle Rückerstattung des tatsächlich bezahlten Betrags oder einmalige Umbuchung auf einen verfügbaren, gleichpreisigen regulären Workshop. Weniger als 30, aber mindestens 14 Tage: keine Geldrückerstattung, aber einmalige Umbuchung möglich. Weniger als 14 Tage: kein Anspruch auf Rückerstattung, Gutschrift oder reguläre Umbuchung — eine kostenlose Übertragung auf eine Ersatzperson bleibt möglich.',
+      },
+      {
+        question: 'Gelten Krankheit oder Terminvergessen als Ausnahme?',
+        answer:
+          'Persönliche Verhinderung (Krankheit, Beruf, Betreuung, Anreiseprobleme, Vergessen des Termins) ändert die Fristen grundsätzlich nicht. In Einzelfällen können wir freiwillig Kulanz anbieten — daraus entsteht kein Anspruch für andere Fälle.',
+      },
+      {
+        question: 'Wie funktioniert die Umbuchung?',
+        answer:
+          'Nur einmal, nur innerhalb der Fristen, nur bei verfügbaren Plätzen und grundsätzlich nur auf einen gleichpreisigen regulären Workshop (auch anderer Workshoptyp möglich). Wirksam erst mit Bestätigung. Danach gibt es keine neuen selbstständigen Storno-/Umbuchungsrechte für denselben Platz. Bei teurerem Zielworkshop ist die Differenz zu zahlen; bei günstigerem wird sie erstattet oder gutgeschrieben.',
+      },
+      {
+        question: 'Ich habe kurzfristig falsch gebucht — was nun?',
+        answer:
+          'Wurde der Workshop weniger als 14 Tage vor Beginn gebucht, kannst du eine offensichtliche Fehlbuchung innerhalb von 24 Stunden nach der Bestätigung einmalig korrigieren — sofern der Workshop noch mindestens 48 Stunden entfernt ist. Dann nur Umbuchung (keine Geldrückerstattung). Technisch verursachte Doppelbuchungen oder Doppelzahlungen korrigieren wir vollständig.',
+      },
+      {
+        question: 'Kann jemand anderes für mich hingehen?',
+        answer:
+          'Ja. Bis zum Workshopbeginn kannst du den bezahlten Platz kostenlos auf eine Ersatzperson übertragen. Bitte uns möglichst vorher informieren. Die Ersatzperson muss Voraussetzungen erfüllen und Allergien angeben. Die ursprünglich buchende Person bleibt Vertragspartnerin, sofern nichts anderes vereinbart ist.',
+      },
+      {
+        question: 'Was gilt bei Nichterscheinen oder Verspätung?',
+        answer:
+          'Ohne rechtzeitige Stornierung kein Anspruch auf Rückerstattung, Umbuchung oder Ersatz. Bei erheblicher Verspätung kann die Teilnahme eingeschränkt oder ausgeschlossen werden. Erinnerungs-E-Mails sind freiwillig — fehlende Erinnerung ändert nichts an der verbindlichen Buchung.',
+      },
+      {
+        question: 'Was, wenn Fermentfreude absagt oder den Termin wesentlich ändert?',
+        answer:
+          'Bei Absage oder wesentlicher Änderung (z. B. anderer Kalendertag, Beginnverschiebung über 60 Minuten, wesentliche Inhalts- oder Ortsänderung) kannst du wählen: Teilnahme am geänderten Termin, Umbuchung auf einen verfügbaren regulären Workshop oder volle Rückerstattung des bezahlten Betrags. Es erfolgt keine automatische Umbuchung.',
       },
     ],
   },
   {
     key: 'vouchers',
     icon: 'gift',
-    title: 'Gutscheine einlösen',
+    title: 'Gutscheine',
     items: [
       {
-        question: 'Wo löse ich meinen Workshop-Gutschein ein?',
+        question: 'Wo löse ich meinen Gutschein ein?',
         answer:
-          'Gehe auf „Gutschein einlösen" in der Fußzeile oder direkt auf /redeem-voucher. Gib dort deinen Gutscheincode ein, wähle einen verfügbaren Termin und schließe die Buchung ab. Du musst nichts zusätzlich bezahlen, solange der Gutscheinwert ausreicht.',
+          'Über „Gutschein einlösen“ in der Fußzeile oder /redeem-voucher. Code eingeben, Termin wählen und Buchung abschließen. Entgeltliche Wertgutscheine können — sofern technisch vorgesehen — teilweise eingelöst werden; Restwert bleibt am Code.',
       },
       {
         question: 'Wie lange ist mein Gutschein gültig?',
         answer:
-          'Workshop-Gutscheine sind ab Ausstellung 3 Jahre gültig. Das genaue Ablaufdatum steht auf deinem Gutschein.',
+          'Entgeltlich erworbene Gutscheine unterliegen — sofern keine kürzere Frist wirksam vereinbart wurde — der gesetzlichen Verjährungsfrist. Kostenlose Aktions-, Werbe- oder Kulanzgutscheine können eine begrenzte Gültigkeit und weitere Bedingungen haben; die stehen auf dem Gutschein oder bei Ausgabe.',
       },
       {
-        question: 'Mein Gutscheincode wird nicht akzeptiert – was tun?',
+        question: 'Kann ich einen Gutschein verschenken oder weitergeben?',
         answer:
-          'Achte darauf, dass du den Code genau so eingibst wie auf dem Gutschein (ohne Leerzeichen, Groß-/Kleinschreibung beachten). Falls es weiterhin nicht klappt, schreib uns mit dem Code per E-Mail an kontakt@fermentfreude.at.',
+          'Entgeltlich erworbene Wertgutscheine sind übertragbar und grundsätzlich nicht an ein persönliches Konto gebunden. Wer den gültigen Code vorlegt, kann einlösen — bitte den Code vor unbefugtem Zugriff schützen.',
       },
       {
-        question: 'Kann ich einen Gutschein verschenken?',
+        question: 'Habe ich ein Rücktrittsrecht beim Online-Kauf eines Gutscheins?',
         answer:
-          'Ja. Im Shop findest du Workshop-Gutscheine, die du als digitale PDF erhältst und direkt weitergeben kannst.',
+          'Ja, Verbraucherinnen und Verbraucher haben beim Onlinekauf eines entgeltlichen Gutscheins grundsätzlich ein 14-tägiges Rücktrittsrecht nach dem FAGG. Details stehen in der Rücktrittsbelehrung. Nach wirksamem Rücktritt erstatten wir den Kaufpreis und deaktivieren den Gutschein.',
+      },
+      {
+        question: 'Was passiert mit dem Gutschein, wenn ich die Buchung storniere?',
+        answer:
+          'Bei wirksamer Rückabwicklung einer mit entgeltlichem Gutschein bezahlten Buchung wird der Gutscheinwert grundsätzlich wieder auf dem Gutschein verfügbar. Ein Gutscheinanteil wird nicht bar ausgezahlt. Bei Mischzahlung: Gutscheinanteil zurück auf den Gutschein, Kartenzahlung zurück auf das Zahlungsmittel. Kostenlose Aktions-/Kulanzanteile werden nicht in Geld ausgezahlt.',
+      },
+      {
+        question: 'Mein Code wird nicht akzeptiert oder ich habe ihn verloren – was tun?',
+        answer:
+          'Code genau wie angegeben eingeben (keine Leerzeichen). Bei Verlust oder unbefugter Nutzung gibt es keinen Ersatzanspruch, sofern der Gutschein nicht eindeutig identifiziert, rechtzeitig gesperrt und als noch nicht eingelöst nachgewiesen werden kann. Schreib uns an kontakt@fermentfreude.at.',
       },
     ],
   },
@@ -148,63 +205,73 @@ const sectionsDE: SectionDE[] = [
     title: 'Shop & Bestellungen',
     items: [
       {
-        question: 'Wo sehe ich meine Bestellungen?',
+        question: 'Wann kommt der Kaufvertrag zustande?',
         answer:
-          'Logge dich ein und öffne im Konto-Menü oben rechts „Bestellungen". Dort findest du alle Bestellungen, Rechnungen und den jeweiligen Status.',
+          'Die Produktdarstellung ist noch kein verbindliches Angebot. Du gibst mit der Bestellung ein Angebot ab; der Vertrag kommt mit unserer ausdrücklichen Bestellbestätigung zustande. Bestellungen nur im Rahmen verfügbarer Mengen.',
       },
       {
-        question: 'Kann ich meine Bestellung nach dem Absenden noch ändern?',
+        question: 'Gibt es ein Rücktrittsrecht bei Waren?',
         answer:
-          'Sobald die Bestellung verschickt ist, können wir sie nicht mehr ändern. Falls die Bestellung gerade erst eingegangen ist, schreib uns so schnell wie möglich an kontakt@fermentfreude.at – wir versuchen, dir zu helfen.',
+          'Verbraucherinnen und Verbraucher haben im Fernabsatz grundsätzlich 14 Tage Rücktrittsrecht, sofern keine Ausnahme greift — z. B. schnell verderbliche Waren oder versiegelte Hygieneartikel nach Entfernen der Versiegelung. Details in der Rücktrittsbelehrung.',
       },
       {
-        question: 'Wie erhalte ich meine Rechnung?',
+        question: 'Wo sehe ich meine Bestellungen und Rechnung?',
         answer:
-          'Nach erfolgreicher Zahlung schicken wir dir die Rechnung automatisch per E-Mail. Du findest sie zusätzlich jederzeit unter „Bestellungen" in deinem Konto.',
+          'Im Konto unter „Bestellungen“. Nach Zahlung erhältst du die Bestätigung/Rechnung per E-Mail. Wir speichern Vertragsdaten nach den gesetzlichen Aufbewahrungspflichten.',
+      },
+      {
+        question: 'Was gilt bei Mängeln?',
+        answer:
+          'Es gelten die gesetzlichen Gewährleistungsrechte. Bitte melde Mängel möglichst zeitnah an kontakt@fermentfreude.at, damit wir rasch prüfen können.',
       },
     ],
   },
   {
     key: 'shipping',
     icon: 'truck',
-    title: 'Versand & Lieferung',
+    title: 'Abholung & Versand',
     items: [
       {
-        question: 'Wohin liefert ihr?',
+        question: 'Versendet ihr alle Produkte?',
         answer:
-          'Wir versenden innerhalb Österreichs und in die EU. Die Versandkosten werden im Checkout angezeigt, bevor du die Bestellung abschließt.',
+          'Nein. Versand nur, wenn er beim Produkt und im Bestellvorgang ausdrücklich angeboten wird. Steht nur Abholung zur Auswahl, wird die Ware nicht versendet und ist am angegebenen Abholort zu übernehmen.',
       },
       {
-        question: 'Wie lange dauert die Lieferung?',
+        question: 'Wie funktioniert die Abholung?',
         answer:
-          'Innerhalb Österreichs in der Regel 2–4 Werktage, in die EU 4–8 Werktage. Bei großem Bestellaufkommen kann es etwas länger dauern.',
+          'Wir informieren dich über Ort und Abholzeiten bzw. vereinbarten Termin. Bitte Bestell- oder Abholbestätigung mitbringen. Verderbliche oder kühlpflichtige Ware muss rechtzeitig abgeholt werden — sonst können wir nach Gesetz neu vereinbaren, vom Vertrag zurücktreten oder entstandenen Schaden geltend machen.',
       },
       {
-        question: 'Bekomme ich eine Sendungsverfolgung?',
+        question: 'Wer trägt die Verantwortung nach der Übergabe?',
         answer:
-          'Ja. Sobald deine Bestellung versendet wird, erhältst du eine E-Mail mit Tracking-Link.',
+          'Nach Übergabe bist du für Kühlung, Lagerung, Transport und Verwendung verantwortlich. Bei Verbraucherinnen und Verbrauchern geht die Gefahr des zufälligen Untergangs grundsätzlich erst mit der tatsächlichen Übergabe über. Bis zur vollständigen Bezahlung bleibt die Ware unser Eigentum.',
       },
     ],
   },
   {
     key: 'payment',
     icon: 'credit-card',
-    title: 'Bezahlung & Sicherheit',
+    title: 'Bezahlung & Preise',
     items: [
       {
         question: 'Welche Zahlungsarten akzeptiert ihr?',
         answer:
-          'Wir nutzen Stripe und akzeptieren die gängigen Kreditkarten (Visa, Mastercard, American Express) sowie weitere Methoden, die im Checkout angezeigt werden, z. B. Apple Pay und Google Pay – je nach Gerät.',
+          'Die im Checkout angebotenen Methoden — die Abwicklung kann über Stripe erfolgen. Zahlung kann schon mit Abgabe der Bestellung autorisiert werden; der Vertrag entsteht dennoch erst mit unserer Annahme.',
+      },
+      {
+        question: 'Warum wird keine Umsatzsteuer ausgewiesen?',
+        answer:
+          'Fermentfreude OG nimmt derzeit die Kleinunternehmerregelung (§ 6 Abs. 1 Z 27 UStG) in Anspruch. Es wird derzeit keine Umsatzsteuer ausgewiesen. Maßgeblich ist der im Buchungs- oder Bestellvorgang gezeigte Gesamtpreis in Euro.',
+      },
+      {
+        question: 'Werden Rabatte oder Aktionsgutscheine bar ausgezahlt?',
+        answer:
+          'Nein. Rabatte, Aktionscodes und kostenlos gewährte Gutscheine werden nicht in bar ausbezahlt und begründen keinen Anspruch auf Auszahlung ihres Nennwerts.',
       },
       {
         question: 'Sind meine Zahlungsdaten sicher?',
         answer:
-          'Ja. Alle Zahlungen laufen verschlüsselt über Stripe. Wir speichern keine vollständigen Kreditkartendaten auf unseren Servern.',
-      },
-      {
-        question: 'Kann ich auf Rechnung zahlen?',
-        answer:
-          'Aktuell bieten wir Rechnungskauf nur für B2B- und Gastro-Kunden an. Bitte schreib uns für ein individuelles Angebot.',
+          'Zahlungen laufen verschlüsselt über den Zahlungsdienstleister (z. B. Stripe). Wir speichern keine vollständigen Kreditkartendaten auf unseren Servern.',
       },
     ],
   },
@@ -216,44 +283,44 @@ const sectionsDE: SectionDE[] = [
       {
         question: 'Liefert ihr Tempeh und Fermente an die Gastronomie?',
         answer:
-          'Ja. Wir liefern Käferbohnen-Tempeh und ausgewählte Fermente wie Kimchi an Restaurants, Hotels und Catering im Großraum Graz und in der Steiermark. Anfragen gehen über die Seite „Gastronomie“ oder per E-Mail an kontakt@fermentfreude.at.',
+          'Ja. Anfragen über die Seite „Gastronomie“ oder an kontakt@fermentfreude.at. Für Unternehmerinnen und Unternehmer gelten die AGB ebenfalls; abweichende Bedingungen brauchen unsere ausdrückliche Zustimmung.',
       },
       {
-        question: 'Für welche Teamgröße sind eure Gastro-Formate geeignet?',
+        question: 'Geht ein Workshop vor Ort in unserer Küche?',
         answer:
-          'Unsere Formate funktionieren für kleine Küchen-Teams ebenso wie für größere Hotel- oder Catering-Strukturen.',
-      },
-      {
-        question: 'Geht ein Workshop auch vor Ort in unserer Küche?',
-        answer:
-          'Ja. Wir bieten On-Site-Workshops an und begleiten die Implementierung direkt in deiner Küche.',
+          'Ja, private oder On-Site-Formate sind möglich. Für Sonder- und Partnerveranstaltungen können ergänzende Bedingungen gelten — darauf weisen wir vor der Buchung hin.',
       },
       {
         question: 'Ist Tempeh vegan und glutenfrei?',
         answer:
-          'Ja. Unser Tempeh ist vegan und glutenfrei — ein eigenständiges Lebensmittel auf Hülsenfruchtbasis, kein klassischer Fleischersatz.',
+          'Ja. Unser Tempeh ist vegan und glutenfrei — ein eigenständiges Lebensmittel auf Hülsenfruchtbasis.',
       },
     ],
   },
   {
     key: 'support',
     icon: 'wrench',
-    title: 'Technische Probleme',
+    title: 'Kontakt & Technik',
     items: [
       {
-        question: 'Die Seite zeigt 404 oder lädt nicht – was kann ich tun?',
+        question: 'Wie erreiche ich euch?',
         answer:
-          'Lade die Seite einmal komplett neu (Cmd/Ctrl + Shift + R). Falls das Problem bleibt, melde es uns bitte mit der genauen URL und einem Screenshot per E-Mail.',
+          'Fermentfreude OG, Grabenstraße 15, 8010 Graz · Telefon +43 (0) 660 49 43 577 · E-Mail kontakt@fermentfreude.at · Website fermentfreude.at. Oder über die Kontaktseite.',
       },
       {
         question: 'Ich habe keine Bestätigungs-E-Mail erhalten.',
         answer:
-          'Prüfe bitte zunächst deinen Spam-Ordner. Falls auch dort nichts ist, schreib uns deine Bestellnummer (oder die verwendete E-Mail-Adresse) – wir senden die Bestätigung erneut.',
+          'Spam-Ordner prüfen. Fehlende Bestätigungen senden wir auf Anfrage erneut. Das bloße Ausbleiben einer E-Mail begründet keinen Rückerstattungsanspruch, wenn die Buchung ordnungsgemäß zustande gekommen ist.',
+      },
+      {
+        question: 'Wo finde ich die vollständigen AGB?',
+        answer:
+          'Die verbindlichen Allgemeinen Geschäftsbedingungen (Stand: 14. Juli 2026) findest du auf der Website unter AGB. Diese FAQ fassen die wichtigsten Punkte verständlich zusammen — im Zweifel gilt die AGB-Fassung, die bei deiner Buchung einbezogen wurde.',
       },
       {
         question: 'Wie ändere ich die Sprache der Seite?',
         answer:
-          'Oben rechts in der Navigation findest du den DE/EN-Umschalter. Deine Auswahl wird gespeichert.',
+          'Oben in der Navigation den DE/EN-Umschalter nutzen. Vertragssprache ist Deutsch.',
       },
     ],
   },
@@ -268,22 +335,21 @@ const sectionsEN: SectionDE[] = [
       {
         question: 'Do I need an account to buy something?',
         answer:
-          'No, you can book workshops and order products as a guest. With an account you can see your orders, saved addresses and workshop bookings any time under "Your account".',
+          'No — you can book workshops and order as a guest. With an account you can view orders and bookings any time under “Your account”.',
       },
       {
         question: 'How do I create an account?',
         answer:
-          'Click the user icon in the top right and select "Register". You only need an email address and a password. You can also create your account during checkout.',
+          'Click the person icon top right and choose “Register”. You need an email and password. You can also create an account during checkout.',
       },
       {
         question: 'I forgot my password — what now?',
         answer:
-          'On the login page, click "Forgot password". You will receive an email with a reset link. Please also check your spam folder.',
+          'On the login page, click “Forgot password”. You will get a reset link by email — please also check spam.',
       },
       {
-        question: 'How do I update my email address or password?',
-        answer:
-          'Sign in and go to "Your account". From there you can update your account details and password yourself.',
+        question: 'How do I change my email or password?',
+        answer: 'Sign in and update your details under “Your account”.',
       },
     ],
   },
@@ -295,69 +361,126 @@ const sectionsEN: SectionDE[] = [
       {
         question: 'How do I book a workshop?',
         answer:
-          'Go to "Workshops", choose a workshop and click "Reserve a spot". Pick a date and the number of seats, add the workshop to your cart and complete the payment. Once the payment goes through, you will receive a confirmation by email.',
+          'Under “Workshops”, choose a date and seats and submit the paid booking. The contract is only formed when Fermentfreude expressly confirms the booking — a payment or receipt acknowledgement alone is not enough.',
       },
       {
-        question: 'When do I get my booking confirmation?',
+        question: 'When is my seat firmly reserved?',
         answer:
-          'Right after a successful payment, we send you an email with all the details: date, time, address and what to bring. If you don\u2019t see anything within 10 minutes, please check your spam folder.',
+          'Only after the contract is formed and payment succeeds. Payment alone does not guarantee a seat if the workshop is sold out, capacity was exceeded, or a technical error occurred. If we cannot accept the booking, any amount already charged is refunded promptly.',
       },
       {
-        question: 'What happens when a workshop is sold out?',
+        question: 'Is there a 14-day withdrawal right for workshops?',
         answer:
-          'On the workshop overview you will see a "Sold out" badge and "New dates coming soon". As soon as we add new dates, the workshop becomes bookable again.',
-      },
-      {
-        question: 'Can I cancel or reschedule my booking?',
-        answer:
-          'Free cancellation or rescheduling is possible up to 14 days before the workshop. Just send us a quick email at kontakt@fermentfreude.at with your order number.',
+          'No. For workshops with a fixed date there is generally no statutory 14-day withdrawal right under § 18 Abs. 1 Z 10 FAGG. Cancellation and rescheduling follow the contractual deadlines in these FAQs / the Terms.',
       },
       {
         question: 'Can I book multiple seats at once?',
         answer:
-          'Yes. In the booking dialog simply select the number of seats you need, as long as enough seats are available for that date.',
+          'Yes. You can book several seats together. Cancellation, rescheduling and substitute-person rules then apply per seat.',
       },
       {
         question: 'Where do the workshops take place?',
         answer:
-          'Our workshops take place in Graz — usually at The Ginery, Grabenstraße 15, 8010 Graz. The exact address and directions are in your booking confirmation.',
+          'In Graz, usually Grabenstraße 15, 8010 Graz. The exact address is in your booking confirmation. Minor venue changes nearby are allowed under the Terms; material location changes give you a choice (attend, reschedule, or full refund).',
       },
       {
-        question: 'What should I bring to a workshop?',
+        question: 'What should I bring — and what about allergies?',
         answer:
-          'Just good spirits! We provide all ingredients, tools, aprons and jars to take home. Comfortable clothes are recommended. Please let us know in advance if you have any allergies.',
+          'We provide ingredients and tools. Please tell us in advance about allergies, intolerances or health restrictions. We cannot guarantee a completely allergen-free shared kitchen unless expressly promised.',
       },
       {
-        question: 'Are the workshops suitable for beginners?',
+        question: 'Can minors take part?',
         answer:
-          'Yes. Our workshops are designed for beginners — you do not need any prior knowledge. We explain everything step by step.',
+          'Bookings by minors need the legally required parental consent. Participation needs prior agreement with us unless the workshop is expressly offered for minors. We may require an adult companion.',
+      },
+      {
+        question: 'What if too few people sign up?',
+        answer:
+          'We generally need four paid seats. We may still run with fewer. A cancellation only for not meeting the minimum happens at the latest 48 hours before start — then you can reschedule or get a full refund of the amount paid.',
+      },
+    ],
+  },
+  {
+    key: 'cancellation',
+    icon: 'book-open',
+    title: 'Cancel, reschedule & substitutes',
+    items: [
+      {
+        question: 'How do I cancel my workshop booking?',
+        answer:
+          'Via the website function provided or by email to kontakt@fermentfreude.at. The time of receipt counts. Deadlines run backwards from workshop start (Europe/Vienna): 30 days = 720 hours, 14 days = 336 hours.',
+      },
+      {
+        question: 'What cancellation deadlines apply?',
+        answer:
+          'At least 30 days before start: full refund of the amount actually paid for that seat, or a one-time reschedule to an available equal-price regular workshop. Less than 30 but at least 14 days: no cash refund, but one-time reschedule. Less than 14 days: no refund, credit or regular reschedule — a free transfer to a substitute person remains possible.',
+      },
+      {
+        question: 'Do illness or forgetting the date count as exceptions?',
+        answer:
+          'Personal reasons (illness, work, care duties, travel issues, forgetting the date) generally do not change the deadlines. We may offer goodwill in individual cases — that creates no right for other cases.',
+      },
+      {
+        question: 'How does rescheduling work?',
+        answer:
+          'Only once, only within the deadlines, only if seats are available, and generally only onto an equal-price regular workshop (another regular workshop type is fine). It is effective only once confirmed. After that there are no new independent cancel/reschedule rights for that seat. For a higher-priced target workshop you pay the difference; for a lower one we refund or credit the difference.',
+      },
+      {
+        question: 'I booked the wrong date at short notice — what now?',
+        answer:
+          'If you booked less than 14 days before start, an obvious misbooking can be corrected once within 24 hours of the confirmation — provided the workshop is still at least 48 hours away. Then only rescheduling (no cash refund). Technical double bookings or double payments are fully corrected.',
+      },
+      {
+        question: 'Can someone else attend in my place?',
+        answer:
+          'Yes. Until the workshop starts you can transfer the paid seat to another person free of charge. Please tell us beforehand if possible. The substitute must meet the requirements and disclose allergies. The original booker remains the contract partner unless otherwise agreed.',
+      },
+      {
+        question: 'What if I no-show or arrive late?',
+        answer:
+          'Without timely cancellation there is no right to refund, reschedule or replacement. Significant lateness may limit or exclude participation. Reminder emails are voluntary — a missing reminder does not change a confirmed booking.',
+      },
+      {
+        question: 'What if Fermentfreude cancels or materially changes the date?',
+        answer:
+          'On cancellation or a material change (e.g. another calendar day, start shifted by more than 60 minutes, material content or venue change) you may choose: attend the changed workshop, reschedule to any available regular workshop, or a full refund of the amount paid. There is no automatic reschedule.',
       },
     ],
   },
   {
     key: 'vouchers',
     icon: 'gift',
-    title: 'Redeeming vouchers',
+    title: 'Vouchers',
     items: [
       {
-        question: 'Where do I redeem my workshop voucher?',
+        question: 'Where do I redeem my voucher?',
         answer:
-          'Open "Redeem voucher" in the footer or go directly to /redeem-voucher. Enter your voucher code, choose an available date and complete the booking. You don\u2019t pay anything extra as long as the voucher value covers the workshop.',
+          'Via “Redeem voucher” in the footer or /redeem-voucher. Enter the code, pick a date and complete booking. Paid value vouchers can be partially redeemed if the system allows; remaining value stays on the code.',
       },
       {
         question: 'How long is my voucher valid?',
         answer:
-          'Workshop vouchers are valid for 3 years from the date of issue. The exact expiry date is printed on your voucher.',
+          'Paid vouchers are subject to the statutory limitation period unless a shorter period was validly agreed. Free promo, marketing or goodwill vouchers may have a limited validity and other conditions — shown on the voucher or at issue.',
       },
       {
-        question: 'My voucher code is not accepted — what should I do?',
+        question: 'Can I gift or transfer a voucher?',
         answer:
-          'Make sure you enter the code exactly as printed (no spaces, watch upper- and lowercase letters). If it still doesn\u2019t work, email us the code at kontakt@fermentfreude.at.',
+          'Paid value vouchers are transferable and generally not tied to a personal account. Whoever presents a valid code can redeem it — please keep the code safe from unauthorised use.',
       },
       {
-        question: 'Can I gift a voucher?',
+        question: 'Do I have a withdrawal right when buying a voucher online?',
         answer:
-          'Yes. You can buy workshop vouchers in our shop and receive them as a digital PDF — perfect to forward as a gift.',
+          'Yes — consumers generally have a 14-day withdrawal right under the FAGG when buying a paid voucher online. Details are in the withdrawal notice. After a valid withdrawal we refund the purchase price and deactivate the voucher.',
+      },
+      {
+        question: 'What happens to the voucher if I cancel the booking?',
+        answer:
+          'If a booking paid with a paid voucher is validly unwound, the voucher value is generally restored to that voucher. Voucher amounts are not paid out in cash. Mixed payment: voucher share back to the voucher, card share back to the payment method. Free promo/goodwill portions are not paid out in cash.',
+      },
+      {
+        question: 'My code is rejected or I lost it — what can I do?',
+        answer:
+          'Enter the code exactly as shown (no spaces). If lost or used without authorisation there is no replacement claim unless the voucher can be clearly identified, blocked in time and shown as unused. Email kontakt@fermentfreude.at.',
       },
     ],
   },
@@ -367,62 +490,73 @@ const sectionsEN: SectionDE[] = [
     title: 'Shop & orders',
     items: [
       {
-        question: 'Where do I see my orders?',
+        question: 'When is the purchase contract formed?',
         answer:
-          'Sign in and open "Orders" from the account menu in the top right. You will find all orders, invoices and their status there.',
+          'Product listings are not a binding offer. You make an offer by ordering; the contract is formed with our express order confirmation. Orders are only accepted within available stock.',
       },
       {
-        question: 'Can I change my order after placing it?',
+        question: 'Is there a withdrawal right for goods?',
         answer:
-          'Once an order has been shipped we can no longer change it. If the order has just been placed, please email us at kontakt@fermentfreude.at as soon as possible — we will do our best to help.',
+          'Consumers generally have 14 days’ withdrawal for distance sales unless an exception applies — e.g. quickly perishable goods or sealed hygiene products after the seal is removed. Details are in the withdrawal notice.',
       },
       {
-        question: 'How do I get my invoice?',
+        question: 'Where do I see my orders and invoice?',
         answer:
-          'After a successful payment we send the invoice automatically by email. You can also access it any time under "Orders" in your account.',
+          'Under “Orders” in your account. After payment you get confirmation/invoice by email. We store contract data as required by law.',
+      },
+      {
+        question: 'What about defects?',
+        answer:
+          'Statutory warranty rights apply. Please report defects promptly to kontakt@fermentfreude.at so we can check quickly.',
       },
     ],
   },
   {
     key: 'shipping',
     icon: 'truck',
-    title: 'Shipping & delivery',
+    title: 'Pickup & shipping',
     items: [
       {
-        question: 'Where do you ship to?',
+        question: 'Do you ship every product?',
         answer:
-          'We ship within Austria and across the EU. Shipping costs are shown in the checkout before you complete your order.',
+          'No. Shipping only if it is expressly offered for that product in checkout. If only pickup is available, goods are not shipped and must be collected at the stated location.',
       },
       {
-        question: 'How long does delivery take?',
+        question: 'How does pickup work?',
         answer:
-          'Within Austria typically 2–4 business days, across the EU 4–8 business days. During busy periods this can take a little longer.',
+          'We tell you the place and pickup times or agreed slot. Please bring your order or pickup confirmation. Perishable or chilled goods must be collected on time — otherwise we may, under the law, agree a new slot, withdraw from the contract, or claim actual damage.',
       },
       {
-        question: 'Will I get tracking information?',
-        answer: 'Yes. As soon as your order ships, you will receive an email with a tracking link.',
+        question: 'Who is responsible after handover?',
+        answer:
+          'After handover you are responsible for cooling, storage, transport and use. For consumers, risk of accidental loss generally passes only on actual handover. Goods remain our property until fully paid.',
       },
     ],
   },
   {
     key: 'payment',
     icon: 'credit-card',
-    title: 'Payment & security',
+    title: 'Payment & prices',
     items: [
       {
         question: 'Which payment methods do you accept?',
         answer:
-          'We use Stripe and accept the major credit cards (Visa, Mastercard, American Express) plus additional methods shown in checkout, such as Apple Pay and Google Pay depending on your device.',
+          'Those shown in checkout — processing may run via Stripe. Payment can be authorised when you place the order; the contract still only forms when we accept it.',
+      },
+      {
+        question: 'Why is no VAT shown?',
+        answer:
+          'Fermentfreude OG currently uses the small-business VAT exemption (§ 6 Abs. 1 Z 27 UStG). No VAT is shown at present. The total price in euro shown in booking/checkout is decisive.',
+      },
+      {
+        question: 'Are discounts or promo vouchers paid out in cash?',
+        answer:
+          'No. Discounts, promo codes and free vouchers are not paid out in cash and create no claim to cash for their face value.',
       },
       {
         question: 'Are my payment details safe?',
         answer:
-          'Yes. All payments are encrypted and processed by Stripe. We do not store full credit card details on our servers.',
-      },
-      {
-        question: 'Can I pay by invoice?',
-        answer:
-          'Right now we offer invoice payment only for B2B and gastronomy customers. Please contact us for an individual offer.',
+          'Payments are encrypted via the payment provider (e.g. Stripe). We do not store full card numbers on our servers.',
       },
     ],
   },
@@ -434,43 +568,44 @@ const sectionsEN: SectionDE[] = [
       {
         question: 'Do you supply tempeh and ferments to restaurants?',
         answer:
-          'Yes. We supply fava bean tempeh and selected ferments such as kimchi to restaurants, hotels and catering in the greater Graz area and Styria. Enquire via the Gastronomy page or email kontakt@fermentfreude.at.',
-      },
-      {
-        question: 'What team size are your gastronomy formats for?',
-        answer:
-          'Our formats work for small kitchen teams as well as larger hotel or catering operations.',
+          'Yes. Enquire via the Gastronomy page or kontakt@fermentfreude.at. The Terms also apply to businesses; different conditions need our express agreement.',
       },
       {
         question: 'Can you run a workshop in our kitchen?',
         answer:
-          'Yes. We offer on-site workshops and support implementation directly in your kitchen.',
+          'Yes — private or on-site formats are possible. Special or partner events may have extra conditions; we point those out before booking.',
       },
       {
         question: 'Is tempeh vegan and gluten-free?',
         answer:
-          'Yes. Our tempeh is vegan and gluten-free — a standalone food based on legumes, not a classic meat substitute.',
+          'Yes. Our tempeh is vegan and gluten-free — a standalone legume-based food.',
       },
     ],
   },
   {
     key: 'support',
     icon: 'wrench',
-    title: 'Technical issues',
+    title: 'Contact & technical',
     items: [
       {
-        question: 'The page shows 404 or doesn\u2019t load — what can I do?',
+        question: 'How can I reach you?',
         answer:
-          'Try a hard reload (Cmd/Ctrl + Shift + R). If the issue persists, please email us the exact URL and a screenshot.',
+          'Fermentfreude OG, Grabenstraße 15, 8010 Graz · Phone +43 (0) 660 49 43 577 · Email kontakt@fermentfreude.at · Website fermentfreude.at. Or use the contact page.',
       },
       {
-        question: 'I didn\u2019t receive a confirmation email.',
+        question: 'I did not receive a confirmation email.',
         answer:
-          'Please check your spam folder first. If nothing is there either, send us your order number (or the email address you used) and we will resend the confirmation.',
+          'Check spam. We will resend missing confirmations on request. A missing email alone does not create a refund claim if the booking was properly formed.',
       },
       {
-        question: 'How do I change the language of the site?',
-        answer: 'Use the DE/EN toggle in the top navigation. Your choice is remembered.',
+        question: 'Where are the full Terms (AGB)?',
+        answer:
+          'The binding Terms (as of 14 July 2026) are on the website under AGB. These FAQs summarise the main points in plain language — if in doubt, the Terms version included at the time of your booking apply.',
+      },
+      {
+        question: 'How do I change the site language?',
+        answer:
+          'Use the DE/EN toggle in the navigation. Contract language is German.',
       },
     ],
   },
