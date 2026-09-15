@@ -4,9 +4,7 @@ import { blockVisible } from '@/fields/blockVisible'
 
 /**
  * HelpFaqBlock — admin-editable Help & FAQ page content.
- * Composed of: hero (eyebrow/title/intro), table-of-contents label,
- * an array of FAQ sections (each with its own anchor key + Q/A items),
- * and a contact CTA at the bottom.
+ * Hub layout: search hero, category cards, Q&A accordion, contact CTA.
  *
  * Founders edit everything from /admin → Pages → Help → Content tab.
  */
@@ -20,18 +18,27 @@ export const HelpFaqBlock: Block = {
   fields: [
     blockVisible,
     {
+      name: 'heroBackground',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Hero background image',
+      admin: {
+        description:
+          'Full-bleed illustration behind the title and search. Leave empty for the charcoal gradient fallback.',
+      },
+    },
+    {
       type: 'group',
       name: 'header',
-      label: 'Header',
-      admin: { description: 'Top of the Help page (eyebrow, title, intro).' },
+      label: 'Header & search',
+      admin: { description: 'Top of the Help page: title and search field.' },
       fields: [
         {
           name: 'eyebrow',
           type: 'text',
-          required: true,
           localized: true,
           label: 'Eyebrow',
-          admin: { description: 'Small label above the title (e.g. "HELP & SUPPORT").' },
+          admin: { description: 'Optional small label above the title (e.g. "HELP & SUPPORT").' },
         },
         {
           name: 'title',
@@ -39,32 +46,112 @@ export const HelpFaqBlock: Block = {
           required: true,
           localized: true,
           label: 'Title',
+          admin: { description: 'e.g. "Hello, how can we help?"' },
         },
         {
           name: 'intro',
           type: 'textarea',
-          required: true,
           localized: true,
           label: 'Intro paragraph',
+          admin: { description: 'Optional line under the title. Leave empty to hide.' },
+        },
+        {
+          name: 'searchPlaceholder',
+          type: 'text',
+          localized: true,
+          label: 'Search placeholder',
+          admin: { description: 'Placeholder inside the search field (e.g. "Search").' },
+        },
+        {
+          name: 'commonSearchesLabel',
+          type: 'text',
+          localized: true,
+          label: 'Popular searches label',
+          admin: {
+            description: 'Unused on the current hub layout (chips removed).',
+            hidden: true,
+          },
+        },
+        {
+          name: 'commonSearches',
+          type: 'array',
+          label: 'Popular searches',
+          labels: { singular: 'Chip', plural: 'Chips' },
+          maxRows: 6,
+          admin: {
+            description: 'Unused on the current hub layout (chips removed).',
+            hidden: true,
+          },
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Label',
+            },
+          ],
+        },
+        {
+          name: 'backLabel',
+          type: 'text',
+          localized: true,
+          label: 'Back button label',
+          admin: { description: 'Shown when a topic is open (e.g. "All topics").' },
+        },
+        {
+          name: 'resultsLabel',
+          type: 'text',
+          localized: true,
+          label: 'Search results label',
+          admin: { description: 'e.g. "Search results".' },
+        },
+        {
+          name: 'emptyResultsLabel',
+          type: 'text',
+          localized: true,
+          label: 'No results message',
+          admin: { description: 'Shown when a search has no matches.' },
+        },
+        {
+          name: 'questionCountSingular',
+          type: 'text',
+          localized: true,
+          label: 'Question count (singular)',
+          admin: {
+            description: 'Word after the number when there is 1 question (e.g. "Frage" / "question").',
+          },
+        },
+        {
+          name: 'questionCountPlural',
+          type: 'text',
+          localized: true,
+          label: 'Question count (plural)',
+          admin: {
+            description: 'Word after the number when there are multiple questions (e.g. "Fragen" / "questions").',
+          },
         },
         {
           name: 'tocLabel',
           type: 'text',
-          required: true,
           localized: true,
-          label: 'Table of contents label',
-          admin: { description: 'e.g. "Topics on this page".' },
+          label: 'Topics label (unused in hub layout)',
+          admin: {
+            description:
+              'Kept for existing content. The hub layout uses category cards instead of a table of contents.',
+            hidden: true,
+          },
         },
       ],
     },
     {
       name: 'sections',
       type: 'array',
-      label: 'FAQ Sections',
-      labels: { singular: 'Section', plural: 'Sections' },
+      label: 'FAQ topics',
+      labels: { singular: 'Topic', plural: 'Topics' },
       admin: {
         description:
-          'Each section becomes a card on the page and an entry in the table of contents. Add, reorder, or delete sections freely.',
+          'Each topic becomes a card on the Help page. Clicking it opens that topic’s questions.',
       },
       fields: [
         {
@@ -74,22 +161,45 @@ export const HelpFaqBlock: Block = {
           label: 'Anchor key',
           admin: {
             description:
-              'URL anchor for this section (lowercase, no spaces — e.g. "account", "workshops", "vouchers"). Used in the table-of-contents links. Same value for both languages.',
+              'URL anchor for this topic (lowercase, no spaces — e.g. "account", "workshops"). Same value for both languages.',
           },
+        },
+        {
+          name: 'icon',
+          type: 'select',
+          label: 'Icon',
+          defaultValue: 'help-circle',
+          admin: {
+            description: 'Icon shown on the topic card.',
+          },
+          options: [
+            { label: 'User / Account', value: 'user' },
+            { label: 'Calendar / Workshops', value: 'calendar' },
+            { label: 'Gift / Vouchers', value: 'gift' },
+            { label: 'Shopping bag / Shop', value: 'shopping-bag' },
+            { label: 'Truck / Shipping', value: 'truck' },
+            { label: 'Credit card / Payment', value: 'credit-card' },
+            { label: 'Utensils / Gastronomy', value: 'utensils' },
+            { label: 'Wrench / Technical', value: 'wrench' },
+            { label: 'Book / Courses', value: 'book-open' },
+            { label: 'Lock / Security', value: 'lock' },
+            { label: 'Star', value: 'star' },
+            { label: 'Question mark', value: 'help-circle' },
+          ],
         },
         {
           name: 'title',
           type: 'text',
           required: true,
           localized: true,
-          label: 'Section title',
+          label: 'Topic title',
         },
         {
           name: 'intro',
           type: 'textarea',
           required: false,
           localized: true,
-          label: 'Section intro (optional)',
+          label: 'Topic intro (optional)',
         },
         {
           name: 'items',
@@ -119,15 +229,21 @@ export const HelpFaqBlock: Block = {
     {
       type: 'group',
       name: 'contact',
-      label: 'Contact CTA (bottom)',
-      admin: { description: 'Dark card at the bottom inviting visitors to email.' },
+      label: 'Contact line (under topics)',
+      admin: {
+        description:
+          'Quiet line under the topic cards, e.g. "Schreib uns – wir helfen gerne. Kontakt".',
+      },
       fields: [
         {
           name: 'title',
           type: 'text',
-          required: true,
           localized: true,
-          label: 'Title',
+          label: 'Title (unused)',
+          admin: {
+            description: 'Kept for existing content. Not shown on the current layout.',
+            hidden: true,
+          },
         },
         {
           name: 'body',
@@ -135,22 +251,33 @@ export const HelpFaqBlock: Block = {
           required: true,
           localized: true,
           label: 'Body text',
+          admin: { description: 'e.g. "Schreib uns – wir helfen gerne."' },
         },
         {
           name: 'ctaLabel',
           type: 'text',
           required: true,
           localized: true,
-          label: 'Button label',
+          label: 'Link label',
+          admin: { description: 'e.g. "Kontakt".' },
+        },
+        {
+          name: 'link',
+          type: 'text',
+          label: 'Link URL',
+          defaultValue: '/contact',
+          admin: {
+            description:
+              'Where the link goes (e.g. "/contact"). Same for both languages. Use a full mailto: only if you want email instead.',
+          },
         },
         {
           name: 'email',
           type: 'text',
-          required: true,
-          label: 'Contact email',
+          label: 'Contact email (optional)',
           admin: {
             description:
-              'Email address shown next to the button and used for the mailto: link. Same for both languages.',
+              'Optional. Only used if Link URL is empty — then we fall back to mailto: this address.',
           },
         },
       ],

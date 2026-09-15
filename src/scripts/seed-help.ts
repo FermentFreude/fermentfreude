@@ -9,9 +9,32 @@
  */
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+import { IMAGE_PRESETS, optimizedFile } from './seed-image-utils'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const heroBgPath = path.resolve(__dirname, '../../public/assets/images/help/help-hero-wide.png')
+
+type FaqIcon =
+  | 'user'
+  | 'calendar'
+  | 'gift'
+  | 'shopping-bag'
+  | 'truck'
+  | 'credit-card'
+  | 'utensils'
+  | 'wrench'
+  | 'book-open'
+  | 'lock'
+  | 'star'
+  | 'help-circle'
 
 type SectionDE = {
   key: string
+  icon: FaqIcon
   title: string
   intro?: string
   items: Array<{ question: string; answer: string }>
@@ -20,6 +43,7 @@ type SectionDE = {
 const sectionsDE: SectionDE[] = [
   {
     key: 'account',
+    icon: 'user',
     title: 'Konto & Anmeldung',
     items: [
       {
@@ -46,6 +70,7 @@ const sectionsDE: SectionDE[] = [
   },
   {
     key: 'workshops',
+    icon: 'calendar',
     title: 'Workshops buchen',
     items: [
       {
@@ -73,10 +98,26 @@ const sectionsDE: SectionDE[] = [
         answer:
           'Ja. Wähle im Buchungsfenster einfach die gewünschte Anzahl an Plätzen aus, solange genug Plätze für diesen Termin verfügbar sind.',
       },
+      {
+        question: 'Wo finden die Workshops statt?',
+        answer:
+          'Unsere Workshops finden in Graz statt — in der Regel bei The Ginery, Grabenstraße 15, 8010 Graz. Die genaue Adresse und Anreisehinweise stehen in deiner Buchungsbestätigung.',
+      },
+      {
+        question: 'Was muss ich zum Workshop mitbringen?',
+        answer:
+          'Nur gute Laune! Wir stellen alle Zutaten, Werkzeuge, Schürzen und Gläser zum Mitnehmen bereit. Bequeme Kleidung wird empfohlen. Wenn du Allergien hast, gib uns bitte vorher Bescheid.',
+      },
+      {
+        question: 'Sind die Workshops für Anfänger geeignet?',
+        answer:
+          'Ja. Unsere Workshops sind für Einsteiger konzipiert — du brauchst keine Vorkenntnisse. Wir erklären alles Schritt für Schritt.',
+      },
     ],
   },
   {
     key: 'vouchers',
+    icon: 'gift',
     title: 'Gutscheine einlösen',
     items: [
       {
@@ -103,6 +144,7 @@ const sectionsDE: SectionDE[] = [
   },
   {
     key: 'shop',
+    icon: 'shopping-bag',
     title: 'Shop & Bestellungen',
     items: [
       {
@@ -124,6 +166,7 @@ const sectionsDE: SectionDE[] = [
   },
   {
     key: 'shipping',
+    icon: 'truck',
     title: 'Versand & Lieferung',
     items: [
       {
@@ -145,6 +188,7 @@ const sectionsDE: SectionDE[] = [
   },
   {
     key: 'payment',
+    icon: 'credit-card',
     title: 'Bezahlung & Sicherheit',
     items: [
       {
@@ -165,7 +209,35 @@ const sectionsDE: SectionDE[] = [
     ],
   },
   {
+    key: 'gastronomy',
+    icon: 'utensils',
+    title: 'Gastronomie & B2B',
+    items: [
+      {
+        question: 'Liefert ihr Tempeh und Fermente an die Gastronomie?',
+        answer:
+          'Ja. Wir liefern Käferbohnen-Tempeh und ausgewählte Fermente wie Kimchi an Restaurants, Hotels und Catering im Großraum Graz und in der Steiermark. Anfragen gehen über die Seite „Gastronomie“ oder per E-Mail an kontakt@fermentfreude.at.',
+      },
+      {
+        question: 'Für welche Teamgröße sind eure Gastro-Formate geeignet?',
+        answer:
+          'Unsere Formate funktionieren für kleine Küchen-Teams ebenso wie für größere Hotel- oder Catering-Strukturen.',
+      },
+      {
+        question: 'Geht ein Workshop auch vor Ort in unserer Küche?',
+        answer:
+          'Ja. Wir bieten On-Site-Workshops an und begleiten die Implementierung direkt in deiner Küche.',
+      },
+      {
+        question: 'Ist Tempeh vegan und glutenfrei?',
+        answer:
+          'Ja. Unser Tempeh ist vegan und glutenfrei — ein eigenständiges Lebensmittel auf Hülsenfruchtbasis, kein klassischer Fleischersatz.',
+      },
+    ],
+  },
+  {
     key: 'support',
+    icon: 'wrench',
     title: 'Technische Probleme',
     items: [
       {
@@ -190,6 +262,7 @@ const sectionsDE: SectionDE[] = [
 const sectionsEN: SectionDE[] = [
   {
     key: 'account',
+    icon: 'user',
     title: 'Account & sign-in',
     items: [
       {
@@ -216,6 +289,7 @@ const sectionsEN: SectionDE[] = [
   },
   {
     key: 'workshops',
+    icon: 'calendar',
     title: 'Booking workshops',
     items: [
       {
@@ -243,10 +317,26 @@ const sectionsEN: SectionDE[] = [
         answer:
           'Yes. In the booking dialog simply select the number of seats you need, as long as enough seats are available for that date.',
       },
+      {
+        question: 'Where do the workshops take place?',
+        answer:
+          'Our workshops take place in Graz — usually at The Ginery, Grabenstraße 15, 8010 Graz. The exact address and directions are in your booking confirmation.',
+      },
+      {
+        question: 'What should I bring to a workshop?',
+        answer:
+          'Just good spirits! We provide all ingredients, tools, aprons and jars to take home. Comfortable clothes are recommended. Please let us know in advance if you have any allergies.',
+      },
+      {
+        question: 'Are the workshops suitable for beginners?',
+        answer:
+          'Yes. Our workshops are designed for beginners — you do not need any prior knowledge. We explain everything step by step.',
+      },
     ],
   },
   {
     key: 'vouchers',
+    icon: 'gift',
     title: 'Redeeming vouchers',
     items: [
       {
@@ -273,6 +363,7 @@ const sectionsEN: SectionDE[] = [
   },
   {
     key: 'shop',
+    icon: 'shopping-bag',
     title: 'Shop & orders',
     items: [
       {
@@ -294,6 +385,7 @@ const sectionsEN: SectionDE[] = [
   },
   {
     key: 'shipping',
+    icon: 'truck',
     title: 'Shipping & delivery',
     items: [
       {
@@ -314,6 +406,7 @@ const sectionsEN: SectionDE[] = [
   },
   {
     key: 'payment',
+    icon: 'credit-card',
     title: 'Payment & security',
     items: [
       {
@@ -334,7 +427,35 @@ const sectionsEN: SectionDE[] = [
     ],
   },
   {
+    key: 'gastronomy',
+    icon: 'utensils',
+    title: 'Gastronomy & B2B',
+    items: [
+      {
+        question: 'Do you supply tempeh and ferments to restaurants?',
+        answer:
+          'Yes. We supply fava bean tempeh and selected ferments such as kimchi to restaurants, hotels and catering in the greater Graz area and Styria. Enquire via the Gastronomy page or email kontakt@fermentfreude.at.',
+      },
+      {
+        question: 'What team size are your gastronomy formats for?',
+        answer:
+          'Our formats work for small kitchen teams as well as larger hotel or catering operations.',
+      },
+      {
+        question: 'Can you run a workshop in our kitchen?',
+        answer:
+          'Yes. We offer on-site workshops and support implementation directly in your kitchen.',
+      },
+      {
+        question: 'Is tempeh vegan and gluten-free?',
+        answer:
+          'Yes. Our tempeh is vegan and gluten-free — a standalone food based on legumes, not a classic meat substitute.',
+      },
+    ],
+  },
+  {
     key: 'support',
+    icon: 'wrench',
     title: 'Technical issues',
     items: [
       {
@@ -388,22 +509,63 @@ async function seedHelp() {
     }
   }
 
+  // ── Upload hero background (reuse clean asset if present) ──
+  let heroBackgroundId: string | null = null
+  const heroFilename = 'help-hero-wide.webp'
+  const existingHero = await payload.find({
+    collection: 'media',
+    where: { filename: { equals: heroFilename } },
+    limit: 1,
+    depth: 0,
+  })
+  if (existingHero.docs[0]) {
+    heroBackgroundId = existingHero.docs[0].id
+    console.log(`  · reuse help hero bg ${heroBackgroundId}`)
+  } else {
+    const uploaded = await payload.create({
+      collection: 'media',
+      data: {
+        alt: 'Help center hero — FermentFreude workshop and support illustration',
+      },
+      file: await optimizedFile(heroBgPath, IMAGE_PRESETS.hero),
+      context: ctx,
+    })
+    heroBackgroundId = uploaded.id
+    console.log(`  📸 Help hero bg: ${heroBackgroundId}`)
+  }
+
   // ── 1. Create DE first ──
   const deBlock = {
     blockType: 'helpFaq' as const,
     visible: true,
+    heroBackground: heroBackgroundId,
     header: {
-      eyebrow: 'HILFE & SUPPORT',
-      title: 'Hilfe & FAQ',
-      intro:
-        'Hier findest du Antworten auf die häufigsten Fragen rund um dein Konto, Buchungen, Gutscheine, Bestellungen und Zahlungen. Falls deine Frage nicht dabei ist, schreib uns gerne direkt.',
+      eyebrow: '',
+      title: 'Hallo, wie können wir helfen?',
+      intro: '',
+      searchPlaceholder: 'Probier „Workshop buchen“ oder „Gutschein“',
+      commonSearchesLabel: 'Beliebte Themen:',
+      commonSearches: [
+        { label: 'Workshop buchen' },
+        { label: 'Gutschein einlösen' },
+        { label: 'Versand' },
+        { label: 'Stornieren' },
+        { label: 'Gastronomie' },
+      ],
+      backLabel: 'Alle Themen',
+      resultsLabel: 'Suchergebnisse',
+      emptyResultsLabel:
+        'Keine passenden Fragen. Versuche einen anderen Begriff oder wähle ein Thema.',
+      questionCountSingular: 'Frage',
+      questionCountPlural: 'Fragen',
       tocLabel: 'Themen auf dieser Seite',
     },
     sections: sectionsDE,
     contact: {
-      title: 'Frage nicht beantwortet?',
-      body: 'Schreib uns eine E-Mail – wir melden uns in der Regel innerhalb eines Werktages zurück.',
-      ctaLabel: 'Kontakt aufnehmen',
+      title: 'Noch nicht gefunden, was du brauchst?',
+      body: 'Schreib uns – wir helfen gerne.',
+      ctaLabel: 'Kontakt',
+      link: '/contact',
       email: 'kontakt@fermentfreude.at',
     },
   }
@@ -439,6 +601,15 @@ async function seedHelp() {
     id?: string
     items?: Array<{ id?: string }>
   }>
+  const freshHeader = block.header as { commonSearches?: Array<{ id?: string }> } | undefined
+  const freshChips = freshHeader?.commonSearches ?? []
+  const commonSearchesEN = [
+    'Book a workshop',
+    'Redeem voucher',
+    'Shipping',
+    'Cancellation',
+    'Gastronomy',
+  ].map((label, i) => ({ id: freshChips[i]?.id, label }))
 
   // ── 3. Build EN with same IDs ──
   const enSections = sectionsEN.map((s, i) => {
@@ -446,6 +617,7 @@ async function seedHelp() {
     return {
       id: fs?.id,
       key: s.key,
+      icon: s.icon,
       title: s.title,
       intro: s.intro,
       items: s.items.map((it, j) => ({
@@ -470,18 +642,28 @@ async function seedHelp() {
           id: blockId,
           blockType: 'helpFaq' as const,
           visible: true,
+          heroBackground: heroBackgroundId,
           header: {
-            eyebrow: 'HELP & SUPPORT',
-            title: 'Help & FAQ',
-            intro:
-              'Find answers to the most common questions about your account, bookings, vouchers, orders and payments. If your question is not listed, just reach out to us directly.',
+            eyebrow: '',
+            title: 'Hello, how can we help?',
+            intro: '',
+            searchPlaceholder: 'Try "book workshop" or "voucher"',
+            commonSearchesLabel: 'Popular topics:',
+            commonSearches: commonSearchesEN,
+            backLabel: 'All topics',
+            resultsLabel: 'Search results',
+            emptyResultsLabel:
+              'No matching questions. Try another search, or browse the topics above.',
+            questionCountSingular: 'question',
+            questionCountPlural: 'questions',
             tocLabel: 'Topics on this page',
           },
           sections: enSections,
           contact: {
-            title: 'Question not answered?',
-            body: 'Send us an email — we usually reply within one business day.',
-            ctaLabel: 'Get in touch',
+            title: "Haven't found what you need?",
+            body: 'Get in touch — we are happy to help.',
+            ctaLabel: 'Contact',
+            link: '/contact',
             email: 'kontakt@fermentfreude.at',
           },
         },

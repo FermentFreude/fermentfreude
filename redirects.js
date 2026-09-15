@@ -45,8 +45,8 @@ const redirects = async () => {
 
     // --- Existing generic rules (apply regardless of host) ---
     {
-      source: '/press',
-      destination: '/presse',
+      source: '/faq',
+      destination: '/help',
       permanent: true,
     },
     {
