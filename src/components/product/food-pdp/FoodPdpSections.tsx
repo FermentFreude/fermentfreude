@@ -149,23 +149,23 @@ export function FoodPdpGlanceGrid({
       {showTitle && (
         <h3 className="mb-5 font-display text-body font-bold text-ff-near-black">{title}</h3>
       )}
-      <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
         {items.map((item) => {
           const Icon = GLANCE_ICONS[item.key] ?? Package
           return (
             <div
               key={item.key}
-              className="flex flex-col gap-3 rounded-2xl p-4 ring-1 ring-ff-near-black/8 sm:p-5"
+              className="flex flex-row items-center gap-3 rounded-2xl p-3 ring-1 ring-ff-near-black/8 sm:flex-col sm:items-start sm:gap-3 sm:p-5"
               style={{ backgroundColor: FOOD_PDP_PANEL_BG }}
             >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-ff-warm-gray/60 text-ff-near-black">
-                <Icon className="size-5" strokeWidth={1.75} aria-hidden />
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-ff-warm-gray/60 text-ff-near-black sm:size-10">
+                <Icon className="size-4 sm:size-5" strokeWidth={1.75} aria-hidden />
               </span>
-              <div>
-                <dt className="text-caption font-medium uppercase tracking-wide text-ff-gray-text">
+              <div className="min-w-0">
+                <dt className="text-[10px] font-medium uppercase tracking-wide text-ff-gray-text sm:text-caption">
                   {item.label}
                 </dt>
-                <dd className="mt-1 font-display text-body font-semibold text-ff-near-black">
+                <dd className="mt-0.5 font-display text-body-sm font-semibold text-ff-near-black sm:mt-1 sm:text-body">
                   {item.value}
                 </dd>
               </div>
@@ -183,16 +183,12 @@ export function FoodPdpIngredientsPanel({
   ingredientsHeading,
   allergensLabel,
   disclaimer,
-  seasonalNotice,
-  isSeasonal,
 }: {
   ingredients?: string | null
   allergens?: string | null
   ingredientsHeading: string
   allergensLabel: string
   disclaimer: string
-  seasonalNotice?: string
-  isSeasonal?: boolean | null
 }) {
   if (!ingredients && !allergens) return null
 
@@ -213,11 +209,6 @@ export function FoodPdpIngredientsPanel({
             <h3 className="font-display text-body font-bold text-ff-near-black">
               {ingredientsHeading}
             </h3>
-            {isSeasonal && seasonalNotice && (
-              <p className="mb-3 mt-3 rounded-lg bg-white/60 px-3 py-2 text-caption leading-relaxed text-ff-gray-text">
-                {seasonalNotice}
-              </p>
-            )}
             <p className="mt-3 text-body leading-[1.85] text-ff-gray-text">{ingredients}</p>
           </div>
         </article>
@@ -461,10 +452,16 @@ export function FoodPdpStoragePanel({
                 <StorageIcon className="size-5" strokeWidth={1.75} aria-hidden />
               </span>
               <div>
-                <Heading className="font-display text-body font-bold text-ff-near-black">
-                  {storageLabel}
-                </Heading>
-                <div className="mt-3 space-y-2 text-body-sm leading-[1.85] text-ff-gray-text">
+                {/* When embedded under “Lagerung & Haltbarkeit”, skip repeating “Lagerung” as a card title */}
+                {!embedded && (
+                  <Heading className="font-display text-body font-bold text-ff-near-black">
+                    {storageLabel}
+                  </Heading>
+                )}
+                {embedded && (
+                  <span className="sr-only">{storageLabel}</span>
+                )}
+                <div className={cn(!embedded && 'mt-3', 'space-y-2 text-body-sm leading-[1.85] text-ff-gray-text')}>
                   {storageInstructions && <p>{storageInstructions}</p>}
                   {showBestBefore && (
                     <p>

@@ -11,9 +11,10 @@ import { useLocale } from '@/providers/Locale'
 import {
   formatEurPrice,
   getCategoryTitles,
+  getDisplayIngredients,
   getProductTypeLabel,
-  getSeasonalIngredientsNotice,
   getSeasonalNotice,
+  isIngredientsPlaceholder,
   type AppLocale,
 } from '@/utilities/productDetailDisplay'
 import {
@@ -139,6 +140,7 @@ type ProductDetailLabels = {
   soldOutLabel?: string | null
   seasonalBadgeLabel?: string | null
   deliveryNotice?: string | null
+  seasonalNotice?: string | null
   navDetailsLabel?: string | null
   navTastePrepLabel?: string | null
   navStorageLabel?: string | null
@@ -197,6 +199,7 @@ export function ShopStyleProductDetail({
     addToCart: pickLabel(labels.addToCartLabel, defaults.addToCart),
     soldOut: pickLabel(labels.soldOutLabel, defaults.soldOut),
     seasonal: pickLabel(labels.seasonalBadgeLabel, defaults.seasonal),
+    seasonalNotice: pickLabel(labels.seasonalNotice, getSeasonalNotice(locale)),
     pickup: pickLabel(labels.deliveryNotice, defaults.pickup),
     glanceTitle: pickLabel(labels.glanceTitle, defaults.glanceTitle),
     weight: pickLabel(labels.weightLabel, defaults.weight),
@@ -328,13 +331,24 @@ export function ShopStyleProductDetail({
     return items
   }, [copy, pdp.madeIn, pdp.origin, product.unitSize, product.weightGrams])
 
+  // One seasonal message in the hero — don’t repeat the same placeholder under Zutaten
+  const showSeasonalHeroNotice =
+    Boolean(product.isSeasonal) && isIngredientsPlaceholder(product.ingredients)
+  const seasonalNoticeText = pickLabel(
+    typeof product.seasonalNotice === 'string' ? product.seasonalNotice : null,
+    copy.seasonalNotice,
+  )
+  const displayIngredients = showSeasonalHeroNotice
+    ? null
+    : getDisplayIngredients(product.ingredients, locale)
+
   const tasteSectionLabel =
     product.productType === 'jarred' ? copy.tasteSectionLabelNeutral : copy.tasteSectionLabel
 
   const sectionNav = useMemo(() => {
     const links: { id: string; label: string }[] = []
     const hasDetails =
-      glanceItems.length > 0 || Boolean(product.ingredients) || Boolean(product.allergens)
+      glanceItems.length > 0 || Boolean(displayIngredients) || Boolean(product.allergens)
     const hasTaste =
       Boolean(pdp.tasteHeadline) ||
       Boolean(pdp.storyIntro) ||
@@ -351,10 +365,10 @@ export function ShopStyleProductDetail({
     if (hasTaste) links.push({ id: 'geschmack', label: copy.navTastePrep })
     if (hasStorage) links.push({ id: 'lagerung', label: copy.navStorage })
     return links
-  }, [copy, glanceItems.length, pdp, product])
+  }, [copy, displayIngredients, glanceItems.length, pdp, product])
 
   const hasDetailsSection =
-    glanceItems.length > 0 || Boolean(product.ingredients) || Boolean(product.allergens)
+    glanceItems.length > 0 || Boolean(displayIngredients) || Boolean(product.allergens)
   const hasTasteSection =
     Boolean(pdp.tasteHeadline) ||
     Boolean(pdp.storyIntro) ||
@@ -378,7 +392,7 @@ export function ShopStyleProductDetail({
           {copy.back}
         </Link>
 
-        <div className="mx-auto max-w-6xl lg:grid lg:grid-cols-2 lg:items-start lg:gap-14">
+        <div className="mx-auto flex max-w-6xl flex-col gap-10 lg:grid lg:grid-cols-2 lg:items-start lg:gap-14">
           <FadeIn immediate delay={0} className="relative lg:sticky lg:top-24 lg:self-start">
               <div
                 className="pointer-events-none absolute -inset-4 rounded-3xl bg-ff-warm-gray/25 opacity-60 blur-2xl lg:-inset-6"
@@ -398,15 +412,15 @@ export function ShopStyleProductDetail({
               </div>
 
               {gallery.length > 1 && (
-                <div className="mt-4 flex gap-2">
+                <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {gallery.map((item, i) => (
                     <button
-                      key={item.image.id}
+                      key={`${typeof item.image === 'object' ? item.image.id : item.image}-${i}`}
                       type="button"
                       onClick={() => setSelectedImageIndex(i)}
                       aria-label={`${locale === 'de' ? 'Bild' : 'Image'} ${i + 1}`}
                       className={cn(
-                        'size-14 shrink-0 overflow-hidden rounded-lg border-2 bg-ff-warm-gray transition-all',
+                        'size-16 shrink-0 overflow-hidden rounded-lg border-2 bg-ff-warm-gray transition-all sm:size-14',
                         i === selectedImageIndex
                           ? 'border-ff-near-black opacity-100 ring-2 ring-ff-near-black/10'
                           : 'border-transparent opacity-50 hover:opacity-90',
@@ -417,7 +431,7 @@ export function ShopStyleProductDetail({
                         resource={item.image}
                         fallbackSrc={galleryFallbacks?.[i]}
                         className="size-full"
-                        sizes="56px"
+                        sizes="64px"
                         imgClassName="size-full object-cover"
                       />
                     </button>
@@ -450,9 +464,9 @@ export function ShopStyleProductDetail({
                 <p className="mt-5 text-body leading-[1.8] text-ff-gray-text">{pdp.heroNote}</p>
               )}
 
-              {product.isSeasonal && (
+              {showSeasonalHeroNotice && (
                 <p className="mt-4 rounded-lg bg-ff-gold-accent/10 px-4 py-3 text-body-sm leading-[1.75] text-ff-gray-text ring-1 ring-ff-gold-accent/25">
-                  {getSeasonalNotice(locale)}
+                  {seasonalNoticeText}
                 </p>
               )}
 
@@ -575,15 +589,11 @@ export function ShopStyleProductDetail({
                 showTitle={Boolean(glanceItems.length)}
               />
               <FoodPdpIngredientsPanel
-                ingredients={product.ingredients}
+                ingredients={displayIngredients}
                 allergens={product.allergens}
                 ingredientsHeading={copy.ingredients}
                 allergensLabel={copy.allergens}
                 disclaimer={copy.ingredientsDisclaimer}
-                isSeasonal={product.isSeasonal}
-                seasonalNotice={
-                  product.isSeasonal ? getSeasonalIngredientsNotice(locale) : undefined
-                }
               />
             </FoodPdpSectionGroup>
           )}

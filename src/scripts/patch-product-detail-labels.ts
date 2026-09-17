@@ -14,6 +14,8 @@ const LABELS_DE = {
   addToCartLabel: 'In den Warenkorb',
   soldOutLabel: 'Ausverkauft',
   seasonalBadgeLabel: 'Saisonal',
+  seasonalNotice:
+    'Unsere Kimchis sind saisonal. Je nach verfügbarer Gemüseauswahl variiert die Rezeptur — Zutaten und Allergene der aktuellen Variante folgen vor Verkaufsstart.',
   deliveryNotice: 'Abholung in Graz, jede Woche frisch.',
   navDetailsLabel: 'Produktdetails',
   navTastePrepLabel: 'Geschmack & Zubereitung',
@@ -53,6 +55,8 @@ const LABELS_EN = {
   addToCartLabel: 'Add to bag',
   soldOutLabel: 'Sold out',
   seasonalBadgeLabel: 'Seasonal',
+  seasonalNotice:
+    'Our kimchis are seasonal. The recipe varies with available vegetables — ingredients and allergens for the current batch will appear here before it goes on sale.',
   deliveryNotice: 'Pickup in Graz, fresh every week.',
   navDetailsLabel: 'Product details',
   navTastePrepLabel: 'Taste & preparation',

@@ -75,7 +75,9 @@ async function main() {
     }
 
     const categoryId =
-      product.slug === 'classic-kimchi' ? kimchiCategoryId : tempehCategoryId
+      product.slug === 'kimchi' || product.slug === 'classic-kimchi'
+        ? kimchiCategoryId
+        : tempehCategoryId
 
     const sharedFields = {
       productType: product.productType,

@@ -97,9 +97,9 @@ export function ShopHeroActions({
       {product && !soldOut && (
         <Link
           href={href}
-          className="shop-hero-copy text-body-sm font-medium text-white/80 underline underline-offset-4 transition-colors hover:text-white"
+          className="shop-hero-copy inline-flex min-h-11 items-center font-display text-body font-semibold text-white underline decoration-white/50 underline-offset-[6px] transition-colors hover:decoration-white"
         >
-          {resolvedDetails}
+          {resolvedDetails} →
         </Link>
       )}
 

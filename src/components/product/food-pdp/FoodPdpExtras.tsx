@@ -63,7 +63,7 @@ export function FoodPdpSectionNav({ sections }: { sections: SectionLink[] }) {
   return (
     <nav
       aria-label="Produktabschnitte"
-      className="mb-6 rounded-2xl p-2 ring-1 ring-ff-near-black/8"
+      className="mb-6 hidden rounded-2xl p-2 ring-1 ring-ff-near-black/8 lg:block"
       style={{ backgroundColor: FOOD_PDP_PANEL_BG }}
     >
       <ul className="flex flex-wrap gap-2 p-0.5">

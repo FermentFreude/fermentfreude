@@ -139,8 +139,8 @@ const PRODUCT_UPDATES = [
     },
   },
   {
-    id: '69bc80514889efa4f93c7ae0', // classic-kimchi
-    slug: 'classic-kimchi',
+    id: '69bc80514889efa4f93c7ae0', // kimchi (was classic-kimchi)
+    slug: 'kimchi',
     data: {
       title: 'Kimchi',
       shortDescription:
