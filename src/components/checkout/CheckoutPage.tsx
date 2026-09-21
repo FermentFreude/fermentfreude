@@ -10,7 +10,7 @@ import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
-import { CalendarCheck, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { Suspense, useCallback, useEffect, useState } from 'react'
@@ -53,8 +53,11 @@ const CHECKOUT_DE = {
   address: 'Adresse',
   noShipping: 'Workshop / digitales Produkt — keine Lieferadresse erforderlich.',
   storePickup: 'Abholung im Geschäft',
-  pickupAfterPaymentNote:
-    'Gleich nach der Bezahlung kannst du deinen Abholtermin buchen. Den Link dazu findest du auf der Bestätigungsseite und in deiner E-Mail.',
+  pickupStepPay: 'Bezahlen',
+  pickupStepBook: 'Abholtermin buchen',
+  pickupStepBookHint: 'Den Link bekommst du sofort auf der Bestätigungsseite und per E-Mail.',
+  pickupStepCollect: 'Bestellung abholen',
+  emailPickupHint: 'An diese Adresse schicken wir dir den Link für deinen Abholtermin.',
   pickupWorkshopNote:
     'Dein Warenkorb enthält auch einen Workshop. Die Abholdetails gelten nur für die physischen Produkte. Dein Workshop-Termin bleibt genau so, wie du ihn gebucht hast.',
   viewOnMaps: 'Auf Google Maps ansehen',
@@ -136,8 +139,11 @@ const CHECKOUT_EN = {
   address: 'Address',
   noShipping: 'Workshop / digital product — no shipping address required.',
   storePickup: 'Store Pickup',
-  pickupAfterPaymentNote:
-    'Right after payment you can book your pickup slot. You will find the link on the confirmation page and in your email.',
+  pickupStepPay: 'Pay',
+  pickupStepBook: 'Book your pickup slot',
+  pickupStepBookHint: 'You get the link straight away on the confirmation page and by email.',
+  pickupStepCollect: 'Collect your order',
+  emailPickupHint: 'We send the link for your pickup slot to this address.',
   pickupWorkshopNote:
     'Your cart also includes a workshop. The pickup details apply to the physical products only. Your workshop date stays exactly as you booked it.',
   viewOnMaps: 'View on Google Maps',
@@ -1105,7 +1111,16 @@ export const CheckoutPage: React.FC = () => {
                   required
                   type="email"
                   className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
+                  aria-describedby={isAllPhysicalPickup ? 'email-pickup-hint' : undefined}
                 />
+                {/* Says what the address is actually for, at the moment it is
+                    typed. This earns its friction in a way a consent checkbox
+                    on the same information would not. */}
+                {isAllPhysicalPickup && (
+                  <p id="email-pickup-hint" className="text-caption text-ff-gray-text-light">
+                    {t.emailPickupHint}
+                  </p>
+                )}
               </FormItem>
 
               {/* Phone number (optional) */}
@@ -1254,15 +1269,41 @@ export const CheckoutPage: React.FC = () => {
               </address>
             </div>
 
-            {/* Bold, and near-black rather than the muted grey: bold muted
-                text reads worse than either weight on its own. */}
-            <p className="mt-6 flex items-start gap-3 text-body-sm font-semibold leading-relaxed text-ff-near-black">
-              <CalendarCheck
-                className="mt-0.5 h-5 w-5 shrink-0 text-ff-near-black"
-                strokeWidth={1.5}
-              />
-              <span>{t.pickupAfterPaymentNote}</span>
-            </p>
+            {/* What happens after paying, as three beats rather than one
+                bold paragraph. A paragraph here gets skipped; three numbered
+                steps get read. Setting the expectation before payment is what
+                stops "where is my order?" mail afterwards.
+
+                This is the same shape as the "Nächste Schritte" list removed
+                from the confirmation page. There it restated what was already
+                on screen; here it describes something that has not happened
+                yet, which is the difference between redundant and useful. */}
+            <ol className="mt-7 flex flex-col gap-4 border-t border-ff-border-light pt-6">
+              {[
+                { label: t.pickupStepPay, hint: null },
+                { label: t.pickupStepBook, hint: t.pickupStepBookHint },
+                { label: t.pickupStepCollect, hint: null },
+              ].map((step, i) => (
+                <li key={step.label} className="flex items-start gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ff-near-black font-display text-caption font-bold text-white"
+                  >
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <span className="block font-display text-body-sm font-semibold text-ff-near-black">
+                      {step.label}
+                    </span>
+                    {step.hint && (
+                      <span className="mt-0.5 block text-body-sm leading-relaxed text-ff-gray-text-light">
+                        {step.hint}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
           </section>
         ) : isAllPhysicalPickup ? (
           // Mixed workshop + product cart: unchanged legacy flow (date/time
