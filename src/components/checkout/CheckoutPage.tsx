@@ -90,8 +90,6 @@ const CHECKOUT_DE = {
   legalPrivacy: 'Datenschutzerklärung',
   legalPost:
     '. Dein gesetzliches Widerrufsrecht und die Bedingungen für Rücksendungen sind in den AGB beschrieben.',
-  pickupCalendarNote:
-    'Für die Abholung buchst du nach der Bezahlung einen Termin über Google Kalender. Den Link bekommst du sofort auf der Bestätigungsseite und per E-Mail — bitte gib deshalb eine E-Mail-Adresse an, auf die du auch wirklich zugreifen kannst.',
   tryAgain: 'Erneut versuchen',
   yourCart: 'Warenkorb',
   orderFailed: 'Bestellung fehlgeschlagen.',
@@ -171,8 +169,6 @@ const CHECKOUT_EN = {
   legalPrivacy: 'privacy policy',
   legalPost:
     '. Your statutory right of withdrawal and the conditions for returns are set out in the terms and conditions.',
-  pickupCalendarNote:
-    'For pickup you book a slot through Google Calendar after payment. You get the link straight away on the confirmation page and by email — so please use an email address you can actually access.',
   tryAgain: 'Try again',
   yourCart: 'Your cart',
   orderFailed: 'Order failed.',
@@ -843,14 +839,14 @@ export const CheckoutPage: React.FC = () => {
    * Those customers keep the explicit button below.
    */
   useEffect(() => {
-    if (!canGoToPayment || paymentData || voucherCoversAll) return
+    if (cartIsEmpty || paymentData || voucherCoversAll) return
     if (createAccountOpt || isProcessingPayment || isCreatingAccount) return
     const timer = setTimeout(() => {
       void initiatePaymentIntent('stripe')
-    }, 600)
+    }, 300)
     return () => clearTimeout(timer)
   }, [
-    canGoToPayment,
+    cartIsEmpty,
     paymentData,
     voucherCoversAll,
     createAccountOpt,
@@ -991,10 +987,15 @@ export const CheckoutPage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
-      {/* ── Left Column: Contact, Address, Payment ── */}
-      <div className="min-w-0 flex-1 flex flex-col gap-8">
+      {/* ── Left Column: Contact, Address, Payment ──
+          One sheet, not a stack of cards. Each step used to be its own
+          bordered box, which made a short form read as a long queue of
+          containers; they are sections of the same surface now, separated by
+          hairlines. The only other surface on the screen is the summary rail,
+          because that is the part worth highlighting. */}
+      <div className="min-w-0 flex-1 overflow-hidden rounded-(--radius-card) bg-white divide-y divide-ff-border-light">
         {/* ── Contact Section ── */}
-        <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
+        <section className="p-6 sm:p-8">
           <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
             {t.contact}
           </h2>
@@ -1214,7 +1215,7 @@ export const CheckoutPage: React.FC = () => {
           // pickup slot is booked after payment via the Google Appointment
           // Schedule link (order confirmation page + email) — deliberately
           // not shown here.
-          <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
+          <section className="p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.storePickup}
             </h2>
@@ -1241,7 +1242,7 @@ export const CheckoutPage: React.FC = () => {
           // Mixed workshop + product cart: unchanged legacy flow (date/time
           // picker, workshop-locations lookup) — workshops are out of scope
           // for this change.
-          <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
+          <section className="p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.storePickup}
             </h2>
@@ -1317,7 +1318,7 @@ export const CheckoutPage: React.FC = () => {
             </FormItem>
           </section>
         ) : (
-          <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
+          <section className="p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.address}
             </h2>
@@ -1429,7 +1430,7 @@ export const CheckoutPage: React.FC = () => {
             if (!needsAllocation) return null
 
             return (
-              <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
+              <section className="p-6 sm:p-8">
                 <h2 className="mb-2 font-display text-subheading font-bold text-ff-near-black">
                   {isDe ? 'Deine Gäste' : 'Your guests'}
                 </h2>
@@ -1475,7 +1476,7 @@ export const CheckoutPage: React.FC = () => {
 
         {!paymentData && voucherCoversAll ? (
           <Button
-            className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
+            className="m-6 sm:m-8 rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
             disabled={!canGoToPayment || isProcessingPayment || isCreatingAccount}
             onClick={(e) => {
               e.preventDefault()
@@ -1492,7 +1493,7 @@ export const CheckoutPage: React.FC = () => {
              registration has to happen before the charge, so it can't be
              triggered off the debounce that opens payment for everyone else. */
           <Button
-            className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
+            className="m-6 sm:m-8 rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
             disabled={!canGoToPayment || isCreatingAccount}
             onClick={(e) => {
               e.preventDefault()
@@ -1507,7 +1508,7 @@ export const CheckoutPage: React.FC = () => {
         ) : null}
 
         {!paymentData?.['clientSecret'] && error && (
-          <div className="rounded-(--radius-card) border border-red-200 bg-red-50 p-6">
+          <div className="m-6 sm:m-8 rounded-(--radius-card) border border-red-200 bg-red-50 p-6">
             <Message error={error} />
             <Button
               onClick={(e) => {
@@ -1523,7 +1524,7 @@ export const CheckoutPage: React.FC = () => {
 
         <Suspense fallback={<React.Fragment />}>
           {!voucherCoversAll && paymentData && typeof paymentData['clientSecret'] === 'string' && (
-            <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
+            <section className="p-6 sm:p-8">
               <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
                 {t.payment}
               </h2>
@@ -1797,15 +1798,6 @@ export const CheckoutPage: React.FC = () => {
                 />
               </div>
             </div>
-
-            {/* How pickup actually works, next to the total rather than buried
-                further up the page. Explanatory, not a consent gate — the
-                order is never blocked on it. */}
-            {isAllPhysicalPickup && (
-              <p className="mt-6 border-t border-ff-border-light pt-6 text-caption leading-relaxed text-ff-gray-text-light">
-                {t.pickupCalendarNote}
-              </p>
-            )}
 
             {/* Sits with the total because that is where the commitment is
                 made. Both destinations are real pages in this app; the right
