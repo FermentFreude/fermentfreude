@@ -8,7 +8,7 @@ import {
   SHOP_CARD_IMAGE_FALLBACK,
 } from '@/utilities/productDetailDisplay'
 import NextImage from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export function ShopProductCardImage({
   product,
@@ -35,6 +35,10 @@ export function ShopProductCardImage({
   const fallbackSrc = fallbackSrcProp ?? slugFallback
   const cmsUrl = cmsMedia?.url?.trim() || null
   const [imageFailed, setImageFailed] = useState(false)
+
+  useEffect(() => {
+    setImageFailed(false)
+  }, [cmsUrl])
 
   // CMS/gallery image takes priority whenever one exists and hasn't failed to
   // load — editors managing images through /admin expect their upload to

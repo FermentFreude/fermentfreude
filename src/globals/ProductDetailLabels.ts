@@ -53,6 +53,16 @@ export const ProductDetailLabelsGlobal: GlobalConfig = {
           label: 'Saisonal-Badge / Seasonal Badge',
         },
         {
+          name: 'seasonalNotice',
+          type: 'textarea',
+          localized: true,
+          label: 'Saison-Hinweis (Fallback) / Seasonal Notice Fallback',
+          admin: {
+            description:
+              'Fallback-Text über dem Preis für saisonale Produkte, falls am Produkt kein eigener Hinweis gesetzt ist. / Fallback above-price notice for seasonal products when the product has no own notice.',
+          },
+        },
+        {
           name: 'deliveryNotice',
           type: 'textarea',
           localized: true,

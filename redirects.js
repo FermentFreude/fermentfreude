@@ -60,6 +60,11 @@ const redirects = async () => {
       permanent: true,
     },
     {
+      source: '/products/classic-kimchi',
+      destination: '/products/kimchi',
+      permanent: true,
+    },
+    {
       source: '/voucher',
       destination: '/workshops/voucher',
       permanent: true,

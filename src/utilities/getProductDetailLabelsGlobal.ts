@@ -7,6 +7,7 @@ export type ProductDetailLabelsGlobal = {
   addToCartLabel?: string | null
   soldOutLabel?: string | null
   seasonalBadgeLabel?: string | null
+  seasonalNotice?: string | null
   deliveryNotice?: string | null
   navDetailsLabel?: string | null
   navTastePrepLabel?: string | null

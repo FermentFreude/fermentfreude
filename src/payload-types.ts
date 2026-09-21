@@ -518,13 +518,17 @@ export interface Product {
    */
   unitSize?: string | null;
   /**
-   * Zutatenliste für Etikett und Shop. Für saisonales Kimchi: bei jeder neuen Variante Titel + diese Zutatenliste aktualisieren (gleiches Produkt, neuer Name). / Ingredient list for label and shop. For seasonal Kimchi: update title + this list whenever the variant changes (same product record, new name).
+   * Zutatenliste für Etikett und Shop. Für saisonales Kimchi: bei jeder neuen Variante Titel + diese Zutatenliste aktualisieren (gleiches Produkt, neuer Name). Leer lassen, solange die Charge noch nicht feststeht — dann erscheint der Saison-Hinweis oben. / Ingredient list for label and shop. For seasonal Kimchi: update title + this list whenever the variant changes. Leave empty until the batch is ready — the seasonal notice shows instead.
    */
   ingredients?: string | null;
   /**
-   * Aktivieren für Kimchi (und ähnliche Produkte). Zeigt die Zutatenliste prominent im Shop und erinnert daran, Titel + Zutaten bei jeder neuen Charge zu aktualisieren. Das Produktbild darf als Beispielbild bleiben. / Enable for Kimchi. Shows ingredients prominently in the shop and reminds editors to update title + ingredients each batch. Keep the image as a typical example if needed.
+   * Aktivieren für Kimchi (und ähnliche Produkte). Zeigt Saison-Badge und optional den Saison-Hinweis, solange die Zutatenliste noch leer/Platzhalter ist. / Enable for Kimchi. Shows seasonal badge and the seasonal notice while ingredients are still empty/placeholder.
    */
   isSeasonal?: boolean | null;
+  /**
+   * Textbox über dem Preis (nur sichtbar, solange Zutaten noch nicht ausgefüllt sind). Kein internes „CMS“-Wording — Kundentext. / Box above the price (shown only while ingredients are still empty). Customer-facing copy — never mention “CMS”.
+   */
+  seasonalNotice?: string | null;
   /**
    * z.B. "Enthält Soja" / "Contains soy"
    */
@@ -8873,6 +8877,7 @@ export interface ProductsSelect<T extends boolean = true> {
   unitSize?: T;
   ingredients?: T;
   isSeasonal?: T;
+  seasonalNotice?: T;
   allergens?: T;
   storageInstructions?: T;
   shelfLife?: T;
@@ -9692,6 +9697,10 @@ export interface ProductDetailLabelsGlobal {
   soldOutLabel?: string | null;
   seasonalBadgeLabel?: string | null;
   /**
+   * Fallback-Text über dem Preis für saisonale Produkte, falls am Produkt kein eigener Hinweis gesetzt ist. / Fallback above-price notice for seasonal products when the product has no own notice.
+   */
+  seasonalNotice?: string | null;
+  /**
    * Kleine Zeile unter dem Warenkorb-Button, z. B. Abholung in Graz.
    */
   deliveryNotice?: string | null;
@@ -10057,6 +10066,7 @@ export interface ProductDetailLabelsGlobalSelect<T extends boolean = true> {
   addToCartLabel?: T;
   soldOutLabel?: T;
   seasonalBadgeLabel?: T;
+  seasonalNotice?: T;
   deliveryNotice?: T;
   navDetailsLabel?: T;
   navTastePrepLabel?: T;

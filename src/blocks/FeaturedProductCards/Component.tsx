@@ -7,6 +7,8 @@ import React from 'react'
 
 import type { FeaturedProductCardsBlock, Product } from '@/payload-types'
 
+import Link from 'next/link'
+
 import { FeaturedProductCardActions } from './FeaturedProductCardActions'
 import { FeaturedProductCardImage } from './FeaturedProductCardImage'
 
@@ -96,17 +98,17 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
     const fallback = await payload.find({
       collection: 'products',
       where: {
-        slug: { in: ['berglinsen-tempeh', 'classic-kimchi'] },
+        slug: { in: ['berglinsen-tempeh', 'kimchi', 'classic-kimchi'] },
         _status: { equals: 'published' },
       },
       ...cmsLocaleQuery(locale),
       depth: 2,
-      limit: 2,
+      limit: 3,
       overrideAccess: true,
     })
     const bySlug = new Map(fallback.docs.map((d) => [d.slug, d]))
-    products = ['berglinsen-tempeh', 'classic-kimchi']
-      .map((s) => bySlug.get(s))
+    products = ['berglinsen-tempeh', 'kimchi']
+      .map((s) => bySlug.get(s) ?? (s === 'kimchi' ? bySlug.get('classic-kimchi') : undefined))
       .filter(Boolean) as Product[]
   }
 
@@ -155,7 +157,13 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
                       {seasonalLabel}
                     </span>
                   )}
-                  <FeaturedProductCardImage product={product} />
+                  <Link
+                    href={detailsHref}
+                    className="absolute inset-0 block"
+                    aria-label={product.title}
+                  >
+                    <FeaturedProductCardImage product={product} />
+                  </Link>
                 </div>
 
                 <div
@@ -168,7 +176,9 @@ export const FeaturedProductCardsComponent: React.FC<FeaturedProductCardsBlock> 
                     </span>
                   )}
                   <h3 className="mb-3 font-display text-subheading font-bold leading-snug text-white">
-                    {product.title}
+                    <Link href={detailsHref} className="hover:underline hover:underline-offset-4">
+                      {product.title}
+                    </Link>
                   </h3>
                   {product.shortDescription && (
                     <p className="mb-6 line-clamp-2 text-body-sm leading-relaxed text-white/80">

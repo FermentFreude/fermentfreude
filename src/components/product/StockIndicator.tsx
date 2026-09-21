@@ -1,5 +1,6 @@
 'use client'
 import { Product, Variant } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 import { useSearchParams } from 'next/navigation'
 import { useMemo } from 'react'
 
@@ -10,6 +11,8 @@ type Props = {
 
 export const StockIndicator: React.FC<Props> = ({ product, tone = 'light' }) => {
   const searchParams = useSearchParams()
+  const { locale } = useLocale()
+  const isDe = locale === 'de'
 
   const selectedVariant = useMemo<Variant | undefined>(() => {
     const variants = product.variants?.docs || []
@@ -47,16 +50,19 @@ export const StockIndicator: React.FC<Props> = ({ product, tone = 'light' }) => 
     return null
   }
 
+  const lowStockLabel = isDe
+    ? `Nur noch ${stockQuantity} auf Lager`
+    : `Only ${stockQuantity} left in stock`
+  const outOfStockLabel = isDe ? 'Ausverkauft' : 'Out of stock'
+
   return (
     <div
       className={`text-caption font-medium uppercase tracking-wide ${
         tone === 'dark' ? 'text-white/70' : 'text-ff-gray-text'
       }`}
     >
-      {stockQuantity < 10 && stockQuantity > 0 && (
-        <span>Only {stockQuantity} left in stock</span>
-      )}
-      {(stockQuantity === 0 || !stockQuantity) && <span>Out of stock</span>}
+      {stockQuantity < 10 && stockQuantity > 0 && <span>{lowStockLabel}</span>}
+      {(stockQuantity === 0 || !stockQuantity) && <span>{outOfStockLabel}</span>}
     </div>
   )
 }

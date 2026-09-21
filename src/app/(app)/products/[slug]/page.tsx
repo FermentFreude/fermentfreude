@@ -119,7 +119,7 @@ export default async function ProductPage({ params }: Args) {
           collection: 'products',
           where: {
             slug: {
-              in: ['kaeferbohnen-tempeh', 'berglinsen-tempeh', 'classic-kimchi'].filter(
+              in: ['kaeferbohnen-tempeh', 'berglinsen-tempeh', 'kimchi', 'classic-kimchi'].filter(
                 (s) => s !== slug,
               ),
             },

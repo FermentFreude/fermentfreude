@@ -94,9 +94,13 @@ async function main() {
 
   const kaferId = await findProductBySlug(payload, 'kaeferbohnen-tempeh', true)
   const bergId = await findProductBySlug(payload, 'berglinsen-tempeh', true)
-  const kimchiId = await findProductBySlug(payload, 'classic-kimchi', true)
+  const kimchiId =
+    (await findProductBySlug(payload, 'kimchi', true)) ??
+    (await findProductBySlug(payload, 'classic-kimchi', true))
   if (!kaferId || !bergId || !kimchiId) {
-    throw new Error('Missing product(s). Need kaeferbohnen-tempeh, berglinsen-tempeh, classic-kimchi.')
+    throw new Error(
+      'Missing product(s). Need kaeferbohnen-tempeh, berglinsen-tempeh, kimchi (or classic-kimchi).',
+    )
   }
 
   // ── Images ──────────────────────────────────────────────────────────
@@ -109,14 +113,14 @@ async function main() {
   )
   const kimchiMedia = await uploadMedia(
     payload,
-    fs.existsSync(path.resolve(ROOT, 'public/shop/kimchi-packaging-mock.webp'))
-      ? 'public/shop/kimchi-packaging-mock.webp'
+    fs.existsSync(path.resolve(ROOT, 'public/shop/kimchi-packaging-kimchi-only.webp'))
+      ? 'public/shop/kimchi-packaging-kimchi-only.webp'
       : fs.existsSync(path.resolve(ROOT, 'public/shop/kimchi-packaging-nobg.webp'))
         ? 'public/shop/kimchi-packaging-nobg.webp'
         : 'public/shop/kimchi-david-jar.webp',
     `kimchi-jar-sync-${stamp}.webp`,
-    'Classic Kimchi im Glas',
-    'Classic kimchi in a jar',
+    'Kimchi im Glas',
+    'Kimchi in a jar',
   )
   const kaferPackMedia = await uploadMedia(
     payload,

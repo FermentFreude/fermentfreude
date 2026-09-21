@@ -131,7 +131,9 @@ async function main() {
 
   const kaferId = await findProductBySlug(payload, 'kaeferbohnen-tempeh', true)
   const berglinsenId = await findProductBySlug(payload, 'berglinsen-tempeh', true)
-  const kimchiId = await findProductBySlug(payload, 'classic-kimchi', true)
+  const kimchiId =
+    (await findProductBySlug(payload, 'kimchi', true)) ??
+    (await findProductBySlug(payload, 'classic-kimchi', true))
 
   await patchBlockInPage(
     payload,

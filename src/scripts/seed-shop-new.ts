@@ -367,7 +367,8 @@ async function seedShopNew() {
 
   const kaferId = await findProductId('kaeferbohnen-tempeh')
   const berglinsenId = await findProductId('berglinsen-tempeh')
-  const kimchiId = await findProductId('classic-kimchi')
+  const kimchiId =
+    (await findProductId('kimchi')) ?? (await findProductId('classic-kimchi'))
 
   // Block 1: ShopHero — Käfer as visual hero product
   const shopHeroDE = {

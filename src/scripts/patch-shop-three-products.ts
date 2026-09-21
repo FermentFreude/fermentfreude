@@ -110,7 +110,9 @@ async function main() {
   payload.logger.info('🛒 Patching shop for 3-product editorial layout…')
 
   const kaferId = await findProductBySlug(payload, 'kaeferbohnen-tempeh', false)
-  const kimchiId = await findProductBySlug(payload, 'classic-kimchi', false)
+  const kimchiId =
+    (await findProductBySlug(payload, 'kimchi', false)) ??
+    (await findProductBySlug(payload, 'classic-kimchi', false))
 
   // Reuse Käfer gallery image as temporary stand-in when creating/fixing Berglinsen
   let kaferGalleryId: string | null = null
@@ -134,7 +136,7 @@ async function main() {
     throw new Error('Product kaeferbohnen-tempeh not found. Run: pnpm seed products')
   }
   if (!kimchiId) {
-    throw new Error('Product classic-kimchi not found. Run: pnpm seed products')
+    throw new Error('Product kimchi (or classic-kimchi) not found. Run: pnpm seed products')
   }
 
   await markKimchiSeasonal(payload, kimchiId)

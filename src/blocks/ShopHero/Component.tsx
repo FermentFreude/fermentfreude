@@ -3,6 +3,7 @@ import { getLocale } from '@/utilities/getLocale'
 import { isProductSoldOut } from '@/utilities/productStock'
 import configPromise from '@payload-config'
 import Image from 'next/image'
+import Link from 'next/link'
 import { getPayload } from 'payload'
 import React from 'react'
 
@@ -152,7 +153,11 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
   return (
     <section id="shop-hero" className="shop-hero relative w-full overflow-hidden bg-ff-near-black">
       <div className="relative min-h-[78vh] md:min-h-[85vh]">
-        <div className="absolute inset-0">
+        <Link
+          href={href}
+          className="absolute inset-0 z-0"
+          aria-label={detailsLabel}
+        >
           <Image
             src={heroSrc}
             alt={heroAlt}
@@ -162,11 +167,11 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
             className="object-cover object-[50%_75%] md:object-[48%_70%]"
             unoptimized={heroSrc.startsWith('http')}
           />
-        </div>
+        </Link>
 
         <div
           aria-hidden
-          className="absolute inset-0"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
               'linear-gradient(90deg, rgba(18,16,15,0.7) 0%, rgba(18,16,15,0.35) 42%, rgba(18,16,15,0.2) 100%)',
@@ -174,7 +179,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
         />
         <div
           aria-hidden
-          className="absolute inset-x-0 bottom-0 h-[28%] md:h-[24%]"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[28%] md:h-[24%]"
           style={{
             background:
               'linear-gradient(180deg, transparent 0%, rgba(18,16,15,0.25) 45%, rgba(18,16,15,0.78) 100%)',
