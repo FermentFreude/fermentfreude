@@ -214,7 +214,7 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
           {seatTickets.map((seat) => (
             <div
               key={seat.key}
-              className="ticket-card border-2 border-ff-near-black rounded-[--radius-lg] overflow-hidden"
+              className="ticket-card border-2 border-ff-near-black rounded-(--radius-card) overflow-hidden"
             >
               {/* Ticket header */}
               <div className="bg-ff-near-black px-6 py-4 flex items-center justify-between">
