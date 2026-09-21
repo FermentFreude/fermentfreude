@@ -76,6 +76,7 @@ const CHECKOUT_DE = {
   voucherNetworkError: 'Verbindungsfehler. Bitte versuche es erneut.',
   voucherApplied: (value: number) => `Gutschein €${value} angewendet!`,
   payment: 'Zahlung',
+  paymentWaiting: 'Gib deine E-Mail-Adresse ein, um die Zahlungsarten zu laden.',
   payWithVoucher: 'Jetzt mit Gutschein bestellen',
   processingOrder: 'Bestellung wird bearbeitet…',
   goToPayment: 'Zur Zahlung',
@@ -158,6 +159,7 @@ const CHECKOUT_EN = {
   voucherNetworkError: 'Connection error. Please try again.',
   voucherApplied: (value: number) => `Voucher €${value} applied!`,
   payment: 'Payment',
+  paymentWaiting: 'Enter your email address to load the payment options.',
   payWithVoucher: 'Order with voucher',
   processingOrder: 'Processing order…',
   goToPayment: 'Go to payment',
@@ -839,13 +841,17 @@ export const CheckoutPage: React.FC = () => {
    * Those customers keep the explicit button below.
    */
   useEffect(() => {
-    if (cartIsEmpty || paymentData || voucherCoversAll) return
+    // The adapter refuses without one: "A valid customer email is required to
+    // make a purchase." Firing before the address is typed just returns 400
+    // on every keystroke, so the email gates the request — not a button.
+    if (!checkoutEmail.includes('@') || cartIsEmpty || paymentData || voucherCoversAll) return
     if (createAccountOpt || isProcessingPayment || isCreatingAccount) return
     const timer = setTimeout(() => {
       void initiatePaymentIntent('stripe')
-    }, 300)
+    }, 600)
     return () => clearTimeout(timer)
   }, [
+    checkoutEmail,
     cartIsEmpty,
     paymentData,
     voucherCoversAll,
@@ -1543,6 +1549,21 @@ export const CheckoutPage: React.FC = () => {
               {t.tryAgain}
             </Button>
           </div>
+        )}
+
+        {/* The payment step is always on the page, even before it can be
+            interactive. Stripe needs a PaymentIntent to render the card form
+            and the adapter refuses to create one without a customer email, so
+            until the address is typed this shows the heading and says why —
+            rather than the section simply not existing, which read as payment
+            being missing from the checkout entirely. */}
+        {!voucherCoversAll && !paymentData && (
+          <section className="p-6 sm:p-8">
+            <h2 className="mb-2 font-display text-subheading font-bold text-ff-near-black">
+              {t.payment}
+            </h2>
+            <p className="text-body-sm text-ff-gray-text-light">{t.paymentWaiting}</p>
+          </section>
         )}
 
         <Suspense fallback={<React.Fragment />}>
