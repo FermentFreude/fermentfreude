@@ -80,6 +80,18 @@ const CHECKOUT_DE = {
   processingOrder: 'Bestellung wird bearbeitet…',
   goToPayment: 'Zur Zahlung',
   cancelPayment: 'Zahlung abbrechen',
+  placeOrder: 'Kostenpflichtig bestellen',
+  // Split around the two links so they can be real <Link>s rather than
+  // dangerouslySetInnerHTML. Widerrufsrecht has no page of its own — it is a
+  // section inside the AGB, which is why it is named rather than linked.
+  legalPre: 'Mit deiner Bestellung akzeptierst du unsere',
+  legalAgb: 'AGB',
+  legalMid: 'und unsere',
+  legalPrivacy: 'Datenschutzerklärung',
+  legalPost:
+    '. Dein gesetzliches Widerrufsrecht und die Bedingungen für Rücksendungen sind in den AGB beschrieben.',
+  pickupCalendarNote:
+    'Für die Abholung buchst du nach der Bezahlung einen Termin über Google Kalender. Den Link bekommst du sofort auf der Bestätigungsseite und per E-Mail — bitte gib deshalb eine E-Mail-Adresse an, auf die du auch wirklich zugreifen kannst.',
   tryAgain: 'Erneut versuchen',
   yourCart: 'Warenkorb',
   orderFailed: 'Bestellung fehlgeschlagen.',
@@ -152,6 +164,15 @@ const CHECKOUT_EN = {
   processingOrder: 'Processing order…',
   goToPayment: 'Go to payment',
   cancelPayment: 'Cancel payment',
+  placeOrder: 'Place binding order',
+  legalPre: 'By placing your order you accept our',
+  legalAgb: 'terms and conditions',
+  legalMid: 'and our',
+  legalPrivacy: 'privacy policy',
+  legalPost:
+    '. Your statutory right of withdrawal and the conditions for returns are set out in the terms and conditions.',
+  pickupCalendarNote:
+    'For pickup you book a slot through Google Calendar after payment. You get the link straight away on the confirmation page and by email — so please use an email address you can actually access.',
   tryAgain: 'Try again',
   yourCart: 'Your cart',
   orderFailed: 'Order failed.',
@@ -808,6 +829,36 @@ export const CheckoutPage: React.FC = () => {
     ],
   )
 
+  /**
+   * Payment is part of the page, not a second step behind a button, so the
+   * PaymentIntent is created as soon as the details needed to charge are
+   * valid — the card form is simply there when the customer reaches it.
+   *
+   * Debounced, because `canGoToPayment` flips true mid-typing (the moment the
+   * email parses) and we don't want a PaymentIntent per keystroke.
+   *
+   * Deliberately skipped when the customer ticked "create an account": that
+   * path has to register them *before* charging, which is a side effect that
+   * must never fire off a debounce while they are still choosing a password.
+   * Those customers keep the explicit button below.
+   */
+  useEffect(() => {
+    if (!canGoToPayment || paymentData || voucherCoversAll) return
+    if (createAccountOpt || isProcessingPayment || isCreatingAccount) return
+    const timer = setTimeout(() => {
+      void initiatePaymentIntent('stripe')
+    }, 600)
+    return () => clearTimeout(timer)
+  }, [
+    canGoToPayment,
+    paymentData,
+    voucherCoversAll,
+    createAccountOpt,
+    isProcessingPayment,
+    isCreatingAccount,
+    initiatePaymentIntent,
+  ])
+
   /* ── Voucher Handlers ── */
   const handleApplyVoucher = useCallback(async () => {
     setVoucherError(null)
@@ -943,7 +994,7 @@ export const CheckoutPage: React.FC = () => {
       {/* ── Left Column: Contact, Address, Payment ── */}
       <div className="min-w-0 flex-1 flex flex-col gap-8">
         {/* ── Contact Section ── */}
-        <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+        <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
           <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
             {t.contact}
           </h2>
@@ -1163,7 +1214,7 @@ export const CheckoutPage: React.FC = () => {
           // pickup slot is booked after payment via the Google Appointment
           // Schedule link (order confirmation page + email) — deliberately
           // not shown here.
-          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+          <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.storePickup}
             </h2>
@@ -1190,7 +1241,7 @@ export const CheckoutPage: React.FC = () => {
           // Mixed workshop + product cart: unchanged legacy flow (date/time
           // picker, workshop-locations lookup) — workshops are out of scope
           // for this change.
-          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+          <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.storePickup}
             </h2>
@@ -1266,7 +1317,7 @@ export const CheckoutPage: React.FC = () => {
             </FormItem>
           </section>
         ) : (
-          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+          <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.address}
             </h2>
@@ -1378,7 +1429,7 @@ export const CheckoutPage: React.FC = () => {
             if (!needsAllocation) return null
 
             return (
-              <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+              <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
                 <h2 className="mb-2 font-display text-subheading font-bold text-ff-near-black">
                   {isDe ? 'Deine Gäste' : 'Your guests'}
                 </h2>
@@ -1436,7 +1487,10 @@ export const CheckoutPage: React.FC = () => {
           >
             {isCreatingAccount ? '…' : isProcessingPayment ? t.processingOrder : t.payWithVoucher}
           </Button>
-        ) : !paymentData ? (
+        ) : !paymentData && createAccountOpt ? (
+          /* Only the create-an-account path still needs an explicit step: the
+             registration has to happen before the charge, so it can't be
+             triggered off the debounce that opens payment for everyone else. */
           <Button
             className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
             disabled={!canGoToPayment || isCreatingAccount}
@@ -1453,7 +1507,7 @@ export const CheckoutPage: React.FC = () => {
         ) : null}
 
         {!paymentData?.['clientSecret'] && error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-6">
+          <div className="rounded-(--radius-card) border border-red-200 bg-red-50 p-6">
             <Message error={error} />
             <Button
               onClick={(e) => {
@@ -1469,7 +1523,7 @@ export const CheckoutPage: React.FC = () => {
 
         <Suspense fallback={<React.Fragment />}>
           {!voucherCoversAll && paymentData && typeof paymentData['clientSecret'] === 'string' && (
-            <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+            <section className="rounded-(--radius-card) border border-ff-border-light bg-white p-6 sm:p-8">
               <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
                 {t.payment}
               </h2>
@@ -1522,12 +1576,6 @@ export const CheckoutPage: React.FC = () => {
                     pickupDate={pickupDate}
                     pickupTime={pickupTime}
                   />
-                  <button
-                    className="self-start font-display text-body-sm font-bold text-ff-gray-text-light underline underline-offset-2 transition-colors hover:text-ff-near-black"
-                    onClick={() => setPaymentData(null)}
-                  >
-                    {t.cancelPayment}
-                  </button>
                 </div>
               </Elements>
             </section>
@@ -1537,7 +1585,7 @@ export const CheckoutPage: React.FC = () => {
 
       {!cartIsEmpty && (
         <aside className="order-first w-full lg:order-last lg:w-95 lg:shrink-0 lg:sticky lg:top-8 lg:max-h-[calc(100vh-9rem)]">
-          <div className="rounded-xl border border-ff-border-light bg-white overflow-y-auto max-h-[calc(100vh-6rem)] md:max-h-[calc(100vh-8rem)] lg:max-h-none p-6 sm:p-8">
+          <div className="rounded-(--radius-card) border border-ff-border-light bg-white overflow-y-auto max-h-[calc(100vh-6rem)] md:max-h-[calc(100vh-8rem)] lg:max-h-none p-6 sm:p-8">
             <h2 className="font-display text-subheading font-bold tracking-tight text-ff-near-black">
               {t.yourCart}
             </h2>
@@ -1749,6 +1797,37 @@ export const CheckoutPage: React.FC = () => {
                 />
               </div>
             </div>
+
+            {/* How pickup actually works, next to the total rather than buried
+                further up the page. Explanatory, not a consent gate — the
+                order is never blocked on it. */}
+            {isAllPhysicalPickup && (
+              <p className="mt-6 border-t border-ff-border-light pt-6 text-caption leading-relaxed text-ff-gray-text-light">
+                {t.pickupCalendarNote}
+              </p>
+            )}
+
+            {/* Sits with the total because that is where the commitment is
+                made. Both destinations are real pages in this app; the right
+                of withdrawal is a section of the AGB, so it is named there
+                rather than linked to a route that does not exist. */}
+            <p className="mt-5 text-caption leading-relaxed text-ff-gray-text-light">
+              {t.legalPre}{' '}
+              <Link
+                href="/agb"
+                className="font-medium text-ff-near-black underline underline-offset-2 transition-colors hover:decoration-transparent"
+              >
+                {t.legalAgb}
+              </Link>{' '}
+              {t.legalMid}{' '}
+              <Link
+                href="/datenschutz"
+                className="font-medium text-ff-near-black underline underline-offset-2 transition-colors hover:decoration-transparent"
+              >
+                {t.legalPrivacy}
+              </Link>
+              {t.legalPost}
+            </p>
           </div>
         </aside>
       )}
