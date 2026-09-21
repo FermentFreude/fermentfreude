@@ -87,7 +87,21 @@ async function uploadMedia(
   return String(media.id)
 }
 
+function assertStagingDatabase() {
+  const dbUrl = process.env.DATABASE_URL ?? ''
+  if (!dbUrl.includes('-staging')) {
+    console.error(
+      '\n🚫 REFUSING TO RUN: DATABASE_URL does not look like the staging database.\n' +
+        '   This script rewrites shop content — it must never run against production.\n' +
+        '   If this really is staging, its connection string must contain "-staging".\n',
+    )
+    process.exit(1)
+  }
+}
+
 async function main() {
+  assertStagingDatabase()
+
   const payload = await getPayload({ config })
   const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 5)}`
   payload.logger.info('🛒 Syncing shop CMS (products + page DE/EN)…')
