@@ -90,7 +90,21 @@ const LABELS_EN = {
   shopFooterCta: 'Visit the shop',
 }
 
+function assertStagingDatabase() {
+  const dbUrl = process.env.DATABASE_URL ?? ''
+  if (!dbUrl.includes('-staging')) {
+    console.error(
+      '\n🚫 REFUSING TO RUN: DATABASE_URL does not look like the staging database.\n' +
+        '   This script rewrites shop content — it must never run against production.\n' +
+        '   If this really is staging, its connection string must contain "-staging".\n',
+    )
+    process.exit(1)
+  }
+}
+
 async function main() {
+  assertStagingDatabase()
+
   const { default: config } = await import('@payload-config')
   const { getPayload } = await import('payload')
   const payload = await getPayload({ config })
