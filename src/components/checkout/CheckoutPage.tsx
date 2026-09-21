@@ -54,9 +54,9 @@ const CHECKOUT_DE = {
   noShipping: 'Workshop / digitales Produkt — keine Lieferadresse erforderlich.',
   storePickup: 'Abholung im Geschäft',
   pickupAfterPaymentNote:
-    'Nach der Bezahlung kannst du direkt einen Termin buchen, um deine Bestellung abzuholen — du erhältst den Link auf der Bestätigungsseite und per E-Mail.',
+    'Gleich nach der Bezahlung kannst du deinen Abholtermin buchen. Den Link dazu findest du auf der Bestätigungsseite und in deiner E-Mail.',
   pickupWorkshopNote:
-    'Dein Warenkorb enthält auch einen Workshop. Die Abholdetails gelten nur für die physischen Produkte — dein Workshop-Termin bleibt unverändert.',
+    'Dein Warenkorb enthält auch einen Workshop. Die Abholdetails gelten nur für die physischen Produkte. Dein Workshop-Termin bleibt genau so, wie du ihn gebucht hast.',
   viewOnMaps: 'Auf Google Maps ansehen',
   pickupDateLabel: 'Abholdatum',
   pickupTimeLabel: 'Abholzeit',
@@ -137,9 +137,9 @@ const CHECKOUT_EN = {
   noShipping: 'Workshop / digital product — no shipping address required.',
   storePickup: 'Store Pickup',
   pickupAfterPaymentNote:
-    'After payment you can book an appointment to collect your order — you will get the link on the confirmation page and by email.',
+    'Right after payment you can book your pickup slot. You will find the link on the confirmation page and in your email.',
   pickupWorkshopNote:
-    'Your cart also includes a workshop. The pickup details below apply to the physical products only — your workshop date stays as booked.',
+    'Your cart also includes a workshop. The pickup details apply to the physical products only. Your workshop date stays exactly as you booked it.',
   viewOnMaps: 'View on Google Maps',
   pickupDateLabel: 'Pickup Date',
   pickupTimeLabel: 'Pickup Time',
@@ -1254,9 +1254,11 @@ export const CheckoutPage: React.FC = () => {
               </address>
             </div>
 
-            <p className="mt-6 flex items-start gap-3 text-body-sm leading-relaxed text-ff-gray-text-light">
+            {/* Bold, and near-black rather than the muted grey: bold muted
+                text reads worse than either weight on its own. */}
+            <p className="mt-6 flex items-start gap-3 text-body-sm font-semibold leading-relaxed text-ff-near-black">
               <CalendarCheck
-                className="mt-0.5 h-5 w-5 shrink-0 text-ff-gray-text-light"
+                className="mt-0.5 h-5 w-5 shrink-0 text-ff-near-black"
                 strokeWidth={1.5}
               />
               <span>{t.pickupAfterPaymentNote}</span>
