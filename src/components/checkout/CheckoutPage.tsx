@@ -10,7 +10,7 @@ import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
-import { CalendarCheck } from 'lucide-react'
+import { CalendarCheck, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { Suspense, useCallback, useEffect, useState } from 'react'
@@ -1157,8 +1157,9 @@ export const CheckoutPage: React.FC = () => {
                 </div>
               </FormItem>
 
-              {/* Optional account creation */}
-              <div className="rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
+              {/* Optional account creation — a checkbox, so it reads as one
+                  rather than as another panel competing with the form above. */}
+              <div className="border-t border-ff-border-light pt-5">
                 <div className="flex items-start gap-3">
                   <Checkbox
                     id="createAccountOpt"
@@ -1219,24 +1220,41 @@ export const CheckoutPage: React.FC = () => {
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.storePickup}
             </h2>
-            <div className="rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
-              <h3 className="mb-3 font-display font-semibold text-ff-near-black">
-                {pickupLocation.name}
-              </h3>
-              <p className="mb-3 text-body-sm text-ff-gray-text-light">{pickupLocation.address}</p>
-              <a
-                href={pickupLocation.mapLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body-sm text-ff-gold-accent underline hover:text-ff-near-black"
-              >
-                {t.viewOnMaps}
-              </a>
+            {/* An address, set as an address — not a panel inside a panel.
+                The link is near-black with a gold underline rather than gold
+                text: #e5b765 on this ground is about 1.9:1, well under the
+                4.5:1 minimum, so the colour carries the brand while the text
+                carries the contrast. */}
+            <div className="flex items-start gap-3">
+              <MapPin
+                className="mt-0.5 h-5 w-5 shrink-0 text-ff-gray-text-light"
+                strokeWidth={1.5}
+              />
+              <address className="not-italic">
+                <span className="block font-display font-semibold text-ff-near-black">
+                  {pickupLocation.name}
+                </span>
+                <span className="mt-0.5 block text-body-sm text-ff-gray-text-light">
+                  {pickupLocation.address}
+                </span>
+                <a
+                  href={pickupLocation.mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block text-body-sm font-medium text-ff-near-black underline decoration-ff-gold-accent decoration-2 underline-offset-4 transition-colors hover:decoration-ff-near-black"
+                >
+                  {t.viewOnMaps}
+                </a>
+              </address>
             </div>
-            <div className="mt-4 flex items-start gap-3 rounded-lg bg-[#f5f1e8] px-5 py-4">
-              <CalendarCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#555954]" />
-              <p className="text-body-sm text-[#555954]">{t.pickupAfterPaymentNote}</p>
-            </div>
+
+            <p className="mt-6 flex items-start gap-3 text-body-sm leading-relaxed text-ff-gray-text-light">
+              <CalendarCheck
+                className="mt-0.5 h-5 w-5 shrink-0 text-ff-gray-text-light"
+                strokeWidth={1.5}
+              />
+              <span>{t.pickupAfterPaymentNote}</span>
+            </p>
           </section>
         ) : isAllPhysicalPickup ? (
           // Mixed workshop + product cart: unchanged legacy flow (date/time
@@ -1247,24 +1265,29 @@ export const CheckoutPage: React.FC = () => {
               {t.storePickup}
             </h2>
             {hasWorkshop && (
-              <div className="mb-6 rounded-lg bg-[#f5f1e8] px-5 py-4 text-body-sm text-[#555954]">
+              <p className="mb-6 text-body-sm leading-relaxed text-ff-gray-text-light">
                 {t.pickupWorkshopNote}
-              </div>
+              </p>
             )}
             {/* Pickup Location */}
-            <div className="mb-6 rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
-              <h3 className="mb-3 font-display font-semibold text-ff-near-black">
-                {pickupLocation.name}
-              </h3>
-              <p className="mb-3 text-body-sm text-ff-gray-text-light">{pickupLocation.address}</p>
-              <a
-                href={pickupLocation.mapLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body-sm text-ff-gold-accent underline hover:text-ff-near-black"
-              >
-                {t.viewOnMaps}
-              </a>
+            <div className="mb-6 flex items-start gap-3">
+              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-ff-gray-text-light" strokeWidth={1.5} />
+              <address className="not-italic">
+                <span className="block font-display font-semibold text-ff-near-black">
+                  {pickupLocation.name}
+                </span>
+                <span className="mt-0.5 block text-body-sm text-ff-gray-text-light">
+                  {pickupLocation.address}
+                </span>
+                <a
+                  href={pickupLocation.mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block text-body-sm font-medium text-ff-near-black underline decoration-ff-gold-accent decoration-2 underline-offset-4 transition-colors hover:decoration-ff-near-black"
+                >
+                  {t.viewOnMaps}
+                </a>
+              </address>
             </div>
 
             {/* Pickup Date */}
