@@ -36,10 +36,13 @@ import { PickupBookingModal } from './PickupBookingModal'
  * reserved for the single action the customer still has to take (booking a
  * pickup slot) — everything else is outlined, so nothing competes with it.
  */
-const CARD = 'rounded-[--radius-lg] border border-ff-border-light bg-ff-cream p-6'
-const CARD_TITLE = 'mb-4 font-display text-lg font-semibold text-ff-near-black'
+const CARD = 'rounded-(--radius-card) border border-ff-border-light bg-ff-cream p-6'
 const BUTTON_SECONDARY =
-  'flex-1 rounded-[--radius-pill] border border-ff-near-black px-6 py-3 text-center font-display font-medium text-ff-near-black transition-colors hover:bg-ff-near-black hover:text-white'
+  'flex-1 rounded-(--radius-pill) border border-ff-near-black px-6 py-3 text-center font-display font-medium text-ff-near-black transition-colors hover:bg-ff-near-black hover:text-white'
+
+/** Label/value row inside the single summary card. */
+const ROW_LABEL = 'text-ff-text-muted'
+const ROW_VALUE = 'font-display font-semibold text-ff-near-black'
 
 type Props = {
   data: OrderConfirmationData
@@ -93,36 +96,32 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
             several competing choices. */}
         {pickupBookingUrl && <PickupBookingCta url={pickupBookingUrl} locale={locale} />}
 
-        {/* Order information */}
-        {orderId && (
-          <section className={CARD}>
-            <h2 className={CARD_TITLE}>{t.orderInfo}</h2>
+        {/* Everything the customer might want to look up, in one card.
+            These were four separate cards — order info, items, pickup address
+            and a numbered "what's next" list. The list only restated the
+            booking card above it, and splitting the rest into three bordered
+            boxes made a short receipt look like a long form. Hairlines
+            separate the groups now instead of borders. */}
+        <section className={CARD}>
+          {orderId && (
             <dl className="space-y-2.5 text-body-sm">
               <div className="flex justify-between gap-4">
-                <dt className="text-ff-text-muted">{t.orderNumber}</dt>
-                <dd className="font-display font-semibold text-ff-near-black">
-                  #{orderId.slice(0, 8).toUpperCase()}
-                </dd>
+                <dt className={ROW_LABEL}>{t.orderNumber}</dt>
+                <dd className={ROW_VALUE}>#{orderId.slice(0, 8).toUpperCase()}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-ff-text-muted">{t.orderDate}</dt>
-                <dd className="font-display font-semibold text-ff-near-black">
-                  {formatDate(new Date().toISOString())}
-                </dd>
+                <dt className={ROW_LABEL}>{t.orderDate}</dt>
+                <dd className={ROW_VALUE}>{formatDate(new Date().toISOString())}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-ff-text-muted">{t.emailConfirmation}</dt>
-                <dd className="font-display font-semibold text-ff-near-black">{t.sentToInbox}</dd>
+                <dt className={ROW_LABEL}>{t.emailConfirmation}</dt>
+                <dd className={ROW_VALUE}>{t.sentToInbox}</dd>
               </div>
             </dl>
-          </section>
-        )}
+          )}
 
-        {/* Items */}
-        {items.length > 0 && (
-          <section className={CARD}>
-            <h2 className={CARD_TITLE}>{t.items}</h2>
-            <ul className="flex flex-col gap-6">
+          {items.length > 0 && (
+            <ul className="mt-6 flex flex-col gap-6 border-t border-ff-border-light pt-6">
               {items.map((item) => (
                 <li key={item.id}>
                   <ProductItem
@@ -133,61 +132,15 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
                 </li>
               ))}
             </ul>
-          </section>
-        )}
+          )}
 
-        {/* Where to collect — address only. Booking lives in the card above;
-            repeating the button here is what made this page feel like three
-            competing calls to action. */}
-        <section className={CARD}>
-          <h2 className={CARD_TITLE}>{t.pickupDetails}</h2>
-          <div className="flex items-start gap-3">
-            <Store className="mt-0.5 h-5 w-5 shrink-0 text-ff-gold" />
+          <div className="mt-6 flex items-start gap-3 border-t border-ff-border-light pt-6">
+            <Store className="mt-0.5 h-5 w-5 shrink-0 text-ff-gold" strokeWidth={1.5} />
             <div>
-              <p className="font-display font-semibold text-ff-near-black">{pickupLocationName}</p>
+              <p className={ROW_VALUE}>{pickupLocationName}</p>
               <p className="text-body-sm text-ff-gray-text">{pickupLocationAddress}</p>
             </div>
           </div>
-        </section>
-
-        {/* What happens next */}
-        <section className={CARD}>
-          <h2 className={CARD_TITLE}>{t.whatsNext}</h2>
-          <ol className="space-y-5">
-            <li className="flex gap-4">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ff-near-black">
-                <CheckCircle className="h-5 w-5 text-white" />
-              </span>
-              <div>
-                <h3 className="font-display font-semibold text-ff-near-black">
-                  {t.orderConfirmed}
-                </h3>
-                <p className="text-body-sm text-ff-gray-text">{t.pickupStep1Desc}</p>
-              </div>
-            </li>
-            <li className="flex gap-4">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ff-gold">
-                <CalendarCheck className="h-5 w-5 text-ff-gold" />
-              </span>
-              <div>
-                <h3 className="font-display font-semibold text-ff-near-black">
-                  {t.pickupStep2Title}
-                </h3>
-                <p className="text-body-sm text-ff-gray-text">{t.pickupStep2Desc}</p>
-              </div>
-            </li>
-            <li className="flex gap-4">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ff-gold">
-                <Store className="h-5 w-5 text-ff-gold" />
-              </span>
-              <div>
-                <h3 className="font-display font-semibold text-ff-near-black">
-                  {t.readyForPickup}
-                </h3>
-                <p className="text-body-sm text-ff-gray-text">{t.pickupStep3Desc}</p>
-              </div>
-            </li>
-          </ol>
         </section>
 
         {/* Secondary actions — never gold, so nothing competes with booking */}
@@ -231,7 +184,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
         {/* Hero */}
         <div className="space-y-6">
           {workshopImage ? (
-            <div className="relative w-full aspect-21/9 rounded-[--radius-lg] overflow-hidden bg-ff-cream">
+            <div className="relative w-full aspect-21/9 rounded-(--radius-card) overflow-hidden bg-ff-cream">
               <Media resource={workshopImage} fill imgClassName="object-cover" priority />
               <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/0 to-black/0" />
               <span className="absolute bottom-5 left-5 inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full text-xs font-display font-bold uppercase tracking-wider text-ff-near-black">
@@ -256,7 +209,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
 
         {/* Booking summary */}
         {bookingSummary && (
-          <div className="border border-ff-border-light rounded-[--radius-lg] p-6 sm:p-8">
+          <div className="border border-ff-border-light rounded-(--radius-card) p-6 sm:p-8">
             <div className="flex items-start justify-between gap-4 mb-6">
               <div>
                 <p className="text-xs font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1.5">
@@ -309,7 +262,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
         {/* Order Info — shown for guests and account holders alike; only the
             account CTA below differs between them. */}
         {orderId && (
-          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+          <Card className="p-6 border border-ff-border-light shadow-sm rounded-(--radius-card)">
             <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
               {t.orderInfo}
             </h2>
@@ -339,7 +292,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
           {downloadToken && orderId && (
             <Link
               href={`/orders/${orderId}/tickets?token=${downloadToken}`}
-              className="flex-1 px-6 py-4 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-bold text-center"
+              className="flex-1 px-6 py-4 bg-ff-near-black text-white rounded-(--radius-pill) hover:opacity-90 transition-opacity font-display font-bold text-center"
             >
               {t.viewTickets}
             </Link>
@@ -347,7 +300,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
           {manageBookingLinks.length > 0 && (
             <Link
               href={manageBookingLinks[0].url}
-              className="flex-1 px-6 py-4 bg-ff-gold text-ff-near-black rounded-[--radius-pill] hover:bg-ff-gold-accent-dark transition-colors font-display font-bold text-center"
+              className="flex-1 px-6 py-4 bg-ff-gold text-ff-near-black rounded-(--radius-pill) hover:bg-ff-gold-accent-dark transition-colors font-display font-bold text-center"
             >
               {t.manageBookingCta}
             </Link>
@@ -355,7 +308,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
         </div>
 
         {/* Profile CTA — go to account, or create one as a guest */}
-        <div className="border border-ff-border-light rounded-[--radius-lg] p-6 flex flex-col sm:flex-row items-center justify-between gap-5 text-center sm:text-left">
+        <div className="border border-ff-border-light rounded-(--radius-card) p-6 flex flex-col sm:flex-row items-center justify-between gap-5 text-center sm:text-left">
           {isLoggedIn ? (
             <>
               <div>
@@ -366,7 +319,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
               </div>
               <Link
                 href={orderId ? `/account/orders/${orderId}` : '/account/orders'}
-                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 border-2 border-ff-near-black text-ff-near-black rounded-[--radius-pill] hover:bg-ff-near-black hover:text-white transition-colors font-display font-bold text-sm"
+                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 border-2 border-ff-near-black text-ff-near-black rounded-(--radius-pill) hover:bg-ff-near-black hover:text-white transition-colors font-display font-bold text-sm"
               >
                 {t.goToProfile}
                 <ArrowRight className="w-4 h-4" />
@@ -382,7 +335,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
               </div>
               <Link
                 href="/create-account"
-                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 border-2 border-ff-near-black text-ff-near-black rounded-[--radius-pill] hover:bg-ff-near-black hover:text-white transition-colors font-display font-bold text-sm"
+                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 border-2 border-ff-near-black text-ff-near-black rounded-(--radius-pill) hover:bg-ff-near-black hover:text-white transition-colors font-display font-bold text-sm"
               >
                 {t.createAccountPrompt}
                 <ArrowRight className="w-4 h-4" />
@@ -436,7 +389,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {otherWorkshops.map((w) => (
                 <Link key={w.slug} href={`/workshops/${w.slug}`} className="group block">
-                  <div className="relative aspect-4/3 rounded-[--radius-lg] overflow-hidden mb-3 bg-ff-cream">
+                  <div className="relative aspect-4/3 rounded-(--radius-card) overflow-hidden mb-3 bg-ff-cream">
                     {w.image && (
                       <Media
                         resource={w.image}
@@ -459,7 +412,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
         <div className="text-center">
           <Link
             href="/workshops"
-            className="inline-flex items-center gap-2 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium"
+            className="inline-flex items-center gap-2 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-(--radius-pill) hover:bg-ff-cream transition-colors font-display font-medium"
           >
             {t.browseMoreWorkshops}
           </Link>
@@ -499,7 +452,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
 
         {/* Order Info */}
         {orderId && (
-          <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+          <Card className="p-6 border border-ff-border-light shadow-sm rounded-(--radius-card)">
             <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
               {t.orderInfo}
             </h2>
@@ -525,7 +478,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
         )}
 
         {/* What's Next — Course */}
-        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+        <Card className="p-6 border border-ff-border-light shadow-sm rounded-(--radius-card)">
           <h2 className="text-lg font-display font-semibold text-ff-near-black mb-6">
             {t.whatsNext}
           </h2>
@@ -569,7 +522,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
         </Card>
 
         {/* Receipt note */}
-        <Card className="p-4 border border-ff-border-light shadow-sm rounded-[--radius-lg] bg-ff-cream">
+        <Card className="p-4 border border-ff-border-light shadow-sm rounded-(--radius-card) bg-ff-cream">
           <p className="text-body-sm text-ff-text-muted text-center mb-3">
             {locale === 'de'
               ? 'Deine Rechnung wurde per E-Mail gesendet.'
@@ -580,7 +533,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
               <a
                 href={`/api/orders/${orderId}/receipt?token=${downloadToken}`}
                 download
-                className="inline-flex items-center gap-2 px-4 py-2 bg-ff-near-black text-white text-sm rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-ff-near-black text-white text-sm rounded-(--radius-pill) hover:opacity-90 transition-opacity font-display font-medium"
               >
                 <Download className="w-4 h-4" />
                 {locale === 'de' ? 'Rechnung herunterladen' : 'Download Receipt'}
@@ -595,13 +548,13 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
             <>
               <Link
                 href="/account/learning"
-                className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+                className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-(--radius-pill) hover:opacity-90 transition-opacity font-display font-medium text-center"
               >
                 {t.goToLearning}
               </Link>
               <Link
                 href="/courses"
-                className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
+                className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-(--radius-pill) hover:bg-ff-cream transition-colors font-display font-medium text-center"
               >
                 {t.browseMoreCourses}
               </Link>
@@ -609,7 +562,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
           ) : (
             <Link
               href="/courses"
-              className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+              className="flex-1 px-6 py-3 bg-ff-near-black text-white rounded-(--radius-pill) hover:opacity-90 transition-opacity font-display font-medium text-center"
             >
               {t.browseMoreCourses}
             </Link>
@@ -617,7 +570,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
         </div>
 
         {/* Support */}
-        <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-[--radius-lg]">
+        <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-(--radius-card)">
           <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
           <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescCourse}</p>
           <a
@@ -649,7 +602,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
 
       {/* Order Info */}
       {orderId && (
-        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+        <Card className="p-6 border border-ff-border-light shadow-sm rounded-(--radius-card)">
           <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
             {t.orderInfo}
           </h2>
@@ -676,7 +629,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
 
       {/* Items */}
       {items.length > 0 && (
-        <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+        <Card className="p-6 border border-ff-border-light shadow-sm rounded-(--radius-card)">
           <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
             {t.items}
           </h2>
@@ -691,7 +644,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
       )}
 
       {/* Timeline */}
-      <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+      <Card className="p-6 border border-ff-border-light shadow-sm rounded-(--radius-card)">
         <h2 className="text-lg font-display font-semibold text-ff-near-black mb-6">
           {t.whatsNext}
         </h2>
@@ -733,7 +686,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
       </Card>
 
       {/* Next Steps */}
-      <Card className="p-6 border border-ff-border-light shadow-sm rounded-[--radius-lg]">
+      <Card className="p-6 border border-ff-border-light shadow-sm rounded-(--radius-card)">
         <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
           {t.whatYouCanDo}
         </h2>
@@ -758,7 +711,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
       </Card>
 
       {/* Receipt note */}
-      <Card className="p-4 border border-ff-border-light shadow-sm rounded-[--radius-lg] bg-ff-cream">
+      <Card className="p-4 border border-ff-border-light shadow-sm rounded-(--radius-card) bg-ff-cream">
         <p className="text-body-sm text-ff-text-muted text-center mb-3">
           {locale === 'de'
             ? 'Deine Rechnung wurde per E-Mail gesendet.'
@@ -769,7 +722,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
             <a
               href={`/api/orders/${orderId}/receipt?token=${downloadToken}`}
               download
-              className="inline-flex items-center gap-2 px-4 py-2 bg-ff-near-black text-white text-sm rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-ff-near-black text-white text-sm rounded-(--radius-pill) hover:opacity-90 transition-opacity font-display font-medium"
             >
               <Download className="w-4 h-4" />
               {locale === 'de' ? 'Rechnung herunterladen' : 'Download Receipt'}
@@ -784,13 +737,13 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
           <>
             <Link
               href="/account/orders"
-              className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+              className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-(--radius-pill) hover:opacity-90 transition-opacity font-display font-medium text-center"
             >
               {t.viewMyOrders}
             </Link>
             <Link
               href="/shop"
-              className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
+              className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-(--radius-pill) hover:bg-ff-cream transition-colors font-display font-medium text-center"
             >
               {t.continueShopping}
             </Link>
@@ -799,13 +752,13 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
           <>
             <Link
               href="/create-account"
-              className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-[--radius-pill] hover:opacity-90 transition-opacity font-display font-medium text-center"
+              className="flex-1 px-6 py-3 bg-ff-gold text-white rounded-(--radius-pill) hover:opacity-90 transition-opacity font-display font-medium text-center"
             >
               {t.createAccount}
             </Link>
             <Link
               href="/shop"
-              className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-[--radius-pill] hover:bg-ff-cream transition-colors font-display font-medium text-center"
+              className="flex-1 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-(--radius-pill) hover:bg-ff-cream transition-colors font-display font-medium text-center"
             >
               {t.continueShopping}
             </Link>
@@ -814,7 +767,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
       </div>
 
       {/* Support */}
-      <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-[--radius-lg]">
+      <Card className="p-6 border-0 shadow-sm bg-ff-cream rounded-(--radius-card)">
         <h3 className="font-display font-semibold text-ff-near-black mb-2">{t.questions}</h3>
         <p className="text-body-sm text-ff-text-muted mb-4">{t.questionsDescOrder}</p>
         <a

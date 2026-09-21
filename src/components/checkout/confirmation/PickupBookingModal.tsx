@@ -8,6 +8,11 @@ import { useEffect, useState } from 'react'
  * Opens over the confirmation page on arrival so the pickup booking is the
  * first thing the customer deals with.
  *
+ * Deliberately shorter than the card underneath: the explanation of when slots
+ * are available lives on the page, and repeating it here is what made the two
+ * read as the same message twice. The dialog states the action and offers the
+ * button — nothing else.
+ *
  * Dismissal is remembered per order in sessionStorage, so going back to the
  * page (or a re-render) doesn't nag someone who already booked or chose to do
  * it later. The same CTA stays on the page underneath, which is what makes
@@ -74,47 +79,46 @@ export function PickupBookingModal({
         type="button"
         aria-label={t.pickupModalDismiss}
         onClick={dismiss}
-        className="absolute inset-0 h-full w-full cursor-default bg-black/50"
+        className="absolute inset-0 h-full w-full cursor-default bg-ff-near-black/70 backdrop-blur-sm"
       />
-      <div className="relative z-10 w-full max-w-md rounded-[--radius-lg] bg-white p-6 sm:p-8 shadow-xl">
+
+      <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-(--radius-card) bg-ff-near-black px-7 pb-8 pt-10 text-center shadow-2xl sm:px-9">
         <button
           type="button"
           onClick={dismiss}
           aria-label={t.pickupModalDismiss}
-          className="absolute right-4 top-4 rounded-full p-1 text-ff-text-muted transition-colors hover:bg-ff-cream hover:text-ff-near-black"
+          className="absolute right-4 top-4 rounded-full p-1.5 text-white/45 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ff-gold"
         >
-          <X className="h-5 w-5" />
+          <X className="h-4.5 w-4.5" />
         </button>
 
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ff-gold">
-            <CalendarCheck className="h-7 w-7 text-ff-near-black" />
-          </div>
-          <h2
-            id="pickup-modal-title"
-            className="font-display text-2xl font-bold text-ff-near-black"
-          >
-            {t.pickupCtaTitle}
-          </h2>
-          <p className="text-body-sm text-ff-gray-text">{t.pickupCtaBody}</p>
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={dismiss}
-            className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-[--radius-pill] bg-ff-gold px-8 py-4 font-display text-lg font-bold text-ff-near-black transition-opacity hover:opacity-90"
-          >
-            <CalendarCheck className="h-5 w-5" />
-            {t.pickupCtaButton}
-          </a>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="text-body-sm text-ff-text-muted underline underline-offset-4 transition-colors hover:text-ff-near-black"
-          >
-            {t.pickupModalDismiss}
-          </button>
-        </div>
+        <CalendarCheck className="mx-auto h-8 w-8 text-ff-gold" strokeWidth={1.5} />
+
+        <h2
+          id="pickup-modal-title"
+          className="mt-5 text-balance font-display text-[1.6rem] font-bold leading-tight text-white"
+        >
+          {t.pickupCtaTitle}
+        </h2>
+
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={dismiss}
+          className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-(--radius-pill) bg-ff-gold px-8 py-3.5 font-display text-base font-bold text-ff-near-black transition-transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ff-gold"
+        >
+          <CalendarCheck className="h-4.5 w-4.5" />
+          {t.pickupCtaButton}
+        </a>
+
+        <button
+          type="button"
+          onClick={dismiss}
+          className="mt-4 text-body-sm text-white/50 underline underline-offset-4 transition-colors hover:text-white"
+        >
+          {t.pickupModalDismiss}
+        </button>
       </div>
     </div>
   )
