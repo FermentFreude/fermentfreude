@@ -10,7 +10,7 @@ import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
-import { MapPin } from 'lucide-react'
+import { MapPin, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { Suspense, useCallback, useEffect, useState } from 'react'
@@ -53,10 +53,8 @@ const CHECKOUT_DE = {
   address: 'Adresse',
   noShipping: 'Workshop / digitales Produkt — keine Lieferadresse erforderlich.',
   storePickup: 'Abholung im Geschäft',
-  pickupStepPay: 'Bezahlen',
-  pickupStepBook: 'Abholtermin buchen',
-  pickupStepBookHint: 'Den Link bekommst du sofort auf der Bestätigungsseite und per E-Mail.',
-  pickupStepCollect: 'Bestellung abholen',
+  pickupNote:
+    'Nach der Bezahlung bekommst du einen Link, um Tag und Uhrzeit für die Abholung auszuwählen.',
   emailPickupHint: 'An diese Adresse schicken wir dir den Link für deinen Abholtermin.',
   pickupWorkshopNote:
     'Dein Warenkorb enthält auch einen Workshop. Die Abholdetails gelten nur für die physischen Produkte. Dein Workshop-Termin bleibt genau so, wie du ihn gebucht hast.',
@@ -79,7 +77,7 @@ const CHECKOUT_DE = {
   voucherNetworkError: 'Verbindungsfehler. Bitte versuche es erneut.',
   voucherApplied: (value: number) => `Gutschein €${value} angewendet!`,
   payment: 'Zahlung',
-  paymentWaiting: 'Gib deine E-Mail-Adresse ein, um die Zahlungsarten zu laden.',
+  poweredByStripe: 'Sichere Zahlung über Stripe',
   payWithVoucher: 'Jetzt mit Gutschein bestellen',
   processingOrder: 'Bestellung wird bearbeitet…',
   goToPayment: 'Zur Zahlung',
@@ -139,10 +137,8 @@ const CHECKOUT_EN = {
   address: 'Address',
   noShipping: 'Workshop / digital product — no shipping address required.',
   storePickup: 'Store Pickup',
-  pickupStepPay: 'Pay',
-  pickupStepBook: 'Book your pickup slot',
-  pickupStepBookHint: 'You get the link straight away on the confirmation page and by email.',
-  pickupStepCollect: 'Collect your order',
+  pickupNote:
+    'After payment you receive a link to choose a day and time to pick up your order.',
   emailPickupHint: 'We send the link for your pickup slot to this address.',
   pickupWorkshopNote:
     'Your cart also includes a workshop. The pickup details apply to the physical products only. Your workshop date stays exactly as you booked it.',
@@ -165,7 +161,7 @@ const CHECKOUT_EN = {
   voucherNetworkError: 'Connection error. Please try again.',
   voucherApplied: (value: number) => `Voucher €${value} applied!`,
   payment: 'Payment',
-  paymentWaiting: 'Enter your email address to load the payment options.',
+  poweredByStripe: 'Secure payment via Stripe',
   payWithVoucher: 'Order with voucher',
   processingOrder: 'Processing order…',
   goToPayment: 'Go to payment',
@@ -846,26 +842,22 @@ export const CheckoutPage: React.FC = () => {
    * must never fire off a debounce while they are still choosing a password.
    * Those customers keep the explicit button below.
    */
+  // Escape closes the payment dialog and the page behind it stops scrolling,
+  // same contract as the pickup dialog on the confirmation page.
   useEffect(() => {
-    // The adapter refuses without one: "A valid customer email is required to
-    // make a purchase." Firing before the address is typed just returns 400
-    // on every keystroke, so the email gates the request — not a button.
-    if (!checkoutEmail.includes('@') || cartIsEmpty || paymentData || voucherCoversAll) return
-    if (createAccountOpt || isProcessingPayment || isCreatingAccount) return
-    const timer = setTimeout(() => {
-      void initiatePaymentIntent('stripe')
-    }, 600)
-    return () => clearTimeout(timer)
-  }, [
-    checkoutEmail,
-    cartIsEmpty,
-    paymentData,
-    voucherCoversAll,
-    createAccountOpt,
-    isProcessingPayment,
-    isCreatingAccount,
-    initiatePaymentIntent,
-  ])
+    const open = Boolean(paymentData?.['clientSecret']) && !voucherCoversAll
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPaymentData(null)
+    }
+    document.addEventListener('keydown', onKey)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [paymentData, voucherCoversAll])
 
   /* ── Voucher Handlers ── */
   const handleApplyVoucher = useCallback(async () => {
@@ -1269,41 +1261,9 @@ export const CheckoutPage: React.FC = () => {
               </address>
             </div>
 
-            {/* What happens after paying, as three beats rather than one
-                bold paragraph. A paragraph here gets skipped; three numbered
-                steps get read. Setting the expectation before payment is what
-                stops "where is my order?" mail afterwards.
-
-                This is the same shape as the "Nächste Schritte" list removed
-                from the confirmation page. There it restated what was already
-                on screen; here it describes something that has not happened
-                yet, which is the difference between redundant and useful. */}
-            <ol className="mt-7 flex flex-col gap-4 border-t border-ff-border-light pt-6">
-              {[
-                { label: t.pickupStepPay, hint: null },
-                { label: t.pickupStepBook, hint: t.pickupStepBookHint },
-                { label: t.pickupStepCollect, hint: null },
-              ].map((step, i) => (
-                <li key={step.label} className="flex items-start gap-3">
-                  <span
-                    aria-hidden="true"
-                    className="mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ff-near-black font-display text-caption font-bold text-white"
-                  >
-                    {i + 1}
-                  </span>
-                  <div className="min-w-0">
-                    <span className="block font-display text-body-sm font-semibold text-ff-near-black">
-                      {step.label}
-                    </span>
-                    {step.hint && (
-                      <span className="mt-0.5 block text-body-sm leading-relaxed text-ff-gray-text-light">
-                        {step.hint}
-                      </span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ol>
+            <p className="mt-5 text-body-sm leading-relaxed text-ff-gray-text-light">
+              {t.pickupNote}
+            </p>
           </section>
         ) : isAllPhysicalPickup ? (
           // Mixed workshop + product cart: unchanged legacy flow (date/time
@@ -1560,10 +1520,7 @@ export const CheckoutPage: React.FC = () => {
           >
             {isCreatingAccount ? '…' : isProcessingPayment ? t.processingOrder : t.payWithVoucher}
           </Button>
-        ) : !paymentData && createAccountOpt ? (
-          /* Only the create-an-account path still needs an explicit step: the
-             registration has to happen before the charge, so it can't be
-             triggered off the debounce that opens payment for everyone else. */
+        ) : !paymentData ? (
           <Button
             className="m-6 sm:m-8 rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
             disabled={!canGoToPayment || isCreatingAccount}
@@ -1594,27 +1551,45 @@ export const CheckoutPage: React.FC = () => {
           </div>
         )}
 
-        {/* The payment step is always on the page, even before it can be
-            interactive. Stripe needs a PaymentIntent to render the card form
-            and the adapter refuses to create one without a customer email, so
-            until the address is typed this shows the heading and says why —
-            rather than the section simply not existing, which read as payment
-            being missing from the checkout entirely. */}
-        {!voucherCoversAll && !paymentData && (
-          <section className="p-6 sm:p-8">
-            <h2 className="mb-2 font-display text-subheading font-bold text-ff-near-black">
-              {t.payment}
-            </h2>
-            <p className="text-body-sm text-ff-gray-text-light">{t.paymentWaiting}</p>
-          </section>
-        )}
-
         <Suspense fallback={<React.Fragment />}>
           {!voucherCoversAll && paymentData && typeof paymentData['clientSecret'] === 'string' && (
-            <section className="p-6 sm:p-8">
-              <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
-                {t.payment}
-              </h2>
+            /* Payment opens over the page rather than extending it. The form
+               is the only thing to do once it is up, and a dialog says that
+               more plainly than another section appended to a long sheet.
+               Closing drops the PaymentIntent, which is what lets the voucher
+               field regenerate a correct one on the next open. */
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="payment-dialog-title"
+              className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+            >
+              <button
+                type="button"
+                aria-label={t.cancelPayment}
+                onClick={() => setPaymentData(null)}
+                className="absolute inset-0 h-full w-full cursor-default bg-ff-near-black/60 backdrop-blur-sm"
+              />
+              <section className="relative z-10 max-h-[92vh] w-full overflow-y-auto rounded-t-(--radius-card) bg-white p-6 sm:max-w-lg sm:rounded-(--radius-card) sm:p-8">
+                <div className="mb-6 flex items-start justify-between gap-4">
+                  <div>
+                    <h2
+                      id="payment-dialog-title"
+                      className="font-display text-subheading font-bold text-ff-near-black"
+                    >
+                      {t.payment}
+                    </h2>
+                    <p className="mt-1 text-caption text-ff-gray-text-light">{t.poweredByStripe}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentData(null)}
+                    aria-label={t.cancelPayment}
+                    className="-mr-1 -mt-1 shrink-0 rounded-full p-1.5 text-ff-gray-text-light transition-colors hover:bg-[#f5f1e8] hover:text-ff-near-black"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
               {error && (
                 <p className="mb-4 text-body-sm text-red-600">{`${t.errorPrefix}: ${error}`}</p>
               )}
@@ -1666,7 +1641,8 @@ export const CheckoutPage: React.FC = () => {
                   />
                 </div>
               </Elements>
-            </section>
+              </section>
+            </div>
           )}
         </Suspense>
       </div>
