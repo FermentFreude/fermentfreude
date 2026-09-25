@@ -79,7 +79,10 @@ export function PickupBookingModal({
         type="button"
         aria-label={t.pickupModalDismiss}
         onClick={dismiss}
-        className="absolute inset-0 h-full w-full cursor-default bg-ff-near-black/70 backdrop-blur-sm"
+        /* Frosted white rather than the usual dark scrim: the card is black,
+           and dimming the page behind it put dark on dark. Lightening the
+           backdrop is what makes the card read as lifted off the page. */
+        className="absolute inset-0 h-full w-full cursor-default bg-white/70 backdrop-blur-md"
       />
 
       <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-(--radius-card) bg-ff-near-black px-7 pb-8 pt-10 text-center shadow-2xl sm:px-9">
