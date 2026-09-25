@@ -79,16 +79,18 @@ export const ProductItem: React.FC<Props> = ({ product, quantity, variant, curre
           </div>
         </div>
 
-        {itemPrice && quantity && (
-          <div className="text-right">
-            <p className="font-medium text-lg">Subtotal</p>
-            <Price
-              className="font-mono text-primary/50 text-sm"
-              amount={itemPrice * quantity}
-              currencyCode={currencyCode}
-            />
-          </div>
-        )}
+        {/* The line total, with no label. This used to print the literal
+            word "Subtotal" above every row — untranslated, and wrong: a
+            per-line figure is a line total, and repeating "Subtotal" once
+            per product is what made a two-item order read as two separate
+            bills. The order total is shown once, by the page. */}
+        {itemPrice && quantity ? (
+          <Price
+            className="font-display text-base font-semibold text-ff-near-black"
+            amount={itemPrice * quantity}
+            currencyCode={currencyCode}
+          />
+        ) : null}
       </div>
     </div>
   )

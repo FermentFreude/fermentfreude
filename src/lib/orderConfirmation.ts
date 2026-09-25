@@ -37,6 +37,14 @@ export type OrderConfirmationData = {
   otherWorkshops: { slug: string; title: string; image: MediaType | string | null }[]
   manageBookingLinks: { workshopTitle: string; url: string }[]
   items: OrderConfirmationItem[]
+  /**
+   * What was actually charged, taken from the Order rather than summed from
+   * the line items — so vouchers and any discount are reflected instead of a
+   * client-side total that quietly disagrees with the customer's card
+   * statement. Null when the order could not be read.
+   */
+  total: number | null
+  currency: string | null
 }
 
 /**
@@ -93,6 +101,8 @@ async function fetchOrderConfirmationData({
     otherWorkshops: [],
     manageBookingLinks: [],
     items: [],
+    total: null,
+    currency: null,
   }
 
   // Pickup location + the Google Appointment Schedule booking link come from a
@@ -131,6 +141,8 @@ async function fetchOrderConfirmationData({
     if (order && typeof order === 'object') {
       const orderData = order as unknown as Record<string, unknown>
       data.downloadToken = (orderData.downloadToken as string | null) ?? null
+      data.total = typeof orderData.amount === 'number' ? orderData.amount : null
+      data.currency = typeof orderData.currency === 'string' ? orderData.currency : null
     }
 
     if (order?.items) {
