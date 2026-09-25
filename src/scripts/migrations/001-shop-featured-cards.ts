@@ -24,7 +24,8 @@ const BANNER_SLUG = 'kaeferbohnen-tempeh'
 // Supporting products only (Berglinsentempeh + seasonal Kimchi)
 const CARD_SLUGS = [
   'berglinsen-tempeh', // supporting 1
-  'classic-kimchi', // supporting 2 — title/ingredients stay editable in admin
+  'classic-kimchi', // legacy — migrated to kimchi
+  'kimchi', // supporting 2 — title/ingredients stay editable in admin
 ]
 
 const CARD_COLORS = [

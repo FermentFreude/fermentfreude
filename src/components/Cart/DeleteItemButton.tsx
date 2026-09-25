@@ -5,10 +5,12 @@ import { gtmRemoveFromCart } from '@/lib/gtm'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
 import { XIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import React, { useRef, useState } from 'react'
 
 export function DeleteItemButton({ item }: { item: CartItem }) {
   const { cart, isLoading, removeItem, refreshCart } = useCart()
+  const router = useRouter()
   const itemId = item.id
   const [isRemoving, setIsRemoving] = useState(false)
   const removingRef = useRef(false)
@@ -114,6 +116,14 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
             // Plugin does not refresh cart when remove returns 4xx ("not found").
             // Sync so ghost rows disappear.
             await refreshCart()
+
+            // Server-side availability (e.g. /workshops) already reflects the
+            // release the instant releaseWorkshopSpotsIfNeeded's request lands
+            // (see revalidateTag('workshop-appointments') in /api/cart/release-spots)
+            // — but this tab's own Server Component tree doesn't know to
+            // re-fetch it without this. Without it, a workshop date could look
+            // unavailable until a manual page reload even though it's actually free.
+            router.refresh()
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error)
             // Plugin returns 4xx when the row ID is already absent — treat as done.
@@ -122,6 +132,7 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
             }
             try {
               await refreshCart()
+              router.refresh()
             } catch {
               // ignore refresh errors
             }

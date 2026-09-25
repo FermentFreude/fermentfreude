@@ -73,11 +73,11 @@ export const SHOP_PRODUCT_IMAGES: ShopProductImageSpec[] = [
     },
   },
   {
-    slug: 'classic-kimchi',
+    slug: 'kimchi',
     driveNote:
       'Vom Feld ins Glas folder — screw-top jar, classic napa kimchi on black (seasonal jars in Kleine Zeitung folder are not this SKU)',
     primary: {
-      localPath: 'public/shop/kimchi-packaging-nobg.webp',
+      localPath: 'public/shop/kimchi-packaging-kimchi-only.webp',
       fallbackPath: 'public/shop/kimchi-david-jar.webp',
       filename: 'kimchi-packaging-shop.webp',
       altDe: 'Kimchi im Glas',
@@ -96,12 +96,27 @@ export const SHOP_PRODUCT_IMAGES: ShopProductImageSpec[] = [
 export const SHOP_PRODUCT_IMAGE_FALLBACKS: Record<string, string> = {
   'kaeferbohnen-tempeh': '/shop/kaefer-packaging-nobg.webp',
   'berglinsen-tempeh': '/shop/berglinsen-packaging-cutout.webp',
-  'classic-kimchi': '/shop/kimchi-packaging-nobg.webp',
+  kimchi: '/shop/kimchi-packaging-kimchi-only.webp',
+  // Legacy slug alias (redirects to /products/kimchi)
+  'classic-kimchi': '/shop/kimchi-packaging-kimchi-only.webp',
 }
 
 /** Per-gallery-index fallbacks (primary + secondary) for PDP thumbnails */
 export const SHOP_GALLERY_FALLBACKS: Record<string, string[]> = {
   'kaeferbohnen-tempeh': ['/shop/kaefer-packaging-nobg.webp', '/shop/hero-kaefer-plate.webp'],
   'berglinsen-tempeh': ['/shop/berglinsen-packaging-cutout.webp', '/shop/berglinsen-plated.webp'],
-  'classic-kimchi': ['/shop/kimchi-packaging-nobg.webp', '/shop/kimchi-david-jar.webp'],
+  kimchi: [
+    '/shop/kimchi-packaging-kimchi-only.webp',
+    '/shop/kimchi-bowl.webp',
+    '/shop/kimchi-jar-bowl.webp',
+    '/shop/kimchi-wood.webp',
+    '/shop/kimchi-stone.webp',
+  ],
+  'classic-kimchi': [
+    '/shop/kimchi-packaging-kimchi-only.webp',
+    '/shop/kimchi-bowl.webp',
+    '/shop/kimchi-jar-bowl.webp',
+    '/shop/kimchi-wood.webp',
+    '/shop/kimchi-stone.webp',
+  ],
 }

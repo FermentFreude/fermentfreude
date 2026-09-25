@@ -144,6 +144,8 @@ const PRODUCTS: Array<{
   unitSizeEn?: string
   ingredientsDe?: string
   ingredientsEn?: string
+  seasonalNoticeDe?: string
+  seasonalNoticeEn?: string
   shortDescriptionDe?: string
   shortDescriptionEn?: string
 }> = [
@@ -372,7 +374,7 @@ const PRODUCTS: Array<{
   {
     titleDe: 'Kimchi',
     titleEn: 'Kimchi',
-    slug: 'classic-kimchi',
+    slug: 'kimchi',
     priceInEUR: 720,
     imagePath: 'images/placeholder.png',
     alt: 'Kimchi – 260g',
@@ -387,10 +389,13 @@ const PRODUCTS: Array<{
       'Unser Kimchi wird aus saisonal wechselndem Gemüse milchsauer fermentiert. Je nach Jahreszeit entstehen unterschiedliche Varianten mit ganz eigenem Charakter.',
     shortDescriptionEn:
       'Our kimchi is lactic-acid fermented from seasonally changing vegetables. Depending on the time of year, different variants with their own character are created.',
-    ingredientsDe:
-      'Saisonale Variante — Zutatenliste wird vor jeder Charge im CMS aktualisiert.',
-    ingredientsEn:
-      'Seasonal variant — ingredient list is updated in the CMS before each batch goes live.',
+    // Ingredients stay empty until a batch is ready — seasonalNotice shows above the price
+    ingredientsDe: '',
+    ingredientsEn: '',
+    seasonalNoticeDe:
+      'Unsere Kimchis sind saisonal. Je nach verfügbarer Gemüseauswahl variiert die Rezeptur — Zutaten und Allergene der aktuellen Variante folgen vor Verkaufsstart.',
+    seasonalNoticeEn:
+      'Our kimchis are seasonal. The recipe varies with available vegetables — ingredients and allergens for the current batch will appear here before it goes on sale.',
   },
   {
     titleDe: 'Käferbohnen-Tempeh',
@@ -531,14 +536,22 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
             ...(benefits ? { benefits } : {}),
             ...(product.isSeasonal != null ? { isSeasonal: product.isSeasonal } : {}),
             ...(product.unitSizeDe ? { unitSize: product.unitSizeDe } : {}),
-            ...(product.ingredientsDe ? { ingredients: product.ingredientsDe } : {}),
+            ...(product.ingredientsDe != null ? { ingredients: product.ingredientsDe } : {}),
+            ...(product.seasonalNoticeDe
+              ? { seasonalNotice: product.seasonalNoticeDe }
+              : {}),
             ...(product.shortDescriptionDe
               ? { shortDescription: product.shortDescriptionDe }
               : {}),
           },
           context: ctx,
         })
-        if (product.unitSizeEn || product.ingredientsEn || product.shortDescriptionEn) {
+        if (
+          product.unitSizeEn ||
+          product.ingredientsEn != null ||
+          product.shortDescriptionEn ||
+          product.seasonalNoticeEn
+        ) {
           await payload.update({
             collection: 'products',
             id: doc.id,
@@ -546,7 +559,10 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
             data: {
               title: product.titleEn,
               ...(product.unitSizeEn ? { unitSize: product.unitSizeEn } : {}),
-              ...(product.ingredientsEn ? { ingredients: product.ingredientsEn } : {}),
+              ...(product.ingredientsEn != null ? { ingredients: product.ingredientsEn } : {}),
+              ...(product.seasonalNoticeEn
+                ? { seasonalNotice: product.seasonalNoticeEn }
+                : {}),
               ...(product.shortDescriptionEn
                 ? { shortDescription: product.shortDescriptionEn }
                 : {}),
@@ -575,7 +591,10 @@ export async function seedProducts(payloadInstance?: PayloadInstance): Promise<s
           _status: 'published',
           ...(product.isSeasonal != null ? { isSeasonal: product.isSeasonal } : {}),
           ...(product.unitSizeDe ? { unitSize: product.unitSizeDe } : {}),
-          ...(product.ingredientsDe ? { ingredients: product.ingredientsDe } : {}),
+          ...(product.ingredientsDe != null ? { ingredients: product.ingredientsDe } : {}),
+          ...(product.seasonalNoticeDe
+            ? { seasonalNotice: product.seasonalNoticeDe }
+            : {}),
           ...(product.shortDescriptionDe
             ? { shortDescription: product.shortDescriptionDe }
             : {}),

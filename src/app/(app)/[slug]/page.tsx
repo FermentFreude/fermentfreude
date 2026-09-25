@@ -62,11 +62,17 @@ export default async function Page({ params }: Args) {
     hero.type === 'foodPresentationSlider' ||
     hero.type === 'highImpact'
   const isLegalPage = LEGAL_SLUGS.includes(slug)
-  const skipTopPadding = isFullBleedHero
+  const skipTopPadding = isFullBleedHero || slug === 'help'
 
   return (
     <article
-      className={skipTopPadding ? 'pb-24' : `pt-16 pb-24${isLegalPage ? ' page-legal' : ''}`}
+      className={
+        slug === 'help'
+          ? 'bg-[#F9F0DC] pb-0'
+          : skipTopPadding
+            ? 'pb-24'
+            : `pt-16 pb-24${isLegalPage ? ' page-legal' : ''}`
+      }
     >
       <RenderHero {...hero} locale={locale} />
       <RenderBlocks blocks={enrichedLayout} slug={slug} locale={locale} />

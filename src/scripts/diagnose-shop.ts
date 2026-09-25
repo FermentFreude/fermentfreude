@@ -12,7 +12,7 @@ async function main() {
   const payload = await getPayload({ config })
 
   console.log('\n=== PRODUCTS ===')
-  for (const slug of ['kaeferbohnen-tempeh', 'berglinsen-tempeh', 'classic-kimchi']) {
+  for (const slug of ['kaeferbohnen-tempeh', 'berglinsen-tempeh', 'kimchi', 'classic-kimchi']) {
     const r = await payload.find({
       collection: 'products',
       where: { slug: { equals: slug } },

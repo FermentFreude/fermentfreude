@@ -54,6 +54,8 @@ const V2_TEMPLATES = [
   { id: 97, slug: 'cancelled-no-refund' },
   { id: 98, slug: 'refund-initiated' },
   { id: 99, slug: 'organiser-cancelled' },
+  { id: 101, slug: 'guest-order-confirmation' },
+  { id: 102, slug: 'guest-workshop-booking' },
 ]
 
 // Mock params per template for test sends
@@ -176,6 +178,9 @@ const MOCK = {
     TOTAL: '€ 59,90',
     SHIPPING_ADDRESS: 'Max Mustermann\nMusterstraße 1\n1010 Wien\nÖsterreich',
     RECEIPT_URL: 'https://www.fermentfreude.at/api/orders/order_abc123/receipt?token=test-token',
+    // Only set on physical-product pickup orders — present here so a test send
+    // actually renders the "Abholtermin buchen" block.
+    PICKUP_BOOKING_URL: 'https://calendar.app.google/oQ2zbpRbD4VcZGwE7',
     ITEMS: [
       {
         IMAGE_URL: 'https://pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev/media/email/shopping-cart-white.png', // Placeholder
@@ -268,6 +273,52 @@ const MOCK = {
     WORKSHOP_TIME: '10:00 – 14:00',
     REASON: 'Der Termin musste leider abgesagt werden.',
     MANAGE_BOOKING_URL: 'https://www.fermentfreude.at/manage-booking/test-token',
+  },
+  101: {
+    FIRST_NAME: 'Max',
+    ORDER_ID: 'order_abc123',
+    ORDER_NUMBER: 'AB12CD34',
+    ORDER_DATE: '4. Mai 2026',
+    CREATE_ACCOUNT_URL: 'https://www.fermentfreude.at/create-account',
+    SUBTOTAL: '€ 54,00',
+    SHIPPING: '€ 5,90',
+    TOTAL: '€ 59,90',
+    SHIPPING_ADDRESS: 'Max Mustermann\nMusterstraße 1\n1010 Wien\nÖsterreich',
+    RECEIPT_URL: 'https://www.fermentfreude.at/api/orders/order_abc123/receipt?token=test-token',
+    // Only set on physical-product pickup orders — present here so a test send
+    // actually renders the "Abholtermin buchen" block.
+    PICKUP_BOOKING_URL: 'https://calendar.app.google/oQ2zbpRbD4VcZGwE7',
+    ITEMS: [
+      {
+        IMAGE_URL: 'https://pub-0cf8a1c18a2f4f6b982dbbbf233430a5.r2.dev/media/email/shopping-cart-white.png', // Placeholder
+        TITLE: 'Tempeh Starter Kit',
+        QUANTITY: '2',
+        PRICE: '€ 48,00',
+      },
+    ],
+    ORDER_ITEMS_HTML: '',
+    WORKSHOP_BOOKINGS_HTML: '',
+    PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
+    AGB_URL: 'https://www.fermentfreude.at/agb',
+  },
+  102: {
+    FIRST_NAME: 'Max',
+    BOOKING_ID: 'abc123def456',
+    BOOKING_REF: 'DEF456',
+    CREATE_ACCOUNT_URL: 'https://www.fermentfreude.at/create-account',
+    MANAGE_BOOKING_URL: 'https://www.fermentfreude.at/manage-booking/test-token',
+    WORKSHOP_TITLE: 'Tempeh Basics',
+    WORKSHOP_DATE: 'Sa, 6. Juni 2026',
+    WORKSHOP_TIME: '10:00 – 14:00',
+    WORKSHOP_LOCATION: 'Studio Wien, Schönbrunner Str. 12, 1050',
+    GUEST_COUNT: '2',
+    TOTAL_PRICE: '€ 178,00',
+    WHAT_TO_BRING: 'Schürze · ein Glas (500 ml) · Lust auf gute Gespräche',
+    RECEIPT_URL: 'https://www.fermentfreude.at/api/bookings/abc123/receipt?token=test-token',
+    TICKETS_URL: 'https://www.fermentfreude.at/orders/order_abc123/tickets?token=test-token',
+    WORKSHOP_BOOKINGS_HTML: '',
+    PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
+    AGB_URL: 'https://www.fermentfreude.at/agb',
   },
 }
 

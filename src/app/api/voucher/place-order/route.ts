@@ -269,6 +269,21 @@ export async function POST(request: NextRequest) {
                 ? `€${booking.totalPrice.toFixed(2).replace('.', ',')}`
                 : String(booking.totalPrice ?? '')
 
+              // Real tickets/receipt links via the order's own downloadToken —
+              // same pattern as confirmWorkshopBookings.ts. Previously TICKETS_URL
+              // was hardcoded to /account/orders here, a dead end for guests and
+              // not an actual tickets page for anyone.
+              const orderDownloadToken =
+                typeof (order as { downloadToken?: unknown }).downloadToken === 'string'
+                  ? (order as { downloadToken?: string }).downloadToken!
+                  : ''
+              const ticketsUrl = orderDownloadToken
+                ? `${SERVER_URL}/orders/${order.id}/tickets?token=${orderDownloadToken}`
+                : `${SERVER_URL}/account/orders`
+              const receiptUrl = orderDownloadToken
+                ? `${SERVER_URL}/api/orders/${order.id}/receipt?token=${orderDownloadToken}`
+                : ''
+
               // Mint the manage-booking magic link — same self-service link the
               // paid-order confirmation email includes (confirmWorkshopBookings.ts).
               // Best-effort: a failed link means no self-service link in this
@@ -292,7 +307,11 @@ export async function POST(request: NextRequest) {
 
               await sendTemplateEmail({
                 to: [{ email: recipientEmail, name: firstName }],
-                templateId: BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION,
+                // Registered customers → the account-linking template;
+                // guests → the manage-booking-magic-link template.
+                templateId: userId
+                  ? BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION
+                  : BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION_GUEST,
                 params: {
                   WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
                   WORKSHOP_DATE: String(booking.date ?? ''),
@@ -306,10 +325,12 @@ export async function POST(request: NextRequest) {
                   BOOKING_ID: String(booking.id),
                   BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
                   SEATS: [],
-                  TICKETS_URL: `${SERVER_URL}/account/orders`,
+                  TICKETS_URL: ticketsUrl,
+                  RECEIPT_URL: receiptUrl,
                   WHAT_TO_BRING: '',
                   PRIVACY_URL: `${SERVER_URL}/datenschutz`,
                   AGB_URL: `${SERVER_URL}/agb`,
+                  CREATE_ACCOUNT_URL: `${SERVER_URL}/create-account`,
                   MANAGE_BOOKING_URL: manageBookingToken
                     ? `${SERVER_URL}/manage-booking/${manageBookingToken}`
                     : `${SERVER_URL}/account/orders`,

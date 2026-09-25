@@ -238,6 +238,17 @@ async function seedShopNew() {
   const payload = await getPayload({ config })
   const forceRecreate = process.argv.includes('--force')
 
+  // Additive seeding against production is a supported workflow (see CLAUDE.md),
+  // but --force overwrites existing content — that must never hit production.
+  if (forceRecreate && !(process.env.DATABASE_URL ?? '').includes('-staging')) {
+    console.error(
+      '\n🚫 REFUSING TO RUN --force: DATABASE_URL does not look like the staging database.\n' +
+        '   --force overwrites existing shop content and must never run against production.\n' +
+        '   Re-run without --force to seed additively.\n',
+    )
+    process.exit(1)
+  }
+
   // ── Non-destructive check ──────────────────────────────────────────────
   const existingCheck = await payload.find({
     collection: 'pages',
@@ -367,7 +378,8 @@ async function seedShopNew() {
 
   const kaferId = await findProductId('kaeferbohnen-tempeh')
   const berglinsenId = await findProductId('berglinsen-tempeh')
-  const kimchiId = await findProductId('classic-kimchi')
+  const kimchiId =
+    (await findProductId('kimchi')) ?? (await findProductId('classic-kimchi'))
 
   // Block 1: ShopHero — Käfer as visual hero product
   const shopHeroDE = {

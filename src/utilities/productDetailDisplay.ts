@@ -112,23 +112,55 @@ export function getDisplayBadges(product: Product): string[] {
   return [...new Set([...(product.badges ?? []), ...derived])]
 }
 
-export function getSeasonalNotice(locale: AppLocale): string {
-  return locale === 'de'
-    ? 'Unsere Kimchis sind saisonal. Je nach verfügbarer Gemüseauswahl variiert die Rezeptur. Zutaten und Allergene der aktuell angebotenen Variante werden vor Verkaufsstart im CMS ergänzt.'
-    : 'Our kimchis are seasonal. The recipe varies with available vegetables. Ingredients and allergens for the variant currently on offer are added in the CMS before each batch goes on sale.'
+/** True when ingredients are empty or still a seasonal placeholder (not a real list yet). */
+export function isIngredientsPlaceholder(ingredients: string | null | undefined): boolean {
+  const text = ingredients?.trim()
+  if (!text) return true
+  return /CMS|vor Verkaufsstart|before each batch|Saisonale Variante|Seasonal variant|werden.*ergänzt|will be added|Aktuell erhältlich/i.test(
+    text,
+  )
 }
 
-/** Shorter copy for the ingredients panel — avoids repeating the full hero notice */
-export function getSeasonalIngredientsNotice(locale: AppLocale): string {
+/**
+ * Customer-facing seasonal notice (hero). No internal “CMS” wording.
+ * Only show when ingredients are still a placeholder — once a real list is filled, hide it.
+ */
+export function getSeasonalNotice(locale: AppLocale): string {
   return locale === 'de'
-    ? 'Saisonale Rezeptur: Zutaten und Allergene der aktuell angebotenen Variante werden vor Verkaufsstart ergänzt.'
-    : 'Seasonal recipe: ingredients and allergens for the variant currently on offer are added before each batch goes on sale.'
+    ? 'Unsere Kimchis sind saisonal. Je nach verfügbarer Gemüseauswahl variiert die Rezeptur — Zutaten und Allergene der aktuellen Variante folgen vor Verkaufsstart.'
+    : 'Our kimchis are seasonal. The recipe varies with available vegetables — ingredients and allergens for the current batch will appear here before it goes on sale.'
+}
+
+/** Placeholder body for the ingredients field when the real list is not ready yet. */
+export function getSeasonalIngredientsPlaceholder(locale: AppLocale): string {
+  return locale === 'de'
+    ? 'Die Zutaten der aktuell angebotenen Variante werden vor Verkaufsstart hier ergänzt.'
+    : 'Ingredients for the variant currently on offer will be listed here before each batch goes on sale.'
+}
+
+/** Alias kept for older call sites — same as getSeasonalIngredientsPlaceholder. */
+export function getSeasonalIngredientsNotice(locale: AppLocale): string {
+  return getSeasonalIngredientsPlaceholder(locale)
+}
+
+/** Resolve ingredients copy for the PDP — never show “CMS” to customers. */
+export function getDisplayIngredients(
+  ingredients: string | null | undefined,
+  locale: AppLocale,
+): string | null {
+  const text = ingredients?.trim()
+  if (!text) return null
+  if (/CMS/i.test(text) || isIngredientsPlaceholder(text)) {
+    return getSeasonalIngredientsPlaceholder(locale)
+  }
+  return text
 }
 
 /** Shop featured-card panel colors — keep PDP in sync with /shop */
 const SHOP_CARD_COLORS: Record<string, string> = {
   'kaeferbohnen-tempeh': '#403c39',
   'berglinsen-tempeh': '#5C6B54',
+  kimchi: '#403c39',
   'classic-kimchi': '#403c39',
 }
 

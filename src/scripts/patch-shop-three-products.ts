@@ -105,12 +105,28 @@ async function markKimchiSeasonal(payload: Awaited<ReturnType<typeof getPayload>
   payload.logger.info('  ✔ Classic Kimchi marked as seasonal')
 }
 
+function assertStagingDatabase() {
+  const dbUrl = process.env.DATABASE_URL ?? ''
+  if (!dbUrl.includes('-staging')) {
+    console.error(
+      '\n🚫 REFUSING TO RUN: DATABASE_URL does not look like the staging database.\n' +
+        '   This script rewrites shop content — it must never run against production.\n' +
+        '   If this really is staging, its connection string must contain "-staging".\n',
+    )
+    process.exit(1)
+  }
+}
+
 async function main() {
+  assertStagingDatabase()
+
   const payload = await getPayload({ config })
   payload.logger.info('🛒 Patching shop for 3-product editorial layout…')
 
   const kaferId = await findProductBySlug(payload, 'kaeferbohnen-tempeh', false)
-  const kimchiId = await findProductBySlug(payload, 'classic-kimchi', false)
+  const kimchiId =
+    (await findProductBySlug(payload, 'kimchi', false)) ??
+    (await findProductBySlug(payload, 'classic-kimchi', false))
 
   // Reuse Käfer gallery image as temporary stand-in when creating/fixing Berglinsen
   let kaferGalleryId: string | null = null
@@ -134,7 +150,7 @@ async function main() {
     throw new Error('Product kaeferbohnen-tempeh not found. Run: pnpm seed products')
   }
   if (!kimchiId) {
-    throw new Error('Product classic-kimchi not found. Run: pnpm seed products')
+    throw new Error('Product kimchi (or classic-kimchi) not found. Run: pnpm seed products')
   }
 
   await markKimchiSeasonal(payload, kimchiId)

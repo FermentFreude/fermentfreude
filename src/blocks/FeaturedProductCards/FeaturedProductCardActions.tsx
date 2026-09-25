@@ -35,7 +35,7 @@ export function FeaturedProductCardActions({
 
       <Link
         href={detailsHref}
-        className="font-display text-[11px] font-bold uppercase tracking-[0.12em] text-white/90 underline underline-offset-4 transition-colors hover:text-white"
+        className="inline-flex min-h-10 items-center font-display text-[12px] font-bold uppercase tracking-[0.12em] text-white underline decoration-white/45 underline-offset-[5px] transition-colors hover:decoration-white"
       >
         {detailsLabel} →
       </Link>

@@ -521,13 +521,17 @@ export interface Product {
    */
   unitSize?: string | null;
   /**
-   * Zutatenliste für Etikett und Shop. Für saisonales Kimchi: bei jeder neuen Variante Titel + diese Zutatenliste aktualisieren (gleiches Produkt, neuer Name). / Ingredient list for label and shop. For seasonal Kimchi: update title + this list whenever the variant changes (same product record, new name).
+   * Zutatenliste für Etikett und Shop. Für saisonales Kimchi: bei jeder neuen Variante Titel + diese Zutatenliste aktualisieren (gleiches Produkt, neuer Name). Leer lassen, solange die Charge noch nicht feststeht — dann erscheint der Saison-Hinweis oben. / Ingredient list for label and shop. For seasonal Kimchi: update title + this list whenever the variant changes. Leave empty until the batch is ready — the seasonal notice shows instead.
    */
   ingredients?: string | null;
   /**
-   * Aktivieren für Kimchi (und ähnliche Produkte). Zeigt die Zutatenliste prominent im Shop und erinnert daran, Titel + Zutaten bei jeder neuen Charge zu aktualisieren. Das Produktbild darf als Beispielbild bleiben. / Enable for Kimchi. Shows ingredients prominently in the shop and reminds editors to update title + ingredients each batch. Keep the image as a typical example if needed.
+   * Aktivieren für Kimchi (und ähnliche Produkte). Zeigt Saison-Badge und optional den Saison-Hinweis, solange die Zutatenliste noch leer/Platzhalter ist. / Enable for Kimchi. Shows seasonal badge and the seasonal notice while ingredients are still empty/placeholder.
    */
   isSeasonal?: boolean | null;
+  /**
+   * Textbox über dem Preis (nur sichtbar, solange Zutaten noch nicht ausgefüllt sind). Kein internes „CMS“-Wording — Kundentext. / Box above the price (shown only while ingredients are still empty). Customer-facing copy — never mention “CMS”.
+   */
+  seasonalNotice?: string | null;
   /**
    * z.B. "Enthält Soja" / "Contains soy"
    */
@@ -4318,29 +4322,95 @@ export interface HelpFaqBlock {
    */
   visible?: boolean | null;
   /**
-   * Top of the Help page (eyebrow, title, intro).
+   * Full-bleed illustration behind the title and search. Leave empty for the charcoal gradient fallback.
+   */
+  heroBackground?: (string | null) | Media;
+  /**
+   * Top of the Help page: title and search field.
    */
   header: {
     /**
-     * Small label above the title (e.g. "HELP & SUPPORT").
+     * Optional small label above the title (e.g. "HELP & SUPPORT").
      */
-    eyebrow: string;
-    title: string;
-    intro: string;
+    eyebrow?: string | null;
     /**
-     * e.g. "Topics on this page".
+     * e.g. "Hello, how can we help?"
      */
-    tocLabel: string;
+    title: string;
+    /**
+     * Optional line under the title. Leave empty to hide.
+     */
+    intro?: string | null;
+    /**
+     * Placeholder inside the search field (e.g. "Search").
+     */
+    searchPlaceholder?: string | null;
+    /**
+     * Unused on the current hub layout (chips removed).
+     */
+    commonSearchesLabel?: string | null;
+    /**
+     * Unused on the current hub layout (chips removed).
+     */
+    commonSearches?:
+      | {
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Shown when a topic is open (e.g. "All topics").
+     */
+    backLabel?: string | null;
+    /**
+     * e.g. "Search results".
+     */
+    resultsLabel?: string | null;
+    /**
+     * Shown when a search has no matches.
+     */
+    emptyResultsLabel?: string | null;
+    /**
+     * Word after the number when there is 1 question (e.g. "Frage" / "question").
+     */
+    questionCountSingular?: string | null;
+    /**
+     * Word after the number when there are multiple questions (e.g. "Fragen" / "questions").
+     */
+    questionCountPlural?: string | null;
+    /**
+     * Kept for existing content. The hub layout uses category cards instead of a table of contents.
+     */
+    tocLabel?: string | null;
   };
   /**
-   * Each section becomes a card on the page and an entry in the table of contents. Add, reorder, or delete sections freely.
+   * Each topic becomes a card on the Help page. Clicking it opens that topic’s questions.
    */
   sections?:
     | {
         /**
-         * URL anchor for this section (lowercase, no spaces — e.g. "account", "workshops", "vouchers"). Used in the table-of-contents links. Same value for both languages.
+         * URL anchor for this topic (lowercase, no spaces — e.g. "account", "workshops"). Same value for both languages.
          */
         key: string;
+        /**
+         * Icon shown on the topic card.
+         */
+        icon?:
+          | (
+              | 'user'
+              | 'calendar'
+              | 'gift'
+              | 'shopping-bag'
+              | 'truck'
+              | 'credit-card'
+              | 'utensils'
+              | 'wrench'
+              | 'book-open'
+              | 'lock'
+              | 'star'
+              | 'help-circle'
+            )
+          | null;
         title: string;
         intro?: string | null;
         items?:
@@ -4354,16 +4424,29 @@ export interface HelpFaqBlock {
       }[]
     | null;
   /**
-   * Dark card at the bottom inviting visitors to email.
+   * Quiet line under the topic cards, e.g. "Schreib uns – wir helfen gerne. Kontakt".
    */
   contact: {
-    title: string;
+    /**
+     * Kept for existing content. Not shown on the current layout.
+     */
+    title?: string | null;
+    /**
+     * e.g. "Schreib uns – wir helfen gerne."
+     */
     body: string;
+    /**
+     * e.g. "Kontakt".
+     */
     ctaLabel: string;
     /**
-     * Email address shown next to the button and used for the mailto: link. Same for both languages.
+     * Where the link goes (e.g. "/contact"). Same for both languages. Use a full mailto: only if you want email instead.
      */
-    email: string;
+    link?: string | null;
+    /**
+     * Optional. Only used if Link URL is empty — then we fall back to mailto: this address.
+     */
+    email?: string | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -7738,18 +7821,33 @@ export interface FormBlockSelect<T extends boolean = true> {
  */
 export interface HelpFaqBlockSelect<T extends boolean = true> {
   visible?: T;
+  heroBackground?: T;
   header?:
     | T
     | {
         eyebrow?: T;
         title?: T;
         intro?: T;
+        searchPlaceholder?: T;
+        commonSearchesLabel?: T;
+        commonSearches?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+            };
+        backLabel?: T;
+        resultsLabel?: T;
+        emptyResultsLabel?: T;
+        questionCountSingular?: T;
+        questionCountPlural?: T;
         tocLabel?: T;
       };
   sections?:
     | T
     | {
         key?: T;
+        icon?: T;
         title?: T;
         intro?: T;
         items?:
@@ -7767,6 +7865,7 @@ export interface HelpFaqBlockSelect<T extends boolean = true> {
         title?: T;
         body?: T;
         ctaLabel?: T;
+        link?: T;
         email?: T;
       };
   id?: T;
@@ -8781,6 +8880,7 @@ export interface ProductsSelect<T extends boolean = true> {
   unitSize?: T;
   ingredients?: T;
   isSeasonal?: T;
+  seasonalNotice?: T;
   allergens?: T;
   storageInstructions?: T;
   shelfLife?: T;
@@ -9600,6 +9700,10 @@ export interface ProductDetailLabelsGlobal {
   soldOutLabel?: string | null;
   seasonalBadgeLabel?: string | null;
   /**
+   * Fallback-Text über dem Preis für saisonale Produkte, falls am Produkt kein eigener Hinweis gesetzt ist. / Fallback above-price notice for seasonal products when the product has no own notice.
+   */
+  seasonalNotice?: string | null;
+  /**
    * Kleine Zeile unter dem Warenkorb-Button, z. B. Abholung in Graz.
    */
   deliveryNotice?: string | null;
@@ -9965,6 +10069,7 @@ export interface ProductDetailLabelsGlobalSelect<T extends boolean = true> {
   addToCartLabel?: T;
   soldOutLabel?: T;
   seasonalBadgeLabel?: T;
+  seasonalNotice?: T;
   deliveryNotice?: T;
   navDetailsLabel?: T;
   navTastePrepLabel?: T;

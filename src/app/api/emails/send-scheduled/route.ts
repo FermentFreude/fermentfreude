@@ -79,7 +79,7 @@ async function sendScheduledEmails() {
             params: {
               FIRST_NAME: firstName,
               WORKSHOP_NAME: workshopName,
-              WORKSHOP_DATE: new Date(sevenDaysAway).toLocaleDateString('de-DE'),
+              WORKSHOP_DATE: new Date(sevenDaysAway).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' }),
               LOCATION: 'FermentFreude Workshop',
               JOIN_URL: `${process.env.NEXT_PUBLIC_SERVER_URL}/workshops/${bookingData.workshopSlug}`,
             },
@@ -153,7 +153,7 @@ async function sendScheduledEmails() {
             params: {
               FIRST_NAME: firstName,
               WORKSHOP_NAME: workshopName,
-              WORKSHOP_DATE: new Date(tomorrow).toLocaleDateString('de-DE'),
+              WORKSHOP_DATE: new Date(tomorrow).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' }),
               TIME: '18:00 Uhr',
               LOCATION: 'FermentFreude Workshop',
               JOIN_INSTRUCTIONS: 'Bitte 15 Minuten früher anmelden',

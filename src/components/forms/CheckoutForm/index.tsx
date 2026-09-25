@@ -3,6 +3,7 @@
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Address } from '@/payload-types'
+import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { useEcommerce, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
@@ -53,6 +54,7 @@ export const CheckoutForm: React.FC<Props> = ({
   pickupTime,
 }) => {
   const { locale } = useLocale()
+  const { user } = useAuth()
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = React.useState<null | string>(null)
@@ -80,6 +82,16 @@ export const CheckoutForm: React.FC<Props> = ({
 
       if (stripe && elements) {
         try {
+          // Computed here, before any redirect can happen, while the cart
+          // props passed into this component are still guaranteed fresh —
+          // baked into returnUrl below so it survives the round trip via the
+          // URL itself. ConfirmOrder.tsx used to re-derive this from the
+          // client-side cart AFTER the redirect, but that cart can be empty,
+          // still loading, or hold leftover items from an earlier session by
+          // then, silently landing the customer on the wrong confirmation
+          // page type (e.g. a workshop confirmation for a plain pickup order).
+          const orderType = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
+
           // Built from the browser's actual origin, not NEXT_PUBLIC_SERVER_URL —
           // that env var is baked in at build time, so it can silently drift
           // from whatever URL this deployment is actually being served at
@@ -88,7 +100,7 @@ export const CheckoutForm: React.FC<Props> = ({
           // with a 400 from Stripe, since card payments never redirect and
           // never hit this path. Matches the pattern already used in
           // VoucherCheckoutClient.tsx for the same reason.
-          const returnUrl = `${window.location.origin}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''}`
+          const returnUrl = `${window.location.origin}/checkout/confirm-order?type=${orderType}${customerEmail ? `&email=${encodeURIComponent(customerEmail)}` : ''}`
 
           // Stash the buyer name so the redirect-based ConfirmOrder fallback
           // (Klarna, iDEAL, etc.) can attach it to the transaction too.
@@ -180,9 +192,13 @@ export const CheckoutForm: React.FC<Props> = ({
                 const emailParam = customerEmail
                   ? `&email=${encodeURIComponent(customerEmail)}`
                   : ''
-                const type = hasWorkshop ? 'workshop' : isAllDigital ? 'course' : 'order'
+                // Route by login status like CheckoutPage.tsx's voucher-covers-cart
+                // path already does — logged-in customers get the account
+                // confirmation page, guests get the (richer, no-account-link)
+                // checkout one.
+                const confirmationBase = user ? '/account' : '/checkout'
                 router.push(
-                  `/checkout/order-confirmation?orderId=${confirmResult.orderID}&type=${type}${emailParam}`,
+                  `${confirmationBase}/order-confirmation?orderId=${confirmResult.orderID}&type=${orderType}${emailParam}`,
                 )
               }
             } catch (err) {
@@ -223,6 +239,7 @@ export const CheckoutForm: React.FC<Props> = ({
       confirmOrder,
       clearSession,
       router,
+      user,
       isAllDigital,
       hasWorkshop,
       pickupDate,

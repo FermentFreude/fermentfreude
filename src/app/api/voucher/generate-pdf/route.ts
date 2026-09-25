@@ -157,7 +157,7 @@ function buildVoucherPDF(sanitizedCode: string): jsPDF {
     footerY,
     { align: 'center' },
   )
-  pdf.text(`Erstellt: ${new Date().toLocaleDateString('de-AT')}`, width / 2, footerY + 7, {
+  pdf.text(`Erstellt: ${new Date().toLocaleDateString('de-AT', { timeZone: 'Europe/Vienna' })}`, width / 2, footerY + 7, {
     align: 'center',
   })
 

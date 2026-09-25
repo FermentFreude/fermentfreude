@@ -14,6 +14,8 @@ const LABELS_DE = {
   addToCartLabel: 'In den Warenkorb',
   soldOutLabel: 'Ausverkauft',
   seasonalBadgeLabel: 'Saisonal',
+  seasonalNotice:
+    'Unsere Kimchis sind saisonal. Je nach verfügbarer Gemüseauswahl variiert die Rezeptur — Zutaten und Allergene der aktuellen Variante folgen vor Verkaufsstart.',
   deliveryNotice: 'Abholung in Graz, jede Woche frisch.',
   navDetailsLabel: 'Produktdetails',
   navTastePrepLabel: 'Geschmack & Zubereitung',
@@ -53,6 +55,8 @@ const LABELS_EN = {
   addToCartLabel: 'Add to bag',
   soldOutLabel: 'Sold out',
   seasonalBadgeLabel: 'Seasonal',
+  seasonalNotice:
+    'Our kimchis are seasonal. The recipe varies with available vegetables — ingredients and allergens for the current batch will appear here before it goes on sale.',
   deliveryNotice: 'Pickup in Graz, fresh every week.',
   navDetailsLabel: 'Product details',
   navTastePrepLabel: 'Taste & preparation',
@@ -86,7 +90,21 @@ const LABELS_EN = {
   shopFooterCta: 'Visit the shop',
 }
 
+function assertStagingDatabase() {
+  const dbUrl = process.env.DATABASE_URL ?? ''
+  if (!dbUrl.includes('-staging')) {
+    console.error(
+      '\n🚫 REFUSING TO RUN: DATABASE_URL does not look like the staging database.\n' +
+        '   This script rewrites shop content — it must never run against production.\n' +
+        '   If this really is staging, its connection string must contain "-staging".\n',
+    )
+    process.exit(1)
+  }
+}
+
 async function main() {
+  assertStagingDatabase()
+
   const { default: config } = await import('@payload-config')
   const { getPayload } = await import('payload')
   const payload = await getPayload({ config })

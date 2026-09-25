@@ -10,6 +10,7 @@ import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
+import { MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { Suspense, useCallback, useEffect, useState } from 'react'
@@ -52,8 +53,11 @@ const CHECKOUT_DE = {
   address: 'Adresse',
   noShipping: 'Workshop / digitales Produkt — keine Lieferadresse erforderlich.',
   storePickup: 'Abholung im Geschäft',
+  pickupNote:
+    'Nach der Bezahlung bekommst du einen Link, um Tag und Uhrzeit für die Abholung auszuwählen.',
+  emailPickupHint: 'An diese Adresse schicken wir dir den Link für deinen Abholtermin.',
   pickupWorkshopNote:
-    'Dein Warenkorb enthält auch einen Workshop. Die Abholdetails gelten nur für die physischen Produkte — dein Workshop-Termin bleibt unverändert.',
+    'Dein Warenkorb enthält auch einen Workshop. Die Abholdetails gelten nur für die physischen Produkte. Dein Workshop-Termin bleibt genau so, wie du ihn gebucht hast.',
   viewOnMaps: 'Auf Google Maps ansehen',
   pickupDateLabel: 'Abholdatum',
   pickupTimeLabel: 'Abholzeit',
@@ -73,10 +77,21 @@ const CHECKOUT_DE = {
   voucherNetworkError: 'Verbindungsfehler. Bitte versuche es erneut.',
   voucherApplied: (value: number) => `Gutschein €${value} angewendet!`,
   payment: 'Zahlung',
+  poweredByStripe: 'Sichere Zahlung über Stripe',
   payWithVoucher: 'Jetzt mit Gutschein bestellen',
   processingOrder: 'Bestellung wird bearbeitet…',
   goToPayment: 'Zur Zahlung',
   cancelPayment: 'Zahlung abbrechen',
+  placeOrder: 'Kostenpflichtig bestellen',
+  // Split around the two links so they can be real <Link>s rather than
+  // dangerouslySetInnerHTML. Widerrufsrecht has no page of its own — it is a
+  // section inside the AGB, which is why it is named rather than linked.
+  legalPre: 'Mit deiner Bestellung akzeptierst du unsere',
+  legalAgb: 'AGB',
+  legalMid: 'und unsere',
+  legalPrivacy: 'Datenschutzerklärung',
+  legalPost:
+    '. Dein gesetzliches Widerrufsrecht und die Bedingungen für Rücksendungen sind in den AGB beschrieben.',
   tryAgain: 'Erneut versuchen',
   yourCart: 'Warenkorb',
   orderFailed: 'Bestellung fehlgeschlagen.',
@@ -122,8 +137,11 @@ const CHECKOUT_EN = {
   address: 'Address',
   noShipping: 'Workshop / digital product — no shipping address required.',
   storePickup: 'Store Pickup',
+  pickupNote:
+    'After payment you receive a link to choose a day and time to pick up your order.',
+  emailPickupHint: 'We send the link for your pickup slot to this address.',
   pickupWorkshopNote:
-    'Your cart also includes a workshop. The pickup details below apply to the physical products only — your workshop date stays as booked.',
+    'Your cart also includes a workshop. The pickup details apply to the physical products only. Your workshop date stays exactly as you booked it.',
   viewOnMaps: 'View on Google Maps',
   pickupDateLabel: 'Pickup Date',
   pickupTimeLabel: 'Pickup Time',
@@ -143,10 +161,18 @@ const CHECKOUT_EN = {
   voucherNetworkError: 'Connection error. Please try again.',
   voucherApplied: (value: number) => `Voucher €${value} applied!`,
   payment: 'Payment',
+  poweredByStripe: 'Secure payment via Stripe',
   payWithVoucher: 'Order with voucher',
   processingOrder: 'Processing order…',
   goToPayment: 'Go to payment',
   cancelPayment: 'Cancel payment',
+  placeOrder: 'Place binding order',
+  legalPre: 'By placing your order you accept our',
+  legalAgb: 'terms and conditions',
+  legalMid: 'and our',
+  legalPrivacy: 'privacy policy',
+  legalPost:
+    '. Your statutory right of withdrawal and the conditions for returns are set out in the terms and conditions.',
   tryAgain: 'Try again',
   yourCart: 'Your cart',
   orderFailed: 'Order failed.',
@@ -803,6 +829,19 @@ export const CheckoutPage: React.FC = () => {
     ],
   )
 
+  /**
+   * Payment is part of the page, not a second step behind a button, so the
+   * PaymentIntent is created as soon as the details needed to charge are
+   * valid — the card form is simply there when the customer reaches it.
+   *
+   * Debounced, because `canGoToPayment` flips true mid-typing (the moment the
+   * email parses) and we don't want a PaymentIntent per keystroke.
+   *
+   * Deliberately skipped when the customer ticked "create an account": that
+   * path has to register them *before* charging, which is a side effect that
+   * must never fire off a debounce while they are still choosing a password.
+   * Those customers keep the explicit button below.
+   */
   /* ── Voucher Handlers ── */
   const handleApplyVoucher = useCallback(async () => {
     setVoucherError(null)
@@ -935,10 +974,15 @@ export const CheckoutPage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
-      {/* ── Left Column: Contact, Address, Payment ── */}
-      <div className="min-w-0 flex-1 flex flex-col gap-8">
+      {/* ── Left Column: Contact, Address, Payment ──
+          One sheet, not a stack of cards. Each step used to be its own
+          bordered box, which made a short form read as a long queue of
+          containers; they are sections of the same surface now, separated by
+          hairlines. The only other surface on the screen is the summary rail,
+          because that is the part worth highlighting. */}
+      <div className="min-w-0 flex-1 overflow-hidden rounded-(--radius-card) bg-white divide-y divide-ff-border-light">
         {/* ── Contact Section ── */}
-        <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+        <section className="p-6 sm:p-8">
           <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
             {t.contact}
           </h2>
@@ -1042,7 +1086,16 @@ export const CheckoutPage: React.FC = () => {
                   required
                   type="email"
                   className="rounded-md border-ff-border-light bg-[#f9f7f3] focus:border-ff-near-black focus:ring-ff-near-black"
+                  aria-describedby={isAllPhysicalPickup ? 'email-pickup-hint' : undefined}
                 />
+                {/* Says what the address is actually for, at the moment it is
+                    typed. This earns its friction in a way a consent checkbox
+                    on the same information would not. */}
+                {isAllPhysicalPickup && (
+                  <p id="email-pickup-hint" className="text-caption text-ff-gray-text-light">
+                    {t.emailPickupHint}
+                  </p>
+                )}
               </FormItem>
 
               {/* Phone number (optional) */}
@@ -1100,8 +1153,9 @@ export const CheckoutPage: React.FC = () => {
                 </div>
               </FormItem>
 
-              {/* Optional account creation */}
-              <div className="rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
+              {/* Optional account creation — a checkbox, so it reads as one
+                  rather than as another panel competing with the form above. */}
+              <div className="border-t border-ff-border-light pt-5">
                 <div className="flex items-start gap-3">
                   <Checkbox
                     id="createAccountOpt"
@@ -1132,6 +1186,7 @@ export const CheckoutPage: React.FC = () => {
                       id="accountPassword"
                       name="accountPassword"
                       type="password"
+                      autoComplete="new-password"
                       value={accountPassword}
                       onChange={(e) => setAccountPassword(e.target.value)}
                       disabled={false}
@@ -1157,52 +1212,74 @@ export const CheckoutPage: React.FC = () => {
           // pickup slot is booked after payment via the Google Appointment
           // Schedule link (order confirmation page + email) — deliberately
           // not shown here.
-          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+          <section className="p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.storePickup}
             </h2>
-            <div className="rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
-              <h3 className="mb-3 font-display font-semibold text-ff-near-black">
-                {pickupLocation.name}
-              </h3>
-              <p className="mb-3 text-body-sm text-ff-gray-text-light">{pickupLocation.address}</p>
-              <a
-                href={pickupLocation.mapLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body-sm text-ff-gold-accent underline hover:text-ff-near-black"
-              >
-                {t.viewOnMaps}
-              </a>
+            {/* An address, set as an address — not a panel inside a panel.
+                The link is near-black with a gold underline rather than gold
+                text: #e5b765 on this ground is about 1.9:1, well under the
+                4.5:1 minimum, so the colour carries the brand while the text
+                carries the contrast. */}
+            <div className="flex items-start gap-3">
+              <MapPin
+                className="mt-0.5 h-5 w-5 shrink-0 text-ff-gray-text-light"
+                strokeWidth={1.5}
+              />
+              <address className="not-italic">
+                <span className="block font-display font-semibold text-ff-near-black">
+                  {pickupLocation.name}
+                </span>
+                <span className="mt-0.5 block text-body-sm text-ff-gray-text-light">
+                  {pickupLocation.address}
+                </span>
+                <a
+                  href={pickupLocation.mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block text-body-sm font-medium text-ff-near-black underline decoration-ff-gold-accent decoration-2 underline-offset-4 transition-colors hover:decoration-ff-near-black"
+                >
+                  {t.viewOnMaps}
+                </a>
+              </address>
             </div>
+
+            <p className="mt-5 text-body-sm leading-relaxed text-ff-gray-text-light">
+              {t.pickupNote}
+            </p>
           </section>
         ) : isAllPhysicalPickup ? (
           // Mixed workshop + product cart: unchanged legacy flow (date/time
           // picker, workshop-locations lookup) — workshops are out of scope
           // for this change.
-          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+          <section className="p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.storePickup}
             </h2>
             {hasWorkshop && (
-              <div className="mb-6 rounded-lg bg-[#f5f1e8] px-5 py-4 text-body-sm text-[#555954]">
+              <p className="mb-6 text-body-sm leading-relaxed text-ff-gray-text-light">
                 {t.pickupWorkshopNote}
-              </div>
+              </p>
             )}
             {/* Pickup Location */}
-            <div className="mb-6 rounded-lg border border-ff-border-light bg-[#f9f7f3] p-4">
-              <h3 className="mb-3 font-display font-semibold text-ff-near-black">
-                {pickupLocation.name}
-              </h3>
-              <p className="mb-3 text-body-sm text-ff-gray-text-light">{pickupLocation.address}</p>
-              <a
-                href={pickupLocation.mapLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body-sm text-ff-gold-accent underline hover:text-ff-near-black"
-              >
-                {t.viewOnMaps}
-              </a>
+            <div className="mb-6 flex items-start gap-3">
+              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-ff-gray-text-light" strokeWidth={1.5} />
+              <address className="not-italic">
+                <span className="block font-display font-semibold text-ff-near-black">
+                  {pickupLocation.name}
+                </span>
+                <span className="mt-0.5 block text-body-sm text-ff-gray-text-light">
+                  {pickupLocation.address}
+                </span>
+                <a
+                  href={pickupLocation.mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block text-body-sm font-medium text-ff-near-black underline decoration-ff-gold-accent decoration-2 underline-offset-4 transition-colors hover:decoration-ff-near-black"
+                >
+                  {t.viewOnMaps}
+                </a>
+              </address>
             </div>
 
             {/* Pickup Date */}
@@ -1256,7 +1333,7 @@ export const CheckoutPage: React.FC = () => {
             </FormItem>
           </section>
         ) : (
-          <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+          <section className="p-6 sm:p-8">
             <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
               {t.address}
             </h2>
@@ -1368,7 +1445,7 @@ export const CheckoutPage: React.FC = () => {
             if (!needsAllocation) return null
 
             return (
-              <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
+              <section className="p-6 sm:p-8">
                 <h2 className="mb-2 font-display text-subheading font-bold text-ff-near-black">
                   {isDe ? 'Deine Gäste' : 'Your guests'}
                 </h2>
@@ -1414,7 +1491,7 @@ export const CheckoutPage: React.FC = () => {
 
         {!paymentData && voucherCoversAll ? (
           <Button
-            className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
+            className="m-6 sm:m-8 rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
             disabled={!canGoToPayment || isProcessingPayment || isCreatingAccount}
             onClick={(e) => {
               e.preventDefault()
@@ -1428,7 +1505,7 @@ export const CheckoutPage: React.FC = () => {
           </Button>
         ) : !paymentData ? (
           <Button
-            className="mt-2 self-start rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
+            className="m-6 sm:m-8 rounded-full bg-ff-near-black px-8 py-3 font-display font-bold text-white hover:bg-ff-near-black/80"
             disabled={!canGoToPayment || isCreatingAccount}
             onClick={(e) => {
               e.preventDefault()
@@ -1443,7 +1520,7 @@ export const CheckoutPage: React.FC = () => {
         ) : null}
 
         {!paymentData?.['clientSecret'] && error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-6">
+          <div className="m-6 sm:m-8 rounded-(--radius-card) border border-red-200 bg-red-50 p-6">
             <Message error={error} />
             <Button
               onClick={(e) => {
@@ -1459,10 +1536,14 @@ export const CheckoutPage: React.FC = () => {
 
         <Suspense fallback={<React.Fragment />}>
           {!voucherCoversAll && paymentData && typeof paymentData['clientSecret'] === 'string' && (
-            <section className="rounded-xl border border-ff-border-light bg-white p-6 sm:p-8">
-              <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
-                {t.payment}
-              </h2>
+            /* Payment sits in the flow, under the details it needs. */
+            <section className="p-6 sm:p-8">
+              <div className="mb-6">
+                <h2 className="font-display text-subheading font-bold text-ff-near-black">
+                  {t.payment}
+                </h2>
+                <p className="mt-1 text-caption text-ff-gray-text-light">{t.poweredByStripe}</p>
+              </div>
               {error && (
                 <p className="mb-4 text-body-sm text-red-600">{`${t.errorPrefix}: ${error}`}</p>
               )}
@@ -1512,12 +1593,6 @@ export const CheckoutPage: React.FC = () => {
                     pickupDate={pickupDate}
                     pickupTime={pickupTime}
                   />
-                  <button
-                    className="self-start font-display text-body-sm font-bold text-ff-gray-text-light underline underline-offset-2 transition-colors hover:text-ff-near-black"
-                    onClick={() => setPaymentData(null)}
-                  >
-                    {t.cancelPayment}
-                  </button>
                 </div>
               </Elements>
             </section>
@@ -1527,7 +1602,7 @@ export const CheckoutPage: React.FC = () => {
 
       {!cartIsEmpty && (
         <aside className="order-first w-full lg:order-last lg:w-95 lg:shrink-0 lg:sticky lg:top-8 lg:max-h-[calc(100vh-9rem)]">
-          <div className="rounded-xl border border-ff-border-light bg-white overflow-y-auto max-h-[calc(100vh-6rem)] md:max-h-[calc(100vh-8rem)] lg:max-h-none p-6 sm:p-8">
+          <div className="rounded-(--radius-card) border border-ff-border-light bg-white overflow-y-auto max-h-[calc(100vh-6rem)] md:max-h-[calc(100vh-8rem)] lg:max-h-none p-6 sm:p-8">
             <h2 className="font-display text-subheading font-bold tracking-tight text-ff-near-black">
               {t.yourCart}
             </h2>
@@ -1739,6 +1814,28 @@ export const CheckoutPage: React.FC = () => {
                 />
               </div>
             </div>
+
+            {/* Sits with the total because that is where the commitment is
+                made. Both destinations are real pages in this app; the right
+                of withdrawal is a section of the AGB, so it is named there
+                rather than linked to a route that does not exist. */}
+            <p className="mt-5 text-caption leading-relaxed text-ff-gray-text-light">
+              {t.legalPre}{' '}
+              <Link
+                href="/agb"
+                className="font-medium text-ff-near-black underline underline-offset-2 transition-colors hover:decoration-transparent"
+              >
+                {t.legalAgb}
+              </Link>{' '}
+              {t.legalMid}{' '}
+              <Link
+                href="/datenschutz"
+                className="font-medium text-ff-near-black underline underline-offset-2 transition-colors hover:decoration-transparent"
+              >
+                {t.legalPrivacy}
+              </Link>
+              {t.legalPost}
+            </p>
           </div>
         </aside>
       )}

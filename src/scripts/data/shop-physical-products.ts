@@ -266,7 +266,7 @@ export const SHOP_PHYSICAL_PRODUCTS: ShopPhysicalProductCopy[] = [
     },
   },
   {
-    slug: 'classic-kimchi',
+    slug: 'kimchi',
     productType: 'jarred',
     priceInEUR: 720,
     de: {

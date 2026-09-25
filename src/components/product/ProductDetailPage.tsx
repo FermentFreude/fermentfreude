@@ -14,6 +14,7 @@ import {
   getDisplayBadges,
   getProductSpecs,
   getSeasonalNotice,
+  isIngredientsPlaceholder,
   type AppLocale,
 } from '@/utilities/productDetailDisplay'
 import {
@@ -438,9 +439,11 @@ function LegacyProductDetailPage({
             {labels.deliveryNotice}
           </p>
 
-          {product.isSeasonal && (
+          {product.isSeasonal && isIngredientsPlaceholder(product.ingredients) && (
             <p className="mt-4 text-sm leading-relaxed text-[#7a7a7a]">
-              {getSeasonalNotice(appLocale)}
+              {product.seasonalNotice?.trim() ||
+                productDetailLabels?.seasonalNotice?.trim() ||
+                getSeasonalNotice(appLocale)}
             </p>
           )}
 

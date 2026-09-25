@@ -46,41 +46,45 @@ export function GastronomyShowcase({ title, slides, locale = 'de' }: Props) {
       </div>
 
       <div className="mt-8 md:mt-10">
-        <div ref={emblaRef} className="overflow-hidden">
-          <div className="flex gap-4 pl-[var(--space-container-x)] pr-[var(--space-container-x)] md:gap-5">
-            {slides.map((slide, i) => {
-              const cms = isResolvedMedia(slide.image) ? slide.image : null
+        <div className="px-[var(--space-container-x)]">
+          <div ref={emblaRef} className="overflow-hidden">
+            {/* Slide spacing via padding (not CSS gap) — gap breaks Embla loop alignment
+                and crops the left card. Snap options stay unchanged. */}
+            <div className="-ml-4 flex touch-pan-y backface-hidden md:-ml-5">
+              {slides.map((slide, i) => {
+                const cms = isResolvedMedia(slide.image) ? slide.image : null
 
-              return (
-                <article
-                  key={slide.id ?? `${slide.title}-${i}`}
-                  className="min-w-0 flex-[0_0_85%] sm:flex-[0_0_70%] md:flex-[0_0_52%] lg:flex-[0_0_38%]"
-                >
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[#ECE5DE]">
-                    {cms ? (
-                      <Media
-                        resource={cms as never}
-                        fill
-                        priority={i === 0}
-                        imgClassName="object-cover transition-transform duration-700 hover:scale-[1.04]"
-                        size="(max-width: 768px) 85vw, 38vw"
+                return (
+                  <article
+                    key={slide.id ?? `${slide.title}-${i}`}
+                    className="min-w-0 flex-[0_0_85%] pl-4 sm:flex-[0_0_70%] md:flex-[0_0_52%] md:pl-5 lg:flex-[0_0_38%]"
+                  >
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[#ECE5DE]">
+                      {cms ? (
+                        <Media
+                          resource={cms as never}
+                          fill
+                          priority={i === 0}
+                          imgClassName="object-cover transition-transform duration-700 hover:scale-[1.04]"
+                          size="(max-width: 768px) 85vw, 38vw"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-[#ECE5DE]" aria-hidden />
+                      )}
+                    </div>
+                    <h3 className="mt-4 font-display text-subheading font-bold text-ff-black">
+                      {slide.title}
+                    </h3>
+                    {slide.text?.trim() ? (
+                      <SentenceBreakText
+                        text={slide.text}
+                        className="mt-1 max-w-sm text-body-sm text-ff-gray-text"
                       />
-                    ) : (
-                      <div className="absolute inset-0 bg-[#ECE5DE]" aria-hidden />
-                    )}
-                  </div>
-                  <h3 className="mt-4 font-display text-subheading font-bold text-ff-black">
-                    {slide.title}
-                  </h3>
-                  {slide.text?.trim() ? (
-                    <SentenceBreakText
-                      text={slide.text}
-                      className="mt-1 max-w-sm text-body-sm text-ff-gray-text"
-                    />
-                  ) : null}
-                </article>
-              )
-            })}
+                    ) : null}
+                  </article>
+                )
+              })}
+            </div>
           </div>
         </div>
 

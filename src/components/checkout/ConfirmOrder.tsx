@@ -136,27 +136,47 @@ export const ConfirmOrder: React.FC = () => {
 
             clearSession()
 
-            const hasWorkshop = cart?.items?.some((item) => {
-              if (typeof item.product !== 'object' || item.product === null) return false
-              const p = item.product as { productType?: string; slug?: string }
-              return (
-                p.productType === 'workshop' ||
-                (typeof p.slug === 'string' && p.slug.startsWith('workshop-'))
-              )
-            })
-            const hasCourse = cart?.items?.some((item) => {
-              if (typeof item.product !== 'object' || item.product === null) return false
-              const p = item.product as { courseSlug?: string; slug?: string }
-              return (
-                Boolean(p.courseSlug) ||
-                (typeof p.slug === 'string' && p.slug.toLowerCase().includes('course'))
-              )
-            })
-
-            const type = hasCourse ? 'course' : hasWorkshop ? 'workshop' : 'order'
+            // Prefer the type CheckoutForm baked into returnUrl before the
+            // Stripe redirect happened, while the cart was still guaranteed
+            // fresh — it survives the round trip via the URL itself. Only
+            // fall back to guessing from the current client-side cart for
+            // older/direct links that never carried a type param; by the
+            // time we're back here that cart can be empty, still loading, or
+            // hold leftovers from an earlier session, which previously could
+            // silently land a plain pickup order on the wrong confirmation
+            // page type.
+            const typeFromUrl = searchParams.get('type')
+            let type: string
+            if (typeFromUrl === 'order' || typeFromUrl === 'workshop' || typeFromUrl === 'course') {
+              type = typeFromUrl
+            } else {
+              const hasWorkshop = cart?.items?.some((item) => {
+                if (typeof item.product !== 'object' || item.product === null) return false
+                const p = item.product as { productType?: string; slug?: string }
+                return (
+                  p.productType === 'workshop' ||
+                  (typeof p.slug === 'string' && p.slug.startsWith('workshop-'))
+                )
+              })
+              const hasCourse = cart?.items?.some((item) => {
+                if (typeof item.product !== 'object' || item.product === null) return false
+                const p = item.product as { courseSlug?: string; slug?: string }
+                return (
+                  Boolean(p.courseSlug) ||
+                  (typeof p.slug === 'string' && p.slug.toLowerCase().includes('course'))
+                )
+              })
+              type = hasCourse ? 'course' : hasWorkshop ? 'workshop' : 'order'
+            }
             const emailParam = checkoutEmail ? `&email=${encodeURIComponent(checkoutEmail)}` : ''
+            // Route by login status like CheckoutPage.tsx's voucher-covers-cart
+            // path already does — logged-in customers get the account
+            // confirmation page, guests get the (richer, no-account-link)
+            // checkout one. Previously this always went to /checkout/... even
+            // for logged-in customers paying by card.
+            const confirmationBase = user ? '/account' : '/checkout'
             router.push(
-              `/checkout/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
+              `${confirmationBase}/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
             )
           } else {
             // confirmOrder returned but without an orderID — surface a recoverable error

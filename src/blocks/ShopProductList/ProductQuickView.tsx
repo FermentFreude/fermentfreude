@@ -4,6 +4,7 @@ import { AddToCart } from '@/components/Cart/AddToCart'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import type { Media as MediaType, Product } from '@/payload-types'
+import { useLocale } from '@/providers/Locale'
 import { Minus, Plus, X } from 'lucide-react'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -57,6 +58,8 @@ export const ProductQuickView: React.FC<Props> = ({ product, onClose }) => {
   const overlayRef = useRef<HTMLDivElement>(null)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
+  const { locale } = useLocale()
+  const isDe = locale === 'de'
 
   const gallery = product.gallery ?? []
   const images = gallery.map((g) => g.image).filter(isMediaObject)
@@ -223,12 +226,12 @@ export const ProductQuickView: React.FC<Props> = ({ product, onClose }) => {
             {/* Stock indicator */}
             {isOutOfStock && (
               <p className="text-sm font-medium text-red-600 uppercase tracking-wider mb-3">
-                Out of stock
+                {isDe ? 'Ausverkauft' : 'Out of stock'}
               </p>
             )}
             {!isOutOfStock && stock > 0 && stock < 10 && (
               <p className="text-sm font-medium text-amber-600 uppercase tracking-wider mb-3">
-                Only {stock} left in stock
+                {isDe ? `Nur noch ${stock} auf Lager` : `Only ${stock} left in stock`}
               </p>
             )}
 
