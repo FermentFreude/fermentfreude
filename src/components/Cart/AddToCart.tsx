@@ -8,7 +8,7 @@ import { useLocale } from '@/providers/Locale'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
 import { useSearchParams } from 'next/navigation'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 type Props = {
   product: Product
@@ -27,7 +27,12 @@ export function AddToCart({
   quantity = 1,
   disabled: externalDisabled = false,
 }: Props) {
-  const { addItem, cart, isLoading, incrementItem } = useCart()
+  const { addItem, cart, incrementItem } = useCart()
+  // Scoped to this button. useCart()'s isLoading is shared by every AddToCart
+  // on the page, so using it here put *all* of them into the disabled state
+  // the moment any one was clicked — two product cards both looked pressed
+  // when only one had been.
+  const [isAdding, setIsAdding] = useState(false)
   const { locale } = useLocale()
   const isDe = locale === 'de'
   const searchParams = useSearchParams()
@@ -55,6 +60,8 @@ export function AddToCart({
   const addToCart = useCallback(
     async (e: React.FormEvent<HTMLButtonElement>) => {
       e.preventDefault()
+      if (isAdding) return
+      setIsAdding(true)
 
       try {
         await addItem({
@@ -112,9 +119,11 @@ export function AddToCart({
               ? 'Artikel konnte nicht zum Warenkorb hinzugefügt werden.'
               : 'Failed to add item to cart. Please check the browser console for details.'),
         )
+      } finally {
+        setIsAdding(false)
       }
     },
-    [addItem, product, selectedVariant, quantity, incrementItem, cart?.items, isDe],
+    [addItem, product, selectedVariant, quantity, incrementItem, cart?.items, isDe, isAdding],
   )
 
   const disabled = useMemo<boolean>(() => {
@@ -170,7 +179,7 @@ export function AddToCart({
         },
         className,
       )}
-      disabled={disabled || isLoading || externalDisabled}
+      disabled={disabled || isAdding || externalDisabled}
       onClick={addToCart}
       type="button"
     >
