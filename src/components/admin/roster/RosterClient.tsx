@@ -169,6 +169,73 @@ const s: Record<string, React.CSSProperties> = {
   main: { flex: 1, overflow: 'auto' },
 }
 
+/**
+ * Mobile rules for the admin dashboard.
+ *
+ * The roster is styled with inline `style` objects, which beat any stylesheet
+ * on specificity — hence `!important` here. Keeping the overrides in one
+ * media-query block means the desktop layout is untouched and every rule that
+ * changes behaviour is visible in one place, rather than spread across
+ * twenty-odd components as conditional style objects.
+ *
+ * The shell is a 220px fixed sidebar beside the content, so on a 375px phone
+ * the content had about 155px to work with. Below 900px the sidebar becomes a
+ * horizontally scrolling bar across the top and the content takes the width.
+ */
+const MOBILE_CSS = `
+@media (max-width: 900px) {
+  .ff-roster-shell { flex-direction: column !important; }
+
+  .ff-roster-sidebar {
+    width: 100% !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-right: none !important;
+    border-bottom: 1px solid var(--theme-elevation-100) !important;
+  }
+  .ff-roster-sidebar::-webkit-scrollbar { height: 0; }
+
+  .ff-roster-head {
+    flex-shrink: 0;
+    padding: 0 10px 0 0 !important;
+    border-bottom: none !important;
+  }
+  .ff-roster-head p { white-space: nowrap; }
+
+  .ff-roster-navsection {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 0 !important;
+  }
+  .ff-roster-navsection > * { flex-shrink: 0; white-space: nowrap; }
+
+  /* Section headings and the live dot are noise in a one-line nav bar. */
+  .ff-roster-navlabel, .ff-roster-live { display: none !important; }
+
+  /* Wide tables scroll inside their own box instead of pushing the page out. */
+  .ff-roster table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hardcoded two-column grids stack; the auto-fit grids already collapse. */
+  .ff-roster [style*="1fr 1fr"] { grid-template-columns: 1fr !important; }
+
+  /* Nothing should force the page wider than the screen. */
+  .ff-roster [style*="min-width: 700"],
+  .ff-roster [style*="min-width: 560"],
+  .ff-roster [style*="minWidth: 700"],
+  .ff-roster [style*="minWidth: 560"] { min-width: 0 !important; }
+}
+`
+
 export function RosterClient({ initialData }: { initialData: RosterData }) {
   const [data, setData] = useState<RosterData>(initialData)
   const [section, setSection] = useState<Section>('dashboard')
@@ -230,10 +297,11 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
   const timeStr = lastRefresh.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
   return (
-    <div style={s.shell}>
+    <div className="ff-roster ff-roster-shell" style={s.shell}>
+      <style>{MOBILE_CSS}</style>
       {/* Sidebar */}
-      <aside style={s.sidebar}>
-        <div style={s.sidebarHeader}>
+      <aside className="ff-roster-sidebar" style={s.sidebar}>
+        <div className="ff-roster-head" style={s.sidebarHeader}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: BRAND.gold, flexShrink: 0 }} />
             <p style={s.sidebarTitle}>Fermentfreude</p>
@@ -241,8 +309,8 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
           <p style={s.sidebarSub}>Admin Dashboard</p>
         </div>
 
-        <div style={s.navSection}>
-          <p style={s.navLabel}>Übersicht</p>
+        <div className="ff-roster-navsection" style={s.navSection}>
+          <p className="ff-roster-navlabel" style={s.navLabel}>Übersicht</p>
           {NAV.map((item) => (
             <button key={item.id} style={navItemStyle(section === item.id || (section === 'detail' && item.id === 'workshops'))} onClick={() => navigate(item.id)}>
               <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
@@ -251,8 +319,8 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
           ))}
         </div>
 
-        <div style={s.navSection}>
-          <p style={s.navLabel}>Shop</p>
+        <div className="ff-roster-navsection" style={s.navSection}>
+          <p className="ff-roster-navlabel" style={s.navLabel}>Shop</p>
           {SHOP_NAV.map((item) => (
             <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
               <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
@@ -261,8 +329,8 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
           ))}
         </div>
 
-        <div style={s.navSection}>
-          <p style={s.navLabel}>Buchhaltung</p>
+        <div className="ff-roster-navsection" style={s.navSection}>
+          <p className="ff-roster-navlabel" style={s.navLabel}>Buchhaltung</p>
           {ORDERS_NAV.map((item) => (
             <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
               <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
@@ -271,8 +339,8 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
           ))}
         </div>
 
-        <div style={s.navSection}>
-          <p style={s.navLabel}>Refunds & Rebooking</p>
+        <div className="ff-roster-navsection" style={s.navSection}>
+          <p className="ff-roster-navlabel" style={s.navLabel}>Refunds & Rebooking</p>
           {REFUNDS_NAV.map((item) => {
             const badgeCount =
               item.id === 'refunds'
@@ -290,14 +358,14 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
           })}
         </div>
 
-        <div style={s.liveIndicator}>
+        <div className="ff-roster-live" style={s.liveIndicator}>
           <span style={s.liveDot} />
           Live · {timeStr}
         </div>
       </aside>
 
       {/* Main content */}
-      <main style={s.main}>
+      <main className="ff-roster-main" style={s.main}>
         {section === 'dashboard' && (
           <DashboardView data={data} onSelectWorkshop={openDetail} onNavigate={navigate} />
         )}
