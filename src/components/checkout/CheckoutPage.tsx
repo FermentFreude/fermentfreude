@@ -10,7 +10,7 @@ import { useAuth } from '@/providers/Auth'
 import { useLocale } from '@/providers/Locale'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
-import { MapPin, X } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { Suspense, useCallback, useEffect, useState } from 'react'
@@ -842,23 +842,6 @@ export const CheckoutPage: React.FC = () => {
    * must never fire off a debounce while they are still choosing a password.
    * Those customers keep the explicit button below.
    */
-  // Escape closes the payment dialog and the page behind it stops scrolling,
-  // same contract as the pickup dialog on the confirmation page.
-  useEffect(() => {
-    const open = Boolean(paymentData?.['clientSecret']) && !voucherCoversAll
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setPaymentData(null)
-    }
-    document.addEventListener('keydown', onKey)
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = previousOverflow
-    }
-  }, [paymentData, voucherCoversAll])
-
   /* ── Voucher Handlers ── */
   const handleApplyVoucher = useCallback(async () => {
     setVoucherError(null)
@@ -1553,43 +1536,14 @@ export const CheckoutPage: React.FC = () => {
 
         <Suspense fallback={<React.Fragment />}>
           {!voucherCoversAll && paymentData && typeof paymentData['clientSecret'] === 'string' && (
-            /* Payment opens over the page rather than extending it. The form
-               is the only thing to do once it is up, and a dialog says that
-               more plainly than another section appended to a long sheet.
-               Closing drops the PaymentIntent, which is what lets the voucher
-               field regenerate a correct one on the next open. */
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="payment-dialog-title"
-              className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
-            >
-              <button
-                type="button"
-                aria-label={t.cancelPayment}
-                onClick={() => setPaymentData(null)}
-                className="absolute inset-0 h-full w-full cursor-default bg-ff-near-black/60 backdrop-blur-sm"
-              />
-              <section className="relative z-10 max-h-[92vh] w-full overflow-y-auto rounded-t-(--radius-card) bg-white p-6 sm:max-w-lg sm:rounded-(--radius-card) sm:p-8">
-                <div className="mb-6 flex items-start justify-between gap-4">
-                  <div>
-                    <h2
-                      id="payment-dialog-title"
-                      className="font-display text-subheading font-bold text-ff-near-black"
-                    >
-                      {t.payment}
-                    </h2>
-                    <p className="mt-1 text-caption text-ff-gray-text-light">{t.poweredByStripe}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentData(null)}
-                    aria-label={t.cancelPayment}
-                    className="-mr-1 -mt-1 shrink-0 rounded-full p-1.5 text-ff-gray-text-light transition-colors hover:bg-[#f5f1e8] hover:text-ff-near-black"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
+            /* Payment sits in the flow, under the details it needs. */
+            <section className="p-6 sm:p-8">
+              <div className="mb-6">
+                <h2 className="font-display text-subheading font-bold text-ff-near-black">
+                  {t.payment}
+                </h2>
+                <p className="mt-1 text-caption text-ff-gray-text-light">{t.poweredByStripe}</p>
+              </div>
               {error && (
                 <p className="mb-4 text-body-sm text-red-600">{`${t.errorPrefix}: ${error}`}</p>
               )}
@@ -1641,8 +1595,7 @@ export const CheckoutPage: React.FC = () => {
                   />
                 </div>
               </Elements>
-              </section>
-            </div>
+            </section>
           )}
         </Suspense>
       </div>
