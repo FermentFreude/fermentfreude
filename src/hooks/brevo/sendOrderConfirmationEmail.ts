@@ -667,7 +667,7 @@ ${sectionTitle('Artikel')}
 ${itemRowsHtml}
 </table>
 ${guestsBlock}${workshopBlock}${shippingBlock}
-<a href="${adminOrderUrl}" style="display:inline-block;margin-top:4px;padding:11px 22px;background:${GOLD};color:${NEAR_BLACK};text-decoration:none;border-radius:999px;font-weight:700;font-size:13px">Bestellung im Roster ansehen →</a>
+<a href="${adminOrderUrl}" style="display:inline-block;margin-top:4px;padding:11px 22px;background:${GOLD};color:${NEAR_BLACK};text-decoration:none;border-radius:999px;font-weight:700;font-size:13px">Im Admin-Dashboard ansehen →</a>
 </div>
 </div>`
 
