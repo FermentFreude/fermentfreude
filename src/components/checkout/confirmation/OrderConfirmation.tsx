@@ -1,5 +1,6 @@
 import { accountI18n } from '@/app/(app)/account/i18n'
 import { Media } from '@/components/Media'
+import { Price } from '@/components/Price'
 import { ProductItem } from '@/components/ProductItem'
 import { Card } from '@/components/ui/card'
 import type { OrderConfirmationData } from '@/lib/orderConfirmation'
@@ -68,6 +69,8 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
     otherWorkshops,
     manageBookingLinks,
     items,
+    total,
+    currency,
   } = data
 
   // ─── Pickup order confirmation ─────────────────────────────
@@ -121,17 +124,36 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
           )}
 
           {items.length > 0 && (
-            <ul className="mt-6 flex flex-col gap-6 border-t border-ff-border-light pt-6">
-              {items.map((item) => (
-                <li key={item.id}>
-                  <ProductItem
-                    product={item.product}
-                    quantity={item.quantity}
-                    variant={item.variant}
+            <div className="mt-6 border-t border-ff-border-light pt-6">
+              <ul className="flex flex-col gap-6">
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <ProductItem
+                      product={item.product}
+                      quantity={item.quantity}
+                      variant={item.variant}
+                      currencyCode={currency ?? undefined}
+                    />
+                  </li>
+                ))}
+              </ul>
+
+              {/* One total, for the amount actually charged. Taken from the
+                  Order rather than summed here, so a voucher or discount can
+                  never leave this disagreeing with the card statement. */}
+              {typeof total === 'number' && (
+                <div className="mt-6 flex items-baseline justify-between gap-4 border-t border-ff-border-light pt-5">
+                  <span className="font-display text-body font-bold text-ff-near-black">
+                    {t.total}
+                  </span>
+                  <Price
+                    className="font-display text-xl font-bold text-ff-near-black"
+                    amount={total}
+                    currencyCode={currency ?? undefined}
                   />
-                </li>
-              ))}
-            </ul>
+                </div>
+              )}
+            </div>
           )}
 
           <div className="mt-6 flex items-start gap-3 border-t border-ff-border-light pt-6">
