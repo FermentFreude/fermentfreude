@@ -199,6 +199,9 @@ export interface Config {
     'product-pickup-settings': ProductPickupSettingsSelect<false> | ProductPickupSettingsSelect<true>;
   };
   locale: 'de' | 'en';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -2710,9 +2713,6 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -2732,9 +2732,6 @@ export interface Form {
   redirect?: {
     url: string;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -2743,9 +2740,6 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: {
           root: {
             type: string;
@@ -4794,7 +4788,10 @@ export interface GastronomyShowcaseBlock {
   slides?:
     | {
         image?: (string | null) | Media;
-        title?: string | null;
+        /**
+         * Required — a slide/card with no title is hidden on the live page, not shown blank.
+         */
+        title: string;
         text?: string | null;
         id?: string | null;
       }[]
@@ -4822,7 +4819,10 @@ export interface GastronomyBenefitsBlock {
          * Shown in the gold circle above the title. Same icon in German and English.
          */
         icon?: ('utensils' | 'sparkles' | 'leaf' | 'chefHat' | 'flame' | 'wheat' | 'heart' | 'sprout') | null;
-        title?: string | null;
+        /**
+         * Required — a benefit with no title is hidden on the live page, not shown blank.
+         */
+        title: string;
         text?: string | null;
         id?: string | null;
       }[]
@@ -4847,7 +4847,10 @@ export interface GastronomyAudienceBlock {
   cards?:
     | {
         image?: (string | null) | Media;
-        title?: string | null;
+        /**
+         * Required — a slide/card with no title is hidden on the live page, not shown blank.
+         */
+        title: string;
         text?: string | null;
         id?: string | null;
       }[]
@@ -10111,6 +10114,16 @@ export interface ProductPickupSettingsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
