@@ -201,11 +201,32 @@ function RelatedProducts({ products }: { products: Product[] }) {
   )
 }
 
+/**
+ * Slugs that were renamed, mapped to the older slug the same product may still
+ * carry in another environment.
+ *
+ * The kimchi product was renamed `classic-kimchi` → `kimchi` on staging, and
+ * `redirects.js` sends the old URL to the new one. Production still holds
+ * `classic-kimchi`, so without this the redirect would land on a slug that
+ * exists nowhere and return a 404 for the whole product page.
+ *
+ * Matching both is how the rest of the codebase already handles this pair —
+ * see the related-products query below and FeaturedProductCards — and it
+ * avoids renaming a live product's slug, which would break every existing link
+ * to it. Drop an entry here once every environment is on the new slug.
+ */
+const LEGACY_SLUGS: Record<string, string> = {
+  kimchi: 'classic-kimchi',
+}
+
 const queryProductBySlug = cache(async ({ slug, locale }: { slug: string; locale?: 'de' | 'en' }) => {
   const { isEnabled: draft } = await draftMode()
   const cmsLocale = normalizeAppLocale(locale)
 
   const payload = await getPayload({ config: configPromise })
+
+  const legacySlug = LEGACY_SLUGS[slug]
+  const slugsToMatch = legacySlug ? [slug, legacySlug] : [slug]
 
   const result = await withMongoRetry(() =>
     payload.find({
@@ -220,7 +241,7 @@ const queryProductBySlug = cache(async ({ slug, locale }: { slug: string; locale
         and: [
           {
             slug: {
-              equals: slug,
+              in: slugsToMatch,
             },
           },
           ...(draft ? [] : [{ _status: { equals: 'published' } }]),
