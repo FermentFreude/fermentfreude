@@ -17,6 +17,7 @@ import { OnlineCourseSliderBlock } from '@/blocks/OnlineCourseSlider/Component'
 import { OurStoryBlock } from '@/blocks/OurStory/Component'
 import { PressBannerBlock } from '@/blocks/PressBanner/Component'
 import { PressMediaAwardsBlock } from '@/blocks/PressMediaAwards/Component'
+import { ProductHeroSliderComponent } from '@/blocks/ProductHeroSlider/Component'
 import { ProductSliderBlock } from '@/blocks/ProductSlider/Component'
 import { ReadyToLearnCTABlock } from '@/blocks/ReadyToLearnCTA/Component'
 import { ShopAutomatenComponent } from '@/blocks/ShopAutomaten/Component'
@@ -64,6 +65,7 @@ const blockComponents = {
   testimonials: TestimonialsBlock,
   threeItemGrid: ThreeItemGridBlock,
   productSlider: ProductSliderBlock,
+  productHeroSlider: ProductHeroSliderComponent,
   featuredProductCards: FeaturedProductCardsComponent,
   shopAutomaten: ShopAutomatenComponent,
   shopHero: ShopHeroComponent,
