@@ -1,6 +1,5 @@
-import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { ensureCartWorkshopHolds, PAYMENT_HOLD_MINUTES } from '@/lib/workshopHolds'
 import configPromise from '@payload-config'
-import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
@@ -27,6 +26,9 @@ export async function POST(request: NextRequest) {
         alreadyRedeemed: 'This voucher has already been redeemed.',
         emptyCart: 'Your cart is empty.',
         failed: 'Order failed. Please try again.',
+        seatsGone:
+          'A workshop date in your cart is no longer available. Please reload the page and choose another date.',
+        reload: 'Please reload the page and try again.',
       }
     : {
         codeRequired: 'Gutschein-Code ist erforderlich.',
@@ -34,10 +36,20 @@ export async function POST(request: NextRequest) {
         alreadyRedeemed: 'Dieser Gutschein wurde bereits eingelöst.',
         emptyCart: 'Der Warenkorb ist leer.',
         failed: 'Bestellung fehlgeschlagen. Bitte versuche es erneut.',
+        seatsGone:
+          'Ein Workshop-Termin in deinem Warenkorb ist nicht mehr verfügbar. Bitte lade die Seite neu und wähle einen anderen Termin.',
+        reload: 'Bitte lade die Seite neu und versuche es erneut.',
       }
   try {
     const body = await request.json()
-    const { voucherCode, customerEmail, customerName, userId, cartItems: clientCartItems } = body
+    const {
+      voucherCode,
+      customerEmail,
+      customerName,
+      userId,
+      cartId: clientCartId,
+      cartItems: clientCartItems,
+    } = body
 
     if (!voucherCode || typeof voucherCode !== 'string') {
       return NextResponse.json(
@@ -82,7 +94,39 @@ export async function POST(request: NextRequest) {
     let cartItems: { product: string; variant?: string | null; quantity: number }[] = []
     let cartId: string | null = null
 
-    if (userId) {
+    // The basket itself is the authority when the browser tells us which one
+    // it is (guests included) — its items carry the appointment of every
+    // workshop line, which the booking confirmation needs.
+    if (typeof clientCartId === 'string' && clientCartId.trim()) {
+      try {
+        const cart = await payload.findByID({
+          collection: 'carts',
+          id: clientCartId.trim(),
+          depth: 0,
+          overrideAccess: true,
+        })
+        if (cart.status !== 'purchased' && cart.items?.length) {
+          cartId = cart.id
+          cartItems = cart.items
+            .filter((item) => item.product)
+            .map((item) => ({
+              product:
+                typeof item.product === 'object' && item.product !== null
+                  ? item.product.id
+                  : String(item.product),
+              variant:
+                item.variant && typeof item.variant === 'object'
+                  ? item.variant.id
+                  : (item.variant ?? null),
+              quantity: item.quantity ?? 1,
+            }))
+        }
+      } catch {
+        // Unknown cart — fall back to the lookups below
+      }
+    }
+
+    if (!cartItems.length && userId) {
       const carts = await payload.find({
         collection: 'carts',
         where: {
@@ -153,6 +197,24 @@ export async function POST(request: NextRequest) {
     }
     const workshopTitle = productTitles.join(', ') || 'Workshop'
 
+    // 3b. Final check at the door — the workshop seats must still be held
+    // (re-held if the hold ran out but seats are free). Without the basket
+    // we can't tell which dates these are, so we can't book them safely.
+    if (workshopItems.length > 0) {
+      if (!cartId) {
+        return NextResponse.json({ success: false, error: ERR.reload }, { status: 400 })
+      }
+      const { lines } = await ensureCartWorkshopHolds(payload, cartId, {
+        holdMinutes: PAYMENT_HOLD_MINUTES,
+      })
+      if (lines.some((line) => line.status !== 'held')) {
+        return NextResponse.json(
+          { success: false, error: ERR.seatsGone, code: 'WORKSHOP_UNAVAILABLE' },
+          { status: 409 },
+        )
+      }
+    }
+
     // 4. Create order
     const order = await payload.create({
       collection: 'orders',
@@ -174,179 +236,16 @@ export async function POST(request: NextRequest) {
       },
       // Read by sendOrderConfirmationEmail's admin notification so a €0,00
       // order reads as "paid with voucher FF-GIFT-XXXX" instead of a mistake.
-      context: { paidByVoucher: sanitizedCode },
+      // cartId: lets confirmWorkshopBookings confirm exactly this basket's
+      // bookings — a voucher order has no Stripe transaction to find it by.
+      context: { paidByVoucher: sanitizedCode, cartId },
       overrideAccess: true,
     })
 
-    // 4b. Explicitly confirm workshop bookings and stamp orderId.
-    // confirmWorkshopBookings (afterChange hook) runs above but may miss bookings
-    // when there is no Stripe transaction (= no cartId) and the booking email
-    // differs from the checkout email. We run a targeted confirmation here as a
-    // reliable fallback. Sequential writes only (Atlas M0 — no Promise.all).
-    for (const { workshopSlug, guestCount } of workshopItems) {
-      try {
-        // Primary: match by email + workshopSlug + guestCount
-        let bookingResult = customerEmail
-          ? await payload.find({
-              collection: 'workshop-bookings',
-              where: {
-                and: [
-                  { workshopSlug: { equals: workshopSlug } },
-                  { status: { equals: 'pending' } },
-                  { guestCount: { equals: guestCount } },
-                  { email: { equals: customerEmail } },
-                ],
-              },
-              sort: '-createdAt',
-              limit: 1,
-              overrideAccess: true,
-            })
-          : null
-
-        // Fallback: any pending booking for this workshop + guest count
-        if (!bookingResult?.totalDocs) {
-          bookingResult = await payload.find({
-            collection: 'workshop-bookings',
-            where: {
-              and: [
-                { workshopSlug: { equals: workshopSlug } },
-                { status: { equals: 'pending' } },
-                { guestCount: { equals: guestCount } },
-              ],
-            },
-            sort: '-createdAt',
-            limit: 1,
-            overrideAccess: true,
-          })
-        }
-
-        // Last resort: any pending booking for this workshop
-        if (!bookingResult?.totalDocs) {
-          bookingResult = await payload.find({
-            collection: 'workshop-bookings',
-            where: {
-              and: [
-                { workshopSlug: { equals: workshopSlug } },
-                { status: { equals: 'pending' } },
-              ],
-            },
-            sort: '-createdAt',
-            limit: 1,
-            overrideAccess: true,
-          })
-        }
-
-        if (bookingResult?.totalDocs && bookingResult.docs[0]) {
-          const booking = bookingResult.docs[0]
-          const updateData: Record<string, unknown> = {
-            status: 'confirmed',
-            orderId: String(order.id),
-          }
-          // Copy customer info if not already on the booking
-          if (!booking.email && customerEmail) updateData.email = customerEmail
-          if (!booking.firstName && typeof customerName === 'string' && customerName.trim()) {
-            const parts = customerName.trim().split(/\s+/)
-            updateData.firstName = parts[0]
-            if (!booking.lastName && parts.length > 1) updateData.lastName = parts.slice(1).join(' ')
-          }
-          await payload.update({
-            collection: 'workshop-bookings',
-            id: booking.id,
-            data: updateData,
-            overrideAccess: true,
-          })
-
-          // Send booking confirmation email (confirmWorkshopBookings hook may have
-          // missed this booking since voucher orders have no Stripe transaction/cartId).
-          // Guard: only send here if the booking was NOT already confirmed by the hook
-          // (i.e. it was still 'pending' when we found it above — we just confirmed it).
-          const recipientEmail = (updateData.email as string | undefined) || booking.email
-          if (recipientEmail) {
-            try {
-              const firstName = (updateData.firstName as string | undefined) || booking.firstName || 'Gast'
-              const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
-              const formattedPrice = typeof booking.totalPrice === 'number'
-                ? `€${booking.totalPrice.toFixed(2).replace('.', ',')}`
-                : String(booking.totalPrice ?? '')
-
-              // Real tickets/receipt links via the order's own downloadToken —
-              // same pattern as confirmWorkshopBookings.ts. Previously TICKETS_URL
-              // was hardcoded to /account/orders here, a dead end for guests and
-              // not an actual tickets page for anyone.
-              const orderDownloadToken =
-                typeof (order as { downloadToken?: unknown }).downloadToken === 'string'
-                  ? (order as { downloadToken?: string }).downloadToken!
-                  : ''
-              const ticketsUrl = orderDownloadToken
-                ? `${SERVER_URL}/orders/${order.id}/tickets?token=${orderDownloadToken}`
-                : `${SERVER_URL}/account/orders`
-              const receiptUrl = orderDownloadToken
-                ? `${SERVER_URL}/api/orders/${order.id}/receipt?token=${orderDownloadToken}`
-                : ''
-
-              // Mint the manage-booking magic link — same self-service link the
-              // paid-order confirmation email includes (confirmWorkshopBookings.ts).
-              // Best-effort: a failed link means no self-service link in this
-              // email, not a failed booking confirmation.
-              let manageBookingToken = ''
-              try {
-                const link = await payload.create({
-                  collection: 'booking-magic-links',
-                  data: {
-                    token: randomUUID(),
-                    bookingId: booking.id,
-                    scope: 'self-service',
-                    issuedAt: new Date().toISOString(),
-                  },
-                  overrideAccess: true,
-                })
-                manageBookingToken = String(link.token)
-              } catch (linkError) {
-                console.error('[place-order] Failed to create magic link for booking', booking.id, linkError)
-              }
-
-              await sendTemplateEmail({
-                to: [{ email: recipientEmail, name: firstName }],
-                // Registered customers → the account-linking template;
-                // guests → the manage-booking-magic-link template.
-                templateId: userId
-                  ? BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION
-                  : BREVO_TEMPLATES.WORKSHOP_BOOKING_CONFIRMATION_GUEST,
-                params: {
-                  WORKSHOP_TITLE: String(booking.workshopTitle ?? 'Workshop'),
-                  WORKSHOP_DATE: String(booking.date ?? ''),
-                  WORKSHOP_TIME: String(booking.time ?? ''),
-                  WORKSHOP_LOCATION: '',
-                  GUEST_COUNT: String(booking.guestCount ?? 1),
-                  TOTAL_PRICE: formattedPrice,
-                  FIRST_NAME: firstName,
-                  CUSTOMER_PHONE: '',
-                  CUSTOMER_DIET_SPECS: 'Keine Angabe',
-                  BOOKING_ID: String(booking.id),
-                  BOOKING_REF: String(booking.id).slice(-8).toUpperCase(),
-                  SEATS: [],
-                  TICKETS_URL: ticketsUrl,
-                  RECEIPT_URL: receiptUrl,
-                  WHAT_TO_BRING: '',
-                  PRIVACY_URL: `${SERVER_URL}/datenschutz`,
-                  AGB_URL: `${SERVER_URL}/agb`,
-                  CREATE_ACCOUNT_URL: `${SERVER_URL}/create-account`,
-                  MANAGE_BOOKING_URL: manageBookingToken
-                    ? `${SERVER_URL}/manage-booking/${manageBookingToken}`
-                    : `${SERVER_URL}/account/orders`,
-                },
-              })
-            } catch (emailErr) {
-              console.error('[place-order] Failed to send booking confirmation email:', emailErr)
-              // Non-fatal
-            }
-          }
-        }
-      } catch (bookingErr) {
-        console.error('[place-order] Failed to confirm booking for', workshopSlug, bookingErr)
-        // Non-fatal: order is still valid, tickets page will use fallback lookup
-      }
-    }
+    // Workshop bookings are confirmed (and their confirmation emails sent)
+    // by the confirmWorkshopBookings hook during the create above, using the
+    // cartId in context. The old fallback here matched "any pending booking
+    // for this workshop" and could confirm another customer's basket.
 
     // 5. Redeem the voucher
     await payload.update({

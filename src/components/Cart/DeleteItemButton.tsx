@@ -1,6 +1,7 @@
 'use client'
 
 import type { CartItem } from '@/components/Cart'
+import { releaseWorkshopLine } from '@/lib/checkWorkshopHolds'
 import { gtmRemoveFromCart } from '@/lib/gtm'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
@@ -22,50 +23,40 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
     if (!productSlug || !productSlug.startsWith('workshop-')) return
 
     try {
-      const stored = localStorage.getItem('workshopBookings')
-      if (!stored) return
-
-      const bookings = JSON.parse(stored) as Record<
+      let bookings: Record<
         string,
-        {
-          appointmentId?: string
-          bookingId?: string | null
-          workshopSlug?: string
-          guestCount?: number
-        }
-      >
+        { appointmentId?: string; bookingId?: string | null; workshopSlug?: string }
+      > = {}
+      try {
+        bookings = JSON.parse(localStorage.getItem('workshopBookings') || '{}')
+      } catch {
+        // corrupt entry — the cart line's own `a` is enough below
+      }
 
       const workshopSlug = productSlug.replace('workshop-', '')
       // Match the exact cart line via `item.a` (last 6 hex chars of the
       // appointment ID — see the `carts` config in src/plugins/index.ts),
-      // not just workshopSlug. Two different dates for the same workshop
-      // type can both be in the cart at once (e.g. switching dates without
-      // fully clearing state first); matching by slug alone would release
-      // spots for whichever entry happens to come first in the object,
-      // potentially releasing the wrong appointment while leaving the one
-      // actually being removed stuck holding its reserved spots forever.
+      // not just workshopSlug: two dates of the same workshop can both be in
+      // the cart, and matching by slug alone would release the wrong one.
       const entry = Object.entries(bookings).find(
         ([, booking]) =>
           booking.workshopSlug === workshopSlug &&
           (!item.a || booking.appointmentId?.slice(-6) === item.a),
       )
-      if (!entry) return
 
-      const [bookingKey, booking] = entry
-      if (!booking.appointmentId || !booking.guestCount) return
-
-      await fetch('/api/cart/release-spots', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          appointmentId: booking.appointmentId,
-          guestCount: booking.guestCount,
-          bookingId: booking.bookingId ?? undefined,
-        }),
+      // The server works out which seats this basket still holds for this
+      // date and gives back exactly those — nothing if the hold already ran
+      // out (those seats went back on sale back then). Works even if this
+      // browser lost its localStorage entry, via the cart line's `a`.
+      await releaseWorkshopLine({
+        appointmentId: entry?.[1].appointmentId ?? item.a ?? null,
+        bookingId: entry?.[1].bookingId ?? null,
       })
 
-      delete bookings[bookingKey]
-      localStorage.setItem('workshopBookings', JSON.stringify(bookings))
+      if (entry) {
+        delete bookings[entry[0]]
+        localStorage.setItem('workshopBookings', JSON.stringify(bookings))
+      }
     } catch (error) {
       console.error('[DeleteItemButton] Failed to release workshop spots:', error)
     }

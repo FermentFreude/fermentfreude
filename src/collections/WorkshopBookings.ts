@@ -74,6 +74,19 @@ export const WorkshopBookings: CollectionConfig = {
       },
     },
     {
+      name: 'holdExpiresAt',
+      type: 'date',
+      label: 'Seats held until',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        date: { pickerAppearance: 'dayAndTime' },
+        description:
+          'Only matters while the booking is "Pending": the seats stay reserved for this customer until this time, then go back on sale automatically. Set by the website — no need to edit.',
+        condition: (data) => data?.status === 'pending',
+      },
+    },
+    {
       name: 'downloadToken',
       type: 'text',
       label: 'Receipt Download Token',
