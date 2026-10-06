@@ -606,20 +606,8 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       // paid via Stripe vs a redeemed voucher) and avoids double-notifying
       // admin for the same order.
 
-      // ── Per-seat guest emails — DISABLED (founders' decision, May 2026) ──
-      // The founders intentionally do NOT want any separate emails sent to
-      // guests/recipients. All workshop confirmations, .ics calendar files
-      // and invoices go to the buyer/payer only. The buyer forwards the
-      // information to their guests themselves. (Vouchers are the dedicated
-      // gift flow — recipients there only receive a confirmation when they
-      // personally redeem the voucher and book a workshop with their own
-      // email address.)
-      //
-      // We still persist optional guest names + notes per seat so the founders
-      // see the attendee list in the admin. The block below is kept as a
-      // commented-out reference in case this policy is revisited.
-      //
-      // for (const seat of seats) { … sendTemplateEmail to seat.recipientEmail … }
+      // Guests get no confirmation of their own — only the buyer does. Guests
+      // who left an email get the 2-day reminder (/api/emails/workshop-reminders).
     }
     }
   }

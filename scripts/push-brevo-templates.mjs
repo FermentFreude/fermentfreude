@@ -29,8 +29,6 @@ const TEST_EMAIL = 'kontakt@fermentfreude.at'
 
 // Templates we manage (V2 only). Order = founder edit priority.
 const V2_TEMPLATES = [
-  { id: 32, slug: 'workshop-7day-reminder' },
-  { id: 33, slug: 'workshop-1day-reminder' },
   { id: 34, slug: 'post-workshop-followup' },
   { id: 35, slug: 'feedback-request' },
   { id: 37, slug: 'shipping-notification' },
@@ -48,7 +46,6 @@ const V2_TEMPLATES = [
   { id: 71, slug: 'login-notification' },
   { id: 72, slug: 'order-confirmation' },
   { id: 73, slug: 'voucher-purchased' },
-  { id: 93, slug: 'workshop-gift' },
   { id: 95, slug: 'customer-rebooked' },
   { id: 96, slug: 'rebooking-voucher-issued' },
   { id: 97, slug: 'cancelled-no-refund' },
@@ -211,18 +208,6 @@ const MOCK = {
   </td></tr>
 </table>`,
     WORKSHOP_BOOKINGS_HTML: '',
-    PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
-    AGB_URL: 'https://www.fermentfreude.at/agb',
-  },
-  93: {
-    RECIPIENT_NAME: 'Lena',
-    SENDER_NAME: 'Max',
-    GIFT_NOTE: 'Ich dachte mir, das ist genau dein Ding — viel Spaß damit!',
-    WORKSHOP_TITLE: 'Tempeh Basics',
-    WORKSHOP_DATE: 'Sa, 6. Juni 2026',
-    WORKSHOP_TIME: '10:00 – 14:00',
-    WORKSHOP_LOCATION: 'Studio Wien, Schönbrunner Str. 12, 1050',
-    WHAT_TO_BRING: 'Schürze · ein Glas (500 ml) · Lust auf gute Gespräche',
     PRIVACY_URL: 'https://www.fermentfreude.at/datenschutz',
     AGB_URL: 'https://www.fermentfreude.at/agb',
   },
@@ -452,8 +437,7 @@ if (createMode) {
   }
   const r = await createTemplate({ name, subject, htmlContent: html })
   console.log(`✓ Created Brevo template — ID = ${r.id}`)
-  console.log(`\n  → Add to .env / Vercel:`)
-  console.log(`     BREVO_TEMPLATE_WORKSHOP_GIFT_NOTIFICATION=${r.id}\n`)
+  console.log(`\n  → Add this ID to BREVO_TEMPLATES in src/lib/brevo.ts and to V2_TEMPLATES above.\n`)
   process.exit(0)
 }
 

@@ -34,6 +34,7 @@ STRIPE_SECRET_KEY                    # sk_test_ (dev) / sk_live_ (prod)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY   # pk_test_ (dev) / pk_live_ (prod)
 STRIPE_WEBHOOKS_SIGNING_SECRET       # whsec_
 DEEPL_API_KEY                        # Auto-translation DE→EN
+CRON_SECRET                          # Auth for Vercel Cron → /api/emails/workshop-reminders (route refuses to run without it)
 ```
 
 **CRITICAL:** `NEXT_PUBLIC_*` vars are baked in at **build time**. Changing them in Vercel requires a full redeploy **without cache**.

@@ -89,7 +89,7 @@ const DEFAULT_SENDER = {
  *
  * V2 templates (Apr 2026 launch redesign) are used for the essential confirmation flows.
  * Non-V2 entries are preserved for templates that don't yet have a V2 (reminders, marketing, etc.).
- * Reminder/follow-up sends are gated off in code until V2 versions ship.
+ * Follow-up sends (34/35) have no sender wired up yet.
  */
 export const BREVO_TEMPLATES = {
   // Transactional (4) — V2
@@ -98,14 +98,14 @@ export const BREVO_TEMPLATES = {
   PASSWORD_RESET: 70, // V2 (was 29)
   LOGIN_NOTIFICATION: 71, // V2 (was 30)
 
-  // Workshop (6) — booking confirmation V2; reminders & follow-ups still v1 (disabled in code)
+  // Workshop — booking confirmation V2; follow-ups still v1 (no sender wired up)
   WORKSHOP_BOOKING_CONFIRMATION: 65, // V2 (was 31) — registered customers: links into /account
   WORKSHOP_BOOKING_CONFIRMATION_GUEST: 102, // Guest: manage-booking magic link instead of an account link, ends with a "create an account" upsell
-  WORKSHOP_GIFT_NOTIFICATION: 93, // V2 — Sprint 3, sent per gift seat (no price)
   ADMIN_WORKSHOP_NOTIFICATION: 94, // Admin notification for new workshop bookings
   WORKSHOP_ALTERNATE_DATE_OFFER: 100, // Roster: offer an overbooked guest a different date, manual follow-up
-  WORKSHOP_7DAY_REMINDER: 32,
-  WORKSHOP_1DAY_REMINDER: 33,
+  // Sent 2 days before the workshop to the buyer + every guest with an email
+  // (src/lib/workshopReminders.ts). 0 = not created in Brevo yet → job refuses to run.
+  WORKSHOP_REMINDER: 0,
   POST_WORKSHOP_FOLLOWUP: 34,
   FEEDBACK_REQUEST: 35,
 

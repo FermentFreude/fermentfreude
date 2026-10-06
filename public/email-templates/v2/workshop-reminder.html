@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="x-apple-disable-message-reformatting">
-<title>Erinnerung: Dein Workshop morgen!</title>
+<title>Erinnerung: Dein Workshop in 2 Tagen</title>
 <style>
   @media only screen and (max-width:620px){
     .ff-container{width:100% !important;}
@@ -18,7 +18,7 @@
 </style>
 </head>
 <body style="margin:0;padding:0;background-color:#FFFFFF;font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;color:#555251;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
-<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#FFFFFF;">Morgen findet dein Workshop "{{ params.WORKSHOP_TITLE | default: "" }}" statt.</div>
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#FFFFFF;">In 2 Tagen findet dein Workshop "{{ params.WORKSHOP_TITLE | default: "" }}" statt.</div>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:#FFFFFF;">
   <tr>
     <td align="center" style="padding:0;">
@@ -46,10 +46,10 @@
         
         <!-- HEADLINE -->
         <tr><td class="ff-px" align="center" style="padding:8px 32px 8px 32px;">
-          <h1 class="ff-h1" style="margin:0;font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:28px;line-height:1.2;color:#1a1a1a;font-weight:700;letter-spacing:-0.01em;">Bis morgen!</h1>
+          <h1 class="ff-h1" style="margin:0;font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:28px;line-height:1.2;color:#1a1a1a;font-weight:700;letter-spacing:-0.01em;">In 2 Tagen geht's los!</h1>
         </td></tr>
         <tr><td class="ff-px" align="center" style="padding:12px 32px 24px 32px;">
-          <p style="margin:0;font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:16px;line-height:1.6;color:#555251;">Hi {{ params.FIRST_NAME | default: "liebe Genießer:in" }}, morgen ist es soweit! Wir freuen uns schon sehr auf den Workshop "{{ params.WORKSHOP_TITLE | default: "Workshop" }}" mit dir.</p>
+          <p style="margin:0;font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:16px;line-height:1.6;color:#555251;">Hi {{ params.FIRST_NAME | default: "liebe Genießer:in" }}, nur eine kurze Erinnerung: In 2 Tagen findet dein Workshop "{{ params.WORKSHOP_TITLE | default: "Workshop" }}" statt. Wir freuen uns auf dich!</p>
         </td></tr>
 
         <!-- DETAILS CARD -->
@@ -126,31 +126,6 @@
         </td></tr>
         <tr><td style="height:16px;line-height:16px;font-size:0;">&nbsp;</td></tr>
 
-        <!-- PREP TIPS (optional) -->
-        {% if params.PREP_TIPS and params.PREP_TIPS != "" %}
-        <tr><td class="ff-px" style="padding:0 32px;">
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:#ffffff;border:1px solid #E8DFD0;border-radius:8px;">
-            <tr><td style="padding:18px 20px;">
-              <div style="font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:12px;line-height:1.3;color:#8a8783;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:8px;">Vorbereitungstipps</div>
-              <div style="font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:14px;line-height:1.6;color:#555251;">{{ params.PREP_TIPS }}</div>
-            </td></tr>
-          </table>
-        </td></tr>
-        <tr><td style="height:16px;line-height:16px;font-size:0;">&nbsp;</td></tr>
-        {% endif %}
-
-        <!-- CTA -->
-        <tr><td class="ff-px" align="center" style="padding:8px 32px 8px 32px;">
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="ff-button" style="border-collapse:collapse;margin:0 auto;">
-            <tr>
-              <td align="center" bgcolor="#E5B765" style="border-radius:6px;background-color:#E5B765;">
-                <a href="{{ params.BOOKING_URL | default: "https://www.fermentfreude.at/account/orders" }}" style="display:inline-block;padding:14px 32px;font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:15px;font-weight:700;letter-spacing:0.02em;color:#1a1a1a;text-decoration:none;border-radius:6px;">Buchung ansehen</a>
-              </td>
-            </tr>
-          </table>
-        </td></tr>
-
-        <tr><td style="height:16px;line-height:16px;font-size:0;">&nbsp;</td></tr>
         <tr><td class="ff-px" align="center" style="padding:12px 32px 24px 32px;">
           <p style="margin:0;font-family: 'Neue Haas Grotesk Display Pro', 'Neue Haas Grotesk Text Pro', 'Neue Haas Grotesk', Helvetica, Arial, sans-serif;font-size:13px;line-height:1.6;color:#8a8783;">Fragen zum Termin? Antworte einfach auf diese E-Mail — wir helfen dir gerne weiter.</p>
         </td></tr>

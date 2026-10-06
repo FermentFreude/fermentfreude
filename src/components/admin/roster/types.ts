@@ -21,6 +21,7 @@ export type AppointmentRow = {
 
 export type SeatEntry = {
   recipientName: string
+  email: string
   giftNote: string
   seatStatus?: string
   cancelledAt?: string

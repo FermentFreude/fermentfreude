@@ -256,6 +256,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         seats: [
           {
             recipientName: booking.seats?.[seatIndex]?.recipientName ?? '',
+            email: booking.seats?.[seatIndex]?.email ?? undefined,
             seatStatus: 'active',
             selfRebookingUsed: false,
             rebookedFromBookingId: String(booking.id),
