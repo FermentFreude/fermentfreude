@@ -292,6 +292,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                       seatIndex={card.seatIndex}
                       currentName={card.editableName}
                       currentNotes={card.notes}
+                      currentEmail={card.isBuyer ? card.booking.email || '' : undefined}
                       onDone={onRefresh}
                     />
                   </div>
