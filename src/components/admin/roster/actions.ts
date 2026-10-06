@@ -358,9 +358,12 @@ export async function deleteManualWorkshopBooking(bookingId: string): Promise<vo
  * itself) or a companion seat (seatIndex > 0, stored as recipientName +
  * giftNote inside that seat's entry in the seats array).
  *
- * Deliberately name + notes ONLY — no guestCount, date, or anything with a
- * capacity implication. Neither field affects the atomic spot counter, so
- * this is safe on ANY booking, real order or manual placeholder alike,
+ * The buyer seat can also edit the booking's contact email — e.g. a manual
+ * booking added without one. Companion seats have no email of their own.
+ *
+ * Deliberately name + notes + email ONLY — no guestCount, date, or anything
+ * with a capacity implication. None of these affect the atomic spot counter,
+ * so this is safe on ANY booking, real order or manual placeholder alike,
  * unlike delete which must stay restricted to manual-only bookings.
  */
 export async function updateBookingSeatDetails(params: {
@@ -368,6 +371,7 @@ export async function updateBookingSeatDetails(params: {
   seatIndex: number
   name: string
   notes: string
+  email?: string
 }): Promise<void> {
   const payload = await getPayload({ config: configPromise })
   await requireAdmin(payload)
@@ -383,6 +387,10 @@ export async function updateBookingSeatDetails(params: {
   const notes = params.notes.trim()
 
   if (params.seatIndex === 0) {
+    const email = params.email?.trim() ?? ''
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new Error('Bitte eine gültige E-Mail-Adresse angeben.')
+    }
     const [firstName, ...rest] = name.split(' ')
     await payload.update({
       collection: 'workshop-bookings',
@@ -391,6 +399,8 @@ export async function updateBookingSeatDetails(params: {
         firstName: firstName ?? '',
         lastName: rest.join(' '),
         notes,
+        // undefined = caller didn't send an email field, leave it untouched
+        ...(params.email !== undefined ? { email: email || null } : {}),
       },
       overrideAccess: true,
     })
