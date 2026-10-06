@@ -1,4 +1,5 @@
 import { getStripe } from '@/lib/stripe'
+import { ensureCartWorkshopHolds, PAYMENT_HOLD_MINUTES } from '@/lib/workshopHolds'
 import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
@@ -60,6 +61,8 @@ export async function POST(request: NextRequest) {
           tooSmall:
             'The remaining amount after the voucher is too small to charge online. Please contact us.',
           failed: 'Could not start payment. Please try again.',
+          seatsGone:
+            'A workshop date in your cart is no longer available. Please reload the page and choose another date.',
         }
       : {
           codeRequired: 'Gutschein-Code ist erforderlich.',
@@ -74,6 +77,8 @@ export async function POST(request: NextRequest) {
           tooSmall:
             'Der Restbetrag nach Abzug des Gutscheins ist zu gering für eine Online-Zahlung. Bitte kontaktiere uns.',
           failed: 'Zahlung konnte nicht gestartet werden. Bitte versuche es erneut.',
+          seatsGone:
+            'Ein Workshop-Termin in deinem Warenkorb ist nicht mehr verfügbar. Bitte lade die Seite neu und wähle einen anderen Termin.',
         }
 
   try {
@@ -151,6 +156,21 @@ export async function POST(request: NextRequest) {
     // instead of the hook's generic one.
     if (cart.status === 'purchased') {
       return NextResponse.json({ success: false, error: ERR.alreadyPaid }, { status: 409 })
+    }
+
+    // 2c. Final check at the door — every workshop in the basket must still
+    // have its seats held (re-held if the hold ran out but seats are free).
+    // The Transactions hook requireWorkshopSeatsHeld enforces this too, but
+    // only after the PaymentIntent below is created; checking first gives a
+    // clear message and no orphaned PaymentIntent.
+    const { lines } = await ensureCartWorkshopHolds(payload, cart.id, {
+      holdMinutes: PAYMENT_HOLD_MINUTES,
+    })
+    if (lines.some((line) => line.status !== 'held')) {
+      return NextResponse.json(
+        { success: false, error: ERR.seatsGone, code: 'WORKSHOP_UNAVAILABLE' },
+        { status: 409 },
+      )
     }
 
     // 3. Compute the discounted amount

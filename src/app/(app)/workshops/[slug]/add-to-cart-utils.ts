@@ -172,21 +172,20 @@ export async function addWorkshopToCart({
         '[addWorkshopToCart] addItem verification failed — releasing spots and clearing stale cart',
       )
 
-      // Only pass bookingId when this request created a brand-new booking —
-      // release-spots cancels the booking it's given. If this request
-      // merged into an existing booking (re-adding the same appointment for
-      // another guest), that booking also covers guests added successfully
-      // earlier; cancelling it would wrongly wipe out their reservation too.
-      // Omitting bookingId still releases this request's own spots back.
-      await fetch('/api/cart/release-spots', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          appointmentId,
-          guestCount,
-          ...(data.wasMerged ? {} : { bookingId: data.bookingId }),
-        }),
-      }).catch((err) => console.error('[addWorkshopToCart] release-spots failed:', err))
+      // Roll back only what THIS request added: a brand-new booking is
+      // cancelled outright; a merge into an existing booking (adding another
+      // guest) removes just this request's guests, keeping the ones added
+      // earlier. The server gives back exactly those seats, once.
+      if (data.bookingId) {
+        await fetch('/api/cart/release-spots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookingId: data.bookingId,
+            ...(data.wasMerged ? { releaseGuests: guestCount } : {}),
+          }),
+        }).catch((err) => console.error('[addWorkshopToCart] release-spots failed:', err))
+      }
 
       // Clear stale cart from localStorage so next page load starts with a fresh cart
       localStorage.removeItem('cart')

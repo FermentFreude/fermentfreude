@@ -15,8 +15,15 @@ import type Stripe from 'stripe'
 /**
  * payment_intent.payment_failed
  *
- * When a payment fails, release reserved workshop spots and
- * cancel the pending booking records.
+ * Deliberately does NOT cancel bookings or give seats back. A failed
+ * attempt is not the end of the payment: Stripe keeps the same
+ * PaymentIntent open, so the customer can retry straight away with
+ * another method (e.g. EPS fails → pays by card). Releasing here used to
+ * put the seats back on sale while the customer was still paying, and the
+ * retry then charged for a booking that no longer existed.
+ *
+ * If the customer gives up, their hold simply runs out and is released by
+ * cleanupExpiredHolds (src/lib/workshopHolds.ts) like any abandoned basket.
  */
 export async function handlePaymentFailed({
   event,
@@ -27,88 +34,9 @@ export async function handlePaymentFailed({
   stripe: Stripe
 }): Promise<void> {
   const paymentIntent = event.data.object as Stripe.PaymentIntent
-  const { payload } = req
-
-  payload.logger.info(
-    `[stripe:payment_failed] PaymentIntent ${paymentIntent.id} failed — releasing workshop spots`,
+  req.payload.logger.info(
+    `[stripe:payment_failed] PaymentIntent ${paymentIntent.id} attempt failed (${paymentIntent.last_payment_error?.code ?? 'unknown'}) — seat holds kept so the customer can retry`,
   )
-
-  const transactionResults = await payload.find({
-    collection: 'transactions',
-    where: {
-      'stripe.paymentIntentID': { equals: paymentIntent.id },
-    },
-    limit: 1,
-    overrideAccess: true,
-  })
-
-  const transaction = transactionResults.docs[0]
-  const cartId =
-    transaction && typeof transaction.cart === 'object' ? transaction.cart?.id : transaction?.cart
-
-  if (!cartId) {
-    payload.logger.warn(
-      `[stripe:payment_failed] No transaction/cart found for paymentIntent ${paymentIntent.id}`,
-    )
-    return
-  }
-
-  const pendingBookings = await payload.find({
-    collection: 'workshop-bookings',
-    where: {
-      and: [{ status: { equals: 'pending' } }, { cartSlug: { equals: cartId } }],
-    },
-    limit: 50,
-    overrideAccess: true,
-  })
-
-  if (pendingBookings.totalDocs === 0) {
-    payload.logger.info('[stripe:payment_failed] No pending bookings to release')
-    return
-  }
-
-  // Cancel each pending booking and restore spots — sequentially (M0)
-  for (const booking of pendingBookings.docs) {
-    // Only cancel bookings that are still pending
-    if (booking.status !== 'pending') continue
-
-    // Restore spots on the appointment
-    if (booking.appointmentId) {
-      try {
-        const appointment = await payload.findByID({
-          collection: 'workshop-appointments',
-          id: booking.appointmentId,
-          depth: 1,
-          overrideAccess: true,
-        })
-
-        const maxCapacity =
-          typeof appointment.workshop === 'object'
-            ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
-            : 12
-
-        await releaseSpotsAtomic(payload, booking.appointmentId, booking.guestCount ?? 1, maxCapacity)
-
-        payload.logger.info(
-          `[stripe:payment_failed] Restored ${booking.guestCount} spot(s) on appointment ${booking.appointmentId}`,
-        )
-      } catch (err) {
-        payload.logger.error(
-          `[stripe:payment_failed] Failed to restore spots for appointment ${booking.appointmentId}: ${err}`,
-        )
-      }
-    }
-
-    // Cancel the booking
-    await payload.update({
-      collection: 'workshop-bookings',
-      id: booking.id,
-      data: { status: 'cancelled' },
-      overrideAccess: true,
-    })
-
-    payload.logger.info(`[stripe:payment_failed] Cancelled booking ${booking.id}`)
-  }
 }
 
 /**
@@ -437,56 +365,8 @@ export async function handleChargeSucceeded({
 
   payload.logger.info(`[stripe:charge_succeeded] Order ${order.id} status set to completed`)
 
-  // Confirm any pending workshop bookings
-  const transactionRef = Array.isArray(order.transactions) ? order.transactions[0] : undefined
-  const transactionId =
-    transactionRef && typeof transactionRef === 'object' ? transactionRef.id : transactionRef
-  let cartId: string | undefined
-
-  if (transactionId) {
-    try {
-      const transaction = await payload.findByID({
-        collection: 'transactions',
-        id: transactionId,
-        depth: 0,
-        overrideAccess: true,
-      })
-      cartId =
-        typeof transaction.cart === 'object'
-          ? transaction.cart?.id || undefined
-          : transaction.cart || undefined
-    } catch {
-      // ignore
-    }
-  }
-
-  if (!cartId) {
-    payload.logger.info(`[stripe:charge_succeeded] No cart found for order ${order.id}`)
-    return
-  }
-
-  const pendingBookings = await payload.find({
-    collection: 'workshop-bookings',
-    where: {
-      and: [{ cartSlug: { equals: cartId } }, { status: { equals: 'pending' } }],
-    },
-    limit: 50,
-    overrideAccess: true,
-  })
-
-  // Confirm each pending booking — sequentially (M0)
-  for (const booking of pendingBookings.docs) {
-    await payload.update({
-      collection: 'workshop-bookings',
-      id: booking.id,
-      data: { status: 'confirmed' },
-      overrideAccess: true,
-    })
-
-    payload.logger.info(`[stripe:charge_succeeded] Confirmed booking ${booking.id}`)
-  }
-
-  payload.logger.info(
-    `[stripe:charge_succeeded] Confirmed ${pendingBookings.totalDocs} booking(s) for order ${order.id}`,
-  )
+  // Workshop bookings are confirmed by confirmWorkshopBookings when the
+  // order is created (it always exists by now — no order, early return
+  // above). Confirming the cart's leftover pending bookings here as well
+  // used to confirm bookings that weren't part of what was paid for.
 }
