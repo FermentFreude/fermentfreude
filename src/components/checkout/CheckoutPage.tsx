@@ -24,6 +24,7 @@ import { FormItem } from '@/components/forms/FormItem'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { Checkbox } from '@/components/ui/checkbox'
 import { cssVariables } from '@/cssVariables'
+import { checkWorkshopHolds, releaseWorkshopLine } from '@/lib/checkWorkshopHolds'
 import { gtmBeginCheckout } from '@/lib/gtm'
 import { Address } from '@/payload-types'
 import {
@@ -98,6 +99,13 @@ const CHECKOUT_DE = {
   cartAlreadyPurchased:
     'Dieser Warenkorb wurde bereits erfolgreich bezahlt. Bitte lade die Seite neu, um eine neue Bestellung zu starten.',
   connectionError: 'Verbindungsfehler. Bitte versuche es erneut.',
+  chooseAnotherDate: 'Anderen Termin wählen',
+  workshopFull: (what: string) =>
+    `${what} ist leider inzwischen ausgebucht. Wir haben den Termin aus deinem Warenkorb entfernt – bitte wähle einen anderen Termin.`,
+  workshopGone: (what: string) =>
+    `${what} ist nicht mehr buchbar. Wir haben den Termin aus deinem Warenkorb entfernt – bitte wähle einen anderen Termin.`,
+  workshopUnknown: (what: string) =>
+    `Wir konnten deinen Termin für ${what} nicht mehr finden. Bitte wähle den Termin erneut aus.`,
   or: 'oder',
   total: 'Gesamt',
   errorPrefix: 'Fehler',
@@ -179,6 +187,13 @@ const CHECKOUT_EN = {
   cartAlreadyPurchased:
     'This cart has already been paid for successfully. Please reload the page to start a new order.',
   connectionError: 'Connection error. Please try again.',
+  chooseAnotherDate: 'Choose another date',
+  workshopFull: (what: string) =>
+    `${what} has been fully booked in the meantime. We removed it from your cart – please choose another date.`,
+  workshopGone: (what: string) =>
+    `${what} can no longer be booked. We removed it from your cart – please choose another date.`,
+  workshopUnknown: (what: string) =>
+    `We couldn't find your date for ${what} any more. Please choose the date again.`,
   or: 'or',
   total: 'Total',
   errorPrefix: 'Error',
@@ -309,7 +324,7 @@ export const CheckoutPage: React.FC = () => {
     >
   >({})
   const handleRemoveItem = useCallback(
-    async (item: { id?: string | null; product: unknown }) => {
+    async (item: { id?: string | null; product: unknown; a?: string | null }) => {
       if (!item.id) return
 
       // Skip remove API if already gone (stale UI / double-click), but refresh to sync.
@@ -330,40 +345,32 @@ export const CheckoutPage: React.FC = () => {
       const productSlug = product?.slug
       if (productSlug?.startsWith('workshop-')) {
         try {
-          const stored = localStorage.getItem('workshopBookings')
-          if (stored) {
-            const bookings = JSON.parse(stored) as Record<
-              string,
-              {
-                workshopSlug?: string
-                appointmentId?: string
-                bookingId?: string | null
-                guestCount?: number
-              }
-            >
-            const slug = productSlug.replace('workshop-', '')
-            const entry = Object.entries(bookings).find(([, b]) => b.workshopSlug === slug)
-            if (entry) {
-              const [bookingKey, booking] = entry
-              if (booking.appointmentId && booking.guestCount) {
-                await fetch('/api/cart/release-spots', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    appointmentId: booking.appointmentId,
-                    guestCount: booking.guestCount,
-                    bookingId: booking.bookingId ?? undefined,
-                  }),
-                })
-                delete bookings[bookingKey]
-                localStorage.setItem('workshopBookings', JSON.stringify(bookings))
-                setBookingMetadata((prev) => {
-                  const updated = { ...prev }
-                  delete updated[bookingKey]
-                  return updated
-                })
-              }
-            }
+          const bookings = JSON.parse(localStorage.getItem('workshopBookings') || '{}') as Record<
+            string,
+            { workshopSlug?: string; appointmentId?: string; bookingId?: string | null }
+          >
+          const slug = productSlug.replace('workshop-', '')
+          // Exact line via `a` (appointment-ID suffix) — two dates of the
+          // same workshop can be in the cart at once.
+          const entry = Object.entries(bookings).find(
+            ([, b]) =>
+              b.workshopSlug === slug && (!item.a || b.appointmentId?.slice(-6) === item.a),
+          )
+          // Server gives back exactly the seats this basket still holds for
+          // this date — none if the hold already ran out.
+          await releaseWorkshopLine({
+            appointmentId: entry?.[1].appointmentId ?? item.a ?? null,
+            bookingId: entry?.[1].bookingId ?? null,
+          })
+          if (entry) {
+            const [bookingKey] = entry
+            delete bookings[bookingKey]
+            localStorage.setItem('workshopBookings', JSON.stringify(bookings))
+            setBookingMetadata((prev) => {
+              const updated = { ...prev }
+              delete updated[bookingKey]
+              return updated
+            })
           }
         } catch (err) {
           console.error('[CheckoutPage] Failed to release workshop spots:', err)
@@ -617,11 +624,109 @@ export const CheckoutPage: React.FC = () => {
   const discountedTotal = Math.max(0, (cart?.subtotal || 0) - (voucherApplied?.value || 0) * 100)
   const voucherCoversAll = Boolean(voucherApplied && discountedTotal === 0)
 
+  /* ── Final check at the door: are the workshop seats still held? ── */
+  // A basket can sit for weeks. Its seat hold runs out after an hour, and
+  // the date may fill up meanwhile. So right when checkout opens, when the
+  // customer starts the payment, and right before Stripe confirms it, the
+  // server re-checks every workshop: still held → hold extended; hold ran
+  // out but seats free → seats held again; date full → we remove the line
+  // and tell the customer. The customer never has to refresh anything.
+  // Returns false if anything had to be removed (caller must stop).
+  const [workshopNotice, setWorkshopNotice] = useState<string | null>(null)
+  // Checks that overlap (e.g. the on-open check and an automatic payment
+  // start) share one request — two parallel re-holds of an expired basket
+  // would otherwise hold its seats twice.
+  const verifyInFlightRef = React.useRef<Promise<boolean> | null>(null)
+  const verifyWorkshopSeats = useCallback((): Promise<boolean> => {
+    if (!hasWorkshop) return Promise.resolve(true)
+    if (verifyInFlightRef.current) return verifyInFlightRef.current
+    const run = runWorkshopSeatCheck().finally(() => {
+      verifyInFlightRef.current = null
+    })
+    verifyInFlightRef.current = run
+    return run
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasWorkshop, cart?.items, removeItem, refreshCart, t])
+
+  const runWorkshopSeatCheck = async (): Promise<boolean> => {
+
+    let before: Record<string, { workshopTitle?: string; date?: string }> = {}
+    try {
+      before = JSON.parse(localStorage.getItem('workshopBookings') || '{}')
+    } catch {
+      // ignore
+    }
+
+    const result = await checkWorkshopHolds()
+    // Couldn't check (network) — the server re-checks when the payment
+    // starts (requireWorkshopSeatsHeld), so it's safe to carry on.
+    if (!result) return true
+
+    try {
+      setBookingMetadata(JSON.parse(localStorage.getItem('workshopBookings') || '{}'))
+    } catch {
+      // ignore
+    }
+    if (result.allHeld) return true
+
+    const messages: string[] = []
+    for (const line of result.unavailable) {
+      const cartItem = cart?.items?.find((ci) => ci.id === line.itemId)
+      const productTitle =
+        cartItem && typeof cartItem.product === 'object' && cartItem.product !== null
+          ? String((cartItem.product as { title?: string }).title ?? '')
+          : ''
+      const known = line.appointmentId ? before[line.appointmentId] : undefined
+      const title = known?.workshopTitle || productTitle || 'Workshop'
+      const what = known?.date ? `${title} (${known.date})` : title
+      messages.push(
+        line.reason === 'full'
+          ? t.workshopFull(what)
+          : line.reason === 'unknown'
+            ? t.workshopUnknown(what)
+            : t.workshopGone(what),
+      )
+
+      try {
+        // Any seats still partly held for this line go back on sale.
+        if (line.appointmentId) await releaseWorkshopLine({ appointmentId: line.appointmentId })
+        if (cartItem?.id) await removeItem(cartItem.id)
+      } catch (err) {
+        console.error('[CheckoutPage] Failed to remove unavailable workshop:', err)
+      }
+    }
+
+    // Any payment form already open was for the old basket contents.
+    setPaymentData(null)
+    try {
+      await refreshCart()
+    } catch {
+      // ignore
+    }
+    const notice = messages.join(' ')
+    setWorkshopNotice(notice)
+    toast.error(notice)
+    return false
+  }
+
+  // Once per visit, as soon as the basket is loaded.
+  const checkedOnOpenRef = React.useRef(false)
+  useEffect(() => {
+    if (checkedOnOpenRef.current || !hasWorkshop || !cart?.id) return
+    checkedOnOpenRef.current = true
+    void verifyWorkshopSeats()
+  }, [hasWorkshop, cart?.id, verifyWorkshopSeats])
+
   /* ── Place order paid entirely by voucher (no Stripe) ── */
   const handleVoucherOrder = useCallback(async () => {
     if (!voucherApplied) return
     setProcessingPayment(true)
     setError(null)
+
+    if (!(await verifyWorkshopSeats())) {
+      setProcessingPayment(false)
+      return
+    }
 
     try {
       const clientCartItems = (cart?.items ?? [])
@@ -646,6 +751,7 @@ export const CheckoutPage: React.FC = () => {
           customerEmail: email || user?.email,
           customerName: customerName.trim() || user?.name || undefined,
           userId: user?.id,
+          cartId: cart?.id,
           cartItems: clientCartItems,
         }),
       })
@@ -671,7 +777,19 @@ export const CheckoutPage: React.FC = () => {
       setError(t.connectionError)
       setProcessingPayment(false)
     }
-  }, [voucherApplied, email, customerName, user, clearSession, router, hasWorkshop, isAllDigital, t])
+  }, [
+    voucherApplied,
+    email,
+    customerName,
+    user,
+    cart?.id,
+    clearSession,
+    router,
+    hasWorkshop,
+    isAllDigital,
+    t,
+    verifyWorkshopSeats,
+  ])
 
   const initiatePaymentIntent = useCallback(
     async (
@@ -699,6 +817,10 @@ export const CheckoutPage: React.FC = () => {
           toast.error(t.cartAlreadyPurchased)
           return
         }
+
+        // Seats must be held before a payment can start (the server enforces
+        // this too — this just gives the customer a clear message first).
+        if (!(await verifyWorkshopSeats())) return
 
         const effectiveVoucher = voucherOverride !== undefined ? voucherOverride : voucherApplied
         const effectiveDiscountedTotal = Math.max(
@@ -826,6 +948,7 @@ export const CheckoutPage: React.FC = () => {
       user?.id,
       t.orderFailed,
       t.cartAlreadyPurchased,
+      verifyWorkshopSeats,
     ],
   )
 
@@ -966,6 +1089,11 @@ export const CheckoutPage: React.FC = () => {
   if (cartIsEmpty) {
     return (
       <div className="prose dark:prose-invert py-12 w-full items-center">
+        {workshopNotice && (
+          <p role="alert" className="rounded-(--radius-card) border border-red-200 bg-red-50 p-6 text-ff-near-black">
+            {workshopNotice} <Link href="/workshops">{t.chooseAnotherDate}</Link>
+          </p>
+        )}
         <p>{t.cartEmpty}</p>
         <Link href="/search">{t.continueShopping}</Link>
       </div>
@@ -981,6 +1109,17 @@ export const CheckoutPage: React.FC = () => {
           hairlines. The only other surface on the screen is the summary rail,
           because that is the part worth highlighting. */}
       <div className="min-w-0 flex-1 overflow-hidden rounded-(--radius-card) bg-white divide-y divide-ff-border-light">
+        {workshopNotice && (
+          <div role="alert" className="m-6 sm:m-8 rounded-(--radius-card) border border-red-200 bg-red-50 p-6">
+            <p className="text-body text-ff-near-black">{workshopNotice}</p>
+            <Link
+              href="/workshops"
+              className="mt-2 inline-block font-display font-bold underline underline-offset-2"
+            >
+              {t.chooseAnotherDate}
+            </Link>
+          </div>
+        )}
         {/* ── Contact Section ── */}
         <section className="p-6 sm:p-8">
           <h2 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
@@ -1592,6 +1731,7 @@ export const CheckoutPage: React.FC = () => {
                     hasWorkshop={hasWorkshop}
                     pickupDate={pickupDate}
                     pickupTime={pickupTime}
+                    beforeConfirm={verifyWorkshopSeats}
                   />
                 </div>
               </Elements>

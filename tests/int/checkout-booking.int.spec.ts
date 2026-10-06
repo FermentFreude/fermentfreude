@@ -71,6 +71,10 @@ describe('checkout booking integration', () => {
 
   it('confirms a pending workshop booking using the cart-linked transaction and sends the booking email', async () => {
     const payload = createPayloadMock()
+    const BOOKING_ID = '65f000000000000000000001'
+    // claimBookingForOrder: guarded pending → confirmed flip on the raw model
+    const claim = vi.fn(async () => ({ matchedCount: 1 }))
+    payload.db.collections['workshop-bookings'] = { findOneAndUpdate: vi.fn(), updateOne: claim }
 
     payload.findByID.mockImplementation(
       async ({ collection, id }: { collection: string; id: string }) => {
@@ -97,7 +101,7 @@ describe('checkout booking integration', () => {
               email: '',
               firstName: '',
               guestCount: 2,
-              id: 'booking_1',
+              id: BOOKING_ID,
               status: 'pending',
               totalPrice: 19800,
               workshopSlug: 'kombucha',
@@ -111,7 +115,7 @@ describe('checkout booking integration', () => {
       throw new Error(`Unexpected find call for ${collection}`)
     })
 
-    payload.update.mockResolvedValue({ id: 'booking_1' })
+    payload.update.mockResolvedValue({ id: BOOKING_ID })
 
     await confirmWorkshopBookings({
       doc: {
@@ -138,15 +142,21 @@ describe('checkout booking integration', () => {
           firstName: 'Buyer Example',
           status: 'confirmed',
         }),
-        id: 'booking_1',
+        id: BOOKING_ID,
         overrideAccess: true,
       }),
+    )
+
+    // Claimed for this order with a guarded update (only while still pending)
+    expect(claim).toHaveBeenCalledWith(
+      expect.objectContaining({ _id: BOOKING_ID }),
+      { $set: expect.objectContaining({ status: 'confirmed', orderId: 'order_1' }) },
     )
 
     expect(sendTemplateEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
-          BOOKING_ID: 'booking_1',
+          BOOKING_ID,
           FIRST_NAME: 'Buyer Example',
           GUEST_COUNT: '2',
           WORKSHOP_TITLE: 'Kombucha Workshop',
@@ -159,51 +169,8 @@ describe('checkout booking integration', () => {
     )
   })
 
-  it('releases appointment spots and cancels pending bookings when Stripe payment fails', async () => {
+  it('keeps seat holds when a Stripe payment attempt fails, so the customer can retry with another method', async () => {
     const payload = createPayloadMock()
-
-    payload.find.mockImplementation(async ({ collection }: { collection: string }) => {
-      if (collection === 'transactions') {
-        return {
-          docs: [{ cart: 'cart_1', id: 'txn_1' }],
-          totalDocs: 1,
-        }
-      }
-
-      if (collection === 'workshop-bookings') {
-        return {
-          docs: [
-            {
-              appointmentId: 'appointment_1',
-              cartSlug: 'cart_1',
-              guestCount: 2,
-              id: 'booking_1',
-              status: 'pending',
-            },
-          ],
-          totalDocs: 1,
-        }
-      }
-
-      throw new Error(`Unexpected find call for ${collection}`)
-    })
-
-    payload.findByID.mockImplementation(
-      async ({ collection, id }: { collection: string; id: string }) => {
-        if (collection === 'workshop-appointments' && id === 'appointment_1') {
-          return {
-            availableSpots: 6,
-            id: 'appointment_1',
-            workshop: { maxCapacityPerSlot: 12 },
-          }
-        }
-
-        throw new Error(`Unexpected findByID call for ${collection}:${id}`)
-      },
-    )
-
-    payload.update.mockResolvedValue({})
-    const getCurrentSpots = mockAppointmentSpotsCollection(payload, 6)
 
     await handlePaymentFailed({
       event: {
@@ -217,25 +184,12 @@ describe('checkout booking integration', () => {
       stripe: {} as never,
     })
 
-    // Spots restore now goes through the atomic $min/$add pipeline update
-    // (releaseSpotsAtomic), not payload.update — 6 + 2 guests = 8.
-    expect(payload.db.collections['workshop-appointments'].findOneAndUpdate).toHaveBeenCalledWith(
-      { _id: 'appointment_1' },
-      expect.anything(),
-      { new: true },
-    )
-    expect(getCurrentSpots()).toBe(8)
-
-    expect(payload.update).toHaveBeenCalledTimes(1)
-    expect(payload.update).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        collection: 'workshop-bookings',
-        data: { status: 'cancelled' },
-        id: 'booking_1',
-        overrideAccess: true,
-      }),
-    )
+    // The same PaymentIntent stays open for a retry (e.g. EPS fails → card).
+    // Releasing here put the seats back on sale while the customer was still
+    // paying — the hold now simply expires if they give up.
+    expect(payload.find).not.toHaveBeenCalled()
+    expect(payload.update).not.toHaveBeenCalled()
+    expect(payload.logger.info).toHaveBeenCalled()
   })
 
   it('marks orders and linked bookings as refunded and restores spots when Stripe sends charge.refunded', async () => {

@@ -5518,6 +5518,10 @@ export interface WorkshopBooking {
    */
   orderId?: string | null;
   /**
+   * Only matters while the booking is "Pending": the seats stay reserved for this customer until this time, then go back on sale automatically. Set by the website — no need to edit.
+   */
+  holdExpiresAt?: string | null;
+  /**
    * Auto-generated on confirmation. Used for the guest receipt download link.
    */
   downloadToken?: string | null;
@@ -8357,6 +8361,7 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
   appointmentId?: T;
   cartSlug?: T;
   orderId?: T;
+  holdExpiresAt?: T;
   downloadToken?: T;
   firstName?: T;
   lastName?: T;

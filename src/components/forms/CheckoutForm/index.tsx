@@ -39,6 +39,12 @@ type Props = {
   hasWorkshop?: boolean
   pickupDate?: string
   pickupTime?: string
+  /**
+   * Runs right before Stripe confirms the payment. Checkout uses it for the
+   * final workshop-seat check (which also extends the hold so it can't run
+   * out while the customer is at their bank). Return false to stop.
+   */
+  beforeConfirm?: () => Promise<boolean>
 }
 
 export const CheckoutForm: React.FC<Props> = ({
@@ -52,6 +58,7 @@ export const CheckoutForm: React.FC<Props> = ({
   hasWorkshop,
   pickupDate,
   pickupTime,
+  beforeConfirm,
 }) => {
   const { locale } = useLocale()
   const { user } = useAuth()
@@ -82,6 +89,14 @@ export const CheckoutForm: React.FC<Props> = ({
 
       if (stripe && elements) {
         try {
+          // If a workshop date is gone, checkout removes it from the basket and
+          // explains why — nothing to pay for here any more.
+          if (beforeConfirm && !(await beforeConfirm())) {
+            setIsLoading(false)
+            setProcessingPayment(false)
+            return
+          }
+
           // Computed here, before any redirect can happen, while the cart
           // props passed into this component are still guaranteed fresh —
           // baked into returnUrl below so it survives the round trip via the
@@ -244,6 +259,7 @@ export const CheckoutForm: React.FC<Props> = ({
       hasWorkshop,
       pickupDate,
       pickupTime,
+      beforeConfirm,
       t,
     ],
   )
