@@ -199,111 +199,117 @@ export const sendOrderConfirmationEmail: CollectionAfterChangeHook = async ({
           })
         : null
 
-      if (transaction) {
-        const cartId =
-          typeof transaction.cart === 'object' ? transaction.cart?.id : transaction.cart
+      const cartId = transaction
+        ? typeof transaction.cart === 'object'
+          ? transaction.cart?.id
+          : transaction.cart
+        : undefined
 
-        if (cartId) {
-          // Pull cart for subtotal/shipping breakdown
-          try {
-            const cart = await req.payload.findByID({
-              collection: 'carts',
-              id: cartId,
-              depth: 0,
-              overrideAccess: true,
-            })
-            const c = cart as unknown as Record<string, unknown>
-            if (typeof c?.subtotal === 'number') cartSubtotal = c.subtotal as number
-            if (typeof c?.shipmentTotal === 'number') cartShipping = c.shipmentTotal as number
-            else if (typeof c?.shipping === 'number') cartShipping = c.shipping as number
-          } catch {
-            // ignore — cart fields are best-effort
-          }
-
-          // Find ALL workshop bookings with this cart ID (A5 — was docs[0])
-          const bookings = await req.payload.find({
-            collection: 'workshop-bookings',
-            where: {
-              cartSlug: {
-                equals: cartId,
-              },
-            },
-            limit: 50,
+      if (cartId) {
+        // Pull cart for subtotal/shipping breakdown
+        try {
+          const cart = await req.payload.findByID({
+            collection: 'carts',
+            id: cartId,
+            depth: 0,
             overrideAccess: true,
           })
+          const c = cart as unknown as Record<string, unknown>
+          if (typeof c?.subtotal === 'number') cartSubtotal = c.subtotal as number
+          if (typeof c?.shipmentTotal === 'number') cartShipping = c.shipmentTotal as number
+          else if (typeof c?.shipping === 'number') cartShipping = c.shipping as number
+        } catch {
+          // ignore — cart fields are best-effort
+        }
+      }
 
-          if (bookings.totalDocs > 0) {
-            // Surface first booking through the legacy singular params
-            const first = bookings.docs[0]
-            workshopDate = first.date || ''
-            workshopTime = first.time || ''
-            guestCount = first.guestCount || 0
-            workshopPrice = first.totalPrice ? `€${first.totalPrice.toFixed(2)}` : ''
+      // Only the bookings confirmed FOR THIS ORDER (confirmWorkshopBookings
+      // runs before this hook and stamps orderId). Matching every booking
+      // that ever had this cart's ID also listed expired and cancelled
+      // holds — a basket kept for weeks showed the same workshop several
+      // times, which is the "weird" confirmation email.
+      const bookings = await req.payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [
+            { orderId: { equals: String(doc.id) } },
+            { status: { equals: 'confirmed' } },
+          ],
+        },
+        limit: 50,
+        overrideAccess: true,
+      })
 
-            // Add workshop bookings to items array for the Brevo template loop
-            for (const b of bookings.docs) {
-              let locName = ''
-              let locAddress = ''
-              if (b.appointmentId) {
-                try {
-                  const appointment = await req.payload.findByID({
-                    collection: 'workshop-appointments',
-                    id: b.appointmentId,
-                    depth: 1,
-                    overrideAccess: true,
-                  })
-                  if (appointment && (appointment as { location?: unknown }).location) {
-                    const loc = (appointment as { location?: unknown }).location
-                    if (typeof loc === 'object' && loc !== null) {
-                      const l = loc as { name?: string; address?: string }
-                      locName = l.name ?? ''
-                      locAddress = l.address ?? ''
-                    } else if (typeof loc === 'string') {
-                      locName = loc
-                    }
-                  }
-                } catch {
-                  // ignore — location is best-effort
+      if (bookings.totalDocs > 0) {
+        // Surface first booking through the legacy singular params
+        const first = bookings.docs[0]
+        workshopDate = first.date || ''
+        workshopTime = first.time || ''
+        guestCount = first.guestCount || 0
+        workshopPrice = first.totalPrice ? `€${first.totalPrice.toFixed(2)}` : ''
+
+        // Add workshop bookings to items array for the Brevo template loop
+        for (const b of bookings.docs) {
+          let locName = ''
+          let locAddress = ''
+          if (b.appointmentId) {
+            try {
+              const appointment = await req.payload.findByID({
+                collection: 'workshop-appointments',
+                id: b.appointmentId,
+                depth: 1,
+                overrideAccess: true,
+              })
+              if (appointment && (appointment as { location?: unknown }).location) {
+                const loc = (appointment as { location?: unknown }).location
+                if (typeof loc === 'object' && loc !== null) {
+                  const l = loc as { name?: string; address?: string }
+                  locName = l.name ?? ''
+                  locAddress = l.address ?? ''
+                } else if (typeof loc === 'string') {
+                  locName = loc
                 }
               }
-              if (!workshopLocation && locName) workshopLocation = locName
-
-              const linePrice =
-                typeof b.totalPrice === 'number'
-                  ? `€${b.totalPrice.toFixed(2).replace('.', ',')}`
-                  : ''
-              const guestCountNum = typeof b.guestCount === 'number' ? b.guestCount : 1
-
-              const bBuyerName =
-                [b.firstName, b.lastName].filter(Boolean).join(' ') || b.email || '—'
-              const bSeats = Array.isArray(
-                (b as unknown as { seats?: Array<{ recipientName?: string }> }).seats,
-              )
-                ? (b as unknown as { seats?: Array<{ recipientName?: string }> }).seats!
-                : []
-              for (let si = 0; si < Math.max(guestCountNum, 1); si++) {
-                const isBuyerSeat = si === 0
-                const seatName = bSeats[si]?.recipientName?.trim()
-                guestNames.push(seatName || (isBuyerSeat ? bBuyerName : `Gast von ${bBuyerName}`))
-              }
-
-              const titleParts = [
-                String(b.workshopTitle ?? 'Workshop'),
-                [String(b.date ?? ''), String(b.time ?? '')].filter((s) => s).join(' '),
-              ]
-              if (locName) titleParts.push(locName + (locAddress ? `, ${locAddress}` : ''))
-              itemsArray.push({
-                IMAGE_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/submark-dark.png`,
-                TITLE: titleParts.filter((s) => s).join(' · '),
-                QUANTITY: `${guestCountNum} ${guestCountNum === 1 ? 'Person' : 'Personen'}`,
-                PRICE: linePrice,
-              })
+            } catch {
+              // ignore — location is best-effort
             }
-
-            // Pickup detection: any workshop booking implies on-site pickup
-            isPickup = true
           }
+          if (!workshopLocation && locName) workshopLocation = locName
+
+          const linePrice =
+            typeof b.totalPrice === 'number'
+              ? `€${b.totalPrice.toFixed(2).replace('.', ',')}`
+              : ''
+          const guestCountNum = typeof b.guestCount === 'number' ? b.guestCount : 1
+
+          const bBuyerName =
+            [b.firstName, b.lastName].filter(Boolean).join(' ') || b.email || '—'
+          const bSeats = Array.isArray(
+            (b as unknown as { seats?: Array<{ recipientName?: string }> }).seats,
+          )
+            ? (b as unknown as { seats?: Array<{ recipientName?: string }> }).seats!
+            : []
+          for (let si = 0; si < Math.max(guestCountNum, 1); si++) {
+            const isBuyerSeat = si === 0
+            const seatName = bSeats[si]?.recipientName?.trim()
+            guestNames.push(seatName || (isBuyerSeat ? bBuyerName : `Gast von ${bBuyerName}`))
+          }
+
+          const titleParts = [
+            String(b.workshopTitle ?? 'Workshop'),
+            [String(b.date ?? ''), String(b.time ?? '')].filter((s) => s).join(' '),
+          ]
+          if (locName) titleParts.push(locName + (locAddress ? `, ${locAddress}` : ''))
+          itemsArray.push({
+            IMAGE_URL: `${process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'}/submark-dark.png`,
+            TITLE: titleParts.filter((s) => s).join(' · '),
+            QUANTITY: `${guestCountNum} ${guestCountNum === 1 ? 'Person' : 'Personen'}`,
+            PRICE: linePrice,
+          })
         }
+
+        // Pickup detection: any workshop booking implies on-site pickup
+        isPickup = true
       }
     } catch (err) {
       req.payload.logger.warn(

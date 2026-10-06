@@ -30,6 +30,7 @@ import {
 } from '@/collections/Orders/stripeWebhooks'
 import { ProductsCollection } from '@/collections/Products'
 import { preventDuplicatePayment } from '@/collections/Transactions/preventDuplicatePayment'
+import { requireWorkshopSeatsHeld } from '@/collections/Transactions/requireWorkshopSeatsHeld'
 import { assignInvoiceNumber } from '@/hooks/assignInvoiceNumber'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
@@ -515,6 +516,7 @@ export const plugins: Plugin[] = [
           beforeValidate: [
             ...(defaultCollection?.hooks?.beforeValidate ?? []),
             preventDuplicatePayment,
+            requireWorkshopSeatsHeld,
           ],
         },
       }),

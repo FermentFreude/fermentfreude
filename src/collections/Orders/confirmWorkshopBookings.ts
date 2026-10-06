@@ -2,8 +2,17 @@ import { randomUUID } from 'crypto'
 
 import type { CollectionAfterChangeHook } from 'payload'
 
-import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import type { Payload } from 'payload'
+
+import { getAdminRecipients } from '@/lib/adminNotification'
+import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 import { generateBookingICS } from '@/lib/generateBookingICS'
+import {
+  claimBookingForOrder,
+  createHeldBooking,
+  getAppointmentInfo,
+  reserveSeats,
+} from '@/lib/workshopHolds'
 import type { WorkshopBooking } from '@/payload-types'
 
 /**
@@ -16,14 +25,19 @@ import type { WorkshopBooking } from '@/payload-types'
  * Workshop items are identified by their product having a slug
  * starting with "workshop-".
  *
- * Matching strategy (in priority order):
- *  1. workshopSlug + guestCount + customer email → exact match
- *  2. workshopSlug + guestCount → fallback (guest without email on booking)
- *  3. workshopSlug only → last resort
+ * Matching — only ever the paying customer's OWN basket (cartSlug):
+ *  0. the cart line's exact appointment (`a` suffix)
+ *  1. any booking in this basket for the same workshop (old carts without `a`)
+ *  If the paid seats have no hold behind them (it ran out mid-payment),
+ *  they are booked anyway — seats re-reserved if still free, otherwise the
+ *  admin gets an "overbooked" alert. Never borrows another customer's
+ *  booking: the old "any pending booking for this workshop" fallbacks
+ *  attached real payments to strangers' unpaid baskets.
  *
  * MongoDB Atlas M0: sequential writes only — no Promise.all.
  */
 export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
+  context,
   doc,
   operation,
   req,
@@ -53,6 +67,10 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       // Non-fatal: fall back to legacy matching below.
     }
   }
+
+  // Orders paid fully by voucher have no Stripe transaction — place-order
+  // passes the basket's ID along instead.
+  if (!cartId && typeof context?.cartId === 'string') cartId = context.cartId
 
   const items: {
     product?: string | { id?: string; slug?: string } | null
@@ -179,7 +197,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
     // heuristics below: same workshopSlug, same guestCount). This is the
     // only strategy that correctly distinguishes them.
     const cartItemAidSuffix = cartItemsByPosition[itemIndex]?.a
-    if (cartItemAidSuffix && remainingGuests > 0) {
+    if (cartItemAidSuffix && cartId && remainingGuests > 0) {
       // `a` is only the last 6 hex chars (Stripe metadata size constraint —
       // see comment above), so this can't be a DB-level `equals` — fetch the
       // small candidate set for this workshop and match the suffix in JS
@@ -188,6 +206,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         collection: 'workshop-bookings',
         where: {
           and: [
+            { cartSlug: { equals: cartId } },
             { workshopSlug: { equals: workshopSlug } },
             {
               // A `confirmed` booking is only a legitimate match if it's
@@ -266,87 +285,62 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       }
     }
 
-    // ── Strategy 2: match by workshopSlug + email ──
-    if (remainingGuests > 0 && customerEmail) {
-      const byEmail = await payload.find({
-        collection: 'workshop-bookings',
-        where: {
-          and: [
-            { workshopSlug: { equals: workshopSlug } },
-            { status: { equals: 'pending' } },
-            { email: { equals: customerEmail } },
-            { id: { not_in: matchedBookings.map((b) => b.id) } },
-          ],
-        },
-        sort: '-createdAt',
-        limit: 10,
-        overrideAccess: true,
+    // ── Recovery: paid seats with no hold behind them ──
+    // Checkout re-checks and extends every hold right before payment, so
+    // this should not happen — but if a hold still ran out mid-payment
+    // (e.g. a very long bank redirect), the customer has paid and must get
+    // their seats.
+    if (remainingGuests > 0 && cartId) {
+      const recovered = await recoverPaidSeats({
+        payload,
+        cartId,
+        workshopSlug,
+        appointmentSuffix: cartItemAidSuffix ?? null,
+        guests: remainingGuests,
+        orderId: String(doc.id),
       })
-      for (const b of byEmail.docs) {
-        if (remainingGuests <= 0) break
-        matchedBookings.push(b)
-        remainingGuests -= typeof b.guestCount === 'number' ? b.guestCount : 1
+      if (recovered) {
+        matchedBookings.push(recovered)
+        remainingGuests = 0
       }
     }
 
-    // ── Strategy 3: match by workshopSlug (no email on booking) ──
     if (remainingGuests > 0) {
-      const byCount = await payload.find({
-        collection: 'workshop-bookings',
-        where: {
-          and: [
-            { workshopSlug: { equals: workshopSlug } },
-            { status: { equals: 'pending' } },
-            { email: { exists: false } },
-            { id: { not_in: matchedBookings.map((b) => b.id) } },
-          ],
-        },
-        sort: '-createdAt',
-        limit: 10,
-        overrideAccess: true,
-      })
-      for (const b of byCount.docs) {
-        if (remainingGuests <= 0) break
-        matchedBookings.push(b)
-        remainingGuests -= typeof b.guestCount === 'number' ? b.guestCount : 1
-      }
-    }
-
-    // ── Strategy 4: last resort — any pending booking for this workshop ──
-    if (remainingGuests > 0) {
-      const bySlug = await payload.find({
-        collection: 'workshop-bookings',
-        where: {
-          and: [
-            { workshopSlug: { equals: workshopSlug } },
-            { status: { equals: 'pending' } },
-            { id: { not_in: matchedBookings.map((b) => b.id) } },
-          ],
-        },
-        sort: '-createdAt',
-        limit: 10,
-        overrideAccess: true,
-      })
-      for (const b of bySlug.docs) {
-        if (remainingGuests <= 0) break
-        matchedBookings.push(b)
-        remainingGuests -= typeof b.guestCount === 'number' ? b.guestCount : 1
-      }
-    }
-
-    if (matchedBookings.length === 0) {
-      payload.logger.warn(
-        `[confirmWorkshopBookings] No pending booking found for workshop "${workshopSlug}" (order ${doc.id})`,
+      payload.logger.error(
+        `[confirmWorkshopBookings] Order ${doc.id} paid for ${remainingGuests} "${workshopSlug}" seat(s) with no booking found in cart ${cartId ?? '(none)'}`,
       )
-      continue
-    }
-    if (remainingGuests > 0) {
-      payload.logger.warn(
-        `[confirmWorkshopBookings] Matched bookings for workshop "${workshopSlug}" only cover ${guestCount - remainingGuests}/${guestCount} guests paid for (order ${doc.id})`,
+      await alertAdmin(
+        `Bezahlte Workshop-Plätze ohne Buchung (Bestellung ${doc.id})`,
+        [
+          `Bestellung <b>${doc.id}</b> hat ${remainingGuests} Platz/Plätze für <b>${workshopSlug}</b> bezahlt, aber es wurde keine passende Buchung gefunden.`,
+          `Kunde: ${customerEmail ?? 'unbekannt'}`,
+          'Bitte die Bestellung prüfen und die Buchung im Dashboard manuell anlegen.',
+        ],
       )
     }
 
     for (const booking of matchedBookings) {
+    // Claim the booking for this order first, with a guarded update — if its
+    // hold was released a split second ago (expired), those seats are back
+    // on sale and must be taken again, or the date would show free seats
+    // that this paid booking actually occupies.
+    if (!(await claimBookingForOrder(payload, String(booking.id), String(doc.id)))) {
+      const seats = booking.guestCount ?? 1
+      const retaken = booking.appointmentId
+        ? (await reserveSeats(payload, booking.appointmentId, seats)).success
+        : false
+      if (!retaken) {
+        payload.logger.error(
+          `[confirmWorkshopBookings] Order ${doc.id}: booking ${booking.id} lost its hold and the date is full — OVERBOOKED by up to ${seats}`,
+        )
+        await alertAdmin(`Workshop überbucht: ${booking.workshopTitle}, ${booking.date}`, [
+          `Bestellung <b>${doc.id}</b> wurde bezahlt, aber der Termin <b>${booking.workshopTitle}, ${booking.date} ${booking.time}</b> war in der Zwischenzeit ausgebucht.`,
+          `Die Buchung (${seats} Person/en) bleibt bestehen, damit der Kunde auf der Teilnehmerliste steht.`,
+          'Bitte im Dashboard prüfen und den Kunden ggf. auf einen anderen Termin verschieben.',
+        ])
+      }
+    }
+
     // Confirm the booking and attach customer info
     const downloadToken = randomUUID()
     const updateData: Record<string, unknown> = {
@@ -631,4 +625,84 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
   }
 
   return doc
+}
+
+/**
+ * Book seats that were paid for but whose hold had already been released.
+ * Re-reserves them if the date still has room; if it doesn't, the booking
+ * is still created (the customer paid and must appear on the roster) and
+ * the admin is alerted that the date is now overbooked.
+ */
+async function recoverPaidSeats({
+  payload,
+  cartId,
+  workshopSlug,
+  appointmentSuffix,
+  guests,
+  orderId,
+}: {
+  payload: Payload
+  cartId: string
+  workshopSlug: string
+  appointmentSuffix: string | null
+  guests: number
+  orderId: string
+}): Promise<WorkshopBooking | null> {
+  // The basket's own (expired) booking tells us which date was paid for.
+  const history = await payload.find({
+    collection: 'workshop-bookings',
+    where: {
+      and: [{ cartSlug: { equals: cartId } }, { workshopSlug: { equals: workshopSlug } }],
+    },
+    sort: '-createdAt',
+    limit: 20,
+    depth: 0,
+    overrideAccess: true,
+  })
+  const previous = history.docs.find(
+    (b) =>
+      typeof b.appointmentId === 'string' &&
+      (!appointmentSuffix || b.appointmentId.endsWith(appointmentSuffix)),
+  )
+  if (!previous?.appointmentId) return null
+
+  const info = await getAppointmentInfo(payload, previous.appointmentId)
+  if (!info) return null
+
+  const reserved = await reserveSeats(payload, info.appointmentId, guests)
+  const booking = await createHeldBooking(payload, {
+    info,
+    guestCount: guests,
+    cartId,
+    holdMinutes: 10, // only needs to survive until it is confirmed a moment later
+    copyFrom: previous,
+  })
+
+  if (reserved.success) {
+    payload.logger.warn(
+      `[confirmWorkshopBookings] Order ${orderId}: hold had expired, re-reserved ${guests} seat(s) on ${info.appointmentId} (booking ${booking.id})`,
+    )
+  } else {
+    payload.logger.error(
+      `[confirmWorkshopBookings] Order ${orderId}: ${info.workshopTitle} ${info.date} is OVERBOOKED by up to ${guests} seat(s) (booking ${booking.id})`,
+    )
+    await alertAdmin(`Workshop überbucht: ${info.workshopTitle}, ${info.date}`, [
+      `Bestellung <b>${orderId}</b> wurde bezahlt, aber der Termin <b>${info.workshopTitle}, ${info.date} ${info.time}</b> war in der Zwischenzeit ausgebucht.`,
+      `Die Buchung (${guests} Person/en) wurde trotzdem angelegt, damit der Kunde auf der Teilnehmerliste steht.`,
+      'Bitte im Dashboard prüfen und den Kunden ggf. auf einen anderen Termin verschieben.',
+    ])
+  }
+  return booking
+}
+
+async function alertAdmin(subject: string, paragraphs: string[]): Promise<void> {
+  try {
+    await sendTransactionalEmail({
+      to: getAdminRecipients(),
+      subject: `⚠️ ${subject}`,
+      htmlContent: paragraphs.map((p) => `<p>${p}</p>`).join(''),
+    })
+  } catch {
+    // Best-effort — the logger line above is the record of last resort.
+  }
 }

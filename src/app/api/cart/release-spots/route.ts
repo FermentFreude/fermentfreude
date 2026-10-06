@@ -1,109 +1,81 @@
-import { releaseSpotsAtomic } from '@/lib/atomicSpots'
+import { cancelPendingBooking, removeGuestsFromPendingBooking } from '@/lib/workshopHolds'
 import configPromise from '@payload-config'
-import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/cart/release-spots
  *
- *  Restores available spots on a workshop appointment and cancels
- *  the associated pending booking record.
+ *  Gives a basket's held seats back when the customer removes a
+ *  workshop (DeleteItemButton, checkout) or when adding it to the
+ *  cart failed half-way (add-to-cart-utils rollback).
  *
- *  Called in three situations:
- *   1. User removes workshop item from cart (DeleteItemButton)
- *   2. Stripe payment fails (webhook handler)
- *   3. Not called for tab-close — that is handled by lazy cleanup
- *      in getWorkshopAppointments (stale pending bookings > 60 min)
+ *  Seats are only ever given back for a booking that is still
+ *  `pending`, and only once — the number of seats comes from the
+ *  booking on the server, never from the browser. A two-week-old
+ *  basket whose hold already expired therefore releases nothing:
+ *  those seats went back on sale when the hold ran out. (Trusting the
+ *  browser's count here is exactly how phantom free seats appeared.)
+ *
+ *  Body (any combination):
+ *    cartId + appointmentId  → every pending booking in that basket for
+ *                              that date (appointmentId may be the full
+ *                              ID or the cart line's 6-char `a` suffix)
+ *    bookingId               → that booking, if still pending
+ *    bookingId + releaseGuests → only that many guests of the booking
+ *                              (rolling back an "add one more guest")
  * ═══════════════════════════════════════════════════════════════ */
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { appointmentId, guestCount, bookingId } = body
+    const body = (await request.json()) as Record<string, unknown>
+    const cartId = typeof body.cartId === 'string' ? body.cartId.trim() : ''
+    const appointmentId = typeof body.appointmentId === 'string' ? body.appointmentId.trim() : ''
+    const bookingId = typeof body.bookingId === 'string' ? body.bookingId.trim() : ''
+    const releaseGuests =
+      typeof body.releaseGuests === 'number' && body.releaseGuests >= 1 && body.releaseGuests <= 12
+        ? Math.floor(body.releaseGuests)
+        : null
 
-    // ─── Input Validation ──────────────────────────────────────
-
-    if (!appointmentId || typeof appointmentId !== 'string') {
+    if (!bookingId && !(cartId && appointmentId)) {
       return NextResponse.json(
-        { success: false, error: 'Missing or invalid appointmentId' },
+        { success: false, error: 'bookingId, or cartId + appointmentId, is required.' },
         { status: 400 },
       )
     }
 
-    if (typeof guestCount !== 'number' || guestCount < 1 || guestCount > 12) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid guestCount — must be between 1 and 12' },
-        { status: 400 },
-      )
-    }
+    const payload = await getPayload({ config: configPromise })
+    let released = 0
 
-    const config = await configPromise
-    const payload = await getPayload({ config })
-
-    // ─── Fetch Appointment ─────────────────────────────────────
-
-    let appointment
-    try {
-      appointment = await payload.findByID({
-        collection: 'workshop-appointments',
-        id: appointmentId,
-        depth: 1, // Populate workshop to read maxCapacityPerSlot
-      })
-    } catch {
-      return NextResponse.json(
-        { success: false, error: 'Appointment not found' },
-        { status: 404 },
-      )
-    }
-
-    // ─── Restore Spots (capped at maxCapacity) ─────────────────
-
-    const maxCapacity =
-      typeof appointment.workshop === 'object'
-        ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
-        : 12
-
-    const { availableSpots: restoredSpots } = await releaseSpotsAtomic(
-      payload,
-      appointmentId,
-      guestCount,
-      maxCapacity,
-    )
-
-    // Bust the /workshops overview's cached appointment list — see the same
-    // call in /api/cart/add-workshop for why.
-    revalidateTag('workshop-appointments')
-
-    // ─── Cancel Pending Booking Record ─────────────────────────
-    // Non-fatal: if bookingId is missing or already cancelled, skip.
-
-    if (bookingId && typeof bookingId === 'string') {
-      try {
-        await payload.update({
+    if (bookingId && releaseGuests !== null) {
+      released += await removeGuestsFromPendingBooking(payload, bookingId, releaseGuests)
+    } else {
+      const ids = new Set<string>()
+      if (bookingId) ids.add(bookingId)
+      if (cartId && appointmentId) {
+        const inCart = await payload.find({
           collection: 'workshop-bookings',
-          id: bookingId,
-          data: { status: 'cancelled' },
+          where: {
+            and: [{ cartSlug: { equals: cartId } }, { status: { equals: 'pending' } }],
+          },
+          depth: 0,
+          limit: 50,
           overrideAccess: true,
         })
-      } catch {
-        // Booking may not exist yet (e.g. creation failed silently) — ignore
+        for (const b of inCart.docs) {
+          if (typeof b.appointmentId === 'string' && b.appointmentId.endsWith(appointmentId)) {
+            ids.add(String(b.id))
+          }
+        }
+      }
+      for (const id of ids) {
+        released += await cancelPendingBooking(payload, id)
       }
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        restoredSpots: guestCount,
-        newAvailableSpots: restoredSpots,
-      },
-      { status: 200 },
-    )
+    return NextResponse.json({ success: true, released })
   } catch (error) {
     console.error('[release-spots]', error)
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 },
-    )
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
