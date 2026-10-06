@@ -46,6 +46,7 @@ export const hero: Field = {
       },
       options: [
         { label: '🏠 Home Page Slider', value: 'heroSlider' },
+        { label: '🎬 Cinematic Slider (full photo, white + gold text)', value: 'heroCinematic' },
         { label: '📷 Full Image Banner', value: 'highImpact' },
         { label: '📄 Simple Title', value: 'lowImpact' },
         { label: '⬜ Split (Text + Image)', value: 'heroSplit' },
@@ -251,6 +252,134 @@ export const hero: Field = {
                   admin: {
                     width: '50%',
                   },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+
+    /* ═══════════════════════════════════════════════════════════════════════
+     * CINEMATIC SLIDER (heroCinematic)
+     * Full-screen dark photo per slide, white headline + gold accent line
+     * ═══════════════════════════════════════════════════════════════════════ */
+    {
+      type: 'collapsible',
+      label: '🎬 Cinematic Slides',
+      admin: {
+        condition: (_, { type } = {}) => type === 'heroCinematic',
+        initCollapsed: false,
+        description:
+          'One full-screen photo per slide. Text sits at the bottom over a dark fade. With a single slide there is no sliding — add more slides to get arrows and auto-play.',
+      },
+      fields: [
+        {
+          name: 'cinematicSlides',
+          type: 'array',
+          label: 'Slides',
+          minRows: 1,
+          maxRows: 6,
+          labels: {
+            singular: 'Slide',
+            plural: 'Slides',
+          },
+          admin: {
+            initCollapsed: false,
+            description: 'Slides play in this order. Drag to re-order.',
+            components: {
+              RowLabel: '@/fields/heroSlideRowLabel.tsx#HeroSlideRowLabel',
+            },
+          },
+          fields: [
+            {
+              name: 'image',
+              type: 'upload',
+              relationTo: 'media',
+              required: true,
+              label: 'Photo',
+              admin: {
+                description:
+                  'Landscape photo (3:2 or 16:9), at least 1920px wide. Works best with a dark background and people/objects in the upper two-thirds — the text sits over the bottom.',
+              },
+            },
+            {
+              name: 'eyebrow',
+              type: 'text',
+              label: 'Small Text Above Title (gold)',
+              localized: true,
+              admin: {
+                description: 'e.g. "Fermentation Studio · Graz"',
+              },
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'textarea',
+                  label: 'Title (white)',
+                  localized: true,
+                  required: true,
+                  admin: {
+                    width: '50%',
+                    description: 'Main headline. Press Enter for a line break.',
+                  },
+                },
+                {
+                  name: 'titleAccent',
+                  type: 'textarea',
+                  label: 'Title Highlight (gold)',
+                  localized: true,
+                  admin: {
+                    width: '50%',
+                    description: 'Optional second part of the headline, shown in gold below the title.',
+                  },
+                },
+              ],
+            },
+            {
+              name: 'description',
+              type: 'textarea',
+              label: 'Description',
+              localized: true,
+              admin: {
+                description: 'One or two short sentences below the title.',
+              },
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'ctaLabel',
+                  type: 'text',
+                  label: 'Main Button Text (gold)',
+                  localized: true,
+                  admin: { width: '50%', description: 'e.g. "Discover workshops"' },
+                },
+                {
+                  name: 'ctaHref',
+                  type: 'text',
+                  label: 'Main Button Link',
+                  admin: { width: '50%', description: 'e.g. "/workshops"' },
+                },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'secondaryCtaLabel',
+                  type: 'text',
+                  label: 'Second Button Text (outline)',
+                  localized: true,
+                  admin: { width: '50%', description: 'Optional. e.g. "Visit the shop"' },
+                },
+                {
+                  name: 'secondaryCtaHref',
+                  type: 'text',
+                  label: 'Second Button Link',
+                  admin: { width: '50%', description: 'Optional. e.g. "/shop"' },
                 },
               ],
             },

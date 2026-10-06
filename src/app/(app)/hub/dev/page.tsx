@@ -400,6 +400,7 @@ npx tsc --noEmit            # Must pass with zero errors`}</Code>
             <tbody style={{ color: '#626160' }}>
               {[
                 ['heroSlider', 'HeroSlider/', t('Startseite — 4 feste Slides (basics, lakto, kombucha, tempeh)', 'Home page — 4 fixed slides (basics, lakto, kombucha, tempeh)')],
+                ['heroCinematic', 'HeroCinematic/', t('Vollbild-Foto-Slider — weißer Titel + goldener Akzent', 'Full-screen photo slider — white title + gold accent')],
                 ['heroCarousel', 'HeroCarousel/', t('Multi-Slide Bild-Karussell', 'Multi-slide image carousel')],
                 ['heroGrid', 'HeroGrid/', t('Raster-basiertes Hero-Layout', 'Grid-based hero layout')],
                 ['heroSplit', 'HeroSplit/', t('Geteiltes Bild/Text Layout', 'Split image/text layout')],

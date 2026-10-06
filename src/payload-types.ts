@@ -831,6 +831,7 @@ export interface Page {
      */
     type:
       | 'heroSlider'
+      | 'heroCinematic'
       | 'highImpact'
       | 'lowImpact'
       | 'heroSplit'
@@ -895,6 +896,50 @@ export interface Page {
           bgColor?: string | null;
           leftImage?: (string | null) | Media;
           rightImage?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Slides play in this order. Drag to re-order.
+     */
+    cinematicSlides?:
+      | {
+          /**
+           * Landscape photo (3:2 or 16:9), at least 1920px wide. Works best with a dark background and people/objects in the upper two-thirds — the text sits over the bottom.
+           */
+          image: string | Media;
+          /**
+           * e.g. "Fermentation Studio · Graz"
+           */
+          eyebrow?: string | null;
+          /**
+           * Main headline. Press Enter for a line break.
+           */
+          title: string;
+          /**
+           * Optional second part of the headline, shown in gold below the title.
+           */
+          titleAccent?: string | null;
+          /**
+           * One or two short sentences below the title.
+           */
+          description?: string | null;
+          /**
+           * e.g. "Discover workshops"
+           */
+          ctaLabel?: string | null;
+          /**
+           * e.g. "/workshops"
+           */
+          ctaHref?: string | null;
+          /**
+           * Optional. e.g. "Visit the shop"
+           */
+          secondaryCtaLabel?: string | null;
+          /**
+           * Optional. e.g. "/shop"
+           */
+          secondaryCtaHref?: string | null;
           id?: string | null;
         }[]
       | null;
@@ -6409,6 +6454,20 @@ export interface PagesSelect<T extends boolean = true> {
               bgColor?: T;
               leftImage?: T;
               rightImage?: T;
+              id?: T;
+            };
+        cinematicSlides?:
+          | T
+          | {
+              image?: T;
+              eyebrow?: T;
+              title?: T;
+              titleAccent?: T;
+              description?: T;
+              ctaLabel?: T;
+              ctaHref?: T;
+              secondaryCtaLabel?: T;
+              secondaryCtaHref?: T;
               id?: T;
             };
         socialLinks?:
