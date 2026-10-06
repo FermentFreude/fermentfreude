@@ -39,12 +39,12 @@ export function useAutoPlay(slideCount: number) {
 
   /* ── Auto-play timer ───────────────────────────────────────── */
   useEffect(() => {
-    if (isPaused || animState === 'exiting') return
+    if (slideCount <= 1 || isPaused || animState === 'exiting') return
     timerRef.current = setTimeout(goNext, AUTO_PLAY_INTERVAL)
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [activeIndex, isPaused, animState, goNext])
+  }, [activeIndex, isPaused, animState, goNext, slideCount])
 
   /* ── Restart progress bar animation on slide change ───────── */
   useEffect(() => {

@@ -56,6 +56,7 @@ export default async function Page({ params }: Args) {
   const isFullBleedHero =
     hero.type === 'heroSlider' ||
     hero.type === 'heroCarousel' ||
+    hero.type === 'heroCinematic' ||
     hero.type === 'heroGrid' ||
     hero.type === 'heroSplit' ||
     hero.type === 'heroPress' ||
