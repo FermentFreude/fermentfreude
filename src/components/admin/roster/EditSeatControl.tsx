@@ -29,22 +29,21 @@ export function EditSeatControl({
   seatIndex: number
   currentName: string
   currentNotes: string
-  /** Only passed for the buyer seat — the booking's contact email. Omit for companion seats. */
-  currentEmail?: string
+  /** Seat 1 = the booking's buyer email; other seats = that guest's own email. */
+  currentEmail: string
   onDone: () => void
 }) {
-  const canEditEmail = currentEmail !== undefined
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(currentName)
   const [notes, setNotes] = useState(currentNotes)
-  const [email, setEmail] = useState(currentEmail ?? '')
+  const [email, setEmail] = useState(currentEmail)
   const [error, setError] = useState('')
   const [isSaving, startSave] = useTransition()
 
   const handleOpen = () => {
     setName(currentName)
     setNotes(currentNotes)
-    setEmail(currentEmail ?? '')
+    setEmail(currentEmail)
     setError('')
     setEditing(true)
   }
@@ -57,13 +56,7 @@ export function EditSeatControl({
     setError('')
     startSave(async () => {
       try {
-        await updateBookingSeatDetails({
-          bookingId,
-          seatIndex,
-          name,
-          notes,
-          ...(canEditEmail ? { email } : {}),
-        })
+        await updateBookingSeatDetails({ bookingId, seatIndex, name, email, notes })
         setEditing(false)
         onDone()
       } catch (err) {
@@ -101,20 +94,16 @@ export function EditSeatControl({
         onChange={(e) => setName(e.target.value)}
         style={{ ...inputStyle, marginBottom: '8px' }}
       />
-      {canEditEmail && (
-        <>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, opacity: 0.6, marginBottom: '4px' }}>
-            E-Mail
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@beispiel.at"
-            style={{ ...inputStyle, marginBottom: '8px' }}
-          />
-        </>
-      )}
+      <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, opacity: 0.6, marginBottom: '4px' }}>
+        E-Mail <span style={{ fontWeight: 400 }}>(bekommt 2 Tage vorher die Erinnerung)</span>
+      </label>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="name@beispiel.at"
+        style={{ ...inputStyle, marginBottom: '8px' }}
+      />
       <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, opacity: 0.6, marginBottom: '4px' }}>
         Ernährungshinweise / Notizen
       </label>

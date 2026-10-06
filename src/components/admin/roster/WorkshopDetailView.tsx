@@ -190,7 +190,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                 seatIndex: si,
                 name: seatName,
                 editableName: seat?.recipientName || (isBuyer ? buyerName : ''),
-                email: isBuyer ? booking.email : '',
+                email: isBuyer ? booking.email : seat?.email ?? '',
                 phone: isBuyer ? booking.phone : '',
                 notes: seatNotes,
                 createdAt: booking.createdAt,
@@ -292,7 +292,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                       seatIndex={card.seatIndex}
                       currentName={card.editableName}
                       currentNotes={card.notes}
-                      currentEmail={card.isBuyer ? card.booking.email || '' : undefined}
+                      currentEmail={card.email}
                       onDone={onRefresh}
                     />
                   </div>

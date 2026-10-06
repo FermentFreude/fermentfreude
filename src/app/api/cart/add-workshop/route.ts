@@ -1,17 +1,11 @@
 import { releaseSpotsAtomic } from '@/lib/atomicSpots'
+import { sanitizeSeatInputs } from '@/lib/workshopSeats'
 import { addGuestsToPendingBooking, BASKET_HOLD_MINUTES, reserveSeats } from '@/lib/workshopHolds'
 import type { WorkshopAppointment, WorkshopBooking } from '@/payload-types'
 import configPromise from '@payload-config'
 import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
-
-type SeatInput = {
-  isGift?: boolean
-  recipientName?: string
-  recipientEmail?: string
-  giftNote?: string
-}
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/cart/add-workshop — Production Endpoint
@@ -35,27 +29,8 @@ export async function POST(request: NextRequest) {
     } = body
     const cartId = typeof rawCartId === 'string' && rawCartId.trim() ? rawCartId.trim() : null
 
-    // ─── Sprint 3 — sanitize optional per-seat gift info ────────
-    const sanitizedSeats: SeatInput[] = Array.isArray(rawSeats)
-      ? (rawSeats as unknown[])
-          .map((s) => {
-            if (!s || typeof s !== 'object') return null
-            const seat = s as Record<string, unknown>
-            return {
-              isGift: Boolean(seat.isGift),
-              recipientName:
-                typeof seat.recipientName === 'string'
-                  ? seat.recipientName.trim().slice(0, 250)
-                  : undefined,
-              recipientEmail:
-                typeof seat.recipientEmail === 'string'
-                  ? seat.recipientEmail.trim().slice(0, 250)
-                  : undefined,
-              giftNote: typeof seat.giftNote === 'string' ? seat.giftNote.slice(0, 500) : undefined,
-            } as SeatInput
-          })
-          .filter((s): s is SeatInput => s !== null)
-      : []
+    // Optional per-seat guest details (name, email, dietary notes)
+    const sanitizedSeats = sanitizeSeatInputs(rawSeats)
 
     // Debug logging
     console.log('[add-workshop] Request received:', {

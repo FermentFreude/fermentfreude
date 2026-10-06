@@ -87,6 +87,37 @@ export const WorkshopBookings: CollectionConfig = {
       },
     },
     {
+      name: 'workshopReminder',
+      type: 'group',
+      label: 'Workshop reminder',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Filled automatically by the daily reminder job (2 days before the workshop). Moving the booking to another date resets it, so the new date gets its own reminder.',
+      },
+      fields: [
+        {
+          name: 'appointmentId',
+          type: 'text',
+          label: 'Sent for appointment',
+          admin: { readOnly: true },
+        },
+        {
+          name: 'sentTo',
+          type: 'text',
+          hasMany: true,
+          label: 'Sent to',
+          admin: { readOnly: true },
+        },
+        {
+          name: 'sentAt',
+          type: 'date',
+          label: 'Last sent',
+          admin: { readOnly: true, date: { pickerAppearance: 'dayAndTime' } },
+        },
+      ],
+    },
+    {
       name: 'downloadToken',
       type: 'text',
       label: 'Receipt Download Token',
@@ -115,7 +146,7 @@ export const WorkshopBookings: CollectionConfig = {
       name: 'email',
       type: 'email',
       label: 'Email',
-      admin: { description: 'Used to send the booking confirmation email.' },
+      admin: { description: 'The buyer. Receives the booking confirmation and the workshop reminder 2 days before.' },
     },
     {
       name: 'phone',
@@ -188,7 +219,7 @@ export const WorkshopBookings: CollectionConfig = {
       label: 'Guests (per seat)',
       admin: {
         description:
-          'One entry per booked seat. Seat 1 is the buyer. Additional seats can include a guest name and dietary notes. Confirmation emails go only to the buyer.',
+          'One entry per booked seat. Seat 1 is the buyer. Each seat can have a guest name, email and dietary notes. Confirmations go only to the buyer; the workshop reminder (2 days before) goes to the buyer and every guest with an email.',
       },
       fields: [
         {
@@ -197,6 +228,15 @@ export const WorkshopBookings: CollectionConfig = {
           label: 'Guest Name',
           admin: {
             description: 'Name of the person attending this seat (optional).',
+          },
+        },
+        {
+          name: 'email',
+          type: 'email',
+          label: 'Guest Email',
+          admin: {
+            description:
+              'Optional. If set, this guest also receives the workshop reminder email 2 days before the workshop.',
           },
         },
         {
@@ -310,25 +350,6 @@ export const WorkshopBookings: CollectionConfig = {
               'Traceability — the specific seat index on the original booking this seat was rebooked from. Paired with rebookedFromBookingId so rebook-now can detect an interrupted request (new booking created but the original seat never got marked resolved) and resume instead of creating a duplicate.',
             readOnly: true,
           },
-        },
-        {
-          name: 'isGift',
-          type: 'checkbox',
-          defaultValue: false,
-          label: 'Legacy: Is a gift (unused)',
-          admin: { hidden: true },
-        },
-        {
-          name: 'recipientEmail',
-          type: 'email',
-          label: 'Legacy: Recipient Email (unused)',
-          admin: { hidden: true },
-        },
-        {
-          name: 'giftEmailSentAt',
-          type: 'date',
-          label: 'Legacy: Gift Email Sent At (unused)',
-          admin: { hidden: true, readOnly: true },
         },
       ],
     },
