@@ -5,23 +5,13 @@ import React, { useEffect, useState } from 'react'
 import { getBookingTimeline, type TimelineEntry } from './actions'
 import type { BookingRow } from './types'
 import { BRAND, STATUS } from './rosterTheme'
+import { seatStatusLabel } from './seatStatusLabels'
 
 interface Props {
   booking: BookingRow
   onClose: () => void
 }
 
-const SEAT_STATUS_LABELS: Record<string, { label: string; tone: keyof typeof STATUS }> = {
-  active: { label: 'Aktiv', tone: 'success' },
-  cancelled_no_refund: { label: 'Storniert — keine Rückerstattung', tone: 'danger' },
-  rebooking_pending: { label: 'Umbuchung ausstehend', tone: 'warning' },
-  rebooked: { label: 'Umgebucht', tone: 'info' },
-  refund_requested: { label: 'Rückerstattung angefragt', tone: 'warning' },
-  refunded: { label: 'Rückerstattet', tone: 'danger' },
-  voucher_issued: { label: 'Gutschein ausgestellt', tone: 'purple' },
-  organiser_cancelled_pending: { label: 'Von uns storniert — wartet auf Kunde', tone: 'warning' },
-  no_show: { label: 'Nicht erschienen', tone: 'neutral' },
-}
 
 function fmtDateTime(iso: string): string {
   if (!iso) return ''
@@ -163,7 +153,7 @@ export function BookingDetailModal({ booking, onClose }: Props) {
           const isBuyer = si === 0
           const seat = booking.seats[si]
           const name = seat?.recipientName || (isBuyer ? buyerName : `Gast von ${buyerName}`)
-          const statusInfo = seat?.seatStatus ? SEAT_STATUS_LABELS[seat.seatStatus] : null
+          const statusInfo = seatStatusLabel(seat?.seatStatus)
           return (
             <div
               key={si}

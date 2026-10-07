@@ -4,7 +4,8 @@ import React, { useState } from 'react'
 
 import { BookingDetailModal } from './BookingDetailModal'
 import type { ParticipantRow, RosterStats } from './types'
-import { BRAND, PageHeader, StatCard } from './rosterTheme'
+import { BRAND, PageHeader, StatCard, STATUS } from './rosterTheme'
+import { seatStatusLabel } from './seatStatusLabels'
 
 interface Props {
   participants: ParticipantRow[]
@@ -109,7 +110,17 @@ export function ParticipantsView({ participants, stats }: Props) {
                         {initials(p.name) || '?'}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 500, color: 'var(--theme-text)' }}>{p.name}</div>
+                        <div style={{ fontWeight: 500, color: 'var(--theme-text)' }}>
+                          {p.name}
+                          {p.seatStatus !== 'active' && (() => {
+                            const st = seatStatusLabel(p.seatStatus)
+                            return (
+                              <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 600, padding: '1px 8px', borderRadius: '999px', background: STATUS[st.tone].bg, color: STATUS[st.tone].color }}>
+                                {st.label}
+                              </span>
+                            )
+                          })()}
+                        </div>
                         {!p.isBuyer && (
                           <div style={{ fontSize: '11px', color: 'var(--theme-text)', opacity: 0.5 }}>
                             {p.guestOfName ? `Begleitung von ${p.guestOfName}` : 'Begleitung'}
