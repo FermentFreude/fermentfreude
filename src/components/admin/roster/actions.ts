@@ -12,7 +12,8 @@ import { addBookingHistory, BOOKING_HISTORY_TYPES, emailOutcome } from '@/lib/bo
 import { seatsHoldingPlace } from '@/lib/seatCapacity'
 import { isValidEmail } from '@/lib/workshopSeats'
 import { getServerSideURL } from '@/utilities/getURL'
-import { fmtDate, fmtTime } from './fetchRosterData'
+import { fmtDate, fmtTime, toBookingRow } from './fetchRosterData'
+import type { BookingRow } from './types'
 
 /**
  * Server Actions are network-callable independent of which page rendered
@@ -1123,4 +1124,168 @@ export async function getBookingTimeline(bookingId: string): Promise<TimelineEnt
   }
 
   return entries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+}
+
+export type OrderDetail = {
+  id: string
+  invoiceNumber: string
+  status: string
+  createdAt: string
+  amount: number // cents
+  customer: {
+    name: string
+    email: string
+    phone: string
+    hasAccount: boolean
+    notes: string
+    address: string
+  }
+  items: { title: string; quantity: number }[]
+  payment: {
+    method: string
+    transactions: { status: string; amount: number; voucherCode: string; stripeUrl: string }[]
+    referenceNote: string
+  }
+  pickup: { date: string; time: string; location: string; status: string } | null
+  voucher: {
+    code: string
+    value: number
+    status: string
+    recipient: string
+    delivery: string
+    redeemed: boolean
+    redeemedOn: string
+  } | null
+  bookings: BookingRow[]
+}
+
+/**
+ * Everything about one order for the roster's order detail: who bought,
+ * what (products, workshop seats, or a voucher), how it was paid, pickup,
+ * and the bookings it created — each booking opens its own detail/Verlauf.
+ */
+export async function getOrderDetail(orderId: string): Promise<OrderDetail> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  const order = await payload.findByID({ collection: 'orders', id: orderId, depth: 1, overrideAccess: true })
+  const od = order as unknown as Record<string, unknown> & {
+    items?: Array<{ product?: unknown; variant?: unknown; quantity?: number }>
+    shippingAddress?: Record<string, unknown> | null
+    purchasedVoucher?: unknown
+    transactions?: unknown[]
+  }
+  const text = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
+
+  // Voucher bought with this order — linked on newer orders, matched by email/amount/time on older ones.
+  const linkedVoucherId =
+    typeof od.purchasedVoucher === 'object' && od.purchasedVoucher !== null
+      ? (od.purchasedVoucher as { id: string }).id
+      : (od.purchasedVoucher as string | undefined)
+  let voucherDoc: Record<string, unknown> | null = null
+  if (linkedVoucherId) {
+    voucherDoc = (await payload.findByID({ collection: 'vouchers', id: linkedVoucherId, depth: 0, overrideAccess: true })) as unknown as Record<string, unknown>
+  } else if ((od.items ?? []).length === 0 && text(od.customerEmail)) {
+    const created = new Date(String(od.createdAt)).getTime()
+    const candidates = await payload.find({
+      collection: 'vouchers',
+      where: {
+        and: [
+          { or: [{ origin: { equals: 'gift-purchase' } }, { origin: { exists: false } }] },
+          { purchaserEmail: { equals: text(od.customerEmail) } },
+        ],
+      },
+      limit: 20,
+      depth: 0,
+      overrideAccess: true,
+    })
+    voucherDoc =
+      (candidates.docs.find(
+        (v) =>
+          Math.round(Number(v.value) * 100) === Number(od.amount) &&
+          Math.abs(new Date(v.createdAt).getTime() - created) < 60 * 60 * 1000,
+      ) as unknown as Record<string, unknown>) ?? null
+  }
+
+  const transactions = await payload.find({
+    collection: 'transactions',
+    where: { id: { in: (od.transactions ?? []).map((t) => (typeof t === 'object' && t !== null ? (t as { id: string }).id : String(t))) } },
+    depth: 0,
+    limit: 20,
+    overrideAccess: true,
+  })
+
+  const bookings = await payload.find({
+    collection: 'workshop-bookings',
+    where: { orderId: { equals: String(order.id) } },
+    depth: 0,
+    limit: 20,
+    overrideAccess: true,
+  })
+
+  const stripeTestMode = process.env.STRIPE_SECRET_KEY?.startsWith('sk_test') ?? false
+  const customer = typeof od.customer === 'object' && od.customer !== null ? (od.customer as Record<string, unknown>) : null
+  const addr = od.shippingAddress ?? null
+  const address = addr
+    ? [text(addr.addressLine1), text(addr.addressLine2), [text(addr.postalCode), text(addr.city)].filter(Boolean).join(' '), text(addr.country)]
+        .filter(Boolean)
+        .join(', ')
+    : ''
+
+  return {
+    id: String(order.id),
+    invoiceNumber: text(od.invoiceNumber) || String(order.id).slice(-8).toUpperCase(),
+    status: text(od.status),
+    createdAt: String(od.createdAt ?? ''),
+    amount: Number(od.amount ?? 0),
+    customer: {
+      name:
+        [text(od.customerFirstName), text(od.customerLastName)].filter(Boolean).join(' ') ||
+        text(od.customerName) ||
+        text(customer?.name),
+      email: text(od.customerEmail) || text(customer?.email),
+      phone: text(od.customerPhone),
+      hasAccount: customer !== null,
+      notes: text(od.customerDietSpecs),
+      address,
+    },
+    items: (od.items ?? []).map((item) => {
+      const product = typeof item.product === 'object' && item.product !== null ? (item.product as Record<string, unknown>) : null
+      const variant = typeof item.variant === 'object' && item.variant !== null ? (item.variant as Record<string, unknown>) : null
+      return {
+        title: [text(product?.title) || 'Produkt', text(variant?.title)].filter(Boolean).join(' · '),
+        quantity: item.quantity ?? 1,
+      }
+    }),
+    payment: {
+      method: text(od.paymentMethod) || (transactions.docs.length > 0 ? 'stripe' : ''),
+      referenceNote: text(od.referenceNote),
+      transactions: transactions.docs.map((t) => {
+        const tx = t as unknown as { status?: string; amount?: number; voucherCode?: string; stripe?: { paymentIntentID?: string } }
+        const pi = tx.stripe?.paymentIntentID ?? ''
+        return {
+          status: tx.status ?? '',
+          amount: tx.amount ?? 0,
+          voucherCode: tx.voucherCode ?? '',
+          // Staging runs on the Stripe test account — its payments live under /test
+          stripeUrl: pi ? `https://dashboard.stripe.com${stripeTestMode ? '/test' : ''}/payments/${pi}` : '',
+        }
+      }),
+    },
+    pickup: text(od.pickupDate)
+      ? { date: text(od.pickupDate), time: text(od.pickupTime), location: text(od.pickupLocation), status: text(od.pickupStatus) }
+      : null,
+    voucher: voucherDoc
+      ? {
+          code: text(voucherDoc.code),
+          value: Number(voucherDoc.value ?? 0),
+          status: text(voucherDoc.status),
+          recipient: [text(voucherDoc.recipientName), text(voucherDoc.recipientEmail)].filter(Boolean).join(' · '),
+          delivery: text(voucherDoc.deliveryMethod),
+          redeemed: Boolean(voucherDoc.redeemed),
+          redeemedOn: String(voucherDoc.redeemedOn ?? ''),
+        }
+      : null,
+    bookings: bookings.docs.map((b) => toBookingRow(b)),
+  }
 }

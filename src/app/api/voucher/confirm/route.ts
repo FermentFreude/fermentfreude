@@ -168,6 +168,8 @@ export async function GET(request: NextRequest) {
           status: 'completed',
           amount: amountCents ?? Math.round(Number(meta.amount) * 100),
           currency: 'EUR',
+          // Link back so the order shows what was bought (items stay empty — a voucher isn't a product)
+          purchasedVoucher: voucher.id,
         },
         context: {
           skipOrderConfirmationEmail: true,

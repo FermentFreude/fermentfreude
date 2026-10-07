@@ -59,7 +59,7 @@ function paidSeats(booking: BookingRow): number {
 }
 
 /** Normalize a raw workshop-bookings doc into the shape the roster UI (list rows + detail modal) needs. */
-function toBookingRow(b: { id: string | number }): BookingRow {
+export function toBookingRow(b: { id: string | number }): BookingRow {
   const bk = b as unknown as {
     firstName?: string
     lastName?: string
@@ -313,6 +313,36 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     }
   }
 
+  // Voucher purchases create an order without items — find the voucher each
+  // one bought so the list can say what it was. Newer orders store the link
+  // (purchasedVoucher); older ones are matched by buyer email + amount + time.
+  const giftVouchers = await payload.find({
+    collection: 'vouchers',
+    // Vouchers from before July 2026 have no origin at all — those were purchases too.
+    where: { or: [{ origin: { equals: 'gift-purchase' } }, { origin: { exists: false } }] },
+    limit: 1000,
+    depth: 0,
+    overrideAccess: true,
+  })
+  const voucherForOrder = (o: { purchasedVoucher?: unknown; customerEmail?: string; amount?: number; createdAt?: string }) => {
+    const linkedId =
+      typeof o.purchasedVoucher === 'object' && o.purchasedVoucher !== null
+        ? (o.purchasedVoucher as { id: string }).id
+        : o.purchasedVoucher
+    if (linkedId) return giftVouchers.docs.find((v) => String(v.id) === String(linkedId)) ?? null
+    const email = o.customerEmail?.toLowerCase()
+    const at = o.createdAt ? new Date(o.createdAt).getTime() : NaN
+    if (!email || Number.isNaN(at)) return null
+    return (
+      giftVouchers.docs.find(
+        (v) =>
+          v.purchaserEmail?.toLowerCase() === email &&
+          Math.round(Number(v.value) * 100) === o.amount &&
+          Math.abs(new Date(v.createdAt).getTime() - at) < 60 * 60 * 1000,
+      ) ?? null
+    )
+  }
+
   const orders: OrderRow[] = ordersResult.docs.map((o) => {
     const od = o as unknown as {
       invoiceNumber?: string
@@ -324,6 +354,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       items?: Array<{ product?: unknown; quantity?: number }>
       amount?: number
       status?: string
+      purchasedVoucher?: unknown
     }
 
     const customerName =
@@ -337,6 +368,8 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
         return qty > 1 ? `${title} ×${qty}` : title
       })
       .join(', ')
+    const boughtVoucher = itemsSummary ? null : voucherForOrder({ ...od, createdAt: od.createdAt })
+    const voucherSummary = boughtVoucher ? `Gutschein €${Number(boughtVoucher.value)} · ${boughtVoucher.code}` : ''
 
     const cancellation = cancellationByOrderId.get(String(o.id)) ?? null
 
@@ -347,7 +380,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       customerEmail: od.customerEmail ?? '',
       amount: od.amount ?? 0,
       status: (od.status as OrderRow['status']) ?? '',
-      itemsSummary,
+      itemsSummary: itemsSummary || voucherSummary,
       createdAt: od.createdAt
         ? new Date(od.createdAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
         : '',

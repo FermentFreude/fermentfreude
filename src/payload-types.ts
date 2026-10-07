@@ -382,6 +382,10 @@ export interface Order {
    * Frozen invoice date. Set once when the order is paid and never overwritten — guarantees the PDF receipt shows the same date no matter when it is downloaded.
    */
   invoiceIssuedAt?: string | null;
+  /**
+   * Set automatically when this order is a voucher purchase — the voucher that was bought.
+   */
+  purchasedVoucher?: (string | null) | Voucher;
   updatedAt: string;
   createdAt: string;
 }
@@ -5193,6 +5197,89 @@ export interface Cart {
   createdAt: string;
 }
 /**
+ * Geschenkgutscheine — generische €99 Workshop-Erlebnis Gutscheine. Käufer wählt keinen Workshop; Empfänger löst den Gutschein beim Checkout für einen beliebigen Workshop ein.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vouchers".
+ */
+export interface Voucher {
+  id: string;
+  /**
+   * Auto-generated unique voucher code (e.g. FF-GIFT-A7K3M2X9)
+   */
+  code: string;
+  /**
+   * Voucher lifecycle status
+   */
+  status: 'active' | 'redeemed' | 'expired';
+  /**
+   * Voucher value in EUR (default €99 for workshop experience)
+   */
+  value: number;
+  /**
+   * How this voucher came to exist. "Cancellation — deferred rebooking" is issued automatically when a customer picks "rebook later via code" instead of a paid gift card.
+   */
+  origin?: ('gift-purchase' | 'cancellation-self-service' | 'admin-goodwill') | null;
+  /**
+   * Full name of the buyer (used in greeting of confirmation email). Optional for legacy vouchers.
+   */
+  purchaserName?: string | null;
+  /**
+   * Email of the buyer (receives purchase confirmation). Leave blank for manually-created vouchers.
+   */
+  purchaserEmail?: string | null;
+  /**
+   * Name of the recipient (used on the gift card and in the email greeting).
+   */
+  recipientName?: string | null;
+  /**
+   * Email of the recipient (used when deliveryMethod = email-recipient).
+   */
+  recipientEmail?: string | null;
+  /**
+   * Optional personal note from the buyer printed on the gift card (max 500 chars).
+   */
+  personalNote?: string | null;
+  /**
+   * How the voucher is delivered to the recipient
+   */
+  deliveryMethod: 'email-recipient' | 'email-self' | 'pdf' | 'email' | 'pickup';
+  /**
+   * Stripe Checkout Session ID for payment verification
+   */
+  stripeSessionId?: string | null;
+  /**
+   * Automatically set to true when voucher is used
+   */
+  redeemed?: boolean | null;
+  /**
+   * Date when voucher was redeemed
+   */
+  redeemedOn?: string | null;
+  /**
+   * Workshop name when voucher was redeemed at checkout
+   */
+  redeemedForWorkshop?: string | null;
+  /**
+   * User who redeemed the voucher
+   */
+  redeemedBy?: (string | null) | User;
+  /**
+   * Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on purchase.
+   */
+  invoiceNumber?: string | null;
+  /**
+   * Internal notes about this voucher
+   */
+  notes?: string | null;
+  /**
+   * Set automatically if the Brevo confirmation email failed to send. Check Vercel logs for the [Brevo] error and resend the voucher manually if needed.
+   */
+  emailDeliveryFailed?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "addresses".
  */
@@ -5665,89 +5752,6 @@ export interface WorkshopBooking {
         id?: string | null;
       }[]
     | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Geschenkgutscheine — generische €99 Workshop-Erlebnis Gutscheine. Käufer wählt keinen Workshop; Empfänger löst den Gutschein beim Checkout für einen beliebigen Workshop ein.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vouchers".
- */
-export interface Voucher {
-  id: string;
-  /**
-   * Auto-generated unique voucher code (e.g. FF-GIFT-A7K3M2X9)
-   */
-  code: string;
-  /**
-   * Voucher lifecycle status
-   */
-  status: 'active' | 'redeemed' | 'expired';
-  /**
-   * Voucher value in EUR (default €99 for workshop experience)
-   */
-  value: number;
-  /**
-   * How this voucher came to exist. "Cancellation — deferred rebooking" is issued automatically when a customer picks "rebook later via code" instead of a paid gift card.
-   */
-  origin?: ('gift-purchase' | 'cancellation-self-service' | 'admin-goodwill') | null;
-  /**
-   * Full name of the buyer (used in greeting of confirmation email). Optional for legacy vouchers.
-   */
-  purchaserName?: string | null;
-  /**
-   * Email of the buyer (receives purchase confirmation). Leave blank for manually-created vouchers.
-   */
-  purchaserEmail?: string | null;
-  /**
-   * Name of the recipient (used on the gift card and in the email greeting).
-   */
-  recipientName?: string | null;
-  /**
-   * Email of the recipient (used when deliveryMethod = email-recipient).
-   */
-  recipientEmail?: string | null;
-  /**
-   * Optional personal note from the buyer printed on the gift card (max 500 chars).
-   */
-  personalNote?: string | null;
-  /**
-   * How the voucher is delivered to the recipient
-   */
-  deliveryMethod: 'email-recipient' | 'email-self' | 'pdf' | 'email' | 'pickup';
-  /**
-   * Stripe Checkout Session ID for payment verification
-   */
-  stripeSessionId?: string | null;
-  /**
-   * Automatically set to true when voucher is used
-   */
-  redeemed?: boolean | null;
-  /**
-   * Date when voucher was redeemed
-   */
-  redeemedOn?: string | null;
-  /**
-   * Workshop name when voucher was redeemed at checkout
-   */
-  redeemedForWorkshop?: string | null;
-  /**
-   * User who redeemed the voucher
-   */
-  redeemedBy?: (string | null) | User;
-  /**
-   * Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on purchase.
-   */
-  invoiceNumber?: string | null;
-  /**
-   * Internal notes about this voucher
-   */
-  notes?: string | null;
-  /**
-   * Set automatically if the Brevo confirmation email failed to send. Check Vercel logs for the [Brevo] error and resend the voucher manually if needed.
-   */
-  emailDeliveryFailed?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -9077,6 +9081,7 @@ export interface OrdersSelect<T extends boolean = true> {
   invoiceNumber?: T;
   downloadToken?: T;
   invoiceIssuedAt?: T;
+  purchasedVoucher?: T;
   updatedAt?: T;
   createdAt?: T;
 }
