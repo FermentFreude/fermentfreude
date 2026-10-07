@@ -4,6 +4,7 @@ import { getAdminRecipients } from '@/lib/adminNotification'
 import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 import { cancelReasonLabel, loadFreshForMutation, logActivityEvent, updateSeat } from '@/lib/manageBooking'
 import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
+import { releaseSeatFromAppointment } from '@/lib/seatCapacity'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/manage-booking/[token]/cancel-no-refund
@@ -53,6 +54,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     cancelledAt: now,
     cancelledReason: reason,
   })
+  // The seat left this date — give the place back so it can be sold again.
+  await releaseSeatFromAppointment(payload, booking.appointmentId, 'manage-booking:cancel-no-refund')
 
   await logActivityEvent(
     payload,

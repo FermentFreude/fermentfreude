@@ -16,6 +16,7 @@ import type {
   SeatEntry,
   VoucherRow,
 } from './types'
+import { seatsHoldingPlace, seatStatusAt } from '@/lib/seatCapacity'
 
 /** Extract plain text from a Lexical rich-text JSON node (recursive). */
 function lexicalToPlainText(value: unknown): string {
@@ -45,6 +46,16 @@ export function fmtTime(iso: string): string {
     minute: '2-digit',
     timeZone: 'Europe/Vienna',
   })
+}
+
+const NO_REVENUE_HERE = new Set(['rebooked', 'voucher_issued', 'refunded'])
+
+/** Seats whose payment belongs to this booking's date. */
+function paidSeats(booking: BookingRow): number {
+  const count = Math.max(booking.guestCount, 1)
+  let paid = 0
+  for (let i = 0; i < count; i++) if (!NO_REVENUE_HERE.has(seatStatusAt(booking, i))) paid++
+  return paid
 }
 
 /** Normalize a raw workshop-bookings doc into the shape the roster UI (list rows + detail modal) needs. */
@@ -150,10 +161,8 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       overrideAccess: true,
     })
 
-    const totalBooked = bResult.docs.reduce(
-      (sum, b) => sum + (Number((b as unknown as { guestCount?: number }).guestCount) || 1),
-      0,
-    )
+    // Seats that were rebooked, cancelled or refunded no longer take a place here.
+    const totalBooked = bResult.docs.reduce((sum, b) => sum + seatsHoldingPlace(b), 0)
     const capacity = Number(workshopAny?.maxCapacityPerSlot ?? 12)
 
     appointments.push({
@@ -204,6 +213,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
         workshopTitle: booking.workshopTitle,
         bookingDate,
         status: (booking.status as ParticipantRow['status']) || 'confirmed',
+        seatStatus: booking.seats[si]?.seatStatus || 'active',
         isBuyer,
         guestOfName: !isBuyer && !seatName ? buyerName : '',
         orderRef: !isBuyer ? orderRef : '',
@@ -502,7 +512,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   // ── 6. Stats ───────────────────────────────────────────────────────────────
   const upcomingWorkshops = appointments.filter((a) => !a.isPast).length
   const totalParticipants = Object.values(bookingsByAppointment).reduce(
-    (sum, bookings) => sum + bookings.reduce((s, b) => s + b.guestCount, 0),
+    (sum, bookings) => sum + bookings.reduce((s, b) => s + seatsHoldingPlace(b), 0),
     0,
   )
   const openPickups = pickupOrders.filter(
@@ -510,7 +520,9 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   ).length
   const workshopRevenue = Object.values(bookingsByAppointment)
     .flat()
-    .reduce((sum, b) => sum + b.guestCount * (appointments.find((a) =>
+    // Money that stayed with this date: not rebooked (counted on the new booking),
+    // not swapped for a voucher, not refunded. A cancellation without refund still counts.
+    .reduce((sum, b) => sum + paidSeats(b) * (appointments.find((a) =>
       bookingsByAppointment[a.id]?.some((bk) => bk.id === b.id)
     )?.pricePerPerson ?? 0), 0)
 

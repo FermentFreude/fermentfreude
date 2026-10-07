@@ -15,6 +15,7 @@
 // @ts-expect-error — dotenv types not resolved via package.json exports
 import { config as loadEnv } from 'dotenv'
 import type { getPayload as GetPayload } from 'payload'
+import { seatsHoldingPlace } from '@/lib/seatCapacity'
 
 loadEnv()
 
@@ -89,7 +90,8 @@ async function run() {
       limit: 50,
       overrideAccess: true,
     })
-    const totalBooked = bookings.docs.reduce((sum, b) => sum + (Number(b.guestCount) || 1), 0)
+    // Seats that were rebooked / cancelled / refunded don't take a place.
+    const totalBooked = bookings.docs.reduce((sum, b) => sum + seatsHoldingPlace(b), 0)
     const correctAvailable = Math.max(0, capacity - totalBooked)
     const current = appt.availableSpots as number
 
