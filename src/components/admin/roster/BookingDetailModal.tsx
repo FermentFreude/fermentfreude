@@ -1,8 +1,9 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
-import type { BookingHistoryEntry, BookingRow } from './types'
+import { getBookingTimeline, type TimelineEntry } from './actions'
+import type { BookingRow } from './types'
 import { BRAND, STATUS } from './rosterTheme'
 
 interface Props {
@@ -47,24 +48,18 @@ const HISTORY_ICONS: Record<string, string> = {
   refund_completed: '✅',
 }
 
-/**
- * Newest first. Bookings created before the history existed have no
- * "created" entry — show one from createdAt so the list always starts
- * somewhere, and say plainly that older steps weren't recorded.
- */
-function historyForDisplay(booking: BookingRow): BookingHistoryEntry[] {
-  const entries = [...booking.history]
-  const hasCreated = entries.some((e) => e.type.startsWith('created_'))
-  if (!hasCreated && booking.createdAt) {
-    entries.unshift({
-      id: 'created-fallback',
-      at: booking.createdAt,
-      type: booking.orderId ? 'created_online' : 'created_manual',
-      summary: `${booking.orderId ? `Online gebucht · Bestellung #${booking.orderId}` : 'Buchung erstellt'} · frühere Schritte wurden noch nicht aufgezeichnet`,
-      by: '',
-    })
-  }
-  return entries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+/** "2× vom Team verschoben · 1× selbst umgebucht · 3 E-Mails gesendet" — the story at a glance. */
+function timelineSummary(entries: TimelineEntry[]): string {
+  const count = (type: string) => entries.filter((e) => e.type === type).length
+  const emails = entries.filter((e) => / gesendet/.test(e.summary)).length
+  return [
+    count('moved') && `${count('moved')}× vom Team verschoben`,
+    count('customer_rebooked') && `${count('customer_rebooked')}× selbst umgebucht`,
+    count('alternate_offered') && `${count('alternate_offered')}× Ausweichtermin angeboten`,
+    emails && `${emails} E-Mail${emails === 1 ? '' : 's'} gesendet`,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -87,6 +82,18 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 export function BookingDetailModal({ booking, onClose }: Props) {
+  const [timeline, setTimeline] = useState<TimelineEntry[] | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    getBookingTimeline(booking.id)
+      .then((t) => !cancelled && setTimeline(t))
+      .catch(() => !cancelled && setTimeline([]))
+    return () => {
+      cancelled = true
+    }
+  }, [booking.id])
+  const summary = timeline ? timelineSummary(timeline) : ''
+
   const buyerName = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || booking.email || '—'
   const seatCount = Math.max(booking.guestCount, 1)
 
@@ -194,9 +201,15 @@ export function BookingDetailModal({ booking, onClose }: Props) {
 
         <SectionTitle>Verlauf</SectionTitle>
         <p style={{ margin: '0 0 6px', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.5 }}>
-          Wird automatisch geschrieben und kann nicht bearbeitet werden.
+          Wird automatisch geschrieben und kann nicht bearbeitet werden. Neueste zuerst.
         </p>
-        {historyForDisplay(booking).map((entry) => (
+        {summary && (
+          <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: 600, color: 'var(--theme-text)' }}>{summary}</p>
+        )}
+        {timeline === null && (
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--theme-text)', opacity: 0.5 }}>Wird geladen…</p>
+        )}
+        {timeline?.map((entry) => (
           <div
             key={entry.id}
             style={{ display: 'flex', gap: '10px', padding: '8px 0', borderBottom: '1px solid var(--theme-elevation-100)' }}
@@ -205,11 +218,13 @@ export function BookingDetailModal({ booking, onClose }: Props) {
               {HISTORY_ICONS[entry.type] ?? '•'}
             </span>
             <div style={{ flex: 1 }}>
-              <p style={{ margin: 0, fontSize: '12px', fontWeight: 600, color: 'var(--theme-text)', opacity: 0.6 }}>
+              <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: 'var(--theme-text)' }}>{entry.title}</p>
+              <p style={{ margin: '1px 0 0', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.6 }}>
                 {fmtDateTime(entry.at)}
-                {entry.by && <span style={{ fontWeight: 400 }}> · {entry.by}</span>}
+                {entry.by && ` · ${entry.by}`}
+                {entry.fromEarlierBooking && ` · frühere Buchung (${entry.fromEarlierBooking})`}
               </p>
-              <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--theme-text)', lineHeight: 1.4 }}>{entry.summary}</p>
+              <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--theme-text)', lineHeight: 1.4 }}>{entry.summary}</p>
             </div>
           </div>
         ))}
