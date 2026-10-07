@@ -649,7 +649,7 @@ admin: {
 **For Founders (David & Marcel):**
 - Read `docs/BOOKING_SYSTEM_FOR_FOUNDERS.md` for user-facing explanation
 - Admin dashboard: `fermentfreude.vercel.app/admin`
-- Test on staging: `fermentfreude-git-staging-raphaellas-projects.vercel.app`
+- Test on staging: `fermentfreude-staging.vercel.app`
 
 ---
 
