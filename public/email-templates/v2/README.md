@@ -31,7 +31,7 @@ Workshop reminder (the only reminder — 2 days before, to the buyer + every gue
 
 | File | Brevo ID | Backend trigger |
 | ---- | -------- | ---------------- |
-| `workshop-reminder.html` | see `BREVO_TEMPLATES.WORKSHOP_REMINDER` | `src/lib/workshopReminders.ts` via daily cron `/api/emails/workshop-reminders` |
+| `workshop-reminder.html` | 103 | `src/lib/workshopReminders.ts` via daily cron `/api/emails/workshop-reminders` |
 
 Create it once with `node --env-file=.env scripts/push-brevo-templates.mjs --create workshop-reminder --name "Workshop-Erinnerung (2 Tage)" --subject "Erinnerung: Dein Workshop in 2 Tagen"`.
 
