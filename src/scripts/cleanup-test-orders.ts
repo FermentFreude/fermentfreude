@@ -14,6 +14,7 @@ import 'dotenv/config'
 
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import { seatsHoldingPlace } from '@/lib/seatCapacity'
 
 const DRY_RUN = !process.argv.includes('--force')
 
@@ -158,7 +159,7 @@ async function run() {
 
   for (const apt of appointments.docs) {
     const confirmedForApt = toKeep.filter((b) => b.appointmentId === (apt.id as string))
-    const usedSpots = confirmedForApt.reduce((sum, b) => sum + (b.guestCount as number), 0)
+    const usedSpots = confirmedForApt.reduce((sum, b) => sum + seatsHoldingPlace(b as Parameters<typeof seatsHoldingPlace>[0]), 0)
     const newSpots = Math.max(0, maxCapacity - usedSpots)
 
     console.log(

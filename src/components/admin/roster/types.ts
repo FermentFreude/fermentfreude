@@ -65,6 +65,8 @@ export type ParticipantRow = {
   workshopTitle: string
   bookingDate: string
   status: 'confirmed' | 'pending' | 'cancelled'
+  /** This person's own seat — 'rebooked', 'refunded' etc. means they're no longer on this date. */
+  seatStatus: string
   isBuyer: boolean
   guestOfName: string
   orderRef: string

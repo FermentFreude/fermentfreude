@@ -8,6 +8,7 @@ import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/li
 import { cancelReasonLabel, loadFreshForMutation, logActivityEvent, updateSeat } from '@/lib/manageBooking'
 import { getServerSideURL } from '@/utilities/getURL'
 import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
+import { releaseSeatFromAppointment } from '@/lib/seatCapacity'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/manage-booking/[token]/rebook-now
@@ -122,6 +123,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         cancelledReason: originalSeat?.cancelledReason ?? reason,
         rebookedToBookingId: String(resumeBooking.id),
       })
+      // The seat left this date — give the place back so it can be sold again.
+      await releaseSeatFromAppointment(payload, booking.appointmentId, 'manage-booking:rebook-now')
       await logActivityEvent(
         payload,
         'booking_rebooked',
@@ -311,6 +314,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     cancelledReason: reason,
     rebookedToBookingId: String(newBooking.id),
   })
+  // The seat left this date — give the place back so it can be sold again.
+  await releaseSeatFromAppointment(payload, booking.appointmentId, 'manage-booking:rebook-now')
 
   await logActivityEvent(
     payload,

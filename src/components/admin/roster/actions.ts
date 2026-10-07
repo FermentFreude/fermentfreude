@@ -9,6 +9,7 @@ import { getPayload, type Payload } from 'payload'
 import { releaseSpotsAtomic, reserveSpotsAtomic } from '@/lib/atomicSpots'
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 import { addBookingHistory, BOOKING_HISTORY_TYPES, emailOutcome } from '@/lib/bookingHistory'
+import { seatsHoldingPlace } from '@/lib/seatCapacity'
 import { isValidEmail } from '@/lib/workshopSeats'
 import { getServerSideURL } from '@/utilities/getURL'
 import { fmtDate, fmtTime } from './fetchRosterData'
@@ -352,7 +353,9 @@ export async function deleteManualWorkshopBooking(bookingId: string): Promise<vo
       const workshop = appointment.workshop
       const maxCapacity =
         typeof workshop === 'object' && workshop !== null ? Number(workshop.maxCapacityPerSlot ?? 12) : 12
-      await releaseSpotsAtomic(payload, booking.appointmentId, booking.guestCount || 1, maxCapacity)
+      // Only seats still on the date — rebooked/cancelled seats already gave theirs back.
+      const holding = seatsHoldingPlace(booking)
+      if (holding > 0) await releaseSpotsAtomic(payload, booking.appointmentId, holding, maxCapacity)
     } catch (err) {
       payload.logger.error(
         `[deleteManualWorkshopBooking] Booking ${bookingId} will be deleted, but releasing its spot failed: ${err instanceof Error ? err.message : err}`,
@@ -509,7 +512,7 @@ export async function getAlternateAppointments(
       depth: 0,
       overrideAccess: true,
     })
-    const totalBooked = bookings.docs.reduce((sum, b) => sum + (b.guestCount || 0), 0)
+    const totalBooked = bookings.docs.reduce((sum, b) => sum + seatsHoldingPlace(b), 0)
     results.push({
       id: appt.id,
       date: fmtDate(String(appt.dateTime)),
@@ -563,7 +566,12 @@ export async function moveWorkshopBooking(params: {
     throw new Error('Workshop-Daten konnten nicht geladen werden.')
   }
   const maxCapacity = Number(workshop.maxCapacityPerSlot ?? 12)
-  const guestCount = booking.guestCount || 1
+  // Only the seats still on this date move — a seat the customer already
+  // rebooked or cancelled has nothing to take along.
+  const guestCount = seatsHoldingPlace(booking)
+  if (guestCount === 0) {
+    throw new Error('Alle Plätze dieser Buchung wurden bereits umgebucht oder storniert — es gibt nichts zu verschieben.')
+  }
 
   const reserveResult = await reserveSpotsAtomic(payload, params.newAppointmentId, guestCount)
   if (!reserveResult.success) {
