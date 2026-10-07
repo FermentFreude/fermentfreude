@@ -56,7 +56,7 @@ function toBookingRow(b: { id: string | number }): BookingRow {
     phone?: string
     guestCount?: number
     notes?: string
-    seats?: Array<{ recipientName?: string; giftNote?: string; seatStatus?: string; cancelledAt?: string; cancelledReason?: string }>
+    seats?: Array<{ recipientName?: string; email?: string | null; giftNote?: string; seatStatus?: string; cancelledAt?: string; cancelledReason?: string }>
     createdAt?: string
     orderId?: string
     workshopTitle?: string
@@ -69,6 +69,7 @@ function toBookingRow(b: { id: string | number }): BookingRow {
   }
   const seats: SeatEntry[] = (bk.seats ?? []).map((s) => ({
     recipientName: s.recipientName?.trim() ?? '',
+    email: s.email?.trim() ?? '',
     giftNote: s.giftNote?.trim() ?? '',
     seatStatus: s.seatStatus ?? '',
     cancelledAt: s.cancelledAt ?? '',
@@ -190,7 +191,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       const seatName = booking.seats[si]?.recipientName
       rows.push({
         name: seatName || (isBuyer ? buyerName : `Gast von ${buyerName}`),
-        email: isBuyer ? booking.email : '',
+        email: isBuyer ? booking.email : booking.seats[si]?.email ?? '',
         phone: isBuyer ? booking.phone : '',
         workshopTitle: booking.workshopTitle,
         bookingDate,

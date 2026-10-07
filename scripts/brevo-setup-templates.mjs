@@ -62,22 +62,6 @@ const TEMPLATES = [
     category: 'Workshop',
   },
   {
-    id: 6,
-    name: 'WORKSHOP_7DAY_REMINDER',
-    templateName: 'Workshop 7-Day Reminder',
-    htmlFile: 'public/email-templates/06-workshop-7day-reminder.html',
-    subject: 'Erinnerung: Dein Workshop in 7 Tagen — {{params.WORKSHOP_TITLE}}',
-    category: 'Workshop',
-  },
-  {
-    id: 7,
-    name: 'WORKSHOP_1DAY_REMINDER',
-    templateName: 'Workshop 1-Day Reminder',
-    htmlFile: 'public/email-templates/07-workshop-1day-reminder.html',
-    subject: 'Erinnerung: Dein Workshop morgen — {{params.WORKSHOP_TITLE}}',
-    category: 'Workshop',
-  },
-  {
     id: 8,
     name: 'POST_WORKSHOP_FOLLOWUP',
     templateName: 'Post-Workshop Follow-up',
