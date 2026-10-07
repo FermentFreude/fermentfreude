@@ -54,10 +54,12 @@ CRON_SECRET                          # Auth for Vercel Cron → /api/emails/work
 | Environment    | Database                | R2 Bucket                     | R2 Public URL             | Branch      | Deploys to                                                 | Who uses it     |
 | -------------- | ----------------------- | ----------------------------- | ------------------------- | ----------- | ---------------------------------------------------------- | --------------- |
 | **Production** | `fermentfreude`         | `fermentfreude-media`         | `pub-c70f47169a...r2.dev` | `main`      | `fermentfreude.vercel.app` (auto)                          | Founders (live) |
-| **Staging**    | `fermentfreude-staging` | `fermentfreude-media-staging` | `pub-0cf8a1c18a...r2.dev` | `staging`   | `fermentfreude-git-staging-raphaellas-projects.vercel.app` | Dev testing     |
+| **Staging**    | `fermentfreude-staging` | `fermentfreude-media-staging` | `pub-0cf8a1c18a...r2.dev` | `staging`   | `fermentfreude-staging.vercel.app` | Dev testing     |
 | **Local dev**  | `fermentfreude-staging` | `fermentfreude-media-staging` | `pub-0cf8a1c18a...r2.dev` | `feature/*` | `localhost:3000`                                           | You & Alaa      |
 
 **Branch flow:** `feature/*` → PR into `staging` → test → merge `staging` → `main`
+
+**Domains (Vercel → Settings → Domains):** `fermentfreude-staging.vercel.app` is connected to the **staging** environment and always shows the newest staging deploy — staging's `NEXT_PUBLIC_SERVER_URL` / `PAYLOAD_PUBLIC_SERVER_URL` must point at it (email links are built from them). Never connect `fermentfreude.vercel.app` to staging — it's production (founders' admin, possibly Stripe webhooks). The old `fermentfreude-git-staging-raphaellas-projects.vercel.app` address is frozen on an old build from before the move to the teamfermentfreude Vercel team.
 
 **Rules:**
 
