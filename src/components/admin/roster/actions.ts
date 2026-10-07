@@ -8,7 +8,7 @@ import { getPayload, type Payload } from 'payload'
 
 import { releaseSpotsAtomic, reserveSpotsAtomic } from '@/lib/atomicSpots'
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
-import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
+import { addBookingHistory, BOOKING_HISTORY_TYPES, emailOutcome } from '@/lib/bookingHistory'
 import { isValidEmail } from '@/lib/workshopSeats'
 import { getServerSideURL } from '@/utilities/getURL'
 import { fmtDate, fmtTime } from './fetchRosterData'
@@ -419,13 +419,16 @@ export async function updateBookingSeatDetails(params: {
   }
 
   if (params.seatIndex === 0) {
+    // Only re-split the name when it was actually changed — otherwise saving
+    // just an email would turn "Anna Maria" + "Müller" into "Anna" + "Maria Müller".
+    const currentName = [booking.firstName, booking.lastName].filter(Boolean).join(' ').trim()
     const [firstName, ...rest] = name.split(' ')
+    const nameData = name === currentName ? {} : { firstName: firstName ?? '', lastName: rest.join(' ') }
     await payload.update({
       collection: 'workshop-bookings',
       id: params.bookingId,
       data: {
-        firstName: firstName ?? '',
-        lastName: rest.join(' '),
+        ...nameData,
         notes,
         email: email || null,
       },
@@ -1046,4 +1049,70 @@ export async function markAllActivityEventsRead(): Promise<void> {
       overrideAccess: true,
     })
   }
+}
+
+export type TimelineEntry = {
+  id: string
+  at: string
+  type: string
+  title: string
+  summary: string
+  by: string
+  /** Which booking (= which date) this happened on — set for entries from an earlier booking. */
+  fromEarlierBooking: string | null
+}
+
+/**
+ * The full story of a booking, including the bookings it came from. A
+ * customer's own rebooking creates a NEW booking, so moves and emails that
+ * happened before live on the old one — this follows
+ * seats[].rebookedFromBookingId back (max 10 steps) and merges everything,
+ * newest first.
+ */
+export async function getBookingTimeline(bookingId: string): Promise<TimelineEntry[]> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  const labels = new Map<string, string>(BOOKING_HISTORY_TYPES.map((t) => [t.value, t.label]))
+  const entries: TimelineEntry[] = []
+  const seen = new Set<string>()
+  let currentId: string | null = bookingId
+
+  for (let step = 0; currentId && step < 10 && !seen.has(currentId); step++) {
+    seen.add(currentId)
+    let booking
+    try {
+      booking = await payload.findByID({ collection: 'workshop-bookings', id: currentId, depth: 0, overrideAccess: true })
+    } catch {
+      break
+    }
+    const earlier = step === 0 ? null : `${booking.date} · ${booking.time}`
+    const history = booking.history ?? []
+    for (const h of history) {
+      entries.push({
+        id: `${booking.id}-${h.id}`,
+        at: h.at ?? '',
+        type: h.type ?? '',
+        title: labels.get(h.type ?? '') ?? 'Eintrag',
+        summary: h.summary ?? '',
+        by: h.by ?? '',
+        fromEarlierBooking: earlier,
+      })
+    }
+    // Bookings from before the history existed: still show when they were made.
+    if (!history.some((h) => h.type?.startsWith('created_')) && booking.createdAt) {
+      entries.push({
+        id: `${booking.id}-created`,
+        at: booking.createdAt,
+        type: booking.orderId ? 'created_online' : 'created_manual',
+        title: booking.orderId ? 'Online gebucht' : 'Buchung erstellt',
+        summary: `${booking.orderId ? `Bestellung #${booking.orderId} · ` : ''}frühere Schritte wurden noch nicht aufgezeichnet`,
+        by: '',
+        fromEarlierBooking: earlier,
+      })
+    }
+    currentId = booking.seats?.find((s) => s.rebookedFromBookingId)?.rebookedFromBookingId ?? null
+  }
+
+  return entries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
 }
