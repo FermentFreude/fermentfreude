@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react'
 
 import { createCancellationInvoice } from './actions'
 import { CreateManualOrderForm } from './CreateManualOrderForm'
+import { OrderDetailModal } from './OrderDetailModal'
 import type { OrderRow } from './types'
 import { BRAND } from './rosterTheme'
 
@@ -48,6 +49,7 @@ const TAB_LABELS: Record<Tab, string> = {
 
 export function OrdersView({ orders, onRefresh }: Props) {
   const [tab, setTab] = useState<Tab>('all')
+  const [detailOrderId, setDetailOrderId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [stornoTarget, setStornoTarget] = useState<{ id: string; invoiceNumber: string } | null>(null)
   const [stornoReason, setStornoReason] = useState('')
@@ -215,7 +217,15 @@ export function OrdersView({ orders, onRefresh }: Props) {
             </thead>
             <tbody>
               {rows.map((o) => (
-                <tr key={o.id} style={{ borderTop: '1px solid var(--theme-elevation-100)' }}>
+                <tr
+                  key={o.id}
+                  // Whole row opens the order — except clicks on its own links/buttons (Rechnung, Stornieren).
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest('a, button')) return
+                    setDetailOrderId(o.id)
+                  }}
+                  style={{ borderTop: '1px solid var(--theme-elevation-100)', cursor: 'pointer' }}
+                >
                   <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontSize: '12px' }}>{o.invoiceNumber}</td>
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ fontWeight: 500 }}>{o.customerName || '—'}</div>
@@ -262,6 +272,7 @@ export function OrdersView({ orders, onRefresh }: Props) {
           </table>
         </div>
       )}
+      {detailOrderId && <OrderDetailModal orderId={detailOrderId} onClose={() => setDetailOrderId(null)} />}
     </div>
   )
 }

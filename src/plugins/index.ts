@@ -412,6 +412,17 @@ export const plugins: Plugin[] = [
               },
             },
           },
+          {
+            name: 'purchasedVoucher',
+            type: 'relationship',
+            relationTo: 'vouchers',
+            label: 'Gekaufter Gutschein',
+            admin: {
+              position: 'sidebar',
+              readOnly: true,
+              description: 'Set automatically when this order is a voucher purchase — the voucher that was bought.',
+            },
+          },
         ],
         hooks: {
           ...defaultCollection?.hooks,
