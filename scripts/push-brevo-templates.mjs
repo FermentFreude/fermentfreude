@@ -63,7 +63,7 @@ const MOCK = {
     WORKSHOP_TITLE: 'Kombucha Workshop',
     WORKSHOP_DATE: 'Sonntag, 25. Oktober 2026',
     WORKSHOP_TIME: '10:00 Uhr',
-    WORKSHOP_LOCATION: 'Studio Wien, Schönbrunner Str. 12, 1050',
+    WORKSHOP_LOCATION: 'Ginery, Grabenstraße 15, 8010 Graz, Österreich',
   },
   32: {
     FIRST_NAME: 'Max',

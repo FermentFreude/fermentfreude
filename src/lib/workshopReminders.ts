@@ -222,7 +222,7 @@ export async function sendDueWorkshopReminders(
   return summary
 }
 
-function appointmentParams(appointment: WorkshopAppointment): Record<string, string> {
+export function appointmentParams(appointment: WorkshopAppointment): Record<string, string> {
   const start = new Date(appointment.dateTime)
   const workshop = typeof appointment.workshop === 'object' ? appointment.workshop : null
   const location = typeof appointment.location === 'object' ? appointment.location : null
