@@ -215,17 +215,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     )
   }
 
+  // Same format as every other booking (checkout, roster, admin move):
+  // "Freitag, 13. November 2026" + "17:30 Uhr" — emails show old and new side by side.
   const dateDisplay = new Date(newAppointment.dateTime).toLocaleDateString('de-DE', {
+    weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     timeZone: 'Europe/Vienna',
   })
-  const timeDisplay = new Date(newAppointment.dateTime).toLocaleTimeString('de-DE', {
+  const timeDisplay = `${new Date(newAppointment.dateTime).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'Europe/Vienna',
-  })
+  })} Uhr`
 
   const pricePerPerson = typeof booking.pricePerPerson === 'number' ? booking.pricePerPerson : 0
 
