@@ -53,10 +53,18 @@ const V2_TEMPLATES = [
   { id: 99, slug: 'organiser-cancelled' },
   { id: 101, slug: 'guest-order-confirmation' },
   { id: 102, slug: 'guest-workshop-booking' },
+  { id: 103, slug: 'workshop-reminder' },
 ]
 
 // Mock params per template for test sends
 const MOCK = {
+  103: {
+    FIRST_NAME: 'Anna',
+    WORKSHOP_TITLE: 'Kombucha Workshop',
+    WORKSHOP_DATE: 'Sonntag, 25. Oktober 2026',
+    WORKSHOP_TIME: '10:00 Uhr',
+    WORKSHOP_LOCATION: 'Studio Wien, Schönbrunner Str. 12, 1050',
+  },
   32: {
     FIRST_NAME: 'Max',
     WORKSHOP_TITLE: 'Tempeh Basics',

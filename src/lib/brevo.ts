@@ -104,8 +104,8 @@ export const BREVO_TEMPLATES = {
   ADMIN_WORKSHOP_NOTIFICATION: 94, // Admin notification for new workshop bookings
   WORKSHOP_ALTERNATE_DATE_OFFER: 100, // Roster: offer an overbooked guest a different date, manual follow-up
   // Sent 2 days before the workshop to the buyer + every guest with an email
-  // (src/lib/workshopReminders.ts). 0 = not created in Brevo yet → job refuses to run.
-  WORKSHOP_REMINDER: 0,
+  // (src/lib/workshopReminders.ts).
+  WORKSHOP_REMINDER: 103,
   POST_WORKSHOP_FOLLOWUP: 34,
   FEEDBACK_REQUEST: 35,
 
