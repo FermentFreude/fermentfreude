@@ -141,7 +141,7 @@
 - Verify: ESLint warnings (acceptable)
 
 **Step 4.2: Test Email Integration**
-1. Go to: https://fermentfreude-git-staging-raphaellas-projects.vercel.app/checkout
+1. Go to: https://fermentfreude-staging.vercel.app/checkout
 2. Create a test workshop booking
 3. Check Brevo dashboard → SMTP & API → Logs
 4. ✅ Verify: Order confirmation email queued/sent

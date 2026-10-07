@@ -1,4 +1,5 @@
 import { isAdmin } from '@/access/isAdmin'
+import { BOOKING_HISTORY_TYPES } from '@/lib/bookingHistory'
 import { CollectionConfig } from 'payload'
 
 export const WorkshopBookings: CollectionConfig = {
@@ -87,6 +88,37 @@ export const WorkshopBookings: CollectionConfig = {
       },
     },
     {
+      name: 'workshopReminder',
+      type: 'group',
+      label: 'Workshop reminder',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Filled automatically by the daily reminder job (2 days before the workshop). Moving the booking to another date resets it, so the new date gets its own reminder.',
+      },
+      fields: [
+        {
+          name: 'appointmentId',
+          type: 'text',
+          label: 'Sent for appointment',
+          admin: { readOnly: true },
+        },
+        {
+          name: 'sentTo',
+          type: 'text',
+          hasMany: true,
+          label: 'Sent to',
+          admin: { readOnly: true },
+        },
+        {
+          name: 'sentAt',
+          type: 'date',
+          label: 'Last sent',
+          admin: { readOnly: true, date: { pickerAppearance: 'dayAndTime' } },
+        },
+      ],
+    },
+    {
       name: 'downloadToken',
       type: 'text',
       label: 'Receipt Download Token',
@@ -115,7 +147,7 @@ export const WorkshopBookings: CollectionConfig = {
       name: 'email',
       type: 'email',
       label: 'Email',
-      admin: { description: 'Used to send the booking confirmation email.' },
+      admin: { description: 'The buyer. Receives the booking confirmation and the workshop reminder 2 days before.' },
     },
     {
       name: 'phone',
@@ -188,7 +220,7 @@ export const WorkshopBookings: CollectionConfig = {
       label: 'Guests (per seat)',
       admin: {
         description:
-          'One entry per booked seat. Seat 1 is the buyer. Additional seats can include a guest name and dietary notes. Confirmation emails go only to the buyer.',
+          'One entry per booked seat. Seat 1 is the buyer. Each seat can have a guest name, email and dietary notes. Confirmations go only to the buyer; the workshop reminder (2 days before) goes to the buyer and every guest with an email.',
       },
       fields: [
         {
@@ -197,6 +229,15 @@ export const WorkshopBookings: CollectionConfig = {
           label: 'Guest Name',
           admin: {
             description: 'Name of the person attending this seat (optional).',
+          },
+        },
+        {
+          name: 'email',
+          type: 'email',
+          label: 'Guest Email',
+          admin: {
+            description:
+              'Optional. If set, this guest also receives the workshop reminder email 2 days before the workshop.',
           },
         },
         {
@@ -311,25 +352,30 @@ export const WorkshopBookings: CollectionConfig = {
             readOnly: true,
           },
         },
+      ],
+    },
+
+    // ── History ────────────────────────────────────────────────
+    {
+      name: 'history',
+      type: 'array',
+      label: 'Verlauf',
+      admin: {
+        readOnly: true,
+        initCollapsed: true,
+        description:
+          'Everything that happened to this booking, newest last: how it was created, moves, emails sent (or not), link opened, customer choices, refunds. Written automatically — cannot be edited, so nothing gets lost.',
+      },
+      fields: [
+        { name: 'at', type: 'date', label: 'Wann', admin: { date: { pickerAppearance: 'dayAndTime' } } },
         {
-          name: 'isGift',
-          type: 'checkbox',
-          defaultValue: false,
-          label: 'Legacy: Is a gift (unused)',
-          admin: { hidden: true },
+          name: 'type',
+          type: 'select',
+          label: 'Was',
+          options: BOOKING_HISTORY_TYPES.map((t) => ({ label: t.label, value: t.value })),
         },
-        {
-          name: 'recipientEmail',
-          type: 'email',
-          label: 'Legacy: Recipient Email (unused)',
-          admin: { hidden: true },
-        },
-        {
-          name: 'giftEmailSentAt',
-          type: 'date',
-          label: 'Legacy: Gift Email Sent At (unused)',
-          admin: { hidden: true, readOnly: true },
-        },
+        { name: 'summary', type: 'text', label: 'Details' },
+        { name: 'by', type: 'text', label: 'Von' },
       ],
     },
   ],

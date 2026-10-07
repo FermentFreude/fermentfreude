@@ -16,6 +16,7 @@ import type {
   SeatEntry,
   VoucherRow,
 } from './types'
+import { seatsHoldingPlace, seatStatusAt } from '@/lib/seatCapacity'
 
 /** Extract plain text from a Lexical rich-text JSON node (recursive). */
 function lexicalToPlainText(value: unknown): string {
@@ -47,6 +48,16 @@ export function fmtTime(iso: string): string {
   })
 }
 
+const NO_REVENUE_HERE = new Set(['rebooked', 'voucher_issued', 'refunded'])
+
+/** Seats whose payment belongs to this booking's date. */
+function paidSeats(booking: BookingRow): number {
+  const count = Math.max(booking.guestCount, 1)
+  let paid = 0
+  for (let i = 0; i < count; i++) if (!NO_REVENUE_HERE.has(seatStatusAt(booking, i))) paid++
+  return paid
+}
+
 /** Normalize a raw workshop-bookings doc into the shape the roster UI (list rows + detail modal) needs. */
 function toBookingRow(b: { id: string | number }): BookingRow {
   const bk = b as unknown as {
@@ -56,7 +67,7 @@ function toBookingRow(b: { id: string | number }): BookingRow {
     phone?: string
     guestCount?: number
     notes?: string
-    seats?: Array<{ recipientName?: string; giftNote?: string; seatStatus?: string; cancelledAt?: string; cancelledReason?: string }>
+    seats?: Array<{ recipientName?: string; email?: string | null; giftNote?: string; seatStatus?: string; cancelledAt?: string; cancelledReason?: string }>
     createdAt?: string
     orderId?: string
     workshopTitle?: string
@@ -66,9 +77,11 @@ function toBookingRow(b: { id: string | number }): BookingRow {
     pricePerPerson?: number
     totalPrice?: number
     status?: string
+    history?: Array<{ id?: string; at?: string; type?: string; summary?: string; by?: string }>
   }
   const seats: SeatEntry[] = (bk.seats ?? []).map((s) => ({
     recipientName: s.recipientName?.trim() ?? '',
+    email: s.email?.trim() ?? '',
     giftNote: s.giftNote?.trim() ?? '',
     seatStatus: s.seatStatus ?? '',
     cancelledAt: s.cancelledAt ?? '',
@@ -92,6 +105,13 @@ function toBookingRow(b: { id: string | number }): BookingRow {
     pricePerPerson: bk.pricePerPerson ?? 0,
     totalPrice: bk.totalPrice ?? 0,
     status: bk.status ?? 'confirmed',
+    history: (bk.history ?? []).map((h, i) => ({
+      id: h.id ?? String(i),
+      at: h.at ?? '',
+      type: h.type ?? '',
+      summary: h.summary ?? '',
+      by: h.by ?? '',
+    })),
   } satisfies BookingRow
 }
 
@@ -141,10 +161,8 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       overrideAccess: true,
     })
 
-    const totalBooked = bResult.docs.reduce(
-      (sum, b) => sum + (Number((b as unknown as { guestCount?: number }).guestCount) || 1),
-      0,
-    )
+    // Seats that were rebooked, cancelled or refunded no longer take a place here.
+    const totalBooked = bResult.docs.reduce((sum, b) => sum + seatsHoldingPlace(b), 0)
     const capacity = Number(workshopAny?.maxCapacityPerSlot ?? 12)
 
     appointments.push({
@@ -190,11 +208,12 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       const seatName = booking.seats[si]?.recipientName
       rows.push({
         name: seatName || (isBuyer ? buyerName : `Gast von ${buyerName}`),
-        email: isBuyer ? booking.email : '',
+        email: isBuyer ? booking.email : booking.seats[si]?.email ?? '',
         phone: isBuyer ? booking.phone : '',
         workshopTitle: booking.workshopTitle,
         bookingDate,
         status: (booking.status as ParticipantRow['status']) || 'confirmed',
+        seatStatus: booking.seats[si]?.seatStatus || 'active',
         isBuyer,
         guestOfName: !isBuyer && !seatName ? buyerName : '',
         orderRef: !isBuyer ? orderRef : '',
@@ -493,7 +512,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   // ── 6. Stats ───────────────────────────────────────────────────────────────
   const upcomingWorkshops = appointments.filter((a) => !a.isPast).length
   const totalParticipants = Object.values(bookingsByAppointment).reduce(
-    (sum, bookings) => sum + bookings.reduce((s, b) => s + b.guestCount, 0),
+    (sum, bookings) => sum + bookings.reduce((s, b) => s + seatsHoldingPlace(b), 0),
     0,
   )
   const openPickups = pickupOrders.filter(
@@ -501,7 +520,9 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   ).length
   const workshopRevenue = Object.values(bookingsByAppointment)
     .flat()
-    .reduce((sum, b) => sum + b.guestCount * (appointments.find((a) =>
+    // Money that stayed with this date: not rebooked (counted on the new booking),
+    // not swapped for a voucher, not refunded. A cancellation without refund still counts.
+    .reduce((sum, b) => sum + paidSeats(b) * (appointments.find((a) =>
       bookingsByAppointment[a.id]?.some((bk) => bk.id === b.id)
     )?.pricePerPerson ?? 0), 0)
 

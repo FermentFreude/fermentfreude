@@ -27,6 +27,14 @@ Refund / rebooking system (`docs/REFUND_REBOOKING_SYSTEM_PLAN.md` §9), created 
 
 Note: ID 94 is intentionally skipped — `BREVO_TEMPLATES.ADMIN_WORKSHOP_NOTIFICATION` in `src/lib/brevo.ts` already claims 94 but has zero call sites anywhere in the codebase and no template ever existed in Brevo for it (confirmed while creating the templates above — a POST create landed on 94 first, proving the ID was free). Left as pre-existing dead code, out of scope for Stage 7; flagged in the build log.
 
+Workshop reminder (the only reminder — 2 days before, to the buyer + every guest with an email):
+
+| File | Brevo ID | Backend trigger |
+| ---- | -------- | ---------------- |
+| `workshop-reminder.html` | 103 | `src/lib/workshopReminders.ts` via daily cron `/api/emails/workshop-reminders` |
+
+Create it once with `node --env-file=.env scripts/push-brevo-templates.mjs --create workshop-reminder --name "Workshop-Erinnerung (2 Tage)" --subject "Erinnerung: Dein Workshop in 2 Tagen"`.
+
 ## Design system
 
 - Width: 600px max, single column, fluid on mobile.

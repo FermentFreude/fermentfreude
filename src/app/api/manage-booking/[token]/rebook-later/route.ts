@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminRecipients } from '@/lib/adminNotification'
 import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 import { cancelReasonLabel, loadFreshForMutation, logActivityEvent, updateSeat } from '@/lib/manageBooking'
+import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
+import { releaseSeatFromAppointment } from '@/lib/seatCapacity'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/manage-booking/[token]/rebook-later
@@ -83,6 +85,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     cancelledReason: reason,
     linkedVoucherId: voucher.id,
   })
+  // The seat left this date — give the place back so it can be sold again.
+  await releaseSeatFromAppointment(payload, booking.appointmentId, 'manage-booking:rebook-later')
 
   await logActivityEvent(
     payload,
@@ -92,10 +96,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   )
 
   // ─── Customer email with the code (best-effort) ───────────────────
+  let customerEmailSent = false
   if (booking.email) {
     const expiry = new Date()
     expiry.setFullYear(expiry.getFullYear() + 1)
-    await sendTemplateEmail({
+    const customerEmail = await sendTemplateEmail({
       to: [{ email: booking.email, name: booking.firstName ?? undefined }],
       templateId: BREVO_TEMPLATES.VOUCHER_CODE_ISSUED,
       params: {
@@ -106,7 +111,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         WORKSHOP_TITLE: String(booking.workshopTitle ?? ''),
       },
     })
+    customerEmailSent = customerEmail.success
   }
+  await addBookingHistory(payload, String(booking.id), {
+    type: 'customer_voucher',
+    summary: `Platz ${seatIndex + 1}: Gutschein-Code für spätere Umbuchung gewählt (${voucher.code}) · Bestätigung: ${emailOutcome(booking.email, customerEmailSent)}`,
+    by: 'Kund:in',
+  })
 
   // ─── Admin alert (best-effort) ─────────────────────────────────────
   try {

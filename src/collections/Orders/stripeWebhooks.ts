@@ -1,4 +1,5 @@
 import { releaseSpotsAtomic } from '@/lib/atomicSpots'
+import { addBookingHistory } from '@/lib/bookingHistory'
 import { logActivityEvent } from '@/lib/manageBooking'
 import type { PayloadRequest } from 'payload'
 import type Stripe from 'stripe'
@@ -187,6 +188,11 @@ export async function handleChargeRefunded({
         String(rr.id),
         `${booking.firstName ?? 'Gast'} ${booking.lastName ?? ''} — ${booking.workshopTitle}, €${(requestedAmountCents / 100).toFixed(2)} Rückerstattung abgeschlossen (Platz ${rr.seatIndex + 1})`,
       )
+      await addBookingHistory(payload, String(booking.id), {
+        type: 'refund_completed',
+        summary: `Platz ${rr.seatIndex + 1}: Erstattung über Stripe abgeschlossen (€${(requestedAmountCents / 100).toFixed(2)})`,
+        by: 'Stripe',
+      })
 
       payload.logger.info(
         `[stripe:charge_refunded] Seat-scoped: reconciled refund-request ${rr.id} (seat ${rr.seatIndex} of booking ${booking.id})`,
@@ -270,6 +276,11 @@ export async function handleChargeRefunded({
       id: booking.id,
       data: { status: 'refunded' },
       overrideAccess: true,
+    })
+    await addBookingHistory(payload, String(booking.id), {
+      type: 'refund_completed',
+      summary: `Ganze Bestellung #${order.id} über Stripe erstattet — Buchung auf "Refunded" gesetzt`,
+      by: 'Stripe',
     })
 
     if (booking.appointmentId) {

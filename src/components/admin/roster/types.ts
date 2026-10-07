@@ -21,10 +21,19 @@ export type AppointmentRow = {
 
 export type SeatEntry = {
   recipientName: string
+  email: string
   giftNote: string
   seatStatus?: string
   cancelledAt?: string
   cancelledReason?: string
+}
+
+export type BookingHistoryEntry = {
+  id: string
+  at: string
+  type: string
+  summary: string
+  by: string
 }
 
 export type BookingRow = {
@@ -45,6 +54,8 @@ export type BookingRow = {
   pricePerPerson: number
   totalPrice: number
   status: string
+  /** Append-only "Verlauf" — oldest first, as stored. */
+  history: BookingHistoryEntry[]
 }
 
 export type ParticipantRow = {
@@ -54,6 +65,8 @@ export type ParticipantRow = {
   workshopTitle: string
   bookingDate: string
   status: 'confirmed' | 'pending' | 'cancelled'
+  /** This person's own seat — 'rebooked', 'refunded' etc. means they're no longer on this date. */
+  seatStatus: string
   isBuyer: boolean
   guestOfName: string
   orderRef: string

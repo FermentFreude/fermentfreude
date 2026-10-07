@@ -7,6 +7,8 @@ import { releaseSpotsAtomic, reserveSpotsAtomic } from '@/lib/atomicSpots'
 import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 import { cancelReasonLabel, loadFreshForMutation, logActivityEvent, updateSeat } from '@/lib/manageBooking'
 import { getServerSideURL } from '@/utilities/getURL'
+import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
+import { releaseSeatFromAppointment } from '@/lib/seatCapacity'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/manage-booking/[token]/rebook-now
@@ -121,6 +123,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         cancelledReason: originalSeat?.cancelledReason ?? reason,
         rebookedToBookingId: String(resumeBooking.id),
       })
+      // The seat left this date — give the place back so it can be sold again.
+      await releaseSeatFromAppointment(payload, booking.appointmentId, 'manage-booking:rebook-now')
       await logActivityEvent(
         payload,
         'booking_rebooked',
@@ -214,17 +218,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     )
   }
 
+  // Same format as every other booking (checkout, roster, admin move):
+  // "Freitag, 13. November 2026" + "17:30 Uhr" — emails show old and new side by side.
   const dateDisplay = new Date(newAppointment.dateTime).toLocaleDateString('de-DE', {
+    weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     timeZone: 'Europe/Vienna',
   })
-  const timeDisplay = new Date(newAppointment.dateTime).toLocaleTimeString('de-DE', {
+  const timeDisplay = `${new Date(newAppointment.dateTime).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'Europe/Vienna',
-  })
+  })} Uhr`
 
   const pricePerPerson = typeof booking.pricePerPerson === 'number' ? booking.pricePerPerson : 0
 
@@ -256,6 +263,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         seats: [
           {
             recipientName: booking.seats?.[seatIndex]?.recipientName ?? '',
+            email: booking.seats?.[seatIndex]?.email ?? undefined,
             seatStatus: 'active',
             selfRebookingUsed: false,
             rebookedFromBookingId: String(booking.id),
@@ -264,6 +272,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         ],
       },
       overrideAccess: true,
+    })
+    await addBookingHistory(payload, String(newBooking.id), {
+      type: 'created_rebooking',
+      summary: `Entstanden durch Umbuchung von ${booking.date} · ${booking.time} (Buchung ${booking.id}, Platz ${seatIndex + 1})`,
+      by: 'Kund:in',
     })
   } catch (err) {
     // Roll back the reservation — without this, a failed booking-create
@@ -301,6 +314,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     cancelledReason: reason,
     rebookedToBookingId: String(newBooking.id),
   })
+  // The seat left this date — give the place back so it can be sold again.
+  await releaseSeatFromAppointment(payload, booking.appointmentId, 'manage-booking:rebook-now')
 
   await logActivityEvent(
     payload,
@@ -312,8 +327,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const manageUrl = `${getServerSideURL().replace(/\/$/, '')}/manage-booking/${newToken}`
 
   // ─── Customer confirmation email (best-effort) ───────────────────
+  let customerEmailSent = false
   if (booking.email) {
-    await sendTemplateEmail({
+    const customerEmail = await sendTemplateEmail({
       to: [{ email: booking.email, name: booking.firstName ?? undefined }],
       templateId: BREVO_TEMPLATES.CUSTOMER_REBOOKED,
       params: {
@@ -331,7 +347,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         MANAGE_URL: manageUrl,
       },
     })
+    customerEmailSent = customerEmail.success
   }
+  await addBookingHistory(payload, String(booking.id), {
+    type: 'customer_rebooked',
+    summary: `Platz ${seatIndex + 1}: von Kund:in umgebucht auf ${dateDisplay} · ${timeDisplay} (neue Buchung ${newBooking.id}) · Bestätigung: ${emailOutcome(booking.email, customerEmailSent)}`,
+    by: 'Kund:in',
+  })
 
   // ─── Admin alert (best-effort) ─────────────────────────────────────
   try {

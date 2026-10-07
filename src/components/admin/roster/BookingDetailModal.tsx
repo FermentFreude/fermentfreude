@@ -1,26 +1,17 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
+import { getBookingTimeline, type TimelineEntry } from './actions'
 import type { BookingRow } from './types'
 import { BRAND, STATUS } from './rosterTheme'
+import { seatStatusLabel } from './seatStatusLabels'
 
 interface Props {
   booking: BookingRow
   onClose: () => void
 }
 
-const SEAT_STATUS_LABELS: Record<string, { label: string; tone: keyof typeof STATUS }> = {
-  active: { label: 'Aktiv', tone: 'success' },
-  cancelled_no_refund: { label: 'Storniert — keine Rückerstattung', tone: 'danger' },
-  rebooking_pending: { label: 'Umbuchung ausstehend', tone: 'warning' },
-  rebooked: { label: 'Umgebucht', tone: 'info' },
-  refund_requested: { label: 'Rückerstattung angefragt', tone: 'warning' },
-  refunded: { label: 'Rückerstattet', tone: 'danger' },
-  voucher_issued: { label: 'Gutschein ausgestellt', tone: 'purple' },
-  organiser_cancelled_pending: { label: 'Von uns storniert — wartet auf Kunde', tone: 'warning' },
-  no_show: { label: 'Nicht erschienen', tone: 'neutral' },
-}
 
 function fmtDateTime(iso: string): string {
   if (!iso) return ''
@@ -28,6 +19,37 @@ function fmtDateTime(iso: string): string {
     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
     timeZone: 'Europe/Vienna',
   })
+}
+
+const HISTORY_ICONS: Record<string, string> = {
+  created_online: '🛒',
+  created_manual: '✍️',
+  created_rebooking: '🔁',
+  moved: '↪️',
+  alternate_offered: '📨',
+  email_changed: '✉️',
+  reminder_sent: '⏰',
+  organiser_cancelled: '⛔',
+  link_opened: '🔗',
+  customer_rebooked: '🔁',
+  customer_voucher: '🎟️',
+  customer_cancelled: '✖️',
+  refund_requested: '💶',
+  refund_completed: '✅',
+}
+
+/** "2× vom Team verschoben · 1× selbst umgebucht · 3 E-Mails gesendet" — the story at a glance. */
+function timelineSummary(entries: TimelineEntry[]): string {
+  const count = (type: string) => entries.filter((e) => e.type === type).length
+  const emails = entries.filter((e) => / gesendet/.test(e.summary)).length
+  return [
+    count('moved') && `${count('moved')}× vom Team verschoben`,
+    count('customer_rebooked') && `${count('customer_rebooked')}× selbst umgebucht`,
+    count('alternate_offered') && `${count('alternate_offered')}× Ausweichtermin angeboten`,
+    emails && `${emails} E-Mail${emails === 1 ? '' : 's'} gesendet`,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -50,6 +72,18 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 export function BookingDetailModal({ booking, onClose }: Props) {
+  const [timeline, setTimeline] = useState<TimelineEntry[] | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    getBookingTimeline(booking.id)
+      .then((t) => !cancelled && setTimeline(t))
+      .catch(() => !cancelled && setTimeline([]))
+    return () => {
+      cancelled = true
+    }
+  }, [booking.id])
+  const summary = timeline ? timelineSummary(timeline) : ''
+
   const buyerName = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || booking.email || '—'
   const seatCount = Math.max(booking.guestCount, 1)
 
@@ -119,7 +153,7 @@ export function BookingDetailModal({ booking, onClose }: Props) {
           const isBuyer = si === 0
           const seat = booking.seats[si]
           const name = seat?.recipientName || (isBuyer ? buyerName : `Gast von ${buyerName}`)
-          const statusInfo = seat?.seatStatus ? SEAT_STATUS_LABELS[seat.seatStatus] : null
+          const statusInfo = seatStatusLabel(seat?.seatStatus)
           return (
             <div
               key={si}
@@ -154,6 +188,36 @@ export function BookingDetailModal({ booking, onClose }: Props) {
             </div>
           )
         })}
+
+        <SectionTitle>Verlauf</SectionTitle>
+        <p style={{ margin: '0 0 6px', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.5 }}>
+          Wird automatisch geschrieben und kann nicht bearbeitet werden. Neueste zuerst.
+        </p>
+        {summary && (
+          <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: 600, color: 'var(--theme-text)' }}>{summary}</p>
+        )}
+        {timeline === null && (
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--theme-text)', opacity: 0.5 }}>Wird geladen…</p>
+        )}
+        {timeline?.map((entry) => (
+          <div
+            key={entry.id}
+            style={{ display: 'flex', gap: '10px', padding: '8px 0', borderBottom: '1px solid var(--theme-elevation-100)' }}
+          >
+            <span aria-hidden style={{ fontSize: '14px', width: '20px', flexShrink: 0 }}>
+              {HISTORY_ICONS[entry.type] ?? '•'}
+            </span>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: 'var(--theme-text)' }}>{entry.title}</p>
+              <p style={{ margin: '1px 0 0', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.6 }}>
+                {fmtDateTime(entry.at)}
+                {entry.by && ` · ${entry.by}`}
+                {entry.fromEarlierBooking && ` · frühere Buchung (${entry.fromEarlierBooking})`}
+              </p>
+              <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--theme-text)', lineHeight: 1.4 }}>{entry.summary}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

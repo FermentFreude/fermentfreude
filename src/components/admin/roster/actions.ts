@@ -1,11 +1,17 @@
 'use server'
 
+import { randomUUID } from 'crypto'
+
 import { headers as getHeaders } from 'next/headers.js'
 import configPromise from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 
 import { releaseSpotsAtomic, reserveSpotsAtomic } from '@/lib/atomicSpots'
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { addBookingHistory, BOOKING_HISTORY_TYPES, emailOutcome } from '@/lib/bookingHistory'
+import { seatsHoldingPlace } from '@/lib/seatCapacity'
+import { isValidEmail } from '@/lib/workshopSeats'
+import { getServerSideURL } from '@/utilities/getURL'
 import { fmtDate, fmtTime } from './fetchRosterData'
 
 /**
@@ -27,6 +33,11 @@ async function requireAdmin(payload: Payload) {
   }
 
   return user
+}
+
+/** How an admin is named in a booking's history. */
+function adminName(user: { email?: string | null; name?: unknown }): string {
+  return (typeof user.name === 'string' && user.name.trim()) || user.email || 'Admin'
 }
 
 export async function updatePickupStatus(
@@ -233,7 +244,7 @@ export async function createManualWorkshopBooking(params: {
   notes?: string
 }): Promise<{ id: string }> {
   const payload = await getPayload({ config: configPromise })
-  await requireAdmin(payload)
+  const user = await requireAdmin(payload)
 
   if (!params.appointmentId) {
     throw new Error('Kein Termin ausgewählt.')
@@ -288,6 +299,11 @@ export async function createManualWorkshopBooking(params: {
       } as any,
       overrideAccess: true,
     })
+    await addBookingHistory(payload, String(created.id), {
+      type: 'created_manual',
+      summary: `Manuell hinzugefügt · ${params.guestCount} ${params.guestCount === 1 ? 'Platz' : 'Plätze'} · keine Bestätigungs-E-Mail${params.email?.trim() ? '' : ' · keine E-Mail hinterlegt'}`,
+      by: adminName(user),
+    })
     return { id: String(created.id) }
   } catch (err) {
     // Booking create failed AFTER the atomic reserve succeeded — release the
@@ -337,7 +353,9 @@ export async function deleteManualWorkshopBooking(bookingId: string): Promise<vo
       const workshop = appointment.workshop
       const maxCapacity =
         typeof workshop === 'object' && workshop !== null ? Number(workshop.maxCapacityPerSlot ?? 12) : 12
-      await releaseSpotsAtomic(payload, booking.appointmentId, booking.guestCount || 1, maxCapacity)
+      // Only seats still on the date — rebooked/cancelled seats already gave theirs back.
+      const holding = seatsHoldingPlace(booking)
+      if (holding > 0) await releaseSpotsAtomic(payload, booking.appointmentId, holding, maxCapacity)
     } catch (err) {
       payload.logger.error(
         `[deleteManualWorkshopBooking] Booking ${bookingId} will be deleted, but releasing its spot failed: ${err instanceof Error ? err.message : err}`,
@@ -358,9 +376,13 @@ export async function deleteManualWorkshopBooking(bookingId: string): Promise<vo
  * itself) or a companion seat (seatIndex > 0, stored as recipientName +
  * giftNote inside that seat's entry in the seats array).
  *
- * Deliberately name + notes ONLY — no guestCount, date, or anything with a
- * capacity implication. Neither field affects the atomic spot counter, so
- * this is safe on ANY booking, real order or manual placeholder alike,
+ * Email: seat 0 edits the booking's buyer email (e.g. a manual booking added
+ * without one); any other seat edits that guest's own email. Either one gets
+ * the 2-day workshop reminder. Empty clears it.
+ *
+ * Deliberately name + notes + email ONLY — no guestCount, date, or anything
+ * with a capacity implication. None of these affect the atomic spot counter,
+ * so this is safe on ANY booking, real order or manual placeholder alike,
  * unlike delete which must stay restricted to manual-only bookings.
  */
 export async function updateBookingSeatDetails(params: {
@@ -368,9 +390,10 @@ export async function updateBookingSeatDetails(params: {
   seatIndex: number
   name: string
   notes: string
+  email: string
 }): Promise<void> {
   const payload = await getPayload({ config: configPromise })
-  await requireAdmin(payload)
+  const user = await requireAdmin(payload)
 
   const booking = await payload.findByID({
     collection: 'workshop-bookings',
@@ -382,18 +405,39 @@ export async function updateBookingSeatDetails(params: {
   const name = params.name.trim()
   const notes = params.notes.trim()
 
+  const email = params.email.trim()
+  if (email && !isValidEmail(email)) {
+    throw new Error('Bitte eine gültige E-Mail-Adresse angeben.')
+  }
+
+  const previousEmail =
+    (params.seatIndex === 0 ? booking.email : booking.seats?.[params.seatIndex]?.email)?.trim() ?? ''
+  const recordEmailChange = async () => {
+    if (previousEmail.toLowerCase() === email.toLowerCase()) return
+    await addBookingHistory(payload, params.bookingId, {
+      type: 'email_changed',
+      summary: `Platz ${params.seatIndex + 1}: E-Mail ${previousEmail || '(leer)'} → ${email || '(leer)'}`,
+      by: adminName(user),
+    })
+  }
+
   if (params.seatIndex === 0) {
+    // Only re-split the name when it was actually changed — otherwise saving
+    // just an email would turn "Anna Maria" + "Müller" into "Anna" + "Maria Müller".
+    const currentName = [booking.firstName, booking.lastName].filter(Boolean).join(' ').trim()
     const [firstName, ...rest] = name.split(' ')
+    const nameData = name === currentName ? {} : { firstName: firstName ?? '', lastName: rest.join(' ') }
     await payload.update({
       collection: 'workshop-bookings',
       id: params.bookingId,
       data: {
-        firstName: firstName ?? '',
-        lastName: rest.join(' '),
+        ...nameData,
         notes,
+        email: email || null,
       },
       overrideAccess: true,
     })
+    await recordEmailChange()
     return
   }
 
@@ -404,6 +448,7 @@ export async function updateBookingSeatDetails(params: {
   seats[params.seatIndex] = {
     ...seats[params.seatIndex],
     recipientName: name,
+    email: email || null,
     giftNote: notes,
   }
 
@@ -414,6 +459,7 @@ export async function updateBookingSeatDetails(params: {
     data: { seats } as any,
     overrideAccess: true,
   })
+  await recordEmailChange()
 }
 
 /**
@@ -466,7 +512,7 @@ export async function getAlternateAppointments(
       depth: 0,
       overrideAccess: true,
     })
-    const totalBooked = bookings.docs.reduce((sum, b) => sum + (b.guestCount || 0), 0)
+    const totalBooked = bookings.docs.reduce((sum, b) => sum + seatsHoldingPlace(b), 0)
     results.push({
       id: appt.id,
       date: fmtDate(String(appt.dateTime)),
@@ -489,9 +535,11 @@ export async function getAlternateAppointments(
 export async function moveWorkshopBooking(params: {
   bookingId: string
   newAppointmentId: string
-}): Promise<{ id: string }> {
+  /** Only when the admin ticks the box — e.g. not when the move was already agreed by phone. */
+  notifyCustomer: boolean
+}): Promise<{ id: string; emailSent: boolean | null }> {
   const payload = await getPayload({ config: configPromise })
-  await requireAdmin(payload)
+  const user = await requireAdmin(payload)
 
   const booking = await payload.findByID({
     collection: 'workshop-bookings',
@@ -518,7 +566,12 @@ export async function moveWorkshopBooking(params: {
     throw new Error('Workshop-Daten konnten nicht geladen werden.')
   }
   const maxCapacity = Number(workshop.maxCapacityPerSlot ?? 12)
-  const guestCount = booking.guestCount || 1
+  // Only the seats still on this date move — a seat the customer already
+  // rebooked or cancelled has nothing to take along.
+  const guestCount = seatsHoldingPlace(booking)
+  if (guestCount === 0) {
+    throw new Error('Alle Plätze dieser Buchung wurden bereits umgebucht oder storniert — es gibt nichts zu verschieben.')
+  }
 
   const reserveResult = await reserveSpotsAtomic(payload, params.newAppointmentId, guestCount)
   if (!reserveResult.success) {
@@ -569,7 +622,60 @@ export async function moveWorkshopBooking(params: {
     )
   }
 
-  return { id: params.bookingId }
+  const newDateTimeStr = String(newAppointment.dateTime ?? '')
+  const newDate = newDateTimeStr ? fmtDate(newDateTimeStr) : ''
+  const newTime = newDateTimeStr ? `${fmtTime(newDateTimeStr)} Uhr` : ''
+  const fromTo = `Verschoben von ${booking.date} · ${booking.time} auf ${newDate} · ${newTime}`
+
+  // null = admin chose not to email; true/false = email attempted
+  let emailSent: boolean | null = null
+  if (params.notifyCustomer && booking.email) {
+    // Fresh "Buchung verwalten" link for the email, same as a customer's own rebooking gets.
+    let manageUrl = `${getServerSideURL().replace(/\/$/, '')}/account/orders`
+    try {
+      const link = await payload.create({
+        collection: 'booking-magic-links',
+        data: {
+          token: randomUUID(),
+          bookingId: params.bookingId,
+          scope: 'self-service',
+          issuedAt: new Date().toISOString(),
+        },
+        overrideAccess: true,
+      })
+      manageUrl = `${getServerSideURL().replace(/\/$/, '')}/manage-booking/${link.token}`
+    } catch (err) {
+      payload.logger.error(
+        `[moveWorkshopBooking] Could not create manage link for ${params.bookingId}: ${err instanceof Error ? err.message : err}`,
+      )
+    }
+    const result = await sendTemplateEmail({
+      to: [{ email: booking.email, name: booking.firstName ?? undefined }],
+      templateId: BREVO_TEMPLATES.CUSTOMER_REBOOKED,
+      params: {
+        FIRST_NAME: booking.firstName || 'Gast',
+        WORKSHOP_TITLE: String(workshop.title ?? ''),
+        OLD_WORKSHOP_TITLE: String(booking.workshopTitle ?? ''),
+        NEW_WORKSHOP_TITLE: String(workshop.title ?? ''),
+        OLD_DATE: String(booking.date ?? ''),
+        OLD_TIME: String(booking.time ?? ''),
+        NEW_DATE: newDate,
+        NEW_TIME: newTime,
+        MANAGE_URL: manageUrl,
+      },
+    })
+    emailSent = result.success
+  }
+
+  await addBookingHistory(payload, params.bookingId, {
+    type: 'moved',
+    summary: params.notifyCustomer
+      ? `${fromTo} · ${emailOutcome(booking.email, emailSent)}`
+      : `${fromTo} · ohne E-Mail (bewusst nicht benachrichtigt)`,
+    by: adminName(user),
+  })
+
+  return { id: params.bookingId, emailSent }
 }
 
 /**
@@ -584,7 +690,7 @@ export async function sendAlternateDateEmail(params: {
   newAppointmentId: string
 }): Promise<{ sent: string[]; skippedNoEmail: string[] }> {
   const payload = await getPayload({ config: configPromise })
-  await requireAdmin(payload)
+  const user = await requireAdmin(payload)
 
   if (params.bookingIds.length === 0) {
     throw new Error('Keine Buchungen ausgewählt.')
@@ -611,8 +717,14 @@ export async function sendAlternateDateEmail(params: {
       overrideAccess: true,
     })
     const name = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || 'Kund:in'
+    const offered = `Ausweichtermin angeboten: ${newDate} · ${newTime}`
     if (!booking.email) {
       skippedNoEmail.push(name)
+      await addBookingHistory(payload, bookingId, {
+        type: 'alternate_offered',
+        summary: `${offered} · nicht gesendet, keine E-Mail hinterlegt`,
+        by: adminName(user),
+      })
       continue
     }
 
@@ -628,19 +740,13 @@ export async function sendAlternateDateEmail(params: {
       },
     })
 
+    await addBookingHistory(payload, bookingId, {
+      type: 'alternate_offered',
+      summary: `${offered} · ${emailOutcome(booking.email, result.success)}`,
+      by: adminName(user),
+    })
     if (result.success) {
       sent.push(name)
-      const contactedNote = `[Kontaktiert ${new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })} wegen Ausweichtermin]`
-      await payload.update({
-        collection: 'workshop-bookings',
-        id: bookingId,
-        data: {
-          notes: booking.notes ? `${booking.notes}\n${contactedNote}` : contactedNote,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
-        overrideAccess: true,
-        context: { skipAutoTranslate: true },
-      })
     } else {
       payload.logger.error(`[sendAlternateDateEmail] Failed to send to booking ${bookingId} (${name})`)
       skippedNoEmail.push(`${name} (Versand fehlgeschlagen)`)
@@ -951,4 +1057,70 @@ export async function markAllActivityEventsRead(): Promise<void> {
       overrideAccess: true,
     })
   }
+}
+
+export type TimelineEntry = {
+  id: string
+  at: string
+  type: string
+  title: string
+  summary: string
+  by: string
+  /** Which booking (= which date) this happened on — set for entries from an earlier booking. */
+  fromEarlierBooking: string | null
+}
+
+/**
+ * The full story of a booking, including the bookings it came from. A
+ * customer's own rebooking creates a NEW booking, so moves and emails that
+ * happened before live on the old one — this follows
+ * seats[].rebookedFromBookingId back (max 10 steps) and merges everything,
+ * newest first.
+ */
+export async function getBookingTimeline(bookingId: string): Promise<TimelineEntry[]> {
+  const payload = await getPayload({ config: configPromise })
+  await requireAdmin(payload)
+
+  const labels = new Map<string, string>(BOOKING_HISTORY_TYPES.map((t) => [t.value, t.label]))
+  const entries: TimelineEntry[] = []
+  const seen = new Set<string>()
+  let currentId: string | null = bookingId
+
+  for (let step = 0; currentId && step < 10 && !seen.has(currentId); step++) {
+    seen.add(currentId)
+    let booking
+    try {
+      booking = await payload.findByID({ collection: 'workshop-bookings', id: currentId, depth: 0, overrideAccess: true })
+    } catch {
+      break
+    }
+    const earlier = step === 0 ? null : `${booking.date} · ${booking.time}`
+    const history = booking.history ?? []
+    for (const h of history) {
+      entries.push({
+        id: `${booking.id}-${h.id}`,
+        at: h.at ?? '',
+        type: h.type ?? '',
+        title: labels.get(h.type ?? '') ?? 'Eintrag',
+        summary: h.summary ?? '',
+        by: h.by ?? '',
+        fromEarlierBooking: earlier,
+      })
+    }
+    // Bookings from before the history existed: still show when they were made.
+    if (!history.some((h) => h.type?.startsWith('created_')) && booking.createdAt) {
+      entries.push({
+        id: `${booking.id}-created`,
+        at: booking.createdAt,
+        type: booking.orderId ? 'created_online' : 'created_manual',
+        title: booking.orderId ? 'Online gebucht' : 'Buchung erstellt',
+        summary: `${booking.orderId ? `Bestellung #${booking.orderId} · ` : ''}frühere Schritte wurden noch nicht aufgezeichnet`,
+        by: '',
+        fromEarlierBooking: earlier,
+      })
+    }
+    currentId = booking.seats?.find((s) => s.rebookedFromBookingId)?.rebookedFromBookingId ?? null
+  }
+
+  return entries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
 }

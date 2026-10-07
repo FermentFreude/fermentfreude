@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 
+import { seatHoldsPlace, seatsHoldingPlace } from '@/lib/seatCapacity'
+
 import { AddManualBookingForm } from './AddManualBookingForm'
 import { BookingDetailModal } from './BookingDetailModal'
 import { DeleteBookingControl } from './DeleteBookingControl'
@@ -10,6 +12,7 @@ import { MoveBookingControl } from './MoveBookingControl'
 import { SendAlternateDateEmailBar } from './SendAlternateDateEmailBar'
 import type { AppointmentRow, BookingRow } from './types'
 import { BRAND, STATUS, workshopColor } from './rosterTheme'
+import { seatStatusLabel } from './seatStatusLabels'
 
 interface Props {
   appointment: AppointmentRow
@@ -139,7 +142,10 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
         <SendAlternateDateEmailBar
           selectedBookingIds={selectedBookingIds}
           currentAppointmentId={appointment.id}
-          onSent={() => setSelectedBookingIds([])}
+          onSent={() => {
+            setSelectedBookingIds([])
+            onRefresh()
+          }}
         />
 
         {bookings.length === 0 ? (
@@ -162,6 +168,11 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
             isBuyer: boolean
             guestOfName: string
             orderRef: string
+            seatStatus: string
+            /** false = rebooked / cancelled / refunded: shown, but no longer on this date */
+            onThisDate: boolean
+            /** seats of this booking still on this date — what a move takes along */
+            seatsToMove: number
           }
           const cards: SeatCard[] = []
           let seatCounter = 0
@@ -172,8 +183,10 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
             const count = Math.max(booking.guestCount, 1)
 
             for (let si = 0; si < count; si++) {
-              seatCounter++
               const seat = booking.seats[si]
+              const seatStatus = seat?.seatStatus || 'active'
+              const onThisDate = seatHoldsPlace(seatStatus)
+              if (onThisDate) seatCounter++
               const isBuyer = si === 0
               // Seat 0 = buyer (recipientName is empty when buyer attends themselves).
               // An unnamed extra guest is shown as "Gast von {buyer}" — never a bare
@@ -186,20 +199,25 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                 bookingId: booking.id,
                 booking,
                 guestCount: booking.guestCount,
-                seatNumber: seatCounter,
+                seatNumber: onThisDate ? seatCounter : 0,
                 seatIndex: si,
                 name: seatName,
                 editableName: seat?.recipientName || (isBuyer ? buyerName : ''),
-                email: isBuyer ? booking.email : '',
+                email: isBuyer ? booking.email : seat?.email ?? '',
                 phone: isBuyer ? booking.phone : '',
                 notes: seatNotes,
                 createdAt: booking.createdAt,
                 isBuyer,
                 guestOfName: !isBuyer && !seat?.recipientName ? buyerName : '',
                 orderRef: !isBuyer ? orderRef : '',
+                seatStatus,
+                onThisDate,
+                seatsToMove: seatsHoldingPlace(booking),
               })
             }
           }
+          // People still coming first; those who left this date at the end, greyed out.
+          cards.sort((a, b) => Number(b.onThisDate) - Number(a.onThisDate))
 
           return (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
@@ -208,8 +226,10 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                   key={card.key}
                   onClick={() => setDetailBooking(card.booking)}
                   style={{
-                    background: 'var(--theme-elevation-0)', border: '1px solid var(--theme-elevation-100)',
+                    background: 'var(--theme-elevation-0)',
+                    border: card.onThisDate ? '1px solid var(--theme-elevation-100)' : '1px dashed var(--theme-elevation-200)',
                     borderRadius: '10px', padding: '18px', cursor: 'pointer',
+                    opacity: card.onThisDate ? 1 : 0.6,
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -229,16 +249,21 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: '11px', fontWeight: 700, color: wc.accent, flexShrink: 0,
                       }}>
-                        {card.seatNumber}
+                        {card.seatNumber || '–'}
                       </span>
                       <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--theme-text)' }}>{card.name}</span>
                     </div>
-                    <span style={{
-                      fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '999px',
-                      background: STATUS.success.bg, color: STATUS.success.color,
-                    }}>
-                      Bestätigt
-                    </span>
+                    {(() => {
+                      const st = seatStatusLabel(card.seatStatus)
+                      return (
+                        <span style={{
+                          fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '999px',
+                          background: STATUS[st.tone].bg, color: STATUS[st.tone].color, textAlign: 'right',
+                        }}>
+                          {st.label}
+                        </span>
+                      )
+                    })()}
                   </div>
 
                   {card.email && (
@@ -271,6 +296,36 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                     </div>
                   )}
 
+                  {card.isBuyer && (() => {
+                    // Latest admin move + whether we can reach this person at all.
+                    const lastMove = [...card.booking.history].reverse().find((h) => h.type === 'moved')
+                    const pill = (text: string, bg: string, color: string, title?: string) => (
+                      <span title={title} style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '999px', background: bg, color }}>
+                        {text}
+                      </span>
+                    )
+                    if (!lastMove && card.booking.email) return null
+                    return (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                        {lastMove &&
+                          pill(
+                            `↪ Verschoben ${new Date(lastMove.at).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })} · ${
+                              lastMove.summary.includes('fehlgeschlagen')
+                                ? 'E-Mail fehlgeschlagen'
+                                : lastMove.summary.includes('gesendet')
+                                  ? 'E-Mail gesendet'
+                                  : 'ohne E-Mail'
+                            }`,
+                            STATUS.info.bg,
+                            STATUS.info.color,
+                            lastMove.summary,
+                          )}
+                        {!card.booking.email &&
+                          pill('⚠ keine E-Mail — keine Erinnerung', STATUS.warning.bg, STATUS.warning.color)}
+                      </div>
+                    )
+                  })()}
+
                   {card.notes && (
                     <div style={{
                       marginTop: '10px', padding: '10px 12px', borderRadius: '6px',
@@ -292,18 +347,21 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                       seatIndex={card.seatIndex}
                       currentName={card.editableName}
                       currentNotes={card.notes}
+                      currentEmail={card.email}
                       onDone={onRefresh}
                     />
                   </div>
 
                   {card.isBuyer && (
                     <div onClick={(e) => e.stopPropagation()}>
+                      {card.seatsToMove > 0 && (
                       <MoveBookingControl
                         bookingId={card.bookingId}
-                        guestCount={card.guestCount}
+                        guestCount={card.seatsToMove}
                         currentAppointmentId={appointment.id}
                         onDone={onRefresh}
                       />
+                      )}
                       {!card.booking.orderId && (
                         <DeleteBookingControl bookingId={card.bookingId} onDone={onRefresh} />
                       )}

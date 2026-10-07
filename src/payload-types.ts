@@ -5522,6 +5522,14 @@ export interface WorkshopBooking {
    */
   holdExpiresAt?: string | null;
   /**
+   * Filled automatically by the daily reminder job (2 days before the workshop). Moving the booking to another date resets it, so the new date gets its own reminder.
+   */
+  workshopReminder?: {
+    appointmentId?: string | null;
+    sentTo?: string[] | null;
+    sentAt?: string | null;
+  };
+  /**
    * Auto-generated on confirmation. Used for the guest receipt download link.
    */
   downloadToken?: string | null;
@@ -5531,7 +5539,7 @@ export interface WorkshopBooking {
   firstName?: string | null;
   lastName?: string | null;
   /**
-   * Used to send the booking confirmation email.
+   * The buyer. Receives the booking confirmation and the workshop reminder 2 days before.
    */
   email?: string | null;
   phone?: string | null;
@@ -5559,7 +5567,7 @@ export interface WorkshopBooking {
   pricePerPerson: number;
   totalPrice: number;
   /**
-   * One entry per booked seat. Seat 1 is the buyer. Additional seats can include a guest name and dietary notes. Confirmation emails go only to the buyer.
+   * One entry per booked seat. Seat 1 is the buyer. Each seat can have a guest name, email and dietary notes. Confirmations go only to the buyer; the workshop reminder (2 days before) goes to the buyer and every guest with an email.
    */
   seats?:
     | {
@@ -5567,6 +5575,10 @@ export interface WorkshopBooking {
          * Name of the person attending this seat (optional).
          */
         recipientName?: string | null;
+        /**
+         * Optional. If set, this guest also receives the workshop reminder email 2 days before the workshop.
+         */
+        email?: string | null;
         /**
          * Dietary requirements, allergies, or accessibility needs for this guest.
          */
@@ -5621,9 +5633,35 @@ export interface WorkshopBooking {
          * Traceability — the specific seat index on the original booking this seat was rebooked from. Paired with rebookedFromBookingId so rebook-now can detect an interrupted request (new booking created but the original seat never got marked resolved) and resume instead of creating a duplicate.
          */
         rebookedFromSeatIndex?: number | null;
-        isGift?: boolean | null;
-        recipientEmail?: string | null;
-        giftEmailSentAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Everything that happened to this booking, newest last: how it was created, moves, emails sent (or not), link opened, customer choices, refunds. Written automatically — cannot be edited, so nothing gets lost.
+   */
+  history?:
+    | {
+        at?: string | null;
+        type?:
+          | (
+              | 'created_online'
+              | 'created_manual'
+              | 'created_rebooking'
+              | 'moved'
+              | 'alternate_offered'
+              | 'email_changed'
+              | 'reminder_sent'
+              | 'organiser_cancelled'
+              | 'link_opened'
+              | 'customer_rebooked'
+              | 'customer_voucher'
+              | 'customer_cancelled'
+              | 'refund_requested'
+              | 'refund_completed'
+            )
+          | null;
+        summary?: string | null;
+        by?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -5974,6 +6012,10 @@ export interface BookingMagicLink {
    * Nullable — leave empty for no expiry. When set and passed, the route rejects the token and the customer must be issued a new link (via the confirmation email's "resend" path or an admin action) — the underlying entitlement is untouched.
    */
   expiresAt?: string | null;
+  /**
+   * When the customer first opened this link. Also recorded in the booking history.
+   */
+  openedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -8362,6 +8404,13 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
   cartSlug?: T;
   orderId?: T;
   holdExpiresAt?: T;
+  workshopReminder?:
+    | T
+    | {
+        appointmentId?: T;
+        sentTo?: T;
+        sentAt?: T;
+      };
   downloadToken?: T;
   firstName?: T;
   lastName?: T;
@@ -8379,6 +8428,7 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
     | T
     | {
         recipientName?: T;
+        email?: T;
         giftNote?: T;
         seatStatus?: T;
         selfRebookingUsed?: T;
@@ -8389,9 +8439,15 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
         rebookedToBookingId?: T;
         rebookedFromBookingId?: T;
         rebookedFromSeatIndex?: T;
-        isGift?: T;
-        recipientEmail?: T;
-        giftEmailSentAt?: T;
+        id?: T;
+      };
+  history?:
+    | T
+    | {
+        at?: T;
+        type?: T;
+        summary?: T;
+        by?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -8557,6 +8613,7 @@ export interface BookingMagicLinksSelect<T extends boolean = true> {
   scope?: T;
   issuedAt?: T;
   expiresAt?: T;
+  openedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

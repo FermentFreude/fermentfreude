@@ -21,12 +21,15 @@ export function MoveBookingControl({
   const [open, setOpen] = useState(false)
   const [alternates, setAlternates] = useState<Alternate[] | null>(null)
   const [selectedId, setSelectedId] = useState('')
+  // Off by default — founders often move someone they've already spoken to.
+  const [notifyCustomer, setNotifyCustomer] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, startLoad] = useTransition()
   const [isMoving, startMove] = useTransition()
 
   const handleOpen = () => {
     setOpen(true)
+    setNotifyCustomer(false)
     setError('')
     startLoad(async () => {
       try {
@@ -47,7 +50,14 @@ export function MoveBookingControl({
     setError('')
     startMove(async () => {
       try {
-        await moveWorkshopBooking({ bookingId, newAppointmentId: selectedId })
+        const result = await moveWorkshopBooking({ bookingId, newAppointmentId: selectedId, notifyCustomer })
+        if (notifyCustomer && result.emailSent !== true) {
+          window.alert(
+            result.emailSent === false
+              ? 'Verschoben — aber die E-Mail konnte nicht gesendet werden. Bitte die Person direkt informieren.'
+              : 'Verschoben — keine E-Mail hinterlegt, es wurde nichts gesendet. Bitte die Person direkt informieren.',
+          )
+        }
         setOpen(false)
         onDone()
       } catch (err) {
@@ -99,6 +109,20 @@ export function MoveBookingControl({
               </option>
             ))}
           </select>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '12px', marginBottom: '8px', cursor: 'pointer', color: 'var(--theme-text)' }}>
+            <input
+              type="checkbox"
+              checked={notifyCustomer}
+              onChange={(e) => setNotifyCustomer(e.target.checked)}
+              style={{ marginTop: '2px', cursor: 'pointer' }}
+            />
+            <span>
+              Kund:in per E-Mail über den neuen Termin informieren
+              <span style={{ display: 'block', opacity: 0.6 }}>
+                Nur anhaken, wenn die Person noch nicht Bescheid weiß. Wird im Verlauf festgehalten.
+              </span>
+            </span>
+          </label>
           {error && <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#dc2626' }}>{error}</p>}
           <div style={{ display: 'flex', gap: '8px' }}>
             <button

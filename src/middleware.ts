@@ -16,6 +16,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/maintenance') ||
     pathname.startsWith('/api/preview-access') ||
     pathname.startsWith('/api/maintenance-waitlist') ||
+    // Stripe can't pass the gate (no cookie) — without this, payments on a
+    // gated environment are taken but the order is never confirmed.
+    pathname.startsWith('/api/payments/stripe/webhooks') ||
     pathname.startsWith('/admin') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
