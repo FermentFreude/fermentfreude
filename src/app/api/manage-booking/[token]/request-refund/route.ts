@@ -4,6 +4,7 @@ import { getAdminRecipients } from '@/lib/adminNotification'
 import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 import { cancelReasonLabel, loadFreshForMutation, logActivityEvent, updateSeat } from '@/lib/manageBooking'
 import { policyResultForAction, type SeatAction } from '@/lib/policyEngine'
+import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/manage-booking/[token]/request-refund
@@ -106,8 +107,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   )
 
   // ─── Customer confirmation email (best-effort) ───────────────────
+  let customerEmailSent = false
   if (booking.email) {
-    await sendTemplateEmail({
+    const customerEmail = await sendTemplateEmail({
       to: [{ email: booking.email, name: booking.firstName ?? undefined }],
       templateId: BREVO_TEMPLATES.REFUND_INITIATED,
       params: {
@@ -116,7 +118,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         AMOUNT: `€${(requestedAmountCents / 100).toFixed(2).replace('.', ',')}`,
       },
     })
+    customerEmailSent = customerEmail.success
   }
+  await addBookingHistory(payload, String(booking.id), {
+    type: 'refund_requested',
+    summary: `Platz ${seatIndex + 1}: Erstattung angefragt (€${(requestedAmountCents / 100).toFixed(2)}) · Bestätigung: ${emailOutcome(booking.email, customerEmailSent)}`,
+    by: 'Kund:in',
+  })
 
   // ─── Admin alert — "action needed" (best-effort) ──────────────────
   try {

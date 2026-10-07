@@ -139,7 +139,10 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
         <SendAlternateDateEmailBar
           selectedBookingIds={selectedBookingIds}
           currentAppointmentId={appointment.id}
-          onSent={() => setSelectedBookingIds([])}
+          onSent={() => {
+            setSelectedBookingIds([])
+            onRefresh()
+          }}
         />
 
         {bookings.length === 0 ? (
@@ -270,6 +273,36 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                       </span>
                     </div>
                   )}
+
+                  {card.isBuyer && (() => {
+                    // Latest admin move + whether we can reach this person at all.
+                    const lastMove = [...card.booking.history].reverse().find((h) => h.type === 'moved')
+                    const pill = (text: string, bg: string, color: string, title?: string) => (
+                      <span title={title} style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '999px', background: bg, color }}>
+                        {text}
+                      </span>
+                    )
+                    if (!lastMove && card.booking.email) return null
+                    return (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                        {lastMove &&
+                          pill(
+                            `↪ Verschoben ${new Date(lastMove.at).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })} · ${
+                              lastMove.summary.includes('fehlgeschlagen')
+                                ? 'E-Mail fehlgeschlagen'
+                                : lastMove.summary.includes('gesendet')
+                                  ? 'E-Mail gesendet'
+                                  : 'ohne E-Mail'
+                            }`,
+                            STATUS.info.bg,
+                            STATUS.info.color,
+                            lastMove.summary,
+                          )}
+                        {!card.booking.email &&
+                          pill('⚠ keine E-Mail — keine Erinnerung', STATUS.warning.bg, STATUS.warning.color)}
+                      </div>
+                    )
+                  })()}
 
                   {card.notes && (
                     <div style={{

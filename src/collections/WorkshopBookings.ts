@@ -1,4 +1,5 @@
 import { isAdmin } from '@/access/isAdmin'
+import { BOOKING_HISTORY_TYPES } from '@/lib/bookingHistory'
 import { CollectionConfig } from 'payload'
 
 export const WorkshopBookings: CollectionConfig = {
@@ -351,6 +352,30 @@ export const WorkshopBookings: CollectionConfig = {
             readOnly: true,
           },
         },
+      ],
+    },
+
+    // ── History ────────────────────────────────────────────────
+    {
+      name: 'history',
+      type: 'array',
+      label: 'Verlauf',
+      admin: {
+        readOnly: true,
+        initCollapsed: true,
+        description:
+          'Everything that happened to this booking, newest last: how it was created, moves, emails sent (or not), link opened, customer choices, refunds. Written automatically — cannot be edited, so nothing gets lost.',
+      },
+      fields: [
+        { name: 'at', type: 'date', label: 'Wann', admin: { date: { pickerAppearance: 'dayAndTime' } } },
+        {
+          name: 'type',
+          type: 'select',
+          label: 'Was',
+          options: BOOKING_HISTORY_TYPES.map((t) => ({ label: t.label, value: t.value })),
+        },
+        { name: 'summary', type: 'text', label: 'Details' },
+        { name: 'by', type: 'text', label: 'Von' },
       ],
     },
   ],

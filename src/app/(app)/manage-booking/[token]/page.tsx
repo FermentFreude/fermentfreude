@@ -1,4 +1,5 @@
-import { getAllSeatBundles, resolveMagicLink } from '@/lib/manageBooking'
+import { recordMagicLinkOpened } from '@/lib/bookingHistory'
+import { getAllSeatBundles, getPayloadClient, resolveMagicLink } from '@/lib/manageBooking'
 
 import { ManageBookingClient } from './ManageBookingClient'
 
@@ -33,6 +34,7 @@ export default async function ManageBookingPage({
 
   const { booking, appointment, magicLink } = resolved
   const seats = getAllSeatBundles(booking, appointment, new Date())
+  await recordMagicLinkOpened(await getPayloadClient(), magicLink, String(booking.id))
 
   return (
     <ManageBookingClient

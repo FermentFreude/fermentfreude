@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminRecipients } from '@/lib/adminNotification'
 import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 import { cancelReasonLabel, loadFreshForMutation, logActivityEvent, updateSeat } from '@/lib/manageBooking'
+import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/manage-booking/[token]/cancel-no-refund
@@ -61,8 +62,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   )
 
   // ─── Customer confirmation email (best-effort) ───────────────────
+  let customerEmailSent = false
   if (booking.email) {
-    await sendTemplateEmail({
+    const customerEmail = await sendTemplateEmail({
       to: [{ email: booking.email, name: booking.firstName ?? undefined }],
       templateId: BREVO_TEMPLATES.CUSTOMER_CANCELLED_NO_REFUND,
       params: {
@@ -73,7 +75,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         REASON: cancelReasonLabel(reason),
       },
     })
+    customerEmailSent = customerEmail.success
   }
+  await addBookingHistory(payload, String(booking.id), {
+    type: 'customer_cancelled',
+    summary: `Platz ${seatIndex + 1}: storniert ohne Erstattung · Bestätigung: ${emailOutcome(booking.email, customerEmailSent)}`,
+    by: 'Kund:in',
+  })
 
   // ─── Admin alert (best-effort) ────────────────────────────────────
   try {
