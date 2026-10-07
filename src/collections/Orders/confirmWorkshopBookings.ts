@@ -6,6 +6,7 @@ import type { Payload } from 'payload'
 
 import { getAdminRecipients } from '@/lib/adminNotification'
 import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
+import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
 import { generateBookingICS } from '@/lib/generateBookingICS'
 import {
   claimBookingForOrder,
@@ -397,6 +398,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
 
     // Send workshop booking confirmation email now that customer info is available
     const bookingEmail = (updateData.email as string) || booking.email
+    let confirmationSent = false
     if (bookingEmail) {
       // Resolve location AND the ISO date / Vienna time range from the
       // appointment in a single fetch. We need the ISO date for the .ics
@@ -537,7 +539,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
         : ''
 
       try {
-        await sendTemplateEmail({
+        const confirmation = await sendTemplateEmail({
           to: [
             {
               email: bookingEmail,
@@ -591,6 +593,7 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
           },
           attachments: icsAttachment ? [icsAttachment] : undefined,
         })
+        confirmationSent = confirmation.success
         payload.logger.info(
           `[confirmWorkshopBookings] Sent booking confirmation email to ${bookingEmail} for booking ${booking.id}`,
         )
@@ -609,6 +612,12 @@ export const confirmWorkshopBookings: CollectionAfterChangeHook = async ({
       // Guests get no confirmation of their own — only the buyer does. Guests
       // who left an email get the 2-day reminder (/api/emails/workshop-reminders).
     }
+
+    await addBookingHistory(payload, String(booking.id), {
+      type: 'created_online',
+      summary: `Online gebucht · Bestellung #${doc.id} · ${booking.guestCount ?? 1} ${booking.guestCount === 1 ? 'Platz' : 'Plätze'} · Buchungsbestätigung: ${emailOutcome(bookingEmail, confirmationSent)}`,
+      by: 'Kund:in',
+    })
     }
   }
 

@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import type { BookingRow } from './types'
+import type { BookingHistoryEntry, BookingRow } from './types'
 import { BRAND, STATUS } from './rosterTheme'
 
 interface Props {
@@ -28,6 +28,43 @@ function fmtDateTime(iso: string): string {
     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
     timeZone: 'Europe/Vienna',
   })
+}
+
+const HISTORY_ICONS: Record<string, string> = {
+  created_online: '🛒',
+  created_manual: '✍️',
+  created_rebooking: '🔁',
+  moved: '↪️',
+  alternate_offered: '📨',
+  email_changed: '✉️',
+  reminder_sent: '⏰',
+  organiser_cancelled: '⛔',
+  link_opened: '🔗',
+  customer_rebooked: '🔁',
+  customer_voucher: '🎟️',
+  customer_cancelled: '✖️',
+  refund_requested: '💶',
+  refund_completed: '✅',
+}
+
+/**
+ * Newest first. Bookings created before the history existed have no
+ * "created" entry — show one from createdAt so the list always starts
+ * somewhere, and say plainly that older steps weren't recorded.
+ */
+function historyForDisplay(booking: BookingRow): BookingHistoryEntry[] {
+  const entries = [...booking.history]
+  const hasCreated = entries.some((e) => e.type.startsWith('created_'))
+  if (!hasCreated && booking.createdAt) {
+    entries.unshift({
+      id: 'created-fallback',
+      at: booking.createdAt,
+      type: booking.orderId ? 'created_online' : 'created_manual',
+      summary: `${booking.orderId ? `Online gebucht · Bestellung #${booking.orderId}` : 'Buchung erstellt'} · frühere Schritte wurden noch nicht aufgezeichnet`,
+      by: '',
+    })
+  }
+  return entries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
 }
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -154,6 +191,28 @@ export function BookingDetailModal({ booking, onClose }: Props) {
             </div>
           )
         })}
+
+        <SectionTitle>Verlauf</SectionTitle>
+        <p style={{ margin: '0 0 6px', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.5 }}>
+          Wird automatisch geschrieben und kann nicht bearbeitet werden.
+        </p>
+        {historyForDisplay(booking).map((entry) => (
+          <div
+            key={entry.id}
+            style={{ display: 'flex', gap: '10px', padding: '8px 0', borderBottom: '1px solid var(--theme-elevation-100)' }}
+          >
+            <span aria-hidden style={{ fontSize: '14px', width: '20px', flexShrink: 0 }}>
+              {HISTORY_ICONS[entry.type] ?? '•'}
+            </span>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: '12px', fontWeight: 600, color: 'var(--theme-text)', opacity: 0.6 }}>
+                {fmtDateTime(entry.at)}
+                {entry.by && <span style={{ fontWeight: 400 }}> · {entry.by}</span>}
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--theme-text)', lineHeight: 1.4 }}>{entry.summary}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

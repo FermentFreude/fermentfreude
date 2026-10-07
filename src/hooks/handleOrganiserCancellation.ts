@@ -2,6 +2,7 @@ import crypto from 'crypto'
 
 import type { CollectionAfterChangeHook } from 'payload'
 
+import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 import { logActivityEvent } from '@/lib/manageBooking'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -103,8 +104,9 @@ export const handleOrganiserCancellation: CollectionAfterChangeHook = async ({
       continue
     }
 
+    let emailSent = false
     if (booking.email) {
-      await sendTemplateEmail({
+      const result = await sendTemplateEmail({
         to: [{ email: booking.email, name: booking.firstName ?? undefined }],
         templateId: BREVO_TEMPLATES.ORGANISER_CANCELLED,
         params: {
@@ -119,7 +121,13 @@ export const handleOrganiserCancellation: CollectionAfterChangeHook = async ({
           MANAGE_BOOKING_URL: `${SERVER_URL}/manage-booking/${token}`,
         },
       })
+      emailSent = result.success
     }
+    await addBookingHistory(payload, String(booking.id), {
+      type: 'organiser_cancelled',
+      summary: `Termin von uns abgesagt · Link zur Wahl (Ersatztermin oder Erstattung): ${emailOutcome(booking.email, emailSent)}`,
+      by: req.user?.email ?? 'Admin',
+    })
   }
 
   const dateDisplay = (() => {

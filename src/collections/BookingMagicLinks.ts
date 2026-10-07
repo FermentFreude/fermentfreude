@@ -81,6 +81,16 @@ export const BookingMagicLinks: CollectionConfig = {
           'Nullable — leave empty for no expiry. When set and passed, the route rejects the token and the customer must be issued a new link (via the confirmation email\'s "resend" path or an admin action) — the underlying entitlement is untouched.',
       },
     },
+    {
+      name: 'openedAt',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        date: { pickerAppearance: 'dayAndTime' },
+        description: 'When the customer first opened this link. Also recorded in the booking history.',
+      },
+    },
   ],
   hooks: {
     beforeValidate: [

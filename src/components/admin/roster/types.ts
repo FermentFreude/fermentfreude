@@ -28,6 +28,14 @@ export type SeatEntry = {
   cancelledReason?: string
 }
 
+export type BookingHistoryEntry = {
+  id: string
+  at: string
+  type: string
+  summary: string
+  by: string
+}
+
 export type BookingRow = {
   id: string
   firstName: string
@@ -46,6 +54,8 @@ export type BookingRow = {
   pricePerPerson: number
   totalPrice: number
   status: string
+  /** Append-only "Verlauf" — oldest first, as stored. */
+  history: BookingHistoryEntry[]
 }
 
 export type ParticipantRow = {
