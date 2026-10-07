@@ -5681,6 +5681,35 @@ export interface WorkshopBooking {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Everything that happened to this booking, newest last: how it was created, moves, emails sent (or not), link opened, customer choices, refunds. Written automatically — cannot be edited, so nothing gets lost.
+   */
+  history?:
+    | {
+        at?: string | null;
+        type?:
+          | (
+              | 'created_online'
+              | 'created_manual'
+              | 'created_rebooking'
+              | 'moved'
+              | 'alternate_offered'
+              | 'email_changed'
+              | 'reminder_sent'
+              | 'organiser_cancelled'
+              | 'link_opened'
+              | 'customer_rebooked'
+              | 'customer_voucher'
+              | 'customer_cancelled'
+              | 'refund_requested'
+              | 'refund_completed'
+            )
+          | null;
+        summary?: string | null;
+        by?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -6028,6 +6057,10 @@ export interface BookingMagicLink {
    * Nullable — leave empty for no expiry. When set and passed, the route rejects the token and the customer must be issued a new link (via the confirmation email's "resend" path or an admin action) — the underlying entitlement is untouched.
    */
   expiresAt?: string | null;
+  /**
+   * When the customer first opened this link. Also recorded in the booking history.
+   */
+  openedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -8467,6 +8500,15 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
         rebookedFromSeatIndex?: T;
         id?: T;
       };
+  history?:
+    | T
+    | {
+        at?: T;
+        type?: T;
+        summary?: T;
+        by?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -8630,6 +8672,7 @@ export interface BookingMagicLinksSelect<T extends boolean = true> {
   scope?: T;
   issuedAt?: T;
   expiresAt?: T;
+  openedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

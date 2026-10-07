@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import { addBookingHistory } from '@/lib/bookingHistory'
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 import type { WorkshopAppointment, WorkshopBooking } from '@/payload-types'
 
@@ -164,6 +165,8 @@ export async function sendDueWorkshopReminders(
 
       // Sequential sends + one write per booking — never Promise.all on Atlas M0.
       let newlySent = 0
+      const sentNow: string[] = []
+      const failedNow: string[] = []
       for (const recipient of due) {
         const result = await sendTemplateEmail({
           to: [{ email: recipient.email, name: recipient.firstName || undefined }],
@@ -172,9 +175,11 @@ export async function sendDueWorkshopReminders(
         })
         if (result.success) {
           alreadySent.add(recipient.email.toLowerCase())
+          sentNow.push(recipient.email)
           newlySent++
           summary.sent++
         } else {
+          failedNow.push(recipient.email)
           summary.failed++
           summary.errors.push(`booking ${booking.id} → ${recipient.email}`)
         }
@@ -202,6 +207,15 @@ export async function sendDueWorkshopReminders(
           )
         }
       }
+
+      const parts = [
+        sentNow.length > 0 ? `gesendet an ${sentNow.join(', ')}` : '',
+        failedNow.length > 0 ? `fehlgeschlagen für ${failedNow.join(', ')}` : '',
+      ].filter(Boolean)
+      await addBookingHistory(payload, booking.id, {
+        type: 'reminder_sent',
+        summary: `Erinnerung für ${params.WORKSHOP_DATE} · ${parts.join(' · ')}`,
+      })
     }
   }
 

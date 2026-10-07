@@ -66,6 +66,7 @@ function toBookingRow(b: { id: string | number }): BookingRow {
     pricePerPerson?: number
     totalPrice?: number
     status?: string
+    history?: Array<{ id?: string; at?: string; type?: string; summary?: string; by?: string }>
   }
   const seats: SeatEntry[] = (bk.seats ?? []).map((s) => ({
     recipientName: s.recipientName?.trim() ?? '',
@@ -93,6 +94,13 @@ function toBookingRow(b: { id: string | number }): BookingRow {
     pricePerPerson: bk.pricePerPerson ?? 0,
     totalPrice: bk.totalPrice ?? 0,
     status: bk.status ?? 'confirmed',
+    history: (bk.history ?? []).map((h, i) => ({
+      id: h.id ?? String(i),
+      at: h.at ?? '',
+      type: h.type ?? '',
+      summary: h.summary ?? '',
+      by: h.by ?? '',
+    })),
   } satisfies BookingRow
 }
 

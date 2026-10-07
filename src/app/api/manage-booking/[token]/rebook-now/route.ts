@@ -7,6 +7,7 @@ import { releaseSpotsAtomic, reserveSpotsAtomic } from '@/lib/atomicSpots'
 import { BREVO_TEMPLATES, sendTemplateEmail, sendTransactionalEmail } from '@/lib/brevo'
 import { cancelReasonLabel, loadFreshForMutation, logActivityEvent, updateSeat } from '@/lib/manageBooking'
 import { getServerSideURL } from '@/utilities/getURL'
+import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/manage-booking/[token]/rebook-now
@@ -266,6 +267,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       overrideAccess: true,
     })
+    await addBookingHistory(payload, String(newBooking.id), {
+      type: 'created_rebooking',
+      summary: `Entstanden durch Umbuchung von ${booking.date} · ${booking.time} (Buchung ${booking.id}, Platz ${seatIndex + 1})`,
+      by: 'Kund:in',
+    })
   } catch (err) {
     // Roll back the reservation — without this, a failed booking-create
     // still leaves the spot permanently decremented with nothing to show
@@ -313,8 +319,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const manageUrl = `${getServerSideURL().replace(/\/$/, '')}/manage-booking/${newToken}`
 
   // ─── Customer confirmation email (best-effort) ───────────────────
+  let customerEmailSent = false
   if (booking.email) {
-    await sendTemplateEmail({
+    const customerEmail = await sendTemplateEmail({
       to: [{ email: booking.email, name: booking.firstName ?? undefined }],
       templateId: BREVO_TEMPLATES.CUSTOMER_REBOOKED,
       params: {
@@ -332,7 +339,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         MANAGE_URL: manageUrl,
       },
     })
+    customerEmailSent = customerEmail.success
   }
+  await addBookingHistory(payload, String(booking.id), {
+    type: 'customer_rebooked',
+    summary: `Platz ${seatIndex + 1}: von Kund:in umgebucht auf ${dateDisplay} · ${timeDisplay} (neue Buchung ${newBooking.id}) · Bestätigung: ${emailOutcome(booking.email, customerEmailSent)}`,
+    by: 'Kund:in',
+  })
 
   // ─── Admin alert (best-effort) ─────────────────────────────────────
   try {
