@@ -306,10 +306,11 @@ export const hero: Field = {
             {
               name: 'eyebrow',
               type: 'text',
-              label: 'Small Text Above Title (gold)',
+              label: 'Big Word (first screen)',
               localized: true,
               admin: {
-                description: 'e.g. "Fermentation Studio · Graz"',
+                description:
+                  'Shown huge across the whole photo when the page opens, then fades away as visitors scroll. Keep it to one short word, e.g. "FermentFreude".',
               },
             },
             {
@@ -318,22 +319,23 @@ export const hero: Field = {
                 {
                   name: 'title',
                   type: 'textarea',
-                  label: 'Title (white)',
+                  label: 'Title',
                   localized: true,
                   required: true,
                   admin: {
                     width: '50%',
-                    description: 'Main headline. Press Enter for a line break.',
+                    description:
+                      'Main headline — appears after the big word, as visitors scroll. Press Enter for a line break.',
                   },
                 },
                 {
                   name: 'titleAccent',
                   type: 'textarea',
-                  label: 'Title Highlight (gold)',
+                  label: 'Title — second part',
                   localized: true,
                   admin: {
                     width: '50%',
-                    description: 'Optional second part of the headline, shown in gold below the title.',
+                    description: 'Optional. Shown on its own line below the title.',
                   },
                 },
               ],
@@ -344,7 +346,8 @@ export const hero: Field = {
               label: 'Description',
               localized: true,
               admin: {
-                description: 'One or two short sentences below the title.',
+                description:
+                  'One or two short sentences — appear last on scroll, with the buttons. Press Enter for a line break.',
               },
             },
             {
@@ -353,7 +356,7 @@ export const hero: Field = {
                 {
                   name: 'ctaLabel',
                   type: 'text',
-                  label: 'Main Button Text (gold)',
+                  label: 'Main Button Text (white)',
                   localized: true,
                   admin: { width: '50%', description: 'e.g. "Discover workshops"' },
                 },
@@ -577,7 +580,8 @@ export const hero: Field = {
               type: 'text',
               label: 'YouTube URL',
               admin: {
-                description: 'Used only when no MP4 is uploaded above. e.g. https://www.youtube.com/watch?v=…',
+                description:
+                  'Used only when no MP4 is uploaded above. e.g. https://www.youtube.com/watch?v=…',
               },
             },
             {

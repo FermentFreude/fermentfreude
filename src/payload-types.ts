@@ -913,19 +913,19 @@ export interface Page {
            */
           image: string | Media;
           /**
-           * e.g. "Fermentation Studio · Graz"
+           * Shown huge across the whole photo when the page opens, then fades away as visitors scroll. Keep it to one short word, e.g. "FermentFreude".
            */
           eyebrow?: string | null;
           /**
-           * Main headline. Press Enter for a line break.
+           * Main headline — appears after the big word, as visitors scroll. Press Enter for a line break.
            */
           title: string;
           /**
-           * Optional second part of the headline, shown in gold below the title.
+           * Optional. Shown on its own line below the title.
            */
           titleAccent?: string | null;
           /**
-           * One or two short sentences below the title.
+           * One or two short sentences — appear last on scroll, with the buttons. Press Enter for a line break.
            */
           description?: string | null;
           /**
