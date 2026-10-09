@@ -38,6 +38,10 @@ const scripts: Record<string, { name: string; file: string }> = {
   backlog: { name: 'Backlog board (internal team tool)', file: 'seed-backlog.ts' },
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
+  'home-tempeh': {
+    name: 'Home Käferbohnen Tempeh story (bilingual, additive)',
+    file: 'seed-home-tempeh.ts',
+  },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
   presse: { name: 'Presse / Press page', file: 'seed-presse.ts' },
@@ -88,6 +92,7 @@ const scripts: Record<string, { name: string; file: string }> = {
 const allOrder = [
   'header',
   'home',
+  'home-tempeh',
   'about',
   'contact',
   'presse',
