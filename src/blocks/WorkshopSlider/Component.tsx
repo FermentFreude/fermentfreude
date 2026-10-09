@@ -141,8 +141,16 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     const container = containerRef.current
     if (!outer || !container) return
 
-    const EASE = 0.08
+    // Share of the remaining distance covered per frame. Higher = follows the
+    // scroll more tightly (0.08 felt floaty: cards kept drifting ~1s after you stopped).
+    const EASE = 0.18
     const MAX_SHIFT = 8
+
+    /* Image positions inside the track, measured once per resize — never read
+     * the layout inside the animation loop (that forced a reflow every frame). */
+    let imageBoxes: { center: number }[] = []
+    let trackLeft = 0
+    let lastWidth = 0
 
     /* Recalculate outer height and scroll limit.
      * Sticky scroll-jacking is kept for desktop (lg+, the signature effect),
@@ -152,6 +160,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
      *  - mobile address-bar resize causes jumps mid-scrub.
      * Below lg the section becomes a native horizontal swipe carousel. */
     const updateDimensions = () => {
+      lastWidth = window.innerWidth
       const enableStickyScene = window.innerWidth >= 1024
       const overshoot = enableStickyScene
         ? Math.max(0, container.scrollWidth - window.innerWidth)
@@ -164,10 +173,20 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
         scrollRef.current.target = 0
         scrollRef.current.current = 0
         container.style.transform = ''
+        return
       }
-    }
 
-    updateDimensions()
+      // Measure at rest (no transform) so positions are relative to the track
+      const prev = container.style.transform
+      container.style.transform = ''
+      trackLeft = container.getBoundingClientRect().left
+      imageBoxes = imgInnerRefs.current.map((inner) => {
+        const box = inner?.parentElement?.getBoundingClientRect()
+        return { center: box ? box.left - trackLeft + box.width / 2 : 0 }
+      })
+      container.style.transform = prev
+      onScroll()
+    }
 
     /* Map vertical page scroll → horizontal translateX target */
     const onScroll = () => {
@@ -177,50 +196,68 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       if (overshoot <= 0) return
       const progress = Math.max(0, Math.min(1, (window.scrollY - outerTop) / overshoot))
       scrollRef.current.target = progress * overshoot
+      start()
     }
 
-    /* RAF loop — lerp + parallax */
+    /* RAF loop — lerp + parallax. Runs only while the track is moving,
+     * then stops (it used to run every frame forever, even off-screen). */
+    let running = false
     const tick = () => {
-      if (isActiveRef.current) {
-        const s = scrollRef.current
-        s.current += (s.target - s.current) * EASE
-        container.style.transform = `translateX(-${s.current}px)`
+      const s = scrollRef.current
+      const diff = s.target - s.current
+      s.current = Math.abs(diff) < 0.3 ? s.target : s.current + diff * EASE
+      container.style.transform = `translate3d(${-s.current}px, 0, 0)`
 
-        /* Parallax each image inner */
-        const vCenter = window.innerWidth * 0.5
-        imgInnerRefs.current.forEach((inner) => {
-          if (!inner) return
-          const outerEl = inner.parentElement
-          if (!outerEl) return
-          const rect = outerEl.getBoundingClientRect()
-          const ec = rect.left + rect.width * 0.5
-          const t = Math.max(-1, Math.min(1, (ec - vCenter) / vCenter))
-          inner.style.transform = `translate3d(${-t * MAX_SHIFT}%, 0, 0)`
-        })
+      /* Parallax each image inner — pure math from cached positions */
+      const vCenter = window.innerWidth * 0.5
+      imgInnerRefs.current.forEach((inner, i) => {
+        if (!inner) return
+        const ec = trackLeft + (imageBoxes[i]?.center ?? 0) - s.current
+        const t = Math.max(-1, Math.min(1, (ec - vCenter) / vCenter))
+        inner.style.transform = `translate3d(${-t * MAX_SHIFT}%, 0, 0)`
+      })
+
+      if (s.current === s.target) {
+        running = false
+        return
       }
       rafRef.current = requestAnimationFrame(tick)
     }
-    rafRef.current = requestAnimationFrame(tick)
+    const start = () => {
+      if (running || !isActiveRef.current) return
+      running = true
+      rafRef.current = requestAnimationFrame(tick)
+    }
 
+    /* Desktop: any resize. Touch sizes: width only — a height-only resize there
+     * is the mobile address bar showing/hiding, not a real layout change. */
+    const onResize = () => {
+      if (window.innerWidth >= 1024 || window.innerWidth !== lastWidth) updateDimensions()
+    }
+
+    updateDimensions()
     window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', updateDimensions)
+    window.addEventListener('resize', onResize)
 
     return () => {
       cancelAnimationFrame(rafRef.current)
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', updateDimensions)
+      window.removeEventListener('resize', onResize)
     }
   }, [])
 
   const workshopCount = resolvedWorkshops.length
 
-  const goToWorkshop = useCallback((index: number) => {
-    const clamped = Math.max(0, Math.min(workshopCount - 1, index))
-    const el = workshopGroupRefs.current[clamped]
-    if (!el) return
-    el.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' })
-    setActiveWorkshopIndex(clamped)
-  }, [workshopCount])
+  const goToWorkshop = useCallback(
+    (index: number) => {
+      const clamped = Math.max(0, Math.min(workshopCount - 1, index))
+      const el = workshopGroupRefs.current[clamped]
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' })
+      setActiveWorkshopIndex(clamped)
+    },
+    [workshopCount],
+  )
 
   /* Mobile: sync dot indicator while user swipes */
   useEffect(() => {
@@ -266,11 +303,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     /* Outer pin div — JS sets height to 100svh + overshoot on lg+.
      * Below lg, height is auto and the section becomes a normal
      * horizontal swipe carousel (no scroll-jacking). */
-    <div
-      ref={outerRef}
-      id={id ?? undefined}
-      className="relative w-full bg-white lg:min-h-svh"
-    >
+    <div ref={outerRef} id={id ?? undefined} className="relative w-full bg-white lg:min-h-svh">
       {/* ── Viewport: sticky on desktop, native horizontal scroll on mobile */}
       <section
         ref={trackRef}
@@ -307,7 +340,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                   className="flex shrink-0 items-center snap-start lg:snap-none"
                   style={{
                     gap: 'clamp(0.75rem, 2vw, 1.5rem)',
-                    marginRight: wIdx < resolvedWorkshops.length - 1 ? 'clamp(1rem, 4vw, 4vw)' : undefined,
+                    marginRight:
+                      wIdx < resolvedWorkshops.length - 1 ? 'clamp(1rem, 4vw, 4vw)' : undefined,
                   }}
                 >
                   {/* ── LEFT COLUMN — title on top, small image below ── */}

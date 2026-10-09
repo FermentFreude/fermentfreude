@@ -3091,35 +3091,39 @@ export interface HeroBannerBlock {
  */
 export interface HomeTempehStoryBlock {
   /**
-   * Hide this homepage section without deleting its content.
+   * Hide this section without deleting its content.
    */
   visible?: boolean | null;
   /**
-   * Heading displayed above the slides.
+   * Large heading above the carousel, e.g. "Käferbohnen Tempeh".
    */
   heading?: string | null;
   /**
-   * The product shown on the first slide, with its photo and a button to its shop page. Leave empty to use Käferbohnen-Tempeh.
-   */
-  product?: (string | null) | Product;
-  /**
-   * Button label linking to the live Käferbohnen-Tempeh shop product.
-   */
-  productLinkLabel?: string | null;
-  /**
-   * Add 3–4 educational slides. The live Käferbohnen-Tempeh product is always shown first.
+   * Slides play in this order — drag to reorder. Start with the product slide (pick the shop product so it gets a button), then explain tempeh.
    */
   slides?:
     | {
         /**
-         * Optional photo for this slide. Without one, a photo of the shop product is used — upload a different image for each topic when you have one.
+         * A full photo with a real background (no cut-out / transparent product images — they look odd in the animation). Landscape works best.
          */
-        image?: (string | null) | Media;
+        image: string | Media;
+        /**
+         * Short tag above the title, e.g. "Unser Produkt", "Die Bohne".
+         */
+        label?: string | null;
         title: string;
         /**
-         * Keep the copy short enough to read at a glance.
+         * Two or three short sentences — readable at a glance.
          */
-        description: string;
+        description?: string | null;
+        /**
+         * Pick a product to show a button that opens its shop page.
+         */
+        product?: (string | null) | Product;
+        /**
+         * e.g. "Zum Produkt". Only shown when a product is picked.
+         */
+        buttonLabel?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -7441,14 +7445,15 @@ export interface HeroBannerBlockSelect<T extends boolean = true> {
 export interface HomeTempehStoryBlockSelect<T extends boolean = true> {
   visible?: T;
   heading?: T;
-  product?: T;
-  productLinkLabel?: T;
   slides?:
     | T
     | {
         image?: T;
+        label?: T;
         title?: T;
         description?: T;
+        product?: T;
+        buttonLabel?: T;
         id?: T;
       };
   id?: T;
