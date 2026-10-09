@@ -1029,6 +1029,15 @@ export interface Page {
       | null;
   };
   /**
+   * Homepage-only story carousel shown directly beneath the hero. It does not affect other pages.
+   */
+  homepageStory?: {
+    /**
+     * The shop product is always the first slide. Add 3–4 educational slides after it.
+     */
+    homeSections?: HomeTempehStoryBlock[] | null;
+  };
+  /**
    * Content blocks. Leave empty for Voucher, Gastronomy, and Fermentation pages (they use dedicated tabs).
    */
   layout?:
@@ -2491,6 +2500,48 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HomeTempehStoryBlock".
+ */
+export interface HomeTempehStoryBlock {
+  /**
+   * Hide this homepage section without deleting its content.
+   */
+  visible?: boolean | null;
+  /**
+   * Heading displayed above the slides.
+   */
+  heading?: string | null;
+  /**
+   * The product shown on the first slide, with its photo and a button to its shop page. Leave empty to use Käferbohnen-Tempeh.
+   */
+  product?: (string | null) | Product;
+  /**
+   * Button label linking to the live Käferbohnen-Tempeh shop product.
+   */
+  productLinkLabel?: string | null;
+  /**
+   * Add 3–4 educational slides. The live Käferbohnen-Tempeh product is always shown first.
+   */
+  slides?:
+    | {
+        /**
+         * Optional photo for this slide. Without one, a photo of the shop product is used — upload a different image for each topic when you have one.
+         */
+        image?: (string | null) | Media;
+        title: string;
+        /**
+         * Keep the copy short enough to read at a glance.
+         */
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'homeTempehStory';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6551,6 +6602,15 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  homepageStory?:
+    | T
+    | {
+        homeSections?:
+          | T
+          | {
+              homeTempehStory?: T | HomeTempehStoryBlockSelect<T>;
+            };
+      };
   layout?:
     | T
     | {
@@ -7232,6 +7292,26 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HomeTempehStoryBlock_select".
+ */
+export interface HomeTempehStoryBlockSelect<T extends boolean = true> {
+  visible?: T;
+  heading?: T;
+  product?: T;
+  productLinkLabel?: T;
+  slides?:
+    | T
+    | {
+        image?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

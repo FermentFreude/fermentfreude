@@ -11,6 +11,7 @@ import { FeaturedProductCardsComponent } from '@/blocks/FeaturedProductCards/Com
 import { FormBlock } from '@/blocks/Form/Component'
 import { HelpFaqBlockComponent } from '@/blocks/HelpFaqBlock/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
+import { HomeTempehStoryBlockComponent } from '@/blocks/HomeTempehStory/Component'
 import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { OnlineCourseSliderBlock } from '@/blocks/OnlineCourseSlider/Component'
@@ -41,6 +42,10 @@ import React, { Fragment } from 'react'
 
 import type { Page } from '../payload-types'
 
+type RenderableBlocks =
+  | NonNullable<Page['layout']>
+  | NonNullable<NonNullable<Page['homepageStory']>['homeSections']>
+
 const blockComponents = {
   contactBlock: ContactBlockComponent,
   archive: ArchiveBlock,
@@ -52,6 +57,7 @@ const blockComponents = {
   formBlock: FormBlock,
   helpFaq: HelpFaqBlockComponent,
   heroBanner: HeroBannerBlock,
+  homeTempehStory: HomeTempehStoryBlockComponent,
   mediaBlock: MediaBlock,
   ourStory: OurStoryBlock,
   pressBanner: PressBannerBlock,
@@ -103,7 +109,7 @@ const globalWrappers: Record<
 }
 
 export const RenderBlocks: React.FC<{
-  blocks: NonNullable<Page['layout']>
+  blocks: RenderableBlocks
   slug?: string
   locale?: 'de' | 'en'
 }> = (props) => {
@@ -115,6 +121,8 @@ export const RenderBlocks: React.FC<{
   const isLegalPage = slug === 'agb' || slug === 'datenschutz' || slug === 'impressum'
   const isPresse = slug === 'presse'
   const isHelp = slug === 'help'
+  // Full-bleed sections with their own background + padding: an outer margin would show as a white band
+  const FLUSH_BLOCKS = new Set<string>(['homeTempehStory'])
   const gapClass = isAbout
     ? 'mb-12 last:mb-0' // increased margin between sections on About
     : isShop
@@ -170,7 +178,7 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className={gapClass} key={index}>
+                <div className={FLUSH_BLOCKS.has(blockType) ? undefined : gapClass} key={index}>
                   <Block
                     {...block}
                     id={blockId}

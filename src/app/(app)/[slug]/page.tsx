@@ -41,6 +41,7 @@ export default async function Page({ params }: Args) {
   }
 
   const { hero, layout } = page
+  const homeSections = page.homepageStory?.homeSections
   const nextWorkshopDatesByHref = await getNextWorkshopDatesByHref(locale)
 
   const enrichedLayout = (layout ?? []).map((block) => {
@@ -76,6 +77,9 @@ export default async function Page({ params }: Args) {
       }
     >
       <RenderHero {...hero} locale={locale} />
+      {slug === 'home' && homeSections?.length ? (
+        <RenderBlocks blocks={homeSections} slug="home" locale={locale} />
+      ) : null}
       <RenderBlocks blocks={enrichedLayout} slug={slug} locale={locale} />
       {slug === 'home' && !enrichedLayout.some((b) => b?.blockType === 'testimonials') && (
         <TestimonialsGlobalWrapper id="testimonials" />

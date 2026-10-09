@@ -6,6 +6,7 @@ import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { gastronomySectionBlocks } from '@/blocks/GastronomySections/config'
+import { HomeTempehStory } from '@/blocks/HomeTempehStory/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
 import { CollectionGrid } from '@/blocks/CollectionGrid/config'
@@ -198,6 +199,27 @@ export const Pages: CollectionConfig = {
         {
           fields: [hero],
           label: 'Hero',
+        },
+        {
+          name: 'homepageStory',
+          label: 'Startseite — Käferbohnen Tempeh',
+          admin: {
+            condition: (data, siblingData) => (data?.slug ?? siblingData?.slug) === 'home',
+            description:
+              'Homepage-only story carousel shown directly beneath the hero. It does not affect other pages.',
+          },
+          fields: [
+            {
+              name: 'homeSections',
+              type: 'blocks',
+              blocks: [HomeTempehStory],
+              required: false,
+              admin: {
+                description:
+                  'The shop product is always the first slide. Add 3–4 educational slides after it.',
+              },
+            },
+          ],
         },
         {
           fields: [
