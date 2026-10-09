@@ -120,7 +120,7 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
       onTouchEnd={handleTouchEnd}
     >
       {/* ── Photo layer (all slides stacked, active one fades in) ── */}
-      <div className="relative mt-16 aspect-[3/2] w-full shrink-0 lg:absolute lg:inset-0 lg:mt-0 lg:aspect-auto">
+      <div className="relative mt-16 aspect-3/2 w-full shrink-0 lg:absolute lg:inset-0 lg:mt-0 lg:aspect-auto">
         {slides.map((s, i) => (
           <div
             key={i}
