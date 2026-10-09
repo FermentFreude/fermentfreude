@@ -191,7 +191,7 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
           >
             {/* Photo — opens up when first seen; drag / swipe to change */}
             <motion.div
-              className="relative aspect-[4/5] cursor-grab touch-pan-y overflow-hidden rounded-[2rem] bg-[#ECE5DE] active:cursor-grabbing sm:aspect-[4/3] lg:col-span-7 lg:aspect-auto lg:min-h-[36rem] [&_img]:pointer-events-none"
+              className="relative aspect-4/5 cursor-grab touch-pan-y overflow-hidden rounded-4xl bg-[#ECE5DE] active:cursor-grabbing sm:aspect-4/3 lg:col-span-7 lg:aspect-auto lg:min-h-144 [&_img]:pointer-events-none"
               initial={{ clipPath: 'inset(8% 8% 8% 8% round 32px)' }}
               animate={{
                 clipPath: seen ? 'inset(0% 0% 0% 0% round 32px)' : 'inset(8% 8% 8% 8% round 32px)',
@@ -236,7 +236,7 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
                     initial="enter"
                     animate={seen ? 'center' : 'enter'}
                     exit="exit"
-                    className="flex h-full min-h-[17rem] flex-col justify-center lg:min-h-0"
+                    className="flex h-full min-h-68 flex-col justify-center lg:min-h-0"
                   >
                     {/* Big outlined slide number */}
                     <Mask>
@@ -311,7 +311,7 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
                         // Tall invisible hit area, thin visible bar
                         className="group flex h-6 flex-1 cursor-pointer items-center"
                       >
-                        <span className="relative h-[3px] w-full overflow-hidden rounded-full bg-ff-near-black/15 transition-colors group-hover:bg-ff-near-black/30">
+                        <span className="relative h-0.75 w-full overflow-hidden rounded-full bg-ff-near-black/15 transition-colors group-hover:bg-ff-near-black/30">
                           <motion.span
                             className="absolute inset-0 origin-left rounded-full bg-ff-near-black"
                             style={{
