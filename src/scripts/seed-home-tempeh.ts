@@ -3,10 +3,11 @@
  *
  * Run: pnpm seed home-tempeh
  *
- * Non-destructive: adds the section if the home page doesn't have it, and fills
- * in English only where the English text is still empty. Never touches images.
- * The section's blocks are shared between languages (only the text inside is
- * localized), so English is written onto the same block/slide IDs as German.
+ * Non-destructive: adds the section as the first block in Content (editors can
+ * drag it anywhere) if the home page doesn't have it, and fills in English only
+ * where the English text is still empty. Never touches images. Content blocks
+ * are shared between languages (only the text inside is localized), so English
+ * is written onto the same block/slide IDs as German.
  */
 import config from '@payload-config'
 import type { HomeTempehStoryBlock } from '@/payload-types'
@@ -96,7 +97,7 @@ async function seedHomeTempeh() {
   })
   const productId = products[0]?.id
 
-  // ── 1. German first (Payload generates block + slide IDs) ──
+  // ── 1. German first: add as the first Content block (Payload generates the IDs) ──
   const de = await payload.findByID({
     collection: 'pages',
     id: home.id,
@@ -104,9 +105,9 @@ async function seedHomeTempeh() {
     depth: 0,
     overrideAccess: true,
   })
-  const deSections = de.homepageStory?.homeSections ?? []
+  const deLayout = de.layout ?? []
 
-  if (!deSections.some(isStoryBlock)) {
+  if (!deLayout.some(isStoryBlock)) {
     await payload.update({
       collection: 'pages',
       id: home.id,
@@ -114,27 +115,26 @@ async function seedHomeTempeh() {
       context: ctx,
       overrideAccess: true,
       data: {
-        homepageStory: {
-          homeSections: [
-            ...deSections,
-            {
-              blockType: 'homeTempehStory',
-              visible: true,
-              product: productId,
-              heading: COPY.de.heading,
-              productLinkLabel: COPY.de.productLinkLabel,
-              slides: COPY.de.slides.map((s) => ({ ...s })),
-            },
-          ],
-        },
+        layout: [
+          {
+            blockType: 'homeTempehStory',
+            visible: true,
+            product: productId,
+            heading: COPY.de.heading,
+            productLinkLabel: COPY.de.productLinkLabel,
+            slides: COPY.de.slides.map((s) => ({ ...s })),
+          },
+          ...deLayout,
+        ],
       },
     })
-    payload.logger.info('Added the tempeh story section (German).')
+    payload.logger.info('Added the tempeh story as the first Content block (German).')
   } else {
-    payload.logger.info('German home page already has the tempeh section — left unchanged.')
+    payload.logger.info('German home page already has the tempeh block — left unchanged.')
   }
 
   // ── 2. Read back the IDs, then English onto the same block + slides ──
+  // fallbackLocale: false so other blocks keep their own (possibly empty) English text
   const en = await payload.findByID({
     collection: 'pages',
     id: home.id,
@@ -143,9 +143,9 @@ async function seedHomeTempeh() {
     depth: 0,
     overrideAccess: true,
   })
-  const enSections = en.homepageStory?.homeSections ?? []
-  const enBlock = enSections.find(isStoryBlock)
-  if (!enBlock) throw new Error('Tempeh section missing after the German save.')
+  const enLayout = en.layout ?? []
+  const enBlock = enLayout.find(isStoryBlock)
+  if (!enBlock) throw new Error('Tempeh block missing after the German save.')
 
   if (enBlock.heading?.trim()) {
     payload.logger.info('English tempeh text already exists — left unchanged.')
@@ -159,21 +159,19 @@ async function seedHomeTempeh() {
     context: ctx,
     overrideAccess: true,
     data: {
-      homepageStory: {
-        homeSections: enSections.map((block) =>
-          block.id === enBlock.id
-            ? {
-                ...enBlock,
-                heading: COPY.en.heading,
-                productLinkLabel: COPY.en.productLinkLabel,
-                slides: (enBlock.slides ?? []).map((slide, i) => ({
-                  ...slide,
-                  ...(COPY.en.slides[i] ?? {}),
-                })),
-              }
-            : block,
-        ),
-      },
+      layout: enLayout.map((block) =>
+        block.id === enBlock.id
+          ? {
+              ...enBlock,
+              heading: COPY.en.heading,
+              productLinkLabel: COPY.en.productLinkLabel,
+              slides: (enBlock.slides ?? []).map((slide, i) => ({
+                ...slide,
+                ...(COPY.en.slides[i] ?? {}),
+              })),
+            }
+          : block,
+      ),
     },
   })
   payload.logger.info('Added the tempeh story text (English).')

@@ -201,27 +201,6 @@ export const Pages: CollectionConfig = {
           label: 'Hero',
         },
         {
-          name: 'homepageStory',
-          label: 'Startseite — Käferbohnen Tempeh',
-          admin: {
-            condition: (data, siblingData) => (data?.slug ?? siblingData?.slug) === 'home',
-            description:
-              'Homepage-only story carousel shown directly beneath the hero. It does not affect other pages.',
-          },
-          fields: [
-            {
-              name: 'homeSections',
-              type: 'blocks',
-              blocks: [HomeTempehStory],
-              required: false,
-              admin: {
-                description:
-                  'The shop product is always the first slide. Add 3–4 educational slides after it.',
-              },
-            },
-          ],
-        },
-        {
           fields: [
             {
               name: 'layout',
@@ -232,6 +211,7 @@ export const Pages: CollectionConfig = {
                 Content,
                 FeatureCards,
                 HeroBanner,
+                HomeTempehStory,
                 MediaBlock,
                 Archive,
                 Carousel,

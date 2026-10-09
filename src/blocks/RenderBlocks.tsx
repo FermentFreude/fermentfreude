@@ -42,9 +42,7 @@ import React, { Fragment } from 'react'
 
 import type { Page } from '../payload-types'
 
-type RenderableBlocks =
-  | NonNullable<Page['layout']>
-  | NonNullable<NonNullable<Page['homepageStory']>['homeSections']>
+type RenderableBlocks = NonNullable<Page['layout']>
 
 const blockComponents = {
   contactBlock: ContactBlockComponent,
