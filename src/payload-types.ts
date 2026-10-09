@@ -913,11 +913,11 @@ export interface Page {
            */
           image: string | Media;
           /**
-           * Shown huge across the whole photo when the page opens, then fades away as visitors scroll. Keep it to one short word, e.g. "FermentFreude".
+           * e.g. "FermentFreude"
            */
           eyebrow?: string | null;
           /**
-           * Main headline — appears after the big word, as visitors scroll. Press Enter for a line break.
+           * Main headline. Press Enter for a line break.
            */
           title: string;
           /**
@@ -925,7 +925,7 @@ export interface Page {
            */
           titleAccent?: string | null;
           /**
-           * One or two short sentences — appear last on scroll, with the buttons. Press Enter for a line break.
+           * One or two short sentences below the title. Press Enter for a line break.
            */
           description?: string | null;
           /**
