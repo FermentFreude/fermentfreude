@@ -112,8 +112,13 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           trigger: galleryEl,
           start: 'center center',
           end: '+=100%',
-          scrub: true,
+          // Number = seconds the animation takes to catch up with the scroll.
+          // `true` followed every wheel step exactly, which felt jerky.
+          scrub: 0.6,
           pin: galleryWrap,
+          // Starts pinning a moment early so a fast scroll doesn't overshoot and snap back
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
       })
       tl.add(flip)
@@ -126,13 +131,26 @@ export const VoucherCtaBlock: React.FC<Props> = ({
     () => {
       createFlip()
 
-      // Recreate on resize (same as CodePen)
-      const onResize = () => createFlip()
+      // Recreate on resize — debounced, and only when the width changes:
+      // a height-only resize is the mobile address bar, and rebuilding the
+      // pinned gallery mid-scroll made the page jump.
+      let lastWidth = window.innerWidth
+      let resizeTimer: ReturnType<typeof setTimeout> | undefined
+      const onResize = () => {
+        if (window.innerWidth === lastWidth) return
+        lastWidth = window.innerWidth
+        clearTimeout(resizeTimer)
+        resizeTimer = setTimeout(createFlip, 200)
+      }
       window.addEventListener('resize', onResize)
+      const cleanupResize = () => {
+        clearTimeout(resizeTimer)
+        window.removeEventListener('resize', onResize)
+      }
 
       /* ── Text reveal animation ── */
       const section = sectionRef.current
-      if (!section) return
+      if (!section) return cleanupResize
 
       const eyebrowEl = section.querySelector('[data-anim="eyebrow"]')
       const headingEl = section.querySelector('[data-anim="heading"]')
@@ -166,7 +184,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         .to(ctaEl, { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: 'back.out(1.7)' }, '-=0.4')
 
       return () => {
-        window.removeEventListener('resize', onResize)
+        cleanupResize()
         flipCtxRef.current?.revert()
       }
     },
