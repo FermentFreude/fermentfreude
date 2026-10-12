@@ -1,5 +1,6 @@
 'use client'
 
+import { SectionHeader } from '@/components/SectionHeader'
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { cn } from '@/utilities/cn'
@@ -41,6 +42,7 @@ export type TempehSlide = {
 }
 
 type Props = {
+  eyebrow?: string | null
   heading: string
   slides: TempehSlide[]
   locale: 'de' | 'en'
@@ -133,7 +135,7 @@ function PunchWord({ text }: { text: string }) {
     <span ref={boxRef} className="block w-full">
       <span
         ref={wordRef}
-        className="inline-block whitespace-nowrap font-display text-[clamp(4.5rem,9vw,8.5rem)] font-bold leading-[1.15] tracking-[-0.045em] text-transparent [-webkit-text-stroke:1.5px_#1a1a1a]"
+        className="inline-block whitespace-nowrap font-display text-[clamp(3rem,6vw,5.5rem)] font-bold leading-[1.15] tracking-[-0.045em] text-transparent [-webkit-text-stroke:1.5px_#1a1a1a]"
         style={fontSize ? { fontSize: `${fontSize}px` } : undefined}
       >
         {text}
@@ -147,7 +149,7 @@ function Mask({ children, className }: { children: React.ReactNode; className?: 
   return <span className={cn('block overflow-hidden', className)}>{children}</span>
 }
 
-export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Props) {
+export function HomeTempehStoryCarousel({ eyebrow, heading, slides: items, locale }: Props) {
   const count = items.length
 
   const [[index, dir], setPage] = useState<[number, number]>([0, 1])
@@ -209,25 +211,14 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
         className="overflow-hidden bg-[#F6F0E8] section-padding-md"
       >
         <div className="container mx-auto container-padding">
-          {/* ── Header: huge heading, rises in when first seen ── */}
-          <div>
-            <motion.h2
-              initial="enter"
-              animate={seen ? 'center' : 'enter'}
-              variants={textGroup}
-              className="font-display text-[clamp(2.75rem,8vw,7.5rem)] font-bold leading-[0.92] tracking-[-0.045em] text-ff-near-black"
-            >
-              <Mask className="pb-[0.08em] -mb-[0.08em]">
-                <motion.span variants={rise} className="block">
-                  {heading}
-                </motion.span>
-              </Mask>
-            </motion.h2>
-          </div>
+          {/* ── Header — shared editorial pattern, fades in when first seen ── */}
+          <motion.div initial="enter" animate={seen ? 'center' : 'enter'} variants={fadeUp}>
+            <SectionHeader eyebrow={eyebrow} heading={heading} />
+          </motion.div>
 
           {/* ── Stage ── */}
           <div
-            className="mt-10 grid gap-8 outline-none lg:mt-14 lg:grid-cols-12 lg:gap-14"
+            className="mt-8 grid gap-8 outline-none lg:mt-10 lg:grid-cols-12 lg:gap-12"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             onFocusCapture={() => setFocused(true)}
@@ -239,7 +230,7 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
           >
             {/* Photo — opens up when first seen; drag / swipe to change */}
             <motion.div
-              className="relative aspect-4/5 cursor-grab touch-pan-y overflow-hidden rounded-4xl bg-[#ECE5DE] active:cursor-grabbing sm:aspect-4/3 lg:col-span-7 lg:aspect-auto lg:min-h-144 [&_img]:pointer-events-none"
+              className="relative aspect-4/5 cursor-grab touch-pan-y overflow-hidden rounded-4xl bg-[#ECE5DE] active:cursor-grabbing sm:aspect-4/3 lg:col-span-7 lg:aspect-auto lg:h-[30rem] [&_img]:pointer-events-none"
               initial={{ clipPath: 'inset(8% 8% 8% 8% round 32px)' }}
               animate={{
                 clipPath: seen ? 'inset(0% 0% 0% 0% round 32px)' : 'inset(8% 8% 8% 8% round 32px)',
@@ -306,7 +297,7 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
                     <h3
                       className={cn(
                         slide.label ? 'mt-2' : 'mt-6',
-                        '  font-display text-[clamp(1.75rem,3vw,2.75rem)] font-bold leading-[1.05] tracking-[-0.025em] text-ff-near-black',
+                        '  text-subheading font-display font-bold tracking-[-0.02em] text-ff-near-black',
                       )}
                     >
                       <Mask className="pb-[0.1em] -mb-[0.1em]">

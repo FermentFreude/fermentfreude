@@ -1,5 +1,6 @@
 'use client'
 
+import { SectionHeader } from '@/components/SectionHeader'
 import { FadeIn } from '@/components/FadeIn'
 import type { FeatureCardsBlock as FeatureCardsBlockType } from '@/payload-types'
 import gsap from 'gsap'
@@ -79,13 +80,12 @@ export const FeatureCardsBlock: React.FC<Props> = ({
   const resolvedButtonLabel = buttonLabel ?? DEFAULTS.buttonLabel
   const resolvedButtonLink = buttonLink ?? DEFAULTS.buttonLink
   const titlesRef = useRef<(HTMLHeadingElement | null)[]>([])
-  const eyebrowRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      /* ── Eyebrow entrance (whole words — avoids mid-word wraps) ── */
-      if (eyebrowRef.current) {
-        const el = eyebrowRef.current
+      /* ── Card titles: animate by word so line breaks never split a word ── */
+      titlesRef.current.forEach((el) => {
+        if (!el) return
         const text = (el.textContent ?? '').trim()
         const words = text.split(/\s+/).filter(Boolean)
         el.innerHTML = words
@@ -93,34 +93,6 @@ export const FeatureCardsBlock: React.FC<Props> = ({
             (word) =>
               `<span class="inline-block whitespace-nowrap" style="opacity:0">${word}</span>`,
           )
-          .join(' ')
-        const wordSpans = el.querySelectorAll(':scope > span')
-        gsap.fromTo(
-          wordSpans,
-          { opacity: 0, y: -24, rotateX: 45 },
-          {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            duration: 0.55,
-            stagger: 0.08,
-            ease: 'power4.out',
-            scrollTrigger: {
-              trigger: el,
-              start: 'top 90%',
-              toggleActions: 'play none none none',
-            },
-          },
-        )
-      }
-
-      /* ── Card titles: animate by word so line breaks never split a word ── */
-      titlesRef.current.forEach((el) => {
-        if (!el) return
-        const text = (el.textContent ?? '').trim()
-        const words = text.split(/\s+/).filter(Boolean)
-        el.innerHTML = words
-          .map((word) => `<span class="inline-block whitespace-nowrap" style="opacity:0">${word}</span>`)
           .join(' ')
         const wordSpans = el.querySelectorAll(':scope > span')
         gsap.fromTo(
@@ -148,50 +120,16 @@ export const FeatureCardsBlock: React.FC<Props> = ({
 
   return (
     <section id={id ?? undefined} className="bg-white section-padding-md">
-      <div className="container mx-auto px-6 flex flex-col items-start gap-(--space-content-xl)">
-        {/* Header: gold eyebrow on top, then heading row + description */}
-        <div className="flex flex-col gap-(--space-content-sm) w-full">
-          {/* Top row: heading block */}
-          <div className="flex w-full">
-            <FadeIn className="flex flex-col items-start gap-2 flex-1">
-              {resolvedEyebrow && (
-                <span
-                  ref={eyebrowRef}
-                  className="text-eyebrow font-bold uppercase tracking-[0.15em] text-ff-gold-accent shrink-0"
-                  style={{ perspective: '600px', color: 'var(--ff-gold-accent)' }}
-                >
-                  {resolvedEyebrow}
-                </span>
-              )}
-              <h2
-                className="font-display font-black"
-                style={{
-                  fontSize: 'clamp(2rem, 4.5vw, 3.75rem)',
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.01em',
-                  color: '#000',
-                }}
-              >
-                {resolvedHeading}
-              </h2>
-            </FadeIn>
-          </div>
-
-          {/* Description below the heading row */}
-          {resolvedDescription && (
-            <FadeIn className="max-w-264">
-              <p
-                className="font-display font-bold"
-                style={{
-                  fontSize: 'clamp(0.9rem, 1.4vw, 1.25rem)',
-                  lineHeight: 1.6,
-                  color: '#000',
-                }}
-              >
-                {resolvedDescription}
-              </p>
-            </FadeIn>
-          )}
+      <div className="container mx-auto container-padding flex flex-col items-start gap-(--space-content-xl)">
+        {/* Header — shared editorial pattern (rule · label · heading · intro) */}
+        <div className="flex w-full flex-col gap-(--space-content-sm)">
+          <FadeIn className="w-full">
+            <SectionHeader
+              eyebrow={resolvedEyebrow}
+              heading={resolvedHeading}
+              intro={resolvedDescription}
+            />
+          </FadeIn>
 
           {/* CTA directly under the intro description */}
           {resolvedButtonLabel && (
@@ -247,14 +185,11 @@ export const FeatureCardsBlock: React.FC<Props> = ({
                 >
                   {card.title}
                 </h3>
-                <p className="text-body-sm text-ff-black mt-2">
-                  {card.description}
-                </p>
+                <p className="text-body-sm text-ff-black mt-2">{card.description}</p>
               </div>
             </FadeIn>
           ))}
         </div>
-
       </div>
     </section>
   )

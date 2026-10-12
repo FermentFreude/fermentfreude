@@ -125,8 +125,10 @@ export const RenderBlocks: React.FC<{
     ? 'mb-12 last:mb-0' // increased margin between sections on About
     : isShop
       ? 'first:mt-0 last:mb-0' // shop: no extra margin between blocks (each block handles its own padding)
-      : isPresse || isHelp
-        ? 'first:mt-0 last:mb-0'
+      : isPresse || isHelp || slug === 'home'
+        ? // home: sections sit edge to edge, each owns its padding → one even
+          // editorial rhythm instead of padding + margin doubling into white bands
+          'first:mt-0 last:mb-0'
         : 'my-[var(--space-section-md)] first:mt-0 last:mb-0'
 
   const hasBlocks = blockList.length > 0

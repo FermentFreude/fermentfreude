@@ -3095,7 +3095,11 @@ export interface HomeTempehStoryBlock {
    */
   visible?: boolean | null;
   /**
-   * Large heading above the carousel, e.g. "Käferbohnen Tempeh".
+   * Short label above the heading, e.g. "Aus unserer Fermentküche".
+   */
+  eyebrow?: string | null;
+  /**
+   * Heading above the carousel, e.g. "Tempeh & Kimchi aus Graz".
    */
   heading?: string | null;
   /**
@@ -4581,6 +4585,10 @@ export interface VoucherCtaBlock {
    * URL the button links to (e.g. "/voucher").
    */
   buttonLink?: string | null;
+  /**
+   * Optional picture of the voucher, e.g. a printed-card mockup. Shown to the right of the text on desktop and below it on mobile. Make sure no real, unused voucher code is readable in it.
+   */
+  voucherImage?: (string | null) | Media;
   /**
    * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
    */
@@ -7448,6 +7456,7 @@ export interface HeroBannerBlockSelect<T extends boolean = true> {
  */
 export interface HomeTempehStoryBlockSelect<T extends boolean = true> {
   visible?: T;
+  eyebrow?: T;
   heading?: T;
   slides?:
     | T
@@ -8065,6 +8074,7 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
   description?: T;
   buttonLabel?: T;
   buttonLink?: T;
+  voucherImage?: T;
   galleryImages?:
     | T
     | {

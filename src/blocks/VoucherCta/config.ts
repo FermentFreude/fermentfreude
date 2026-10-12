@@ -69,6 +69,17 @@ export const VoucherCta: Block = {
       },
     },
     {
+      name: 'voucherImage',
+      type: 'upload',
+      relationTo: 'media',
+      required: false,
+      label: 'Voucher picture (next to the text)',
+      admin: {
+        description:
+          'Optional picture of the voucher, e.g. a printed-card mockup. Shown to the right of the text on desktop and below it on mobile. Make sure no real, unused voucher code is readable in it.',
+      },
+    },
+    {
       name: 'galleryImages',
       type: 'array',
       label: 'Bento Gallery Images',
@@ -124,8 +135,7 @@ export const VoucherCta: Block = {
       required: false,
       label: 'Custom Background Color (HEX)',
       admin: {
-        description:
-          'Used when "Background Theme" is set to "Custom color". Example: #ECE5DE',
+        description: 'Used when "Background Theme" is set to "Custom color". Example: #ECE5DE',
         condition: (_, siblingData) => siblingData?.backgroundTheme === 'custom',
       },
     },

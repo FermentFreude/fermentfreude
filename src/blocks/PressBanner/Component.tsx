@@ -1,5 +1,6 @@
 'use client'
 
+import { SectionHeader } from '@/components/SectionHeader'
 import { Media } from '@/components/Media'
 import type { Media as MediaType, PressBannerBlock as PressBannerBlockType } from '@/payload-types'
 import Link from 'next/link'
@@ -28,7 +29,8 @@ const DEFAULTS = {
     },
     {
       outlet: 'Junge Wirtschaft Steiermark',
-      quote: 'Second place at the Elevator Pitch — 90 seconds for regional ingredients and food innovation.',
+      quote:
+        'Second place at the Elevator Pitch — 90 seconds for regional ingredients and food innovation.',
       linkLabel: 'Read more',
       url: 'https://www.meinbezirk.at/graz/c-wirtschaft/vier-junge-unternehmen-ueberzeugten-beim-elevator-pitch_a7820501',
     },
@@ -62,9 +64,7 @@ export const PressBannerBlock: React.FC<Props> = ({
   const shouldAutoplay = autoplay !== false
 
   const resolvedSlides: Slide[] =
-    Array.isArray(slides) && slides.length > 0
-      ? slides
-      : (DEFAULTS.slides as unknown as Slide[])
+    Array.isArray(slides) && slides.length > 0 ? slides : (DEFAULTS.slides as unknown as Slide[])
 
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -106,18 +106,14 @@ export const PressBannerBlock: React.FC<Props> = ({
       aria-label={resolvedHeading}
     >
       <div className="container mx-auto container-padding">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center max-w-(--content-wide) mx-auto">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-14">
           {/* Left — heading / CTA */}
           <div className="lg:col-span-5 flex flex-col gap-5">
-            {resolvedEyebrow ? (
-              <p className="text-eyebrow text-ff-gold-accent tracking-[0.18em]">{resolvedEyebrow}</p>
-            ) : null}
-            <h2 className="text-section-heading font-display font-bold text-ff-near-black">
-              {resolvedHeading}
-            </h2>
-            {resolvedDescription ? (
-              <p className="text-body-lg text-ff-near-black/70 max-w-md">{resolvedDescription}</p>
-            ) : null}
+            <SectionHeader
+              eyebrow={resolvedEyebrow}
+              heading={resolvedHeading}
+              intro={resolvedDescription}
+            />
             {resolvedCtaLabel && resolvedCtaLink ? (
               <div className="pt-1">
                 <Link

@@ -18,12 +18,21 @@ export const HomeTempehStory: Block = {
       },
     },
     {
+      name: 'eyebrow',
+      type: 'text',
+      localized: true,
+      label: 'Small label',
+      admin: {
+        description: 'Short label above the heading, e.g. "Aus unserer Fermentküche".',
+      },
+    },
+    {
       name: 'heading',
       type: 'text',
       localized: true,
       label: 'Section heading',
       admin: {
-        description: 'Large heading above the carousel, e.g. "Käferbohnen Tempeh".',
+        description: 'Heading above the carousel, e.g. "Tempeh & Kimchi aus Graz".',
       },
     },
     {

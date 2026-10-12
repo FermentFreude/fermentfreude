@@ -351,13 +351,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                   >
                     <div className="shrink-0 pb-4 md:pb-5 w-full">
                       <FadeIn>
-                        <p
-                          className="text-eyebrow font-bold mb-2 text-[10px] tracking-[0.18em] uppercase"
-                          style={{ color: 'var(--ff-gold)' }}
-                        >
+                        <p className="text-eyebrow font-bold mb-2 tracking-[0.18em] uppercase text-ff-near-black/55">
                           {resolvedEyebrow}
                         </p>
-                        <h2 className="text-ff-black mb-3 md:mb-4 text-[1.9rem] sm:text-[2.2rem] md:text-[2.5rem] lg:text-inherit leading-[0.95]">
+                        <h2 className="text-section-heading font-display font-bold leading-[1.05] tracking-[-0.025em] text-ff-black mb-3 md:mb-4">
                           {workshop.title}
                         </h2>
                         <p className="text-body-sm text-ff-olive text-[13px] sm:text-sm md:text-[15px] leading-relaxed">
