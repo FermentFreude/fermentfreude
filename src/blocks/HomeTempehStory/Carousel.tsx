@@ -125,7 +125,7 @@ function PunchWord({ text }: { text: string }) {
     <span ref={boxRef} className="block w-full">
       <span
         ref={wordRef}
-        className="inline-block whitespace-nowrap font-display text-[clamp(4.5rem,9vw,8.5rem)] font-bold leading-[0.95] tracking-[-0.045em] text-transparent [-webkit-text-stroke:1.5px_#1a1a1a]"
+        className="inline-block whitespace-nowrap font-display text-[clamp(4.5rem,9vw,8.5rem)] font-bold leading-[1.15] tracking-[-0.045em] text-transparent [-webkit-text-stroke:1.5px_#1a1a1a]"
         style={fontSize ? { fontSize: `${fontSize}px` } : undefined}
       >
         {text}
@@ -279,8 +279,8 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
                     className="flex h-full min-h-68 flex-col justify-center lg:min-h-0"
                   >
                     {/* Big outlined punch word — falls back to the slide number.
-                        Extra mask padding keeps descenders (g, p) from being clipped. */}
-                    <Mask className="pb-[0.22em] -mb-[0.22em]">
+                        Its line height (1.15) leaves room for descenders (g, p) inside the mask. */}
+                    <Mask>
                       <motion.span variants={rise} className="block" aria-hidden>
                         <PunchWord text={slide.punchWord || pad(index + 1)} />
                       </motion.span>
