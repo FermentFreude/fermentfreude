@@ -16,7 +16,7 @@ import {
   type Variants,
 } from 'motion/react'
 import Link from 'next/link'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
  *  TEMPEH STORY CAROUSEL — every slide (product first, then the story)
@@ -32,6 +32,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 export type TempehSlide = {
   key: string
   label?: string | null
+  punchWord?: string | null
   title: string
   description?: string | null
   image: MediaType | null
@@ -92,6 +93,45 @@ const fadeUp: Variants = {
   enter: { opacity: 0, y: 16 },
   center: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
   exit: { opacity: 0, y: -8, transition: { duration: 0.25 } },
+}
+
+/**
+ * The big outlined word (or number) above each slide's text. Starts at the
+ * full display size; a long word shrinks just enough to fit the column instead
+ * of overflowing it.
+ */
+function PunchWord({ text }: { text: string }) {
+  const boxRef = useRef<HTMLSpanElement>(null)
+  const wordRef = useRef<HTMLSpanElement>(null)
+  const [fontSize, setFontSize] = useState<number | null>(null)
+
+  useLayoutEffect(() => {
+    const box = boxRef.current
+    const word = wordRef.current
+    if (!box || !word) return
+    const fit = () => {
+      word.style.fontSize = '' // measure at the full display size first
+      const full = parseFloat(getComputedStyle(word).fontSize)
+      const ratio = box.clientWidth / word.offsetWidth
+      setFontSize(ratio < 1 ? full * ratio * 0.98 : null)
+    }
+    fit()
+    const observer = new ResizeObserver(fit)
+    observer.observe(box)
+    return () => observer.disconnect()
+  }, [text])
+
+  return (
+    <span ref={boxRef} className="block w-full">
+      <span
+        ref={wordRef}
+        className="inline-block whitespace-nowrap font-display text-[clamp(4.5rem,9vw,8.5rem)] font-bold leading-[1.15] tracking-[-0.045em] text-transparent [-webkit-text-stroke:1.5px_#1a1a1a]"
+        style={fontSize ? { fontSize: `${fontSize}px` } : undefined}
+      >
+        {text}
+      </span>
+    </span>
+  )
 }
 
 /** Clips its child so it can rise in from below / lift out above. */
@@ -238,14 +278,11 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
                     exit="exit"
                     className="flex h-full min-h-68 flex-col justify-center lg:min-h-0"
                   >
-                    {/* Big outlined slide number */}
+                    {/* Big outlined punch word — falls back to the slide number.
+                        Its line height (1.15) leaves room for descenders (g, p) inside the mask. */}
                     <Mask>
-                      <motion.span
-                        variants={rise}
-                        className="block font-display text-[clamp(4.5rem,9vw,8.5rem)] font-bold leading-[0.9] tracking-[-0.04em] text-transparent [-webkit-text-stroke:1.5px_#1a1a1a]"
-                        aria-hidden
-                      >
-                        {pad(index + 1)}
+                      <motion.span variants={rise} className="block" aria-hidden>
+                        <PunchWord text={slide.punchWord || pad(index + 1)} />
                       </motion.span>
                     </Mask>
 

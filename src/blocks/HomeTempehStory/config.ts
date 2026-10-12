@@ -55,6 +55,17 @@ export const HomeTempehStory: Block = {
           },
         },
         {
+          name: 'punchWord',
+          type: 'text',
+          localized: true,
+          maxLength: 16,
+          label: 'Punch word',
+          admin: {
+            description:
+              'One short, bold word shown huge in outline above the text, e.g. "Nussig." or "Steirisch.". Leave empty to show the slide number instead.',
+          },
+        },
+        {
           type: 'row',
           fields: [
             {
