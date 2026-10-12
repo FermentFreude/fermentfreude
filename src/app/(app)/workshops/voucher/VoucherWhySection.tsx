@@ -95,7 +95,7 @@ export function VoucherWhySection({
             className="relative mx-auto mb-14 max-w-3xl overflow-hidden rounded-[var(--radius-2xl)] bg-ff-warm-gray shadow-[0_8px_30px_rgb(0,0,0,0.08)] animate-fade-in-up"
             style={{ animationDelay: '0ms', animationFillMode: 'both' }}
           >
-            <div className="aspect-[3/2] w-full">
+            <div className="aspect-3/2 w-full">
               <Media
                 resource={image}
                 fill

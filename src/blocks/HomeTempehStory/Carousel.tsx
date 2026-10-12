@@ -19,7 +19,8 @@ import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
- *  TEMPEH STORY CAROUSEL — product first, then 3–4 explainer slides.
+ *  TEMPEH STORY CAROUSEL — every slide (product first, then the story)
+ *  comes from the CMS: photo, small label, title, text, optional button.
  *
  *  Photo (left) wipes in over the previous one, which drifts back
  *  underneath. Text (right) rises in line by line behind masks.
@@ -28,34 +29,20 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  *  Drag / swipe the photo, use the arrows, or ← → keys.
  * ═══════════════════════════════════════════════════════════════ */
 
-export type HomeTempehStorySlide = {
-  id: string
-  title: string
-  description: string
-  image: MediaType | null
-}
-
-export type HomeTempehProductSlide = {
-  title: string
-  description?: string | null
-  href: string
-  image: MediaType | null
-}
-
-type Props = {
-  heading: string
-  productLinkLabel: string
-  product: HomeTempehProductSlide
-  slides: HomeTempehStorySlide[]
-  locale: 'de' | 'en'
-}
-
-type Slide = {
+export type TempehSlide = {
   key: string
+  label?: string | null
   title: string
   description?: string | null
   image: MediaType | null
   href?: string
+  buttonLabel?: string
+}
+
+type Props = {
+  heading: string
+  slides: TempehSlide[]
+  locale: 'de' | 'en'
 }
 
 const AUTOPLAY_SECONDS = 7
@@ -112,22 +99,7 @@ function Mask({ children, className }: { children: React.ReactNode; className?: 
   return <span className={cn('block overflow-hidden', className)}>{children}</span>
 }
 
-export function HomeTempehStoryCarousel({
-  heading,
-  productLinkLabel,
-  product,
-  slides,
-  locale,
-}: Props) {
-  const items: Slide[] = [
-    { key: 'shop-product', ...product },
-    ...slides.map((s) => ({
-      key: s.id,
-      title: s.title,
-      description: s.description,
-      image: s.image,
-    })),
-  ]
+export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Props) {
   const count = items.length
 
   const [[index, dir], setPage] = useState<[number, number]>([0, 1])
@@ -219,7 +191,7 @@ export function HomeTempehStoryCarousel({
           >
             {/* Photo — opens up when first seen; drag / swipe to change */}
             <motion.div
-              className="relative aspect-[4/5] cursor-grab touch-pan-y overflow-hidden rounded-[2rem] bg-[#ECE5DE] active:cursor-grabbing sm:aspect-[4/3] lg:col-span-7 lg:aspect-auto lg:min-h-[36rem] [&_img]:pointer-events-none"
+              className="relative aspect-4/5 cursor-grab touch-pan-y overflow-hidden rounded-4xl bg-[#ECE5DE] active:cursor-grabbing sm:aspect-4/3 lg:col-span-7 lg:aspect-auto lg:min-h-144 [&_img]:pointer-events-none"
               initial={{ clipPath: 'inset(8% 8% 8% 8% round 32px)' }}
               animate={{
                 clipPath: seen ? 'inset(0% 0% 0% 0% round 32px)' : 'inset(8% 8% 8% 8% round 32px)',
@@ -264,7 +236,7 @@ export function HomeTempehStoryCarousel({
                     initial="enter"
                     animate={seen ? 'center' : 'enter'}
                     exit="exit"
-                    className="flex h-full min-h-[17rem] flex-col justify-center lg:min-h-0"
+                    className="flex h-full min-h-68 flex-col justify-center lg:min-h-0"
                   >
                     {/* Big outlined slide number */}
                     <Mask>
@@ -277,7 +249,21 @@ export function HomeTempehStoryCarousel({
                       </motion.span>
                     </Mask>
 
-                    <h3 className="mt-6 font-display text-[clamp(1.75rem,3vw,2.75rem)] font-bold leading-[1.05] tracking-[-0.025em] text-ff-near-black">
+                    {slide.label ? (
+                      <motion.p
+                        variants={fadeUp}
+                        className="mt-6 font-display text-xs font-bold uppercase tracking-[0.18em] text-ff-near-black/55"
+                      >
+                        {slide.label}
+                      </motion.p>
+                    ) : null}
+
+                    <h3
+                      className={cn(
+                        slide.label ? 'mt-2' : 'mt-6',
+                        '  font-display text-[clamp(1.75rem,3vw,2.75rem)] font-bold leading-[1.05] tracking-[-0.025em] text-ff-near-black',
+                      )}
+                    >
                       <Mask className="pb-[0.1em] -mb-[0.1em]">
                         <motion.span variants={rise} className="block">
                           {slide.title}
@@ -294,13 +280,13 @@ export function HomeTempehStoryCarousel({
                       </motion.p>
                     ) : null}
 
-                    {slide.href ? (
+                    {slide.href && slide.buttonLabel ? (
                       <motion.div variants={fadeUp} className="mt-8">
                         <Link
                           href={slide.href}
                           className="group inline-flex items-center gap-3 rounded-full bg-ff-near-black py-3 pl-6 pr-3 font-display text-sm font-bold text-white transition-colors hover:bg-black"
                         >
-                          {productLinkLabel}
+                          {slide.buttonLabel}
                           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-ff-near-black transition-transform duration-300 group-hover:rotate-45">
                             <ArrowUpRight className="h-4 w-4" aria-hidden />
                           </span>
@@ -325,7 +311,7 @@ export function HomeTempehStoryCarousel({
                         // Tall invisible hit area, thin visible bar
                         className="group flex h-6 flex-1 cursor-pointer items-center"
                       >
-                        <span className="relative h-[3px] w-full overflow-hidden rounded-full bg-ff-near-black/15 transition-colors group-hover:bg-ff-near-black/30">
+                        <span className="relative h-0.75 w-full overflow-hidden rounded-full bg-ff-near-black/15 transition-colors group-hover:bg-ff-near-black/30">
                           <motion.span
                             className="absolute inset-0 origin-left rounded-full bg-ff-near-black"
                             style={{

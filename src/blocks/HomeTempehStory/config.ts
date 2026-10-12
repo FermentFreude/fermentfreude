@@ -4,8 +4,8 @@ export const HomeTempehStory: Block = {
   slug: 'homeTempehStory',
   interfaceName: 'HomeTempehStoryBlock',
   labels: {
-    singular: 'Käferbohnen Tempeh Story',
-    plural: 'Käferbohnen Tempeh Story',
+    singular: 'Tempeh Story Carousel',
+    plural: 'Tempeh Story Carousels',
   },
   fields: [
     {
@@ -14,7 +14,7 @@ export const HomeTempehStory: Block = {
       label: 'Show this section',
       defaultValue: true,
       admin: {
-        description: 'Hide this homepage section without deleting its content.',
+        description: 'Hide this section without deleting its content.',
       },
     },
     {
@@ -23,68 +23,94 @@ export const HomeTempehStory: Block = {
       localized: true,
       label: 'Section heading',
       admin: {
-        description: 'Heading displayed above the slides.',
-      },
-    },
-    {
-      name: 'product',
-      type: 'relationship',
-      relationTo: 'products',
-      label: 'Shop product (first slide)',
-      admin: {
-        description:
-          'The product shown on the first slide, with its photo and a button to its shop page. Leave empty to use Käferbohnen-Tempeh.',
-      },
-    },
-    {
-      name: 'productLinkLabel',
-      type: 'text',
-      localized: true,
-      label: 'Product link label',
-      admin: {
-        description: 'Button label linking to the live Käferbohnen-Tempeh shop product.',
+        description: 'Large heading above the carousel, e.g. "Käferbohnen Tempeh".',
       },
     },
     {
       name: 'slides',
       type: 'array',
-      minRows: 3,
-      maxRows: 4,
+      minRows: 2,
+      maxRows: 8,
       labels: {
-        singular: 'Tempeh story slide',
-        plural: 'Tempeh story slides',
+        singular: 'Slide',
+        plural: 'Slides',
       },
       admin: {
         description:
-          'Add 3–4 educational slides. The live Käferbohnen-Tempeh product is always shown first.',
+          'Slides play in this order — drag to reorder. Start with the product slide (pick the shop product so it gets a button), then explain tempeh.',
+        components: {
+          RowLabel: '@/blocks/HomeTempehStory/slideRowLabel.tsx#TempehSlideRowLabel',
+        },
       },
       fields: [
         {
           name: 'image',
           type: 'upload',
           relationTo: 'media',
-          label: 'Slide image',
+          required: true,
+          label: 'Photo',
           admin: {
             description:
-              'Optional photo for this slide. Without one, a photo of the shop product is used — upload a different image for each topic when you have one.',
+              'A full photo with a real background (no cut-out / transparent product images — they look odd in the animation). Landscape works best.',
           },
         },
         {
-          name: 'title',
-          type: 'text',
-          required: true,
-          localized: true,
-          label: 'Slide title',
+          type: 'row',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+              localized: true,
+              label: 'Small label',
+              admin: {
+                width: '35%',
+                description: 'Short tag above the title, e.g. "Unser Produkt", "Die Bohne".',
+              },
+            },
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+              localized: true,
+              label: 'Title',
+              admin: { width: '65%' },
+            },
+          ],
         },
         {
           name: 'description',
           type: 'textarea',
-          required: true,
           localized: true,
-          label: 'Slide text',
+          label: 'Text',
           admin: {
-            description: 'Keep the copy short enough to read at a glance.',
+            description: 'Two or three short sentences — readable at a glance.',
           },
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'product',
+              type: 'relationship',
+              relationTo: 'products',
+              label: 'Shop product (optional)',
+              admin: {
+                width: '50%',
+                description: 'Pick a product to show a button that opens its shop page.',
+              },
+            },
+            {
+              name: 'buttonLabel',
+              type: 'text',
+              localized: true,
+              label: 'Button text',
+              admin: {
+                width: '50%',
+                description: 'e.g. "Zum Produkt". Only shown when a product is picked.',
+                condition: (_, siblingData) => Boolean(siblingData?.product),
+              },
+            },
+          ],
         },
       ],
     },

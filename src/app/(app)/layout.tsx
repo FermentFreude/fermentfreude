@@ -5,6 +5,7 @@ import { Header } from '@/components/Header'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { OpeningPopups } from '@/components/OpeningPopups'
 import { SplashScreen } from '@/components/SplashScreen'
+import { ScrollTriggerRefresh } from '@/components/ScrollTriggerRefresh'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { getLocale } from '@/utilities/getLocale'
@@ -64,6 +65,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <SplashScreen />
           </div>
           <LivePreviewListener />
+          <ScrollTriggerRefresh />
 
           {/* Skip-to-main-content link for keyboard / screen-reader users */}
           <a
