@@ -32,6 +32,7 @@ export async function HomeTempehStoryBlockComponent(props: Props) {
       return {
         key: slide.id ?? `slide-${i}`,
         label: slide.label?.trim() || null,
+        punchWord: slide.punchWord?.trim() || null,
         title: slide.title,
         description: slide.description,
         image: isMedia(slide.image) ? slide.image : null,

@@ -3108,6 +3108,10 @@ export interface HomeTempehStoryBlock {
          */
         image: string | Media;
         /**
+         * One short, bold word shown huge in outline above the text, e.g. "Nussig." or "Steirisch.". Leave empty to show the slide number instead.
+         */
+        punchWord?: string | null;
+        /**
          * Short tag above the title, e.g. "Unser Produkt", "Die Bohne".
          */
         label?: string | null;
@@ -7449,6 +7453,7 @@ export interface HomeTempehStoryBlockSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
+        punchWord?: T;
         label?: T;
         title?: T;
         description?: T;
