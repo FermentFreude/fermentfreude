@@ -163,7 +163,7 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
       {/* ── Text ───────────────────────────────────────────── */}
       <div className="relative z-10 -mt-14 flex flex-1 flex-col justify-center pb-24 lg:absolute lg:inset-x-0 lg:bottom-0 lg:mt-0 lg:flex-none lg:pb-28">
         <div className="container mx-auto container-padding">
-          <div className={cn('max-w-xl lg:max-w-2xl', !isRevealed && 'opacity-0')}>
+          <div className={cn('max-w-xl lg:max-w-4xl', !isRevealed && 'opacity-0')}>
             {slide.eyebrow && (
               <p
                 className={cn(
@@ -178,7 +178,7 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
 
             <h1
               className={cn(
-                'font-display text-hero font-bold leading-[1.05] tracking-[-0.025em] text-white',
+                'font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[1.02] tracking-[-0.035em] text-white',
                 animateIn && 'hero-anim-title',
                 isExiting && 'hero-exit-content',
               )}

@@ -45,6 +45,7 @@ export async function HomeTempehStoryBlockComponent(props: Props) {
 
   return (
     <HomeTempehStoryCarousel
+      eyebrow={props.eyebrow?.trim() || null}
       heading={props.heading?.trim() || DEFAULTS.heading}
       slides={slides}
       locale={locale === 'de' ? 'de' : 'en'}

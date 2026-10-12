@@ -3095,7 +3095,11 @@ export interface HomeTempehStoryBlock {
    */
   visible?: boolean | null;
   /**
-   * Large heading above the carousel, e.g. "Käferbohnen Tempeh".
+   * Short label above the heading, e.g. "Aus unserer Fermentküche".
+   */
+  eyebrow?: string | null;
+  /**
+   * Heading above the carousel, e.g. "Tempeh & Kimchi aus Graz".
    */
   heading?: string | null;
   /**
@@ -7448,6 +7452,7 @@ export interface HeroBannerBlockSelect<T extends boolean = true> {
  */
 export interface HomeTempehStoryBlockSelect<T extends boolean = true> {
   visible?: T;
+  eyebrow?: T;
   heading?: T;
   slides?:
     | T

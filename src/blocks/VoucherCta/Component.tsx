@@ -1,5 +1,6 @@
 'use client'
 
+import { SectionHeader } from '@/components/SectionHeader'
 import { Media } from '@/components/Media'
 import type { Media as MediaType, VoucherCtaBlock as VoucherCtaBlockType } from '@/payload-types'
 import { useGSAP } from '@gsap/react'
@@ -70,8 +71,6 @@ export const VoucherCtaBlock: React.FC<Props> = ({
 
   // Text colors — white on image, dark on light panel, white on dark panel
   const useWhiteText = hasBgImage || isDark
-  const headingColorClass = useWhiteText ? 'text-white' : 'text-ff-near-black'
-  const descColorClass = useWhiteText ? 'text-white/85' : 'text-ff-gray-text'
   const ctaBorderClass = useWhiteText
     ? 'border-white/40 text-white hover:border-white hover:bg-white hover:text-ff-near-black'
     : 'border-ff-charcoal/35 text-ff-near-black hover:border-ff-charcoal hover:bg-ff-charcoal hover:text-white'
@@ -223,7 +222,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
       {/* ── Text + Button below gallery ── */}
       <div
         data-anim="content"
-        className="relative flex flex-col items-center overflow-hidden text-center section-padding-md container-padding"
+        className="relative overflow-hidden section-padding-md"
         style={{ backgroundColor: panelBgColor }}
       >
         {backgroundImage ? (
@@ -239,28 +238,21 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           </>
         ) : null}
 
-        <div className="relative z-10 max-w-2xl flex flex-col items-center gap-3 sm:gap-5">
-          {resolvedEyebrow ? (
-            <p
-              data-anim="eyebrow"
-              className="text-eyebrow font-bold uppercase tracking-[0.2em] text-ff-gold-accent"
-            >
-              {resolvedEyebrow}
-            </p>
-          ) : null}
-          <h2
-            data-anim="heading"
-            className={`font-display font-bold tracking-tight text-balance ${headingColorClass}`}
-          >
-            {resolvedHeading}
-          </h2>
-          <p data-anim="desc" className={`text-body-lg max-w-lg leading-relaxed ${descColorClass}`}>
-            {resolvedDescription}
-          </p>
+        {/* Shared editorial header, left-aligned; data-anim hooks keep the GSAP text reveal */}
+        <div className="container relative z-10 mx-auto container-padding">
+          <SectionHeader
+            tone={useWhiteText ? 'light' : 'dark'}
+            eyebrow={resolvedEyebrow}
+            heading={resolvedHeading}
+            intro={resolvedDescription}
+            eyebrowProps={{ 'data-anim': 'eyebrow' } as React.HTMLAttributes<HTMLParagraphElement>}
+            headingProps={{ 'data-anim': 'heading' } as React.HTMLAttributes<HTMLHeadingElement>}
+            introProps={{ 'data-anim': 'desc' } as React.HTMLAttributes<HTMLParagraphElement>}
+          />
           <Link
             data-anim="cta"
             href={resolvedButtonLink}
-            className={`inline-flex items-center justify-center rounded-full border-2 bg-transparent px-6 py-2.5 font-display text-base font-bold uppercase tracking-widest transition-all hover:scale-[1.03] active:scale-[0.97] ${ctaBorderClass}`}
+            className={`mt-8 inline-flex items-center justify-center rounded-full border-2 bg-transparent px-6 py-2.5 font-display text-base font-bold uppercase tracking-widest transition-all hover:scale-[1.03] active:scale-[0.97] ${ctaBorderClass}`}
           >
             {resolvedButtonLabel}
           </Link>
