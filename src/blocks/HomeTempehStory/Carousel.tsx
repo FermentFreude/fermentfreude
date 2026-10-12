@@ -104,17 +104,25 @@ function PunchWord({ text }: { text: string }) {
   const boxRef = useRef<HTMLSpanElement>(null)
   const wordRef = useRef<HTMLSpanElement>(null)
   const [fontSize, setFontSize] = useState<number | null>(null)
+  /** Full display size from the CSS clamp(), read while no override is applied */
+  const fullSizeRef = useRef<number | null>(null)
 
   useLayoutEffect(() => {
     const box = boxRef.current
     const word = wordRef.current
     if (!box || !word) return
+    fullSizeRef.current = null
+    // Never write the size to the DOM here — React owns it via `fontSize`
     const fit = () => {
-      word.style.fontSize = '' // measure at the full display size first
-      const full = parseFloat(getComputedStyle(word).fontSize)
-      const ratio = box.clientWidth / word.offsetWidth
-      setFontSize(ratio < 1 ? full * ratio * 0.98 : null)
+      const current = parseFloat(getComputedStyle(word).fontSize)
+      if (fullSizeRef.current === null) fullSizeRef.current = current
+      const width = word.offsetWidth
+      if (!width || !box.clientWidth) return
+      const target = current * (box.clientWidth / width) * 0.98
+      const full = fullSizeRef.current
+      setFontSize(target >= full ? null : target)
     }
+    setFontSize(null)
     fit()
     const observer = new ResizeObserver(fit)
     observer.observe(box)
@@ -266,9 +274,9 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
               </AnimatePresence>
             </motion.div>
 
-            {/* Text + controls */}
-            <div className="flex flex-col lg:col-span-5">
-              <div className="flex-1" aria-live={playing ? 'off' : 'polite'}>
+            {/* Text + controls — min-w-0 so a long punch word can't widen the column (it shrinks to fit instead) */}
+            <div className="flex min-w-0 flex-col lg:col-span-5">
+              <div className="min-w-0 flex-1" aria-live={playing ? 'off' : 'polite'}>
                 <AnimatePresence mode="wait" initial={false} custom={dir}>
                   <motion.div
                     key={slide.key}
@@ -383,6 +391,20 @@ export function HomeTempehStoryCarousel({ heading, slides: items, locale }: Prop
               )}
             </div>
           </div>
+        </div>
+
+        {/* Every slide's text for search engines: the animated panel above only
+            renders the active slide, so slides 2+ were missing from the HTML.
+            `hidden` keeps it out of view and away from screen readers (they get
+            the live panel), while crawlers still read the text and follow links. */}
+        <div hidden>
+          {items.map((item) => (
+            <article key={item.key}>
+              <h3>{item.title}</h3>
+              {item.description ? <p>{item.description}</p> : null}
+              {item.href && item.buttonLabel ? <a href={item.href}>{item.buttonLabel}</a> : null}
+            </article>
+          ))}
         </div>
       </section>
     </MotionConfig>
