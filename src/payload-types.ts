@@ -4586,6 +4586,10 @@ export interface VoucherCtaBlock {
    */
   buttonLink?: string | null;
   /**
+   * Optional picture of the voucher, e.g. a printed-card mockup. Shown to the right of the text on desktop and below it on mobile. Make sure no real, unused voucher code is readable in it.
+   */
+  voucherImage?: (string | null) | Media;
+  /**
    * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
    */
   galleryImages?:
@@ -8070,6 +8074,7 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
   description?: T;
   buttonLabel?: T;
   buttonLink?: T;
+  voucherImage?: T;
   galleryImages?:
     | T
     | {

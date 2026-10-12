@@ -34,6 +34,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   buttonLabel,
   buttonLink,
   galleryImages,
+  voucherImage,
   backgroundImage,
   backgroundTheme,
   customBackgroundColor,
@@ -64,6 +65,8 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   // When a background image is present we always use a dark scrim + white text
   // (matches the Kombucha / Tempeh voucher CTA look). The admin overlayOpacity
   // (0–90%) only controls the strength of that scrim. Defaults to 55%.
+  const hasVoucherImage =
+    typeof voucherImage === 'object' && voucherImage !== null && 'url' in voucherImage
   const hasBgImage = backgroundImage != null
   const overlayPct = Math.min(90, Math.max(0, overlayOpacity ?? 55))
   const overlayAlpha = overlayPct / 100
@@ -238,24 +241,42 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           </>
         ) : null}
 
-        {/* Shared editorial header, left-aligned; data-anim hooks keep the GSAP text reveal */}
-        <div className="container relative z-10 mx-auto container-padding">
-          <SectionHeader
-            tone={useWhiteText ? 'light' : 'dark'}
-            eyebrow={resolvedEyebrow}
-            heading={resolvedHeading}
-            intro={resolvedDescription}
-            eyebrowProps={{ 'data-anim': 'eyebrow' } as React.HTMLAttributes<HTMLParagraphElement>}
-            headingProps={{ 'data-anim': 'heading' } as React.HTMLAttributes<HTMLHeadingElement>}
-            introProps={{ 'data-anim': 'desc' } as React.HTMLAttributes<HTMLParagraphElement>}
-          />
-          <Link
-            data-anim="cta"
-            href={resolvedButtonLink}
-            className={`mt-8 inline-flex items-center justify-center rounded-full border-2 bg-transparent px-6 py-2.5 font-display text-base font-bold uppercase tracking-widest transition-all hover:scale-[1.03] active:scale-[0.97] ${ctaBorderClass}`}
-          >
-            {resolvedButtonLabel}
-          </Link>
+        {/* Shared editorial header, left-aligned; data-anim hooks keep the GSAP text reveal.
+            With a voucher picture: text left + picture right on desktop, picture below on mobile. */}
+        <div
+          className={`container relative z-10 mx-auto container-padding ${
+            hasVoucherImage ? 'grid items-center gap-10 lg:grid-cols-2 lg:gap-16' : ''
+          }`}
+        >
+          <div>
+            <SectionHeader
+              tone={useWhiteText ? 'light' : 'dark'}
+              eyebrow={resolvedEyebrow}
+              heading={resolvedHeading}
+              intro={resolvedDescription}
+              eyebrowProps={
+                { 'data-anim': 'eyebrow' } as React.HTMLAttributes<HTMLParagraphElement>
+              }
+              headingProps={{ 'data-anim': 'heading' } as React.HTMLAttributes<HTMLHeadingElement>}
+              introProps={{ 'data-anim': 'desc' } as React.HTMLAttributes<HTMLParagraphElement>}
+            />
+            <Link
+              data-anim="cta"
+              href={resolvedButtonLink}
+              className={`mt-8 inline-flex items-center justify-center rounded-full border-2 bg-transparent px-6 py-2.5 font-display text-base font-bold uppercase tracking-widest transition-all hover:scale-[1.03] active:scale-[0.97] ${ctaBorderClass}`}
+            >
+              {resolvedButtonLabel}
+            </Link>
+          </div>
+          {hasVoucherImage ? (
+            <div data-anim="voucher-image" className="overflow-hidden rounded-3xl">
+              <Media
+                resource={voucherImage}
+                imgClassName="h-auto w-full"
+                size="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
