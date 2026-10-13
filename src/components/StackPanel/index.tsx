@@ -45,15 +45,16 @@ export function StackPanel({ children, index, overlap = index > 0, last = false 
     resize.observe(el)
     window.addEventListener('resize', measure)
 
-    // How far the next panel has slid over this one
+    // Share of this panel the next one already covers: 0 while the next panel
+    // is still below this one's bottom edge (nothing hidden yet) → 1 fully covered
     let frame = 0
     const update = () => {
       frame = 0
       const next = el.nextElementSibling as HTMLElement | null
       if (!next) return
+      const own = el.getBoundingClientRect()
       const nextTop = next.getBoundingClientRect().top
-      const vh = window.innerHeight
-      covered.set(Math.min(1, Math.max(0, 1 - nextTop / vh)))
+      covered.set(Math.min(1, Math.max(0, (own.bottom - nextTop) / own.height)))
     }
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update)
@@ -69,8 +70,9 @@ export function StackPanel({ children, index, overlap = index > 0, last = false 
     }
   }, [covered])
 
-  const scale = useTransform(covered, [0, 1], [1, 0.94])
-  const shade = useTransform(covered, [0, 1], [0, 0.45])
+  // Subtle: the covered panel sinks back just a little
+  const scale = useTransform(covered, [0, 1], [1, 0.97])
+  const shade = useTransform(covered, [0, 1], [0, 0.3])
 
   return (
     <div
@@ -78,9 +80,14 @@ export function StackPanel({ children, index, overlap = index > 0, last = false 
       className={cn(
         'relative',
         overlap &&
-          '-mt-8 overflow-hidden rounded-t-[2rem] shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:-mt-10 md:rounded-t-[2.5rem]',
+          // No negative margin: the previous panel is always seen in full before this one covers it
+          'overflow-hidden rounded-t-[2rem] shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:rounded-t-[2.5rem]',
       )}
-      style={{ position: last ? 'relative' : 'sticky', top, zIndex: index + 1 }}
+      style={
+        last
+          ? { position: 'relative', zIndex: index + 1 }
+          : { position: 'sticky', top, zIndex: index + 1 }
+      }
     >
       <motion.div className="origin-top" style={last || reduce ? undefined : { scale }}>
         {children}

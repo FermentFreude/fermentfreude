@@ -64,11 +64,18 @@ export default async function Page({ params }: Args) {
     hero.type === 'foodPresentationSlider' ||
     hero.type === 'highImpact'
   const isLegalPage = LEGAL_SLUGS.includes(slug)
-  // Home: the product sections directly under the hero slide over it like stacked cards
-  const STACKED_BLOCKS = new Set(['productShowcase', 'homeTempehStory'])
+  // Home: the product showcase directly under the hero slides over it like a stacked card
+  const STACKED_BLOCKS = new Set(['productShowcase'])
+  // Experimental: on Home the new product showcase replaces the old Tempeh & Kimchi
+  // carousel. The old block stays saved in the CMS (and keeps showing wherever
+  // this code isn't deployed) — it's only skipped here.
+  const pageLayout =
+    slug === 'home' && enrichedLayout.some((b) => b?.blockType === 'productShowcase')
+      ? enrichedLayout.filter((b) => b?.blockType !== 'homeTempehStory')
+      : enrichedLayout
   const stackBlocks: typeof enrichedLayout = []
   if (slug === 'home') {
-    for (const block of enrichedLayout) {
+    for (const block of pageLayout) {
       if (!block || !STACKED_BLOCKS.has(block.blockType) || block.visible === false) break
       stackBlocks.push(block)
     }
@@ -101,8 +108,8 @@ export default async function Page({ params }: Args) {
       ) : (
         <RenderHero {...hero} locale={locale} />
       )}
-      <RenderBlocks blocks={enrichedLayout.slice(stackBlocks.length)} slug={slug} locale={locale} />
-      {slug === 'home' && !enrichedLayout.some((b) => b?.blockType === 'testimonials') && (
+      <RenderBlocks blocks={pageLayout.slice(stackBlocks.length)} slug={slug} locale={locale} />
+      {slug === 'home' && !pageLayout.some((b) => b?.blockType === 'testimonials') && (
         <TestimonialsGlobalWrapper id="testimonials" />
       )}
     </article>
