@@ -91,10 +91,20 @@ function LayerImg({ img, shadow }: { img: LayerImage; shadow?: boolean }) {
  * The big word, sized so its widest line spans the stage width without
  * getting taller than the stage. One mask per line; letters are animated.
  */
-function BigWord({ text, active }: { text: string; active: boolean }) {
+function BigWord({
+  text,
+  active,
+  sharedSize,
+  onFit,
+}: {
+  text: string
+  active: boolean
+  /** One size for every product's word (the smallest that fits them all) */
+  sharedSize: number | null
+  onFit: (size: number) => void
+}) {
   const boxRef = useRef<HTMLDivElement>(null)
   const measureRef = useRef<HTMLDivElement>(null)
-  const [size, setSize] = useState<number | null>(null)
   const lines = text
     .toUpperCase()
     .split('\n')
@@ -113,14 +123,17 @@ function BigWord({ text, active }: { text: string; active: boolean }) {
       if (!widest) return
       const byWidth = (box.clientWidth / widest) * 100
       const byHeight = box.clientHeight / (lines.length * 0.86)
-      setSize(Math.min(byWidth, byHeight) * 0.98)
+      // Report the largest size at which this word fits; the parent picks the
+      // smallest of all words so every product uses the same size
+      onFit(Math.min(byWidth, byHeight) * 0.96)
     }
     fit()
     const observer = new ResizeObserver(fit)
     observer.observe(box)
     document.fonts?.ready.then(fit)
     return () => observer.disconnect()
-  }, [text, lines.length])
+  }, [text, lines.length, onFit])
+  const size = sharedSize
 
   return (
     <div ref={boxRef} className="relative flex h-full w-full items-center justify-center">
@@ -191,13 +204,18 @@ function ProductPanel({
   count,
   tagline,
   trustPoints,
+  wordSize,
+  onWordFit,
 }: {
   slide: ShowcaseSlide
   index: number
   count: number
   tagline: string | null
   trustPoints: string[]
+  wordSize: number | null
+  onWordFit: (index: number, size: number) => void
 }) {
+  const reportFit = React.useCallback((size: number) => onWordFit(index, size), [index, onWordFit])
   const ref = useRef<HTMLElement>(null)
   const reduce = useReducedMotion()
   const active = useInView(ref, { once: true, amount: 0.45 })
@@ -230,6 +248,35 @@ function ProductPanel({
 
   const imageBox = 'relative h-[86%] w-[82%] sm:w-[62%] lg:-mt-[6%] lg:h-[84%] lg:w-[44%]'
 
+  /* Desktop: the big word sits exactly in the free band between the tagline
+   * and the product text, so it never touches either — on any screen height */
+  const taglineRef = useRef<HTMLParagraphElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const infoRef = useRef<HTMLDivElement>(null)
+  const [band, setBand] = useState<{ top: number; bottom: number } | null>(null)
+  useLayoutEffect(() => {
+    const stage = stageRef.current
+    const info = infoRef.current
+    if (!stage || !info) return
+    const GAP = 28
+    const measure = () => {
+      if (window.innerWidth < 1024) return setBand(null)
+      const st = stage.getBoundingClientRect()
+      const tagBottom = taglineRef.current?.getBoundingClientRect().bottom ?? st.top
+      // offsetTop/Height ignore the info's own entrance animation (transform)
+      const infoTop = info.offsetTop - stage.offsetTop
+      setBand({
+        top: Math.max(0, tagBottom - st.top) + GAP,
+        bottom: Math.max(0, stage.offsetHeight - infoTop) + GAP,
+      })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(stage)
+    observer.observe(info)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <section
       ref={ref}
@@ -242,19 +289,27 @@ function ProductPanel({
       <div className="container mx-auto container-padding flex-1">
         <div className="relative h-full">
           {tagline ? (
-            <p className="relative z-30 whitespace-pre-line pt-8 font-display text-xs font-bold uppercase leading-[1.5] tracking-[0.12em] text-[#1D1D1D]/80 lg:absolute lg:left-0 lg:top-0 lg:pt-10">
+            <p
+              ref={taglineRef}
+              className="relative z-30 whitespace-pre-line pt-8 font-display text-xs font-bold uppercase leading-[1.5] tracking-[0.12em] text-[#1D1D1D]/80 lg:absolute lg:left-0 lg:top-0 lg:pt-10"
+            >
               {tagline}
             </p>
           ) : null}
 
           {/* ── Stage: word, product, ingredients ── */}
-          <div className="relative h-[24rem] sm:h-[30rem] lg:h-[calc(100svh-4rem)]">
+          <div ref={stageRef} className="relative h-[24rem] sm:h-[30rem] lg:h-[calc(100svh-4rem)]">
             <motion.div
               className="absolute inset-x-0 top-[6%] bottom-[10%] lg:top-[13%] lg:bottom-[36%]"
-              style={reduce ? undefined : { x: wordX, y: wordY }}
+              style={{ ...(band ?? {}), ...(reduce ? {} : { x: wordX, y: wordY }) }}
             >
               <h2 className="sr-only">{slide.name}</h2>
-              <BigWord text={slide.bigWord} active={active} />
+              <BigWord
+                text={slide.bigWord}
+                active={active}
+                sharedSize={wordSize}
+                onFit={reportFit}
+              />
             </motion.div>
 
             <motion.div
@@ -288,6 +343,7 @@ function ProductPanel({
 
           {/* ── Info, bottom left ── */}
           <motion.div
+            ref={infoRef}
             variants={infoGroup}
             initial="enter"
             animate={active ? 'center' : 'enter'}
@@ -461,6 +517,14 @@ export function ProductShowcaseStack({ tagline, slides, trustPoints, locale }: P
   const containerRef = useRef<HTMLDivElement>(null)
   const label = locale === 'en' ? 'Products' : 'Produkte'
 
+  // Every product's big word at the same size: the largest that fits all of them
+  const [fits, setFits] = useState<Record<number, number>>({})
+  const onWordFit = React.useCallback((i: number, size: number) => {
+    setFits((prev) => (Math.abs((prev[i] ?? 0) - size) < 0.5 ? prev : { ...prev, [i]: size }))
+  }, [])
+  const known = Object.values(fits)
+  const wordSize = known.length === slides.length ? Math.min(...known) : null
+
   return (
     <MotionConfig reducedMotion="user">
       <div ref={containerRef} className="relative" aria-label={label} role="region">
@@ -472,6 +536,8 @@ export function ProductShowcaseStack({ tagline, slides, trustPoints, locale }: P
               count={slides.length}
               tagline={tagline}
               trustPoints={trustPoints}
+              wordSize={wordSize}
+              onWordFit={onWordFit}
             />
           </StackPanel>
         ))}
