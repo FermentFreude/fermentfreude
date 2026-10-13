@@ -1,7 +1,7 @@
 'use client'
 
-import { SectionHeader } from '@/components/SectionHeader'
 import { Media } from '@/components/Media'
+import { SectionHeader } from '@/components/SectionHeader'
 import type { Media as MediaType } from '@/payload-types'
 import { cn } from '@/utilities/cn'
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
@@ -20,14 +20,18 @@ import Link from 'next/link'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
- *  TEMPEH STORY CAROUSEL — every slide (product first, then the story)
- *  comes from the CMS: photo, small label, title, text, optional button.
+ *  TEMPEH STORY CAROUSEL — autoplay strip.
  *
- *  Photo (left) wipes in over the previous one, which drifts back
- *  underneath. Text (right) rises in line by line behind masks.
- *  A story-style progress bar plays each slide; it pauses on hover,
- *  keyboard focus, off-screen, or with reduced motion.
- *  Drag / swipe the photo, use the arrows, or ← → keys.
+ *  A horizontal strip of photo cards slides along on a soft spring.
+ *  The active card lines up with the section text; its neighbours
+ *  peek in at both edges and fade out. The strip loops endlessly
+ *  (cards are rendered from an unbounded index, so there is never a
+ *  jump back to the start). One progress bar fills before each slide;
+ *  it pauses on hover, keyboard focus, off-screen and reduced motion.
+ *  Drag / swipe the strip, use the arrows, or ← → keys.
+ *
+ *  Below the strip, the active slide's punch word, label, title, text
+ *  and button change with each card. Every slide comes from the CMS.
  * ═══════════════════════════════════════════════════════════════ */
 
 export type TempehSlide = {
@@ -48,59 +52,36 @@ type Props = {
   locale: 'de' | 'en'
 }
 
-const AUTOPLAY_SECONDS = 7
-const SWIPE_DISTANCE = 60
-const SWIPE_VELOCITY = 400
+const AUTOPLAY_SECONDS = 6
+const GAP = 20
+/** Cards rendered on each side of the active one (covers wide screens + drags) */
+const BUFFER = 3
+const SLIDE_SPRING = { type: 'spring', visualDuration: 0.75, bounce: 0.1 } as const
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
 const pad = (n: number) => String(n).padStart(2, '0')
-
-/* ── Photo: new one wipes in from the travel direction, old one drifts back ── */
-const photo: Variants = {
-  enter: (dir: number) => ({
-    clipPath: dir > 0 ? 'inset(0% 0% 0% 100%)' : 'inset(0% 100% 0% 0%)',
-    scale: 1.15,
-    zIndex: 2,
-  }),
-  center: {
-    clipPath: 'inset(0% 0% 0% 0%)',
-    scale: 1,
-    x: '0%',
-    zIndex: 2,
-    transition: {
-      clipPath: { duration: 1, ease: EASE },
-      scale: { duration: 1.4, ease: EASE },
-    },
-  },
-  exit: (dir: number) => ({
-    x: dir > 0 ? '-10%' : '10%',
-    scale: 0.96,
-    zIndex: 1,
-    transition: { duration: 1, ease: EASE },
-  }),
-}
+const mod = (n: number, m: number) => ((n % m) + m) % m
 
 /* ── Text: masked lines rise in, lift out ── */
 const textGroup: Variants = {
   enter: {},
-  center: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } },
+  center: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
   exit: { transition: { staggerChildren: 0.03 } },
 }
 const rise: Variants = {
   enter: { y: '110%' },
-  center: { y: '0%', transition: { duration: 0.8, ease: EASE } },
-  exit: { y: '-110%', transition: { duration: 0.3, ease: [0.4, 0, 1, 1] } },
+  center: { y: '0%', transition: { duration: 0.7, ease: EASE } },
+  exit: { y: '-110%', transition: { duration: 0.28, ease: [0.4, 0, 1, 1] } },
 }
 const fadeUp: Variants = {
-  enter: { opacity: 0, y: 16 },
-  center: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.25 } },
+  enter: { opacity: 0, y: 14 },
+  center: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.22 } },
 }
 
 /**
- * The big outlined word (or number) above each slide's text. Starts at the
- * full display size; a long word shrinks just enough to fit the column instead
- * of overflowing it.
+ * The big outlined word (or number) for the active slide. Starts at the
+ * full display size; a long word shrinks just enough to fit its column.
  */
 function PunchWord({ text }: { text: string }) {
   const boxRef = useRef<HTMLSpanElement>(null)
@@ -149,58 +130,106 @@ function Mask({ children, className }: { children: React.ReactNode; className?: 
   return <span className={cn('block overflow-hidden', className)}>{children}</span>
 }
 
+/**
+ * Card size + where the active card starts, from the strip's width and the
+ * page container's left edge (so the active card lines up with the text).
+ */
+function useStripLayout(
+  viewportRef: React.RefObject<HTMLDivElement | null>,
+  alignRef: React.RefObject<HTMLDivElement | null>,
+) {
+  const [layout, setLayout] = useState({ cardW: 0, cardH: 0, left: 0 })
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current
+    const align = alignRef.current
+    if (!viewport || !align) return
+    const measure = () => {
+      const vw = viewport.clientWidth
+      const left = align.getBoundingClientRect().left - viewport.getBoundingClientRect().left
+      const contentW = align.clientWidth
+      const desktop = vw >= 1024
+      // Desktop: landscape cards ~44% of the content width; mobile: almost full width
+      const cardW = desktop ? Math.min(680, contentW * 0.44) : contentW * 0.86
+      const cardH = cardW * (desktop ? 0.62 : 0.78)
+      setLayout({ cardW, cardH, left })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(viewport)
+    return () => observer.disconnect()
+  }, [viewportRef, alignRef])
+  return layout
+}
+
 export function HomeTempehStoryCarousel({ eyebrow, heading, slides: items, locale }: Props) {
   const count = items.length
-
-  const [[index, dir], setPage] = useState<[number, number]>([0, 1])
-  const slide = items[index] ?? items[0]
+  /** Unbounded index — the visible slide is items[mod(index, count)] */
+  const [index, setIndex] = useState(0)
+  const slide = items[mod(index, count)] ?? items[0]
 
   const sectionRef = useRef<HTMLElement>(null)
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const alignRef = useRef<HTMLDivElement>(null)
+  const { cardW, cardH, left } = useStripLayout(viewportRef, alignRef)
+  const step = cardW + GAP
+
   const seen = useInView(sectionRef, { once: true, amount: 0.3 })
-  const onScreen = useInView(sectionRef, { amount: 0.4 })
+  const onScreen = useInView(sectionRef, { amount: 0.35 })
   const reduce = useReducedMotion()
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
-  const playing = Boolean(seen && onScreen && !hovered && !focused && !reduce && count > 1)
-
-  /* ── Navigation ── */
-  const progress = useMotionValue(0)
-  const paginate = useCallback(
-    (step: number) => {
-      progress.set(0)
-      setPage(([i]) => [(i + step + count) % count, step])
-    },
-    [count, progress],
+  const [dragging, setDragging] = useState(false)
+  const playing = Boolean(
+    seen && onScreen && !hovered && !focused && !dragging && !reduce && count > 1,
   )
+
+  /* ── Strip position ── */
+  const x = useMotionValue(0)
+  // Keep the strip on the active card when the size changes (resize, first measure)
+  useEffect(() => {
+    if (step > 0) x.set(-index * step)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
+
+  const progress = useMotionValue(0)
   const goTo = useCallback(
     (target: number) => {
       progress.set(0)
-      setPage(([i]) => [target, target >= i ? 1 : -1])
+      setIndex(target)
+      if (step > 0) animate(x, -target * step, reduce ? { duration: 0 } : SLIDE_SPRING)
     },
-    [progress],
+    [progress, step, x, reduce],
   )
 
-  /* ── Autoplay: fills the active progress segment, then moves on ── */
+  /* ── Autoplay: fills the progress bar, then moves on ── */
   useEffect(() => {
     if (!playing) return
     const controls = animate(progress, 1, {
       // Resume from where a pause left off
       duration: AUTOPLAY_SECONDS * (1 - progress.get()),
       ease: 'linear',
-      onComplete: () => paginate(1),
+      onComplete: () => goTo(index + 1),
     })
     return () => controls.stop()
-  }, [playing, index, paginate, progress])
+  }, [playing, index, goTo, progress])
 
+  /* ── Drag: snap to the nearest card, with a flick moving one card ── */
   const onDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.x < -SWIPE_DISTANCE || info.velocity.x < -SWIPE_VELOCITY) paginate(1)
-    else if (info.offset.x > SWIPE_DISTANCE || info.velocity.x > SWIPE_VELOCITY) paginate(-1)
+    setDragging(false)
+    if (step <= 0) return
+    const position = -x.get() / step
+    const flick = Math.abs(info.velocity.x) > 350 ? -Math.sign(info.velocity.x) * 0.5 : 0
+    const target = Math.round(position + flick)
+    goTo(Math.max(index - 2, Math.min(index + 2, target)))
   }
 
   const labels =
     locale === 'en'
-      ? { prev: 'Previous slide', next: 'Next slide', goTo: 'Go to slide', slides: 'Slides' }
-      : { prev: 'Vorherige Folie', next: 'Nächste Folie', goTo: 'Zu Folie', slides: 'Folien' }
+      ? { prev: 'Previous slide', next: 'Next slide', slide: 'Slide', of: 'of' }
+      : { prev: 'Vorherige Folie', next: 'Nächste Folie', slide: 'Folie', of: 'von' }
+
+  const visible: number[] = []
+  for (let i = index - BUFFER; i <= index + BUFFER; i++) visible.push(i)
 
   return (
     <MotionConfig reducedMotion="user">
@@ -209,185 +238,183 @@ export function HomeTempehStoryCarousel({ eyebrow, heading, slides: items, local
         aria-roledescription="carousel"
         aria-label={heading}
         className="overflow-hidden bg-[#F6F0E8] section-padding-md"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocusCapture={() => setFocused(true)}
+        onBlurCapture={() => setFocused(false)}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowRight') goTo(index + 1)
+          if (e.key === 'ArrowLeft') goTo(index - 1)
+        }}
       >
         <div className="container mx-auto container-padding">
           {/* ── Header — shared editorial pattern, fades in when first seen ── */}
           <motion.div initial="enter" animate={seen ? 'center' : 'enter'} variants={fadeUp}>
             <SectionHeader eyebrow={eyebrow} heading={heading} />
           </motion.div>
+          {/* Invisible ruler: the active card lines up with this content edge */}
+          <div ref={alignRef} aria-hidden className="h-0" />
+        </div>
 
-          {/* ── Stage ── */}
-          <div
-            className="mt-8 grid gap-8 outline-none lg:mt-10 lg:grid-cols-12 lg:gap-12"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            onFocusCapture={() => setFocused(true)}
-            onBlurCapture={() => setFocused(false)}
-            onKeyDown={(e) => {
-              if (e.key === 'ArrowRight') paginate(1)
-              if (e.key === 'ArrowLeft') paginate(-1)
-            }}
-          >
-            {/* Photo — opens up when first seen; drag / swipe to change */}
+        {/* ── Strip: full-bleed, edges fade out so neighbours "peek" ── */}
+        <div
+          ref={viewportRef}
+          className="relative mt-8 w-full overflow-hidden lg:mt-10"
+          style={{
+            height: cardH || undefined,
+            // Fade only the margins: the previous card fades out in the left gutter,
+            // the next ones towards the right edge — the active card stays crisp
+            maskImage: `linear-gradient(to right, transparent 0px, black ${Math.round(left)}px, black 82%, transparent 100%)`,
+            WebkitMaskImage: `linear-gradient(to right, transparent 0px, black ${Math.round(left)}px, black 82%, transparent 100%)`,
+          }}
+        >
+          {cardW > 0 && (
             <motion.div
-              className="relative aspect-4/5 cursor-grab touch-pan-y overflow-hidden rounded-4xl bg-[#ECE5DE] active:cursor-grabbing sm:aspect-4/3 lg:col-span-7 lg:aspect-auto lg:h-[30rem] [&_img]:pointer-events-none"
-              initial={{ clipPath: 'inset(8% 8% 8% 8% round 32px)' }}
-              animate={{
-                clipPath: seen ? 'inset(0% 0% 0% 0% round 32px)' : 'inset(8% 8% 8% 8% round 32px)',
-              }}
-              transition={{ duration: 1.2, ease: EASE }}
+              className="absolute inset-y-0 cursor-grab touch-pan-y active:cursor-grabbing [&_img]:pointer-events-none"
+              style={{ x, left, width: step * (count + 2 * BUFFER) }}
               drag={count > 1 ? 'x' : false}
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.12}
+              dragMomentum={false}
+              onDragStart={() => setDragging(true)}
               onDragEnd={onDragEnd}
             >
-              <AnimatePresence initial={false} custom={dir}>
-                <motion.div
-                  key={slide.key}
-                  custom={dir}
-                  variants={photo}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  className="absolute inset-0"
-                >
-                  {slide.image ? (
-                    <Media
-                      resource={slide.image}
-                      fill
-                      imgClassName="object-cover"
-                      size="(max-width: 1024px) 100vw, 58vw"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 bg-[#ECE5DE]" />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </motion.div>
-
-            {/* Text + controls — min-w-0 so a long punch word can't widen the column (it shrinks to fit instead) */}
-            <div className="flex min-w-0 flex-col lg:col-span-5">
-              <div className="min-w-0 flex-1" aria-live={playing ? 'off' : 'polite'}>
-                <AnimatePresence mode="wait" initial={false} custom={dir}>
+              {visible.map((i) => {
+                const item = items[mod(i, count)]
+                const active = i === index
+                return (
                   <motion.div
-                    key={slide.key}
-                    variants={textGroup}
-                    initial="enter"
-                    animate={seen ? 'center' : 'enter'}
-                    exit="exit"
-                    className="flex h-full min-h-68 flex-col justify-center lg:min-h-0"
+                    key={i}
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`${labels.slide} ${mod(i, count) + 1} ${labels.of} ${count}`}
+                    aria-hidden={!active}
+                    className="absolute top-0 overflow-hidden rounded-3xl bg-[#ECE5DE]"
+                    style={{ left: i * step, width: cardW, height: cardH }}
+                    initial={false}
+                    animate={{ opacity: active ? 1 : 0.5, scale: active ? 1 : 0.96 }}
+                    transition={{ duration: 0.6, ease: EASE }}
+                    onClick={() => !active && goTo(i)}
                   >
-                    {/* Big outlined punch word — falls back to the slide number.
-                        Its line height (1.15) leaves room for descenders (g, p) inside the mask. */}
-                    <Mask>
-                      <motion.span variants={rise} className="block" aria-hidden>
-                        <PunchWord text={slide.punchWord || pad(index + 1)} />
-                      </motion.span>
-                    </Mask>
-
-                    {slide.label ? (
-                      <motion.p
-                        variants={fadeUp}
-                        className="mt-6 font-display text-xs font-bold uppercase tracking-[0.18em] text-ff-near-black/55"
-                      >
-                        {slide.label}
-                      </motion.p>
-                    ) : null}
-
-                    <h3
-                      className={cn(
-                        slide.label ? 'mt-2' : 'mt-6',
-                        '  text-subheading font-display font-bold tracking-[-0.02em] text-ff-near-black',
-                      )}
-                    >
-                      <Mask className="pb-[0.1em] -mb-[0.1em]">
-                        <motion.span variants={rise} className="block">
-                          {slide.title}
-                        </motion.span>
-                      </Mask>
-                    </h3>
-
-                    {slide.description ? (
-                      <motion.p
-                        variants={fadeUp}
-                        className="mt-4 max-w-md text-body-lg leading-relaxed text-ff-gray-text"
-                      >
-                        {slide.description}
-                      </motion.p>
-                    ) : null}
-
-                    {slide.href && slide.buttonLabel ? (
-                      <motion.div variants={fadeUp} className="mt-8">
-                        <Link
-                          href={slide.href}
-                          className="group inline-flex items-center gap-3 rounded-full bg-ff-near-black py-3 pl-6 pr-3 font-display text-sm font-bold text-white transition-colors hover:bg-black"
-                        >
-                          {slide.buttonLabel}
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-ff-near-black transition-transform duration-300 group-hover:rotate-45">
-                            <ArrowUpRight className="h-4 w-4" aria-hidden />
-                          </span>
-                        </Link>
-                      </motion.div>
+                    {item?.image ? (
+                      <Media
+                        resource={item.image}
+                        fill
+                        imgClassName="object-cover"
+                        size="(max-width: 1024px) 86vw, 50vw"
+                      />
                     ) : null}
                   </motion.div>
-                </AnimatePresence>
-              </div>
+                )
+              })}
+            </motion.div>
+          )}
+        </div>
 
-              {/* Story-style progress + arrows */}
-              {count > 1 && (
-                <div className="mt-10 flex items-center gap-5">
-                  <div className="flex flex-1 gap-1.5" role="group" aria-label={labels.slides}>
-                    {items.map((item, i) => (
-                      <button
-                        key={item.key}
-                        type="button"
-                        onClick={() => goTo(i)}
-                        aria-label={`${labels.goTo} ${i + 1}: ${item.title}`}
-                        aria-current={i === index ? 'true' : undefined}
-                        // Tall invisible hit area, thin visible bar
-                        className="group flex h-6 flex-1 cursor-pointer items-center"
-                      >
-                        <span className="relative h-0.75 w-full overflow-hidden rounded-full bg-ff-near-black/15 transition-colors group-hover:bg-ff-near-black/30">
-                          <motion.span
-                            className="absolute inset-0 origin-left rounded-full bg-ff-near-black"
-                            style={{
-                              scaleX: i === index ? (reduce ? 1 : progress) : i < index ? 1 : 0,
-                            }}
-                          />
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="flex shrink-0 gap-2">
-                    {[
-                      { label: labels.prev, step: -1, Icon: ArrowLeft },
-                      { label: labels.next, step: 1, Icon: ArrowRight },
-                    ].map(({ label, step, Icon }) => (
-                      <motion.button
-                        key={label}
-                        type="button"
-                        onClick={() => paginate(step)}
-                        aria-label={label}
-                        whileHover={{ scale: 1.06 }}
-                        whileTap={{ scale: 0.92 }}
-                        transition={{ type: 'spring', visualDuration: 0.25, bounce: 0.3 }}
-                        className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-ff-near-black/20 text-ff-near-black transition-colors hover:border-ff-near-black hover:bg-ff-near-black hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ff-near-black"
-                      >
-                        <Icon className="h-5 w-5" aria-hidden />
-                      </motion.button>
-                    ))}
-                  </div>
+        <div className="container mx-auto container-padding">
+          {/* ── Progress + counter + arrows ── */}
+          {count > 1 && (
+            <div className="mt-6 flex items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="h-[3px] w-[120px] overflow-hidden rounded-full bg-ff-near-black/15"
+                  aria-hidden
+                >
+                  <motion.span
+                    className="block h-full origin-left rounded-full bg-ff-near-black"
+                    style={{ scaleX: reduce ? 1 : progress }}
+                  />
                 </div>
-              )}
+                <span className="font-display text-xs font-bold tabular-nums tracking-[0.12em] text-ff-near-black/60">
+                  {pad(mod(index, count) + 1)} / {pad(count)}
+                </span>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                {[
+                  { label: labels.prev, step: -1, Icon: ArrowLeft },
+                  { label: labels.next, step: 1, Icon: ArrowRight },
+                ].map(({ label, step: dirStep, Icon }) => (
+                  <motion.button
+                    key={label}
+                    type="button"
+                    onClick={() => goTo(index + dirStep)}
+                    aria-label={label}
+                    whileHover={{ scale: 1.06 }}
+                    whileTap={{ scale: 0.92 }}
+                    transition={{ type: 'spring', visualDuration: 0.25, bounce: 0.3 }}
+                    className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-ff-near-black/20 text-ff-near-black transition-colors hover:border-ff-near-black hover:bg-ff-near-black hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ff-near-black"
+                  >
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </motion.button>
+                ))}
+              </div>
             </div>
+          )}
+
+          {/* ── Active slide text ── */}
+          <div className="mt-8 min-h-56 lg:mt-10" aria-live={playing ? 'off' : 'polite'}>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={mod(index, count)}
+                variants={textGroup}
+                initial="enter"
+                animate={seen ? 'center' : 'enter'}
+                exit="exit"
+                className="grid gap-4 lg:grid-cols-12 lg:gap-12"
+              >
+                {/* Big outlined punch word — falls back to the slide number */}
+                <div className="min-w-0 lg:col-span-5">
+                  <Mask>
+                    <motion.span variants={rise} className="block" aria-hidden>
+                      <PunchWord text={slide.punchWord || pad(mod(index, count) + 1)} />
+                    </motion.span>
+                  </Mask>
+                </div>
+
+                <div className="min-w-0 lg:col-span-7 lg:pt-3">
+                  {slide.label ? (
+                    <motion.p
+                      variants={fadeUp}
+                      className="font-display text-xs font-bold uppercase tracking-[0.18em] text-ff-near-black/55"
+                    >
+                      {slide.label}
+                    </motion.p>
+                  ) : null}
+                  <h3 className="mt-2 text-subheading font-display font-bold tracking-[-0.02em] text-ff-near-black">
+                    <Mask className="pb-[0.1em] -mb-[0.1em]">
+                      <motion.span variants={rise} className="block">
+                        {slide.title}
+                      </motion.span>
+                    </Mask>
+                  </h3>
+                  {slide.description ? (
+                    <motion.p
+                      variants={fadeUp}
+                      className="mt-3 max-w-xl text-body-lg leading-relaxed text-ff-gray-text"
+                    >
+                      {slide.description}
+                    </motion.p>
+                  ) : null}
+                  {slide.href && slide.buttonLabel ? (
+                    <motion.div variants={fadeUp} className="mt-6">
+                      <Link
+                        href={slide.href}
+                        className="group inline-flex items-center gap-3 rounded-full bg-ff-near-black py-3 pl-6 pr-3 font-display text-sm font-bold text-white transition-colors hover:bg-black"
+                      >
+                        {slide.buttonLabel}
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-ff-near-black transition-transform duration-300 group-hover:rotate-45">
+                          <ArrowUpRight className="h-4 w-4" aria-hidden />
+                        </span>
+                      </Link>
+                    </motion.div>
+                  ) : null}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
 
-        {/* Every slide's text for search engines: the animated panel above only
-            renders the active slide, so slides 2+ were missing from the HTML.
-            `hidden` keeps it out of view and away from screen readers (they get
-            the live panel), while crawlers still read the text and follow links. */}
+        {/* Every slide's text for search engines: the panel above only renders
+            the active slide. `hidden` keeps it out of view and away from screen
+            readers (they get the live panel); crawlers still read it. */}
         <div hidden>
           {items.map((item) => (
             <article key={item.key}>
