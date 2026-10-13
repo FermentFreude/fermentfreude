@@ -1,9 +1,8 @@
 'use client'
 
-import { Media } from '@/components/Media'
-import type { Media as MediaType } from '@/payload-types'
+import Image from 'next/image'
 import { cn } from '@/utilities/cn'
-import { ArrowDown, ArrowUp, ArrowUpRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
 import {
   AnimatePresence,
   MotionConfig,
@@ -34,11 +33,14 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
  *  off-screen, reduced motion); swipe, arrows, ← → keys.
  * ═══════════════════════════════════════════════════════════════ */
 
+/** One image layer — from public/showcase (code) or a CMS fallback */
+export type LayerImage = { src: string; width: number; height: number; alt: string }
+
 export type ShowcaseSlide = {
   key: string
   bigWord: string
-  image: MediaType
-  ingredients: MediaType | null
+  image: LayerImage
+  ingredients: LayerImage | null
   name: string
   text: string | null
   price: string | null
@@ -73,29 +75,53 @@ const letter: Variants = {
 
 /* ── Product: swings in from the travel direction ── */
 const product: Variants = {
-  // Next product rises from below; going back, it drops in from above
-  enter: (dir: number) => ({ opacity: 0, y: `${dir * 38}%`, rotate: dir * -4, scale: 0.94 }),
+  // Next product swings in from the right; going back, from the left
+  enter: (dir: number) => ({ opacity: 0, x: `${dir * 26}%`, rotate: dir * 6, scale: 0.92 }),
   center: {
     opacity: 1,
-    y: '0%',
+    x: '0%',
     rotate: 0,
     scale: 1,
-    transition: { type: 'spring', visualDuration: 0.9, bounce: 0.12 },
+    transition: { type: 'spring', visualDuration: 0.85, bounce: 0.14 },
   },
   exit: (dir: number) => ({
     opacity: 0,
-    y: `${dir * -30}%`,
-    rotate: dir * 3,
-    scale: 0.96,
-    transition: { duration: 0.5, ease: [0.4, 0, 1, 1] },
+    x: `${dir * -26}%`,
+    rotate: dir * -6,
+    scale: 0.92,
+    transition: { duration: 0.45, ease: [0.4, 0, 1, 1] },
   }),
 }
 
 /* ── Ingredients: burst in just after the product ── */
 const ingredients: Variants = {
-  enter: { opacity: 0, scale: 1.18 },
-  center: { opacity: 1, scale: 1, transition: { duration: 0.9, ease: EASE, delay: 0.15 } },
-  exit: { opacity: 0, scale: 0.92, transition: { duration: 0.3 } },
+  enter: (dir: number) => ({ opacity: 0, x: `${dir * 40}%`, scale: 1.12 }),
+  center: {
+    opacity: 1,
+    x: '0%',
+    scale: 1,
+    transition: { type: 'spring', visualDuration: 1, bounce: 0.1, delay: 0.12 },
+  },
+  exit: (dir: number) => ({
+    opacity: 0,
+    x: `${dir * -40}%`,
+    scale: 0.94,
+    transition: { duration: 0.35, ease: [0.4, 0, 1, 1] },
+  }),
+}
+
+/** One layer image, filling its box and keeping its proportions */
+function LayerImg({ img, sizes, shadow }: { img: LayerImage; sizes: string; shadow?: boolean }) {
+  return (
+    <Image
+      src={img.src}
+      alt={img.alt}
+      fill
+      sizes={sizes}
+      draggable={false}
+      className={cn('object-contain', shadow && 'drop-shadow-[0_24px_30px_rgba(60,40,20,0.18)]')}
+    />
+  )
 }
 
 /* ── Info panel ── */
@@ -267,8 +293,9 @@ export function ProductShowcaseSlider({ tagline, slides, trustPoints, locale }: 
   const wordY = useTransform(() => py.get() * -12 + sp.get() * 70)
   const productX = useTransform(() => px.get() * 26)
   const productY = useTransform(() => py.get() * 18 + sp.get() * -50)
-  const ingrX = useTransform(() => px.get() * 54)
-  const ingrY = useTransform(() => py.get() * 38 + sp.get() * -110)
+  const ingrX = useTransform(() => px.get() * 60)
+  const ingrY = useTransform(() => py.get() * 42 + sp.get() * -110)
+  const ingrRotate = useTransform(() => px.get() * 4)
 
   const labels =
     locale === 'en'
@@ -293,14 +320,8 @@ export function ProductShowcaseSlider({ tagline, slides, trustPoints, locale }: 
         onFocusCapture={() => setFocused(true)}
         onBlurCapture={() => setFocused(false)}
         onKeyDown={(e) => {
-          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-            e.preventDefault()
-            paginate(1)
-          }
-          if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-            e.preventDefault()
-            paginate(-1)
-          }
+          if (e.key === 'ArrowRight') paginate(1)
+          if (e.key === 'ArrowLeft') paginate(-1)
         }}
       >
         <div className="container mx-auto container-padding">
@@ -356,13 +377,7 @@ export function ProductShowcaseSlider({ tagline, slides, trustPoints, locale }: 
                       animate={{ y: [0, -8, 0] }}
                       transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
                     >
-                      <Media
-                        resource={slide.image}
-                        fill
-                        priority={false}
-                        imgClassName="object-contain drop-shadow-[0_24px_30px_rgba(60,40,20,0.18)]"
-                        size="(max-width: 1024px) 82vw, 46vw"
-                      />
+                      <LayerImg img={slide.image} sizes="(max-width: 1024px) 90vw, 60vw" shadow />
                     </motion.div>
                   </motion.div>
                 </AnimatePresence>
@@ -371,26 +386,33 @@ export function ProductShowcaseSlider({ tagline, slides, trustPoints, locale }: 
               {/* 3 · Ingredients (front) */}
               <motion.div
                 className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
-                style={reduce ? undefined : { x: ingrX, y: ingrY }}
+                style={reduce ? undefined : { x: ingrX, y: ingrY, rotate: ingrRotate }}
               >
-                <AnimatePresence initial={false}>
+                <AnimatePresence initial={false} custom={dir}>
                   {slide.ingredients ? (
                     <motion.div
                       key={mod(index, count)}
+                      custom={dir}
                       variants={ingredients}
                       initial="enter"
                       animate={seen ? 'center' : 'enter'}
                       exit="exit"
                       className="absolute inset-0 flex items-center justify-center"
                     >
-                      <div className="relative h-[86%] w-[82%] sm:w-[62%] lg:-mt-[6%] lg:h-[84%] lg:w-[44%]">
-                        <Media
-                          resource={slide.ingredients}
-                          fill
-                          imgClassName="object-contain"
-                          size="(max-width: 1024px) 82vw, 46vw"
-                        />
-                      </div>
+                      {/* Same box as the product (same canvas) so the layers line up;
+                          its own slower float, out of step with the product */}
+                      <motion.div
+                        className="relative h-[86%] w-[82%] sm:w-[62%] lg:-mt-[6%] lg:h-[84%] lg:w-[44%]"
+                        animate={{ y: [0, 10, 0], rotate: [0, 1.2, 0] }}
+                        transition={{
+                          duration: 7.5,
+                          ease: 'easeInOut',
+                          repeat: Infinity,
+                          delay: 1,
+                        }}
+                      >
+                        <LayerImg img={slide.ingredients} sizes="(max-width: 1024px) 90vw, 60vw" />
+                      </motion.div>
                     </motion.div>
                   ) : null}
                 </AnimatePresence>
@@ -456,7 +478,7 @@ export function ProductShowcaseSlider({ tagline, slides, trustPoints, locale }: 
                 <div className="flex items-end gap-6 lg:pb-1">
                   {/* Product index: 01 — name, the active one fills with the autoplay progress */}
                   <ol
-                    className="flex flex-1 gap-1.5 lg:flex-none lg:flex-col lg:gap-0.5"
+                    className="flex flex-1 gap-1.5 lg:flex-none lg:gap-6"
                     aria-label={labels.products}
                   >
                     {slides.map((s, i) => {
@@ -512,10 +534,10 @@ export function ProductShowcaseSlider({ tagline, slides, trustPoints, locale }: 
                   <span className="pb-1 font-display text-xs font-bold tabular-nums tracking-[0.12em] text-[#1D1D1D]/60 lg:hidden">
                     {pad(mod(index, count) + 1)} / {pad(count)}
                   </span>
-                  <div className="flex gap-2 lg:flex-col">
+                  <div className="flex gap-2">
                     {[
-                      { label: labels.prev, step: -1, Icon: ArrowUp },
-                      { label: labels.next, step: 1, Icon: ArrowDown },
+                      { label: labels.prev, step: -1, Icon: ArrowLeft },
+                      { label: labels.next, step: 1, Icon: ArrowRight },
                     ].map(({ label, step, Icon }) => (
                       <motion.button
                         key={label}

@@ -4,12 +4,20 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { formatEurPrice } from '@/utilities/productDetailDisplay'
 
-import { ProductShowcaseSlider, type ShowcaseSlide } from './Slider'
+import { SHOWCASE_LAYERS } from './layers'
+import { ProductShowcaseSlider, type LayerImage, type ShowcaseSlide } from './Slider'
 
 type Props = ProductShowcaseBlock & { locale?: 'de' | 'en' }
 
 const isMedia = (m: unknown): m is Media =>
   typeof m === 'object' && m !== null && 'url' in m && Boolean((m as Media).url)
+
+const fromMedia = (m: Media, alt: string): LayerImage => ({
+  src: m.url as string,
+  width: m.width ?? 1200,
+  height: m.height ?? 900,
+  alt: m.alt || alt,
+})
 
 /** English fallback — CMS data always wins. */
 const DEFAULT_BUTTON = 'View product'
@@ -38,15 +46,30 @@ export async function ProductShowcaseBlockComponent(props: Props) {
   const slides: ShowcaseSlide[] = (props.slides ?? []).flatMap((s, i) => {
     const id = typeof s.product === 'object' && s.product ? s.product.id : s.product
     const product = typeof id === 'string' ? byId.get(id) : undefined
-    if (!product || !isMedia(s.productImage)) return []
+    if (!product) return []
+    // Images: the layered files in public/showcase/<slug>/ first, CMS cut-out as fallback
+    const layers = product.slug ? SHOWCASE_LAYERS[product.slug] : undefined
+    const image: LayerImage | null = layers
+      ? { ...layers.product, alt: product.title }
+      : isMedia(s.productImage)
+        ? fromMedia(s.productImage, product.title)
+        : null
+    if (!image) return []
+    const ingredientsImage: LayerImage | null = layers
+      ? layers.ingredients
+        ? { ...layers.ingredients, alt: '' }
+        : null
+      : isMedia(s.ingredientsImage)
+        ? fromMedia(s.ingredientsImage, '')
+        : null
     const live = product._status !== 'draft'
     const weight = product.weightGrams ? `${product.weightGrams} g` : null
     return [
       {
         key: s.id ?? `slide-${i}`,
         bigWord: (s.bigWord ?? '').trim(),
-        image: s.productImage,
-        ingredients: isMedia(s.ingredientsImage) ? s.ingredientsImage : null,
+        image,
+        ingredients: ingredientsImage,
         name: s.label?.trim() || product.title,
         text: s.text?.trim() || product.shortDescription || null,
         price: product.priceInEUR ? formatEurPrice(product.priceInEUR, locale) : null,
