@@ -213,13 +213,19 @@ export function HomeTempehStoryCarousel({ eyebrow, heading, slides: items, local
     return () => controls.stop()
   }, [playing, index, goTo, progress])
 
-  /* ── Drag: snap to the nearest card, with a flick moving one card ── */
+  /* ── Drag / finger swipe: snap to the nearest card. A short swipe (or a
+   *  quick flick) is enough to move one card — on a phone nobody drags half
+   *  a card's width. A long drag can move up to two. ── */
   const onDragEnd = (_: unknown, info: PanInfo) => {
     setDragging(false)
     if (step <= 0) return
-    const position = -x.get() / step
-    const flick = Math.abs(info.velocity.x) > 350 ? -Math.sign(info.velocity.x) * 0.5 : 0
-    const target = Math.round(position + flick)
+    let target = Math.round(-x.get() / step)
+    if (target === index) {
+      const distance = info.offset.x
+      const swiped =
+        Math.abs(distance) > Math.min(70, step * 0.15) || Math.abs(info.velocity.x) > 300
+      if (swiped) target = index - Math.sign(distance || info.velocity.x)
+    }
     goTo(Math.max(index - 2, Math.min(index + 2, target)))
   }
 
@@ -238,8 +244,9 @@ export function HomeTempehStoryCarousel({ eyebrow, heading, slides: items, local
         aria-roledescription="carousel"
         aria-label={heading}
         className="overflow-hidden bg-[#F6F0E8] section-padding-md"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        // Mouse only — on touch screens a tap also fires "enter" and would pause for good
+        onPointerEnter={(e) => e.pointerType === 'mouse' && setHovered(true)}
+        onPointerLeave={(e) => e.pointerType === 'mouse' && setHovered(false)}
         onFocusCapture={() => setFocused(true)}
         onBlurCapture={() => setFocused(false)}
         onKeyDown={(e) => {
@@ -274,6 +281,7 @@ export function HomeTempehStoryCarousel({ eyebrow, heading, slides: items, local
               style={{ x, left, width: step * (count + 2 * BUFFER) }}
               drag={count > 1 ? 'x' : false}
               dragMomentum={false}
+              dragDirectionLock
               onDragStart={() => setDragging(true)}
               onDragEnd={onDragEnd}
             >
