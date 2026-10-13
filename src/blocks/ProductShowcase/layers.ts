@@ -15,4 +15,29 @@ export type ShowcaseLayer = { src: string; width: number; height: number }
 export const SHOWCASE_LAYERS: Record<
   string,
   { product: ShowcaseLayer; ingredients?: ShowcaseLayer }
-> = {}
+> = {
+  'berglinsen-tempeh': {
+    product: { src: '/showcase/berglinsen-tempeh/product.webp', width: 2400, height: 2140 },
+    ingredients: { src: '/showcase/berglinsen-tempeh/ingredients.webp', width: 2400, height: 2140 },
+  },
+  'kaeferbohnen-tempeh': {
+    product: { src: '/showcase/kaeferbohnen-tempeh/product.webp', width: 2400, height: 2147 },
+    ingredients: {
+      src: '/showcase/kaeferbohnen-tempeh/ingredients.webp',
+      width: 2400,
+      height: 2147,
+    },
+  },
+  kimchi: {
+    product: { src: '/showcase/kimchi/product.webp', width: 2400, height: 2096 },
+    ingredients: { src: '/showcase/kimchi/ingredients.webp', width: 2400, height: 2096 },
+  },
+  'klassischer-tempeh': {
+    product: { src: '/showcase/klassischer-tempeh/product.webp', width: 2400, height: 1966 },
+    ingredients: {
+      src: '/showcase/klassischer-tempeh/ingredients.webp',
+      width: 2400,
+      height: 1966,
+    },
+  },
+}

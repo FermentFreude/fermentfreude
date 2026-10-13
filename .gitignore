@@ -70,3 +70,6 @@ src/scripts/data/wix-bookings/
 src/scripts/data/prod-sync/
 src/scripts/data/prod-media-dump/
 
+
+# Product Showcase: large Kittl originals stay local — only the generated .webp layers are committed
+public/showcase/**/*.png
