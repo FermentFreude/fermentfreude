@@ -59,6 +59,11 @@ type Props = {
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 const pad = (n: number) => String(n).padStart(2, '0')
 
+/* ── Entrance order when a card arrives: word → product → the rest ──
+ *  so there is time to read the title before more appears */
+const T_PRODUCT = 0.45
+const T_REST = 1.25
+
 const wordGroup: Variants = {
   enter: {},
   center: { transition: { staggerChildren: 0.025, delayChildren: 0.05 } },
@@ -69,7 +74,12 @@ const letter: Variants = {
 }
 const infoGroup: Variants = {
   enter: {},
-  center: { transition: { staggerChildren: 0.07, delayChildren: 0.25 } },
+  center: { transition: { staggerChildren: 0.08, delayChildren: T_REST + 0.15 } },
+}
+/* Small label above the big word: comes with "the rest" */
+const labelIn: Variants = {
+  enter: { opacity: 0, y: '60%' },
+  center: { opacity: 1, y: '0%', transition: { duration: 0.6, ease: EASE, delay: T_REST } },
 }
 const fadeUp: Variants = {
   enter: { opacity: 0, y: 14 },
@@ -128,8 +138,8 @@ function BigWord({
       )
       if (!widest) return
       const byWidth = (box.clientWidth / widest) * 100
-      // Lines are 0.86em tall; the label above takes ~0.14em of the word size
-      const byHeight = box.clientHeight / (lines.length * 0.86 + (eyebrow ? 0.14 : 0))
+      // Lines are 0.86em tall; the small label above takes ~0.06em of the word size
+      const byHeight = box.clientHeight / (lines.length * 0.86 + (eyebrow ? 0.06 : 0))
       // Report the largest size at which this word fits; the parent picks the
       // smallest of all words so every product uses the same size
       onFit(Math.min(byWidth, byHeight) * 0.96)
@@ -167,9 +177,9 @@ function BigWord({
           // Label at the top right, scaled with the word
           <span className="block overflow-hidden pr-[0.04em]">
             <motion.span
-              variants={letter}
-              className="block text-[max(11px,0.075em)] uppercase leading-none tracking-[0.18em] text-[#1D1D1D]/70"
-              style={{ marginBottom: '0.4em' }}
+              variants={labelIn}
+              className="block text-[max(11px,0.048em)] uppercase leading-none tracking-[0.2em] text-[#1D1D1D]/75"
+              style={{ marginBottom: '-0.2em' }}
             >
               {eyebrow}
             </motion.span>
@@ -237,7 +247,7 @@ function ProductPanel({
   const reportFit = React.useCallback((size: number) => onWordFit(index, size), [index, onWordFit])
   const ref = useRef<HTMLElement>(null)
   const reduce = useReducedMotion()
-  const active = useInView(ref, { once: true, amount: 0.45 })
+  const active = useInView(ref, { once: true, amount: 0.6 })
   const arrival = useArrival(ref)
 
   /* Pointer parallax — each layer moves a different amount */
@@ -337,13 +347,23 @@ function ProductPanel({
               className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
               style={reduce ? undefined : { x: productX, y: productY, rotate: productRotate }}
             >
+              {/* 2 · Product: appears just after the word */}
               <motion.div
-                className={imageBox}
-                style={{ scale: slide.scale }}
-                animate={reduce ? undefined : { y: [0, -8, 0] }}
-                transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
+                className="flex h-full w-full items-center justify-center"
+                initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                animate={
+                  active ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 40 }
+                }
+                transition={{ duration: 0.9, ease: EASE, delay: T_PRODUCT }}
               >
-                <LayerImg img={slide.image} shadow />
+                <motion.div
+                  className={imageBox}
+                  style={{ scale: slide.scale }}
+                  animate={reduce ? undefined : { y: [0, -8, 0] }}
+                  transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
+                >
+                  <LayerImg img={slide.image} shadow />
+                </motion.div>
               </motion.div>
             </motion.div>
 
@@ -352,12 +372,20 @@ function ProductPanel({
                 className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
                 style={reduce ? undefined : { x: ingrX, y: ingrY, rotate: ingrRotate }}
               >
+                {/* 3 · Ingredients: burst in with the rest, after the title */}
                 <motion.div
-                  className={imageBox}
-                  animate={reduce ? undefined : { y: [0, 10, 0], rotate: [0, 1.2, 0] }}
-                  transition={{ duration: 7.5, ease: 'easeInOut', repeat: Infinity, delay: 1 }}
+                  className="flex h-full w-full items-center justify-center"
+                  initial={{ opacity: 0, scale: 1.15 }}
+                  animate={active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.15 }}
+                  transition={{ duration: 1, ease: EASE, delay: T_REST }}
                 >
-                  <LayerImg img={slide.ingredients} />
+                  <motion.div
+                    className={imageBox}
+                    animate={reduce ? undefined : { y: [0, 10, 0], rotate: [0, 1.2, 0] }}
+                    transition={{ duration: 7.5, ease: 'easeInOut', repeat: Infinity, delay: 1 }}
+                  >
+                    <LayerImg img={slide.ingredients} />
+                  </motion.div>
                 </motion.div>
               </motion.div>
             ) : null}
