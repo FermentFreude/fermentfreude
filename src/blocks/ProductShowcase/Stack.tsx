@@ -56,34 +56,37 @@ type Props = {
   locale: 'de' | 'en'
 }
 
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/* ── Entrance order when a card arrives: word → product → the rest ──
- *  so there is time to read the title before more appears */
-const T_PRODUCT = 0.45
-const T_REST = 1.25
+/* ── Entrance order when a card arrives: the text first (word, label,
+ *  name/description — slow and smooth), then the product and the
+ *  ingredients rising from different depths */
+const T_LABEL = 0.55
+const T_INFO = 0.7
+const T_PRODUCT = 1.05
+const T_INGREDIENTS = 1.25
+const SMOOTH: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
 const wordGroup: Variants = {
   enter: {},
-  center: { transition: { staggerChildren: 0.025, delayChildren: 0.05 } },
+  center: { transition: { staggerChildren: 0.05, delayChildren: 0.05 } },
 }
 const letter: Variants = {
   enter: { y: '105%' },
-  center: { y: '0%', transition: { duration: 0.8, ease: EASE } },
+  center: { y: '0%', transition: { duration: 1.2, ease: SMOOTH } },
 }
 const infoGroup: Variants = {
   enter: {},
-  center: { transition: { staggerChildren: 0.08, delayChildren: T_REST + 0.15 } },
+  center: { transition: { staggerChildren: 0.1, delayChildren: T_INFO } },
 }
 /* Small label above the big word: comes with "the rest" */
 const labelIn: Variants = {
   enter: { opacity: 0, y: '60%' },
-  center: { opacity: 1, y: '0%', transition: { duration: 0.6, ease: EASE, delay: T_REST } },
+  center: { opacity: 1, y: '0%', transition: { duration: 0.9, ease: SMOOTH, delay: T_LABEL } },
 }
 const fadeUp: Variants = {
   enter: { opacity: 0, y: 14 },
-  center: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
+  center: { opacity: 1, y: 0, transition: { duration: 0.9, ease: SMOOTH } },
 }
 
 /** One layer image, filling its box and keeping its proportions */
@@ -347,14 +350,14 @@ function ProductPanel({
               className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
               style={reduce ? undefined : { x: productX, y: productY, rotate: productRotate }}
             >
-              {/* 2 · Product: appears just after the word */}
+              {/* 2 · Product: rises in after the text */}
               <motion.div
                 className="flex h-full w-full items-center justify-center"
-                initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                initial={{ opacity: 0, scale: 0.96, y: 120 }}
                 animate={
-                  active ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 40 }
+                  active ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 120 }
                 }
-                transition={{ duration: 0.9, ease: EASE, delay: T_PRODUCT }}
+                transition={{ duration: 1.3, ease: SMOOTH, delay: T_PRODUCT }}
               >
                 <motion.div
                   className={imageBox}
@@ -372,12 +375,15 @@ function ProductPanel({
                 className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
                 style={reduce ? undefined : { x: ingrX, y: ingrY, rotate: ingrRotate }}
               >
-                {/* 3 · Ingredients: burst in with the rest, after the title */}
+                {/* 3 · Ingredients: right after the product, from further down */}
                 <motion.div
                   className="flex h-full w-full items-center justify-center"
-                  initial={{ opacity: 0, scale: 1.15 }}
-                  animate={active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.15 }}
-                  transition={{ duration: 1, ease: EASE, delay: T_REST }}
+                  // Rises from further down than the product → depth on entrance
+                  initial={{ opacity: 0, scale: 1.04, y: 240 }}
+                  animate={
+                    active ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 1.04, y: 240 }
+                  }
+                  transition={{ duration: 1.6, ease: SMOOTH, delay: T_INGREDIENTS }}
                 >
                   <motion.div
                     className={imageBox}

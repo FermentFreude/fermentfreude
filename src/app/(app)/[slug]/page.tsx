@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
 import { RenderHero } from '@/heros/RenderHero'
+import { ParallaxPanel } from '@/components/ParallaxPanel'
 import { StackPanel } from '@/components/StackPanel'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
@@ -96,9 +97,10 @@ export default async function Page({ params }: Args) {
         // Home: hero and the product sections right after it stack like cards.
         // Dark backdrop shows around a panel as it sinks back.
         <div className="relative bg-[#0b0b0b]">
-          <StackPanel index={0}>
+          {/* The hero scrolls away at half speed while the showcase glides over it */}
+          <ParallaxPanel>
             <RenderHero {...hero} locale={locale} />
-          </StackPanel>
+          </ParallaxPanel>
           {stackBlocks.map((block, i) => (
             <StackPanel key={block.id ?? i} index={i + 1} last={i === stackBlocks.length - 1}>
               <RenderBlocks blocks={[block]} slug={slug} locale={locale} />
