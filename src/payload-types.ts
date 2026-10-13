@@ -3095,11 +3095,11 @@ export interface HomeTempehStoryBlock {
    */
   visible?: boolean | null;
   /**
-   * Short label above the heading, e.g. "Aus unserer Fermentküche".
+   * e.g. "Aus unserer Fermentküche" — shown in small capitals above the heading.
    */
   eyebrow?: string | null;
   /**
-   * Heading above the carousel, e.g. "Tempeh & Kimchi aus Graz".
+   * e.g. "Tempeh & Kimchi aus Graz".
    */
   heading?: string | null;
   /**
