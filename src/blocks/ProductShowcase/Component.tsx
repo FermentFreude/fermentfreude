@@ -5,7 +5,7 @@ import { getPayload } from 'payload'
 import { formatEurPrice } from '@/utilities/productDetailDisplay'
 
 import { SHOWCASE_LAYERS } from './layers'
-import { ProductShowcaseSlider, type LayerImage, type ShowcaseSlide } from './Slider'
+import { ProductShowcaseStack, type LayerImage, type ShowcaseSlide } from './Stack'
 
 type Props = ProductShowcaseBlock & { locale?: 'de' | 'en' }
 
@@ -82,7 +82,7 @@ export async function ProductShowcaseBlockComponent(props: Props) {
   if (!slides.length) return null
 
   return (
-    <ProductShowcaseSlider
+    <ProductShowcaseStack
       tagline={props.tagline?.trim() || null}
       slides={slides}
       trustPoints={(props.trustPoints ?? []).map((t) => t.text).filter(Boolean)}

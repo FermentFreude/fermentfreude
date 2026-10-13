@@ -81,7 +81,7 @@ export function StackPanel({ children, index, overlap = index > 0, last = false 
         'relative',
         overlap &&
           // No negative margin: the previous panel is always seen in full before this one covers it
-          'overflow-hidden rounded-t-[2rem] shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:rounded-t-[2.5rem]',
+          'overflow-clip rounded-t-[2rem] shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:rounded-t-[2.5rem]',
       )}
       style={
         last
