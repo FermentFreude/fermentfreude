@@ -25,9 +25,18 @@ type Props = {
   overlap?: boolean
   /** The last panel doesn't need to stick */
   last?: boolean
+  /** Shrink + darken while the next panel covers this one (default on) */
+  sink?: boolean
 }
 
-export function StackPanel({ children, index, overlap = index > 0, last = false }: Props) {
+export function StackPanel({
+  children,
+  index,
+  overlap = index > 0,
+  last = false,
+  sink = true,
+}: Props) {
+  const sinks = sink && !last
   const ref = useRef<HTMLDivElement>(null)
   const reduce = useReducedMotion()
   const [top, setTop] = useState(0)
@@ -89,11 +98,11 @@ export function StackPanel({ children, index, overlap = index > 0, last = false 
           : { position: 'sticky', top, zIndex: index + 1 }
       }
     >
-      <motion.div className="origin-top" style={last || reduce ? undefined : { scale }}>
+      <motion.div className="origin-top" style={!sinks || reduce ? undefined : { scale }}>
         {children}
       </motion.div>
       {/* Darkens as the next panel covers this one */}
-      {!last && !reduce ? (
+      {sinks && !reduce ? (
         <motion.div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-black"

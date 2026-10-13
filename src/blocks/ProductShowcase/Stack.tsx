@@ -58,22 +58,20 @@ type Props = {
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/* ── Entrance order when a card arrives: the text first (word, label,
- *  name/description — slow and smooth), then the product and the
- *  ingredients rising from different depths */
-const T_LABEL = 0.55
-const T_INFO = 0.7
-const T_PRODUCT = 1.05
-const T_INGREDIENTS = 1.25
+/* ── When a card starts sliding in, the text animates in (slow and smooth);
+ *  the product and ingredients are tied to the scroll and rise into place
+ *  from different depths as the card arrives */
+const T_LABEL = 0.6
+const T_INFO = 0.75
 const SMOOTH: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
 const wordGroup: Variants = {
   enter: {},
-  center: { transition: { staggerChildren: 0.05, delayChildren: 0.05 } },
+  center: { transition: { staggerChildren: 0.07, delayChildren: 0 } },
 }
 const letter: Variants = {
   enter: { y: '105%' },
-  center: { y: '0%', transition: { duration: 1.2, ease: SMOOTH } },
+  center: { y: '0%', transition: { duration: 1.6, ease: SMOOTH } },
 }
 const infoGroup: Variants = {
   enter: {},
@@ -250,7 +248,7 @@ function ProductPanel({
   const reportFit = React.useCallback((size: number) => onWordFit(index, size), [index, onWordFit])
   const ref = useRef<HTMLElement>(null)
   const reduce = useReducedMotion()
-  const active = useInView(ref, { once: true, amount: 0.6 })
+  const active = useInView(ref, { once: true, amount: 0.12 })
   const arrival = useArrival(ref)
 
   /* Pointer parallax — each layer moves a different amount */
@@ -268,14 +266,22 @@ function ProductPanel({
   }
 
   // As the panel slides in, the product and ingredients lift into place
-  const lift = useTransform(arrival, [0, 1], [1, 0])
+  // Product + ingredients follow the scroll: 1 = still below, 0 = in place.
+  // A soft spring keeps it smooth between wheel steps.
+  const lift = useSpring(useTransform(arrival, [0.15, 0.95], [1, 0], { clamp: true }), {
+    stiffness: 90,
+    damping: 24,
+    restDelta: 0.001,
+  })
+  const productOpacity = useTransform(lift, [0.75, 0.15], [0, 1])
+  const ingrOpacity = useTransform(lift, [0.6, 0], [0, 1])
   const wordX = useTransform(() => px.get() * -18)
   const wordY = useTransform(() => py.get() * -12)
   const productX = useTransform(() => px.get() * 26)
-  const productY = useTransform(() => py.get() * 18 + lift.get() * 90)
+  const productY = useTransform(() => py.get() * 18 + lift.get() * 160)
   const productRotate = useTransform(() => lift.get() * 6)
   const ingrX = useTransform(() => px.get() * 60)
-  const ingrY = useTransform(() => py.get() * 42 + lift.get() * 180)
+  const ingrY = useTransform(() => py.get() * 42 + lift.get() * 320)
   const ingrRotate = useTransform(() => px.get() * 4)
 
   // A touch smaller than the stage so the huge word stays readable around it
@@ -350,14 +356,10 @@ function ProductPanel({
               className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
               style={reduce ? undefined : { x: productX, y: productY, rotate: productRotate }}
             >
-              {/* 2 · Product: rises in after the text */}
+              {/* 2 · Product: rises with the scroll as the card slides in */}
               <motion.div
                 className="flex h-full w-full items-center justify-center"
-                initial={{ opacity: 0, scale: 0.96, y: 120 }}
-                animate={
-                  active ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 120 }
-                }
-                transition={{ duration: 1.3, ease: SMOOTH, delay: T_PRODUCT }}
+                style={{ opacity: reduce ? 1 : productOpacity }}
               >
                 <motion.div
                   className={imageBox}
@@ -375,15 +377,11 @@ function ProductPanel({
                 className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
                 style={reduce ? undefined : { x: ingrX, y: ingrY, rotate: ingrRotate }}
               >
-                {/* 3 · Ingredients: right after the product, from further down */}
+                {/* 3 · Ingredients: follow the product, from further down */}
                 <motion.div
                   className="flex h-full w-full items-center justify-center"
-                  // Rises from further down than the product → depth on entrance
-                  initial={{ opacity: 0, scale: 1.04, y: 240 }}
-                  animate={
-                    active ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 1.04, y: 240 }
-                  }
-                  transition={{ duration: 1.6, ease: SMOOTH, delay: T_INGREDIENTS }}
+                  // Rises from further down than the product → depth on scroll
+                  style={{ opacity: reduce ? 1 : ingrOpacity }}
                 >
                   <motion.div
                     className={imageBox}
@@ -585,7 +583,7 @@ export function ProductShowcaseStack({ tagline, slides, trustPoints, locale }: P
     <MotionConfig reducedMotion="user">
       <div ref={containerRef} className="relative" aria-label={label} role="region">
         {slides.map((slide, i) => (
-          <StackPanel key={slide.key} index={i} last={i === slides.length - 1}>
+          <StackPanel key={slide.key} index={i} last={i === slides.length - 1} sink={false}>
             <ProductPanel
               slide={slide}
               index={i}
