@@ -16,7 +16,8 @@ import React from 'react'
 
 type Props = {
   eyebrow?: string | null
-  heading: React.ReactNode
+  /** Optional — an empty heading is simply not shown */
+  heading?: React.ReactNode
   intro?: React.ReactNode
   /** Light text for dark/photo backgrounds */
   tone?: 'light' | 'dark'
@@ -70,20 +71,24 @@ export function SectionHeader({
         </p>
       ) : null}
 
-      <div className="mt-4 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-        <h2
-          id={headingId}
-          {...headingProps}
-          className={cn(
-            'max-w-3xl text-section-heading font-display font-bold leading-[1.05] tracking-[-0.025em] text-balance',
-            light ? 'text-white' : 'text-ff-near-black',
-            headingProps?.className,
-          )}
-        >
-          {heading}
-        </h2>
-        {aside ? <div className="shrink-0">{aside}</div> : null}
-      </div>
+      {heading || aside ? (
+        <div className="mt-4 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          {heading ? (
+            <h2
+              id={headingId}
+              {...headingProps}
+              className={cn(
+                'max-w-3xl text-section-heading font-display font-bold leading-[1.05] tracking-[-0.025em] text-balance',
+                light ? 'text-white' : 'text-ff-near-black',
+                headingProps?.className,
+              )}
+            >
+              {heading}
+            </h2>
+          ) : null}
+          {aside ? <div className="shrink-0">{aside}</div> : null}
+        </div>
+      ) : null}
 
       {intro ? (
         <p

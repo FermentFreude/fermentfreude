@@ -5,7 +5,6 @@ import { HomeTempehStoryCarousel, type TempehSlide } from './Carousel'
 
 /** English fallbacks — CMS data always wins. */
 const DEFAULTS = {
-  heading: 'Runner Bean Tempeh',
   buttonLabel: 'View product',
 } as const
 
@@ -46,7 +45,8 @@ export async function HomeTempehStoryBlockComponent(props: Props) {
   return (
     <HomeTempehStoryCarousel
       eyebrow={props.eyebrow?.trim() || null}
-      heading={props.heading?.trim() || DEFAULTS.heading}
+      // Empty heading in the CMS = no heading (not an English fallback on a German page)
+      heading={props.heading?.trim() || ''}
       slides={slides}
       locale={locale === 'de' ? 'de' : 'en'}
     />
