@@ -3,7 +3,7 @@
 import { Media } from '@/components/Media'
 import type { Media as MediaType } from '@/payload-types'
 import { cn } from '@/utilities/cn'
-import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpRight } from 'lucide-react'
 import {
   AnimatePresence,
   MotionConfig,
@@ -73,20 +73,21 @@ const letter: Variants = {
 
 /* ── Product: swings in from the travel direction ── */
 const product: Variants = {
-  enter: (dir: number) => ({ opacity: 0, x: `${dir * 22}%`, rotate: dir * 7, scale: 0.9 }),
+  // Next product rises from below; going back, it drops in from above
+  enter: (dir: number) => ({ opacity: 0, y: `${dir * 38}%`, rotate: dir * -4, scale: 0.94 }),
   center: {
     opacity: 1,
-    x: '0%',
+    y: '0%',
     rotate: 0,
     scale: 1,
-    transition: { type: 'spring', visualDuration: 0.8, bounce: 0.15 },
+    transition: { type: 'spring', visualDuration: 0.9, bounce: 0.12 },
   },
   exit: (dir: number) => ({
     opacity: 0,
-    x: `${dir * -22}%`,
-    rotate: dir * -7,
-    scale: 0.9,
-    transition: { duration: 0.45, ease: [0.4, 0, 1, 1] },
+    y: `${dir * -30}%`,
+    rotate: dir * 3,
+    scale: 0.96,
+    transition: { duration: 0.5, ease: [0.4, 0, 1, 1] },
   }),
 }
 
@@ -292,8 +293,14 @@ export function ProductShowcaseSlider({ tagline, slides, trustPoints, locale }: 
         onFocusCapture={() => setFocused(true)}
         onBlurCapture={() => setFocused(false)}
         onKeyDown={(e) => {
-          if (e.key === 'ArrowRight') paginate(1)
-          if (e.key === 'ArrowLeft') paginate(-1)
+          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault()
+            paginate(1)
+          }
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault()
+            paginate(-1)
+          }
         }}
       >
         <div className="container mx-auto container-padding">
@@ -446,44 +453,69 @@ export function ProductShowcaseSlider({ tagline, slides, trustPoints, locale }: 
               </div>
 
               {count > 1 && (
-                <div className="flex items-center gap-5 lg:pb-1">
-                  <div className="flex w-40 gap-1.5" role="group" aria-label={labels.products}>
+                <div className="flex items-end gap-6 lg:pb-1">
+                  {/* Product index: 01 — name, the active one fills with the autoplay progress */}
+                  <ol
+                    className="flex flex-1 gap-1.5 lg:flex-none lg:flex-col lg:gap-0.5"
+                    aria-label={labels.products}
+                  >
                     {slides.map((s, i) => {
-                      const active = i === mod(index, count)
+                      const current = mod(index, count)
+                      const active = i === current
                       return (
-                        <button
-                          key={s.key}
-                          type="button"
-                          onClick={() => goTo(i)}
-                          aria-label={`${labels.goTo} ${s.name}`}
-                          aria-current={active ? 'true' : undefined}
-                          className="group flex h-6 flex-1 cursor-pointer items-center"
-                        >
-                          <span className="relative h-0.75 w-full overflow-hidden rounded-full bg-[#1D1D1D]/15">
-                            <motion.span
-                              className="absolute inset-0 origin-left rounded-full bg-[#1D1D1D]"
-                              style={{
-                                scaleX: active
-                                  ? reduce
-                                    ? 1
-                                    : progress
-                                  : i < mod(index, count)
-                                    ? 1
-                                    : 0,
-                              }}
-                            />
-                          </span>
-                        </button>
+                        <li key={s.key} className="flex-1 lg:flex-none">
+                          <button
+                            type="button"
+                            onClick={() => goTo(i)}
+                            aria-label={`${labels.goTo} ${s.name}`}
+                            aria-current={active ? 'true' : undefined}
+                            className="group flex h-6 w-full cursor-pointer items-center gap-3 text-left lg:h-7"
+                          >
+                            <span
+                              className={cn(
+                                'hidden w-5 font-display text-[11px] font-bold tabular-nums transition-colors duration-500 lg:block',
+                                active
+                                  ? 'text-[#1D1D1D]'
+                                  : 'text-[#1D1D1D]/35 group-hover:text-[#1D1D1D]/70',
+                              )}
+                            >
+                              {pad(i + 1)}
+                            </span>
+                            <span
+                              className={cn(
+                                'relative h-0.5 w-full overflow-hidden rounded-full bg-[#1D1D1D]/15 transition-[width] duration-500 ease-out',
+                                active ? 'lg:w-14' : 'lg:w-5 lg:group-hover:w-8',
+                              )}
+                            >
+                              <motion.span
+                                className="absolute inset-0 origin-left rounded-full bg-[#1D1D1D]"
+                                style={{
+                                  scaleX: active ? (reduce ? 1 : progress) : i < current ? 1 : 0,
+                                }}
+                              />
+                            </span>
+                            <span
+                              className={cn(
+                                'hidden whitespace-nowrap font-display text-[11px] font-bold uppercase tracking-[0.12em] transition-colors duration-500 lg:block',
+                                active
+                                  ? 'text-[#1D1D1D]'
+                                  : 'text-[#1D1D1D]/35 group-hover:text-[#1D1D1D]/70',
+                              )}
+                            >
+                              {s.name}
+                            </span>
+                          </button>
+                        </li>
                       )
                     })}
-                  </div>
-                  <span className="font-display text-xs font-bold tabular-nums tracking-[0.12em] text-[#1D1D1D]/60">
+                  </ol>
+                  <span className="pb-1 font-display text-xs font-bold tabular-nums tracking-[0.12em] text-[#1D1D1D]/60 lg:hidden">
                     {pad(mod(index, count) + 1)} / {pad(count)}
                   </span>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 lg:flex-col">
                     {[
-                      { label: labels.prev, step: -1, Icon: ArrowLeft },
-                      { label: labels.next, step: 1, Icon: ArrowRight },
+                      { label: labels.prev, step: -1, Icon: ArrowUp },
+                      { label: labels.next, step: 1, Icon: ArrowDown },
                     ].map(({ label, step, Icon }) => (
                       <motion.button
                         key={label}

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
 import { RenderHero } from '@/heros/RenderHero'
+import { StackPanel } from '@/components/StackPanel'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
@@ -63,6 +64,15 @@ export default async function Page({ params }: Args) {
     hero.type === 'foodPresentationSlider' ||
     hero.type === 'highImpact'
   const isLegalPage = LEGAL_SLUGS.includes(slug)
+  // Home: the product sections directly under the hero slide over it like stacked cards
+  const STACKED_BLOCKS = new Set(['productShowcase', 'homeTempehStory'])
+  const stackBlocks: typeof enrichedLayout = []
+  if (slug === 'home') {
+    for (const block of enrichedLayout) {
+      if (!block || !STACKED_BLOCKS.has(block.blockType) || block.visible === false) break
+      stackBlocks.push(block)
+    }
+  }
   const skipTopPadding = isFullBleedHero || slug === 'help'
 
   return (
@@ -75,8 +85,23 @@ export default async function Page({ params }: Args) {
             : `pt-16 pb-24${isLegalPage ? ' page-legal' : ''}`
       }
     >
-      <RenderHero {...hero} locale={locale} />
-      <RenderBlocks blocks={enrichedLayout} slug={slug} locale={locale} />
+      {stackBlocks.length ? (
+        // Home: hero and the product sections right after it stack like cards.
+        // Dark backdrop shows around a panel as it sinks back.
+        <div className="relative bg-[#0b0b0b]">
+          <StackPanel index={0}>
+            <RenderHero {...hero} locale={locale} />
+          </StackPanel>
+          {stackBlocks.map((block, i) => (
+            <StackPanel key={block.id ?? i} index={i + 1} last={i === stackBlocks.length - 1}>
+              <RenderBlocks blocks={[block]} slug={slug} locale={locale} />
+            </StackPanel>
+          ))}
+        </div>
+      ) : (
+        <RenderHero {...hero} locale={locale} />
+      )}
+      <RenderBlocks blocks={enrichedLayout.slice(stackBlocks.length)} slug={slug} locale={locale} />
       {slug === 'home' && !enrichedLayout.some((b) => b?.blockType === 'testimonials') && (
         <TestimonialsGlobalWrapper id="testimonials" />
       )}
