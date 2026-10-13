@@ -3160,6 +3160,10 @@ export interface ProductShowcaseBlock {
          */
         product: string | Product;
         /**
+         * Optional, e.g. "Käferbohnen", "Klassisch", "Linsen". Leave empty for none.
+         */
+        eyebrow?: string | null;
+        /**
          * Shown huge behind the product. One line per row, e.g. "Käfer⏎bohnen⏎Tempeh". Press Enter for a new line.
          */
         bigWord: string;
@@ -7545,6 +7549,7 @@ export interface ProductShowcaseBlockSelect<T extends boolean = true> {
     | T
     | {
         product?: T;
+        eyebrow?: T;
         bigWord?: T;
         productImage?: T;
         ingredientsImage?: T;

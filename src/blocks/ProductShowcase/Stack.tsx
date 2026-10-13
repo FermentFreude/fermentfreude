@@ -36,6 +36,9 @@ export type LayerImage = { src: string; width: number; height: number; alt: stri
 export type ShowcaseSlide = {
   key: string
   bigWord: string
+  eyebrow: string | null
+  /** Product image size tweak (1 = default) */
+  scale: number
   image: LayerImage
   ingredients: LayerImage | null
   name: string
@@ -93,11 +96,14 @@ function LayerImg({ img, shadow }: { img: LayerImage; shadow?: boolean }) {
  */
 function BigWord({
   text,
+  eyebrow,
   active,
   sharedSize,
   onFit,
 }: {
   text: string
+  /** Small label at the top right of the word (e.g. the tempeh variety) */
+  eyebrow: string | null
   active: boolean
   /** One size for every product's word (the smallest that fits them all) */
   sharedSize: number | null
@@ -122,7 +128,8 @@ function BigWord({
       )
       if (!widest) return
       const byWidth = (box.clientWidth / widest) * 100
-      const byHeight = box.clientHeight / (lines.length * 0.86)
+      // Lines are 0.86em tall; the label above takes ~0.14em of the word size
+      const byHeight = box.clientHeight / (lines.length * 0.86 + (eyebrow ? 0.14 : 0))
       // Report the largest size at which this word fits; the parent picks the
       // smallest of all words so every product uses the same size
       onFit(Math.min(byWidth, byHeight) * 0.96)
@@ -132,7 +139,7 @@ function BigWord({
     observer.observe(box)
     document.fonts?.ready.then(fit)
     return () => observer.disconnect()
-  }, [text, lines.length, onFit])
+  }, [text, eyebrow, lines.length, onFit])
   const size = sharedSize
 
   return (
@@ -153,9 +160,21 @@ function BigWord({
         variants={wordGroup}
         initial="enter"
         animate={active ? 'center' : 'enter'}
-        className="font-display font-bold leading-[0.86] tracking-[-0.035em] text-[#1D1D1D]"
+        className="flex flex-col items-end font-display font-bold leading-[0.86] tracking-[-0.035em] text-[#1D1D1D]"
         style={{ fontSize: size ? `${size}px` : '10vw', opacity: size ? 1 : 0 }}
       >
+        {eyebrow ? (
+          // Label at the top right, scaled with the word
+          <span className="block overflow-hidden pr-[0.04em]">
+            <motion.span
+              variants={letter}
+              className="block text-[max(11px,0.075em)] uppercase leading-none tracking-[0.18em] text-[#1D1D1D]/70"
+              style={{ marginBottom: '0.4em' }}
+            >
+              {eyebrow}
+            </motion.span>
+          </span>
+        ) : null}
         {lines.map((line, li) => (
           // Mask per line; padding keeps umlauts and descenders inside it
           <span key={li} className="flex justify-center overflow-hidden pt-[0.06em] pb-[0.02em]">
@@ -246,7 +265,8 @@ function ProductPanel({
   const ingrY = useTransform(() => py.get() * 42 + lift.get() * 180)
   const ingrRotate = useTransform(() => px.get() * 4)
 
-  const imageBox = 'relative h-[86%] w-[82%] sm:w-[62%] lg:-mt-[6%] lg:h-[84%] lg:w-[44%]'
+  // A touch smaller than the stage so the huge word stays readable around it
+  const imageBox = 'relative h-[80%] w-[76%] sm:w-[56%] lg:-mt-[5%] lg:h-[76%] lg:w-[40%]'
 
   /* Desktop: the big word sits exactly in the free band between the tagline
    * and the product text, so it never touches either — on any screen height */
@@ -305,6 +325,7 @@ function ProductPanel({
             >
               <h2 className="sr-only">{slide.name}</h2>
               <BigWord
+                eyebrow={slide.eyebrow}
                 text={slide.bigWord}
                 active={active}
                 sharedSize={wordSize}
@@ -318,6 +339,7 @@ function ProductPanel({
             >
               <motion.div
                 className={imageBox}
+                style={{ scale: slide.scale }}
                 animate={reduce ? undefined : { y: [0, -8, 0] }}
                 transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
               >

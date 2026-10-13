@@ -12,6 +12,11 @@
  */
 export type ShowcaseLayer = { src: string; width: number; height: number }
 
+/** Optional size tweak per product (1 = default), e.g. a tall jar a bit smaller */
+export const SHOWCASE_PRODUCT_SCALE: Record<string, number> = {
+  kimchi: 0.86,
+}
+
 export const SHOWCASE_LAYERS: Record<
   string,
   { product: ShowcaseLayer; ingredients?: ShowcaseLayer }

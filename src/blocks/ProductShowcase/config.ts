@@ -52,6 +52,16 @@ export const ProductShowcase: Block = {
           },
         },
         {
+          name: 'eyebrow',
+          type: 'text',
+          localized: true,
+          label: 'Small label (top right of the big word)',
+          admin: {
+            description:
+              'Optional, e.g. "Käferbohnen", "Klassisch", "Linsen". Leave empty for none.',
+          },
+        },
+        {
           name: 'bigWord',
           type: 'textarea',
           localized: true,

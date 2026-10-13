@@ -4,7 +4,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { formatEurPrice } from '@/utilities/productDetailDisplay'
 
-import { SHOWCASE_LAYERS } from './layers'
+import { SHOWCASE_LAYERS, SHOWCASE_PRODUCT_SCALE } from './layers'
 import { ProductShowcaseStack, type LayerImage, type ShowcaseSlide } from './Stack'
 
 type Props = ProductShowcaseBlock & { locale?: 'de' | 'en' }
@@ -68,6 +68,8 @@ export async function ProductShowcaseBlockComponent(props: Props) {
       {
         key: s.id ?? `slide-${i}`,
         bigWord: (s.bigWord ?? '').trim(),
+        eyebrow: s.eyebrow?.trim() || null,
+        scale: (product.slug && SHOWCASE_PRODUCT_SCALE[product.slug]) || 1,
         image,
         ingredients: ingredientsImage,
         name: s.label?.trim() || product.title,
