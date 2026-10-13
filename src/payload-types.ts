@@ -1039,6 +1039,7 @@ export interface Page {
         | FeatureCardsBlock
         | HeroBannerBlock
         | HomeTempehStoryBlock
+        | ProductShowcaseBlock
         | MediaBlock
         | ArchiveBlock
         | CarouselBlock
@@ -3138,6 +3139,65 @@ export interface HomeTempehStoryBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'homeTempehStory';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductShowcaseBlock".
+ */
+export interface ProductShowcaseBlock {
+  visible?: boolean | null;
+  /**
+   * Short lines in small capitals, e.g. "Fermentiert.⏎Funktional.⏎Für dich." Press Enter for a new line.
+   */
+  tagline?: string | null;
+  /**
+   * One slide per product, in this order — drag to reorder. Price and weight come live from the shop product.
+   */
+  slides?:
+    | {
+        /**
+         * Price, weight and the button link come from this product.
+         */
+        product: string | Product;
+        /**
+         * Shown huge behind the product. One line per row, e.g. "Käfer⏎bohnen⏎Tempeh". Press Enter for a new line.
+         */
+        bigWord: string;
+        /**
+         * The product on a TRANSPARENT background (export from Kittl as PNG). It floats in front of the big word.
+         */
+        productImage: string | Media;
+        /**
+         * Optional: beans, leaves, chili… on a transparent background, same size as the product cut-out. Floats at its own depth for extra parallax.
+         */
+        ingredientsImage?: (string | null) | Media;
+        /**
+         * Leave empty to use the shop product name.
+         */
+        label?: string | null;
+        /**
+         * Leave empty to use the shop product short description.
+         */
+        text?: string | null;
+        /**
+         * e.g. "Zum Produkt". The button opens the shop product.
+         */
+        buttonLabel?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The line along the bottom, e.g. "100 % pflanzlich", "Natürlich fermentiert", "Regional aus Graz".
+   */
+  trustPoints?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productShowcase';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6619,6 +6679,7 @@ export interface PagesSelect<T extends boolean = true> {
         featureCards?: T | FeatureCardsBlockSelect<T>;
         heroBanner?: T | HeroBannerBlockSelect<T>;
         homeTempehStory?: T | HomeTempehStoryBlockSelect<T>;
+        productShowcase?: T | ProductShowcaseBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
@@ -7468,6 +7529,34 @@ export interface HomeTempehStoryBlockSelect<T extends boolean = true> {
         description?: T;
         product?: T;
         buttonLabel?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductShowcaseBlock_select".
+ */
+export interface ProductShowcaseBlockSelect<T extends boolean = true> {
+  visible?: T;
+  tagline?: T;
+  slides?:
+    | T
+    | {
+        product?: T;
+        bigWord?: T;
+        productImage?: T;
+        ingredientsImage?: T;
+        label?: T;
+        text?: T;
+        buttonLabel?: T;
+        id?: T;
+      };
+  trustPoints?:
+    | T
+    | {
+        text?: T;
         id?: T;
       };
   id?: T;

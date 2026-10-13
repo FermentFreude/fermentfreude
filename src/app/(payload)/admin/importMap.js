@@ -15,6 +15,7 @@ import { LinkFeatureClient as LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { IndentFeatureClient as IndentFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { TableFeatureClient as TableFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { TempehSlideRowLabel as TempehSlideRowLabel_fa95fdaa71e9b079561f1b1ab74db6c3 } from '@/blocks/HomeTempehStory/slideRowLabel.tsx'
+import { ProductShowcaseRowLabel as ProductShowcaseRowLabel_7bb070d89afbf933a9628c5551972908 } from '@/blocks/ProductShowcase/slideRowLabel.tsx'
 import { PressItemRowLabel as PressItemRowLabel_1cab4db13d634badb5e5e3a1a0186021 } from '@/blocks/PressMediaAwards/pressItemRowLabel.tsx'
 import { OverviewComponent as OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
@@ -57,6 +58,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#IndentFeatureClient": IndentFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#TableFeatureClient": TableFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/blocks/HomeTempehStory/slideRowLabel.tsx#TempehSlideRowLabel": TempehSlideRowLabel_fa95fdaa71e9b079561f1b1ab74db6c3,
+  "@/blocks/ProductShowcase/slideRowLabel.tsx#ProductShowcaseRowLabel": ProductShowcaseRowLabel_7bb070d89afbf933a9628c5551972908,
   "@/blocks/PressMediaAwards/pressItemRowLabel.tsx#PressItemRowLabel": PressItemRowLabel_1cab4db13d634badb5e5e3a1a0186021,
   "@payloadcms/plugin-seo/client#OverviewComponent": OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaTitleComponent": MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860,

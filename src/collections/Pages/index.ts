@@ -7,6 +7,7 @@ import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { gastronomySectionBlocks } from '@/blocks/GastronomySections/config'
 import { HomeTempehStory } from '@/blocks/HomeTempehStory/config'
+import { ProductShowcase } from '@/blocks/ProductShowcase/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
 import { CollectionGrid } from '@/blocks/CollectionGrid/config'
@@ -212,6 +213,7 @@ export const Pages: CollectionConfig = {
                 FeatureCards,
                 HeroBanner,
                 HomeTempehStory,
+                ProductShowcase,
                 MediaBlock,
                 Archive,
                 Carousel,
