@@ -160,7 +160,14 @@ function WorkshopBanner({
 type Props = WorkshopSliderBlockType & {
   id?: string
   upcomingLabel?: string
-  upcomingDatesByHref?: Record<string, string>
+  /** Formatted date per workshop href. The page passes { date, soldOut } records, the global wrapper plain strings. */
+  upcomingDatesByHref?: Record<string, string | { date: string | null } | null>
+}
+
+/** Next bookable date as text, or undefined when there is none (sold out / no appointment) */
+function dateText(value: string | { date: string | null } | null | undefined): string | undefined {
+  if (!value) return undefined
+  return (typeof value === 'object' ? value.date : value) || undefined
 }
 
 function resolveMedia(image: MediaType | string | number | null | undefined): MediaType | null {
@@ -224,8 +231,9 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           detailsButtonLabel:
             (w as { detailsButtonLabel?: string | null }).detailsButtonLabel ||
             DEFAULT_DETAILS_CTA_LABEL,
-          nextDate:
-            upcomingDatesByHref?.[w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''] || undefined,
+          nextDate: dateText(
+            upcomingDatesByHref?.[w.ctaLink || DEFAULT_WORKSHOPS[i]?.ctaLink || ''],
+          ),
         }))
       : DEFAULT_WORKSHOPS.map((w) => ({
           ...w,
@@ -233,7 +241,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           image: null as MediaType | null,
           image2: null as MediaType | null,
           detailsButtonLabel: DEFAULT_DETAILS_CTA_LABEL,
-          nextDate: upcomingDatesByHref?.[w.ctaLink],
+          nextDate: dateText(upcomingDatesByHref?.[w.ctaLink]),
         }))
 
   /* ── Sticky scroll + parallax engine (all breakpoints) ─────── */
@@ -546,14 +554,13 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                       }}
                     >
                       {workshop.nextDate ? (
-                        <div className="mb-4 pb-3 border-b border-black/10">
-                          <p className="text-[10px] font-display font-bold tracking-widest uppercase text-black/45 mb-1">
+                        // Gold badge: dark text on gold stays readable (gold text on white wouldn't)
+                        <div className="mb-5 rounded-xl bg-ff-gold px-4 py-3">
+                          <p className="mb-1 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-ff-near-black/70">
                             {upcomingLabel || 'Upcoming'}
                           </p>
-                          <p className="text-sm md:text-base font-display font-bold text-black/85">
-                            {typeof workshop.nextDate === 'object' && workshop.nextDate !== null
-                              ? (workshop as any).nextDate.date
-                              : String(workshop.nextDate)}
+                          <p className="mb-0 font-display text-base font-bold leading-tight tracking-[-0.01em] text-ff-near-black md:text-lg">
+                            {workshop.nextDate}
                           </p>
                         </div>
                       ) : null}
