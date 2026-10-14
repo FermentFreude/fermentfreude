@@ -83,6 +83,15 @@ export default async function Page({ params }: Args) {
   }
   const skipTopPadding = isFullBleedHero || slug === 'help'
 
+  // Home: the testimonials slide up over the section before them (that one holds
+  // still once fully seen) — same rounded card effect as the product showcase
+  const restLayout = pageLayout.slice(stackBlocks.length)
+  const tIndex =
+    slug === 'home'
+      ? restLayout.findIndex((b) => b?.blockType === 'testimonials' && b.visible !== false)
+      : -1
+  const liftTestimonials = tIndex > 0
+
   return (
     <article
       className={
@@ -110,7 +119,26 @@ export default async function Page({ params }: Args) {
       ) : (
         <RenderHero {...hero} locale={locale} />
       )}
-      <RenderBlocks blocks={pageLayout.slice(stackBlocks.length)} slug={slug} locale={locale} />
+      {liftTestimonials ? (
+        <>
+          <RenderBlocks blocks={restLayout.slice(0, tIndex - 1)} slug={slug} locale={locale} />
+          <div className="relative">
+            <StackPanel index={0} sink={false}>
+              <div className="bg-white">
+                <RenderBlocks blocks={[restLayout[tIndex - 1]]} slug={slug} locale={locale} />
+              </div>
+            </StackPanel>
+            <StackPanel index={1} last>
+              <div className="bg-white">
+                <RenderBlocks blocks={[restLayout[tIndex]]} slug={slug} locale={locale} />
+              </div>
+            </StackPanel>
+          </div>
+          <RenderBlocks blocks={restLayout.slice(tIndex + 1)} slug={slug} locale={locale} />
+        </>
+      ) : (
+        <RenderBlocks blocks={restLayout} slug={slug} locale={locale} />
+      )}
       {slug === 'home' && !pageLayout.some((b) => b?.blockType === 'testimonials') && (
         <TestimonialsGlobalWrapper id="testimonials" />
       )}
