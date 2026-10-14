@@ -1041,6 +1041,7 @@ export interface Page {
         | HomeTempehStoryBlock
         | ProductShowcaseBlock
         | FermentationStoryBlock
+        | FermentationFactsBlock
         | MediaBlock
         | ArchiveBlock
         | CarouselBlock
@@ -3251,6 +3252,48 @@ export interface FermentationStoryBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'fermentationStory';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FermentationFactsBlock".
+ */
+export interface FermentationFactsBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Gold label above the heading, e.g. "Fermentation & Ernährung".
+   */
+  eyebrow?: string | null;
+  /**
+   * e.g. "Was hinter dem Glas steckt".
+   */
+  heading?: string | null;
+  /**
+   * The cards you swipe through sideways. Keep it short and honest: say what research looks at, never promise a health effect.
+   */
+  slides?:
+    | {
+        title: string;
+        /**
+         * A few short sentences.
+         */
+        text: string;
+        /**
+         * Small line under the text, e.g. "Wastyk et al., Cell (2021)".
+         */
+        sourceLabel?: string | null;
+        /**
+         * Link to the study.
+         */
+        sourceUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'fermentationFacts';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6801,6 +6844,7 @@ export interface PagesSelect<T extends boolean = true> {
         homeTempehStory?: T | HomeTempehStoryBlockSelect<T>;
         productShowcase?: T | ProductShowcaseBlockSelect<T>;
         fermentationStory?: T | FermentationStoryBlockSelect<T>;
+        fermentationFacts?: T | FermentationFactsBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
@@ -7702,6 +7746,26 @@ export interface FermentationStoryBlockSelect<T extends boolean = true> {
         icon?: T;
         title?: T;
         text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FermentationFactsBlock_select".
+ */
+export interface FermentationFactsBlockSelect<T extends boolean = true> {
+  visible?: T;
+  eyebrow?: T;
+  heading?: T;
+  slides?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        sourceLabel?: T;
+        sourceUrl?: T;
         id?: T;
       };
   id?: T;

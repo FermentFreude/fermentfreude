@@ -13,6 +13,7 @@ import { FormBlock } from '@/blocks/Form/Component'
 import { HelpFaqBlockComponent } from '@/blocks/HelpFaqBlock/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
 import { HomeTempehStoryBlockComponent } from '@/blocks/HomeTempehStory/Component'
+import { FermentationFactsBlock } from '@/blocks/FermentationFacts/Component'
 import { FermentationStoryBlock } from '@/blocks/FermentationStory/Component'
 import { ProductShowcaseBlockComponent } from '@/blocks/ProductShowcase/Component'
 import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Component'
@@ -61,6 +62,7 @@ const blockComponents = {
   homeTempehStory: HomeTempehStoryBlockComponent,
   productShowcase: ProductShowcaseBlockComponent,
   fermentationStory: FermentationStoryBlock,
+  fermentationFacts: FermentationFactsBlock,
   mediaBlock: MediaBlock,
   ourStory: OurStoryBlock,
   pressBanner: PressBannerBlock,

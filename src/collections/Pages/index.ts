@@ -7,6 +7,7 @@ import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { gastronomySectionBlocks } from '@/blocks/GastronomySections/config'
 import { HomeTempehStory } from '@/blocks/HomeTempehStory/config'
+import { FermentationFacts } from '@/blocks/FermentationFacts/config'
 import { FermentationStory } from '@/blocks/FermentationStory/config'
 import { ProductShowcase } from '@/blocks/ProductShowcase/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
@@ -216,6 +217,7 @@ export const Pages: CollectionConfig = {
                 HomeTempehStory,
                 ProductShowcase,
                 FermentationStory,
+                FermentationFacts,
                 MediaBlock,
                 Archive,
                 Carousel,
