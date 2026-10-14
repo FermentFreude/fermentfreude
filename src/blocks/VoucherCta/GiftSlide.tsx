@@ -114,7 +114,7 @@ function JarIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 function PointIcon({ icon }: { icon?: string | null }) {
-  const cls = 'size-4'
+  const cls = 'size-5 md:size-4'
   if (icon === 'jar') return <JarIcon className={cls} />
   if (icon === 'heart') return <Heart className={cls} strokeWidth={1.25} />
   if (icon === 'gift') return <Gift className={cls} strokeWidth={1.25} />
@@ -207,7 +207,8 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         ref={ref}
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}
-        className="relative flex h-full flex-col overflow-clip"
+        // 100svh = the part of the screen a phone really shows (browser bars excluded)
+        className="relative flex h-[100svh] max-h-full flex-col overflow-clip"
         style={{ backgroundColor: PAPER, color: INK }}
       >
         {/* ── Scene grid: the headline and the text each own their area, so they
@@ -349,35 +350,33 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
           </div>
         </div>
 
-        {/* ── Points along the bottom — editorial shop bar: even columns divided
-         *    by hairlines (the ul's colour shows through 1px gaps), outlined icon,
-         *    bold title, muted line ── */}
+        {/* ── Points along the bottom — editorial shop bar. Tablet/desktop: even
+         *    columns divided by hairlines (the ul's colour shows through 1px gaps),
+         *    outlined icon, bold title, muted line. Phone: four columns in one row,
+         *    icon on top with the title stacked under it (no second line). ── */}
         {points.length ? (
           <div className="relative z-20 shrink-0 border-t" style={{ borderColor: `${INK}1F` }}>
             <div className="container mx-auto container-padding">
-              <ul
-                className="grid grid-cols-2 gap-px md:grid-cols-4"
-                style={{ backgroundColor: `${INK}1F` }}
-              >
+              <ul className="grid grid-cols-4 gap-px" style={{ backgroundColor: `${INK}1F` }}>
                 {points.map((point, i) => (
                   <li
                     key={point.id ?? i}
-                    className="flex items-center gap-3 px-3 py-3.5 first:pl-0 md:px-6 md:py-5 md:first:pl-0 [&:nth-child(3)]:pl-0 md:[&:nth-child(3)]:pl-6"
+                    className="flex flex-col items-center gap-2 px-0.5 py-3.5 text-center md:flex-row md:gap-3 md:px-6 md:py-5 md:text-left md:first:pl-0"
                     style={{ backgroundColor: PAPER }}
                   >
                     <span
-                      className="flex size-9 shrink-0 items-center justify-center rounded-full border"
+                      className="flex size-11 shrink-0 items-center justify-center rounded-full border md:size-9"
                       style={{ borderColor: `${INK}33` }}
                     >
                       <PointIcon icon={point.icon} />
                     </span>
-                    {/* Short screens (small phones): titles only, so everything fits */}
                     <span className="min-w-0">
-                      <span className="block font-display text-[10px] font-bold uppercase leading-tight tracking-[0.06em] md:text-[11px]">
+                      <span className="block font-display text-[clamp(8.5px,2.7vw,11.5px)] font-bold uppercase leading-[1.2] md:text-[11px] md:leading-tight md:tracking-[0.06em]">
                         {point.title}
                       </span>
                       {point.text ? (
-                        <span className="mt-0.5 block text-[11px] leading-snug opacity-60 md:text-xs [@media(max-height:700px)]:hidden">
+                        // Phone and short screens: titles only
+                        <span className="mt-0.5 hidden text-xs leading-snug opacity-60 md:block [@media(max-height:700px)]:hidden">
                           {point.text}
                         </span>
                       ) : null}

@@ -295,7 +295,8 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           <div
             ref={giftCardRef}
             className="absolute inset-0 z-20 overflow-clip rounded-t-[2rem] shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:rounded-t-[2.5rem]"
-            style={{ transform: 'translateY(100%)' }}
+            // Paper colour behind the slide, so the strip under the browser bar matches
+            style={{ transform: 'translateY(100%)', backgroundColor: '#F5E7D6' }}
           >
             <GiftSlide data={giftSlide} />
           </div>
