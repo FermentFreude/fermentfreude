@@ -559,12 +559,12 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                         boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
                       }}
                     >
-                      {/* Gold label (white text) + the date below, bold black */}
-                      <div className="mb-5 border-b border-black/10 pb-4">
-                        <span className="mb-2 inline-block rounded-full bg-ff-gold px-3 py-1 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-white">
+                      {/* Gold box: white label + the date in bold black. Fixed size on every card; room for a 2nd line when a long date wraps on a narrow card */}
+                      <div className="mb-5 flex h-[4.75rem] flex-col justify-center rounded-xl bg-ff-gold px-4">
+                        <p className="mb-1 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-white">
                           {nextDateLabel || upcomingLabel || DEFAULT_NEXT_DATE_LABEL}
-                        </span>
-                        <p className="mb-0 font-display text-sm font-bold text-black/85 md:text-base">
+                        </p>
+                        <p className="mb-0 line-clamp-2 font-display text-[15px] font-bold leading-tight text-black">
                           {workshop.nextDate || noDateLabel || DEFAULT_NO_DATE_LABEL}
                         </p>
                       </div>
