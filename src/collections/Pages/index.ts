@@ -7,6 +7,7 @@ import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { gastronomySectionBlocks } from '@/blocks/GastronomySections/config'
 import { HomeTempehStory } from '@/blocks/HomeTempehStory/config'
+import { FermentationStory } from '@/blocks/FermentationStory/config'
 import { ProductShowcase } from '@/blocks/ProductShowcase/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
@@ -214,6 +215,7 @@ export const Pages: CollectionConfig = {
                 HeroBanner,
                 HomeTempehStory,
                 ProductShowcase,
+                FermentationStory,
                 MediaBlock,
                 Archive,
                 Carousel,
@@ -324,7 +326,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Tagline',
-                  admin: { description: 'One short line under the title. Keep it to 1–2 sentences.' },
+                  admin: {
+                    description: 'One short line under the title. Keep it to 1–2 sentences.',
+                  },
                 },
                 {
                   type: 'row',
@@ -407,7 +411,8 @@ export const Pages: CollectionConfig = {
                   maxRows: 8,
                   labels: { singular: 'Slide', plural: 'Slides' },
                   admin: {
-                    description: 'Each slide: photo + title + one short line. Photography does the talking.',
+                    description:
+                      'Each slide: photo + title + one short line. Photography does the talking.',
                   },
                   fields: [
                     {
@@ -542,7 +547,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Product CTA label',
-                  admin: { description: 'Button under the facts. e.g. “Jetzt B2B-Anfrage senden”.' },
+                  admin: {
+                    description: 'Button under the facts. e.g. “Jetzt B2B-Anfrage senden”.',
+                  },
                 },
                 {
                   name: 'gastronomyProductB2bLine',
@@ -585,7 +592,13 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Image',
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -682,7 +695,13 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Icon',
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -895,7 +914,13 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Image',
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -960,7 +985,8 @@ export const Pages: CollectionConfig = {
                   maxRows: 4,
                   labels: { singular: 'Card', plural: 'Cards' },
                   admin: {
-                    description: 'Photo, title and one short line. Leave photo empty to use the default.',
+                    description:
+                      'Photo, title and one short line. Leave photo empty to use the default.',
                   },
                   fields: [
                     {
@@ -1082,99 +1108,105 @@ export const Pages: CollectionConfig = {
                 },
                 {
                   name: 'gastronomyFormPlaceholders',
-              type: 'group',
-              label: 'Form Placeholders',
-              fields: [
+                  type: 'group',
+                  label: 'Form Placeholders',
+                  fields: [
+                    {
+                      name: 'firstName',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Name',
+                    },
+                    {
+                      name: 'lastName',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Restaurant / company',
+                    },
+                    {
+                      name: 'email',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Email',
+                    },
+                    {
+                      name: 'phone',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Phone',
+                    },
+                    {
+                      name: 'quantity',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Quantity',
+                    },
+                    {
+                      name: 'message',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Message',
+                    },
+                  ],
+                },
                 {
-                  name: 'firstName',
+                  name: 'gastronomyBusinessTypeOptions',
+                  type: 'group',
+                  label: 'Type of business dropdown',
+                  fields: [
+                    {
+                      name: 'default',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Placeholder',
+                      admin: { description: 'e.g. “Art des Betriebs”.' },
+                    },
+                    {
+                      name: 'options',
+                      type: 'array',
+                      label: 'Options',
+                      minRows: 0,
+                      fields: [{ name: 'label', type: 'text', required: false, localized: true }],
+                    },
+                  ],
+                },
+                {
+                  name: 'gastronomySubjectOptions',
+                  type: 'group',
+                  label: 'Interest dropdown',
+                  fields: [
+                    {
+                      name: 'default',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Placeholder',
+                      admin: { description: 'e.g. “Worum geht es?”.' },
+                    },
+                    {
+                      name: 'options',
+                      type: 'array',
+                      label: 'Options',
+                      minRows: 0,
+                      fields: [{ name: 'label', type: 'text', required: false, localized: true }],
+                    },
+                  ],
+                },
+                {
+                  name: 'gastronomySubmitButtonLabel',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Name',
+                  label: 'Submit button',
+                  admin: { description: 'e.g. “Anfrage senden” / “Send enquiry”.' },
                 },
-                {
-                  name: 'lastName',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Restaurant / company',
-                },
-                { name: 'email', type: 'text', required: false, localized: true, label: 'Email' },
-                {
-                  name: 'phone',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Phone',
-                },
-                {
-                  name: 'quantity',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Quantity',
-                },
-                {
-                  name: 'message',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Message',
-                },
-              ],
-            },
-            {
-              name: 'gastronomyBusinessTypeOptions',
-              type: 'group',
-              label: 'Type of business dropdown',
-              fields: [
-                {
-                  name: 'default',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Placeholder',
-                  admin: { description: 'e.g. “Art des Betriebs”.' },
-                },
-                {
-                  name: 'options',
-                  type: 'array',
-                  label: 'Options',
-                  minRows: 0,
-                  fields: [{ name: 'label', type: 'text', required: false, localized: true }],
-                },
-              ],
-            },
-            {
-              name: 'gastronomySubjectOptions',
-              type: 'group',
-              label: 'Interest dropdown',
-              fields: [
-                {
-                  name: 'default',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Placeholder',
-                  admin: { description: 'e.g. “Worum geht es?”.' },
-                },
-                {
-                  name: 'options',
-                  type: 'array',
-                  label: 'Options',
-                  minRows: 0,
-                  fields: [{ name: 'label', type: 'text', required: false, localized: true }],
-                },
-              ],
-            },
-            {
-              name: 'gastronomySubmitButtonLabel',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Submit button',
-              admin: { description: 'e.g. “Anfrage senden” / “Send enquiry”.' },
-            },
               ],
             },
           ],

@@ -1040,6 +1040,7 @@ export interface Page {
         | HeroBannerBlock
         | HomeTempehStoryBlock
         | ProductShowcaseBlock
+        | FermentationStoryBlock
         | MediaBlock
         | ArchiveBlock
         | CarouselBlock
@@ -3206,6 +3207,50 @@ export interface ProductShowcaseBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'productShowcase';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FermentationStoryBlock".
+ */
+export interface FermentationStoryBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Short question or headline, e.g. "Warum Fermentation?".
+   */
+  title?: string | null;
+  /**
+   * One or two short sentences under the title.
+   */
+  intro?: string | null;
+  /**
+   * The huge word across the section — one short, punchy word, e.g. "GESUND". The picture floats over it.
+   */
+  bigWord?: string | null;
+  /**
+   * e.g. "Mehr über Fermentation". Empty = no button.
+   */
+  buttonLabel?: string | null;
+  /**
+   * e.g. "/fermentation".
+   */
+  buttonLink?: string | null;
+  /**
+   * Up to 3 short benefits with an icon — a title and one short line each.
+   */
+  benefits?:
+    | {
+        icon?: ('microscope' | 'leaf' | 'sparkles' | 'sprout') | null;
+        title: string;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'fermentationStory';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6755,6 +6800,7 @@ export interface PagesSelect<T extends boolean = true> {
         heroBanner?: T | HeroBannerBlockSelect<T>;
         homeTempehStory?: T | HomeTempehStoryBlockSelect<T>;
         productShowcase?: T | ProductShowcaseBlockSelect<T>;
+        fermentationStory?: T | FermentationStoryBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
@@ -7633,6 +7679,28 @@ export interface ProductShowcaseBlockSelect<T extends boolean = true> {
   trustPoints?:
     | T
     | {
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FermentationStoryBlock_select".
+ */
+export interface FermentationStoryBlockSelect<T extends boolean = true> {
+  visible?: T;
+  title?: T;
+  intro?: T;
+  bigWord?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  benefits?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
         text?: T;
         id?: T;
       };

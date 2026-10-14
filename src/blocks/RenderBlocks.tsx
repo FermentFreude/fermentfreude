@@ -13,6 +13,7 @@ import { FormBlock } from '@/blocks/Form/Component'
 import { HelpFaqBlockComponent } from '@/blocks/HelpFaqBlock/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
 import { HomeTempehStoryBlockComponent } from '@/blocks/HomeTempehStory/Component'
+import { FermentationStoryBlock } from '@/blocks/FermentationStory/Component'
 import { ProductShowcaseBlockComponent } from '@/blocks/ProductShowcase/Component'
 import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
@@ -59,6 +60,7 @@ const blockComponents = {
   heroBanner: HeroBannerBlock,
   homeTempehStory: HomeTempehStoryBlockComponent,
   productShowcase: ProductShowcaseBlockComponent,
+  fermentationStory: FermentationStoryBlock,
   mediaBlock: MediaBlock,
   ourStory: OurStoryBlock,
   pressBanner: PressBannerBlock,
@@ -123,7 +125,7 @@ export const RenderBlocks: React.FC<{
   const isPresse = slug === 'presse'
   const isHelp = slug === 'help'
   // Full-bleed sections with their own background + padding: an outer margin would show as a white band
-  const FLUSH_BLOCKS = new Set<string>(['homeTempehStory', 'productShowcase'])
+  const FLUSH_BLOCKS = new Set<string>(['homeTempehStory', 'productShowcase', 'fermentationStory'])
   const gapClass = isAbout
     ? 'mb-12 last:mb-0' // increased margin between sections on About
     : isShop

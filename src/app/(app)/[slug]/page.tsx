@@ -70,9 +70,20 @@ export default async function Page({ params }: Args) {
   // Experimental: on Home the new product showcase replaces the old Tempeh & Kimchi
   // carousel. The old block stays saved in the CMS (and keeps showing wherever
   // this code isn't deployed) — it's only skipped here.
+  // Same for the new Fermentation Story: it replaces the old "IS HEALTHY" feature cards.
+  const hasStory = enrichedLayout.some(
+    (b) => b?.blockType === 'fermentationStory' && b.visible !== false,
+  )
   const pageLayout =
-    slug === 'home' && enrichedLayout.some((b) => b?.blockType === 'productShowcase')
-      ? enrichedLayout.filter((b) => b?.blockType !== 'homeTempehStory')
+    slug === 'home'
+      ? enrichedLayout.filter(
+          (b) =>
+            !(
+              (b?.blockType === 'homeTempehStory' &&
+                enrichedLayout.some((x) => x?.blockType === 'productShowcase')) ||
+              (b?.blockType === 'featureCards' && hasStory)
+            ),
+        )
       : enrichedLayout
   const stackBlocks: typeof enrichedLayout = []
   if (slug === 'home') {
@@ -83,14 +94,27 @@ export default async function Page({ params }: Args) {
   }
   const skipTopPadding = isFullBleedHero || slug === 'help'
 
-  // Home: the testimonials slide up over the section before them (that one holds
-  // still once fully seen) — same rounded card effect as the product showcase
+  // Home: these sections slide up over the section right before them (that one
+  // holds still once fully seen) — same rounded card effect as the product showcase
+  const LIFT_BLOCKS = new Set(['fermentationStory', 'testimonials'])
   const restLayout = pageLayout.slice(stackBlocks.length)
-  const tIndex =
-    slug === 'home'
-      ? restLayout.findIndex((b) => b?.blockType === 'testimonials' && b.visible !== false)
-      : -1
-  const liftTestimonials = tIndex > 0
+  type Segment =
+    | { kind: 'plain'; blocks: typeof restLayout }
+    | { kind: 'lift'; under: (typeof restLayout)[number]; over: (typeof restLayout)[number] }
+  const segments: Segment[] = []
+  for (let i = 0; i < restLayout.length; i++) {
+    const next = restLayout[i + 1]
+    const liftNext =
+      slug === 'home' && next && LIFT_BLOCKS.has(next.blockType) && next.visible !== false
+    if (liftNext) {
+      segments.push({ kind: 'lift', under: restLayout[i], over: next })
+      i++
+      continue
+    }
+    const last = segments[segments.length - 1]
+    if (last?.kind === 'plain') last.blocks.push(restLayout[i])
+    else segments.push({ kind: 'plain', blocks: [restLayout[i]] })
+  }
 
   return (
     <article
@@ -119,25 +143,23 @@ export default async function Page({ params }: Args) {
       ) : (
         <RenderHero {...hero} locale={locale} />
       )}
-      {liftTestimonials ? (
-        <>
-          <RenderBlocks blocks={restLayout.slice(0, tIndex - 1)} slug={slug} locale={locale} />
-          <div className="relative">
+      {segments.map((seg, i) =>
+        seg.kind === 'plain' ? (
+          <RenderBlocks key={i} blocks={seg.blocks} slug={slug} locale={locale} />
+        ) : (
+          <div key={i} className="relative">
             <StackPanel index={0} sink={false}>
               <div className="bg-white">
-                <RenderBlocks blocks={[restLayout[tIndex - 1]]} slug={slug} locale={locale} />
+                <RenderBlocks blocks={[seg.under]} slug={slug} locale={locale} />
               </div>
             </StackPanel>
             <StackPanel index={1} last>
               <div className="bg-white">
-                <RenderBlocks blocks={[restLayout[tIndex]]} slug={slug} locale={locale} />
+                <RenderBlocks blocks={[seg.over]} slug={slug} locale={locale} />
               </div>
             </StackPanel>
           </div>
-          <RenderBlocks blocks={restLayout.slice(tIndex + 1)} slug={slug} locale={locale} />
-        </>
-      ) : (
-        <RenderBlocks blocks={restLayout} slug={slug} locale={locale} />
+        ),
       )}
       {slug === 'home' && !pageLayout.some((b) => b?.blockType === 'testimonials') && (
         <TestimonialsGlobalWrapper id="testimonials" />
