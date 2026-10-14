@@ -483,6 +483,9 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     return () => observer.disconnect()
   }, [workshopCount])
 
+  /** Phone/tablet: hand visible only when resting, and not on the last workshop */
+  const showHand = handDirection !== 'hidden' && !isSwiping
+
   if (visible === false) return null
 
   /* ═══════════════════════════════════════════════════════════ */
@@ -687,20 +690,20 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
         {workshopCount > 1 ? (
           <div className="lg:hidden flex justify-center px-6 pt-2 pb-6">
             <div
-              className="inline-flex items-center gap-3 rounded-full bg-ff-near-black py-2 pl-4 pr-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+              className={`inline-flex items-center gap-3 rounded-full bg-ff-near-black py-2 pr-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-[padding] duration-400 ${showHand ? 'pl-4' : 'pl-3'}`}
               role="group"
               aria-label="Workshop navigation"
             >
-              {/* Hand + divider: collapse away at the last workshop, fade while swiping */}
+              {/* Hand + divider: collapse away (capsule shrinks to the dots) while swiping and on the last workshop */}
               <motion.span
                 aria-hidden
                 data-hand={handDirection}
                 className="flex items-center gap-3 overflow-hidden"
                 initial={false}
                 animate={{
-                  width: handDirection === 'hidden' ? 0 : 'auto',
-                  opacity: handDirection === 'hidden' || isSwiping ? 0 : 1,
-                  marginRight: handDirection === 'hidden' ? -12 : 0,
+                  width: showHand ? 'auto' : 0,
+                  opacity: showHand ? 1 : 0,
+                  marginRight: showHand ? 0 : -12,
                 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               >
