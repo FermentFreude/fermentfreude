@@ -323,46 +323,24 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
             </div>
           </div>
 
-          {/* Info — built exactly like the product info on the showcase cards:
-           *  name, short description, big price, black pill button with an arrow.
-           *  Bottom left on every screen, above the layers so it stays readable. */}
+          {/* Info, bottom left on every screen — big price first, the button right
+           *  under it, then name + short description. Above the layers so it
+           *  always stays readable. */}
           <div className="relative z-20 max-w-xs self-end md:max-w-sm">
-            {data.label ? (
-              <motion.h3
+            {data.priceText ? (
+              <motion.p
                 custom={0}
                 variants={fadeUp}
                 initial="hidden"
                 animate={active ? 'show' : 'hidden'}
-                className="font-display text-base font-bold uppercase tracking-[0.04em]"
-              >
-                {data.label}
-              </motion.h3>
-            ) : null}
-            {textLines.length ? (
-              <motion.p
-                custom={1}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mb-0 mt-2 text-sm leading-relaxed opacity-75"
-              >
-                {textLines.join(' ')}
-              </motion.p>
-            ) : null}
-            {data.priceText ? (
-              <motion.p
-                custom={2}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mb-0 mt-4 font-display text-3xl font-bold leading-none tracking-[-0.02em]"
+                className="mb-0 font-display text-6xl font-bold leading-none tracking-[-0.03em] md:text-7xl [@media(max-height:700px)]:text-5xl"
               >
                 {data.priceText}
               </motion.p>
             ) : null}
             {data.buttonLabel ? (
               <motion.div
-                custom={3}
+                custom={1}
                 variants={fadeUp}
                 initial="hidden"
                 animate={active ? 'show' : 'hidden'}
@@ -382,6 +360,28 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                   </span>
                 </Link>
               </motion.div>
+            ) : null}
+            {data.label ? (
+              <motion.h3
+                custom={2}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mt-6 font-display text-base font-bold uppercase tracking-[0.04em]"
+              >
+                {data.label}
+              </motion.h3>
+            ) : null}
+            {textLines.length ? (
+              <motion.p
+                custom={3}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mb-0 mt-2 text-sm leading-relaxed opacity-75"
+              >
+                {textLines.join(' ')}
+              </motion.p>
             ) : null}
           </div>
         </div>
