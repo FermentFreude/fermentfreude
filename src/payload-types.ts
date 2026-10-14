@@ -4685,6 +4685,50 @@ export interface VoucherCtaBlock {
    * Dark overlay strength on top of the background image. Lower values keep images brighter.
    */
   overlayOpacity?: number | null;
+  /**
+   * A full-screen card that slides up over the photo gallery once it is fully open — big headline, voucher picture and price. The pictures (jars, ingredients, voucher card) are built into the website; everything written here is editable.
+   */
+  giftSlide?: {
+    /**
+     * ON = the gift slide replaces the text panel under the gallery (eyebrow, heading, description above are then not shown).
+     */
+    enabled?: boolean | null;
+    /**
+     * Huge headline behind the pictures. One line per row, e.g. "VERSCHENKE" / "EIN ERLEBNIS".
+     */
+    bigWord?: string | null;
+    /**
+     * Small uppercase line bottom left, e.g. "Fermentations-Workshop".
+     */
+    label?: string | null;
+    /**
+     * A few short lines under the label — one per row.
+     */
+    text?: string | null;
+    /**
+     * Shown big, e.g. "99 €". Leave empty to hide.
+     */
+    priceText?: string | null;
+    /**
+     * e.g. "Gutschein kaufen". Empty = no button.
+     */
+    buttonLabel?: string | null;
+    /**
+     * e.g. "/voucher".
+     */
+    buttonLink?: string | null;
+    /**
+     * Up to 4 short points with a small icon, along the bottom of the slide.
+     */
+    points?:
+      | {
+          icon?: ('leaf' | 'jar' | 'heart' | 'gift') | null;
+          title: string;
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'voucherCta';
@@ -8200,6 +8244,25 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
   backgroundTheme?: T;
   customBackgroundColor?: T;
   overlayOpacity?: T;
+  giftSlide?:
+    | T
+    | {
+        enabled?: T;
+        bigWord?: T;
+        label?: T;
+        text?: T;
+        priceText?: T;
+        buttonLabel?: T;
+        buttonLink?: T;
+        points?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+      };
   id?: T;
   blockName?: T;
 }

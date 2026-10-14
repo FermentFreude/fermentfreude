@@ -1,6 +1,7 @@
 'use client'
 
 import { ScrollCue } from '@/components/ScrollCue'
+import { GiftSlide } from './GiftSlide'
 import { SectionHeader } from '@/components/SectionHeader'
 import { Media } from '@/components/Media'
 import type { Media as MediaType, VoucherCtaBlock as VoucherCtaBlockType } from '@/payload-types'
@@ -41,8 +42,10 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   backgroundTheme,
   customBackgroundColor,
   overlayOpacity,
+  giftSlide,
   id,
 }) => {
+  const giftOn = Boolean(giftSlide?.enabled)
   const resolvedEyebrow =
     eyebrow != null && String(eyebrow).trim() !== '' ? String(eyebrow).trim() : DEFAULTS.eyebrow
   const resolvedHeading = heading ?? DEFAULTS.heading
@@ -84,6 +87,9 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   const galleryWrapRef = useRef<HTMLDivElement>(null)
   const galleryRef = useRef<HTMLDivElement>(null)
   const flipCtxRef = useRef<ReturnType<typeof gsap.context> | null>(null)
+  /** Gift slide on: the pin lasts one more screen so the card can slide up over the open gallery */
+  const giftOnRef = useRef(giftOn)
+  giftOnRef.current = giftOn
 
   /* ── Scroll cue (capsule at the right edge of the gallery) ──
    * Shown while the gallery is on screen and not fully open. The gesture
@@ -162,11 +168,14 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         ease: 'expoScale(1, 5)',
       })
 
+      const withGift = giftOnRef.current
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: galleryEl,
           start: 'center center',
-          end: '+=100%',
+          // With the gift slide: first screen opens the gallery, second screen
+          // holds it still while the card slides up over it
+          end: withGift ? '+=200%' : '+=100%',
           // Number = seconds the animation takes to catch up with the scroll.
           // `true` followed every wheel step exactly, which felt jerky.
           scrub: 0.6,
@@ -174,10 +183,13 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           // Starts pinning a moment early so a fast scroll doesn't overshoot and snap back
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          onUpdate: (self) => onGalleryProgressRef.current(self.progress),
+          onUpdate: (self) =>
+            onGalleryProgressRef.current(withGift ? Math.min(1, self.progress * 2) : self.progress),
         },
       })
       tl.add(flip)
+      // Hold the open gallery for the second half (gift slide arrives)
+      if (withGift) tl.to({}, { duration: flip.duration() })
 
       return () => gsap.set(items, { clearProps: 'all' })
     })
@@ -213,6 +225,12 @@ export const VoucherCtaBlock: React.FC<Props> = ({
       const descEl = section.querySelector('[data-anim="desc"]')
       const ctaEl = section.querySelector('[data-anim="cta"]')
       const contentEl = section.querySelector('[data-anim="content"]')
+      // Gift slide replaces the text panel — nothing to reveal here
+      if (!contentEl)
+        return () => {
+          cleanupResize()
+          flipCtxRef.current?.revert()
+        }
 
       if (eyebrowEl) gsap.set(eyebrowEl, { y: 28, opacity: 0 })
       gsap.set(headingEl, { y: 50, opacity: 0 })
@@ -244,7 +262,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         flipCtxRef.current?.revert()
       }
     },
-    { scope: sectionRef, dependencies: [galleryImages, createFlip, eyebrow] },
+    { scope: sectionRef, dependencies: [galleryImages, createFlip, eyebrow, giftOn] },
   )
 
   if (visible === false) return null
@@ -287,63 +305,75 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* ── Text + Button below gallery ── */}
-      <div
-        data-anim="content"
-        className="relative overflow-hidden section-padding-md"
-        style={{ backgroundColor: panelBgColor }}
-      >
-        {backgroundImage ? (
-          <>
-            <div className="absolute inset-0">
-              <Media resource={backgroundImage} fill imgClassName="object-cover" />
-            </div>
-            <div
-              className="absolute inset-0"
-              style={{ backgroundColor: overlayColor, opacity: overlayAlpha }}
-              aria-hidden
-            />
-          </>
-        ) : null}
-
-        {/* Shared editorial header, left-aligned; data-anim hooks keep the GSAP text reveal.
-            With a voucher picture: text left + picture right on desktop, picture below on mobile. */}
-        <div
-          className={`container relative z-10 mx-auto container-padding ${
-            hasVoucherImage ? 'grid items-center gap-10 lg:grid-cols-2 lg:gap-16' : ''
-          }`}
-        >
-          <div>
-            <SectionHeader
-              tone={useWhiteText ? 'light' : 'dark'}
-              eyebrow={resolvedEyebrow}
-              heading={resolvedHeading}
-              intro={resolvedDescription}
-              eyebrowProps={
-                { 'data-anim': 'eyebrow' } as React.HTMLAttributes<HTMLParagraphElement>
-              }
-              headingProps={{ 'data-anim': 'heading' } as React.HTMLAttributes<HTMLHeadingElement>}
-              introProps={{ 'data-anim': 'desc' } as React.HTMLAttributes<HTMLParagraphElement>}
-            />
-            <Link
-              data-anim="cta"
-              href={resolvedButtonLink}
-              className={`mt-8 inline-flex items-center justify-center rounded-full border-2 bg-transparent px-6 py-2.5 font-display text-base font-bold uppercase tracking-widest transition-all hover:scale-[1.03] active:scale-[0.97] ${ctaBorderClass}`}
-            >
-              {resolvedButtonLabel}
-            </Link>
-          </div>
-          {hasVoucherImage ? (
-            <div data-anim="voucher-image" className="overflow-hidden rounded-3xl">
-              <Media
-                resource={voucherImage}
-                imgClassName="h-auto w-full"
-                size="(max-width: 1024px) 100vw, 50vw"
-              />
-            </div>
-          ) : null}
+      {giftOn && giftSlide ? (
+        /* ── Gift slide — pulled up one screen so it slides over the open,
+         *    still-pinned gallery (the pin lasts one extra screen) ── */
+        <div className="relative z-10 -mt-[100vh] overflow-clip rounded-t-[2rem] shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:rounded-t-[2.5rem]">
+          <GiftSlide data={giftSlide} />
         </div>
-      </div>
+      ) : (
+        <>
+          {/* ── Text + Button below gallery ── */}
+          <div
+            data-anim="content"
+            className="relative overflow-hidden section-padding-md"
+            style={{ backgroundColor: panelBgColor }}
+          >
+            {backgroundImage ? (
+              <>
+                <div className="absolute inset-0">
+                  <Media resource={backgroundImage} fill imgClassName="object-cover" />
+                </div>
+                <div
+                  className="absolute inset-0"
+                  style={{ backgroundColor: overlayColor, opacity: overlayAlpha }}
+                  aria-hidden
+                />
+              </>
+            ) : null}
+
+            {/* Shared editorial header, left-aligned; data-anim hooks keep the GSAP text reveal.
+              With a voucher picture: text left + picture right on desktop, picture below on mobile. */}
+            <div
+              className={`container relative z-10 mx-auto container-padding ${
+                hasVoucherImage ? 'grid items-center gap-10 lg:grid-cols-2 lg:gap-16' : ''
+              }`}
+            >
+              <div>
+                <SectionHeader
+                  tone={useWhiteText ? 'light' : 'dark'}
+                  eyebrow={resolvedEyebrow}
+                  heading={resolvedHeading}
+                  intro={resolvedDescription}
+                  eyebrowProps={
+                    { 'data-anim': 'eyebrow' } as React.HTMLAttributes<HTMLParagraphElement>
+                  }
+                  headingProps={
+                    { 'data-anim': 'heading' } as React.HTMLAttributes<HTMLHeadingElement>
+                  }
+                  introProps={{ 'data-anim': 'desc' } as React.HTMLAttributes<HTMLParagraphElement>}
+                />
+                <Link
+                  data-anim="cta"
+                  href={resolvedButtonLink}
+                  className={`mt-8 inline-flex items-center justify-center rounded-full border-2 bg-transparent px-6 py-2.5 font-display text-base font-bold uppercase tracking-widest transition-all hover:scale-[1.03] active:scale-[0.97] ${ctaBorderClass}`}
+                >
+                  {resolvedButtonLabel}
+                </Link>
+              </div>
+              {hasVoucherImage ? (
+                <div data-anim="voucher-image" className="overflow-hidden rounded-3xl">
+                  <Media
+                    resource={voucherImage}
+                    imgClassName="h-auto w-full"
+                    size="(max-width: 1024px) 100vw, 50vw"
+                  />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </>
+      )}
     </section>
   )
 }

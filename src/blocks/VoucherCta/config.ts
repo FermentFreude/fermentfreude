@@ -153,5 +153,133 @@ export const VoucherCta: Block = {
         condition: (_, siblingData) => Boolean(siblingData?.backgroundImage),
       },
     },
+    {
+      name: 'giftSlide',
+      type: 'group',
+      label: 'Gift slide (after the gallery)',
+      admin: {
+        description:
+          'A full-screen card that slides up over the photo gallery once it is fully open — big headline, voucher picture and price. The pictures (jars, ingredients, voucher card) are built into the website; everything written here is editable.',
+      },
+      fields: [
+        {
+          name: 'enabled',
+          type: 'checkbox',
+          label: 'Show the gift slide',
+          defaultValue: false,
+          admin: {
+            description:
+              'ON = the gift slide replaces the text panel under the gallery (eyebrow, heading, description above are then not shown).',
+          },
+        },
+        {
+          name: 'bigWord',
+          type: 'textarea',
+          localized: true,
+          label: 'Big headline',
+          admin: {
+            description:
+              'Huge headline behind the pictures. One line per row, e.g. "VERSCHENKE" / "EIN ERLEBNIS".',
+            condition: (_, siblingData) => Boolean(siblingData?.enabled),
+          },
+        },
+        {
+          name: 'label',
+          type: 'text',
+          localized: true,
+          label: 'Small label',
+          admin: {
+            description: 'Small uppercase line bottom left, e.g. "Fermentations-Workshop".',
+            condition: (_, siblingData) => Boolean(siblingData?.enabled),
+          },
+        },
+        {
+          name: 'text',
+          type: 'textarea',
+          localized: true,
+          label: 'Short text',
+          admin: {
+            description: 'A few short lines under the label — one per row.',
+            condition: (_, siblingData) => Boolean(siblingData?.enabled),
+          },
+        },
+        {
+          name: 'priceText',
+          type: 'text',
+          localized: true,
+          label: 'Price',
+          admin: {
+            description: 'Shown big, e.g. "99 €". Leave empty to hide.',
+            condition: (_, siblingData) => Boolean(siblingData?.enabled),
+          },
+        },
+        {
+          type: 'row',
+          admin: { condition: (_, siblingData) => Boolean(siblingData?.enabled) },
+          fields: [
+            {
+              name: 'buttonLabel',
+              type: 'text',
+              localized: true,
+              label: 'Button text',
+              admin: { description: 'e.g. "Gutschein kaufen". Empty = no button.', width: '50%' },
+            },
+            {
+              name: 'buttonLink',
+              type: 'text',
+              localized: true,
+              label: 'Button link',
+              admin: { description: 'e.g. "/voucher".', width: '50%' },
+            },
+          ],
+        },
+        {
+          name: 'points',
+          type: 'array',
+          label: 'Points along the bottom',
+          maxRows: 4,
+          labels: { singular: 'Point', plural: 'Points' },
+          admin: {
+            description: 'Up to 4 short points with a small icon, along the bottom of the slide.',
+            condition: (_, siblingData) => Boolean(siblingData?.enabled),
+          },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'icon',
+                  type: 'select',
+                  label: 'Icon',
+                  defaultValue: 'leaf',
+                  options: [
+                    { label: 'Leaf', value: 'leaf' },
+                    { label: 'Jar', value: 'jar' },
+                    { label: 'Heart', value: 'heart' },
+                    { label: 'Gift', value: 'gift' },
+                  ],
+                  admin: { width: '25%' },
+                },
+                {
+                  name: 'title',
+                  type: 'text',
+                  localized: true,
+                  required: true,
+                  label: 'Title',
+                  admin: { width: '35%' },
+                },
+                {
+                  name: 'text',
+                  type: 'text',
+                  localized: true,
+                  label: 'Text',
+                  admin: { width: '40%' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
