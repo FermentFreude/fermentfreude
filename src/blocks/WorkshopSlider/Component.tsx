@@ -7,13 +7,16 @@ import type {
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
 import { MotionConfig, motion, type Variants } from 'motion/react'
-import { Pointer } from 'lucide-react'
+import { SwipeCapsule, useSwipeNudge, useSwipeTrack } from '@/components/SwipeCapsule'
 import Link from 'next/link'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
  *  HARDCODED DEFAULTS  (English — CMS data always wins)
  * ═══════════════════════════════════════════════════════════════ */
+
+/** Below lg the gallery is a native swipe row (desktop: sticky scroll scene) */
+const isTouchLayout = () => window.innerWidth < 1024
 
 const DEFAULT_EYEBROW = 'Workshop Experience'
 const DEFAULT_SECTION_HEADING = 'Our next workshops'
@@ -214,11 +217,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   const scrollRef = useRef({ current: 0, target: 0, limit: 0 })
   const rafRef = useRef<number>(0)
   const isActiveRef = useRef(false)
-  const [activeWorkshopIndex, setActiveWorkshopIndex] = useState(0)
-  /** Phone/tablet swipe hand: which way it swipes (follows your last direction), hidden at the last workshop */
-  const [handDirection, setHandDirection] = useState<'forward' | 'back' | 'hidden'>('forward')
-  /** Hand fades out while you are swiping, back a moment after you stop */
-  const [isSwiping, setIsSwiping] = useState(false)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
   const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
@@ -367,124 +365,21 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
   const workshopCount = resolvedWorkshops.length
 
-  const goToWorkshop = useCallback(
-    (index: number) => {
-      const clamped = Math.max(0, Math.min(workshopCount - 1, index))
-      const el = workshopGroupRefs.current[clamped]
-      if (!el) return
-      el.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' })
-      setActiveWorkshopIndex(clamped)
-    },
-    [workshopCount],
-  )
-
-  /* Mobile: sync dot indicator + swipe hand while user swipes */
-  useEffect(() => {
-    const track = trackRef.current
-    if (!track || workshopCount === 0) return
-
-    let swipeStartLeft: number | null = null
-    let idleTimer: ReturnType<typeof setTimeout> | undefined
-
-    /** Index of the workshop whose start is closest to the left edge */
-    const closestIndex = () => {
-      const trackRect = track.getBoundingClientRect()
-      let closest = 0
-      let minDistance = Number.POSITIVE_INFINITY
-      workshopGroupRefs.current.forEach((group, index) => {
-        if (!group) return
-        const distance = Math.abs(group.getBoundingClientRect().left - trackRect.left)
-        if (distance < minDistance) {
-          minDistance = distance
-          closest = index
-        }
-      })
-      return closest
-    }
-
-    /* Hand, decided once a swipe has settled: hidden on the last workshop,
-     * forward on the first; in between it follows the net direction of your
-     * last swipe — so swiping back flips it. A small swipe that snaps back
-     * to the same card changes nothing. */
-    const updateHand = () => {
-      const index = closestIndex()
-      const net = swipeStartLeft === null ? 0 : track.scrollLeft - swipeStartLeft
-      setHandDirection((prev) =>
-        index >= workshopCount - 1
-          ? 'hidden'
-          : index === 0
-            ? 'forward'
-            : net > 24
-              ? 'forward'
-              : net < -24
-                ? 'back'
-                : prev === 'hidden'
-                  ? 'back'
-                  : prev,
-      )
-    }
-
-    const syncActiveIndex = () => {
-      if (window.innerWidth >= 1024) return
-      setActiveWorkshopIndex(closestIndex())
-    }
-
-    const onScroll = () => {
-      syncActiveIndex()
-      if (swipeStartLeft === null) swipeStartLeft = track.scrollLeft
-      setIsSwiping(true)
-      clearTimeout(idleTimer)
-      idleTimer = setTimeout(() => {
-        updateHand()
-        swipeStartLeft = null
-        setIsSwiping(false)
-      }, 600)
-    }
-
-    syncActiveIndex()
-    updateHand()
-    track.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', syncActiveIndex)
-
-    return () => {
-      clearTimeout(idleTimer)
-      track.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', syncActiveIndex)
-    }
-  }, [workshopCount])
-
-  /* Phone/tablet: when the gallery first comes into view, the cards slide a
-   * little to the left and back — shows there is more to swipe to. Once only;
-   * skipped with "reduce motion" and on desktop (that has its own scroll scene). */
-  useEffect(() => {
-    const track = trackRef.current
-    const row = containerRef.current
-    if (!track || !row || workshopCount < 2) return
-    if (window.innerWidth >= 1024) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return
-        observer.disconnect()
-        if (track.scrollLeft > 24) return
-        row.animate(
-          [
-            { transform: 'translateX(0)' },
-            { transform: 'translateX(-56px)', offset: 0.45 },
-            { transform: 'translateX(0)' },
-          ],
-          { duration: 1400, delay: 500, easing: 'cubic-bezier(0.45, 0, 0.25, 1)' },
-        )
-      },
-      { threshold: 0.5 },
-    )
-    observer.observe(track)
-    return () => observer.disconnect()
-  }, [workshopCount])
-
-  /** Phone/tablet: hand visible only when resting, and not on the last workshop */
-  const showHand = handDirection !== 'hidden' && !isSwiping
+  /* Phone/tablet: swipe capsule (hand + dots) follows the native swipe row;
+   * the cards nudge once when the gallery comes into view. Desktop has its own
+   * sticky scroll scene, so nothing is tracked there. */
+  const {
+    active: activeWorkshopIndex,
+    handDirection,
+    isSwiping,
+    goTo: goToWorkshop,
+  } = useSwipeTrack({
+    trackRef,
+    itemRefs: workshopGroupRefs,
+    count: workshopCount,
+    enabled: isTouchLayout,
+  })
+  useSwipeNudge(trackRef, containerRef, workshopCount, isTouchLayout)
 
   if (visible === false) return null
 
@@ -689,70 +584,14 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
             sticky scene. */}
         {workshopCount > 1 ? (
           <div className="lg:hidden flex justify-center px-6 pt-2 pb-6">
-            <div
-              className={`inline-flex items-center gap-3 rounded-full bg-ff-near-black py-2 pr-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-[padding] duration-400 ${showHand ? 'pl-4' : 'pl-3'}`}
-              role="group"
-              aria-label="Workshop navigation"
-            >
-              {/* Hand + divider: collapse away (capsule shrinks to the dots) while swiping and on the last workshop */}
-              <motion.span
-                aria-hidden
-                data-hand={handDirection}
-                className="flex items-center gap-3 overflow-hidden"
-                initial={false}
-                animate={{
-                  width: showHand ? 'auto' : 0,
-                  opacity: showHand ? 1 : 0,
-                  marginRight: showHand ? 0 : -12,
-                }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <span className="flex h-5 w-7 shrink-0 items-center justify-center">
-                  {/* key restarts the loop when the direction flips */}
-                  <motion.span
-                    key={handDirection}
-                    className="inline-flex text-ff-ivory"
-                    animate={
-                      handDirection === 'back'
-                        ? { x: [-9, 9, 9], opacity: [0, 1, 0], rotate: [8, 16, 16] }
-                        : { x: [9, -9, -9], opacity: [0, 1, 0], rotate: [-8, -16, -16] }
-                    }
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      repeatDelay: 0.5,
-                      ease: 'easeInOut',
-                      times: [0, 0.65, 1],
-                    }}
-                  >
-                    <Pointer className="size-4" strokeWidth={1.75} />
-                  </motion.span>
-                </span>
-                <span className="h-4 w-px shrink-0 bg-white/15" />
-              </motion.span>
-              <div className="flex items-center">
-                {resolvedWorkshops.map((workshop, index) => {
-                  const isActive = index === activeWorkshopIndex
-                  return (
-                    <button
-                      key={workshop.ctaLink ?? index}
-                      type="button"
-                      onClick={() => goToWorkshop(index)}
-                      className="flex h-6 items-center px-1"
-                      aria-label={`${workshop.title}${isActive ? ' (current)' : ''}`}
-                      aria-current={isActive ? 'true' : undefined}
-                    >
-                      {/* Active = longer gold bar, others small ivory dots */}
-                      <span
-                        className={`block h-1.5 rounded-full transition-all duration-300 ${
-                          isActive ? 'w-5 bg-ff-gold' : 'w-1.5 bg-ff-ivory/35'
-                        }`}
-                      />
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+            <SwipeCapsule
+              labels={resolvedWorkshops.map((w) => w.title)}
+              active={activeWorkshopIndex}
+              handDirection={handDirection}
+              isSwiping={isSwiping}
+              onSelect={goToWorkshop}
+              ariaLabel="Workshop navigation"
+            />
           </div>
         ) : null}
       </div>
