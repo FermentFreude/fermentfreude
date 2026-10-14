@@ -88,6 +88,7 @@ function resolveMedia(image: MediaType | string | number | null | undefined): Me
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
   visible,
+  sectionLead,
   sectionHeading,
   eyebrow,
   workshops,
@@ -309,10 +310,16 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
      * horizontal swipe carousel (no scroll-jacking). */
     <div id={id ?? undefined} className="bg-white">
       {/* ── Section title — introduces the workshops before the gallery pins */}
+      {/* ── Banner — bridges the product showcase to the workshops */}
       {resolvedSectionHeading ? (
-        <div className="container mx-auto container-padding pt-16 md:pt-20 lg:pt-24">
-          <FadeIn>
-            <h2 className="whitespace-nowrap text-center font-display text-[clamp(1.5rem,5.6vw,3.5rem)] font-bold leading-[1] tracking-[-0.035em] text-ff-near-black">
+        <div className="bg-ff-near-black py-14 md:py-16 lg:py-20">
+          <FadeIn className="container mx-auto container-padding text-center">
+            {sectionLead ? (
+              <p className="mx-auto mb-3 max-w-2xl text-balance font-sans text-base leading-relaxed text-ff-gold md:mb-4 md:text-lg">
+                {sectionLead}
+              </p>
+            ) : null}
+            <h2 className="whitespace-nowrap font-display text-[clamp(1.5rem,5.6vw,3.5rem)] font-bold leading-[1] tracking-[-0.035em] text-ff-ivory">
               {resolvedSectionHeading}
             </h2>
           </FadeIn>

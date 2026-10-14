@@ -4800,7 +4800,11 @@ export interface WorkshopSliderBlock {
    */
   useGlobalData?: boolean | null;
   /**
-   * Big centred title above the workshops, e.g. "Unsere nächsten Workshops". Leave empty to hide it.
+   * Small gold line in the banner above the title, e.g. "Mit Fermentfreude lernst du, Tempeh, Kimchi, Kombucha und mehr zuhause selbst zu machen." Optional.
+   */
+  sectionLead?: string | null;
+  /**
+   * Title in the dark banner above the workshops, e.g. "Unsere nächsten Workshops". Leave empty to hide the whole banner.
    */
   sectionHeading?: string | null;
   /**
@@ -8237,6 +8241,7 @@ export interface CourseWaitlistCtaBlockSelect<T extends boolean = true> {
 export interface WorkshopSliderBlockSelect<T extends boolean = true> {
   visible?: T;
   useGlobalData?: T;
+  sectionLead?: T;
   sectionHeading?: T;
   eyebrow?: T;
   workshops?:

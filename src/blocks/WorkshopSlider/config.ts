@@ -28,13 +28,23 @@ export const WorkshopSlider: Block = {
       },
     },
     {
+      name: 'sectionLead',
+      type: 'text',
+      localized: true,
+      label: 'Banner — intro line',
+      admin: {
+        description:
+          'Small gold line in the banner above the title, e.g. "Mit Fermentfreude lernst du, Tempeh, Kimchi, Kombucha und mehr zuhause selbst zu machen." Optional.',
+      },
+    },
+    {
       name: 'sectionHeading',
       type: 'text',
       localized: true,
-      label: 'Section title',
+      label: 'Banner — title',
       admin: {
         description:
-          'Big centred title above the workshops, e.g. "Unsere nächsten Workshops". Leave empty to hide it.',
+          'Title in the dark banner above the workshops, e.g. "Unsere nächsten Workshops". Leave empty to hide the whole banner.',
       },
     },
     {
