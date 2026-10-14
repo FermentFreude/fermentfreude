@@ -215,6 +215,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   const rafRef = useRef<number>(0)
   const isActiveRef = useRef(false)
   const [activeWorkshopIndex, setActiveWorkshopIndex] = useState(0)
+  /** Phone/tablet swipe hand: which way it swipes (follows your last direction), hidden at the last workshop */
+  const [handDirection, setHandDirection] = useState<'forward' | 'back' | 'hidden'>('forward')
+  /** Hand fades out while you are swiping, back a moment after you stop */
+  const [isSwiping, setIsSwiping] = useState(false)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
   const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
@@ -374,18 +378,19 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     [workshopCount],
   )
 
-  /* Mobile: sync dot indicator while user swipes */
+  /* Mobile: sync dot indicator + swipe hand while user swipes */
   useEffect(() => {
     const track = trackRef.current
     if (!track || workshopCount === 0) return
 
-    const syncActiveIndex = () => {
-      if (window.innerWidth >= 1024) return
+    let swipeStartLeft: number | null = null
+    let idleTimer: ReturnType<typeof setTimeout> | undefined
 
+    /** Index of the workshop whose start is closest to the left edge */
+    const closestIndex = () => {
       const trackRect = track.getBoundingClientRect()
       let closest = 0
       let minDistance = Number.POSITIVE_INFINITY
-
       workshopGroupRefs.current.forEach((group, index) => {
         if (!group) return
         const distance = Math.abs(group.getBoundingClientRect().left - trackRect.left)
@@ -394,16 +399,56 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           closest = index
         }
       })
+      return closest
+    }
 
-      setActiveWorkshopIndex(closest)
+    /* Hand, decided once a swipe has settled: hidden on the last workshop,
+     * forward on the first; in between it follows the net direction of your
+     * last swipe — so swiping back flips it. A small swipe that snaps back
+     * to the same card changes nothing. */
+    const updateHand = () => {
+      const index = closestIndex()
+      const net = swipeStartLeft === null ? 0 : track.scrollLeft - swipeStartLeft
+      setHandDirection((prev) =>
+        index >= workshopCount - 1
+          ? 'hidden'
+          : index === 0
+            ? 'forward'
+            : net > 24
+              ? 'forward'
+              : net < -24
+                ? 'back'
+                : prev === 'hidden'
+                  ? 'back'
+                  : prev,
+      )
+    }
+
+    const syncActiveIndex = () => {
+      if (window.innerWidth >= 1024) return
+      setActiveWorkshopIndex(closestIndex())
+    }
+
+    const onScroll = () => {
+      syncActiveIndex()
+      if (swipeStartLeft === null) swipeStartLeft = track.scrollLeft
+      setIsSwiping(true)
+      clearTimeout(idleTimer)
+      idleTimer = setTimeout(() => {
+        updateHand()
+        swipeStartLeft = null
+        setIsSwiping(false)
+      }, 600)
     }
 
     syncActiveIndex()
-    track.addEventListener('scroll', syncActiveIndex, { passive: true })
+    updateHand()
+    track.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', syncActiveIndex)
 
     return () => {
-      track.removeEventListener('scroll', syncActiveIndex)
+      clearTimeout(idleTimer)
+      track.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', syncActiveIndex)
     }
   }, [workshopCount])
@@ -646,22 +691,42 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               role="group"
               aria-label="Workshop navigation"
             >
-              <span aria-hidden className="flex h-5 w-7 items-center justify-center">
-                <motion.span
-                  className="inline-flex text-ff-ivory"
-                  animate={{ x: [9, -9, -9], opacity: [0, 1, 0], rotate: [-8, -16, -16] }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatDelay: 0.5,
-                    ease: 'easeInOut',
-                    times: [0, 0.65, 1],
-                  }}
-                >
-                  <Pointer className="size-4" strokeWidth={1.75} />
-                </motion.span>
-              </span>
-              <span aria-hidden className="h-4 w-px bg-white/15" />
+              {/* Hand + divider: collapse away at the last workshop, fade while swiping */}
+              <motion.span
+                aria-hidden
+                data-hand={handDirection}
+                className="flex items-center gap-3 overflow-hidden"
+                initial={false}
+                animate={{
+                  width: handDirection === 'hidden' ? 0 : 'auto',
+                  opacity: handDirection === 'hidden' || isSwiping ? 0 : 1,
+                  marginRight: handDirection === 'hidden' ? -12 : 0,
+                }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <span className="flex h-5 w-7 shrink-0 items-center justify-center">
+                  {/* key restarts the loop when the direction flips */}
+                  <motion.span
+                    key={handDirection}
+                    className="inline-flex text-ff-ivory"
+                    animate={
+                      handDirection === 'back'
+                        ? { x: [-9, 9, 9], opacity: [0, 1, 0], rotate: [8, 16, 16] }
+                        : { x: [9, -9, -9], opacity: [0, 1, 0], rotate: [-8, -16, -16] }
+                    }
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      repeatDelay: 0.5,
+                      ease: 'easeInOut',
+                      times: [0, 0.65, 1],
+                    }}
+                  >
+                    <Pointer className="size-4" strokeWidth={1.75} />
+                  </motion.span>
+                </span>
+                <span className="h-4 w-px shrink-0 bg-white/15" />
+              </motion.span>
               <div className="flex items-center">
                 {resolvedWorkshops.map((workshop, index) => {
                   const isActive = index === activeWorkshopIndex
