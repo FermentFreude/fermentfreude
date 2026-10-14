@@ -283,8 +283,12 @@ export const VoucherCta: Block = {
                   name: 'text',
                   type: 'text',
                   localized: true,
-                  label: 'Text',
-                  admin: { width: '40%' },
+                  label: 'Short line (not shown at the moment)',
+                  admin: {
+                    width: '40%',
+                    description:
+                      'Kept for later — the points currently show icon + title only, the same on every screen.',
+                  },
                 },
               ],
             },

@@ -4694,7 +4694,7 @@ export interface VoucherCtaBlock {
      */
     enabled?: boolean | null;
     /**
-     * Huge headline behind the pictures. One line per row, e.g. "VERSCHENKE" / "EIN ERLEBNIS".
+     * Huge word behind the pictures — keep it to one short, punchy word, e.g. "GUTSCHEIN". (A new row also works, but one word reads strongest.)
      */
     bigWord?: string | null;
     /**
@@ -4728,6 +4728,9 @@ export interface VoucherCtaBlock {
       | {
           icon?: ('leaf' | 'jar' | 'heart' | 'gift') | null;
           title: string;
+          /**
+           * Kept for later — the points currently show icon + title only, the same on every screen.
+           */
           text?: string | null;
           id?: string | null;
         }[]

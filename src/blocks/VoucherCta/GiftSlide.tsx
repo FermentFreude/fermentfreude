@@ -6,6 +6,7 @@ import {
   motion,
   useInView,
   useMotionValue,
+  useMotionValueEvent,
   useSpring,
   useTransform,
   type MotionValue,
@@ -90,15 +91,24 @@ function useFitSize(
     const measure = measureRef.current
     if (!box || !measure) return
     const fit = () => {
-      // measure is rendered at 100px
+      // measure is rendered at 100px; skip while anything is still 0-sized
+      // (not laid out yet) — the CSS fallback size shows meanwhile
+      if (!box.clientWidth || !box.clientHeight || !measure.scrollWidth) return
       const byWidth = (box.clientWidth / measure.scrollWidth) * 100
       const byHeight = box.clientHeight / (lines * 0.86)
       setSize(Math.floor(Math.min(byWidth, byHeight)))
     }
     fit()
+    // Re-measure when the box resizes, the window resizes, and once the web
+    // fonts have loaded (the fallback font has different widths)
     const observer = new ResizeObserver(fit)
     observer.observe(box)
-    return () => observer.disconnect()
+    window.addEventListener('resize', fit)
+    document.fonts?.ready.then(fit).catch(() => {})
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', fit)
+    }
   }, [boxRef, measureRef, lines])
   return size
 }
@@ -114,7 +124,7 @@ function JarIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 function PointIcon({ icon }: { icon?: string | null }) {
-  const cls = 'size-5 md:size-4'
+  const cls = 'size-[46%]'
   if (icon === 'jar') return <JarIcon className={cls} />
   if (icon === 'heart') return <Heart className={cls} strokeWidth={1.25} />
   if (icon === 'gift') return <Gift className={cls} strokeWidth={1.25} />
@@ -170,7 +180,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
     : null
 
   const fontSize = useFitSize(wordBoxRef, measureRef, lines.length)
-  const active = useInView(ref, { once: true, amount: 0.3 })
+  const inView = useInView(ref, { once: true, amount: 0.3 })
 
   // Pointer float (desktop)
   const px = useSpring(0, { stiffness: 60, damping: 18 })
@@ -189,6 +199,13 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
   // As the card slides in, the layers lift into place (ingredients further, card a
   // touch less). Movement only — the layers stay fully solid the whole time.
   const arrival = useArrival(ref)
+  // Safety net: the entrance also starts once the card has (nearly) landed,
+  // in case a browser misses the in-view signal inside the pinned scene
+  const [landed, setLanded] = useState(false)
+  useMotionValueEvent(arrival, 'change', (v) => {
+    if (v > 0.85 && !landed) setLanded(true)
+  })
+  const active = inView || landed
   const lift = useSpring(useTransform(arrival, [0.1, 0.95], [1, 0], { clamp: true }), {
     stiffness: 70,
     damping: 22,
@@ -269,11 +286,11 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                 </div>
                 <motion.h2
                   className="absolute inset-0 flex flex-col items-center justify-center text-center font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
+                  // Fallback size until measured — never invisible
                   style={{
-                    fontSize: fontSize ?? undefined,
+                    fontSize: fontSize ?? 'clamp(3rem, 13vw, 9.5rem)',
                     x: wordX,
                     y: wordY,
-                    opacity: fontSize ? 1 : 0,
                   }}
                 >
                   {lines.map((line, i) => (
@@ -355,10 +372,10 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
           </div>
         </div>
 
-        {/* ── Points along the bottom — editorial shop bar. Tablet/desktop: even
-         *    columns divided by hairlines (the ul's colour shows through 1px gaps),
-         *    outlined icon, bold title, muted line. Phone: four columns in one row,
-         *    icon on top with the title stacked under it (no second line). ── */}
+        {/* ── Points along the bottom — ONE design on every screen: four equal
+         *    columns divided by hairlines (the ul's colour shows through the 1px
+         *    gaps), outlined icon on top, title centred underneath. Only the size
+         *    changes, fluidly with the screen width (clamp), never the layout. ── */}
         {points.length ? (
           <div className="relative z-20 shrink-0 border-t" style={{ borderColor: `${INK}1F` }}>
             <div className="container mx-auto container-padding">
@@ -366,25 +383,17 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                 {points.map((point, i) => (
                   <li
                     key={point.id ?? i}
-                    className="flex flex-col items-center gap-2 px-0.5 py-3.5 text-center md:flex-row md:gap-3 md:px-6 md:py-5 md:text-left md:first:pl-0"
+                    className="flex flex-col items-center gap-[clamp(6px,0.8vw,12px)] px-0.5 py-[clamp(12px,1.5vw,22px)] text-center"
                     style={{ backgroundColor: PAPER }}
                   >
                     <span
-                      className="flex size-11 shrink-0 items-center justify-center rounded-full border md:size-9"
+                      className="flex size-[clamp(40px,3.4vw,52px)] shrink-0 items-center justify-center rounded-full border"
                       style={{ borderColor: `${INK}33` }}
                     >
                       <PointIcon icon={point.icon} />
                     </span>
-                    <span className="min-w-0">
-                      <span className="block font-display text-[clamp(8.5px,2.7vw,11.5px)] font-bold uppercase leading-[1.2] md:text-[11px] md:leading-tight md:tracking-[0.06em]">
-                        {point.title}
-                      </span>
-                      {point.text ? (
-                        // Phone and short screens: titles only
-                        <span className="mt-0.5 hidden text-xs leading-snug opacity-60 md:block [@media(max-height:700px)]:hidden">
-                          {point.text}
-                        </span>
-                      ) : null}
+                    <span className="block font-display text-[clamp(8.5px,2.7vw,12.5px)] font-bold uppercase leading-[1.2] tracking-[0.02em]">
+                      {point.title}
                     </span>
                   </li>
                 ))}
