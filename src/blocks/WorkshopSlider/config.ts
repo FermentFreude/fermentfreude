@@ -77,10 +77,10 @@ export const WorkshopSlider: Block = {
       name: 'scrollHintLabel',
       type: 'text',
       localized: true,
-      label: 'Scroll hint',
+      label: 'Swipe hint (phone & tablet)',
       admin: {
         description:
-          'Text in the small dark pill at the bottom of the gallery on desktop, e.g. "Nach rechts scrollen".',
+          'Phones and tablets: text in the small dark pill under the workshops, e.g. "Wischen für mehr Workshops". It disappears after the first swipe.',
       },
     },
     {

@@ -20,7 +20,7 @@ const DEFAULT_SECTION_HEADING = 'Our next workshops'
 const DEFAULT_DETAILS_CTA_LABEL = 'Explore'
 const DEFAULT_NEXT_DATE_LABEL = 'Next date'
 const DEFAULT_NO_DATE_LABEL = 'Available soon'
-const DEFAULT_SCROLL_HINT = 'Scroll to the right'
+const DEFAULT_SCROLL_HINT = 'Swipe for more workshops'
 
 const DEFAULT_WORKSHOPS = [
   {
@@ -216,8 +216,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   const scrollRef = useRef({ current: 0, target: 0, limit: 0 })
   const rafRef = useRef<number>(0)
   const isActiveRef = useRef(false)
-  const hintRef = useRef<HTMLDivElement>(null)
-  const hintBarRef = useRef<HTMLSpanElement>(null)
+  /** Phone/tablet: the swipe hint hides after the first swipe */
+  const [hasSwiped, setHasSwiped] = useState(false)
   const [activeWorkshopIndex, setActiveWorkshopIndex] = useState(0)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
@@ -327,11 +327,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       s.current = Math.abs(diff) < 0.3 ? s.target : s.current + diff * EASE
       container.style.transform = `translate3d(${-s.current}px, 0, 0)`
 
-      /* Scroll hint: gold bar shows progress, the pill fades out near the end */
-      const progress = s.limit > 0 ? s.current / s.limit : 0
-      if (hintBarRef.current) hintBarRef.current.style.transform = `scaleX(${progress})`
-      if (hintRef.current) hintRef.current.style.opacity = progress > 0.94 ? '0' : '1'
-
       /* Parallax each image inner — pure math from cached positions */
       const vCenter = window.innerWidth * 0.5
       imgInnerRefs.current.forEach((inner, i) => {
@@ -405,6 +400,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       })
 
       setActiveWorkshopIndex(closest)
+      if (track.scrollLeft > 24) setHasSwiped(true)
     }
 
     syncActiveIndex()
@@ -415,6 +411,36 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       track.removeEventListener('scroll', syncActiveIndex)
       window.removeEventListener('resize', syncActiveIndex)
     }
+  }, [workshopCount])
+
+  /* Phone/tablet: when the gallery first comes into view, the cards slide a
+   * little to the left and back — shows there is more to swipe to. Once only;
+   * skipped with "reduce motion" and on desktop (that has its own scroll scene). */
+  useEffect(() => {
+    const track = trackRef.current
+    const row = containerRef.current
+    if (!track || !row || workshopCount < 2) return
+    if (window.innerWidth >= 1024) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        observer.disconnect()
+        if (track.scrollLeft > 24) return
+        row.animate(
+          [
+            { transform: 'translateX(0)' },
+            { transform: 'translateX(-56px)', offset: 0.45 },
+            { transform: 'translateX(0)' },
+          ],
+          { duration: 1400, delay: 500, easing: 'cubic-bezier(0.45, 0, 0.25, 1)' },
+        )
+      },
+      { threshold: 0.5 },
+    )
+    observer.observe(track)
+    return () => observer.disconnect()
   }, [workshopCount])
 
   if (visible === false) return null
@@ -444,32 +470,10 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           className="relative w-full bg-white overflow-x-auto overflow-y-hidden lg:sticky lg:top-0 lg:overflow-hidden h-auto lg:h-svh py-10 lg:py-0"
           style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
         >
-          {/* ── Scroll hint (desktop only — mobile has its own arrows + dots).
-               Arrow nudges right; the gold line fills as you move through the
-               workshops; the pill fades out at the last one. */}
-          <div
-            ref={hintRef}
-            aria-hidden
-            className="pointer-events-none absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 select-none items-center gap-3 rounded-full bg-ff-near-black px-5 py-2.5 text-white shadow-[0_8px_30px_rgba(0,0,0,0.18)] transition-opacity duration-500 lg:flex"
-          >
-            <span className="font-display text-xs font-bold tracking-[0.02em]">
-              {scrollHintLabel || DEFAULT_SCROLL_HINT}
-            </span>
-            <motion.span
-              className="inline-block text-ff-gold"
-              animate={{ x: [0, 6, 0] }}
-              transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              →
-            </motion.span>
-            <span className="relative h-0.5 w-14 overflow-hidden rounded-full bg-white/20">
-              <span
-                ref={hintBarRef}
-                className="absolute inset-0 origin-left rounded-full bg-ff-gold"
-                style={{ transform: 'scaleX(0)' }}
-              />
-            </span>
-          </div>
+          {/* ── Scroll hint (desktop only — mobile gets native swipe affordance) */}
+          <p className="hidden lg:block absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
+            scroll →
+          </p>
 
           {/* ══════════════════════════════════════════════════════
            *  RESPONSIVE TRACK
@@ -639,7 +643,31 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
         {/* Mobile carousel controls — hidden on desktop sticky scene */}
         {workshopCount > 1 ? (
-          <div className="lg:hidden flex justify-center px-6 pt-2 pb-6">
+          <div className="lg:hidden flex flex-col items-center gap-4 px-6 pt-2 pb-6">
+            {/* Swipe hint — a finger dot slides left, like the gesture itself.
+                Hidden after the first swipe. */}
+            <div
+              aria-hidden
+              className={`flex items-center gap-3 rounded-full bg-ff-near-black px-4 py-2 text-white transition-opacity duration-500 ${hasSwiped ? 'opacity-0' : 'opacity-100'}`}
+            >
+              <span className="relative h-4 w-9">
+                <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-white/25" />
+                <motion.span
+                  className="absolute top-1/2 -mt-[5px] size-2.5 rounded-full bg-ff-gold"
+                  animate={{ left: ['70%', '0%', '0%'], opacity: [0, 1, 0] }}
+                  transition={{
+                    duration: 1.6,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    times: [0, 0.7, 1],
+                  }}
+                />
+              </span>
+              <span className="font-display text-xs font-bold">
+                {scrollHintLabel || DEFAULT_SCROLL_HINT}
+              </span>
+            </div>
+
             <div
               className="inline-flex items-center gap-4"
               role="group"
