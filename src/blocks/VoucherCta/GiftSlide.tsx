@@ -214,78 +214,83 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         {/* ── Scene grid: the headline and the text each own their area, so they
          *    can never overlap. Desktop: text column left · headline centred ·
          *    equal empty column right. Phone/tablet: headline above, text below. ── */}
-        <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-6 pb-6 pt-20 lg:grid-cols-[minmax(12rem,15%)_1fr_minmax(12rem,15%)] lg:grid-rows-1 lg:gap-8 lg:pb-10 lg:pt-24">
+        <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-6 pb-6 pt-20 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 [@media(max-height:700px)]:pt-16 lg:grid-cols-[minmax(12rem,15%)_1fr_minmax(12rem,15%)] lg:grid-rows-1 lg:gap-8 lg:pb-10 lg:pt-24">
           {/* Headline + layers as one group.
-           *  Phone/tablet: the group has the artboard's proportions and sits centred
-           *  above the text — layers fill it, the headline sits in its middle.
-           *  Desktop: the group is not positioned, so the layers take the Kittl
-           *  positions across the whole slide and the headline fills the centre column. */}
-          <div className="relative aspect-[1004/673] w-full self-center lg:static lg:col-start-2 lg:row-start-1 lg:aspect-auto lg:self-stretch">
-            {/* Layers — in front of the headline */}
-            <motion.div
-              aria-hidden
-              className={`pointer-events-none absolute z-10 ${LAYER_BOX}`}
-              style={{ x: ingrX, y: ingrY }}
-            >
-              <Image
-                src={VOUCHER_LAYERS.ingredients.src}
-                width={VOUCHER_LAYERS.ingredients.width}
-                height={VOUCHER_LAYERS.ingredients.height}
-                alt=""
-                sizes="(min-width: 1024px) 82vw, 100vw"
-                className="h-auto w-full drop-shadow-[0_18px_24px_rgba(60,40,20,0.18)]"
-              />
-            </motion.div>
-            <motion.div
-              className={`pointer-events-none absolute z-10 ${LAYER_BOX}`}
-              style={{ x: cardX, y: cardY, rotate: cardRotate }}
-            >
-              <Image
-                src={VOUCHER_LAYERS.card.src}
-                width={VOUCHER_LAYERS.card.width}
-                height={VOUCHER_LAYERS.card.height}
-                alt={cardAlt}
-                sizes="(min-width: 1024px) 82vw, 100vw"
-                className="h-auto w-full drop-shadow-[0_22px_30px_rgba(40,30,15,0.25)]"
-              />
-            </motion.div>
-            {/* Headline area — the word is sized to fit it */}
-            <div
-              ref={wordBoxRef}
-              className="absolute inset-x-0 inset-y-[22%] lg:relative lg:inset-auto lg:h-full"
-            >
-              {/* Hidden copy at 100px to measure the widest line */}
-              <div
-                ref={measureRef}
+           *  Phone/tablet: the cell above the text is a size container; the group
+           *  keeps the artboard's proportions and is as big as that cell allows —
+           *  limited by width AND height (cqw/cqh), so on a short screen (browser
+           *  bars) it shrinks instead of running behind the text and points bar.
+           *  Desktop: cell and group are not positioned, so the layers take the
+           *  Kittl positions across the whole slide and the headline fills the
+           *  centre column. */}
+          <div className="relative flex min-h-0 items-center justify-center [container-type:size] lg:static lg:col-start-2 lg:row-start-1 lg:block lg:[container-type:normal]">
+            <div className="relative aspect-[1004/673] w-[min(100cqw,calc(100cqh*1.4918))] lg:static lg:aspect-auto lg:h-full lg:w-auto">
+              {/* Layers — in front of the headline */}
+              <motion.div
                 aria-hidden
-                className="invisible absolute left-0 top-0 w-max whitespace-pre font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
-                style={{ fontSize: 100 }}
+                className={`pointer-events-none absolute z-10 ${LAYER_BOX}`}
+                style={{ x: ingrX, y: ingrY }}
               >
-                {lines.join('\n')}
+                <Image
+                  src={VOUCHER_LAYERS.ingredients.src}
+                  width={VOUCHER_LAYERS.ingredients.width}
+                  height={VOUCHER_LAYERS.ingredients.height}
+                  alt=""
+                  sizes="(min-width: 1024px) 82vw, 100vw"
+                  className="h-auto w-full drop-shadow-[0_18px_24px_rgba(60,40,20,0.18)]"
+                />
+              </motion.div>
+              <motion.div
+                className={`pointer-events-none absolute z-10 ${LAYER_BOX}`}
+                style={{ x: cardX, y: cardY, rotate: cardRotate }}
+              >
+                <Image
+                  src={VOUCHER_LAYERS.card.src}
+                  width={VOUCHER_LAYERS.card.width}
+                  height={VOUCHER_LAYERS.card.height}
+                  alt={cardAlt}
+                  sizes="(min-width: 1024px) 82vw, 100vw"
+                  className="h-auto w-full drop-shadow-[0_22px_30px_rgba(40,30,15,0.25)]"
+                />
+              </motion.div>
+              {/* Headline area — the word is sized to fit it */}
+              <div
+                ref={wordBoxRef}
+                className="absolute inset-x-0 inset-y-[22%] lg:relative lg:inset-auto lg:h-full"
+              >
+                {/* Hidden copy at 100px to measure the widest line */}
+                <div
+                  ref={measureRef}
+                  aria-hidden
+                  className="invisible absolute left-0 top-0 w-max whitespace-pre font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
+                  style={{ fontSize: 100 }}
+                >
+                  {lines.join('\n')}
+                </div>
+                <motion.h2
+                  className="absolute inset-0 flex flex-col items-center justify-center text-center font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
+                  style={{
+                    fontSize: fontSize ?? undefined,
+                    x: wordX,
+                    y: wordY,
+                    opacity: fontSize ? 1 : 0,
+                  }}
+                >
+                  {lines.map((line, i) => (
+                    <span key={i} className="block overflow-hidden pb-[0.04em]">
+                      <motion.span
+                        className="block"
+                        custom={i}
+                        variants={lineRise}
+                        initial="hidden"
+                        animate={active ? 'show' : 'hidden'}
+                      >
+                        {line}
+                      </motion.span>
+                    </span>
+                  ))}
+                </motion.h2>
               </div>
-              <motion.h2
-                className="absolute inset-0 flex flex-col items-center justify-center text-center font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
-                style={{
-                  fontSize: fontSize ?? undefined,
-                  x: wordX,
-                  y: wordY,
-                  opacity: fontSize ? 1 : 0,
-                }}
-              >
-                {lines.map((line, i) => (
-                  <span key={i} className="block overflow-hidden pb-[0.04em]">
-                    <motion.span
-                      className="block"
-                      custom={i}
-                      variants={lineRise}
-                      initial="hidden"
-                      animate={active ? 'show' : 'hidden'}
-                    >
-                      {line}
-                    </motion.span>
-                  </span>
-                ))}
-              </motion.h2>
             </div>
           </div>
 
@@ -324,7 +329,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                   variants={fadeUp}
                   initial="hidden"
                   animate={active ? 'show' : 'hidden'}
-                  className="mb-0 font-display text-5xl font-bold leading-none tracking-[-0.03em] lg:text-6xl"
+                  className="mb-0 font-display text-5xl font-bold leading-none tracking-[-0.03em] lg:text-6xl [@media(max-height:700px)]:text-4xl"
                 >
                   {data.priceText}
                 </motion.p>
