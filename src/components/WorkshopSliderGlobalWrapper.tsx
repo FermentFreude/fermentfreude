@@ -48,7 +48,6 @@ export async function WorkshopSliderGlobalWrapper({
       sectionLead={(fb.sectionLead as string | null | undefined) ?? undefined}
       nextDateLabel={(fb.nextDateLabel as string | null | undefined) ?? undefined}
       noDateLabel={(fb.noDateLabel as string | null | undefined) ?? undefined}
-      scrollHintLabel={(fb.scrollHintLabel as string | null | undefined) ?? undefined}
       sectionHeading={(fb.sectionHeading as string | null | undefined) ?? undefined}
       eyebrow={
         hasGlobalContent ? (data.eyebrow ?? undefined) : ((fb.eyebrow as string) ?? undefined)

@@ -4816,10 +4816,6 @@ export interface WorkshopSliderBlock {
    */
   noDateLabel?: string | null;
   /**
-   * Phones and tablets: text in the small dark pill under the workshops, e.g. "Wischen für mehr Workshops". It disappears after the first swipe.
-   */
-  scrollHintLabel?: string | null;
-  /**
    * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
    */
   eyebrow?: string | null;
@@ -8257,7 +8253,6 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
   sectionHeading?: T;
   nextDateLabel?: T;
   noDateLabel?: T;
-  scrollHintLabel?: T;
   eyebrow?: T;
   workshops?:
     | T

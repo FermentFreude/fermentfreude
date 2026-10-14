@@ -7,6 +7,7 @@ import type {
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
 import { MotionConfig, motion, type Variants } from 'motion/react'
+import { Pointer } from 'lucide-react'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -19,7 +20,6 @@ const DEFAULT_SECTION_HEADING = 'Our next workshops'
 const DEFAULT_DETAILS_CTA_LABEL = 'Explore'
 const DEFAULT_NEXT_DATE_LABEL = 'Next date'
 const DEFAULT_NO_DATE_LABEL = 'Available soon'
-const DEFAULT_SCROLL_HINT = 'Swipe for more workshops'
 
 const DEFAULT_WORKSHOPS = [
   {
@@ -203,7 +203,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   upcomingLabel,
   nextDateLabel,
   noDateLabel,
-  scrollHintLabel,
   upcomingDatesByHref,
 }) => {
   /* ── refs ──────────────────────────────────────────────────── */
@@ -637,38 +636,33 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           </div>
         </section>
 
-        {/* Mobile/tablet controls: swipe hint + dots only — hidden on the desktop sticky scene */}
+        {/* Mobile/tablet controls — one wordless capsule: a hand that swipes
+            left (the gesture itself) + the slide dots. Hidden on the desktop
+            sticky scene. */}
         {workshopCount > 1 ? (
-          <div className="lg:hidden flex flex-col items-center gap-4 px-6 pt-2 pb-6">
-            {/* Swipe hint — a finger dot slides left, like the gesture itself. Always visible. */}
+          <div className="lg:hidden flex justify-center px-6 pt-2 pb-6">
             <div
-              aria-hidden
-              className="flex items-center gap-3 rounded-full bg-ff-near-black px-4 py-2 text-white"
-            >
-              <span className="relative h-4 w-9">
-                <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-white/25" />
-                <motion.span
-                  className="absolute top-1/2 -mt-[5px] size-2.5 rounded-full bg-ff-gold"
-                  animate={{ left: ['70%', '0%', '0%'], opacity: [0, 1, 0] }}
-                  transition={{
-                    duration: 1.6,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                    times: [0, 0.7, 1],
-                  }}
-                />
-              </span>
-              <span className="font-display text-xs font-bold">
-                {scrollHintLabel || DEFAULT_SCROLL_HINT}
-              </span>
-            </div>
-
-            <div
-              className="inline-flex items-center gap-4"
+              className="inline-flex items-center gap-3 rounded-full bg-ff-near-black py-2 pl-4 pr-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
               role="group"
               aria-label="Workshop navigation"
             >
-              <div className="flex items-center gap-2.5">
+              <span aria-hidden className="flex h-5 w-7 items-center justify-center">
+                <motion.span
+                  className="inline-flex text-ff-ivory"
+                  animate={{ x: [9, -9, -9], opacity: [0, 1, 0], rotate: [-8, -16, -16] }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatDelay: 0.5,
+                    ease: 'easeInOut',
+                    times: [0, 0.65, 1],
+                  }}
+                >
+                  <Pointer className="size-4" strokeWidth={1.75} />
+                </motion.span>
+              </span>
+              <span aria-hidden className="h-4 w-px bg-white/15" />
+              <div className="flex items-center">
                 {resolvedWorkshops.map((workshop, index) => {
                   const isActive = index === activeWorkshopIndex
                   return (
@@ -676,14 +670,17 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                       key={workshop.ctaLink ?? index}
                       type="button"
                       onClick={() => goToWorkshop(index)}
-                      className={`rounded-full transition-all duration-200 ${
-                        isActive
-                          ? 'size-2.5 bg-[#E6BE68]'
-                          : 'size-1.5 bg-[#555954]/30 hover:bg-[#555954]/45'
-                      }`}
+                      className="flex h-6 items-center px-1"
                       aria-label={`${workshop.title}${isActive ? ' (current)' : ''}`}
                       aria-current={isActive ? 'true' : undefined}
-                    />
+                    >
+                      {/* Active = longer gold bar, others small ivory dots */}
+                      <span
+                        className={`block h-1.5 rounded-full transition-all duration-300 ${
+                          isActive ? 'w-5 bg-ff-gold' : 'w-1.5 bg-ff-ivory/35'
+                        }`}
+                      />
+                    </button>
                   )
                 })}
               </div>

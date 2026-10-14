@@ -74,16 +74,6 @@ export const WorkshopSlider: Block = {
       ],
     },
     {
-      name: 'scrollHintLabel',
-      type: 'text',
-      localized: true,
-      label: 'Swipe hint (phone & tablet)',
-      admin: {
-        description:
-          'Phones and tablets: text in the small dark pill under the workshops, e.g. "Wischen für mehr Workshops". It disappears after the first swipe.',
-      },
-    },
-    {
       name: 'eyebrow',
       type: 'text',
       localized: true,
