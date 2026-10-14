@@ -18,6 +18,13 @@ export const HeroBanner: Block = {
       },
     },
     {
+      name: 'eyebrow',
+      type: 'text',
+      localized: true,
+      label: 'Small label',
+      admin: { description: 'Gold label above the heading, e.g. "Events & Gastronomie". Optional.' },
+    },
+    {
       name: 'heading',
       type: 'textarea',
       required: true,

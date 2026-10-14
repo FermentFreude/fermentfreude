@@ -3060,6 +3060,10 @@ export interface HeroBannerBlock {
    */
   visible?: boolean | null;
   /**
+   * Gold label above the heading, e.g. "Events & Gastronomie". Optional.
+   */
+  eyebrow?: string | null;
+  /**
    * Large white heading over the background image (e.g. "For Chefs and Food Professionals").
    */
   heading: string;
@@ -7653,6 +7657,7 @@ export interface FeatureCardsBlockSelect<T extends boolean = true> {
  */
 export interface HeroBannerBlockSelect<T extends boolean = true> {
   visible?: T;
+  eyebrow?: T;
   heading?: T;
   description?: T;
   buttonLabel?: T;
