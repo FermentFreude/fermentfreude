@@ -4722,11 +4722,11 @@ export interface VoucherCtaBlock {
      */
     cardAlt?: string | null;
     /**
-     * Up to 4 short points with a small icon, along the bottom of the slide.
+     * 3–4 short points with a small icon, along the bottom of the slide (icon + title are shown).
      */
     points?:
       | {
-          icon?: ('leaf' | 'jar' | 'heart' | 'gift') | null;
+          icon?: ('leaf' | 'jar' | 'heart' | 'gift' | 'box' | 'bowl') | null;
           title: string;
           /**
            * Kept for later — the points currently show icon + title only, the same on every screen.

@@ -251,7 +251,8 @@ export const VoucherCta: Block = {
           maxRows: 4,
           labels: { singular: 'Point', plural: 'Points' },
           admin: {
-            description: 'Up to 4 short points with a small icon, along the bottom of the slide.',
+            description:
+              '3–4 short points with a small icon, along the bottom of the slide (icon + title are shown).',
             condition: (_, siblingData) => Boolean(siblingData?.enabled),
           },
           fields: [
@@ -268,6 +269,8 @@ export const VoucherCta: Block = {
                     { label: 'Jar', value: 'jar' },
                     { label: 'Heart', value: 'heart' },
                     { label: 'Gift', value: 'gift' },
+                    { label: 'Box (kit)', value: 'box' },
+                    { label: 'Bowl', value: 'bowl' },
                   ],
                   admin: { width: '25%' },
                 },

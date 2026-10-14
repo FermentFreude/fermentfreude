@@ -1,6 +1,6 @@
 'use client'
 
-import { Gift, Heart, Leaf } from 'lucide-react'
+import { Gift, Heart, Leaf, Package } from 'lucide-react'
 import {
   MotionConfig,
   motion,
@@ -123,9 +123,21 @@ function JarIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
+function BowlIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.25} {...props}>
+      <path d="M3 11h18a9 9 0 0 1-18 0Z" />
+      <path d="M7.5 11c.6-2 2.4-3.3 4.5-3.3s3.9 1.3 4.5 3.3" />
+      <path d="M9 20.5h6" />
+    </svg>
+  )
+}
+
 function PointIcon({ icon }: { icon?: string | null }) {
   const cls = 'size-[46%]'
   if (icon === 'jar') return <JarIcon className={cls} />
+  if (icon === 'box') return <Package className={cls} strokeWidth={1.25} />
+  if (icon === 'bowl') return <BowlIcon className={cls} />
   if (icon === 'heart') return <Heart className={cls} strokeWidth={1.25} />
   if (icon === 'gift') return <Gift className={cls} strokeWidth={1.25} />
   return <Leaf className={cls} strokeWidth={1.25} />
@@ -228,19 +240,18 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         className="relative flex h-[100svh] max-h-full flex-col overflow-clip"
         style={{ backgroundColor: PAPER, color: INK }}
       >
-        {/* ── Scene grid: the headline and the text each own their area, so they
-         *    can never overlap. Desktop: text column left · headline centred ·
-         *    equal empty column right. Phone/tablet: headline above, text below. ── */}
-        <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-6 pb-6 pt-20 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 [@media(max-height:700px)]:pt-16 lg:grid-cols-[minmax(12rem,15%)_1fr_minmax(12rem,15%)] lg:grid-rows-1 lg:gap-8 lg:pb-10 lg:pt-24">
+        {/* ── Scene grid: headline area on top, info row underneath — they can
+         *    never overlap. Phone: info stacked. Tablet/desktop: ONE row — what
+         *    the voucher includes on the left, price + button together on the right. ── */}
+        <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-6 pb-6 pt-20 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 [@media(max-height:700px)]:pt-16 md:gap-8 md:pb-8 lg:pb-10 lg:pt-24">
           {/* Headline + layers as one group.
            *  Phone/tablet: the cell above the text is a size container; the group
            *  keeps the artboard's proportions and is as big as that cell allows —
            *  limited by width AND height (cqw/cqh), so on a short screen (browser
            *  bars) it shrinks instead of running behind the text and points bar.
            *  Desktop: cell and group are not positioned, so the layers take the
-           *  Kittl positions across the whole slide and the headline fills the
-           *  centre column. */}
-          <div className="relative flex min-h-0 items-center justify-center [container-type:size] lg:static lg:col-start-2 lg:row-start-1 lg:block lg:[container-type:normal]">
+           *  Kittl positions across the whole slide; the headline is centred. */}
+          <div className="relative flex min-h-0 items-center justify-center [container-type:size] lg:static lg:block lg:[container-type:normal]">
             <div className="relative aspect-[1004/673] w-[min(100cqw,calc(100cqh*1.4918))] lg:static lg:aspect-auto lg:h-full lg:w-auto">
               {/* Layers — in front of the headline */}
               <motion.div
@@ -254,6 +265,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                   height={VOUCHER_LAYERS.ingredients.height}
                   alt=""
                   sizes="(min-width: 1024px) 82vw, 100vw"
+                  loading="eager"
                   className="h-auto w-full drop-shadow-[0_18px_24px_rgba(60,40,20,0.18)]"
                 />
               </motion.div>
@@ -267,13 +279,14 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                   height={VOUCHER_LAYERS.card.height}
                   alt={cardAlt}
                   sizes="(min-width: 1024px) 82vw, 100vw"
+                  loading="eager"
                   className="h-auto w-full drop-shadow-[0_22px_30px_rgba(40,30,15,0.25)]"
                 />
               </motion.div>
               {/* Headline area — the word is sized to fit it */}
               <div
                 ref={wordBoxRef}
-                className="absolute inset-x-0 inset-y-[22%] lg:relative lg:inset-auto lg:h-full"
+                className="absolute inset-x-0 inset-y-[22%] lg:relative lg:inset-auto lg:mx-[14%] lg:h-full"
               >
                 {/* Hidden copy at 100px to measure the widest line */}
                 <div
@@ -311,42 +324,52 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
             </div>
           </div>
 
-          {/* Text — bottom left; above the layers so it always stays readable */}
-          <div className="relative z-20 self-end lg:col-start-1 lg:row-start-1">
-            {data.label ? (
-              <motion.p
-                custom={0}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mb-3 font-display text-[11px] font-bold uppercase tracking-[0.08em]"
-              >
-                {data.label}
-              </motion.p>
-            ) : null}
-            {textLines.length ? (
-              <motion.p
-                custom={1}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mb-0 text-sm leading-snug opacity-80 lg:text-base"
-              >
-                {textLines.map((l, i) => (
-                  <span key={i} className="block">
-                    {l}
-                  </span>
-                ))}
-              </motion.p>
-            ) : null}
-            <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-4 lg:mt-6 lg:block">
+          {/* Info row — above the layers so it always stays readable */}
+          <div className="relative z-20 md:flex md:items-end md:justify-between md:gap-10">
+            <div className="md:max-w-[30rem] lg:max-w-[34rem]">
+              {data.label ? (
+                <motion.p
+                  custom={0}
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate={active ? 'show' : 'hidden'}
+                  className="mb-3 font-display text-[11px] font-bold uppercase tracking-[0.08em] md:text-xs"
+                >
+                  {data.label}
+                </motion.p>
+              ) : null}
+              {textLines.length ? (
+                <motion.p
+                  custom={1}
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate={active ? 'show' : 'hidden'}
+                  className="mb-0 font-display font-bold tracking-[-0.01em]"
+                >
+                  {/* First line = the punchline (bigger); the rest = what is included */}
+                  {textLines.map((l, i) => (
+                    <span
+                      key={i}
+                      className={
+                        i === 0
+                          ? 'block text-lg leading-tight md:text-2xl lg:text-[1.65rem]'
+                          : 'mt-1.5 block text-sm leading-snug opacity-70 md:text-base'
+                      }
+                    >
+                      {l}
+                    </span>
+                  ))}
+                </motion.p>
+              ) : null}
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-4 md:mt-0 md:shrink-0 md:flex-nowrap">
               {data.priceText ? (
                 <motion.p
                   custom={2}
                   variants={fadeUp}
                   initial="hidden"
                   animate={active ? 'show' : 'hidden'}
-                  className="mb-0 font-display text-5xl font-bold leading-none tracking-[-0.03em] lg:text-6xl [@media(max-height:700px)]:text-4xl"
+                  className="mb-0 font-display text-5xl font-bold leading-none tracking-[-0.03em] md:text-6xl lg:text-7xl [@media(max-height:700px)]:text-4xl"
                 >
                   {data.priceText}
                 </motion.p>
@@ -357,11 +380,10 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                   variants={fadeUp}
                   initial="hidden"
                   animate={active ? 'show' : 'hidden'}
-                  className="lg:mt-6"
                 >
                   <Link
                     href={href}
-                    className="pointer-events-auto inline-flex items-center justify-center rounded-full px-6 py-3 font-display text-sm font-bold text-ff-ivory transition-transform duration-300 hover:scale-[1.03]"
+                    className="pointer-events-auto inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-3 font-display text-sm font-bold text-ff-ivory transition-transform duration-300 hover:scale-[1.03] md:px-8 md:py-4 md:text-base"
                     style={{ backgroundColor: INK }}
                   >
                     {data.buttonLabel}
@@ -379,7 +401,14 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         {points.length ? (
           <div className="relative z-20 shrink-0 border-t" style={{ borderColor: `${INK}1F` }}>
             <div className="container mx-auto container-padding">
-              <ul className="grid grid-cols-4 gap-px" style={{ backgroundColor: `${INK}1F` }}>
+              <ul
+                className="grid gap-px"
+                // One equal column per point (3 or 4)
+                style={{
+                  backgroundColor: `${INK}1F`,
+                  gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))`,
+                }}
+              >
                 {points.map((point, i) => (
                   <li
                     key={point.id ?? i}
@@ -387,12 +416,12 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                     style={{ backgroundColor: PAPER }}
                   >
                     <span
-                      className="flex size-[clamp(40px,3.4vw,52px)] shrink-0 items-center justify-center rounded-full border"
+                      className="flex size-[clamp(40px,5.2vw,52px)] shrink-0 items-center justify-center rounded-full border"
                       style={{ borderColor: `${INK}33` }}
                     >
                       <PointIcon icon={point.icon} />
                     </span>
-                    <span className="block font-display text-[clamp(8.5px,2.7vw,12.5px)] font-bold uppercase leading-[1.2] tracking-[0.02em]">
+                    <span className="block font-display text-[clamp(8.5px,2.7vw,13px)] font-bold uppercase leading-[1.2] tracking-[0.02em]">
                       {point.title}
                     </span>
                   </li>
