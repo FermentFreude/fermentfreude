@@ -2,6 +2,6 @@
 export type VoucherLayer = { src: string; width: number; height: number }
 
 export const VOUCHER_LAYERS: { ingredients: VoucherLayer; card: VoucherLayer } = {
-  ingredients: { src: '/voucher/ingredients.webp', width: 1004, height: 673 },
-  card: { src: '/voucher/card.webp', width: 1004, height: 673 },
+  ingredients: { src: '/voucher/ingredients.webp', width: 2400, height: 1610 },
+  card: { src: '/voucher/card.webp', width: 2400, height: 1610 },
 }
