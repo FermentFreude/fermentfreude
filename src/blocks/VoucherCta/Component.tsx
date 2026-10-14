@@ -1,5 +1,6 @@
 'use client'
 
+import { ScrollCue } from '@/components/ScrollCue'
 import { SectionHeader } from '@/components/SectionHeader'
 import { Media } from '@/components/Media'
 import type { Media as MediaType, VoucherCtaBlock as VoucherCtaBlockType } from '@/payload-types'
@@ -8,8 +9,9 @@ import gsap from 'gsap'
 import { EasePack } from 'gsap/EasePack'
 import { Flip } from 'gsap/Flip'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useMotionValue } from 'motion/react'
 import Link from 'next/link'
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 gsap.registerPlugin(ScrollTrigger, Flip, EasePack)
 
@@ -83,6 +85,57 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   const galleryRef = useRef<HTMLDivElement>(null)
   const flipCtxRef = useRef<ReturnType<typeof gsap.context> | null>(null)
 
+  /* ── Scroll cue (capsule at the right edge of the gallery) ──
+   * Shown while the gallery is on screen and not fully open. The gesture
+   * hides while you scroll; once you stop it points the way you last went
+   * (down, or up if you scrolled back). At the end the capsule fades out. */
+  const cueProgress = useMotionValue(0)
+  const [cueInView, setCueInView] = useState(false)
+  const [cueEnded, setCueEnded] = useState(false)
+  const [cueResting, setCueResting] = useState(true)
+  const [cueDirection, setCueDirection] = useState<'down' | 'up'>('down')
+  const cueRef = useRef<{ start: number | null; idle?: ReturnType<typeof setTimeout> }>({
+    start: null,
+  })
+
+  /** Called by the gallery's ScrollTrigger on every update */
+  const onGalleryProgress = useCallback(
+    (p: number) => {
+      const cue = cueRef.current
+      cueProgress.set(p)
+      setCueEnded(p >= 0.98)
+      if (cue.start === null) cue.start = p
+      setCueResting(false)
+      clearTimeout(cue.idle)
+      cue.idle = setTimeout(() => {
+        const now = cueProgress.get()
+        const net = now - (cue.start ?? now)
+        if (now <= 0.01) setCueDirection('down')
+        else if (net > 0.01) setCueDirection('down')
+        else if (net < -0.01) setCueDirection('up')
+        cue.start = null
+        setCueResting(true)
+      }, 600)
+    },
+    [cueProgress],
+  )
+  const onGalleryProgressRef = useRef(onGalleryProgress)
+  onGalleryProgressRef.current = onGalleryProgress
+
+  useEffect(() => {
+    const wrap = galleryWrapRef.current
+    if (!wrap) return
+    const observer = new IntersectionObserver(([entry]) => setCueInView(!!entry?.isIntersecting), {
+      threshold: 0.5,
+    })
+    observer.observe(wrap)
+    const cue = cueRef.current
+    return () => {
+      observer.disconnect()
+      clearTimeout(cue.idle)
+    }
+  }, [])
+
   const createFlip = useCallback(() => {
     const galleryEl = galleryRef.current
     const galleryWrap = galleryWrapRef.current
@@ -121,6 +174,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
           // Starts pinning a moment early so a fast scroll doesn't overshoot and snap back
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          onUpdate: (self) => onGalleryProgressRef.current(self.progress),
         },
       })
       tl.add(flip)
@@ -201,6 +255,17 @@ export const VoucherCtaBlock: React.FC<Props> = ({
     <section ref={sectionRef} id={id ?? undefined} className="w-full">
       {/* ── Bento Gallery (pinned on scroll) ── */}
       <div ref={galleryWrapRef} className="bento-gallery-wrap">
+        {/* Scroll cue — right edge, vertically centred */}
+        {images.length > 0 ? (
+          <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2 md:right-6">
+            <ScrollCue
+              progress={cueProgress}
+              visible={cueInView && !cueEnded}
+              resting={cueResting}
+              direction={cueDirection}
+            />
+          </div>
+        ) : null}
         <div ref={galleryRef} className="bento-gallery bento-gallery--bento">
           {images.slice(0, 8).map((item, i) => {
             const _img = typeof item.image === 'object' ? (item.image as MediaType) : null
