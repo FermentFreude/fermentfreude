@@ -116,6 +116,30 @@ function useFitSize(
   return size
 }
 
+/** Height of the site navbar while it is on screen, 0 while it has slid away
+ *  (it hides on scroll-down, comes back on scroll-up) — so the points bar can sit
+ *  flush at the top and still never be covered */
+function useNavOffset() {
+  const [offset, setOffset] = useState(0)
+  useEffect(() => {
+    const nav = document.querySelector<HTMLElement>('#site-header nav')
+    if (!nav) return
+    const update = () =>
+      setOffset(
+        nav.classList.contains('-translate-y-full') ? 0 : nav.getBoundingClientRect().height,
+      )
+    update()
+    const observer = new MutationObserver(update)
+    observer.observe(nav, { attributes: true, attributeFilter: ['class'] })
+    window.addEventListener('resize', update)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', update)
+    }
+  }, [])
+  return offset
+}
+
 function JarIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.25} {...props}>
@@ -195,6 +219,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
     : null
 
   const fontSize = useFitSize(wordBoxRef, measureRef, lines.length)
+  const navOffset = useNavOffset()
   const inView = useInView(ref, { once: true, amount: 0.3 })
 
   // Pointer float (desktop)
@@ -243,14 +268,14 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         className="relative flex h-[100svh] max-h-full flex-col overflow-clip"
         style={{ backgroundColor: PAPER, color: INK }}
       >
-        {/* ── Points along the top (under the site header) — ONE design on every screen: four equal
+        {/* ── Points along the top edge of the slide (the site header slides away while scrolling down) — ONE design on every screen: four equal
          *    columns divided by hairlines (the ul's colour shows through the 1px
          *    gaps), outlined icon on top, title centred underneath. Only the size changes, fluidly with the screen width
          *    (clamp), never the layout. ── */}
         {points.length ? (
           <div
-            className="relative z-20 mt-16 shrink-0 border-y lg:mt-[4.5rem]"
-            style={{ borderColor: `${INK}1F` }}
+            className="relative z-20 shrink-0 border-b transition-[padding] duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]"
+            style={{ borderColor: `${INK}1F`, paddingTop: navOffset }}
           >
             <div className="container mx-auto container-padding">
               <ul
