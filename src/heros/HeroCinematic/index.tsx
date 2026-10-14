@@ -225,7 +225,7 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
           <div className="container mx-auto container-padding">
             <motion.div
               key={activeIndex}
-              className="max-w-xl lg:max-w-4xl"
+              className="max-w-lg lg:max-w-2xl"
               variants={textGroup}
               initial="hidden"
               animate={!isRevealed ? 'hidden' : isExiting ? 'exit' : 'show'}
@@ -233,14 +233,14 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
               {slide.eyebrow && (
                 <motion.p
                   variants={riseIn}
-                  className="mb-4 font-display text-eyebrow font-bold text-white"
+                  className="mb-4 font-display text-eyebrow font-bold text-ff-ivory/90"
                 >
                   {slide.eyebrow}
                 </motion.p>
               )}
 
-              <h1 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[1.02] tracking-[-0.035em] text-white">
-                {/* Gold first line, white second line */}
+              <h1 className="font-display text-[clamp(1.875rem,3.4vw,3.25rem)] font-medium leading-[1.06] tracking-[-0.025em] text-ff-ivory">
+                {/* Gold first line, ivory second line */}
                 <motion.span variants={riseIn} className="block whitespace-pre-line text-ff-gold">
                   {slide.title}
                 </motion.span>
@@ -254,7 +254,7 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
               {slide.description && (
                 <motion.p
                   variants={riseIn}
-                  className="mt-5 max-w-md font-sans text-body-lg leading-relaxed text-white/85"
+                  className="mt-4 max-w-md font-sans text-base leading-relaxed text-ff-ivory/80"
                 >
                   {slide.description}
                 </motion.p>
@@ -262,11 +262,11 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
 
               {((slide.ctaLabel && slide.ctaHref) ||
                 (slide.secondaryCtaLabel && slide.secondaryCtaHref)) && (
-                <motion.div variants={riseIn} className="mt-8 flex flex-wrap items-center gap-3">
+                <motion.div variants={riseIn} className="mt-7 flex flex-wrap items-center gap-3">
                   {slide.ctaLabel && slide.ctaHref && (
                     <Link
                       href={slide.ctaHref}
-                      className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-ff-gold px-7 py-3 font-display text-sm font-bold text-ff-near-black transition-all duration-300 hover:bg-ff-gold-light hover:scale-[1.03]"
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-ff-gold px-6 py-2.5 font-display text-[13px] font-bold text-ff-near-black transition-all duration-300 hover:bg-ff-gold-light hover:scale-[1.03]"
                     >
                       {slide.ctaLabel}
                     </Link>
@@ -274,7 +274,7 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
                   {slide.secondaryCtaLabel && slide.secondaryCtaHref && (
                     <Link
                       href={slide.secondaryCtaHref}
-                      className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-white/70 px-7 py-3 font-display text-sm font-bold text-white transition-all duration-300 hover:bg-white hover:text-ff-near-black hover:scale-[1.03]"
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-ff-ivory/60 px-6 py-2.5 font-display text-[13px] font-bold text-ff-ivory transition-all duration-300 hover:bg-ff-ivory hover:text-ff-near-black hover:scale-[1.03]"
                     >
                       {slide.secondaryCtaLabel}
                     </Link>
