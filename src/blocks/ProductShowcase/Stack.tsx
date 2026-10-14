@@ -37,6 +37,8 @@ export type ShowcaseSlide = {
   key: string
   bigWord: string
   eyebrow: string | null
+  /** Label colour per variety (hex) */
+  accent: string | null
   /** Product image size tweak (1 = default) */
   scale: number
   image: LayerImage
@@ -108,6 +110,7 @@ function LayerImg({ img, shadow }: { img: LayerImage; shadow?: boolean }) {
 function BigWord({
   text,
   eyebrow,
+  accent,
   active,
   sharedSize,
   onFit,
@@ -115,6 +118,7 @@ function BigWord({
   text: string
   /** Small label at the top right of the word (e.g. the tempeh variety) */
   eyebrow: string | null
+  accent: string | null
   active: boolean
   /** One size for every product's word (the smallest that fits them all) */
   sharedSize: number | null
@@ -176,12 +180,22 @@ function BigWord({
       >
         {eyebrow ? (
           // Label at the top right, scaled with the word
-          <span className="block overflow-hidden pr-[0.04em]">
+          // Mask with room below, so the dot and letters aren't clipped; the
+          // negative margin keeps the label tight on the word
+          <span className="-mb-[0.02em] block overflow-hidden pr-[0.04em] pt-[0.01em] pb-[0.025em]">
             <motion.span
               variants={labelIn}
-              className="block text-[max(11px,0.048em)] uppercase leading-none tracking-[0.2em] text-[#1D1D1D]/75"
-              style={{ marginBottom: '-0.2em' }}
+              className="flex items-center gap-[0.6em] text-[max(11px,0.048em)] uppercase leading-[1.2] tracking-[0.2em]"
+              style={{ color: accent ?? 'rgba(29,29,29,0.75)' }}
             >
+              {/* Colour dot + name: tells the varieties apart at a glance */}
+              {accent ? (
+                <span
+                  aria-hidden
+                  className="inline-block size-[0.75em] rounded-full"
+                  style={{ backgroundColor: accent }}
+                />
+              ) : null}
               {eyebrow}
             </motion.span>
           </span>
@@ -345,6 +359,7 @@ function ProductPanel({
               <h2 className="sr-only">{slide.name}</h2>
               <BigWord
                 eyebrow={slide.eyebrow}
+                accent={slide.accent}
                 text={slide.bigWord}
                 active={active}
                 sharedSize={wordSize}
@@ -579,6 +594,33 @@ export function ProductShowcaseStack({ tagline, slides, trustPoints, locale }: P
   const known = Object.values(fits)
   const wordSize = known.length === slides.length ? Math.min(...known) : null
 
+  /* Pause at each product: snap points at the start of every card. The cards
+   * themselves are sticky (their on-screen position changes), so invisible
+   * markers sit at each card's place in the page. "proximity" snaps only when
+   * the scroll ends near a card — it never traps the visitor. */
+  const [snapTops, setSnapTops] = useState<number[]>([])
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const measure = () =>
+      setSnapTops(
+        Array.from(el.children)
+          .filter((c) => (c as HTMLElement).style.position !== '' || c.querySelector('section'))
+          .slice(0, slides.length)
+          .map((c) => (c as HTMLElement).offsetTop),
+      )
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    const root = document.documentElement
+    const previous = root.style.scrollSnapType
+    root.style.scrollSnapType = 'y proximity'
+    return () => {
+      observer.disconnect()
+      root.style.scrollSnapType = previous
+    }
+  }, [slides.length])
+
   return (
     <MotionConfig reducedMotion="user">
       <div ref={containerRef} className="relative" aria-label={label} role="region">
@@ -594,6 +636,15 @@ export function ProductShowcaseStack({ tagline, slides, trustPoints, locale }: P
               onWordFit={onWordFit}
             />
           </StackPanel>
+        ))}
+
+        {snapTops.map((top, i) => (
+          <div
+            key={i}
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 h-px [scroll-snap-align:start] [scroll-snap-stop:normal]"
+            style={{ top }}
+          />
         ))}
 
         {/* Index overlay: spans all panels, its inner part sticks to the screen */}

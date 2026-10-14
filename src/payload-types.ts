@@ -3164,6 +3164,10 @@ export interface ProductShowcaseBlock {
          */
         eyebrow?: string | null;
         /**
+         * Colour of the small label, as a hex code, e.g. #7A2E3B (bean red), #B07A1F (ochre), #5C6B2E (olive). Helps tell the varieties apart.
+         */
+        accentColor?: string | null;
+        /**
          * Shown huge behind the product. One line per row, e.g. "Käfer⏎bohnen⏎Tempeh". Press Enter for a new line.
          */
         bigWord: string;
@@ -7550,6 +7554,7 @@ export interface ProductShowcaseBlockSelect<T extends boolean = true> {
     | {
         product?: T;
         eyebrow?: T;
+        accentColor?: T;
         bigWord?: T;
         productImage?: T;
         ingredientsImage?: T;

@@ -69,6 +69,7 @@ export async function ProductShowcaseBlockComponent(props: Props) {
         key: s.id ?? `slide-${i}`,
         bigWord: (s.bigWord ?? '').trim(),
         eyebrow: s.eyebrow?.trim() || null,
+        accent: s.accentColor?.trim() || null,
         scale: (product.slug && SHOWCASE_PRODUCT_SCALE[product.slug]) || 1,
         image,
         ingredients: ingredientsImage,

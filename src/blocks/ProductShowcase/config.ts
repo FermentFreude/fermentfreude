@@ -62,6 +62,18 @@ export const ProductShowcase: Block = {
           },
         },
         {
+          name: 'accentColor',
+          type: 'text',
+          label: 'Label colour',
+          admin: {
+            description:
+              'Colour of the small label, as a hex code, e.g. #7A2E3B (bean red), #B07A1F (ochre), #5C6B2E (olive). Helps tell the varieties apart.',
+            condition: (_, siblingData) => Boolean(siblingData?.eyebrow),
+          },
+          validate: (value: string | null | undefined) =>
+            !value || /^#[0-9a-fA-F]{6}$/.test(value) || 'Use a 6-digit hex code like #7A2E3B',
+        },
+        {
           name: 'bigWord',
           type: 'textarea',
           localized: true,
