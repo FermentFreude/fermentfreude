@@ -1,8 +1,17 @@
 'use client'
 
 import { useArrival, useFitSize, useNavOffset } from '@/components/StoryScene/hooks'
+import { SwipeCapsule, useSwipeNudge, useSwipeTrack } from '@/components/SwipeCapsule'
 import type { FermentationStoryBlock as Props } from '@/payload-types'
-import { ArrowUpRight, Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
+import {
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+  Leaf,
+  Microscope,
+  Sparkles,
+  Sprout,
+} from 'lucide-react'
 import {
   MotionConfig,
   motion,
@@ -20,12 +29,13 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FERMENTATION_LAYERS, type PictureSlot, type StoryLayer } from './layers'
 
 /* ═══════════════════════════════════════════════════════════════
- *  FERMENTATION STORY — full-screen cards that slide in from the side
- *  while you scroll down (the frame holds still): the intro card ("Warum Fermentation? / GESUND",
+ *  FERMENTATION STORY — one full-screen card on the page ("Warum
+ *  Fermentation? / GESUND"); the other cards are optional, a sideways
+ *  swipe row with the shared swipe capsule: the intro card ("Warum Fermentation? / GESUND",
  *  button + benefits) and then one card per topic. Every card: title +
  *  text top left, one huge black word (same size on every card), a
  *  picture floating over it (lifts in on scroll, follows the pointer).
- *  The scroll pauses at each card. Text is CMS; pictures live in code.
+ *  Text is CMS; pictures live in code.
  * ═══════════════════════════════════════════════════════════════ */
 
 const INK = '#1A1A1A' // brand near-black
@@ -146,7 +156,7 @@ function StoryCard({
       style={{ backgroundColor: PAPER, color: INK }}
     >
       <div
-        className="container mx-auto container-padding flex h-full flex-col gap-6 py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10"
+        className="container mx-auto container-padding flex h-full flex-col gap-6 py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10 [@media(max-height:620px)]:gap-3"
         style={navOffset ? { paddingTop: navOffset + 24 } : undefined}
       >
         {/* ── Number, title + text, top left ── */}
@@ -211,7 +221,7 @@ function StoryCard({
 
         {/* ── Big word with the picture floating over it ── */}
         <div className="relative flex flex-1 items-center">
-          <div ref={wordBoxRef} className="relative h-[clamp(4rem,22vw,15rem)] w-full">
+          <div ref={wordBoxRef} className="relative h-[clamp(4rem,22vw,15rem)] w-full [@media(max-height:620px)]:h-14">
             {/* Hidden copy at 100px to measure the word */}
             <div
               ref={measureRef}
@@ -312,7 +322,7 @@ function StoryCard({
                       {item.title}
                     </span>
                     {item.text ? (
-                      <span className="mt-1 block text-xs leading-snug opacity-70 md:text-sm">
+                      <span className="mt-1 block text-xs leading-snug opacity-70 md:text-sm [@media(max-height:620px)]:hidden">
                         {item.text}
                       </span>
                     ) : null}
@@ -327,40 +337,30 @@ function StoryCard({
   )
 }
 
-/** One card in the side-scrolling frame. Card 0 sits in place; card i slides in
- *  from the right (100% → 0) during the i-th screen of scrolling, over the
- *  cards before it, with rounded left corners and a soft shadow. */
-function SideCard({
+/** One card in the sideways swipe row. `enter` goes 0 → 1 as the card comes
+ *  into view horizontally (drives its picture lift); the first card uses its
+ *  vertical arrival instead. */
+function SlideCard({
   index,
-  count,
-  progress,
+  scrollX,
+  trackRef,
+  cardRef,
   children,
 }: {
   index: number
-  count: number
-  progress: MotionValue<number>
+  scrollX: MotionValue<number>
+  trackRef: React.RefObject<HTMLDivElement | null>
+  cardRef: (el: HTMLDivElement | null) => void
   children: (enter: MotionValue<number> | undefined) => React.ReactNode
 }) {
-  const steps = Math.max(1, count - 1)
-  const enter = useTransform(progress, [(index - 1) / steps, index / steps], [0, 1], {
-    clamp: true,
+  const enter = useTransform(() => {
+    const width = trackRef.current?.clientWidth || 1
+    return Math.max(0, Math.min(1, 1 - Math.abs(scrollX.get() / width - index)))
   })
-  // Waits an extra 80px off-screen so its shadow doesn't peek in before it moves
-  const x = useTransform(enter, (v) => `calc(${(1 - v) * 100}% + ${(1 - v) * 80}px)`)
-  // zIndex on every card (incl. the first) keeps each card's content inside its own layer
-  if (index === 0)
-    return (
-      <div className="absolute inset-0" style={{ zIndex: 1 }}>
-        {children(undefined)}
-      </div>
-    )
   return (
-    <motion.div
-      className="absolute inset-0 overflow-clip rounded-l-[2rem] shadow-[-24px_0_60px_-20px_rgba(0,0,0,0.35)] md:rounded-l-[2.5rem]"
-      style={{ x, zIndex: index + 1 }}
-    >
-      {children(enter)}
-    </motion.div>
+    <div ref={cardRef} className="relative h-full w-full shrink-0 snap-start snap-always">
+      {children(index === 0 ? undefined : enter)}
+    </div>
   )
 }
 
@@ -408,60 +408,91 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
   const known = Object.values(fits)
   const wordSize = known.length === cards.length ? Math.min(...known) : null
 
-  /* Side scroll: the section is (cards) screens tall; its inner frame sticks to
-   * the screen while you scroll down, and each next card slides in from the
-   * right over the one before. Scroll distance per card = one screen. */
-  const outerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({ target: outerRef, offset: ['start start', 'end end'] })
-
-  /* Pause at each card: snap points one screen apart ("proximity" only snaps
-   * when the scroll ends near a card — it never traps the visitor) */
-  useEffect(() => {
-    if (cards.length < 2) return
-    const root = document.documentElement
-    const previous = root.style.scrollSnapType
-    root.style.scrollSnapType = 'y proximity'
-    return () => {
-      root.style.scrollSnapType = previous
-    }
-  }, [cards.length])
+  /* The first card is what you see while scrolling down. The others are
+   * optional: a sideways swipe row (touch, trackpad, dots, arrows) — the page
+   * scroll is never taken over. */
+  const trackRef = useRef<HTMLDivElement>(null)
+  const rowRef = useRef<HTMLDivElement>(null)
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+  const { scrollX } = useScroll({ container: trackRef })
+  const { active, handDirection, isSwiping, goTo } = useSwipeTrack({
+    trackRef,
+    itemRefs: cardRefs,
+    count: cards.length,
+  })
+  useSwipeNudge(trackRef, rowRef, cards.length)
 
   if (visible === false) return null
 
   return (
     <MotionConfig reducedMotion="user">
-      <div
-        ref={outerRef}
-        id={id ?? undefined}
-        className="relative"
-        style={{ height: `${cards.length * 100}svh` }}
-      >
-        <div className="sticky top-0 h-[100svh] overflow-clip">
-          {cards.map((card, i) => (
-            <SideCard key={card.key} index={i} count={cards.length} progress={scrollYProgress}>
-              {(enter) => (
-                <StoryCard
-                  card={card}
-                  index={i}
-                  count={cards.length}
-                  wordSize={wordSize}
-                  onFit={onFit}
-                  enter={enter}
-                />
-              )}
-            </SideCard>
-          ))}
-        </div>
-        {cards.length > 1
-          ? cards.map((card, i) => (
-              <div
+      <div id={id ?? undefined} className="relative" style={{ backgroundColor: PAPER }}>
+        <div
+          ref={trackRef}
+          className="h-[calc(100svh-4.5rem)] snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ overscrollBehaviorX: 'contain' }}
+          aria-label="Fermentation"
+          role="region"
+        >
+          <div ref={rowRef} className="flex h-full">
+            {cards.map((card, i) => (
+              <SlideCard
                 key={card.key}
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 h-px [scroll-snap-align:start] [scroll-snap-stop:normal]"
-                style={{ top: `${i * 100}svh` }}
-              />
-            ))
-          : null}
+                index={i}
+                scrollX={scrollX}
+                trackRef={trackRef}
+                cardRef={(el) => {
+                  cardRefs.current[i] = el
+                }}
+              >
+                {(enter) => (
+                  <StoryCard
+                    card={card}
+                    index={i}
+                    count={cards.length}
+                    wordSize={wordSize}
+                    onFit={onFit}
+                    enter={enter}
+                  />
+                )}
+              </SlideCard>
+            ))}
+          </div>
+        </div>
+
+        {/* Swipe capsule (+ arrows on desktop) — under the cards; card + capsule = one screen */}
+        {cards.length > 1 ? (
+          <div className="flex h-[4.5rem] items-start justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => goTo(active - 1)}
+              disabled={active === 0}
+              aria-label="Previous"
+              className="hidden size-10 items-center justify-center rounded-full border transition-opacity disabled:opacity-25 lg:flex"
+              style={{ borderColor: `${INK}33`, color: INK }}
+            >
+              <ChevronLeft className="size-4" strokeWidth={1.75} />
+            </button>
+            <SwipeCapsule
+              labels={cards.map((c) => c.title || c.word)}
+              active={active}
+              handDirection={handDirection}
+              isSwiping={isSwiping}
+              onSelect={goTo}
+              ariaLabel="Fermentation cards"
+            />
+            <button
+              type="button"
+              onClick={() => goTo(active + 1)}
+              disabled={active >= cards.length - 1}
+              aria-label="Next"
+              className="hidden size-10 items-center justify-center rounded-full border transition-opacity disabled:opacity-25 lg:flex"
+              style={{ borderColor: `${INK}33`, color: INK }}
+            >
+              <ChevronRight className="size-4" strokeWidth={1.75} />
+            </button>
+          </div>
+        ) : null}
       </div>
     </MotionConfig>
   )
