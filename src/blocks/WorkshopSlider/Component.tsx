@@ -20,6 +20,7 @@ const DEFAULT_SECTION_HEADING = 'Our next workshops'
 const DEFAULT_DETAILS_CTA_LABEL = 'Explore'
 const DEFAULT_NEXT_DATE_LABEL = 'Next date'
 const DEFAULT_NO_DATE_LABEL = 'Available soon'
+const DEFAULT_SCROLL_HINT = 'Scroll to the right'
 
 const DEFAULT_WORKSHOPS = [
   {
@@ -203,6 +204,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   upcomingLabel,
   nextDateLabel,
   noDateLabel,
+  scrollHintLabel,
   upcomingDatesByHref,
 }) => {
   /* ── refs ──────────────────────────────────────────────────── */
@@ -214,6 +216,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   const scrollRef = useRef({ current: 0, target: 0, limit: 0 })
   const rafRef = useRef<number>(0)
   const isActiveRef = useRef(false)
+  const hintRef = useRef<HTMLDivElement>(null)
+  const hintBarRef = useRef<HTMLSpanElement>(null)
   const [activeWorkshopIndex, setActiveWorkshopIndex] = useState(0)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
@@ -322,6 +326,11 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       const diff = s.target - s.current
       s.current = Math.abs(diff) < 0.3 ? s.target : s.current + diff * EASE
       container.style.transform = `translate3d(${-s.current}px, 0, 0)`
+
+      /* Scroll hint: gold bar shows progress, the pill fades out near the end */
+      const progress = s.limit > 0 ? s.current / s.limit : 0
+      if (hintBarRef.current) hintBarRef.current.style.transform = `scaleX(${progress})`
+      if (hintRef.current) hintRef.current.style.opacity = progress > 0.94 ? '0' : '1'
 
       /* Parallax each image inner — pure math from cached positions */
       const vCenter = window.innerWidth * 0.5
@@ -435,10 +444,32 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           className="relative w-full bg-white overflow-x-auto overflow-y-hidden lg:sticky lg:top-0 lg:overflow-hidden h-auto lg:h-svh py-10 lg:py-0"
           style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
         >
-          {/* ── Scroll hint (desktop only — mobile gets native swipe affordance) */}
-          <p className="hidden lg:block absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
-            scroll →
-          </p>
+          {/* ── Scroll hint (desktop only — mobile has its own arrows + dots).
+               Arrow nudges right; the gold line fills as you move through the
+               workshops; the pill fades out at the last one. */}
+          <div
+            ref={hintRef}
+            aria-hidden
+            className="pointer-events-none absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 select-none items-center gap-3 rounded-full bg-ff-near-black px-5 py-2.5 text-white shadow-[0_8px_30px_rgba(0,0,0,0.18)] transition-opacity duration-500 lg:flex"
+          >
+            <span className="font-display text-xs font-bold tracking-[0.02em]">
+              {scrollHintLabel || DEFAULT_SCROLL_HINT}
+            </span>
+            <motion.span
+              className="inline-block text-ff-gold"
+              animate={{ x: [0, 6, 0] }}
+              transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              →
+            </motion.span>
+            <span className="relative h-0.5 w-14 overflow-hidden rounded-full bg-white/20">
+              <span
+                ref={hintBarRef}
+                className="absolute inset-0 origin-left rounded-full bg-ff-gold"
+                style={{ transform: 'scaleX(0)' }}
+              />
+            </span>
+          </div>
 
           {/* ══════════════════════════════════════════════════════
            *  RESPONSIVE TRACK

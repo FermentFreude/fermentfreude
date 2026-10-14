@@ -4816,6 +4816,10 @@ export interface WorkshopSliderBlock {
    */
   noDateLabel?: string | null;
   /**
+   * Text in the small dark pill at the bottom of the gallery on desktop, e.g. "Nach rechts scrollen".
+   */
+  scrollHintLabel?: string | null;
+  /**
    * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
    */
   eyebrow?: string | null;
@@ -8253,6 +8257,7 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
   sectionHeading?: T;
   nextDateLabel?: T;
   noDateLabel?: T;
+  scrollHintLabel?: T;
   eyebrow?: T;
   workshops?:
     | T

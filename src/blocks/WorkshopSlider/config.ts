@@ -74,6 +74,16 @@ export const WorkshopSlider: Block = {
       ],
     },
     {
+      name: 'scrollHintLabel',
+      type: 'text',
+      localized: true,
+      label: 'Scroll hint',
+      admin: {
+        description:
+          'Text in the small dark pill at the bottom of the gallery on desktop, e.g. "Nach rechts scrollen".',
+      },
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       localized: true,
