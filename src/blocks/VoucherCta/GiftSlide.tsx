@@ -261,9 +261,9 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
           {/* Info, bottom left on every screen — big price first, the button right
            *  under it, then name + short description. Above the layers so it
            *  always stays readable. */}
-          <div className="relative z-20 max-w-xs self-end md:max-w-sm lg:col-start-1 lg:row-start-1 lg:max-w-none">
-            {/* Phone: price + button side by side (saves height); tablet+: stacked */}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-3 md:block">
+          <div className="relative z-20 mx-auto max-w-sm self-end text-center lg:col-start-1 lg:row-start-1 lg:mx-0 lg:max-w-none lg:text-left">
+            {/* Phone: price + button side by side (saves height); tablet+: stacked. Centred below lg */}
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 md:block">
               {data.priceText ? (
                 <motion.p
                   custom={0}
@@ -318,7 +318,20 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                 animate={active ? 'show' : 'hidden'}
                 className="mb-0 mt-2 text-sm leading-relaxed opacity-75"
               >
-                {textLines.join(' ')}
+                {/* Hyphenated words (E-Mail, Lakto-Gemüse) never break at the hyphen */}
+                {textLines
+                  .join(' ')
+                  .split(/(\S+-\S+)/)
+                  .map((part, i) =>
+                    /\S+-\S+/.test(part) ? (
+                      // inline style: a global CMS line-break rule overrides the class
+                      <span key={i} style={{ whiteSpace: 'nowrap' }}>
+                        {part}
+                      </span>
+                    ) : (
+                      part
+                    ),
+                  )}
               </motion.p>
             ) : null}
           </div>
