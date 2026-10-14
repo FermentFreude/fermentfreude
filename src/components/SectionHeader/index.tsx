@@ -61,11 +61,9 @@ export function SectionHeader({
       {eyebrow ? (
         <p
           {...eyebrowProps}
-          className={cn(
-            'text-eyebrow font-bold uppercase tracking-[0.18em]',
-            light ? 'text-white/70' : 'text-ff-near-black/55',
-            eyebrowProps?.className,
-          )}
+          // text-eyebrow kept outside cn(): tailwind-merge mistakes it for a colour
+          // class and would drop it next to text-ff-gold-accent
+          className={`text-eyebrow ${cn('font-bold uppercase tracking-[0.18em] text-ff-gold-accent', eyebrowProps?.className)}`}
         >
           {eyebrow}
         </p>
