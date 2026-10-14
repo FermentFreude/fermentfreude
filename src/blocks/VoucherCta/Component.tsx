@@ -1,6 +1,7 @@
 'use client'
 
 import { ScrollCue } from '@/components/ScrollCue'
+import { StackPanel } from '@/components/StackPanel'
 import { GiftSlide } from './GiftSlide'
 import { SectionHeader } from '@/components/SectionHeader'
 import { Media } from '@/components/Media'
@@ -10,7 +11,7 @@ import gsap from 'gsap'
 import { EasePack } from 'gsap/EasePack'
 import { Flip } from 'gsap/Flip'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useMotionValue } from 'motion/react'
+import { motion, useMotionValue } from 'motion/react'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -28,6 +29,10 @@ type Props = VoucherCtaBlockType & {
   id?: string
   backgroundImage?: string | MediaType | null
 }
+
+/* Photo grid cell sizes (8 photos). Phone 2 columns: a wide first photo, one tall.
+ * Desktop 4 columns × 3 rows: big first photo, one tall, the rest single cells. */
+const BENTO_SPANS = ['col-span-2 md:row-span-2', '', 'row-span-2', '', '', '', '', '']
 
 export const VoucherCtaBlock: React.FC<Props> = ({
   visible,
@@ -284,6 +289,49 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   if (visible === false) return null
 
   const images = galleryImages ?? []
+
+  /* ── With the gift slide: a calm photo grid (no pin, no zoom) and the gift
+   *    card slides up over it — the same stacked-card effect as the rest of
+   *    the page. Phone: 2 columns; desktop: 4 columns, 3 rows. ── */
+  if (giftOn && giftSlide) {
+    return (
+      <section ref={sectionRef} id={id ?? undefined} className="relative w-full">
+        <StackPanel index={0} sink={false}>
+          <div className="bg-white py-14 md:py-20">
+            <div className="container mx-auto container-padding">
+              <div className="grid grid-flow-dense auto-rows-[38vw] grid-cols-2 gap-2 sm:gap-3 md:auto-rows-[clamp(9rem,17vw,15rem)] md:grid-cols-4 md:gap-4">
+                {images.slice(0, 8).map((item, i) => (
+                  <motion.div
+                    key={item.id ?? i}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: (i % 4) * 0.08 }}
+                    className={`relative overflow-hidden rounded-xl bg-[#ECE5DE] md:rounded-2xl ${BENTO_SPANS[i] ?? ''}`}
+                  >
+                    {item.image ? (
+                      <Media
+                        resource={item.image}
+                        fill
+                        size="(min-width: 768px) 50vw, 100vw"
+                        imgClassName="object-cover transition-transform duration-700 ease-out hover:scale-[1.03]"
+                        className="absolute inset-0"
+                      />
+                    ) : null}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </StackPanel>
+        <StackPanel index={1} last>
+          <div style={{ backgroundColor: '#F5E7D6' }}>
+            <GiftSlide data={giftSlide} />
+          </div>
+        </StackPanel>
+      </section>
+    )
+  }
 
   return (
     <section ref={sectionRef} id={id ?? undefined} className="w-full">
