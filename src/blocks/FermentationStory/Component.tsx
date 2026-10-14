@@ -221,7 +221,10 @@ function StoryCard({
 
         {/* ── Big word with the picture floating over it ── */}
         <div className="relative flex flex-1 items-center">
-          <div ref={wordBoxRef} className="relative h-[clamp(4rem,22vw,15rem)] w-full [@media(max-height:620px)]:h-14">
+          <div
+            ref={wordBoxRef}
+            className="relative h-[clamp(4rem,22vw,15rem)] w-full [@media(max-height:620px)]:h-14"
+          >
             {/* Hidden copy at 100px to measure the word */}
             <div
               ref={measureRef}
@@ -272,9 +275,9 @@ function StoryCard({
           ) : null}
         </div>
 
-        {/* ── Button + benefits (intro card) ── */}
+        {/* ── Intro card: desktop benefits left + button right; phone button, then benefits ── */}
         {card.button || benefits.length ? (
-          <div className="relative z-20 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="relative z-20 flex flex-col gap-8 lg:flex-row-reverse lg:items-end lg:justify-between">
             {card.button ? (
               <motion.div
                 custom={4}
