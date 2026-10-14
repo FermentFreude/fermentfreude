@@ -14,7 +14,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { useRef, useState } from 'react'
 
-import { useArrival, useFitSize, useNavOffset } from '@/components/StoryScene/hooks'
+import { useArrival, useFitSize } from '@/components/StoryScene/hooks'
 
 import { VOUCHER_LAYERS } from './layers'
 
@@ -49,11 +49,8 @@ const INK = '#1A1A1A' // brand near-black
 const PAPER = '#F5E7D6'
 const EASE = [0.16, 1, 0.3, 1] as const
 
-/* Where the layer artboard sits in the scene: Kittl layout on desktop; on phone/tablet it fills the headline group */
-// Desktop: right-aligned like the Kittl layout, as wide as fits — limited by the
-// screen height too, so the lowest ingredient (ginger) stays above the points bar
-const LAYER_BOX =
-  'inset-x-0 top-0 w-full lg:left-auto lg:right-[2%] lg:top-[2%] lg:w-[min(72%,calc((100svh-22rem)*1.49))]'
+// The layer artboard fills the centred headline group on every screen
+const LAYER_BOX = 'inset-x-0 top-0 w-full'
 
 function JarIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -134,7 +131,6 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
     : null
 
   const fontSize = useFitSize(wordBoxRef, measureRef, lines.length)
-  const navOffset = useNavOffset()
   const inView = useInView(ref, { once: true, amount: 0.3 })
 
   // Pointer float (desktop)
@@ -183,59 +179,17 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         className="relative flex h-[100svh] max-h-full flex-col overflow-clip"
         style={{ backgroundColor: PAPER, color: INK }}
       >
-        {/* ── Points along the top edge of the slide (the site header slides away while scrolling down) — ONE design on every screen: four equal
-         *    columns divided by hairlines (the ul's colour shows through the 1px
-         *    gaps), outlined icon on top, title centred underneath. Only the size changes, fluidly with the screen width
-         *    (clamp), never the layout. ── */}
-        {points.length ? (
-          <div
-            className="relative z-20 shrink-0 border-b transition-[padding] duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]"
-            style={{ borderColor: `${INK}1F`, paddingTop: navOffset }}
-          >
-            <div className="container mx-auto container-padding">
-              <ul
-                className="grid gap-px"
-                // One equal column per point (3 or 4)
-                style={{
-                  backgroundColor: `${INK}1F`,
-                  gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))`,
-                }}
-              >
-                {points.map((point, i) => (
-                  <li
-                    key={point.id ?? i}
-                    className="flex flex-col items-center gap-[clamp(6px,0.8vw,12px)] px-0.5 py-[clamp(12px,1.5vw,22px)] text-center"
-                    style={{ backgroundColor: PAPER }}
-                  >
-                    <span
-                      className="flex size-[clamp(40px,5.2vw,52px)] shrink-0 items-center justify-center rounded-full border"
-                      style={{ borderColor: `${INK}33` }}
-                    >
-                      <PointIcon icon={point.icon} />
-                    </span>
-                    <span className="block font-display text-[clamp(8.5px,2.5vw,12.5px)] font-bold uppercase leading-[1.2] tracking-[0.02em]">
-                      {point.title}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        ) : null}
-
         {/* ── Scene grid: headline area on top, info underneath — they can never
          *    overlap. ── */}
-        {/* lg:relative — on desktop the layers are placed in this area, below the points bar */}
-        <div className="container mx-auto container-padding grid min-h-0 flex-1 lg:relative grid-rows-[1fr_auto] gap-6 pb-6 pt-4 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 md:gap-8 md:pb-8 lg:pb-10 lg:pt-6">
+        <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-5 pb-5 pt-16 md:gap-8 md:pb-8 md:pt-20 lg:grid-cols-[minmax(15rem,20rem)_1fr] lg:grid-rows-1 lg:gap-10 lg:pb-10 lg:pt-20 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 [@media(max-height:700px)]:pt-14">
           {/* Headline + layers as one group.
            *  Phone/tablet: the cell above the text is a size container; the group
            *  keeps the artboard's proportions and is as big as that cell allows —
            *  limited by width AND height (cqw/cqh), so on a short screen (browser
            *  bars) it shrinks instead of running behind the text and points bar.
-           *  Desktop: cell and group are not positioned, so the layers take the
-           *  Kittl positions across the whole slide; the headline is centred. */}
-          <div className="relative flex min-h-0 items-center justify-center [container-type:size] lg:static lg:block lg:[container-type:normal]">
-            <div className="relative aspect-[1004/673] w-[min(100cqw,calc(100cqh*1.4918))] lg:static lg:aspect-auto lg:h-full lg:w-auto">
+           *  Desktop: same group, centred in the column right of the info. */}
+          <div className="relative flex min-h-0 items-center justify-center [container-type:size] lg:col-start-2 lg:row-start-1">
+            <div className="relative aspect-[1004/673] w-[min(100cqw,calc(100cqh*1.4918))]">
               {/* Layers — in front of the headline */}
               <motion.div
                 aria-hidden
@@ -267,10 +221,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                 />
               </motion.div>
               {/* Headline area — the word is sized to fit it */}
-              <div
-                ref={wordBoxRef}
-                className="absolute inset-x-0 inset-y-[22%] lg:relative lg:inset-auto lg:mx-[14%] lg:h-full"
-              >
+              <div ref={wordBoxRef} className="absolute inset-x-[4%] inset-y-[22%]">
                 {/* Hidden copy at 100px to measure the widest line */}
                 <div
                   ref={measureRef}
@@ -310,7 +261,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
           {/* Info, bottom left on every screen — big price first, the button right
            *  under it, then name + short description. Above the layers so it
            *  always stays readable. */}
-          <div className="relative z-20 max-w-xs self-end md:max-w-sm">
+          <div className="relative z-20 max-w-xs self-end md:max-w-sm lg:col-start-1 lg:row-start-1 lg:max-w-none">
             {/* Phone: price + button side by side (saves height); tablet+: stacked */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-3 md:block">
               {data.priceText ? (
@@ -372,6 +323,43 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
             ) : null}
           </div>
         </div>
+
+        {/* ── Points along the bottom — ONE design on every screen: four equal
+         *    columns divided by hairlines (the ul's colour shows through the 1px
+         *    gaps), outlined icon on top, title centred underneath. Only the size changes, fluidly with the screen width
+         *    (clamp), never the layout. ── */}
+        {points.length ? (
+          <div className="relative z-20 shrink-0 border-t" style={{ borderColor: `${INK}1F` }}>
+            <div className="container mx-auto container-padding">
+              <ul
+                className="grid gap-px"
+                // One equal column per point (3 or 4)
+                style={{
+                  backgroundColor: `${INK}1F`,
+                  gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))`,
+                }}
+              >
+                {points.map((point, i) => (
+                  <li
+                    key={point.id ?? i}
+                    className="flex flex-col items-center gap-[clamp(6px,0.8vw,12px)] px-0.5 py-[clamp(12px,1.5vw,22px)] text-center"
+                    style={{ backgroundColor: PAPER }}
+                  >
+                    <span
+                      className="flex size-[clamp(40px,5.2vw,52px)] shrink-0 items-center justify-center rounded-full border"
+                      style={{ borderColor: `${INK}33` }}
+                    >
+                      <PointIcon icon={point.icon} />
+                    </span>
+                    <span className="block font-display text-[clamp(8.5px,2.5vw,12.5px)] font-bold uppercase leading-[1.2] tracking-[0.02em]">
+                      {point.title}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : null}
 
         {jsonLd ? (
           <script
