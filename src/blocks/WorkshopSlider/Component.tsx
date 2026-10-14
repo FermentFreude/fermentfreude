@@ -16,7 +16,11 @@ import React, { useEffect, useRef } from 'react'
  * ═══════════════════════════════════════════════════════════════ */
 
 /** Below lg the gallery is a native swipe row (desktop: sticky scroll scene) */
-const isTouchLayout = () => window.innerWidth < 1024
+/** Desktop sticky scroll scene only on a wide screen WITH a mouse — touch tablets
+ *  (even iPad Pro / landscape) get the swipe row + capsule. Matches the `desk:` variant. */
+const isDeskScene = () =>
+  window.innerWidth >= 1024 && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+const isTouchLayout = () => !isDeskScene()
 
 const DEFAULT_EYEBROW = 'Workshop Experience'
 const DEFAULT_SECTION_HEADING = 'Our next workshops'
@@ -278,7 +282,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
      * Below lg the section becomes a native horizontal swipe carousel. */
     const updateDimensions = () => {
       lastWidth = window.innerWidth
-      const enableStickyScene = window.innerWidth >= 1024
+      const enableStickyScene = isDeskScene()
       const overshoot = enableStickyScene
         ? Math.max(0, container.scrollWidth - window.innerWidth)
         : 0
@@ -349,7 +353,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     /* Desktop: any resize. Touch sizes: width only — a height-only resize there
      * is the mobile address bar showing/hiding, not a real layout change. */
     const onResize = () => {
-      if (window.innerWidth >= 1024 || window.innerWidth !== lastWidth) updateDimensions()
+      if (isDeskScene() || window.innerWidth !== lastWidth) updateDimensions()
     }
 
     updateDimensions()
@@ -401,24 +405,24 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
         />
       ) : null}
 
-      <div ref={outerRef} className="relative w-full bg-white lg:min-h-svh">
+      <div ref={outerRef} className="relative w-full bg-white desk:min-h-svh">
         {/* ── Viewport: sticky on desktop, native horizontal scroll on mobile */}
         <section
           ref={trackRef}
-          className="relative w-full bg-white overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:sticky lg:top-0 lg:overflow-hidden h-auto lg:h-svh py-10 lg:py-0"
+          className="relative w-full bg-white overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden desk:sticky desk:top-0 desk:overflow-hidden h-auto desk:h-svh py-10 desk:py-0"
           style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
         >
           {/* ── Scroll hint (desktop only — mobile gets native swipe affordance) */}
-          <p className="hidden lg:block absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
+          <p className="hidden desk:block absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
             scroll →
           </p>
 
           {/* ══════════════════════════════════════════════════════
            *  RESPONSIVE TRACK
            *   · lg+: absolutely positioned, transformed by JS (sticky scene)
-           *   · <lg: in-flow flex row, native overflow-x with snap
+           *   · <desk: in-flow flex row, native overflow-x with snap
            * ══════════════════════════════════════════════════════ */}
-          <div className="lg:absolute lg:inset-0 lg:overflow-hidden select-none snap-x snap-mandatory lg:snap-none">
+          <div className="desk:absolute desk:inset-0 desk:overflow-hidden select-none snap-x snap-mandatory desk:snap-none">
             <div
               ref={containerRef}
               className="flex items-center h-full will-change-transform"
@@ -439,7 +443,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                     ref={(el) => {
                       workshopGroupRefs.current[wIdx] = el
                     }}
-                    className="flex shrink-0 items-center snap-start lg:snap-none"
+                    className="flex shrink-0 items-center snap-start desk:snap-none"
                     style={{
                       gap: 'clamp(0.75rem, 2vw, 1.5rem)',
                       marginRight:
@@ -448,7 +452,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                   >
                     {/* ── LEFT COLUMN — title on top, small image below ── */}
                     <div
-                      className="shrink-0 flex flex-col self-center w-[80vw] sm:w-[20rem] md:w-88 lg:w-85"
+                      className="shrink-0 flex flex-col self-center w-[80vw] sm:w-[20rem] md:w-88 desk:w-85"
                       style={{ height: 'clamp(62svh, 74svh, 78vh)' }}
                     >
                       <div className="shrink-0 pb-4 md:pb-5 w-full">
@@ -583,7 +587,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
             left (the gesture itself) + the slide dots. Hidden on the desktop
             sticky scene. */}
         {workshopCount > 1 ? (
-          <div className="lg:hidden flex justify-center px-6 pt-2 pb-6">
+          <div className="desk:hidden flex justify-center px-6 pt-2 pb-6">
             <SwipeCapsule
               labels={resolvedWorkshops.map((w) => w.title)}
               active={activeWorkshopIndex}
