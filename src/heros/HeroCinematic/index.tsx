@@ -239,7 +239,7 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
                 </motion.p>
               )}
 
-              <h1 className="font-display text-[clamp(1.875rem,3.4vw,3.25rem)] font-medium leading-[1.06] tracking-[-0.025em] text-ff-ivory">
+              <h1 className="font-display text-[clamp(2.25rem,4.2vw,3.75rem)] font-bold leading-[1.03] tracking-[-0.03em] text-ff-ivory">
                 {/* Gold first line, ivory second line */}
                 <motion.span variants={riseIn} className="block whitespace-pre-line text-ff-gold">
                   {slide.title}
