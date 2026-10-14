@@ -187,9 +187,10 @@ export const VoucherCta: Block = {
           name: 'label',
           type: 'text',
           localized: true,
-          label: 'Small label',
+          label: 'Name',
           admin: {
-            description: 'Small uppercase line bottom left, e.g. "Fermentations-Workshop".',
+            description:
+              'Bold uppercase name above the description, e.g. "Gutschein · Fermentations-Workshop".',
             condition: (_, siblingData) => Boolean(siblingData?.enabled),
           },
         },
@@ -252,7 +253,7 @@ export const VoucherCta: Block = {
           labels: { singular: 'Point', plural: 'Points' },
           admin: {
             description:
-              '3–4 short points with a small icon, along the bottom of the slide (icon + title are shown).',
+              '3–4 short points along the bottom of the slide: icon, title and a short description.',
             condition: (_, siblingData) => Boolean(siblingData?.enabled),
           },
           fields: [
@@ -286,12 +287,8 @@ export const VoucherCta: Block = {
                   name: 'text',
                   type: 'text',
                   localized: true,
-                  label: 'Short line (not shown at the moment)',
-                  admin: {
-                    width: '40%',
-                    description:
-                      'Kept for later — the points currently show icon + title only, the same on every screen.',
-                  },
+                  label: 'Short description',
+                  admin: { width: '40%' },
                 },
               ],
             },

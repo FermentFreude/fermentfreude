@@ -1,6 +1,6 @@
 'use client'
 
-import { Gift, Heart, Leaf, Package } from 'lucide-react'
+import { ArrowUpRight, Gift, Heart, Leaf, Package } from 'lucide-react'
 import {
   MotionConfig,
   motion,
@@ -240,9 +240,8 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         className="relative flex h-[100svh] max-h-full flex-col overflow-clip"
         style={{ backgroundColor: PAPER, color: INK }}
       >
-        {/* ── Scene grid: headline area on top, info row underneath — they can
-         *    never overlap. Phone: info stacked. Tablet/desktop: ONE row — what
-         *    the voucher includes on the left, price + button together on the right. ── */}
+        {/* ── Scene grid: headline area on top, info underneath — they can never
+         *    overlap. ── */}
         <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-6 pb-6 pt-20 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 [@media(max-height:700px)]:pt-16 md:gap-8 md:pb-8 lg:pb-10 lg:pt-24">
           {/* Headline + layers as one group.
            *  Phone/tablet: the cell above the text is a size container; the group
@@ -324,80 +323,74 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
             </div>
           </div>
 
-          {/* Info row — above the layers so it always stays readable */}
-          <div className="relative z-20 md:flex md:items-end md:justify-between md:gap-10">
-            <div className="md:max-w-[30rem] lg:max-w-[34rem]">
-              {data.label ? (
-                <motion.p
-                  custom={0}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate={active ? 'show' : 'hidden'}
-                  className="mb-3 font-display text-[11px] font-bold uppercase tracking-[0.08em] md:text-xs"
+          {/* Info — built exactly like the product info on the showcase cards:
+           *  name, short description, big price, black pill button with an arrow.
+           *  Bottom left on every screen, above the layers so it stays readable. */}
+          <div className="relative z-20 max-w-xs self-end md:max-w-sm">
+            {data.label ? (
+              <motion.h3
+                custom={0}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="font-display text-base font-bold uppercase tracking-[0.04em]"
+              >
+                {data.label}
+              </motion.h3>
+            ) : null}
+            {textLines.length ? (
+              <motion.p
+                custom={1}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mb-0 mt-2 text-sm leading-relaxed opacity-75"
+              >
+                {textLines.join(' ')}
+              </motion.p>
+            ) : null}
+            {data.priceText ? (
+              <motion.p
+                custom={2}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mb-0 mt-4 font-display text-3xl font-bold leading-none tracking-[-0.02em]"
+              >
+                {data.priceText}
+              </motion.p>
+            ) : null}
+            {data.buttonLabel ? (
+              <motion.div
+                custom={3}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mt-5"
+              >
+                <Link
+                  href={href}
+                  className="group pointer-events-auto inline-flex items-center gap-3 rounded-full py-2.5 pl-5 pr-2.5 font-display text-sm font-bold text-white transition-colors hover:bg-black"
+                  style={{ backgroundColor: INK }}
                 >
-                  {data.label}
-                </motion.p>
-              ) : null}
-              {textLines.length ? (
-                <motion.p
-                  custom={1}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate={active ? 'show' : 'hidden'}
-                  className="mb-0 font-display font-bold tracking-[-0.01em]"
-                >
-                  {/* First line = the punchline (bigger); the rest = what is included */}
-                  {textLines.map((l, i) => (
-                    <span
-                      key={i}
-                      className={
-                        i === 0
-                          ? 'block text-lg leading-tight md:text-2xl lg:text-[1.65rem]'
-                          : 'mt-1.5 block text-sm leading-snug opacity-70 md:text-base'
-                      }
-                    >
-                      {l}
-                    </span>
-                  ))}
-                </motion.p>
-              ) : null}
-            </div>
-            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-4 md:mt-0 md:shrink-0 md:flex-nowrap">
-              {data.priceText ? (
-                <motion.p
-                  custom={2}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate={active ? 'show' : 'hidden'}
-                  className="mb-0 font-display text-5xl font-bold leading-none tracking-[-0.03em] md:text-6xl lg:text-7xl [@media(max-height:700px)]:text-4xl"
-                >
-                  {data.priceText}
-                </motion.p>
-              ) : null}
-              {data.buttonLabel ? (
-                <motion.div
-                  custom={3}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate={active ? 'show' : 'hidden'}
-                >
-                  <Link
-                    href={href}
-                    className="pointer-events-auto inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-3 font-display text-sm font-bold text-ff-ivory transition-transform duration-300 hover:scale-[1.03] md:px-8 md:py-4 md:text-base"
-                    style={{ backgroundColor: INK }}
+                  {data.buttonLabel}
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-white transition-transform duration-300 group-hover:rotate-45"
+                    style={{ color: INK }}
                   >
-                    {data.buttonLabel}
-                  </Link>
-                </motion.div>
-              ) : null}
-            </div>
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+                  </span>
+                </Link>
+              </motion.div>
+            ) : null}
           </div>
         </div>
 
         {/* ── Points along the bottom — ONE design on every screen: four equal
          *    columns divided by hairlines (the ul's colour shows through the 1px
-         *    gaps), outlined icon on top, title centred underneath. Only the size
-         *    changes, fluidly with the screen width (clamp), never the layout. ── */}
+         *    gaps), outlined icon on top, title + short description centred
+         *    underneath. Only the size changes, fluidly with the screen width
+         *    (clamp), never the layout. ── */}
         {points.length ? (
           <div className="relative z-20 shrink-0 border-t" style={{ borderColor: `${INK}1F` }}>
             <div className="container mx-auto container-padding">
@@ -421,9 +414,14 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                     >
                       <PointIcon icon={point.icon} />
                     </span>
-                    <span className="block font-display text-[clamp(8.5px,2.7vw,13px)] font-bold uppercase leading-[1.2] tracking-[0.02em]">
+                    <span className="block font-display text-[clamp(8.5px,2.5vw,12.5px)] font-bold uppercase leading-[1.2] tracking-[0.02em]">
                       {point.title}
                     </span>
+                    {point.text ? (
+                      <span className="-mt-[clamp(2px,0.4vw,6px)] block max-w-[18rem] text-[clamp(8.5px,2.4vw,13px)] leading-snug opacity-70">
+                        {point.text}
+                      </span>
+                    ) : null}
                   </li>
                 ))}
               </ul>

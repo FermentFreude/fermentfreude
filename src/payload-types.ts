@@ -4698,7 +4698,7 @@ export interface VoucherCtaBlock {
      */
     bigWord?: string | null;
     /**
-     * Small uppercase line bottom left, e.g. "Fermentations-Workshop".
+     * Bold uppercase name above the description, e.g. "Gutschein · Fermentations-Workshop".
      */
     label?: string | null;
     /**
@@ -4722,15 +4722,12 @@ export interface VoucherCtaBlock {
      */
     cardAlt?: string | null;
     /**
-     * 3–4 short points with a small icon, along the bottom of the slide (icon + title are shown).
+     * 3–4 short points along the bottom of the slide: icon, title and a short description.
      */
     points?:
       | {
           icon?: ('leaf' | 'jar' | 'heart' | 'gift' | 'box' | 'bowl') | null;
           title: string;
-          /**
-           * Kept for later — the points currently show icon + title only, the same on every screen.
-           */
           text?: string | null;
           id?: string | null;
         }[]
