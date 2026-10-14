@@ -134,10 +134,10 @@ function WorkshopBanner({
           ) : null}
           {heading ? (
             <motion.p variants={goldLine} className={sentences.length ? 'mt-4 md:mt-5' : ''}>
-              {/* Link to all workshops — underline draws in + arrow nudges on hover */}
+              {/* Link to all workshops — underline draws in on hover */}
               <Link
                 href={href}
-                className="group/all inline-flex items-center gap-2 font-display text-lg font-bold tracking-[-0.01em] text-ff-gold transition-colors duration-300 hover:text-ff-gold-light md:text-2xl"
+                className="group/all inline-flex items-center font-display text-lg font-bold tracking-[-0.01em] text-ff-gold transition-colors duration-300 hover:text-ff-gold-light md:text-2xl"
               >
                 <span className="relative">
                   {heading}
@@ -145,12 +145,6 @@ function WorkshopBanner({
                     aria-hidden
                     className="absolute inset-x-0 -bottom-0.5 h-[2px] origin-left scale-x-0 bg-current transition-transform duration-500 ease-out group-hover/all:scale-x-100"
                   />
-                </span>
-                <span
-                  aria-hidden
-                  className="inline-block transition-transform duration-300 ease-out group-hover/all:translate-x-1.5"
-                >
-                  →
                 </span>
               </Link>
             </motion.p>
