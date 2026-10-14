@@ -50,7 +50,10 @@ const PAPER = '#F5E7D6'
 const EASE = [0.16, 1, 0.3, 1] as const
 
 /* Where the layer artboard sits in the scene: Kittl layout on desktop; on phone/tablet it fills the headline group */
-const LAYER_BOX = 'inset-x-0 top-0 w-full lg:left-[17%] lg:right-auto lg:top-[3%] lg:w-[82%]'
+// Desktop: right-aligned like the Kittl layout, as wide as fits — limited by the
+// screen height too, so the lowest ingredient (ginger) stays above the points bar
+const LAYER_BOX =
+  'inset-x-0 top-0 w-full lg:left-auto lg:right-[2%] lg:top-[2%] lg:w-[min(72%,calc((100svh-22rem)*1.49))]'
 
 /** 0 while the card is below the screen → 1 once its top reaches the top */
 function useArrival(ref: React.RefObject<HTMLElement | null>): MotionValue<number> {
@@ -240,9 +243,50 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         className="relative flex h-[100svh] max-h-full flex-col overflow-clip"
         style={{ backgroundColor: PAPER, color: INK }}
       >
+        {/* ── Points along the top (under the site header) — ONE design on every screen: four equal
+         *    columns divided by hairlines (the ul's colour shows through the 1px
+         *    gaps), outlined icon on top, title centred underneath. Only the size changes, fluidly with the screen width
+         *    (clamp), never the layout. ── */}
+        {points.length ? (
+          <div
+            className="relative z-20 mt-16 shrink-0 border-y lg:mt-[4.5rem]"
+            style={{ borderColor: `${INK}1F` }}
+          >
+            <div className="container mx-auto container-padding">
+              <ul
+                className="grid gap-px"
+                // One equal column per point (3 or 4)
+                style={{
+                  backgroundColor: `${INK}1F`,
+                  gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))`,
+                }}
+              >
+                {points.map((point, i) => (
+                  <li
+                    key={point.id ?? i}
+                    className="flex flex-col items-center gap-[clamp(6px,0.8vw,12px)] px-0.5 py-[clamp(12px,1.5vw,22px)] text-center"
+                    style={{ backgroundColor: PAPER }}
+                  >
+                    <span
+                      className="flex size-[clamp(40px,5.2vw,52px)] shrink-0 items-center justify-center rounded-full border"
+                      style={{ borderColor: `${INK}33` }}
+                    >
+                      <PointIcon icon={point.icon} />
+                    </span>
+                    <span className="block font-display text-[clamp(8.5px,2.5vw,12.5px)] font-bold uppercase leading-[1.2] tracking-[0.02em]">
+                      {point.title}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : null}
+
         {/* ── Scene grid: headline area on top, info underneath — they can never
          *    overlap. ── */}
-        <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-6 pb-6 pt-20 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 [@media(max-height:700px)]:pt-16 md:gap-8 md:pb-8 lg:pb-10 lg:pt-24">
+        {/* lg:relative — on desktop the layers are placed in this area, below the points bar */}
+        <div className="container mx-auto container-padding grid min-h-0 flex-1 lg:relative grid-rows-[1fr_auto] gap-6 pb-6 pt-4 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 md:gap-8 md:pb-8 lg:pb-10 lg:pt-6">
           {/* Headline + layers as one group.
            *  Phone/tablet: the cell above the text is a size container; the group
            *  keeps the artboard's proportions and is as big as that cell allows —
@@ -263,7 +307,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                   width={VOUCHER_LAYERS.ingredients.width}
                   height={VOUCHER_LAYERS.ingredients.height}
                   alt=""
-                  sizes="(min-width: 1024px) 82vw, 100vw"
+                  sizes="(min-width: 1024px) 72vw, 100vw"
                   loading="eager"
                   className="h-auto w-full drop-shadow-[0_18px_24px_rgba(60,40,20,0.18)]"
                 />
@@ -277,7 +321,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                   width={VOUCHER_LAYERS.card.width}
                   height={VOUCHER_LAYERS.card.height}
                   alt={cardAlt}
-                  sizes="(min-width: 1024px) 82vw, 100vw"
+                  sizes="(min-width: 1024px) 72vw, 100vw"
                   loading="eager"
                   className="h-auto w-full drop-shadow-[0_22px_30px_rgba(40,30,15,0.25)]"
                 />
@@ -327,47 +371,50 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
            *  under it, then name + short description. Above the layers so it
            *  always stays readable. */}
           <div className="relative z-20 max-w-xs self-end md:max-w-sm">
-            {data.priceText ? (
-              <motion.p
-                custom={0}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mb-0 font-display text-6xl font-bold leading-none tracking-[-0.03em] md:text-7xl [@media(max-height:700px)]:text-5xl"
-              >
-                {data.priceText}
-              </motion.p>
-            ) : null}
-            {data.buttonLabel ? (
-              <motion.div
-                custom={1}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mt-5"
-              >
-                <Link
-                  href={href}
-                  className="group pointer-events-auto inline-flex items-center gap-3 rounded-full py-2.5 pl-5 pr-2.5 font-display text-sm font-bold text-white transition-colors hover:bg-black"
-                  style={{ backgroundColor: INK }}
+            {/* Phone: price + button side by side (saves height); tablet+: stacked */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3 md:block">
+              {data.priceText ? (
+                <motion.p
+                  custom={0}
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate={active ? 'show' : 'hidden'}
+                  className="mb-0 font-display text-6xl font-bold leading-none tracking-[-0.03em] md:text-7xl [@media(max-height:700px)]:text-5xl"
                 >
-                  {data.buttonLabel}
-                  <span
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-white transition-transform duration-300 group-hover:rotate-45"
-                    style={{ color: INK }}
+                  {data.priceText}
+                </motion.p>
+              ) : null}
+              {data.buttonLabel ? (
+                <motion.div
+                  custom={1}
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate={active ? 'show' : 'hidden'}
+                  className="md:mt-5"
+                >
+                  <Link
+                    href={href}
+                    className="group pointer-events-auto inline-flex items-center gap-3 rounded-full py-2.5 pl-5 pr-2.5 font-display text-sm font-bold text-white transition-colors hover:bg-black"
+                    style={{ backgroundColor: INK }}
                   >
-                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-                  </span>
-                </Link>
-              </motion.div>
-            ) : null}
+                    {data.buttonLabel}
+                    <span
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-white transition-transform duration-300 group-hover:rotate-45"
+                      style={{ color: INK }}
+                    >
+                      <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+                    </span>
+                  </Link>
+                </motion.div>
+              ) : null}
+            </div>
             {data.label ? (
               <motion.h3
                 custom={2}
                 variants={fadeUp}
                 initial="hidden"
                 animate={active ? 'show' : 'hidden'}
-                className="mt-6 font-display text-base font-bold uppercase tracking-[0.04em]"
+                className="mt-5 font-display text-xs font-bold uppercase tracking-[0.06em] md:mt-6"
               >
                 {data.label}
               </motion.h3>
@@ -385,49 +432,6 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
             ) : null}
           </div>
         </div>
-
-        {/* ── Points along the bottom — ONE design on every screen: four equal
-         *    columns divided by hairlines (the ul's colour shows through the 1px
-         *    gaps), outlined icon on top, title + short description centred
-         *    underneath. Only the size changes, fluidly with the screen width
-         *    (clamp), never the layout. ── */}
-        {points.length ? (
-          <div className="relative z-20 shrink-0 border-t" style={{ borderColor: `${INK}1F` }}>
-            <div className="container mx-auto container-padding">
-              <ul
-                className="grid gap-px"
-                // One equal column per point (3 or 4)
-                style={{
-                  backgroundColor: `${INK}1F`,
-                  gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))`,
-                }}
-              >
-                {points.map((point, i) => (
-                  <li
-                    key={point.id ?? i}
-                    className="flex flex-col items-center gap-[clamp(6px,0.8vw,12px)] px-0.5 py-[clamp(12px,1.5vw,22px)] text-center"
-                    style={{ backgroundColor: PAPER }}
-                  >
-                    <span
-                      className="flex size-[clamp(40px,5.2vw,52px)] shrink-0 items-center justify-center rounded-full border"
-                      style={{ borderColor: `${INK}33` }}
-                    >
-                      <PointIcon icon={point.icon} />
-                    </span>
-                    <span className="block font-display text-[clamp(8.5px,2.5vw,12.5px)] font-bold uppercase leading-[1.2] tracking-[0.02em]">
-                      {point.title}
-                    </span>
-                    {point.text ? (
-                      <span className="-mt-[clamp(2px,0.4vw,6px)] block max-w-[18rem] text-[clamp(8.5px,2.4vw,13px)] leading-snug opacity-70">
-                        {point.text}
-                      </span>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        ) : null}
 
         {jsonLd ? (
           <script

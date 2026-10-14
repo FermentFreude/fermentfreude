@@ -252,8 +252,7 @@ export const VoucherCta: Block = {
           maxRows: 4,
           labels: { singular: 'Point', plural: 'Points' },
           admin: {
-            description:
-              '3–4 short points along the bottom of the slide: icon, title and a short description.',
+            description: '3–4 short points along the bottom of the slide: icon + title.',
             condition: (_, siblingData) => Boolean(siblingData?.enabled),
           },
           fields: [
@@ -287,8 +286,11 @@ export const VoucherCta: Block = {
                   name: 'text',
                   type: 'text',
                   localized: true,
-                  label: 'Short description',
-                  admin: { width: '40%' },
+                  label: 'Short line (not shown)',
+                  admin: {
+                    width: '40%',
+                    description: 'Not shown at the moment — the points show icon + title.',
+                  },
                 },
               ],
             },

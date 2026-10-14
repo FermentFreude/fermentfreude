@@ -4722,12 +4722,15 @@ export interface VoucherCtaBlock {
      */
     cardAlt?: string | null;
     /**
-     * 3–4 short points along the bottom of the slide: icon, title and a short description.
+     * 3–4 short points along the bottom of the slide: icon + title.
      */
     points?:
       | {
           icon?: ('leaf' | 'jar' | 'heart' | 'gift' | 'box' | 'bowl') | null;
           title: string;
+          /**
+           * Not shown at the moment — the points show icon + title.
+           */
           text?: string | null;
           id?: string | null;
         }[]
