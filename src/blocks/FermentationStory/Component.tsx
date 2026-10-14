@@ -1,7 +1,6 @@
 'use client'
 
-import { StackPanel } from '@/components/StackPanel'
-import { useArrival, useFitSize } from '@/components/StoryScene/hooks'
+import { useArrival, useFitSize, useNavOffset } from '@/components/StoryScene/hooks'
 import type { FermentationStoryBlock as Props } from '@/payload-types'
 import { ArrowUpRight, Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
 import {
@@ -10,6 +9,8 @@ import {
   useInView,
   useSpring,
   useTransform,
+  useScroll,
+  type MotionValue,
   type Variants,
 } from 'motion/react'
 import Image from 'next/image'
@@ -19,8 +20,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FERMENTATION_LAYERS, type PictureSlot, type StoryLayer } from './layers'
 
 /* ═══════════════════════════════════════════════════════════════
- *  FERMENTATION STORY — full-screen cards that stack on scroll, like
- *  the product showcase: the intro card ("Warum Fermentation? / GESUND",
+ *  FERMENTATION STORY — full-screen cards that slide in from the side
+ *  while you scroll down (the frame holds still): the intro card ("Warum Fermentation? / GESUND",
  *  button + benefits) and then one card per topic. Every card: title +
  *  text top left, one huge black word (same size on every card), a
  *  picture floating over it (lifts in on scroll, follows the pointer).
@@ -81,10 +82,13 @@ function StoryCard({
   count,
   wordSize,
   onFit,
+  enter,
 }: {
   card: CardData
   index: number
   count: number
+  /** 0 → 1 while this card slides in from the side (cards after the first) */
+  enter?: MotionValue<number>
   /** Shared size (the smallest fit of all cards) so every big word matches */
   wordSize: number | null
   onFit: (key: string, size: number) => void
@@ -98,6 +102,8 @@ function StoryCard({
   }, [ownFit, card.key, onFit])
 
   const active = useInView(ref, { once: true, amount: 0.25 })
+  // Room for the site header while it is on screen (it slides away on scroll-down)
+  const navOffset = useNavOffset()
 
   // Pointer float (desktop)
   const px = useSpring(0, { stiffness: 60, damping: 18 })
@@ -114,8 +120,10 @@ function StoryCard({
   }
 
   // The picture lifts into place as the card slides in — movement only, never faded
+  // First card: driven by its vertical arrival; side cards: by their slide-in
   const arrival = useArrival(ref)
-  const lift = useSpring(useTransform(arrival, [0.1, 0.95], [1, 0], { clamp: true }), {
+  const progress = enter ?? arrival
+  const lift = useSpring(useTransform(progress, [0.1, 0.95], [1, 0], { clamp: true }), {
     stiffness: 70,
     damping: 22,
   })
@@ -134,10 +142,13 @@ function StoryCard({
       ref={ref}
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
-      className="relative overflow-clip"
+      className="relative h-full overflow-clip"
       style={{ backgroundColor: PAPER, color: INK }}
     >
-      <div className="container mx-auto container-padding flex min-h-[100svh] flex-col gap-8 py-16 md:py-20 lg:gap-6 lg:py-16">
+      <div
+        className="container mx-auto container-padding flex h-full flex-col gap-6 py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10"
+        style={navOffset ? { paddingTop: navOffset + 24 } : undefined}
+      >
         {/* ── Number, title + text, top left ── */}
         <div className="relative z-20 max-w-md">
           {count > 1 ? (
@@ -316,6 +327,43 @@ function StoryCard({
   )
 }
 
+/** One card in the side-scrolling frame. Card 0 sits in place; card i slides in
+ *  from the right (100% → 0) during the i-th screen of scrolling, over the
+ *  cards before it, with rounded left corners and a soft shadow. */
+function SideCard({
+  index,
+  count,
+  progress,
+  children,
+}: {
+  index: number
+  count: number
+  progress: MotionValue<number>
+  children: (enter: MotionValue<number> | undefined) => React.ReactNode
+}) {
+  const steps = Math.max(1, count - 1)
+  const enter = useTransform(progress, [(index - 1) / steps, index / steps], [0, 1], {
+    clamp: true,
+  })
+  // Waits an extra 80px off-screen so its shadow doesn't peek in before it moves
+  const x = useTransform(enter, (v) => `calc(${(1 - v) * 100}% + ${(1 - v) * 80}px)`)
+  // zIndex on every card (incl. the first) keeps each card's content inside its own layer
+  if (index === 0)
+    return (
+      <div className="absolute inset-0" style={{ zIndex: 1 }}>
+        {children(undefined)}
+      </div>
+    )
+  return (
+    <motion.div
+      className="absolute inset-0 overflow-clip rounded-l-[2rem] shadow-[-24px_0_60px_-20px_rgba(0,0,0,0.35)] md:rounded-l-[2.5rem]"
+      style={{ x, zIndex: index + 1 }}
+    >
+      {children(enter)}
+    </motion.div>
+  )
+}
+
 export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
   visible,
   title,
@@ -328,8 +376,6 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
   slides,
   id,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-
   const resolvedButton = buttonLabel ?? DEFAULTS.buttonLabel
   const cards: CardData[] = [
     {
@@ -362,27 +408,20 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
   const known = Object.values(fits)
   const wordSize = known.length === cards.length ? Math.min(...known) : null
 
-  /* Pause at each card: snap points at the start of every card (same as the
-   * product showcase). The cards are sticky, so invisible markers sit at each
-   * card's place in the page. "proximity" never traps the visitor. */
-  const [snapTops, setSnapTops] = useState<number[]>([])
+  /* Side scroll: the section is (cards) screens tall; its inner frame sticks to
+   * the screen while you scroll down, and each next card slides in from the
+   * right over the one before. Scroll distance per card = one screen. */
+  const outerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: outerRef, offset: ['start start', 'end end'] })
+
+  /* Pause at each card: snap points one screen apart ("proximity" only snaps
+   * when the scroll ends near a card — it never traps the visitor) */
   useEffect(() => {
-    const el = containerRef.current
-    if (!el || cards.length < 2) return
-    const measure = () =>
-      setSnapTops(
-        Array.from(el.children)
-          .filter((c) => c.querySelector('section'))
-          .map((c) => (c as HTMLElement).offsetTop),
-      )
-    measure()
-    const observer = new ResizeObserver(measure)
-    observer.observe(el)
+    if (cards.length < 2) return
     const root = document.documentElement
     const previous = root.style.scrollSnapType
     root.style.scrollSnapType = 'y proximity'
     return () => {
-      observer.disconnect()
       root.style.scrollSnapType = previous
     }
   }, [cards.length])
@@ -391,26 +430,38 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
 
   return (
     <MotionConfig reducedMotion="user">
-      <div ref={containerRef} id={id ?? undefined} className="relative">
-        {cards.map((card, i) => (
-          <StackPanel key={card.key} index={i} last={i === cards.length - 1} sink={false}>
-            <StoryCard
-              card={card}
-              index={i}
-              count={cards.length}
-              wordSize={wordSize}
-              onFit={onFit}
-            />
-          </StackPanel>
-        ))}
-        {snapTops.map((top, i) => (
-          <div
-            key={i}
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 h-px [scroll-snap-align:start] [scroll-snap-stop:normal]"
-            style={{ top }}
-          />
-        ))}
+      <div
+        ref={outerRef}
+        id={id ?? undefined}
+        className="relative"
+        style={{ height: `${cards.length * 100}svh` }}
+      >
+        <div className="sticky top-0 h-[100svh] overflow-clip">
+          {cards.map((card, i) => (
+            <SideCard key={card.key} index={i} count={cards.length} progress={scrollYProgress}>
+              {(enter) => (
+                <StoryCard
+                  card={card}
+                  index={i}
+                  count={cards.length}
+                  wordSize={wordSize}
+                  onFit={onFit}
+                  enter={enter}
+                />
+              )}
+            </SideCard>
+          ))}
+        </div>
+        {cards.length > 1
+          ? cards.map((card, i) => (
+              <div
+                key={card.key}
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 h-px [scroll-snap-align:start] [scroll-snap-stop:normal]"
+                style={{ top: `${i * 100}svh` }}
+              />
+            ))
+          : null}
       </div>
     </MotionConfig>
   )
