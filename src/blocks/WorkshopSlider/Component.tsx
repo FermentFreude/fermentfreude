@@ -310,9 +310,9 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     <div id={id ?? undefined} className="bg-white">
       {/* ── Section title — introduces the workshops before the gallery pins */}
       {resolvedSectionHeading ? (
-        <div className="container mx-auto container-padding pt-20 md:pt-24 lg:pt-28">
+        <div className="container mx-auto container-padding pt-16 md:pt-20 lg:pt-24">
           <FadeIn>
-            <h2 className="whitespace-nowrap text-center font-display text-[clamp(1.5rem,7.2vw,5.5rem)] font-bold leading-[1] tracking-[-0.035em] text-ff-near-black">
+            <h2 className="whitespace-nowrap text-center font-display text-[clamp(1.5rem,5.6vw,3.5rem)] font-bold leading-[1] tracking-[-0.035em] text-ff-near-black">
               {resolvedSectionHeading}
             </h2>
           </FadeIn>
