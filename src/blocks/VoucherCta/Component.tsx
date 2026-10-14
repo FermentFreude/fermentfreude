@@ -90,6 +90,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
   /** Gift slide on: the pin lasts one more screen so the card can slide up over the open gallery */
   const giftOnRef = useRef(giftOn)
   giftOnRef.current = giftOn
+  const giftCardRef = useRef<HTMLDivElement>(null)
 
   /* ── Scroll cue (capsule at the right edge of the gallery) ──
    * Shown while the gallery is on screen and not fully open. The gesture
@@ -168,28 +169,43 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         ease: 'expoScale(1, 5)',
       })
 
-      const withGift = giftOnRef.current
+      /* With the gift slide the pinned scene has three parts (screens of scroll):
+       *   1    the gallery opens
+       *   1.4  the gift card rises over it — slower than the scroll, easing into place
+       *   0.4  it rests a moment before the page scrolls on (soft landing, no hard stop) */
+      const giftCard = giftOnRef.current ? giftCardRef.current : null
+      const OPEN = 1
+      const RISE = 1.4
+      const REST = 0.4
+      const screens = giftCard ? OPEN + RISE + REST : OPEN
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: galleryEl,
           start: 'center center',
-          // With the gift slide: first screen opens the gallery, second screen
-          // holds it still while the card slides up over it
-          end: withGift ? '+=200%' : '+=100%',
+          end: `+=${screens * 100}%`,
           // Number = seconds the animation takes to catch up with the scroll.
           // `true` followed every wheel step exactly, which felt jerky.
-          scrub: 0.6,
+          scrub: 0.8,
           pin: galleryWrap,
           // Starts pinning a moment early so a fast scroll doesn't overshoot and snap back
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          // The scroll cue only follows the opening part
           onUpdate: (self) =>
-            onGalleryProgressRef.current(withGift ? Math.min(1, self.progress * 2) : self.progress),
+            onGalleryProgressRef.current(Math.min(1, (self.progress * screens) / OPEN)),
         },
       })
       tl.add(flip)
-      // Hold the open gallery for the second half (gift slide arrives)
-      if (withGift) tl.to({}, { duration: flip.duration() })
+      if (giftCard) {
+        const unit = flip.duration() / OPEN
+        // y: 0 replaces the markup's translateY(100%) (no flash before JS) instead of adding to it
+        tl.fromTo(
+          giftCard,
+          { y: 0, yPercent: 100 },
+          { y: 0, yPercent: 0, ease: 'power2.out', duration: RISE * unit },
+        )
+        tl.to({}, { duration: REST * unit })
+      }
 
       return () => gsap.set(items, { clearProps: 'all' })
     })
@@ -273,6 +289,17 @@ export const VoucherCtaBlock: React.FC<Props> = ({
     <section ref={sectionRef} id={id ?? undefined} className="w-full">
       {/* ── Bento Gallery (pinned on scroll) ── */}
       <div ref={galleryWrapRef} className="bento-gallery-wrap">
+        {/* Gift slide — part of the pinned scene: starts below the screen and is
+            scrolled up over the open gallery by the timeline above */}
+        {giftOn && giftSlide ? (
+          <div
+            ref={giftCardRef}
+            className="absolute inset-0 z-20 overflow-clip rounded-t-[2rem] shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:rounded-t-[2.5rem]"
+            style={{ transform: 'translateY(100%)' }}
+          >
+            <GiftSlide data={giftSlide} />
+          </div>
+        ) : null}
         {/* Scroll cue — right edge, vertically centred */}
         {images.length > 0 ? (
           <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2 md:right-6">
@@ -305,13 +332,7 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         </div>
       </div>
 
-      {giftOn && giftSlide ? (
-        /* ── Gift slide — pulled up one screen so it slides over the open,
-         *    still-pinned gallery (the pin lasts one extra screen) ── */
-        <div className="relative z-10 -mt-[100vh] overflow-clip rounded-t-[2rem] shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:rounded-t-[2.5rem]">
-          <GiftSlide data={giftSlide} />
-        </div>
-      ) : (
+      {giftOn && giftSlide ? null : (
         <>
           {/* ── Text + Button below gallery ── */}
           <div

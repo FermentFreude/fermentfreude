@@ -33,6 +33,7 @@ export type GiftSlideData = {
   label?: string | null
   text?: string | null
   priceText?: string | null
+  cardAlt?: string | null
   buttonLabel?: string | null
   buttonLink?: string | null
   points?:
@@ -40,14 +41,15 @@ export type GiftSlideData = {
     | null
 }
 
-const DEFAULT_BIG_WORD = 'GIFT AN\nEXPERIENCE'
+const DEFAULT_BIG_WORD = 'VOUCHER'
 const DEFAULT_LINK = '/workshops/voucher'
-const INK = '#4A4B39'
+const DEFAULT_CARD_ALT = 'Gift voucher for a fermentation workshop at FermentFreude in Graz'
+const INK = '#1A1A1A' // brand near-black
 const PAPER = '#F5E7D6'
 const EASE = [0.16, 1, 0.3, 1] as const
 
-/* Where the layer artboard sits in the scene: Kittl layout on desktop, full width around the headline on phone/tablet */
-const LAYER_BOX = 'left-0 top-[10%] w-full lg:left-[17%] lg:top-[3%] lg:w-[82%]'
+/* Where the layer artboard sits in the scene: Kittl layout on desktop; on phone/tablet it fills the headline group */
+const LAYER_BOX = 'inset-x-0 top-0 w-full lg:left-[17%] lg:right-auto lg:top-[3%] lg:w-[82%]'
 
 /** 0 while the card is below the screen → 1 once its top reaches the top */
 function useArrival(ref: React.RefObject<HTMLElement | null>): MotionValue<number> {
@@ -112,7 +114,7 @@ function JarIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 function PointIcon({ icon }: { icon?: string | null }) {
-  const cls = 'size-5'
+  const cls = 'size-4'
   if (icon === 'jar') return <JarIcon className={cls} />
   if (icon === 'heart') return <Heart className={cls} strokeWidth={1.25} />
   if (icon === 'gift') return <Gift className={cls} strokeWidth={1.25} />
@@ -144,6 +146,28 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
   const textLines = (data.text ?? '').split('\n').filter((l) => l.trim())
   const href = data.buttonLink?.trim() || DEFAULT_LINK
   const points = (data.points ?? []).slice(0, 4)
+  const cardAlt = data.cardAlt?.trim() || DEFAULT_CARD_ALT
+
+  // Product data for search engines (Google can show name + price in results)
+  const price = data.priceText?.replace(',', '.').match(/\d+(\.\d+)?/)?.[0]
+  const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? ''
+  const jsonLd = price
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: cardAlt,
+        description: textLines.join(' '),
+        image: `${siteUrl}${VOUCHER_LAYERS.card.src}`,
+        brand: { '@type': 'Brand', name: 'FermentFreude' },
+        offers: {
+          '@type': 'Offer',
+          price,
+          priceCurrency: 'EUR',
+          availability: 'https://schema.org/InStock',
+          url: `${siteUrl}${href}`,
+        },
+      }
+    : null
 
   const fontSize = useFitSize(wordBoxRef, measureRef, lines.length)
   const active = useInView(ref, { once: true, amount: 0.3 })
@@ -162,21 +186,20 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
     py.set(0)
   }
 
-  // As the card slides in, the layers lift into place (ingredients further, card a touch less)
+  // As the card slides in, the layers lift into place (ingredients further, card a
+  // touch less). Movement only — the layers stay fully solid the whole time.
   const arrival = useArrival(ref)
-  const lift = useSpring(useTransform(arrival, [0.15, 0.95], [1, 0], { clamp: true }), {
-    stiffness: 90,
-    damping: 24,
+  const lift = useSpring(useTransform(arrival, [0.1, 0.95], [1, 0], { clamp: true }), {
+    stiffness: 70,
+    damping: 22,
   })
-  const ingrOpacity = useTransform(lift, [0.6, 0], [0, 1])
-  const cardOpacity = useTransform(lift, [0.75, 0.15], [0, 1])
   const wordX = useTransform(() => px.get() * -14)
   const wordY = useTransform(() => py.get() * -10)
   const ingrX = useTransform(() => px.get() * 50)
-  const ingrY = useTransform(() => py.get() * 36 + lift.get() * 300)
-  const cardX = useTransform(() => px.get() * 22 + lift.get() * 120)
-  const cardY = useTransform(() => py.get() * 16 + lift.get() * 140)
-  const cardRotate = useTransform(() => px.get() * 3 + lift.get() * 8)
+  const ingrY = useTransform(() => py.get() * 36 + lift.get() * 180)
+  const cardX = useTransform(() => px.get() * 22 + lift.get() * 80)
+  const cardY = useTransform(() => py.get() * 16 + lift.get() * 90)
+  const cardRotate = useTransform(() => px.get() * 3 + lift.get() * 6)
 
   return (
     <MotionConfig reducedMotion="user">
@@ -184,117 +207,123 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         ref={ref}
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}
-        className="relative flex min-h-svh flex-col overflow-clip"
+        className="relative flex h-full flex-col overflow-clip"
         style={{ backgroundColor: PAPER, color: INK }}
       >
-        {/* ── Scene: headline + layers ── */}
-        <div className="relative flex flex-1 flex-col">
-          {/* Headline box — centred, ~2/3 of the width on desktop */}
-          <div
-            ref={wordBoxRef}
-            className="absolute inset-x-[4%] top-[20%] h-[30%] lg:inset-x-[17%] lg:top-[15%] lg:h-[52%]"
-          >
-            {/* Hidden copy at 100px to measure the widest line */}
-            <div
-              ref={measureRef}
+        {/* ── Scene grid: the headline and the text each own their area, so they
+         *    can never overlap. Desktop: text column left · headline centred ·
+         *    equal empty column right. Phone/tablet: headline above, text below. ── */}
+        <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-6 pb-6 pt-20 lg:grid-cols-[minmax(12rem,15%)_1fr_minmax(12rem,15%)] lg:grid-rows-1 lg:gap-8 lg:pb-10 lg:pt-24">
+          {/* Headline + layers as one group.
+           *  Phone/tablet: the group has the artboard's proportions and sits centred
+           *  above the text — layers fill it, the headline sits in its middle.
+           *  Desktop: the group is not positioned, so the layers take the Kittl
+           *  positions across the whole slide and the headline fills the centre column. */}
+          <div className="relative aspect-[1004/673] w-full self-center lg:static lg:col-start-2 lg:row-start-1 lg:aspect-auto lg:self-stretch">
+            {/* Layers — in front of the headline */}
+            <motion.div
               aria-hidden
-              className="invisible absolute left-0 top-0 w-max whitespace-pre font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
-              style={{ fontSize: 100 }}
+              className={`pointer-events-none absolute z-10 ${LAYER_BOX}`}
+              style={{ x: ingrX, y: ingrY }}
             >
-              {lines.join('\n')}
+              <Image
+                src={VOUCHER_LAYERS.ingredients.src}
+                width={VOUCHER_LAYERS.ingredients.width}
+                height={VOUCHER_LAYERS.ingredients.height}
+                alt=""
+                sizes="(min-width: 1024px) 82vw, 100vw"
+                className="h-auto w-full drop-shadow-[0_18px_24px_rgba(60,40,20,0.18)]"
+              />
+            </motion.div>
+            <motion.div
+              className={`pointer-events-none absolute z-10 ${LAYER_BOX}`}
+              style={{ x: cardX, y: cardY, rotate: cardRotate }}
+            >
+              <Image
+                src={VOUCHER_LAYERS.card.src}
+                width={VOUCHER_LAYERS.card.width}
+                height={VOUCHER_LAYERS.card.height}
+                alt={cardAlt}
+                sizes="(min-width: 1024px) 82vw, 100vw"
+                className="h-auto w-full drop-shadow-[0_22px_30px_rgba(40,30,15,0.25)]"
+              />
+            </motion.div>
+            {/* Headline area — the word is sized to fit it */}
+            <div
+              ref={wordBoxRef}
+              className="absolute inset-x-0 inset-y-[22%] lg:relative lg:inset-auto lg:h-full"
+            >
+              {/* Hidden copy at 100px to measure the widest line */}
+              <div
+                ref={measureRef}
+                aria-hidden
+                className="invisible absolute left-0 top-0 w-max whitespace-pre font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
+                style={{ fontSize: 100 }}
+              >
+                {lines.join('\n')}
+              </div>
+              <motion.h2
+                className="absolute inset-0 flex flex-col items-center justify-center text-center font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
+                style={{
+                  fontSize: fontSize ?? undefined,
+                  x: wordX,
+                  y: wordY,
+                  opacity: fontSize ? 1 : 0,
+                }}
+              >
+                {lines.map((line, i) => (
+                  <span key={i} className="block overflow-hidden pb-[0.04em]">
+                    <motion.span
+                      className="block"
+                      custom={i}
+                      variants={lineRise}
+                      initial="hidden"
+                      animate={active ? 'show' : 'hidden'}
+                    >
+                      {line}
+                    </motion.span>
+                  </span>
+                ))}
+              </motion.h2>
             </div>
-            <motion.h2
-              className="flex h-full flex-col items-center justify-center text-center font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
-              style={{
-                fontSize: fontSize ?? undefined,
-                x: wordX,
-                y: wordY,
-                opacity: fontSize ? 1 : 0,
-              }}
-            >
-              {lines.map((line, i) => (
-                <span key={i} className="block overflow-hidden pb-[0.04em]">
-                  <motion.span
-                    className="block"
-                    custom={i}
-                    variants={lineRise}
-                    initial="hidden"
-                    animate={active ? 'show' : 'hidden'}
-                  >
-                    {line}
-                  </motion.span>
-                </span>
-              ))}
-            </motion.h2>
           </div>
 
-          {/* Ingredients layer */}
-          <motion.div
-            aria-hidden
-            className={`pointer-events-none absolute ${LAYER_BOX}`}
-            style={{ x: ingrX, y: ingrY, opacity: ingrOpacity }}
-          >
-            <Image
-              src={VOUCHER_LAYERS.ingredients.src}
-              width={VOUCHER_LAYERS.ingredients.width}
-              height={VOUCHER_LAYERS.ingredients.height}
-              alt=""
-              sizes="(min-width: 1024px) 82vw, 100vw"
-              className="h-auto w-full drop-shadow-[0_18px_24px_rgba(60,40,20,0.18)]"
-            />
-          </motion.div>
-
-          {/* Voucher card layer */}
-          <motion.div
-            className={`pointer-events-none absolute ${LAYER_BOX}`}
-            style={{ x: cardX, y: cardY, rotate: cardRotate, opacity: cardOpacity }}
-          >
-            <Image
-              src={VOUCHER_LAYERS.card.src}
-              width={VOUCHER_LAYERS.card.width}
-              height={VOUCHER_LAYERS.card.height}
-              alt={data.label ? `Gutschein — ${data.label}` : 'Gutschein'}
-              sizes="(min-width: 1024px) 82vw, 100vw"
-              className="h-auto w-full drop-shadow-[0_22px_30px_rgba(40,30,15,0.25)]"
-            />
-          </motion.div>
-
-          {/* ── Info, bottom left ── */}
-          <div className="container mx-auto container-padding relative flex flex-1 flex-col justify-end pb-8 pt-[52vh] lg:pb-10 lg:pt-0">
-            <div className="relative z-10 max-w-xs">
-              {data.label ? (
-                <motion.p
-                  custom={0}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate={active ? 'show' : 'hidden'}
-                  className="mb-3 font-display text-[11px] font-bold uppercase tracking-[0.08em]"
-                >
-                  {data.label}
-                </motion.p>
-              ) : null}
-              {textLines.length ? (
-                <motion.p
-                  custom={1}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate={active ? 'show' : 'hidden'}
-                  className="mb-0 text-base leading-snug opacity-80"
-                >
-                  {textLines.map((l, i) => (
-                    <span key={i} className="block">
-                      {l}
-                    </span>
-                  ))}
-                </motion.p>
-              ) : null}
+          {/* Text — bottom left; above the layers so it always stays readable */}
+          <div className="relative z-20 self-end lg:col-start-1 lg:row-start-1">
+            {data.label ? (
+              <motion.p
+                custom={0}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mb-3 font-display text-[11px] font-bold uppercase tracking-[0.08em]"
+              >
+                {data.label}
+              </motion.p>
+            ) : null}
+            {textLines.length ? (
+              <motion.p
+                custom={1}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mb-0 text-sm leading-snug opacity-80 lg:text-base"
+              >
+                {textLines.map((l, i) => (
+                  <span key={i} className="block">
+                    {l}
+                  </span>
+                ))}
+              </motion.p>
+            ) : null}
+            <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-4 lg:mt-6 lg:block">
               {data.priceText ? (
                 <motion.p
                   custom={2}
                   variants={fadeUp}
                   initial="hidden"
                   animate={active ? 'show' : 'hidden'}
-                  className="mb-0 mt-6 font-display text-5xl font-bold leading-none tracking-[-0.03em] md:text-6xl"
+                  className="mb-0 font-display text-5xl font-bold leading-none tracking-[-0.03em] lg:text-6xl"
                 >
                   {data.priceText}
                 </motion.p>
@@ -305,7 +334,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                   variants={fadeUp}
                   initial="hidden"
                   animate={active ? 'show' : 'hidden'}
-                  className="mt-6"
+                  className="lg:mt-6"
                 >
                   <Link
                     href={href}
@@ -320,27 +349,51 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
           </div>
         </div>
 
-        {/* ── Points along the bottom ── */}
+        {/* ── Points along the bottom — editorial shop bar: even columns divided
+         *    by hairlines (the ul's colour shows through 1px gaps), outlined icon,
+         *    bold title, muted line ── */}
         {points.length ? (
-          <div className="relative z-10 border-t" style={{ borderColor: `${INK}26` }}>
-            <ul className="container mx-auto container-padding grid grid-cols-2 gap-x-6 gap-y-5 py-6 md:grid-cols-4 md:py-7">
-              {points.map((point, i) => (
-                <li key={point.id ?? i} className="flex items-start gap-3">
-                  <span className="mt-0.5 shrink-0 opacity-80">
-                    <PointIcon icon={point.icon} />
-                  </span>
-                  <span>
-                    <span className="block font-display text-[11px] font-bold uppercase tracking-[0.06em]">
-                      {point.title}
+          <div className="relative z-20 shrink-0 border-t" style={{ borderColor: `${INK}1F` }}>
+            <div className="container mx-auto container-padding">
+              <ul
+                className="grid grid-cols-2 gap-px md:grid-cols-4"
+                style={{ backgroundColor: `${INK}1F` }}
+              >
+                {points.map((point, i) => (
+                  <li
+                    key={point.id ?? i}
+                    className="flex items-center gap-3 px-3 py-3.5 first:pl-0 md:px-6 md:py-5 md:first:pl-0 [&:nth-child(3)]:pl-0 md:[&:nth-child(3)]:pl-6"
+                    style={{ backgroundColor: PAPER }}
+                  >
+                    <span
+                      className="flex size-9 shrink-0 items-center justify-center rounded-full border"
+                      style={{ borderColor: `${INK}33` }}
+                    >
+                      <PointIcon icon={point.icon} />
                     </span>
-                    {point.text ? (
-                      <span className="mt-0.5 block text-xs opacity-75">{point.text}</span>
-                    ) : null}
-                  </span>
-                </li>
-              ))}
-            </ul>
+                    {/* Short screens (small phones): titles only, so everything fits */}
+                    <span className="min-w-0">
+                      <span className="block font-display text-[10px] font-bold uppercase leading-tight tracking-[0.06em] md:text-[11px]">
+                        {point.title}
+                      </span>
+                      {point.text ? (
+                        <span className="mt-0.5 block text-[11px] leading-snug opacity-60 md:text-xs [@media(max-height:700px)]:hidden">
+                          {point.text}
+                        </span>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
+        ) : null}
+
+        {jsonLd ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
         ) : null}
       </section>
     </MotionConfig>

@@ -4718,6 +4718,10 @@ export interface VoucherCtaBlock {
      */
     buttonLink?: string | null;
     /**
+     * Describes the voucher picture and names the product for search engines, e.g. "Geschenkgutschein für einen Fermentations-Workshop bei FermentFreude in Graz".
+     */
+    cardAlt?: string | null;
+    /**
      * Up to 4 short points with a small icon, along the bottom of the slide.
      */
     points?:
@@ -8254,6 +8258,7 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
         priceText?: T;
         buttonLabel?: T;
         buttonLink?: T;
+        cardAlt?: T;
         points?:
           | T
           | {

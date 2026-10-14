@@ -6,14 +6,16 @@
  *
  * Input  (originals, NOT committed):  public/voucher/ingredients.png
  *                                      public/voucher/card.png
- * Output (committed, used by the site): public/voucher/ingredients.webp
- *                                       public/voucher/card.webp
+ * Output (committed, used by the site): public/voucher/ingredients.<hash>.webp
+ *                                       public/voucher/card.<hash>.webp
  *                                       src/blocks/VoucherCta/layers.ts
  *
  * Both layers must be exported from the same Kittl artboard at the same size
  * (everything else transparent) — then they line up when stacked. Never
- * upscaled; capped at MAX_WIDTH.
+ * upscaled; capped at MAX_WIDTH. The file name carries a content hash, so a
+ * new export always gets a new URL (no stale image from any cache).
  */
+import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import sharp from 'sharp'
@@ -24,20 +26,26 @@ const MAX_WIDTH = 2400
 const LAYERS = ['ingredients', 'card'] as const
 
 async function main() {
-  const sizes: Record<string, { width: number; height: number }> = {}
+  const sizes: Record<string, { width: number; height: number; file: string }> = {}
 
   for (const name of LAYERS) {
     const src = path.join(DIR, `${name}.png`)
     if (!fs.existsSync(src)) throw new Error(`Missing ${src}`)
     const meta = await sharp(src).metadata()
     const width = Math.min(MAX_WIDTH, meta.width!)
-    const out = path.join(DIR, `${name}.webp`)
-    const info = await sharp(src)
+    const { data, info } = await sharp(src)
       .resize({ width, withoutEnlargement: true })
       .webp({ quality: 88, alphaQuality: 95, effort: 6 })
-      .toFile(out)
-    sizes[name] = { width: info.width, height: info.height }
-    console.log(`✅ ${name}: ${info.width}×${info.height} — ${Math.round(info.size / 1024)} KB`)
+      .toBuffer({ resolveWithObject: true })
+    const hash = crypto.createHash('sha1').update(data).digest('hex').slice(0, 8)
+    const file = `${name}.${hash}.webp`
+    // Remove earlier versions of this layer, then write the new one
+    for (const old of fs.readdirSync(DIR)) {
+      if (old.startsWith(`${name}.`) && old.endsWith('.webp')) fs.unlinkSync(path.join(DIR, old))
+    }
+    fs.writeFileSync(path.join(DIR, file), data)
+    sizes[name] = { width: info.width, height: info.height, file }
+    console.log(`✅ ${file}: ${info.width}×${info.height} — ${Math.round(info.size / 1024)} KB`)
   }
 
   const [a, b] = LAYERS.map((n) => sizes[n]!)
@@ -55,7 +63,7 @@ export type VoucherLayer = { src: string; width: number; height: number }
 export const VOUCHER_LAYERS: { ingredients: VoucherLayer; card: VoucherLayer } = {
 ${LAYERS.map(
   (n) =>
-    `  ${n}: { src: '/voucher/${n}.webp', width: ${sizes[n]!.width}, height: ${sizes[n]!.height} },`,
+    `  ${n}: { src: '/voucher/${sizes[n]!.file}', width: ${sizes[n]!.width}, height: ${sizes[n]!.height} },`,
 ).join('\n')}
 }
 `,

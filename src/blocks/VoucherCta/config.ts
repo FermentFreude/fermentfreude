@@ -179,7 +179,7 @@ export const VoucherCta: Block = {
           label: 'Big headline',
           admin: {
             description:
-              'Huge headline behind the pictures. One line per row, e.g. "VERSCHENKE" / "EIN ERLEBNIS".',
+              'Huge word behind the pictures — keep it to one short, punchy word, e.g. "GUTSCHEIN". (A new row also works, but one word reads strongest.)',
             condition: (_, siblingData) => Boolean(siblingData?.enabled),
           },
         },
@@ -232,6 +232,17 @@ export const VoucherCta: Block = {
               admin: { description: 'e.g. "/voucher".', width: '50%' },
             },
           ],
+        },
+        {
+          name: 'cardAlt',
+          type: 'text',
+          localized: true,
+          label: 'Voucher picture description (for Google & screen readers)',
+          admin: {
+            description:
+              'Describes the voucher picture and names the product for search engines, e.g. "Geschenkgutschein für einen Fermentations-Workshop bei FermentFreude in Graz".',
+            condition: (_, siblingData) => Boolean(siblingData?.enabled),
+          },
         },
         {
           name: 'points',
