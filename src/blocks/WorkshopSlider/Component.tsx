@@ -18,6 +18,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 const DEFAULT_EYEBROW = 'Workshop Experience'
 const DEFAULT_SECTION_HEADING = 'Our next workshops'
 const DEFAULT_DETAILS_CTA_LABEL = 'Explore'
+const DEFAULT_NEXT_DATE_LABEL = 'Next date'
+const DEFAULT_NO_DATE_LABEL = 'Available soon'
 
 const DEFAULT_WORKSHOPS = [
   {
@@ -161,13 +163,15 @@ type Props = WorkshopSliderBlockType & {
   id?: string
   upcomingLabel?: string
   /** Formatted date per workshop href. The page passes { date, soldOut } records, the global wrapper plain strings. */
-  upcomingDatesByHref?: Record<string, string | { date: string | null } | null>
+  upcomingDatesByHref?: Record<string, string | { dateFirst: string | null } | null>
 }
 
 /** Next bookable date as text, or undefined when there is none (sold out / no appointment) */
-function dateText(value: string | { date: string | null } | null | undefined): string | undefined {
+function dateText(
+  value: string | { dateFirst: string | null } | null | undefined,
+): string | undefined {
   if (!value) return undefined
-  return (typeof value === 'object' ? value.date : value) || undefined
+  return (typeof value === 'object' ? value.dateFirst : value) || undefined
 }
 
 function resolveMedia(image: MediaType | string | number | null | undefined): MediaType | null {
@@ -197,6 +201,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   workshops,
   id,
   upcomingLabel,
+  nextDateLabel,
+  noDateLabel,
   upcomingDatesByHref,
 }) => {
   /* ── refs ──────────────────────────────────────────────────── */
@@ -553,17 +559,15 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                         boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
                       }}
                     >
-                      {workshop.nextDate ? (
-                        // Gold badge with white text
-                        <div className="mb-5 rounded-xl bg-ff-gold px-4 py-3">
-                          <p className="mb-1 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-white/85">
-                            {upcomingLabel || 'Upcoming'}
-                          </p>
-                          <p className="mb-0 font-display text-base font-bold leading-tight tracking-[-0.01em] text-white md:text-lg">
-                            {workshop.nextDate}
-                          </p>
-                        </div>
-                      ) : null}
+                      {/* Gold label (white text) + the date below, bold black */}
+                      <div className="mb-5 border-b border-black/10 pb-4">
+                        <span className="mb-2 inline-block rounded-full bg-ff-gold px-3 py-1 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-white">
+                          {nextDateLabel || upcomingLabel || DEFAULT_NEXT_DATE_LABEL}
+                        </span>
+                        <p className="mb-0 font-display text-sm font-bold text-black/85 md:text-base">
+                          {workshop.nextDate || noDateLabel || DEFAULT_NO_DATE_LABEL}
+                        </p>
+                      </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         {workshop.features.map((feature, fIdx) => (

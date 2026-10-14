@@ -48,6 +48,32 @@ export const WorkshopSlider: Block = {
       },
     },
     {
+      type: 'row',
+      fields: [
+        {
+          name: 'nextDateLabel',
+          type: 'text',
+          localized: true,
+          label: 'Date badge — label',
+          admin: {
+            description: 'Small label in the gold box on each workshop, e.g. "Nächster Termin".',
+            width: '50%',
+          },
+        },
+        {
+          name: 'noDateLabel',
+          type: 'text',
+          localized: true,
+          label: 'Date badge — no date yet',
+          admin: {
+            description:
+              'Shown instead of a date when a workshop has no bookable date, e.g. "Bald verfügbar".',
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       localized: true,

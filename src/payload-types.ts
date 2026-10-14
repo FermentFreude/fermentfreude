@@ -4800,13 +4800,21 @@ export interface WorkshopSliderBlock {
    */
   useGlobalData?: boolean | null;
   /**
-   * Bold ivory line in the banner above the title, e.g. "Tempeh, Kimchi & Kombucha selber machen. Lerne Fermentieren in Graz." Optional.
+   * Big ivory title of the dark banner above the workshops, e.g. "Tempeh, Kimchi & Kombucha selber machen. Lerne Fermentieren in Graz." Use words people search for.
    */
   sectionLead?: string | null;
   /**
-   * Title in the dark banner above the workshops, e.g. "Unsere nächsten Workshops". Leave empty to hide the whole banner.
+   * Smaller gold line under the big title, e.g. "Unsere nächsten Workshops". It links to the "All Workshops Link" below (default /workshops). Leave both banner fields empty to hide the banner.
    */
   sectionHeading?: string | null;
+  /**
+   * Small label in the gold box on each workshop, e.g. "Nächster Termin".
+   */
+  nextDateLabel?: string | null;
+  /**
+   * Shown instead of a date when a workshop has no bookable date, e.g. "Bald verfügbar".
+   */
+  noDateLabel?: string | null;
   /**
    * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
    */
@@ -8243,6 +8251,8 @@ export interface WorkshopSliderBlockSelect<T extends boolean = true> {
   useGlobalData?: T;
   sectionLead?: T;
   sectionHeading?: T;
+  nextDateLabel?: T;
+  noDateLabel?: T;
   eyebrow?: T;
   workshops?:
     | T

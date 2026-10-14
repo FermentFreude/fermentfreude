@@ -30,8 +30,8 @@ export async function WorkshopSliderGlobalWrapper({
   // bogus "Next date" badge for them.
   const upcomingDatesByHref: Record<string, string> = Object.fromEntries(
     Object.entries(upcomingDatesByHrefRaw)
-      .filter(([, info]) => info.date)
-      .map(([href, info]) => [href, info.date as string]),
+      .filter(([, info]) => info.dateFirst)
+      .map(([href, info]) => [href, info.dateFirst as string]),
   )
 
   const upcomingLabel = locale === 'en' ? 'Next date' : 'Nächster Termin'
@@ -46,6 +46,8 @@ export async function WorkshopSliderGlobalWrapper({
       blockType="workshopSlider"
       // Section title is always per page (block), never from the global
       sectionLead={(fb.sectionLead as string | null | undefined) ?? undefined}
+      nextDateLabel={(fb.nextDateLabel as string | null | undefined) ?? undefined}
+      noDateLabel={(fb.noDateLabel as string | null | undefined) ?? undefined}
       sectionHeading={(fb.sectionHeading as string | null | undefined) ?? undefined}
       eyebrow={
         hasGlobalContent ? (data.eyebrow ?? undefined) : ((fb.eyebrow as string) ?? undefined)
