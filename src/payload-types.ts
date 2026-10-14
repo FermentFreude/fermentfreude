@@ -4816,7 +4816,7 @@ export interface WorkshopSliderBlock {
    */
   noDateLabel?: string | null;
   /**
-   * Text in the small dark pill at the bottom of the gallery on desktop, e.g. "Nach rechts scrollen".
+   * Phones and tablets: text in the small dark pill under the workshops, e.g. "Wischen für mehr Workshops". It disappears after the first swipe.
    */
   scrollHintLabel?: string | null;
   /**

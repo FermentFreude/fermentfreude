@@ -8,7 +8,6 @@ import type {
 } from '@/payload-types'
 import { MotionConfig, motion, type Variants } from 'motion/react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -216,8 +215,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   const scrollRef = useRef({ current: 0, target: 0, limit: 0 })
   const rafRef = useRef<number>(0)
   const isActiveRef = useRef(false)
-  /** Phone/tablet: the swipe hint hides after the first swipe */
-  const [hasSwiped, setHasSwiped] = useState(false)
   const [activeWorkshopIndex, setActiveWorkshopIndex] = useState(0)
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
@@ -400,7 +397,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       })
 
       setActiveWorkshopIndex(closest)
-      if (track.scrollLeft > 24) setHasSwiped(true)
     }
 
     syncActiveIndex()
@@ -467,7 +463,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
         {/* ── Viewport: sticky on desktop, native horizontal scroll on mobile */}
         <section
           ref={trackRef}
-          className="relative w-full bg-white overflow-x-auto overflow-y-hidden lg:sticky lg:top-0 lg:overflow-hidden h-auto lg:h-svh py-10 lg:py-0"
+          className="relative w-full bg-white overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:sticky lg:top-0 lg:overflow-hidden h-auto lg:h-svh py-10 lg:py-0"
           style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
         >
           {/* ── Scroll hint (desktop only — mobile gets native swipe affordance) */}
@@ -641,14 +637,13 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
           </div>
         </section>
 
-        {/* Mobile carousel controls — hidden on desktop sticky scene */}
+        {/* Mobile/tablet controls: swipe hint + dots only — hidden on the desktop sticky scene */}
         {workshopCount > 1 ? (
           <div className="lg:hidden flex flex-col items-center gap-4 px-6 pt-2 pb-6">
-            {/* Swipe hint — a finger dot slides left, like the gesture itself.
-                Hidden after the first swipe. */}
+            {/* Swipe hint — a finger dot slides left, like the gesture itself. Always visible. */}
             <div
               aria-hidden
-              className={`flex items-center gap-3 rounded-full bg-ff-near-black px-4 py-2 text-white transition-opacity duration-500 ${hasSwiped ? 'opacity-0' : 'opacity-100'}`}
+              className="flex items-center gap-3 rounded-full bg-ff-near-black px-4 py-2 text-white"
             >
               <span className="relative h-4 w-9">
                 <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-white/25" />
@@ -673,16 +668,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
               role="group"
               aria-label="Workshop navigation"
             >
-              <button
-                type="button"
-                onClick={() => goToWorkshop(activeWorkshopIndex - 1)}
-                disabled={activeWorkshopIndex === 0}
-                className="flex items-center justify-center text-[#555954] transition-opacity disabled:opacity-25"
-                aria-label="Previous workshop"
-              >
-                <ChevronLeft className="size-5" strokeWidth={1.75} />
-              </button>
-
               <div className="flex items-center gap-2.5">
                 {resolvedWorkshops.map((workshop, index) => {
                   const isActive = index === activeWorkshopIndex
@@ -702,16 +687,6 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                   )
                 })}
               </div>
-
-              <button
-                type="button"
-                onClick={() => goToWorkshop(activeWorkshopIndex + 1)}
-                disabled={activeWorkshopIndex >= workshopCount - 1}
-                className="flex items-center justify-center text-[#555954] transition-opacity disabled:opacity-25"
-                aria-label="Next workshop"
-              >
-                <ChevronRight className="size-5" strokeWidth={1.75} />
-              </button>
             </div>
           </div>
         ) : null}
