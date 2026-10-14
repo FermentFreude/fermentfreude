@@ -367,6 +367,8 @@ function SlideCard({
   )
 }
 
+const isTouch = () => !window.matchMedia('(hover: hover) and (pointer: fine)').matches
+
 export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
   visible,
   title,
@@ -423,7 +425,9 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
     itemRefs: cardRefs,
     count: cards.length,
   })
-  useSwipeNudge(trackRef, rowRef, cards.length)
+  // Mouse/trackpad: no free sideways scrolling (desk:overflow-x-hidden) and no
+  // nudge — cards change only with the arrows/dots. Touch: swipe + nudge.
+  useSwipeNudge(trackRef, rowRef, cards.length, isTouch)
 
   if (visible === false) return null
 
@@ -432,7 +436,7 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
       <div id={id ?? undefined} className="relative" style={{ backgroundColor: PAPER }}>
         <div
           ref={trackRef}
-          className="h-[calc(100svh-4.5rem)] snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="h-[calc(100svh-4.5rem)] snap-x snap-mandatory overflow-x-auto overflow-y-hidden desk:overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{ overscrollBehaviorX: 'contain' }}
           aria-label="Fermentation"
           role="region"
