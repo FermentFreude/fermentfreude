@@ -63,14 +63,14 @@ export function SectionHeader({
           {...eyebrowProps}
           // text-eyebrow kept outside cn(): tailwind-merge mistakes it for a colour
           // class and would drop it next to text-ff-gold-accent
-          className={`text-eyebrow ${cn('font-bold uppercase tracking-[0.18em] text-ff-gold-accent', eyebrowProps?.className)}`}
+          className={`text-eyebrow ${cn('font-bold uppercase tracking-[0.08em] text-ff-gold-accent', eyebrowProps?.className)}`}
         >
           {eyebrow}
         </p>
       ) : null}
 
       {heading || aside ? (
-        <div className="mt-4 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="mt-2 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           {heading ? (
             <h2
               id={headingId}

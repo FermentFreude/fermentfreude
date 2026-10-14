@@ -2,6 +2,7 @@
 
 import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
+import { SectionHeader } from '@/components/SectionHeader'
 import type {
   Media as MediaType,
   WorkshopSliderBlock as WorkshopSliderBlockType,
@@ -15,6 +16,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
  * ═══════════════════════════════════════════════════════════════ */
 
 const DEFAULT_EYEBROW = 'Workshop Experience'
+const DEFAULT_SECTION_EYEBROW = 'Workshops'
+const DEFAULT_SECTION_HEADING = 'Fermentation, hands-on'
+const DEFAULT_ALL_WORKSHOPS_LABEL = 'All workshops'
 const DEFAULT_DETAILS_CTA_LABEL = 'Explore'
 
 const DEFAULT_WORKSHOPS = [
@@ -87,8 +91,13 @@ function resolveMedia(image: MediaType | string | number | null | undefined): Me
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
   visible,
+  sectionEyebrow,
+  sectionHeading,
+  sectionIntro,
   eyebrow,
   workshops,
+  allWorkshopsButtonLabel,
+  allWorkshopsLink,
   id,
   upcomingLabel,
   upcomingDatesByHref,
@@ -106,6 +115,11 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
   const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
+  // null/undefined → English default; an empty string in the CMS hides the title area
+  const resolvedSectionHeading = sectionHeading ?? DEFAULT_SECTION_HEADING
+  const resolvedSectionEyebrow = sectionEyebrow ?? DEFAULT_SECTION_EYEBROW
+  const allLabel = allWorkshopsButtonLabel || DEFAULT_ALL_WORKSHOPS_LABEL
+  const allHref = allWorkshopsLink || '/workshops'
   const resolvedWorkshops =
     workshops && workshops.length > 0
       ? workshops.map((w, i) => ({
@@ -303,233 +317,260 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     /* Outer pin div — JS sets height to 100svh + overshoot on lg+.
      * Below lg, height is auto and the section becomes a normal
      * horizontal swipe carousel (no scroll-jacking). */
-    <div ref={outerRef} id={id ?? undefined} className="relative w-full bg-white lg:min-h-svh">
-      {/* ── Viewport: sticky on desktop, native horizontal scroll on mobile */}
-      <section
-        ref={trackRef}
-        className="relative w-full bg-white overflow-x-auto overflow-y-hidden lg:sticky lg:top-0 lg:overflow-hidden h-auto lg:h-svh py-10 lg:py-0"
-        style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
-      >
-        {/* ── Scroll hint (desktop only — mobile gets native swipe affordance) */}
-        <p className="hidden lg:block absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
-          scroll →
-        </p>
-
-        {/* ══════════════════════════════════════════════════════
-         *  RESPONSIVE TRACK
-         *   · lg+: absolutely positioned, transformed by JS (sticky scene)
-         *   · <lg: in-flow flex row, native overflow-x with snap
-         * ══════════════════════════════════════════════════════ */}
-        <div className="lg:absolute lg:inset-0 lg:overflow-hidden select-none snap-x snap-mandatory lg:snap-none">
-          <div
-            ref={containerRef}
-            className="flex items-center h-full will-change-transform"
-            style={{ gap: 'clamp(0.75rem, 2vw, 1.5rem)', paddingLeft: '5vw', paddingRight: '5vw' }}
-          >
-            {resolvedWorkshops.map((workshop, wIdx) => {
-              const imgAIdx = wIdx * 2
-              const imgBIdx = wIdx * 2 + 1
-              const secondImg = workshop.image2 ?? workshop.image
-
-              return (
-                <div
-                  key={wIdx}
-                  ref={(el) => {
-                    workshopGroupRefs.current[wIdx] = el
-                  }}
-                  className="flex shrink-0 items-center snap-start lg:snap-none"
-                  style={{
-                    gap: 'clamp(0.75rem, 2vw, 1.5rem)',
-                    marginRight:
-                      wIdx < resolvedWorkshops.length - 1 ? 'clamp(1rem, 4vw, 4vw)' : undefined,
-                  }}
+    <div id={id ?? undefined} className="bg-white">
+      {/* ── Section title — introduces the workshops before the gallery pins */}
+      {resolvedSectionHeading ? (
+        <div className="container mx-auto container-padding pt-16 md:pt-20 lg:pt-24">
+          <FadeIn>
+            <SectionHeader
+              eyebrow={resolvedSectionEyebrow}
+              heading={resolvedSectionHeading}
+              intro={sectionIntro}
+              aside={
+                <Link
+                  href={allHref}
+                  className="inline-flex w-fit items-center justify-center rounded-full bg-ff-black px-6 py-2.5 font-display text-base font-bold text-white transition-all hover:scale-[1.03] hover:bg-transparent hover:text-ff-black hover:shadow-[inset_0_0_0_2px_var(--ff-black)] active:scale-[0.97]"
                 >
-                  {/* ── LEFT COLUMN — title on top, small image below ── */}
+                  {allLabel}
+                </Link>
+              }
+            />
+          </FadeIn>
+        </div>
+      ) : null}
+
+      <div ref={outerRef} className="relative w-full bg-white lg:min-h-svh">
+        {/* ── Viewport: sticky on desktop, native horizontal scroll on mobile */}
+        <section
+          ref={trackRef}
+          className="relative w-full bg-white overflow-x-auto overflow-y-hidden lg:sticky lg:top-0 lg:overflow-hidden h-auto lg:h-svh py-10 lg:py-0"
+          style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
+        >
+          {/* ── Scroll hint (desktop only — mobile gets native swipe affordance) */}
+          <p className="hidden lg:block absolute bottom-6 md:bottom-8 right-[5vw] z-10 text-black/20 text-[10px] md:text-xs font-display tracking-[0.15em] uppercase pointer-events-none select-none">
+            scroll →
+          </p>
+
+          {/* ══════════════════════════════════════════════════════
+           *  RESPONSIVE TRACK
+           *   · lg+: absolutely positioned, transformed by JS (sticky scene)
+           *   · <lg: in-flow flex row, native overflow-x with snap
+           * ══════════════════════════════════════════════════════ */}
+          <div className="lg:absolute lg:inset-0 lg:overflow-hidden select-none snap-x snap-mandatory lg:snap-none">
+            <div
+              ref={containerRef}
+              className="flex items-center h-full will-change-transform"
+              style={{
+                gap: 'clamp(0.75rem, 2vw, 1.5rem)',
+                paddingLeft: '5vw',
+                paddingRight: '5vw',
+              }}
+            >
+              {resolvedWorkshops.map((workshop, wIdx) => {
+                const imgAIdx = wIdx * 2
+                const imgBIdx = wIdx * 2 + 1
+                const secondImg = workshop.image2 ?? workshop.image
+
+                return (
                   <div
-                    className="shrink-0 flex flex-col self-center w-[80vw] sm:w-[20rem] md:w-88 lg:w-85"
-                    style={{ height: 'clamp(62svh, 74svh, 78vh)' }}
+                    key={wIdx}
+                    ref={(el) => {
+                      workshopGroupRefs.current[wIdx] = el
+                    }}
+                    className="flex shrink-0 items-center snap-start lg:snap-none"
+                    style={{
+                      gap: 'clamp(0.75rem, 2vw, 1.5rem)',
+                      marginRight:
+                        wIdx < resolvedWorkshops.length - 1 ? 'clamp(1rem, 4vw, 4vw)' : undefined,
+                    }}
                   >
-                    <div className="shrink-0 pb-4 md:pb-5 w-full">
-                      <FadeIn>
-                        <p className="text-eyebrow font-bold mb-2 tracking-[0.18em] uppercase text-ff-gold">
-                          {resolvedEyebrow}
-                        </p>
-                        <h2 className="text-section-heading font-display font-bold leading-[1.05] tracking-[-0.025em] text-ff-black mb-3 md:mb-4">
-                          {workshop.title}
-                        </h2>
-                        <p className="text-body-sm text-ff-olive text-[13px] sm:text-sm md:text-[15px] leading-relaxed">
-                          {(() => {
-                            const match = workshop.description.match(/^(.+?[.!?])\s*(.*)$/s)
-                            return match?.[1] ?? workshop.description
-                          })()}
-                        </p>
-                      </FadeIn>
+                    {/* ── LEFT COLUMN — title on top, small image below ── */}
+                    <div
+                      className="shrink-0 flex flex-col self-center w-[80vw] sm:w-[20rem] md:w-88 lg:w-85"
+                      style={{ height: 'clamp(62svh, 74svh, 78vh)' }}
+                    >
+                      <div className="shrink-0 pb-4 md:pb-5 w-full">
+                        <FadeIn>
+                          <p className="text-eyebrow font-bold mb-2 tracking-[0.08em] uppercase text-ff-gold">
+                            {resolvedEyebrow}
+                          </p>
+                          <h2 className="text-section-heading font-display font-bold leading-[1.05] tracking-[-0.025em] text-ff-black mb-3 md:mb-4">
+                            {workshop.title}
+                          </h2>
+                          <p className="text-body-sm text-ff-olive text-[13px] sm:text-sm md:text-[15px] leading-relaxed">
+                            {(() => {
+                              const match = workshop.description.match(/^(.+?[.!?])\s*(.*)$/s)
+                              return match?.[1] ?? workshop.description
+                            })()}
+                          </p>
+                        </FadeIn>
+                      </div>
+
+                      {/* Small image — fills remaining height */}
+                      <div
+                        className="relative overflow-hidden rounded-2xl"
+                        style={{ flex: 1, aspectRatio: '4 / 3', minHeight: 0 }}
+                      >
+                        <div
+                          ref={(el) => {
+                            imgInnerRefs.current[imgBIdx] = el
+                          }}
+                          className="absolute top-0 h-full will-change-transform"
+                          style={{ left: '-12.5%', width: '125%' }}
+                        >
+                          {secondImg ? (
+                            <Media
+                              resource={secondImg}
+                              fill
+                              imgClassName="object-cover"
+                              className="absolute inset-0"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-[#e0e0e0]" />
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Small image — fills remaining height */}
+                    {/* ── BIG IMAGE ───────────────────────────────────── */}
                     <div
-                      className="relative overflow-hidden rounded-2xl"
-                      style={{ flex: 1, aspectRatio: '4 / 3', minHeight: 0 }}
+                      className="relative shrink-0 overflow-hidden self-center hidden sm:block rounded-2xl"
+                      style={{ aspectRatio: '3 / 4', height: 'clamp(52svh, 62svh, 68vh)' }}
                     >
                       <div
                         ref={(el) => {
-                          imgInnerRefs.current[imgBIdx] = el
+                          imgInnerRefs.current[imgAIdx] = el
                         }}
                         className="absolute top-0 h-full will-change-transform"
                         style={{ left: '-12.5%', width: '125%' }}
                       >
-                        {secondImg ? (
+                        {workshop.image ? (
                           <Media
-                            resource={secondImg}
+                            resource={workshop.image}
                             fill
                             imgClassName="object-cover"
                             className="absolute inset-0"
                           />
                         ) : (
-                          <div className="w-full h-full bg-[#e0e0e0]" />
+                          <div className="w-full h-full bg-[#141414]" />
                         )}
                       </div>
                     </div>
-                  </div>
 
-                  {/* ── BIG IMAGE ───────────────────────────────────── */}
-                  <div
-                    className="relative shrink-0 overflow-hidden self-center hidden sm:block rounded-2xl"
-                    style={{ aspectRatio: '3 / 4', height: 'clamp(52svh, 62svh, 68vh)' }}
-                  >
+                    {/* ── DETAILS CARD ────────────────────────────────── */}
                     <div
-                      ref={(el) => {
-                        imgInnerRefs.current[imgAIdx] = el
+                      className="shrink-0 relative flex flex-col justify-between self-center rounded-2xl"
+                      style={{
+                        width: 'clamp(220px, 24vw, 280px)',
+                        padding: 'clamp(1.25rem, 2.2vw, 2rem)',
+                        background: 'rgba(255,255,255,0.5)',
+                        backdropFilter: 'blur(18px)',
+                        WebkitBackdropFilter: 'blur(18px)',
+                        border: '1px solid rgba(255,255,255,0.8)',
+                        boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
                       }}
-                      className="absolute top-0 h-full will-change-transform"
-                      style={{ left: '-12.5%', width: '125%' }}
                     >
-                      {workshop.image ? (
-                        <Media
-                          resource={workshop.image}
-                          fill
-                          imgClassName="object-cover"
-                          className="absolute inset-0"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-[#141414]" />
-                      )}
-                    </div>
-                  </div>
+                      {workshop.nextDate ? (
+                        <div className="mb-4 pb-3 border-b border-black/10">
+                          <p className="text-[10px] font-display font-bold tracking-widest uppercase text-black/45 mb-1">
+                            {upcomingLabel || 'Upcoming'}
+                          </p>
+                          <p className="text-sm md:text-base font-display font-bold text-black/85">
+                            {typeof workshop.nextDate === 'object' && workshop.nextDate !== null
+                              ? (workshop as any).nextDate.date
+                              : String(workshop.nextDate)}
+                          </p>
+                        </div>
+                      ) : null}
 
-                  {/* ── DETAILS CARD ────────────────────────────────── */}
-                  <div
-                    className="shrink-0 relative flex flex-col justify-between self-center rounded-2xl"
-                    style={{
-                      width: 'clamp(220px, 24vw, 280px)',
-                      padding: 'clamp(1.25rem, 2.2vw, 2rem)',
-                      background: 'rgba(255,255,255,0.5)',
-                      backdropFilter: 'blur(18px)',
-                      WebkitBackdropFilter: 'blur(18px)',
-                      border: '1px solid rgba(255,255,255,0.8)',
-                      boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
-                    }}
-                  >
-                    {workshop.nextDate ? (
-                      <div className="mb-4 pb-3 border-b border-black/10">
-                        <p className="text-[10px] font-display font-bold tracking-widest uppercase text-black/45 mb-1">
-                          {upcomingLabel || 'Upcoming'}
-                        </p>
-                        <p className="text-sm md:text-base font-display font-bold text-black/85">
-                          {typeof workshop.nextDate === 'object' && workshop.nextDate !== null
-                            ? (workshop as any).nextDate.date
-                            : String(workshop.nextDate)}
-                        </p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {workshop.features.map((feature, fIdx) => (
+                          <p
+                            key={fIdx}
+                            className="text-black/70 font-display font-bold text-[11px] md:text-xs leading-relaxed flex gap-3"
+                          >
+                            <span className="tabular-nums shrink-0 font-bold">
+                              {String(fIdx + 1).padStart(2, '0')}
+                            </span>
+                            {(feature as { text?: string }).text}
+                          </p>
+                        ))}
                       </div>
-                    ) : null}
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      {workshop.features.map((feature, fIdx) => (
-                        <p
-                          key={fIdx}
-                          className="text-black/70 font-display font-bold text-[11px] md:text-xs leading-relaxed flex gap-3"
+                      {/* ── CTA link — text + circle "+" ─────────────── */}
+                      <div className="mt-6 pt-4 border-t border-black/10">
+                        <Link
+                          href={workshop.ctaLink}
+                          className="flex items-center justify-end gap-3 sm:justify-between group/cta"
+                          aria-label={`Workshop Seite: ${workshop.title}`}
                         >
-                          <span className="tabular-nums shrink-0 font-bold">
-                            {String(fIdx + 1).padStart(2, '0')}
+                          <span className="text-[11px] font-display font-bold tracking-widest uppercase text-black/40 group-hover/cta:text-black transition-colors duration-200">
+                            {workshop.detailsButtonLabel}
                           </span>
-                          {(feature as { text?: string }).text}
-                        </p>
-                      ))}
-                    </div>
-
-                    {/* ── CTA link — text + circle "+" ─────────────── */}
-                    <div className="mt-6 pt-4 border-t border-black/10">
-                      <Link
-                        href={workshop.ctaLink}
-                        className="flex items-center justify-end gap-3 sm:justify-between group/cta"
-                        aria-label={`Workshop Seite: ${workshop.title}`}
-                      >
-                        <span className="text-[11px] font-display font-bold tracking-widest uppercase text-black/40 group-hover/cta:text-black transition-colors duration-200">
-                          {workshop.detailsButtonLabel}
-                        </span>
-                        <span className="size-9 rounded-full border border-black/25 flex items-center justify-center text-base leading-none text-black/35 transition-all duration-200 group-hover/cta:border-black group-hover/cta:text-black group-hover/cta:scale-110">
-                          +
-                        </span>
-                      </Link>
+                          <span className="size-9 rounded-full border border-black/25 flex items-center justify-center text-base leading-none text-black/35 transition-all duration-200 group-hover/cta:border-black group-hover/cta:text-black group-hover/cta:scale-110">
+                            +
+                          </span>
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Mobile carousel controls — hidden on desktop sticky scene */}
-      {workshopCount > 1 ? (
-        <div className="lg:hidden flex justify-center px-6 pt-2 pb-6">
-          <div
-            className="inline-flex items-center gap-4"
-            role="group"
-            aria-label="Workshop navigation"
-          >
-            <button
-              type="button"
-              onClick={() => goToWorkshop(activeWorkshopIndex - 1)}
-              disabled={activeWorkshopIndex === 0}
-              className="flex items-center justify-center text-[#555954] transition-opacity disabled:opacity-25"
-              aria-label="Previous workshop"
-            >
-              <ChevronLeft className="size-5" strokeWidth={1.75} />
-            </button>
-
-            <div className="flex items-center gap-2.5">
-              {resolvedWorkshops.map((workshop, index) => {
-                const isActive = index === activeWorkshopIndex
-                return (
-                  <button
-                    key={workshop.ctaLink ?? index}
-                    type="button"
-                    onClick={() => goToWorkshop(index)}
-                    className={`rounded-full transition-all duration-200 ${
-                      isActive
-                        ? 'size-2.5 bg-[#E6BE68]'
-                        : 'size-1.5 bg-[#555954]/30 hover:bg-[#555954]/45'
-                    }`}
-                    aria-label={`${workshop.title}${isActive ? ' (current)' : ''}`}
-                    aria-current={isActive ? 'true' : undefined}
-                  />
                 )
               })}
             </div>
-
-            <button
-              type="button"
-              onClick={() => goToWorkshop(activeWorkshopIndex + 1)}
-              disabled={activeWorkshopIndex >= workshopCount - 1}
-              className="flex items-center justify-center text-[#555954] transition-opacity disabled:opacity-25"
-              aria-label="Next workshop"
-            >
-              <ChevronRight className="size-5" strokeWidth={1.75} />
-            </button>
           </div>
-        </div>
-      ) : null}
+        </section>
+
+        {/* Mobile carousel controls — hidden on desktop sticky scene */}
+        {workshopCount > 1 ? (
+          <div className="lg:hidden flex justify-center px-6 pt-2 pb-6">
+            <div
+              className="inline-flex items-center gap-4"
+              role="group"
+              aria-label="Workshop navigation"
+            >
+              <button
+                type="button"
+                onClick={() => goToWorkshop(activeWorkshopIndex - 1)}
+                disabled={activeWorkshopIndex === 0}
+                className="flex items-center justify-center text-[#555954] transition-opacity disabled:opacity-25"
+                aria-label="Previous workshop"
+              >
+                <ChevronLeft className="size-5" strokeWidth={1.75} />
+              </button>
+
+              <div className="flex items-center gap-2.5">
+                {resolvedWorkshops.map((workshop, index) => {
+                  const isActive = index === activeWorkshopIndex
+                  return (
+                    <button
+                      key={workshop.ctaLink ?? index}
+                      type="button"
+                      onClick={() => goToWorkshop(index)}
+                      className={`rounded-full transition-all duration-200 ${
+                        isActive
+                          ? 'size-2.5 bg-[#E6BE68]'
+                          : 'size-1.5 bg-[#555954]/30 hover:bg-[#555954]/45'
+                      }`}
+                      aria-label={`${workshop.title}${isActive ? ' (current)' : ''}`}
+                      aria-current={isActive ? 'true' : undefined}
+                    />
+                  )
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => goToWorkshop(activeWorkshopIndex + 1)}
+                disabled={activeWorkshopIndex >= workshopCount - 1}
+                className="flex items-center justify-center text-[#555954] transition-opacity disabled:opacity-25"
+                aria-label="Next workshop"
+              >
+                <ChevronRight className="size-5" strokeWidth={1.75} />
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }
