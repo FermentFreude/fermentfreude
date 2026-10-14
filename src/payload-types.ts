@@ -4800,7 +4800,7 @@ export interface WorkshopSliderBlock {
    */
   useGlobalData?: boolean | null;
   /**
-   * Small gold line in the banner above the title, e.g. "Mit Fermentfreude lernst du, Tempeh, Kimchi, Kombucha und mehr zuhause selbst zu machen." Optional.
+   * Bold ivory line in the banner above the title, e.g. "Tempeh, Kimchi & Kombucha selber machen. Lerne Fermentieren in Graz." Optional.
    */
   sectionLead?: string | null;
   /**

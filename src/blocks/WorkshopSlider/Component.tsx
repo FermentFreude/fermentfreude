@@ -310,18 +310,29 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
      * horizontal swipe carousel (no scroll-jacking). */
     <div id={id ?? undefined} className="bg-white">
       {/* ── Section title — introduces the workshops before the gallery pins */}
-      {/* ── Banner — bridges the product showcase to the workshops */}
-      {resolvedSectionHeading ? (
+      {/* ── Banner — bridges the product showcase to the workshops.
+       *  The intro sentence is the big h2 (keywords for SEO), the
+       *  "next workshops" line sits under it, small and gold. */}
+      {sectionLead || resolvedSectionHeading ? (
         <div className="bg-ff-near-black py-14 md:py-16 lg:py-20">
           <FadeIn className="container mx-auto container-padding text-center">
             {sectionLead ? (
-              <p className="mx-auto mb-3 max-w-2xl text-balance font-sans text-base leading-relaxed text-ff-gold md:mb-4 md:text-lg">
-                {sectionLead}
+              <h2 className="mx-auto text-balance font-display text-[clamp(1.875rem,4.6vw,3.75rem)] font-bold leading-[1.05] tracking-[-0.03em] text-ff-ivory">
+                {/* One sentence per line — no break in the middle of a sentence */}
+                {sectionLead.split(/(?<=[.!?])\s+/).map((sentence, i) => (
+                  <span key={i} className="block">
+                    {sentence}
+                  </span>
+                ))}
+              </h2>
+            ) : null}
+            {resolvedSectionHeading ? (
+              <p
+                className={`font-display text-lg font-bold tracking-[-0.01em] text-ff-gold md:text-2xl ${sectionLead ? 'mt-4 md:mt-5' : ''}`}
+              >
+                {resolvedSectionHeading}
               </p>
             ) : null}
-            <h2 className="whitespace-nowrap font-display text-[clamp(1.5rem,5.6vw,3.5rem)] font-bold leading-[1] tracking-[-0.035em] text-ff-ivory">
-              {resolvedSectionHeading}
-            </h2>
           </FadeIn>
         </div>
       ) : null}
