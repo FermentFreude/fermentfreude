@@ -82,7 +82,15 @@ const wordRise: Variants = {
   show: { y: '0%', transition: { duration: 1.1, ease: EASE_OUT } },
 }
 
-function WorkshopBanner({ lead, heading }: { lead?: string | null; heading?: string | null }) {
+function WorkshopBanner({
+  lead,
+  heading,
+  href,
+}: {
+  lead?: string | null
+  heading?: string | null
+  href: string
+}) {
   // One sentence per line — never a break in the middle of a sentence
   const sentences = lead ? lead.split(/(?<=[.!?])\s+/).map((s) => s.split(/\s+/)) : []
   const wordCount = sentences.flat().length
@@ -125,11 +133,26 @@ function WorkshopBanner({ lead, heading }: { lead?: string | null; heading?: str
             </h2>
           ) : null}
           {heading ? (
-            <motion.p
-              variants={goldLine}
-              className={`font-display text-lg font-bold tracking-[-0.01em] text-ff-gold md:text-2xl ${sentences.length ? 'mt-4 md:mt-5' : ''}`}
-            >
-              {heading}
+            <motion.p variants={goldLine} className={sentences.length ? 'mt-4 md:mt-5' : ''}>
+              {/* Link to all workshops — underline draws in + arrow nudges on hover */}
+              <Link
+                href={href}
+                className="group/all inline-flex items-center gap-2 font-display text-lg font-bold tracking-[-0.01em] text-ff-gold transition-colors duration-300 hover:text-ff-gold-light md:text-2xl"
+              >
+                <span className="relative">
+                  {heading}
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-0 -bottom-0.5 h-[2px] origin-left scale-x-0 bg-current transition-transform duration-500 ease-out group-hover/all:scale-x-100"
+                  />
+                </span>
+                <span
+                  aria-hidden
+                  className="inline-block transition-transform duration-300 ease-out group-hover/all:translate-x-1.5"
+                >
+                  →
+                </span>
+              </Link>
             </motion.p>
           ) : null}
         </div>
@@ -168,6 +191,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
   visible,
   sectionLead,
   sectionHeading,
+  allWorkshopsLink,
   eyebrow,
   workshops,
   id,
@@ -389,7 +413,11 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     <div id={id ?? undefined} className="bg-white">
       {/* ── Section title — introduces the workshops before the gallery pins */}
       {sectionLead || resolvedSectionHeading ? (
-        <WorkshopBanner lead={sectionLead} heading={resolvedSectionHeading} />
+        <WorkshopBanner
+          lead={sectionLead}
+          heading={resolvedSectionHeading}
+          href={allWorkshopsLink || '/workshops'}
+        />
       ) : null}
 
       <div ref={outerRef} className="relative w-full bg-white lg:min-h-svh">

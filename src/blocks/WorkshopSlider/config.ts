@@ -44,7 +44,7 @@ export const WorkshopSlider: Block = {
       label: 'Banner — small gold line',
       admin: {
         description:
-          'Smaller gold line under the big title, e.g. "Unsere nächsten Workshops". Leave both banner fields empty to hide the banner.',
+          'Smaller gold line under the big title, e.g. "Unsere nächsten Workshops". It links to the "All Workshops Link" below (default /workshops). Leave both banner fields empty to hide the banner.',
       },
     },
     {
