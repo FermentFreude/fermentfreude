@@ -6,6 +6,7 @@ import type {
   Media as MediaType,
   WorkshopSliderBlock as WorkshopSliderBlockType,
 } from '@/payload-types'
+import { MotionConfig, motion, type Variants } from 'motion/react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -59,6 +60,83 @@ const DEFAULT_WORKSHOPS = [
     ctaLink: '/workshops/tempeh',
   },
 ]
+
+/* ═══════════════════════════════════════════════════════════════
+ *  BANNER — bridges the product showcase to the workshops.
+ *  The intro sentence is the big h2 (keywords for SEO), one sentence
+ *  per line; the "next workshops" line sits under it, small and gold.
+ *
+ *  Reveal (once, on scroll into view): each word rises out of a mask,
+ *  staggered, then the gold line follows when the title has landed.
+ * ═══════════════════════════════════════════════════════════════ */
+
+const EASE_OUT = [0.16, 1, 0.3, 1] as const
+const WORD_STAGGER = 0.07
+
+const bannerGroup: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: WORD_STAGGER } },
+}
+const wordRise: Variants = {
+  hidden: { y: '110%' },
+  show: { y: '0%', transition: { duration: 1.1, ease: EASE_OUT } },
+}
+
+function WorkshopBanner({ lead, heading }: { lead?: string | null; heading?: string | null }) {
+  // One sentence per line — never a break in the middle of a sentence
+  const sentences = lead ? lead.split(/(?<=[.!?])\s+/).map((s) => s.split(/\s+/)) : []
+  const wordCount = sentences.flat().length
+  const goldLine: Variants = {
+    hidden: { opacity: 0, y: 14 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.9, ease: EASE_OUT, delay: wordCount * WORD_STAGGER + 0.35 },
+    },
+  }
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <motion.div
+        className="bg-ff-near-black py-14 md:py-16 lg:py-20"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.45 }}
+        variants={bannerGroup}
+      >
+        <div className="container mx-auto container-padding text-center">
+          {sentences.length ? (
+            <h2 className="mx-auto text-balance font-display text-[clamp(1.875rem,4.6vw,3.75rem)] font-bold leading-[1.05] tracking-[-0.03em] text-ff-ivory">
+              {sentences.map((words, i) => (
+                <span key={i} className="block">
+                  {words.map((word, j) => (
+                    <React.Fragment key={j}>
+                      {/* Mask: padding keeps descenders (g, p) visible */}
+                      <span className="-mb-[0.14em] inline-block overflow-hidden pb-[0.14em] align-bottom">
+                        <motion.span className="inline-block" variants={wordRise}>
+                          {word}
+                        </motion.span>
+                      </span>
+                      {j < words.length - 1 ? ' ' : null}
+                    </React.Fragment>
+                  ))}
+                </span>
+              ))}
+            </h2>
+          ) : null}
+          {heading ? (
+            <motion.p
+              variants={goldLine}
+              className={`font-display text-lg font-bold tracking-[-0.01em] text-ff-gold md:text-2xl ${sentences.length ? 'mt-4 md:mt-5' : ''}`}
+            >
+              {heading}
+            </motion.p>
+          ) : null}
+        </div>
+      </motion.div>
+    </MotionConfig>
+  )
+}
 
 /* ═══════════════════════════════════════════════════════════════ */
 
@@ -310,31 +388,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
      * horizontal swipe carousel (no scroll-jacking). */
     <div id={id ?? undefined} className="bg-white">
       {/* ── Section title — introduces the workshops before the gallery pins */}
-      {/* ── Banner — bridges the product showcase to the workshops.
-       *  The intro sentence is the big h2 (keywords for SEO), the
-       *  "next workshops" line sits under it, small and gold. */}
       {sectionLead || resolvedSectionHeading ? (
-        <div className="bg-ff-near-black py-14 md:py-16 lg:py-20">
-          <FadeIn className="container mx-auto container-padding text-center">
-            {sectionLead ? (
-              <h2 className="mx-auto text-balance font-display text-[clamp(1.875rem,4.6vw,3.75rem)] font-bold leading-[1.05] tracking-[-0.03em] text-ff-ivory">
-                {/* One sentence per line — no break in the middle of a sentence */}
-                {sectionLead.split(/(?<=[.!?])\s+/).map((sentence, i) => (
-                  <span key={i} className="block">
-                    {sentence}
-                  </span>
-                ))}
-              </h2>
-            ) : null}
-            {resolvedSectionHeading ? (
-              <p
-                className={`font-display text-lg font-bold tracking-[-0.01em] text-ff-gold md:text-2xl ${sectionLead ? 'mt-4 md:mt-5' : ''}`}
-              >
-                {resolvedSectionHeading}
-              </p>
-            ) : null}
-          </FadeIn>
-        </div>
+        <WorkshopBanner lead={sectionLead} heading={resolvedSectionHeading} />
       ) : null}
 
       <div ref={outerRef} className="relative w-full bg-white lg:min-h-svh">
