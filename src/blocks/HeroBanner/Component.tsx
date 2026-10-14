@@ -59,37 +59,35 @@ export const HeroBannerBlock: React.FC<Props> = ({
       ) : image ? (
         // Own positioned layer — Media's wrapper is always `relative`
         <div className="absolute inset-0">
-          <Media
-            resource={image}
-            fill
-            size="100vw"
-            imgClassName="object-cover object-[50%_40%]"
-          />
+          <Media resource={image} fill size="100vw" imgClassName="object-cover object-[50%_40%]" />
         </div>
       ) : null}
 
-      {/* Readability: dark from the bottom left, the photo stays visible top right */}
+      {/* Readability: the whole photo is toned down, then darkened strongly where
+          the text sits (bottom, and the left on desktop) */}
+      <div aria-hidden className="absolute inset-0 bg-black/35" />
       <div
         aria-hidden
-        className="absolute inset-0 bg-linear-to-t from-black/90 via-black/55 to-black/10 lg:from-black/85 lg:via-black/35"
+        className="absolute inset-0 bg-linear-to-t from-black/95 via-black/60 to-transparent"
       />
       <div
         aria-hidden
-        className="absolute inset-0 hidden bg-linear-to-r from-black/55 via-black/10 to-transparent lg:block"
+        className="absolute inset-0 hidden bg-linear-to-r from-black/75 via-black/30 to-transparent lg:block"
       />
 
       {/* Content */}
       <FadeIn className="container relative z-10 mx-auto w-full container-padding pb-16 pt-32 md:pb-20 lg:pb-24">
-        <div className="max-w-2xl">
+        {/* Phone/tablet: centred; desktop: left, editorial */}
+        <div className="mx-auto max-w-4xl text-center [text-shadow:0_2px_24px_rgba(0,0,0,0.45)] lg:mx-0 lg:text-left">
           {eyebrow ? (
             <p className="mb-4 font-display text-xs font-bold uppercase tracking-[0.08em] text-ff-gold md:text-sm">
               {eyebrow}
             </p>
           ) : null}
-          <h2 className="whitespace-pre-line font-display text-[clamp(2.25rem,5.5vw,4.75rem)] font-bold leading-[1.02] tracking-[-0.03em] text-ff-ivory">
+          <h2 className="whitespace-pre-line font-display text-[clamp(1.75rem,8.4vw,4.75rem)] lg:text-[clamp(2.25rem,5.5vw,4.75rem)] font-bold leading-[1.02] tracking-[-0.03em] text-ff-ivory">
             {resolvedHeading}
           </h2>
-          <p className="mb-0 mt-5 max-w-xl whitespace-pre-line text-base leading-relaxed text-ff-ivory/85 md:text-lg">
+          <p className="mx-auto mb-0 mt-5 max-w-xl whitespace-pre-line lg:mx-0 text-base leading-relaxed text-ff-ivory md:text-lg">
             {resolvedDescription}
           </p>
           <Link
