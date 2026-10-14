@@ -1,3 +1,4 @@
+import { cn } from '@/utilities/cn'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
@@ -147,6 +148,9 @@ export const RenderBlocks: React.FC<{
 
           if (blockData.visible === false) return null
 
+          // Home only: the sponsors banner sits on ivory instead of warm grey
+          const homeSponsors = slug === 'home' && blockType === 'sponsorsBar'
+
           // When useGlobalData is explicitly true, render the GlobalWrapper
           const useGlobal = blockData.useGlobalData === true
           const sponsorRows = Array.isArray(blockData.sponsors)
@@ -165,7 +169,7 @@ export const RenderBlocks: React.FC<{
           ) {
             const GlobalWrapper = globalWrappers[blockType]
             return (
-              <div className={gapClass} key={index}>
+              <div className={cn(gapClass, homeSponsors && 'home-sponsors')} key={index}>
                 <GlobalWrapper id={blockId} fallbackData={blockData} />
               </div>
             )
@@ -180,7 +184,13 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className={FLUSH_BLOCKS.has(blockType) ? undefined : gapClass} key={index}>
+                <div
+                  className={cn(
+                    FLUSH_BLOCKS.has(blockType) ? undefined : gapClass,
+                    homeSponsors && 'home-sponsors',
+                  )}
+                  key={index}
+                >
                   <Block
                     {...block}
                     id={blockId}

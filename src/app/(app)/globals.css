@@ -1531,3 +1531,8 @@ button {
   grid-template-rows: repeat(4, 49.5vh);
   gap: 1vh;
 }
+
+/* Home: sponsors banner on ivory (Shop/About keep the warm grey) */
+.home-sponsors .block-sponsors-bar {
+  background-color: var(--ff-ivory);
+}
