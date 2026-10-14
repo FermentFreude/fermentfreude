@@ -1,10 +1,12 @@
 import type { Block } from 'payload'
 
+import { PICTURE_SLOTS } from './layers'
+
 export const FermentationStory: Block = {
   slug: 'fermentationStory',
   interfaceName: 'FermentationStoryBlock',
   labels: {
-    singular: 'Fermentation Story',
+    singular: 'Fermentation Story (stacked cards)',
     plural: 'Fermentation Stories',
   },
   admin: {
@@ -64,6 +66,14 @@ export const FermentationStory: Block = {
       ],
     },
     {
+      name: 'introPicture',
+      type: 'select',
+      label: 'Picture (intro card)',
+      defaultValue: 'intro',
+      options: PICTURE_SLOTS,
+      admin: { description: 'Which built-in picture floats over the big word on the first card.' },
+    },
+    {
       name: 'benefits',
       type: 'array',
       label: 'Benefits',
@@ -103,6 +113,72 @@ export const FermentationStory: Block = {
               localized: true,
               label: 'Short line',
               admin: { width: '45%' },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'slides',
+      type: 'array',
+      label: 'More cards',
+      maxRows: 6,
+      labels: { singular: 'Card', plural: 'Cards' },
+      admin: {
+        description:
+          'Each card slides up over the one before, full screen — like the product showcase. Keep it short and honest: say what research looks at, never promise a health effect.',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'bigWord',
+              type: 'text',
+              localized: true,
+              required: true,
+              label: 'Big word',
+              admin: { description: 'One short word, e.g. "LEBENDIG".', width: '50%' },
+            },
+            {
+              name: 'picture',
+              type: 'select',
+              label: 'Picture',
+              options: PICTURE_SLOTS,
+              admin: { description: 'Built-in picture over the big word.', width: '50%' },
+            },
+          ],
+        },
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+          required: true,
+          label: 'Title',
+        },
+        {
+          name: 'text',
+          type: 'textarea',
+          localized: true,
+          required: true,
+          label: 'Text',
+          admin: { description: 'A few short sentences.' },
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'sourceLabel',
+              type: 'text',
+              localized: true,
+              label: 'Source (optional)',
+              admin: { description: 'e.g. "Wastyk et al., Cell (2021)".', width: '50%' },
+            },
+            {
+              name: 'sourceUrl',
+              type: 'text',
+              label: 'Source link (optional)',
+              admin: { width: '50%' },
             },
           ],
         },

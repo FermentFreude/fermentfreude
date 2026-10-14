@@ -1,5 +1,6 @@
 'use client'
 
+import { StackPanel } from '@/components/StackPanel'
 import { useArrival, useFitSize } from '@/components/StoryScene/hooks'
 import type { FermentationStoryBlock as Props } from '@/payload-types'
 import { ArrowUpRight, Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
@@ -13,17 +14,17 @@ import {
 } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { FERMENTATION_LAYER } from './layers'
+import { FERMENTATION_LAYERS, type PictureSlot, type StoryLayer } from './layers'
 
 /* ═══════════════════════════════════════════════════════════════
- *  FERMENTATION STORY — "Why fermentation?" as a full-screen story card
- *  (same family as the voucher gift slide): title + intro top left, one
- *  huge black word across the card, a single picture floating over it
- *  (lifts in on scroll, follows the pointer), button + three benefits.
- *  On Home it slides up over the section before it (StackPanel, page.tsx).
- *  Text is CMS; the picture lives in code (layers.ts).
+ *  FERMENTATION STORY — full-screen cards that stack on scroll, like
+ *  the product showcase: the intro card ("Warum Fermentation? / GESUND",
+ *  button + benefits) and then one card per topic. Every card: title +
+ *  text top left, one huge black word (same size on every card), a
+ *  picture floating over it (lifts in on scroll, follows the pointer).
+ *  The scroll pauses at each card. Text is CMS; pictures live in code.
  * ═══════════════════════════════════════════════════════════════ */
 
 const INK = '#1A1A1A' // brand near-black
@@ -50,6 +51,8 @@ const fadeUp: Variants = {
   }),
 }
 
+const pad = (n: number) => String(n).padStart(2, '0')
+
 function BenefitIcon({ icon }: { icon?: string | null }) {
   const cls = 'size-[46%]'
   if (icon === 'leaf') return <Leaf className={cls} strokeWidth={1.25} />
@@ -58,27 +61,42 @@ function BenefitIcon({ icon }: { icon?: string | null }) {
   return <Microscope className={cls} strokeWidth={1.25} />
 }
 
-export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
-  visible,
-  title,
-  intro,
-  bigWord,
-  buttonLabel,
-  buttonLink,
-  benefits,
-  id,
-}) => {
+type Benefit = NonNullable<Props['benefits']>[number]
+
+type CardData = {
+  key: string
+  word: string
+  title?: string | null
+  text?: string | null
+  sourceLabel?: string | null
+  sourceUrl?: string | null
+  layer?: StoryLayer
+  button?: { label: string; href: string }
+  benefits?: Benefit[]
+}
+
+function StoryCard({
+  card,
+  index,
+  count,
+  wordSize,
+  onFit,
+}: {
+  card: CardData
+  index: number
+  count: number
+  /** Shared size (the smallest fit of all cards) so every big word matches */
+  wordSize: number | null
+  onFit: (key: string, size: number) => void
+}) {
   const ref = useRef<HTMLElement>(null)
   const wordBoxRef = useRef<HTMLDivElement>(null)
   const measureRef = useRef<HTMLDivElement>(null)
+  const ownFit = useFitSize(wordBoxRef, measureRef, 1)
+  useEffect(() => {
+    if (ownFit) onFit(card.key, ownFit)
+  }, [ownFit, card.key, onFit])
 
-  const word = (bigWord?.trim() || DEFAULTS.bigWord).toUpperCase()
-  const resolvedTitle = title ?? DEFAULTS.title
-  const resolvedButton = buttonLabel ?? DEFAULTS.buttonLabel
-  const href = buttonLink?.trim() || DEFAULTS.buttonLink
-  const items = (benefits ?? []).slice(0, 3)
-
-  const fontSize = useFitSize(wordBoxRef, measureRef, 1)
   const active = useInView(ref, { once: true, amount: 0.25 })
 
   // Pointer float (desktop)
@@ -107,109 +125,149 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
   const imgY = useTransform(() => py.get() * 22 + lift.get() * 160)
   const imgRotate = useTransform(() => px.get() * 3 + lift.get() * 5)
 
-  if (visible === false) return null
+  const benefits = card.benefits ?? []
+  const isFirst = index === 0
+  const Heading = isFirst ? 'h2' : 'h3'
 
   return (
-    <MotionConfig reducedMotion="user">
-      <section
-        ref={ref}
-        id={id ?? undefined}
-        onPointerMove={onPointerMove}
-        onPointerLeave={onPointerLeave}
-        className="relative overflow-clip"
-        style={{ backgroundColor: PAPER, color: INK }}
-      >
-        <div className="container mx-auto container-padding flex min-h-[100svh] flex-col gap-8 py-16 md:py-20 lg:gap-6 lg:py-16">
-          {/* ── Title + intro, top left ── */}
-          <div className="relative z-20 max-w-md">
-            {resolvedTitle ? (
-              <motion.h2
-                custom={0}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="font-display text-2xl font-bold leading-tight tracking-[-0.02em] md:text-3xl"
-              >
-                {resolvedTitle}
-              </motion.h2>
-            ) : null}
-            {intro ? (
-              <motion.p
-                custom={1}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mb-0 mt-3 text-sm leading-relaxed opacity-75 md:text-base"
-              >
-                {intro}
-              </motion.p>
-            ) : null}
-          </div>
+    <section
+      ref={ref}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      className="relative overflow-clip"
+      style={{ backgroundColor: PAPER, color: INK }}
+    >
+      <div className="container mx-auto container-padding flex min-h-[100svh] flex-col gap-8 py-16 md:py-20 lg:gap-6 lg:py-16">
+        {/* ── Number, title + text, top left ── */}
+        <div className="relative z-20 max-w-md">
+          {count > 1 ? (
+            <motion.p
+              custom={0}
+              variants={fadeUp}
+              initial="hidden"
+              animate={active ? 'show' : 'hidden'}
+              className="mb-3 font-display text-[11px] font-bold tabular-nums tracking-[0.14em] opacity-50"
+            >
+              {pad(index + 1)} / {pad(count)}
+            </motion.p>
+          ) : null}
+          {card.title ? (
+            <motion.div
+              custom={1}
+              variants={fadeUp}
+              initial="hidden"
+              animate={active ? 'show' : 'hidden'}
+            >
+              <Heading className="font-display text-2xl font-bold leading-tight tracking-[-0.02em] md:text-3xl">
+                {card.title}
+              </Heading>
+            </motion.div>
+          ) : null}
+          {card.text ? (
+            <motion.p
+              custom={2}
+              variants={fadeUp}
+              initial="hidden"
+              animate={active ? 'show' : 'hidden'}
+              className="mb-0 mt-3 whitespace-pre-line text-sm leading-relaxed opacity-75 md:text-base"
+            >
+              {card.text}
+            </motion.p>
+          ) : null}
+          {card.sourceLabel ? (
+            <motion.p
+              custom={3}
+              variants={fadeUp}
+              initial="hidden"
+              animate={active ? 'show' : 'hidden'}
+              className="mb-0 mt-3 text-xs opacity-55"
+            >
+              {card.sourceUrl ? (
+                <a
+                  href={card.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-current/30 underline-offset-2 hover:decoration-current"
+                >
+                  {card.sourceLabel}
+                </a>
+              ) : (
+                card.sourceLabel
+              )}
+            </motion.p>
+          ) : null}
+        </div>
 
-          {/* ── Big word with the picture floating over it ── */}
-          <div className="relative flex flex-1 items-center">
-            <div ref={wordBoxRef} className="relative h-[clamp(4rem,22vw,15rem)] w-full">
-              {/* Hidden copy at 100px to measure the word */}
-              <div
-                ref={measureRef}
-                aria-hidden
-                className="invisible absolute left-0 top-0 w-max whitespace-pre font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
-                style={{ fontSize: 100 }}
-              >
-                {word}
-              </div>
-              <motion.p
-                aria-hidden
-                className="absolute inset-0 m-0 flex items-center justify-center whitespace-nowrap font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
-                style={{ fontSize: fontSize ?? 'clamp(3rem, 14vw, 13rem)', x: wordX, y: wordY }}
-              >
-                <span className="block overflow-hidden pb-[0.04em]">
-                  <motion.span
-                    className="block"
-                    variants={lineRise}
-                    initial="hidden"
-                    animate={active ? 'show' : 'hidden'}
-                  >
-                    {word}
-                  </motion.span>
-                </span>
-              </motion.p>
+        {/* ── Big word with the picture floating over it ── */}
+        <div className="relative flex flex-1 items-center">
+          <div ref={wordBoxRef} className="relative h-[clamp(4rem,22vw,15rem)] w-full">
+            {/* Hidden copy at 100px to measure the word */}
+            <div
+              ref={measureRef}
+              aria-hidden
+              className="invisible absolute left-0 top-0 w-max whitespace-pre font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
+              style={{ fontSize: 100 }}
+            >
+              {card.word}
             </div>
-
-            {FERMENTATION_LAYER ? (
-              <motion.div
-                className="pointer-events-none absolute right-[4%] top-1/2 z-10 w-[min(44%,24rem)] -translate-y-1/2 md:w-[min(34%,26rem)]"
-                style={{ x: imgX, y: imgY, rotate: imgRotate }}
-              >
-                <Image
-                  src={FERMENTATION_LAYER.src}
-                  width={FERMENTATION_LAYER.width}
-                  height={FERMENTATION_LAYER.height}
-                  alt={FERMENTATION_LAYER.alt}
-                  sizes="(min-width: 768px) 34vw, 44vw"
-                  loading="eager"
-                  className="h-auto w-full drop-shadow-[0_22px_30px_rgba(40,30,15,0.25)]"
-                />
-              </motion.div>
-            ) : null}
+            <motion.p
+              aria-hidden
+              className="absolute inset-0 m-0 flex items-center justify-center whitespace-nowrap font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
+              style={{
+                fontSize: wordSize ?? ownFit ?? 'clamp(3rem, 14vw, 13rem)',
+                x: wordX,
+                y: wordY,
+              }}
+            >
+              {/* Mask: top padding keeps accents (Ü, É) visible, bottom padding the descenders */}
+              <span className="-my-[0.16em] block overflow-hidden pb-[0.06em] pt-[0.16em]">
+                <motion.span
+                  className="block"
+                  variants={lineRise}
+                  initial="hidden"
+                  animate={active ? 'show' : 'hidden'}
+                >
+                  {card.word}
+                </motion.span>
+              </span>
+            </motion.p>
           </div>
 
-          {/* ── Button + benefits ── */}
+          {card.layer ? (
+            <motion.div
+              className="pointer-events-none absolute right-[4%] top-1/2 z-10 w-[min(44%,24rem)] -translate-y-1/2 md:w-[min(34%,26rem)]"
+              style={{ x: imgX, y: imgY, rotate: imgRotate }}
+            >
+              <Image
+                src={card.layer.src}
+                width={card.layer.width}
+                height={card.layer.height}
+                alt={card.layer.alt}
+                sizes="(min-width: 768px) 34vw, 44vw"
+                loading="eager"
+                className="h-auto w-full drop-shadow-[0_22px_30px_rgba(40,30,15,0.25)]"
+              />
+            </motion.div>
+          ) : null}
+        </div>
+
+        {/* ── Button + benefits (intro card) ── */}
+        {card.button || benefits.length ? (
           <div className="relative z-20 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            {resolvedButton ? (
+            {card.button ? (
               <motion.div
-                custom={2}
+                custom={4}
                 variants={fadeUp}
                 initial="hidden"
                 animate={active ? 'show' : 'hidden'}
                 className="shrink-0"
               >
                 <Link
-                  href={href}
+                  href={card.button.href}
                   className="group inline-flex items-center gap-3 rounded-full py-2.5 pl-5 pr-2.5 font-display text-sm font-bold text-white transition-colors hover:bg-black"
                   style={{ backgroundColor: INK }}
                 >
-                  {resolvedButton}
+                  {card.button.label}
                   <span
                     className="flex h-7 w-7 items-center justify-center rounded-full bg-white transition-transform duration-300 group-hover:rotate-45"
                     style={{ color: INK }}
@@ -220,15 +278,15 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
               </motion.div>
             ) : null}
 
-            {items.length ? (
+            {benefits.length ? (
               <ul
                 className="grid gap-x-6 gap-y-6 sm:gap-x-10 lg:max-w-3xl lg:flex-1"
-                style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+                style={{ gridTemplateColumns: `repeat(${benefits.length}, minmax(0, 1fr))` }}
               >
-                {items.map((item, i) => (
+                {benefits.map((item, i) => (
                   <motion.li
                     key={item.id ?? i}
-                    custom={3 + i}
+                    custom={5 + i}
                     variants={fadeUp}
                     initial="hidden"
                     animate={active ? 'show' : 'hidden'}
@@ -252,8 +310,108 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
               </ul>
             ) : null}
           </div>
-        </div>
-      </section>
+        ) : null}
+      </div>
+    </section>
+  )
+}
+
+export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
+  visible,
+  title,
+  intro,
+  bigWord,
+  buttonLabel,
+  buttonLink,
+  introPicture,
+  benefits,
+  slides,
+  id,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const resolvedButton = buttonLabel ?? DEFAULTS.buttonLabel
+  const cards: CardData[] = [
+    {
+      key: 'intro',
+      word: (bigWord?.trim() || DEFAULTS.bigWord).toUpperCase(),
+      title: title ?? DEFAULTS.title,
+      text: intro,
+      layer: FERMENTATION_LAYERS[(introPicture as PictureSlot | null) ?? 'intro'],
+      button: resolvedButton
+        ? { label: resolvedButton, href: buttonLink?.trim() || DEFAULTS.buttonLink }
+        : undefined,
+      benefits: (benefits ?? []).slice(0, 3),
+    },
+    ...(slides ?? []).map((s, i) => ({
+      key: s.id ?? `card-${i}`,
+      word: s.bigWord.toUpperCase(),
+      title: s.title,
+      text: s.text,
+      sourceLabel: s.sourceLabel,
+      sourceUrl: s.sourceUrl,
+      layer: s.picture ? FERMENTATION_LAYERS[s.picture as PictureSlot] : undefined,
+    })),
+  ]
+
+  // Every big word at the same size: the smallest fit of all cards
+  const [fits, setFits] = useState<Record<string, number>>({})
+  const onFit = useCallback((key: string, size: number) => {
+    setFits((prev) => (prev[key] === size ? prev : { ...prev, [key]: size }))
+  }, [])
+  const known = Object.values(fits)
+  const wordSize = known.length === cards.length ? Math.min(...known) : null
+
+  /* Pause at each card: snap points at the start of every card (same as the
+   * product showcase). The cards are sticky, so invisible markers sit at each
+   * card's place in the page. "proximity" never traps the visitor. */
+  const [snapTops, setSnapTops] = useState<number[]>([])
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el || cards.length < 2) return
+    const measure = () =>
+      setSnapTops(
+        Array.from(el.children)
+          .filter((c) => c.querySelector('section'))
+          .map((c) => (c as HTMLElement).offsetTop),
+      )
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    const root = document.documentElement
+    const previous = root.style.scrollSnapType
+    root.style.scrollSnapType = 'y proximity'
+    return () => {
+      observer.disconnect()
+      root.style.scrollSnapType = previous
+    }
+  }, [cards.length])
+
+  if (visible === false) return null
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <div ref={containerRef} id={id ?? undefined} className="relative">
+        {cards.map((card, i) => (
+          <StackPanel key={card.key} index={i} last={i === cards.length - 1} sink={false}>
+            <StoryCard
+              card={card}
+              index={i}
+              count={cards.length}
+              wordSize={wordSize}
+              onFit={onFit}
+            />
+          </StackPanel>
+        ))}
+        {snapTops.map((top, i) => (
+          <div
+            key={i}
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 h-px [scroll-snap-align:start] [scroll-snap-stop:normal]"
+            style={{ top }}
+          />
+        ))}
+      </div>
     </MotionConfig>
   )
 }
