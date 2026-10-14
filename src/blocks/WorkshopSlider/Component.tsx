@@ -312,7 +312,7 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
       {resolvedSectionHeading ? (
         <div className="container mx-auto container-padding pt-20 md:pt-24 lg:pt-28">
           <FadeIn>
-            <h2 className="mx-auto max-w-4xl text-balance text-center font-display text-[clamp(2.5rem,6vw,5.5rem)] font-bold leading-[1] tracking-[-0.035em] text-ff-near-black">
+            <h2 className="whitespace-nowrap text-center font-display text-[clamp(1.5rem,7.2vw,5.5rem)] font-bold leading-[1] tracking-[-0.035em] text-ff-near-black">
               {resolvedSectionHeading}
             </h2>
           </FadeIn>
