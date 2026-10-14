@@ -554,12 +554,12 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
                       }}
                     >
                       {workshop.nextDate ? (
-                        // Gold badge: dark text on gold stays readable (gold text on white wouldn't)
+                        // Gold badge with white text
                         <div className="mb-5 rounded-xl bg-ff-gold px-4 py-3">
-                          <p className="mb-1 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-ff-near-black/70">
+                          <p className="mb-1 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-white/85">
                             {upcomingLabel || 'Upcoming'}
                           </p>
-                          <p className="mb-0 font-display text-base font-bold leading-tight tracking-[-0.01em] text-ff-near-black md:text-lg">
+                          <p className="mb-0 font-display text-base font-bold leading-tight tracking-[-0.01em] text-white md:text-lg">
                             {workshop.nextDate}
                           </p>
                         </div>
