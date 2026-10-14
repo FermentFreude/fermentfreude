@@ -28,35 +28,14 @@ export const WorkshopSlider: Block = {
       },
     },
     {
-      type: 'collapsible',
-      label: 'Section title (above the workshops)',
-      admin: { initCollapsed: false },
-      fields: [
-        {
-          name: 'sectionEyebrow',
-          type: 'text',
-          localized: true,
-          label: 'Small label',
-          admin: { description: 'Gold uppercase label above the section title, e.g. "Workshops".' },
-        },
-        {
-          name: 'sectionHeading',
-          type: 'text',
-          localized: true,
-          label: 'Section title',
-          admin: {
-            description:
-              'Big title that introduces the workshops, e.g. "Fermentation zum Mitmachen". Leave empty to hide the whole title area.',
-          },
-        },
-        {
-          name: 'sectionIntro',
-          type: 'textarea',
-          localized: true,
-          label: 'Intro text',
-          admin: { description: 'One or two sentences under the title (optional).' },
-        },
-      ],
+      name: 'sectionHeading',
+      type: 'text',
+      localized: true,
+      label: 'Section title',
+      admin: {
+        description:
+          'Big centred title above the workshops, e.g. "Unsere nächsten Workshops". Leave empty to hide it.',
+      },
     },
     {
       name: 'eyebrow',

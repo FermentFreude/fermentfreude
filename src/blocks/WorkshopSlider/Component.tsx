@@ -2,7 +2,6 @@
 
 import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
-import { SectionHeader } from '@/components/SectionHeader'
 import type {
   Media as MediaType,
   WorkshopSliderBlock as WorkshopSliderBlockType,
@@ -16,9 +15,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
  * ═══════════════════════════════════════════════════════════════ */
 
 const DEFAULT_EYEBROW = 'Workshop Experience'
-const DEFAULT_SECTION_EYEBROW = 'Workshops'
-const DEFAULT_SECTION_HEADING = 'Fermentation, hands-on'
-const DEFAULT_ALL_WORKSHOPS_LABEL = 'All workshops'
+const DEFAULT_SECTION_HEADING = 'Our next workshops'
 const DEFAULT_DETAILS_CTA_LABEL = 'Explore'
 
 const DEFAULT_WORKSHOPS = [
@@ -91,13 +88,9 @@ function resolveMedia(image: MediaType | string | number | null | undefined): Me
 
 export const WorkshopSliderBlock: React.FC<Props> = ({
   visible,
-  sectionEyebrow,
   sectionHeading,
-  sectionIntro,
   eyebrow,
   workshops,
-  allWorkshopsButtonLabel,
-  allWorkshopsLink,
   id,
   upcomingLabel,
   upcomingDatesByHref,
@@ -115,11 +108,8 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
 
   /* ── merge CMS + defaults ──────────────────────────────────── */
   const resolvedEyebrow = eyebrow || DEFAULT_EYEBROW
-  // null/undefined → English default; an empty string in the CMS hides the title area
+  // null/undefined → English default; an empty string in the CMS hides the title
   const resolvedSectionHeading = sectionHeading ?? DEFAULT_SECTION_HEADING
-  const resolvedSectionEyebrow = sectionEyebrow ?? DEFAULT_SECTION_EYEBROW
-  const allLabel = allWorkshopsButtonLabel || DEFAULT_ALL_WORKSHOPS_LABEL
-  const allHref = allWorkshopsLink || '/workshops'
   const resolvedWorkshops =
     workshops && workshops.length > 0
       ? workshops.map((w, i) => ({
@@ -320,21 +310,11 @@ export const WorkshopSliderBlock: React.FC<Props> = ({
     <div id={id ?? undefined} className="bg-white">
       {/* ── Section title — introduces the workshops before the gallery pins */}
       {resolvedSectionHeading ? (
-        <div className="container mx-auto container-padding pt-16 md:pt-20 lg:pt-24">
+        <div className="container mx-auto container-padding pt-20 md:pt-24 lg:pt-28">
           <FadeIn>
-            <SectionHeader
-              eyebrow={resolvedSectionEyebrow}
-              heading={resolvedSectionHeading}
-              intro={sectionIntro}
-              aside={
-                <Link
-                  href={allHref}
-                  className="inline-flex w-fit items-center justify-center rounded-full bg-ff-black px-6 py-2.5 font-display text-base font-bold text-white transition-all hover:scale-[1.03] hover:bg-transparent hover:text-ff-black hover:shadow-[inset_0_0_0_2px_var(--ff-black)] active:scale-[0.97]"
-                >
-                  {allLabel}
-                </Link>
-              }
-            />
+            <h2 className="mx-auto max-w-4xl text-balance text-center font-display text-[clamp(2.5rem,6vw,5.5rem)] font-bold leading-[1] tracking-[-0.035em] text-ff-near-black">
+              {resolvedSectionHeading}
+            </h2>
           </FadeIn>
         </div>
       ) : null}

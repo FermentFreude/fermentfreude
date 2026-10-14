@@ -4800,17 +4800,9 @@ export interface WorkshopSliderBlock {
    */
   useGlobalData?: boolean | null;
   /**
-   * Gold uppercase label above the section title, e.g. "Workshops".
-   */
-  sectionEyebrow?: string | null;
-  /**
-   * Big title that introduces the workshops, e.g. "Fermentation zum Mitmachen". Leave empty to hide the whole title area.
+   * Big centred title above the workshops, e.g. "Unsere nächsten Workshops". Leave empty to hide it.
    */
   sectionHeading?: string | null;
-  /**
-   * One or two sentences under the title (optional).
-   */
-  sectionIntro?: string | null;
   /**
    * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
    */
@@ -8245,9 +8237,7 @@ export interface CourseWaitlistCtaBlockSelect<T extends boolean = true> {
 export interface WorkshopSliderBlockSelect<T extends boolean = true> {
   visible?: T;
   useGlobalData?: T;
-  sectionEyebrow?: T;
   sectionHeading?: T;
-  sectionIntro?: T;
   eyebrow?: T;
   workshops?:
     | T

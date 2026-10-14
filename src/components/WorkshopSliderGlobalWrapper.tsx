@@ -45,9 +45,7 @@ export async function WorkshopSliderGlobalWrapper({
       id={id}
       blockType="workshopSlider"
       // Section title is always per page (block), never from the global
-      sectionEyebrow={(fb.sectionEyebrow as string | null | undefined) ?? undefined}
       sectionHeading={(fb.sectionHeading as string | null | undefined) ?? undefined}
-      sectionIntro={(fb.sectionIntro as string | null | undefined) ?? undefined}
       eyebrow={
         hasGlobalContent ? (data.eyebrow ?? undefined) : ((fb.eyebrow as string) ?? undefined)
       }
