@@ -56,6 +56,14 @@ export const DECOR_BY_SLOT: Partial<Record<PictureSlot, Decor[]>> = {
   // NATÜRLICH: chef pulling a broccoli — in its own space under the word, fully on
   // the cream (the black line drawing must never sit on the black letters):
   // right-aligned on desktop, centred above the swipe capsule on phone/tablet.
+  // ALLTAG: chef with a garlic, sitting above the right end of the word — fully on
+  // the cream, never on the letters
+  everyday: [
+    {
+      ...FERMENTATION_DECOR.garlic,
+      className: 'bottom-full right-[0.02em] mb-[0.1em] w-[0.9em] max-md:w-[1.05em]',
+    },
+  ],
   natural: [
     {
       ...FERMENTATION_DECOR.broccoliChef,
