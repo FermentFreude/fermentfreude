@@ -16,7 +16,15 @@ export const FERMENTATION_LAYERS: Partial<Record<PictureSlot, StoryLayer>> = {}
 
 /* Small Kittl cut-outs placed around a card's big word (public/fermentation).
  * Sizes/positions are in em of the big word, so they scale with it. */
-export type Decor = { src: string; width: number; height: number; className: string }
+export type Decor = {
+  src: string
+  width: number
+  height: number
+  /** Position around the big word (em of the word) — not used for 'below' */
+  className: string
+  /** 'below' = in its own space under the word, sized to fit (never on the letters) */
+  placement?: 'word' | 'below'
+}
 
 export const FERMENTATION_DECOR = {
   broccoliChef: { src: '/fermentation/broccoli-chef.webp', width: 1200, height: 812 },
@@ -44,12 +52,14 @@ export const DECOR_BY_SLOT: Partial<Record<PictureSlot, Decor[]>> = {
         '-right-[0.55em] -top-[0.85em] w-[1.5em] -rotate-6 max-md:-right-[0.3em] max-md:w-[1.8em]',
     },
   ],
-  // HANDWERK: chef pulling a broccoli, coming in at the bottom left of the word
+  // HANDWERK: chef pulling a broccoli — in its own space under the word, fully on
+  // the cream (the black line drawing must never sit on the black letters):
+  // right-aligned on desktop, centred above the swipe capsule on phone/tablet.
   craft: [
     {
       ...FERMENTATION_DECOR.broccoliChef,
-      className:
-        '-bottom-[0.65em] -left-[0.05em] w-[1.4em] max-md:left-0 max-md:w-[1.7em] md:[@media(max-height:800px)]:-bottom-[0.42em] md:[@media(max-height:800px)]:w-[1.15em]',
+      className: '',
+      placement: 'below',
     },
   ],
 }

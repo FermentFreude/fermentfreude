@@ -145,6 +145,7 @@ function StoryCard({
   const imgRotate = useTransform(() => px.get() * 3 + lift.get() * 5)
 
   const benefits = card.benefits ?? []
+  const belowDecor = card.decor?.find((d) => d.placement === 'below')
   const isFirst = index === 0
   const Heading = isFirst ? 'h2' : 'h3'
 
@@ -221,10 +222,13 @@ function StoryCard({
         </div>
 
         {/* ── Big word with the picture floating over it ── */}
-        <div className="relative flex flex-1 items-center">
+        <div
+          className={`relative flex min-h-0 flex-1 ${belowDecor ? 'flex-col justify-center' : 'items-center'}`}
+        >
           <div
             ref={wordBoxRef}
-            className="relative h-[clamp(4rem,22vw,15rem)] w-full [@media(max-height:620px)]:h-14"
+            // Short laptops: a lower word box leaves room for cut-outs (all cards share the size)
+            className="relative h-[clamp(4rem,22vw,15rem)] w-full [@media(max-height:620px)]:h-14 lg:[@media(max-height:800px)]:h-[clamp(4rem,19vh,9.5rem)]"
           >
             {/* Hidden copy at 100px to measure the word */}
             <div
@@ -257,27 +261,51 @@ function StoryCard({
                   </motion.span>
                 </span>
                 {/* Cut-outs around the word — sized in em, so they scale with it */}
-                {card.decor?.map((d, i) => (
-                  <motion.span
-                    key={d.src}
-                    className={`pointer-events-none absolute block ${d.className}`}
-                    initial={{ opacity: 0, y: '0.2em', scale: 0.9 }}
-                    animate={active ? { opacity: 1, y: 0, scale: 1 } : undefined}
-                    transition={{ duration: 1.1, ease: EASE, delay: 0.5 + i * 0.12 }}
-                  >
-                    <Image
-                      src={d.src}
-                      width={d.width}
-                      height={d.height}
-                      alt=""
-                      loading="eager"
-                      className="h-auto w-full drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)]"
-                    />
-                  </motion.span>
-                ))}
+                {card.decor
+                  ?.filter((d) => d.placement !== 'below')
+                  .map((d, i) => (
+                    <motion.span
+                      key={d.src}
+                      className={`pointer-events-none absolute block ${d.className}`}
+                      initial={{ opacity: 0, y: '0.2em', scale: 0.9 }}
+                      animate={active ? { opacity: 1, y: 0, scale: 1 } : undefined}
+                      transition={{ duration: 1.1, ease: EASE, delay: 0.5 + i * 0.12 }}
+                    >
+                      <Image
+                        src={d.src}
+                        width={d.width}
+                        height={d.height}
+                        alt=""
+                        loading="eager"
+                        className="h-auto w-full drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)]"
+                      />
+                    </motion.span>
+                  ))}
               </span>
             </motion.p>
           </div>
+
+          {/* Cut-out below the word, in its own space: shrinks to fit, so it never
+              sits on the black letters or leaves the card. Right-aligned on
+              desktop, centred on phone/tablet (above the swipe capsule). */}
+          {belowDecor ? (
+            <motion.div
+              className="flex min-h-0 max-h-[min(18rem,34vh)] flex-1 justify-center pt-[clamp(0.5rem,2vh,1.5rem)] lg:justify-end"
+              initial={{ opacity: 0, y: 16 }}
+              animate={active ? { opacity: 1, y: 0 } : undefined}
+              transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
+            >
+              <Image
+                src={belowDecor.src}
+                width={belowDecor.width}
+                height={belowDecor.height}
+                alt=""
+                loading="eager"
+                sizes="(min-width: 1024px) 30vw, 70vw"
+                className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)] lg:object-right-bottom"
+              />
+            </motion.div>
+          ) : null}
 
           {card.layer ? (
             <motion.div
