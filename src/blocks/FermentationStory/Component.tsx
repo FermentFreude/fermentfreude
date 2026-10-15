@@ -472,9 +472,87 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
     itemRefs: cardRefs,
     count: cards.length,
   })
-  // Mouse/trackpad: no free sideways scrolling (desk:overflow-x-hidden) and no
-  // nudge — cards change only with the arrows/dots. Touch: swipe + nudge.
+  // Swipe everywhere: touch, trackpad (sideways two-finger swipe) and mouse drag;
+  // snap-mandatory always lands on a full card. The nudge is for touch only.
   useSwipeNudge(trackRef, rowRef, cards.length, isTouch)
+
+  /* Desktop mouse: click-and-drag the card sideways. Past a small threshold the
+   * next/previous card is shown; a short drag springs back. Clicks on links and
+   * buttons still work (a drag under 6px counts as a click). */
+  const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null)
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return
+    const track = trackRef.current
+    if (!track) return
+    drag.current = { x: e.clientX, left: track.scrollLeft, moved: false }
+    track.style.scrollSnapType = 'none'
+  }
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current
+    const track = trackRef.current
+    if (!d || !track) return
+    const dx = e.clientX - d.x
+    if (Math.abs(dx) > 6 && !d.moved) {
+      d.moved = true
+      track.setPointerCapture(e.pointerId)
+    }
+    if (d.moved) track.scrollLeft = d.left - dx
+  }
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current
+    dragJustEnded.current = Boolean(d?.moved)
+    setTimeout(() => (dragJustEnded.current = false), 0)
+    const track = trackRef.current
+    drag.current = null
+    if (!d || !track) return
+    track.style.scrollSnapType = ''
+    if (!d.moved) return
+    const dx = e.clientX - d.x
+    const threshold = track.clientWidth * 0.12
+    goTo(dx < -threshold ? active + 1 : dx > threshold ? active - 1 : active)
+  }
+  // A drag must not turn into a click on a link/button underneath
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (dragJustEnded.current) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+  const dragJustEnded = useRef(false)
+
+  /* Trackpad / horizontal wheel: one sideways swipe = one card, in that
+   * direction (snapping alone pulled short swipes back to the same card).
+   * Vertical scrolling is left to the page. */
+  const activeRef = useRef(active)
+  activeRef.current = active
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    let sum = 0
+    let locked = false
+    let idle: ReturnType<typeof setTimeout> | undefined
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return
+      e.preventDefault()
+      clearTimeout(idle)
+      // A gesture ends after a short pause; then the next swipe can move again
+      idle = setTimeout(() => {
+        sum = 0
+        locked = false
+      }, 180)
+      if (locked) return
+      sum += e.deltaX
+      if (Math.abs(sum) > 30) {
+        locked = true
+        goTo(activeRef.current + (sum > 0 ? 1 : -1))
+      }
+    }
+    track.addEventListener('wheel', onWheel, { passive: false })
+    return () => {
+      clearTimeout(idle)
+      track.removeEventListener('wheel', onWheel)
+    }
+  }, [goTo])
   // The track must never scroll vertically (focus, find-in-page, trackpads)
   useEffect(() => {
     const track = trackRef.current
@@ -493,8 +571,14 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
       <div id={id ?? undefined} className="relative" style={{ backgroundColor: PAPER }}>
         <div
           ref={trackRef}
-          className="h-[calc(100svh-4.5rem)] snap-x snap-mandatory overflow-x-auto overflow-y-hidden desk:overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="h-[calc(100svh-4.5rem)] snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] desk:cursor-grab desk:active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
           style={{ overscrollBehaviorX: 'contain' }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onClickCapture={onClickCapture}
+          onDragStart={(e) => e.preventDefault()}
           aria-label="Fermentation"
           role="region"
         >
