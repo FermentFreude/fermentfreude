@@ -19,6 +19,7 @@ export const FERMENTATION_LAYERS: Partial<Record<PictureSlot, StoryLayer>> = {}
 export type Decor = { src: string; width: number; height: number; className: string }
 
 export const FERMENTATION_DECOR = {
+  carrotChef: { src: '/fermentation/carrot-chef.webp', width: 1260, height: 764 },
   appleChef: { src: '/fermentation/apple-chef.webp', width: 1260, height: 864 },
   jar: { src: '/fermentation/jar.webp', width: 192, height: 218 },
   garlic: { src: '/fermentation/garlic.webp', width: 726, height: 726 },
@@ -31,3 +32,15 @@ export const INTRO_DECOR: Decor[] = [
     className: '-bottom-[0.55em] -right-[0.8em] w-[1.35em] max-md:-right-[0.5em] max-md:w-[1.7em]',
   },
 ]
+
+/** Cut-outs per picture slot (the "More cards" picture select) */
+export const DECOR_BY_SLOT: Partial<Record<PictureSlot, Decor[]>> = {
+  // LEBENDIG: chef riding a carrot, flying in at the top right of the word
+  alive: [
+    {
+      ...FERMENTATION_DECOR.carrotChef,
+      className:
+        '-right-[0.55em] -top-[0.85em] w-[1.5em] -rotate-6 max-md:-right-[0.3em] max-md:w-[1.8em]',
+    },
+  ],
+}

@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   FERMENTATION_LAYERS,
+  DECOR_BY_SLOT,
   INTRO_DECOR,
   type Decor,
   type PictureSlot,
@@ -419,6 +420,7 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
       sourceLabel: s.sourceLabel,
       sourceUrl: s.sourceUrl,
       layer: s.picture ? FERMENTATION_LAYERS[s.picture as PictureSlot] : undefined,
+      decor: s.picture ? DECOR_BY_SLOT[s.picture as PictureSlot] : undefined,
     })),
   ]
 
