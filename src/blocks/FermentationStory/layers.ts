@@ -19,16 +19,15 @@ export const FERMENTATION_LAYERS: Partial<Record<PictureSlot, StoryLayer>> = {}
 export type Decor = { src: string; width: number; height: number; className: string }
 
 export const FERMENTATION_DECOR = {
-  ginger: { src: '/fermentation/ginger.webp', width: 583, height: 900 },
+  appleChef: { src: '/fermentation/apple-chef.webp', width: 1260, height: 864 },
   jar: { src: '/fermentation/jar.webp', width: 192, height: 218 },
   garlic: { src: '/fermentation/garlic.webp', width: 726, height: 726 },
 } as const
 
-/** Intro card (GESUND): ginger top left of the word, just touching its corner */
+/** Intro card (GESUND): chef pulling an apple, bottom right of the word */
 export const INTRO_DECOR: Decor[] = [
   {
-    ...FERMENTATION_DECOR.ginger,
-    className:
-      '-left-[0.34em] -top-[0.62em] w-[0.5em] -rotate-[28deg] [@media(max-height:800px)]:-top-[0.36em] [@media(max-height:800px)]:w-[0.4em]',
+    ...FERMENTATION_DECOR.appleChef,
+    className: '-bottom-[0.55em] -right-[0.8em] w-[1.35em] max-md:-right-[0.5em] max-md:w-[1.7em]',
   },
 ]
