@@ -18,7 +18,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { FERMENTATION_LAYERS, type PictureSlot, type StoryLayer } from './layers'
+import {
+  FERMENTATION_LAYERS,
+  INTRO_DECOR,
+  type Decor,
+  type PictureSlot,
+  type StoryLayer,
+} from './layers'
 
 /* ═══════════════════════════════════════════════════════════════
  *  FERMENTATION STORY — one full-screen card on the page ("Warum
@@ -74,6 +80,8 @@ type CardData = {
   sourceLabel?: string | null
   sourceUrl?: string | null
   layer?: StoryLayer
+  /** Small cut-outs around the big word */
+  decor?: Decor[]
   button?: { label: string; href: string }
   benefits?: Benefit[]
 }
@@ -236,15 +244,36 @@ function StoryCard({
               }}
             >
               {/* Mask: top padding keeps accents (Ü, É) visible, bottom padding the descenders */}
-              <span className="-my-[0.16em] block overflow-hidden pb-[0.06em] pt-[0.16em]">
-                <motion.span
-                  className="block"
-                  variants={lineRise}
-                  initial="hidden"
-                  animate={active ? 'show' : 'hidden'}
-                >
-                  {card.word}
-                </motion.span>
+              <span className="relative inline-block">
+                <span className="-my-[0.16em] block overflow-hidden pb-[0.06em] pt-[0.16em]">
+                  <motion.span
+                    className="block"
+                    variants={lineRise}
+                    initial="hidden"
+                    animate={active ? 'show' : 'hidden'}
+                  >
+                    {card.word}
+                  </motion.span>
+                </span>
+                {/* Cut-outs around the word — sized in em, so they scale with it */}
+                {card.decor?.map((d, i) => (
+                  <motion.span
+                    key={d.src}
+                    className={`pointer-events-none absolute block ${d.className}`}
+                    initial={{ opacity: 0, y: '0.2em', scale: 0.9 }}
+                    animate={active ? { opacity: 1, y: 0, scale: 1 } : undefined}
+                    transition={{ duration: 1.1, ease: EASE, delay: 0.5 + i * 0.12 }}
+                  >
+                    <Image
+                      src={d.src}
+                      width={d.width}
+                      height={d.height}
+                      alt=""
+                      loading="eager"
+                      className="h-auto w-full drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)]"
+                    />
+                  </motion.span>
+                ))}
               </span>
             </motion.p>
           </div>
@@ -376,6 +405,7 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
       title: title ?? DEFAULTS.title,
       text: intro,
       layer: FERMENTATION_LAYERS[(introPicture as PictureSlot | null) ?? 'intro'],
+      decor: INTRO_DECOR,
       button: resolvedButton
         ? { label: resolvedButton, href: buttonLink?.trim() || DEFAULTS.buttonLink }
         : undefined,
