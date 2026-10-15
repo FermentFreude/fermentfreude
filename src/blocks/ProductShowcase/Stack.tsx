@@ -410,13 +410,13 @@ function ProductPanel({
             ) : null}
           </div>
 
-          {/* ── Info, bottom left ── */}
+          {/* ── Info: centred under the product on phone/tablet, bottom left on desktop ── */}
           <motion.div
             ref={infoRef}
             variants={infoGroup}
             initial="enter"
             animate={active ? 'center' : 'enter'}
-            className="relative z-30 max-w-xs pb-8 lg:absolute lg:bottom-0 lg:left-0 lg:pb-10"
+            className="relative z-30 mx-auto max-w-xs pb-8 text-center lg:absolute lg:bottom-0 lg:left-0 lg:mx-0 lg:pb-10 lg:text-left"
           >
             <motion.p
               variants={fadeUp}
@@ -612,12 +612,17 @@ export function ProductShowcaseStack({ tagline, slides, trustPoints, locale }: P
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(el)
+    // Snapping only while the showcase is on screen — page-wide it pulled on the
+    // scroll everywhere (trackpads, Safari), e.g. inside the pinned voucher gallery
     const root = document.documentElement
-    const previous = root.style.scrollSnapType
-    root.style.scrollSnapType = 'y proximity'
+    const visible = new IntersectionObserver(([entry]) => {
+      root.style.scrollSnapType = entry?.isIntersecting ? 'y proximity' : ''
+    })
+    visible.observe(el)
     return () => {
       observer.disconnect()
-      root.style.scrollSnapType = previous
+      visible.disconnect()
+      root.style.scrollSnapType = ''
     }
   }, [slides.length])
 

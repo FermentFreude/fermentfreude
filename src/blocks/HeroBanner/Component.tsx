@@ -5,9 +5,10 @@ import { ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 
 /* ═══════════════════════════════════════════════════════════════
- *  HERO BANNER — full-screen photo (or video) with an editorial text
- *  block bottom left: gold label, big ivory heading, short text and
- *  the brand pill button. A dark gradient keeps the text readable.
+ *  HERO BANNER — black section: text on the left (gold label, big ivory
+ *  heading, short text, brand pill button), the photo (or video) on the
+ *  right with rounded corners. Phone/tablet: text first (centred), then
+ *  the photo.
  * ═══════════════════════════════════════════════════════════════ */
 
 const DEFAULTS = {
@@ -40,54 +41,19 @@ export const HeroBannerBlock: React.FC<Props> = ({
     backgroundImage && typeof backgroundImage === 'object' ? (backgroundImage as MediaType) : null
 
   return (
-    <section
-      id={id ?? undefined}
-      className="relative flex min-h-[100svh] w-full items-end overflow-hidden bg-ff-near-black"
-    >
-      {/* Background: video when set, otherwise the photo */}
-      {backgroundVideoUrl ? (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-          poster={image?.url ?? undefined}
-        >
-          <source src={backgroundVideoUrl} type="video/mp4" />
-        </video>
-      ) : image ? (
-        // Own positioned layer — Media's wrapper is always `relative`
-        <div className="absolute inset-0">
-          <Media resource={image} fill size="100vw" imgClassName="object-cover object-[50%_40%]" />
-        </div>
-      ) : null}
-
-      {/* Readability: the whole photo is toned down, then darkened strongly where
-          the text sits (bottom, and the left on desktop) */}
-      <div aria-hidden className="absolute inset-0 bg-black/35" />
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-linear-to-t from-black/95 via-black/60 to-transparent"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 hidden bg-linear-to-r from-black/75 via-black/30 to-transparent lg:block"
-      />
-
-      {/* Content */}
-      <FadeIn className="container relative z-10 mx-auto w-full container-padding pb-16 pt-32 md:pb-20 lg:pb-24">
-        {/* Phone/tablet: centred; desktop: left, editorial */}
-        <div className="mx-auto max-w-4xl text-center [text-shadow:0_2px_24px_rgba(0,0,0,0.45)] lg:mx-0 lg:text-left">
+    <section id={id ?? undefined} className="w-full bg-ff-near-black py-16 md:py-20 lg:py-24">
+      <div className="container mx-auto container-padding grid items-center gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16">
+        {/* Text — left on desktop, first on phone/tablet (centred there) */}
+        <FadeIn className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
           {eyebrow ? (
             <p className="mb-4 font-display text-xs font-bold uppercase tracking-[0.08em] text-ff-gold md:text-sm">
               {eyebrow}
             </p>
           ) : null}
-          <h2 className="whitespace-pre-line font-display text-[clamp(1.75rem,8.4vw,4.75rem)] lg:text-[clamp(2.25rem,5.5vw,4.75rem)] font-bold leading-[1.02] tracking-[-0.03em] text-ff-ivory">
+          <h2 className="whitespace-pre-line font-display text-[clamp(1.75rem,8.4vw,4rem)] font-bold leading-[1.02] tracking-[-0.03em] text-ff-ivory lg:text-[clamp(2.25rem,4.2vw,4rem)]">
             {resolvedHeading}
           </h2>
-          <p className="mx-auto mb-0 mt-5 max-w-xl whitespace-pre-line lg:mx-0 text-base leading-relaxed text-ff-ivory md:text-lg">
+          <p className="mx-auto mb-0 mt-5 max-w-lg whitespace-pre-line text-base leading-relaxed text-ff-ivory/80 md:text-lg lg:mx-0">
             {resolvedDescription}
           </p>
           <Link
@@ -99,8 +65,35 @@ export const HeroBannerBlock: React.FC<Props> = ({
               <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
             </span>
           </Link>
-        </div>
-      </FadeIn>
+        </FadeIn>
+
+        {/* Photo (or video) — right on desktop, below the text on phone/tablet */}
+        <FadeIn // Desktop: as tall as fits the screen (never cut), phone/tablet: fixed ratio
+          className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-ff-charcoal sm:aspect-[4/3] md:rounded-3xl lg:aspect-auto lg:h-[min(calc(100svh-12rem),44rem)]"
+        >
+          {backgroundVideoUrl ? (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 h-full w-full object-cover"
+              poster={image?.url ?? undefined}
+            >
+              <source src={backgroundVideoUrl} type="video/mp4" />
+            </video>
+          ) : image ? (
+            <div className="absolute inset-0">
+              <Media
+                resource={image}
+                fill
+                size="(min-width: 1024px) 50vw, 100vw"
+                imgClassName="object-cover object-[60%_40%]"
+              />
+            </div>
+          ) : null}
+        </FadeIn>
+      </div>
     </section>
   )
 }
