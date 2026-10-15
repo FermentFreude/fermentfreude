@@ -3,15 +3,7 @@
 import { useArrival, useFitSize, useNavOffset } from '@/components/StoryScene/hooks'
 import { SwipeCapsule, useSwipeNudge, useSwipeTrack } from '@/components/SwipeCapsule'
 import type { FermentationStoryBlock as Props } from '@/payload-types'
-import {
-  ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
-  Leaf,
-  Microscope,
-  Sparkles,
-  Sprout,
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
 import {
   MotionConfig,
   motion,
@@ -284,20 +276,15 @@ function StoryCard({
                 variants={fadeUp}
                 initial="hidden"
                 animate={active ? 'show' : 'hidden'}
-                className="shrink-0"
+                // Centred on phone/tablet, right on desktop
+                className="shrink-0 self-center lg:self-auto"
               >
                 <Link
                   href={card.button.href}
-                  className="group inline-flex items-center gap-3 rounded-full py-2.5 pl-5 pr-2.5 font-display text-sm font-bold text-white transition-colors hover:bg-black"
+                  className="inline-flex items-center rounded-full px-6 py-3 font-display text-sm font-bold text-white transition-transform duration-300 hover:scale-[1.03]"
                   style={{ backgroundColor: INK }}
                 >
                   {card.button.label}
-                  <span
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-white transition-transform duration-300 group-hover:rotate-45"
-                    style={{ color: INK }}
-                  >
-                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-                  </span>
                 </Link>
               </motion.div>
             ) : null}
