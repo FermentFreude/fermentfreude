@@ -7,7 +7,7 @@ export type PictureSlot = 'intro' | 'alive' | 'natural' | 'everyday' | 'protein'
 export const PICTURE_SLOTS: { label: string; value: PictureSlot }[] = [
   { label: 'Intro (GESUND)', value: 'intro' },
   { label: 'Lebendig — chef on a carrot', value: 'alive' },
-  { label: 'Natürlich — chef pulling broccoli', value: 'natural' },
+  { label: 'Natürlich — sliced leek', value: 'natural' },
   { label: 'Alltag', value: 'everyday' },
   { label: 'Protein', value: 'protein' },
   { label: 'Experten', value: 'experts' },
@@ -28,6 +28,7 @@ export type Decor = {
 }
 
 export const FERMENTATION_DECOR = {
+  leek: { src: '/fermentation/leek.webp', width: 1400, height: 824 },
   broccoliChef: { src: '/fermentation/broccoli-chef.webp', width: 1200, height: 812 },
   carrotChef: { src: '/fermentation/carrot-chef.webp', width: 1260, height: 764 },
   appleChef: { src: '/fermentation/apple-chef.webp', width: 1260, height: 864 },
@@ -53,20 +54,12 @@ export const DECOR_BY_SLOT: Partial<Record<PictureSlot, Decor[]>> = {
         '-right-[0.55em] -top-[0.85em] w-[1.5em] -rotate-6 max-md:-right-[0.3em] max-md:w-[1.8em]',
     },
   ],
-  // NATÜRLICH: chef pulling a broccoli — in its own space under the word, fully on
-  // the cream (the black line drawing must never sit on the black letters):
+  // NATÜRLICH: sliced leek — in its own space under the word, fully on the cream:
   // right-aligned on desktop, centred above the swipe capsule on phone/tablet.
-  // ALLTAG: chef with a garlic, sitting above the right end of the word — fully on
-  // the cream, never on the letters
-  everyday: [
-    {
-      ...FERMENTATION_DECOR.garlic,
-      className: 'bottom-full right-[0.02em] mb-[0.1em] w-[0.9em] max-md:w-[1.05em]',
-    },
-  ],
+  // (The broccoli chef stays available in FERMENTATION_DECOR.)
   natural: [
     {
-      ...FERMENTATION_DECOR.broccoliChef,
+      ...FERMENTATION_DECOR.leek,
       className: '',
       placement: 'below',
     },
