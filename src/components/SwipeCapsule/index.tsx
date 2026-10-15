@@ -212,15 +212,15 @@ export function SwipeCapsule({
             className="inline-flex text-ff-ivory"
             animate={
               handDirection === 'back'
-                ? { x: [-9, 9, 9], opacity: [0, 1, 0], rotate: [8, 16, 16] }
-                : { x: [9, -9, -9], opacity: [0, 1, 0], rotate: [-8, -16, -16] }
+                ? { x: [-7, 7, -7], rotate: [8, 14, 8] }
+                : { x: [7, -7, 7], rotate: [-8, -14, -8] }
             }
             transition={{
               duration: 1.5,
               repeat: Infinity,
               repeatDelay: 0.5,
               ease: 'easeInOut',
-              times: [0, 0.65, 1],
+              times: [0, 0.55, 1],
             }}
           >
             <Pointer className="size-4" strokeWidth={1.75} />
@@ -236,7 +236,7 @@ export function SwipeCapsule({
               key={index}
               type="button"
               onClick={() => onSelect(index)}
-              className="flex h-6 items-center px-1"
+              className="flex h-6 items-center rounded-full px-1 outline-none focus-visible:ring-2 focus-visible:ring-ff-gold"
               aria-label={`${label}${isActive ? ' (current)' : ''}`}
               aria-current={isActive ? 'true' : undefined}
             >

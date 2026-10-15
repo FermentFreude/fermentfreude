@@ -3,7 +3,7 @@
 import { useArrival, useFitSize, useNavOffset } from '@/components/StoryScene/hooks'
 import { SwipeCapsule, useSwipeNudge, useSwipeTrack } from '@/components/SwipeCapsule'
 import type { FermentationStoryBlock as Props } from '@/payload-types'
-import { ChevronLeft, ChevronRight, Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
+import { Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
 import {
   MotionConfig,
   motion,
@@ -145,7 +145,11 @@ function StoryCard({
   const imgRotate = useTransform(() => px.get() * 3 + lift.get() * 5)
 
   const benefits = card.benefits ?? []
-  const belowDecor = card.decor?.find((d) => d.placement === 'below')
+  // Phone/tablet: every card's picture sits centred between the word and the
+  // button. Desktop: 'below' pictures stay there (right-aligned), the others
+  // are placed around the word.
+  const belowDecor = card.decor?.find((d) => d.placement === 'below') ?? card.decor?.[0]
+  const belowOnDesktop = belowDecor?.placement === 'below'
   const isFirst = index === 0
   const Heading = isFirst ? 'h2' : 'h3'
 
@@ -162,7 +166,8 @@ function StoryCard({
         style={navOffset ? { paddingTop: navOffset + 24 } : undefined}
       >
         {/* ── Number, title + text, top left ── */}
-        <div className="relative z-20 max-w-md">
+        {/* Phone/tablet: centred; desktop: top left */}
+        <div className="relative z-20 mx-auto max-w-md text-center lg:mx-0 lg:text-left">
           {count > 1 ? (
             <motion.p
               custom={0}
@@ -223,7 +228,7 @@ function StoryCard({
 
         {/* ── Big word with the picture floating over it ── */}
         <div
-          className={`relative flex min-h-0 flex-1 ${belowDecor ? 'flex-col justify-center' : 'items-center'}`}
+          className={`relative flex min-h-0 flex-1 ${belowDecor ? 'flex-col justify-center' : 'items-center'} ${belowDecor && !belowOnDesktop ? 'lg:flex-row lg:items-center lg:justify-start' : ''}`}
         >
           <div
             ref={wordBoxRef}
@@ -266,7 +271,8 @@ function StoryCard({
                   .map((d, i) => (
                     <motion.span
                       key={d.src}
-                      className={`pointer-events-none absolute block ${d.className}`}
+                      // Around the word on desktop only — phone/tablet show it below the word
+                      className={`pointer-events-none absolute block max-lg:hidden ${d.className}`}
                       initial={{ opacity: 0, y: '0.2em', scale: 0.9 }}
                       animate={active ? { opacity: 1, y: 0, scale: 1 } : undefined}
                       transition={{ duration: 1.1, ease: EASE, delay: 0.5 + i * 0.12 }}
@@ -290,7 +296,7 @@ function StoryCard({
               desktop, centred on phone/tablet (above the swipe capsule). */}
           {belowDecor ? (
             <motion.div
-              className="flex min-h-0 max-h-[min(18rem,34vh)] flex-1 justify-center pt-[clamp(0.5rem,2vh,1.5rem)] lg:justify-end"
+              className={`flex min-h-0 max-h-[min(22rem,40vh)] flex-1 justify-center pt-[clamp(0.5rem,2vh,1.5rem)] lg:max-h-[min(18rem,34vh)] lg:justify-end ${belowOnDesktop ? '' : 'lg:hidden'}`}
               initial={{ opacity: 0, y: 16 }}
               animate={active ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
@@ -359,6 +365,7 @@ function StoryCard({
                     variants={fadeUp}
                     initial="hidden"
                     animate={active ? 'show' : 'hidden'}
+                    className="flex flex-col items-center text-center lg:items-start lg:text-left"
                   >
                     <span
                       className="flex size-[clamp(40px,4.5vw,48px)] items-center justify-center rounded-full border"
@@ -611,19 +618,9 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
           </div>
         </div>
 
-        {/* Swipe capsule (+ arrows on desktop) — under the cards; card + capsule = one screen */}
+        {/* Swipe capsule (hand gesture + dots) — under the cards; card + capsule = one screen */}
         {cards.length > 1 ? (
-          <div className="flex h-[4.5rem] items-start justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => goTo(active - 1)}
-              disabled={active === 0}
-              aria-label="Previous"
-              className="hidden size-10 items-center justify-center rounded-full border transition-opacity disabled:opacity-25 lg:flex"
-              style={{ borderColor: `${INK}33`, color: INK }}
-            >
-              <ChevronLeft className="size-4" strokeWidth={1.75} />
-            </button>
+          <div className="flex h-[4.5rem] items-start justify-center">
             <SwipeCapsule
               labels={cards.map((c) => c.title || c.word)}
               active={active}
@@ -632,16 +629,6 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
               onSelect={goTo}
               ariaLabel="Fermentation cards"
             />
-            <button
-              type="button"
-              onClick={() => goTo(active + 1)}
-              disabled={active >= cards.length - 1}
-              aria-label="Next"
-              className="hidden size-10 items-center justify-center rounded-full border transition-opacity disabled:opacity-25 lg:flex"
-              style={{ borderColor: `${INK}33`, color: INK }}
-            >
-              <ChevronRight className="size-4" strokeWidth={1.75} />
-            </button>
           </div>
         ) : null}
       </div>
