@@ -181,14 +181,14 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
       >
         {/* ── Scene grid: headline area on top, info underneath — they can never
          *    overlap. ── */}
-        <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-5 pb-5 pt-16 md:gap-8 md:pb-8 md:pt-20 lg:grid-cols-[minmax(15rem,20rem)_1fr] lg:grid-rows-1 lg:gap-10 lg:pb-10 lg:pt-20 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 [@media(max-height:700px)]:pt-14">
+        <div className="container mx-auto container-padding grid min-h-0 flex-1 grid-rows-[1fr_auto] gap-5 pb-5 pt-16 md:gap-8 md:pb-8 md:pt-20 lg:landscape:grid-cols-[minmax(15rem,20rem)_1fr] lg:landscape:grid-rows-1 lg:landscape:gap-10 lg:pb-10 lg:pt-20 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:pb-4 [@media(max-height:700px)]:pt-14">
           {/* Headline + layers as one group.
            *  Phone/tablet: the cell above the text is a size container; the group
            *  keeps the artboard's proportions and is as big as that cell allows —
            *  limited by width AND height (cqw/cqh), so on a short screen (browser
            *  bars) it shrinks instead of running behind the text and points bar.
            *  Desktop: same group, centred in the column right of the info. */}
-          <div className="relative flex min-h-0 items-center justify-center [container-type:size] lg:col-start-2 lg:row-start-1">
+          <div className="relative flex min-h-0 items-center justify-center [container-type:size] lg:landscape:col-start-2 lg:landscape:row-start-1">
             <div className="relative aspect-[1004/673] w-[min(100cqw,calc(100cqh*1.4918))]">
               {/* Layers — in front of the headline */}
               <motion.div
@@ -261,7 +261,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
           {/* Info, bottom left on every screen — big price first, the button right
            *  under it, then name + short description. Above the layers so it
            *  always stays readable. */}
-          <div className="relative z-20 mx-auto max-w-sm self-end text-center lg:col-start-1 lg:row-start-1 lg:mx-0 lg:max-w-none lg:text-left">
+          <div className="relative z-20 mx-auto max-w-sm self-end text-center lg:landscape:col-start-1 lg:landscape:row-start-1 lg:landscape:mx-0 lg:landscape:max-w-none lg:landscape:text-left">
             {/* Phone: price + button side by side (saves height); tablet+: stacked. Centred below lg */}
             <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 md:block">
               {data.priceText ? (

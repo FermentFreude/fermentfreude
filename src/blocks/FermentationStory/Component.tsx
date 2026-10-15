@@ -158,7 +158,7 @@ function StoryCard({
       style={{ backgroundColor: PAPER, color: INK }}
     >
       <div
-        className="container mx-auto container-padding flex h-full flex-col gap-6 py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10 [@media(max-height:620px)]:gap-3"
+        className="container mx-auto container-padding flex h-full flex-col gap-6 py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10 [@media(max-height:620px)]:gap-3 [@media(max-height:620px)]:py-6"
         style={navOffset ? { paddingTop: navOffset + 24 } : undefined}
       >
         {/* ── Number, title + text, top left ── */}
@@ -192,7 +192,7 @@ function StoryCard({
               variants={fadeUp}
               initial="hidden"
               animate={active ? 'show' : 'hidden'}
-              className="mb-0 mt-3 whitespace-pre-line text-sm leading-relaxed opacity-75 md:text-base"
+              className="mb-0 mt-3 whitespace-pre-line text-sm leading-relaxed opacity-75 md:text-base [@media(max-height:620px)]:mt-2 [@media(max-height:620px)]:text-[13px] [@media(max-height:620px)]:leading-snug"
             >
               {card.text}
             </motion.p>
@@ -475,6 +475,16 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
   // Mouse/trackpad: no free sideways scrolling (desk:overflow-x-hidden) and no
   // nudge — cards change only with the arrows/dots. Touch: swipe + nudge.
   useSwipeNudge(trackRef, rowRef, cards.length, isTouch)
+  // The track must never scroll vertically (focus, find-in-page, trackpads)
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    const keepTop = () => {
+      if (track.scrollTop !== 0) track.scrollTop = 0
+    }
+    track.addEventListener('scroll', keepTop, { passive: true })
+    return () => track.removeEventListener('scroll', keepTop)
+  }, [])
 
   if (visible === false) return null
 

@@ -111,11 +111,19 @@ export function useSwipeTrack({ trackRef, itemRefs, count, enabled }: TrackOptio
     (index: number) => {
       const clamped = Math.max(0, Math.min(count - 1, index))
       const el = itemRefs.current?.[clamped]
-      if (!el) return
-      el.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' })
+      const track = trackRef.current
+      if (!el || !track) return
+      // Sideways only — scrollIntoView could also move the page or the track vertically
+      const snapLeft = parseFloat(getComputedStyle(track).scrollPaddingLeft) || 0
+      const left =
+        el.getBoundingClientRect().left -
+        track.getBoundingClientRect().left +
+        track.scrollLeft -
+        snapLeft
+      track.scrollTo({ left, behavior: 'smooth' })
       setActive(clamped)
     },
-    [count, itemRefs],
+    [count, itemRefs, trackRef],
   )
 
   return { active, handDirection, isSwiping, goTo }
