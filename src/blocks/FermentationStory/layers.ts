@@ -2,14 +2,15 @@
 // One slot per card; a card whose slot is empty simply shows without a picture.
 export type StoryLayer = { src: string; width: number; height: number; alt: string }
 
-export type PictureSlot = 'intro' | 'alive' | 'craft' | 'research' | 'kitchen'
+export type PictureSlot = 'intro' | 'alive' | 'natural' | 'everyday' | 'protein' | 'experts'
 
 export const PICTURE_SLOTS: { label: string; value: PictureSlot }[] = [
-  { label: '1 · Intro (GESUND)', value: 'intro' },
-  { label: '2 · Alive', value: 'alive' },
-  { label: '3 · Craft', value: 'craft' },
-  { label: '4 · Research', value: 'research' },
-  { label: '5 · Kitchen', value: 'kitchen' },
+  { label: 'Intro (GESUND)', value: 'intro' },
+  { label: 'Lebendig — chef on a carrot', value: 'alive' },
+  { label: 'Natürlich — chef pulling broccoli', value: 'natural' },
+  { label: 'Alltag', value: 'everyday' },
+  { label: 'Protein', value: 'protein' },
+  { label: 'Experten', value: 'experts' },
 ]
 
 export const FERMENTATION_LAYERS: Partial<Record<PictureSlot, StoryLayer>> = {}
@@ -52,10 +53,10 @@ export const DECOR_BY_SLOT: Partial<Record<PictureSlot, Decor[]>> = {
         '-right-[0.55em] -top-[0.85em] w-[1.5em] -rotate-6 max-md:-right-[0.3em] max-md:w-[1.8em]',
     },
   ],
-  // HANDWERK: chef pulling a broccoli — in its own space under the word, fully on
+  // NATÜRLICH: chef pulling a broccoli — in its own space under the word, fully on
   // the cream (the black line drawing must never sit on the black letters):
   // right-aligned on desktop, centred above the swipe capsule on phone/tablet.
-  craft: [
+  natural: [
     {
       ...FERMENTATION_DECOR.broccoliChef,
       className: '',

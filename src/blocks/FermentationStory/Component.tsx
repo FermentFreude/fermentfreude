@@ -449,6 +449,9 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
       sourceUrl: s.sourceUrl,
       layer: s.picture ? FERMENTATION_LAYERS[s.picture as PictureSlot] : undefined,
       decor: s.picture ? DECOR_BY_SLOT[s.picture as PictureSlot] : undefined,
+      button: s.buttonLabel?.trim()
+        ? { label: s.buttonLabel.trim(), href: s.buttonLink?.trim() || '/' }
+        : undefined,
     })),
   ]
 

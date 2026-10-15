@@ -3244,7 +3244,7 @@ export interface FermentationStoryBlock {
   /**
    * Which built-in picture floats over the big word on the first card.
    */
-  introPicture?: ('intro' | 'alive' | 'craft' | 'research' | 'kitchen') | null;
+  introPicture?: ('intro' | 'alive' | 'natural' | 'everyday' | 'protein' | 'experts') | null;
   /**
    * Up to 3 short benefits with an icon — a title and one short line each.
    */
@@ -3257,7 +3257,7 @@ export interface FermentationStoryBlock {
       }[]
     | null;
   /**
-   * Each card slides up over the one before, full screen — like the product showcase. Keep it short and honest: say what research looks at, never promise a health effect.
+   * The cards after the first — visitors swipe sideways through them. Keep it short and factual: describe the food and the craft, never promise a health effect.
    */
   slides?:
     | {
@@ -3268,12 +3268,20 @@ export interface FermentationStoryBlock {
         /**
          * Built-in picture over the big word.
          */
-        picture?: ('intro' | 'alive' | 'craft' | 'research' | 'kitchen') | null;
+        picture?: ('intro' | 'alive' | 'natural' | 'everyday' | 'protein' | 'experts') | null;
         title: string;
         /**
          * A few short sentences.
          */
         text: string;
+        /**
+         * e.g. "Zum Shop". Empty = no button.
+         */
+        buttonLabel?: string | null;
+        /**
+         * e.g. "/shop".
+         */
+        buttonLink?: string | null;
         /**
          * e.g. "Wastyk et al., Cell (2021)".
          */
@@ -7747,6 +7755,8 @@ export interface FermentationStoryBlockSelect<T extends boolean = true> {
         picture?: T;
         title?: T;
         text?: T;
+        buttonLabel?: T;
+        buttonLink?: T;
         sourceLabel?: T;
         sourceUrl?: T;
         id?: T;

@@ -126,7 +126,7 @@ export const FermentationStory: Block = {
       labels: { singular: 'Card', plural: 'Cards' },
       admin: {
         description:
-          'Each card slides up over the one before, full screen — like the product showcase. Keep it short and honest: say what research looks at, never promise a health effect.',
+          'The cards after the first — visitors swipe sideways through them. Keep it short and factual: describe the food and the craft, never promise a health effect.',
       },
       fields: [
         {
@@ -163,6 +163,25 @@ export const FermentationStory: Block = {
           required: true,
           label: 'Text',
           admin: { description: 'A few short sentences.' },
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'buttonLabel',
+              type: 'text',
+              localized: true,
+              label: 'Button text (optional)',
+              admin: { description: 'e.g. "Zum Shop". Empty = no button.', width: '50%' },
+            },
+            {
+              name: 'buttonLink',
+              type: 'text',
+              localized: true,
+              label: 'Button link',
+              admin: { description: 'e.g. "/shop".', width: '50%' },
+            },
+          ],
         },
         {
           type: 'row',
