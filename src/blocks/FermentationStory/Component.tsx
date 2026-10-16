@@ -112,6 +112,28 @@ function StoryCard({
     if (ownFit) onFit(card.key, ownFit)
   }, [ownFit, card.key, onFit])
 
+  // Where the big word ends (space right of it) and the empty strip under its
+  // letters — desktop lines the 'below' picture + button up with the word's end
+  // and lets the picture use that strip. Offsets ignore the pointer float.
+  const lettersRef = useRef<HTMLSpanElement>(null)
+  const [wordEdge, setWordEdge] = useState<{ end: number; gap: number } | null>(null)
+  useEffect(() => {
+    const box = wordBoxRef.current
+    const letters = lettersRef.current
+    const line = letters?.offsetParent as HTMLElement | null
+    if (!box || !letters || !line) return
+    const measure = () =>
+      setWordEdge({
+        end: Math.max(0, line.clientWidth - (letters.offsetLeft + letters.offsetWidth)),
+        gap: Math.max(0, line.clientHeight - (letters.offsetTop + letters.offsetHeight)),
+      })
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(box)
+    observer.observe(letters)
+    return () => observer.disconnect()
+  }, [])
+
   const active = useInView(ref, { once: true, amount: 0.25 })
   // Room for the site header while it is on screen (it slides away on scroll-down)
   const navOffset = useNavOffset()
@@ -159,7 +181,14 @@ function StoryCard({
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       className="relative h-full overflow-clip"
-      style={{ backgroundColor: PAPER, color: INK }}
+      style={
+        {
+          backgroundColor: PAPER,
+          color: INK,
+          '--word-end': `${wordEdge?.end ?? 0}px`,
+          '--word-gap': `${wordEdge?.gap ?? 0}px`,
+        } as React.CSSProperties
+      }
     >
       <div
         className="container mx-auto container-padding flex h-full flex-col gap-6 py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10 [@media(max-height:620px)]:gap-3 [@media(max-height:620px)]:py-6"
@@ -254,7 +283,7 @@ function StoryCard({
               }}
             >
               {/* Mask: top padding keeps accents (Ü, É) visible, bottom padding the descenders */}
-              <span className="relative inline-block">
+              <span ref={lettersRef} className="relative inline-block">
                 <span className="-my-[0.16em] block overflow-hidden pb-[0.06em] pt-[0.16em]">
                   <motion.span
                     className="block"
@@ -292,15 +321,26 @@ function StoryCard({
           </div>
 
           {/* Cut-out below the word, in its own space: shrinks to fit, so it never
-              sits on the black letters or leaves the card. Right-aligned on
-              desktop, centred on phone/tablet (above the swipe capsule). */}
+              sits on the black letters or leaves the card. Desktop: bigger, its
+              right edge lined up with the end of the word (button below it; on
+              short screens beside it, so the picture keeps its size);
+              phone/tablet: centred (above the swipe capsule). */}
           {belowDecor ? (
             <motion.div
-              className={`flex min-h-0 max-h-[min(22rem,40vh)] flex-1 justify-center pt-[clamp(0.5rem,2vh,1.5rem)] lg:max-h-[min(18rem,34vh)] lg:justify-end ${belowOnDesktop ? '' : 'lg:hidden'}`}
+              className={`flex min-h-0 max-h-[min(22rem,40vh)] flex-1 justify-center pt-[clamp(0.5rem,2vh,1.5rem)] lg:mt-[calc(var(--word-gap)*-1)] lg:max-h-[min(26rem,42vh)] lg:justify-end lg:pr-[var(--word-end)] lg:pt-5 ${belowOnDesktop ? '' : 'lg:hidden'}`}
               initial={{ opacity: 0, y: 16 }}
               animate={active ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
             >
+              {belowOnDesktop && card.button ? (
+                <Link
+                  href={card.button.href}
+                  className="mr-6 hidden shrink-0 items-center self-end rounded-full px-6 py-3 font-display text-sm font-bold text-white transition-transform duration-300 hover:scale-[1.03] lg:[@media(max-height:820px)]:inline-flex"
+                  style={{ backgroundColor: INK }}
+                >
+                  {card.button.label}
+                </Link>
+              ) : null}
               <Image
                 src={belowDecor.src}
                 width={belowDecor.width}
@@ -308,7 +348,7 @@ function StoryCard({
                 alt=""
                 loading="eager"
                 sizes="(min-width: 1024px) 30vw, 70vw"
-                className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)] lg:object-right-bottom"
+                className="h-full w-auto min-w-0 max-w-full object-contain object-bottom drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)] lg:object-right-bottom"
               />
             </motion.div>
           ) : null}
@@ -333,7 +373,10 @@ function StoryCard({
 
         {/* ── Intro card: desktop benefits left + button right; phone button, then benefits ── */}
         {card.button || benefits.length ? (
-          <div className="relative z-20 flex flex-col gap-8 lg:flex-row-reverse lg:items-end lg:justify-between">
+          <div
+            // Desktop, with a picture under the word: button right under it, same right edge
+            className={`relative z-20 flex flex-col gap-8 lg:flex-row-reverse lg:items-end lg:justify-between ${belowOnDesktop ? 'lg:-mt-3 lg:pr-[var(--word-end)] lg:[@media(max-height:820px)]:hidden' : ''}`}
+          >
             {card.button ? (
               <motion.div
                 custom={4}
