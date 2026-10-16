@@ -93,6 +93,8 @@ function StoryCard({
   count,
   wordSize,
   onFit,
+  shared,
+  onMeasure,
   enter,
 }: {
   card: CardData
@@ -103,6 +105,9 @@ function StoryCard({
   /** Shared size (the smallest fit of all cards) so every big word matches */
   wordSize: number | null
   onFit: (key: string, size: number) => void
+  /** Shared heights (the tallest of all cards): text block + whole stack */
+  shared: { text: number | null; stack: number | null }
+  onMeasure: (key: string, kind: 'text' | 'stack', height: number) => void
 }) {
   const ref = useRef<HTMLElement>(null)
   const wordBoxRef = useRef<HTMLDivElement>(null)
@@ -133,6 +138,41 @@ function StoryCard({
     observer.observe(letters)
     return () => observer.disconnect()
   }, [])
+
+  /* Same layout on every card: the text block takes the height of the tallest
+   * one, so the big word, the picture space and the button sit at the same
+   * place on every card; the whole stack is centred like the tallest card's. */
+  const containerRef = useRef<HTMLDivElement>(null)
+  const textRef = useRef<HTMLDivElement>(null)
+  const [frame, setFrame] = useState<{ height: number; pad: number } | null>(null)
+  useEffect(() => {
+    const section = ref.current
+    const container = containerRef.current
+    const text = textRef.current
+    if (!section || !container || !text) return
+    const measure = () => {
+      onMeasure(card.key, 'text', text.offsetHeight)
+      // Natural stack height (text at its shared height + word + picture space +
+      // button): the parts plus the gaps between them, never the free space
+      const items = ([...container.children] as HTMLElement[]).filter((el) => el.offsetHeight > 0)
+      const gap = parseFloat(getComputedStyle(container).rowGap) || 0
+      onMeasure(
+        card.key,
+        'stack',
+        items.reduce((sum, el) => sum + el.offsetHeight, 0) + gap * Math.max(0, items.length - 1),
+      )
+      setFrame({
+        height: section.clientHeight,
+        pad: parseFloat(getComputedStyle(container).paddingBottom) || 0,
+      })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(section)
+    observer.observe(text)
+    ;[...container.children].forEach((child) => observer.observe(child))
+    return () => observer.disconnect()
+  }, [card.key, onMeasure])
 
   const active = useInView(ref, { once: true, amount: 0.25 })
   // Room for the site header while it is on screen (it slides away on scroll-down)
@@ -172,7 +212,16 @@ function StoryCard({
   // are placed around the word.
   const belowDecor = card.decor?.find((d) => d.placement === 'below') ?? card.decor?.[0]
   const belowOnDesktop = belowDecor?.placement === 'below'
+  // A lone button (no benefits) sits right under the picture space, at the word's end
+  const buttonOnly = Boolean(card.button) && benefits.length === 0
   const isFirst = index === 0
+  // Top padding: centres the tallest card's stack (never less than the normal
+  // padding, never under the site header) — the same value on every card
+  const centredTop =
+    frame && shared.stack ? Math.max(frame.pad, (frame.height - shared.stack) / 2) : null
+  const navTop = navOffset ? navOffset + 24 : 0
+  const paddingTop =
+    centredTop !== null ? Math.max(centredTop, navTop) : navTop ? navTop : undefined
   const Heading = isFirst ? 'h2' : 'h3'
 
   return (
@@ -191,74 +240,78 @@ function StoryCard({
       }
     >
       <div
-        className="container mx-auto container-padding flex h-full flex-col gap-6 py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10 [@media(max-height:620px)]:gap-3 [@media(max-height:620px)]:py-6"
-        style={navOffset ? { paddingTop: navOffset + 24 } : undefined}
+        ref={containerRef}
+        className="container mx-auto container-padding flex h-full flex-col gap-6 [--pic:clamp(6rem,min(58vw,calc(46svh_-_13rem)),19rem)] lg:[--pic:clamp(6rem,min(17vw,calc(50svh_-_15rem)),15rem)] py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10 [@media(max-height:620px)]:gap-3 [@media(max-height:620px)]:py-6"
+        style={paddingTop !== undefined ? { paddingTop } : undefined}
       >
         {/* ── Number, title + text, top left ── */}
-        {/* Phone/tablet: centred; desktop: top left */}
-        <div className="relative z-20 mx-auto max-w-md text-center lg:mx-0 lg:text-left">
-          {count > 1 ? (
-            <motion.p
-              custom={0}
-              variants={fadeUp}
-              initial="hidden"
-              animate={active ? 'show' : 'hidden'}
-              className="mb-3 font-display text-[11px] font-bold tabular-nums tracking-[0.14em] opacity-50"
-            >
-              {pad(index + 1)} / {pad(count)}
-            </motion.p>
-          ) : null}
-          {card.title ? (
-            <motion.div
-              custom={1}
-              variants={fadeUp}
-              initial="hidden"
-              animate={active ? 'show' : 'hidden'}
-            >
-              <Heading className="font-display text-2xl font-bold leading-tight tracking-[-0.02em] md:text-3xl">
-                {card.title}
-              </Heading>
-            </motion.div>
-          ) : null}
-          {card.text ? (
-            <motion.p
-              custom={2}
-              variants={fadeUp}
-              initial="hidden"
-              animate={active ? 'show' : 'hidden'}
-              className="mb-0 mt-3 whitespace-pre-line text-sm leading-relaxed opacity-75 md:text-base [@media(max-height:620px)]:mt-2 [@media(max-height:620px)]:text-[13px] [@media(max-height:620px)]:leading-snug"
-            >
-              {card.text}
-            </motion.p>
-          ) : null}
-          {card.sourceLabel ? (
-            <motion.p
-              custom={3}
-              variants={fadeUp}
-              initial="hidden"
-              animate={active ? 'show' : 'hidden'}
-              className="mb-0 mt-3 text-xs opacity-55"
-            >
-              {card.sourceUrl ? (
-                <a
-                  href={card.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline decoration-current/30 underline-offset-2 hover:decoration-current"
-                >
-                  {card.sourceLabel}
-                </a>
-              ) : (
-                card.sourceLabel
-              )}
-            </motion.p>
-          ) : null}
+        {/* Phone/tablet: centred; desktop: top left. Held at the tallest card's height. */}
+        <div className="shrink-0" style={{ minHeight: shared.text ?? undefined }}>
+          <div
+            ref={textRef}
+            className="relative z-20 mx-auto max-w-md text-center lg:mx-0 lg:text-left"
+          >
+            {count > 1 ? (
+              <motion.p
+                custom={0}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mb-3 font-display text-[11px] font-bold tabular-nums tracking-[0.14em] opacity-50"
+              >
+                {pad(index + 1)} / {pad(count)}
+              </motion.p>
+            ) : null}
+            {card.title ? (
+              <motion.div
+                custom={1}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+              >
+                <Heading className="font-display text-2xl font-bold leading-tight tracking-[-0.02em] md:text-3xl">
+                  {card.title}
+                </Heading>
+              </motion.div>
+            ) : null}
+            {card.text ? (
+              <motion.p
+                custom={2}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mb-0 mt-3 whitespace-pre-line text-sm leading-relaxed opacity-75 md:text-base [@media(max-height:620px)]:mt-2 [@media(max-height:620px)]:text-[13px] [@media(max-height:620px)]:leading-snug"
+              >
+                {card.text}
+              </motion.p>
+            ) : null}
+            {card.sourceLabel ? (
+              <motion.p
+                custom={3}
+                variants={fadeUp}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="mb-0 mt-3 text-xs opacity-55"
+              >
+                {card.sourceUrl ? (
+                  <a
+                    href={card.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-current/30 underline-offset-2 hover:decoration-current"
+                  >
+                    {card.sourceLabel}
+                  </a>
+                ) : (
+                  card.sourceLabel
+                )}
+              </motion.p>
+            ) : null}
+          </div>
         </div>
 
-        {/* ── Big word with the picture floating over it ── */}
-        <div
-          className={`relative flex min-h-0 flex-1 ${belowDecor ? 'flex-col justify-center' : 'items-center'} ${belowDecor && !belowOnDesktop ? 'lg:flex-row lg:items-center lg:justify-start' : ''}`}
-        >
+        {/* ── Big word, then the picture space (same height on every card) ── */}
+        <div className="relative flex shrink-0 flex-col">
           <div
             ref={wordBoxRef}
             // Short laptops: a lower word box leaves room for cut-outs (all cards share the size)
@@ -320,27 +373,31 @@ function StoryCard({
             </motion.p>
           </div>
 
-          {/* Cut-out below the word, in its own space: shrinks to fit, so it never
-              sits on the black letters or leaves the card. Desktop: bigger, its
-              right edge lined up with the end of the word (button below it; on
-              short screens beside it, so the picture keeps its size);
-              phone/tablet: centred (above the swipe capsule). */}
-          {belowDecor ? (
-            <motion.div
-              className={`flex min-h-0 max-h-[min(22rem,40vh)] flex-1 justify-center pt-[clamp(0.5rem,2vh,1.5rem)] lg:mt-[calc(var(--word-gap)*-1)] lg:max-h-[min(26rem,42vh)] lg:justify-end lg:pr-[var(--word-end)] lg:pt-5 ${belowOnDesktop ? '' : 'lg:hidden'}`}
-              initial={{ opacity: 0, y: 16 }}
-              animate={active ? { opacity: 1, y: 0 } : undefined}
-              transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
-            >
-              {belowOnDesktop && card.button ? (
-                <Link
-                  href={card.button.href}
-                  className="mr-6 hidden shrink-0 items-center self-end rounded-full px-6 py-3 font-display text-sm font-bold text-white transition-transform duration-300 hover:scale-[1.03] lg:[@media(max-height:820px)]:inline-flex"
-                  style={{ backgroundColor: INK }}
-                >
-                  {card.button.label}
-                </Link>
-              ) : null}
+          {/* Picture space under the word — on every card, same fixed height, so
+              the button lands at the same place everywhere. Size comes from the
+              screen only (--pic), never from the space left over: it doesn't
+              change while the site header slides in/out. Every picture has the
+              same visual weight (equal area, whatever its shape).
+              Desktop: right edge at the end of the word; cards whose picture sits
+              around the word keep the space empty (the intro card drops it and
+              pulls its benefits row up, so its button lines up with the others). Short desktop screens: the
+              button sits beside the picture instead of below it. */}
+          <motion.div
+            className={`flex h-[calc(var(--pic)*0.94_+_clamp(0.5rem,2vh,1.5rem))] shrink-0 items-end justify-center pt-[clamp(0.5rem,2vh,1.5rem)] lg:mt-[calc(var(--word-gap)*-1)] lg:h-[calc(var(--pic)*0.94_+_1.25rem)] lg:justify-end lg:pr-[var(--word-end)] lg:pt-5 ${benefits.length && !belowOnDesktop ? 'lg:hidden' : ''}`}
+            initial={{ opacity: 0, y: 16 }}
+            animate={active ? { opacity: 1, y: 0 } : undefined}
+            transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
+          >
+            {buttonOnly && card.button ? (
+              <Link
+                href={card.button.href}
+                className="mr-6 hidden shrink-0 items-center self-end rounded-full px-6 py-3 font-display text-sm font-bold text-white transition-transform duration-300 hover:scale-[1.03] lg:[@media(max-height:820px)]:inline-flex"
+                style={{ backgroundColor: INK }}
+              >
+                {card.button.label}
+              </Link>
+            ) : null}
+            {belowDecor ? (
               <Image
                 src={belowDecor.src}
                 width={belowDecor.width}
@@ -348,10 +405,14 @@ function StoryCard({
                 alt=""
                 loading="eager"
                 sizes="(min-width: 1024px) 30vw, 70vw"
-                className="h-full w-auto min-w-0 max-w-full object-contain object-bottom drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)] lg:object-right-bottom"
+                className={`h-auto max-h-full min-w-0 max-w-full drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)] ${belowOnDesktop ? '' : 'lg:hidden'}`}
+                // Equal area: width = size × √(width/height)
+                style={{
+                  width: `calc(var(--pic) * ${Math.sqrt(belowDecor.width / belowDecor.height).toFixed(3)})`,
+                }}
               />
-            </motion.div>
-          ) : null}
+            ) : null}
+          </motion.div>
 
           {card.layer ? (
             <motion.div
@@ -374,8 +435,9 @@ function StoryCard({
         {/* ── Intro card: desktop benefits left + button right; phone button, then benefits ── */}
         {card.button || benefits.length ? (
           <div
-            // Desktop, with a picture under the word: button right under it, same right edge
-            className={`relative z-20 flex flex-col gap-8 lg:flex-row-reverse lg:items-end lg:justify-between ${belowOnDesktop ? 'lg:-mt-3 lg:pr-[var(--word-end)] lg:[@media(max-height:820px)]:hidden' : ''}`}
+            // Desktop, lone button: right under the picture space, at the word's end
+            // (short screens: beside the picture, inside that space)
+            className={`relative z-20 flex shrink-0 flex-col gap-8 lg:flex-row-reverse lg:items-end lg:justify-between ${benefits.length ? 'lg:mt-[calc(var(--pic)*0.94_-_var(--word-gap)_-_52px)] lg:[@media(max-height:820px)]:mt-[calc(var(--pic)*0.94_-_var(--word-gap)_-_90px)]' : ''} ${buttonOnly ? 'lg:-mt-3 lg:pr-[var(--word-end)] lg:[@media(max-height:820px)]:hidden' : ''}`}
           >
             {card.button ? (
               <motion.div
@@ -512,6 +574,18 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
   }, [])
   const known = Object.values(fits)
   const wordSize = known.length === cards.length ? Math.min(...known) : null
+
+  // Same layout on every card: the tallest text block and the tallest stack
+  const [heights, setHeights] = useState<Record<string, number>>({})
+  const onMeasure = useCallback((key: string, kind: 'text' | 'stack', height: number) => {
+    const id = `${kind}:${key}`
+    setHeights((prev) => (prev[id] === height ? prev : { ...prev, [id]: height }))
+  }, [])
+  const tallest = (kind: 'text' | 'stack') => {
+    const values = cards.map((card) => heights[`${kind}:${card.key}`])
+    return values.every((v) => v !== undefined) ? Math.max(...(values as number[])) : null
+  }
+  const shared = { text: tallest('text'), stack: tallest('stack') }
 
   /* The first card is what you see while scrolling down. The others are
    * optional: a sideways swipe row (touch, trackpad, dots, arrows) — the page
@@ -653,6 +727,8 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
                     count={cards.length}
                     wordSize={wordSize}
                     onFit={onFit}
+                    shared={shared}
+                    onMeasure={onMeasure}
                     enter={enter}
                   />
                 )}
