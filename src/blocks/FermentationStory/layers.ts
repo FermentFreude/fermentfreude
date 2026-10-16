@@ -8,9 +8,9 @@ export const PICTURE_SLOTS: { label: string; value: PictureSlot }[] = [
   { label: 'Intro (GESUND)', value: 'intro' },
   { label: 'Lebendig — chef on a carrot', value: 'alive' },
   { label: 'Natürlich — chef pulling broccoli', value: 'natural' },
-  { label: 'Alltag — chef riding a leek', value: 'everyday' },
-  { label: 'Protein', value: 'protein' },
-  { label: 'Experten — chef peeking over a tempeh block', value: 'experts' },
+  { label: 'Alltag — chef hugging a jar of kimchi', value: 'everyday' },
+  { label: 'Protein — chef peeking over a tempeh block', value: 'protein' },
+  { label: 'Experten — chef riding a leek', value: 'experts' },
 ]
 
 export const FERMENTATION_LAYERS: Partial<Record<PictureSlot, StoryLayer>> = {}
@@ -35,6 +35,7 @@ export const FERMENTATION_DECOR = {
   jar: { src: '/fermentation/jar.webp', width: 192, height: 218 },
   garlic: { src: '/fermentation/garlic.webp', width: 726, height: 726 },
   tempehChef: { src: '/fermentation/tempeh-chef.webp', width: 1400, height: 791 },
+  kimchiChef: { src: '/fermentation/kimchi-chef.webp', width: 1400, height: 1218 },
 } as const
 
 /** Intro card (GESUND): chef pulling an apple, bottom right of the word */
@@ -64,22 +65,29 @@ export const DECOR_BY_SLOT: Partial<Record<PictureSlot, Decor[]>> = {
       placement: 'below',
     },
   ],
-  // ALLTAG: leek-riding chef at the top right corner of the word — above the
-  // letters, fully on the cream
+  // ALLTAG: chef hugging a jar of kimchi — in its own space under the word
   everyday: [
     {
-      ...FERMENTATION_DECOR.leek,
-      className:
-        'bottom-full -right-[0.15em] mb-[0.06em] w-[1.25em] max-md:right-0 max-md:w-[1.9em] max-md:[@media(max-height:620px)]:w-[1.3em]',
+      ...FERMENTATION_DECOR.kimchiChef,
+      className: '',
+      placement: 'below',
     },
   ],
-  // EXPERTEN: chef peeking over a block of tempeh — like NATÜRLICH, in its own
-  // space under the word (right-aligned on desktop, centred on phone/tablet)
-  experts: [
+  // PROTEIN: chef peeking over a block of tempeh — in its own space under the word
+  protein: [
     {
       ...FERMENTATION_DECOR.tempehChef,
       className: '',
       placement: 'below',
+    },
+  ],
+  // EXPERTEN: leek-riding chef at the top right corner of the word — above the
+  // letters, fully on the cream (phone/tablet: centred under the word)
+  experts: [
+    {
+      ...FERMENTATION_DECOR.leek,
+      className:
+        'bottom-full -right-[0.15em] mb-[0.06em] w-[1.25em] max-md:right-0 max-md:w-[1.9em] max-md:[@media(max-height:620px)]:w-[1.3em]',
     },
   ],
 }
