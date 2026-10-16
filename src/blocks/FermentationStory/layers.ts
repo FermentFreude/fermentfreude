@@ -10,7 +10,7 @@ export const PICTURE_SLOTS: { label: string; value: PictureSlot }[] = [
   { label: 'Natürlich — chef pulling broccoli', value: 'natural' },
   { label: 'Alltag — chef riding a leek', value: 'everyday' },
   { label: 'Protein', value: 'protein' },
-  { label: 'Experten', value: 'experts' },
+  { label: 'Experten — chef peeking over a tempeh block', value: 'experts' },
 ]
 
 export const FERMENTATION_LAYERS: Partial<Record<PictureSlot, StoryLayer>> = {}
@@ -34,6 +34,7 @@ export const FERMENTATION_DECOR = {
   appleChef: { src: '/fermentation/apple-chef.webp', width: 1260, height: 864 },
   jar: { src: '/fermentation/jar.webp', width: 192, height: 218 },
   garlic: { src: '/fermentation/garlic.webp', width: 726, height: 726 },
+  tempehChef: { src: '/fermentation/tempeh-chef.webp', width: 1400, height: 791 },
 } as const
 
 /** Intro card (GESUND): chef pulling an apple, bottom right of the word */
@@ -70,6 +71,15 @@ export const DECOR_BY_SLOT: Partial<Record<PictureSlot, Decor[]>> = {
       ...FERMENTATION_DECOR.leek,
       className:
         'bottom-full -right-[0.15em] mb-[0.06em] w-[1.25em] max-md:right-0 max-md:w-[1.9em] max-md:[@media(max-height:620px)]:w-[1.3em]',
+    },
+  ],
+  // EXPERTEN: chef peeking over a block of tempeh — like NATÜRLICH, in its own
+  // space under the word (right-aligned on desktop, centred on phone/tablet)
+  experts: [
+    {
+      ...FERMENTATION_DECOR.tempehChef,
+      className: '',
+      placement: 'below',
     },
   ],
 }
