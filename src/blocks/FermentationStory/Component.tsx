@@ -1,16 +1,17 @@
 'use client'
 
-import { useArrival, useFitSize } from '@/components/StoryScene/hooks'
+import { useFitSize } from '@/components/StoryScene/hooks'
 import { SwipeCapsule, useSwipeNudge, useSwipeTrack } from '@/components/SwipeCapsule'
 import type { FermentationStoryBlock as Props } from '@/payload-types'
-import { Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
+import { ArrowRight, Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
 import {
   MotionConfig,
   motion,
   useInView,
+  useReducedMotion,
+  useScroll,
   useSpring,
   useTransform,
-  useScroll,
   type MotionValue,
   type Variants,
 } from 'motion/react'
@@ -18,62 +19,65 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import {
-  FERMENTATION_LAYERS,
-  DECOR_BY_SLOT,
-  INTRO_DECOR,
-  type Decor,
-  type PictureSlot,
-  type StoryLayer,
-} from './layers'
+import { PICTURE_BY_SLOT, UPRIGHT_RATIO, type PictureSlot, type StoryPicture } from './layers'
 
 /* ═══════════════════════════════════════════════════════════════
- *  FERMENTATION STORY — one full-screen card on the page ("Warum
- *  Fermentation? / GESUND"); the other cards are optional, a sideways
- *  swipe row with the shared swipe capsule: the intro card ("Warum Fermentation? / GESUND",
- *  button + benefits) and then one card per topic. Every card: title +
- *  text top left, one huge black word (same size on every card), a
- *  picture floating over it (lifts in on scroll, follows the pointer).
- *  Text is CMS; pictures live in code.
+ *  FERMENTATION STORY — a full-screen sideways swipe row of cards:
+ *  the intro card ("Warum Fermentation? / GESUND", button + benefits)
+ *  and one card per topic. Every card has the same four rows, shared
+ *  across all cards with CSS subgrid, so nothing jumps while swiping:
+ *
+ *    1 · number, title, text      (as tall as the tallest card's)
+ *    2 · one huge word            (same size on every card)
+ *    3 · the picture              (takes the room that is left — it
+ *                                  shrinks instead of overlapping)
+ *    4 · button (phone/tablet)    (desktop: beside the picture)
+ *
+ *  While swiping, the word lags and the picture leads (parallax).
+ *  Text is CMS; pictures live in code (layers.ts).
  * ═══════════════════════════════════════════════════════════════ */
 
 const INK = '#1A1A1A' // brand near-black
-// Desktop picture size in em of the big word: the apple on the first card
-// (1.35em × 0.93em) has the same area as a 1.12em square
-const APPLE_SIZE = 1.12
-
-type MeasureKind = 'text' | 'stack' | 'pic'
 const PAPER = '#F5E7D6'
 const EASE = [0.16, 1, 0.3, 1] as const
 
 const DEFAULTS = {
   title: 'Why fermentation?',
-  bigWord: 'IS HEALTHY',
+  bigWord: 'HEALTHY',
   buttonLabel: 'More about fermentation',
   buttonLink: '/fermentation',
 }
 
 const lineRise: Variants = {
   hidden: { y: '105%' },
-  show: { y: '0%', transition: { duration: 1.2, ease: EASE, delay: 0.1 } },
+  show: { y: '0%', transition: { duration: 1.1, ease: EASE, delay: 0.1 } },
 }
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: 16 },
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.9, ease: EASE, delay: 0.35 + i * 0.08 },
+    transition: { duration: 0.8, ease: EASE, delay: 0.2 + i * 0.07 },
   }),
+}
+const pictureIn: Variants = {
+  hidden: { opacity: 0, y: 70, rotate: 5, scale: 0.94 },
+  show: {
+    opacity: 1,
+    y: 0,
+    rotate: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 90, damping: 16, mass: 0.9, delay: 0.35 },
+  },
 }
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-function BenefitIcon({ icon }: { icon?: string | null }) {
-  const cls = 'size-[46%]'
-  if (icon === 'leaf') return <Leaf className={cls} strokeWidth={1.25} />
-  if (icon === 'sparkles') return <Sparkles className={cls} strokeWidth={1.25} />
-  if (icon === 'sprout') return <Sprout className={cls} strokeWidth={1.25} />
-  return <Microscope className={cls} strokeWidth={1.25} />
+function BenefitIcon({ icon, className }: { icon?: string | null; className: string }) {
+  if (icon === 'leaf') return <Leaf className={className} strokeWidth={1.25} />
+  if (icon === 'sparkles') return <Sparkles className={className} strokeWidth={1.25} />
+  if (icon === 'sprout') return <Sprout className={className} strokeWidth={1.25} />
+  return <Microscope className={className} strokeWidth={1.25} />
 }
 
 type Benefit = NonNullable<Props['benefits']>[number]
@@ -85,11 +89,88 @@ type CardData = {
   text?: string | null
   sourceLabel?: string | null
   sourceUrl?: string | null
-  layer?: StoryLayer
-  /** Small cut-outs around the big word */
-  decor?: Decor[]
+  picture?: StoryPicture
   button?: { label: string; href: string }
   benefits?: Benefit[]
+}
+
+function CardButton({ button }: { button: NonNullable<CardData['button']> }) {
+  return (
+    <Link
+      href={button.href}
+      className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full py-3 pl-6 pr-5 font-display text-sm font-bold text-white shadow-[0_10px_24px_-12px_rgba(26,26,26,0.6)] transition-transform duration-300 ease-out hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current"
+      style={{ backgroundColor: INK }}
+    >
+      {button.label}
+      <ArrowRight
+        className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-0.5"
+        strokeWidth={2}
+        aria-hidden
+      />
+    </Link>
+  )
+}
+
+/** Intro benefits. Compact (phone/tablet): icon + title in one row. Full (desktop):
+ *  three columns with icon, title and short line. */
+function Benefits({
+  items,
+  active,
+  compact,
+}: {
+  items: Benefit[]
+  active: boolean
+  compact?: boolean
+}) {
+  if (compact) {
+    return (
+      <ul className="m-0 grid w-[min(22rem,100%)] list-none grid-cols-3 gap-2 p-0">
+        {items.map((item, i) => (
+          <motion.li
+            key={item.id ?? i}
+            custom={5 + i}
+            variants={fadeUp}
+            initial="hidden"
+            animate={active ? 'show' : 'hidden'}
+            className="flex flex-col items-center gap-1.5 text-center"
+          >
+            <span
+              className="flex size-8 items-center justify-center rounded-full border"
+              style={{ borderColor: `${INK}26` }}
+            >
+              <BenefitIcon icon={item.icon} className="size-4" />
+            </span>
+            <span className="font-display text-[10px] font-bold uppercase tracking-[0.08em]">
+              {item.title}
+            </span>
+          </motion.li>
+        ))}
+      </ul>
+    )
+  }
+  return (
+    <ul
+      className="m-0 grid list-none gap-x-8 p-0"
+      style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+    >
+      {items.map((item, i) => (
+        <motion.li key={item.id ?? i} custom={5 + i} variants={fadeUp} initial="hidden" animate={active ? 'show' : 'hidden'}>
+          <span
+            className="flex size-11 items-center justify-center rounded-full border"
+            style={{ borderColor: `${INK}26` }}
+          >
+            <BenefitIcon icon={item.icon} className="size-5" />
+          </span>
+          <span className="mt-3 block font-display text-sm font-bold uppercase tracking-[0.05em]">
+            {item.title}
+          </span>
+          {item.text ? (
+            <span className="mt-1 block text-sm leading-snug opacity-70">{item.text}</span>
+          ) : null}
+        </motion.li>
+      ))}
+    </ul>
+  )
 }
 
 function StoryCard({
@@ -98,24 +179,29 @@ function StoryCard({
   count,
   wordSize,
   onFit,
-  shared,
-  onMeasure,
-  enter,
+  scrollX,
+  cardRef,
 }: {
   card: CardData
   index: number
   count: number
-  /** 0 → 1 while this card slides in from the side (cards after the first) */
-  enter?: MotionValue<number>
   /** Shared size (the smallest fit of all cards) so every big word matches */
   wordSize: number | null
   onFit: (key: string, size: number) => void
-  /** Shared heights (the tallest of all cards): text block + whole stack; and the
-   *  desktop picture size (the smallest that fits on every card) */
-  shared: { text: number | null; stack: number | null; pic: number | null }
-  onMeasure: (key: string, kind: MeasureKind, value: number) => void
+  /** Sideways scroll of the row — drives the swipe parallax */
+  scrollX: MotionValue<number>
+  cardRef: (el: HTMLElement | null) => void
 }) {
   const ref = useRef<HTMLElement>(null)
+  const setRef = useCallback(
+    (el: HTMLElement | null) => {
+      ref.current = el
+      cardRef(el)
+    },
+    [cardRef],
+  )
+
+  // Big word: fit to the box, then all cards share the smallest size
   const wordBoxRef = useRef<HTMLDivElement>(null)
   const measureRef = useRef<HTMLDivElement>(null)
   const ownFit = useFitSize(wordBoxRef, measureRef, 1)
@@ -123,104 +209,31 @@ function StoryCard({
     if (ownFit) onFit(card.key, ownFit)
   }, [ownFit, card.key, onFit])
 
-  // Where the big word ends (space right of it) and the empty strip under its
-  // letters — desktop lines the 'below' picture + button up with the word's end
-  // and lets the picture use that strip. Offsets ignore the pointer float.
+  // Space right of the big word — desktop lines the picture up with the word's end
   const lettersRef = useRef<HTMLSpanElement>(null)
-  const [wordEdge, setWordEdge] = useState<{ end: number; gap: number } | null>(null)
+  const [wordEnd, setWordEnd] = useState(0)
+  // Card width, for the parallax (read every frame — cached, never measured there)
+  const width = useRef(1)
   useEffect(() => {
-    const box = wordBoxRef.current
+    const card = ref.current
     const letters = lettersRef.current
     const line = letters?.offsetParent as HTMLElement | null
-    if (!box || !letters || !line) return
-    const measure = () =>
-      setWordEdge({
-        end: Math.max(0, line.clientWidth - (letters.offsetLeft + letters.offsetWidth)),
-        gap: Math.max(0, line.clientHeight - (letters.offsetTop + letters.offsetHeight)),
-      })
+    if (!card || !letters || !line) return
+    const measure = () => {
+      width.current = card.clientWidth || 1
+      setWordEnd(Math.round(Math.max(0, line.clientWidth - (letters.offsetLeft + letters.offsetWidth))))
+    }
     measure()
     const observer = new ResizeObserver(measure)
-    observer.observe(box)
+    observer.observe(card)
     observer.observe(letters)
     return () => observer.disconnect()
   }, [])
 
-  /* Same layout on every card: the text block takes the height of the tallest
-   * one, so the big word, the picture space and the button sit at the same
-   * place on every card; the whole stack is centred like the tallest card's. */
-  const containerRef = useRef<HTMLDivElement>(null)
-  const textRef = useRef<HTMLDivElement>(null)
-  const areaRef = useRef<HTMLDivElement>(null)
-  const bottomRowRef = useRef<HTMLDivElement>(null)
-  const [frame, setFrame] = useState<{
-    height: number
-    pad: number
-    nav: number
-    row: number
-    gap: number
-  } | null>(null)
-  useEffect(() => {
-    const section = ref.current
-    const container = containerRef.current
-    const text = textRef.current
-    const area = areaRef.current
-    if (!section || !container || !text || !area) return
-    const desktop = window.matchMedia('(min-width: 1024px)')
-    const outer = (el: HTMLElement) => {
-      const style = getComputedStyle(el)
-      return (
-        el.offsetHeight + (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0)
-      )
-    }
-    const measure = () => {
-      onMeasure(card.key, 'text', text.offsetHeight)
-      // Natural stack height (text at its shared height + word + picture space +
-      // button): the parts plus the gaps between them, never the free space
-      const items = ([...container.children] as HTMLElement[]).filter((el) => el.offsetHeight > 0)
-      const gap = parseFloat(getComputedStyle(container).rowGap) || 0
-      const stack =
-        items.reduce((sum, el) => sum + outer(el), 0) + gap * Math.max(0, items.length - 1)
-      onMeasure(card.key, 'stack', stack)
+  const active = useInView(ref, { once: true, amount: 0.35 })
+  const wordReady = active && wordSize !== null
 
-      // The site header's room is always kept (also while it is slid away), so
-      // nothing moves when it comes and goes
-      const nav = document.querySelector<HTMLElement>('#site-header nav')?.offsetHeight ?? 0
-      const pad = parseFloat(getComputedStyle(container).paddingBottom) || 0
-      const height = section.clientHeight
-      setFrame({ height, pad, nav, gap, row: bottomRowRef.current?.offsetHeight ?? 0 })
-
-      // Desktop picture size: as big as the apple on the first card (same area),
-      // but never more than the room left under the word
-      if (desktop.matches && area.offsetHeight > 0) {
-        const areaStyle = getComputedStyle(area)
-        const areaPart = outer(area)
-        const top = Math.max(pad, nav ? nav + 24 : 0)
-        const room = height - top - pad - (stack - areaPart)
-        const areaMax = room - (parseFloat(areaStyle.marginTop) || 0)
-        const fromRoom = (areaMax - (parseFloat(areaStyle.paddingTop) || 0)) / 0.94
-        const fontSize = parseFloat(
-          getComputedStyle(lettersRef.current?.offsetParent ?? area).fontSize,
-        )
-        onMeasure(card.key, 'pic', Math.max(96, Math.min(fontSize * APPLE_SIZE, fromRoom)))
-      } else {
-        onMeasure(card.key, 'pic', Number.POSITIVE_INFINITY)
-      }
-    }
-    measure()
-    const observer = new ResizeObserver(measure)
-    observer.observe(section)
-    observer.observe(text)
-    ;[...container.children].forEach((child) => observer.observe(child))
-    desktop.addEventListener('change', measure)
-    return () => {
-      observer.disconnect()
-      desktop.removeEventListener('change', measure)
-    }
-  }, [card.key, onMeasure])
-
-  const active = useInView(ref, { once: true, amount: 0.25 })
-
-  // Pointer float (desktop)
+  // Pointer float (desktop mouse only)
   const px = useSpring(0, { stiffness: 60, damping: 18 })
   const py = useSpring(0, { stiffness: 60, damping: 18 })
   const onPointerMove = (e: React.PointerEvent) => {
@@ -234,263 +247,150 @@ function StoryCard({
     py.set(0)
   }
 
-  // The picture lifts into place as the card slides in — movement only, never faded
-  // First card: driven by its vertical arrival; side cards: by their slide-in
-  const arrival = useArrival(ref)
-  const progress = enter ?? arrival
-  const lift = useSpring(useTransform(progress, [0.1, 0.95], [1, 0], { clamp: true }), {
-    stiffness: 70,
-    damping: 22,
-  })
-  const wordX = useTransform(() => px.get() * -14)
-  const wordY = useTransform(() => py.get() * -10)
-  const imgX = useTransform(() => px.get() * 30)
-  const imgY = useTransform(() => py.get() * 22 + lift.get() * 160)
-  const imgRotate = useTransform(() => px.get() * 3 + lift.get() * 5)
+  // Swipe parallax: pos = 0 while this card fills the row, ±1 one card away.
+  // The word lags behind the card, the picture runs ahead, the text fades.
+  const reduce = useReducedMotion()
+  const depth = reduce ? 0 : 1
+  const pos = useTransform(() => scrollX.get() / width.current - index)
+  const textX = useTransform(() => pos.get() * width.current * 0.12 * depth)
+  const textOpacity = useTransform(() => 1 - Math.min(1, Math.abs(pos.get()) * 1.5 * depth))
+  const wordX = useTransform(() => (pos.get() * width.current * 0.3 + px.get() * -14) * depth)
+  const wordY = useTransform(() => py.get() * -10 * depth)
+  const picX = useTransform(() => (pos.get() * width.current * -0.2 + px.get() * 28) * depth)
+  const picY = useTransform(() => py.get() * 20 * depth)
+  const picRotate = useTransform(() => (pos.get() * -10 + px.get() * 3) * depth)
 
   const benefits = card.benefits ?? []
-  // Phone/tablet: every card's picture sits centred between the word and the
-  // button. Desktop: 'below' pictures stay there (right-aligned), the others
-  // are placed around the word.
-  const belowDecor = card.decor?.find((d) => d.placement === 'below') ?? card.decor?.[0]
-  const belowOnDesktop = belowDecor?.placement === 'below'
-  // A lone button (no benefits) sits right under the picture space, at the word's end
-  const buttonOnly = Boolean(card.button) && benefits.length === 0
-  const isFirst = index === 0
-  // Top padding: centres the tallest card's stack (never less than the normal
-  // padding, never under the site header) — the same value on every card
-  const centredTop =
-    frame && shared.stack ? Math.max(frame.pad, (frame.height - shared.stack) / 2) : null
-  const navTop = frame?.nav ? frame.nav + 24 : 0
-  const paddingTop =
-    centredTop !== null ? Math.max(centredTop, navTop) : navTop ? navTop : undefined
-  const desktopPic = shared.pic !== null && Number.isFinite(shared.pic) ? shared.pic : null
-  const Heading = isFirst ? 'h2' : 'h3'
+  const Heading = index === 0 ? 'h2' : 'h3'
+  const pic = card.picture
+  // Same visual weight for every picture: equal area, whatever its shape. The most
+  // upright one fills the picture row's height; never wider than the room beside it.
+  const ratio = pic ? pic.width / pic.height : 1
+  const areaScale = Math.sqrt(UPRIGHT_RATIO / ratio)
+  const picHeight = `min(${(areaScale * 94).toFixed(1)}cqh, ${(areaScale * 26).toFixed(2)}rem, calc(var(--room) / ${ratio.toFixed(3)}))`
 
   return (
-    <section
-      ref={ref}
+    <article
+      ref={setRef}
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
-      className="relative h-full overflow-clip"
-      style={
-        {
-          backgroundColor: PAPER,
-          color: INK,
-          '--word-end': `${wordEdge?.end ?? 0}px`,
-          '--word-gap': `${wordEdge?.gap ?? 0}px`,
-        } as React.CSSProperties
-      }
+      className="relative row-span-4 grid snap-start snap-always grid-rows-subgrid overflow-clip"
+      style={{ '--word-end': `${wordEnd}px` } as React.CSSProperties}
+      aria-roledescription="slide"
+      aria-label={`${index + 1} / ${count}`}
     >
-      <div
-        ref={containerRef}
-        className="container mx-auto container-padding flex h-full flex-col gap-6 [--pic:clamp(6rem,min(58vw,calc(46svh_-_13rem)),19rem)] lg:[--pic:clamp(6rem,min(17vw,calc(50svh_-_15rem)),15rem)] [--pic-pt:clamp(0.5rem,2vh,1.5rem)] lg:[--pic-pt:0.75rem] py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10 [@media(max-height:620px)]:gap-3 [@media(max-height:620px)]:py-6 lg:[@media(max-height:820px)]:pb-5"
-        style={
-          {
-            paddingTop,
-            ...(desktopPic ? { '--pic': `${desktopPic}px` } : {}),
-            ...(frame?.row ? { '--row-h': `${frame.row + frame.gap}px` } : {}),
-          } as React.CSSProperties
-        }
+      {/* ── 1 · Number, title + text (phone/tablet centred, desktop top left) ── */}
+      <motion.div
+        className="container container-padding relative z-20 pt-[calc(var(--nav,4.5rem)+clamp(0.75rem,4svh,3rem))]"
+        style={{ x: textX, opacity: textOpacity }}
       >
-        {/* ── Number, title + text, top left ── */}
-        {/* Phone/tablet: centred; desktop: top left. Held at the tallest card's height. */}
-        <div className="shrink-0" style={{ minHeight: shared.text ?? undefined }}>
-          <div
-            ref={textRef}
-            className="relative z-20 mx-auto max-w-md text-center lg:mx-0 lg:text-left"
-          >
-            {count > 1 ? (
-              <motion.p
-                custom={0}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mb-3 font-display text-[11px] font-bold tabular-nums tracking-[0.14em] opacity-50"
-              >
-                {pad(index + 1)} / {pad(count)}
-              </motion.p>
-            ) : null}
-            {card.title ? (
-              <motion.div
-                custom={1}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-              >
-                <Heading className="font-display text-2xl font-bold leading-tight tracking-[-0.02em] md:text-3xl">
-                  {card.title}
-                </Heading>
-              </motion.div>
-            ) : null}
-            {card.text ? (
-              <motion.p
-                custom={2}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mb-0 mt-3 whitespace-pre-line text-sm leading-relaxed opacity-75 md:text-base [@media(max-height:620px)]:mt-2 [@media(max-height:620px)]:text-[13px] [@media(max-height:620px)]:leading-snug"
-              >
-                {card.text}
-              </motion.p>
-            ) : null}
-            {card.sourceLabel ? (
-              <motion.p
-                custom={3}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="mb-0 mt-3 text-xs opacity-55"
-              >
-                {card.sourceUrl ? (
-                  <a
-                    href={card.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline decoration-current/30 underline-offset-2 hover:decoration-current"
-                  >
-                    {card.sourceLabel}
-                  </a>
-                ) : (
-                  card.sourceLabel
-                )}
-              </motion.p>
-            ) : null}
-          </div>
-        </div>
-
-        {/* ── Big word, then the picture space (same height on every card) ── */}
-        <div className="relative flex shrink-0 flex-col">
-          <div
-            ref={wordBoxRef}
-            // Short laptops: a lower word box leaves room for cut-outs (all cards share the size)
-            className="relative h-[clamp(4rem,22vw,15rem)] w-full [@media(max-height:620px)]:h-14 lg:[@media(max-height:800px)]:h-[clamp(4rem,19vh,9.5rem)]"
-          >
-            {/* Hidden copy at 100px to measure the word */}
-            <div
-              ref={measureRef}
-              aria-hidden
-              className="invisible absolute left-0 top-0 w-max whitespace-pre font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
-              style={{ fontSize: 100 }}
-            >
-              {card.word}
-            </div>
+        <div className="mx-auto max-w-[24rem] text-center md:max-w-[30rem] lg:mx-0 lg:text-left">
+          {count > 1 ? (
             <motion.p
-              aria-hidden
-              className="absolute inset-0 m-0 flex items-center justify-center whitespace-nowrap font-display font-bold uppercase leading-[0.86] tracking-[-0.02em]"
-              style={{
-                fontSize: wordSize ?? ownFit ?? 'clamp(3rem, 14vw, 13rem)',
-                x: wordX,
-                y: wordY,
-              }}
+              custom={0}
+              variants={fadeUp}
+              initial="hidden"
+              animate={active ? 'show' : 'hidden'}
+              className="mb-2 font-display text-[11px] font-bold tabular-nums tracking-[0.16em] opacity-45 md:mb-3"
             >
-              {/* Mask: top padding keeps accents (Ü, É) visible, bottom padding the descenders */}
-              <span ref={lettersRef} className="relative inline-block">
-                <span className="-my-[0.16em] block overflow-hidden pb-[0.06em] pt-[0.16em]">
-                  <motion.span
-                    className="block"
-                    variants={lineRise}
-                    initial="hidden"
-                    animate={active ? 'show' : 'hidden'}
-                  >
-                    {card.word}
-                  </motion.span>
-                </span>
-                {/* Cut-outs around the word — sized in em, so they scale with it */}
-                {card.decor
-                  ?.filter((d) => d.placement !== 'below')
-                  .map((d, i) => (
-                    <motion.span
-                      key={d.src}
-                      // Around the word on desktop only — phone/tablet show it below the word
-                      className={`pointer-events-none absolute block max-lg:hidden ${d.className}`}
-                      initial={{ opacity: 0, y: '0.2em', scale: 0.9 }}
-                      animate={active ? { opacity: 1, y: 0, scale: 1 } : undefined}
-                      transition={{ duration: 1.1, ease: EASE, delay: 0.5 + i * 0.12 }}
-                    >
-                      <Image
-                        src={d.src}
-                        width={d.width}
-                        height={d.height}
-                        alt=""
-                        loading="eager"
-                        className="h-auto w-full drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)]"
-                      />
-                    </motion.span>
-                  ))}
-              </span>
+              {pad(index + 1)} / {pad(count)}
             </motion.p>
-          </div>
-
-          {/* Picture space under the word — on every card, same height, so the
-              word and button land at the same place everywhere. Every picture
-              has the same visual weight (equal area, whatever its shape).
-              Phone/tablet: size from the screen, centred. Desktop: as big as the
-              apple on the first card, but never more than the room under the
-              word (measured, the same on every card — it never changes while
-              the site header slides in/out); right edge at the end of the word,
-              button beside it. Cards whose picture sits around the word keep the
-              space empty (the intro card drops it and pulls its benefits row up,
-              so its button lines up with the others). */}
-          <motion.div
-            ref={areaRef}
-            className={`flex h-[calc(var(--pic)*0.94_+_var(--pic-pt))] shrink-0 items-end justify-center pt-[var(--pic-pt)] lg:mt-[calc(var(--word-gap)*-1)] lg:justify-end lg:pr-[var(--word-end)] ${benefits.length && !belowOnDesktop ? 'lg:hidden' : ''}`}
-            initial={{ opacity: 0, y: 16 }}
-            animate={active ? { opacity: 1, y: 0 } : undefined}
-            transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
-          >
-            {buttonOnly && card.button ? (
-              <Link
-                href={card.button.href}
-                className="mr-6 hidden shrink-0 items-center self-end rounded-full px-6 py-3 font-display text-sm font-bold text-white transition-transform duration-300 hover:scale-[1.03] lg:inline-flex"
-                style={{ backgroundColor: INK }}
-              >
-                {card.button.label}
-              </Link>
-            ) : null}
-            {belowDecor ? (
-              <Image
-                src={belowDecor.src}
-                width={belowDecor.width}
-                height={belowDecor.height}
-                alt=""
-                loading="eager"
-                sizes="(min-width: 1024px) 30vw, 70vw"
-                className={`h-auto max-h-full min-w-0 max-w-full drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)] ${belowOnDesktop ? '' : 'lg:hidden'}`}
-                // Equal area: width = size × √(width/height)
-                style={{
-                  width: `calc(var(--pic) * ${Math.sqrt(belowDecor.width / belowDecor.height).toFixed(3)})`,
-                }}
-              />
-            ) : null}
-          </motion.div>
-
-          {card.layer ? (
-            <motion.div
-              className="pointer-events-none absolute right-[4%] top-1/2 z-10 w-[min(44%,24rem)] -translate-y-1/2 md:w-[min(34%,26rem)]"
-              style={{ x: imgX, y: imgY, rotate: imgRotate }}
-            >
-              <Image
-                src={card.layer.src}
-                width={card.layer.width}
-                height={card.layer.height}
-                alt={card.layer.alt}
-                sizes="(min-width: 768px) 34vw, 44vw"
-                loading="eager"
-                className="h-auto w-full drop-shadow-[0_22px_30px_rgba(40,30,15,0.25)]"
-              />
+          ) : null}
+          {card.title ? (
+            <motion.div custom={1} variants={fadeUp} initial="hidden" animate={active ? 'show' : 'hidden'}>
+              <Heading className="m-0 font-display text-[clamp(1.375rem,2.4vw,2rem)] font-bold leading-[1.1] tracking-[-0.025em] text-balance">
+                {card.title}
+              </Heading>
             </motion.div>
           ) : null}
+          {card.text ? (
+            <motion.p
+              custom={2}
+              variants={fadeUp}
+              initial="hidden"
+              animate={active ? 'show' : 'hidden'}
+              className="mb-0 mt-2.5 whitespace-pre-line text-[15px] leading-[1.5] text-pretty opacity-75 md:mt-3 md:text-base [@media(max-height:560px)]:hidden"
+            >
+              {card.text}
+            </motion.p>
+          ) : null}
+          {card.sourceLabel ? (
+            <motion.p
+              custom={3}
+              variants={fadeUp}
+              initial="hidden"
+              animate={active ? 'show' : 'hidden'}
+              className="mb-0 mt-2 text-xs opacity-55"
+            >
+              {card.sourceUrl ? (
+                <a
+                  href={card.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-current/30 underline-offset-2 hover:decoration-current"
+                >
+                  {card.sourceLabel}
+                </a>
+              ) : (
+                card.sourceLabel
+              )}
+            </motion.p>
+          ) : null}
         </div>
+      </motion.div>
 
-        {/* ── Intro card: desktop benefits left + button right; phone button, then benefits ── */}
-        {card.button || benefits.length ? (
+      {/* ── 2 · Big word (same size on every card) ── */}
+      <div className="container container-padding pt-[clamp(0.5rem,3svh,2.5rem)]">
+        <div ref={wordBoxRef} className="relative h-[clamp(3.25rem,min(22vw,19svh),14rem)] [@media(max-height:720px)]:h-[clamp(3rem,min(20vw,15svh),14rem)] w-full">
+          {/* Hidden copy at 100px to measure the word */}
           <div
-            ref={bottomRowRef}
-            // Desktop: a lone button sits beside the picture instead (inside the
-            // picture space); the intro card's row is pulled up so its button
-            // lines up with those
-            className={`relative z-20 flex shrink-0 flex-col gap-8 lg:flex-row-reverse lg:items-end lg:justify-between ${benefits.length ? 'lg:mt-[calc(var(--pic)*0.94_+_var(--pic-pt)_-_var(--word-gap)_-_var(--row-h,104px))]' : ''} ${buttonOnly ? 'lg:hidden' : ''}`}
+            ref={measureRef}
+            aria-hidden
+            className="invisible absolute left-0 top-0 w-max whitespace-pre font-display font-bold uppercase leading-[0.86] tracking-[-0.03em]"
+            style={{ fontSize: 100 }}
+          >
+            {card.word}
+          </div>
+          <motion.p
+            aria-hidden
+            className="absolute inset-0 m-0 flex items-center justify-center whitespace-nowrap font-display font-bold uppercase leading-[0.86] tracking-[-0.03em] will-change-transform"
+            style={{ fontSize: wordSize ?? ownFit ?? 'clamp(3rem, 14vw, 13rem)', x: wordX, y: wordY }}
+          >
+            {/* Mask: top padding keeps accents (Ü, É) visible, bottom padding the descenders */}
+            <span ref={lettersRef} className="-my-[0.16em] block overflow-hidden pb-[0.06em] pt-[0.16em]">
+              <motion.span
+                className="block"
+                variants={lineRise}
+                initial="hidden"
+                animate={wordReady ? 'show' : 'hidden'}
+              >
+                {card.word}
+              </motion.span>
+            </span>
+          </motion.p>
+        </div>
+      </div>
+
+      {/* ── 3 · Picture (desktop: benefits left; button + picture at the word's end) ── */}
+      <div className="container container-padding flex min-h-0 gap-10 py-[clamp(0.5rem,2.5svh,1.75rem)]">
+        {benefits.length ? (
+          <div className="hidden w-[min(30rem,40%)] shrink-0 self-end lg:block">
+            <Benefits items={benefits} active={active} />
+          </div>
+        ) : null}
+        <div
+          className={`relative min-h-0 min-w-0 flex-1 [container-type:size] [--room:100cqw] ${
+            benefits.length
+              ? 'lg:[--room:calc(100cqw_-_17rem)]'
+              : card.button
+                ? 'lg:[--room:calc(100cqw_-_var(--word-end)_-_17rem)]'
+                : 'lg:[--room:calc(100cqw_-_var(--word-end))]'
+          }`}
+        >
+          {/* The intro card has its benefits on the left — its picture uses the
+              full room instead of stopping at the (short) word's end */}
+          <div
+            className={`absolute inset-0 flex items-end justify-center gap-8 lg:justify-end ${benefits.length ? '' : 'lg:pr-[var(--word-end)]'}`}
           >
             {card.button ? (
               <motion.div
@@ -498,82 +398,68 @@ function StoryCard({
                 variants={fadeUp}
                 initial="hidden"
                 animate={active ? 'show' : 'hidden'}
-                // Centred on phone/tablet, right on desktop
-                className="shrink-0 self-center lg:self-auto"
+                className="hidden shrink-0 pb-[6%] lg:block"
               >
-                <Link
-                  href={card.button.href}
-                  className="inline-flex items-center rounded-full px-6 py-3 font-display text-sm font-bold text-white transition-transform duration-300 hover:scale-[1.03]"
-                  style={{ backgroundColor: INK }}
-                >
-                  {card.button.label}
-                </Link>
+                <CardButton button={card.button} />
               </motion.div>
             ) : null}
-
-            {benefits.length ? (
-              <ul
-                className="grid gap-x-6 gap-y-6 sm:gap-x-10 lg:max-w-3xl lg:flex-1"
-                style={{ gridTemplateColumns: `repeat(${benefits.length}, minmax(0, 1fr))` }}
+            {pic ? (
+              <motion.div
+                variants={pictureIn}
+                initial="hidden"
+                animate={active ? 'show' : 'hidden'}
+                className="relative shrink-0"
               >
-                {benefits.map((item, i) => (
-                  <motion.li
-                    key={item.id ?? i}
-                    custom={5 + i}
-                    variants={fadeUp}
-                    initial="hidden"
-                    animate={active ? 'show' : 'hidden'}
-                    className="flex flex-col items-center text-center lg:items-start lg:text-left"
+                <motion.div className="will-change-transform" style={{ x: picX, y: picY, rotate: picRotate }}>
+                  {/* Gentle idle float, out of step from card to card */}
+                  <motion.div
+                    animate={reduce ? undefined : { y: [0, -9, 0], rotate: [0, -1.2, 0] }}
+                    transition={{
+                      duration: 5.5,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                      delay: (index % 3) * 0.8,
+                    }}
                   >
-                    <span
-                      className="flex size-[clamp(40px,4.5vw,48px)] items-center justify-center rounded-full border"
-                      style={{ borderColor: `${INK}33` }}
-                    >
-                      <BenefitIcon icon={item.icon} />
-                    </span>
-                    <span className="mt-3 block font-display text-xs font-bold uppercase tracking-[0.04em] md:text-sm">
-                      {item.title}
-                    </span>
-                    {item.text ? (
-                      <span className="mt-1 block text-xs leading-snug opacity-70 md:text-sm [@media(max-height:620px)]:hidden">
-                        {item.text}
-                      </span>
-                    ) : null}
-                  </motion.li>
-                ))}
-              </ul>
+                    <Image
+                      src={pic.src}
+                      width={pic.width}
+                      height={pic.height}
+                      alt=""
+                      loading="eager"
+                      sizes="(min-width: 1024px) 34vw, 80vw"
+                      draggable={false}
+                      className="block max-w-none select-none drop-shadow-[0_18px_22px_rgba(60,40,20,0.18)]"
+                      style={{ height: picHeight, width: 'auto' }}
+                    />
+                  </motion.div>
+                </motion.div>
+              </motion.div>
             ) : null}
+          </div>
+        </div>
+      </div>
+
+      {/* ── 4 · Phone/tablet: button, then the intro benefits ── */}
+      <div className="container container-padding flex flex-col items-center gap-4 pb-[clamp(0.75rem,2.5svh,1.75rem)] lg:pb-[clamp(1.5rem,5svh,3.5rem)]">
+        {card.button ? (
+          <motion.div
+            custom={4}
+            variants={fadeUp}
+            initial="hidden"
+            animate={active ? 'show' : 'hidden'}
+            className="lg:hidden"
+          >
+            <CardButton button={card.button} />
+          </motion.div>
+        ) : null}
+        {benefits.length ? (
+          <div className="lg:hidden [@media(max-height:680px)]:hidden">
+            <Benefits items={benefits} active={active} compact />
           </div>
         ) : null}
       </div>
-    </section>
-  )
-}
-
-/** One card in the sideways swipe row. `enter` goes 0 → 1 as the card comes
- *  into view horizontally (drives its picture lift); the first card uses its
- *  vertical arrival instead. */
-function SlideCard({
-  index,
-  scrollX,
-  trackRef,
-  cardRef,
-  children,
-}: {
-  index: number
-  scrollX: MotionValue<number>
-  trackRef: React.RefObject<HTMLDivElement | null>
-  cardRef: (el: HTMLDivElement | null) => void
-  children: (enter: MotionValue<number> | undefined) => React.ReactNode
-}) {
-  const enter = useTransform(() => {
-    const width = trackRef.current?.clientWidth || 1
-    return Math.max(0, Math.min(1, 1 - Math.abs(scrollX.get() / width - index)))
-  })
-  return (
-    <div ref={cardRef} className="relative h-full w-full shrink-0 snap-start snap-always">
-      {children(index === 0 ? undefined : enter)}
-    </div>
+    </article>
   )
 }
 
@@ -598,8 +484,7 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
       word: (bigWord?.trim() || DEFAULTS.bigWord).toUpperCase(),
       title: title ?? DEFAULTS.title,
       text: intro,
-      layer: FERMENTATION_LAYERS[(introPicture as PictureSlot | null) ?? 'intro'],
-      decor: INTRO_DECOR,
+      picture: PICTURE_BY_SLOT[(introPicture as PictureSlot | null) ?? 'intro'],
       button: resolvedButton
         ? { label: resolvedButton, href: buttonLink?.trim() || DEFAULTS.buttonLink }
         : undefined,
@@ -612,8 +497,7 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
       text: s.text,
       sourceLabel: s.sourceLabel,
       sourceUrl: s.sourceUrl,
-      layer: s.picture ? FERMENTATION_LAYERS[s.picture as PictureSlot] : undefined,
-      decor: s.picture ? DECOR_BY_SLOT[s.picture as PictureSlot] : undefined,
+      picture: s.picture ? PICTURE_BY_SLOT[s.picture as PictureSlot] : undefined,
       button: s.buttonLabel?.trim()
         ? { label: s.buttonLabel.trim(), href: s.buttonLink?.trim() || '/' }
         : undefined,
@@ -628,47 +512,39 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
   const known = Object.values(fits)
   const wordSize = known.length === cards.length ? Math.min(...known) : null
 
-  // Same layout on every card: the tallest text block and the tallest stack
-  const [heights, setHeights] = useState<Record<string, number>>({})
-  const onMeasure = useCallback((key: string, kind: MeasureKind, value: number) => {
-    const id = `${kind}:${key}`
-    // Whole pixels: sub-pixel jitter would keep re-rendering
-    const rounded = Number.isFinite(value) ? Math.round(value) : value
-    setHeights((prev) => (prev[id] === rounded ? prev : { ...prev, [id]: rounded }))
+  // The site header's room is always kept (also while it is slid away), so
+  // nothing moves when it comes and goes
+  const rootRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const root = rootRef.current
+    const nav = document.querySelector<HTMLElement>('#site-header nav')
+    if (!root || !nav) return
+    const update = () => root.style.setProperty('--nav', `${nav.offsetHeight}px`)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(nav)
+    return () => observer.disconnect()
   }, [])
-  const all = (kind: MeasureKind) => {
-    const values = cards.map((card) => heights[`${kind}:${card.key}`])
-    return values.every((v) => v !== undefined) ? (values as number[]) : null
-  }
-  const texts = all('text')
-  const stacks = all('stack')
-  const pics = all('pic')
-  const shared = {
-    text: texts ? Math.max(...texts) : null,
-    stack: stacks ? Math.max(...stacks) : null,
-    pic: pics ? Math.min(...pics) : null,
-  }
 
-  /* The first card is what you see while scrolling down. The others are
-   * optional: a sideways swipe row (touch, trackpad, dots, arrows) — the page
-   * scroll is never taken over. */
+  /* Sideways swipe row (touch, trackpad, mouse drag, dots, arrow keys) — the
+   * page scroll is never taken over. */
   const trackRef = useRef<HTMLDivElement>(null)
   const rowRef = useRef<HTMLDivElement>(null)
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+  const cardRefs = useRef<(HTMLElement | null)[]>([])
   const { scrollX } = useScroll({ container: trackRef })
   const { active, handDirection, isSwiping, goTo } = useSwipeTrack({
     trackRef,
     itemRefs: cardRefs,
     count: cards.length,
   })
-  // Swipe everywhere: touch, trackpad (sideways two-finger swipe) and mouse drag;
-  // snap-mandatory always lands on a full card. The nudge is for touch only.
+  // Touch only: the row slides a little once, to show there is more
   useSwipeNudge(trackRef, rowRef, cards.length, isTouch)
 
-  /* Desktop mouse: click-and-drag the card sideways. Past a small threshold the
-   * next/previous card is shown; a short drag springs back. Clicks on links and
-   * buttons still work (a drag under 6px counts as a click). */
+  /* Desktop mouse: click-and-drag sideways. Past a small threshold the
+   * next/previous card is shown; a short drag springs back. Clicks on links
+   * still work (a drag under 6px counts as a click). */
   const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null)
+  const dragJustEnded = useRef(false)
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== 'mouse' || e.button !== 0) return
     const track = trackRef.current
@@ -700,14 +576,22 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
     const threshold = track.clientWidth * 0.12
     goTo(dx < -threshold ? active + 1 : dx > threshold ? active - 1 : active)
   }
-  // A drag must not turn into a click on a link/button underneath
+  // A drag must not turn into a click on a link underneath
   const onClickCapture = (e: React.MouseEvent) => {
     if (dragJustEnded.current) {
       e.preventDefault()
       e.stopPropagation()
     }
   }
-  const dragJustEnded = useRef(false)
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      goTo(active + 1)
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      goTo(active - 1)
+    }
+  }
 
   /* Trackpad / horizontal wheel: one sideways swipe = one card, in that
    * direction (snapping alone pulled short swipes back to the same card).
@@ -757,49 +641,51 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
 
   return (
     <MotionConfig reducedMotion="user">
-      <div id={id ?? undefined} className="relative" style={{ backgroundColor: PAPER }}>
+      <div
+        ref={rootRef}
+        id={id ?? undefined}
+        className="relative"
+        style={{ backgroundColor: PAPER, color: INK }}
+      >
         <div
           ref={trackRef}
-          className="h-[calc(100svh-4.5rem)] snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] desk:cursor-grab desk:active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+          className="h-[calc(100svh-4.5rem)] snap-x snap-mandatory overflow-x-auto overflow-y-hidden outline-none [scrollbar-width:none] desk:cursor-grab desk:active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
           style={{ overscrollBehaviorX: 'contain' }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
           onClickCapture={onClickCapture}
+          onKeyDown={onKeyDown}
           onDragStart={(e) => e.preventDefault()}
+          tabIndex={0}
           aria-label="Fermentation"
+          aria-roledescription="carousel"
           role="region"
         >
-          <div ref={rowRef} className="flex h-full">
+          {/* One column per card; the four rows are shared by all cards (subgrid) */}
+          <div
+            ref={rowRef}
+            className="grid h-full auto-cols-[100%] grid-flow-col grid-rows-[auto_auto_minmax(0,1fr)_auto]"
+          >
             {cards.map((card, i) => (
-              <SlideCard
+              <StoryCard
                 key={card.key}
+                card={card}
                 index={i}
+                count={cards.length}
+                wordSize={wordSize}
+                onFit={onFit}
                 scrollX={scrollX}
-                trackRef={trackRef}
                 cardRef={(el) => {
                   cardRefs.current[i] = el
                 }}
-              >
-                {(enter) => (
-                  <StoryCard
-                    card={card}
-                    index={i}
-                    count={cards.length}
-                    wordSize={wordSize}
-                    onFit={onFit}
-                    shared={shared}
-                    onMeasure={onMeasure}
-                    enter={enter}
-                  />
-                )}
-              </SlideCard>
+              />
             ))}
           </div>
         </div>
 
-        {/* Swipe capsule (hand gesture + dots) — under the cards; card + capsule = one screen */}
+        {/* Swipe capsule (hand gesture + dots) — under the cards; cards + capsule = one screen */}
         {cards.length > 1 ? (
           <div className="flex h-[4.5rem] items-start justify-center">
             <SwipeCapsule

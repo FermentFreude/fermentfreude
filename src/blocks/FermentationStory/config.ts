@@ -6,7 +6,7 @@ export const FermentationStory: Block = {
   slug: 'fermentationStory',
   interfaceName: 'FermentationStoryBlock',
   labels: {
-    singular: 'Fermentation Story (stacked cards)',
+    singular: 'Fermentation Story (swipe cards)',
     plural: 'Fermentation Stories',
   },
   admin: {
@@ -34,7 +34,7 @@ export const FermentationStory: Block = {
       type: 'textarea',
       localized: true,
       label: 'Intro',
-      admin: { description: 'One or two short sentences under the title.' },
+      admin: { description: 'One short sentence under the title (about 100 characters) — longer text squeezes the picture.' },
     },
     {
       name: 'bigWord',
@@ -43,7 +43,7 @@ export const FermentationStory: Block = {
       label: 'Big word',
       admin: {
         description:
-          'The huge word across the section — one short, punchy word, e.g. "GESUND". The picture floats over it.',
+          'The huge word across the section — one short, punchy word, e.g. "GESUND". The picture sits under it.',
       },
     },
     {
@@ -71,7 +71,7 @@ export const FermentationStory: Block = {
       label: 'Picture (intro card)',
       defaultValue: 'intro',
       options: PICTURE_SLOTS,
-      admin: { description: 'Which built-in picture floats over the big word on the first card.' },
+      admin: { description: 'Which built-in illustration sits under the big word on the first card.' },
     },
     {
       name: 'benefits',
@@ -145,7 +145,7 @@ export const FermentationStory: Block = {
               type: 'select',
               label: 'Picture',
               options: PICTURE_SLOTS,
-              admin: { description: 'Built-in picture over the big word.', width: '50%' },
+              admin: { description: 'Built-in illustration under the big word.', width: '50%' },
             },
           ],
         },
@@ -162,7 +162,7 @@ export const FermentationStory: Block = {
           localized: true,
           required: true,
           label: 'Text',
-          admin: { description: 'A few short sentences.' },
+          admin: { description: 'One or two short sentences (about 100 characters) — longer text squeezes the picture.' },
         },
         {
           type: 'row',

@@ -1,93 +1,30 @@
-// Pictures of the Fermentation Story cards — built into the website (public/fermentation).
-// One slot per card; a card whose slot is empty simply shows without a picture.
-export type StoryLayer = { src: string; width: number; height: number; alt: string }
-
+// Pictures of the Fermentation Story cards — Kittl cut-outs built into the website
+// (public/fermentation). One picture per card, always in the same place: under the
+// big word (phone/tablet: centred; desktop: at the word's end, button beside it).
 export type PictureSlot = 'intro' | 'alive' | 'natural' | 'everyday' | 'protein' | 'experts'
 
 export const PICTURE_SLOTS: { label: string; value: PictureSlot }[] = [
-  { label: 'Intro (GESUND)', value: 'intro' },
-  { label: 'Lebendig — chef on a carrot', value: 'alive' },
+  { label: 'Gesund — chef pulling an apple', value: 'intro' },
+  { label: 'Lebendig — chef riding a carrot', value: 'alive' },
   { label: 'Natürlich — chef pulling broccoli', value: 'natural' },
   { label: 'Alltag — chef hugging a jar of kimchi', value: 'everyday' },
   { label: 'Protein — chef peeking over a tempeh block', value: 'protein' },
   { label: 'Experten — chef riding a leek', value: 'experts' },
 ]
 
-export const FERMENTATION_LAYERS: Partial<Record<PictureSlot, StoryLayer>> = {}
+export type StoryPicture = { src: string; width: number; height: number }
 
-/* Small Kittl cut-outs placed around a card's big word (public/fermentation).
- * Sizes/positions are in em of the big word, so they scale with it. */
-export type Decor = {
-  src: string
-  width: number
-  height: number
-  /** Position around the big word (em of the word) — not used for 'below' */
-  className: string
-  /** 'below' = in its own space under the word, sized to fit (never on the letters) */
-  placement?: 'word' | 'below'
+export const PICTURE_BY_SLOT: Record<PictureSlot, StoryPicture> = {
+  intro: { src: '/fermentation/apple-chef.webp', width: 1260, height: 864 },
+  alive: { src: '/fermentation/carrot-chef.webp', width: 1260, height: 764 },
+  natural: { src: '/fermentation/broccoli-chef.webp', width: 1200, height: 812 },
+  everyday: { src: '/fermentation/kimchi-chef.webp', width: 1400, height: 1218 },
+  protein: { src: '/fermentation/tempeh-chef.webp', width: 1400, height: 791 },
+  experts: { src: '/fermentation/leek.webp', width: 1400, height: 824 },
 }
 
-export const FERMENTATION_DECOR = {
-  leek: { src: '/fermentation/leek.webp', width: 1400, height: 824 },
-  broccoliChef: { src: '/fermentation/broccoli-chef.webp', width: 1200, height: 812 },
-  carrotChef: { src: '/fermentation/carrot-chef.webp', width: 1260, height: 764 },
-  appleChef: { src: '/fermentation/apple-chef.webp', width: 1260, height: 864 },
-  jar: { src: '/fermentation/jar.webp', width: 192, height: 218 },
-  garlic: { src: '/fermentation/garlic.webp', width: 726, height: 726 },
-  tempehChef: { src: '/fermentation/tempeh-chef.webp', width: 1400, height: 791 },
-  kimchiChef: { src: '/fermentation/kimchi-chef.webp', width: 1400, height: 1218 },
-} as const
-
-/** Intro card (GESUND): chef pulling an apple, bottom right of the word */
-export const INTRO_DECOR: Decor[] = [
-  {
-    ...FERMENTATION_DECOR.appleChef,
-    className: '-bottom-[0.55em] -right-[0.8em] w-[1.35em] max-md:-right-[0.5em] max-md:w-[1.7em]',
-  },
-]
-
-/** Cut-outs per picture slot (the "More cards" picture select) */
-export const DECOR_BY_SLOT: Partial<Record<PictureSlot, Decor[]>> = {
-  // LEBENDIG: chef riding a carrot, flying in at the top right of the word
-  alive: [
-    {
-      ...FERMENTATION_DECOR.carrotChef,
-      className:
-        '-right-[0.55em] -top-[0.85em] w-[1.5em] -rotate-6 max-md:-right-[0.3em] max-md:w-[1.8em]',
-    },
-  ],
-  // NATÜRLICH: chef pulling a broccoli — in its own space under the word, fully on
-  // the cream: right-aligned on desktop, centred above the swipe capsule on phone/tablet.
-  natural: [
-    {
-      ...FERMENTATION_DECOR.broccoliChef,
-      className: '',
-      placement: 'below',
-    },
-  ],
-  // ALLTAG: chef hugging a jar of kimchi — in its own space under the word
-  everyday: [
-    {
-      ...FERMENTATION_DECOR.kimchiChef,
-      className: '',
-      placement: 'below',
-    },
-  ],
-  // PROTEIN: chef peeking over a block of tempeh — in its own space under the word
-  protein: [
-    {
-      ...FERMENTATION_DECOR.tempehChef,
-      className: '',
-      placement: 'below',
-    },
-  ],
-  // EXPERTEN: leek-riding chef at the top right corner of the word — above the
-  // letters, fully on the cream (phone/tablet: centred under the word)
-  experts: [
-    {
-      ...FERMENTATION_DECOR.leek,
-      className:
-        'bottom-full -right-[0.15em] mb-[0.06em] w-[1.25em] max-md:right-0 max-md:w-[1.9em] max-md:[@media(max-height:620px)]:w-[1.3em]',
-    },
-  ],
-}
+/** Width ÷ height of the most upright picture — the one that fills the full
+ *  picture height; the wider ones are shrunk so every picture has the same area */
+export const UPRIGHT_RATIO = Math.min(
+  ...Object.values(PICTURE_BY_SLOT).map((p) => p.width / p.height),
+)
