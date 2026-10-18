@@ -1,6 +1,6 @@
 'use client'
 
-import { useArrival, useFitSize, useNavOffset } from '@/components/StoryScene/hooks'
+import { useArrival, useFitSize } from '@/components/StoryScene/hooks'
 import { SwipeCapsule, useSwipeNudge, useSwipeTrack } from '@/components/SwipeCapsule'
 import type { FermentationStoryBlock as Props } from '@/payload-types'
 import { Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
@@ -38,6 +38,11 @@ import {
  * ═══════════════════════════════════════════════════════════════ */
 
 const INK = '#1A1A1A' // brand near-black
+// Desktop picture size in em of the big word: the apple on the first card
+// (1.35em × 0.93em) has the same area as a 1.12em square
+const APPLE_SIZE = 1.12
+
+type MeasureKind = 'text' | 'stack' | 'pic'
 const PAPER = '#F5E7D6'
 const EASE = [0.16, 1, 0.3, 1] as const
 
@@ -105,9 +110,10 @@ function StoryCard({
   /** Shared size (the smallest fit of all cards) so every big word matches */
   wordSize: number | null
   onFit: (key: string, size: number) => void
-  /** Shared heights (the tallest of all cards): text block + whole stack */
-  shared: { text: number | null; stack: number | null }
-  onMeasure: (key: string, kind: 'text' | 'stack', height: number) => void
+  /** Shared heights (the tallest of all cards): text block + whole stack; and the
+   *  desktop picture size (the smallest that fits on every card) */
+  shared: { text: number | null; stack: number | null; pic: number | null }
+  onMeasure: (key: string, kind: MeasureKind, value: number) => void
 }) {
   const ref = useRef<HTMLElement>(null)
   const wordBoxRef = useRef<HTMLDivElement>(null)
@@ -144,39 +150,75 @@ function StoryCard({
    * place on every card; the whole stack is centred like the tallest card's. */
   const containerRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
-  const [frame, setFrame] = useState<{ height: number; pad: number } | null>(null)
+  const areaRef = useRef<HTMLDivElement>(null)
+  const bottomRowRef = useRef<HTMLDivElement>(null)
+  const [frame, setFrame] = useState<{
+    height: number
+    pad: number
+    nav: number
+    row: number
+    gap: number
+  } | null>(null)
   useEffect(() => {
     const section = ref.current
     const container = containerRef.current
     const text = textRef.current
-    if (!section || !container || !text) return
+    const area = areaRef.current
+    if (!section || !container || !text || !area) return
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    const outer = (el: HTMLElement) => {
+      const style = getComputedStyle(el)
+      return (
+        el.offsetHeight + (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0)
+      )
+    }
     const measure = () => {
       onMeasure(card.key, 'text', text.offsetHeight)
       // Natural stack height (text at its shared height + word + picture space +
       // button): the parts plus the gaps between them, never the free space
       const items = ([...container.children] as HTMLElement[]).filter((el) => el.offsetHeight > 0)
       const gap = parseFloat(getComputedStyle(container).rowGap) || 0
-      onMeasure(
-        card.key,
-        'stack',
-        items.reduce((sum, el) => sum + el.offsetHeight, 0) + gap * Math.max(0, items.length - 1),
-      )
-      setFrame({
-        height: section.clientHeight,
-        pad: parseFloat(getComputedStyle(container).paddingBottom) || 0,
-      })
+      const stack =
+        items.reduce((sum, el) => sum + outer(el), 0) + gap * Math.max(0, items.length - 1)
+      onMeasure(card.key, 'stack', stack)
+
+      // The site header's room is always kept (also while it is slid away), so
+      // nothing moves when it comes and goes
+      const nav = document.querySelector<HTMLElement>('#site-header nav')?.offsetHeight ?? 0
+      const pad = parseFloat(getComputedStyle(container).paddingBottom) || 0
+      const height = section.clientHeight
+      setFrame({ height, pad, nav, gap, row: bottomRowRef.current?.offsetHeight ?? 0 })
+
+      // Desktop picture size: as big as the apple on the first card (same area),
+      // but never more than the room left under the word
+      if (desktop.matches && area.offsetHeight > 0) {
+        const areaStyle = getComputedStyle(area)
+        const areaPart = outer(area)
+        const top = Math.max(pad, nav ? nav + 24 : 0)
+        const room = height - top - pad - (stack - areaPart)
+        const areaMax = room - (parseFloat(areaStyle.marginTop) || 0)
+        const fromRoom = (areaMax - (parseFloat(areaStyle.paddingTop) || 0)) / 0.94
+        const fontSize = parseFloat(
+          getComputedStyle(lettersRef.current?.offsetParent ?? area).fontSize,
+        )
+        onMeasure(card.key, 'pic', Math.max(96, Math.min(fontSize * APPLE_SIZE, fromRoom)))
+      } else {
+        onMeasure(card.key, 'pic', Number.POSITIVE_INFINITY)
+      }
     }
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(section)
     observer.observe(text)
     ;[...container.children].forEach((child) => observer.observe(child))
-    return () => observer.disconnect()
+    desktop.addEventListener('change', measure)
+    return () => {
+      observer.disconnect()
+      desktop.removeEventListener('change', measure)
+    }
   }, [card.key, onMeasure])
 
   const active = useInView(ref, { once: true, amount: 0.25 })
-  // Room for the site header while it is on screen (it slides away on scroll-down)
-  const navOffset = useNavOffset()
 
   // Pointer float (desktop)
   const px = useSpring(0, { stiffness: 60, damping: 18 })
@@ -219,9 +261,10 @@ function StoryCard({
   // padding, never under the site header) — the same value on every card
   const centredTop =
     frame && shared.stack ? Math.max(frame.pad, (frame.height - shared.stack) / 2) : null
-  const navTop = navOffset ? navOffset + 24 : 0
+  const navTop = frame?.nav ? frame.nav + 24 : 0
   const paddingTop =
     centredTop !== null ? Math.max(centredTop, navTop) : navTop ? navTop : undefined
+  const desktopPic = shared.pic !== null && Number.isFinite(shared.pic) ? shared.pic : null
   const Heading = isFirst ? 'h2' : 'h3'
 
   return (
@@ -241,8 +284,14 @@ function StoryCard({
     >
       <div
         ref={containerRef}
-        className="container mx-auto container-padding flex h-full flex-col gap-6 [--pic:clamp(6rem,min(58vw,calc(46svh_-_13rem)),19rem)] lg:[--pic:clamp(6rem,min(17vw,calc(50svh_-_15rem)),15rem)] py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10 [@media(max-height:620px)]:gap-3 [@media(max-height:620px)]:py-6"
-        style={paddingTop !== undefined ? { paddingTop } : undefined}
+        className="container mx-auto container-padding flex h-full flex-col gap-6 [--pic:clamp(6rem,min(58vw,calc(46svh_-_13rem)),19rem)] lg:[--pic:clamp(6rem,min(17vw,calc(50svh_-_15rem)),15rem)] [--pic-pt:clamp(0.5rem,2vh,1.5rem)] lg:[--pic-pt:0.75rem] py-14 md:gap-8 md:py-20 lg:gap-6 lg:py-16 [@media(max-height:700px)]:gap-4 [@media(max-height:700px)]:py-10 [@media(max-height:620px)]:gap-3 [@media(max-height:620px)]:py-6 lg:[@media(max-height:820px)]:pb-5"
+        style={
+          {
+            paddingTop,
+            ...(desktopPic ? { '--pic': `${desktopPic}px` } : {}),
+            ...(frame?.row ? { '--row-h': `${frame.row + frame.gap}px` } : {}),
+          } as React.CSSProperties
+        }
       >
         {/* ── Number, title + text, top left ── */}
         {/* Phone/tablet: centred; desktop: top left. Held at the tallest card's height. */}
@@ -373,17 +422,19 @@ function StoryCard({
             </motion.p>
           </div>
 
-          {/* Picture space under the word — on every card, same fixed height, so
-              the button lands at the same place everywhere. Size comes from the
-              screen only (--pic), never from the space left over: it doesn't
-              change while the site header slides in/out. Every picture has the
-              same visual weight (equal area, whatever its shape).
-              Desktop: right edge at the end of the word; cards whose picture sits
-              around the word keep the space empty (the intro card drops it and
-              pulls its benefits row up, so its button lines up with the others). Short desktop screens: the
-              button sits beside the picture instead of below it. */}
+          {/* Picture space under the word — on every card, same height, so the
+              word and button land at the same place everywhere. Every picture
+              has the same visual weight (equal area, whatever its shape).
+              Phone/tablet: size from the screen, centred. Desktop: as big as the
+              apple on the first card, but never more than the room under the
+              word (measured, the same on every card — it never changes while
+              the site header slides in/out); right edge at the end of the word,
+              button beside it. Cards whose picture sits around the word keep the
+              space empty (the intro card drops it and pulls its benefits row up,
+              so its button lines up with the others). */}
           <motion.div
-            className={`flex h-[calc(var(--pic)*0.94_+_clamp(0.5rem,2vh,1.5rem))] shrink-0 items-end justify-center pt-[clamp(0.5rem,2vh,1.5rem)] lg:mt-[calc(var(--word-gap)*-1)] lg:h-[calc(var(--pic)*0.94_+_1.25rem)] lg:justify-end lg:pr-[var(--word-end)] lg:pt-5 ${benefits.length && !belowOnDesktop ? 'lg:hidden' : ''}`}
+            ref={areaRef}
+            className={`flex h-[calc(var(--pic)*0.94_+_var(--pic-pt))] shrink-0 items-end justify-center pt-[var(--pic-pt)] lg:mt-[calc(var(--word-gap)*-1)] lg:justify-end lg:pr-[var(--word-end)] ${benefits.length && !belowOnDesktop ? 'lg:hidden' : ''}`}
             initial={{ opacity: 0, y: 16 }}
             animate={active ? { opacity: 1, y: 0 } : undefined}
             transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
@@ -391,7 +442,7 @@ function StoryCard({
             {buttonOnly && card.button ? (
               <Link
                 href={card.button.href}
-                className="mr-6 hidden shrink-0 items-center self-end rounded-full px-6 py-3 font-display text-sm font-bold text-white transition-transform duration-300 hover:scale-[1.03] lg:[@media(max-height:820px)]:inline-flex"
+                className="mr-6 hidden shrink-0 items-center self-end rounded-full px-6 py-3 font-display text-sm font-bold text-white transition-transform duration-300 hover:scale-[1.03] lg:inline-flex"
                 style={{ backgroundColor: INK }}
               >
                 {card.button.label}
@@ -435,9 +486,11 @@ function StoryCard({
         {/* ── Intro card: desktop benefits left + button right; phone button, then benefits ── */}
         {card.button || benefits.length ? (
           <div
-            // Desktop, lone button: right under the picture space, at the word's end
-            // (short screens: beside the picture, inside that space)
-            className={`relative z-20 flex shrink-0 flex-col gap-8 lg:flex-row-reverse lg:items-end lg:justify-between ${benefits.length ? 'lg:mt-[calc(var(--pic)*0.94_-_var(--word-gap)_-_52px)] lg:[@media(max-height:820px)]:mt-[calc(var(--pic)*0.94_-_var(--word-gap)_-_90px)]' : ''} ${buttonOnly ? 'lg:-mt-3 lg:pr-[var(--word-end)] lg:[@media(max-height:820px)]:hidden' : ''}`}
+            ref={bottomRowRef}
+            // Desktop: a lone button sits beside the picture instead (inside the
+            // picture space); the intro card's row is pulled up so its button
+            // lines up with those
+            className={`relative z-20 flex shrink-0 flex-col gap-8 lg:flex-row-reverse lg:items-end lg:justify-between ${benefits.length ? 'lg:mt-[calc(var(--pic)*0.94_+_var(--pic-pt)_-_var(--word-gap)_-_var(--row-h,104px))]' : ''} ${buttonOnly ? 'lg:hidden' : ''}`}
           >
             {card.button ? (
               <motion.div
@@ -577,15 +630,24 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
 
   // Same layout on every card: the tallest text block and the tallest stack
   const [heights, setHeights] = useState<Record<string, number>>({})
-  const onMeasure = useCallback((key: string, kind: 'text' | 'stack', height: number) => {
+  const onMeasure = useCallback((key: string, kind: MeasureKind, value: number) => {
     const id = `${kind}:${key}`
-    setHeights((prev) => (prev[id] === height ? prev : { ...prev, [id]: height }))
+    // Whole pixels: sub-pixel jitter would keep re-rendering
+    const rounded = Number.isFinite(value) ? Math.round(value) : value
+    setHeights((prev) => (prev[id] === rounded ? prev : { ...prev, [id]: rounded }))
   }, [])
-  const tallest = (kind: 'text' | 'stack') => {
+  const all = (kind: MeasureKind) => {
     const values = cards.map((card) => heights[`${kind}:${card.key}`])
-    return values.every((v) => v !== undefined) ? Math.max(...(values as number[])) : null
+    return values.every((v) => v !== undefined) ? (values as number[]) : null
   }
-  const shared = { text: tallest('text'), stack: tallest('stack') }
+  const texts = all('text')
+  const stacks = all('stack')
+  const pics = all('pic')
+  const shared = {
+    text: texts ? Math.max(...texts) : null,
+    stack: stacks ? Math.max(...stacks) : null,
+    pic: pics ? Math.min(...pics) : null,
+  }
 
   /* The first card is what you see while scrolling down. The others are
    * optional: a sideways swipe row (touch, trackpad, dots, arrows) — the page
