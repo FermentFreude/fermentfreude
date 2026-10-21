@@ -337,32 +337,6 @@ function StoryCard({
                   {card.word}
                 </motion.span>
               </span>
-              {/* Desktop: a picture that flies at the word (sized in em, scales with it) */}
-              {pic?.aroundWord ? (
-                <motion.span
-                  className={`pointer-events-none absolute block max-lg:hidden ${pic.aroundWord}`}
-                  initial={{ opacity: 0, y: '0.2em', scale: 0.9 }}
-                  animate={wordReady ? { opacity: 1, y: 0, scale: 1 } : undefined}
-                  transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
-                >
-                  <motion.span
-                    className="block"
-                    animate={reduce ? undefined : { y: ['0em', '-0.04em', '0em'] }}
-                    transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
-                  >
-                    <Image
-                      src={pic.src}
-                      width={pic.width}
-                      height={pic.height}
-                      alt=""
-                      loading="eager"
-                      sizes="30vw"
-                      draggable={false}
-                      className="h-auto w-full select-none drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)]"
-                    />
-                  </motion.span>
-                </motion.span>
-              ) : null}
             </span>
           </motion.p>
         </div>
@@ -371,9 +345,7 @@ function StoryCard({
       {/* ── 3 · Picture, centred under the word ── */}
       <div className="container container-padding flex min-h-0 py-[clamp(0.5rem,1.75svh,1.5rem)]">
         <div className="relative min-h-0 min-w-0 flex-1 [container-type:size]">
-          <div
-            className={`absolute inset-0 flex items-end justify-center ${pic?.aroundWord ? 'lg:hidden' : ''}`}
-          >
+          <div className="absolute inset-0 flex items-end justify-center">
             {pic ? (
               <motion.div
                 variants={pictureIn}
