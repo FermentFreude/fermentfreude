@@ -29,23 +29,11 @@ export const PICTURE_BY_SLOT: Record<PictureSlot, StoryPicture> = {
     height: 864,
     aroundWord: '-bottom-[0.55em] -right-[0.5em] w-[1.35em]',
   },
-  // LEBENDIG: chef riding a carrot, flying in at the top right of the word
-  alive: {
-    src: '/fermentation/carrot-chef.webp',
-    width: 1260,
-    height: 764,
-    aroundWord: '-right-[0.55em] -top-[0.85em] w-[1.5em] -rotate-6',
-  },
+  alive: { src: '/fermentation/carrot-chef.webp', width: 1260, height: 764 },
   natural: { src: '/fermentation/broccoli-chef.webp', width: 1200, height: 812 },
   everyday: { src: '/fermentation/kimchi-chef.webp', width: 1400, height: 1218 },
   protein: { src: '/fermentation/tempeh-chef.webp', width: 1400, height: 791 },
-  // EXPERTEN: chef riding a leek, above the top right corner of the word
-  experts: {
-    src: '/fermentation/leek.webp',
-    width: 1400,
-    height: 824,
-    aroundWord: 'bottom-full -right-[0.15em] mb-[0.06em] w-[1.5em]',
-  },
+  experts: { src: '/fermentation/leek.webp', width: 1400, height: 824 },
 }
 
 /** Width ÷ height of the most upright picture — the one that fills the full

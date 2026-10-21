@@ -26,7 +26,7 @@ import { PICTURE_BY_SLOT, UPRIGHT_RATIO, type PictureSlot, type StoryPicture } f
  *  the intro card ("Warum Fermentation? / GESUND", button + benefits)
  *  and one card per topic. Phone/tablet: everything centred. Desktop:
  *  text top left; the picture centred two thirds along the word, or
- *  around the word itself (apple, carrot, leek). Every card has the same four rows, shared
+ *  around the word itself (the GESUND apple). Every card has the same four rows, shared
  *  across all cards with CSS subgrid, so nothing jumps while swiping:
  *
  *    1 · number, title, text      (as tall as the tallest card's)
