@@ -27,7 +27,7 @@ export const PICTURE_BY_SLOT: Record<PictureSlot, StoryPicture> = {
     src: '/fermentation/apple-chef.webp',
     width: 1260,
     height: 864,
-    aroundWord: '-bottom-[0.55em] -right-[0.8em] w-[1.35em]',
+    aroundWord: '-bottom-[0.55em] -right-[0.5em] w-[1.35em]',
   },
   // LEBENDIG: chef riding a carrot, flying in at the top right of the word
   alive: {
@@ -44,7 +44,7 @@ export const PICTURE_BY_SLOT: Record<PictureSlot, StoryPicture> = {
     src: '/fermentation/leek.webp',
     width: 1400,
     height: 824,
-    aroundWord: 'bottom-full -right-[0.15em] mb-[0.06em] w-[1.25em]',
+    aroundWord: 'bottom-full -right-[0.15em] mb-[0.06em] w-[1.5em]',
   },
 }
 

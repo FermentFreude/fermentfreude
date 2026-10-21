@@ -25,7 +25,7 @@ import { PICTURE_BY_SLOT, UPRIGHT_RATIO, type PictureSlot, type StoryPicture } f
  *  FERMENTATION STORY — a full-screen sideways swipe row of cards:
  *  the intro card ("Warum Fermentation? / GESUND", button + benefits)
  *  and one card per topic. Phone/tablet: everything centred. Desktop:
- *  text top left; the picture at the word's end (button beside it) or
+ *  text top left; the picture centred two thirds along the word, or
  *  around the word itself (apple, carrot, leek). Every card has the same four rows, shared
  *  across all cards with CSS subgrid, so nothing jumps while swiping:
  *
@@ -424,74 +424,85 @@ function StoryCard({
         </div>
       </div>
 
-      {/* ── 3 · Picture (desktop: benefits left; button + picture at the word's end) ── */}
+      {/* ── 3 · Picture (desktop: intro benefits + button bottom left; the picture
+          centred at two thirds of the word, a little right of the middle) ── */}
       <div className="container container-padding flex min-h-0 gap-10 py-[clamp(0.5rem,1.75svh,1.5rem)]">
         {benefits.length ? (
-          <div className="hidden w-[min(30rem,40%)] shrink-0 self-end lg:block">
-            <Benefits items={benefits} active={active} />
-          </div>
-        ) : null}
-        <div
-          className={`relative min-h-0 min-w-0 flex-1 [container-type:size] [--room:100cqw] ${
-            benefits.length
-              ? 'lg:[--room:calc(100cqw_-_17rem)]'
-              : card.button
-                ? 'lg:[--room:calc(100cqw_-_var(--word-end)_-_17rem)]'
-                : 'lg:[--room:calc(100cqw_-_var(--word-end))]'
-          }`}
-        >
-          {/* The intro card has its benefits on the left and its button at the right
-              edge (its apple hangs off the word's end) */}
-          <div
-            className={`absolute inset-0 flex items-end justify-center gap-8 lg:justify-end ${benefits.length ? '' : 'lg:pr-[var(--word-end)]'}`}
-          >
+          <div className="hidden shrink-0 items-end gap-10 self-end lg:flex">
+            <div className="w-[min(30rem,40vw)]">
+              <Benefits items={benefits} active={active} />
+            </div>
             {card.button ? (
               <motion.div
                 custom={4}
                 variants={fadeUp}
                 initial="hidden"
                 animate={active ? 'show' : 'hidden'}
-                className="hidden shrink-0 pb-[6%] lg:block"
+                className="shrink-0 pb-1"
               >
                 <CardButton button={card.button} />
               </motion.div>
             ) : null}
-            {pic ? (
-              <motion.div
-                variants={pictureIn}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="relative shrink-0"
-              >
+          </div>
+        ) : null}
+        <div
+          className={`relative min-h-0 min-w-0 flex-1 [container-type:size] [--room:100cqw] ${
+            card.button && !benefits.length
+              ? 'lg:[--room:calc(100cqw_-_2*var(--word-end)_-_17rem)]'
+              : 'lg:[--room:calc(100cqw_-_2*var(--word-end))]'
+          }`}
+        >
+          <div className="absolute inset-0 flex items-end justify-center">
+            {/* Desktop: centred on a point two thirds along the word */}
+            <div className="flex items-end gap-8 lg:absolute lg:bottom-0 lg:left-[calc(var(--word-end)+(100%-2*var(--word-end))*0.66)] lg:-translate-x-1/2">
+              {card.button && !benefits.length ? (
                 <motion.div
-                  className="will-change-transform"
-                  style={{ x: picX, y: picY, rotate: picRotate }}
+                  custom={4}
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate={active ? 'show' : 'hidden'}
+                  className="hidden shrink-0 pb-[6%] lg:block"
                 >
-                  {/* Gentle idle float, out of step from card to card */}
+                  <CardButton button={card.button} />
+                </motion.div>
+              ) : null}
+              {pic ? (
+                <motion.div
+                  variants={pictureIn}
+                  initial="hidden"
+                  animate={active ? 'show' : 'hidden'}
+                  className="relative shrink-0"
+                >
                   <motion.div
-                    animate={reduce ? undefined : { y: [0, -9, 0], rotate: [0, -1.2, 0] }}
-                    transition={{
-                      duration: 5.5,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                      delay: (index % 3) * 0.8,
-                    }}
+                    className="will-change-transform"
+                    style={{ x: picX, y: picY, rotate: picRotate }}
                   >
-                    <Image
-                      src={pic.src}
-                      width={pic.width}
-                      height={pic.height}
-                      alt=""
-                      loading="eager"
-                      sizes="(min-width: 1024px) 34vw, 80vw"
-                      draggable={false}
-                      className={`block max-w-none select-none drop-shadow-[0_18px_22px_rgba(60,40,20,0.18)] ${pic.aroundWord ? 'lg:hidden' : ''}`}
-                      style={{ height: picHeight, width: 'auto' }}
-                    />
+                    {/* Gentle idle float, out of step from card to card */}
+                    <motion.div
+                      animate={reduce ? undefined : { y: [0, -9, 0], rotate: [0, -1.2, 0] }}
+                      transition={{
+                        duration: 5.5,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: (index % 3) * 0.8,
+                      }}
+                    >
+                      <Image
+                        src={pic.src}
+                        width={pic.width}
+                        height={pic.height}
+                        alt=""
+                        loading="eager"
+                        sizes="(min-width: 1024px) 34vw, 80vw"
+                        draggable={false}
+                        className={`block max-w-none select-none drop-shadow-[0_18px_22px_rgba(60,40,20,0.18)] ${pic.aroundWord ? 'lg:hidden' : ''}`}
+                        style={{ height: picHeight, width: 'auto' }}
+                      />
+                    </motion.div>
                   </motion.div>
                 </motion.div>
-              </motion.div>
-            ) : null}
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
