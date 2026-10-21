@@ -24,21 +24,22 @@ import { PICTURE_BY_SLOT, UPRIGHT_RATIO, type PictureSlot, type StoryPicture } f
 /* ═══════════════════════════════════════════════════════════════
  *  FERMENTATION STORY — a full-screen sideways swipe row of cards:
  *  the intro card ("Warum Fermentation? / GESUND", button + benefits)
- *  and one card per topic. Every card has the same four rows, shared
- *  across all cards with CSS subgrid, so nothing jumps while swiping:
+ *  and one card per topic. Everything centred, on every screen size.
+ *  Every card has the same four rows, shared across all cards with CSS
+ *  subgrid, so nothing jumps while swiping:
  *
  *    1 · number, title, text      (as tall as the tallest card's)
  *    2 · one huge word            (same size on every card)
  *    3 · the picture              (takes the room that is left — it
  *                                  shrinks instead of overlapping)
- *    4 · button (phone/tablet)    (desktop: beside the picture)
+ *    4 · button (+ intro benefits)
  *
  *  While swiping, the word lags and the picture leads (parallax).
  *  Text is CMS; pictures live in code (layers.ts).
  * ═══════════════════════════════════════════════════════════════ */
 
 const INK = '#1A1A1A' // brand near-black
-const PAPER = '#F5E7D6'
+const PAPER = '#FAF2E0'
 const EASE = [0.16, 1, 0.3, 1] as const
 
 const DEFAULTS = {
@@ -111,62 +112,28 @@ function CardButton({ button }: { button: NonNullable<CardData['button']> }) {
   )
 }
 
-/** Intro benefits. Compact (phone/tablet): icon + title in one row. Full (desktop):
- *  three columns with icon, title and short line. */
-function Benefits({
-  items,
-  active,
-  compact,
-}: {
-  items: Benefit[]
-  active: boolean
-  compact?: boolean
-}) {
-  if (compact) {
-    return (
-      <ul className="m-0 grid w-[min(22rem,100%)] list-none grid-cols-3 gap-2 p-0">
-        {items.map((item, i) => (
-          <motion.li
-            key={item.id ?? i}
-            custom={5 + i}
-            variants={fadeUp}
-            initial="hidden"
-            animate={active ? 'show' : 'hidden'}
-            className="flex flex-col items-center gap-1.5 text-center"
-          >
-            <span
-              className="flex size-8 items-center justify-center rounded-full border"
-              style={{ borderColor: `${INK}26` }}
-            >
-              <BenefitIcon icon={item.icon} className="size-4" />
-            </span>
-            <span className="font-display text-[10px] font-bold uppercase tracking-[0.08em]">
-              {item.title}
-            </span>
-          </motion.li>
-        ))}
-      </ul>
-    )
-  }
+/** Intro benefits: icon over title, three in a row */
+function Benefits({ items, active }: { items: Benefit[]; active: boolean }) {
   return (
-    <ul
-      className="m-0 grid list-none gap-x-8 p-0"
-      style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
-    >
+    <ul className="m-0 grid w-[min(22rem,100%)] list-none grid-cols-3 gap-2 p-0 lg:w-[26rem]">
       {items.map((item, i) => (
-        <motion.li key={item.id ?? i} custom={5 + i} variants={fadeUp} initial="hidden" animate={active ? 'show' : 'hidden'}>
+        <motion.li
+          key={item.id ?? i}
+          custom={5 + i}
+          variants={fadeUp}
+          initial="hidden"
+          animate={active ? 'show' : 'hidden'}
+          className="flex flex-col items-center gap-1.5 text-center"
+        >
           <span
-            className="flex size-11 items-center justify-center rounded-full border"
+            className="flex size-8 items-center justify-center rounded-full border lg:size-9"
             style={{ borderColor: `${INK}26` }}
           >
-            <BenefitIcon icon={item.icon} className="size-5" />
+            <BenefitIcon icon={item.icon} className="size-4" />
           </span>
-          <span className="mt-3 block font-display text-sm font-bold uppercase tracking-[0.05em]">
+          <span className="font-display text-[10px] font-bold uppercase tracking-[0.08em] lg:text-[11px]">
             {item.title}
           </span>
-          {item.text ? (
-            <span className="mt-1 block text-sm leading-snug opacity-70">{item.text}</span>
-          ) : null}
         </motion.li>
       ))}
     </ul>
@@ -209,24 +176,15 @@ function StoryCard({
     if (ownFit) onFit(card.key, ownFit)
   }, [ownFit, card.key, onFit])
 
-  // Space right of the big word — desktop lines the picture up with the word's end
-  const lettersRef = useRef<HTMLSpanElement>(null)
-  const [wordEnd, setWordEnd] = useState(0)
   // Card width, for the parallax (read every frame — cached, never measured there)
   const width = useRef(1)
   useEffect(() => {
     const card = ref.current
-    const letters = lettersRef.current
-    const line = letters?.offsetParent as HTMLElement | null
-    if (!card || !letters || !line) return
-    const measure = () => {
-      width.current = card.clientWidth || 1
-      setWordEnd(Math.round(Math.max(0, line.clientWidth - (letters.offsetLeft + letters.offsetWidth))))
-    }
+    if (!card) return
+    const measure = () => (width.current = card.clientWidth || 1)
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(card)
-    observer.observe(letters)
     return () => observer.disconnect()
   }, [])
 
@@ -264,10 +222,10 @@ function StoryCard({
   const Heading = index === 0 ? 'h2' : 'h3'
   const pic = card.picture
   // Same visual weight for every picture: equal area, whatever its shape. The most
-  // upright one fills the picture row's height; never wider than the room beside it.
+  // upright one fills the picture row's height; never wider than the card.
   const ratio = pic ? pic.width / pic.height : 1
   const areaScale = Math.sqrt(UPRIGHT_RATIO / ratio)
-  const picHeight = `min(${(areaScale * 94).toFixed(1)}cqh, ${(areaScale * 26).toFixed(2)}rem, calc(var(--room) / ${ratio.toFixed(3)}))`
+  const picHeight = `min(${(areaScale * 94).toFixed(1)}cqh, ${(areaScale * 26).toFixed(2)}rem, calc(100cqw / ${ratio.toFixed(3)}))`
 
   return (
     <article
@@ -275,16 +233,15 @@ function StoryCard({
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       className="relative row-span-4 grid snap-start snap-always grid-rows-subgrid overflow-clip"
-      style={{ '--word-end': `${wordEnd}px` } as React.CSSProperties}
       aria-roledescription="slide"
       aria-label={`${index + 1} / ${count}`}
     >
-      {/* ── 1 · Number, title + text (phone/tablet centred, desktop top left) ── */}
+      {/* ── 1 · Number, title + text ── */}
       <motion.div
-        className="container container-padding relative z-20 pt-[calc(var(--nav,4.5rem)+clamp(0.75rem,4svh,3rem))]"
+        className="container container-padding relative z-20 pt-[calc(var(--nav,4.5rem)+clamp(0.75rem,3svh,2.5rem))]"
         style={{ x: textX, opacity: textOpacity }}
       >
-        <div className="mx-auto max-w-[24rem] text-center md:max-w-[30rem] lg:mx-0 lg:text-left">
+        <div className="mx-auto max-w-[24rem] text-center md:max-w-[30rem] lg:max-w-[34rem]">
           {count > 1 ? (
             <motion.p
               custom={0}
@@ -297,7 +254,12 @@ function StoryCard({
             </motion.p>
           ) : null}
           {card.title ? (
-            <motion.div custom={1} variants={fadeUp} initial="hidden" animate={active ? 'show' : 'hidden'}>
+            <motion.div
+              custom={1}
+              variants={fadeUp}
+              initial="hidden"
+              animate={active ? 'show' : 'hidden'}
+            >
               <Heading className="m-0 font-display text-[clamp(1.375rem,2.4vw,2rem)] font-bold leading-[1.1] tracking-[-0.025em] text-balance">
                 {card.title}
               </Heading>
@@ -340,8 +302,11 @@ function StoryCard({
       </motion.div>
 
       {/* ── 2 · Big word (same size on every card) ── */}
-      <div className="container container-padding pt-[clamp(0.5rem,3svh,2.5rem)]">
-        <div ref={wordBoxRef} className="relative h-[clamp(3.25rem,min(22vw,19svh),14rem)] [@media(max-height:720px)]:h-[clamp(3rem,min(20vw,15svh),14rem)] w-full">
+      <div className="container container-padding pt-[clamp(0.25rem,2svh,2rem)]">
+        <div
+          ref={wordBoxRef}
+          className="relative h-[clamp(3.25rem,min(22vw,19svh),14rem)] [@media(max-height:720px)]:h-[clamp(3rem,min(20vw,15svh),14rem)] w-full"
+        >
           {/* Hidden copy at 100px to measure the word */}
           <div
             ref={measureRef}
@@ -354,55 +319,61 @@ function StoryCard({
           <motion.p
             aria-hidden
             className="absolute inset-0 m-0 flex items-center justify-center whitespace-nowrap font-display font-bold uppercase leading-[0.86] tracking-[-0.03em] will-change-transform"
-            style={{ fontSize: wordSize ?? ownFit ?? 'clamp(3rem, 14vw, 13rem)', x: wordX, y: wordY }}
+            style={{
+              fontSize: wordSize ?? ownFit ?? 'clamp(3rem, 14vw, 13rem)',
+              x: wordX,
+              y: wordY,
+            }}
           >
-            {/* Mask: top padding keeps accents (Ü, É) visible, bottom padding the descenders */}
-            <span ref={lettersRef} className="-my-[0.16em] block overflow-hidden pb-[0.06em] pt-[0.16em]">
-              <motion.span
-                className="block"
-                variants={lineRise}
-                initial="hidden"
-                animate={wordReady ? 'show' : 'hidden'}
-              >
-                {card.word}
-              </motion.span>
+            <span className="relative inline-block">
+              {/* Mask: top padding keeps accents (Ü, É) visible, bottom padding the descenders */}
+              <span className="-my-[0.16em] block overflow-hidden pb-[0.06em] pt-[0.16em]">
+                <motion.span
+                  className="block"
+                  variants={lineRise}
+                  initial="hidden"
+                  animate={wordReady ? 'show' : 'hidden'}
+                >
+                  {card.word}
+                </motion.span>
+              </span>
+              {/* Desktop: a picture that flies at the word (sized in em, scales with it) */}
+              {pic?.aroundWord ? (
+                <motion.span
+                  className={`pointer-events-none absolute block max-lg:hidden ${pic.aroundWord}`}
+                  initial={{ opacity: 0, y: '0.2em', scale: 0.9 }}
+                  animate={wordReady ? { opacity: 1, y: 0, scale: 1 } : undefined}
+                  transition={{ duration: 1.1, ease: EASE, delay: 0.5 }}
+                >
+                  <motion.span
+                    className="block"
+                    animate={reduce ? undefined : { y: ['0em', '-0.04em', '0em'] }}
+                    transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <Image
+                      src={pic.src}
+                      width={pic.width}
+                      height={pic.height}
+                      alt=""
+                      loading="eager"
+                      sizes="30vw"
+                      draggable={false}
+                      className="h-auto w-full select-none drop-shadow-[0_14px_18px_rgba(60,40,20,0.2)]"
+                    />
+                  </motion.span>
+                </motion.span>
+              ) : null}
             </span>
           </motion.p>
         </div>
       </div>
 
-      {/* ── 3 · Picture (desktop: benefits left; button + picture at the word's end) ── */}
-      <div className="container container-padding flex min-h-0 gap-10 py-[clamp(0.5rem,2.5svh,1.75rem)]">
-        {benefits.length ? (
-          <div className="hidden w-[min(30rem,40%)] shrink-0 self-end lg:block">
-            <Benefits items={benefits} active={active} />
-          </div>
-        ) : null}
-        <div
-          className={`relative min-h-0 min-w-0 flex-1 [container-type:size] [--room:100cqw] ${
-            benefits.length
-              ? 'lg:[--room:calc(100cqw_-_17rem)]'
-              : card.button
-                ? 'lg:[--room:calc(100cqw_-_var(--word-end)_-_17rem)]'
-                : 'lg:[--room:calc(100cqw_-_var(--word-end))]'
-          }`}
-        >
-          {/* The intro card has its benefits on the left — its picture uses the
-              full room instead of stopping at the (short) word's end */}
+      {/* ── 3 · Picture, centred under the word ── */}
+      <div className="container container-padding flex min-h-0 py-[clamp(0.5rem,1.75svh,1.5rem)]">
+        <div className="relative min-h-0 min-w-0 flex-1 [container-type:size]">
           <div
-            className={`absolute inset-0 flex items-end justify-center gap-8 lg:justify-end ${benefits.length ? '' : 'lg:pr-[var(--word-end)]'}`}
+            className={`absolute inset-0 flex items-end justify-center ${pic?.aroundWord ? 'lg:hidden' : ''}`}
           >
-            {card.button ? (
-              <motion.div
-                custom={4}
-                variants={fadeUp}
-                initial="hidden"
-                animate={active ? 'show' : 'hidden'}
-                className="hidden shrink-0 pb-[6%] lg:block"
-              >
-                <CardButton button={card.button} />
-              </motion.div>
-            ) : null}
             {pic ? (
               <motion.div
                 variants={pictureIn}
@@ -410,7 +381,10 @@ function StoryCard({
                 animate={active ? 'show' : 'hidden'}
                 className="relative shrink-0"
               >
-                <motion.div className="will-change-transform" style={{ x: picX, y: picY, rotate: picRotate }}>
+                <motion.div
+                  className="will-change-transform"
+                  style={{ x: picX, y: picY, rotate: picRotate }}
+                >
                   {/* Gentle idle float, out of step from card to card */}
                   <motion.div
                     animate={reduce ? undefined : { y: [0, -9, 0], rotate: [0, -1.2, 0] }}
@@ -440,22 +414,21 @@ function StoryCard({
         </div>
       </div>
 
-      {/* ── 4 · Phone/tablet: button, then the intro benefits ── */}
-      <div className="container container-padding flex flex-col items-center gap-4 pb-[clamp(0.75rem,2.5svh,1.75rem)] lg:pb-[clamp(1.5rem,5svh,3.5rem)]">
+      {/* ── 4 · Button, then the intro benefits ── */}
+      <div className="container container-padding flex flex-col items-center gap-3 pb-[clamp(0.75rem,2.5svh,1.75rem)] lg:pb-[clamp(1.5rem,5svh,3.5rem)]">
         {card.button ? (
           <motion.div
             custom={4}
             variants={fadeUp}
             initial="hidden"
             animate={active ? 'show' : 'hidden'}
-            className="lg:hidden"
           >
             <CardButton button={card.button} />
           </motion.div>
         ) : null}
         {benefits.length ? (
-          <div className="lg:hidden [@media(max-height:680px)]:hidden">
-            <Benefits items={benefits} active={active} compact />
+          <div className="[@media(max-height:680px)]:hidden">
+            <Benefits items={benefits} active={active} />
           </div>
         ) : null}
       </div>

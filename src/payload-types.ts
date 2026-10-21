@@ -3226,11 +3226,11 @@ export interface FermentationStoryBlock {
    */
   title?: string | null;
   /**
-   * One or two short sentences under the title.
+   * One short sentence under the title (about 100 characters) — longer text squeezes the picture.
    */
   intro?: string | null;
   /**
-   * The huge word across the section — one short, punchy word, e.g. "GESUND". The picture floats over it.
+   * The huge word across the section — one short, punchy word, e.g. "GESUND". The picture sits under it.
    */
   bigWord?: string | null;
   /**
@@ -3242,7 +3242,7 @@ export interface FermentationStoryBlock {
    */
   buttonLink?: string | null;
   /**
-   * Which built-in picture floats over the big word on the first card.
+   * Which built-in illustration sits under the big word on the first card.
    */
   introPicture?: ('intro' | 'alive' | 'natural' | 'everyday' | 'protein' | 'experts') | null;
   /**
@@ -3266,12 +3266,12 @@ export interface FermentationStoryBlock {
          */
         bigWord: string;
         /**
-         * Built-in picture over the big word.
+         * Built-in illustration under the big word.
          */
         picture?: ('intro' | 'alive' | 'natural' | 'everyday' | 'protein' | 'experts') | null;
         title: string;
         /**
-         * A few short sentences.
+         * One or two short sentences (about 100 characters) — longer text squeezes the picture.
          */
         text: string;
         /**

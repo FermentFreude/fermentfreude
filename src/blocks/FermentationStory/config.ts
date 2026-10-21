@@ -34,7 +34,10 @@ export const FermentationStory: Block = {
       type: 'textarea',
       localized: true,
       label: 'Intro',
-      admin: { description: 'One short sentence under the title (about 100 characters) — longer text squeezes the picture.' },
+      admin: {
+        description:
+          'One short sentence under the title (about 100 characters) — longer text squeezes the picture.',
+      },
     },
     {
       name: 'bigWord',
@@ -71,7 +74,9 @@ export const FermentationStory: Block = {
       label: 'Picture (intro card)',
       defaultValue: 'intro',
       options: PICTURE_SLOTS,
-      admin: { description: 'Which built-in illustration sits under the big word on the first card.' },
+      admin: {
+        description: 'Which built-in illustration sits under the big word on the first card.',
+      },
     },
     {
       name: 'benefits',
@@ -162,7 +167,10 @@ export const FermentationStory: Block = {
           localized: true,
           required: true,
           label: 'Text',
-          admin: { description: 'One or two short sentences (about 100 characters) — longer text squeezes the picture.' },
+          admin: {
+            description:
+              'One or two short sentences (about 100 characters) — longer text squeezes the picture.',
+          },
         },
         {
           type: 'row',
