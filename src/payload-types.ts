@@ -183,6 +183,7 @@ export interface Config {
     'workshop-cards-global': WorkshopCardsGlobal;
     'product-detail-labels-global': ProductDetailLabelsGlobal;
     'product-pickup-settings': ProductPickupSetting;
+    'chat-assistant-global': ChatAssistantGlobal;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -197,6 +198,7 @@ export interface Config {
     'workshop-cards-global': WorkshopCardsGlobalSelect<false> | WorkshopCardsGlobalSelect<true>;
     'product-detail-labels-global': ProductDetailLabelsGlobalSelect<false> | ProductDetailLabelsGlobalSelect<true>;
     'product-pickup-settings': ProductPickupSettingsSelect<false> | ProductPickupSettingsSelect<true>;
+    'chat-assistant-global': ChatAssistantGlobalSelect<false> | ChatAssistantGlobalSelect<true>;
   };
   locale: 'de' | 'en';
   widgets: {
@@ -9984,6 +9986,54 @@ export interface ProductPickupSetting {
   createdAt?: string | null;
 }
 /**
+ * Der Chat-Assistent unten rechts auf jeder Seite. Er beantwortet Fragen zu Workshops, Terminen, Produkten und FAQ automatisch anhand der Inhalte im Admin. / The chat bubble in the bottom corner. It answers questions about workshops, dates, products and FAQ using the content in this admin.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-assistant-global".
+ */
+export interface ChatAssistantGlobal {
+  id: string;
+  /**
+   * Chat-Blase auf der Website anzeigen. / Show the chat bubble on the website. (Also needs the ANTHROPIC_API_KEY env var on Vercel.)
+   */
+  enabled?: boolean | null;
+  /**
+   * Text on the round chat button (e.g. "Fragen?"). Leave empty for the default.
+   */
+  launcherLabel?: string | null;
+  /**
+   * Heading at the top of the chat window (e.g. "FermentFreude Assistent").
+   */
+  title?: string | null;
+  /**
+   * First message visitors see when they open the chat.
+   */
+  greeting?: string | null;
+  /**
+   * Grey hint text in the message box (e.g. "Deine Frage…").
+   */
+  inputPlaceholder?: string | null;
+  /**
+   * Up to 4 quick-start buttons shown under the greeting (e.g. "Wann ist der nächste Kombucha-Workshop?").
+   */
+  suggestedQuestions?:
+    | {
+        question: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Small note under the message box. Should mention that messages are processed by an AI service and link to the privacy policy.
+   */
+  privacyNote?: string | null;
+  /**
+   * Alles, was der Assistent zusätzlich wissen soll und nicht schon auf der Website steht (z.B. Parken, Barrierefreiheit, Gruppenanfragen, Firmen-Events). Klartext, je ein Punkt pro Zeile. / Anything else the assistant should know that is not already on the site. Plain text, one point per line.
+   */
+  extraKnowledge?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -10321,6 +10371,28 @@ export interface ProductPickupSettingsSelect<T extends boolean = true> {
   locationName?: T;
   locationAddress?: T;
   googleScheduleUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-assistant-global_select".
+ */
+export interface ChatAssistantGlobalSelect<T extends boolean = true> {
+  enabled?: T;
+  launcherLabel?: T;
+  title?: T;
+  greeting?: T;
+  inputPlaceholder?: T;
+  suggestedQuestions?:
+    | T
+    | {
+        question?: T;
+        id?: T;
+      };
+  privacyNote?: T;
+  extraKnowledge?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

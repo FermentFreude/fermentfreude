@@ -35,6 +35,8 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY   # pk_test_ (dev) / pk_live_ (prod)
 STRIPE_WEBHOOKS_SIGNING_SECRET       # whsec_
 DEEPL_API_KEY                        # Auto-translation DE→EN
 CRON_SECRET                          # Auth for Vercel Cron → /api/emails/workshop-reminders (route refuses to run without it)
+ANTHROPIC_API_KEY                    # Claude API key for the website chat assistant (/api/chat). Unset = chat bubble hidden
+CHATBOT_MODEL                        # Optional. Claude model for the chat assistant (default: claude-opus-5-5)
 ```
 
 **CRITICAL:** `NEXT_PUBLIC_*` vars are baked in at **build time**. Changing them in Vercel requires a full redeploy **without cache**.
