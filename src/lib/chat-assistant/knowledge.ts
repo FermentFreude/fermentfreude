@@ -4,21 +4,85 @@ import { getPayload } from 'payload'
 import type { AppLocale } from '@/utilities/payloadLocaleQuery'
 
 /**
- * Builds the plain-text "knowledge sheet" the chat assistant answers from.
+ * Loads everything the chat assistant answers from.
  *
  * Everything is read live from Payload with public read access only
  * (overrideAccess: false), so the assistant can never see bookings, orders,
- * customers or internal notes. The sheet is cached in memory for a few
+ * customers or internal notes. The data is cached in memory for a few
  * minutes per locale so a busy chat does not hit MongoDB on every message.
+ *
+ * Two consumers:
+ * - `getChatData()` → structured data for the free keyword answerer
+ * - `getChatKnowledge()` → a plain-text sheet for the Claude-powered answerer
  */
 
 const CACHE_TTL_MS = 5 * 60 * 1000
 const MAX_APPOINTMENTS = 60
 const APPOINTMENT_WINDOW_DAYS = 120
 
-const cache = new Map<AppLocale, { at: number; text: string }>()
-
 type AnyDoc = Record<string, unknown>
+
+export type ChatWorkshop = {
+  slug: string
+  title: string
+  price: number
+  maxCapacity: number | null
+  description: string
+  whatToBring: string
+}
+
+export type ChatAppointment = {
+  workshopSlug: string
+  workshopTitle: string
+  dateTime: string
+  when: string
+  location: string
+  spots: number
+}
+
+export type ChatProduct = {
+  slug: string
+  title: string
+  price: string | null
+  unitSize: string
+  outOfStock: boolean
+  seasonal: boolean
+  shortDescription: string
+  ingredients: string
+  allergens: string
+  storage: string
+}
+
+export type ChatCourse = {
+  path: string
+  title: string
+  meta: string
+  description: string
+  comingSoon: boolean
+}
+
+export type ChatFaq = { section: string; question: string; answer: string }
+
+export type ChatContact = {
+  companyName: string
+  address: string
+  email: string
+  phone: string
+  website: string
+}
+
+export type ChatData = {
+  locale: AppLocale
+  contact: ChatContact
+  workshops: ChatWorkshop[]
+  appointments: ChatAppointment[]
+  products: ChatProduct[]
+  courses: ChatCourse[]
+  faq: ChatFaq[]
+  extraKnowledge: string
+}
+
+const cache = new Map<AppLocale, { at: number; data: ChatData }>()
 
 function lexicalToPlainText(value: unknown): string {
   if (!value || typeof value !== 'object') return typeof value === 'string' ? value : ''
@@ -55,7 +119,7 @@ function formatDateTime(iso: string, locale: AppLocale): string {
   })
 }
 
-async function build(locale: AppLocale): Promise<string> {
+async function load(locale: AppLocale): Promise<ChatData> {
   const payload = await getPayload({ config: configPromise })
   const localeQuery = { locale, fallbackLocale: 'de' as const, overrideAccess: false }
   const now = new Date()
@@ -122,112 +186,170 @@ async function build(locale: AppLocale): Promise<string> {
     ...localeQuery,
   })) as unknown as AnyDoc
 
-  const lines: string[] = []
+  const address = business.addressLine1
+    ? `${clean(business.addressLine1)}, ${clean(business.postalCode)} ${clean(business.city)}, ${clean(business.country)}`
+        .replace(/\s+,/g, ',')
+        .replace(/,\s*$/, '')
+    : ''
 
-  // ── Business ──────────────────────────────────────────────
-  lines.push('## Contact & company')
-  const contactParts = [
-    business.companyName && `Company: ${clean(business.companyName)}`,
-    business.addressLine1 &&
-      `Address: ${clean(business.addressLine1)}, ${clean(business.postalCode)} ${clean(business.city)}, ${clean(business.country)}`,
-    business.email && `Email: ${clean(business.email)}`,
-    business.phone && `Phone: ${clean(business.phone)}`,
-    business.website && `Website: ${clean(business.website)}`,
-  ].filter(Boolean) as string[]
-  lines.push(...(contactParts.length ? contactParts : ['(no contact details in the CMS)']))
-
-  // ── Workshops ─────────────────────────────────────────────
-  lines.push('', '## Workshops (in person)')
-  for (const w of workshops.docs as unknown as AnyDoc[]) {
-    lines.push(
-      `### ${clean(w.title)} — page: /workshops/${w.slug}`,
-      `Price: €${Number(w.basePrice ?? 0).toFixed(2)} per person · max ${w.maxCapacityPerSlot} people per session`,
-    )
-    const description = clean(w.description, 900)
-    if (description) lines.push(`About: ${description}`)
-    const bring = clean(w.whatToBring, 400)
-    if (bring) lines.push(`What to bring: ${bring}`)
-  }
-  if (!workshops.docs.length) lines.push('(no active workshops)')
-
-  // ── Upcoming dates ────────────────────────────────────────
-  lines.push('', `## Upcoming workshop dates (next ${APPOINTMENT_WINDOW_DAYS} days, Vienna time)`)
-  for (const a of appointments.docs as unknown as AnyDoc[]) {
-    const workshop = (a.workshop ?? {}) as AnyDoc
-    const location = (a.location ?? {}) as AnyDoc
-    const spots = Number(a.availableSpots ?? 0)
-    const spotsText = spots > 0 ? `${spots} spots free` : 'SOLD OUT'
-    const where = [clean(location.name), clean(location.address, 200)].filter(Boolean).join(', ')
-    lines.push(
-      `- ${clean(workshop.title) || 'Workshop'} (/workshops/${workshop.slug ?? ''}): ${formatDateTime(String(a.dateTime), locale)}${where ? ` @ ${where}` : ''} — ${spotsText}`,
-    )
-  }
-  if (!appointments.docs.length) lines.push('(no upcoming dates published right now)')
-
-  // ── Shop ──────────────────────────────────────────────────
-  lines.push('', '## Shop products — shop overview: /shop')
-  for (const p of products.docs as unknown as AnyDoc[]) {
-    if (p.productType === 'workshop') continue // covered above
-    const details = [
-      euros(p.priceInEUR),
-      clean(p.unitSize, 60),
-      p.inventory === 0 ? 'currently out of stock' : null,
-      p.isSeasonal ? 'seasonal' : null,
-    ].filter(Boolean)
-    lines.push(
-      `- ${clean(p.title)} (/products/${p.slug})${details.length ? ` — ${details.join(', ')}` : ''}`,
-    )
-    const short = clean(p.shortDescription, 300)
-    if (short) lines.push(`  ${short}`)
-    const extra = [
-      p.ingredients && `Ingredients: ${clean(p.ingredients, 300)}`,
-      p.allergens && `Allergens: ${clean(p.allergens, 200)}`,
-      p.storageInstructions && `Storage: ${clean(p.storageInstructions, 200)}`,
-    ].filter(Boolean)
-    if (extra.length) lines.push(`  ${extra.join(' · ')}`)
-  }
-
-  // ── Online courses ────────────────────────────────────────
-  const activeCourses = (courses.docs as unknown as AnyDoc[]).filter((c) => c.isActive !== false)
-  if (activeCourses.length) {
-    lines.push('', '## Online courses — overview: /courses')
-    for (const c of activeCourses) {
-      const meta = [clean(c.durationText, 60), clean(c.levelText, 60), c.isComingSoon ? 'coming soon' : null]
-        .filter(Boolean)
-        .join(', ')
-      const path = `/courses/${c.courseSlug || c.slug}`
-      lines.push(`- ${clean(c.title)} (${path})${meta ? ` — ${meta}` : ''}`)
-      const description = clean(c.description, 400)
-      if (description) lines.push(`  ${description}`)
-    }
-  }
-
-  // ── FAQ ───────────────────────────────────────────────────
   const helpLayout = ((helpPage.docs[0] as unknown as AnyDoc | undefined)?.layout ?? []) as AnyDoc[]
-  const faqBlocks = helpLayout.filter((b) => b.blockType === 'helpFaq')
-  if (faqBlocks.length) {
-    lines.push('', '## FAQ (from the Help page: /help)')
-    for (const block of faqBlocks) {
-      for (const section of (block.sections ?? []) as AnyDoc[]) {
-        lines.push(`### ${clean(section.title)}`)
-        for (const item of (section.items ?? []) as AnyDoc[]) {
-          lines.push(`Q: ${clean(item.question)}`, `A: ${clean(item.answer, 1200)}`)
-        }
+  const faq: ChatFaq[] = []
+  for (const block of helpLayout.filter((b) => b.blockType === 'helpFaq')) {
+    for (const section of (block.sections ?? []) as AnyDoc[]) {
+      for (const item of (section.items ?? []) as AnyDoc[]) {
+        const question = clean(item.question, 300)
+        const answer = clean(item.answer, 1200)
+        if (question && answer) faq.push({ section: clean(section.title, 120), question, answer })
       }
     }
   }
 
-  // ── Extra knowledge from the admin ────────────────────────
-  const extra = typeof chatGlobal.extraKnowledge === 'string' ? chatGlobal.extraKnowledge.trim() : ''
-  if (extra) lines.push('', '## Extra notes from the FermentFreude team', extra)
+  return {
+    locale,
+    contact: {
+      companyName: clean(business.companyName),
+      address,
+      email: clean(business.email),
+      phone: clean(business.phone),
+      website: clean(business.website),
+    },
+    workshops: (workshops.docs as unknown as AnyDoc[]).map((w) => ({
+      slug: String(w.slug ?? ''),
+      title: clean(w.title),
+      price: Number(w.basePrice ?? 0),
+      maxCapacity: typeof w.maxCapacityPerSlot === 'number' ? w.maxCapacityPerSlot : null,
+      description: clean(w.description, 900),
+      whatToBring: clean(w.whatToBring, 400),
+    })),
+    appointments: (appointments.docs as unknown as AnyDoc[]).map((a) => {
+      const workshop = (a.workshop ?? {}) as AnyDoc
+      const location = (a.location ?? {}) as AnyDoc
+      return {
+        workshopSlug: String(workshop.slug ?? ''),
+        workshopTitle: clean(workshop.title) || 'Workshop',
+        dateTime: String(a.dateTime),
+        when: formatDateTime(String(a.dateTime), locale),
+        location: [clean(location.name), clean(location.address, 200)].filter(Boolean).join(', '),
+        spots: Number(a.availableSpots ?? 0),
+      }
+    }),
+    products: (products.docs as unknown as AnyDoc[])
+      .filter((p) => p.productType !== 'workshop') // workshops are covered above
+      .map((p) => ({
+        slug: String(p.slug ?? ''),
+        title: clean(p.title),
+        price: euros(p.priceInEUR),
+        unitSize: clean(p.unitSize, 60),
+        outOfStock: p.inventory === 0,
+        seasonal: Boolean(p.isSeasonal),
+        shortDescription: clean(p.shortDescription, 300),
+        ingredients: clean(p.ingredients, 300),
+        allergens: clean(p.allergens, 200),
+        storage: clean(p.storageInstructions, 200),
+      })),
+    courses: (courses.docs as unknown as AnyDoc[])
+      .filter((c) => c.isActive !== false)
+      .map((c) => ({
+        path: `/courses/${c.courseSlug || c.slug}`,
+        title: clean(c.title),
+        meta: [clean(c.durationText, 60), clean(c.levelText, 60)].filter(Boolean).join(', '),
+        description: clean(c.description, 400),
+        comingSoon: Boolean(c.isComingSoon),
+      })),
+    faq,
+    extraKnowledge: typeof chatGlobal.extraKnowledge === 'string' ? chatGlobal.extraKnowledge.trim() : '',
+  }
+}
+
+/** Plain-text knowledge sheet for the Claude prompt. */
+export function buildKnowledgeSheet(data: ChatData): string {
+  const lines: string[] = []
+  const { contact } = data
+
+  lines.push('## Contact & company')
+  const contactParts = [
+    contact.companyName && `Company: ${contact.companyName}`,
+    contact.address && `Address: ${contact.address}`,
+    contact.email && `Email: ${contact.email}`,
+    contact.phone && `Phone: ${contact.phone}`,
+    contact.website && `Website: ${contact.website}`,
+  ].filter(Boolean) as string[]
+  lines.push(...(contactParts.length ? contactParts : ['(no contact details in the CMS)']))
+
+  lines.push('', '## Workshops (in person)')
+  for (const w of data.workshops) {
+    lines.push(
+      `### ${w.title} — page: /workshops/${w.slug}`,
+      `Price: €${w.price.toFixed(2)} per person${w.maxCapacity ? ` · max ${w.maxCapacity} people per session` : ''}`,
+    )
+    if (w.description) lines.push(`About: ${w.description}`)
+    if (w.whatToBring) lines.push(`What to bring: ${w.whatToBring}`)
+  }
+  if (!data.workshops.length) lines.push('(no active workshops)')
+
+  lines.push('', `## Upcoming workshop dates (next ${APPOINTMENT_WINDOW_DAYS} days, Vienna time)`)
+  for (const a of data.appointments) {
+    const spotsText = a.spots > 0 ? `${a.spots} spots free` : 'SOLD OUT'
+    lines.push(
+      `- ${a.workshopTitle} (/workshops/${a.workshopSlug}): ${a.when}${a.location ? ` @ ${a.location}` : ''} — ${spotsText}`,
+    )
+  }
+  if (!data.appointments.length) lines.push('(no upcoming dates published right now)')
+
+  lines.push('', '## Shop products — shop overview: /shop')
+  for (const p of data.products) {
+    const details = [
+      p.price,
+      p.unitSize,
+      p.outOfStock ? 'currently out of stock' : null,
+      p.seasonal ? 'seasonal' : null,
+    ].filter(Boolean)
+    lines.push(`- ${p.title} (/products/${p.slug})${details.length ? ` — ${details.join(', ')}` : ''}`)
+    if (p.shortDescription) lines.push(`  ${p.shortDescription}`)
+    const extra = [
+      p.ingredients && `Ingredients: ${p.ingredients}`,
+      p.allergens && `Allergens: ${p.allergens}`,
+      p.storage && `Storage: ${p.storage}`,
+    ].filter(Boolean)
+    if (extra.length) lines.push(`  ${extra.join(' · ')}`)
+  }
+
+  if (data.courses.length) {
+    lines.push('', '## Online courses — overview: /courses')
+    for (const c of data.courses) {
+      const meta = [c.meta, c.comingSoon ? 'coming soon' : null].filter(Boolean).join(', ')
+      lines.push(`- ${c.title} (${c.path})${meta ? ` — ${meta}` : ''}`)
+      if (c.description) lines.push(`  ${c.description}`)
+    }
+  }
+
+  if (data.faq.length) {
+    lines.push('', '## FAQ (from the Help page: /help)')
+    let section = ''
+    for (const item of data.faq) {
+      if (item.section !== section) {
+        section = item.section
+        lines.push(`### ${section}`)
+      }
+      lines.push(`Q: ${item.question}`, `A: ${item.answer}`)
+    }
+  }
+
+  if (data.extraKnowledge) {
+    lines.push('', '## Extra notes from the FermentFreude team', data.extraKnowledge)
+  }
 
   return lines.join('\n')
 }
 
-export async function getChatKnowledge(locale: AppLocale): Promise<string> {
+export async function getChatData(locale: AppLocale): Promise<ChatData> {
   const hit = cache.get(locale)
-  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.text
-  const text = await build(locale)
-  cache.set(locale, { at: Date.now(), text })
-  return text
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.data
+  const data = await load(locale)
+  cache.set(locale, { at: Date.now(), data })
+  return data
+}
+
+export async function getChatKnowledge(locale: AppLocale): Promise<string> {
+  return buildKnowledgeSheet(await getChatData(locale))
 }

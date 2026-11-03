@@ -1,7 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { getChatKnowledge } from '@/lib/chat-assistant/knowledge'
+import { answerWithoutAI } from '@/lib/chat-assistant/answerWithoutAI'
+import { buildKnowledgeSheet, getChatData } from '@/lib/chat-assistant/knowledge'
 import { CHAT_SYSTEM_PROMPT, knowledgeBlock } from '@/lib/chat-assistant/prompt'
 import { normalizeAppLocale } from '@/utilities/payloadLocaleQuery'
 
@@ -15,9 +16,12 @@ export const maxDuration = 60
  * Body: { messages: { role: 'user' | 'assistant', content: string }[], locale?: 'de' | 'en' }
  * Response: streamed plain text (the assistant's reply).
  *
- * Read-only: the assistant only sees public CMS content (see
- * src/lib/chat-assistant/knowledge.ts) and has no tools, so it cannot change
- * any data. Env vars: ANTHROPIC_API_KEY (required), CHATBOT_MODEL (optional).
+ * Two modes:
+ * - ANTHROPIC_API_KEY set → Claude answers, streamed (CHATBOT_MODEL optional).
+ * - no key → free keyword answerer (src/lib/chat-assistant/answerWithoutAI.ts).
+ *
+ * Read-only either way: only public CMS content (see
+ * src/lib/chat-assistant/knowledge.ts), no tools, so it cannot change data.
  */
 
 const MODEL = process.env.CHATBOT_MODEL || 'claude-opus-5-5'
@@ -62,10 +66,6 @@ function parseMessages(raw: unknown): Anthropic.Beta.BetaMessageParam[] | null {
 }
 
 export async function POST(request: NextRequest) {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: 'Chat is not configured', code: 'CHAT_NOT_CONFIGURED' }, { status: 503 })
-  }
-
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
   if (rateLimited(ip)) {
     return NextResponse.json({ error: 'Too many messages', code: 'RATE_LIMITED' }, { status: 429 })
@@ -84,13 +84,25 @@ export async function POST(request: NextRequest) {
   }
   const locale = normalizeAppLocale(typeof body.locale === 'string' ? body.locale : undefined)
 
-  let knowledge: string
+  let data: Awaited<ReturnType<typeof getChatData>>
   try {
-    knowledge = await getChatKnowledge(locale)
+    data = await getChatData(locale)
   } catch (error) {
     console.error('[Chat] Failed to load knowledge:', error)
     return NextResponse.json({ error: 'Chat unavailable', code: 'CHAT_UNAVAILABLE' }, { status: 503 })
   }
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    const question = String(messages[messages.length - 1].content)
+    return new Response(answerWithoutAI(question, data), {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    })
+  }
+  const knowledge = buildKnowledgeSheet(data)
 
   const client = new Anthropic()
   const encoder = new TextEncoder()

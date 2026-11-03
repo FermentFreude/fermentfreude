@@ -12,8 +12,8 @@ import { revalidateGlobal } from './hooks/revalidateGlobal'
  * Business Info. Everything here is optional: empty fields fall back to the
  * built-in defaults in `src/components/ChatAssistant/defaults.ts`.
  *
- * The bubble only appears when "Enabled" is ticked AND the server has an
- * ANTHROPIC_API_KEY environment variable.
+ * The bubble appears when "Enabled" is ticked. With an ANTHROPIC_API_KEY env
+ * var Claude answers; without one a free keyword answerer is used.
  */
 export const ChatAssistantGlobal: GlobalConfig = {
   slug: 'chat-assistant-global',
@@ -39,7 +39,7 @@ export const ChatAssistantGlobal: GlobalConfig = {
       admin: {
         position: 'sidebar',
         description:
-          'Chat-Blase auf der Website anzeigen. / Show the chat bubble on the website. (Also needs the ANTHROPIC_API_KEY env var on Vercel.)',
+          'Chat-Blase auf der Website anzeigen. / Show the chat bubble on the website.',
       },
     },
     {

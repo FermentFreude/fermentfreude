@@ -16,7 +16,8 @@ type ChatAssistantGlobalData = {
 
 /**
  * Server wrapper for the chat bubble. Renders nothing unless the assistant is
- * switched on in Admin → Website → Chat Assistant and ANTHROPIC_API_KEY is set.
+ * switched on in Admin → Website → Chat Assistant. Without ANTHROPIC_API_KEY
+ * the free keyword answerer is used instead of Claude.
  *
  * Local preview: CHAT_ASSISTANT_FORCE_ENABLED=true in .env shows the bubble in
  * `pnpm dev` without ticking "Enabled" (useful when local points at a
@@ -25,7 +26,6 @@ type ChatAssistantGlobalData = {
 export async function ChatAssistant({ locale: rawLocale }: { locale: string }) {
   const forceLocal =
     process.env.NODE_ENV === 'development' && process.env.CHAT_ASSISTANT_FORCE_ENABLED === 'true'
-  if (!process.env.ANTHROPIC_API_KEY && !forceLocal) return null
 
   const locale = normalizeAppLocale(rawLocale)
   let data: ChatAssistantGlobalData | null = null
