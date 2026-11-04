@@ -1,5 +1,7 @@
 import type { Block } from 'payload'
 
+import { pointIconField } from '@/fields/pointIcon'
+
 import { PICTURE_SLOTS } from './layers'
 
 export const FermentationStory: Block = {
@@ -91,19 +93,7 @@ export const FermentationStory: Block = {
         {
           type: 'row',
           fields: [
-            {
-              name: 'icon',
-              type: 'select',
-              label: 'Icon',
-              defaultValue: 'microscope',
-              options: [
-                { label: 'Microscope (cultures)', value: 'microscope' },
-                { label: 'Leaf (nutrients)', value: 'leaf' },
-                { label: 'Sparkles (flavour)', value: 'sparkles' },
-                { label: 'Sprout', value: 'sprout' },
-              ],
-              admin: { width: '25%' },
-            },
+            pointIconField('microscope'),
             {
               name: 'title',
               type: 'text',

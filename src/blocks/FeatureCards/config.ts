@@ -4,7 +4,7 @@ export const FeatureCards: Block = {
   slug: 'featureCards',
   interfaceName: 'FeatureCardsBlock',
   labels: {
-    singular: 'Feature Cards',
+    singular: 'Feature cards (3 cards with icons)',
     plural: 'Feature Cards',
   },
   fields: [

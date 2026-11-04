@@ -233,15 +233,15 @@ export const HeroCinematic: React.FC<HeroCinematicProps> = (props) => {
               {slide.eyebrow && (
                 <motion.p
                   variants={riseIn}
-                  className="mb-4 font-display text-eyebrow font-bold text-ff-ivory/90"
+                  className="mb-4 font-display text-eyebrow font-bold text-ff-gold"
                 >
                   {slide.eyebrow}
                 </motion.p>
               )}
 
               <h1 className="font-display text-[clamp(2.25rem,4.2vw,3.75rem)] font-bold leading-[1.03] tracking-[-0.03em] text-ff-ivory">
-                {/* Gold first line, ivory second line */}
-                <motion.span variants={riseIn} className="block whitespace-pre-line text-ff-gold">
+                {/* Gold eyebrow above, ivory (cream) headline */}
+                <motion.span variants={riseIn} className="block whitespace-pre-line">
                   {slide.title}
                 </motion.span>
                 {slide.titleAccent && (

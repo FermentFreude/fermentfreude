@@ -1,6 +1,7 @@
 'use client'
 
 import { StackPanel } from '@/components/StackPanel'
+import { PointsRow, type PointsRowItem } from '@/components/PointsRow'
 import { cn } from '@/utilities/cn'
 import { ArrowUpRight } from 'lucide-react'
 import {
@@ -54,21 +55,26 @@ export type ShowcaseSlide = {
   workshops: { title: string; href: string; date: string | null }[] | null
   seasonalLabel: string
   name: string
+  subline: string | null
   text: string | null
   price: string | null
   meta: string | null
+  buttonNote: string | null
   href?: string
   buttonLabel: string
 }
 
+
 type Props = {
   tagline: string | null
   slides: ShowcaseSlide[]
-  trustPoints: string[]
+  trustPointsTitle: string | null
+  trustPoints: PointsRowItem[]
   locale: 'de' | 'en'
 }
 
-const pad = (n: number) => String(n).padStart(2, '0')
+/** Pause on each slide (in screen heights) before the next one covers it */
+const SLIDE_HOLD = 0.4
 
 /* ── When a card starts sliding in, the text animates in (slow and smooth);
  *  the product and ingredients are tied to the scroll and rise into place
@@ -259,17 +265,17 @@ function useArrival(ref: React.RefObject<HTMLElement | null>): MotionValue<numbe
 function ProductPanel({
   slide,
   index,
-  count,
   tagline,
+  trustPointsTitle,
   trustPoints,
   wordSize,
   onWordFit,
 }: {
   slide: ShowcaseSlide
   index: number
-  count: number
   tagline: string | null
-  trustPoints: string[]
+  trustPointsTitle: string | null
+  trustPoints: PointsRowItem[]
   wordSize: number | null
   onWordFit: (index: number, size: number) => void
 }) {
@@ -281,6 +287,9 @@ function ProductPanel({
 
   const onPhoto = Boolean(slide.background)
   const light = onPhoto && slide.textTone === 'light'
+  const hasPoints = trustPoints.length > 0 && !slide.workshops
+  // Desktop: text column left, list (workshops) or points right
+  const twoCol = Boolean(slide.workshops) || hasPoints
   /* Text colours: charcoal on beige/ivory, cream on a dark photo */
   const ink = light ? 'text-[#F9F0DC]' : 'text-[#1D1D1D]'
   const inkSoft = light ? 'text-[#F9F0DC]/75' : 'text-[#1D1D1D]/75'
@@ -306,7 +315,7 @@ function ProductPanel({
   // Without a product picture the word needs less room on phones
   const stageHeight = slide.image
     ? 'h-96 sm:h-120 lg:h-[calc(100svh-4rem)]'
-    : 'h-38 sm:h-64 lg:h-[calc(100svh-4rem)]'
+    : 'h-32 sm:h-64 lg:h-[calc(100svh-4rem)]'
 
   /* Desktop: the big word sits exactly in the free band between the tagline
    * and the product text, so it never touches either — on any screen height */
@@ -371,8 +380,8 @@ function ProductPanel({
           ) : null}
         </div>
       ) : null}
-      <div className="container mx-auto container-padding flex-1">
-        <div className="relative h-full">
+      <div className="container mx-auto container-padding flex flex-1 flex-col">
+        <div className="relative flex flex-1 flex-col lg:block lg:h-full">
           {tagline ? (
             <p
               ref={taglineRef}
@@ -386,7 +395,7 @@ function ProductPanel({
           ) : null}
 
           {/* ── Stage: word, product, ingredients ── */}
-          <div ref={stageRef} className={cn('relative', stageHeight)}>
+          <div ref={stageRef} className={cn('relative mt-auto lg:mt-0', stageHeight)}>
             <motion.div
               className="absolute inset-x-0 top-[6%] bottom-[10%] lg:top-[13%] lg:bottom-[36%]"
               style={band ?? undefined}
@@ -444,30 +453,54 @@ function ProductPanel({
             initial="enter"
             animate={active ? 'center' : 'enter'}
             className={cn(
-              'relative z-30 mx-auto pb-8 lg:absolute lg:bottom-0 lg:left-0 lg:mx-0 lg:pb-10 lg:text-left',
-              slide.workshops ? 'w-full max-w-md text-left' : 'max-w-xs text-center',
+              'relative z-30 mx-auto mb-auto pb-8 lg:absolute lg:bottom-0 lg:left-0 lg:mx-0 lg:mb-0 lg:pb-10 lg:text-left',
+              slide.workshops
+                ? // Phone: text, list, button stacked. Desktop: text + button left, list right
+                  'flex w-full max-w-md flex-col text-left lg:grid lg:max-w-4xl lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-end lg:gap-x-16'
+                : hasPoints
+                  ? // Phone: everything centred, points at the end. Desktop: text + button left, points at the far right
+                    'max-w-sm text-center lg:grid lg:w-full lg:max-w-none lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-end lg:gap-x-12'
+                  : 'max-w-sm text-center lg:max-w-md',
             )}
           >
-            <motion.p
-              variants={fadeUp}
-              className={cn('mb-3 font-display text-[11px] font-bold tabular-nums tracking-[0.14em]', inkMuted)}
-            >
-              {pad(index + 1)} / {pad(count)}
-            </motion.p>
+            <div className={twoCol ? cn('lg:col-start-1 lg:row-start-1', hasPoints && 'lg:max-w-lg') : 'contents'}>
             <motion.h3
               variants={fadeUp}
-              className={cn('font-display text-base font-bold uppercase tracking-[0.04em]', ink)}
+              className={cn(
+                'font-display font-bold',
+                slide.workshops
+                  ? 'text-base uppercase tracking-[0.04em]'
+                  : // Product slides: an editorial headline, e.g. "Regional. Innovativ. Vielseitig."
+                    'text-2xl leading-[1.08] tracking-[-0.02em] sm:text-3xl lg:text-[2.125rem]',
+                ink,
+              )}
             >
               {slide.name}
             </motion.h3>
+            {slide.subline ? (
+              <motion.p
+                variants={fadeUp}
+                className={cn('mb-0 mt-1 font-display text-sm font-bold', light ? 'text-ff-gold' : inkSoft)}
+              >
+                {slide.subline}
+              </motion.p>
+            ) : null}
             {slide.text ? (
-              <motion.p variants={fadeUp} className={cn('mb-0 mt-2 text-base leading-relaxed', inkSoft)}>
+              <motion.p
+                variants={fadeUp}
+                // Editorial measure: a narrow column, airy lines
+                className={cn('mb-0 mt-3 text-[15px] leading-[1.65] sm:text-base lg:mt-4', inkSoft)}
+              >
                 {slide.text}
               </motion.p>
             ) : null}
+            </div>
             {slide.workshops?.length ? (
               /* The workshops, one calm row each: name left, next date right */
-              <motion.ul variants={fadeUp} className={cn('mt-5 border-t', rule)}>
+              <motion.ul
+                variants={fadeUp}
+                className={cn('mt-5 border-t lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0', rule)}
+              >
                 {slide.workshops.map((w) => (
                   <li key={w.href} className={cn('border-b', rule)}>
                     <Link
@@ -475,13 +508,15 @@ function ProductPanel({
                       className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                     >
                       <span className={cn('font-display text-base font-bold', ink)}>{w.title}</span>
-                      {/* Next date as a small gold label (dark text: readable on ivory and on photos);
+                      {/* Next date as a solid label (black on a light slide, cream on a dark photo);
                           no date → quiet outlined label */}
                       <span
                         className={cn(
                           'w-fit shrink-0 rounded-full px-3 py-1 text-sm font-bold sm:self-center',
                           w.date
-                            ? 'bg-[#E6BE68] text-[#1A1A1A]'
+                            ? light
+                              ? 'bg-[#F9F0DC] text-[#1A1A1A]'
+                              : 'bg-[#1D1D1D] text-white'
                             : cn('border font-normal', rule, inkMuted),
                         )}
                       >
@@ -492,21 +527,23 @@ function ProductPanel({
                 ))}
               </motion.ul>
             ) : null}
+            <div className={twoCol ? cn('lg:col-start-1 lg:row-start-2', hasPoints && 'lg:max-w-lg') : 'contents'}>
             {slide.price ? (
               <motion.p
                 variants={fadeUp}
-                className={cn('mb-0 mt-4 font-display text-3xl font-bold leading-none tracking-[-0.02em]', ink)}
+                className={cn('mb-0 mt-4 font-display text-3xl font-bold leading-none tracking-[-0.02em] lg:mt-5', ink)}
               >
                 {slide.price}
               </motion.p>
             ) : null}
-            {slide.meta ? (
+            {/* Weight line only when there is no note under the button (keeps the slide calm) */}
+            {slide.meta && !slide.buttonNote ? (
               <motion.p variants={fadeUp} className={cn('mb-0 mt-2 text-xs', inkMuted)}>
                 {slide.meta}
               </motion.p>
             ) : null}
             {slide.href ? (
-              <motion.div variants={fadeUp} className="mt-5">
+              <motion.div variants={fadeUp} className="mt-4 lg:mt-5">
                 <Link
                   href={slide.href}
                   className={cn(
@@ -528,174 +565,68 @@ function ProductPanel({
                 </Link>
               </motion.div>
             ) : null}
+            {slide.buttonNote ? (
+              <motion.p
+                variants={fadeUp}
+                className={cn('mb-0 mt-2 whitespace-pre-line text-xs leading-relaxed lg:mt-3', inkMuted)}
+              >
+                {slide.buttonNote}
+              </motion.p>
+            ) : null}
+            </div>
+            {/* The site's points row: icon, title, one quiet line. Desktop: the right column.
+                Very short phones: hidden, the product page has the same steps */}
+            {hasPoints ? (
+              <motion.div
+                variants={fadeUp}
+                className="mt-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-end [@media(max-height:700px)]:hidden lg:[@media(max-height:700px)]:block"
+              >
+                <PointsRow
+                  heading={trustPointsTitle}
+                  items={trustPoints}
+                  tone={light ? 'light' : 'dark'}
+                  align="center"
+                  alignLg="start"
+                  phoneText
+                  listAll={false}
+                />
+              </motion.div>
+            ) : null}
           </motion.div>
         </div>
       </div>
 
-      {/* ── Trust points along the bottom ── */}
-      {trustPoints.length && !slide.workshops ? (
-        <div className={cn('relative z-30 border-t', rule)}>
-          <ul className="container mx-auto container-padding flex gap-6 overflow-x-auto py-4 [scrollbar-width:none] lg:justify-between lg:gap-4">
-            {trustPoints.map((t, i) => (
-              <li
-                key={i}
-                className={cn('shrink-0 whitespace-nowrap font-display text-[11px] font-bold uppercase tracking-[0.14em]', inkSoft)}
-              >
-                {t}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
     </section>
   )
 }
 
-/** Fixed product index, bottom right (desktop): where you are, click to jump */
-function ProductIndex({
-  slides,
-  containerRef,
-  label,
-}: {
-  slides: ShowcaseSlide[]
-  containerRef: React.RefObject<HTMLDivElement | null>
-  label: string
-}) {
-  const [current, setCurrent] = useState(0)
-  const progress = useMotionValue(0)
-
-  useEffect(() => {
-    let frame = 0
-    const update = () => {
-      frame = 0
-      const el = containerRef.current
-      if (!el) return
-      const top = el.getBoundingClientRect().top + window.scrollY
-      const step = window.innerHeight
-      const p = (window.scrollY - top) / step
-      const i = Math.min(slides.length - 1, Math.max(0, Math.round(p)))
-      setCurrent(i)
-      progress.set(Math.min(1, Math.max(0, p / Math.max(1, slides.length - 1))))
-    }
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update)
-    }
-    update()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      if (frame) cancelAnimationFrame(frame)
-    }
-  }, [containerRef, slides.length, progress])
-
-  const jump = (i: number) => {
-    const el = containerRef.current
-    if (!el) return
-    const top = el.getBoundingClientRect().top + window.scrollY + i * window.innerHeight
-    window.scrollTo({ top, behavior: 'smooth' })
-  }
-
-  return (
-    <nav
-      aria-label={label}
-      className="pointer-events-auto flex items-stretch gap-4 transition-colors duration-500"
-      // Follows the slide on screen: cream on a dark photo, charcoal on a light one
-      style={
-        {
-          '--idx':
-            slides[current]?.background && slides[current]?.textTone === 'light'
-              ? '#F9F0DC'
-              : '#1D1D1D',
-        } as React.CSSProperties
-      }
-    >
-      {/* Overall progress through the products */}
-      <span className="relative w-0.5 overflow-hidden rounded-full bg-[var(--idx)]/15" aria-hidden>
-        <motion.span
-          className="absolute inset-x-0 top-0 h-full origin-top rounded-full bg-[var(--idx)]"
-          style={{ scaleY: progress }}
-        />
-      </span>
-      <ol className="flex flex-col gap-1">
-        {slides.map((s, i) => {
-          const active = i === current
-          return (
-            <li key={s.key}>
-              <button
-                type="button"
-                onClick={() => jump(i)}
-                aria-current={active ? 'true' : undefined}
-                className="group flex cursor-pointer items-center gap-3 py-1 text-left"
-              >
-                <span
-                  className={cn(
-                    'font-display text-[11px] font-bold tabular-nums transition-colors duration-500',
-                    active ? 'text-[var(--idx)]' : 'text-[var(--idx)]/40 group-hover:text-[var(--idx)]/75',
-                  )}
-                >
-                  {pad(i + 1)}
-                </span>
-                <span
-                  className={cn(
-                    'h-0.5 rounded-full transition-all duration-500 ease-out',
-                    active ? 'w-8 bg-[var(--idx)]' : 'w-3 bg-[var(--idx)]/25 group-hover:w-5',
-                  )}
-                />
-                <span
-                  className={cn(
-                    'whitespace-nowrap font-display text-[11px] font-bold uppercase tracking-[0.12em] transition-colors duration-500',
-                    active ? 'text-[var(--idx)]' : 'text-[var(--idx)]/40 group-hover:text-[var(--idx)]/75',
-                  )}
-                >
-                  {s.name}
-                </span>
-              </button>
-            </li>
-          )
-        })}
-      </ol>
-    </nav>
-  )
-}
-
-export function ProductShowcaseStack({ tagline, slides, trustPoints, locale }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null)
+export function ProductShowcaseStack({ tagline, slides, trustPointsTitle, trustPoints, locale }: Props) {
   const label = locale === 'en' ? 'Products' : 'Produkte'
 
-  // Every product's big word at the same size: the largest that fits all of them
+  // Each slide's big word at the largest size that fits its own stage. (One shared
+  // size made TEMPEH as small as WORKSHOPS, whose stage is shorter on desktop.)
   const [fits, setFits] = useState<Record<number, number>>({})
   const onWordFit = React.useCallback((i: number, size: number) => {
     setFits((prev) => (Math.abs((prev[i] ?? 0) - size) < 0.5 ? prev : { ...prev, [i]: size }))
   }, [])
-  const known = Object.values(fits)
-  const wordSize = known.length === slides.length ? Math.min(...known) : null
 
   return (
     <MotionConfig reducedMotion="user">
-      <div ref={containerRef} className="relative" aria-label={label} role="region">
+      <div className="relative" aria-label={label} role="region">
         {slides.map((slide, i) => (
-          <StackPanel key={slide.key} index={i} last={i === slides.length - 1} sink={false}>
+          // A short pause on each slide, so its text and labels can be read before the next covers it
+          <StackPanel key={slide.key} index={i} last={i === slides.length - 1} sink={false} hold={SLIDE_HOLD}>
             <ProductPanel
               slide={slide}
               index={i}
-              count={slides.length}
               tagline={tagline}
+              trustPointsTitle={trustPointsTitle}
               trustPoints={trustPoints}
-              wordSize={wordSize}
+              wordSize={fits[i] ?? null}
               onWordFit={onWordFit}
             />
           </StackPanel>
         ))}
-
-
-        {/* Index overlay: spans all panels, its inner part sticks to the screen */}
-        {slides.length > 1 ? (
-          <div className="pointer-events-none absolute inset-0 z-60 hidden lg:block">
-            <div className="sticky top-0 flex h-svh items-end justify-end pb-24 pr-[max(4rem,calc((100vw-86rem)/2+4rem))]">
-              <ProductIndex slides={slides} containerRef={containerRef} label={label} />
-            </div>
-          </div>
-        ) : null}
 
         {/* Every product's text for search engines */}
         <div hidden>

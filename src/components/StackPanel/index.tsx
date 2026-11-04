@@ -27,6 +27,9 @@ type Props = {
   last?: boolean
   /** Shrink + darken while the next panel covers this one (default on) */
   sink?: boolean
+  /** Extra scroll (in screen heights, e.g. 0.4) during which this panel holds
+   *  still, fully visible, before the next one starts to cover it */
+  hold?: number
 }
 
 export function StackPanel({
@@ -35,6 +38,7 @@ export function StackPanel({
   overlap = index > 0,
   last = false,
   sink = true,
+  hold = 0,
 }: Props) {
   const sinks = sink && !last
   const ref = useRef<HTMLDivElement>(null)
@@ -95,7 +99,13 @@ export function StackPanel({
       style={
         last
           ? { position: 'relative', zIndex: index + 1 }
-          : { position: 'sticky', top, zIndex: index + 1 }
+          : {
+              position: 'sticky',
+              top,
+              zIndex: index + 1,
+              // The next panel starts this much later → a short pause on this one
+              ...(hold > 0 ? { marginBottom: `${hold * 100}svh` } : {}),
+            }
       }
     >
       <motion.div className="origin-top" style={!sinks || reduce ? undefined : { scale }}>

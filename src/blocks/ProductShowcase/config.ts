@@ -1,10 +1,12 @@
 import type { Block } from 'payload'
 
+import { pointIconField } from '@/fields/pointIcon'
+
 export const ProductShowcase: Block = {
   slug: 'productShowcase',
   interfaceName: 'ProductShowcaseBlock',
   labels: {
-    singular: 'Product Showcase (big word + floating product)',
+    singular: 'Showcase slides (Tempeh, Workshops …)',
     plural: 'Product Showcases',
   },
   admin: {
@@ -111,15 +113,34 @@ export const ProductShowcase: Block = {
           },
         },
         {
+          name: 'showProductImages',
+          type: 'checkbox',
+          defaultValue: true,
+          label: 'Show the product picture and ingredients',
+          admin: {
+            description:
+              'Untick to hide the floating product and ingredients on this slide (e.g. when the background picture is enough). They come back as soon as you tick it again.',
+            condition: (_, siblingData) => siblingData?.slideType !== 'workshops',
+          },
+        },
+        {
           type: 'row',
+          // Hidden while "Show the product picture" is unticked — they aren't shown then
+          admin: { condition: (_, siblingData) => siblingData?.showProductImages !== false },
           fields: [
             {
               name: 'productImage',
               type: 'upload',
               relationTo: 'media',
               label: 'Picture (transparent PNG)',
-              validate: (value: unknown, { siblingData }: { siblingData?: { slideType?: string } }) =>
-                Boolean(value) || siblingData?.slideType === 'workshops' || 'This field is required.',
+              validate: (
+                value: unknown,
+                { siblingData }: { siblingData?: { slideType?: string; showProductImages?: boolean } },
+              ) =>
+                Boolean(value) ||
+                siblingData?.slideType === 'workshops' ||
+                siblingData?.showProductImages === false ||
+                'This field is required.',
               admin: {
                 width: '50%',
                 description:
@@ -182,6 +203,18 @@ export const ProductShowcase: Block = {
           ],
         },
         {
+          name: 'workshopsToShow',
+          type: 'relationship',
+          relationTo: 'workshops',
+          hasMany: true,
+          label: 'Workshops in the list',
+          admin: {
+            description:
+              'Which workshops appear on this slide, in this order (drag to reorder). Leave empty to show all active workshops.',
+            condition: (_, siblingData) => siblingData?.slideType === 'workshops',
+          },
+        },
+        {
           name: 'seasonalLabel',
           type: 'text',
           localized: true,
@@ -192,22 +225,21 @@ export const ProductShowcase: Block = {
           },
         },
         {
-          name: 'showProductImages',
-          type: 'checkbox',
-          defaultValue: true,
-          label: 'Show the product picture and ingredients',
-          admin: {
-            description:
-              'Untick to hide the floating product and ingredients on this slide (e.g. when the background picture is enough). They come back as soon as you tick it again.',
-            condition: (_, siblingData) => siblingData?.slideType !== 'workshops',
-          },
-        },
-        {
           name: 'label',
           type: 'text',
           localized: true,
           label: 'Name (bottom left)',
           admin: { description: 'Leave empty to use the shop product name.' },
+        },
+        {
+          name: 'subline',
+          type: 'text',
+          localized: true,
+          label: 'Second line under the name',
+          admin: {
+            description: 'Optional, e.g. "Regional. Innovativ. Vielseitig."',
+            condition: (_, siblingData) => siblingData?.slideType !== 'workshops',
+          },
         },
         {
           name: 'text',
@@ -223,18 +255,57 @@ export const ProductShowcase: Block = {
           label: 'Button text',
           admin: { description: 'e.g. "Zum Produkt". The button opens the shop product.' },
         },
+        {
+          name: 'buttonNote',
+          type: 'textarea',
+          localized: true,
+          label: 'Note under the button',
+          admin: {
+            description: 'Optional, one or two short lines, e.g. "Vakuumiert & gekühlt" / "6 Wochen haltbar".',
+            condition: (_, siblingData) => siblingData?.slideType !== 'workshops',
+          },
+        },
       ],
+    },
+    {
+      name: 'trustPointsTitle',
+      type: 'text',
+      localized: true,
+      label: 'Heading above the points',
+      admin: { description: 'Optional small heading over the points row, e.g. "Zubereitung".' },
     },
     {
       name: 'trustPoints',
       type: 'array',
-      maxRows: 8,
+      maxRows: 3,
       labels: { singular: 'Point', plural: 'Points' },
       admin: {
         description:
-          'The line along the bottom, e.g. "100 % pflanzlich", "Natürlich fermentiert", "Regional aus Graz".',
+          'Up to 3 points under the button of the product slide (same look as the chefs banner), e.g. the preparation steps.',
       },
-      fields: [{ name: 'text', type: 'text', localized: true, required: true, label: 'Text' }],
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            pointIconField('bean'),
+            {
+              name: 'text',
+              type: 'text',
+              localized: true,
+              required: true,
+              label: 'Title',
+              admin: { width: '75%' },
+            },
+          ],
+        },
+        {
+          name: 'detail',
+          type: 'text',
+          localized: true,
+          label: 'Short line (optional)',
+          admin: { description: 'One short line under the title, e.g. "Käferbohnen, Apfelessig, Tempeh-Kultur."' },
+        },
+      ],
     },
   ],
 }

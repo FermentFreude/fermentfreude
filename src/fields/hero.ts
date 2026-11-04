@@ -40,6 +40,14 @@ export const hero: Field = {
       label: 'Hero Style',
       defaultValue: 'heroSlider',
       required: true,
+      // Home only uses the cinematic photo hero — don't offer the other styles there
+      filterOptions: ({ data, options }) =>
+        data?.slug === 'home'
+          ? options.filter((o) => {
+              const value = typeof o === 'string' ? o : o.value
+              return value === 'heroCinematic' || value === data?.hero?.type
+            })
+          : options,
       admin: {
         description:
           'Choose how this page looks at the top. "Offerings Grid" shows all items at once (no carousel).',

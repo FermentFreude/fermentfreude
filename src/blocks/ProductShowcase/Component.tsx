@@ -74,10 +74,13 @@ export async function ProductShowcaseBlockComponent(props: Props) {
     return isMedia(m) ? fromMedia(m, '') : null
   }
 
-  // Workshops slide: the active workshops with their next bookable date
-  const hasWorkshops = (props.slides ?? []).some((s) => s.slideType === 'workshops')
+  // Workshops slide: the chosen (or all active) workshops with their next bookable date
+  const workshopsSlide = (props.slides ?? []).find((s) => s.slideType === 'workshops')
   let workshopRows: ShowcaseSlide['workshops'] = null
-  if (hasWorkshops) {
+  if (workshopsSlide) {
+    const chosen = (workshopsSlide.workshopsToShow ?? [])
+      .map((w) => (typeof w === 'object' && w ? w.id : w))
+      .filter((id): id is string => typeof id === 'string')
     const { docs: ws } = await payload.find({
       collection: 'workshops',
       where: { isActive: { equals: true } },
@@ -87,11 +90,14 @@ export async function ProductShowcaseBlockComponent(props: Props) {
       overrideAccess: true,
       pagination: false,
     })
-    const sorted = [...ws].sort((a, b) => {
-      const ia = WORKSHOP_ORDER.indexOf(a.slug ?? '')
-      const ib = WORKSHOP_ORDER.indexOf(b.slug ?? '')
-      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || (a.title ?? '').localeCompare(b.title ?? '')
-    })
+    const sorted = chosen.length
+      ? // The editor's pick, in the editor's order
+        chosen.map((id) => ws.find((w) => w.id === id)).filter((w): w is (typeof ws)[number] => Boolean(w))
+      : [...ws].sort((a, b) => {
+          const ia = WORKSHOP_ORDER.indexOf(a.slug ?? '')
+          const ib = WORKSHOP_ORDER.indexOf(b.slug ?? '')
+          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || (a.title ?? '').localeCompare(b.title ?? '')
+        })
     const hrefOf = (slug: string) => WORKSHOP_HREF[slug] ?? `/workshops/${slug}`
     const dates = await getNextWorkshopDatesByHref(locale)
     workshopRows = sorted
@@ -121,7 +127,9 @@ export async function ProductShowcaseBlockComponent(props: Props) {
           workshops: workshopRows,
           seasonalLabel: s.seasonalLabel?.trim() || DEFAULT_SEASONAL,
           name: s.label?.trim() || DEFAULT_WORKSHOPS_NAME,
+          subline: null,
           text: s.text?.trim() || null,
+          buttonNote: null,
           price: null,
           meta: null,
           href: s.linkUrl?.trim() || '/workshops',
@@ -166,7 +174,9 @@ export async function ProductShowcaseBlockComponent(props: Props) {
         workshops: null,
         seasonalLabel: DEFAULT_SEASONAL,
         name: s.label?.trim() || product.title,
+        subline: s.subline?.trim() || null,
         text: s.text?.trim() || product.shortDescription || null,
+        buttonNote: s.buttonNote?.trim() || null,
         price: product.priceInEUR ? formatEurPrice(product.priceInEUR, locale) : null,
         meta: [weight, product.unitSize].filter(Boolean).join('  |  ') || null,
         href: live && product.slug ? `/products/${product.slug}` : undefined,
@@ -180,7 +190,10 @@ export async function ProductShowcaseBlockComponent(props: Props) {
     <ProductShowcaseStack
       tagline={props.tagline?.trim() || null}
       slides={slides}
-      trustPoints={(props.trustPoints ?? []).map((t) => t.text).filter(Boolean)}
+      trustPointsTitle={props.trustPointsTitle?.trim() || null}
+      trustPoints={(props.trustPoints ?? [])
+        .filter((t) => t.text)
+        .map((t) => ({ id: t.id, icon: t.icon, title: t.text, text: t.detail ?? null }))}
       locale={locale}
     />
   )

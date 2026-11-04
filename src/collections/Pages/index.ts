@@ -115,6 +115,19 @@ const GASTRONOMY_HIDDEN_KEYS = [
   'gastronomyWorkshopCards',
 ] as const
 
+/** The sections the Home page is built from — the only blocks offered when editing Home. */
+const HOME_BLOCKS = [
+  'productShowcase',
+  'voucherCta',
+  'featureCards',
+  'heroBanner',
+  'fermentationStory',
+  'teamPreview',
+  'testimonials',
+  'pressBanner',
+  'sponsorsBar',
+]
+
 const preserveHiddenGastronomyFields: CollectionBeforeChangeHook = ({
   data,
   originalDoc,
@@ -247,6 +260,14 @@ export const Pages: CollectionConfig = {
                 WorkshopPhases,
               ],
               required: false,
+              // Home: only offer the sections Home is built from (plus any already on it)
+              filterOptions: ({ data }) => {
+                if (data?.slug !== 'home') return true
+                const present = (Array.isArray(data?.layout) ? data.layout : [])
+                  .map((b: { blockType?: string }) => b?.blockType)
+                  .filter((s: unknown): s is string => typeof s === 'string')
+                return [...new Set([...HOME_BLOCKS, ...present])]
+              },
               admin: {
                 description:
                   'Content blocks. Leave empty for Voucher, Gastronomy, and Fermentation pages (they use dedicated tabs).',
