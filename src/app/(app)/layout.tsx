@@ -6,6 +6,7 @@ import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { OpeningPopups } from '@/components/OpeningPopups'
 import { SplashScreen } from '@/components/SplashScreen'
 import { ScrollTriggerRefresh } from '@/components/ScrollTriggerRefresh'
+import { ScrollToTopOnNavigate } from '@/components/ScrollToTopOnNavigate'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { getLocale } from '@/utilities/getLocale'
@@ -20,7 +21,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const locale = await getLocale()
 
   return (
-    <html lang={locale} suppressHydrationWarning={true}>
+    <html lang={locale} suppressHydrationWarning={true} data-scroll-behavior="smooth">
       <head>
         <InitTheme />
         <link rel="preconnect" href="https://use.typekit.net" crossOrigin="" />
@@ -79,6 +80,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <Header />
           </div>
           <OpeningPopups locale={locale} />
+          <ScrollToTopOnNavigate />
           <main id="main-content">{children}</main>
           <div id="site-footer" style={{ display: 'contents' }}>
             <Footer />
