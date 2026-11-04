@@ -9,6 +9,8 @@
 @custom-variant lg (@media (width >= theme(--breakpoint-lg)));
 @custom-variant xl (@media (width >= theme(--breakpoint-xl)));
 @custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));
+/* Wide screen WITH a mouse (laptops/desktops) — big touch tablets don't match */
+@custom-variant desk (@media (width >= theme(--breakpoint-lg)) and (hover: hover) and (pointer: fine));
 
 /* ════════════════════════════════════════════════════════════════
  *  CMS LINE BREAKS
@@ -1530,4 +1532,9 @@ button {
   grid-template-columns: repeat(3, 100vw);
   grid-template-rows: repeat(4, 49.5vh);
   gap: 1vh;
+}
+
+/* Home: sponsors banner on ivory (Shop/About keep the warm grey) */
+.home-sponsors .block-sponsors-bar {
+  background-color: var(--ff-ivory);
 }

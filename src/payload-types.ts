@@ -1039,6 +1039,8 @@ export interface Page {
         | FeatureCardsBlock
         | HeroBannerBlock
         | HomeTempehStoryBlock
+        | ProductShowcaseBlock
+        | FermentationStoryBlock
         | MediaBlock
         | ArchiveBlock
         | CarouselBlock
@@ -3058,6 +3060,10 @@ export interface HeroBannerBlock {
    */
   visible?: boolean | null;
   /**
+   * Gold label above the heading, e.g. "Events & Gastronomie". Optional.
+   */
+  eyebrow?: string | null;
+  /**
    * Large white heading over the background image (e.g. "For Chefs and Food Professionals").
    */
   heading: string;
@@ -3073,6 +3079,20 @@ export interface HeroBannerBlock {
    * URL the CTA button links to.
    */
   buttonLink: string;
+  /**
+   * Optional: what you offer, shown as a short row under the text (e.g. "Tempeh für eure Küche", "Schulungen fürs Team"). 3 points look best.
+   */
+  points?:
+    | {
+        title: string;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Side: black section with the picture or video in a rounded frame. Full background: the picture or video fills the whole section, the text sits on a dark shade.
+   */
+  mediaLayout?: ('side' | 'background') | null;
   /**
    * Full-width background image for the banner section. Used as fallback/poster when a video is set.
    */
@@ -3138,6 +3158,183 @@ export interface HomeTempehStoryBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'homeTempehStory';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductShowcaseBlock".
+ */
+export interface ProductShowcaseBlock {
+  visible?: boolean | null;
+  /**
+   * Short lines in small capitals, e.g. "Fermentiert.⏎Funktional.⏎Für dich." Press Enter for a new line.
+   */
+  tagline?: string | null;
+  /**
+   * One slide per product, in this order — drag to reorder. Price and weight come live from the shop product. A slide can also be the "Workshops" slide that leads to the workshop booking page.
+   */
+  slides?:
+    | {
+        /**
+         * Product: shows a shop product with price and button. Workshops: shows a short text and a button to the workshops page.
+         */
+        slideType: 'product' | 'workshops';
+        /**
+         * Price, weight and the button link come from this product.
+         */
+        product?: (string | null) | Product;
+        /**
+         * Where the button goes, e.g. /workshops (the page to book workshops).
+         */
+        linkUrl?: string | null;
+        /**
+         * Optional, e.g. "Käferbohnen", "Klassisch", "Linsen". Leave empty for none.
+         */
+        eyebrow?: string | null;
+        /**
+         * Colour of the small label, as a hex code, e.g. #7A2E3B (bean red), #B07A1F (ochre), #5C6B2E (olive). Helps tell the varieties apart.
+         */
+        accentColor?: string | null;
+        /**
+         * Shown huge behind the product. One line per row, e.g. "Käfer⏎bohnen⏎Tempeh". Press Enter for a new line.
+         */
+        bigWord: string;
+        /**
+         * The product on a TRANSPARENT background (export from Kittl as PNG). It floats in front of the big word. On the Workshops slide the picture is optional.
+         */
+        productImage?: (string | null) | Media;
+        /**
+         * Optional: beans, leaves, chili… on a transparent background, same size as the product cut-out. Floats at its own depth for extra parallax.
+         */
+        ingredientsImage?: (string | null) | Media;
+        /**
+         * A photo that fills the whole slide behind the big word and the product. Leave empty for the plain beige background. Use a calm, light picture so the text stays easy to read.
+         */
+        backgroundImage?: (string | null) | Media;
+        /**
+         * Light = cream text with a dark shade at the bottom. Dark = charcoal text with an ivory shade.
+         */
+        textTone?: ('light' | 'dark') | null;
+        /**
+         * How strong the shade over the picture is, so the text stays readable. 0 = picture as it is.
+         */
+        backgroundVeil?: number | null;
+        /**
+         * Shown instead of a date, e.g. "Saisonal". The list of workshops comes from the Workshops collection (active ones).
+         */
+        seasonalLabel?: string | null;
+        /**
+         * Untick to hide the floating product and ingredients on this slide (e.g. when the background picture is enough). They come back as soon as you tick it again.
+         */
+        showProductImages?: boolean | null;
+        /**
+         * Leave empty to use the shop product name.
+         */
+        label?: string | null;
+        /**
+         * Leave empty to use the shop product short description.
+         */
+        text?: string | null;
+        /**
+         * e.g. "Zum Produkt". The button opens the shop product.
+         */
+        buttonLabel?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The line along the bottom, e.g. "100 % pflanzlich", "Natürlich fermentiert", "Regional aus Graz".
+   */
+  trustPoints?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productShowcase';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FermentationStoryBlock".
+ */
+export interface FermentationStoryBlock {
+  /**
+   * Toggle off to hide this section on the page without deleting it.
+   */
+  visible?: boolean | null;
+  /**
+   * Short question or headline, e.g. "Warum Fermentation?".
+   */
+  title?: string | null;
+  /**
+   * One short sentence under the title (about 100 characters) — longer text squeezes the picture.
+   */
+  intro?: string | null;
+  /**
+   * The huge word across the section — one short, punchy word, e.g. "GESUND". The picture sits under it.
+   */
+  bigWord?: string | null;
+  /**
+   * e.g. "Mehr über Fermentation". Empty = no button.
+   */
+  buttonLabel?: string | null;
+  /**
+   * e.g. "/fermentation".
+   */
+  buttonLink?: string | null;
+  /**
+   * Which built-in illustration sits under the big word on the first card.
+   */
+  introPicture?: ('intro' | 'alive' | 'natural' | 'everyday' | 'protein' | 'experts') | null;
+  /**
+   * Up to 3 short benefits with an icon — a title and one short line each.
+   */
+  benefits?:
+    | {
+        icon?: ('microscope' | 'leaf' | 'sparkles' | 'sprout') | null;
+        title: string;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The cards after the first — visitors swipe sideways through them. Keep it short and factual: describe the food and the craft, never promise a health effect.
+   */
+  slides?:
+    | {
+        /**
+         * One short word, e.g. "LEBENDIG".
+         */
+        bigWord: string;
+        /**
+         * Built-in illustration under the big word.
+         */
+        picture?: ('intro' | 'alive' | 'natural' | 'everyday' | 'protein' | 'experts') | null;
+        title: string;
+        /**
+         * One or two short sentences (about 100 characters) — longer text squeezes the picture.
+         */
+        text: string;
+        /**
+         * e.g. "Zum Shop". Empty = no button.
+         */
+        buttonLabel?: string | null;
+        /**
+         * e.g. "/shop".
+         */
+        buttonLink?: string | null;
+        /**
+         * e.g. "Wastyk et al., Cell (2021)".
+         */
+        sourceLabel?: string | null;
+        sourceUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'fermentationStory';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4617,6 +4814,57 @@ export interface VoucherCtaBlock {
    * Dark overlay strength on top of the background image. Lower values keep images brighter.
    */
   overlayOpacity?: number | null;
+  /**
+   * A full-screen card that slides up over the photo gallery once it is fully open — big headline, voucher picture and price. The pictures (jars, ingredients, voucher card) are built into the website; everything written here is editable.
+   */
+  giftSlide?: {
+    /**
+     * ON = the gift slide replaces the text panel under the gallery (eyebrow, heading, description above are then not shown).
+     */
+    enabled?: boolean | null;
+    /**
+     * Huge word behind the pictures — keep it to one short, punchy word, e.g. "GUTSCHEIN". (A new row also works, but one word reads strongest.)
+     */
+    bigWord?: string | null;
+    /**
+     * Bold uppercase name above the description, e.g. "Gutschein · Fermentations-Workshop".
+     */
+    label?: string | null;
+    /**
+     * A few short lines under the label — one per row.
+     */
+    text?: string | null;
+    /**
+     * Shown big, e.g. "99 €". Leave empty to hide.
+     */
+    priceText?: string | null;
+    /**
+     * e.g. "Gutschein kaufen". Empty = no button.
+     */
+    buttonLabel?: string | null;
+    /**
+     * e.g. "/voucher".
+     */
+    buttonLink?: string | null;
+    /**
+     * Describes the voucher picture and names the product for search engines, e.g. "Geschenkgutschein für einen Fermentations-Workshop bei FermentFreude in Graz".
+     */
+    cardAlt?: string | null;
+    /**
+     * 3–4 short points along the bottom of the slide: icon + title.
+     */
+    points?:
+      | {
+          icon?: ('leaf' | 'jar' | 'heart' | 'gift' | 'box' | 'bowl') | null;
+          title: string;
+          /**
+           * Not shown at the moment — the points show icon + title.
+           */
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'voucherCta';
@@ -4731,6 +4979,22 @@ export interface WorkshopSliderBlock {
    * ❌ OFF = Use custom content just for this page (default).
    */
   useGlobalData?: boolean | null;
+  /**
+   * Big ivory title of the dark banner above the workshops, e.g. "Tempeh, Kimchi & Kombucha selber machen. Lerne Fermentieren in Graz." Use words people search for.
+   */
+  sectionLead?: string | null;
+  /**
+   * Smaller gold line under the big title, e.g. "Unsere nächsten Workshops". It links to the "All Workshops Link" below (default /workshops). Leave both banner fields empty to hide the banner.
+   */
+  sectionHeading?: string | null;
+  /**
+   * Small label in the gold box on each workshop, e.g. "Nächster Termin".
+   */
+  nextDateLabel?: string | null;
+  /**
+   * Shown instead of a date when a workshop has no bookable date, e.g. "Bald verfügbar".
+   */
+  noDateLabel?: string | null;
   /**
    * Small uppercase text shown above each workshop slide (e.g. "Workshop Experience").
    */
@@ -6619,6 +6883,8 @@ export interface PagesSelect<T extends boolean = true> {
         featureCards?: T | FeatureCardsBlockSelect<T>;
         heroBanner?: T | HeroBannerBlockSelect<T>;
         homeTempehStory?: T | HomeTempehStoryBlockSelect<T>;
+        productShowcase?: T | ProductShowcaseBlockSelect<T>;
+        fermentationStory?: T | FermentationStoryBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
@@ -7441,10 +7707,19 @@ export interface FeatureCardsBlockSelect<T extends boolean = true> {
  */
 export interface HeroBannerBlockSelect<T extends boolean = true> {
   visible?: T;
+  eyebrow?: T;
   heading?: T;
   description?: T;
   buttonLabel?: T;
   buttonLink?: T;
+  points?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  mediaLayout?: T;
   backgroundImage?: T;
   backgroundVideoUrl?: T;
   id?: T;
@@ -7468,6 +7743,79 @@ export interface HomeTempehStoryBlockSelect<T extends boolean = true> {
         description?: T;
         product?: T;
         buttonLabel?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductShowcaseBlock_select".
+ */
+export interface ProductShowcaseBlockSelect<T extends boolean = true> {
+  visible?: T;
+  tagline?: T;
+  slides?:
+    | T
+    | {
+        slideType?: T;
+        product?: T;
+        linkUrl?: T;
+        eyebrow?: T;
+        accentColor?: T;
+        bigWord?: T;
+        productImage?: T;
+        ingredientsImage?: T;
+        backgroundImage?: T;
+        textTone?: T;
+        backgroundVeil?: T;
+        seasonalLabel?: T;
+        showProductImages?: T;
+        label?: T;
+        text?: T;
+        buttonLabel?: T;
+        id?: T;
+      };
+  trustPoints?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FermentationStoryBlock_select".
+ */
+export interface FermentationStoryBlockSelect<T extends boolean = true> {
+  visible?: T;
+  title?: T;
+  intro?: T;
+  bigWord?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  introPicture?: T;
+  benefits?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  slides?:
+    | T
+    | {
+        bigWord?: T;
+        picture?: T;
+        title?: T;
+        text?: T;
+        buttonLabel?: T;
+        buttonLink?: T;
+        sourceLabel?: T;
+        sourceUrl?: T;
         id?: T;
       };
   id?: T;
@@ -8085,6 +8433,26 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
   backgroundTheme?: T;
   customBackgroundColor?: T;
   overlayOpacity?: T;
+  giftSlide?:
+    | T
+    | {
+        enabled?: T;
+        bigWord?: T;
+        label?: T;
+        text?: T;
+        priceText?: T;
+        buttonLabel?: T;
+        buttonLink?: T;
+        cardAlt?: T;
+        points?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+      };
   id?: T;
   blockName?: T;
 }
@@ -8134,6 +8502,10 @@ export interface CourseWaitlistCtaBlockSelect<T extends boolean = true> {
 export interface WorkshopSliderBlockSelect<T extends boolean = true> {
   visible?: T;
   useGlobalData?: T;
+  sectionLead?: T;
+  sectionHeading?: T;
+  nextDateLabel?: T;
+  noDateLabel?: T;
   eyebrow?: T;
   workshops?:
     | T
