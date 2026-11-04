@@ -3080,6 +3080,20 @@ export interface HeroBannerBlock {
    */
   buttonLink: string;
   /**
+   * Optional: what you offer, shown as a short row under the text (e.g. "Tempeh für eure Küche", "Schulungen fürs Team"). 3 points look best.
+   */
+  points?:
+    | {
+        title: string;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Side: black section with the picture or video in a rounded frame. Full background: the picture or video fills the whole section, the text sits on a dark shade.
+   */
+  mediaLayout?: ('side' | 'background') | null;
+  /**
    * Full-width background image for the banner section. Used as fallback/poster when a video is set.
    */
   backgroundImage?: (string | null) | Media;
@@ -3156,14 +3170,22 @@ export interface ProductShowcaseBlock {
    */
   tagline?: string | null;
   /**
-   * One slide per product, in this order — drag to reorder. Price and weight come live from the shop product.
+   * One slide per product, in this order — drag to reorder. Price and weight come live from the shop product. A slide can also be the "Workshops" slide that leads to the workshop booking page.
    */
   slides?:
     | {
         /**
+         * Product: shows a shop product with price and button. Workshops: shows a short text and a button to the workshops page.
+         */
+        slideType: 'product' | 'workshops';
+        /**
          * Price, weight and the button link come from this product.
          */
-        product: string | Product;
+        product?: (string | null) | Product;
+        /**
+         * Where the button goes, e.g. /workshops (the page to book workshops).
+         */
+        linkUrl?: string | null;
         /**
          * Optional, e.g. "Käferbohnen", "Klassisch", "Linsen". Leave empty for none.
          */
@@ -3177,13 +3199,33 @@ export interface ProductShowcaseBlock {
          */
         bigWord: string;
         /**
-         * The product on a TRANSPARENT background (export from Kittl as PNG). It floats in front of the big word.
+         * The product on a TRANSPARENT background (export from Kittl as PNG). It floats in front of the big word. On the Workshops slide the picture is optional.
          */
-        productImage: string | Media;
+        productImage?: (string | null) | Media;
         /**
          * Optional: beans, leaves, chili… on a transparent background, same size as the product cut-out. Floats at its own depth for extra parallax.
          */
         ingredientsImage?: (string | null) | Media;
+        /**
+         * A photo that fills the whole slide behind the big word and the product. Leave empty for the plain beige background. Use a calm, light picture so the text stays easy to read.
+         */
+        backgroundImage?: (string | null) | Media;
+        /**
+         * Light = cream text with a dark shade at the bottom. Dark = charcoal text with an ivory shade.
+         */
+        textTone?: ('light' | 'dark') | null;
+        /**
+         * How strong the shade over the picture is, so the text stays readable. 0 = picture as it is.
+         */
+        backgroundVeil?: number | null;
+        /**
+         * Shown instead of a date, e.g. "Saisonal". The list of workshops comes from the Workshops collection (active ones).
+         */
+        seasonalLabel?: string | null;
+        /**
+         * Untick to hide the floating product and ingredients on this slide (e.g. when the background picture is enough). They come back as soon as you tick it again.
+         */
+        showProductImages?: boolean | null;
         /**
          * Leave empty to use the shop product name.
          */
@@ -7670,6 +7712,14 @@ export interface HeroBannerBlockSelect<T extends boolean = true> {
   description?: T;
   buttonLabel?: T;
   buttonLink?: T;
+  points?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  mediaLayout?: T;
   backgroundImage?: T;
   backgroundVideoUrl?: T;
   id?: T;
@@ -7708,12 +7758,19 @@ export interface ProductShowcaseBlockSelect<T extends boolean = true> {
   slides?:
     | T
     | {
+        slideType?: T;
         product?: T;
+        linkUrl?: T;
         eyebrow?: T;
         accentColor?: T;
         bigWord?: T;
         productImage?: T;
         ingredientsImage?: T;
+        backgroundImage?: T;
+        textTone?: T;
+        backgroundVeil?: T;
+        seasonalLabel?: T;
+        showProductImages?: T;
         label?: T;
         text?: T;
         buttonLabel?: T;

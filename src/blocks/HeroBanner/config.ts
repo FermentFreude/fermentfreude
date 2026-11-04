@@ -66,6 +66,34 @@ export const HeroBanner: Block = {
       },
     },
     {
+      name: 'points',
+      type: 'array',
+      maxRows: 4,
+      labels: { singular: 'Offer point', plural: 'Offer points' },
+      admin: {
+        description:
+          'Optional: what you offer, shown as a short row under the text (e.g. "Tempeh für eure Küche", "Schulungen fürs Team"). 3 points look best.',
+      },
+      fields: [
+        { name: 'title', type: 'text', localized: true, required: true, label: 'Title' },
+        { name: 'text', type: 'textarea', localized: true, label: 'Short text (one line)' },
+      ],
+    },
+    {
+      name: 'mediaLayout',
+      type: 'select',
+      defaultValue: 'side',
+      label: 'Picture / video position',
+      options: [
+        { label: 'Beside the text (rounded frame on the right)', value: 'side' },
+        { label: 'Full background (cinematic, text on top)', value: 'background' },
+      ],
+      admin: {
+        description:
+          'Side: black section with the picture or video in a rounded frame. Full background: the picture or video fills the whole section, the text sits on a dark shade.',
+      },
+    },
+    {
       name: 'backgroundImage',
       type: 'upload',
       relationTo: 'media',

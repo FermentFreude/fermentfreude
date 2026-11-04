@@ -32,15 +32,30 @@ export const ProductShowcase: Block = {
       type: 'array',
       minRows: 1,
       maxRows: 6,
-      labels: { singular: 'Product', plural: 'Products' },
+      labels: { singular: 'Slide', plural: 'Slides' },
       admin: {
         description:
-          'One slide per product, in this order — drag to reorder. Price and weight come live from the shop product.',
+          'One slide per product, in this order — drag to reorder. Price and weight come live from the shop product. A slide can also be the "Workshops" slide that leads to the workshop booking page.',
         components: {
           RowLabel: '@/blocks/ProductShowcase/slideRowLabel.tsx#ProductShowcaseRowLabel',
         },
       },
       fields: [
+        {
+          name: 'slideType',
+          type: 'select',
+          defaultValue: 'product',
+          required: true,
+          label: 'Slide type',
+          options: [
+            { label: 'Shop product', value: 'product' },
+            { label: 'Workshops (leads to the workshop booking page)', value: 'workshops' },
+          ],
+          admin: {
+            description:
+              'Product: shows a shop product with price and button. Workshops: shows a short text and a button to the workshops page.',
+          },
+        },
         {
           name: 'product',
           type: 'relationship',
@@ -49,6 +64,17 @@ export const ProductShowcase: Block = {
           label: 'Shop product',
           admin: {
             description: 'Price, weight and the button link come from this product.',
+            condition: (_, siblingData) => siblingData?.slideType !== 'workshops',
+          },
+        },
+        {
+          name: 'linkUrl',
+          type: 'text',
+          label: 'Button link',
+          defaultValue: '/workshops',
+          admin: {
+            description: 'Where the button goes, e.g. /workshops (the page to book workshops).',
+            condition: (_, siblingData) => siblingData?.slideType === 'workshops',
           },
         },
         {
@@ -91,12 +117,13 @@ export const ProductShowcase: Block = {
               name: 'productImage',
               type: 'upload',
               relationTo: 'media',
-              required: true,
-              label: 'Product cut-out (transparent PNG)',
+              label: 'Picture (transparent PNG)',
+              validate: (value: unknown, { siblingData }: { siblingData?: { slideType?: string } }) =>
+                Boolean(value) || siblingData?.slideType === 'workshops' || 'This field is required.',
               admin: {
                 width: '50%',
                 description:
-                  'The product on a TRANSPARENT background (export from Kittl as PNG). It floats in front of the big word.',
+                  'The product on a TRANSPARENT background (export from Kittl as PNG). It floats in front of the big word. On the Workshops slide the picture is optional.',
               },
             },
             {
@@ -111,6 +138,69 @@ export const ProductShowcase: Block = {
               },
             },
           ],
+        },
+        {
+          name: 'backgroundImage',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Background picture (optional)',
+          admin: {
+            description:
+              'A photo that fills the whole slide behind the big word and the product. Leave empty for the plain beige background. Use a calm, light picture so the text stays easy to read.',
+          },
+        },
+        {
+          type: 'row',
+          admin: { condition: (_, siblingData) => Boolean(siblingData?.backgroundImage) },
+          fields: [
+            {
+              name: 'textTone',
+              type: 'select',
+              defaultValue: 'light',
+              label: 'Text on the picture',
+              options: [
+                { label: 'Light text (for dark photos)', value: 'light' },
+                { label: 'Dark text (for bright photos)', value: 'dark' },
+              ],
+              admin: {
+                width: '50%',
+                description: 'Light = cream text with a dark shade at the bottom. Dark = charcoal text with an ivory shade.',
+              },
+            },
+            {
+              name: 'backgroundVeil',
+              type: 'number',
+              min: 0,
+              max: 80,
+              defaultValue: 30,
+              label: 'Shade strength (0–80 %)',
+              admin: {
+                width: '50%',
+                description: 'How strong the shade over the picture is, so the text stays readable. 0 = picture as it is.',
+              },
+            },
+          ],
+        },
+        {
+          name: 'seasonalLabel',
+          type: 'text',
+          localized: true,
+          label: 'Label for workshops without a date',
+          admin: {
+            description: 'Shown instead of a date, e.g. "Saisonal". The list of workshops comes from the Workshops collection (active ones).',
+            condition: (_, siblingData) => siblingData?.slideType === 'workshops',
+          },
+        },
+        {
+          name: 'showProductImages',
+          type: 'checkbox',
+          defaultValue: true,
+          label: 'Show the product picture and ingredients',
+          admin: {
+            description:
+              'Untick to hide the floating product and ingredients on this slide (e.g. when the background picture is enough). They come back as soon as you tick it again.',
+            condition: (_, siblingData) => siblingData?.slideType !== 'workshops',
+          },
         },
         {
           name: 'label',
