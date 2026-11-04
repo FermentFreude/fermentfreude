@@ -1,7 +1,7 @@
 'use client'
 
 import { ScrollCue } from '@/components/ScrollCue'
-import { GiftSlide } from './GiftSlide'
+import { GiftSlide, giftSlideColor } from './GiftSlide'
 import { SectionHeader } from '@/components/SectionHeader'
 import { Media } from '@/components/Media'
 import type { Media as MediaType, VoucherCtaBlock as VoucherCtaBlockType } from '@/payload-types'
@@ -294,9 +294,9 @@ export const VoucherCtaBlock: React.FC<Props> = ({
         {giftOn && giftSlide ? (
           <div
             ref={giftCardRef}
-            className="absolute inset-0 z-20 overflow-clip rounded-t-[2rem] shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:rounded-t-[2.5rem]"
+            className="absolute inset-0 z-20 overflow-clip rounded-t-4xl shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.35)] md:rounded-t-[2.5rem]"
             // Paper colour behind the slide, so the strip under the browser bar matches
-            style={{ transform: 'translateY(100%)', backgroundColor: '#F5E7D6' }}
+            style={{ transform: 'translateY(100%)', backgroundColor: giftSlideColor(giftSlide) }}
           >
             <GiftSlide data={giftSlide} />
           </div>

@@ -4,7 +4,7 @@ export const HomeTempehStory: Block = {
   slug: 'homeTempehStory',
   interfaceName: 'HomeTempehStoryBlock',
   labels: {
-    singular: 'Product Story Carousel (Tempeh & Kimchi)',
+    singular: 'Product Story Carousel (old — not shown while Showcase slides exist)',
     plural: 'Product Story Carousels',
   },
   fields: [

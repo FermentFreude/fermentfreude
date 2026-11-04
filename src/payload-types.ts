@@ -3084,6 +3084,33 @@ export interface HeroBannerBlock {
    */
   points?:
     | {
+        icon?:
+          | (
+              | 'leaf'
+              | 'sprout'
+              | 'vegan'
+              | 'bean'
+              | 'wheat'
+              | 'jar'
+              | 'bowl'
+              | 'box'
+              | 'gift'
+              | 'heart'
+              | 'microscope'
+              | 'sparkles'
+              | 'chefHat'
+              | 'utensils'
+              | 'graduationCap'
+              | 'users'
+              | 'award'
+              | 'shieldCheck'
+              | 'clock'
+              | 'muscle'
+              | 'flame'
+              | 'slice'
+              | 'droplets'
+            )
+          | null;
         title: string;
         text?: string | null;
         id?: string | null;
@@ -3199,6 +3226,10 @@ export interface ProductShowcaseBlock {
          */
         bigWord: string;
         /**
+         * Untick to hide the floating product and ingredients on this slide (e.g. when the background picture is enough). They come back as soon as you tick it again.
+         */
+        showProductImages?: boolean | null;
+        /**
          * The product on a TRANSPARENT background (export from Kittl as PNG). It floats in front of the big word. On the Workshops slide the picture is optional.
          */
         productImage?: (string | null) | Media;
@@ -3219,17 +3250,21 @@ export interface ProductShowcaseBlock {
          */
         backgroundVeil?: number | null;
         /**
+         * Which workshops appear on this slide, in this order (drag to reorder). Leave empty to show all active workshops.
+         */
+        workshopsToShow?: (string | Workshop)[] | null;
+        /**
          * Shown instead of a date, e.g. "Saisonal". The list of workshops comes from the Workshops collection (active ones).
          */
         seasonalLabel?: string | null;
         /**
-         * Untick to hide the floating product and ingredients on this slide (e.g. when the background picture is enough). They come back as soon as you tick it again.
-         */
-        showProductImages?: boolean | null;
-        /**
          * Leave empty to use the shop product name.
          */
         label?: string | null;
+        /**
+         * Optional, e.g. "Regional. Innovativ. Vielseitig."
+         */
+        subline?: string | null;
         /**
          * Leave empty to use the shop product short description.
          */
@@ -3238,21 +3273,117 @@ export interface ProductShowcaseBlock {
          * e.g. "Zum Produkt". The button opens the shop product.
          */
         buttonLabel?: string | null;
+        /**
+         * Optional, one or two short lines, e.g. "Vakuumiert & gekühlt" / "6 Wochen haltbar".
+         */
+        buttonNote?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * The line along the bottom, e.g. "100 % pflanzlich", "Natürlich fermentiert", "Regional aus Graz".
+   * Optional small heading over the points row, e.g. "Zubereitung".
+   */
+  trustPointsTitle?: string | null;
+  /**
+   * Up to 3 points under the button of the product slide (same look as the chefs banner), e.g. the preparation steps.
    */
   trustPoints?:
     | {
+        icon?:
+          | (
+              | 'leaf'
+              | 'sprout'
+              | 'vegan'
+              | 'bean'
+              | 'wheat'
+              | 'jar'
+              | 'bowl'
+              | 'box'
+              | 'gift'
+              | 'heart'
+              | 'microscope'
+              | 'sparkles'
+              | 'chefHat'
+              | 'utensils'
+              | 'graduationCap'
+              | 'users'
+              | 'award'
+              | 'shieldCheck'
+              | 'clock'
+              | 'muscle'
+              | 'flame'
+              | 'slice'
+              | 'droplets'
+            )
+          | null;
         text: string;
+        /**
+         * One short line under the title, e.g. "Käferbohnen, Apfelessig, Tempeh-Kultur."
+         */
+        detail?: string | null;
         id?: string | null;
       }[]
     | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'productShowcase';
+}
+/**
+ * Define workshop metadata. Price and capacity apply to all dates and locations.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workshops".
+ */
+export interface Workshop {
+  id: string;
+  /**
+   * URL-friendly identifier (e.g., kombucha, lakto, tempeh, basics)
+   */
+  slug: string;
+  /**
+   * Workshop name (displayed on frontend)
+   */
+  title: string;
+  /**
+   * Detailed workshop description
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Price per person in EUR (default: €99)
+   */
+  basePrice: number;
+  /**
+   * Maximum number of people per workshop session. Keep this matched to your real room/class size — it controls how many spots show as available on the booking page.
+   */
+  maxCapacityPerSlot: number;
+  /**
+   * Workshop hero image
+   */
+  image?: (string | null) | Media;
+  /**
+   * What attendees should bring to the workshop. Plain text — line breaks are preserved in confirmation/reminder emails. Leave empty to omit the section.
+   */
+  whatToBring?: string | null;
+  /**
+   * Hide workshop from frontend if unchecked
+   */
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3292,7 +3423,33 @@ export interface FermentationStoryBlock {
    */
   benefits?:
     | {
-        icon?: ('microscope' | 'leaf' | 'sparkles' | 'sprout') | null;
+        icon?:
+          | (
+              | 'leaf'
+              | 'sprout'
+              | 'vegan'
+              | 'bean'
+              | 'wheat'
+              | 'jar'
+              | 'bowl'
+              | 'box'
+              | 'gift'
+              | 'heart'
+              | 'microscope'
+              | 'sparkles'
+              | 'chefHat'
+              | 'utensils'
+              | 'graduationCap'
+              | 'users'
+              | 'award'
+              | 'shieldCheck'
+              | 'clock'
+              | 'muscle'
+              | 'flame'
+              | 'slice'
+              | 'droplets'
+            )
+          | null;
         title: string;
         text?: string | null;
         id?: string | null;
@@ -3525,7 +3682,11 @@ export interface PressBannerBlock {
          */
         quote: string;
         /**
-         * Optional logo for this outlet. Falls back to a soft placeholder if empty.
+         * Small picture next to the sentence — e.g. the same picture as on the press page for this article. Landscape works best.
+         */
+        image?: (string | null) | Media;
+        /**
+         * Optional logo for this outlet. Not shown when the slide has a picture (the picture carries the logo).
          */
         logo?: (string | null) | Media;
         /**
@@ -4763,6 +4924,105 @@ export interface VoucherCtaBlock {
    */
   visible?: boolean | null;
   /**
+   * Exactly 8 pictures. They sit in a grid and open up to a full-screen gallery while you scroll. Use large photos (at least 1920 px wide) so they stay sharp full-screen.
+   */
+  galleryImages?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * A full-screen slide that rises over the open photo wall — built like the Tempeh and Workshops slides: a picture, a short text with price and button, and up to 4 points with icons.
+   */
+  giftSlide?: {
+    /**
+     * ON = the gift slide follows the photo wall. OFF = a simple text panel with a button is shown under the photo wall instead.
+     */
+    enabled?: boolean | null;
+    /**
+     * A photo or an illustration for the slide. Choose below how it is shown.
+     */
+    backgroundImage?: (string | null) | Media;
+    /**
+     * On top: the picture sits above the text on a paper background. Full background: the photo fills the slide like on the Tempeh slide, with the big headline on top.
+     */
+    pictureLayout?: ('top' | 'background') | null;
+    /**
+     * Huge word across the slide — one short word, e.g. "GUTSCHEIN". Not shown when the picture sits on top (the illustration carries the word).
+     */
+    bigWord?: string | null;
+    /**
+     * Small uppercase line above the headline, e.g. "Gutschein · Fermentations-Workshop".
+     */
+    label?: string | null;
+    /**
+     * Editorial headline in the text block, e.g. "Ein Erlebnis zum Verschenken."
+     */
+    headline?: string | null;
+    /**
+     * One short paragraph under the headline.
+     */
+    text?: string | null;
+    /**
+     * Shown big, e.g. "99 €". Leave empty to hide.
+     */
+    priceText?: string | null;
+    /**
+     * e.g. "Gutschein kaufen". Empty = no button.
+     */
+    buttonLabel?: string | null;
+    /**
+     * e.g. "/voucher".
+     */
+    buttonLink?: string | null;
+    /**
+     * Optional, one or two short lines, e.g. "Sofort per E-Mail" / "oder zur Abholung vor Ort".
+     */
+    buttonNote?: string | null;
+    /**
+     * 3–4 short points on the slide: icon, title and an optional short line.
+     */
+    points?:
+      | {
+          icon?:
+            | (
+                | 'leaf'
+                | 'sprout'
+                | 'vegan'
+                | 'bean'
+                | 'wheat'
+                | 'jar'
+                | 'bowl'
+                | 'box'
+                | 'gift'
+                | 'heart'
+                | 'microscope'
+                | 'sparkles'
+                | 'chefHat'
+                | 'utensils'
+                | 'graduationCap'
+                | 'users'
+                | 'award'
+                | 'shieldCheck'
+                | 'clock'
+                | 'muscle'
+                | 'flame'
+                | 'slice'
+                | 'droplets'
+              )
+            | null;
+          title: string;
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Names the voucher for search engines, e.g. "Geschenkgutschein für einen Fermentations-Workshop bei FermentFreude in Graz".
+     */
+    cardAlt?: string | null;
+  };
+  /**
    * Small uppercase line above the main heading, in brand gold (e.g. "WORKSHOPS & GUTSCHEINE"). Leave empty to hide.
    */
   eyebrow?: string | null;
@@ -4787,18 +5047,6 @@ export interface VoucherCtaBlock {
    */
   voucherImage?: (string | null) | Media;
   /**
-   * Upload exactly 8 images for the bento gallery grid. They animate into a full-screen scrubbed gallery on scroll.
-   */
-  galleryImages?:
-    | {
-        /**
-         * One of the 8 bento gallery images. Use square or portrait orientation.
-         */
-        image: string | Media;
-        id?: string | null;
-      }[]
-    | null;
-  /**
    * Background image shown behind heading and button below the gallery. Uses a neutral fallback color if not set.
    */
   backgroundImage?: (string | null) | Media;
@@ -4814,57 +5062,6 @@ export interface VoucherCtaBlock {
    * Dark overlay strength on top of the background image. Lower values keep images brighter.
    */
   overlayOpacity?: number | null;
-  /**
-   * A full-screen card that slides up over the photo gallery once it is fully open — big headline, voucher picture and price. The pictures (jars, ingredients, voucher card) are built into the website; everything written here is editable.
-   */
-  giftSlide?: {
-    /**
-     * ON = the gift slide replaces the text panel under the gallery (eyebrow, heading, description above are then not shown).
-     */
-    enabled?: boolean | null;
-    /**
-     * Huge word behind the pictures — keep it to one short, punchy word, e.g. "GUTSCHEIN". (A new row also works, but one word reads strongest.)
-     */
-    bigWord?: string | null;
-    /**
-     * Bold uppercase name above the description, e.g. "Gutschein · Fermentations-Workshop".
-     */
-    label?: string | null;
-    /**
-     * A few short lines under the label — one per row.
-     */
-    text?: string | null;
-    /**
-     * Shown big, e.g. "99 €". Leave empty to hide.
-     */
-    priceText?: string | null;
-    /**
-     * e.g. "Gutschein kaufen". Empty = no button.
-     */
-    buttonLabel?: string | null;
-    /**
-     * e.g. "/voucher".
-     */
-    buttonLink?: string | null;
-    /**
-     * Describes the voucher picture and names the product for search engines, e.g. "Geschenkgutschein für einen Fermentations-Workshop bei FermentFreude in Graz".
-     */
-    cardAlt?: string | null;
-    /**
-     * 3–4 short points along the bottom of the slide: icon + title.
-     */
-    points?:
-      | {
-          icon?: ('leaf' | 'jar' | 'heart' | 'gift' | 'box' | 'bowl') | null;
-          title: string;
-          /**
-           * Not shown at the moment — the points show icon + title.
-           */
-          text?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'voucherCta';
@@ -5379,63 +5576,6 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Define workshop metadata. Price and capacity apply to all dates and locations.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "workshops".
- */
-export interface Workshop {
-  id: string;
-  /**
-   * URL-friendly identifier (e.g., kombucha, lakto, tempeh, basics)
-   */
-  slug: string;
-  /**
-   * Workshop name (displayed on frontend)
-   */
-  title: string;
-  /**
-   * Detailed workshop description
-   */
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Price per person in EUR (default: €99)
-   */
-  basePrice: number;
-  /**
-   * Maximum number of people per workshop session. Keep this matched to your real room/class size — it controls how many spots show as available on the booking page.
-   */
-  maxCapacityPerSlot: number;
-  /**
-   * Workshop hero image
-   */
-  image?: (string | null) | Media;
-  /**
-   * What attendees should bring to the workshop. Plain text — line breaks are preserved in confirmation/reminder emails. Leave empty to omit the section.
-   */
-  whatToBring?: string | null;
-  /**
-   * Hide workshop from frontend if unchecked
-   */
-  isActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -7715,6 +7855,7 @@ export interface HeroBannerBlockSelect<T extends boolean = true> {
   points?:
     | T
     | {
+        icon?: T;
         title?: T;
         text?: T;
         id?: T;
@@ -7764,22 +7905,28 @@ export interface ProductShowcaseBlockSelect<T extends boolean = true> {
         eyebrow?: T;
         accentColor?: T;
         bigWord?: T;
+        showProductImages?: T;
         productImage?: T;
         ingredientsImage?: T;
         backgroundImage?: T;
         textTone?: T;
         backgroundVeil?: T;
+        workshopsToShow?: T;
         seasonalLabel?: T;
-        showProductImages?: T;
         label?: T;
+        subline?: T;
         text?: T;
         buttonLabel?: T;
+        buttonNote?: T;
         id?: T;
       };
+  trustPointsTitle?: T;
   trustPoints?:
     | T
     | {
+        icon?: T;
         text?: T;
+        detail?: T;
         id?: T;
       };
   id?: T;
@@ -7898,6 +8045,7 @@ export interface PressBannerBlockSelect<T extends boolean = true> {
     | {
         outlet?: T;
         quote?: T;
+        image?: T;
         logo?: T;
         url?: T;
         linkLabel?: T;
@@ -8417,33 +8565,26 @@ export interface HelpFaqBlockSelect<T extends boolean = true> {
  */
 export interface VoucherCtaBlockSelect<T extends boolean = true> {
   visible?: T;
-  eyebrow?: T;
-  heading?: T;
-  description?: T;
-  buttonLabel?: T;
-  buttonLink?: T;
-  voucherImage?: T;
   galleryImages?:
     | T
     | {
         image?: T;
         id?: T;
       };
-  backgroundImage?: T;
-  backgroundTheme?: T;
-  customBackgroundColor?: T;
-  overlayOpacity?: T;
   giftSlide?:
     | T
     | {
         enabled?: T;
+        backgroundImage?: T;
+        pictureLayout?: T;
         bigWord?: T;
         label?: T;
+        headline?: T;
         text?: T;
         priceText?: T;
         buttonLabel?: T;
         buttonLink?: T;
-        cardAlt?: T;
+        buttonNote?: T;
         points?:
           | T
           | {
@@ -8452,7 +8593,18 @@ export interface VoucherCtaBlockSelect<T extends boolean = true> {
               text?: T;
               id?: T;
             };
+        cardAlt?: T;
       };
+  eyebrow?: T;
+  heading?: T;
+  description?: T;
+  buttonLabel?: T;
+  buttonLink?: T;
+  voucherImage?: T;
+  backgroundImage?: T;
+  backgroundTheme?: T;
+  customBackgroundColor?: T;
+  overlayOpacity?: T;
   id?: T;
   blockName?: T;
 }

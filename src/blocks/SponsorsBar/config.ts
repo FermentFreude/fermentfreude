@@ -4,7 +4,7 @@ export const SponsorsBar: Block = {
   slug: 'sponsorsBar',
   interfaceName: 'SponsorsBarBlock',
   labels: {
-    singular: 'Sponsors Bar',
+    singular: 'Sponsors & partners (logo row)',
     plural: 'Sponsors Bars',
   },
   fields: [

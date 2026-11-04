@@ -1494,9 +1494,12 @@ button {
 
 /* ── Compact bento state ── */
 .bento-gallery--bento {
+  /* Gap follows the shorter side: on a tall phone 1vh is wider than the
+     room between 3 columns, and the outer photos were cut off at the edges */
+  --bento-gap: min(1vh, 1.25vw);
   display: grid;
-  gap: 1vh;
-  grid-template-columns: repeat(3, 32.5vw);
+  gap: var(--bento-gap);
+  grid-template-columns: repeat(3, calc((100vw - 4 * var(--bento-gap)) / 3));
   grid-template-rows: repeat(4, 23vh);
   justify-content: center;
   align-content: center;
@@ -1530,8 +1533,8 @@ button {
 /* ── Expanded full-viewport state (class toggled by Flip) ── */
 .bento-gallery--final.bento-gallery--bento {
   grid-template-columns: repeat(3, 100vw);
-  grid-template-rows: repeat(4, 49.5vh);
-  gap: 1vh;
+  /* Two rows + one gap = exactly one screen for the centre photo */
+  grid-template-rows: repeat(4, calc((100vh - var(--bento-gap)) / 2));
 }
 
 /* Home: sponsors banner on ivory (Shop/About keep the warm grey) */

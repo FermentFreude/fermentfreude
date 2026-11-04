@@ -1,9 +1,10 @@
 'use client'
 
+import { PointsRow } from '@/components/PointsRow'
 import { useFitSize } from '@/components/StoryScene/hooks'
 import { SwipeCapsule, useSwipeNudge, useSwipeTrack } from '@/components/SwipeCapsule'
 import type { FermentationStoryBlock as Props } from '@/payload-types'
-import { ArrowRight, Leaf, Microscope, Sparkles, Sprout } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import {
   MotionConfig,
   motion,
@@ -75,13 +76,6 @@ const pictureIn: Variants = {
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-function BenefitIcon({ icon, className }: { icon?: string | null; className: string }) {
-  if (icon === 'leaf') return <Leaf className={className} strokeWidth={1.25} />
-  if (icon === 'sparkles') return <Sparkles className={className} strokeWidth={1.25} />
-  if (icon === 'sprout') return <Sprout className={className} strokeWidth={1.25} />
-  return <Microscope className={className} strokeWidth={1.25} />
-}
-
 type Benefit = NonNullable<Props['benefits']>[number]
 
 type CardData = {
@@ -113,8 +107,8 @@ function CardButton({ button }: { button: NonNullable<CardData['button']> }) {
   )
 }
 
-/** Intro benefits. Compact (phone/tablet): icon + title in one row. Full (desktop):
- *  three columns with icon, title and short line. */
+/** Intro benefits: the site's points row. Compact (phone/tablet): smaller, centred,
+ *  titles only. Full (desktop): icon, title and short line, left aligned. */
 function Benefits({
   items,
   active,
@@ -124,60 +118,21 @@ function Benefits({
   active: boolean
   compact?: boolean
 }) {
-  if (compact) {
-    return (
-      <ul className="m-0 grid w-[min(22rem,100%)] list-none grid-cols-3 gap-2 p-0">
-        {items.map((item, i) => (
-          <motion.li
-            key={item.id ?? i}
-            custom={5 + i}
-            variants={fadeUp}
-            initial="hidden"
-            animate={active ? 'show' : 'hidden'}
-            className="flex flex-col items-center gap-1.5 text-center"
-          >
-            <span
-              className="flex size-8 items-center justify-center rounded-full border"
-              style={{ borderColor: `${INK}26` }}
-            >
-              <BenefitIcon icon={item.icon} className="size-4" />
-            </span>
-            <span className="font-display text-[10px] font-bold uppercase tracking-[0.08em]">
-              {item.title}
-            </span>
-          </motion.li>
-        ))}
-      </ul>
-    )
-  }
   return (
-    <ul
-      className="m-0 grid list-none gap-x-8 p-0"
-      style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+    <motion.div
+      custom={5}
+      variants={fadeUp}
+      initial="hidden"
+      animate={active ? 'show' : 'hidden'}
+      // Compact: centred, a little wider on tablets so the short lines don't wrap three times
+      className={compact ? 'mx-auto w-full max-w-88 sm:max-w-120' : undefined}
     >
-      {items.map((item, i) => (
-        <motion.li
-          key={item.id ?? i}
-          custom={5 + i}
-          variants={fadeUp}
-          initial="hidden"
-          animate={active ? 'show' : 'hidden'}
-        >
-          <span
-            className="flex size-11 items-center justify-center rounded-full border"
-            style={{ borderColor: `${INK}26` }}
-          >
-            <BenefitIcon icon={item.icon} className="size-5" />
-          </span>
-          <span className="mt-3 block font-display text-sm font-bold uppercase tracking-[0.05em]">
-            {item.title}
-          </span>
-          {item.text ? (
-            <span className="mt-1 block text-sm leading-snug opacity-70">{item.text}</span>
-          ) : null}
-        </motion.li>
-      ))}
-    </ul>
+      {compact ? (
+        <PointsRow items={items} tone="dark" align="center" size="sm" rule={false} />
+      ) : (
+        <PointsRow items={items} tone="dark" align="start" />
+      )}
+    </motion.div>
   )
 }
 
@@ -297,7 +252,7 @@ function StoryCard({
         className="container container-padding relative z-20 pt-[calc(var(--nav,4.5rem)+clamp(0.75rem,3svh,2.5rem))]"
         style={{ x: textX, opacity: textOpacity }}
       >
-        <div className="mx-auto max-w-[24rem] text-center md:max-w-[30rem] lg:mx-0 lg:text-left">
+        <div className="mx-auto max-w-[24rem] text-center md:max-w-120 lg:mx-0 lg:text-left">
           {count > 1 ? (
             <motion.p
               custom={0}
@@ -327,7 +282,7 @@ function StoryCard({
               variants={fadeUp}
               initial="hidden"
               animate={active ? 'show' : 'hidden'}
-              className="mb-0 mt-2.5 whitespace-pre-line text-[15px] leading-[1.5] text-pretty opacity-75 md:mt-3 md:text-base [@media(max-height:560px)]:hidden"
+              className="mb-0 mt-2.5 whitespace-pre-line text-[15px] leading-normal text-pretty opacity-75 md:mt-3 md:text-base [@media(max-height:560px)]:hidden"
             >
               {card.text}
             </motion.p>
@@ -446,10 +401,10 @@ function StoryCard({
           </div>
         ) : null}
         <div
-          className={`relative min-h-0 min-w-0 flex-1 [container-type:size] [--room:100cqw] ${
+          className={`relative min-h-0 min-w-0 flex-1 @container-[size] [--room:100cqw] ${
             card.button && !benefits.length
-              ? 'lg:[--room:calc(100cqw_-_2*var(--word-end)_-_17rem)]'
-              : 'lg:[--room:calc(100cqw_-_2*var(--word-end))]'
+              ? 'lg:[--room:calc(100cqw-2*var(--word-end)-17rem)]'
+              : 'lg:[--room:calc(100cqw-2*var(--word-end))]'
           }`}
         >
           <div className="absolute inset-0 flex items-end justify-center">
@@ -757,7 +712,7 @@ export const FermentationStoryBlock: React.FC<Props & { id?: string }> = ({
 
         {/* Swipe capsule (hand gesture + dots) — under the cards; cards + capsule = one screen */}
         {cards.length > 1 ? (
-          <div className="flex h-[4.5rem] items-start justify-center">
+          <div className="flex h-18 items-start justify-center">
             <SwipeCapsule
               labels={cards.map((c) => c.title || c.word)}
               active={active}

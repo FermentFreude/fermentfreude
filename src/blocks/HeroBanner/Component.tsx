@@ -1,5 +1,6 @@
 import { FadeIn } from '@/components/FadeIn'
 import { Media } from '@/components/Media'
+import { PointsRow } from '@/components/PointsRow'
 import type { HeroBannerBlock as HeroBannerBlockType, Media as MediaType } from '@/payload-types'
 import { ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
@@ -70,23 +71,11 @@ export const HeroBannerBlock: React.FC<Props> = ({
     </>
   )
 
-  // What we offer: a calm row of short points, numbered, gold hairline on top
+  // What we offer: the site's points row (icon, title, one quiet line)
   const offer = points?.length ? (
-    <ul className="mt-12 grid gap-6 text-left sm:grid-cols-3 sm:gap-8 lg:mt-16">
-      {points.map((pt, i) => (
-        <li key={pt.id ?? i} className="border-t border-ff-gold/50 pt-4">
-          <p className="mb-1 font-display text-xs font-bold tabular-nums tracking-[0.14em] text-ff-gold">
-            {String(i + 1).padStart(2, '0')}
-          </p>
-          <p className="mb-0 font-display text-base font-bold text-ff-ivory md:text-lg">{pt.title}</p>
-          {pt.text ? (
-            <p className="mb-0 mt-1 whitespace-pre-line text-sm leading-relaxed text-ff-ivory/75">
-              {pt.text}
-            </p>
-          ) : null}
-        </li>
-      ))}
-    </ul>
+    <div className="mt-12 lg:mt-16">
+      <PointsRow items={points} tone="light" align="start" phone="list" />
+    </div>
   ) : null
 
   const media = backgroundVideoUrl ? (
@@ -146,7 +135,7 @@ export const HeroBannerBlock: React.FC<Props> = ({
 
         {/* Photo (or video) — right on desktop, below the text on phone/tablet */}
         <FadeIn // Desktop: as tall as fits the screen (never cut), phone/tablet: fixed ratio
-          className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-ff-charcoal sm:aspect-[4/3] md:rounded-3xl lg:aspect-auto lg:h-[min(calc(100svh-12rem),44rem)]"
+          className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-ff-charcoal sm:aspect-4/3 md:rounded-3xl lg:aspect-auto lg:h-[min(calc(100svh-12rem),44rem)]"
         >
           {media}
         </FadeIn>

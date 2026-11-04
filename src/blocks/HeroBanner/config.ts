@@ -1,10 +1,12 @@
 import type { Block } from 'payload'
 
+import { pointIconField } from '@/fields/pointIcon'
+
 export const HeroBanner: Block = {
   slug: 'heroBanner',
   interfaceName: 'HeroBannerBlock',
   labels: {
-    singular: 'Hero Banner',
+    singular: 'Big banner (photo or video + text)',
     plural: 'Hero Banners',
   },
   fields: [
@@ -75,7 +77,20 @@ export const HeroBanner: Block = {
           'Optional: what you offer, shown as a short row under the text (e.g. "Tempeh für eure Küche", "Schulungen fürs Team"). 3 points look best.',
       },
       fields: [
-        { name: 'title', type: 'text', localized: true, required: true, label: 'Title' },
+        {
+          type: 'row',
+          fields: [
+            pointIconField('chefHat'),
+            {
+              name: 'title',
+              type: 'text',
+              localized: true,
+              required: true,
+              label: 'Title',
+              admin: { width: '75%' },
+            },
+          ],
+        },
         { name: 'text', type: 'textarea', localized: true, label: 'Short text (one line)' },
       ],
     },
