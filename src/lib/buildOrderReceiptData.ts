@@ -146,6 +146,36 @@ export async function buildOrderReceiptData(
     }
   }
 
+  // A voucher bought online: its order has no product items, only the link
+  // to the voucher (/api/voucher/confirm). One line for the voucher itself.
+  let isVoucherOrder = false
+  if (receiptItems.length === 0 && order.purchasedVoucher) {
+    try {
+      const ref = order.purchasedVoucher
+      const voucher =
+        typeof ref === 'object' && ref !== null
+          ? (ref as Record<string, unknown>)
+          : ((await payload.findByID({
+              collection: 'vouchers',
+              id: String(ref),
+              depth: 0,
+              overrideAccess: true,
+            })) as unknown as Record<string, unknown>)
+      const value = typeof voucher.value === 'number' ? voucher.value : 0
+      const name = value === 99 ? 'Workshop-Geschenkgutschein' : `Wertgutschein €${value}`
+      receiptItems = [
+        {
+          title: voucher.code ? `${name} · Code ${voucher.code as string}` : name,
+          qty: 1,
+          unitPrice: Math.round(value * 100),
+        },
+      ]
+      isVoucherOrder = true
+    } catch {
+      // Voucher gone — fall through; the total still shows
+    }
+  }
+
   // Fall back to order.items for non-workshop purchases. The ecommerce
   // plugin's Orders.items schema has no per-item price field (only
   // product/variant/quantity) — the current price is resolved live from the
@@ -225,11 +255,16 @@ export async function buildOrderReceiptData(
   const orderNumber = String(order.id).slice(-8).toUpperCase()
   const orderedAt = order.createdAt ? new Date(order.createdAt as string) : issueDate
 
+  // Shop products are picked up: the pickup date is chosen after payment and
+  // the address object is stored empty ({}), so "no address lines" (the
+  // shippingAddress string built above) already means Abholung.
   const fulfilmentType = hasWorkshopItems
     ? 'Workshop'
-    : order.pickupDate
-      ? 'Abholung'
-      : 'Versand'
+    : isVoucherOrder
+      ? 'Digital per E-Mail'
+      : order.pickupDate || order.pickupLocation || !shippingAddress
+        ? 'Abholung'
+        : 'Versand'
 
   const isManual = (order as { paymentMethod?: string }).paymentMethod === 'manual'
   const referenceNote = (order as { referenceNote?: string | null }).referenceNote || undefined
