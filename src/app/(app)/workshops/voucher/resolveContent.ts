@@ -86,6 +86,10 @@ export function resolveVoucherContent(
       backFrom: str(print?.card?.backFrom, d.card.backFrom),
     },
     hero: {
+      // a photo layout without a photo falls back to the ticket
+      visual: hero?.visual && hero.visual !== 'ticket' && asMedia(hero.image) ? hero.visual : 'ticket',
+      image: asMedia(hero?.image),
+      ticketOnBackground: hero?.ticketOnBackground ?? true,
       eyebrow: str(hero?.eyebrow, d.hero.eyebrow),
       headline: str(hero?.headline, d.hero.headline),
       text: str(hero?.text, d.hero.text),

@@ -1594,6 +1594,15 @@ export interface Page {
      */
     hero?: {
       /**
+       * Beim Hintergrund-Foto wird der Text hell auf einer dunklen Schattierung, damit er gut lesbar bleibt.
+       */
+      visual?: ('ticket' | 'image' | 'background') | null;
+      /**
+       * Rechts: Hochformat oder quadratisch (mind. 1200 px). Hintergrund: Querformat (mind. 1920 px), das Motiv eher rechts im Bild.
+       */
+      image?: (string | null) | Media;
+      ticketOnBackground?: boolean | null;
+      /**
        * z. B. „Geschenkgutschein · Graz“
        */
       eyebrow?: string | null;
@@ -7341,6 +7350,9 @@ export interface PagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              visual?: T;
+              image?: T;
+              ticketOnBackground?: T;
               eyebrow?: T;
               headline?: T;
               text?: T;
