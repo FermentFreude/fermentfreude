@@ -102,6 +102,21 @@ export const voucherTab: Tab = {
           },
         },
         {
+          name: 'backgroundBlur',
+          type: 'select',
+          label: 'Unschärfe des Hintergrund-Fotos / Background blur',
+          defaultValue: 'soft',
+          options: [
+            { label: 'Keine / None', value: 'none' },
+            { label: 'Leicht / Soft', value: 'soft' },
+            { label: 'Stark / Strong', value: 'strong' },
+          ],
+          admin: {
+            description: 'Mit Unschärfe tritt das Foto zurück und Text und Gutschein-Motiv stehen klarer davor.',
+            condition: (_, sibling) => sibling?.visual === 'background',
+          },
+        },
+        {
           name: 'ticketOnBackground',
           type: 'checkbox',
           defaultValue: true,

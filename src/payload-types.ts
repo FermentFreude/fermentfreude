@@ -1601,6 +1601,10 @@ export interface Page {
        * Rechts: Hochformat oder quadratisch (mind. 1200 px). Hintergrund: Querformat (mind. 1920 px), das Motiv eher rechts im Bild.
        */
       image?: (string | null) | Media;
+      /**
+       * Mit Unschärfe tritt das Foto zurück und Text und Gutschein-Motiv stehen klarer davor.
+       */
+      backgroundBlur?: ('none' | 'soft' | 'strong') | null;
       ticketOnBackground?: boolean | null;
       /**
        * z. B. „Geschenkgutschein · Graz“
@@ -7352,6 +7356,7 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               visual?: T;
               image?: T;
+              backgroundBlur?: T;
               ticketOnBackground?: T;
               eyebrow?: T;
               headline?: T;

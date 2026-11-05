@@ -23,6 +23,7 @@ export type OccasionKey = 'christmas' | 'teams' | 'plant' | 'birthday'
 
 /** What the hero shows on the right: the drawn €99 ticket, a photo, or a photo behind the whole hero */
 export type HeroVisual = 'ticket' | 'image' | 'background'
+export type HeroBlur = 'none' | 'soft' | 'strong'
 
 /** Media library photos for the occasions: used by the seed, and by the page while the admin has no rows */
 export const OCCASION_PHOTOS: Record<OccasionKey, string> = {
@@ -75,6 +76,7 @@ const de = {
     visual: 'ticket' as HeroVisual,
     image: null as MediaType | null,
     ticketOnBackground: true,
+    backgroundBlur: 'soft' as HeroBlur,
     eyebrow: 'Geschenkgutschein · Graz',
     headline: 'Verschenk einen Fermentations-Workshop.',
     text: 'Kombucha, Tempeh oder Lakto-Gemüse selbst ansetzen, verkosten und das eigene Glas mit nach Hause nehmen. Ein Geschenk, das noch Wochen später weiterfermentiert.',
@@ -275,6 +277,7 @@ const en: VoucherContent = {
     visual: 'ticket',
     image: null,
     ticketOnBackground: true,
+    backgroundBlur: 'soft',
     eyebrow: 'Gift voucher · Graz',
     headline: 'Give a fermentation workshop.',
     text: 'Make your own kombucha, tempeh or lacto-fermented vegetables, taste them and take your own jar home. A gift that keeps fermenting for weeks.',

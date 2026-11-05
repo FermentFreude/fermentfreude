@@ -90,6 +90,7 @@ export function resolveVoucherContent(
       visual: hero?.visual && hero.visual !== 'ticket' && asMedia(hero.image) ? hero.visual : 'ticket',
       image: asMedia(hero?.image),
       ticketOnBackground: hero?.ticketOnBackground ?? true,
+      backgroundBlur: hero?.backgroundBlur ?? d.hero.backgroundBlur,
       eyebrow: str(hero?.eyebrow, d.hero.eyebrow),
       headline: str(hero?.headline, d.hero.headline),
       text: str(hero?.text, d.hero.text),

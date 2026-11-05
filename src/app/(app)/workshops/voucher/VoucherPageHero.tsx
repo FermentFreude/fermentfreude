@@ -26,11 +26,14 @@ import { VoucherTicket } from './VoucherTicket'
  *  admin (hero.visual):
  *    ticket      the drawn €99 ticket (default), leaning towards the mouse
  *    image       a photo instead of the ticket
- *    background  a photo behind the whole hero under a dark shade, text in
- *                cream; the ticket stays on top unless switched off
+ *    background  a photo behind the whole hero (optionally blurred) under a
+ *                dark shade, text in cream; the ticket stays on top unless
+ *                switched off
  * ═══════════════════════════════════════════════════════════════ */
 
 const EASE = [0.16, 1, 0.3, 1] as const
+// Background blur; the photo is scaled up a little so the soft edges stay outside the frame
+const BLUR = { none: { px: 0, scale: 1 }, soft: { px: 10, scale: 1.08 }, strong: { px: 22, scale: 1.15 } } as const
 const PAPER = '#F9F2E0'
 
 const fadeUp: Variants = {
@@ -44,6 +47,7 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
   const onPhoto = h.visual === 'background' && !!h.image
   const photoRight = h.visual === 'image' && !!h.image
   const showTicket = !photoRight && (!onPhoto || h.ticketOnBackground)
+  const blur = BLUR[h.backgroundBlur] ?? BLUR.soft
 
   const px = useMotionValue(0)
   const py = useMotionValue(0)
@@ -76,11 +80,12 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
           <>
             <motion.div
               className="absolute inset-0 -z-10"
-              initial={{ scale: 1.06, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale: blur.scale + 0.06, opacity: 0 }}
+              animate={{ scale: blur.scale, opacity: 1 }}
               transition={{ duration: 1.6, ease: EASE }}
+              style={blur.px ? { filter: `blur(${blur.px}px)` } : undefined}
             >
-              <Media resource={h.image} fill priority size="100vw" imgClassName="object-cover" />
+              <Media resource={h.image} fill priority size={blur.px ? '50vw' : '100vw'} imgClassName="object-cover" />
             </motion.div>
             {/* shade: even on phone, darker on the text side from desktop up */}
             <div
