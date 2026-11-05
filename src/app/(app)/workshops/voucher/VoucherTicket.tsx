@@ -15,6 +15,8 @@ import { FfWordmark } from './FfWordmark'
  *
  *  variant  'workshop' = the €99 workshop voucher (olive + gold stub)
  *           'value'    = the €50 / €30 / €20 value vouchers
+ *  simple   Rafaela's simpler copies (canvas "Wert copy"): only the amount,
+ *           the title and the stub — no top line, description or footer
  * ═══════════════════════════════════════════════════════════════ */
 
 const OLIVE = '#4B4F4A'
@@ -107,9 +109,10 @@ type TicketProps = {
   className?: string
   /** Accessible description of the whole picture */
   alt?: string
+  simple?: boolean
 }
 
-export function VoucherTicket({ amount, variant, text, className, alt }: TicketProps) {
+export function VoucherTicket({ amount, variant, text, className, alt, simple = false }: TicketProps) {
   const isWorkshop = variant === 'workshop'
   return (
     <div
@@ -147,13 +150,17 @@ export function VoucherTicket({ amount, variant, text, className, alt }: TicketP
           }}
         />
 
-        <div className="absolute" style={{ ...caps, left: u(56), top: u(58), color: GOLD }}>
-          {text.label}
-        </div>
-        <div
-          className="absolute"
-          style={{ left: u(56), width: u(644), top: u(88), height: 1, background: 'rgba(230,190,104,.45)' }}
-        />
+        {!simple && (
+          <>
+            <div className="absolute" style={{ ...caps, left: u(56), top: u(58), color: GOLD }}>
+              {text.label}
+            </div>
+            <div
+              className="absolute"
+              style={{ left: u(56), width: u(644), top: u(88), height: 1, background: 'rgba(230,190,104,.45)' }}
+            />
+          </>
+        )}
 
         {/* € + value */}
         <div
@@ -166,7 +173,7 @@ export function VoucherTicket({ amount, variant, text, className, alt }: TicketP
           className="absolute font-bold tabular-nums"
           style={{
             left: u(isWorkshop ? 104 : 99),
-            top: u(isWorkshop ? 112 : 108),
+            top: u(simple ? (isWorkshop ? 113 : 102) : isWorkshop ? 112 : 108),
             fontSize: u(268),
             lineHeight: 1,
             color: GOLD,
@@ -183,7 +190,7 @@ export function VoucherTicket({ amount, variant, text, className, alt }: TicketP
           {text.title}
         </div>
         <div
-          className="absolute font-sans"
+          className={cn('absolute font-sans', simple && 'hidden')}
           style={{
             left: u(420),
             top: u(isWorkshop ? 262 : 232),
@@ -200,9 +207,11 @@ export function VoucherTicket({ amount, variant, text, className, alt }: TicketP
           className="absolute"
           style={{ left: u(56), width: u(644), top: u(400), height: 1, background: 'rgba(230,190,104,.45)' }}
         />
-        <div className="absolute" style={{ ...caps, left: u(56), top: u(418), color: 'rgba(250,242,224,.55)' }}>
-          {text.footer}
-        </div>
+        {!simple && (
+          <div className="absolute" style={{ ...caps, left: u(56), top: u(418), color: 'rgba(250,242,224,.55)' }}>
+            {text.footer}
+          </div>
+        )}
 
         {/* gold stub */}
         <div className="absolute top-0 h-full" style={{ left: u(727), right: 0, background: GOLD, color: INK }}>
