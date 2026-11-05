@@ -109,6 +109,7 @@ export function VoucherBuyProvider({ c, children }: { c: VoucherContent; childre
                 <VoucherTicket
                   amount={amount}
                   variant={isWorkshop ? 'workshop' : 'value'}
+                  simple={!isWorkshop}
                   text={{ ...(isWorkshop ? c.ticket.workshop : c.ticket.value), footer: c.ticket.footer, stub: c.ticket.stub }}
                 />
               </div>

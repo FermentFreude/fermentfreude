@@ -39,6 +39,7 @@ export function ValueVouchersSection({ c }: { c: VoucherContent }) {
                   <VoucherTicket
                     amount={item.amount}
                     variant="value"
+                    simple
                     text={{ ...c.ticket.value, footer: c.ticket.footer, stub: c.ticket.stub }}
                     alt={`${v.valueName} €${item.amount}`}
                   />

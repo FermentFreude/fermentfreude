@@ -75,6 +75,54 @@ export const voucherTab: Tab = {
       label: '1 · Oben: €99 Workshop-Gutschein / Top: €99 workshop voucher',
       admin: { description: 'Der erste Bildschirm: Überschrift, Text, Preis, Button und das Gutschein-Motiv rechts.' },
       fields: [
+        {
+          name: 'visual',
+          type: 'select',
+          label: 'Was rechts zu sehen ist / What shows on the right',
+          defaultValue: 'ticket',
+          options: [
+            { label: 'Gutschein-Motiv (€99 Ticket) / Voucher ticket', value: 'ticket' },
+            { label: 'Foto rechts (statt Ticket) / Photo on the right', value: 'image' },
+            { label: 'Foto als Hintergrund / Photo as background', value: 'background' },
+          ],
+          admin: {
+            description:
+              'Beim Hintergrund-Foto wird der Text hell auf einer dunklen Schattierung, damit er gut lesbar bleibt.',
+          },
+        },
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Foto / Photo',
+          admin: {
+            description:
+              'Rechts: Hochformat oder quadratisch (mind. 1200 px). Hintergrund: Querformat (mind. 1920 px), das Motiv eher rechts im Bild.',
+            condition: (_, sibling) => sibling?.visual === 'image' || sibling?.visual === 'background',
+          },
+        },
+        {
+          name: 'backgroundBlur',
+          type: 'select',
+          label: 'Unschärfe des Hintergrund-Fotos / Background blur',
+          defaultValue: 'soft',
+          options: [
+            { label: 'Keine / None', value: 'none' },
+            { label: 'Leicht / Soft', value: 'soft' },
+            { label: 'Stark / Strong', value: 'strong' },
+          ],
+          admin: {
+            description: 'Mit Unschärfe tritt das Foto zurück und Text und Gutschein-Motiv stehen klarer davor.',
+            condition: (_, sibling) => sibling?.visual === 'background',
+          },
+        },
+        {
+          name: 'ticketOnBackground',
+          type: 'checkbox',
+          defaultValue: true,
+          label: 'Gutschein-Motiv über dem Foto zeigen / Show the ticket over the photo',
+          admin: { condition: (_, sibling) => sibling?.visual === 'background' },
+        },
         text('eyebrow', 'Kleine Zeile über der Überschrift / Small line above the headline', 'z. B. „Geschenkgutschein · Graz“'),
         text('headline', 'Überschrift (H1) / Headline', 'Die wichtigste Zeile für Google: Gutschein + Fermentations-Workshop nennen.'),
         area('text', 'Text unter der Überschrift / Text'),
