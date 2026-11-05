@@ -33,7 +33,7 @@ import { VoucherTicket } from './VoucherTicket'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 // Background blur; the photo is scaled up a little so the soft edges stay outside the frame
-const BLUR = { none: { px: 0, scale: 1 }, soft: { px: 10, scale: 1.08 }, strong: { px: 22, scale: 1.15 } } as const
+const BLUR = { none: { px: 0, scale: 1 }, soft: { px: 3, scale: 1.03 }, strong: { px: 10, scale: 1.08 } } as const
 const PAPER = '#F9F2E0'
 
 const fadeUp: Variants = {
@@ -85,7 +85,7 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
               transition={{ duration: 1.6, ease: EASE }}
               style={blur.px ? { filter: `blur(${blur.px}px)` } : undefined}
             >
-              <Media resource={h.image} fill priority size={blur.px ? '50vw' : '100vw'} imgClassName="object-cover" />
+              <Media resource={h.image} fill priority size={blur.px >= 10 ? '50vw' : '100vw'} imgClassName="object-cover" />
             </motion.div>
             {/* shade: even on phone, darker on the text side from desktop up */}
             <div
