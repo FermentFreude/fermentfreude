@@ -13,7 +13,7 @@ const SUCCESS_DE = {
   successTitle: 'Gutschein erstellt!',
   successSubtitle: (
     <>
-      Dein Geschenkgutschein f\u00FCr ein <strong>Workshop-Erlebnis</strong> wurde erfolgreich
+      Dein Geschenkgutschein für ein <strong>Workshop-Erlebnis</strong> wurde erfolgreich
       erstellt.
     </>
   ),

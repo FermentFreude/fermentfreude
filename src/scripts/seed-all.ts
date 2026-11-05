@@ -56,7 +56,7 @@ const scripts: Record<string, { name: string; file: string }> = {
   help: { name: 'Help & FAQ page', file: 'seed-help.ts' },
 
   legal: { name: 'Legal pages (datenschutz, agb, impressum)', file: 'seed-legal-pages.ts' },
-  voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
+  voucher: { name: 'Voucher page (all sections, photos from the media library)', file: 'seed-voucher.ts' },
   'shop-new': { name: 'Shop page (hero, products, automaten)', file: 'seed-shop-new.ts' },
   kombucha: { name: 'Kombucha workshop (experienceCards)', file: 'seed-kombucha.ts' },
   'kombucha-detail': {
