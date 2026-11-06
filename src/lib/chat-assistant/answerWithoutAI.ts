@@ -298,7 +298,7 @@ export function answerWithoutAI(question: string, data: ChatData, history: strin
   const addAction = (label: string, href: string) => {
     if (!actions.some((a) => a.href === href)) actions.push({ label, href })
   }
-  let handoff = false
+  let handoff: ChatReply['handoff']
   const reply = (): ChatReply => ({
     text: text.join('\n\n'),
     ...(handoff ? { handoff } : {}),
@@ -439,7 +439,13 @@ export function answerWithoutAI(question: string, data: ChatData, history: strin
     if (data.extraKnowledge && /parken|parking|anfahrt/.test(q)) text.push(data.extraKnowledge)
   }
 
-  if (has('contact') && !text.length) text.push(contactText(lang, data))
+  if (has('contact') && !text.length) {
+    text.push(
+      `${contactText(lang, data)}\n\n${t(lang, 'Du kannst uns auch gleich hier im Chat schreiben, wir antworten dir per E-Mail:', 'You can also write to us right here in the chat and we will reply by email:')}`,
+    )
+    handoff = 'contact'
+    addAction(t(lang, 'Zur Kontaktseite', 'Contact page'), '/contact')
+  }
 
   if (!text.length && has('beginner') && data.workshops.length) {
     const basics = data.workshops.find((w) => /basic|grundl|einsteig/.test(normalize(`${w.slug} ${w.title}`)))
@@ -501,7 +507,7 @@ export function answerWithoutAI(question: string, data: ChatData, history: strin
         `Hmm, I can't answer that reliably. 🤔 Just send your question to our team below and we'll reply personally by email.${email ? ` Or write to [${email}](mailto:${email}).` : ''}`,
       ),
     )
-    handoff = true
+    handoff = 'unanswered'
     addAction(t(lang, 'Hilfe & FAQ', 'Help & FAQ'), '/help')
   }
 

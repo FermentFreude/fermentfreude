@@ -34,8 +34,8 @@ type ChatMessage = {
   cards?: ChatCard[]
   actions?: ChatAction[]
   suggestions?: string[]
-  /** Show the "ask our team" form under this answer. */
-  handoff?: boolean
+  /** Show the "ask our team" form under this answer (see ChatReply.handoff). */
+  handoff?: ChatReply['handoff']
   handoffSent?: boolean
   feedback?: 'up' | 'down'
 }
@@ -568,6 +568,14 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
 
   const lastQuestion = [...messages].reverse().find((m) => m.role === 'user')?.content ?? ''
 
+  // Envelope button in the header: open the "ask our team" form at any time.
+  const openTeamForm = () => {
+    if (busy) return
+    const last = messages[messages.length - 1]
+    if (last?.handoff && !last.handoffSent) return
+    setMessages((prev) => [...prev, { role: 'assistant', content: texts.handoffIntro, handoff: 'contact' }])
+  }
+
   const reset = () => {
     if (busy) return
     setMessages([])
@@ -616,6 +624,16 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                 {texts.subtitle}
               </p>
             </div>
+            <button
+              type="button"
+              onClick={openTeamForm}
+              disabled={busy}
+              aria-label={texts.handoffButton}
+              title={texts.handoffButton}
+              className="rounded-full p-1.5 transition hover:bg-white/10 disabled:opacity-50"
+            >
+              <Mail className="size-4" />
+            </button>
             {messages.length > 0 && (
               <button
                 type="button"
@@ -623,7 +641,7 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                 disabled={busy}
                 aria-label={texts.resetLabel}
                 title={texts.resetLabel}
-                className="rounded-full p-2 transition hover:bg-white/10 disabled:opacity-50"
+                className="rounded-full p-1.5 transition hover:bg-white/10 disabled:opacity-50"
               >
                 <RotateCcw className="size-4" />
               </button>
@@ -633,7 +651,7 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
               onClick={() => setOpen(false)}
               aria-label={texts.closeLabel}
               title={texts.closeLabel}
-              className="rounded-full p-2 transition hover:bg-white/10"
+              className="rounded-full p-1.5 transition hover:bg-white/10"
             >
               <X className="size-5" />
             </button>
@@ -706,7 +724,7 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                       <HandoffForm
                         texts={texts}
                         locale={locale}
-                        initialMessage={lastQuestion}
+                        initialMessage={m.handoff === 'unanswered' ? lastQuestion : ''}
                         transcript={plainTranscript()}
                         onSent={() => {
                           updateMessage(i, { handoffSent: true })
@@ -721,7 +739,7 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                       <Feedback
                         texts={texts}
                         value={m.feedback}
-                        onChange={(value) => updateMessage(i, { feedback: value, ...(value === 'down' ? { handoff: true } : {}) })}
+                        onChange={(value) => updateMessage(i, { feedback: value, ...(value === 'down' ? { handoff: 'unanswered' as const } : {}) })}
                       />
                     </div>
                   )}

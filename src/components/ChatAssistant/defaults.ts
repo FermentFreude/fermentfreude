@@ -29,6 +29,8 @@ export type ChatTexts = {
   /** "Ask our team" form. */
   handoffButton: string
   handoffTitle: string
+  /** Shown when the visitor opens the form with the envelope button in the header. */
+  handoffIntro: string
   handoffNameLabel: string
   handoffEmailLabel: string
   handoffMessageLabel: string
@@ -72,6 +74,7 @@ const EN: ChatTexts = {
   outOfStockLabel: 'Out of stock',
   handoffButton: 'Ask our team',
   handoffTitle: 'Ask our team directly',
+  handoffIntro: "Write to us here and we'll reply by email. You can also use our [contact page](/contact).",
   handoffNameLabel: 'Your name',
   handoffEmailLabel: 'Your email',
   handoffMessageLabel: 'Your question',
@@ -114,6 +117,7 @@ const DE: ChatTexts = {
   outOfStockLabel: 'Ausverkauft',
   handoffButton: 'Frag unser Team',
   handoffTitle: 'Frag unser Team direkt',
+  handoffIntro: 'Schreib uns hier, wir antworten dir per E-Mail. Oder nutze unsere [Kontaktseite](/contact).',
   handoffNameLabel: 'Dein Name',
   handoffEmailLabel: 'Deine E-Mail',
   handoffMessageLabel: 'Deine Frage',

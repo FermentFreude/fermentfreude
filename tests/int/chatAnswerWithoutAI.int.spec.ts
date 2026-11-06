@@ -103,8 +103,15 @@ describe('answerWithoutAI', () => {
     expect(answerWithoutAI('Wo kann ich parken?', d)).toContain('Nebenstraße')
   })
 
+  it('offers the chat form and the contact page for contact questions', () => {
+    const reply = answerReply('Wie kann ich euch per E-Mail kontaktieren?', data())
+    expect(reply.handoff).toBe('contact')
+    expect(reply.actions?.map((a) => a.href)).toContain('/contact')
+    expect(reply.text).toContain('kontakt@example.at')
+  })
+
   it('offers the team form when it cannot answer', () => {
-    expect(answerReply('Was ist die Hauptstadt von Frankreich?', data()).handoff).toBe(true)
+    expect(answerReply('Was ist die Hauptstadt von Frankreich?', data()).handoff).toBe('unanswered')
     expect(answerReply('Welche Zahlungsarten gibt es?', data()).handoff).toBeUndefined()
   })
 
