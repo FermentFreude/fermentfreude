@@ -395,9 +395,9 @@ function HandoffForm({
       >
         {status === 'sending' ? '…' : texts.handoffSend}
       </button>
-      <p className="text-[11px] leading-snug text-ff-gray-text-light">
+      <div className="text-[11px] leading-snug text-ff-gray-text-light">
         <MessageText text={texts.handoffConsent} />
-      </p>
+      </div>
     </form>
   )
 }
@@ -785,9 +785,9 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                 {input.length}/{MAX_INPUT}
               </p>
             )}
-            <p className="mt-2 px-1 text-center text-[11px] leading-snug text-ff-gray-text-light">
+            <div className="mt-2 px-1 text-center text-[11px] leading-snug text-ff-gray-text-light">
               <MessageText text={texts.privacyNote} />
-            </p>
+            </div>
           </form>
         </div>
       )}
