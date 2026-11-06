@@ -64,7 +64,7 @@ export const ChatAssistantGlobal: GlobalConfig = {
           type: 'text',
           localized: true,
           label: 'Window title',
-          admin: { description: 'Heading at the top of the chat window (e.g. "FermentFreude Assistent").' },
+          admin: { description: 'Heading at the top of the chat window (e.g. "Fermentfreude Assistent").' },
         },
         {
           name: 'greeting',

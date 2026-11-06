@@ -239,7 +239,7 @@ const DOMAIN =
  * Decides whether a question may go to the AI at all. Off-topic questions
  * (homework, code, politics, other companies, …) are answered by the keyword
  * answerer instead, which offers the "ask our team" form. Keeps the AI on
- * FermentFreude topics and saves the daily AI budget.
+ * Fermentfreude topics and saves the daily AI budget.
  */
 export function isOnTopic(question: string, data: ChatData, history: string[] = []): boolean {
   const q = normalize(question)

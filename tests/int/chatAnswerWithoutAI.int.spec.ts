@@ -14,7 +14,7 @@ function answerWithoutAI(question: string, d: ChatData, history: string[] = []):
 function data(locale: 'de' | 'en' = 'de'): ChatData {
   return {
     locale,
-    contact: { companyName: 'FermentFreude', address: 'Grabenstraße 15, 8010 Graz', email: 'kontakt@example.at', phone: '', website: '' },
+    contact: { companyName: 'Fermentfreude', address: 'Grabenstraße 15, 8010 Graz', email: 'kontakt@example.at', phone: '', website: '' },
     workshops: [
       { slug: 'basics', title: 'Fermentation Basics', price: 99, maxCapacity: 8, description: 'Die Grundlagen.', whatToBring: '' },
       { slug: 'lakto', title: 'Lakto-Gemüse', price: 99, maxCapacity: 8, description: '', whatToBring: '' },
@@ -119,7 +119,7 @@ describe('answerWithoutAI', () => {
     expect(answerWithoutAI('Was ist die Hauptstadt von Frankreich?', data())).toContain('kontakt@example.at')
   })
 
-  it('only lets FermentFreude topics through to the AI', () => {
+  it('only lets Fermentfreude topics through to the AI', () => {
     const d = data()
     expect(isOnTopic('Wann ist der nächste Kombucha Workshop?', d)).toBe(true)
     expect(isOnTopic('Ist Tempeh vegan?', d)).toBe(true)

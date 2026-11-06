@@ -47,9 +47,9 @@ export type ChatTexts = {
 
 const EN: ChatTexts = {
   launcherLabel: 'Got a question? Ask me!',
-  title: 'FermentFreude Assistant',
+  title: 'Fermentfreude Assistant',
   greeting:
-    "Hi! I'm the FermentFreude assistant. Ask me about workshops, free dates, prices, products or vouchers.",
+    "Hi! I'm the Fermentfreude assistant. Ask me about workshops, free dates, prices, products or vouchers.",
   inputPlaceholder: 'Type your question…',
   privacyNote:
     'Automatic answers, without guarantee. Please don’t share personal data. [Privacy policy](/datenschutz)',
@@ -90,9 +90,9 @@ const EN: ChatTexts = {
 
 const DE: ChatTexts = {
   launcherLabel: 'Hast du eine Frage? Frag mich!',
-  title: 'FermentFreude Assistent',
+  title: 'Fermentfreude Assistent',
   greeting:
-    'Hallo! Ich bin der FermentFreude-Assistent. Frag mich zu Workshops, freien Terminen, Preisen, Produkten oder Gutscheinen.',
+    'Hallo! Ich bin der Fermentfreude-Assistent. Frag mich zu Workshops, freien Terminen, Preisen, Produkten oder Gutscheinen.',
   inputPlaceholder: 'Deine Frage…',
   privacyNote:
     'Automatische Antworten, ohne Gewähr. Bitte keine persönlichen Daten eingeben. [Datenschutz](/datenschutz)',

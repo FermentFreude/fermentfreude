@@ -53,7 +53,7 @@ describe('getChatKnowledge', () => {
     find.mockImplementation(async ({ collection }: { collection: string }) => ({ docs: data[collection] ?? [] }))
     findGlobal.mockImplementation(async ({ slug }: { slug: string }) =>
       slug === 'business-info'
-        ? { companyName: 'FermentFreude', email: 'hallo@example.at' }
+        ? { companyName: 'Fermentfreude', email: 'hallo@example.at' }
         : { extraKnowledge: 'Parking behind the building.' },
     )
   })

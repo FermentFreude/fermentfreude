@@ -35,7 +35,12 @@ export const maxDuration = 60
  * src/lib/chat-assistant/knowledge.ts), no tools, so it cannot change data.
  */
 
-const MODEL = process.env.CHATBOT_MODEL || 'claude-opus-5-5'
+// Haiku 5.5 is the cheapest current Claude model ($0.10 / $0.50 per million
+// tokens) and plenty for FAQ-style answers. CHATBOT_MODEL can switch it.
+const MODEL = process.env.CHATBOT_MODEL || 'claude-haiku-5-5'
+// Server-side refusal fallbacks exist for Opus / Sonnet / Fable, not Haiku.
+const FALLBACKS: Pick<Anthropic.Beta.MessageCreateParamsStreaming, 'betas' | 'fallbacks'> =
+  /^claude-(opus|sonnet|fable)-/.test(MODEL) ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' } : {}
 const MAX_MESSAGES = 20
 const MAX_MESSAGE_CHARS = 500
 
@@ -96,7 +101,7 @@ export async function POST(request: NextRequest) {
   const workersAI = process.env.ANTHROPIC_API_KEY ? null : workersAIConfig()
   if (!process.env.ANTHROPIC_API_KEY && !workersAI) return keywordReply()
 
-  // Control what reaches the AI: only FermentFreude topics, and only within
+  // Control what reaches the AI: only Fermentfreude topics, and only within
   // today's budget (Admin → Chat Assistant → "AI answers per day").
   // Everything else gets the free keyword answer, which offers the team form.
   if (!isOnTopic(question, data, earlier)) return keywordReply()
@@ -152,8 +157,7 @@ export async function POST(request: NextRequest) {
           max_tokens: 4000,
           // Low effort: chat answers are short and should feel snappy.
           output_config: { effort: 'low' },
-          betas: ['server-side-fallback-2026-07-01'],
-          fallbacks: 'default',
+          ...FALLBACKS,
           system: [
             { type: 'text', text: CHAT_SYSTEM_PROMPT },
             {

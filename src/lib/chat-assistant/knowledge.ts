@@ -339,7 +339,7 @@ export function buildKnowledgeSheet(data: ChatData): string {
   }
 
   if (data.extraKnowledge) {
-    lines.push('', '## Extra notes from the FermentFreude team', data.extraKnowledge)
+    lines.push('', '## Extra notes from the Fermentfreude team', data.extraKnowledge)
   }
 
   return lines.join('\n')
