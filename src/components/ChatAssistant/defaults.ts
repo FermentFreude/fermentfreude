@@ -26,8 +26,6 @@ export type ChatTexts = {
   oneSpotLeftLabel: string
   nextDateLabel: string
   outOfStockLabel: string
-  /** Welcome bubble above the launcher, once per visit. */
-  teaser: string
   /** "Ask our team" form. */
   handoffButton: string
   handoffTitle: string
@@ -72,7 +70,6 @@ const EN: ChatTexts = {
   oneSpotLeftLabel: 'Last spot',
   nextDateLabel: 'Next date',
   outOfStockLabel: 'Out of stock',
-  teaser: 'Hi! 👋 Questions about workshops, dates or vouchers? Ask me!',
   handoffButton: 'Ask our team',
   handoffTitle: 'Ask our team directly',
   handoffNameLabel: 'Your name',
@@ -115,7 +112,6 @@ const DE: ChatTexts = {
   oneSpotLeftLabel: 'Letzter Platz',
   nextDateLabel: 'Nächster Termin',
   outOfStockLabel: 'Ausverkauft',
-  teaser: 'Hi! 👋 Fragen zu Workshops, Terminen oder Gutscheinen? Frag mich!',
   handoffButton: 'Frag unser Team',
   handoffTitle: 'Frag unser Team direkt',
   handoffNameLabel: 'Dein Name',

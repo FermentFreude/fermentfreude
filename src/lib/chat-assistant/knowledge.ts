@@ -80,6 +80,8 @@ export type ChatData = {
   courses: ChatCourse[]
   faq: ChatFaq[]
   extraKnowledge: string
+  /** Admin → Chat Assistant → "AI answers per day". Undefined = default. */
+  aiDailyLimit?: number
 }
 
 const cache = new Map<AppLocale, { at: number; data: ChatData }>()
@@ -258,6 +260,7 @@ async function load(locale: AppLocale): Promise<ChatData> {
       })),
     faq,
     extraKnowledge: typeof chatGlobal.extraKnowledge === 'string' ? chatGlobal.extraKnowledge.trim() : '',
+    aiDailyLimit: typeof chatGlobal.aiDailyLimit === 'number' ? chatGlobal.aiDailyLimit : undefined,
   }
 }
 

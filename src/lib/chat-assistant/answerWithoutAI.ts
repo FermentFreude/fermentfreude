@@ -231,6 +231,32 @@ function suggestionsFor(lang: Lang, topics: Set<string>): string[] {
     .map(([, de, en]) => t(lang, de, en))
 }
 
+// Topic words that are fine to send to the AI even when no FAQ matches.
+const DOMAIN =
+  /\b(workshop\w*|kurs\w*|termin\w*|datum|plaetze|platz|ausgebucht|schedule|adresse|address|anfahrt|parken|parking|ferment\w*|kimchi|kombucha|tempeh|lakto\w*|lacto\w*|sauerkraut|miso|kefir|kraut|gemuese|vegetables?|essen|food|lebensmittel|rezept\w*|recipe\w*|glas|jar|zutat\w*|ingredient\w*|allerg\w*|vegan\w*|vegetar\w*|gluten\w*|laktose|lactose|halal|kinder|kids?|child\w*|gruppe\w*|group\w*|firm\w*|team ?event\w*|company|corporate|geburtstag|birthday|studio|graz|zahl\w*|bezahl\w*|pay\w*|rechnung|invoice|konto|account|login|passwort|password|newsletter|koch\w*|chef\w*|gastro\w*|restaurant\w*|barriere\w*|rollstuhl|wheelchair|hund\w*|dog|haustier|pet|dauer|dauert|how long|lange|uhrzeit|zeit|time|sprache|language|englisch|english|deutsch|german)\b/
+
+/**
+ * Decides whether a question may go to the AI at all. Off-topic questions
+ * (homework, code, politics, other companies, …) are answered by the keyword
+ * answerer instead, which offers the "ask our team" form. Keeps the AI on
+ * FermentFreude topics and saves the daily AI budget.
+ */
+export function isOnTopic(question: string, data: ChatData, history: string[] = []): boolean {
+  const q = normalize(question)
+  if (!q) return false
+  // Intents with clearly shop-related words. "dates" / "location" / "followUp" are left out
+  // because words like "wann", "nächste" or "wo" appear in any question.
+  const strong: Array<keyof typeof INTENTS> = ['list', 'price', 'voucher', 'manage', 'book', 'contact', 'bring', 'courses', 'shop']
+  if (strong.some((name) => INTENTS[name].test(q))) return true
+  if (DOMAIN.test(q)) return true
+  if (matchWorkshops(q, data.workshops).length || matchProducts(q, data.products).length) return true
+  const qWords = new Set(keywords(question))
+  const known = [...data.faq.map((f) => f.question), ...extraFaq(data.extraKnowledge).map((f) => f.question)]
+  if (known.some((text) => keywords(text).some((word) => qWords.has(word)))) return true
+  // Short follow-ups in an ongoing chat ("und am Wochenende?") stay on topic.
+  return history.length > 0 && q.split(' ').length <= 6
+}
+
 /**
  * @param question the visitor's latest message
  * @param data     live CMS data (see knowledge.ts)

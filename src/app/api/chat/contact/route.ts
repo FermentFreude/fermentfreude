@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { getAdminRecipients } from '@/lib/adminNotification'
 import { sendTransactionalEmail } from '@/lib/brevo'
+import { contactLimited } from '@/lib/chat-assistant/limits'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -15,23 +16,6 @@ export const dynamic = 'force-dynamic'
  * Nothing is stored. `website` is a honeypot: bots fill it, people don't see it.
  */
 
-const RATE_LIMIT = 5
-const RATE_WINDOW_MS = 60 * 60 * 1000
-const hits = new Map<string, number[]>()
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now()
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS)
-  recent.push(now)
-  hits.set(ip, recent)
-  if (hits.size > 5000) {
-    for (const [key, times] of hits) {
-      if (!times.some((t) => now - t < RATE_WINDOW_MS)) hits.delete(key)
-    }
-  }
-  return recent.length > RATE_LIMIT
-}
-
 const escapeHtml = (value: string) =>
   value
     .replace(/&/g, '&amp;')
@@ -44,7 +28,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
-  if (rateLimited(ip)) {
+  if (await contactLimited(ip)) {
     return NextResponse.json({ error: 'Too many messages', code: 'RATE_LIMITED' }, { status: 429 })
   }
 

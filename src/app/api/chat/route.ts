@@ -1,8 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { answerWithoutAI } from '@/lib/chat-assistant/answerWithoutAI'
+import { answerWithoutAI, isOnTopic } from '@/lib/chat-assistant/answerWithoutAI'
 import { buildKnowledgeSheet, getChatData } from '@/lib/chat-assistant/knowledge'
+import { takeAiAnswer, visitorLimited } from '@/lib/chat-assistant/limits'
 import { CHAT_SYSTEM_PROMPT, knowledgeBlock } from '@/lib/chat-assistant/prompt'
 import { replyToText } from '@/lib/chat-assistant/types'
 import { startWorkersAIStream, workersAIConfig } from '@/lib/chat-assistant/workersAI'
@@ -26,32 +27,17 @@ export const maxDuration = 60
  *   refuses (free allowance used up etc.) the keyword answerer takes over.
  * - neither → free keyword answerer (src/lib/chat-assistant/answerWithoutAI.ts).
  *
+ * Limits: questions up to 500 characters, 30 questions per visitor per 10
+ * minutes and a daily AI budget, both counted in MongoDB
+ * (src/lib/chat-assistant/limits.ts). Off-topic questions never reach the AI.
+ *
  * Read-only either way: only public CMS content (see
  * src/lib/chat-assistant/knowledge.ts), no tools, so it cannot change data.
  */
 
 const MODEL = process.env.CHATBOT_MODEL || 'claude-opus-5-5'
 const MAX_MESSAGES = 20
-const MAX_MESSAGE_CHARS = 1500
-
-// Best-effort per-IP limit. In-memory, so it resets per serverless instance —
-// enough to stop a single tab from hammering the API, not a hard guarantee.
-const RATE_LIMIT = 30
-const RATE_WINDOW_MS = 10 * 60 * 1000
-const hits = new Map<string, number[]>()
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now()
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS)
-  recent.push(now)
-  hits.set(ip, recent)
-  if (hits.size > 5000) {
-    for (const [key, times] of hits) {
-      if (!times.some((t) => now - t < RATE_WINDOW_MS)) hits.delete(key)
-    }
-  }
-  return recent.length > RATE_LIMIT
-}
+const MAX_MESSAGE_CHARS = 500
 
 function parseMessages(raw: unknown): Anthropic.Beta.BetaMessageParam[] | null {
   if (!Array.isArray(raw) || raw.length === 0) return null
@@ -61,7 +47,8 @@ function parseMessages(raw: unknown): Anthropic.Beta.BetaMessageParam[] | null {
     if (!m || typeof m !== 'object') return null
     const { role, content } = m as { role?: unknown; content?: unknown }
     if ((role !== 'user' && role !== 'assistant') || typeof content !== 'string') return null
-    const text = content.trim().slice(0, MAX_MESSAGE_CHARS)
+    // Visitors may ask up to 500 characters; earlier assistant answers can be longer.
+    const text = content.trim().slice(0, role === 'user' ? MAX_MESSAGE_CHARS : MAX_MESSAGE_CHARS * 4)
     if (!text) continue
     messages.push({ role, content: text })
   }
@@ -73,7 +60,7 @@ function parseMessages(raw: unknown): Anthropic.Beta.BetaMessageParam[] | null {
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
-  if (rateLimited(ip)) {
+  if (await visitorLimited(ip)) {
     return NextResponse.json({ error: 'Too many messages', code: 'RATE_LIMITED' }, { status: 429 })
   }
 
@@ -106,10 +93,16 @@ export async function POST(request: NextRequest) {
   const keywordReply = () =>
     NextResponse.json(answerWithoutAI(question, data, earlier), { headers: { 'Cache-Control': 'no-store' } })
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    const workersAI = workersAIConfig()
-    if (!workersAI) return keywordReply()
+  const workersAI = process.env.ANTHROPIC_API_KEY ? null : workersAIConfig()
+  if (!process.env.ANTHROPIC_API_KEY && !workersAI) return keywordReply()
 
+  // Control what reaches the AI: only FermentFreude topics, and only within
+  // today's budget (Admin → Chat Assistant → "AI answers per day").
+  // Everything else gets the free keyword answer, which offers the team form.
+  if (!isOnTopic(question, data, earlier)) return keywordReply()
+  if (!(await takeAiAnswer(data.aiDailyLimit))) return keywordReply()
+
+  if (workersAI) {
     const pieces = await startWorkersAIStream(workersAI, [
       { role: 'system', content: `${CHAT_SYSTEM_PROMPT}\n\n${knowledgeBlock(buildKnowledgeSheet(data), locale)}` },
       ...messages.map((m) => ({ role: m.role, content: String(m.content) })),

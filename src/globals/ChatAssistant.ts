@@ -60,16 +60,6 @@ export const ChatAssistantGlobal: GlobalConfig = {
           },
         },
         {
-          name: 'teaser',
-          type: 'text',
-          localized: true,
-          label: 'Welcome bubble',
-          admin: {
-            description:
-              'Kleine Sprechblase, die einmal pro Besuch nach ein paar Sekunden über dem Chat-Button erscheint (z.B. "Hi! 👋 Fragen zu Workshops oder Gutscheinen?"). Leer = Standardtext. / Small bubble shown once per visit above the chat button.',
-          },
-        },
-        {
           name: 'title',
           type: 'text',
           localized: true,
@@ -121,6 +111,18 @@ export const ChatAssistantGlobal: GlobalConfig = {
           },
         },
       ],
+    },
+    {
+      name: 'aiDailyLimit',
+      type: 'number',
+      label: 'AI answers per day (limit)',
+      defaultValue: 150,
+      min: 0,
+      admin: {
+        position: 'sidebar',
+        description:
+          'Höchstens so viele KI-Antworten pro Tag (für alle Besucher zusammen). Danach antwortet der Chat mit den kostenlosen Standard-Antworten aus den FAQ. 0 = KI aus. / Max AI answers per day for all visitors; after that the free FAQ answers are used. 0 = AI off.',
+      },
     },
     {
       name: 'extraKnowledge',

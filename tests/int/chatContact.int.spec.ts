@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const send = vi.fn(async (_args: { htmlContent: string; replyTo?: { email: string } }) => ({ success: true }))
 vi.mock('@/lib/brevo', () => ({ sendTransactionalEmail: (args: never) => send(args) }))
 
+vi.mock('@/lib/chat-assistant/limits', () => ({ contactLimited: async () => false }))
+
 import { POST } from '@/app/api/chat/contact/route'
 
 let ip = 0

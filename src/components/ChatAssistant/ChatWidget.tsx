@@ -40,11 +40,8 @@ type ChatMessage = {
   feedback?: 'up' | 'down'
 }
 
-const TEASER_KEY = 'ff-chat-teaser-seen'
-const TEASER_DELAY_MS = 6000
-
 const STORAGE_KEY = 'ff-chat-assistant-v2'
-const MAX_INPUT = 1500
+const MAX_INPUT = 500
 
 const isInternal = (href: string) => href.startsWith('/') && !href.startsWith('//')
 
@@ -438,34 +435,8 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
-  const [teaser, setTeaser] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-
-  // Welcome bubble: once per visit, a few seconds after the page loads.
-  useEffect(() => {
-    if (!texts.teaser) return
-    try {
-      if (sessionStorage.getItem(TEASER_KEY)) return
-    } catch {
-      return
-    }
-    const timer = window.setTimeout(() => setTeaser(true), TEASER_DELAY_MS)
-    return () => window.clearTimeout(timer)
-  }, [texts.teaser])
-
-  const hideTeaser = useCallback(() => {
-    setTeaser(false)
-    try {
-      sessionStorage.setItem(TEASER_KEY, '1')
-    } catch {
-      // ignore
-    }
-  }, [])
-
-  useEffect(() => {
-    if (open) hideTeaser()
-  }, [open, hideTeaser])
 
   // Restore the conversation for this browser tab.
   useEffect(() => {
@@ -804,26 +775,20 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                 <ArrowUp className="size-4" strokeWidth={2.5} />
               </button>
             </div>
+            {input.length > MAX_INPUT - 100 && (
+              <p
+                className={cn(
+                  'mt-1 px-1 text-right text-[11px]',
+                  input.length >= MAX_INPUT ? 'text-ff-shop-burgundy' : 'text-ff-gray-text-light',
+                )}
+              >
+                {input.length}/{MAX_INPUT}
+              </p>
+            )}
             <p className="mt-2 px-1 text-center text-[11px] leading-snug text-ff-gray-text-light">
               <MessageText text={texts.privacyNote} />
             </p>
           </form>
-        </div>
-      )}
-
-      {teaser && !open && (
-        <div className="relative max-w-[260px] rounded-2xl rounded-br-md bg-white py-3 pl-4 pr-8 text-sm leading-snug text-ff-near-black shadow-[0_10px_30px_-8px_rgba(26,26,26,0.45)] animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <button type="button" onClick={() => setOpen(true)} className="text-left">
-            {texts.teaser}
-          </button>
-          <button
-            type="button"
-            onClick={hideTeaser}
-            aria-label={texts.closeLabel}
-            className="absolute right-1.5 top-1.5 rounded-full p-1 text-ff-charcoal transition hover:bg-ff-warm-gray"
-          >
-            <X className="size-3.5" />
-          </button>
         </div>
       )}
 

@@ -10002,10 +10002,6 @@ export interface ChatAssistantGlobal {
    */
   launcherLabel?: string | null;
   /**
-   * Kleine Sprechblase, die einmal pro Besuch nach ein paar Sekunden über dem Chat-Button erscheint (z.B. "Hi! 👋 Fragen zu Workshops oder Gutscheinen?"). Leer = Standardtext. / Small bubble shown once per visit above the chat button.
-   */
-  teaser?: string | null;
-  /**
    * Heading at the top of the chat window (e.g. "FermentFreude Assistent").
    */
   title?: string | null;
@@ -10030,6 +10026,10 @@ export interface ChatAssistantGlobal {
    * Small note under the message box. Should mention that messages are processed by an AI service and link to the privacy policy.
    */
   privacyNote?: string | null;
+  /**
+   * Höchstens so viele KI-Antworten pro Tag (für alle Besucher zusammen). Danach antwortet der Chat mit den kostenlosen Standard-Antworten aus den FAQ. 0 = KI aus. / Max AI answers per day for all visitors; after that the free FAQ answers are used. 0 = AI off.
+   */
+  aiDailyLimit?: number | null;
   /**
    * Alles, was der Assistent zusätzlich wissen soll und nicht schon auf der Website steht (z.B. Parken, Barrierefreiheit, Gruppenanfragen, Firmen-Events). Klartext, je ein Punkt pro Zeile. / Anything else the assistant should know that is not already on the site. Plain text, one point per line.
    */
@@ -10386,7 +10386,6 @@ export interface ProductPickupSettingsSelect<T extends boolean = true> {
 export interface ChatAssistantGlobalSelect<T extends boolean = true> {
   enabled?: T;
   launcherLabel?: T;
-  teaser?: T;
   title?: T;
   greeting?: T;
   inputPlaceholder?: T;
@@ -10397,6 +10396,7 @@ export interface ChatAssistantGlobalSelect<T extends boolean = true> {
         id?: T;
       };
   privacyNote?: T;
+  aiDailyLimit?: T;
   extraKnowledge?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { answerWithoutAI as answerReply } from '@/lib/chat-assistant/answerWithoutAI'
+import { answerWithoutAI as answerReply, isOnTopic } from '@/lib/chat-assistant/answerWithoutAI'
 import type { ChatData } from '@/lib/chat-assistant/knowledge'
 import { replyToText } from '@/lib/chat-assistant/types'
 
@@ -110,5 +110,17 @@ describe('answerWithoutAI', () => {
 
   it('falls back to the contact email for unknown questions', () => {
     expect(answerWithoutAI('Was ist die Hauptstadt von Frankreich?', data())).toContain('kontakt@example.at')
+  })
+
+  it('only lets FermentFreude topics through to the AI', () => {
+    const d = data()
+    expect(isOnTopic('Wann ist der nächste Kombucha Workshop?', d)).toBe(true)
+    expect(isOnTopic('Ist Tempeh vegan?', d)).toBe(true)
+    expect(isOnTopic('Kann ich meinen Hund mitnehmen?', d)).toBe(true)
+    expect(isOnTopic('Welche Zahlungsarten akzeptiert ihr?', d)).toBe(true)
+    expect(isOnTopic('Was ist die Hauptstadt von Frankreich?', d)).toBe(false)
+    expect(isOnTopic('Schreib mir ein Python Skript für meine Hausaufgabe', d)).toBe(false)
+    expect(isOnTopic('Wer gewinnt die nächste Wahl?', d)).toBe(false)
+    expect(isOnTopic('und am Samstag?', d, ['Wann ist Kombucha?'])).toBe(true)
   })
 })
