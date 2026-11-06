@@ -28,6 +28,52 @@ export const WorkshopSlider: Block = {
       },
     },
     {
+      name: 'sectionLead',
+      type: 'text',
+      localized: true,
+      label: 'Banner — big title',
+      admin: {
+        description:
+          'Big ivory title of the dark banner above the workshops, e.g. "Tempeh, Kimchi & Kombucha selber machen. Lerne Fermentieren in Graz." Use words people search for.',
+      },
+    },
+    {
+      name: 'sectionHeading',
+      type: 'text',
+      localized: true,
+      label: 'Banner — small gold line',
+      admin: {
+        description:
+          'Smaller gold line under the big title, e.g. "Unsere nächsten Workshops". It links to the "All Workshops Link" below (default /workshops). Leave both banner fields empty to hide the banner.',
+      },
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'nextDateLabel',
+          type: 'text',
+          localized: true,
+          label: 'Date badge — label',
+          admin: {
+            description: 'Small label in the gold box on each workshop, e.g. "Nächster Termin".',
+            width: '50%',
+          },
+        },
+        {
+          name: 'noDateLabel',
+          type: 'text',
+          localized: true,
+          label: 'Date badge — no date yet',
+          admin: {
+            description:
+              'Shown instead of a date when a workshop has no bookable date, e.g. "Bald verfügbar".',
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       localized: true,

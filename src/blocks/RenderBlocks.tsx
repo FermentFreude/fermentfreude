@@ -1,3 +1,4 @@
+import { cn } from '@/utilities/cn'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
@@ -12,6 +13,8 @@ import { FormBlock } from '@/blocks/Form/Component'
 import { HelpFaqBlockComponent } from '@/blocks/HelpFaqBlock/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
 import { HomeTempehStoryBlockComponent } from '@/blocks/HomeTempehStory/Component'
+import { FermentationStoryBlock } from '@/blocks/FermentationStory/Component'
+import { ProductShowcaseBlockComponent } from '@/blocks/ProductShowcase/Component'
 import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { OnlineCourseSliderBlock } from '@/blocks/OnlineCourseSlider/Component'
@@ -56,6 +59,8 @@ const blockComponents = {
   helpFaq: HelpFaqBlockComponent,
   heroBanner: HeroBannerBlock,
   homeTempehStory: HomeTempehStoryBlockComponent,
+  productShowcase: ProductShowcaseBlockComponent,
+  fermentationStory: FermentationStoryBlock,
   mediaBlock: MediaBlock,
   ourStory: OurStoryBlock,
   pressBanner: PressBannerBlock,
@@ -120,7 +125,7 @@ export const RenderBlocks: React.FC<{
   const isPresse = slug === 'presse'
   const isHelp = slug === 'help'
   // Full-bleed sections with their own background + padding: an outer margin would show as a white band
-  const FLUSH_BLOCKS = new Set<string>(['homeTempehStory'])
+  const FLUSH_BLOCKS = new Set<string>(['homeTempehStory', 'productShowcase', 'fermentationStory'])
   const gapClass = isAbout
     ? 'mb-12 last:mb-0' // increased margin between sections on About
     : isShop
@@ -145,6 +150,9 @@ export const RenderBlocks: React.FC<{
 
           if (blockData.visible === false) return null
 
+          // Home only: the sponsors banner sits on ivory instead of warm grey
+          const homeSponsors = slug === 'home' && blockType === 'sponsorsBar'
+
           // When useGlobalData is explicitly true, render the GlobalWrapper
           const useGlobal = blockData.useGlobalData === true
           const sponsorRows = Array.isArray(blockData.sponsors)
@@ -163,7 +171,7 @@ export const RenderBlocks: React.FC<{
           ) {
             const GlobalWrapper = globalWrappers[blockType]
             return (
-              <div className={gapClass} key={index}>
+              <div className={cn(gapClass, homeSponsors && 'home-sponsors')} key={index}>
                 <GlobalWrapper id={blockId} fallbackData={blockData} />
               </div>
             )
@@ -178,7 +186,13 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className={FLUSH_BLOCKS.has(blockType) ? undefined : gapClass} key={index}>
+                <div
+                  className={cn(
+                    FLUSH_BLOCKS.has(blockType) ? undefined : gapClass,
+                    homeSponsors && 'home-sponsors',
+                  )}
+                  key={index}
+                >
                   <Block
                     {...block}
                     id={blockId}

@@ -1,0 +1,73 @@
+/**
+ * Home showcase, Workshops slide: list only the three main workshops —
+ * Tempeh, Lakto-fermentiertes Gemüse, Kombucha (in that order). "Vom Feld ins
+ * Glas" stays a normal workshop, it's just not on Home.
+ *
+ * Run:  npx tsx src/scripts/patch-home-showcase-three-workshops.ts   (staging DB only)
+ */
+process.env.PAYLOAD_SEED = 'true'
+
+// @ts-expect-error — dotenv types not resolved via package.json exports
+import { config as loadEnv } from 'dotenv'
+import path from 'path'
+
+loadEnv({ path: path.resolve(process.cwd(), '.env') })
+
+const ctx = { skipRevalidate: true, disableRevalidate: true, skipAutoTranslate: true }
+
+if (!(process.env.DATABASE_URL ?? '').includes('-staging')) {
+  console.error('🚫 REFUSING TO RUN: DATABASE_URL does not look like the staging database.')
+  process.exit(1)
+}
+
+const SLUGS = ['tempeh', 'lakto', 'kombucha']
+
+const { default: config } = await import('@payload-config')
+const { getPayload } = await import('payload')
+
+async function main() {
+  const payload = await getPayload({ config })
+  const { docs: ws } = await payload.find({
+    collection: 'workshops',
+    where: { slug: { in: SLUGS } },
+    depth: 0,
+    limit: 10,
+  })
+  const ids = SLUGS.map((slug) => ws.find((w) => w.slug === slug)?.id)
+  if (ids.some((id) => !id)) throw new Error(`Workshop missing: ${JSON.stringify(ids)}`)
+
+  const found = await payload.find({
+    collection: 'pages',
+    where: { slug: { equals: 'home' } },
+    limit: 1,
+    depth: 0,
+  })
+  const home = found.docs[0]
+  if (!home) throw new Error('Home page not found')
+  console.log('Home updatedAt before this run:', home.updatedAt)
+
+  for (const locale of ['de', 'en'] as const) {
+    const doc = await payload.findByID({ collection: 'pages', id: home.id, locale, depth: 0 })
+    const layout = (doc.layout ?? []).map((b) =>
+      b.blockType !== 'productShowcase'
+        ? b
+        : {
+            ...b,
+            slides: (b.slides ?? []).map((s) =>
+              s.slideType === 'workshops' ? { ...s, workshopsToShow: ids } : s,
+            ),
+          },
+    )
+    await payload.update({
+      collection: 'pages',
+      id: home.id,
+      locale,
+      data: { layout } as never,
+      context: ctx,
+    })
+    console.log(`✅ ${locale}`)
+  }
+}
+
+await main()
+process.exit(0)

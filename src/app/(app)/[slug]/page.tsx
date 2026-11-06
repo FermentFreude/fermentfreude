@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { TestimonialsGlobalWrapper } from '@/components/TestimonialsGlobalWrapper'
 import { RenderHero } from '@/heros/RenderHero'
+import { ParallaxPanel } from '@/components/ParallaxPanel'
+import { StackPanel } from '@/components/StackPanel'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocale } from '@/utilities/getLocale'
 import { getNextWorkshopDatesByHref } from '@/utilities/getNextWorkshopDatesByHref'
@@ -63,7 +65,56 @@ export default async function Page({ params }: Args) {
     hero.type === 'foodPresentationSlider' ||
     hero.type === 'highImpact'
   const isLegalPage = LEGAL_SLUGS.includes(slug)
+  // Home: the product showcase directly under the hero slides over it like a stacked card
+  const STACKED_BLOCKS = new Set(['productShowcase'])
+  // Experimental: on Home the new product showcase replaces the old Tempeh & Kimchi
+  // carousel. The old block stays saved in the CMS (and keeps showing wherever
+  // this code isn't deployed) — it's only skipped here.
+  // Same for the new Fermentation Story: it replaces the old "IS HEALTHY" feature cards.
+  const hasStory = enrichedLayout.some(
+    (b) => b?.blockType === 'fermentationStory' && b.visible !== false,
+  )
+  const pageLayout =
+    slug === 'home'
+      ? enrichedLayout.filter(
+          (b) =>
+            !(
+              (b?.blockType === 'homeTempehStory' &&
+                enrichedLayout.some((x) => x?.blockType === 'productShowcase')) ||
+              (b?.blockType === 'featureCards' && hasStory)
+            ),
+        )
+      : enrichedLayout
+  const stackBlocks: typeof enrichedLayout = []
+  if (slug === 'home') {
+    for (const block of pageLayout) {
+      if (!block || !STACKED_BLOCKS.has(block.blockType) || block.visible === false) break
+      stackBlocks.push(block)
+    }
+  }
   const skipTopPadding = isFullBleedHero || slug === 'help'
+
+  // Home: these sections slide up over the section right before them (that one
+  // holds still once fully seen) — same rounded card effect as the product showcase
+  const LIFT_BLOCKS = new Set(['fermentationStory', 'testimonials'])
+  const restLayout = pageLayout.slice(stackBlocks.length)
+  type Segment =
+    | { kind: 'plain'; blocks: typeof restLayout }
+    | { kind: 'lift'; under: (typeof restLayout)[number]; over: (typeof restLayout)[number] }
+  const segments: Segment[] = []
+  for (let i = 0; i < restLayout.length; i++) {
+    const next = restLayout[i + 1]
+    const liftNext =
+      slug === 'home' && next && LIFT_BLOCKS.has(next.blockType) && next.visible !== false
+    if (liftNext) {
+      segments.push({ kind: 'lift', under: restLayout[i], over: next })
+      i++
+      continue
+    }
+    const last = segments[segments.length - 1]
+    if (last?.kind === 'plain') last.blocks.push(restLayout[i])
+    else segments.push({ kind: 'plain', blocks: [restLayout[i]] })
+  }
 
   return (
     <article
@@ -75,9 +126,42 @@ export default async function Page({ params }: Args) {
             : `pt-16 pb-24${isLegalPage ? ' page-legal' : ''}`
       }
     >
-      <RenderHero {...hero} locale={locale} />
-      <RenderBlocks blocks={enrichedLayout} slug={slug} locale={locale} />
-      {slug === 'home' && !enrichedLayout.some((b) => b?.blockType === 'testimonials') && (
+      {stackBlocks.length ? (
+        // Home: hero and the product sections right after it stack like cards.
+        // Dark backdrop shows around a panel as it sinks back.
+        <div className="relative bg-[#0b0b0b]">
+          {/* The hero scrolls away at half speed while the showcase glides over it */}
+          <ParallaxPanel>
+            <RenderHero {...hero} locale={locale} />
+          </ParallaxPanel>
+          {stackBlocks.map((block, i) => (
+            <StackPanel key={block.id ?? i} index={i + 1} last={i === stackBlocks.length - 1}>
+              <RenderBlocks blocks={[block]} slug={slug} locale={locale} />
+            </StackPanel>
+          ))}
+        </div>
+      ) : (
+        <RenderHero {...hero} locale={locale} />
+      )}
+      {segments.map((seg, i) =>
+        seg.kind === 'plain' ? (
+          <RenderBlocks key={i} blocks={seg.blocks} slug={slug} locale={locale} />
+        ) : (
+          <div key={i} className="relative">
+            <StackPanel index={0} sink={false}>
+              <div className="bg-white">
+                <RenderBlocks blocks={[seg.under]} slug={slug} locale={locale} />
+              </div>
+            </StackPanel>
+            <StackPanel index={1} last>
+              <div className="bg-white">
+                <RenderBlocks blocks={[seg.over]} slug={slug} locale={locale} />
+              </div>
+            </StackPanel>
+          </div>
+        ),
+      )}
+      {slug === 'home' && !pageLayout.some((b) => b?.blockType === 'testimonials') && (
         <TestimonialsGlobalWrapper id="testimonials" />
       )}
     </article>

@@ -130,37 +130,62 @@ export const PressBannerBlock: React.FC<Props> = ({
           {/* Right — slide panel */}
           <div className="lg:col-span-7 relative">
             <div
-              className="relative min-h-[14rem] md:min-h-[16rem] bg-ff-warm-gray/55 border border-ff-border-light px-6 py-8 md:px-10 md:py-10"
+              // All slides share one grid cell: the panel keeps the tallest slide's
+              // height, so the page below doesn't jump when the slide changes
+              className="relative grid min-h-56 md:min-h-64 bg-ff-warm-gray/55 border border-ff-border-light px-6 py-8 md:px-10 md:py-10"
               aria-live="polite"
               aria-atomic="true"
             >
               {resolvedSlides.map((slide, index) => {
                 const isActive = index === active
                 const logo = slide.logo
+                const image = isResolvedMedia(slide.image) ? slide.image : null
 
                 return (
                   <div
                     key={slide.id ?? `${slide.outlet}-${index}`}
-                    className={`transition-all duration-500 ease-out ${
+                    className={`col-start-1 row-start-1 transition-all duration-500 ease-out ${
                       isActive
-                        ? 'relative opacity-100 translate-x-0'
-                        : 'absolute inset-0 opacity-0 pointer-events-none translate-x-4'
+                        ? 'opacity-100 translate-x-0'
+                        : 'opacity-0 pointer-events-none translate-x-4'
+                    } ${
+                      // Picture beside the text from tablet up, above it on phones
+                      image
+                        ? 'flex flex-col gap-6 sm:grid sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:items-center md:gap-8'
+                        : ''
                     }`}
                     aria-hidden={!isActive}
+                    // Hidden slides' links can't be tabbed to
+                    inert={!isActive}
                   >
-                    <div className="flex flex-col gap-5 h-full justify-between">
-                      <div className="flex items-center gap-4 min-h-10">
-                        <div className="relative h-8 w-28 shrink-0">
-                          {isResolvedMedia(logo) ? (
-                            <Media
-                              resource={logo}
-                              imgClassName="object-contain object-left w-full h-full"
-                              className="absolute inset-0"
-                            />
-                          ) : (
-                            <div className="h-full w-full bg-[#ECE5DE]" />
-                          )}
-                        </div>
+                    {image ? (
+                      <div className="relative aspect-3/2 w-full overflow-hidden rounded-xl bg-[#ECE5DE]">
+                        <Media
+                          resource={image}
+                          fill
+                          size="(min-width: 640px) 14rem, 100vw"
+                          imgClassName="object-cover"
+                        />
+                      </div>
+                    ) : null}
+                    <div
+                      className={`flex flex-col gap-5 ${image ? 'justify-center' : 'h-full justify-between'}`}
+                    >
+                      <div className={`flex items-center gap-4 ${image ? '' : 'min-h-10'}`}>
+                        {/* The picture already carries the outlet's logo */}
+                        {image ? null : (
+                          <div className="relative h-8 w-28 shrink-0">
+                            {isResolvedMedia(logo) ? (
+                              <Media
+                                resource={logo}
+                                imgClassName="object-contain object-left w-full h-full"
+                                className="absolute inset-0"
+                              />
+                            ) : (
+                              <div className="h-full w-full bg-[#ECE5DE]" />
+                            )}
+                          </div>
+                        )}
                         {slide.outlet ? (
                           <p className="label-uppercase text-ff-near-black/50">{slide.outlet}</p>
                         ) : null}
