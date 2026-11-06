@@ -29,7 +29,7 @@ export type ChatTexts = {
 }
 
 const EN: ChatTexts = {
-  launcherLabel: 'Questions?',
+  launcherLabel: 'Got a question? Ask me!',
   title: 'FermentFreude Assistant',
   greeting:
     "Hi! I'm the FermentFreude assistant. Ask me about workshops, free dates, prices, products or vouchers.",
@@ -40,6 +40,7 @@ const EN: ChatTexts = {
     'When is the next workshop?',
     'Which workshop is best for beginners?',
     'Can I buy a workshop as a gift?',
+    'How do I redeem my voucher?',
   ],
   sendLabel: 'Send',
   closeLabel: 'Close chat',
@@ -57,7 +58,7 @@ const EN: ChatTexts = {
 }
 
 const DE: ChatTexts = {
-  launcherLabel: 'Fragen?',
+  launcherLabel: 'Hast du eine Frage? Frag mich!',
   title: 'FermentFreude Assistent',
   greeting:
     'Hallo! Ich bin der FermentFreude-Assistent. Frag mich zu Workshops, freien Terminen, Preisen, Produkten oder Gutscheinen.',
@@ -68,6 +69,7 @@ const DE: ChatTexts = {
     'Wann ist der nächste Workshop?',
     'Welcher Workshop passt für Anfänger:innen?',
     'Kann ich einen Workshop verschenken?',
+    'Wie löse ich meinen Gutschein ein?',
   ],
   sendLabel: 'Senden',
   closeLabel: 'Chat schließen',

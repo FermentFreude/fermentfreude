@@ -31,6 +31,7 @@ function data(locale: 'de' | 'en' = 'de'): ChatData {
     courses: [],
     faq: [
       { section: 'Gutscheine', question: 'Kann ich einen Gutschein verschenken oder weitergeben?', answer: 'Ja, Gutscheine sind übertragbar.' },
+      { section: 'Gutscheine', question: 'Wo löse ich meinen Gutschein ein?', answer: 'Über /redeem-voucher den Code eingeben.' },
       { section: 'Buchen', question: 'Wie buche ich einen Workshop?', answer: 'Termin wählen und buchen.' },
       { section: 'Zahlung', question: 'Welche Zahlungsarten akzeptiert ihr?', answer: 'Karte über Stripe.' },
       { section: 'Gastro', question: 'Ist Tempeh vegan und glutenfrei?', answer: 'Ja, vegan und glutenfrei.' },
@@ -68,6 +69,10 @@ describe('answerWithoutAI', () => {
     const answer = answerWithoutAI('Kann ich einen Workshop verschenken?', data())
     expect(answer).toContain('übertragbar')
     expect(answer).toContain('/voucher')
+  })
+
+  it('answers how to redeem a voucher', () => {
+    expect(answerWithoutAI('Wie löse ich meinen Gutschein ein?', data())).toContain('/redeem-voucher')
   })
 
   it('finds products', () => {
