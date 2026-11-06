@@ -582,10 +582,9 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
     inputRef.current?.focus()
   }
 
-  // Close the full-screen sheet on phones when a card or link takes the visitor to another page.
-  const closeOnMobile = () => {
-    if (window.matchMedia('(max-width: 639px)').matches) setOpen(false)
-  }
+  // A card or button takes the visitor to another page: close the chat so they
+  // see the page right away (the conversation is kept and comes back on reopen).
+  const closeOnNavigate = () => setOpen(false)
 
   // Product pages have a sticky "add to cart" bar on smaller screens.
   const liftOnMobile = pathname?.startsWith('/products/')
@@ -696,7 +695,7 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                   {m.cards && m.cards.length > 0 && (
                     <div className="space-y-2 pl-9">
                       {m.cards.map((card, j) => (
-                        <CardView key={j} card={card} texts={texts} onNavigate={closeOnMobile} />
+                        <CardView key={j} card={card} texts={texts} onNavigate={closeOnNavigate} />
                       ))}
                     </div>
                   )}
@@ -707,7 +706,7 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                         <SmartLink
                           key={a.href + a.label}
                           href={a.href}
-                          onClick={closeOnMobile}
+                          onClick={closeOnNavigate}
                           className="inline-flex items-center gap-1 rounded-full bg-ff-gold-accent px-3 py-1.5 font-display text-xs font-bold text-ff-near-black transition hover:bg-ff-gold-accent-dark"
                         >
                           <>
