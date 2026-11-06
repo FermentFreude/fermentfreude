@@ -172,6 +172,8 @@ type SendTransactionalEmailParams = {
   to: BrevoRecipient[]
   subject: string
   htmlContent: string
+  /** Where "Reply" in the recipient's mail app goes (e.g. the visitor who asked a question). */
+  replyTo?: BrevoRecipient
 }
 
 /**
@@ -241,6 +243,7 @@ export async function sendTransactionalEmail({
   to,
   subject,
   htmlContent,
+  replyTo,
 }: SendTransactionalEmailParams): Promise<{ success: boolean; messageId?: string }> {
   const apiKey = getBrevoApiKey()
   if (!apiKey) {
@@ -261,6 +264,7 @@ export async function sendTransactionalEmail({
         to,
         subject,
         htmlContent,
+        ...(replyTo ? { replyTo } : {}),
       }),
     })
 

@@ -139,6 +139,15 @@ function matchMonth(q: string): number | null {
   return null
 }
 
+/** Each line of Admin → Chat Assistant → "Extra knowledge" becomes a searchable entry. */
+function extraFaq(extra: string): ChatFaq[] {
+  return extra
+    .split('\n')
+    .map((line) => line.replace(/^\s*[-•*]\s*/, '').trim())
+    .filter((line) => line.length > 3)
+    .map((line) => ({ section: 'Info', question: line, answer: line }))
+}
+
 function bestFaq(question: string, faq: ChatFaq[], filter?: RegExp): { item: ChatFaq; score: number } | null {
   const qWords = keywords(question)
   if (filter) faq = faq.filter((item) => filter.test(normalize(`${item.section} ${item.question}`)))
@@ -251,9 +260,10 @@ export function answerWithoutAI(question: string, data: ChatData, history: strin
   )
   // For voucher questions only look at voucher FAQs, so "Workshop verschenken"
   // doesn't land on the general booking answer.
+  const faqPool = [...data.faq, ...extraFaq(data.extraKnowledge)]
   const faq = has('voucher')
-    ? (bestFaq(question, data.faq, /gutschein|voucher|gift|geschenk/) ?? bestFaq(question, data.faq))
-    : bestFaq(question, data.faq)
+    ? (bestFaq(question, faqPool, /gutschein|voucher|gift|geschenk/) ?? bestFaq(question, faqPool))
+    : bestFaq(question, faqPool)
   const strongFaq = faq && faq.score >= 0.5 ? faq.item : null
 
   const text: string[] = []
@@ -262,8 +272,10 @@ export function answerWithoutAI(question: string, data: ChatData, history: strin
   const addAction = (label: string, href: string) => {
     if (!actions.some((a) => a.href === href)) actions.push({ label, href })
   }
+  let handoff = false
   const reply = (): ChatReply => ({
     text: text.join('\n\n'),
+    ...(handoff ? { handoff } : {}),
     ...(cards.length ? { cards } : {}),
     ...(actions.length ? { actions: actions.slice(0, 3) } : {}),
     suggestions: suggestionsFor(lang, topics),
@@ -459,10 +471,11 @@ export function answerWithoutAI(question: string, data: ChatData, history: strin
     text.push(
       t(
         lang,
-        `Hmm, das kann ich leider nicht sicher beantworten. 🤔 ${email ? `Schreib uns am besten an [${email}](mailto:${email}), wir helfen dir gerne persönlich weiter.` : 'Schau gern auf unserer Hilfe-Seite vorbei.'}`,
-        `Hmm, I can't answer that reliably. 🤔 ${email ? `Please email us at [${email}](mailto:${email}) and we'll help you personally.` : 'Have a look at our Help page.'}`,
+        `Hmm, das kann ich leider nicht sicher beantworten. 🤔 Schick deine Frage einfach unten an unser Team, wir antworten dir persönlich per E-Mail.${email ? ` Oder schreib direkt an [${email}](mailto:${email}).` : ''}`,
+        `Hmm, I can't answer that reliably. 🤔 Just send your question to our team below and we'll reply personally by email.${email ? ` Or write to [${email}](mailto:${email}).` : ''}`,
       ),
     )
+    handoff = true
     addAction(t(lang, 'Hilfe & FAQ', 'Help & FAQ'), '/help')
   }
 

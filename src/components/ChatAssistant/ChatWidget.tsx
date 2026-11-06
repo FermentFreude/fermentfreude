@@ -1,6 +1,18 @@
 'use client'
 
-import { ArrowRight, ArrowUp, CalendarDays, MapPin, MessageCircle, RotateCcw, Sparkles, X } from 'lucide-react'
+import {
+  ArrowRight,
+  ArrowUp,
+  CalendarDays,
+  Mail,
+  MapPin,
+  MessageCircle,
+  RotateCcw,
+  Sparkles,
+  ThumbsDown,
+  ThumbsUp,
+  X,
+} from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
@@ -22,7 +34,14 @@ type ChatMessage = {
   cards?: ChatCard[]
   actions?: ChatAction[]
   suggestions?: string[]
+  /** Show the "ask our team" form under this answer. */
+  handoff?: boolean
+  handoffSent?: boolean
+  feedback?: 'up' | 'down'
 }
+
+const TEASER_KEY = 'ff-chat-teaser-seen'
+const TEASER_DELAY_MS = 6000
 
 const STORAGE_KEY = 'ff-chat-assistant-v2'
 const MAX_INPUT = 1500
@@ -101,7 +120,7 @@ function MessageText({ text }: { text: string }) {
     else blocks.push({ type, lines: [content] })
   }
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 [&_p]:m-0 [&_ul]:m-0">
       {blocks
         .filter((b) => b.lines.length)
         .map((b, i) =>
@@ -286,14 +305,167 @@ function Chips({ items, onPick, disabled }: { items: string[]; onPick: (q: strin
   )
 }
 
+const fieldClass =
+  'w-full rounded-lg border border-ff-border-light bg-ff-cream px-3 py-2 text-base focus:border-ff-near-black/40 focus:bg-white focus:outline-none sm:text-sm'
+
+function HandoffForm({
+  texts,
+  locale,
+  initialMessage,
+  transcript,
+  onSent,
+}: {
+  texts: ChatTexts
+  locale: string
+  initialMessage: string
+  transcript: { role: 'user' | 'assistant'; content: string }[]
+  onSent: () => void
+}) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState(initialMessage)
+  const [website, setWebsite] = useState('')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle')
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (status === 'sending') return
+    setStatus('sending')
+    try {
+      const res = await fetch('/api/chat/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message, locale, transcript, website }),
+      })
+      if (!res.ok) throw new Error(String(res.status))
+      onSent()
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  return (
+    <form
+      onSubmit={submit}
+      className="space-y-2 rounded-xl border border-ff-border-light bg-white p-3 shadow-sm animate-in fade-in slide-in-from-bottom-1"
+    >
+      <p className="flex items-center gap-1.5 font-display text-sm font-bold">
+        <Mail className="size-4" />
+        {texts.handoffTitle}
+      </p>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value.slice(0, 100))}
+        placeholder={texts.handoffNameLabel}
+        aria-label={texts.handoffNameLabel}
+        autoComplete="name"
+        className={fieldClass}
+      />
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value.slice(0, 254))}
+        placeholder={texts.handoffEmailLabel}
+        aria-label={texts.handoffEmailLabel}
+        autoComplete="email"
+        className={fieldClass}
+      />
+      <textarea
+        required
+        rows={3}
+        value={message}
+        onChange={(e) => setMessage(e.target.value.slice(0, 2000))}
+        placeholder={texts.handoffMessageLabel}
+        aria-label={texts.handoffMessageLabel}
+        className={cn(fieldClass, 'resize-none')}
+      />
+      {/* Honeypot: hidden from people, bots fill it in. */}
+      <input
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden
+        value={website}
+        onChange={(e) => setWebsite(e.target.value)}
+        name="website"
+        className="hidden"
+      />
+      {status === 'error' && <p className="text-xs text-ff-shop-burgundy">{texts.handoffError}</p>}
+      <button
+        type="submit"
+        disabled={status === 'sending' || !email.trim() || !message.trim()}
+        className="w-full rounded-full bg-ff-near-black py-2 font-display text-sm font-bold text-white transition hover:bg-black disabled:opacity-40"
+      >
+        {status === 'sending' ? '…' : texts.handoffSend}
+      </button>
+      <p className="text-[11px] leading-snug text-ff-gray-text-light">
+        <MessageText text={texts.handoffConsent} />
+      </p>
+    </form>
+  )
+}
+
+function Feedback({
+  texts,
+  value,
+  onChange,
+}: {
+  texts: ChatTexts
+  value?: 'up' | 'down'
+  onChange: (value: 'up' | 'down') => void
+}) {
+  if (value) {
+    return <p className="text-[11px] text-ff-gray-text-light">{texts.feedbackThanks}</p>
+  }
+  const btn =
+    'flex size-7 items-center justify-center rounded-full text-ff-charcoal transition hover:bg-white hover:text-ff-near-black hover:shadow-sm'
+  return (
+    <div className="flex items-center gap-1 text-[11px] text-ff-gray-text-light">
+      <span className="mr-1">{texts.feedbackQuestion}</span>
+      <button type="button" className={btn} onClick={() => onChange('up')} aria-label={texts.feedbackYes} title={texts.feedbackYes}>
+        <ThumbsUp className="size-3.5" />
+      </button>
+      <button type="button" className={btn} onClick={() => onChange('down')} aria-label={texts.feedbackNo} title={texts.feedbackNo}>
+        <ThumbsDown className="size-3.5" />
+      </button>
+    </div>
+  )
+}
+
 export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
+  const [teaser, setTeaser] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  // Welcome bubble: once per visit, a few seconds after the page loads.
+  useEffect(() => {
+    if (!texts.teaser) return
+    try {
+      if (sessionStorage.getItem(TEASER_KEY)) return
+    } catch {
+      return
+    }
+    const timer = window.setTimeout(() => setTeaser(true), TEASER_DELAY_MS)
+    return () => window.clearTimeout(timer)
+  }, [texts.teaser])
+
+  const hideTeaser = useCallback(() => {
+    setTeaser(false)
+    try {
+      sessionStorage.setItem(TEASER_KEY, '1')
+    } catch {
+      // ignore
+    }
+  }, [])
+
+  useEffect(() => {
+    if (open) hideTeaser()
+  }, [open, hideTeaser])
 
   // Restore the conversation for this browser tab.
   useEffect(() => {
@@ -387,6 +559,7 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
             cards: reply.cards,
             actions: reply.actions,
             suggestions: reply.suggestions,
+            handoff: reply.handoff,
           })
           return
         }
@@ -410,6 +583,19 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
     },
     [busy, locale, messages, texts.errorText, texts.rateLimitText],
   )
+
+  const updateMessage = (index: number, patch: Partial<ChatMessage>) =>
+    setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, ...patch } : m)))
+
+  const plainTranscript = () =>
+    messages
+      .filter((m) => m.content)
+      .map((m) => ({
+        role: m.role,
+        content: m.role === 'assistant' ? replyToText({ text: m.content, cards: m.cards }) : m.content,
+      }))
+
+  const lastQuestion = [...messages].reverse().find((m) => m.role === 'user')?.content ?? ''
 
   const reset = () => {
     if (busy) return
@@ -544,7 +730,32 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                     </div>
                   )}
 
-                  {m === last && !busy && m.suggestions && m.suggestions.length > 0 && (
+                  {m.handoff && !m.handoffSent && (
+                    <div className="pl-9">
+                      <HandoffForm
+                        texts={texts}
+                        locale={locale}
+                        initialMessage={lastQuestion}
+                        transcript={plainTranscript()}
+                        onSent={() => {
+                          updateMessage(i, { handoffSent: true })
+                          setMessages((prev) => [...prev, { role: 'assistant', content: texts.handoffSuccess }])
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {m === last && !busy && m.content && !m.handoff && m.content !== texts.handoffSuccess && (
+                    <div className="pl-9">
+                      <Feedback
+                        texts={texts}
+                        value={m.feedback}
+                        onChange={(value) => updateMessage(i, { feedback: value, ...(value === 'down' ? { handoff: true } : {}) })}
+                      />
+                    </div>
+                  )}
+
+                  {m === last && !busy && !m.handoff && m.suggestions && m.suggestions.length > 0 && (
                     <div className="pl-9">
                       <Chips items={m.suggestions} onPick={send} />
                     </div>
@@ -597,6 +808,22 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
               <MessageText text={texts.privacyNote} />
             </p>
           </form>
+        </div>
+      )}
+
+      {teaser && !open && (
+        <div className="relative max-w-[260px] rounded-2xl rounded-br-md bg-white py-3 pl-4 pr-8 text-sm leading-snug text-ff-near-black shadow-[0_10px_30px_-8px_rgba(26,26,26,0.45)] animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <button type="button" onClick={() => setOpen(true)} className="text-left">
+            {texts.teaser}
+          </button>
+          <button
+            type="button"
+            onClick={hideTeaser}
+            aria-label={texts.closeLabel}
+            className="absolute right-1.5 top-1.5 rounded-full p-1 text-ff-charcoal transition hover:bg-ff-warm-gray"
+          >
+            <X className="size-3.5" />
+          </button>
         </div>
       )}
 

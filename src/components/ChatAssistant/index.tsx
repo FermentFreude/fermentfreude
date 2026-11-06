@@ -7,6 +7,7 @@ import { defaultChatTexts, type ChatTexts } from './defaults'
 type ChatAssistantGlobalData = {
   enabled?: boolean | null
   launcherLabel?: string | null
+  teaser?: string | null
   title?: string | null
   greeting?: string | null
   inputPlaceholder?: string | null
@@ -45,6 +46,7 @@ export async function ChatAssistant({ locale: rawLocale }: { locale: string }) {
   const texts: ChatTexts = {
     ...defaults,
     launcherLabel: data?.launcherLabel || defaults.launcherLabel,
+    teaser: data?.teaser || defaults.teaser,
     title: data?.title || defaults.title,
     greeting: data?.greeting || defaults.greeting,
     inputPlaceholder: data?.inputPlaceholder || defaults.inputPlaceholder,

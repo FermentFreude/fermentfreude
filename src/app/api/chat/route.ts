@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { answerWithoutAI } from '@/lib/chat-assistant/answerWithoutAI'
 import { buildKnowledgeSheet, getChatData } from '@/lib/chat-assistant/knowledge'
 import { CHAT_SYSTEM_PROMPT, knowledgeBlock } from '@/lib/chat-assistant/prompt'
+import { replyToText } from '@/lib/chat-assistant/types'
+import { startWorkersAIStream, workersAIConfig } from '@/lib/chat-assistant/workersAI'
 import { normalizeAppLocale } from '@/utilities/payloadLocaleQuery'
 
 export const runtime = 'nodejs'
@@ -17,9 +19,12 @@ export const maxDuration = 60
  * Response: streamed plain text (AI mode) or a JSON ChatReply (free mode,
  * with cards, action buttons and follow-up suggestions).
  *
- * Two modes:
+ * Three modes, picked by env vars:
  * - ANTHROPIC_API_KEY set → Claude answers, streamed (CHATBOT_MODEL optional).
- * - no key → free keyword answerer (src/lib/chat-assistant/answerWithoutAI.ts).
+ * - CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_AI_TOKEN set → free Cloudflare Workers AI
+ *   answers, streamed (src/lib/chat-assistant/workersAI.ts). If Workers AI
+ *   refuses (free allowance used up etc.) the keyword answerer takes over.
+ * - neither → free keyword answerer (src/lib/chat-assistant/answerWithoutAI.ts).
  *
  * Read-only either way: only public CMS content (see
  * src/lib/chat-assistant/knowledge.ts), no tools, so it cannot change data.
@@ -93,16 +98,50 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Chat unavailable', code: 'CHAT_UNAVAILABLE' }, { status: 503 })
   }
 
+  const question = String(messages[messages.length - 1].content)
+  const earlier = messages
+    .slice(0, -1)
+    .filter((m) => m.role === 'user')
+    .map((m) => String(m.content))
+  const keywordReply = () =>
+    NextResponse.json(answerWithoutAI(question, data, earlier), { headers: { 'Cache-Control': 'no-store' } })
+
   if (!process.env.ANTHROPIC_API_KEY) {
-    const question = String(messages[messages.length - 1].content)
-    const earlier = messages
-      .slice(0, -1)
-      .filter((m) => m.role === 'user')
-      .map((m) => String(m.content))
-    return NextResponse.json(answerWithoutAI(question, data, earlier), {
-      headers: { 'Cache-Control': 'no-store' },
+    const workersAI = workersAIConfig()
+    if (!workersAI) return keywordReply()
+
+    const pieces = await startWorkersAIStream(workersAI, [
+      { role: 'system', content: `${CHAT_SYSTEM_PROMPT}\n\n${knowledgeBlock(buildKnowledgeSheet(data), locale)}` },
+      ...messages.map((m) => ({ role: m.role, content: String(m.content) })),
+    ])
+    if (!pieces) return keywordReply()
+
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        let wroteText = false
+        try {
+          for await (const piece of pieces) {
+            wroteText = true
+            controller.enqueue(encoder.encode(piece))
+          }
+        } catch (error) {
+          console.error('[Chat] Workers AI stream broke:', error)
+        }
+        // Nothing came back → answer with the keyword answerer instead of an empty bubble.
+        if (!wroteText) controller.enqueue(encoder.encode(replyToText(answerWithoutAI(question, data, earlier))))
+        controller.close()
+      },
+    })
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+      },
     })
   }
+
   const knowledge = buildKnowledgeSheet(data)
 
   const client = new Anthropic()

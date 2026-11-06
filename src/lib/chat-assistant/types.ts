@@ -37,6 +37,8 @@ export type ChatReply = {
   cards?: ChatCard[]
   actions?: ChatAction[]
   suggestions?: string[]
+  /** True when the assistant couldn't answer: the chat offers the "ask our team" form. */
+  handoff?: boolean
 }
 
 /** Content type the API uses when it returns a JSON ChatReply instead of streamed text. */

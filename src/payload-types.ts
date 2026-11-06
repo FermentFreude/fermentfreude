@@ -9994,13 +9994,17 @@ export interface ProductPickupSetting {
 export interface ChatAssistantGlobal {
   id: string;
   /**
-   * Chat-Blase auf der Website anzeigen. / Show the chat bubble on the website. (Also needs the ANTHROPIC_API_KEY env var on Vercel.)
+   * Chat-Blase auf der Website anzeigen. / Show the chat bubble on the website.
    */
   enabled?: boolean | null;
   /**
    * Text on the round chat button (e.g. "Fragen?"). Leave empty for the default.
    */
   launcherLabel?: string | null;
+  /**
+   * Kleine Sprechblase, die einmal pro Besuch nach ein paar Sekunden über dem Chat-Button erscheint (z.B. "Hi! 👋 Fragen zu Workshops oder Gutscheinen?"). Leer = Standardtext. / Small bubble shown once per visit above the chat button.
+   */
+  teaser?: string | null;
   /**
    * Heading at the top of the chat window (e.g. "FermentFreude Assistent").
    */
@@ -10382,6 +10386,7 @@ export interface ProductPickupSettingsSelect<T extends boolean = true> {
 export interface ChatAssistantGlobalSelect<T extends boolean = true> {
   enabled?: T;
   launcherLabel?: T;
+  teaser?: T;
   title?: T;
   greeting?: T;
   inputPlaceholder?: T;

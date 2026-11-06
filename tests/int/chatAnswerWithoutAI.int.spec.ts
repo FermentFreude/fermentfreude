@@ -98,6 +98,16 @@ describe('answerWithoutAI', () => {
     expect(answerReply('Welche Zahlungsarten gibt es?', data()).suggestions?.length).toBeGreaterThan(0)
   })
 
+  it('answers from the Extra knowledge field', () => {
+    const d = { ...data(), extraKnowledge: '- Parken: Gratis-Parkplätze gibt es in der Nebenstraße.\n- Barrierefreiheit: Das Studio ist ebenerdig.' }
+    expect(answerWithoutAI('Wo kann ich parken?', d)).toContain('Nebenstraße')
+  })
+
+  it('offers the team form when it cannot answer', () => {
+    expect(answerReply('Was ist die Hauptstadt von Frankreich?', data()).handoff).toBe(true)
+    expect(answerReply('Welche Zahlungsarten gibt es?', data()).handoff).toBeUndefined()
+  })
+
   it('falls back to the contact email for unknown questions', () => {
     expect(answerWithoutAI('Was ist die Hauptstadt von Frankreich?', data())).toContain('kontakt@example.at')
   })

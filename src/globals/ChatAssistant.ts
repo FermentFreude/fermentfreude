@@ -12,8 +12,11 @@ import { revalidateGlobal } from './hooks/revalidateGlobal'
  * Business Info. Everything here is optional: empty fields fall back to the
  * built-in defaults in `src/components/ChatAssistant/defaults.ts`.
  *
- * The bubble appears when "Enabled" is ticked. With an ANTHROPIC_API_KEY env
- * var Claude answers; without one a free keyword answerer is used.
+ * The bubble appears when "Enabled" is ticked. Who answers depends on env vars:
+ * ANTHROPIC_API_KEY → Claude; else CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_AI_TOKEN →
+ * free Cloudflare Workers AI; else a free keyword answerer. Questions the
+ * assistant can't answer get an "ask our team" form that emails
+ * ADMIN_NOTIFICATION_EMAIL.
  */
 export const ChatAssistantGlobal: GlobalConfig = {
   slug: 'chat-assistant-global',
@@ -54,6 +57,16 @@ export const ChatAssistantGlobal: GlobalConfig = {
           label: 'Bubble label',
           admin: {
             description: 'Text on the round chat button (e.g. "Fragen?"). Leave empty for the default.',
+          },
+        },
+        {
+          name: 'teaser',
+          type: 'text',
+          localized: true,
+          label: 'Welcome bubble',
+          admin: {
+            description:
+              'Kleine Sprechblase, die einmal pro Besuch nach ein paar Sekunden über dem Chat-Button erscheint (z.B. "Hi! 👋 Fragen zu Workshops oder Gutscheinen?"). Leer = Standardtext. / Small bubble shown once per visit above the chat button.',
           },
         },
         {

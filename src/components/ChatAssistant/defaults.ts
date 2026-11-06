@@ -26,6 +26,23 @@ export type ChatTexts = {
   oneSpotLeftLabel: string
   nextDateLabel: string
   outOfStockLabel: string
+  /** Welcome bubble above the launcher, once per visit. */
+  teaser: string
+  /** "Ask our team" form. */
+  handoffButton: string
+  handoffTitle: string
+  handoffNameLabel: string
+  handoffEmailLabel: string
+  handoffMessageLabel: string
+  handoffSend: string
+  handoffConsent: string
+  handoffSuccess: string
+  handoffError: string
+  /** Thumbs up / down under answers. */
+  feedbackQuestion: string
+  feedbackYes: string
+  feedbackNo: string
+  feedbackThanks: string
 }
 
 const EN: ChatTexts = {
@@ -55,6 +72,20 @@ const EN: ChatTexts = {
   oneSpotLeftLabel: 'Last spot',
   nextDateLabel: 'Next date',
   outOfStockLabel: 'Out of stock',
+  teaser: 'Hi! 👋 Questions about workshops, dates or vouchers? Ask me!',
+  handoffButton: 'Ask our team',
+  handoffTitle: 'Ask our team directly',
+  handoffNameLabel: 'Your name',
+  handoffEmailLabel: 'Your email',
+  handoffMessageLabel: 'Your question',
+  handoffSend: 'Send question',
+  handoffConsent: 'We only use your details to answer you. [Privacy policy](/datenschutz)',
+  handoffSuccess: "Thanks! Your question has been sent. We'll reply by email as soon as we can. 🙂",
+  handoffError: 'Sending didn’t work. Please email us directly instead.',
+  feedbackQuestion: 'Was this helpful?',
+  feedbackYes: 'Yes',
+  feedbackNo: 'No',
+  feedbackThanks: 'Thanks for your feedback!',
 }
 
 const DE: ChatTexts = {
@@ -84,6 +115,20 @@ const DE: ChatTexts = {
   oneSpotLeftLabel: 'Letzter Platz',
   nextDateLabel: 'Nächster Termin',
   outOfStockLabel: 'Ausverkauft',
+  teaser: 'Hi! 👋 Fragen zu Workshops, Terminen oder Gutscheinen? Frag mich!',
+  handoffButton: 'Frag unser Team',
+  handoffTitle: 'Frag unser Team direkt',
+  handoffNameLabel: 'Dein Name',
+  handoffEmailLabel: 'Deine E-Mail',
+  handoffMessageLabel: 'Deine Frage',
+  handoffSend: 'Frage senden',
+  handoffConsent: 'Wir nutzen deine Angaben nur, um dir zu antworten. [Datenschutz](/datenschutz)',
+  handoffSuccess: 'Danke! Deine Frage ist bei uns angekommen. Wir antworten dir so schnell wie möglich per E-Mail. 🙂',
+  handoffError: 'Das Senden hat leider nicht geklappt. Bitte schreib uns direkt per E-Mail.',
+  feedbackQuestion: 'War das hilfreich?',
+  feedbackYes: 'Ja',
+  feedbackNo: 'Nein',
+  feedbackThanks: 'Danke für dein Feedback!',
 }
 
 export function defaultChatTexts(locale: string): ChatTexts {
