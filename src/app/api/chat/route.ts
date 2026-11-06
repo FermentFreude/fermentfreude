@@ -14,7 +14,8 @@ export const maxDuration = 60
  * POST /api/chat — website chat assistant.
  *
  * Body: { messages: { role: 'user' | 'assistant', content: string }[], locale?: 'de' | 'en' }
- * Response: streamed plain text (the assistant's reply).
+ * Response: streamed plain text (AI mode) or a JSON ChatReply (free mode,
+ * with cards, action buttons and follow-up suggestions).
  *
  * Two modes:
  * - ANTHROPIC_API_KEY set → Claude answers, streamed (CHATBOT_MODEL optional).
@@ -94,12 +95,12 @@ export async function POST(request: NextRequest) {
 
   if (!process.env.ANTHROPIC_API_KEY) {
     const question = String(messages[messages.length - 1].content)
-    return new Response(answerWithoutAI(question, data), {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-store',
-        'X-Content-Type-Options': 'nosniff',
-      },
+    const earlier = messages
+      .slice(0, -1)
+      .filter((m) => m.role === 'user')
+      .map((m) => String(m.content))
+    return NextResponse.json(answerWithoutAI(question, data, earlier), {
+      headers: { 'Cache-Control': 'no-store' },
     })
   }
   const knowledge = buildKnowledgeSheet(data)

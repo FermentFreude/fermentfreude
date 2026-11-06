@@ -1,18 +1,61 @@
 'use client'
 
-import { MessageCircle, RotateCcw, Send, X } from 'lucide-react'
+import { ArrowRight, ArrowUp, CalendarDays, MapPin, MessageCircle, RotateCcw, Sparkles, X } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 
+import {
+  CHAT_REPLY_JSON_TYPE,
+  replyToText,
+  type ChatAction,
+  type ChatCard,
+  type ChatReply,
+} from '@/lib/chat-assistant/types'
 import { cn } from '@/utilities/cn'
 
 import type { ChatTexts } from './defaults'
 
-type ChatMessage = { role: 'user' | 'assistant'; content: string }
+type ChatMessage = {
+  role: 'user' | 'assistant'
+  content: string
+  cards?: ChatCard[]
+  actions?: ChatAction[]
+  suggestions?: string[]
+}
 
-const STORAGE_KEY = 'ff-chat-assistant-v1'
+const STORAGE_KEY = 'ff-chat-assistant-v2'
 const MAX_INPUT = 1500
+
+const isInternal = (href: string) => href.startsWith('/') && !href.startsWith('//')
+
+function SmartLink({
+  href,
+  className,
+  onClick,
+  children,
+}: {
+  href: string
+  className?: string
+  onClick?: () => void
+  children: ReactNode
+}) {
+  if (isInternal(href)) {
+    return (
+      <Link href={href} className={className} onClick={onClick}>
+        {children}
+      </Link>
+    )
+  }
+  if (/^https:\/\//.test(href) || /^mailto:/.test(href)) {
+    return (
+      <a href={href} className={className} onClick={onClick} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    )
+  }
+  return <span className={className}>{children}</span>
+}
 
 /** Render the tiny Markdown subset the assistant uses: [links](/path) and **bold**. */
 function renderInline(text: string): ReactNode[] {
@@ -24,23 +67,15 @@ function renderInline(text: string): ReactNode[] {
   while ((match = pattern.exec(text))) {
     if (match.index > last) nodes.push(text.slice(last, match.index))
     if (match[1] && match[2]) {
-      const href = match[2]
-      const linkClass = 'font-semibold underline underline-offset-2 hover:text-ff-charcoal'
-      if (href.startsWith('/') && !href.startsWith('//')) {
-        nodes.push(
-          <Link key={key++} href={href} className={linkClass}>
-            {match[1]}
-          </Link>,
-        )
-      } else if (/^https:\/\//.test(href) || /^mailto:/.test(href)) {
-        nodes.push(
-          <a key={key++} href={href} className={linkClass} target="_blank" rel="noopener noreferrer">
-            {match[1]}
-          </a>,
-        )
-      } else {
-        nodes.push(match[1])
-      }
+      nodes.push(
+        <SmartLink
+          key={key++}
+          href={match[2]}
+          className="font-semibold underline decoration-ff-gold-accent decoration-2 underline-offset-2 hover:text-ff-charcoal"
+        >
+          {match[1]}
+        </SmartLink>,
+      )
     } else if (match[3]) {
       nodes.push(<strong key={key++}>{match[3]}</strong>)
     }
@@ -50,17 +85,204 @@ function renderInline(text: string): ReactNode[] {
   return nodes
 }
 
+/** Paragraphs, plus real lists for lines that start with "• ", "- " or "* ". */
 function MessageText({ text }: { text: string }) {
-  const lines = text.split('\n')
+  const blocks: Array<{ type: 'p' | 'ul'; lines: string[] }> = []
+  for (const line of text.split('\n')) {
+    const item = /^\s*(?:[•\-*])\s+(.*)$/.exec(line)
+    const type = item ? 'ul' : 'p'
+    const content = item ? item[1] : line
+    if (!item && !line.trim()) {
+      blocks.push({ type: 'p', lines: [] })
+      continue
+    }
+    const prev = blocks[blocks.length - 1]
+    if (prev && prev.type === type && (type === 'ul' || prev.lines.length)) prev.lines.push(content)
+    else blocks.push({ type, lines: [content] })
+  }
   return (
-    <>
-      {lines.map((line, i) => (
-        <Fragment key={i}>
-          {renderInline(line)}
-          {i < lines.length - 1 && <br />}
-        </Fragment>
+    <div className="space-y-2">
+      {blocks
+        .filter((b) => b.lines.length)
+        .map((b, i) =>
+          b.type === 'ul' ? (
+            <ul key={i} className="space-y-1">
+              {b.lines.map((l, j) => (
+                <li key={j} className="flex gap-2">
+                  <span className="mt-[0.55em] size-1.5 shrink-0 rounded-full bg-ff-gold-accent" />
+                  <span>{renderInline(l)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p key={i}>
+              {b.lines.map((l, j) => (
+                <Fragment key={j}>
+                  {renderInline(l)}
+                  {j < b.lines.length - 1 && <br />}
+                </Fragment>
+              ))}
+            </p>
+          ),
+        )}
+    </div>
+  )
+}
+
+function Avatar({ size = 'sm' }: { size?: 'sm' | 'lg' }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'flex shrink-0 items-center justify-center rounded-full bg-ff-gold-accent text-ff-near-black',
+        size === 'lg' ? 'size-10' : 'size-7',
+      )}
+    >
+      <Sparkles className={size === 'lg' ? 'size-5' : 'size-3.5'} />
+    </span>
+  )
+}
+
+/** "Sa., 14. November 2026 um 10:00" → { day: "14", month: "Nov" } */
+function calendarParts(when: string): { day: string; month: string } | null {
+  const m = /(\d{1,2})\.?\s+(\p{L}+)/u.exec(when)
+  return m ? { day: m[1], month: m[2].slice(0, 3) } : null
+}
+
+function spotsLabel(texts: ChatTexts, spots: number): string {
+  if (spots <= 0) return texts.soldOutLabel
+  if (spots === 1) return texts.oneSpotLeftLabel
+  return texts.spotsLeftLabel.replace('{n}', String(spots))
+}
+
+function CardView({ card, texts, onNavigate }: { card: ChatCard; texts: ChatTexts; onNavigate: () => void }) {
+  const base =
+    'group flex items-center gap-3 rounded-xl border border-ff-border-light bg-white p-3 text-left transition hover:border-ff-near-black/30 hover:shadow-md'
+
+  if (card.kind === 'date') {
+    const cal = calendarParts(card.when)
+    const soldOut = card.spots <= 0
+    return (
+      <SmartLink href={card.href} onClick={onNavigate} className={cn(base, soldOut && 'opacity-70')}>
+        <>
+          <span className="flex w-12 shrink-0 flex-col items-center overflow-hidden rounded-lg border border-ff-border-light text-center">
+            <span className="w-full bg-ff-near-black py-0.5 font-display text-[10px] font-bold uppercase tracking-wide text-white">
+              {cal?.month ?? <CalendarDays className="mx-auto size-3" />}
+            </span>
+            <span className="py-1 font-display text-lg font-bold leading-none">{cal?.day ?? '–'}</span>
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate font-display text-sm font-bold">{card.title}</span>
+            <span className="block text-xs leading-snug text-ff-charcoal">{card.when}</span>
+            <span className="mt-1 flex items-center gap-2">
+              <span
+                className={cn(
+                  'shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                  soldOut
+                    ? 'bg-ff-warm-gray text-ff-charcoal'
+                    : card.spots <= 2
+                      ? 'bg-ff-gold-light text-ff-near-black'
+                      : 'bg-[#e3ecdf] text-[#2f4a2a]',
+                )}
+              >
+                {spotsLabel(texts, card.spots)}
+              </span>
+              {card.location && (
+                <span className="flex min-w-0 items-center gap-0.5 truncate text-[11px] text-ff-charcoal">
+                  <MapPin className="size-3 shrink-0" />
+                  <span className="truncate">{card.location}</span>
+                </span>
+              )}
+            </span>
+          </span>
+          {!soldOut && (
+            <span className="shrink-0 rounded-full bg-ff-near-black px-3 py-1.5 font-display text-xs font-bold text-white transition group-hover:bg-black">
+              {texts.bookLabel}
+            </span>
+          )}
+        </>
+      </SmartLink>
+    )
+  }
+
+  if (card.kind === 'workshop') {
+    return (
+      <SmartLink href={card.href} onClick={onNavigate} className={cn(base, 'flex-col items-stretch gap-1.5')}>
+        <>
+          <span className="flex items-baseline justify-between gap-2">
+            <span className="font-display text-sm font-bold">{card.title}</span>
+            <span className="shrink-0 text-xs font-semibold">{card.price}</span>
+          </span>
+          {card.description && (
+            <span className="line-clamp-2 text-xs leading-relaxed text-ff-charcoal">{card.description}</span>
+          )}
+          <span className="flex items-center justify-between gap-2 pt-0.5">
+            <span className="flex min-w-0 items-center gap-1 text-[11px] text-ff-charcoal">
+              {card.nextDate && (
+                <>
+                  <CalendarDays className="size-3 shrink-0" />
+                  <span className="truncate">
+                    {texts.nextDateLabel}: {card.nextDate}
+                  </span>
+                </>
+              )}
+            </span>
+            <span className="flex shrink-0 items-center gap-1 font-display text-xs font-bold">
+              {texts.viewLabel}
+              <ArrowRight className="size-3 transition group-hover:translate-x-0.5" />
+            </span>
+          </span>
+        </>
+      </SmartLink>
+    )
+  }
+
+  return (
+    <SmartLink href={card.href} onClick={onNavigate} className={base}>
+      <>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-display text-sm font-bold">{card.title}</span>
+          {card.description && (
+            <span className="block truncate text-xs text-ff-charcoal">{card.description}</span>
+          )}
+          {card.outOfStock && (
+            <span className="mt-1 inline-block rounded-full bg-ff-warm-gray px-2 py-0.5 text-[11px] font-semibold text-ff-charcoal">
+              {texts.outOfStockLabel}
+            </span>
+          )}
+        </span>
+        {card.price && <span className="shrink-0 text-sm font-semibold">{card.price}</span>}
+        <ArrowRight className="size-4 shrink-0 transition group-hover:translate-x-0.5" />
+      </>
+    </SmartLink>
+  )
+}
+
+function TypingDots() {
+  return (
+    <span className="inline-flex gap-1 py-1.5" aria-label="…">
+      <span className="size-1.5 animate-bounce rounded-full bg-ff-charcoal [animation-delay:-0.3s]" />
+      <span className="size-1.5 animate-bounce rounded-full bg-ff-charcoal [animation-delay:-0.15s]" />
+      <span className="size-1.5 animate-bounce rounded-full bg-ff-charcoal" />
+    </span>
+  )
+}
+
+function Chips({ items, onPick, disabled }: { items: string[]; onPick: (q: string) => void; disabled?: boolean }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((q) => (
+        <button
+          key={q}
+          type="button"
+          disabled={disabled}
+          onClick={() => onPick(q)}
+          className="rounded-full border border-ff-near-black/15 bg-white px-3 py-1.5 text-left text-xs shadow-sm transition hover:border-ff-near-black hover:bg-ff-near-black hover:text-white disabled:opacity-50"
+        >
+          {q}
+        </button>
       ))}
-    </>
+    </div>
   )
 }
 
@@ -97,13 +319,30 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
 
   useEffect(() => {
     if (!open) return
-    inputRef.current?.focus()
+    // Small delay so the mobile keyboard doesn't fight the open animation.
+    const focus = window.setTimeout(() => inputRef.current?.focus(), 150)
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false)
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    // Full-screen on phones: stop the page behind from scrolling.
+    const mobile = window.matchMedia('(max-width: 639px)').matches
+    const previousOverflow = document.body.style.overflow
+    if (mobile) document.body.style.overflow = 'hidden'
+    return () => {
+      window.clearTimeout(focus)
+      window.removeEventListener('keydown', onKey)
+      if (mobile) document.body.style.overflow = previousOverflow
+    }
   }, [open])
+
+  // Auto-grow the message box up to ~5 lines.
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 128)}px`
+  }, [input, open])
 
   const send = useCallback(
     async (raw: string) => {
@@ -114,10 +353,10 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
       setInput('')
       setBusy(true)
 
-      const setReply = (content: string) =>
+      const setReply = (reply: Omit<ChatMessage, 'role'>) =>
         setMessages((prev) => {
           const next = [...prev]
-          next[next.length - 1] = { role: 'assistant', content }
+          next[next.length - 1] = { role: 'assistant', ...reply }
           return next
         })
 
@@ -125,12 +364,33 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: history, locale }),
+          // The API only needs plain text; cards are flattened into the text.
+          body: JSON.stringify({
+            messages: history.map((m) => ({
+              role: m.role,
+              content: m.role === 'assistant' ? replyToText({ text: m.content, cards: m.cards }) : m.content,
+            })),
+            locale,
+          }),
         })
         if (!res.ok || !res.body) {
-          setReply(res.status === 429 ? texts.rateLimitText : texts.errorText)
+          setReply({ content: res.status === 429 ? texts.rateLimitText : texts.errorText })
           return
         }
+
+        if (res.headers.get('content-type')?.includes(CHAT_REPLY_JSON_TYPE)) {
+          const reply = (await res.json()) as ChatReply
+          // Short pause so the typing dots don't just flash.
+          await new Promise((r) => setTimeout(r, 350))
+          setReply({
+            content: reply.text || texts.errorText,
+            cards: reply.cards,
+            actions: reply.actions,
+            suggestions: reply.suggestions,
+          })
+          return
+        }
+
         const reader = res.body.getReader()
         const decoder = new TextDecoder()
         let reply = ''
@@ -138,12 +398,12 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
           const { done, value } = await reader.read()
           if (done) break
           reply += decoder.decode(value, { stream: true })
-          setReply(reply)
+          setReply({ content: reply })
         }
         reply += decoder.decode()
-        setReply(reply.trim() || texts.errorText)
+        setReply({ content: reply.trim() || texts.errorText })
       } catch {
-        setReply(texts.errorText)
+        setReply({ content: texts.errorText })
       } finally {
         setBusy(false)
       }
@@ -157,8 +417,15 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
     inputRef.current?.focus()
   }
 
+  // Close the full-screen sheet on phones when a card or link takes the visitor to another page.
+  const closeOnMobile = () => {
+    if (window.matchMedia('(max-width: 639px)').matches) setOpen(false)
+  }
+
   // Product pages have a sticky "add to cart" bar on smaller screens.
   const liftOnMobile = pathname?.startsWith('/products/')
+  const last = messages[messages.length - 1]
+  const canSend = !busy && input.trim().length > 0
 
   return (
     <div
@@ -171,51 +438,66 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
         <div
           role="dialog"
           aria-label={texts.title}
-          className="flex h-[min(560px,calc(100dvh-7rem))] w-[calc(100vw-2rem)] max-w-[380px] flex-col overflow-hidden rounded-2xl border border-ff-border-light bg-ff-cream text-ff-near-black shadow-2xl"
+          className={cn(
+            'flex flex-col overflow-hidden bg-ff-cream text-ff-near-black',
+            // Phones: full-screen sheet. Larger screens: floating panel above the button.
+            'fixed inset-0 sm:static sm:inset-auto',
+            'sm:h-[min(620px,calc(100dvh-7rem))] sm:w-[400px] sm:rounded-3xl sm:border sm:border-ff-border-light sm:shadow-[0_24px_60px_-12px_rgba(26,26,26,0.35)]',
+            'animate-in fade-in slide-in-from-bottom-4 duration-200 sm:zoom-in-95 sm:origin-bottom-right',
+          )}
         >
-          <div className="flex items-center justify-between gap-2 bg-ff-near-black px-4 py-3 text-white">
-            <p className="font-display text-sm font-bold">{texts.title}</p>
-            <div className="flex items-center gap-1">
-              {messages.length > 0 && (
-                <button
-                  type="button"
-                  onClick={reset}
-                  disabled={busy}
-                  aria-label={texts.resetLabel}
-                  title={texts.resetLabel}
-                  className="rounded-full p-1.5 transition hover:bg-white/10 disabled:opacity-50"
-                >
-                  <RotateCcw className="size-4" />
-                </button>
-              )}
+          {/* Header */}
+          <div className="flex items-center gap-3 bg-ff-near-black px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white sm:py-3.5">
+            <Avatar size="lg" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-display text-[15px] font-bold leading-tight">{texts.title}</p>
+              <p className="flex items-center gap-1.5 text-xs text-white/70">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#7bc47f] opacity-60" />
+                  <span className="relative inline-flex size-2 rounded-full bg-[#7bc47f]" />
+                </span>
+                {texts.subtitle}
+              </p>
+            </div>
+            {messages.length > 0 && (
               <button
                 type="button"
-                onClick={() => setOpen(false)}
-                aria-label={texts.closeLabel}
-                className="rounded-full p-1.5 transition hover:bg-white/10"
+                onClick={reset}
+                disabled={busy}
+                aria-label={texts.resetLabel}
+                title={texts.resetLabel}
+                className="rounded-full p-2 transition hover:bg-white/10 disabled:opacity-50"
               >
-                <X className="size-4" />
+                <RotateCcw className="size-4" />
               </button>
-            </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label={texts.closeLabel}
+              title={texts.closeLabel}
+              className="rounded-full p-2 transition hover:bg-white/10"
+            >
+              <X className="size-5" />
+            </button>
           </div>
 
-          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4" aria-live="polite">
-            <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-3.5 py-2.5 text-sm leading-relaxed shadow-sm">
-              <MessageText text={texts.greeting} />
+          {/* Conversation */}
+          <div
+            ref={scrollRef}
+            className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-5"
+            aria-live="polite"
+          >
+            <div className="flex items-end gap-2">
+              <Avatar />
+              <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-sm leading-relaxed shadow-sm">
+                <MessageText text={texts.greeting} />
+              </div>
             </div>
 
             {messages.length === 0 && texts.suggestedQuestions.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-1">
-                {texts.suggestedQuestions.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => send(q)}
-                    className="rounded-full border border-ff-near-black/20 bg-white px-3 py-1.5 text-left text-xs transition hover:border-ff-near-black hover:bg-ff-near-black hover:text-white"
-                  >
-                    {q}
-                  </button>
-                ))}
+              <div className="pl-9">
+                <Chips items={texts.suggestedQuestions} onPick={send} />
               </div>
             )}
 
@@ -223,37 +505,64 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
               m.role === 'user' ? (
                 <div
                   key={i}
-                  className="ml-auto max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-ff-near-black px-3.5 py-2.5 text-sm leading-relaxed text-white"
+                  className="ml-auto w-fit max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-ff-near-black px-3.5 py-2.5 text-sm leading-relaxed text-white animate-in fade-in slide-in-from-bottom-1"
                 >
                   {m.content}
                 </div>
               ) : (
-                <div
-                  key={i}
-                  className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-3.5 py-2.5 text-sm leading-relaxed shadow-sm"
-                >
-                  {m.content ? (
-                    <MessageText text={m.content} />
-                  ) : (
-                    <span className="inline-flex gap-1 py-1" aria-label="…">
-                      <span className="size-1.5 animate-bounce rounded-full bg-ff-charcoal [animation-delay:-0.3s]" />
-                      <span className="size-1.5 animate-bounce rounded-full bg-ff-charcoal [animation-delay:-0.15s]" />
-                      <span className="size-1.5 animate-bounce rounded-full bg-ff-charcoal" />
-                    </span>
+                <div key={i} className="space-y-2.5 animate-in fade-in slide-in-from-bottom-1">
+                  <div className="flex items-end gap-2">
+                    <Avatar />
+                    <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-sm leading-relaxed shadow-sm">
+                      {m.content ? <MessageText text={m.content} /> : <TypingDots />}
+                    </div>
+                  </div>
+
+                  {m.cards && m.cards.length > 0 && (
+                    <div className="space-y-2 pl-9">
+                      {m.cards.map((card, j) => (
+                        <CardView key={j} card={card} texts={texts} onNavigate={closeOnMobile} />
+                      ))}
+                    </div>
+                  )}
+
+                  {m.actions && m.actions.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pl-9">
+                      {m.actions.map((a) => (
+                        <SmartLink
+                          key={a.href + a.label}
+                          href={a.href}
+                          onClick={closeOnMobile}
+                          className="inline-flex items-center gap-1 rounded-full bg-ff-gold-accent px-3 py-1.5 font-display text-xs font-bold text-ff-near-black transition hover:bg-ff-gold-accent-dark"
+                        >
+                          <>
+                            {a.label}
+                            <ArrowRight className="size-3" />
+                          </>
+                        </SmartLink>
+                      ))}
+                    </div>
+                  )}
+
+                  {m === last && !busy && m.suggestions && m.suggestions.length > 0 && (
+                    <div className="pl-9">
+                      <Chips items={m.suggestions} onPick={send} />
+                    </div>
                   )}
                 </div>
               ),
             )}
           </div>
 
+          {/* Composer */}
           <form
-            className="border-t border-ff-border-light bg-white px-3 pb-2 pt-3"
+            className="border-t border-ff-border-light bg-white px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-3"
             onSubmit={(e) => {
               e.preventDefault()
               void send(input)
             }}
           >
-            <div className="flex items-end gap-2">
+            <div className="flex items-end gap-2 rounded-2xl border border-ff-border-light bg-ff-cream py-1.5 pl-3.5 pr-1.5 transition focus-within:border-ff-near-black/40 focus-within:bg-white">
               <textarea
                 ref={inputRef}
                 value={input}
@@ -267,18 +576,24 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
                 rows={1}
                 placeholder={texts.inputPlaceholder}
                 aria-label={texts.inputPlaceholder}
-                className="max-h-28 min-h-10 flex-1 resize-none rounded-xl border border-ff-border-light bg-ff-cream px-3 py-2.5 text-base focus:border-ff-near-black focus:outline-none sm:text-sm"
+                className="max-h-32 flex-1 resize-none bg-transparent py-1.5 text-base leading-snug placeholder:text-ff-gray-text-light focus:outline-none sm:text-sm"
               />
               <button
                 type="submit"
-                disabled={busy || !input.trim()}
+                disabled={!canSend}
                 aria-label={texts.sendLabel}
-                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ff-near-black text-white transition hover:bg-black disabled:opacity-40"
+                title={texts.sendLabel}
+                className={cn(
+                  'flex size-9 shrink-0 items-center justify-center rounded-full transition',
+                  canSend
+                    ? 'bg-ff-gold-accent text-ff-near-black hover:bg-ff-gold-accent-dark'
+                    : 'bg-ff-warm-gray text-ff-charcoal/60',
+                )}
               >
-                <Send className="size-4" />
+                <ArrowUp className="size-4" strokeWidth={2.5} />
               </button>
             </div>
-            <p className="mt-2 text-[11px] leading-snug text-ff-charcoal">
+            <p className="mt-2 px-1 text-center text-[11px] leading-snug text-ff-gray-text-light">
               <MessageText text={texts.privacyNote} />
             </p>
           </form>
@@ -290,9 +605,17 @@ export function ChatWidget({ locale, texts }: { locale: string; texts: ChatTexts
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={open ? texts.closeLabel : texts.launcherLabel}
-        className="flex items-center gap-2 rounded-full bg-ff-near-black px-4 py-3 font-display text-sm font-bold text-white shadow-lg transition hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-ff-gold-accent focus-visible:ring-offset-2"
+        className={cn(
+          'group flex items-center gap-2 rounded-full bg-ff-near-black py-2 pl-2 pr-5 font-display text-sm font-bold text-white shadow-[0_10px_30px_-8px_rgba(26,26,26,0.6)] transition hover:-translate-y-0.5 hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-ff-gold-accent focus-visible:ring-offset-2',
+          open && 'hidden pr-2 sm:flex',
+        )}
       >
-        {open ? <X className="size-5" /> : <MessageCircle className="size-5" />}
+        <span className="relative flex size-9 items-center justify-center rounded-full bg-ff-gold-accent text-ff-near-black">
+          {open ? <X className="size-5" /> : <MessageCircle className="size-5" />}
+          {!open && messages.length === 0 && (
+            <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border-2 border-ff-near-black bg-[#7bc47f]" />
+          )}
+        </span>
         <span className={cn(open && 'sr-only')}>{texts.launcherLabel}</span>
       </button>
     </div>

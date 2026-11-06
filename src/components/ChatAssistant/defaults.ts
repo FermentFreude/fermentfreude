@@ -15,6 +15,17 @@ export type ChatTexts = {
   resetLabel: string
   errorText: string
   rateLimitText: string
+  /** Small line under the window title. */
+  subtitle: string
+  /** Labels on the answer cards. */
+  bookLabel: string
+  viewLabel: string
+  soldOutLabel: string
+  /** `{n}` is replaced with the number of free spots. */
+  spotsLeftLabel: string
+  oneSpotLeftLabel: string
+  nextDateLabel: string
+  outOfStockLabel: string
 }
 
 const EN: ChatTexts = {
@@ -35,6 +46,14 @@ const EN: ChatTexts = {
   resetLabel: 'New chat',
   errorText: 'Sorry, the assistant is not available right now. Please try again later.',
   rateLimitText: 'That was a lot of questions! Please wait a few minutes and try again.',
+  subtitle: 'Answers right away',
+  bookLabel: 'Book',
+  viewLabel: 'View',
+  soldOutLabel: 'Sold out',
+  spotsLeftLabel: '{n} spots left',
+  oneSpotLeftLabel: 'Last spot',
+  nextDateLabel: 'Next date',
+  outOfStockLabel: 'Out of stock',
 }
 
 const DE: ChatTexts = {
@@ -55,6 +74,14 @@ const DE: ChatTexts = {
   resetLabel: 'Neuer Chat',
   errorText: 'Der Assistent ist gerade nicht erreichbar. Bitte versuch es später noch einmal.',
   rateLimitText: 'Das waren viele Fragen! Bitte warte ein paar Minuten und versuch es dann noch einmal.',
+  subtitle: 'Antwortet sofort',
+  bookLabel: 'Buchen',
+  viewLabel: 'Ansehen',
+  soldOutLabel: 'Ausgebucht',
+  spotsLeftLabel: 'Noch {n} Plätze',
+  oneSpotLeftLabel: 'Letzter Platz',
+  nextDateLabel: 'Nächster Termin',
+  outOfStockLabel: 'Ausverkauft',
 }
 
 export function defaultChatTexts(locale: string): ChatTexts {

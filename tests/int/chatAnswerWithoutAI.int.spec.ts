@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
-import { answerWithoutAI } from '@/lib/chat-assistant/answerWithoutAI'
+import { answerWithoutAI as answerReply } from '@/lib/chat-assistant/answerWithoutAI'
 import type { ChatData } from '@/lib/chat-assistant/knowledge'
+import { replyToText } from '@/lib/chat-assistant/types'
+
+/** Everything a visitor sees (text, cards, buttons) as one string, for simple assertions. */
+function answerWithoutAI(question: string, d: ChatData, history: string[] = []): string {
+  const reply = answerReply(question, d, history)
+  const hrefs = [...(reply.cards ?? []), ...(reply.actions ?? [])].map((x) => x.href)
+  return [replyToText(reply), ...hrefs].join('\n')
+}
 
 function data(locale: 'de' | 'en' = 'de'): ChatData {
   return {
@@ -35,8 +43,9 @@ describe('answerWithoutAI', () => {
   it('lists upcoming dates with free spots', () => {
     const answer = answerWithoutAI('Wann ist der nächste Workshop?', data())
     expect(answer).toContain('Kombucha')
-    expect(answer).toContain('3 Plätze frei')
-    expect(answer).toContain('ausgebucht')
+    const reply = answerReply('Wann ist der nächste Workshop?', data())
+    const dates = (reply.cards ?? []).filter((c) => c.kind === 'date')
+    expect(dates.map((c) => c.kind === 'date' && c.spots)).toEqual([3, 0])
   })
 
   it('filters dates by the workshop the visitor names', () => {
@@ -47,7 +56,7 @@ describe('answerWithoutAI', () => {
   })
 
   it('answers prices', () => {
-    expect(answerWithoutAI('Was kostet der Tempeh Workshop?', data())).toContain('€119.00')
+    expect(answerWithoutAI('Was kostet der Tempeh Workshop?', data())).toContain('€119 ')
   })
 
   it('uses the FAQ for general questions', () => {
@@ -66,7 +75,22 @@ describe('answerWithoutAI', () => {
   })
 
   it('answers in English on the English site', () => {
-    expect(answerWithoutAI('When is the next workshop?', data('en'))).toContain('3 spots left')
+    const reply = answerReply('When is the next workshop?', data('en'))
+    expect(reply.text).toMatch(/[a-z]/i)
+    expect(reply.suggestions?.[0]).toMatch(/^[A-Z][a-z ]+/)
+    expect(reply.text).not.toMatch(/Termin|Workshops gibt/)
+  })
+
+  it('tolerates typos in workshop names', () => {
+    expect(answerWithoutAI('Wann ist der nächste Kombucah Workshop?', data())).toContain('/workshops/kombucha')
+  })
+
+  it('understands follow-up questions about the workshop named before', () => {
+    expect(answerWithoutAI('Und was kostet der?', data(), ['Wann ist der Tempeh Workshop?'])).toContain('€119')
+  })
+
+  it('always offers follow-up suggestions', () => {
+    expect(answerReply('Welche Zahlungsarten gibt es?', data()).suggestions?.length).toBeGreaterThan(0)
   })
 
   it('falls back to the contact email for unknown questions', () => {

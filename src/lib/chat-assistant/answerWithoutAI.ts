@@ -1,15 +1,19 @@
-import type { ChatData, ChatFaq, ChatProduct, ChatWorkshop } from './knowledge'
+import type { ChatAppointment, ChatData, ChatFaq, ChatProduct, ChatWorkshop } from './knowledge'
+import type { ChatAction, ChatCard, ChatReply } from './types'
+export { replyToText } from './types'
 
 /**
  * Free chat answerer (no AI). Used when ANTHROPIC_API_KEY is not set.
  *
  * Answers from live CMS data by recognising what the visitor asks about
  * (dates, prices, vouchers, bookings, contact, a specific workshop or product)
- * and by matching the question against the Help & FAQ page. Anything it does
- * not recognise gets a friendly "ask the team" reply with the contact email.
+ * and by matching the question against the Help & FAQ page. Returns a
+ * structured reply (text + date/workshop/product cards + buttons + follow-up
+ * suggestions) that the chat window renders nicely. Anything it does not
+ * recognise gets a friendly "ask the team" reply with the contact email.
  */
 
-const MAX_DATES = 5
+const MAX_DATES = 4
 
 const STOPWORDS = new Set(
   `a an and are as at be bei bin bis bitte can das dass dein deine dem den der des die do does du ein eine einen einem einer es for gibt habe haben hat have how i ich ihr im in is ist it ja kann kannst man me mein meine mich mir mit my nach nicht noch nur of oder on or so the to und uns unser von vor was we what wenn wer wie wir with wo you your zu zum zur auch am auf aus fuer about any bei hallo hi hey frage question bitte danke also gerne mal welche welcher welches which there this that workshop workshops`.split(
@@ -18,7 +22,22 @@ const STOPWORDS = new Set(
 )
 
 // Words that are too generic to identify a specific workshop or product.
-const GENERIC = new Set(['workshop', 'workshops', 'kurs', 'kurse', 'fermentation', 'fermentieren', 'basic', 'online'])
+const GENERIC = new Set(['workshop', 'workshops', 'kurs', 'kurse', 'fermentation', 'fermentieren', 'basic', 'online', 'classic', 'natur'])
+
+const MONTHS: Array<[RegExp, number]> = [
+  [/\b(jaenner|januar|january|jan)\b/, 0],
+  [/\b(feber|februar|february|feb)\b/, 1],
+  [/\b(maerz|march|mar)\b/, 2],
+  [/\b(april|apr)\b/, 3],
+  [/\b(mai|may)\b/, 4],
+  [/\b(juni|june|jun)\b/, 5],
+  [/\b(juli|july|jul)\b/, 6],
+  [/\b(august|aug)\b/, 7],
+  [/\b(september|sept?)\b/, 8],
+  [/\b(oktober|october|okt|oct)\b/, 9],
+  [/\b(november|nov)\b/, 10],
+  [/\b(dezember|december|dez|dec)\b/, 11],
+]
 
 function normalize(text: string): string {
   return text
@@ -47,9 +66,35 @@ function keywords(text: string): string[] {
   ]
 }
 
+/** Edit distance, capped: returns max+1 as soon as it is clearly above max. */
+function distance(a: string, b: string, max: number): number {
+  if (Math.abs(a.length - b.length) > max) return max + 1
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i)
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i]
+    let rowMin = i
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+      rowMin = Math.min(rowMin, cur[j])
+    }
+    if (rowMin > max) return max + 1
+    prev = cur
+  }
+  return prev[b.length]
+}
+
+/** True when the question mentions `word`, allowing a small typo ("kombutcha", "tempe"). */
+function mentions(q: string, word: string): boolean {
+  if (q.includes(word)) return true
+  if (word.length < 5) return false
+  const max = word.length >= 7 ? 2 : 1
+  return q.split(/[\s-]+/).some((token) => token.length >= 4 && distance(token, word, max) <= max)
+}
+
 const INTENTS = {
   greeting: /^(hallo|hi|hey|servus|gruess gott|guten (tag|morgen|abend)|hello|good (morning|evening|afternoon))\b/,
   thanks: /\b(danke|dankeschoen|vielen dank|thanks|thank you|thx|merci)\b/,
+  list: /\b(welche workshops|what workshops|which workshops|alle workshops|all workshops|workshops (gibt|habt|bietet)|angebot\w*|what do you offer|was bietet|uebersicht|overview)\b/,
   dates: /\b(wann|termin\w*|datum|daten|naechste\w*|next|when|dates?|frei\w*|plaetze|platz|spots?|available|verfuegbar\w*|ausgebucht|sold out|schedule|kalender)\b/,
   price: /(€|\b(preis\w*|kost\w*|euro|price\w*|costs?|how much|wie ?viel|teuer|guenstig)\b)/,
   voucher: /\b(gutschein\w*|geschenk\w*|schenk\w*|verschenk\w*|voucher\w*|gift\w*)\b/,
@@ -61,6 +106,8 @@ const INTENTS = {
   courses: /\b(online\w*|e-?learning|video\w*)\b/,
   beginner: /\b(anfaeng\w*|beginner\w*|einsteig\w*|einstieg|neuling\w*|first time|erste[rsn]? mal|keine erfahrung|no experience|starten|start)\b/,
   shop: /\b(shop|kaufen|buy|produkt\w*|products?|bestell\w*|order\w*|liefer\w*|versand|shipping|deliver\w*)\b/,
+  // "und was kostet der?", "and how much is it?" — refers back to the last topic
+  followUp: /\b(der|den|dem|die|das|es|dort|da|it|that|this one|there)\b/,
 }
 
 type Lang = 'de' | 'en'
@@ -69,30 +116,30 @@ function t(lang: Lang, de: string, en: string): string {
   return lang === 'de' ? de : en
 }
 
+function workshopWords(w: ChatWorkshop): string[] {
+  const words = [w.slug, ...normalize(w.title).split(/[\s-]+/)].filter((word) => word.length >= 4 && !GENERIC.has(word))
+  // "lacto" spelled with c, "lakto" with k
+  return [...new Set([...words, ...words.map((word) => word.replace(/k/g, 'c'))])]
+}
+
 function matchWorkshops(q: string, workshops: ChatWorkshop[]): ChatWorkshop[] {
-  return workshops.filter((w) => {
-    const words = [w.slug, ...normalize(w.title).split(' ')].filter(
-      (word) => word.length >= 4 && !GENERIC.has(word),
-    )
-    // "lacto" spelled with c, "lakto" with k
-    const alt = words.map((word) => word.replace(/k/g, 'c'))
-    return [...words, ...alt].some((word) => q.includes(word))
-  })
+  return workshops.filter((w) => workshopWords(w).some((word) => mentions(q, word)))
 }
 
 function matchProducts(q: string, products: ChatProduct[]): ChatProduct[] {
   return products.filter((p) =>
     normalize(p.title)
-      .split(' ')
-      .some((word) => word.length >= 4 && !GENERIC.has(word) && q.includes(word)),
+      .split(/[\s-]+/)
+      .some((word) => word.length >= 4 && !GENERIC.has(word) && mentions(q, word)),
   )
 }
 
-function bestFaq(
-  question: string,
-  faq: ChatFaq[],
-  filter?: RegExp,
-): { item: ChatFaq; score: number } | null {
+function matchMonth(q: string): number | null {
+  for (const [pattern, month] of MONTHS) if (pattern.test(q)) return month
+  return null
+}
+
+function bestFaq(question: string, faq: ChatFaq[], filter?: RegExp): { item: ChatFaq; score: number } | null {
   const qWords = keywords(question)
   if (filter) faq = faq.filter((item) => filter.test(normalize(`${item.section} ${item.question}`)))
   if (!qWords.length) return null
@@ -111,75 +158,43 @@ function bestFaq(
   return best
 }
 
-function workshopLink(slug: string, title: string): string {
-  return `[${title}](/workshops/${slug})`
-}
+const euro = (n: number) => `€${n.toFixed(2).replace(/\.00$/, '')}`
 
-function datesPart(lang: Lang, data: ChatData, only: ChatWorkshop[]): string {
-  const slugs = new Set(only.map((w) => w.slug))
-  const upcoming = data.appointments.filter((a) => !slugs.size || slugs.has(a.workshopSlug))
-  if (!upcoming.length) {
-    const which = only.length ? only.map((w) => w.title).join(', ') : ''
-    return t(
-      lang,
-      `Für ${which || 'die Workshops'} sind gerade keine neuen Termine online. Schau bald wieder auf [Workshops](/workshops) vorbei oder schreib uns${data.contact.email ? ` an ${data.contact.email}` : ''}.`,
-      `There are no upcoming dates online for ${which || 'our workshops'} right now. Check [Workshops](/workshops) again soon or email us${data.contact.email ? ` at ${data.contact.email}` : ''}.`,
-    )
+function dateCard(a: ChatAppointment): ChatCard {
+  return {
+    kind: 'date',
+    title: a.workshopTitle,
+    when: a.when,
+    location: a.location,
+    spots: a.spots,
+    href: `/workshops/${a.workshopSlug}`,
   }
-  const lines = upcoming.slice(0, MAX_DATES).map((a) => {
-    const spots =
-      a.spots > 0
-        ? t(lang, `${a.spots} ${a.spots === 1 ? 'Platz' : 'Plätze'} frei`, `${a.spots} ${a.spots === 1 ? 'spot' : 'spots'} left`)
-        : t(lang, 'ausgebucht', 'sold out')
-    return `• **${a.workshopTitle}**: ${a.when}${a.location ? `, ${a.location}` : ''} (${spots})`
-  })
-  const more = upcoming.length > MAX_DATES ? t(lang, '\nWeitere Termine findest du auf der Workshop-Seite.', '\nMore dates are on the workshop page.') : ''
-  const book =
-    only.length === 1
-      ? t(lang, `\nBuchen kannst du direkt hier: ${workshopLink(only[0].slug, only[0].title)}`, `\nYou can book here: ${workshopLink(only[0].slug, only[0].title)}`)
-      : t(lang, '\nBuchen kannst du auf der jeweiligen [Workshop-Seite](/workshops).', '\nBook on the [workshop page](/workshops).')
-  return `${t(lang, 'Die nächsten Termine (Stand jetzt):', 'Next dates (current status):')}\n${lines.join('\n')}${more}${book}`
 }
 
-function pricePart(lang: Lang, workshops: ChatWorkshop[], products: ChatProduct[]): string {
-  const lines = [
-    ...workshops.map(
-      (w) => `• ${workshopLink(w.slug, w.title)}: €${w.price.toFixed(2)} ${t(lang, 'pro Person', 'per person')}`,
-    ),
-    ...products
-      .filter((p) => p.price)
-      .map((p) => `• [${p.title}](/products/${p.slug}): ${p.price}${p.unitSize ? ` (${p.unitSize})` : ''}`),
-  ]
-  return lines.length ? `${t(lang, 'Preise:', 'Prices:')}\n${lines.join('\n')}` : ''
+function workshopCard(lang: Lang, w: ChatWorkshop, data: ChatData): ChatCard {
+  const next = data.appointments.find((a) => a.workshopSlug === w.slug && a.spots > 0)
+  return {
+    kind: 'workshop',
+    title: w.title,
+    description: w.description.length > 140 ? `${w.description.slice(0, 140).trimEnd()}…` : w.description,
+    price: `${euro(w.price)} ${t(lang, 'pro Person', 'per person')}`,
+    nextDate: next ? next.when : null,
+    href: `/workshops/${w.slug}`,
+  }
 }
 
-function workshopPart(lang: Lang, w: ChatWorkshop): string {
-  const about = w.description ? `${w.description}\n` : ''
-  const size = w.maxCapacity ? t(lang, `, max. ${w.maxCapacity} Personen`, `, max ${w.maxCapacity} people`) : ''
-  return `**${w.title}**\n${about}${t(lang, 'Preis', 'Price')}: €${w.price.toFixed(2)} ${t(lang, 'pro Person', 'per person')}${size}. ${t(lang, 'Mehr Infos & Buchung', 'Details & booking')}: ${workshopLink(w.slug, w.title)}`
+function productCard(p: ChatProduct): ChatCard {
+  return {
+    kind: 'product',
+    title: p.title,
+    description: [p.unitSize, p.shortDescription].filter(Boolean).join(' · '),
+    price: p.price,
+    outOfStock: p.outOfStock,
+    href: `/products/${p.slug}`,
+  }
 }
 
-function productPart(lang: Lang, p: ChatProduct): string {
-  const facts = [
-    p.price,
-    p.unitSize,
-    p.outOfStock ? t(lang, 'gerade ausverkauft', 'currently out of stock') : null,
-    p.seasonal ? t(lang, 'saisonal', 'seasonal') : null,
-  ].filter(Boolean)
-  const extra = [
-    p.ingredients && `${t(lang, 'Zutaten', 'Ingredients')}: ${p.ingredients}`,
-    p.allergens && `${t(lang, 'Allergene', 'Allergens')}: ${p.allergens}`,
-  ].filter(Boolean)
-  return [
-    `**[${p.title}](/products/${p.slug})**${facts.length ? ` (${facts.join(', ')})` : ''}`,
-    p.shortDescription,
-    ...extra,
-  ]
-    .filter(Boolean)
-    .join('\n')
-}
-
-function contactPart(lang: Lang, data: ChatData): string {
+function contactText(lang: Lang, data: ChatData): string {
   const c = data.contact
   const lines = [
     c.email && `E-Mail: [${c.email}](mailto:${c.email})`,
@@ -191,23 +206,46 @@ function contactPart(lang: Lang, data: ChatData): string {
     : t(lang, 'Alle Kontaktmöglichkeiten findest du auf der [Hilfe-Seite](/help).', 'All contact options are on the [Help page](/help).')
 }
 
-function fallback(lang: Lang, data: ChatData): string {
-  const email = data.contact.email
-  return t(
-    lang,
-    `Das kann ich leider nicht sicher beantworten. ${email ? `Schreib uns am besten an [${email}](mailto:${email}), wir helfen dir gerne weiter.` : 'Schau gern auf unserer [Hilfe-Seite](/help) vorbei.'}\nIch kann dir z. B. sagen, wann die nächsten [Workshops](/workshops) stattfinden, was sie kosten oder was es im [Shop](/shop) gibt.`,
-    `Sorry, I can't answer that reliably. ${email ? `Please email us at [${email}](mailto:${email}) and we'll be happy to help.` : 'Have a look at our [Help page](/help).'}\nI can tell you when the next [workshops](/workshops) are, what they cost, or what's in the [shop](/shop).`,
-  )
+/** Default follow-up questions, so the visitor always has a next step to tap. */
+function suggestionsFor(lang: Lang, topics: Set<string>): string[] {
+  const all: Array<[string, string, string]> = [
+    ['dates', 'Wann sind die nächsten Termine?', 'When are the next dates?'],
+    ['price', 'Was kostet ein Workshop?', 'How much is a workshop?'],
+    ['voucher', 'Kann ich einen Gutschein verschenken?', 'Can I give a voucher as a gift?'],
+    ['bring', 'Was muss ich mitbringen?', 'What should I bring?'],
+    ['manage', 'Wie kann ich umbuchen oder stornieren?', 'How can I reschedule or cancel?'],
+    ['list', 'Welche Workshops gibt es?', 'Which workshops do you offer?'],
+  ]
+  return all
+    .filter(([topic]) => !topics.has(topic))
+    .slice(0, 3)
+    .map(([, de, en]) => t(lang, de, en))
 }
 
-export function answerWithoutAI(question: string, data: ChatData): string {
+/**
+ * @param question the visitor's latest message
+ * @param data     live CMS data (see knowledge.ts)
+ * @param history  the visitor's earlier messages, newest last — used for follow-ups like "und was kostet der?"
+ */
+export function answerWithoutAI(question: string, data: ChatData, history: string[] = []): ChatReply {
   const lang: Lang = data.locale
   const q = normalize(question)
   const has = (intent: keyof typeof INTENTS) => INTENTS[intent].test(q)
+  const topics = new Set<string>()
 
-  const workshops = matchWorkshops(q, data.workshops)
+  let workshops = matchWorkshops(q, data.workshops)
+  // Follow-up without a name ("und wann ist der nächste?") → reuse the workshop from earlier.
+  if (!workshops.length && (has('followUp') || has('dates') || has('price') || has('bring'))) {
+    for (const earlier of [...history].reverse()) {
+      const found = matchWorkshops(normalize(earlier), data.workshops)
+      if (found.length) {
+        workshops = found
+        break
+      }
+    }
+  }
   const products = matchProducts(q, data.products).filter(
-    // A workshop name like "Kombucha" can also match a product; prefer the
+    // A workshop name like "Tempeh" can also match a product; prefer the
     // workshop when the visitor says "workshop" or asks for dates.
     () => !(workshops.length && (has('dates') || /workshop|kurs/.test(q))),
   )
@@ -217,127 +255,216 @@ export function answerWithoutAI(question: string, data: ChatData): string {
     ? (bestFaq(question, data.faq, /gutschein|voucher|gift|geschenk/) ?? bestFaq(question, data.faq))
     : bestFaq(question, data.faq)
   const strongFaq = faq && faq.score >= 0.5 ? faq.item : null
-  const parts: string[] = []
+
+  const text: string[] = []
+  const cards: ChatCard[] = []
+  const actions: ChatAction[] = []
+  const addAction = (label: string, href: string) => {
+    if (!actions.some((a) => a.href === href)) actions.push({ label, href })
+  }
+  const reply = (): ChatReply => ({
+    text: text.join('\n\n'),
+    ...(cards.length ? { cards } : {}),
+    ...(actions.length ? { actions: actions.slice(0, 3) } : {}),
+    suggestions: suggestionsFor(lang, topics),
+  })
 
   const words = q.split(' ').filter(Boolean)
   if (words.length <= 4 && (has('greeting') || has('thanks')) && !workshops.length && !products.length) {
-    return has('thanks')
-      ? t(lang, 'Sehr gerne! Melde dich, wenn du noch Fragen hast. 🙂', "You're welcome! Let me know if you have any other questions. 🙂")
-      : t(
-          lang,
-          'Hallo! Wie kann ich dir helfen? Frag mich z. B. nach den nächsten Workshop-Terminen, Preisen oder Gutscheinen.',
-          'Hi! How can I help? Ask me about upcoming workshop dates, prices or vouchers.',
-        )
+    text.push(
+      has('thanks')
+        ? t(lang, 'Sehr gerne! Melde dich, wenn du noch Fragen hast. 🙂', "You're welcome! Let me know if you have any other questions. 🙂")
+        : t(lang, 'Hallo! 👋 Wie kann ich dir helfen?', 'Hi! 👋 How can I help?'),
+    )
+    return reply()
   }
 
   // A clear FAQ match wins for general questions (payment, allergies, deadlines, …),
   // as long as the visitor isn't asking for live data like dates or prices.
   const namesSomething = workshops.length > 0 || products.length > 0
   if (strongFaq && !has('dates') && !has('price') && (faq!.score >= 0.75 || (faq!.score >= 0.6 && !namesSomething))) {
-    const link = has('manage')
-      ? t(lang, '\n\n[Buchung verwalten](/manage-booking)', '\n\n[Manage booking](/manage-booking)')
-      : has('voucher')
-        ? t(lang, '\n\n[Gutschein kaufen](/voucher)', '\n\n[Buy a voucher](/voucher)')
-        : ''
-    return `${strongFaq.answer}${link}`
+    text.push(strongFaq.answer)
+    if (has('manage')) {
+      topics.add('manage')
+      addAction(t(lang, 'Buchung verwalten', 'Manage booking'), '/manage-booking')
+    }
+    if (has('voucher')) {
+      topics.add('voucher')
+      addAction(t(lang, 'Gutschein kaufen', 'Buy a voucher'), '/voucher')
+    }
+    if (has('bring')) topics.add('bring')
+    addAction(t(lang, 'Alle FAQ', 'All FAQ'), '/help')
+    return reply()
   }
 
   if (has('manage')) {
-    if (strongFaq) parts.push(strongFaq.answer)
-    parts.push(
-      t(
-        lang,
-        'Deine Buchung kannst du hier selbst verwalten (umbuchen oder stornieren): [Buchung verwalten](/manage-booking).',
-        'You can manage your booking yourself (reschedule or cancel) here: [Manage booking](/manage-booking).',
-      ),
+    topics.add('manage')
+    text.push(
+      strongFaq?.answer ??
+        t(
+          lang,
+          'Deine Buchung kannst du selbst verwalten, also umbuchen oder stornieren. Du brauchst dafür die E-Mail-Adresse deiner Buchung.',
+          'You can manage your booking yourself (reschedule or cancel). You need the email address you booked with.',
+        ),
     )
+    addAction(t(lang, 'Buchung verwalten', 'Manage booking'), '/manage-booking')
   }
 
   if (has('voucher')) {
-    if (strongFaq && !parts.includes(strongFaq.answer)) parts.push(strongFaq.answer)
-    parts.push(
+    topics.add('voucher')
+    if (strongFaq && !text.includes(strongFaq.answer)) text.push(strongFaq.answer)
+    text.push(
       t(
         lang,
-        'Workshop-Gutscheine kannst du hier kaufen: [Gutschein](/voucher). Eingelöst wird er bei der Buchung.',
-        'You can buy workshop vouchers here: [Voucher](/voucher). It is redeemed when booking.',
+        'Workshop-Gutscheine sind das perfekte Geschenk 🎁 Sie werden bei der Buchung eingelöst.',
+        'Workshop vouchers make a great gift 🎁 They are redeemed when booking.',
       ),
     )
+    addAction(t(lang, 'Gutschein kaufen', 'Buy a voucher'), '/voucher')
+  }
+
+  if (has('list') && !workshops.length) {
+    topics.add('list')
+    text.push(t(lang, 'Das sind unsere Workshops:', 'These are our workshops:'))
+    cards.push(...data.workshops.map((w) => workshopCard(lang, w, data)))
+    addAction(t(lang, 'Alle Workshops', 'All workshops'), '/workshops')
+    return reply()
   }
 
   if (has('dates') || (has('book') && !has('manage'))) {
-    parts.push(datesPart(lang, data, workshops))
+    topics.add('dates')
+    const slugs = new Set(workshops.map((w) => w.slug))
+    const month = matchMonth(q)
+    const upcoming = data.appointments.filter(
+      (a) =>
+        (!slugs.size || slugs.has(a.workshopSlug)) &&
+        (month === null || !a.dateTime || new Date(a.dateTime).getMonth() === month),
+    )
+    const which = workshops.map((w) => w.title).join(', ')
+    if (!upcoming.length) {
+      text.push(
+        t(
+          lang,
+          `Für ${which || 'unsere Workshops'} sind ${month !== null ? 'in diesem Monat ' : ''}gerade keine Termine online. Schau bald wieder vorbei, oder melde dich bei uns${data.contact.email ? ` unter [${data.contact.email}](mailto:${data.contact.email})` : ''}.`,
+          `There are no dates online for ${which || 'our workshops'}${month !== null ? ' in that month' : ''} right now. Check back soon or contact us${data.contact.email ? ` at [${data.contact.email}](mailto:${data.contact.email})` : ''}.`,
+        ),
+      )
+    } else {
+      const free = upcoming.filter((a) => a.spots > 0).length
+      text.push(
+        t(
+          lang,
+          free
+            ? `Hier sind die nächsten Termine${which ? ` für **${which}**` : ''}. Plätze sind begrenzt, also am besten bald buchen:`
+            : `Die nächsten Termine${which ? ` für **${which}**` : ''} sind leider ausgebucht. Neue Termine kommen laufend dazu.`,
+          free
+            ? `Here are the next dates${which ? ` for **${which}**` : ''}. Spots are limited, so book soon:`
+            : `The next dates${which ? ` for **${which}**` : ''} are sold out. New dates are added regularly.`,
+        ),
+      )
+      cards.push(...upcoming.slice(0, MAX_DATES).map(dateCard))
+    }
+    addAction(t(lang, 'Alle Termine', 'All dates'), workshops.length === 1 ? `/workshops/${workshops[0].slug}` : '/workshops')
   }
 
   if (has('price')) {
-    const priceText = pricePart(lang, workshops.length || products.length ? workshops : data.workshops, products)
-    if (priceText) parts.push(priceText)
+    topics.add('price')
+    const priced = workshops.length || products.length ? workshops : data.workshops
+    const lines = [
+      ...priced.map((w) => `• **${w.title}**: ${euro(w.price)} ${t(lang, 'pro Person', 'per person')}`),
+      ...products.filter((p) => p.price).map((p) => `• **${p.title}**: ${p.price}${p.unitSize ? ` (${p.unitSize})` : ''}`),
+    ]
+    if (lines.length) {
+      text.push(`${t(lang, 'Die Preise:', 'Prices:')}\n${lines.join('\n')}`)
+      for (const w of priced.slice(0, 2)) addAction(t(lang, `${w.title} buchen`, `Book ${w.title}`), `/workshops/${w.slug}`)
+    }
   }
 
   if (has('bring')) {
+    topics.add('bring')
     const list = (workshops.length ? workshops : data.workshops).filter((w) => w.whatToBring)
-    parts.push(
+    text.push(
       list.length
         ? list.map((w) => `**${w.title}**: ${w.whatToBring}`).join('\n')
-        : t(lang, 'Alles Nötige stellen wir bereit. Details stehen in deiner Buchungsbestätigung.', 'We provide everything you need. Details are in your booking confirmation.'),
+        : strongFaq?.answer ??
+            t(lang, 'Alles Nötige stellen wir bereit. Details stehen in deiner Buchungsbestätigung.', 'We provide everything you need. Details are in your booking confirmation.'),
     )
   }
 
-  if (has('location') && !parts.length) {
+  if (has('location') && !text.length) {
     const places = [...new Set(data.appointments.map((a) => a.location).filter(Boolean))].slice(0, 3)
     if (places.length) {
-      parts.push(`${t(lang, 'Unsere Workshops finden hier statt:', 'Our workshops take place at:')}\n${places.map((p) => `• ${p}`).join('\n')}`)
+      text.push(`${t(lang, 'Unsere Workshops finden hier statt:', 'Our workshops take place at:')}\n${places.map((p) => `• ${p}`).join('\n')}`)
+    } else if (strongFaq) {
+      text.push(strongFaq.answer)
     }
-    if (data.extraKnowledge && /parken|parking|anfahrt/.test(q)) parts.push(data.extraKnowledge)
+    if (data.extraKnowledge && /parken|parking|anfahrt/.test(q)) text.push(data.extraKnowledge)
   }
 
-  if (has('contact') && !parts.length) parts.push(contactPart(lang, data))
+  if (has('contact') && !text.length) text.push(contactText(lang, data))
 
-  if (!parts.length && has('beginner') && data.workshops.length) {
+  if (!text.length && has('beginner') && data.workshops.length) {
     const basics = data.workshops.find((w) => /basic|grundl|einsteig/.test(normalize(`${w.slug} ${w.title}`)))
-    parts.push(
+    text.push(
       basics
         ? t(
             lang,
-            `Für den Einstieg empfehlen wir ${workshopLink(basics.slug, basics.title)}. Dort lernst du die Grundlagen, ganz ohne Vorkenntnisse. Alle Workshops sind aber auch für Anfänger:innen geeignet: [Workshops](/workshops).`,
-            `For beginners we recommend ${workshopLink(basics.slug, basics.title)}, where you learn the basics with no experience needed. All our workshops are beginner-friendly though: [Workshops](/workshops).`,
+            `Für den Einstieg empfehlen wir **${basics.title}**: Dort lernst du die Grundlagen, ganz ohne Vorkenntnisse. Aber keine Sorge, alle unsere Workshops sind anfängerfreundlich.`,
+            `For beginners we recommend **${basics.title}**, where you learn the basics with no experience needed. All our workshops are beginner-friendly though.`,
           )
-        : t(
-            lang,
-            `Alle unsere Workshops sind für Anfänger:innen geeignet, Vorkenntnisse brauchst du keine. Zur Auswahl: ${data.workshops.map((w) => workshopLink(w.slug, w.title)).join(', ')}.`,
-            `All our workshops are beginner-friendly, no experience needed. Choose from: ${data.workshops.map((w) => workshopLink(w.slug, w.title)).join(', ')}.`,
-          ),
+        : t(lang, 'Alle unsere Workshops sind anfängerfreundlich, Vorkenntnisse brauchst du keine:', 'All our workshops are beginner-friendly, no experience needed:'),
     )
+    cards.push(...(basics ? [basics] : data.workshops).map((w) => workshopCard(lang, w, data)))
   }
 
-  if (!parts.length && workshops.length) {
-    parts.push(...workshops.slice(0, 2).map((w) => workshopPart(lang, w)))
-    const next = data.appointments.find((a) => a.workshopSlug === workshops[0].slug && a.spots > 0)
-    if (next) parts.push(t(lang, `Nächster freier Termin: ${next.when}.`, `Next available date: ${next.when}.`))
+  if (!text.length && workshops.length) {
+    text.push(workshops.length === 1 ? t(lang, 'Gute Wahl! 😊', 'Great choice! 😊') : t(lang, 'Diese Workshops passen dazu:', 'These workshops match:'))
+    cards.push(...workshops.slice(0, 3).map((w) => workshopCard(lang, w, data)))
   }
 
-  if (!parts.length && products.length) {
-    parts.push(...products.slice(0, 3).map((p) => productPart(lang, p)))
+  if (!text.length && products.length) {
+    text.push(t(lang, 'Das haben wir im Shop:', 'Here is what we have in the shop:'))
+    cards.push(...products.slice(0, 3).map(productCard))
+    addAction(t(lang, 'Zum Shop', 'Go to shop'), '/shop')
   }
 
-  if (!parts.length && has('courses') && data.courses.length) {
-    parts.push(
+  if (!text.length && has('courses') && data.courses.length) {
+    text.push(
       `${t(lang, 'Unsere Online-Kurse:', 'Our online courses:')}\n${data.courses
-        .map((c) => `• [${c.title}](${c.path})${c.meta ? ` (${c.meta})` : ''}${c.comingSoon ? t(lang, ' (bald verfügbar)', ' (coming soon)') : ''}`)
+        .map((c) => `• **${c.title}**${c.meta ? ` (${c.meta})` : ''}${c.comingSoon ? t(lang, ', bald verfügbar', ', coming soon') : ''}`)
         .join('\n')}`,
     )
+    for (const c of data.courses.slice(0, 2)) addAction(c.title, c.path)
   }
 
-  if (!parts.length && strongFaq) parts.push(strongFaq.answer)
+  if (!text.length && strongFaq) {
+    text.push(strongFaq.answer)
+    addAction(t(lang, 'Alle FAQ', 'All FAQ'), '/help')
+  }
 
-  if (!parts.length && has('shop')) {
-    const list = data.products.slice(0, 6).map((p) => `• [${p.title}](/products/${p.slug})${p.price ? `: ${p.price}` : ''}`)
-    parts.push(
-      `${t(lang, 'Im Shop findest du zum Beispiel:', 'In our shop you can find, for example:')}\n${list.join('\n')}\n${t(lang, 'Alles ansehen', 'See everything')}: [Shop](/shop)`,
-    )
+  if (!text.length && has('shop')) {
+    text.push(t(lang, 'Im Shop findest du zum Beispiel:', 'In our shop you can find, for example:'))
+    cards.push(...data.products.slice(0, 3).map(productCard))
+    addAction(t(lang, 'Ganzen Shop ansehen', 'See the whole shop'), '/shop')
   }
 
   // A weaker FAQ match is still better than nothing.
-  if (!parts.length && faq && faq.score >= 0.34) parts.push(faq.item.answer)
+  if (!text.length && faq && faq.score >= 0.34) {
+    text.push(faq.item.answer)
+    addAction(t(lang, 'Alle FAQ', 'All FAQ'), '/help')
+  }
 
-  return parts.length ? parts.join('\n\n') : fallback(lang, data)
+  if (!text.length && !cards.length) {
+    const email = data.contact.email
+    text.push(
+      t(
+        lang,
+        `Hmm, das kann ich leider nicht sicher beantworten. 🤔 ${email ? `Schreib uns am besten an [${email}](mailto:${email}), wir helfen dir gerne persönlich weiter.` : 'Schau gern auf unserer Hilfe-Seite vorbei.'}`,
+        `Hmm, I can't answer that reliably. 🤔 ${email ? `Please email us at [${email}](mailto:${email}) and we'll help you personally.` : 'Have a look at our Help page.'}`,
+      ),
+    )
+    addAction(t(lang, 'Hilfe & FAQ', 'Help & FAQ'), '/help')
+  }
+
+  return reply()
 }
