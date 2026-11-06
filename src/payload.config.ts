@@ -41,6 +41,7 @@ import { WorkshopBookings } from '@/collections/WorkshopBookings'
 import { WorkshopLocations } from '@/collections/WorkshopLocations'
 import { Workshops } from '@/collections/Workshops'
 import { BusinessInfoGlobal } from '@/globals/BusinessInfo'
+import { ChatAssistantGlobal } from '@/globals/ChatAssistant'
 import { InvoiceCounterGlobal } from '@/globals/InvoiceCounter'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
@@ -255,6 +256,7 @@ export default buildConfig({
     WorkshopCardsGlobal,
     ProductDetailLabelsGlobal,
     ProductPickupSettingsGlobal,
+    ChatAssistantGlobal,
   ],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',

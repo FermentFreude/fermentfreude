@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import { ChatAssistant } from '@/components/ChatAssistant'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -80,6 +81,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <Header />
           </div>
           <OpeningPopups locale={locale} />
+          <ChatAssistant locale={locale} />
           <ScrollToTopOnNavigate />
           <main id="main-content">{children}</main>
           <div id="site-footer" style={{ display: 'contents' }}>
