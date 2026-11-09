@@ -1,6 +1,8 @@
 import { releaseSpotsAtomic } from '@/lib/atomicSpots'
+import { completeCartPayment } from '@/lib/cartFulfilment'
 import { addBookingHistory } from '@/lib/bookingHistory'
 import { logActivityEvent } from '@/lib/manageBooking'
+import { fulfilVoucherPurchase } from '@/lib/voucherFulfilment'
 import type { PayloadRequest } from 'payload'
 import type Stripe from 'stripe'
 
@@ -314,12 +316,14 @@ export async function handleChargeRefunded({
 /**
  * charge.succeeded OR payment_intent.succeeded
  *
- * When a payment succeeds, update order status from 'processing' to 'completed'
- * and confirm any pending workshop bookings.
+ * When a payment succeeds, update order status from 'processing' to 'completed'.
+ * If the purchase was never completed by the customer's browser, complete it
+ * here first (voucher, or cart order with its workshop seats and emails).
  */
 export async function handleChargeSucceeded({
   event,
   req,
+  stripe,
 }: {
   event: Stripe.Event
   req: PayloadRequest
@@ -347,24 +351,59 @@ export async function handleChargeSucceeded({
 
   payload.logger.info(`[stripe:${event.type}] ${obj.id} succeeded (PI: ${paymentIntentId})`)
 
-  // Find the order by payment intent ID
-  const orders = await payload.find({
-    collection: 'orders',
-    where: {
-      'transactions.stripe.paymentIntentID': { equals: paymentIntentId },
-    },
-    limit: 1,
-    overrideAccess: true,
-  })
+  const findOrder = async () =>
+    (
+      await payload.find({
+        collection: 'orders',
+        where: {
+          'transactions.stripe.paymentIntentID': { equals: paymentIntentId },
+        },
+        limit: 1,
+        overrideAccess: true,
+      })
+    ).docs[0]
 
-  if (orders.totalDocs === 0) {
-    payload.logger.warn(
-      `[stripe:charge_succeeded] No order found for paymentIntent ${paymentIntentId}`,
+  let order = await findOrder()
+
+  if (!order) {
+    // Paid, but the customer's browser hasn't completed the purchase —
+    // closed tab, never came back from the Klarna / PayPal / bank app, lost
+    // connection. Complete it here so a payment never goes without its
+    // voucher, order or workshop seat. Runs exactly once per payment even
+    // when the browser shows up at the same moment (see paymentFulfilment.ts).
+    // Throwing makes the webhook answer with an error, so Stripe retries.
+    const paymentIntent =
+      event.type === 'payment_intent.succeeded'
+        ? (obj as Stripe.PaymentIntent)
+        : await stripe.paymentIntents.retrieve(paymentIntentId)
+    if (paymentIntent.status !== 'succeeded') return
+
+    if (paymentIntent.metadata?.type === 'voucher_purchase') {
+      const voucher = await fulfilVoucherPurchase(payload, {
+        paymentKey: paymentIntentId,
+        meta: paymentIntent.metadata,
+        amountCents: paymentIntent.amount,
+        waitMs: 8_000,
+      })
+      payload.logger.info(
+        `[stripe:${event.type}] Voucher ${voucher.code} in place for paymentIntent ${paymentIntentId}`,
+      )
+      return
+    }
+
+    const completed = await completeCartPayment(req, paymentIntent, { waitMs: 8_000 })
+    if (!completed) {
+      payload.logger.warn(
+        `[stripe:${event.type}] No checkout transaction for paymentIntent ${paymentIntentId} — not ours, skipping`,
+      )
+      return
+    }
+    payload.logger.info(
+      `[stripe:${event.type}] Order ${completed.orderID} in place for paymentIntent ${paymentIntentId}`,
     )
-    return
+    order = await findOrder()
+    if (!order) return
   }
-
-  const order = orders.docs[0]
 
   // Update order status to 'completed'
   await payload.update({
