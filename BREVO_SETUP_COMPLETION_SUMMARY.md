@@ -123,7 +123,7 @@ Required in `.env`:
 ```
 BREVO_API_KEY=xkeysib_...              # Brevo API key (production)
 BREVO_SENDER_EMAIL=kontakt@fermentfreude.at   # Optional, has default
-BREVO_SENDER_NAME=FermentFreude        # Optional, has default
+BREVO_SENDER_NAME=Fermentfreude        # Optional, has default
 ```
 
 ---
@@ -133,7 +133,7 @@ BREVO_SENDER_NAME=FermentFreude        # Optional, has default
 Latest run: ✅ **All 19 templates created successfully**
 
 ```
-🚀 FermentFreude Brevo Templates Setup
+🚀 Fermentfreude Brevo Templates Setup
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✓ API key found: xkeysib-72037b27cccf...
 

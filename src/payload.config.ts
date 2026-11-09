@@ -100,7 +100,7 @@ export default buildConfig({
       baseDir: srcDir,
     },
     meta: {
-      titleSuffix: ' — FermentFreude',
+      titleSuffix: ' — Fermentfreude',
       icons: [{ url: '/submark-dark.png' }],
     },
     components: {

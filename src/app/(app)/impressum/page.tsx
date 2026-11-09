@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 
 export const metadata: Metadata = {
-  title: 'Impressum | FermentFreude',
+  title: 'Impressum | Fermentfreude',
   description: 'Impressum der Fermentfreude OG.',
 }
 

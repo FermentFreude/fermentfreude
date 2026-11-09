@@ -4,7 +4,7 @@ import { Suspense } from 'react'
 import { VoucherCheckoutClient } from './VoucherCheckoutClient'
 
 export const metadata: Metadata = {
-  title: 'Gutschein kaufen | FermentFreude',
+  title: 'Gutschein kaufen | Fermentfreude',
   description: 'Bezahle deinen Geschenkgutschein sicher mit Karte.',
   robots: { index: false },
 }

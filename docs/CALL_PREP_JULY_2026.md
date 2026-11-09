@@ -1,4 +1,4 @@
-# Call Prep — FermentFreude Next Steps
+# Call Prep — Fermentfreude Next Steps
 **For:** Rafaela  
 **Date:** July 2026  
 **Purpose:** Talking points for call with David & Marcel
@@ -9,11 +9,11 @@
 
 The word "handover" suggests something is in the wrong hands. It's not.
 
-Almost everything was set up under the FermentFreude name from day one:
+Almost everything was set up under the Fermentfreude name from day one:
 - Brevo → their account, they manage it
 - Stripe → their account, they manage it
 - Domain (EasyName) → their account
-- GitHub → FermentFreude org
+- GitHub → Fermentfreude org
 - Vercel → managed by Rafaela as developer (normal)
 
 **Two small things to clean up (not urgent):**
@@ -75,7 +75,7 @@ These are real and I will fix them:
 | Bug | What it is | Fix |
 |-----|-----------|-----|
 | WEB-006 | "Edit page in Admin" button visible to all public visitors on Gastronomy page | Remove or hide behind admin login check |
-| WEB-012 | "Payload Ecommerce Template" appearing in shop page titles / browser tabs | Replace with FermentFreude branding |
+| WEB-012 | "Payload Ecommerce Template" appearing in shop page titles / browser tabs | Replace with Fermentfreude branding |
 
 **Phone number (WEB-005):** The placeholder `+43 664 1234567` is in the CMS. David can fix this himself in `/admin` → Business Info → Phone. No code change needed.
 

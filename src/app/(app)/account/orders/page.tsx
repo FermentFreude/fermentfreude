@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 
 export const metadata = {
-  title: 'Orders — FermentFreude',
+  title: 'Orders — Fermentfreude',
   description: 'Your order history',
 }
 

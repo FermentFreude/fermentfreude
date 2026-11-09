@@ -16,7 +16,7 @@ const DEFAULTS = {
   label: 'About Us',
   heading: 'Where tradition meets science',
   description:
-    'FermentFreude makes fermentation accessible and enjoyable. Discover workshops, products, and our passionate team dedicated to gut health.',
+    'Fermentfreude makes fermentation accessible and enjoyable. Discover workshops, products, and our passionate team dedicated to gut health.',
   ctaLabel: 'Learn more',
   ctaUrl: '/fermentation',
 }

@@ -38,7 +38,7 @@ export const sendAccountCreationEmail: CollectionAfterChangeHook = async ({
         WORKSHOPS_URL: `${serverUrl}/workshops`,
         PRIVACY_URL: `${serverUrl}/datenschutz`,
         AGB_URL: `${serverUrl}/agb`,
-        WELCOME_MESSAGE: `Willkommen bei FermentFreude, ${recipientFirstName}! Wir freuen uns, dich in unserer Community zu begrüßen.`,
+        WELCOME_MESSAGE: `Willkommen bei Fermentfreude, ${recipientFirstName}! Wir freuen uns, dich in unserer Community zu begrüßen.`,
       },
     })
 

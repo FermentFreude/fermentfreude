@@ -25,7 +25,7 @@ const copy = {
   de: {
     hero: {
       eyebrow: 'Marcel & David · Graz',
-      title: 'Wir sind FermentFreude.',
+      title: 'Wir sind Fermentfreude.',
       titleAccent: '',
       description:
         'Marcel bringt die Küche mit, David die Wissenschaft. In Graz machen wir Tempeh aus steirischen Käferbohnen und zeigen dir, wie Fermentieren zu Hause einfach und sicher gelingt.',
@@ -40,7 +40,7 @@ const copy = {
   en: {
     hero: {
       eyebrow: 'Marcel & David · Graz',
-      title: 'We are FermentFreude.',
+      title: 'We are Fermentfreude.',
       titleAccent: '',
       description:
         'Marcel brings the kitchen, David the science. In Graz we make tempeh from Styrian runner beans and show you how fermenting at home works – simply and safely.',

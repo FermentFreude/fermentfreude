@@ -26,7 +26,7 @@ All items below have been implemented and verified with `npx tsc --noEmit` (zero
 
 | What | Detail |
 |------|--------|
-| **Deleted `src/endpoints/seed/`** | 17 files, 3,630 lines, 2.8 MB of Payload ecommerce template seed code (t-shirts, hats, generic content). None of it was FermentFreude content. |
+| **Deleted `src/endpoints/seed/`** | 17 files, 3,630 lines, 2.8 MB of Payload ecommerce template seed code (t-shirts, hats, generic content). None of it was Fermentfreude content. |
 | **Preserved 3 data files** | `about.ts`, `contact.ts`, `voucher-page.ts` — moved to `src/scripts/data/` and seed scripts updated to import from new location. |
 
 ### 1.2 — Security Hole Closed
@@ -168,7 +168,7 @@ Estimated time: **2–4 hours**. No schema changes, no CMS migrations.
 
 **File:** `tests/e2e/frontend.e2e.spec.ts` (644 lines)
 
-This is unmodified Payload ecommerce template boilerplate. It tests "Payload Ecommerce Template" page title, hardcoded credit card details, and product creation flows that don't match FermentFreude's schema. Delete and replace with actual FermentFreude E2E tests when test coverage work begins.
+This is unmodified Payload ecommerce template boilerplate. It tests "Payload Ecommerce Template" page title, hardcoded credit card details, and product creation flows that don't match Fermentfreude's schema. Delete and replace with actual Fermentfreude E2E tests when test coverage work begins.
 
 ---
 
@@ -262,7 +262,7 @@ Estimated time: **Ongoing**. Test strategy and infrastructure.
 
 Delete `tests/e2e/frontend.e2e.spec.ts` (644 lines of Payload template boilerplate).
 
-### 6.2 — Write FermentFreude-Specific Tests
+### 6.2 — Write Fermentfreude-Specific Tests
 
 **Priority test targets:**
 

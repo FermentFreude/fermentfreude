@@ -63,7 +63,7 @@ interface ResolvedCinematicSlide {
 const DEFAULT_SLIDES: ResolvedCinematicSlide[] = [
   {
     image: null,
-    eyebrow: 'FermentFreude',
+    eyebrow: 'Fermentfreude',
     title: 'Fermentation,\nmade by hand.',
     titleAccent: 'Taste the difference.',
     description:

@@ -26,7 +26,7 @@ export const Footer: GlobalConfig = {
       label: 'Newsletter Heading',
       admin: {
         description:
-          'Heading for the newsletter section (DE: "Werde Teil der FermentFreude Bewegung").',
+          'Heading for the newsletter section (DE: "Werde Teil der Fermentfreude Bewegung").',
       },
     },
     {
@@ -93,7 +93,7 @@ export const Footer: GlobalConfig = {
       label: 'Copyright Text',
       admin: {
         description:
-          'Copyright line at the bottom. The year is added automatically (e.g. "FermentFreude — All Rights Reserved").',
+          'Copyright line at the bottom. The year is added automatically (e.g. "Fermentfreude — All Rights Reserved").',
       },
     },
     // ── Navigation Columns ──

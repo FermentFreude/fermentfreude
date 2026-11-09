@@ -1,4 +1,4 @@
-# FermentFreude Design System
+# Fermentfreude Design System
 
 All tokens are defined in `src/app/(app)/globals.css` as CSS custom properties.
 They are the **single source of truth** — never hardcode font sizes, section padding, or spacing inline.

@@ -102,7 +102,7 @@ export default async function VoucherPage() {
       '@type': 'Product',
       name: amount === 99 ? c.ticket.workshop.label : `${c.ticket.value.label} €${amount}`,
       description: amount === 99 ? c.ticket.workshop.text : c.ticket.value.text,
-      brand: { '@type': 'Brand', name: 'FermentFreude' },
+      brand: { '@type': 'Brand', name: 'Fermentfreude' },
       offers: {
         '@type': 'Offer',
         price: amount.toFixed(2),

@@ -132,8 +132,8 @@ const LEGAL_PAGES: LegalPageSeed[] = [
     slug: 'datenschutz',
     deTitle: 'Datenschutz',
     enTitle: 'Privacy Policy',
-    deDescription: 'Datenschutzerklaerung von FermentFreude.',
-    enDescription: 'Privacy policy of FermentFreude.',
+    deDescription: 'Datenschutzerklaerung von Fermentfreude.',
+    enDescription: 'Privacy policy of Fermentfreude.',
     deSections: [
       {
         heading: '1. Verantwortlicher',

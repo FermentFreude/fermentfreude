@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
- *  FermentFreude Tipps — Tempeh Articles
+ *  Fermentfreude Tipps — Tempeh Articles
  *
  *  6 educational articles about tempeh fermentation,
  *  covering fundamentals, recipes, and tips.
- *  Written in FermentFreude brand voice (German).
+ *  Written in Fermentfreude brand voice (German).
  *  Images are managed via Payload Admin — placeholder shown if missing.
  * ═══════════════════════════════════════════════════════════════ */
 

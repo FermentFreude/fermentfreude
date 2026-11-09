@@ -8,7 +8,7 @@ import { FooterBrand } from './FooterBrand'
 import NewsletterForm from './NewsletterForm'
 
 const DEFAULTS_DE = {
-  newsletterHeading: 'Werde Teil der FermentFreude Bewegung',
+  newsletterHeading: 'Werde Teil der Fermentfreude Bewegung',
   freeRecipesLabel: 'Kostenlose Workshop-Rezepte',
   quickLinksHeading: 'Schnellzugriff',
   workshopsHeading: 'Workshops',
@@ -17,7 +17,7 @@ const DEFAULTS_DE = {
 }
 
 const DEFAULTS_EN = {
-  newsletterHeading: 'Join the FermentFreude Movement',
+  newsletterHeading: 'Join the Fermentfreude Movement',
   freeRecipesLabel: 'Free Workshop Recipes',
   quickLinksHeading: 'Quick Links',
   workshopsHeading: 'Workshops',
@@ -83,7 +83,7 @@ export async function Footer() {
   const followUsHeading = footer.followUsHeading ?? d.followUsHeading
   const copyrightText =
     footer.copyrightText ??
-    (isDe ? 'FermentFreude — Alle Rechte vorbehalten' : 'FermentFreude — All Rights Reserved')
+    (isDe ? 'Fermentfreude — Alle Rechte vorbehalten' : 'Fermentfreude — All Rights Reserved')
   const accentColorValue =
     typeof (footer as { accentColor?: unknown }).accentColor === 'string'
       ? (footer as { accentColor?: string | null }).accentColor

@@ -1,4 +1,6 @@
-# CLAUDE.md — FermentFreude
+# CLAUDE.md — Fermentfreude
+
+> **Brand name: always `Fermentfreude`** — one word, capital F, lowercase "freude". Never `FermentFreude`, `Ferment Freude`, `Ferment-Freude` or `FERMENTFREUDE` (except where a design is set in all caps). Applies everywhere: site text, seeds, emails, admin labels, docs, and documents for the founders. Only exception: quoted customer reviews keep their original wording.
 
 > This file is auto-read by Claude Code at session start. It is the single-file context for the entire project.
 
@@ -41,7 +43,7 @@ CRON_SECRET                          # Auth for Vercel Cron → /api/emails/work
 
 **Setting or changing an env var on staging/production:** Claude has no Vercel dashboard or CLI access in this environment (unless a session confirms an authenticated `vercel` CLI is actually present — check, don't assume). Never report a Vercel env var change as done without one of those. Default to giving Rafaela these exact steps instead:
 
-1. vercel.com → the FermentFreude project → **Settings → Environment Variables**
+1. vercel.com → the Fermentfreude project → **Settings → Environment Variables**
 2. Add or edit the variable name and value
 3. Select the correct environment(s) — Production (`main`), Preview (`staging`), and/or Development — a var only set on Production won't exist on staging and vice versa
 4. Save

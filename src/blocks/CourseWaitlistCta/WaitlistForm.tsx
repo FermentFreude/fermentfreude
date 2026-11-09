@@ -19,8 +19,8 @@ function buildMailtoHref(email: string, locale: 'de' | 'en'): string {
   const to = 'kontakt@fermentfreude.at'
   const subject =
     locale === 'de'
-      ? 'Warteliste: Online-Kurs – FermentFreude'
-      : 'Waitlist: FermentFreude online course'
+      ? 'Warteliste: Online-Kurs – Fermentfreude'
+      : 'Waitlist: Fermentfreude online course'
   const bodyLines =
     locale === 'de'
       ? [

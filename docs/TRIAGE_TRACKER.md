@@ -1,4 +1,4 @@
-# FermentFreude — Triage Tracker
+# Fermentfreude — Triage Tracker
 
 > Source of truth for the founder-reported issues (PDF triage shared 2026-04 → 2026-05).
 > Use this file when the user says "next issue" so we never lose context between sessions.
@@ -60,7 +60,7 @@ Full audit of [/fermentation](../src/app/(app)/fermentation/page.tsx) vs admin �
 ### 6. Open Graph link preview shows "Payload" + generic text — 30.04
 **Status: ❌ Not done**
 - No global default OG image / title set; falls back to Payload defaults.
-- **Plan:** Set defaults in [src/utilities/mergeOpenGraph.ts](../src/utilities/mergeOpenGraph.ts) or root `layout.tsx` metadata: site name "FermentFreude", description, default OG image (1200×630 webp uploaded to Media). SEO global lets editors override per-page.
+- **Plan:** Set defaults in [src/utilities/mergeOpenGraph.ts](../src/utilities/mergeOpenGraph.ts) or root `layout.tsx` metadata: site name "Fermentfreude", description, default OG image (1200×630 webp uploaded to Media). SEO global lets editors override per-page.
 
 ---
 

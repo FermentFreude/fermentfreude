@@ -105,7 +105,7 @@ fi
 # ── Banner ───────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║  FermentFreude — Promote Staging → Production                ║${NC}"
+echo -e "${CYAN}║  Fermentfreude — Promote Staging → Production                ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  Source staging : ${YELLOW}$STAGING_DB${NC}"

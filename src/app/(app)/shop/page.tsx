@@ -46,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const page = await queryShopPage(locale)
   if (!page) {
     return {
-      title: 'Shop | FermentFreude',
+      title: 'Shop | Fermentfreude',
       description:
         'Discover unique handcrafted ferments. Shop Kombucha, fermented vegetables, and more.',
     }

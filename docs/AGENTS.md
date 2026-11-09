@@ -1,4 +1,4 @@
-# Payload CMS Development Rules — FermentFreude
+# Payload CMS Development Rules — Fermentfreude
 
 > **Inherits from:** `docs/##INSTRUCTIONS.md` (project rules). This file covers Payload CMS patterns, security, hooks, queries, and component development specific to this project.
 

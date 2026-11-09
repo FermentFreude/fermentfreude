@@ -1,4 +1,4 @@
-# FermentFreude — User Flow Diagrams
+# Fermentfreude — User Flow Diagrams
 
 Prepared by Rafaela Studio · 2026-07-09
 

@@ -47,7 +47,7 @@ export type GiftSlideData = {
 
 const DEFAULT_BIG_WORD = 'VOUCHER'
 const DEFAULT_LINK = '/workshops/voucher'
-const DEFAULT_CARD_ALT = 'Gift voucher for a fermentation workshop at FermentFreude in Graz'
+const DEFAULT_CARD_ALT = 'Gift voucher for a fermentation workshop at Fermentfreude in Graz'
 const INK = '#1A1A1A' // brand near-black
 export const GIFT_PAPER = '#F9F2E0' // the illustration's paper, so the picture melts into the slide
 const NIGHT = '#1A1A1A' // behind a full-background photo
@@ -93,7 +93,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
         name: cardAlt,
         description: text ?? undefined,
         image: bg?.url ?? `${siteUrl}${VOUCHER_LAYERS.card.src}`,
-        brand: { '@type': 'Brand', name: 'FermentFreude' },
+        brand: { '@type': 'Brand', name: 'Fermentfreude' },
         offers: {
           '@type': 'Offer',
           price,

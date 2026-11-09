@@ -8,7 +8,7 @@
 
 ## Overview for Clients
 
-Your FermentFreude website sends **automated order confirmation emails** using Brevo. You manage the email account directly — no developer action needed for day-to-day operations.
+Your Fermentfreude website sends **automated order confirmation emails** using Brevo. You manage the email account directly — no developer action needed for day-to-day operations.
 
 ### What You Control
 

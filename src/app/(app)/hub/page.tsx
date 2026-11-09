@@ -76,7 +76,7 @@ function HubContent() {
           className="font-display mb-3 text-sm font-medium tracking-widest uppercase"
           style={{ color: '#555954' }}
         >
-          FermentFreude
+          Fermentfreude
         </p>
         <h1
           className="font-display mb-4 text-4xl font-bold md:text-5xl"

@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
           get back to you shortly to help you book your workshop spot.</em>
         </p>
         <p style="margin-top:2rem;font-size:0.8rem;color:#bbb">
-          FermentFreude &middot; Du erh&auml;ltst diese E-Mail, weil du dich auf fermentfreude.at angemeldet hast.
+          Fermentfreude &middot; Du erh&auml;ltst diese E-Mail, weil du dich auf fermentfreude.at angemeldet hast.
         </p>
       </div>
     `,

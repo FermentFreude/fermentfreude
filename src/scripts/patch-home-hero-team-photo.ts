@@ -32,9 +32,9 @@ const IMAGE = {
   ),
   name: 'home-hero-marcel-david.webp',
   altDe:
-    'Marcel und David von FermentFreude an einem Holztisch, dahinter ein Regal mit Fermentgläsern',
+    'Marcel und David von Fermentfreude an einem Holztisch, dahinter ein Regal mit Fermentgläsern',
   altEn:
-    'Marcel and David of FermentFreude at a wooden table, a shelf of fermentation jars behind them',
+    'Marcel and David of Fermentfreude at a wooden table, a shelf of fermentation jars behind them',
 }
 
 const { IMAGE_PRESETS, optimizedFile } = await import('@/scripts/seed-image-utils')

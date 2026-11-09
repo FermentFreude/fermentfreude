@@ -94,7 +94,7 @@ export default function ComingSoonPage() {
           color: '#aaa',
         }}
       >
-        © {new Date().getFullYear()} FermentFreude
+        © {new Date().getFullYear()} Fermentfreude
       </p>
     </div>
   )

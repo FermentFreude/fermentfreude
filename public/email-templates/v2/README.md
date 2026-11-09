@@ -1,4 +1,4 @@
-# FermentFreude V2 Email Templates
+# Fermentfreude V2 Email Templates
 
 Source-of-truth HTML for the 8 founder-edited Brevo V2 transactional templates.
 
