@@ -317,7 +317,7 @@ export const hero: Field = {
               label: 'Small Text Above Title',
               localized: true,
               admin: {
-                description: 'e.g. "FermentFreude"',
+                description: 'e.g. "Fermentfreude"',
               },
             },
             {

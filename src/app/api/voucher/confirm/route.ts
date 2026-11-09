@@ -1,5 +1,6 @@
 import { getStripe } from '@/lib/stripe'
 import config from '@/payload.config'
+import { getServerSideURL } from '@/utilities/getURL'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
@@ -122,6 +123,41 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // ─── Order record first: it holds the invoice (Rechnung WEB) ──
+    // Created before the voucher so the voucher email can link the invoice,
+    // like the workshop confirmation does. Non-fatal: without it the voucher
+    // and its email still go out, just without the invoice link.
+    // skipOrderConfirmationEmail: the voucher email is the confirmation.
+    let order: { id: string; downloadToken?: string | null } | null = null
+    try {
+      order = (await payload.create({
+        collection: 'orders',
+        overrideAccess: true,
+        data: {
+          items: [],
+          customerEmail: meta.purchaserEmail,
+          customerName: meta.purchaserName || undefined,
+          status: 'completed',
+          amount: amountCents ?? Math.round(Number(meta.amount) * 100),
+          currency: 'EUR',
+        },
+        context: {
+          skipOrderConfirmationEmail: true,
+          skipRevalidate: true,
+          skipAutoTranslate: true,
+        },
+      })) as unknown as { id: string; downloadToken?: string | null }
+      payload.logger.info(`[voucher/confirm] Created order record ${order.id} for key ${idempotencyKey}`)
+    } catch (orderError) {
+      payload.logger.error(
+        `[voucher/confirm] Failed to create order record for key ${idempotencyKey}: ${orderError instanceof Error ? orderError.message : String(orderError)}`,
+      )
+    }
+    const receiptUrl =
+      order?.downloadToken
+        ? `${getServerSideURL().replace(/\/$/, '')}/api/orders/${order.id}/receipt?token=${order.downloadToken}`
+        : undefined
+
     // ─── Create Voucher Record ───────────────────────────────────
 
     const voucher = await payload.create({
@@ -144,44 +180,29 @@ export async function GET(request: NextRequest) {
         stripeSessionId: idempotencyKey,
         redeemed: false,
       },
+      // The purchase email (afterChange hook) adds the invoice link
+      context: { receiptUrl },
     })
 
     payload.logger.info(
       `[voucher/confirm] Created voucher ${voucher.code} for key ${idempotencyKey}`,
     )
 
-    // ─── Email + admin notification sent automatically via afterChange hook ─
-
-    // ─── Create matching Orders record so the purchase shows up in the CMS ──
-    // Non-fatal: the voucher itself (and its confirmation email) is already
-    // done above — a failure here must not affect the customer-facing result.
-    // skipOrderConfirmationEmail: sendVoucherPurchaseEmail already emailed the
-    // customer and pinged the admin for this purchase — avoid double-sending.
-    try {
-      await payload.create({
-        collection: 'orders',
-        overrideAccess: true,
-        data: {
-          items: [],
-          customerEmail: meta.purchaserEmail,
-          customerName: meta.purchaserName || undefined,
-          status: 'completed',
-          amount: amountCents ?? Math.round(Number(meta.amount) * 100),
-          currency: 'EUR',
-          // Link back so the order shows what was bought (items stay empty — a voucher isn't a product)
-          purchasedVoucher: voucher.id,
-        },
-        context: {
-          skipOrderConfirmationEmail: true,
-          skipRevalidate: true,
-          skipAutoTranslate: true,
-        },
-      })
-      payload.logger.info(`[voucher/confirm] Created order record for voucher ${voucher.code}`)
-    } catch (orderError) {
-      payload.logger.error(
-        `[voucher/confirm] Failed to create order record for voucher ${voucher.code}: ${orderError instanceof Error ? orderError.message : String(orderError)}`,
-      )
+    // ─── Link the order to its voucher (the invoice line reads it) ──
+    if (order) {
+      try {
+        await payload.update({
+          collection: 'orders',
+          id: order.id,
+          overrideAccess: true,
+          data: { purchasedVoucher: voucher.id },
+          context: { skipOrderConfirmationEmail: true, skipRevalidate: true, skipAutoTranslate: true },
+        })
+      } catch (linkError) {
+        payload.logger.error(
+          `[voucher/confirm] Order ${order.id} not linked to voucher ${voucher.code}: ${linkError instanceof Error ? linkError.message : String(linkError)}`,
+        )
+      }
     }
 
     return NextResponse.json({

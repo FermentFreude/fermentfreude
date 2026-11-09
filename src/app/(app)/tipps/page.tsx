@@ -15,7 +15,7 @@ function isResolvedMedia(img: unknown): img is MediaType {
 export async function generateMetadata() {
   const locale = await getLocale()
   return {
-    title: locale === 'de' ? 'Tipps & Guides — FermentFreude' : 'Tips & Guides — FermentFreude',
+    title: locale === 'de' ? 'Tipps & Guides — Fermentfreude' : 'Tips & Guides — Fermentfreude',
     description:
       locale === 'de'
         ? 'Anleitungen und Guides rund ums Fermentieren.'

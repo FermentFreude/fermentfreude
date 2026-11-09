@@ -29,9 +29,9 @@ if (!(process.env.DATABASE_URL ?? '').includes('-staging')) {
 const GIFT_PHOTO = {
   filename: 'gutschein.webp',
   altDe:
-    'Gutschein – im FermentFreude-Studio: Gläser mit Gewürzen und Fermenten, Kochplatte mit Topf auf dem Holztisch',
+    'Gutschein – im Fermentfreude-Studio: Gläser mit Gewürzen und Fermenten, Kochplatte mit Topf auf dem Holztisch',
   altEn:
-    'Voucher – in the FermentFreude studio: jars of spices and ferments, a hot plate with a pot on the wooden counter',
+    'Voucher – in the Fermentfreude studio: jars of spices and ferments, a hot plate with a pot on the wooden counter',
 }
 
 const restoreIdx = process.argv.indexOf('--restore')

@@ -1,4 +1,4 @@
-# 🎓 FermentFreude Booking System — Founder's Guide
+# 🎓 Fermentfreude Booking System — Founder's Guide
 
 **For:** David & Marcel (Founders)  
 **Topic:** How the new workshop booking system works  

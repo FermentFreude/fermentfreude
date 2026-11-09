@@ -29,6 +29,8 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
     const pdfUrl = `${baseUrl}/api/voucher/generate-pdf?code=${encodeURIComponent(String(doc.code ?? ''))}`
     // Printable greeting card ("Von Herzen"), the same file as on /workshops/voucher
     const cardPdfUrl = `${baseUrl}/gutschein-karte.pdf`
+    // Invoice (Rechnung WEB) of the order behind an online purchase, set by /api/voucher/confirm
+    const receiptUrl = typeof req?.context?.receiptUrl === 'string' ? req.context.receiptUrl : ''
 
     const expiryDate = new Date(doc.createdAt)
     expiryDate.setFullYear(expiryDate.getFullYear() + 1)
@@ -91,6 +93,7 @@ export const sendVoucherPurchaseEmail: CollectionAfterChangeHook = async ({
       PURCHASER_NAME: purchaserNameValue,
       PDF_DOWNLOAD_URL: pdfUrl,
       CARD_PDF_URL: cardPdfUrl,
+      RECEIPT_URL: receiptUrl,
       SHOP_URL: shopUrl,
       VOUCHER_URL: voucherUrl,
       PRIVACY_URL: privacyUrl,

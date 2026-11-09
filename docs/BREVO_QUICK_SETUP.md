@@ -18,7 +18,7 @@ pnpm brevo-setup-templates
 
 **Example output:**
 ```
-🚀 FermentFreude Brevo Templates Setup
+🚀 Fermentfreude Brevo Templates Setup
 ================================================
 ✓ API key found: xkeysib-72037b27cccf...
 
@@ -71,12 +71,12 @@ If you want to create templates manually via Brevo dashboard:
 
 | ID | Template Name | HTML File | Subject |
 |---|---|---|---|
-| 2 | Order Confirmation | `10-order-confirmation.html` | `Deine Bestellung bei FermentFreude — {{params.ORDER_ID}}` |
+| 2 | Order Confirmation | `10-order-confirmation.html` | `Deine Bestellung bei Fermentfreude — {{params.ORDER_ID}}` |
 | 3 | Workshop Booking Confirmation | `05-workshop-booking-confirmation.html` | `Workshop Buchung bestätigt — {{params.BOOKING_ID}}` |
 | 4 | Course Enrollment | `15-course-enrollment.html` | `Kurs-Registrierung erfolgreich — {{params.COURSE_SLUG}}` |
 | 5 | Voucher Purchased | `19-voucher-purchased.html` | `Dein Gutschein — {{params.VOUCHER_CODE}}` |
-| 6 | Welcome Email | `01-account-creation.html` | `Willkommen bei FermentFreude — {{params.CUSTOMER_NAME}}` |
-| 7 | Password Reset | `03-password-reset.html` | `Passwort zurücksetzen — FermentFreude` |
+| 6 | Welcome Email | `01-account-creation.html` | `Willkommen bei Fermentfreude — {{params.CUSTOMER_NAME}}` |
+| 7 | Password Reset | `03-password-reset.html` | `Passwort zurücksetzen — Fermentfreude` |
 
 ---
 
@@ -118,7 +118,7 @@ You should receive **2 emails**:
 | Email 1 | Email 2 |
 |---------|---------|
 | **Order Confirmation** | **Workshop Booking** |
-| Subject: "Deine Bestellung bei FermentFreude — ord_..." | Subject: "Workshop Buchung bestätigt — book_..." |
+| Subject: "Deine Bestellung bei Fermentfreude — ord_..." | Subject: "Workshop Buchung bestätigt — book_..." |
 | Receipt + order details | Workshop details + booking info |
 | Sent immediately after payment | Sent 2-5 sec after Email 1 |
 

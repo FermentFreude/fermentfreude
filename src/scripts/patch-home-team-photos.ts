@@ -28,15 +28,15 @@ const PORTRAITS = [
     match: /david/i,
     file: path.join(DOWNLOADS, 'David.jpg'),
     name: 'team-david-portrait.webp',
-    altDe: 'David Haider von FermentFreude im schwarzen Hemd, lächelnd',
-    altEn: 'David Haider of FermentFreude in a black shirt, smiling',
+    altDe: 'David Haider von Fermentfreude im schwarzen Hemd, lächelnd',
+    altEn: 'David Haider of Fermentfreude in a black shirt, smiling',
   },
   {
     match: /marcel/i,
     file: path.join(DOWNLOADS, 'Marcel.jpg'),
     name: 'team-marcel-portrait.webp',
-    altDe: 'Marcel Raunnigger von FermentFreude in dunkelblauer Kochjacke, lächelnd',
-    altEn: 'Marcel Raunnigger of FermentFreude in a navy chef jacket, smiling',
+    altDe: 'Marcel Raunnigger von Fermentfreude in dunkelblauer Kochjacke, lächelnd',
+    altEn: 'Marcel Raunnigger of Fermentfreude in a navy chef jacket, smiling',
   },
 ]
 

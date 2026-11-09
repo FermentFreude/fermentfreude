@@ -1,4 +1,4 @@
-# FermentFreude Voucher System - Go-Live Deployment Guide
+# Fermentfreude Voucher System - Go-Live Deployment Guide
 
 **Status**: ✅ **PRODUCTION READY** (Code complete | Brevo template manual setup required)  
 **Deployment Date**: April 22, 2026  
@@ -12,7 +12,7 @@
 - **PDF Generation API** (`/api/voucher/generate-pdf`)
   - GET endpoint: Downloads PDF as file
   - POST endpoint: Returns base64 for email attachment
-  - Beautiful A4 template with FermentFreude branding
+  - Beautiful A4 template with Fermentfreude branding
   - German-language instructions and details
   
 - **Success Page Enhancement**
@@ -83,7 +83,7 @@ This URL is used in email links so the PDF download works for recipients.
 
 **Subject Line**:
 ```
-Dein FermentFreude Geschenkgutschein - {{VOUCHER_CODE}}
+Dein Fermentfreude Geschenkgutschein - {{VOUCHER_CODE}}
 ```
 
 **Template Content** (HTML):
@@ -225,7 +225,7 @@ Copy and paste the template HTML from below. This includes all necessary variabl
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎁 FermentFreude</h1>
+            <h1>🎁 Fermentfreude</h1>
             <p>Geschenkgutschein für Workshop-Erlebnisse</p>
         </div>
         
@@ -276,7 +276,7 @@ Copy and paste the template HTML from below. This includes all necessary variabl
             <div class="instructions">
                 <h3>ℹ️ Informationen zum Gutschein:</h3>
                 <ul style="margin: 10px 0; padding-left: 20px; color: #555;">
-                    <li><strong>Gültig für:</strong> Alle FermentFreude Workshops (Kombucha, Lacto-Gemüse, Tempeh etc.)</li>
+                    <li><strong>Gültig für:</strong> Alle Fermentfreude Workshops (Kombucha, Lacto-Gemüse, Tempeh etc.)</li>
                     <li><strong>Gültigkeit:</strong> 12 Monate ab Ausstellung</li>
                     <li><strong>Teilzahlung:</strong> Der Gutschein kann in mehreren Schritten verwendet werden</li>
                     <li><strong>Nicht übertragbar:</strong> Persönlicher Gutschein des Empfängers</li>
@@ -291,7 +291,7 @@ Copy and paste the template HTML from below. This includes all necessary variabl
         </div>
         
         <div class="footer">
-            <p>© FermentFreude 2026 - Alle Rechte vorbehalten</p>
+            <p>© Fermentfreude 2026 - Alle Rechte vorbehalten</p>
             <p>Grabenstraße 15, 8010 Graz, Österreich</p>
         </div>
     </div>

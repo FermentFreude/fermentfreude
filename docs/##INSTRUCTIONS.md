@@ -1,8 +1,8 @@
-# Developer Instructions — FermentFreude
+# Developer Instructions — Fermentfreude
 
 > **This is the single source of truth.** All other instruction files (`.github/copilot-instructions.md`, `.cursorrules`, `docs/AGENTS.md`) inherit from this document.
 
-**Project:** FermentFreude — Next.js 15 (App Router) + Payload CMS 3.x + Stripe
+**Project:** Fermentfreude — Next.js 15 (App Router) + Payload CMS 3.x + Stripe
 **Goal:** Implement features with senior full-stack discipline: minimal code, clear separation of concerns, secure by default, accessible UI.
 
 ---
@@ -738,7 +738,7 @@ If you still get access denied errors:
 
 ### Overview
 
-FermentFreude has a full digital course system: purchase → auto-enroll → watch lessons → track progress. This section is the reference for that entire flow.
+Fermentfreude has a full digital course system: purchase → auto-enroll → watch lessons → track progress. This section is the reference for that entire flow.
 
 ### Collections & Globals Involved
 
@@ -916,5 +916,5 @@ To pre-populate from code: `pnpm seed courses-page` (non-destructive) or `pnpm s
 ---
 
 _Last Updated: March 18, 2026_
-_Project: FermentFreude Digital Ecosystem_
+_Project: Fermentfreude Digital Ecosystem_
 _Stack: Next.js 15 + Payload CMS 3.x + TailwindCSS 4 + shadcn/ui + Cloudflare R2 + Stripe_

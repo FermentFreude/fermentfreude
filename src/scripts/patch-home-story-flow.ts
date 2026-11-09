@@ -27,7 +27,7 @@ const { getPayload } = await import('payload')
 const hero = {
   de: {
     eyebrow: 'Marcel & David · Graz',
-    title: 'Wir sind FermentFreude.',
+    title: 'Wir sind Fermentfreude.',
     titleAccent: 'Fermentation von Hand, mit Geduld.',
     description:
       'Kulinarik trifft Wissenschaft: In unserer Fermentküche in Graz machen wir Käferbohnen-Tempeh und zeigen in Workshops, wie Fermentieren zu Hause gelingt.',
@@ -38,7 +38,7 @@ const hero = {
   },
   en: {
     eyebrow: 'Marcel & David · Graz',
-    title: 'We are FermentFreude.',
+    title: 'We are Fermentfreude.',
     titleAccent: 'Fermentation by hand, with patience.',
     description:
       'Cooking meets science: in our fermentation kitchen in Graz we make runner-bean tempeh and show in our workshops how fermenting at home succeeds.',

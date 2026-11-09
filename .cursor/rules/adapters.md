@@ -138,9 +138,9 @@ Available storage adapters:
 - **@payloadcms/storage-gcs** - Google Cloud Storage
 - **@payloadcms/storage-uploadthing** - Uploadthing
 
-> **FermentFreude uses `@payloadcms/storage-s3` with Cloudflare R2.** See `src/plugins/index.ts` for the actual config.
+> **Fermentfreude uses `@payloadcms/storage-s3` with Cloudflare R2.** See `src/plugins/index.ts` for the actual config.
 
-### Cloudflare R2 via S3 Adapter (FermentFreude)
+### Cloudflare R2 via S3 Adapter (Fermentfreude)
 
 ```typescript
 import { s3Storage } from '@payloadcms/storage-s3'

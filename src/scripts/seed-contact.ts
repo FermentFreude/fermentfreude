@@ -132,7 +132,7 @@ async function seedContact() {
   if (fs.existsSync(contactHeroPath)) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'Contact hero – FermentFreude fermented foods and workshop' },
+      data: { alt: 'Contact hero – Fermentfreude fermented foods and workshop' },
       file: await optimizedFile(contactHeroPath, IMAGE_PRESETS.hero),
       context: { skipAutoTranslate: true },
     })
@@ -143,7 +143,7 @@ async function seedContact() {
   if (fs.existsSync(contactFormImagePath)) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'contact-card – FermentFreude team at workshop' },
+      data: { alt: 'contact-card – Fermentfreude team at workshop' },
       file: await optimizedFile(contactFormImagePath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })
@@ -154,7 +154,7 @@ async function seedContact() {
   if (fs.existsSync(bannerPath)) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'Hero slider – FermentFreude workshop banner' },
+      data: { alt: 'Hero slider – Fermentfreude workshop banner' },
       file: await optimizedFile(bannerPath, IMAGE_PRESETS.hero),
       context: { skipAutoTranslate: true },
     })
@@ -217,7 +217,7 @@ async function seedContact() {
   if (voucherSourcePath) {
     const created = await payload.create({
       collection: 'media',
-      data: { alt: 'Gift voucher – FermentFreude gift set for workshops' },
+      data: { alt: 'Gift voucher – Fermentfreude gift set for workshops' },
       file: await optimizedFile(voucherSourcePath, IMAGE_PRESETS.card),
       context: { skipAutoTranslate: true },
     })

@@ -405,7 +405,7 @@ export interface Product {
    */
   shortDescription?: string | null;
   /**
-   * Markenname, z.B. "FermentFreude". Wird in der Produkt-Infotabelle angezeigt. / Brand name shown in the product specs table.
+   * Markenname, z.B. "Fermentfreude". Wird in der Produkt-Infotabelle angezeigt. / Brand name shown in the product specs table.
    */
   brand?: string | null;
   /**
@@ -913,7 +913,7 @@ export interface Page {
            */
           image: string | Media;
           /**
-           * e.g. "FermentFreude"
+           * e.g. "Fermentfreude"
            */
           eyebrow?: string | null;
           /**
@@ -4021,7 +4021,7 @@ export interface FeaturedProductCardsBlock {
    */
   visible?: boolean | null;
   /**
-   * Shown first and largest — FermentFreude hero product (Käferbohnentempeh).
+   * Shown first and largest — Fermentfreude hero product (Käferbohnentempeh).
    */
   bannerProduct?: (string | null) | Product;
   /**
@@ -4222,7 +4222,7 @@ export interface ShopHeroBlock {
      */
     show?: boolean | null;
     /**
-     * e.g. FermentFreude
+     * e.g. Fermentfreude
      */
     brand?: string | null;
     /**
@@ -5020,7 +5020,7 @@ export interface VoucherCtaBlock {
         }[]
       | null;
     /**
-     * Names the voucher for search engines, e.g. "Geschenkgutschein für einen Fermentations-Workshop bei FermentFreude in Graz".
+     * Names the voucher for search engines, e.g. "Geschenkgutschein für einen Fermentations-Workshop bei Fermentfreude in Graz".
      */
     cardAlt?: string | null;
   };
@@ -9969,7 +9969,7 @@ export interface Header {
 export interface Footer {
   id: string;
   /**
-   * Heading for the newsletter section (DE: "Werde Teil der FermentFreude Bewegung").
+   * Heading for the newsletter section (DE: "Werde Teil der Fermentfreude Bewegung").
    */
   newsletterHeading?: string | null;
   /**
@@ -9997,7 +9997,7 @@ export interface Footer {
    */
   followUsHeading?: string | null;
   /**
-   * Copyright line at the bottom. The year is added automatically (e.g. "FermentFreude — All Rights Reserved").
+   * Copyright line at the bottom. The year is added automatically (e.g. "Fermentfreude — All Rights Reserved").
    */
   copyrightText?: string | null;
   /**

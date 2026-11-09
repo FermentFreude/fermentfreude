@@ -1,4 +1,4 @@
-# Dark Mode Implementation Plan — FermentFreude
+# Dark Mode Implementation Plan — Fermentfreude
 
 ## Scope
 

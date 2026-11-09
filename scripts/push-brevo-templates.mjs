@@ -367,7 +367,7 @@ async function createTemplate({ name, subject, htmlContent, replyTo, tag }) {
     body: JSON.stringify({
       templateName: name,
       subject,
-      sender: { name: 'FermentFreude', email: 'kontakt@fermentfreude.at' },
+      sender: { name: 'Fermentfreude', email: 'kontakt@fermentfreude.at' },
       replyTo: replyTo || 'kontakt@fermentfreude.at',
       htmlContent,
       isActive: true,
@@ -423,8 +423,8 @@ if (createMode) {
   }
   const nameIdx = args.indexOf('--name')
   const subjIdx = args.indexOf('--subject')
-  const name = nameIdx > -1 ? args[nameIdx + 1] : `FermentFreude — ${slug}`
-  const subject = subjIdx > -1 ? args[subjIdx + 1] : 'FermentFreude'
+  const name = nameIdx > -1 ? args[nameIdx + 1] : `Fermentfreude — ${slug}`
+  const subject = subjIdx > -1 ? args[subjIdx + 1] : 'Fermentfreude'
 
   // Find a file matching <id>-<slug>.html OR <slug>.html
   const files = readdirSync(TEMPLATES_DIR)

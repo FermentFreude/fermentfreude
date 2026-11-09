@@ -1,4 +1,4 @@
-# AGENTS.md — FermentFreude
+# AGENTS.md — Fermentfreude
 
 > This file is auto-read by Codex at session start. It is the single-file context for the entire project.
 

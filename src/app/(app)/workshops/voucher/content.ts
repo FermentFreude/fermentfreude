@@ -47,7 +47,7 @@ export type OccasionRow = {
 const de = {
   sections: { values: true, occasions: true, print: true, faq: true },
   meta: {
-    title: 'Gutschein für Fermentations-Workshops in Graz | FermentFreude',
+    title: 'Gutschein für Fermentations-Workshops in Graz | Fermentfreude',
     description:
       'Geschenkgutschein für einen Fermentations-Workshop in Graz oder unseren Shop: Kombucha, Tempeh & Kimchi selbst machen. Sofort als PDF per E-Mail, mit Grußkarte.',
   },
@@ -89,7 +89,7 @@ const de = {
       { icon: 'gift', title: 'Grußkarte inklusive', text: 'Zum Ausdrucken und Hineinschreiben' },
       { icon: 'shieldCheck', title: 'Freie Wahl', text: 'Jeder Workshop, jeder Termin' },
     ],
-    ticketAlt: 'Workshop-Geschenkgutschein über 99 Euro von FermentFreude Graz',
+    ticketAlt: 'Workshop-Geschenkgutschein über 99 Euro von Fermentfreude Graz',
   },
   values: {
     eyebrow: 'Wertgutscheine',
@@ -184,7 +184,7 @@ const de = {
       {
         question: 'Wofür kann ich den Gutschein einlösen?',
         answer:
-          'Für alle Fermentations-Workshops bei FermentFreude in Graz, zum Beispiel Kombucha, Tempeh oder Lakto-Gemüse, und für Produkte in unserem Shop. Der Workshop-Gutschein über 99 € deckt einen ganzen Workshop pro Person.',
+          'Für alle Fermentations-Workshops bei Fermentfreude in Graz, zum Beispiel Kombucha, Tempeh oder Lakto-Gemüse, und für Produkte in unserem Shop. Der Workshop-Gutschein über 99 € deckt einen ganzen Workshop pro Person.',
       },
       {
         question: 'Wie löse ich den Gutschein ein?',
@@ -248,7 +248,7 @@ export type VoucherContent = typeof de
 const en: VoucherContent = {
   sections: { values: true, occasions: true, print: true, faq: true },
   meta: {
-    title: 'Gift voucher for fermentation workshops in Graz | FermentFreude',
+    title: 'Gift voucher for fermentation workshops in Graz | Fermentfreude',
     description:
       'Gift voucher for a fermentation workshop in Graz or our shop: make your own kombucha, tempeh and kimchi. Instantly as a PDF by email, with a greeting card.',
   },
@@ -290,7 +290,7 @@ const en: VoucherContent = {
       { icon: 'gift', title: 'Greeting card included', text: 'To print and write in' },
       { icon: 'shieldCheck', title: 'Their choice', text: 'Any workshop, any date' },
     ],
-    ticketAlt: 'FermentFreude Graz workshop gift voucher worth 99 euros',
+    ticketAlt: 'Fermentfreude Graz workshop gift voucher worth 99 euros',
   },
   values: {
     eyebrow: 'Gift vouchers',
@@ -379,7 +379,7 @@ const en: VoucherContent = {
       {
         question: 'What can I redeem the voucher for?',
         answer:
-          'For all fermentation workshops at FermentFreude in Graz, such as kombucha, tempeh or lacto-fermented vegetables, and for products in our shop. The €99 workshop voucher covers one full workshop per person.',
+          'For all fermentation workshops at Fermentfreude in Graz, such as kombucha, tempeh or lacto-fermented vegetables, and for products in our shop. The €99 workshop voucher covers one full workshop per person.',
       },
       {
         question: 'How do I redeem the voucher?',

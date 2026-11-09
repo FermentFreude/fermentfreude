@@ -37,7 +37,7 @@ function CheckIcon({ className }: { className?: string }) {
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Online Courses | FermentFreude',
+    title: 'Online Courses | Fermentfreude',
     description: DEFAULT_HERO_DESCRIPTION,
   }
 }

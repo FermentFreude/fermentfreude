@@ -1,4 +1,4 @@
-# Brevo Implementation — FermentFreude
+# Brevo Implementation — Fermentfreude
 
 ## Overview
 
@@ -16,7 +16,7 @@ Code sends emails by referencing template IDs and passing dynamic parameters.
 
 | File | Purpose |
 |------|---------|
-| `src/components/admin/Logo.tsx` | FermentFreude submark on login page — switches between light/dark theme |
+| `src/components/admin/Logo.tsx` | Fermentfreude submark on login page — switches between light/dark theme |
 | `src/components/admin/Icon.tsx` | Smaller submark in sidebar nav — also theme-aware |
 | `src/app/(payload)/custom.scss` | Brand-tinted admin colors (elevation, success) |
 | `public/submark-light.png` | Light theme logo (from `submark 1.png`) |
@@ -25,7 +25,7 @@ Code sends emails by referencing template IDs and passing dynamic parameters.
 **Registered in** `payload.config.ts`:
 - `admin.components.graphics.Logo` → Logo component
 - `admin.components.graphics.Icon` → Icon component
-- `admin.meta.titleSuffix` → `" — FermentFreude"`
+- `admin.meta.titleSuffix` → `" — Fermentfreude"`
 - `admin.meta.icons` → submark favicon
 
 ### 2. Admin Sidebar Reorganization

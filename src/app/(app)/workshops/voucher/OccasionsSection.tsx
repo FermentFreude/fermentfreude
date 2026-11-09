@@ -41,18 +41,18 @@ export function OccasionsSection({ c }: { c: VoucherContent }) {
           const image = row.image
           const reverse = i % 2 === 1
           return (
-            <article key={row.key} className="py-12 lg:py-16">
+            <article key={row.key} className="py-12 md:py-10 lg:py-16">
               <div
-                className={`grid items-center gap-10 lg:grid-cols-2 lg:gap-20 ${
-                  reverse ? 'lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1' : ''
+                className={`grid items-center gap-10 md:grid-cols-2 lg:gap-20 ${
+                  reverse ? 'md:[&>*:first-child]:order-2 md:[&>*:last-child]:order-1' : ''
                 }`}
               >
-                <RevealImage className="relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-[#ECE5DE] lg:aspect-5/4">
+                <RevealImage className="relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-[#ECE5DE] md:aspect-4/5 lg:aspect-5/4">
                   {image && (
                     <Media
                       resource={image}
                       fill
-                      size="(min-width: 1024px) 560px, 100vw"
+                      size="(min-width: 1024px) 560px, (min-width: 768px) 50vw, 100vw"
                       imgClassName="object-cover"
                     />
                   )}

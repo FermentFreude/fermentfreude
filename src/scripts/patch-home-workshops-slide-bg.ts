@@ -29,9 +29,9 @@ const IMAGE = {
   file: path.join(os.homedir(), 'Downloads', 'FF-Vorschau-60.jpg'),
   name: 'home-showcase-bg-workshops-studio.webp',
   altDe:
-    'Workshop im FermentFreude-Studio: Marcel und David mit zwei Teilnehmerinnen am langen Holztisch, dahinter Regale mit Gläsern',
+    'Workshop im Fermentfreude-Studio: Marcel und David mit zwei Teilnehmerinnen am langen Holztisch, dahinter Regale mit Gläsern',
   altEn:
-    'Workshop in the FermentFreude studio: Marcel and David with two guests at the long wooden table, shelves of jars behind',
+    'Workshop in the Fermentfreude studio: Marcel and David with two guests at the long wooden table, shelves of jars behind',
 }
 
 const { IMAGE_PRESETS, optimizedFile } = await import('@/scripts/seed-image-utils')

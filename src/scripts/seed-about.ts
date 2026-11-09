@@ -95,7 +95,7 @@ async function seedAbout() {
 
   const heroImage = await payload.create({
     collection: 'media',
-    data: { alt: 'about-hero – FermentFreude about page banner' },
+    data: { alt: 'about-hero – Fermentfreude about page banner' },
     file: await optimizedFile(path.join(imagesDir, 'Banner.png'), IMAGE_PRESETS.hero),
     context: { skipAutoTranslate: true },
   })

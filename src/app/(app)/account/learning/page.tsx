@@ -12,7 +12,7 @@ import { getLocale } from '@/utilities/getLocale'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
-  title: 'My Learning — FermentFreude',
+  title: 'My Learning — Fermentfreude',
   description: 'Your online courses and progress',
 }
 

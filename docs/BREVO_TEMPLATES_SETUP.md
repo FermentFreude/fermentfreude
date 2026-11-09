@@ -1,4 +1,4 @@
-# Brevo Email Templates Setup — FermentFreude
+# Brevo Email Templates Setup — Fermentfreude
 
 > **Status:** Templates disabled in Brevo. This guide enables them.  
 > **Deadline:** Before going live with checkout/orders.
@@ -109,7 +109,7 @@ Your app expects **6 email templates** with specific IDs. Map them in Brevo dash
 2. Click **Edit** or **Create**
 3. Fill in:
    - **Template Name:** ORDER_CONFIRMATION
-   - **Subject:** `Deine Bestellung bei FermentFreude — {{params.ORDER_ID}}`
+   - **Subject:** `Deine Bestellung bei Fermentfreude — {{params.ORDER_ID}}`
    - **From Email:** Keep as `kontakt@fermentfreude.at`
    - **From Name:** Fermentfreude
 4. In the **Design** tab, paste the HTML from `public/email-templates/10-order-confirmation.html`
@@ -171,7 +171,7 @@ After creating all 6 templates:
 
 | # | Template | Status | Email Subject | Recipient |
 |---|---|---|---|---|
-| 1️⃣ | ORDER_CONFIRMATION | Should deliver | "Deine Bestellung bei FermentFreude — ord_..." | Customer email |
+| 1️⃣ | ORDER_CONFIRMATION | Should deliver | "Deine Bestellung bei Fermentfreude — ord_..." | Customer email |
 | 2️⃣ | WORKSHOP_BOOKING_CONFIRMATION | Should deliver | "Workshop Buchung bestätigt — book_..." | Customer email |
 
 ---

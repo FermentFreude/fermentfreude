@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 
 export const metadata = {
-  title: 'Workshop Tickets — FermentFreude',
+  title: 'Workshop Tickets — Fermentfreude',
   description: 'Your printable workshop tickets',
 }
 
@@ -219,7 +219,7 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
               {/* Ticket header */}
               <div className="bg-ff-near-black px-6 py-4 flex items-center justify-between">
                 <span className="font-display font-semibold text-white text-lg tracking-wide">
-                  FermentFreude
+                  Fermentfreude
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-ff-gold font-display text-sm font-semibold">

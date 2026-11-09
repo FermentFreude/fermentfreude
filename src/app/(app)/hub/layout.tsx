@@ -3,8 +3,8 @@ import type { ReactNode } from 'react'
 import { HubLocaleProvider } from './HubShell'
 
 export const metadata = {
-  title: 'FermentFreude Hub',
-  description: 'Documentation and knowledge base for FermentFreude editors and developers.',
+  title: 'Fermentfreude Hub',
+  description: 'Documentation and knowledge base for Fermentfreude editors and developers.',
   robots: { index: false, follow: false },
 }
 

@@ -218,7 +218,7 @@ export const VoucherCta: Block = {
           label: 'Description for Google & screen readers',
           admin: {
             description:
-              'Names the voucher for search engines, e.g. "Geschenkgutschein für einen Fermentations-Workshop bei FermentFreude in Graz".',
+              'Names the voucher for search engines, e.g. "Geschenkgutschein für einen Fermentations-Workshop bei Fermentfreude in Graz".',
             condition: (_, siblingData) => Boolean(siblingData?.enabled),
           },
         },

@@ -1,6 +1,6 @@
 # Localization & Auto-Translation
 
-FermentFreude is a bilingual website (German 🇩🇪 / English 🇬🇧) powered by Payload CMS localization and DeepL auto-translation.
+Fermentfreude is a bilingual website (German 🇩🇪 / English 🇬🇧) powered by Payload CMS localization and DeepL auto-translation.
 
 ## Overview
 

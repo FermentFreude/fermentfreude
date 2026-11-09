@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: { params: Params }) {
     if (!post) return {}
 
     return {
-      title: `${post.title} — FermentFreude`,
+      title: `${post.title} — Fermentfreude`,
       description: post.summary ?? undefined,
     }
   } catch {

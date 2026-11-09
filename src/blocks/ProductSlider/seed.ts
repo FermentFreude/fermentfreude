@@ -11,7 +11,7 @@ export function buildProductSlider(opts?: { productIds?: string[] }) {
     heading: 'Entdecke EINZIGARTIGE.',
     headingAccent: 'GESCHMÄCKER',
     description:
-      'Tauche ein in die Welt der Fermentations-Innovation bei FermentFreude. Unsere sorgfältig kuratierte Auswahl vereint die neuesten Geschmacksrichtungen und zeitlose Klassiker, damit du für jeden Anlass den perfekten Genuss findest.',
+      'Tauche ein in die Welt der Fermentations-Innovation bei Fermentfreude. Unsere sorgfältig kuratierte Auswahl vereint die neuesten Geschmacksrichtungen und zeitlose Klassiker, damit du für jeden Anlass den perfekten Genuss findest.',
     buttonLabel: 'Alle Produkte ansehen',
     buttonLink: '/products',
     products: opts?.productIds ?? [],
@@ -22,7 +22,7 @@ export function buildProductSlider(opts?: { productIds?: string[] }) {
     heading: 'Discover UNIQUE.',
     headingAccent: 'FLAVOURS',
     description:
-      'Dive into a world of fermentation innovation at FermentFreude. Our carefully curated products bring together the latest flavours and timeless classics, ensuring you find the perfect taste for every occasion.',
+      'Dive into a world of fermentation innovation at Fermentfreude. Our carefully curated products bring together the latest flavours and timeless classics, ensuring you find the perfect taste for every occasion.',
     buttonLabel: 'View All Products',
     buttonLink: '/products',
     products: opts?.productIds ?? [],

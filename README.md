@@ -1,4 +1,4 @@
-# FermentFreude
+# Fermentfreude
 
 Fermentation workshop bookings, shop, and community platform — built on Next.js 15 + Payload CMS, deployed on Vercel.
 
