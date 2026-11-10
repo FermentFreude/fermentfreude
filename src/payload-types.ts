@@ -5653,6 +5653,14 @@ export interface Transaction {
    */
   customerName?: string | null;
   /**
+   * Phone number supplied by the buyer at checkout. Copied to the Order.
+   */
+  customerPhone?: string | null;
+  /**
+   * Dietary notes supplied by the buyer at checkout. Copied to the Order.
+   */
+  customerDietSpecs?: string | null;
+  /**
    * Date chosen for in-store pickup. Copied to Order on creation.
    */
   pickupDate?: string | null;
@@ -9845,6 +9853,8 @@ export interface TransactionsSelect<T extends boolean = true> {
   customerFirstName?: T;
   customerLastName?: T;
   customerName?: T;
+  customerPhone?: T;
+  customerDietSpecs?: T;
   pickupDate?: T;
   pickupTime?: T;
   pickupLocation?: T;

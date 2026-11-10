@@ -1,5 +1,6 @@
 'use client'
 
+import { completePaymentOnServer } from '@/components/checkout/completePaymentOnServer'
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Address } from '@/payload-types'
@@ -194,28 +195,35 @@ export const CheckoutForm: React.FC<Props> = ({
                   ...(pickupDate ? { pickupDate } : {}),
                   ...(pickupTime ? { pickupTime } : {}),
                 },
+              }).catch((err: unknown) => {
+                console.warn('[CheckoutForm] confirmOrder failed, asking the server:', err)
+                return null
               })
 
-              if (
+              // Paid either way: if the plugin's confirm failed (e.g. the
+              // Stripe webhook got there first and emptied the cart), the
+              // server completes or finds the order from the payment alone.
+              const orderID =
                 confirmResult &&
                 typeof confirmResult === 'object' &&
                 'orderID' in confirmResult &&
                 confirmResult.orderID
-              ) {
-                clearSession()
+                  ? String(confirmResult.orderID)
+                  : await completePaymentOnServer(paymentIntent.id)
 
-                const emailParam = customerEmail
-                  ? `&email=${encodeURIComponent(customerEmail)}`
-                  : ''
-                // Route by login status like CheckoutPage.tsx's voucher-covers-cart
-                // path already does — logged-in customers get the account
-                // confirmation page, guests get the (richer, no-account-link)
-                // checkout one.
-                const confirmationBase = user ? '/account' : '/checkout'
-                router.push(
-                  `${confirmationBase}/order-confirmation?orderId=${confirmResult.orderID}&type=${orderType}${emailParam}`,
-                )
-              }
+              if (!orderID) throw new Error(t.somethingWentWrong)
+
+              clearSession()
+
+              const emailParam = customerEmail ? `&email=${encodeURIComponent(customerEmail)}` : ''
+              // Route by login status like CheckoutPage.tsx's voucher-covers-cart
+              // path already does — logged-in customers get the account
+              // confirmation page, guests get the (richer, no-account-link)
+              // checkout one.
+              const confirmationBase = user ? '/account' : '/checkout'
+              router.push(
+                `${confirmationBase}/order-confirmation?orderId=${orderID}&type=${orderType}${emailParam}`,
+              )
             } catch (err) {
               const msg = err instanceof Error ? err.message : t.somethingWentWrong
               setError(t.errorConfirming(msg))

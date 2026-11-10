@@ -29,13 +29,22 @@ import {
   handlePaymentFailed,
 } from '@/collections/Orders/stripeWebhooks'
 import { ProductsCollection } from '@/collections/Products'
+import { copyCheckoutDetails } from '@/collections/Transactions/copyCheckoutDetails'
 import { preventDuplicatePayment } from '@/collections/Transactions/preventDuplicatePayment'
+import { exactlyOnceConfirmOrder } from '@/lib/cartFulfilment'
 import { requireWorkshopSeatsHeld } from '@/collections/Transactions/requireWorkshopSeatsHeld'
 import { assignInvoiceNumber } from '@/hooks/assignInvoiceNumber'
 import { sendOrderConfirmationEmail } from '@/hooks/brevo/sendOrderConfirmationEmail'
 import { Page, Product } from '@/payload-types'
 import { mediaFixR2UrlAfterReadPlugin } from '@/plugins/mediaFixR2UrlAfterRead'
 import { getServerSideURL } from '@/utilities/getURL'
+
+// The browser and the Stripe webhook both confirm cart payments; this
+// makes sure only one Order is ever created per payment (src/lib/cartFulfilment.ts).
+const withExactlyOnceConfirmOrder = (adapter: ReturnType<typeof stripeAdapter>) => ({
+  ...adapter,
+  confirmOrder: exactlyOnceConfirmOrder(adapter.confirmOrder),
+})
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Fermentfreude` : 'Fermentfreude'
@@ -217,17 +226,19 @@ export const plugins: Plugin[] = [
     },
     payments: {
       paymentMethods: [
-        stripeAdapter({
-          secretKey: process.env.STRIPE_SECRET_KEY!,
-          publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-          webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET!,
-          webhooks: {
-            'payment_intent.payment_failed': handlePaymentFailed,
-            'charge.refunded': handleChargeRefunded,
-            'charge.succeeded': handleChargeSucceeded,
-            'payment_intent.succeeded': handleChargeSucceeded,
-          },
-        }),
+        withExactlyOnceConfirmOrder(
+          stripeAdapter({
+            secretKey: process.env.STRIPE_SECRET_KEY!,
+            publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+            webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET!,
+            webhooks: {
+              'payment_intent.payment_failed': handlePaymentFailed,
+              'charge.refunded': handleChargeRefunded,
+              'charge.succeeded': handleChargeSucceeded,
+              'payment_intent.succeeded': handleChargeSucceeded,
+            },
+          }),
+        ),
       ],
     },
     products: {
@@ -481,6 +492,22 @@ export const plugins: Plugin[] = [
             },
           },
           {
+            name: 'customerPhone',
+            type: 'text',
+            label: 'Customer phone',
+            admin: {
+              description: 'Phone number supplied by the buyer at checkout. Copied to the Order.',
+            },
+          },
+          {
+            name: 'customerDietSpecs',
+            type: 'textarea',
+            label: 'Customer dietary specifications',
+            admin: {
+              description: 'Dietary notes supplied by the buyer at checkout. Copied to the Order.',
+            },
+          },
+          {
             name: 'pickupDate',
             type: 'text',
             label: 'Pickup Date',
@@ -526,6 +553,7 @@ export const plugins: Plugin[] = [
           ...defaultCollection?.hooks,
           beforeValidate: [
             ...(defaultCollection?.hooks?.beforeValidate ?? []),
+            copyCheckoutDetails,
             preventDuplicatePayment,
             requireWorkshopSeatsHeld,
           ],
