@@ -384,7 +384,7 @@ function StoryCard({
       <div className="container container-padding flex min-h-0 gap-10 py-[clamp(0.5rem,1.75svh,1.5rem)]">
         {benefits.length ? (
           <div className="hidden shrink-0 items-end gap-10 self-end lg:flex">
-            <div className="w-[min(30rem,40vw)]">
+            <div className="w-[min(40rem,46vw)]">
               <Benefits items={benefits} active={active} />
             </div>
             {card.button ? (

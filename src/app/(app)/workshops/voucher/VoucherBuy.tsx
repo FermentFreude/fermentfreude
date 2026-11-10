@@ -33,7 +33,13 @@ const inputClass =
   'mt-1.5 w-full rounded-xl border border-[#E8E4D9] bg-white px-3.5 py-3 font-sans text-[15px] text-[#1A1A1A] outline-none transition placeholder:text-[#9A968F] focus:border-[#1A1A1A] focus:ring-2 focus:ring-[#E6BE68]/40'
 const labelClass = 'block font-sans text-[13px] font-semibold text-[#1A1A1A]'
 
-export function VoucherBuyProvider({ c, children }: { c: VoucherContent; children: React.ReactNode }) {
+export function VoucherBuyProvider({
+  c,
+  children,
+}: {
+  c: VoucherContent
+  children: React.ReactNode
+}) {
   const router = useRouter()
   const t = c.buy
 
@@ -75,7 +81,10 @@ export function VoucherBuyProvider({ c, children }: { c: VoucherContent; childre
         return
       }
       if (data.clientSecret) {
-        sessionStorage.setItem('voucherCheckout', JSON.stringify({ clientSecret: data.clientSecret, ...payload }))
+        sessionStorage.setItem(
+          'voucherCheckout',
+          JSON.stringify({ clientSecret: data.clientSecret, ...payload }),
+        )
         router.push('/voucher/checkout')
       } else if (data.sessionUrl) {
         router.push(data.sessionUrl)
@@ -110,39 +119,50 @@ export function VoucherBuyProvider({ c, children }: { c: VoucherContent; childre
                   amount={amount}
                   variant={isWorkshop ? 'workshop' : 'value'}
                   simple={!isWorkshop}
-                  text={{ ...(isWorkshop ? c.ticket.workshop : c.ticket.value), footer: c.ticket.footer, stub: c.ticket.stub }}
+                  text={{
+                    ...(isWorkshop ? c.ticket.workshop : c.ticket.value),
+                    footer: c.ticket.footer,
+                    stub: c.ticket.stub,
+                  }}
                 />
               </div>
 
-              <fieldset className="mt-7">
-                <legend className={labelClass}>{t.amountLabel}</legend>
-                <div className="mt-2 grid grid-cols-4 gap-2">
-                  {ALL_AMOUNTS.map((value) => (
-                    <label
-                      key={value}
-                      className={cn(
-                        'flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-xl border px-2 py-2 text-center transition',
-                        amount === value
-                          ? 'border-[#1A1A1A] bg-[#1A1A1A] text-[#FAF2E0]'
-                          : 'border-[#E8E4D9] bg-white text-[#1A1A1A] hover:border-[#1A1A1A]',
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="amount"
-                        value={value}
-                        checked={amount === value}
-                        onChange={() => setAmount(value)}
-                        className="sr-only"
-                      />
-                      <span className="font-display text-lg font-bold leading-none">€{value}</span>
-                      {value === 99 && (
-                        <span className="mt-1 font-sans text-[11px] leading-none opacity-75">{t.workshopChip}</span>
-                      )}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+              {/* €50/€30/€20 only while the value-voucher section is switched on */}
+              {c.sections.values && (
+                <fieldset className="mt-7">
+                  <legend className={labelClass}>{t.amountLabel}</legend>
+                  <div className="mt-2 grid grid-cols-4 gap-2">
+                    {ALL_AMOUNTS.map((value) => (
+                      <label
+                        key={value}
+                        className={cn(
+                          'flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-xl border px-2 py-2 text-center transition',
+                          amount === value
+                            ? 'border-[#1A1A1A] bg-[#1A1A1A] text-[#FAF2E0]'
+                            : 'border-[#E8E4D9] bg-white text-[#1A1A1A] hover:border-[#1A1A1A]',
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="amount"
+                          value={value}
+                          checked={amount === value}
+                          onChange={() => setAmount(value)}
+                          className="sr-only"
+                        />
+                        <span className="font-display text-lg font-bold leading-none">
+                          €{value}
+                        </span>
+                        {value === 99 && (
+                          <span className="mt-1 font-sans text-[11px] leading-none opacity-75">
+                            {t.workshopChip}
+                          </span>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
 
               <p className="mb-0 mt-6 rounded-xl bg-[#F9F2E0] px-4 py-3 font-sans text-[14px] leading-snug text-[#4B4B4B]">
                 {t.deliveryNote}

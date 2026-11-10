@@ -33,12 +33,20 @@ import { VoucherTicket } from './VoucherTicket'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 // Background blur; the photo is scaled up a little so the soft edges stay outside the frame
-const BLUR = { none: { px: 0, scale: 1 }, soft: { px: 3, scale: 1.03 }, strong: { px: 10, scale: 1.08 } } as const
+const BLUR = {
+  none: { px: 0, scale: 1 },
+  soft: { px: 3, scale: 1.03 },
+  strong: { px: 10, scale: 1.08 },
+} as const
 const PAPER = '#F9F2E0'
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
-  show: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE, delay: 0.08 * i } }),
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.9, ease: EASE, delay: 0.08 * i },
+  }),
 }
 
 export function VoucherPageHero({ c }: { c: VoucherContent }) {
@@ -85,7 +93,13 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
               transition={{ duration: 1.6, ease: EASE }}
               style={blur.px ? { filter: `blur(${blur.px}px)` } : undefined}
             >
-              <Media resource={h.image} fill priority size={blur.px >= 10 ? '50vw' : '100vw'} imgClassName="object-cover" />
+              <Media
+                resource={h.image}
+                fill
+                priority
+                size={blur.px >= 10 ? '50vw' : '100vw'}
+                imgClassName="object-cover"
+              />
             </motion.div>
             {/* shade: even on phone, darker on the text side from desktop up */}
             <div
@@ -97,7 +111,11 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
 
         {/* phone/tablet: headline → visual → text; desktop: text left, visual right */}
         <div className="container-padding mx-auto grid max-w-360 grid-cols-[minmax(0,1fr)] gap-x-16 pb-16 pt-10 sm:pt-14 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:grid-rows-[1fr_auto_auto_1fr] lg:pb-20 lg:pt-12">
-          <motion.div initial="hidden" animate="show" className="max-w-xl lg:col-start-1 lg:row-start-2">
+          <motion.div
+            initial="hidden"
+            animate="show"
+            className="max-w-xl lg:col-start-1 lg:row-start-2"
+          >
             <motion.div variants={fadeUp} custom={0}>
               <Eyebrow tone={onPhoto ? 'light' : 'dark'}>{h.eyebrow}</Eyebrow>
             </motion.div>
@@ -105,7 +123,7 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
               variants={fadeUp}
               custom={1}
               className={cn(
-                "mb-0 mt-4 font-display text-[clamp(2.5rem,5.2vw,4.75rem)] font-bold leading-[0.95] tracking-[-0.04em] hyphens-manual",
+                'mb-0 mt-4 font-display text-[clamp(2.5rem,5.2vw,4.75rem)] font-bold leading-[0.95] tracking-[-0.04em] hyphens-manual',
                 onPhoto ? 'text-[#FAF2E0]' : 'text-[#1A1A1A]',
               )}
             >
@@ -121,38 +139,51 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
               animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0% 0% 0% round 16px)' }}
               transition={{ duration: 1.3, ease: EASE, delay: 0.2 }}
             >
-              <Media resource={h.image} fill priority size="(min-width: 1024px) 608px, 100vw" imgClassName="object-cover" />
+              <Media
+                resource={h.image}
+                fill
+                priority
+                size="(min-width: 1024px) 608px, 100vw"
+                imgClassName="object-cover"
+              />
             </motion.div>
           ) : showTicket ? (
-          <div className="mx-auto mt-10 w-full max-w-xl px-2 py-4 sm:py-8 lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:mt-0 lg:max-w-184 lg:self-center">
-            <motion.div
-              initial={{ opacity: 0, y: 60, rotate: -9 }}
-              animate={{ opacity: 1, y: 0, rotate: -3.5 }}
-              transition={{ duration: 1.3, ease: EASE, delay: 0.25 }}
-            >
+            <div className="mx-auto mt-10 w-full max-w-xl px-2 py-4 sm:py-8 lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:mt-0 lg:max-w-184 lg:self-center">
               <motion.div
-                style={reduce ? undefined : { rotate: ticketRotate, x: ticketX, y: ticketY }}
-                className="drop-shadow-[0_30px_50px_rgba(26,26,26,0.28)]"
+                initial={{ opacity: 0, y: 60, rotate: -9 }}
+                animate={{ opacity: 1, y: 0, rotate: -3.5 }}
+                transition={{ duration: 1.3, ease: EASE, delay: 0.25 }}
               >
                 <motion.div
-                  animate={reduce ? undefined : { y: [0, -7, 0] }}
-                  transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity, delay: 1.6 }}
+                  style={reduce ? undefined : { rotate: ticketRotate, x: ticketX, y: ticketY }}
+                  className="drop-shadow-[0_30px_50px_rgba(26,26,26,0.28)]"
                 >
-                  <VoucherTicket
-                    amount={99}
-                    variant="workshop"
-                    text={{ ...c.ticket.workshop, footer: c.ticket.footer, stub: c.ticket.stub }}
-                    alt={h.ticketAlt}
-                  />
+                  <motion.div
+                    animate={reduce ? undefined : { y: [0, -7, 0] }}
+                    transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity, delay: 1.6 }}
+                  >
+                    <VoucherTicket
+                      amount={99}
+                      variant="workshop"
+                      text={{ ...c.ticket.workshop, footer: c.ticket.footer, stub: c.ticket.stub }}
+                      alt={h.ticketAlt}
+                    />
+                  </motion.div>
                 </motion.div>
               </motion.div>
-            </motion.div>
-          </div>
+            </div>
           ) : (
-            <div className="hidden lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:block" aria-hidden="true" />
+            <div
+              className="hidden lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:block"
+              aria-hidden="true"
+            />
           )}
 
-          <motion.div initial="hidden" animate="show" className="mt-8 max-w-xl lg:col-start-1 lg:row-start-3 lg:mt-0">
+          <motion.div
+            initial="hidden"
+            animate="show"
+            className="mt-8 max-w-xl lg:col-start-1 lg:row-start-3 lg:mt-0"
+          >
             <motion.p
               variants={fadeUp}
               custom={2}
@@ -173,12 +204,21 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
               >
                 {h.price}
               </span>
-              <span className={cn('font-sans text-[15px]', onPhoto ? 'text-[#FAF2E0]/85' : 'text-[#4B4B4B]')}>
+              <span
+                className={cn(
+                  'font-sans text-[15px]',
+                  onPhoto ? 'text-[#FAF2E0]/85' : 'text-[#4B4B4B]',
+                )}
+              >
                 {h.priceNote}
               </span>
             </motion.div>
 
-            <motion.div variants={fadeUp} custom={4} className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4">
+            <motion.div
+              variants={fadeUp}
+              custom={4}
+              className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4"
+            >
               <BuyButton
                 amount={99}
                 className="group inline-flex min-h-13 items-center gap-2 rounded-full bg-[#E6BE68] px-7 py-3.5 font-display text-base font-bold text-[#1A1A1A] transition hover:bg-[#D4A654]"
@@ -189,16 +229,20 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
                   aria-hidden="true"
                 />
               </BuyButton>
-              <a
-                href="#betraege"
-                className={cn(
-                  'inline-flex min-h-11 items-center gap-1.5 font-display text-[15px] font-bold underline decoration-[#E6BE68] decoration-2 underline-offset-[6px] transition',
-                  onPhoto ? 'text-[#FAF2E0] hover:decoration-[#FAF2E0]' : 'text-[#1A1A1A] hover:decoration-[#1A1A1A]',
-                )}
-              >
-                {h.secondary}
-                <ArrowDown className="size-4" aria-hidden="true" />
-              </a>
+              {c.sections.values && (
+                <a
+                  href="#betraege"
+                  className={cn(
+                    'inline-flex min-h-11 items-center gap-1.5 font-display text-[15px] font-bold underline decoration-[#E6BE68] decoration-2 underline-offset-[6px] transition',
+                    onPhoto
+                      ? 'text-[#FAF2E0] hover:decoration-[#FAF2E0]'
+                      : 'text-[#1A1A1A] hover:decoration-[#1A1A1A]',
+                  )}
+                >
+                  {h.secondary}
+                  <ArrowDown className="size-4" aria-hidden="true" />
+                </a>
+              )}
             </motion.div>
 
             <motion.div variants={fadeUp} custom={5} className="mt-10 lg:mt-12">

@@ -45,7 +45,7 @@ export type OccasionRow = {
 }
 
 const de = {
-  sections: { values: true, occasions: true, print: true, faq: true },
+  sections: { values: false, occasions: true, print: true, faq: true },
   meta: {
     title: 'Gutschein für Fermentations-Workshops in Graz | Fermentfreude',
     description:
@@ -68,7 +68,7 @@ const de = {
   card: {
     frontEyebrow: 'Für dich',
     frontWords: 'Von\nHerzen',
-    backEyebrow: 'Du bist etwas Besonderes',
+    backEyebrow: 'Für einen besonderen Menschen',
     backFor: 'Das hier ist für',
     backFrom: 'Von',
   },
@@ -77,17 +77,17 @@ const de = {
     image: null as MediaType | null,
     ticketOnBackground: true,
     backgroundBlur: 'soft' as HeroBlur,
-    eyebrow: 'Geschenkgutschein · Graz',
-    headline: 'Verschenk einen Fermentations-Workshop.',
-    text: 'Kombucha, Tempeh oder Lakto-Gemüse selbst ansetzen, verkosten und das eigene Glas mit nach Hause nehmen. Ein Geschenk, das noch Wochen später weiterfermentiert.',
+    eyebrow: 'Geschenkgutschein',
+    headline: 'Verschenke einen Workshop voller Geschmack.',
+    text: 'Ob Kombucha, Tempeh oder fermentiertes Gemüse wie Kimchi – gemeinsam fermentieren, verkosten und genießen. Die selbstgemachten Fermente dürfen natürlich mit nach Hause!',
     price: '€99',
-    priceNote: 'ein ganzer Workshop nach Wahl, pro Person',
+    priceNote: 'Ein Workshop nach Wahl für eine Person',
     button: 'Gutschein verschenken',
     secondary: 'Oder einen Betrag schenken',
     points: [
-      { icon: 'clock', title: 'Sofort per E-Mail', text: 'Als PDF, in wenigen Minuten' },
-      { icon: 'gift', title: 'Grußkarte inklusive', text: 'Zum Ausdrucken und Hineinschreiben' },
-      { icon: 'shieldCheck', title: 'Freie Wahl', text: 'Jeder Workshop, jeder Termin' },
+      { icon: 'clock', title: 'Sofort per E-Mail', text: 'Als PDF direkt nach dem Kauf' },
+      { icon: 'gift', title: 'Grußkarte inklusive', text: 'Zum Ausdrucken und Beschriften' },
+      { icon: 'shieldCheck', title: 'Freie Wahl', text: 'Workshop und Termin selbst auswählen' },
     ],
     ticketAlt: 'Workshop-Geschenkgutschein über 99 Euro von Fermentfreude Graz',
   },
@@ -106,60 +106,50 @@ const de = {
   occasions: {
     eyebrow: 'Geschenkideen',
     headline: 'Ein Geschenk, das man schmeckt.',
-    intro: 'Ob unterm Christbaum, fürs ganze Team oder zum Geburtstag: Ein Fermentations-Workshop ist ein Erlebnis, das bleibt. Und das Glas fermentiert zu Hause weiter.',
+    intro: 'Ob zu Weihnachten, zum Geburtstag oder einfach als besondere Überraschung: Verschenke gemeinsame Genussmomente, neue Erfahrungen und die Freude am Selbermachen.',
     rows: [
       {
         key: 'christmas',
         label: 'Weihnachtsgeschenk',
-        title: 'Das perfekte Weihnachtsgeschenk: ein Erlebnis statt noch einem Ding.',
-        text: 'Statt Socken und Gutscheinkarten von der Stange: ein Workshop, in dem man selbst Kombucha, Tempeh oder Lakto-Gemüse ansetzt. Das eigene Glas kommt mit nach Hause und erinnert noch lange an das Geschenk.',
+        title: 'Ein Erlebnis, das in Erinnerung bleibt.',
+        text: 'Statt noch einem Geschenk von der Stange: Überrasche deine Liebsten mit einem besonderen Erlebnis. Gemeinsam fermentieren, Neues entdecken und genießen – mit selbstgemachten Fermenten für zu Hause.',
         bullets: [
-          'Sofort per E-Mail, auch noch kurz vor Heiligabend',
-          'Mit Grußkarte zum Ausdrucken und Hineinschreiben',
+          'Sofort per E-Mail, auch kurz vor Heiligabend',
+          'Mit Grußkarte zum Ausdrucken und Beschriften',
           'Workshop und Termin frei wählbar',
         ],
-        cta: { kind: 'buy', amount: 99, label: 'Weihnachtsgeschenk sichern' },
+        cta: { kind: 'buy', amount: 99, label: 'Gutschein kaufen' },
       },
       {
         key: 'teams',
-        label: 'Firmengeschenk & Teamevent',
-        title: 'Weihnachtsgeschenk für Mitarbeiter:innen, oder ein Tag mit dem ganzen Team.',
-        text: 'Schenk deinem Team etwas, das nicht in der Schublade landet. Jede:r löst den Gutschein selbst ein, für einen Workshop oder im Shop. Oder ihr fermentiert gemeinsam: als Teamevent, das man schmeckt.',
+        label: 'Firmengeschenke & Teamevents',
+        title: 'Ein Erlebnis, das verbindet.',
+        text: 'Ob als besonderes Dankeschön für Mitarbeiter:innen oder als gemeinsames Teamevent: Verschenke ein Erlebnis voller Geschmack! Bei uns wird fermentiert, verkostet und Neues entdeckt. Eine genussvolle Abwechslung abseits des Arbeitsalltags.',
         bullets: [
-          'Gutscheine für das ganze Team, einzeln einlösbar',
-          'Gemeinsamer Workshop als Teamevent',
-          'Ab 10 Gutscheinen: schreib uns, wir helfen gern',
+          'Workshop-Gutscheine für Mitarbeiter:innen – frei einlösbar',
+          'Einfach & unkompliziert – Gutscheine zum Ausdrucken, ohne Terminabstimmung',
+          'Gemeinsame Fermentations-Workshops als Teamevent',
         ],
         cta: { kind: 'link', href: '/contact', label: 'Anfrage für Firmen' },
       },
       {
-        key: 'plant',
-        label: 'Vegan & vegetarisch',
-        title: 'Für alle, die pflanzlich genießen, oder es entdecken wollen.',
-        text: 'Tempeh, Kimchi und Kombucha sind vegan und voller Geschmack. Ein Workshop zeigt, wie einfach Fermentieren zu Hause geht. Der Wertgutschein passt für alle, die lieber gleich im Shop probieren.',
-        bullets: [
-          'Handwerklich fermentiert in Graz',
-          'Ohne Vorkenntnisse, auch für Einsteiger:innen',
-        ],
-        cta: { kind: 'buy', amount: 50, label: 'Wertgutschein verschenken' },
-      },
-      {
         key: 'birthday',
         label: 'Geburtstagsgeschenk',
-        title: 'Mach den Geburtstag zu etwas Besonderem.',
-        text: 'Für Menschen, die schon alles haben. Außer einem eigenen Glas Kimchi. Ein Workshop-Gutschein ist eine Geschenkidee, die man erlebt, schmeckt und mit nach Hause nimmt.',
+        title: 'Für alle, die schon alles haben. Fast.',
+        text: 'Überrasche das Geburtstagskind mit einem besonderen Erlebnis voller Geschmack, neuer Entdeckungen und Spaß am Selbermachen. Oder feiert gleich gemeinsam bei uns!',
         bullets: [
-          'Nicht personengebunden, frei übertragbar',
-          'Termin wählt die beschenkte Person selbst',
+          'Ein besonderes Geschenk statt noch mehr Dinge',
+          'Workshop und Termin frei wählbar',
+          'Geburtstagsfeier als Fermentations-Workshop auf Anfrage',
         ],
-        cta: { kind: 'buy', amount: 99, label: 'Geburtstagsgeschenk verschenken' },
+        cta: { kind: 'buy', amount: 99, label: 'Gutschein kaufen' },
       },
     ] as OccasionRow[],
   },
   print: {
     eyebrow: 'Zum Ausdrucken',
-    headline: 'Die Grußkarte zum Gutschein.',
-    text: 'Druck sie aus, schreib ein paar Zeilen hinein und überreich sie zusammen mit dem Gutschein. Den Gutschein selbst bekommst du nach dem Kauf per E-Mail als PDF.',
+    headline: 'Eine persönliche Grußkarte zum Gutschein.',
+    text: 'Ein paar persönliche Worte machen dein Geschenk noch besonderer. Lade unsere Grußkarte kostenlos herunter, druck sie aus und ergänze deine eigene Botschaft. Den Gutschein selbst erhältst du nach dem Kauf als PDF per E-Mail.',
     button: 'Grußkarte herunterladen (PDF)',
     note: 'A5 quer, Vorder- und Rückseite.',
     file: '/gutschein-karte.pdf',
@@ -168,10 +158,10 @@ const de = {
   how: {
     eyebrow: 'So funktioniert’s',
     points: [
-      { icon: 'gift', title: 'Gutschein wählen', text: 'Workshop oder Betrag' },
+      { icon: 'gift', title: 'Gutschein kaufen', text: '99 € für einen Workshop nach Wahl' },
       { icon: 'clock', title: 'Sofort erhalten', text: 'Als PDF per E-Mail' },
-      { icon: 'heart', title: 'Grußkarte dazulegen', text: 'Ausdrucken und ein paar Zeilen schreiben' },
-      { icon: 'shieldCheck', title: 'Einlösen', text: 'Code beim Bezahlen eingeben' },
+      { icon: 'heart', title: 'Persönlich verschenken', text: 'Grußkarte ausdrucken und beschriften' },
+      { icon: 'shieldCheck', title: 'Workshop buchen', text: 'Workshop und Termin wählen, Gutscheincode einlösen' },
     ],
   },
   faq: {
@@ -184,22 +174,22 @@ const de = {
       {
         question: 'Wofür kann ich den Gutschein einlösen?',
         answer:
-          'Für alle Fermentations-Workshops bei Fermentfreude in Graz, zum Beispiel Kombucha, Tempeh oder Lakto-Gemüse, und für Produkte in unserem Shop. Der Workshop-Gutschein über 99 € deckt einen ganzen Workshop pro Person.',
+          'Für alle unsere Fermentations-Workshops in Graz – ob Kombucha, Tempeh oder fermentiertes Gemüse. Der 99-€-Gutschein beinhaltet einen Workshop nach Wahl für eine Person.',
       },
       {
         question: 'Wie löse ich den Gutschein ein?',
         answer:
-          'Workshop oder Produkte in den Warenkorb legen und beim Bezahlen den Gutschein-Code eingeben. Der Betrag wird sofort abgezogen. Falls etwas nicht klappt, schreib uns einfach.',
+          'Workshop oder Produkte in den Warenkorb legen und beim Bezahlen den Gutscheincode eingeben. Der Betrag wird sofort abgezogen. Falls etwas nicht klappt, schreib uns einfach.',
       },
       {
         question: 'Was passiert, wenn der Einkauf mehr kostet als der Gutschein?',
         answer:
-          'Dann zahlst du den Rest ganz normal online. So lässt sich zum Beispiel auch ein 50-€-Gutschein für einen Workshop verwenden.',
+          'Dann bezahlst du einfach die Differenz. Der Gutscheinbetrag wird beim Bezahlen automatisch abgezogen.',
       },
       {
         question: 'Wie bekomme ich den Gutschein?',
         answer:
-          'Direkt nach dem Kauf per E-Mail, als PDF zum Ausdrucken oder Weiterleiten. Dazu gibt es unsere Grußkarte zum Ausdrucken und Hineinschreiben.',
+          'Direkt nach dem Kauf per E-Mail als PDF zum Ausdrucken oder Weiterleiten. Unsere Grußkarte kannst du zusätzlich kostenlos herunterladen.',
       },
       {
         question: 'Muss ich beim Kauf einen Workshop oder Termin auswählen?',
@@ -208,7 +198,7 @@ const de = {
       },
       {
         question: 'Ist der Gutschein übertragbar?',
-        answer: 'Ja, der Gutschein ist nicht personengebunden und kann von jeder Person eingelöst werden.',
+        answer: 'Ja, der Gutschein ist nicht personengebunden und kann von jeder Person mit dem Gutscheincode eingelöst werden.',
       },
       {
         question: 'Braucht man Vorkenntnisse für einen Workshop?',
@@ -218,7 +208,7 @@ const de = {
       {
         question: 'Gibt es Gutscheine für Firmen und Teams?',
         answer:
-          'Ja. Als Weihnachtsgeschenk für Mitarbeiter:innen oder als gemeinsames Teamevent. Für größere Mengen schreib uns an kontakt@fermentfreude.at.',
+          'Ja! Ob als Mitarbeitergeschenk, Weihnachtsgeschenk oder gemeinsames Teamevent – schreib uns einfach an kontakt@fermentfreude.at.',
       },
     ],
   },
@@ -246,7 +236,7 @@ const de = {
 export type VoucherContent = typeof de
 
 const en: VoucherContent = {
-  sections: { values: true, occasions: true, print: true, faq: true },
+  sections: { values: false, occasions: true, print: true, faq: true },
   meta: {
     title: 'Gift voucher for fermentation workshops in Graz | Fermentfreude',
     description:
@@ -269,7 +259,7 @@ const en: VoucherContent = {
   card: {
     frontEyebrow: 'For you',
     frontWords: 'With\nlove',
-    backEyebrow: 'You are someone special',
+    backEyebrow: 'For someone special',
     backFor: 'This is for',
     backFrom: 'From',
   },
@@ -278,17 +268,17 @@ const en: VoucherContent = {
     image: null,
     ticketOnBackground: true,
     backgroundBlur: 'soft',
-    eyebrow: 'Gift voucher · Graz',
-    headline: 'Give a fermentation workshop.',
-    text: 'Make your own kombucha, tempeh or lacto-fermented vegetables, taste them and take your own jar home. A gift that keeps fermenting for weeks.',
+    eyebrow: 'Gift voucher',
+    headline: 'Give a workshop full of flavour.',
+    text: 'Kombucha, tempeh or fermented vegetables like kimchi – ferment, taste and enjoy together. And of course the homemade ferments go home with you!',
     price: '€99',
-    priceNote: 'one full workshop of their choice, per person',
+    priceNote: 'One workshop of their choice for one person',
     button: 'Give a voucher',
     secondary: 'Or give an amount',
     points: [
-      { icon: 'clock', title: 'Instantly by email', text: 'As a PDF, within minutes' },
-      { icon: 'gift', title: 'Greeting card included', text: 'To print and write in' },
-      { icon: 'shieldCheck', title: 'Their choice', text: 'Any workshop, any date' },
+      { icon: 'clock', title: 'Instantly by email', text: 'As a PDF right after purchase' },
+      { icon: 'gift', title: 'Greeting card included', text: 'To print and write on' },
+      { icon: 'shieldCheck', title: 'Their choice', text: 'They pick the workshop and date' },
     ],
     ticketAlt: 'Fermentfreude Graz workshop gift voucher worth 99 euros',
   },
@@ -307,54 +297,50 @@ const en: VoucherContent = {
   occasions: {
     eyebrow: 'Gift ideas',
     headline: 'A gift you can taste.',
-    intro: 'Under the Christmas tree, for the whole team or for a birthday: a fermentation workshop is an experience that stays. And the jar keeps fermenting at home.',
+    intro: 'For Christmas, a birthday or simply as a special surprise: give shared moments of enjoyment, new experiences and the joy of making things yourself.',
     rows: [
       {
         key: 'christmas',
         label: 'Christmas gift',
-        title: 'The perfect Christmas gift: an experience instead of one more thing.',
-        text: 'Instead of socks and off-the-shelf gift cards: a workshop where you make your own kombucha, tempeh or lacto-fermented vegetables. The jar comes home with you and keeps the gift in mind for a long time.',
+        title: 'An experience to remember.',
+        text: 'Instead of yet another off-the-shelf present: surprise your loved ones with a special experience. Ferment together, discover something new and enjoy – with homemade ferments to take home.',
         bullets: [
           'Instantly by email, even just before Christmas Eve',
-          'With a greeting card to print and write in',
+          'With a greeting card to print and write on',
           'Workshop and date of their choice',
         ],
-        cta: { kind: 'buy', amount: 99, label: 'Get the Christmas gift' },
+        cta: { kind: 'buy', amount: 99, label: 'Buy a voucher' },
       },
       {
         key: 'teams',
-        label: 'Corporate gift & team event',
-        title: 'A Christmas gift for your employees, or a day with the whole team.',
-        text: 'Give your team something that won’t end up in a drawer. Everyone redeems their voucher themselves, for a workshop or in the shop. Or ferment together: a team event you can taste.',
+        label: 'Corporate gifts & team events',
+        title: 'An experience that brings people together.',
+        text: 'As a special thank-you for your employees or as a shared team event: give an experience full of flavour! With us you ferment, taste and discover something new – an enjoyable change from everyday work.',
         bullets: [
-          'Vouchers for the whole team, redeemed individually',
-          'A shared workshop as a team event',
-          'More than 10 vouchers? Write to us, we are happy to help',
+          'Workshop vouchers for employees – redeem any time',
+          'Simple & easy – printable vouchers, no scheduling needed',
+          'Fermentation workshops together as a team event',
         ],
         cta: { kind: 'link', href: '/contact', label: 'Enquiry for companies' },
       },
       {
-        key: 'plant',
-        label: 'Vegan & vegetarian',
-        title: 'For everyone who enjoys plant-based food, or wants to discover it.',
-        text: 'Tempeh, kimchi and kombucha are vegan and full of flavour. A workshop shows how easy fermenting at home is. The gift voucher suits everyone who would rather try the shop straight away.',
-        bullets: ['Handcrafted and fermented in Graz', 'No experience needed, great for beginners'],
-        cta: { kind: 'buy', amount: 50, label: 'Give a gift voucher' },
-      },
-      {
         key: 'birthday',
         label: 'Birthday gift',
-        title: 'Make their birthday something special.',
-        text: 'For people who already have everything. Except their own jar of kimchi. A workshop voucher is a gift idea you experience, taste and take home.',
-        bullets: ['Not tied to a person, freely transferable', 'They choose the date themselves'],
-        cta: { kind: 'buy', amount: 99, label: 'Give a birthday gift' },
+        title: 'For people who have everything. Almost.',
+        text: 'Surprise the birthday person with a special experience full of flavour, new discoveries and the fun of making things yourself. Or celebrate together with us!',
+        bullets: [
+          'A special gift instead of more stuff',
+          'Workshop and date of their choice',
+          'Birthday party as a fermentation workshop on request',
+        ],
+        cta: { kind: 'buy', amount: 99, label: 'Buy a voucher' },
       },
     ],
   },
   print: {
     eyebrow: 'Ready to print',
-    headline: 'The greeting card for your voucher.',
-    text: 'Print it, write a few lines inside and hand it over together with the voucher. You get the voucher itself as a PDF by email after your purchase.',
+    headline: 'A personal greeting card for your voucher.',
+    text: 'A few personal words make your gift even more special. Download our greeting card for free, print it and add your own message. You get the voucher itself as a PDF by email after your purchase.',
     button: 'Download the greeting card (PDF)',
     note: 'A5 landscape, front and back.',
     file: '/greeting-card.pdf',
@@ -363,10 +349,10 @@ const en: VoucherContent = {
   how: {
     eyebrow: 'How it works',
     points: [
-      { icon: 'gift', title: 'Choose a voucher', text: 'A workshop or an amount' },
+      { icon: 'gift', title: 'Buy a voucher', text: '€99 for a workshop of their choice' },
       { icon: 'clock', title: 'Get it instantly', text: 'As a PDF by email' },
-      { icon: 'heart', title: 'Add the greeting card', text: 'Print it and write a few lines' },
-      { icon: 'shieldCheck', title: 'Redeem', text: 'Enter the code at checkout' },
+      { icon: 'heart', title: 'Give it personally', text: 'Print the greeting card and write on it' },
+      { icon: 'shieldCheck', title: 'Book a workshop', text: 'Choose workshop and date, redeem the voucher code' },
     ],
   },
   faq: {
@@ -379,7 +365,7 @@ const en: VoucherContent = {
       {
         question: 'What can I redeem the voucher for?',
         answer:
-          'For all fermentation workshops at Fermentfreude in Graz, such as kombucha, tempeh or lacto-fermented vegetables, and for products in our shop. The €99 workshop voucher covers one full workshop per person.',
+          'For all our fermentation workshops in Graz – kombucha, tempeh or fermented vegetables. The €99 voucher covers one workshop of their choice for one person.',
       },
       {
         question: 'How do I redeem the voucher?',
@@ -388,12 +374,12 @@ const en: VoucherContent = {
       },
       {
         question: 'What if my purchase costs more than the voucher?',
-        answer: 'Then you simply pay the rest online. That way a €50 voucher can also go towards a workshop.',
+        answer: 'Then you simply pay the difference. The voucher amount is deducted automatically at checkout.',
       },
       {
         question: 'How do I receive the voucher?',
         answer:
-          'Straight after your purchase by email, as a PDF to print or forward. You also get our greeting card to print and write in.',
+          'Straight after your purchase by email as a PDF to print or forward. You can also download our greeting card for free.',
       },
       {
         question: 'Do I have to choose a workshop or date when buying?',
@@ -401,7 +387,7 @@ const en: VoucherContent = {
       },
       {
         question: 'Is the voucher transferable?',
-        answer: 'Yes, the voucher is not tied to a person and can be redeemed by anyone.',
+        answer: 'Yes, the voucher is not tied to a person and can be redeemed by anyone with the voucher code.',
       },
       {
         question: 'Do I need any experience for a workshop?',
@@ -410,7 +396,7 @@ const en: VoucherContent = {
       {
         question: 'Are there vouchers for companies and teams?',
         answer:
-          'Yes. As a Christmas gift for employees or as a shared team event. For larger quantities write to us at kontakt@fermentfreude.at.',
+          'Yes! As a gift for employees, a Christmas present or a shared team event – just write to us at kontakt@fermentfreude.at.',
       },
     ],
   },
