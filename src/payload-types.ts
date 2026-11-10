@@ -1687,6 +1687,9 @@ export interface Page {
       stub?: string | null;
     };
     values?: {
+      /**
+       * Aus = nur der 99-€-Workshop-Gutschein ist kaufbar: Der Abschnitt, der Link „Oder einen Betrag schenken“ und die Beträge €50/€30/€20 im Kauf-Fenster verschwinden. / Off = only the €99 workshop voucher can be bought: this section, the hero link and the €50/€30/€20 choice in the buy panel are hidden.
+       */
       show?: boolean | null;
       eyebrow?: string | null;
       headline?: string | null;

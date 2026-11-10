@@ -13,7 +13,12 @@ import { pointIconField } from '@/fields/pointIcon'
  *  database and simply aren't used any more.
  * ═══════════════════════════════════════════════════════════════ */
 
-const text = (name: string, label: string, description?: string, extra: Partial<Field> = {}): Field =>
+const text = (
+  name: string,
+  label: string,
+  description?: string,
+  extra: Partial<Field> = {},
+): Field =>
   ({
     name,
     type: 'text',
@@ -38,7 +43,12 @@ const show = (what: string): Field => ({
   label: `Abschnitt anzeigen / Show ${what}`,
 })
 
-const amountField = (name: string, options: number[], label: string, description: string): Field => ({
+const amountField = (
+  name: string,
+  options: number[],
+  label: string,
+  description: string,
+): Field => ({
   name,
   type: 'select',
   label,
@@ -73,7 +83,10 @@ export const voucherTab: Tab = {
       name: 'hero',
       type: 'group',
       label: '1 · Oben: €99 Workshop-Gutschein / Top: €99 workshop voucher',
-      admin: { description: 'Der erste Bildschirm: Überschrift, Text, Preis, Button und das Gutschein-Motiv rechts.' },
+      admin: {
+        description:
+          'Der erste Bildschirm: Überschrift, Text, Preis, Button und das Gutschein-Motiv rechts.',
+      },
       fields: [
         {
           name: 'visual',
@@ -98,7 +111,8 @@ export const voucherTab: Tab = {
           admin: {
             description:
               'Rechts: Hochformat oder quadratisch (mind. 1200 px). Hintergrund: Querformat (mind. 1920 px), das Motiv eher rechts im Bild.',
-            condition: (_, sibling) => sibling?.visual === 'image' || sibling?.visual === 'background',
+            condition: (_, sibling) =>
+              sibling?.visual === 'image' || sibling?.visual === 'background',
           },
         },
         {
@@ -112,7 +126,8 @@ export const voucherTab: Tab = {
             { label: 'Stark / Strong', value: 'strong' },
           ],
           admin: {
-            description: 'Mit Unschärfe tritt das Foto zurück und Text und Gutschein-Motiv stehen klarer davor.',
+            description:
+              'Mit Unschärfe tritt das Foto zurück und Text und Gutschein-Motiv stehen klarer davor.',
             condition: (_, sibling) => sibling?.visual === 'background',
           },
         },
@@ -123,15 +138,31 @@ export const voucherTab: Tab = {
           label: 'Gutschein-Motiv über dem Foto zeigen / Show the ticket over the photo',
           admin: { condition: (_, sibling) => sibling?.visual === 'background' },
         },
-        text('eyebrow', 'Kleine Zeile über der Überschrift / Small line above the headline', 'z. B. „Geschenkgutschein · Graz“'),
-        text('headline', 'Überschrift (H1) / Headline', 'Die wichtigste Zeile für Google: Gutschein + Fermentations-Workshop nennen.'),
+        text(
+          'eyebrow',
+          'Kleine Zeile über der Überschrift / Small line above the headline',
+          'z. B. „Geschenkgutschein · Graz“',
+        ),
+        text(
+          'headline',
+          'Überschrift (H1) / Headline',
+          'Die wichtigste Zeile für Google: Gutschein + Fermentations-Workshop nennen.',
+        ),
         area('text', 'Text unter der Überschrift / Text'),
         text('price', 'Preis / Price', 'z. B. „€99“'),
-        text('priceNote', 'Zeile neben dem Preis / Next to the price', 'z. B. „ein ganzer Workshop nach Wahl, pro Person“'),
+        text(
+          'priceNote',
+          'Zeile neben dem Preis / Next to the price',
+          'z. B. „ein ganzer Workshop nach Wahl, pro Person“',
+        ),
         text('button', 'Button (öffnet den Kauf) / Buy button'),
         text('secondary', 'Link zu den Wertgutscheinen / Link to value vouchers'),
         points('Drei kurze Punkte unter den Buttons.'),
-        text('ticketAlt', 'Bildbeschreibung des Gutscheins / Voucher picture description', 'Für Google und Screenreader.'),
+        text(
+          'ticketAlt',
+          'Bildbeschreibung des Gutscheins / Voucher picture description',
+          'Für Google und Screenreader.',
+        ),
       ],
     },
     {
@@ -158,7 +189,13 @@ export const voucherTab: Tab = {
       type: 'group',
       label: '2 · Wertgutscheine €50 / €30 / €20 / Value vouchers',
       fields: [
-        show('value vouchers'),
+        {
+          ...show('value vouchers'),
+          admin: {
+            description:
+              'Aus = nur der 99-€-Workshop-Gutschein ist kaufbar: Der Abschnitt, der Link „Oder einen Betrag schenken“ und die Beträge €50/€30/€20 im Kauf-Fenster verschwinden. / Off = only the €99 workshop voucher can be bought: this section, the hero link and the €50/€30/€20 choice in the buy panel are hidden.',
+          },
+        } as Field,
         text('eyebrow', 'Kleine Zeile / Small line'),
         text('headline', 'Überschrift / Headline'),
         area('text', 'Text'),
@@ -168,14 +205,24 @@ export const voucherTab: Tab = {
           label: 'Gutscheine / Vouchers',
           labels: { singular: 'Gutschein', plural: 'Gutscheine' },
           maxRows: 3,
-          admin: { description: 'Ein Eintrag pro Betrag, in dieser Reihenfolge.', initCollapsed: true },
+          admin: {
+            description: 'Ein Eintrag pro Betrag, in dieser Reihenfolge.',
+            initCollapsed: true,
+          },
           fields: [
-            { ...amountField('amount', [50, 30, 20], 'Betrag / Amount', 'Welcher Gutschein.'), required: true } as Field,
+            {
+              ...amountField('amount', [50, 30, 20], 'Betrag / Amount', 'Welcher Gutschein.'),
+              required: true,
+            } as Field,
             text('line', 'Kurzer Satz unter dem Betrag / Short line'),
           ],
         },
         text('button', 'Button-Text / Button text', 'z. B. „Verschenken“'),
-        text('valueName', 'Name neben dem Betrag / Name next to the amount', 'z. B. „Wertgutschein“'),
+        text(
+          'valueName',
+          'Name neben dem Betrag / Name next to the amount',
+          'z. B. „Wertgutschein“',
+        ),
       ],
     },
     {
@@ -194,7 +241,8 @@ export const voucherTab: Tab = {
           labels: { singular: 'Anlass', plural: 'Anlässe' },
           maxRows: 6,
           admin: {
-            description: 'Eine Zeile pro Anlass. Foto und Text wechseln automatisch die Seite (links, rechts, links …).',
+            description:
+              'Eine Zeile pro Anlass. Foto und Text wechseln automatisch die Seite (links, rechts, links …).',
             initCollapsed: true,
           },
           fields: [
@@ -203,7 +251,9 @@ export const voucherTab: Tab = {
               type: 'upload',
               relationTo: 'media',
               label: 'Foto / Photo',
-              admin: { description: 'Querformat, mind. 1200 px breit. Wird auf 5:4 zugeschnitten.' },
+              admin: {
+                description: 'Querformat, mind. 1200 px breit. Wird auf 5:4 zugeschnitten.',
+              },
             },
             text('label', 'Kleine Zeile (Anlass) / Small line', 'z. B. „Weihnachtsgeschenk“'),
             text('title', 'Überschrift / Headline', undefined, { required: true }),
@@ -227,7 +277,12 @@ export const voucherTab: Tab = {
               ],
             },
             {
-              ...amountField('ctaAmount', [99, 50, 30, 20], 'Welcher Gutschein / Which voucher', 'Ist im Kauf-Fenster vorausgewählt.'),
+              ...amountField(
+                'ctaAmount',
+                [99, 50, 30, 20],
+                'Welcher Gutschein / Which voucher',
+                'Ist im Kauf-Fenster vorausgewählt.',
+              ),
               defaultValue: '99',
               admin: {
                 description: 'Ist im Kauf-Fenster vorausgewählt.',
@@ -238,7 +293,10 @@ export const voucherTab: Tab = {
               name: 'ctaHref',
               type: 'text',
               label: 'Link',
-              admin: { description: 'z. B. /contact', condition: (_, sibling) => sibling?.ctaKind === 'link' },
+              admin: {
+                description: 'z. B. /contact',
+                condition: (_, sibling) => sibling?.ctaKind === 'link',
+              },
             },
             text('ctaLabel', 'Button-Text / Button text'),
           ],
@@ -255,7 +313,11 @@ export const voucherTab: Tab = {
         text('headline', 'Überschrift / Headline'),
         area('text', 'Text'),
         text('button', 'Download-Button / Download button'),
-        text('note', 'Zeile neben dem Button / Next to the button', 'z. B. „A5 quer, Vorder- und Rückseite.“'),
+        text(
+          'note',
+          'Zeile neben dem Button / Next to the button',
+          'z. B. „A5 quer, Vorder- und Rückseite.“',
+        ),
         text('cardAlt', 'Bildbeschreibung der Karte / Card picture description'),
         {
           name: 'card',
@@ -267,7 +329,11 @@ export const voucherTab: Tab = {
           },
           fields: [
             text('frontEyebrow', 'Vorderseite: kleine Zeile / Front: small line'),
-            area('frontWords', 'Vorderseite: große Worte / Front: big words', 'Zeilenumbruch = neue Zeile, z. B. „Von“ ⏎ „Herzen“'),
+            area(
+              'frontWords',
+              'Vorderseite: große Worte / Front: big words',
+              'Zeilenumbruch = neue Zeile, z. B. „Von“ ⏎ „Herzen“',
+            ),
             text('backEyebrow', 'Rückseite: kleine Zeile / Back: small line'),
             text('backFor', 'Rückseite: „Das hier ist für“ / Back: “This is for”'),
             text('backFrom', 'Rückseite: „Von“ / Back: “From”'),
@@ -318,7 +384,11 @@ export const voucherTab: Tab = {
         text('yourName', 'Feld „Name“ / Name field'),
         text('yourNamePlaceholder', 'Platzhalter im Namensfeld / Name placeholder'),
         text('yourEmail', 'Feld „E-Mail“ / Email field'),
-        text('submit', 'Button (ohne Betrag) / Button (without amount)', 'Der Betrag wird automatisch angehängt, z. B. „Weiter zur Zahlung · €99“.'),
+        text(
+          'submit',
+          'Button (ohne Betrag) / Button (without amount)',
+          'Der Betrag wird automatisch angehängt, z. B. „Weiter zur Zahlung · €99“.',
+        ),
         text('secure', 'Zeile unter dem Button / Line under the button'),
       ],
     },

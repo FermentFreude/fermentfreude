@@ -97,7 +97,7 @@ export default async function VoucherPage() {
           },
         ]
       : []),
-    ...ALL_AMOUNTS.map((amount) => ({
+    ...(c.sections.values ? ALL_AMOUNTS : ALL_AMOUNTS.filter((a) => a === 99)).map((amount) => ({
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: amount === 99 ? c.ticket.workshop.label : `${c.ticket.value.label} €${amount}`,
