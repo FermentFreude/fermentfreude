@@ -25,6 +25,7 @@ export const POINT_ICON_OPTIONS = [
   { label: 'Award', value: 'award' },
   { label: 'Shield check (quality)', value: 'shieldCheck' },
   { label: 'Clock (shelf life)', value: 'clock' },
+  { label: 'Calendar (choose a date)', value: 'calendar' },
   { label: 'Flexed arm (protein)', value: 'muscle' },
   { label: 'Flame (frying)', value: 'flame' },
   { label: 'Knife (cutting)', value: 'slice' },

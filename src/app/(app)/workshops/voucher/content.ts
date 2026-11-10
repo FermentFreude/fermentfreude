@@ -87,7 +87,7 @@ const de = {
     points: [
       { icon: 'clock', title: 'Sofort per E-Mail', text: 'Als PDF direkt nach dem Kauf' },
       { icon: 'gift', title: 'Grußkarte inklusive', text: 'Zum Ausdrucken und Beschriften' },
-      { icon: 'shieldCheck', title: 'Freie Wahl', text: 'Workshop und Termin selbst auswählen' },
+      { icon: 'calendar', title: 'Freie Wahl', text: 'Workshop und Termin selbst auswählen' },
     ],
     ticketAlt: 'Workshop-Geschenkgutschein über 99 Euro von Fermentfreude Graz',
   },
@@ -278,7 +278,7 @@ const en: VoucherContent = {
     points: [
       { icon: 'clock', title: 'Instantly by email', text: 'As a PDF right after purchase' },
       { icon: 'gift', title: 'Greeting card included', text: 'To print and write on' },
-      { icon: 'shieldCheck', title: 'Their choice', text: 'They pick the workshop and date' },
+      { icon: 'calendar', title: 'Their choice', text: 'They pick the workshop and date' },
     ],
     ticketAlt: 'Fermentfreude Graz workshop gift voucher worth 99 euros',
   },
