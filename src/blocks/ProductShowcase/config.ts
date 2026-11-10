@@ -26,7 +26,7 @@ export const ProductShowcase: Block = {
       label: 'Small text top left',
       admin: {
         description:
-          'Short lines in small capitals, e.g. "Fermentiert.⏎Funktional.⏎Für dich." Press Enter for a new line.',
+          'Short lines in small capitals, e.g. "Fermentiert.⏎Funktional.⏎Für dich." Press Enter for a new line. Shown on the product slide (Tempeh) only, not on the Workshops slide.',
       },
     },
     {
@@ -135,7 +135,9 @@ export const ProductShowcase: Block = {
               label: 'Picture (transparent PNG)',
               validate: (
                 value: unknown,
-                { siblingData }: { siblingData?: { slideType?: string; showProductImages?: boolean } },
+                {
+                  siblingData,
+                }: { siblingData?: { slideType?: string; showProductImages?: boolean } },
               ) =>
                 Boolean(value) ||
                 siblingData?.slideType === 'workshops' ||
@@ -185,7 +187,8 @@ export const ProductShowcase: Block = {
               ],
               admin: {
                 width: '50%',
-                description: 'Light = cream text with a dark shade at the bottom. Dark = charcoal text with an ivory shade.',
+                description:
+                  'Light = cream text with a dark shade at the bottom. Dark = charcoal text with an ivory shade.',
               },
             },
             {
@@ -197,7 +200,8 @@ export const ProductShowcase: Block = {
               label: 'Shade strength (0–80 %)',
               admin: {
                 width: '50%',
-                description: 'How strong the shade over the picture is, so the text stays readable. 0 = picture as it is.',
+                description:
+                  'How strong the shade over the picture is, so the text stays readable. 0 = picture as it is.',
               },
             },
           ],
@@ -220,7 +224,8 @@ export const ProductShowcase: Block = {
           localized: true,
           label: 'Label for workshops without a date',
           admin: {
-            description: 'Shown instead of a date, e.g. "Saisonal". The list of workshops comes from the Workshops collection (active ones).',
+            description:
+              'Shown instead of a date, e.g. "Saisonal". The list of workshops comes from the Workshops collection (active ones).',
             condition: (_, siblingData) => siblingData?.slideType === 'workshops',
           },
         },
@@ -261,7 +266,8 @@ export const ProductShowcase: Block = {
           localized: true,
           label: 'Note under the button',
           admin: {
-            description: 'Optional, one or two short lines, e.g. "Vakuumiert & gekühlt" / "6 Wochen haltbar".',
+            description:
+              'Optional, one or two short lines, e.g. "Vakuumiert & gekühlt" / "6 Wochen haltbar".',
             condition: (_, siblingData) => siblingData?.slideType !== 'workshops',
           },
         },
@@ -303,7 +309,10 @@ export const ProductShowcase: Block = {
           type: 'text',
           localized: true,
           label: 'Short line (optional)',
-          admin: { description: 'One short line under the title, e.g. "Käferbohnen, Apfelessig, Tempeh-Kultur."' },
+          admin: {
+            description:
+              'One short line under the title, e.g. "Käferbohnen, Apfelessig, Tempeh-Kultur."',
+          },
         },
       ],
     },

@@ -3201,7 +3201,7 @@ export interface HomeTempehStoryBlock {
 export interface ProductShowcaseBlock {
   visible?: boolean | null;
   /**
-   * Short lines in small capitals, e.g. "Fermentiert.⏎Funktional.⏎Für dich." Press Enter for a new line.
+   * Short lines in small capitals, e.g. "Fermentiert.⏎Funktional.⏎Für dich." Press Enter for a new line. Shown on the product slide (Tempeh) only, not on the Workshops slide.
    */
   tagline?: string | null;
   /**
