@@ -1,5 +1,6 @@
 'use client'
 
+import { completePaymentOnServer } from '@/components/checkout/completePaymentOnServer'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { gtmPurchase } from '@/lib/gtm'
 import { useAuth } from '@/providers/Auth'
@@ -99,16 +100,27 @@ export const ConfirmOrder: React.FC = () => {
               paymentIntentID,
               ...(checkoutEmail ? { customerEmail: checkoutEmail } : {}),
             },
+          }).catch((err: unknown) => {
+            console.warn('[ConfirmOrder] confirmOrder failed, asking the server:', err)
+            return null
           }),
         )
-        .then((result) => {
+        .then(async (result) => {
           try {
             sessionStorage.removeItem('checkoutCustomerName')
           } catch {
             // ignore
           }
 
-          if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
+          // The plugin's confirm needs the browser cart. When the Stripe
+          // webhook already completed this order (and emptied the cart), or
+          // the cart never loaded, complete/find it from the payment alone.
+          const orderID =
+            result && typeof result === 'object' && 'orderID' in result && result.orderID
+              ? String(result.orderID)
+              : await completePaymentOnServer(paymentIntentID)
+
+          if (orderID) {
             // GA4 + Meta Pixel: purchase event
             if (cart?.items?.length) {
               const items = cart.items.map((item) => {
@@ -128,7 +140,7 @@ export const ConfirmOrder: React.FC = () => {
                 }
               })
               gtmPurchase({
-                transaction_id: String(result.orderID),
+                transaction_id: orderID,
                 value: cart.subtotal ?? 0,
                 items,
               })
@@ -176,7 +188,7 @@ export const ConfirmOrder: React.FC = () => {
             // for logged-in customers paying by card.
             const confirmationBase = user ? '/account' : '/checkout'
             router.push(
-              `${confirmationBase}/order-confirmation?orderId=${result.orderID}&type=${type}${emailParam}`,
+              `${confirmationBase}/order-confirmation?orderId=${orderID}&type=${type}${emailParam}`,
             )
           } else {
             // confirmOrder returned but without an orderID — surface a recoverable error

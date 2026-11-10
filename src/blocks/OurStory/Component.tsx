@@ -11,7 +11,7 @@ const DEFAULTS = {
     'Making fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods',
   paragraphs: [
     {
-      text: 'FermentFreude is an Austrian food-tech company on a mission to bring joy to fermentation. Through hands-on workshops and premium fermented products, we help people discover how gut health meets delight—turning age-old craft into everyday pleasure.',
+      text: 'Fermentfreude is an Austrian food-tech company on a mission to bring joy to fermentation. Through hands-on workshops and premium fermented products, we help people discover how gut health meets delight—turning age-old craft into everyday pleasure.',
       image: null as MediaType | null,
     },
     {

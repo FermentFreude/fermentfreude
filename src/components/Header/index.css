@@ -125,11 +125,11 @@
   color: white;
 }
 
-[data-theme='dark'] header[data-transparent] nav img {
+[data-theme='dark'] header[data-transparent] nav img:not(.dropdown-glass *) {
   filter: brightness(0) invert(1);
 }
 
-[data-theme='dark'] header[data-transparent] nav svg {
+[data-theme='dark'] header[data-transparent] nav svg:not(.dropdown-glass *) {
   color: white;
 }
 
@@ -140,4 +140,34 @@ header[data-header-theme='dark'] .navLink:hover {
 
 header[data-header-theme='dark'] .navLink::after {
   background-color: white;
+}
+
+/* ── Transparent header over a dark full-photo hero ──────────
+ * HeroCinematic sets <body data-hero-dark> while it is on screen.
+ * Only applies while the header is transparent (top of the home page);
+ * once scrolled, the frosted nav-glass returns and default colors apply. */
+body[data-hero-dark] header[data-transparent] nav button:not(.dropdown-glass *),
+body[data-hero-dark] header[data-transparent] nav a:not(.navLink):not(.dropdown-glass *) {
+  color: white;
+}
+
+body[data-hero-dark] header[data-transparent] nav img:not(.dropdown-glass *) {
+  filter: brightness(0) invert(1);
+}
+
+body[data-hero-dark] header[data-transparent] nav svg:not(.dropdown-glass *) {
+  color: white;
+}
+
+body[data-hero-dark] header[data-transparent] nav [aria-label='Language'] {
+  border-color: rgb(255 255 255 / 0.5);
+}
+
+body[data-hero-dark] header[data-transparent] nav [aria-label='Language'] button[aria-pressed='true'] {
+  background-color: white;
+  color: var(--ff-near-black);
+}
+
+body[data-hero-dark] header[data-transparent] nav [aria-label='Language'] button[aria-pressed='false'] {
+  color: rgb(255 255 255 / 0.85);
 }

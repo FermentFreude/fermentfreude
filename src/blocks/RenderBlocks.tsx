@@ -1,3 +1,4 @@
+import { cn } from '@/utilities/cn'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
@@ -11,6 +12,9 @@ import { FeaturedProductCardsComponent } from '@/blocks/FeaturedProductCards/Com
 import { FormBlock } from '@/blocks/Form/Component'
 import { HelpFaqBlockComponent } from '@/blocks/HelpFaqBlock/Component'
 import { HeroBannerBlock } from '@/blocks/HeroBanner/Component'
+import { HomeTempehStoryBlockComponent } from '@/blocks/HomeTempehStory/Component'
+import { FermentationStoryBlock } from '@/blocks/FermentationStory/Component'
+import { ProductShowcaseBlockComponent } from '@/blocks/ProductShowcase/Component'
 import { LaktoVoucherCtaBlockComponent } from '@/blocks/LaktoVoucherCta/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { OnlineCourseSliderBlock } from '@/blocks/OnlineCourseSlider/Component'
@@ -41,6 +45,8 @@ import React, { Fragment } from 'react'
 
 import type { Page } from '../payload-types'
 
+type RenderableBlocks = NonNullable<Page['layout']>
+
 const blockComponents = {
   contactBlock: ContactBlockComponent,
   archive: ArchiveBlock,
@@ -52,6 +58,9 @@ const blockComponents = {
   formBlock: FormBlock,
   helpFaq: HelpFaqBlockComponent,
   heroBanner: HeroBannerBlock,
+  homeTempehStory: HomeTempehStoryBlockComponent,
+  productShowcase: ProductShowcaseBlockComponent,
+  fermentationStory: FermentationStoryBlock,
   mediaBlock: MediaBlock,
   ourStory: OurStoryBlock,
   pressBanner: PressBannerBlock,
@@ -103,7 +112,7 @@ const globalWrappers: Record<
 }
 
 export const RenderBlocks: React.FC<{
-  blocks: NonNullable<Page['layout']>
+  blocks: RenderableBlocks
   slug?: string
   locale?: 'de' | 'en'
 }> = (props) => {
@@ -115,12 +124,16 @@ export const RenderBlocks: React.FC<{
   const isLegalPage = slug === 'agb' || slug === 'datenschutz' || slug === 'impressum'
   const isPresse = slug === 'presse'
   const isHelp = slug === 'help'
+  // Full-bleed sections with their own background + padding: an outer margin would show as a white band
+  const FLUSH_BLOCKS = new Set<string>(['homeTempehStory', 'productShowcase', 'fermentationStory'])
   const gapClass = isAbout
     ? 'mb-12 last:mb-0' // increased margin between sections on About
     : isShop
       ? 'first:mt-0 last:mb-0' // shop: no extra margin between blocks (each block handles its own padding)
-      : isPresse || isHelp
-        ? 'first:mt-0 last:mb-0'
+      : isPresse || isHelp || slug === 'home'
+        ? // home: sections sit edge to edge, each owns its padding → one even
+          // editorial rhythm instead of padding + margin doubling into white bands
+          'first:mt-0 last:mb-0'
         : 'my-[var(--space-section-md)] first:mt-0 last:mb-0'
 
   const hasBlocks = blockList.length > 0
@@ -136,6 +149,9 @@ export const RenderBlocks: React.FC<{
           const blockData = block as unknown as Record<string, unknown>
 
           if (blockData.visible === false) return null
+
+          // Home only: the sponsors banner sits on ivory instead of warm grey
+          const homeSponsors = slug === 'home' && blockType === 'sponsorsBar'
 
           // When useGlobalData is explicitly true, render the GlobalWrapper
           const useGlobal = blockData.useGlobalData === true
@@ -155,7 +171,7 @@ export const RenderBlocks: React.FC<{
           ) {
             const GlobalWrapper = globalWrappers[blockType]
             return (
-              <div className={gapClass} key={index}>
+              <div className={cn(gapClass, homeSponsors && 'home-sponsors')} key={index}>
                 <GlobalWrapper id={blockId} fallbackData={blockData} />
               </div>
             )
@@ -170,7 +186,13 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className={gapClass} key={index}>
+                <div
+                  className={cn(
+                    FLUSH_BLOCKS.has(blockType) ? undefined : gapClass,
+                    homeSponsors && 'home-sponsors',
+                  )}
+                  key={index}
+                >
                   <Block
                     {...block}
                     id={blockId}

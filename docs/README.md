@@ -147,7 +147,7 @@ Payload CMS development rules including:
 ## 🏗️ Documentation Structure
 
 ```
-FermentFreude/
+fermentfreude/
 ├── README.md                           # Project overview
 ├── AGENTS.md                           # AI assistant / Payload CMS rules
 └── docs/                               # Detailed documentation

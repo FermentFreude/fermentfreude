@@ -1,4 +1,4 @@
-# FermentFreude — Refund, Rebooking & Cancellation System
+# Fermentfreude — Refund, Rebooking & Cancellation System
 ## Master Implementation Plan
 
 **Status:** Planning complete, policy confirmed, nothing built yet.

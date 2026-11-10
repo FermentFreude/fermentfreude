@@ -25,7 +25,7 @@ const TEMPLATES = [
     name: 'ACCOUNT_CREATION',
     templateName: 'Account Creation',
     htmlFile: 'public/email-templates/01-account-creation.html',
-    subject: 'Willkommen bei FermentFreude — {{params.CUSTOMER_NAME}}',
+    subject: 'Willkommen bei Fermentfreude — {{params.CUSTOMER_NAME}}',
     category: 'Transactional',
   },
   {
@@ -41,7 +41,7 @@ const TEMPLATES = [
     name: 'PASSWORD_RESET',
     templateName: 'Password Reset',
     htmlFile: 'public/email-templates/03-password-reset.html',
-    subject: 'Passwort zurücksetzen — FermentFreude',
+    subject: 'Passwort zurücksetzen — Fermentfreude',
     category: 'Transactional',
   },
   {
@@ -49,7 +49,7 @@ const TEMPLATES = [
     name: 'LOGIN_NOTIFICATION',
     templateName: 'Login Notification',
     htmlFile: 'public/email-templates/04-login-notification.html',
-    subject: 'Neue Anmeldung in deinem FermentFreude Konto',
+    subject: 'Neue Anmeldung in deinem Fermentfreude Konto',
     category: 'Transactional',
   },
   // Workshop (5)
@@ -83,7 +83,7 @@ const TEMPLATES = [
     name: 'ORDER_CONFIRMATION',
     templateName: 'Order Confirmation',
     htmlFile: 'public/email-templates/10-order-confirmation.html',
-    subject: 'Deine Bestellung bei FermentFreude — {{params.ORDER_ID}}',
+    subject: 'Deine Bestellung bei Fermentfreude — {{params.ORDER_ID}}',
     category: 'E-commerce',
   },
   {
@@ -140,7 +140,7 @@ const TEMPLATES = [
     name: 'RE_ENGAGEMENT',
     templateName: 'Re-Engagement',
     htmlFile: 'public/email-templates/17-re-engagement.html',
-    subject: 'Wir vermissen dich — Komm zurück zu FermentFreude',
+    subject: 'Wir vermissen dich — Komm zurück zu Fermentfreude',
     category: 'Marketing',
   },
   {
@@ -148,7 +148,7 @@ const TEMPLATES = [
     name: 'REFERRAL_PROGRAM',
     templateName: 'Referral Program',
     htmlFile: 'public/email-templates/18-referral-program.html',
-    subject: 'Empfehle FermentFreude und verdiene {{params.REWARD_AMOUNT}}',
+    subject: 'Empfehle Fermentfreude und verdiene {{params.REWARD_AMOUNT}}',
     category: 'Marketing',
   },
   // Custom
@@ -245,7 +245,7 @@ async function createTemplate(apiKey, template) {
  * Main setup function
  */
 async function setupTemplates() {
-  console.log('🚀 FermentFreude Brevo Templates Setup')
+  console.log('🚀 Fermentfreude Brevo Templates Setup')
   console.log('━'.repeat(50))
 
   const apiKey = getBrevoApiKey()

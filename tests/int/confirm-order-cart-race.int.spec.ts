@@ -12,6 +12,7 @@ let mockCart: { items: never[]; subtotal: number } | undefined
 
 vi.mock('@payloadcms/plugin-ecommerce/client/react', () => ({
   useCart: () => ({ cart: mockCart, clearCart }),
+  useEcommerce: () => ({ clearSession: clearCart }),
   usePayments: () => ({ confirmOrder }),
 }))
 

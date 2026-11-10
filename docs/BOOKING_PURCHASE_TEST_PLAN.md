@@ -2,7 +2,7 @@
 
 ## Goal
 
-This plan defines the minimum professional coverage required to keep FermentFreude checkout, workshop bookings, voucher purchases, Stripe payments, and Brevo side effects reliable.
+This plan defines the minimum professional coverage required to keep Fermentfreude checkout, workshop bookings, voucher purchases, Stripe payments, and Brevo side effects reliable.
 
 The target is not just "it builds". The target is:
 

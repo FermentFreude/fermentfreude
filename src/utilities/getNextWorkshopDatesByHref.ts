@@ -23,9 +23,23 @@ function formatUpcomingDate(dateValue: string, locale: SupportedLocale): string 
   return formatter.format(new Date(dateValue))
 }
 
+/** Date first, then the weekday — "25. Oktober, Sonntag" / "25 October, Sunday" (workshop slider) */
+function formatDateThenWeekday(dateValue: string, locale: SupportedLocale): string {
+  const opts = { timeZone: 'Europe/Vienna' } as const
+  const lang = locale === 'de' ? 'de-DE' : 'en-GB'
+  const date = new Date(dateValue)
+  const dayMonth = new Intl.DateTimeFormat(lang, { ...opts, day: 'numeric', month: 'long' }).format(
+    date,
+  )
+  const weekday = new Intl.DateTimeFormat(lang, { ...opts, weekday: 'long' }).format(date)
+  return `${dayMonth}, ${weekday}`
+}
+
 export type NextWorkshopDateInfo = {
   /** Formatted date string of next bookable appointment, or null if none. */
   date: string | null
+  /** Same date as "25. Oktober, Sonntag" (date first, then weekday), or null if none. */
+  dateFirst: string | null
   /** Available spots on the next bookable appointment (undefined = unlimited). */
   availableSpots?: number
   /** True when no bookable future appointment exists for this workshop. */
@@ -42,7 +56,7 @@ export async function getNextWorkshopDatesByHref(
   const nextByHref: Record<string, NextWorkshopDateInfo> = {}
   for (const href of Object.values(WORKSHOP_SLUG_TO_HREF)) {
     if (!nextByHref[href]) {
-      nextByHref[href] = { date: null, soldOut: true }
+      nextByHref[href] = { date: null, dateFirst: null, soldOut: true }
     }
   }
 
@@ -80,6 +94,7 @@ export async function getNextWorkshopDatesByHref(
 
       nextByHref[href] = {
         date: formatUpcomingDate(appointment.dateTime, locale),
+        dateFirst: formatDateThenWeekday(appointment.dateTime, locale),
         availableSpots: typeof spots === 'number' ? spots : undefined,
         soldOut: false,
       }

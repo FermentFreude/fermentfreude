@@ -43,6 +43,8 @@ const nextConfig = {
     ]
   },
   images: {
+    // <Media> renders at quality 90; Next 16 refuses qualities that aren't listed
+    qualities: [75, 90],
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
         const url = new URL(item)

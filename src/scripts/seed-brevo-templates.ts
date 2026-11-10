@@ -33,17 +33,17 @@ const TEMPLATES: Partial<TemplateData>[] = [
     brevoTemplateId: 27,
     templateName: 'Willkommen',
     triggerDescription: 'Wird gesendet, wenn ein neues Konto erstellt wird',
-    subject: 'Willkommen bei FermentFreude!',
+    subject: 'Willkommen bei Fermentfreude!',
     heroIcon: '👋',
     heroHeading: 'WILLKOMMEN',
     heroSubheading: 'Dein Konto wurde erfolgreich erstellt.',
     greeting: 'Hallo {{ params.FIRST_NAME }},',
     bodySection1:
-      'schön, dass du dabei bist! Bei FermentFreude dreht sich alles um die faszinierende Welt der Fermentation — von Kombucha über Kimchi bis Tempeh.',
+      'schön, dass du dabei bist! Bei Fermentfreude dreht sich alles um die faszinierende Welt der Fermentation — von Kombucha über Kimchi bis Tempeh.',
     bodySection2:
       'Entdecke unsere Workshops, stöbere im Shop oder starte direkt mit deinem ersten Online-Kurs.',
     bodySection3:
-      'Das erwartet dich bei FermentFreude: Workshops buchen — Lerne Fermentation von Kombucha bis Tempeh in kleinen Gruppen mit Hands-on-Erfahrung. Shop entdecken — Fermentationssets, Zutaten und Bücher — alles für dein nächstes Projekt. Online-Kurse — Lerne in deinem eigenen Tempo mit unseren Schritt-für-Schritt-Videokursen. Gastronomie-Partner — Professionelle Fermentationslösungen für Restaurants und Hotels.',
+      'Das erwartet dich bei Fermentfreude: Workshops buchen — Lerne Fermentation von Kombucha bis Tempeh in kleinen Gruppen mit Hands-on-Erfahrung. Shop entdecken — Fermentationssets, Zutaten und Bücher — alles für dein nächstes Projekt. Online-Kurse — Lerne in deinem eigenen Tempo mit unseren Schritt-für-Schritt-Videokursen. Gastronomie-Partner — Professionelle Fermentationslösungen für Restaurants und Hotels.',
     bodySection4:
       'So startest du durch: 1. Profil anlegen — Erzähl uns mehr über dich und deine Fermentations-Interessen. 2. Workshop wählen — Finde den perfekten Kurs — von Basics bis Fortgeschrittene. 3. Loslegen — Buche deinen Platz und starte dein Fermentations-Abenteuer.',
     ctaHeading: 'Dein erster Workshop wartet',
@@ -68,7 +68,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     ctaUrl: '{{ params.VERIFICATION_URL }}',
     ctaDescription:
       'Button funktioniert nicht? Kopiere diesen Link: {{ params.VERIFICATION_URL }} | Dieser Link ist 24 Stunden gültig.',
-    footerContent: 'FermentFreude GmbH | Folge uns auf Instagram & Facebook',
+    footerContent: 'Fermentfreude GmbH | Folge uns auf Instagram & Facebook',
   },
   {
     brevoTemplateId: 28,
@@ -84,7 +84,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     ctaUrl: '{{ params.RESET_URL }}',
     ctaDescription:
       'Dieser Link ist 1 Stunde gültig. Falls du keine Passwort-Zurücksetzung angefordert hast, ignoriere diese E-Mail einfach.',
-    footerContent: 'FermentFreude GmbH | Datenschutz',
+    footerContent: 'Fermentfreude GmbH | Datenschutz',
   },
   {
     brevoTemplateId: 30,
@@ -100,7 +100,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     bodySection3: 'Zeit: {{ params.LOGIN_DATE }}',
     ctaText: 'Passwort ändern',
     ctaUrl: '{{ params.RESET_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz',
+    footerContent: 'Fermentfreude GmbH | Datenschutz',
   },
   {
     brevoTemplateId: 31,
@@ -118,7 +118,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     bodySection4: 'Was du mitbringen solltest: {{ params.WHAT_TO_BRING }}',
     ctaText: 'Buchung ansehen',
     ctaUrl: '{{ params.BOOKING_URL }}',
-    footerContent: 'FermentFreude GmbH | AGB | Datenschutz',
+    footerContent: 'Fermentfreude GmbH | AGB | Datenschutz',
   },
   {
     brevoTemplateId: 34,
@@ -134,7 +134,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
       'Ähnliche Workshops: {{ params.RELATED_TITLE_1 }} ({{ params.RELATED_DATE_1 }}) | {{ params.RELATED_TITLE_2 }} ({{ params.RELATED_DATE_2 }})',
     ctaText: 'Feedback geben',
     ctaUrl: '{{ params.FEEDBACK_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz | Abmelden',
+    footerContent: 'Fermentfreude GmbH | Datenschutz | Abmelden',
   },
   {
     brevoTemplateId: 35,
@@ -147,7 +147,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
       'Hallo {{ params.FIRST_NAME }}, wir möchten gerne deine Meinung zum Workshop "{{ params.WORKSHOP_TITLE }}" erfahren!',
     ctaText: 'Feedback geben',
     ctaUrl: '{{ params.FEEDBACK_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz | Abmelden',
+    footerContent: 'Fermentfreude GmbH | Datenschutz | Abmelden',
   },
   {
     brevoTemplateId: 36,
@@ -164,7 +164,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     bodySection3: 'Versandadresse: {{ params.SHIPPING_ADDRESS }}',
     ctaText: 'Bestellung ansehen',
     ctaUrl: '{{ params.ORDER_URL }}',
-    footerContent: 'FermentFreude GmbH | AGB | Datenschutz',
+    footerContent: 'Fermentfreude GmbH | AGB | Datenschutz',
   },
   {
     brevoTemplateId: 37,
@@ -180,7 +180,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     bodySection3: 'Erwartete Lieferung: {{ params.ESTIMATED_DELIVERY }}',
     ctaText: 'Paket verfolgen',
     ctaUrl: '{{ params.TRACKING_URL }}',
-    footerContent: 'FermentFreude GmbH | AGB | Datenschutz',
+    footerContent: 'Fermentfreude GmbH | AGB | Datenschutz',
   },
   {
     brevoTemplateId: 38,
@@ -194,7 +194,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     bodySection1: 'Bestellt am: {{ params.ORDER_DATE }}',
     ctaText: 'Jetzt bewerten',
     ctaUrl: '{{ params.REVIEW_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz | Abmelden',
+    footerContent: 'Fermentfreude GmbH | Datenschutz | Abmelden',
   },
   {
     brevoTemplateId: 42,
@@ -208,7 +208,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
       'Artikel: {{ item.TITLE }} ({{ item.QUANTITY }}x € {{ item.PRICE }}) | Summe: {{ params.TOTAL }}',
     ctaText: 'Zum Warenkorb',
     ctaUrl: '{{ params.CART_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz | Abmelden',
+    footerContent: 'Fermentfreude GmbH | Datenschutz | Abmelden',
   },
   {
     brevoTemplateId: 40,
@@ -216,12 +216,12 @@ const TEMPLATES: Partial<TemplateData>[] = [
     triggerDescription: 'Newsletter-Anmeldung',
     subject: 'Willkommen zum Newsletter!',
     heroIcon: '📬',
-    heroHeading: 'Willkommen bei FermentFreude!',
+    heroHeading: 'Willkommen bei Fermentfreude!',
     greeting: 'Hallo {{ params.FIRST_NAME }}, danke für die Newsletter-Anmeldung!',
     bodySection1: 'Du erhältst jetzt exklusive Updates zu Workshops, Rezepten und Angeboten.',
     ctaText: 'Alle Workshops ansehen',
     ctaUrl: '{{ params.WORKSHOPS_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz | Abmelden',
+    footerContent: 'Fermentfreude GmbH | Datenschutz | Abmelden',
   },
   {
     brevoTemplateId: 43,
@@ -236,7 +236,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     bodySection2: '{{ params.FIRST_LESSON_DESCRIPTION }}',
     ctaText: 'Kurs starten',
     ctaUrl: '{{ params.COURSE_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz',
+    footerContent: 'Fermentfreude GmbH | Datenschutz',
   },
   {
     brevoTemplateId: 45,
@@ -251,7 +251,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     bodySection2: 'Nachricht: {{ params.MESSAGE }}',
     ctaText: 'Zu B2B-Program',
     ctaUrl: '{{ params.GASTRONOMY_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz',
+    footerContent: 'Fermentfreude GmbH | Datenschutz',
   },
   {
     brevoTemplateId: 41,
@@ -269,7 +269,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
       'Exklusiv für dich: {{ params.DISCOUNT_PERCENT }}% Rabatt mit Code {{ params.DISCOUNT_CODE }} (gültig bis {{ params.DISCOUNT_EXPIRY }})',
     ctaText: 'Workshops entdecken',
     ctaUrl: '{{ params.WORKSHOPS_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz | Abmelden',
+    footerContent: 'Fermentfreude GmbH | Datenschutz | Abmelden',
   },
   {
     brevoTemplateId: 44,
@@ -278,13 +278,13 @@ const TEMPLATES: Partial<TemplateData>[] = [
     subject: 'Freunde empfehlen & profitieren!',
     heroIcon: '👥',
     heroHeading: 'Freude teilen, Freude bekommen!',
-    greeting: 'Hallo {{ params.FIRST_NAME }}, empfehle FermentFreude weiter und verdiene Rewards!',
+    greeting: 'Hallo {{ params.FIRST_NAME }}, empfehle Fermentfreude weiter und verdiene Rewards!',
     bodySection1: 'Freund erhält: {{ params.FRIEND_DISCOUNT }}% Rabatt',
     bodySection2: 'Du erhältst: {{ params.YOUR_REWARD }}',
     bodySection3: 'Dein Referral-Code: {{ params.REFERRAL_CODE }}',
     ctaText: 'Freunde einladen',
     ctaUrl: '{{ params.REFERRAL_URL }}',
-    footerContent: 'FermentFreude GmbH | Datenschutz | Abmelden',
+    footerContent: 'Fermentfreude GmbH | Datenschutz | Abmelden',
   },
   {
     brevoTemplateId: 39,
@@ -299,7 +299,7 @@ const TEMPLATES: Partial<TemplateData>[] = [
     bodySection3: 'Gültig bis: {{ params.VOUCHER_EXPIRY }}',
     ctaText: 'Zum Shop',
     ctaUrl: '{{ params.SHOP_URL }}',
-    footerContent: 'FermentFreude GmbH | AGB | Datenschutz',
+    footerContent: 'Fermentfreude GmbH | AGB | Datenschutz',
   },
 ]
 

@@ -43,4 +43,4 @@ const apiKey = getApiKey()
 console.log(`Using API key: ${apiKey.slice(0, 20)}...`)
 
 await updateTemplate(apiKey, 65, '05-workshop-booking-confirmation.html', 'Workshop Buchung bestätigt — {{params.BOOKING_REF}}')
-await updateTemplate(apiKey, 72, '10-order-confirmation.html', 'Deine Bestellung bei FermentFreude — {{params.ORDER_ID}}')
+await updateTemplate(apiKey, 72, '10-order-confirmation.html', 'Deine Bestellung bei Fermentfreude — {{params.ORDER_ID}}')

@@ -88,7 +88,7 @@ export function buildPressBannerEN(logos: LogoIds = {}): PressBannerSeed {
       {
         outlet: 'Kleine Zeitung',
         quote:
-          'From Food Masterclass to market — the story of FermentFreude and Styrian field-bean tempeh.',
+          'From Food Masterclass to market — the story of Fermentfreude and Styrian field-bean tempeh.',
         logo: logos.kleineZeitung,
         url: 'https://www.kleinezeitung.at/artikel/20140608/aromen-aufstriche-alkoholfreier-gin-innovationen-auf-dem-teller-und-im',
         linkLabel: 'Read article',

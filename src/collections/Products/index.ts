@@ -114,7 +114,7 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
               label: 'Marke / Brand',
               admin: {
                 description:
-                  'Markenname, z.B. "FermentFreude". Wird in der Produkt-Infotabelle angezeigt. / Brand name shown in the product specs table.',
+                  'Markenname, z.B. "Fermentfreude". Wird in der Produkt-Infotabelle angezeigt. / Brand name shown in the product specs table.',
               },
             },
             {

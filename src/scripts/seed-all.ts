@@ -38,6 +38,10 @@ const scripts: Record<string, { name: string; file: string }> = {
   backlog: { name: 'Backlog board (internal team tool)', file: 'seed-backlog.ts' },
   header: { name: 'Header (nav items)', file: 'seed-header.ts' },
   home: { name: 'Home (hero + workshop slider)', file: 'seed-home.ts' },
+  'home-tempeh': {
+    name: 'Home Käferbohnen Tempeh story (bilingual, additive)',
+    file: 'seed-home-tempeh.ts',
+  },
   about: { name: 'About page (with images)', file: 'seed-about.ts' },
   contact: { name: 'Contact page (with images)', file: 'seed-contact.ts' },
   presse: { name: 'Presse / Press page', file: 'seed-presse.ts' },
@@ -52,7 +56,7 @@ const scripts: Record<string, { name: string; file: string }> = {
   help: { name: 'Help & FAQ page', file: 'seed-help.ts' },
 
   legal: { name: 'Legal pages (datenschutz, agb, impressum)', file: 'seed-legal-pages.ts' },
-  voucher: { name: 'Voucher page (with images)', file: 'seed-voucher.ts' },
+  voucher: { name: 'Voucher page (all sections, photos from the media library)', file: 'seed-voucher.ts' },
   'shop-new': { name: 'Shop page (hero, products, automaten)', file: 'seed-shop-new.ts' },
   kombucha: { name: 'Kombucha workshop (experienceCards)', file: 'seed-kombucha.ts' },
   'kombucha-detail': {
@@ -88,6 +92,7 @@ const scripts: Record<string, { name: string; file: string }> = {
 const allOrder = [
   'header',
   'home',
+  'home-tempeh',
   'about',
   'contact',
   'presse',

@@ -19,7 +19,7 @@ export const Logo: React.FC = () => {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={theme === 'dark' ? '/submark-dark.png' : '/submark-light.png'}
-        alt="FermentFreude"
+        alt="Fermentfreude"
         style={{
           width: '320px',
           maxWidth: '80vw',

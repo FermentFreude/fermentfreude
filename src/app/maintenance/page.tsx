@@ -91,7 +91,7 @@ export default function MaintenancePage() {
       {/* Logo */}
       <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/secondary-logo.svg" alt="FermentFreude" width={200} height={86} />
+        <img src="/secondary-logo.svg" alt="Fermentfreude" width={200} height={86} />
       </div>
 
       {/* Headline */}
@@ -243,7 +243,7 @@ export default function MaintenancePage() {
       </div>
 
       <p style={{ marginTop: '2rem', fontSize: '0.75rem', color: '#ccc' }}>
-        © {new Date().getFullYear()} FermentFreude
+        © {new Date().getFullYear()} Fermentfreude
       </p>
     </div>
   )

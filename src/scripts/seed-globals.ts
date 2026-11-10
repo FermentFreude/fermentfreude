@@ -111,9 +111,9 @@ async function seedFooter(payload: Awaited<ReturnType<typeof getPayload>>) {
   const enData: Record<string, unknown> = {}
 
   if (force || !hasNewsletter) {
-    deData.newsletterHeading = 'Werde Teil der FermentFreude Bewegung'
+    deData.newsletterHeading = 'Werde Teil der Fermentfreude Bewegung'
     deData.freeRecipesLabel = 'Kostenlose Workshop-Rezepte'
-    enData.newsletterHeading = 'Join the FermentFreude Movement'
+    enData.newsletterHeading = 'Join the Fermentfreude Movement'
     enData.freeRecipesLabel = 'Free Workshop Recipes'
     console.log('  + Newsletter fields')
   }
@@ -131,8 +131,8 @@ async function seedFooter(payload: Awaited<ReturnType<typeof getPayload>>) {
   }
 
   if (force || !hasCopyright) {
-    deData.copyrightText = 'FermentFreude — Alle Rechte vorbehalten'
-    enData.copyrightText = 'FermentFreude — All Rights Reserved'
+    deData.copyrightText = 'Fermentfreude — Alle Rechte vorbehalten'
+    enData.copyrightText = 'Fermentfreude — All Rights Reserved'
     console.log('  + Copyright text')
   }
 
@@ -187,8 +187,8 @@ async function seedFooter(payload: Awaited<ReturnType<typeof getPayload>>) {
   if (force || !Boolean(existing.socialMedia?.instagram)) {
     deData.socialMedia = {
       instagram: 'https://www.instagram.com/fermentfreude/',
-      facebook: 'https://www.facebook.com/fermentfreude/',
-      linkedin: '',
+      facebook: 'https://www.facebook.com/p/Ferment-Freude-100087329564765/',
+      linkedin: 'https://www.linkedin.com/company/fermentfreude-og/',
     }
     enData.socialMedia = deData.socialMedia
     console.log('  + Social media')
@@ -765,7 +765,7 @@ async function seedProductSlider(payload: Awaited<ReturnType<typeof getPayload>>
       heading: 'Entdecke EINZIGARTIGE.',
       headingAccent: 'GESCHMÄCKER',
       description:
-        'Tauche ein in die Welt der Fermentations-Innovation bei FermentFreude. Unsere sorgfältig kuratierte Auswahl vereint die neuesten Geschmacksrichtungen und zeitlose Klassiker, damit du für jeden Anlass den perfekten Genuss findest.',
+        'Tauche ein in die Welt der Fermentations-Innovation bei Fermentfreude. Unsere sorgfältig kuratierte Auswahl vereint die neuesten Geschmacksrichtungen und zeitlose Klassiker, damit du für jeden Anlass den perfekten Genuss findest.',
       buttonLabel: 'Alle Produkte ansehen',
       buttonLink: '/products',
       products: productIds,
@@ -782,7 +782,7 @@ async function seedProductSlider(payload: Awaited<ReturnType<typeof getPayload>>
       heading: 'Discover UNIQUE.',
       headingAccent: 'FLAVOURS',
       description:
-        'Dive into a world of fermentation innovation at FermentFreude. Our carefully curated products bring together the latest flavours and timeless classics, ensuring you find the perfect taste for every occasion.',
+        'Dive into a world of fermentation innovation at Fermentfreude. Our carefully curated products bring together the latest flavours and timeless classics, ensuring you find the perfect taste for every occasion.',
       buttonLabel: 'View All Products',
       buttonLink: '/products',
       products: productIds,

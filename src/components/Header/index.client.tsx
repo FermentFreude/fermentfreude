@@ -212,7 +212,7 @@ export function HeaderClient({ header, locale, navWorkshops = [] }: Props) {
             <Link
               href="/"
               className="shrink-0 flex items-center h-full justify-self-start"
-              aria-label="FermentFreude Home"
+              aria-label="Fermentfreude Home"
             >
               <Image
                 src="/primary-logo.svg"

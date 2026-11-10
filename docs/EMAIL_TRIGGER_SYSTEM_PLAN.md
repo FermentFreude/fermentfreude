@@ -1,4 +1,4 @@
-# FermentFreude Email Trigger System — Complete Marketing Logic
+# Fermentfreude Email Trigger System — Complete Marketing Logic
 
 ## Overview
 Complete email automation for workshop bookings, purchases, and customer lifecycle — 19 templates across 4 categories, with both immediate and scheduled triggers.
@@ -338,7 +338,7 @@ Add abandoned cart tracking:
 
 ## 6. Database Considerations (MongoDB M0)
 
-**Important:** FermentFreude uses MongoDB Atlas M0 (free tier):
+**Important:** Fermentfreude uses MongoDB Atlas M0 (free tier):
 - ❌ No transactions
 - ❌ No Promise.all for mutations
 - ✅ Sequential writes only

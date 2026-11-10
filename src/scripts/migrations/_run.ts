@@ -75,7 +75,7 @@ async function run() {
     : '🔴 PRODUCTION (fermentfreude)'
 
   console.log(`\n╔══════════════════════════════════════════════════════╗`)
-  console.log(`║  FermentFreude Migration Runner`)
+  console.log(`║  Fermentfreude Migration Runner`)
   console.log(`║  Target DB: ${targetLabel}`)
   console.log(`╚══════════════════════════════════════════════════════╝\n`)
 

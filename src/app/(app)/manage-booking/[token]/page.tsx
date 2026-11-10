@@ -4,7 +4,7 @@ import { getAllSeatBundles, getPayloadClient, resolveMagicLink } from '@/lib/man
 import { ManageBookingClient } from './ManageBookingClient'
 
 export const metadata = {
-  title: 'Buchung verwalten — FermentFreude',
+  title: 'Buchung verwalten — Fermentfreude',
 }
 
 export default async function ManageBookingPage({

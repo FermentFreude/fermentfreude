@@ -5,6 +5,7 @@ import type { SupportedLocale } from '@/utilities/getLocale'
 
 import { FoodPresentationSlider } from '@/heros/FoodPresentationSlider'
 import { HeroCarousel } from '@/heros/HeroCarousel'
+import { HeroCinematic } from '@/heros/HeroCinematic'
 import { HeroGrid } from '@/heros/HeroGrid'
 import { HeroSlider } from '@/heros/HeroSlider'
 import { HeroPress } from '@/heros/HeroPress'
@@ -16,6 +17,7 @@ import { MediumImpactHero } from '@/heros/MediumImpact'
 const heroes = {
   foodPresentationSlider: FoodPresentationSlider,
   heroCarousel: HeroCarousel,
+  heroCinematic: HeroCinematic,
   heroGrid: HeroGrid,
   heroSplit: HeroSplit,
   heroPress: HeroPress,

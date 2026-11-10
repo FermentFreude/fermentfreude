@@ -2,7 +2,7 @@
 
 ## Overview
 
-FermentFreude now has a unified email template editing system. All 19 Brevo email templates can be edited directly in the Payload CMS admin dashboard, just like editing pages.
+Fermentfreude now has a unified email template editing system. All 19 Brevo email templates can be edited directly in the Payload CMS admin dashboard, just like editing pages.
 
 - ✅ **19 templates** all managed in `/admin`
 - ✅ **Live sync to Brevo** - changes go directly to Brevo's servers

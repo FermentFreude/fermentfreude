@@ -21,7 +21,7 @@ const DEFAULTS = {
   heading: 'Discover UNIQUE.',
   headingAccent: 'FLAVOURS',
   description:
-    'Dive into a world of fermentation innovation at FermentFreude. Our carefully curated products bring together the latest flavours and timeless classics, ensuring you find the perfect taste for every occasion.',
+    'Dive into a world of fermentation innovation at Fermentfreude. Our carefully curated products bring together the latest flavours and timeless classics, ensuring you find the perfect taste for every occasion.',
   buttonLabel: 'View All Products',
   buttonLink: '/products',
 }

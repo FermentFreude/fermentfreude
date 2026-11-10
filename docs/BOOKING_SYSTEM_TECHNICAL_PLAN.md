@@ -1,4 +1,4 @@
-# 📘 FermentFreude Booking System — Complete Technical Plan
+# 📘 Fermentfreude Booking System — Complete Technical Plan
 
 **Status:** Ready for Implementation  
 **Updated:** March 9, 2026  

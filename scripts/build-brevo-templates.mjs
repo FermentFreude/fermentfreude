@@ -64,7 +64,7 @@ function header() {
       <tr>
         <td align="center" style="padding:36px 24px 28px 24px;background-color:${C.white};">
           <a href="${SITE}" style="text-decoration:none;border:0;outline:none;">
-            <img src="${R2}/submark-dark.png" alt="FermentFreude" width="80" height="80" style="display:block;border:0;outline:none;width:80px;height:auto;margin:0 auto;" />
+            <img src="${R2}/submark-dark.png" alt="Fermentfreude" width="80" height="80" style="display:block;border:0;outline:none;width:80px;height:auto;margin:0 auto;" />
           </a>
         </td>
       </tr>
@@ -90,7 +90,7 @@ function footer() {
       <tr>
         <td align="center" style="padding:36px 24px 12px 24px;background-color:${C.white};">
           <a href="${SITE}" style="text-decoration:none;border:0;outline:none;">
-            <img src="${R2}/submark-dark.png" alt="FermentFreude" width="56" height="56" style="display:block;border:0;outline:none;width:56px;height:auto;margin:0 auto;" />
+            <img src="${R2}/submark-dark.png" alt="Fermentfreude" width="56" height="56" style="display:block;border:0;outline:none;width:56px;height:auto;margin:0 auto;" />
           </a>
         </td>
       </tr>
@@ -138,7 +138,7 @@ function footer() {
       <!-- Copyright -->
       <tr>
         <td align="center" style="padding:0 24px 28px 24px;background-color:${C.white};${FONT}font-size:11px;line-height:1.5;color:${C.muted};letter-spacing:0.04em;">
-          &copy; FermentFreude
+          &copy; Fermentfreude
         </td>
       </tr>
       <!-- Yellow brand border (bottom) -->
@@ -285,7 +285,7 @@ function tpl_66() {
   const body = `
 ${intro({
   heading: `Willkommen, ${p('FIRST_NAME', 'liebe Genießer:in')}.`,
-  lead: 'Dein Konto bei FermentFreude ist eingerichtet. Wir freuen uns, dich in unserer Community zu begrüßen — bereit, gemeinsam zu fermentieren.',
+  lead: 'Dein Konto bei Fermentfreude ist eingerichtet. Wir freuen uns, dich in unserer Community zu begrüßen — bereit, gemeinsam zu fermentieren.',
 })}
 ${ctaRow(p('DASHBOARD_URL', SITE + '/account'), 'Zu meinem Konto')}
 ${spacer(24)}
@@ -298,7 +298,7 @@ ${note('Brauchst du Hilfe? Antworte einfach auf diese E-Mail — wir sind direkt
 ${spacer(8)}
 `
   return shell({
-    title: 'Willkommen bei FermentFreude',
+    title: 'Willkommen bei Fermentfreude',
     preheaderText: `Hi ${p('FIRST_NAME', 'liebe Genießer:in')}, dein Konto ist bereit.`,
     body,
   })
@@ -328,7 +328,7 @@ ${spacer(8)}
 `
   return shell({
     title: 'E-Mail bestätigen',
-    preheaderText: 'Aktiviere dein FermentFreude-Konto in einem Klick.',
+    preheaderText: 'Aktiviere dein Fermentfreude-Konto in einem Klick.',
     body,
   })
 }
@@ -353,7 +353,7 @@ ${spacer(8)}
 `
   return shell({
     title: 'Passwort zurücksetzen',
-    preheaderText: 'Setze dein FermentFreude-Passwort zurück.',
+    preheaderText: 'Setze dein Fermentfreude-Passwort zurück.',
     body,
   })
 }
@@ -365,7 +365,7 @@ function tpl_71() {
   const body = `
 ${intro({
   heading: 'Neue Anmeldung in deinem Konto',
-  lead: `Hi ${p('FIRST_NAME', 'liebe Genießer:in')}, wir haben gerade eine neue Anmeldung in deinem FermentFreude-Konto registriert. Wenn du das warst, ist alles in Ordnung.`,
+  lead: `Hi ${p('FIRST_NAME', 'liebe Genießer:in')}, wir haben gerade eine neue Anmeldung in deinem Fermentfreude-Konto registriert. Wenn du das warst, ist alles in Ordnung.`,
 })}
 ${card(`
   ${detailRow({ icon: 'clock', label: 'Zeitpunkt', value: p('LOGIN_DATE', '—') })}
@@ -551,7 +551,7 @@ function tpl_73() {
   const body = `
 ${intro({
   heading: 'Dein Gutschein ist bereit',
-  lead: `Hi ${p('FIRST_NAME', 'liebe Genießer:in')}, danke für deinen Kauf. Hier ist dein FermentFreude-Gutschein zum Verschenken oder selbst Genießen.`,
+  lead: `Hi ${p('FIRST_NAME', 'liebe Genießer:in')}, danke für deinen Kauf. Hier ist dein Fermentfreude-Gutschein zum Verschenken oder selbst Genießen.`,
 })}
 
 <!-- Voucher card -->

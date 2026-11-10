@@ -6,7 +6,7 @@ import { headers as getHeaders } from 'next/headers.js'
 import { getPayload } from 'payload'
 
 export const metadata = {
-  title: 'Order Confirmation - FermentFreude',
+  title: 'Order Confirmation - Fermentfreude',
   description: 'Order confirmation',
 }
 

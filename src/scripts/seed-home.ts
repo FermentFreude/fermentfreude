@@ -101,28 +101,28 @@ async function seedHome() {
   const heroImage1 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude hero – fermented foods arrangement slide 1' },
+    data: { alt: 'Fermentfreude hero – fermented foods arrangement slide 1' },
     file: await optimizedFile(path.join(heroDir, 'hero-slide-1.png'), IMAGE_PRESETS.card),
   })
 
   const heroImage2 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude hero – fermented foods arrangement slide 2' },
+    data: { alt: 'Fermentfreude hero – fermented foods arrangement slide 2' },
     file: await optimizedFile(path.join(heroDir, 'hero-slide-2.png'), IMAGE_PRESETS.card),
   })
 
   const heroImage3 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude hero – fermented foods arrangement slide 3' },
+    data: { alt: 'Fermentfreude hero – fermented foods arrangement slide 3' },
     file: await optimizedFile(path.join(heroDir, 'hero-slide-3.png'), IMAGE_PRESETS.card),
   })
 
   const heroImage4 = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude hero – fermented foods arrangement slide 4' },
+    data: { alt: 'Fermentfreude hero – fermented foods arrangement slide 4' },
     file: await optimizedFile(path.join(heroDir, 'hero-slide-4.png'), IMAGE_PRESETS.card),
   })
 
@@ -132,13 +132,13 @@ async function seedHome() {
   const laktoSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-lakto-left – FermentFreude Sauerkraut Jar' },
+    data: { alt: 'slide-lakto-left – Fermentfreude Sauerkraut Jar' },
     file: await optimizedFile(path.join(heroDir, 'lakto1.png'), IMAGE_PRESETS.card),
   })
   const laktoSlideRight = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-lakto-right – FermentFreude Sauerkraut Jar' },
+    data: { alt: 'slide-lakto-right – Fermentfreude Sauerkraut Jar' },
     file: await optimizedFile(path.join(heroDir, 'lakto2.png'), IMAGE_PRESETS.card),
   })
 
@@ -146,13 +146,13 @@ async function seedHome() {
   const kombuchaSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-kombucha-left – FermentFreude Kombucha Apple & Carrot' },
+    data: { alt: 'slide-kombucha-left – Fermentfreude Kombucha Apple & Carrot' },
     file: await optimizedFile(path.join(heroDir, 'kombucha1.png'), IMAGE_PRESETS.card),
   })
   const kombuchaSlideRight = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-kombucha-right – FermentFreude Kombucha Coffee Flavour' },
+    data: { alt: 'slide-kombucha-right – Fermentfreude Kombucha Coffee Flavour' },
     file: await optimizedFile(path.join(heroDir, 'kombucha2.png'), IMAGE_PRESETS.card),
   })
 
@@ -160,13 +160,13 @@ async function seedHome() {
   const tempehSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-tempeh-left – FermentFreude Tempeh Slices' },
+    data: { alt: 'slide-tempeh-left – Fermentfreude Tempeh Slices' },
     file: await optimizedFile(path.join(heroDir, 'tempeh1.png'), IMAGE_PRESETS.card),
   })
   const tempehSlideRight = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-tempeh-right – FermentFreude Black Bean Tempeh' },
+    data: { alt: 'slide-tempeh-right – Fermentfreude Black Bean Tempeh' },
     file: await optimizedFile(path.join(heroDir, 'tempeh2.png'), IMAGE_PRESETS.card),
   })
 
@@ -174,13 +174,13 @@ async function seedHome() {
   const basicsSlideLeft = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-basics-left – David Heider, FermentFreude founder' },
+    data: { alt: 'slide-basics-left – David Heider, Fermentfreude founder' },
     file: await optimizedFile(path.join(heroDir, 'DavidHeroCopy.png'), IMAGE_PRESETS.card),
   })
   const basicsSlideRight = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'slide-basics-right – Marcel Rauminger, FermentFreude founder' },
+    data: { alt: 'slide-basics-right – Marcel Rauminger, Fermentfreude founder' },
     file: await optimizedFile(path.join(heroDir, 'MarcelHero.png'), IMAGE_PRESETS.card),
   })
 
@@ -191,7 +191,7 @@ async function seedHome() {
   const voucherImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude Gift Set – fermentation starter kit in box' },
+    data: { alt: 'Fermentfreude Gift Set – fermentation starter kit in box' },
     file: await optimizedFile(path.join(imagesDir, 'Image (Gift Set).png'), IMAGE_PRESETS.card),
   })
 
@@ -199,7 +199,7 @@ async function seedHome() {
   const bannerImage = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'FermentFreude chefs banner – professional kitchen scene' },
+    data: { alt: 'Fermentfreude chefs banner – professional kitchen scene' },
     file: await optimizedFile(path.join(imagesDir, 'Banner.png'), IMAGE_PRESETS.hero),
   })
 
@@ -207,13 +207,13 @@ async function seedHome() {
   const davidPhoto = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'David Heider – FermentFreude co-founder and instructor' },
+    data: { alt: 'David Heider – Fermentfreude co-founder and instructor' },
     file: await optimizedFile(path.join(imagesDir, 'david-heider.jpg'), IMAGE_PRESETS.card),
   })
   const marcelPhoto = await payload.create({
     collection: 'media',
     context: { skipAutoTranslate: true, skipRevalidate: true },
-    data: { alt: 'Marcel Rauminger – FermentFreude co-founder and instructor' },
+    data: { alt: 'Marcel Rauminger – Fermentfreude co-founder and instructor' },
     file: await optimizedFile(path.join(imagesDir, 'marcel-rauminger.jpg'), IMAGE_PRESETS.card),
   })
 
@@ -1069,7 +1069,7 @@ async function seedHome() {
       hero: heroDE,
       layout: layoutDE,
       meta: {
-        title: 'FermentFreude — Gutes Essen, bessere Gesundheit, echte Freude',
+        title: 'Fermentfreude — Gutes Essen, bessere Gesundheit, echte Freude',
         description:
           'Wir machen Fermentation genussvoll & zugänglich und stärken die Darmgesundheit durch Geschmack, Bildung und handgemachte Lebensmittel.',
       },
@@ -1232,7 +1232,7 @@ async function seedHome() {
       hero: heroEN_withIds,
       layout: layoutEN,
       meta: {
-        title: 'FermentFreude — Good food, better health, real joy',
+        title: 'Fermentfreude — Good food, better health, real joy',
         description:
           'We make fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods.',
       },

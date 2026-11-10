@@ -405,4 +405,4 @@ A: Yes, Stripe emails it automatically. Also available in Stripe Dashboard → P
 
 *Created: March 11, 2026*  
 *Version: 1.0*  
-*For: FermentFreude Founders*
+*For: Fermentfreude Founders*

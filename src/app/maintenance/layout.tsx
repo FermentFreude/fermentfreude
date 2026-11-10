@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 export const metadata = {
-  title: 'FermentFreude — Wartung / Maintenance',
+  title: 'Fermentfreude — Wartung / Maintenance',
   robots: { index: false, follow: false },
 }
 

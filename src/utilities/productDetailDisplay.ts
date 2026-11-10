@@ -71,7 +71,7 @@ export function getProductSpecs(
 ): { label: string; value: string }[] {
   const specs: { label: string; value: string }[] = []
 
-  specs.push({ label: getSpecLabel('brand', locale), value: product.brand?.trim() || 'FermentFreude' })
+  specs.push({ label: getSpecLabel('brand', locale), value: product.brand?.trim() || 'Fermentfreude' })
 
   const categories = getCategoryTitles(product)
   if (categories.length > 0) {

@@ -1,4 +1,4 @@
-# FermentFreude Booking System — Step-by-Step Implementation TODO
+# Fermentfreude Booking System — Step-by-Step Implementation TODO
 
 **Project:** Add cart-based workshop booking system with availability management
 **Timeline:** Phase-based (can complete in 1-2 days)

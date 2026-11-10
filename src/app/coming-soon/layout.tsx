@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'FermentFreude — Coming Soon',
-  description: 'FermentFreude — Coming Soon',
+  title: 'Fermentfreude — Coming Soon',
+  description: 'Fermentfreude — Coming Soon',
   robots: { index: false, follow: false },
 }
 

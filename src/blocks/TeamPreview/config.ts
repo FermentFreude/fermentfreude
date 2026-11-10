@@ -4,7 +4,7 @@ export const TeamPreview: Block = {
   slug: 'teamPreview',
   interfaceName: 'TeamPreviewBlock',
   labels: {
-    singular: 'Team Preview',
+    singular: "Team (founders' photos)",
     plural: 'Team Previews',
   },
   fields: [

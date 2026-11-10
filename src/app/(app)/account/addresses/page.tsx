@@ -11,7 +11,7 @@ import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 
 export const metadata = {
-  title: 'Addresses — FermentFreude',
+  title: 'Addresses — Fermentfreude',
   description: 'Manage your shipping and billing addresses',
 }
 

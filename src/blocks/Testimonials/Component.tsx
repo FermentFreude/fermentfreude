@@ -1,5 +1,6 @@
 'use client'
 
+import { SectionHeader } from '@/components/SectionHeader'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 /* ── Brand color ── */
@@ -233,33 +234,12 @@ export const TestimonialsBlock: React.FC<Props> = ({
       `}</style>
 
       <div className="container mx-auto container-padding">
-        {/* ── Header ── */}
-        <div className="flex flex-col items-start gap-2 mb-(--space-content-xl) text-left">
-          {resolvedEyebrow && (
-            <span className="text-eyebrow font-bold text-ff-gold-accent lg:hidden">
-              {resolvedEyebrow}
-            </span>
-          )}
-          <h2
-            className="font-display font-black"
-            style={{
-              fontSize: 'clamp(1.5rem, 3.5vw, 3rem)',
-              lineHeight: 1.1,
-              letterSpacing: '-0.01em',
-              color: '#000',
-            }}
-          >
-            {resolvedHeading.split(/(\b[A-ZÄÖÜ]{2,}\b)/g).map((part: string, i: number) =>
-              /^[A-ZÄÖÜ]{2,}$/.test(part) ? (
-                <span key={i} style={{ fontSize: '1.35em', letterSpacing: '-0.03em' }}>
-                  {part}
-                </span>
-              ) : (
-                <span key={i}>{part}</span>
-              ),
-            )}
-          </h2>
-        </div>
+        {/* ── Header — shared editorial pattern ── */}
+        <SectionHeader
+          eyebrow={resolvedEyebrow}
+          heading={resolvedHeading}
+          className="mb-(--space-content-xl)"
+        />
 
         {/* ── Testimonial Card ── */}
         <div

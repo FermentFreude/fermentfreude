@@ -40,7 +40,7 @@ export const ShopHero: Block = {
           type: 'text',
           localized: true,
           label: 'Line 1',
-          admin: { description: 'e.g. FermentFreude' },
+          admin: { description: 'e.g. Fermentfreude' },
         },
         {
           name: 'title',

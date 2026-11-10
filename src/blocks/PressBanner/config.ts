@@ -4,7 +4,7 @@ export const PressBanner: Block = {
   slug: 'pressBanner',
   interfaceName: 'PressBannerBlock',
   labels: {
-    singular: 'Press Banner',
+    singular: 'Press slider (articles & TV)',
     plural: 'Press Banners',
   },
   fields: [
@@ -104,12 +104,23 @@ export const PressBanner: Block = {
           },
         },
         {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Picture',
+          admin: {
+            description:
+              'Small picture next to the sentence — e.g. the same picture as on the press page for this article. Landscape works best.',
+          },
+        },
+        {
           name: 'logo',
           type: 'upload',
           relationTo: 'media',
           label: 'Outlet Logo',
           admin: {
-            description: 'Optional logo for this outlet. Falls back to a soft placeholder if empty.',
+            description: 'Optional logo for this outlet. Not shown when the slide has a picture (the picture carries the logo).',
+            condition: (_, siblingData) => !siblingData?.image,
           },
         },
         {
