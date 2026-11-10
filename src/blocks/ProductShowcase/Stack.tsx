@@ -64,7 +64,6 @@ export type ShowcaseSlide = {
   buttonLabel: string
 }
 
-
 type Props = {
   tagline: string | null
   slides: ShowcaseSlide[]
@@ -382,7 +381,8 @@ function ProductPanel({
       ) : null}
       <div className="container mx-auto container-padding flex flex-1 flex-col">
         <div className="relative flex flex-1 flex-col lg:block lg:h-full">
-          {tagline ? (
+          {/* Product slides only — not repeated on the Workshops slide */}
+          {tagline && !slide.workshops ? (
             <p
               ref={taglineRef}
               className={cn(
@@ -463,43 +463,58 @@ function ProductPanel({
                   : 'max-w-sm text-center lg:max-w-md',
             )}
           >
-            <div className={twoCol ? cn('lg:col-start-1 lg:row-start-1', hasPoints && 'lg:max-w-lg') : 'contents'}>
-            <motion.h3
-              variants={fadeUp}
-              className={cn(
-                'font-display font-bold',
-                slide.workshops
-                  ? 'text-base uppercase tracking-[0.04em]'
-                  : // Product slides: an editorial headline, e.g. "Regional. Innovativ. Vielseitig."
-                    'text-2xl leading-[1.08] tracking-[-0.02em] sm:text-3xl lg:text-[2.125rem]',
-                ink,
-              )}
+            <div
+              className={
+                twoCol
+                  ? cn('lg:col-start-1 lg:row-start-1', hasPoints && 'lg:max-w-lg')
+                  : 'contents'
+              }
             >
-              {slide.name}
-            </motion.h3>
-            {slide.subline ? (
-              <motion.p
+              <motion.h3
                 variants={fadeUp}
-                className={cn('mb-0 mt-1 font-display text-sm font-bold', light ? 'text-ff-gold' : inkSoft)}
+                className={cn(
+                  'font-display font-bold',
+                  slide.workshops
+                    ? 'text-base uppercase tracking-[0.04em]'
+                    : // Product slides: an editorial headline, e.g. "Regional. Innovativ. Vielseitig."
+                      'text-2xl leading-[1.08] tracking-[-0.02em] sm:text-3xl lg:text-[2.125rem]',
+                  ink,
+                )}
               >
-                {slide.subline}
-              </motion.p>
-            ) : null}
-            {slide.text ? (
-              <motion.p
-                variants={fadeUp}
-                // Editorial measure: a narrow column, airy lines
-                className={cn('mb-0 mt-3 text-[15px] leading-[1.65] sm:text-base lg:mt-4', inkSoft)}
-              >
-                {slide.text}
-              </motion.p>
-            ) : null}
+                {slide.name}
+              </motion.h3>
+              {slide.subline ? (
+                <motion.p
+                  variants={fadeUp}
+                  className={cn(
+                    'mb-0 mt-1 font-display text-sm font-bold',
+                    light ? 'text-ff-gold' : inkSoft,
+                  )}
+                >
+                  {slide.subline}
+                </motion.p>
+              ) : null}
+              {slide.text ? (
+                <motion.p
+                  variants={fadeUp}
+                  // Editorial measure: a narrow column, airy lines
+                  className={cn(
+                    'mb-0 mt-3 text-[15px] leading-[1.65] sm:text-base lg:mt-4',
+                    inkSoft,
+                  )}
+                >
+                  {slide.text}
+                </motion.p>
+              ) : null}
             </div>
             {slide.workshops?.length ? (
               /* The workshops, one calm row each: name left, next date right */
               <motion.ul
                 variants={fadeUp}
-                className={cn('mt-5 border-t lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0', rule)}
+                className={cn(
+                  'mt-5 border-t lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0',
+                  rule,
+                )}
               >
                 {slide.workshops.map((w) => (
                   <li key={w.href} className={cn('border-b', rule)}>
@@ -527,52 +542,64 @@ function ProductPanel({
                 ))}
               </motion.ul>
             ) : null}
-            <div className={twoCol ? cn('lg:col-start-1 lg:row-start-2', hasPoints && 'lg:max-w-lg') : 'contents'}>
-            {slide.price ? (
-              <motion.p
-                variants={fadeUp}
-                className={cn('mb-0 mt-4 font-display text-3xl font-bold leading-none tracking-[-0.02em] lg:mt-5', ink)}
-              >
-                {slide.price}
-              </motion.p>
-            ) : null}
-            {/* Weight line only when there is no note under the button (keeps the slide calm) */}
-            {slide.meta && !slide.buttonNote ? (
-              <motion.p variants={fadeUp} className={cn('mb-0 mt-2 text-xs', inkMuted)}>
-                {slide.meta}
-              </motion.p>
-            ) : null}
-            {slide.href ? (
-              <motion.div variants={fadeUp} className="mt-4 lg:mt-5">
-                <Link
-                  href={slide.href}
+            <div
+              className={
+                twoCol
+                  ? cn('lg:col-start-1 lg:row-start-2', hasPoints && 'lg:max-w-lg')
+                  : 'contents'
+              }
+            >
+              {slide.price ? (
+                <motion.p
+                  variants={fadeUp}
                   className={cn(
-                    'group inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full py-2.5 pl-6 pr-3 font-display text-sm font-bold transition-colors sm:w-auto',
-                    light
-                      ? 'bg-[#E6BE68] text-[#1A1A1A] hover:bg-[#EDD195]'
-                      : 'bg-[#1D1D1D] text-white hover:bg-black',
+                    'mb-0 mt-4 font-display text-3xl font-bold leading-none tracking-[-0.02em] lg:mt-5',
+                    ink,
                   )}
                 >
-                  {slide.buttonLabel}
-                  <span
+                  {slide.price}
+                </motion.p>
+              ) : null}
+              {/* Weight line only when there is no note under the button (keeps the slide calm) */}
+              {slide.meta && !slide.buttonNote ? (
+                <motion.p variants={fadeUp} className={cn('mb-0 mt-2 text-xs', inkMuted)}>
+                  {slide.meta}
+                </motion.p>
+              ) : null}
+              {slide.href ? (
+                <motion.div variants={fadeUp} className="mt-4 lg:mt-5">
+                  <Link
+                    href={slide.href}
                     className={cn(
-                      'flex h-7 w-7 items-center justify-center rounded-full transition-transform duration-300 group-hover:rotate-45',
-                      light ? 'bg-[#1A1A1A] text-[#E6BE68]' : 'bg-white text-[#1D1D1D]',
+                      'group inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full py-2.5 pl-6 pr-3 font-display text-sm font-bold transition-colors sm:w-auto',
+                      light
+                        ? 'bg-[#E6BE68] text-[#1A1A1A] hover:bg-[#EDD195]'
+                        : 'bg-[#1D1D1D] text-white hover:bg-black',
                     )}
                   >
-                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-                  </span>
-                </Link>
-              </motion.div>
-            ) : null}
-            {slide.buttonNote ? (
-              <motion.p
-                variants={fadeUp}
-                className={cn('mb-0 mt-2 whitespace-pre-line text-xs leading-relaxed lg:mt-3', inkMuted)}
-              >
-                {slide.buttonNote}
-              </motion.p>
-            ) : null}
+                    {slide.buttonLabel}
+                    <span
+                      className={cn(
+                        'flex h-7 w-7 items-center justify-center rounded-full transition-transform duration-300 group-hover:rotate-45',
+                        light ? 'bg-[#1A1A1A] text-[#E6BE68]' : 'bg-white text-[#1D1D1D]',
+                      )}
+                    >
+                      <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+                    </span>
+                  </Link>
+                </motion.div>
+              ) : null}
+              {slide.buttonNote ? (
+                <motion.p
+                  variants={fadeUp}
+                  className={cn(
+                    'mb-0 mt-2 whitespace-pre-line text-xs leading-relaxed lg:mt-3',
+                    inkMuted,
+                  )}
+                >
+                  {slide.buttonNote}
+                </motion.p>
+              ) : null}
             </div>
             {/* The site's points row: icon, title, one quiet line. Desktop: the right column.
                 Very short phones: hidden, the product page has the same steps */}
@@ -595,12 +622,17 @@ function ProductPanel({
           </motion.div>
         </div>
       </div>
-
     </section>
   )
 }
 
-export function ProductShowcaseStack({ tagline, slides, trustPointsTitle, trustPoints, locale }: Props) {
+export function ProductShowcaseStack({
+  tagline,
+  slides,
+  trustPointsTitle,
+  trustPoints,
+  locale,
+}: Props) {
   const label = locale === 'en' ? 'Products' : 'Produkte'
 
   // Each slide's big word at the largest size that fits its own stage. (One shared
@@ -615,7 +647,13 @@ export function ProductShowcaseStack({ tagline, slides, trustPointsTitle, trustP
       <div className="relative" aria-label={label} role="region">
         {slides.map((slide, i) => (
           // A short pause on each slide, so its text and labels can be read before the next covers it
-          <StackPanel key={slide.key} index={i} last={i === slides.length - 1} sink={false} hold={SLIDE_HOLD}>
+          <StackPanel
+            key={slide.key}
+            index={i}
+            last={i === slides.length - 1}
+            sink={false}
+            hold={SLIDE_HOLD}
+          >
             <ProductPanel
               slide={slide}
               index={i}

@@ -187,8 +187,8 @@ async function seedFooter(payload: Awaited<ReturnType<typeof getPayload>>) {
   if (force || !Boolean(existing.socialMedia?.instagram)) {
     deData.socialMedia = {
       instagram: 'https://www.instagram.com/fermentfreude/',
-      facebook: 'https://www.facebook.com/fermentfreude/',
-      linkedin: '',
+      facebook: 'https://www.facebook.com/p/Ferment-Freude-100087329564765/',
+      linkedin: 'https://www.linkedin.com/company/fermentfreude-og/',
     }
     enData.socialMedia = deData.socialMedia
     console.log('  + Social media')
