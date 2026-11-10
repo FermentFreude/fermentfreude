@@ -211,6 +211,51 @@ export default function DatenschutzPage() {
 
           <section>
             <h2 className="font-display font-bold text-xl uppercase tracking-wide mb-4 text-[#1d1d1d]">
+              8a. Chat-Assistent
+            </h2>
+            <p>
+              Auf unserer Website können Sie Fragen an einen automatischen Chat-Assistenten stellen.
+              Er beantwortet Fragen zu Workshops, Terminen, Produkten und Gutscheinen anhand der
+              Inhalte unserer Website. Bitte geben Sie im Chat keine persönlichen Daten ein.
+            </p>
+            <p className="mt-3">Dabei werden folgende Daten verarbeitet:</p>
+            <ul className="mt-3 list-disc list-inside space-y-1">
+              <li>der Text Ihrer Fragen und der bisherige Chat-Verlauf</li>
+              <li>
+                Ihre IP-Adresse, nur in verschlüsselter (gehashter) Form, um Missbrauch zu begrenzen;
+                dieser Eintrag wird automatisch nach spätestens 2 Stunden gelöscht
+              </li>
+            </ul>
+            <p className="mt-3">
+              Der Chat-Verlauf wird nicht dauerhaft gespeichert. Er bleibt nur in Ihrem Browser, bis
+              Sie das Fenster schließen.
+            </p>
+            <p className="mt-3">
+              Für einen Teil der Antworten nutzen wir KI-Dienste. Dafür wird der Text Ihrer Frage und
+              der bisherige Chat-Verlauf an einen der folgenden Anbieter übermittelt:
+            </p>
+            <ul className="mt-3 list-disc list-inside space-y-1">
+              <li>Anthropic PBC (Claude), USA</li>
+              <li>Cloudflare, Inc. (Workers AI), USA</li>
+            </ul>
+            <p className="mt-3">
+              Die Übermittlung in die USA erfolgt auf Grundlage geeigneter Garantien (z. B.
+              Standardvertragsklauseln bzw. EU-US Data Privacy Framework).
+            </p>
+            <p className="mt-3">
+              Wenn Sie über das Formular im Chat eine Frage an unser Team senden, verarbeiten wir Ihren
+              Namen, Ihre E-Mail-Adresse, Ihre Nachricht und den Chat-Verlauf, um Ihnen per E-Mail zu
+              antworten. Der Versand erfolgt über Brevo (siehe Punkt 8).
+            </p>
+            <p className="mt-3">
+              Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer schnellen
+              Beantwortung von Anfragen) sowie Art. 6 Abs. 1 lit. b DSGVO bei Anfragen zu einer
+              Buchung oder Bestellung.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-display font-bold text-xl uppercase tracking-wide mb-4 text-[#1d1d1d]">
               9. Tracking & Analyse
             </h2>
             <p>Wir nutzen folgende Tools:</p>
