@@ -55,6 +55,8 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
   const onPhoto = h.visual === 'background' && !!h.image
   const photoRight = h.visual === 'image' && !!h.image
   const showTicket = !photoRight && (!onPhoto || h.ticketOnBackground)
+  /** Photo behind the hero and nothing on the right: the points get the right column (like the Home Tempeh slide) */
+  const pointsRight = onPhoto && !showTicket
   const blur = BLUR[h.backgroundBlur] ?? BLUR.soft
 
   const px = useMotionValue(0)
@@ -106,6 +108,14 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
               className="absolute inset-0 -z-10 bg-[#1A1A1A]/60 lg:bg-transparent lg:bg-[linear-gradient(90deg,rgba(26,26,26,0.85)_0%,rgba(26,26,26,0.6)_45%,rgba(26,26,26,0.25)_100%)]"
               aria-hidden="true"
             />
+            {/* desktop, points on the right: a shade rising from the bottom so they read
+                on the bright half of the photo (like the even veil on the Home Tempeh slide) */}
+            {pointsRight && (
+              <div
+                className="absolute inset-0 -z-10 hidden bg-[linear-gradient(0deg,rgba(26,26,26,0.8)_0%,rgba(26,26,26,0.45)_30%,rgba(26,26,26,0)_60%)] lg:block"
+                aria-hidden="true"
+              />
+            )}
           </>
         )}
 
@@ -206,7 +216,7 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
               </span>
               <span
                 className={cn(
-                  'font-sans text-[15px]',
+                  'font-sans text-[15px] text-balance',
                   onPhoto ? 'text-[#FAF2E0]/85' : 'text-[#4B4B4B]',
                 )}
               >
@@ -244,10 +254,31 @@ export function VoucherPageHero({ c }: { c: VoucherContent }) {
                 </a>
               )}
             </motion.div>
+          </motion.div>
 
-            <motion.div variants={fadeUp} custom={5} className="mt-10 lg:mt-12">
-              <PointsRow items={h.points} tone={onPhoto ? 'light' : 'dark'} phoneText size="sm" />
-            </motion.div>
+          {/* Points — like the Home Tempeh slide: centred under the button on phone/tablet;
+              on desktop a 26rem column at the far right, bottom-aligned with the price and
+              button (or under the button when the right half shows the ticket/photo) */}
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={fadeUp}
+            custom={5}
+            className={cn(
+              'mt-10 w-full',
+              pointsRight
+                ? 'lg:col-start-2 lg:row-start-3 lg:mt-0 lg:w-[min(32rem,100%)] lg:self-end lg:justify-self-end'
+                : 'max-w-xl lg:col-start-1 lg:row-start-4 lg:mt-12 lg:self-start',
+            )}
+          >
+            <PointsRow
+              items={h.points}
+              tone={onPhoto ? 'light' : 'dark'}
+              align="center"
+              alignLg="start"
+              phoneText
+              balance
+            />
           </motion.div>
         </div>
       </section>

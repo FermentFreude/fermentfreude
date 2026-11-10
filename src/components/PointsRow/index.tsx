@@ -42,6 +42,8 @@ type Props = {
   rule?: boolean
   /** Small heading above the points (under the hairline), e.g. "Zubereitung" */
   heading?: string | null
+  /** Even line breaks in titles and lines (no single word left on its own line) */
+  balance?: boolean
   className?: string
 }
 
@@ -64,6 +66,7 @@ export function PointsRow({
   size = 'md',
   rule = true,
   heading,
+  balance = false,
   className,
 }: Props) {
   if (!items.length) return null
@@ -72,7 +75,9 @@ export function PointsRow({
   const list = phone === 'list' || listAll
   const sm = size === 'sm'
 
-  const ring = light ? 'border-ff-ivory/25 text-ff-gold' : 'border-ff-near-black/25 text-ff-near-black'
+  const ring = light
+    ? 'border-ff-ivory/25 text-ff-gold'
+    : 'border-ff-near-black/25 text-ff-near-black'
   const title = light ? 'text-ff-ivory' : 'text-ff-near-black'
   const text = light ? 'text-ff-ivory/70' : 'text-ff-near-black/70'
   const hairline = light ? 'border-ff-gold/40' : 'border-ff-near-black/15'
@@ -82,7 +87,12 @@ export function PointsRow({
       className={cn(
         'm-0 grid list-none p-0',
         list
-          ? cn('grid-cols-1 gap-y-4', listAll ? 'sm:gap-y-5' : cn('sm:gap-x-6 sm:gap-y-5', LIST_COLS[Math.min(items.length, 4)]))
+          ? cn(
+              'grid-cols-1 gap-y-4',
+              listAll
+                ? 'sm:gap-y-5'
+                : cn('sm:gap-x-6 sm:gap-y-5', LIST_COLS[Math.min(items.length, 4)]),
+            )
           : 'gap-x-3 gap-y-5 sm:gap-x-6',
         rule && !heading && cn('border-t', sm ? 'pt-4' : 'pt-5 sm:pt-6', hairline),
         !heading && className,
@@ -99,8 +109,14 @@ export function PointsRow({
             'flex min-w-0',
             list
               ? cn('flex-row items-start gap-4 text-left', !listAll && 'sm:flex-col sm:gap-0')
-              : cn('flex-col', align === 'center' ? 'items-center text-center' : 'items-start text-left'),
-            list && cn(lg === 'center' ? 'lg:items-center lg:text-center' : 'lg:items-start lg:text-left'),
+              : cn(
+                  'flex-col',
+                  align === 'center' ? 'items-center text-center' : 'items-start text-left',
+                ),
+            list &&
+              cn(
+                lg === 'center' ? 'lg:items-center lg:text-center' : 'lg:items-start lg:text-left',
+              ),
             !list &&
               (lg === 'center' ? 'lg:items-center lg:text-center' : 'lg:items-start lg:text-left'),
           )}
@@ -118,7 +134,10 @@ export function PointsRow({
             <span
               className={cn(
                 'block font-display font-bold leading-tight',
-                sm ? 'mt-2 text-xs' : cn('text-sm sm:text-base', list ? (listAll ? '' : 'sm:mt-3') : 'mt-3'),
+                sm
+                  ? 'mt-2 text-xs'
+                  : cn('text-sm sm:text-base', list ? (listAll ? '' : 'sm:mt-3') : 'mt-3'),
+                balance && 'text-balance',
                 title,
               )}
             >
@@ -131,6 +150,7 @@ export function PointsRow({
                   // Grid on phone: the line only from tablet up unless asked for; never on short screens
                   !list && !phoneText && 'hidden sm:block',
                   '[@media(max-height:700px)]:hidden',
+                  balance && 'text-balance',
                   text,
                 )}
               >
