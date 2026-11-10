@@ -37,6 +37,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY   # pk_test_ (dev) / pk_live_ (prod)
 STRIPE_WEBHOOKS_SIGNING_SECRET       # whsec_
 DEEPL_API_KEY                        # Auto-translation DE→EN
 CRON_SECRET                          # Auth for Vercel Cron → /api/emails/workshop-reminders (route refuses to run without it)
+MAINTENANCE_MODE                     # "true" = visitors see /wartung (503); team enters PREVIEW_PASSWORD at /maintenance. Off by default
 ```
 
 **CRITICAL:** `NEXT_PUBLIC_*` vars are baked in at **build time**. Changing them in Vercel requires a full redeploy **without cache**.
