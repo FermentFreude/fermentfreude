@@ -40,6 +40,8 @@ export type NextWorkshopDateInfo = {
   date: string | null
   /** Same date as "25. Oktober, Sonntag" (date first, then weekday), or null if none. */
   dateFirst: string | null
+  /** The same date as an ISO timestamp, for sorting (null if none). */
+  dateTime?: string | null
   /** Available spots on the next bookable appointment (undefined = unlimited). */
   availableSpots?: number
   /** True when no bookable future appointment exists for this workshop. */
@@ -95,6 +97,7 @@ export async function getNextWorkshopDatesByHref(
       nextByHref[href] = {
         date: formatUpcomingDate(appointment.dateTime, locale),
         dateFirst: formatDateThenWeekday(appointment.dateTime, locale),
+        dateTime: appointment.dateTime,
         availableSpots: typeof spots === 'number' ? spots : undefined,
         soldOut: false,
       }

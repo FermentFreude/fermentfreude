@@ -7,7 +7,7 @@ export type PictureSlot = 'intro' | 'alive' | 'natural' | 'everyday' | 'protein'
 export const PICTURE_SLOTS: { label: string; value: PictureSlot }[] = [
   { label: 'Gesund — chef pulling an apple', value: 'intro' },
   { label: 'Lebendig — chef riding a carrot', value: 'alive' },
-  { label: 'Natürlich — chef pulling broccoli', value: 'natural' },
+  { label: 'Natürlich — chef carrying a pan of tempeh', value: 'natural' },
   { label: 'Alltag — chef hugging a jar of kimchi', value: 'everyday' },
   { label: 'Protein — chef peeking over a tempeh block', value: 'protein' },
   { label: 'Experten — chef riding a leek', value: 'experts' },
@@ -30,7 +30,7 @@ export const PICTURE_BY_SLOT: Record<PictureSlot, StoryPicture> = {
     aroundWord: '-bottom-[0.55em] -right-[0.5em] w-[1.35em]',
   },
   alive: { src: '/fermentation/carrot-chef.webp', width: 1260, height: 764 },
-  natural: { src: '/fermentation/broccoli-chef.webp', width: 1200, height: 812 },
+  natural: { src: '/fermentation/tempeh-pan-chef.webp', width: 1200, height: 1105 },
   everyday: { src: '/fermentation/kimchi-chef.webp', width: 1400, height: 1218 },
   protein: { src: '/fermentation/tempeh-chef.webp', width: 1400, height: 791 },
   experts: { src: '/fermentation/leek.webp', width: 1400, height: 824 },

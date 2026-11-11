@@ -36,7 +36,7 @@ export type BookingICSInput = {
   url?: string
 }
 
-const PRODID = '-//FermentFreude//Workshop Booking//EN'
+const PRODID = '-//Fermentfreude//Workshop Booking//EN'
 
 /** Escape a value per RFC 5545 §3.3.11 (TEXT). */
 function escapeText(value: string): string {
