@@ -10,6 +10,56 @@ import type { Payload } from 'payload'
  * fetch, reused by both, so that can't happen again.
  */
 
+const isMediaDoc = (m: unknown): m is MediaType =>
+  typeof m === 'object' && m !== null && 'url' in (m as object) && Boolean((m as MediaType).url)
+
+/**
+ * A picture for a workshop that always resolves to a real image when one exists anywhere:
+ *   1. the workshop's own `image` (when it points at a picture that still exists),
+ *   2. the first photo of the workshop's shop product (`workshop-<slug>`),
+ *   3. a general studio photo.
+ * (On production the `image` of Tempeh/Lakto/Kombucha points at a picture record that no
+ * longer exists, so the page used to show an empty grey box.)
+ */
+async function workshopPicture(
+  payload: Payload,
+  slug: string,
+  own: unknown,
+  studio: MediaType | null,
+): Promise<MediaType | null> {
+  if (isMediaDoc(own)) return own
+  try {
+    const prod = await payload.find({
+      collection: 'products',
+      where: { slug: { equals: `workshop-${slug}` } },
+      limit: 1,
+      depth: 1,
+      overrideAccess: true,
+    })
+    const first = (prod.docs[0] as { gallery?: { image?: unknown }[] } | undefined)?.gallery?.[0]
+      ?.image
+    if (isMediaDoc(first)) return first
+  } catch {
+    // fall through to the studio photo
+  }
+  return studio
+}
+
+async function studioPhoto(payload: Payload): Promise<MediaType | null> {
+  try {
+    const r = await payload.find({
+      collection: 'media',
+      where: { filename: { equals: 'home-showcase-bg-workshops-studio.webp' } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    return isMediaDoc(r.docs[0]) ? (r.docs[0] as MediaType) : null
+  } catch {
+    return null
+  }
+}
+
 export type BookingSummary = {
   workshopTitle: string
   workshopSlug: string
@@ -240,8 +290,12 @@ async function fetchOrderConfirmationData({
                 depth: 1,
                 overrideAccess: true,
               })
-              data.workshopImage =
-                (wsResult.docs[0] as { image?: MediaType | string } | undefined)?.image ?? null
+              data.workshopImage = await workshopPicture(
+                payload,
+                workshopSlug,
+                (wsResult.docs[0] as { image?: unknown } | undefined)?.image,
+                await studioPhoto(payload),
+              )
             } catch {
               // ignore — falls back to no hero image
             }
@@ -267,11 +321,17 @@ async function fetchOrderConfirmationData({
           depth: 1,
           overrideAccess: true,
         })
-        data.otherWorkshops = others.docs.map((w) => ({
-          slug: String((w as { slug?: string }).slug ?? ''),
-          title: String((w as { title?: string }).title ?? ''),
-          image: (w as { image?: MediaType | string }).image ?? null,
-        }))
+        const studio = await studioPhoto(payload)
+        data.otherWorkshops = await Promise.all(
+          others.docs.map(async (w) => {
+            const slug = String((w as { slug?: string }).slug ?? '')
+            return {
+              slug,
+              title: String((w as { title?: string }).title ?? ''),
+              image: await workshopPicture(payload, slug, (w as { image?: unknown }).image, studio),
+            }
+          }),
+        )
       } catch {
         // ignore — the "explore more" section just won't render
       }

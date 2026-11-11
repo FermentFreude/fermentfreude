@@ -132,30 +132,30 @@ export const accountI18n = {
     // Order confirmation
     welcomeToCourse: 'Willkommen zu deinem Kurs!',
     courseConfirmDesc:
-      'Dein Kauf ist bestätigt und dein Kurs ist sofort verfügbar — kein Warten, kein Versand.',
+      'Dein Kauf ist bestätigt und dein Kurs ist sofort verfügbar. Kein Warten, kein Versand.',
     orderInfo: 'Bestellinformationen',
     orderNumber: 'Bestellnummer',
     access: 'Zugang',
-    lifetimeAccess: 'Lebenslang — sofortiger Zugang',
+    lifetimeAccess: 'Lebenslang und sofort verfügbar',
     whatsNext: 'Nächste Schritte',
     paymentConfirmed: 'Zahlung bestätigt',
     paymentConfirmedDesc:
-      'Deine Zahlung wurde erfolgreich verarbeitet. Eine Quittung wurde an deine E-Mail gesendet.',
+      'Deine Zahlung wurde erfolgreich verarbeitet. Die Quittung ist per Mail unterwegs.',
     youreEnrolled: 'Du bist eingeschrieben',
     enrolledDesc:
-      'Dein Kurs wurde deinem Lern-Dashboard hinzugefügt. Alle Lektionen sind freigeschaltet.',
+      'Dein Kurs liegt jetzt in deinem Lernbereich. Alle Lektionen sind freigeschaltet.',
     startLearning: 'Lerne jetzt',
     startLearningDesc:
-      'Gehe zu deinem Lern-Dashboard und beginne mit der ersten Lektion. Lerne in deinem eigenen Tempo.',
+      'Öffne deinen Lernbereich und starte mit der ersten Lektion. Du lernst in deinem eigenen Tempo.',
     goToLearning: 'Zu Meinen Kursen',
     browseMoreCourses: 'Weitere Kurse durchsuchen',
     questions: 'Fragen?',
-    questionsDescCourse: 'Brauchst du Hilfe beim Einstieg? Unser Support-Team hilft dir gerne.',
+    questionsDescCourse: 'Brauchst du Hilfe beim Einstieg? Unser Team hilft dir gerne weiter.',
     contactSupport: 'Support kontaktieren',
     thankYouOrder: 'Vielen Dank für deine Bestellung!',
     orderPlacedDesc:
       'Deine Bestellung wurde erfolgreich aufgegeben. Wir freuen uns, sie dir zu liefern!',
-    emailConfirmation: 'E-Mail-Bestätigung',
+    emailConfirmation: 'Bestätigung',
     sentToInbox: 'An deinen Posteingang gesendet',
     orderConfirmed: 'Bestellung bestätigt',
     orderConfirmedDesc: 'Deine Zahlung wurde verarbeitet und deine Bestellung ist bestätigt',
@@ -178,10 +178,10 @@ export const accountI18n = {
     processingShippingDesc:
       'Wir bereiten deine Artikel vor und versenden innerhalb von 1-2 Werktagen',
     onTheWay: 'Unterwegs',
-    onTheWayDesc: 'Du erhältst die Sendungsverfolgung per E-Mail',
+    onTheWayDesc: 'Die Sendungsverfolgung bekommst du per Mail.',
     whatYouCanDo: 'Was du jetzt tun kannst',
-    checkEmail: 'Prüfe deine E-Mail für eine Bestellbestätigung und Quittung',
-    visitDashboard: 'Besuche dein Konto-Dashboard, um den Bestellstatus zu verfolgen',
+    checkEmail: 'Prüfe dein Postfach. Wir haben dir die Bestätigung und die Quittung geschickt.',
+    visitDashboard: 'In deinem Konto siehst du jederzeit den Stand deiner Bestellung.',
     visitDashboardGuest: 'Erstelle ein Konto, um deine Bestellungen jederzeit einsehen zu können',
     contactUs: 'Kontaktiere uns bei Fragen zu deiner Bestellung',
     viewMyOrders: 'Meine Bestellungen ansehen',
@@ -190,15 +190,15 @@ export const accountI18n = {
     questionsDescOrder: 'Unser Kundenservice ist für dich da. Melde dich jederzeit.',
 
     // Workshop confirmation
-    workshopConfirmed: 'Dein Workshop-Platz ist reserviert!',
-    workshopConfirmDesc: 'Deine Buchung ist bestätigt — wir freuen uns auf dich!',
+    workshopConfirmed: 'Dein Platz ist reserviert.',
+    workshopConfirmDesc: 'Alles ist bestätigt. Wir freuen uns auf dich.',
     bookingConfirmed: 'Buchung bestätigt',
     bookingConfirmedDesc: 'Deine Zahlung wurde verarbeitet und dein Platz ist gesichert.',
-    confirmationEmail: 'Bestätigungs-E-Mail',
-    confirmationEmailDesc: 'Du erhältst eine E-Mail mit allen Workshop-Details und Anfahrt.',
-    workshopDay: 'Am Workshop-Tag',
+    confirmationEmail: 'Bestätigung per Mail',
+    confirmationEmailDesc: 'Du bekommst eine Mail mit allen Details zum Workshop und zur Anfahrt.',
+    workshopDay: 'Am Tag des Workshops',
     workshopDayDesc:
-      'Komm einfach pünktlich — wir kümmern uns um den Rest. Alle Materialien sind inklusive.',
+      'Komm einfach pünktlich. Um alles Weitere kümmern wir uns. Alle Materialien sind inklusive.',
     viewBookingDetails: 'Buchungsdetails ansehen',
     browseMoreWorkshops: 'Weitere Workshops',
     viewTickets: 'Tickets ansehen & drucken',
@@ -214,7 +214,8 @@ export const accountI18n = {
     labelGuests: 'Teilnehmer',
     goToProfile: 'Zu meinem Konto',
     createAccountPrompt: 'Konto erstellen',
-    createAccountDesc: 'Erstelle ein Konto, um alle deine Buchungen jederzeit im Überblick zu haben.',
+    createAccountDesc:
+      'Erstelle ein Konto, um alle deine Buchungen jederzeit im Überblick zu haben.',
     exploreOtherWorkshops: 'Entdecke weitere Workshops',
     learnMore: 'Mehr erfahren',
 
@@ -381,11 +382,11 @@ export const accountI18n = {
     // Order confirmation
     welcomeToCourse: 'Welcome to Your Course!',
     courseConfirmDesc:
-      'Your purchase is confirmed and your course is ready to start — no waiting, no shipping.',
+      'Your purchase is confirmed and your course is ready to start. No waiting, no shipping.',
     orderInfo: 'Order Information',
     orderNumber: 'Order Number',
     access: 'Access',
-    lifetimeAccess: 'Lifetime — instant access',
+    lifetimeAccess: 'Lifetime access, available at once',
     whatsNext: "What's Next",
     paymentConfirmed: 'Payment Confirmed',
     paymentConfirmedDesc:
@@ -438,14 +439,15 @@ export const accountI18n = {
     questionsDescOrder: 'Our customer support team is here to help. Reach out anytime.',
 
     // Workshop confirmation
-    workshopConfirmed: 'Your Workshop Spot is Reserved!',
-    workshopConfirmDesc: 'Your booking is confirmed — we look forward to seeing you!',
+    workshopConfirmed: 'Your spot is reserved.',
+    workshopConfirmDesc: 'Everything is confirmed. We look forward to seeing you.',
     bookingConfirmed: 'Booking Confirmed',
     bookingConfirmedDesc: 'Your payment was processed and your spot is secured.',
     confirmationEmail: 'Confirmation Email',
     confirmationEmailDesc: "You'll receive an email with all workshop details and directions.",
     workshopDay: 'On Workshop Day',
-    workshopDayDesc: 'Just show up on time — we take care of the rest. All materials are included.',
+    workshopDayDesc:
+      'Just arrive on time. We take care of everything else. All materials are included.',
     viewBookingDetails: 'View Booking Details',
     browseMoreWorkshops: 'Browse More Workshops',
     viewTickets: 'View & Print Tickets',
