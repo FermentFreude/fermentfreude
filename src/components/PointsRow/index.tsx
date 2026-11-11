@@ -44,6 +44,10 @@ type Props = {
   heading?: string | null
   /** Even line breaks in titles and lines (no single word left on its own line) */
   balance?: boolean
+  /** Columns on phones (e.g. 2 for four points → a tidy 2×2); from tablet up every point gets its own column */
+  phoneColumns?: number
+  /** Keep the short line visible on short screens too (the slides hide it there to save height) */
+  alwaysShowText?: boolean
   className?: string
 }
 
@@ -54,6 +58,8 @@ const LIST_COLS: Record<number, string> = {
   3: 'sm:grid-cols-3',
   4: 'sm:grid-cols-4',
 }
+
+const PHONE_COLS: Record<number, string> = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-3' }
 
 export function PointsRow({
   items,
@@ -67,6 +73,8 @@ export function PointsRow({
   rule = true,
   heading,
   balance = false,
+  phoneColumns,
+  alwaysShowText = false,
   className,
 }: Props) {
   if (!items.length) return null
@@ -93,14 +101,24 @@ export function PointsRow({
                 ? 'sm:gap-y-5'
                 : cn('sm:gap-x-6 sm:gap-y-5', LIST_COLS[Math.min(items.length, 4)]),
             )
-          : 'gap-x-3 gap-y-5 sm:gap-x-6',
+          : phoneColumns
+            ? // phone: `phoneColumns` equal columns; tablet up: one column per point
+              cn(
+                'gap-x-3 gap-y-7 sm:gap-x-6 sm:gap-y-5',
+                PHONE_COLS[phoneColumns] ?? 'grid-cols-2',
+                'sm:grid-cols-[repeat(var(--pr-cols),minmax(0,1fr))]',
+              )
+            : 'gap-x-3 gap-y-5 sm:gap-x-6',
         rule && !heading && cn('border-t', sm ? 'pt-4' : 'pt-5 sm:pt-6', hairline),
         !heading && className,
       )}
-      style={{
-        // Phone list: one column; otherwise one equal column per point
-        gridTemplateColumns: list ? undefined : `repeat(${items.length}, minmax(0, 1fr))`,
-      }}
+      style={
+        list
+          ? undefined
+          : phoneColumns
+            ? ({ '--pr-cols': items.length } as React.CSSProperties)
+            : { gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }
+      }
     >
       {items.map((item, i) => (
         <li
@@ -108,7 +126,11 @@ export function PointsRow({
           className={cn(
             'flex min-w-0',
             list
-              ? cn('flex-row items-start gap-4 text-left', !listAll && 'sm:flex-col sm:gap-0')
+              ? cn(
+                  'flex-row items-start gap-4 text-left',
+                  !listAll && 'sm:flex-col sm:gap-0',
+                  !listAll && align === 'center' && 'sm:items-center sm:text-center',
+                )
               : cn(
                   'flex-col',
                   align === 'center' ? 'items-center text-center' : 'items-start text-left',
@@ -149,7 +171,7 @@ export function PointsRow({
                   'mt-1 block text-xs leading-snug sm:text-sm',
                   // Grid on phone: the line only from tablet up unless asked for; never on short screens
                   !list && !phoneText && 'hidden sm:block',
-                  '[@media(max-height:700px)]:hidden',
+                  !alwaysShowText && '[@media(max-height:700px)]:hidden',
                   balance && 'text-balance',
                   text,
                 )}

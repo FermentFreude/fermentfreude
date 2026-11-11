@@ -456,7 +456,7 @@ function ProductPanel({
               'relative z-30 mx-auto mb-auto pb-8 lg:absolute lg:bottom-0 lg:left-0 lg:mx-0 lg:mb-0 lg:pb-10 lg:text-left',
               slide.workshops
                 ? // Phone: text, list, button stacked. Desktop: text + button left, list right
-                  'flex w-full max-w-md flex-col text-left lg:grid lg:max-w-4xl lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-end lg:gap-x-16'
+                  'flex w-full max-w-md flex-col text-left lg:grid lg:max-w-4xl lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-center lg:gap-x-16'
                 : hasPoints
                   ? // Phone: everything centred, points at the end. Desktop: text + button left, points at the far right
                     'max-w-sm text-center lg:grid lg:w-full lg:max-w-none lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-end lg:gap-x-12'
@@ -613,7 +613,7 @@ function ProductPanel({
                   items={trustPoints}
                   tone={light ? 'light' : 'dark'}
                   align="center"
-                  alignLg="start"
+                  alignLg="center"
                   phoneText
                   listAll={false}
                 />

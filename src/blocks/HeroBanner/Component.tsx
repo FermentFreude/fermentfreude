@@ -74,7 +74,7 @@ export const HeroBannerBlock: React.FC<Props> = ({
   // What we offer: the site's points row (icon, title, one quiet line)
   const offer = points?.length ? (
     <div className="mt-12 lg:mt-16">
-      <PointsRow items={points} tone="light" align="start" phone="list" />
+      <PointsRow items={points} tone="light" align="center" alignLg="center" phone="list" />
     </div>
   ) : null
 

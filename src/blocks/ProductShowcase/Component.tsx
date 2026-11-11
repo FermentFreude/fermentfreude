@@ -92,20 +92,34 @@ export async function ProductShowcaseBlockComponent(props: Props) {
     })
     const sorted = chosen.length
       ? // The editor's pick, in the editor's order
-        chosen.map((id) => ws.find((w) => w.id === id)).filter((w): w is (typeof ws)[number] => Boolean(w))
+        chosen
+          .map((id) => ws.find((w) => w.id === id))
+          .filter((w): w is (typeof ws)[number] => Boolean(w))
       : [...ws].sort((a, b) => {
           const ia = WORKSHOP_ORDER.indexOf(a.slug ?? '')
           const ib = WORKSHOP_ORDER.indexOf(b.slug ?? '')
-          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || (a.title ?? '').localeCompare(b.title ?? '')
+          return (
+            (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || (a.title ?? '').localeCompare(b.title ?? '')
+          )
         })
     const hrefOf = (slug: string) => WORKSHOP_HREF[slug] ?? `/workshops/${slug}`
     const dates = await getNextWorkshopDatesByHref(locale)
-    workshopRows = sorted
+    const withDates = sorted
       .filter((w) => w.slug && w.title)
       .map((w) => {
         const href = hrefOf(w.slug as string)
-        return { title: w.title as string, href, date: dates[href]?.date ?? null }
+        const at = dates[href]?.dateTime
+          ? new Date(dates[href]!.dateTime as string).getTime()
+          : null
+        return { row: { title: w.title as string, href, date: dates[href]?.date ?? null }, at }
       })
+    // Soonest date first (a December date never above a November one); workshops without a
+    // date keep the editor's order at the end. Array.sort is stable, so ties keep that order too.
+    workshopRows = withDates
+      .sort(
+        (a, b) => (a.at === null ? 1 : 0) - (b.at === null ? 1 : 0) || (a.at ?? 0) - (b.at ?? 0),
+      )
+      .map((x) => x.row)
   }
 
   const slides: ShowcaseSlide[] = (props.slides ?? []).flatMap((s, i): ShowcaseSlide[] => {
