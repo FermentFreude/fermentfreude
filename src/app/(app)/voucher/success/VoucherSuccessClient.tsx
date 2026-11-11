@@ -1,89 +1,100 @@
 'use client'
 
+import { CalendarCheck, Download, Gift, Mail, ShoppingBag, Store } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useLocale } from '@/providers/Locale'
 
+/* ═══════════════════════════════════════════════════════════════
+ *  VOUCHER CONFIRMATION — shown right after a voucher was paid.
+ *  Editorial copy (short sentences, no hyphens or dashes), one black
+ *  card with the code and the three downloads, type scales with the screen.
+ * ═══════════════════════════════════════════════════════════════ */
+
 const SUCCESS_DE = {
-  loading: 'Gutschein wird erstellt\u2026',
-  errorTitle: 'Fehler',
-  successTitle: 'Gutschein erstellt!',
-  successSubtitle: (
-    <>
-      Dein Geschenkgutschein für ein <strong>Workshop-Erlebnis</strong> wurde erfolgreich
-      erstellt.
-    </>
-  ),
-  voucherCodeLabel: 'Gutschein-Code',
+  loading: 'Dein Gutschein wird erstellt',
+  errorTitle: 'Das hat nicht geklappt',
+  eyebrow: 'Zahlung erfolgreich',
+  headline: 'Dein Gutschein ist da.',
+  subline: 'Vielen Dank. Ein Workshop voller Geschmack wartet auf die beschenkte Person.',
+  codeLabel: 'Dein Gutscheincode',
+  valueWorkshop: 'Ein Workshop nach Wahl für eine Person',
+  valueAmount: (value: number) => `Wertgutschein über ${value} €`,
   copyCode: 'Code kopieren',
-  codeCopied: '\u2713 Kopiert!',
-  copyToast: 'Code kopiert!',
-  voucherDesc: (value: number) => `Workshop-Erlebnis Gutschein \u2014 \u20AC${value},00`,
-  deliveredByEmail: 'Per E-Mail zugestellt',
-  emailTo: (email: string) => `An: ${email}`,
-  confirmationSent: 'Eine Best\u00E4tigung wurde auch an deine E-Mail-Adresse gesendet.',
-  emailFailedWarning:
-    'Deine Zahlung wurde erfolgreich verarbeitet und dein Gutschein ist g\u00FCltig \u2014 wir hatten allerdings ein tempor\u00E4res Problem beim Versand der Best\u00E4tigungs-E-Mail. Unser Team wurde automatisch informiert und meldet sich bei dir. Du kannst deinen Code oben jetzt schon kopieren oder als PDF herunterladen.',
-  readyForPickup: 'Zur Abholung bereit',
-  pickupAddress: 'Grabenstra\u00DFe 15, 8010 Graz',
-  pickupNotification: 'Wir informieren dich per E-Mail, sobald der Gutschein abholbereit ist.',
-  howToUse: 'So nutzt du deinen Gutschein:',
-  step1: 'W\u00E4hle einen Workshop auf fermentfreude.at/workshops',
-  step2: 'Lege den Workshop in den Warenkorb',
-  step3: 'Beim Checkout: Gib deinen Code ein \u2013 die Geb\u00FChr wird direkt abgezogen',
-  downloading: 'Wird heruntergeladen...',
+  codeCopied: 'Code kopiert',
+  copyToast: 'Code kopiert',
+  downloading: 'Wird geladen',
   downloadPDF: 'Gutschein als PDF herunterladen',
-  backHome: 'Zur Startseite',
-  backVoucher: 'Zur\u00FCck zum Gutschein',
+  cardButton: 'Grußkarte herunterladen',
+  mailTitle: 'Dein Gutschein liegt in deinem Postfach',
+  mailText:
+    'Wir haben ihn dir mit dem PDF per Mail geschickt. Schau bei Bedarf auch im Spamordner nach.',
+  mailTo: (email: string) => `Gesendet an ${email}.`,
+  mailFailed:
+    'Deine Zahlung war erfolgreich und dein Gutschein ist gültig. Beim Versand der Mail gab es ein kurzes Problem. Unser Team wurde informiert und meldet sich bei dir. Deinen Code kannst du oben schon kopieren oder als PDF laden.',
+  pickupTitle: 'Zur Abholung bereit',
+  pickupText:
+    'Grabenstraße 15, 8010 Graz. Wir schreiben dir, sobald der Gutschein abholbereit ist.',
+  stepsTitle: 'So löst du ihn ein',
+  stepA: 'Workshop und Termin wählen',
+  stepAText: 'Alle Termine findest du auf fermentfreude.at/workshops.',
+  stepB: 'In den Warenkorb legen',
+  stepBText: 'Der Workshop kommt ganz normal in den Warenkorb.',
+  stepC: 'Beim Bezahlen den Code eingeben',
+  stepCText: 'Der Betrag wird sofort abgezogen.',
+  bookWorkshop: 'Workshop buchen',
   buyAnother: 'Weiteren Gutschein kaufen',
-  pdfError: 'PDF konnte nicht heruntergeladen werden.',
-  pdfSuccess: 'PDF heruntergeladen!',
-  pdfDownloadError: 'Fehler beim Download.',
-  confirmError: 'Fehler bei der Best\u00E4tigung.',
-  connectionError: 'Verbindungsfehler. Bitte lade die Seite neu.',
-  noSessionId: 'Keine Sitzungs-ID gefunden.',
+  backHome: 'Zur Startseite',
+  backVoucher: 'Zurück zum Gutschein',
+  pdfSuccess: 'PDF heruntergeladen',
+  pdfDownloadError: 'Der Download hat nicht geklappt.',
+  confirmError: 'Die Bestätigung hat nicht geklappt.',
+  connectionError: 'Keine Verbindung. Bitte lade die Seite neu.',
+  noSessionId: 'Es wurde keine Zahlung gefunden.',
 }
 
-const SUCCESS_EN = {
-  loading: 'Creating your voucher\u2026',
-  errorTitle: 'Error',
-  successTitle: 'Voucher created!',
-  successSubtitle: (
-    <>
-      Your gift voucher for a <strong>workshop experience</strong> has been created successfully.
-    </>
-  ),
-  voucherCodeLabel: 'Voucher Code',
+const SUCCESS_EN: typeof SUCCESS_DE = {
+  loading: 'Creating your voucher',
+  errorTitle: 'Something went wrong',
+  eyebrow: 'Payment successful',
+  headline: 'Your voucher is here.',
+  subline: 'Thank you. A workshop full of flavour is waiting for whoever receives it.',
+  codeLabel: 'Your voucher code',
+  valueWorkshop: 'One workshop of your choice for one person',
+  valueAmount: (value: number) => `Gift voucher worth €${value}`,
   copyCode: 'Copy code',
-  codeCopied: '\u2713 Copied!',
-  copyToast: 'Code copied!',
-  voucherDesc: (value: number) => `Workshop Experience Voucher \u2014 \u20AC${value}.00`,
-  deliveredByEmail: 'Delivered by email',
-  emailTo: (email: string) => `To: ${email}`,
-  confirmationSent: 'A confirmation has also been sent to your email address.',
-  emailFailedWarning:
-    'Your payment was processed successfully and your voucher is valid — however, we hit a temporary issue sending the confirmation email. Our team has been notified automatically and will follow up with you. You can already copy your code above or download it as a PDF.',
-  readyForPickup: 'Ready for pickup',
-  pickupAddress: 'Grabenstra\u00DFe 15, 8010 Graz',
-  pickupNotification: 'We will notify you by email once the voucher is ready for pickup.',
-  howToUse: 'How to use your voucher:',
-  step1: 'Browse workshops at fermentfreude.at/workshops',
-  step2: 'Add your chosen workshop to the cart',
-  step3: 'At checkout: enter your code \u2014 the fee is deducted directly',
-  downloading: 'Downloading...',
+  codeCopied: 'Code copied',
+  copyToast: 'Code copied',
+  downloading: 'Loading',
   downloadPDF: 'Download voucher as PDF',
-  backHome: 'Back to home',
-  backVoucher: 'Back to voucher',
+  cardButton: 'Download greeting card',
+  mailTitle: 'Your voucher is in your inbox',
+  mailText:
+    'We emailed it to you with the PDF. If you cannot see it, please check your spam folder.',
+  mailTo: (email: string) => `Sent to ${email}.`,
+  mailFailed:
+    'Your payment was successful and your voucher is valid. We had a short problem sending the email. Our team has been told and will get in touch. You can already copy your code above or download it as a PDF.',
+  pickupTitle: 'Ready for pickup',
+  pickupText: 'Grabenstraße 15, 8010 Graz. We will write to you as soon as the voucher is ready.',
+  stepsTitle: 'How to redeem it',
+  stepA: 'Choose a workshop and date',
+  stepAText: 'You can find all dates at fermentfreude.at/workshops.',
+  stepB: 'Add it to the cart',
+  stepBText: 'The workshop goes into the cart like any other.',
+  stepC: 'Enter the code at checkout',
+  stepCText: 'The amount is deducted straight away.',
+  bookWorkshop: 'Book a workshop',
   buyAnother: 'Buy another voucher',
-  pdfError: 'Could not download PDF.',
-  pdfSuccess: 'PDF downloaded!',
-  pdfDownloadError: 'Download error.',
-  confirmError: 'Error confirming voucher.',
-  connectionError: 'Connection error. Please reload the page.',
-  noSessionId: 'No session ID found.',
+  backHome: 'Back to home',
+  backVoucher: 'Back to the voucher',
+  pdfSuccess: 'PDF downloaded',
+  pdfDownloadError: 'The download did not work.',
+  confirmError: 'We could not confirm the voucher.',
+  connectionError: 'No connection. Please reload the page.',
+  noSessionId: 'No payment was found.',
 }
 
 type VoucherResult = {
@@ -93,6 +104,13 @@ type VoucherResult = {
   recipientEmail: string | null
   emailWarning?: boolean
 }
+
+const LABEL = 'font-display text-[11px] font-bold uppercase tracking-[0.2em]'
+const BTN_BASE =
+  'inline-flex min-h-14 w-full items-center justify-center gap-2.5 rounded-full px-7 py-4 text-center font-display text-[15px] font-bold transition-colors sm:text-base'
+const BTN_LIGHT = `${BTN_BASE} border-2 border-white/35 text-white hover:bg-white hover:text-ff-near-black`
+const BTN_GOLD = `${BTN_BASE} bg-ff-gold text-ff-near-black hover:bg-ff-gold-accent-dark disabled:cursor-not-allowed disabled:opacity-60`
+const BTN_OUTLINE = `${BTN_BASE} border-2 border-ff-near-black text-ff-near-black hover:bg-ff-near-black hover:text-white sm:w-auto`
 
 export function VoucherSuccessClient() {
   const searchParams = useSearchParams()
@@ -181,10 +199,10 @@ export function VoucherSuccessClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="flex min-h-[60vh] items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-ff-gold-accent border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="font-sans text-body text-ff-gray-text">{t.loading}</p>
+          <div className="mx-auto mb-4 size-8 animate-spin rounded-full border-4 border-ff-gold-accent border-t-transparent" />
+          <p className="font-sans text-base text-ff-gray-text">{t.loading}</p>
         </div>
       </div>
     )
@@ -192,22 +210,13 @@ export function VoucherSuccessClient() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+      <div className="flex min-h-[60vh] items-center justify-center bg-white px-6">
         <div className="max-w-md text-center">
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-red-500">
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
-                fill="currentColor"
-              />
-            </svg>
-          </div>
-          <h1 className="font-display text-h2 font-bold text-ff-near-black mb-3">{t.errorTitle}</h1>
-          <p className="font-sans text-body text-ff-gray-text mb-6">{error}</p>
-          <Link
-            href="/workshops/voucher"
-            className="inline-block rounded-full bg-ff-gold-accent px-8 py-3 font-display text-body font-bold text-ff-near-black transition-all hover:bg-ff-gold-accent-dark"
-          >
+          <h1 className="mb-3 font-display text-[clamp(1.75rem,5vw,2.5rem)] font-bold tracking-tight text-ff-near-black">
+            {t.errorTitle}
+          </h1>
+          <p className="mb-8 font-sans text-base text-ff-gray-text sm:text-lg">{error}</p>
+          <Link href="/workshops/voucher" className={BTN_OUTLINE}>
             {t.backVoucher}
           </Link>
         </div>
@@ -217,156 +226,129 @@ export function VoucherSuccessClient() {
 
   if (!voucher) return null
 
+  const isPickup = voucher.deliveryMethod === 'pickup'
+  const valueLine = voucher.value === 99 ? t.valueWorkshop : t.valueAmount(voucher.value)
+  const cardFile = locale === 'de' ? '/gutschein-karte.pdf' : '/greeting-card.pdf'
+  const steps = [
+    { icon: CalendarCheck, title: t.stepA, text: t.stepAText },
+    { icon: ShoppingBag, title: t.stepB, text: t.stepBText },
+    { icon: Gift, title: t.stepC, text: t.stepCText },
+  ]
+
   return (
-    <div className="min-h-screen bg-white py-16 px-6">
-      <div className="max-w-lg mx-auto text-center">
-        {/* Success Icon */}
-        <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-8">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" className="text-green-600">
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-              fill="currentColor"
-            />
-          </svg>
-        </div>
-
-        <h1 className="font-display text-h1 font-bold text-ff-near-black mb-3">{t.successTitle}</h1>
-        <p className="font-sans text-body-lg text-ff-gray-text mb-10">{t.successSubtitle}</p>
-
-        {/* Voucher Code Card with Copy */}
-        <div className="rounded-2xl border-2 border-ff-gold-accent bg-[radial-gradient(circle_at_top,#F8F2E6,#FFFFFF)] p-8 mb-8 shadow-md">
-          <p className="font-sans text-body-sm font-medium text-ff-gray-text uppercase tracking-wider mb-2">
-            {t.voucherCodeLabel}
+    <div className="bg-white px-5 py-14 sm:px-8 sm:py-20">
+      <div className="mx-auto max-w-4xl space-y-16 sm:space-y-24 [&_h1]:mb-0 [&_h2]:mb-0 [&_h3]:mb-0 [&_p]:mb-0">
+        {/* Headline */}
+        <header className="text-center">
+          <p className={`${LABEL} text-ff-near-black`}>{t.eyebrow}</p>
+          <h1 className="mx-auto mt-5 max-w-3xl text-balance font-display text-[clamp(2.25rem,6.5vw,4.75rem)] font-bold leading-[0.97] tracking-[-0.04em] text-ff-near-black">
+            {t.headline}
+          </h1>
+          <p className="mx-auto mt-5 max-w-lg text-pretty text-[clamp(1rem,1.7vw,1.25rem)] leading-relaxed text-ff-gray-text">
+            {t.subline}
           </p>
-          <p className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ff-near-black tracking-widest select-all mb-4">
+        </header>
+
+        {/* The code: one black card, the three downloads stacked */}
+        <div className="mx-auto w-full max-w-2xl rounded-[32px] bg-ff-near-black px-6 py-12 text-center text-white ring-1 ring-white/10 sm:px-14 sm:py-16">
+          <p className={`${LABEL} text-white/55`}>{t.codeLabel}</p>
+          <span className="mx-auto mt-6 block h-px w-12 bg-ff-gold" aria-hidden="true" />
+          <p className="mt-8 select-all whitespace-nowrap font-display text-[clamp(1.1rem,5.4vw,2.75rem)] font-bold leading-none tracking-[0.04em]">
             {voucher.code}
           </p>
-          <button
-            onClick={handleCopyCode}
-            className="mx-auto block rounded-lg bg-ff-gold-accent/10 hover:bg-ff-gold-accent/20 px-4 py-2 font-sans text-body-sm font-medium text-ff-gold-accent transition-colors mb-4"
-          >
-            {codeCopied ? t.codeCopied : t.copyCode}
-          </button>
-          <div className="pt-4 border-t border-ff-border-light">
-            <p className="font-sans text-body text-ff-gray-text">{t.voucherDesc(voucher.value)}</p>
+          <p className="mx-auto mt-5 max-w-sm text-pretty text-[clamp(0.95rem,1.6vw,1.125rem)] leading-snug text-white/65">
+            {valueLine}
+          </p>
+
+          <div className="mx-auto mt-12 flex w-full max-w-sm flex-col gap-3">
+            <button type="button" onClick={handleCopyCode} className={BTN_LIGHT}>
+              {codeCopied ? t.codeCopied : t.copyCode}
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadPDF}
+              disabled={pdfLoading}
+              className={BTN_GOLD}
+            >
+              {pdfLoading ? (
+                <>
+                  <span className="size-4 animate-spin rounded-full border-2 border-ff-near-black border-t-transparent" />
+                  {t.downloading}
+                </>
+              ) : (
+                <>
+                  <Download className="size-5" aria-hidden="true" />
+                  {t.downloadPDF}
+                </>
+              )}
+            </button>
+            <a href={cardFile} download className={BTN_LIGHT}>
+              <Download className="size-5" aria-hidden="true" />
+              {t.cardButton}
+            </a>
           </div>
         </div>
 
-        {/* Email delivery warning — shown only if the confirmation email failed to send */}
+        {/* Mail failed to send: only then */}
         {voucher.emailWarning && (
-          <div className="rounded-xl bg-amber-50 border border-amber-200 p-5 mb-8 text-left">
-            <p className="font-sans text-body-sm text-amber-800">{t.emailFailedWarning}</p>
+          <div className="mx-auto max-w-2xl rounded-[22px] border border-amber-200 bg-amber-50 p-6 sm:p-8">
+            <p className="text-base leading-relaxed text-amber-900">{t.mailFailed}</p>
           </div>
         )}
 
-        {/* Delivery Info */}
-        <div className="rounded-xl bg-ff-cream border border-ff-border-light p-5 mb-8 text-left">
-          {voucher.deliveryMethod !== 'pickup' ? (
-            <div className="flex items-start gap-3">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="text-ff-gold-accent mt-0.5 shrink-0"
-              >
-                <path
-                  d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
-                  fill="currentColor"
-                />
-              </svg>
-              <div>
-                <p className="font-sans text-body font-medium text-ff-near-black">
-                  {t.deliveredByEmail}
-                </p>
-                {voucher.recipientEmail && (
-                  <p className="font-sans text-body-sm text-ff-gray-text mt-1">
-                    {t.emailTo(voucher.recipientEmail)}
-                  </p>
-                )}
-                {!voucher.emailWarning && (
-                  <p className="font-sans text-body-sm text-ff-gray-text mt-1">
-                    {t.confirmationSent}
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-start gap-3">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="text-ff-gold-accent mt-0.5 shrink-0"
-              >
-                <path
-                  d="M19 7V4H5V7H2V20H8V14H16V20H22V7H19ZM6 18H4V9H6V18ZM20 18H18V14H20V18ZM18 12V9H16V12H18Z"
-                  fill="currentColor"
-                />
-              </svg>
-              <div>
-                <p className="font-sans text-body font-medium text-ff-near-black">
-                  {t.readyForPickup}
-                </p>
-                <p className="font-sans text-body-sm text-ff-gray-text mt-1">{t.pickupAddress}</p>
-                <p className="font-sans text-body-sm text-ff-gray-text mt-1">
-                  {t.pickupNotification}
-                </p>
-              </div>
-            </div>
-          )}
+        {/* Delivery */}
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 text-center">
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-ff-near-black">
+            {isPickup ? (
+              <Store className="size-6 text-white" aria-hidden="true" />
+            ) : (
+              <Mail className="size-6 text-white" aria-hidden="true" />
+            )}
+          </span>
+          <div>
+            <p className="font-display text-[clamp(1.25rem,2.4vw,1.625rem)] font-bold leading-tight tracking-tight text-ff-near-black">
+              {isPickup ? t.pickupTitle : t.mailTitle}
+            </p>
+            <p className="mt-2 text-[clamp(0.95rem,1.5vw,1.0625rem)] leading-relaxed text-ff-gray-text">
+              {isPickup
+                ? t.pickupText
+                : `${voucher.recipientEmail ? `${t.mailTo(voucher.recipientEmail)} ` : ''}${t.mailText}`}
+            </p>
+          </div>
         </div>
 
-        {/* Redemption Instructions */}
-        <div className="rounded-xl bg-ff-ivory-mist border border-ff-border-light/50 p-6 mb-8 text-left">
-          <h3 className="font-display text-body font-bold text-ff-near-black mb-4">{t.howToUse}</h3>
-          <ol className="space-y-3">
-            {([t.step1, t.step2, t.step3] as React.ReactNode[]).map((step, i) => (
-              <li key={i} className="flex gap-3">
-                <span className="inline-block w-6 h-6 rounded-full bg-ff-gold-accent text-white text-center text-body-sm font-bold shrink-0">
-                  {i + 1}
+        {/* How to redeem */}
+        <section>
+          <h2 className="text-center font-display text-[clamp(1.75rem,4vw,2.75rem)] font-bold leading-none tracking-[-0.03em] text-ff-near-black">
+            {t.stepsTitle}
+          </h2>
+          <ol className="mt-10 grid gap-10 sm:grid-cols-3 sm:gap-8">
+            {steps.map((step) => (
+              <li key={step.title} className="flex flex-col items-center text-center">
+                <span className="flex size-12 items-center justify-center rounded-full bg-ff-near-black">
+                  <step.icon className="size-6 text-white" aria-hidden="true" />
                 </span>
-                <span className="font-sans text-body text-ff-gray-text pt-0.5">{step}</span>
+                <h3 className="mt-5 font-display text-[clamp(1.125rem,2vw,1.375rem)] font-bold leading-snug tracking-tight text-ff-near-black">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-[clamp(0.95rem,1.4vw,1.0625rem)] leading-relaxed text-ff-gray-text">
+                  {step.text}
+                </p>
               </li>
             ))}
           </ol>
-        </div>
+        </section>
 
-        {/* PDF Download */}
-        <button
-          onClick={handleDownloadPDF}
-          disabled={pdfLoading}
-          className="w-full rounded-full bg-ff-gold-accent px-8 py-4 font-display text-body-lg font-bold text-ff-near-black shadow-md transition-all duration-200 hover:bg-ff-gold-accent-dark hover:shadow-lg active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed mb-3 flex items-center justify-center gap-2"
-        >
-          {pdfLoading ? (
-            <>
-              <span className="animate-spin h-4 w-4 border-2 border-ff-near-black border-t-transparent rounded-full" />
-              {t.downloading}
-            </>
-          ) : (
-            <>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="inline-block">
-                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="currentColor" />
-              </svg>
-              {t.downloadPDF}
-            </>
-          )}
-        </button>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            href="/"
-            className="inline-block rounded-full bg-ff-gold-accent px-8 py-3 font-display text-body font-bold text-ff-near-black transition-all hover:bg-ff-gold-accent-dark"
-          >
-            {t.backHome}
+        {/* Next */}
+        <div className="flex flex-col items-stretch justify-center gap-3 sm:flex-row">
+          <Link href="/workshops" className={BTN_OUTLINE}>
+            {t.bookWorkshop}
           </Link>
-          <Link
-            href="/workshops/voucher"
-            className="inline-block rounded-full border-2 border-ff-border-light px-8 py-3 font-display text-body font-bold text-ff-near-black transition-all hover:border-ff-gold-accent/50"
-          >
+          <Link href="/workshops/voucher" className={BTN_OUTLINE}>
             {t.buyAnother}
+          </Link>
+          <Link href="/" className={BTN_OUTLINE}>
+            {t.backHome}
           </Link>
         </div>
       </div>
