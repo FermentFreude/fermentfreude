@@ -142,7 +142,7 @@ export const SponsorsBarBlock: React.FC<Props> = ({
       className={`block-sponsors-bar section-padding-md bg-ff-warm-gray border-t border-ff-border-light transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
     >
       <div className="container mx-auto container-padding">
-        <SectionHeader heading={resolvedHeading} className="mb-6 lg:mb-8" />
+        <SectionHeader heading={resolvedHeading} rule={false} className="mb-6 lg:mb-8" />
 
         <div className="w-full max-w-(--content-wide) mx-auto overflow-hidden">
           <div

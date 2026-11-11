@@ -130,7 +130,7 @@ function Benefits({
       {compact ? (
         <PointsRow items={items} tone="dark" align="center" size="sm" rule={false} />
       ) : (
-        <PointsRow items={items} tone="dark" align="start" />
+        <PointsRow items={items} tone="dark" align="center" alignLg="center" />
       )}
     </motion.div>
   )

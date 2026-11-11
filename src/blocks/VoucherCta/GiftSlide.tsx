@@ -275,7 +275,7 @@ export function GiftSlide({ data }: { data: GiftSlideData }) {
                   items={points}
                   tone={full ? 'light' : 'dark'}
                   align="center"
-                  alignLg="start"
+                  alignLg="center"
                 />
               </motion.div>
             ) : null}

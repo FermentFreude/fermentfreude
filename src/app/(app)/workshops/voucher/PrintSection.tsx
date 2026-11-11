@@ -30,7 +30,9 @@ export function PrintSection({ c }: { c: VoucherContent }) {
           <h2 className="mb-0 mt-4 font-display text-[clamp(2.25rem,4.4vw,4rem)] font-bold leading-[0.98] tracking-[-0.035em] text-[#1A1A1A]">
             {p.headline}
           </h2>
-          <p className="mb-0 mt-6 font-sans text-[17px] leading-relaxed text-[#4B4B4B] lg:text-lg">{p.text}</p>
+          <p className="mb-0 mt-6 font-sans text-[17px] leading-relaxed text-[#4B4B4B] lg:text-lg">
+            {p.text}
+          </p>
           <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
             <DownloadCardButton label={p.button} file={p.file} />
             <span className="font-sans text-[14px] text-[#6B6B6B]">{p.note}</span>
@@ -40,10 +42,20 @@ export function PrintSection({ c }: { c: VoucherContent }) {
 
       <div className="container-padding mx-auto max-w-360 pb-20 lg:pb-28">
         <Reveal>
-          <div className="mb-6">
+          {/* Phone/tablet: centred, two by two (like the Home slides); desktop: left, one row */}
+          <div className="mb-6 flex justify-center lg:justify-start">
             <Eyebrow>{c.how.eyebrow}</Eyebrow>
           </div>
-          <PointsRow items={c.how.points} tone="dark" phoneText />
+          <PointsRow
+            items={c.how.points}
+            tone="dark"
+            align="center"
+            alignLg="start"
+            phoneText
+            alwaysShowText
+            phoneColumns={2}
+            balance
+          />
         </Reveal>
       </div>
     </section>
