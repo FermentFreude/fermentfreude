@@ -200,253 +200,226 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
       { icon: Mail, title: t.confirmationEmail, desc: t.confirmationEmailDesc },
       { icon: CalendarCheck, title: t.workshopDay, desc: t.workshopDayDesc },
     ]
+    const LABEL = 'font-display text-[11px] font-bold uppercase tracking-[0.18em]'
+    const OUTLINE_BTN =
+      'inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-(--radius-pill) border-2 border-ff-near-black px-7 py-4 text-center font-display text-base font-bold text-ff-near-black transition-colors hover:bg-ff-near-black hover:text-white'
 
     return (
-      <div className="max-w-3xl mx-auto space-y-12">
-        {/* Hero */}
-        <div className="space-y-6">
+      <div className="mx-auto max-w-4xl space-y-14 px-5 sm:space-y-20 sm:px-8 lg:px-0 [&_h1]:mb-0 [&_h2]:mb-0 [&_h3]:mb-0 [&_p]:mb-0">
+        {/* Headline — big, black on white */}
+        <header className="pt-6 text-center sm:pt-10">
+          <p className={`${LABEL} text-ff-near-black`}>
+            {locale === 'de' ? 'Buchung bestätigt' : 'Booking confirmed'}
+          </p>
+          <h1 className="mx-auto mt-5 max-w-4xl text-balance font-display text-[clamp(2.25rem,6.5vw,4.75rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ff-near-black">
+            {t.workshopConfirmed}
+          </h1>
+          <p className="mx-auto mt-5 max-w-lg text-pretty text-[clamp(1rem,1.7vw,1.25rem)] leading-relaxed text-ff-text-muted">
+            {t.workshopConfirmDesc}
+          </p>
+        </header>
+
+        {/* Photo of the booked workshop, with its name */}
+        <div className="relative mx-auto aspect-3/2 w-full max-w-3xl overflow-hidden rounded-[28px] bg-ff-near-black sm:aspect-5/2">
           {workshopImage ? (
-            <div className="relative w-full aspect-21/9 rounded-(--radius-card) overflow-hidden bg-ff-cream">
-              <Media resource={workshopImage} fill imgClassName="object-cover" priority />
-              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/0 to-black/0" />
-              <span className="absolute bottom-5 left-5 inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full text-xs font-display font-bold uppercase tracking-wider text-ff-near-black">
-                <CheckCircle className="w-3.5 h-3.5" />
-                {locale === 'de' ? 'Bestätigt' : 'Confirmed'}
-              </span>
-            </div>
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-ff-near-black flex items-center justify-center mx-auto">
-              <CheckCircle className="w-8 h-8 text-white" />
+            <Media resource={workshopImage} fill imgClassName="object-cover" priority />
+          ) : null}
+          <div
+            className="absolute inset-0 bg-linear-to-t from-black/80 via-black/25 to-black/10"
+            aria-hidden="true"
+          />
+          {bookingSummary && (
+            <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8">
+              <p className={`${LABEL} text-white/75`}>{t.bookingSummaryTitle}</p>
+              <h2 className="mt-2 font-display text-[clamp(1.5rem,3.6vw,2.75rem)] font-bold leading-[0.98] tracking-[-0.03em] text-white">
+                {bookingSummary.workshopTitle}
+              </h2>
             </div>
           )}
-          <div className="text-center space-y-3">
-            <h1 className="font-display font-bold text-4xl sm:text-5xl text-ff-near-black tracking-tight text-balance">
-              {t.workshopConfirmed}
-            </h1>
-            <p className="text-body text-ff-text-muted max-w-md mx-auto">
-              {t.workshopConfirmDesc}
-            </p>
-          </div>
         </div>
 
-        {/* Booking summary */}
+        {/* The details — black card, big white text */}
         {bookingSummary && (
-          <div className="border border-ff-border-light rounded-(--radius-card) p-6 sm:p-8">
-            <div className="flex items-start justify-between gap-4 mb-6">
-              <div>
-                <p className="text-xs font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1.5">
-                  {t.bookingSummaryTitle}
-                </p>
-                <h2 className="font-display font-bold text-2xl text-ff-near-black">
-                  {bookingSummary.workshopTitle}
-                </h2>
-              </div>
+          <dl className="mx-auto -mt-6 grid w-full max-w-3xl grid-cols-2 gap-x-6 gap-y-8 rounded-[28px] bg-ff-near-black p-6 text-white sm:-mt-8 sm:grid-cols-4 sm:p-8">
+            <div>
+              <dt className={`${LABEL} text-white/60`}>{t.labelDate}</dt>
+              <dd className="mt-2 font-display text-lg font-bold leading-tight tracking-tight sm:text-2xl">
+                {bookingSummary.date}
+              </dd>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-5">
-              <div>
-                <p className="text-[11px] font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1">
-                  {t.labelDate}
-                </p>
-                <p className="font-display font-semibold text-ff-near-black">
-                  {bookingSummary.date}
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1">
-                  {t.labelTime}
-                </p>
-                <p className="font-display font-semibold text-ff-near-black">
-                  {bookingSummary.time}
-                </p>
-              </div>
-              {bookingSummary.location && (
-                <div>
-                  <p className="text-[11px] font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1">
-                    {t.labelLocation}
-                  </p>
-                  <p className="font-display font-semibold text-ff-near-black">
-                    {bookingSummary.location}
-                  </p>
-                </div>
-              )}
-              <div>
-                <p className="text-[11px] font-display font-bold uppercase tracking-wider text-ff-text-muted mb-1">
-                  {t.labelGuests}
-                </p>
-                <p className="font-display font-semibold text-ff-near-black">
-                  {bookingSummary.guestCount}
-                </p>
-              </div>
+            <div>
+              <dt className={`${LABEL} text-white/60`}>{t.labelTime}</dt>
+              <dd className="mt-2 font-display text-lg font-bold leading-tight tracking-tight sm:text-2xl">
+                {bookingSummary.time}
+              </dd>
             </div>
+            {bookingSummary.location && (
+              <div className="col-span-2 sm:col-span-1">
+                <dt className={`${LABEL} text-white/60`}>{t.labelLocation}</dt>
+                <dd className="mt-2 font-display text-base font-bold leading-snug tracking-tight sm:text-lg">
+                  {bookingSummary.location}
+                </dd>
+              </div>
+            )}
+            <div>
+              <dt className={`${LABEL} text-white/60`}>{t.labelGuests}</dt>
+              <dd className="mt-2 font-display text-lg font-bold leading-tight tracking-tight sm:text-2xl">
+                {bookingSummary.guestCount}
+              </dd>
+            </div>
+          </dl>
+        )}
+
+        {/* Actions: manage the booking, download the invoice */}
+        {(manageBookingLinks.length > 0 || (orderId && downloadToken)) && (
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 sm:flex-row">
+            {manageBookingLinks.length > 0 && (
+              <Link
+                href={manageBookingLinks[0].url}
+                className="inline-flex min-h-14 flex-1 items-center justify-center rounded-(--radius-pill) bg-ff-gold px-7 py-4 text-center font-display text-base font-bold text-ff-near-black transition-colors hover:bg-ff-gold-accent-dark"
+              >
+                {t.manageBookingCta}
+              </Link>
+            )}
+            {orderId && downloadToken && (
+              <a
+                href={`/api/orders/${orderId}/receipt?token=${downloadToken}`}
+                download
+                className={OUTLINE_BTN}
+              >
+                <Download className="size-5" aria-hidden="true" />
+                {locale === 'de' ? 'Rechnung herunterladen' : 'Download invoice'}
+              </a>
+            )}
           </div>
         )}
 
-        {/* Order Info — shown for guests and account holders alike; only the
-            account CTA below differs between them. */}
+        {/* Order info — one calm line of big values */}
         {orderId && (
-          <Card className="p-6 border border-ff-border-light shadow-sm rounded-(--radius-card)">
-            <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
-              {t.orderInfo}
-            </h2>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-ff-text-muted">{t.orderNumber}</span>
-                <span className="font-semibold text-ff-near-black">
-                  #{orderId.slice(0, 8).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-ff-text-muted">{t.orderDate}</span>
-                <span className="font-semibold text-ff-near-black">
-                  {formatDate(new Date().toISOString())}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-ff-text-muted">{t.emailConfirmation}</span>
-                <span className="font-semibold text-[#555954]">{t.sentToInbox}</span>
-              </div>
+          <dl className="grid gap-8 border-y border-ff-near-black/15 py-10 sm:grid-cols-3">
+            <div>
+              <dt className={`${LABEL} text-ff-text-muted`}>{t.orderNumber}</dt>
+              <dd className="mt-2 font-display text-xl font-bold tracking-tight text-ff-near-black sm:text-2xl">
+                #{orderId.slice(0, 8).toUpperCase()}
+              </dd>
             </div>
-          </Card>
+            <div>
+              <dt className={`${LABEL} text-ff-text-muted`}>{t.orderDate}</dt>
+              <dd className="mt-2 font-display text-xl font-bold tracking-tight text-ff-near-black sm:text-2xl">
+                {formatDate(new Date().toISOString())}
+              </dd>
+            </div>
+            <div>
+              <dt className={`${LABEL} text-ff-text-muted`}>{t.emailConfirmation}</dt>
+              <dd className="mt-2 font-display text-xl font-bold tracking-tight text-ff-near-black sm:text-2xl">
+                {t.sentToInbox}
+              </dd>
+            </div>
+          </dl>
         )}
 
-        {/* Primary actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          {downloadToken && orderId && (
-            <Link
-              href={`/orders/${orderId}/tickets?token=${downloadToken}`}
-              className="flex-1 px-6 py-4 bg-ff-near-black text-white rounded-(--radius-pill) hover:opacity-90 transition-opacity font-display font-bold text-center"
-            >
-              {t.viewTickets}
-            </Link>
-          )}
-          {manageBookingLinks.length > 0 && (
-            <Link
-              href={manageBookingLinks[0].url}
-              className="flex-1 px-6 py-4 bg-ff-gold text-ff-near-black rounded-(--radius-pill) hover:bg-ff-gold-accent-dark transition-colors font-display font-bold text-center"
-            >
-              {t.manageBookingCta}
-            </Link>
-          )}
-        </div>
+        {/* What's next */}
+        <section>
+          <h2 className="text-center font-display text-[clamp(1.75rem,4vw,2.75rem)] font-bold leading-none tracking-[-0.03em] text-ff-near-black">
+            {t.whatsNext}
+          </h2>
+          <ol className="mt-10 grid gap-10 sm:grid-cols-3 sm:gap-8">
+            {nextSteps.map((step) => (
+              <li key={step.title} className="flex flex-col items-center text-center">
+                <span className="flex size-12 items-center justify-center rounded-full bg-ff-near-black">
+                  <step.icon className="size-6 text-white" aria-hidden="true" />
+                </span>
+                <h3 className="mt-5 font-display text-[clamp(1.125rem,2vw,1.375rem)] font-bold tracking-tight text-ff-near-black">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-base leading-relaxed text-ff-text-muted">{step.desc}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
 
         {/* Profile CTA — go to account, or create one as a guest */}
-        <div className="border border-ff-border-light rounded-(--radius-card) p-6 flex flex-col sm:flex-row items-center justify-between gap-5 text-center sm:text-left">
+        <div className="flex flex-col items-center justify-between gap-6 rounded-[28px] border border-ff-near-black/15 p-7 text-center sm:flex-row sm:p-10 sm:text-left">
           {isLoggedIn ? (
             <>
               <div>
-                <p className="font-display font-bold text-ff-near-black mb-1">
+                <p className="font-display text-xl font-bold tracking-tight text-ff-near-black">
                   {t.viewBookingDetails}
                 </p>
-                <p className="text-body-sm text-ff-text-muted">{t.bookingConfirmedDesc}</p>
+                <p className="mt-1.5 text-base text-ff-text-muted">{t.bookingConfirmedDesc}</p>
               </div>
               <Link
                 href={orderId ? `/account/orders/${orderId}` : '/account/orders'}
-                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 border-2 border-ff-near-black text-ff-near-black rounded-(--radius-pill) hover:bg-ff-near-black hover:text-white transition-colors font-display font-bold text-sm"
+                className="inline-flex shrink-0 items-center gap-2 rounded-(--radius-pill) border-2 border-ff-near-black px-6 py-3 font-display text-sm font-bold text-ff-near-black transition-colors hover:bg-ff-near-black hover:text-white"
               >
                 {t.goToProfile}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </>
           ) : (
             <>
               <div>
-                <p className="font-display font-bold text-ff-near-black mb-1">
+                <p className="font-display text-xl font-bold tracking-tight text-ff-near-black">
                   {t.createAccountPrompt}
                 </p>
-                <p className="text-body-sm text-ff-text-muted">{t.createAccountDesc}</p>
+                <p className="mt-1.5 text-base text-ff-text-muted">{t.createAccountDesc}</p>
               </div>
               <Link
                 href="/create-account"
-                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 border-2 border-ff-near-black text-ff-near-black rounded-(--radius-pill) hover:bg-ff-near-black hover:text-white transition-colors font-display font-bold text-sm"
+                className="inline-flex shrink-0 items-center gap-2 rounded-(--radius-pill) border-2 border-ff-near-black px-6 py-3 font-display text-sm font-bold text-ff-near-black transition-colors hover:bg-ff-near-black hover:text-white"
               >
                 {t.createAccountPrompt}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </>
           )}
         </div>
 
-        {/* What's next — one consistent icon treatment throughout */}
-        <div>
-          <h2 className="font-display font-bold text-xl text-ff-near-black mb-6">
-            {t.whatsNext}
-          </h2>
-          <div className="space-y-5">
-            {nextSteps.map((step) => (
-              <div key={step.title} className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-full bg-ff-near-black flex items-center justify-center shrink-0">
-                  <step.icon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-display font-semibold text-ff-near-black mb-0.5">
-                    {step.title}
-                  </h3>
-                  <p className="text-body-sm text-ff-text-muted">{step.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Invoice download */}
-        {orderId && downloadToken && (
-          <div className="text-center">
-            <a
-              href={`/api/orders/${orderId}/receipt?token=${downloadToken}`}
-              download
-              className="inline-flex items-center gap-2 text-ff-near-black font-display font-semibold underline decoration-ff-gold decoration-2 underline-offset-4 hover:decoration-ff-near-black transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              {locale === 'de' ? 'Rechnung herunterladen' : 'Download Invoice'}
-            </a>
-          </div>
-        )}
-
         {/* Explore other workshops */}
         {otherWorkshops.length > 0 && (
-          <div>
-            <h2 className="font-display font-bold text-xl text-ff-near-black mb-6">
+          <section>
+            <h2 className="font-display text-[clamp(1.75rem,4vw,2.75rem)] font-bold leading-none tracking-[-0.03em] text-ff-near-black">
               {t.exploreOtherWorkshops}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
               {otherWorkshops.map((w) => (
                 <Link key={w.slug} href={`/workshops/${w.slug}`} className="group block">
-                  <div className="relative aspect-4/3 rounded-(--radius-card) overflow-hidden mb-3 bg-ff-cream">
+                  <div className="relative mb-4 aspect-4/3 overflow-hidden rounded-[22px] bg-ff-near-black">
                     {w.image && (
                       <Media
                         resource={w.image}
                         fill
-                        imgClassName="object-cover group-hover:scale-105 transition-transform duration-300"
+                        imgClassName="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     )}
                   </div>
-                  <h3 className="font-display font-bold text-ff-near-black mb-1">{w.title}</h3>
-                  <span className="inline-flex items-center gap-1 text-sm font-display font-semibold text-ff-near-black underline decoration-ff-gold decoration-2 underline-offset-4">
+                  <h3 className="font-display text-xl font-bold tracking-tight text-ff-near-black">
+                    {w.title}
+                  </h3>
+                  <span className="mt-1.5 inline-flex items-center gap-1.5 font-display text-sm font-bold text-ff-near-black underline decoration-ff-gold decoration-2 underline-offset-4">
                     {t.learnMore}
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <ArrowRight className="size-3.5" aria-hidden="true" />
                   </span>
                 </Link>
               ))}
             </div>
-          </div>
+            <div className="mt-10 text-center">
+              <Link href="/workshops" className={`${OUTLINE_BTN} flex-none`}>
+                {t.browseMoreWorkshops}
+              </Link>
+            </div>
+          </section>
         )}
 
-        <div className="text-center">
-          <Link
-            href="/workshops"
-            className="inline-flex items-center gap-2 px-6 py-3 border border-ff-border-light text-ff-near-black rounded-(--radius-pill) hover:bg-ff-cream transition-colors font-display font-medium"
-          >
-            {t.browseMoreWorkshops}
-          </Link>
-        </div>
-
         {/* Support */}
-        <div className="border-t border-ff-border-light pt-8 text-center">
-          <h3 className="font-display font-semibold text-ff-near-black mb-1">{t.questions}</h3>
-          <p className="text-body-sm text-ff-text-muted mb-3">{t.questionsDescWorkshop}</p>
+        <div className="border-t border-ff-near-black/15 pt-10 text-center">
+          <h3 className="font-display text-xl font-bold tracking-tight text-ff-near-black">
+            {t.questions}
+          </h3>
+          <p className="mt-1.5 text-base text-ff-text-muted">{t.questionsDescWorkshop}</p>
           <a
             href="mailto:kontakt@fermentfreude.at"
-            className="text-ff-near-black font-display font-semibold underline decoration-ff-gold decoration-2 underline-offset-4 hover:decoration-ff-near-black transition-colors"
+            className="mt-4 inline-block font-display text-base font-bold text-ff-near-black underline decoration-ff-gold decoration-2 underline-offset-4 transition-colors hover:decoration-ff-near-black"
           >
             {t.contactSupport}
           </a>
@@ -547,7 +520,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
         <Card className="p-4 border border-ff-border-light shadow-sm rounded-(--radius-card) bg-ff-cream">
           <p className="text-body-sm text-ff-text-muted text-center mb-3">
             {locale === 'de'
-              ? 'Deine Rechnung wurde per E-Mail gesendet.'
+              ? 'Deine Rechnung wurde per Mail gesendet.'
               : 'Your receipt has been sent to your email.'}
           </p>
           {orderId && downloadToken && (
@@ -652,13 +625,15 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
       {/* Items */}
       {items.length > 0 && (
         <Card className="p-6 border border-ff-border-light shadow-sm rounded-(--radius-card)">
-          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">
-            {t.items}
-          </h2>
+          <h2 className="text-lg font-display font-semibold text-ff-near-black mb-4">{t.items}</h2>
           <ul className="flex flex-col gap-6">
             {items.map((item) => (
               <li key={item.id}>
-                <ProductItem product={item.product} quantity={item.quantity} variant={item.variant} />
+                <ProductItem
+                  product={item.product}
+                  quantity={item.quantity}
+                  variant={item.variant}
+                />
               </li>
             ))}
           </ul>
@@ -736,7 +711,7 @@ export function OrderConfirmation({ data, orderId, type, locale, isLoggedIn }: P
       <Card className="p-4 border border-ff-border-light shadow-sm rounded-(--radius-card) bg-ff-cream">
         <p className="text-body-sm text-ff-text-muted text-center mb-3">
           {locale === 'de'
-            ? 'Deine Rechnung wurde per E-Mail gesendet.'
+            ? 'Deine Rechnung wurde per Mail gesendet.'
             : 'Your receipt has been sent to your email.'}
         </p>
         {orderId && downloadToken && (
