@@ -44,8 +44,8 @@ export default function AdminHubPage() {
       <HubSection id="getting-started" title={t('Erste Schritte', 'Getting Started')}>
         <p className="text-base leading-relaxed">
           {t(
-            'Willkommen im Admin Hub! Hier findest du alle Anleitungen, um die FermentFreude-Website über das Admin-Dashboard zu verwalten. Du brauchst keine technischen Kenntnisse — alles wird Schritt für Schritt erklärt.',
-            "Welcome to the Admin Hub! Here you'll find all the guides for managing the FermentFreude website via the admin dashboard. No technical skills needed — everything is explained step by step.",
+            'Willkommen im Admin Hub! Hier findest du alle Anleitungen, um die Fermentfreude-Website über das Admin-Dashboard zu verwalten. Du brauchst keine technischen Kenntnisse — alles wird Schritt für Schritt erklärt.',
+            "Welcome to the Admin Hub! Here you'll find all the guides for managing the Fermentfreude website via the admin dashboard. No technical skills needed — everything is explained step by step.",
           )}
         </p>
 
@@ -612,7 +612,7 @@ export default function AdminHubPage() {
             },
             {
               name: t('Marke', 'Brand'),
-              description: t('Markenname (z.B. FermentFreude)', 'Brand name (e.g. FermentFreude)'),
+              description: t('Markenname (z.B. Fermentfreude)', 'Brand name (e.g. Fermentfreude)'),
             },
             {
               name: t('Geschmacksrichtung', 'Flavor'),

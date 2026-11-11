@@ -165,7 +165,7 @@ Returns:
 - All pages use Tailwind CSS utilities
 - Design tokens applied inline (colors)
 - shadcn/ui components for consistency
-- Custom components follow FermentFreude patterns
+- Custom components follow Fermentfreude patterns
 - Responsive breakpoints: `sm`, `md`, `lg`, `xl`
 
 ## Testing URLs

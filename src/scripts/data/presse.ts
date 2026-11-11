@@ -7,9 +7,9 @@ export const presseMetaDE = {
 }
 
 export const presseMetaEN = {
-  title: 'FermentFreude in the Media | Press, TV & Awards',
+  title: 'Fermentfreude in the Media | Press, TV & Awards',
   description:
-    'FermentFreude in press and TV: reports, awards, and expert appearances on field-bean tempeh, fermentation, and workshops in Graz.',
+    'Fermentfreude in press and TV: reports, awards, and expert appearances on field-bean tempeh, fermentation, and workshops in Graz.',
 }
 
 export const PRESSE_HERO_YOUTUBE_URL =
@@ -42,7 +42,7 @@ export const presseHeroDE = (args: PresseHeroArgs = {}) => ({
 export const presseHeroEN = (args: PresseHeroArgs = {}) => ({
   type: 'heroPress' as const,
   splitLabel: 'Press',
-  splitHeading: 'FermentFreude in the Media',
+  splitHeading: 'Fermentfreude in the Media',
   splitDescription:
     'Press and TV coverage, awards, and expert appearances on fermentation, field-bean tempeh, and our workshops in Graz.',
   splitCtaLabel: '',
@@ -162,14 +162,14 @@ const PRESS_ITEMS_EN: PressItemSeed[] = [
     categoryLabel: 'Press',
     type: 'press',
     imageCrop: 'top',
-    imageCredit: 'Photo: © FermentFreude',
+    imageCredit: 'Photo: © Fermentfreude',
     outlet: 'Kleine Zeitung',
     dateLabel: '27 September 2025',
     titleHighlight: 'From Masterclass to Market:',
     titleHighlightColor: 'gold',
-    title: 'Kleine Zeitung on FermentFreude',
+    title: 'Kleine Zeitung on Fermentfreude',
     description:
-      'Two Food Masterclass participants became co-founders and unusual product ideas became a shared vision.\n\nKleine Zeitung tells how David Haider and Marcel Rauminger founded FermentFreude and reimagined tempeh with Styrian field beans. The story covers our path to market, the versatility of field-bean tempeh, and the link between regional value creation, fermentation, and culinary innovation.',
+      'Two Food Masterclass participants became co-founders and unusual product ideas became a shared vision.\n\nKleine Zeitung tells how David Haider and Marcel Rauminger founded Fermentfreude and reimagined tempeh with Styrian field beans. The story covers our path to market, the versatility of field-bean tempeh, and the link between regional value creation, fermentation, and culinary innovation.',
     ctaLabel: 'Read the original article',
     url: 'https://www.kleinezeitung.at/artikel/20140608/aromen-aufstriche-alkoholfreier-gin-innovationen-auf-dem-teller-und-im',
   },
@@ -181,7 +181,7 @@ const PRESS_ITEMS_EN: PressItemSeed[] = [
     imageCredit: 'Video: kanal3 Regionalfernseh GmbH · Editor: Michael Forstner · Camera & edit: Franziska Ettl',
     outlet: 'kanal3',
     dateLabel: 'March 2026',
-    titleHighlight: 'FermentFreude on TV:',
+    titleHighlight: 'Fermentfreude on TV:',
     titleHighlightColor: 'gold',
     title: 'Kanal 3 shows what fermentation can do',
     description:
@@ -196,9 +196,9 @@ const PRESS_ITEMS_EN: PressItemSeed[] = [
     imageCredit: 'Photo: © Christof Hütter Fotografie',
     outlet: 'Junge Wirtschaft Steiermark',
     dateLabel: 'November 2025',
-    title: 'An elevator, 90 seconds, and second place for FermentFreude',
+    title: 'An elevator, 90 seconds, and second place for Fermentfreude',
     description:
-      'Out of around 80 entries, FermentFreude made it to the final of the Elevator Pitch by Junge Wirtschaft Steiermark. In just 90 seconds, David Haider convinced the jury with our idea of turning Styrian field-bean by-products into high-quality fermented foods and took second place. An award for regional ingredients, circular economy, and food innovation with a future.',
+      'Out of around 80 entries, Fermentfreude made it to the final of the Elevator Pitch by Junge Wirtschaft Steiermark. In just 90 seconds, David Haider convinced the jury with our idea of turning Styrian field-bean by-products into high-quality fermented foods and took second place. An award for regional ingredients, circular economy, and food innovation with a future.',
     ctaLabel: 'Read the MeinBezirk report',
     url: 'https://www.meinbezirk.at/graz/c-wirtschaft/vier-junge-unternehmen-ueberzeugten-beim-elevator-pitch_a7820501',
     secondaryLinks: [
@@ -219,9 +219,9 @@ const PRESS_ITEMS_EN: PressItemSeed[] = [
     imageCredit: 'Photo: © SFG / Rene Strasser',
     outlet: 'Styrian Food Hub / SFG',
     dateLabel: '23 to 24 April 2026',
-    title: 'FermentFreude at the first Austrian Fermentation Congress',
+    title: 'Fermentfreude at the first Austrian Fermentation Congress',
     description:
-      'At the first Austrian National Fermentation Congress, David Haider presented FermentFreude to experts from the food industry, research, and production. Under the title “From by-product to premium product”, he shared our business model and the development of regional fermented foods. On the second day, he also led the hands-on workshop “Kombucha & Co”. In front of more than 220 participants, FermentFreude showed how product innovation, economic perspective, and solid fermentation knowledge come together.',
+      'At the first Austrian National Fermentation Congress, David Haider presented Fermentfreude to experts from the food industry, research, and production. Under the title “From by-product to premium product”, he shared our business model and the development of regional fermented foods. On the second day, he also led the hands-on workshop “Kombucha & Co”. In front of more than 220 participants, Fermentfreude showed how product innovation, economic perspective, and solid fermentation knowledge come together.',
     ctaLabel: 'View congress recap',
     url: 'https://www.sfg.at/styrian-food-hub/bundeskongress-fermentation/',
   },
@@ -234,7 +234,7 @@ const PRESS_ITEMS_EN: PressItemSeed[] = [
     dateLabel: 'September 2024',
     title: 'Where it all began: Our shared story at the Food Masterclass',
     description:
-      'At the first Food Masterclass by Styrian Food Hub, David Haider and Marcel Rauminger still competed with two separate projects. David worked on lentil tempeh and its further processing; Marcel presented tempeh from Styrian field beans and took third place. There they met, discovered their shared passion for fermentation, and laid the foundation for their later collaboration and the founding of FermentFreude.',
+      'At the first Food Masterclass by Styrian Food Hub, David Haider and Marcel Rauminger still competed with two separate projects. David worked on lentil tempeh and its further processing; Marcel presented tempeh from Styrian field beans and took third place. There they met, discovered their shared passion for fermentation, and laid the foundation for their later collaboration and the founding of Fermentfreude.',
     ctaLabel: 'Read the Kleine Zeitung report',
     url: 'https://www.kleinezeitung.at/artikel/18899201/steirische-innovationen-von-kaeferbohnen-tempeh-bis-kuerbiswurst',
   },
@@ -283,9 +283,9 @@ export const pressMediaAwardsEN = () => ({
   secondaryLinksPrefix: 'More coverage:',
   intro: {
     label: 'PRESS',
-    heading: 'FermentFreude in the Media',
+    heading: 'Fermentfreude in the Media',
     description:
-      'FermentFreude brings fermentation into the public eye — with innovative foods, expert knowledge, and hands-on workshops. Press and TV coverage, awards, and appearances at industry events show that our work on field-bean tempeh and regional ingredients is gaining attention.',
+      'Fermentfreude brings fermentation into the public eye — with innovative foods, expert knowledge, and hands-on workshops. Press and TV coverage, awards, and appearances at industry events show that our work on field-bean tempeh and regional ingredients is gaining attention.',
   },
   items: PRESS_ITEMS_EN,
   pressContact: {
@@ -339,9 +339,9 @@ export const PRESS_IMAGE_ALTS_DE = [
 ]
 
 export const PRESS_IMAGE_ALTS_EN = [
-  'FermentFreude founders David Haider and Marcel Rauminger with field-bean tempeh and fermented vegetables.',
-  'David Haider and Marcel Rauminger of FermentFreude explain the basics of fermentation on Kanal 3.',
-  'David Haider of FermentFreude with the winners of Elevator Pitch 2025.',
-  'David Haider presents FermentFreude at the first Austrian National Fermentation Congress.',
+  'Fermentfreude founders David Haider and Marcel Rauminger with field-bean tempeh and fermented vegetables.',
+  'David Haider and Marcel Rauminger of Fermentfreude explain the basics of fermentation on Kanal 3.',
+  'David Haider of Fermentfreude with the winners of Elevator Pitch 2025.',
+  'David Haider presents Fermentfreude at the first Austrian National Fermentation Congress.',
   'Marcel Rauminger presents field-bean tempeh at the first Food Masterclass by Styrian Food Hub.',
 ]

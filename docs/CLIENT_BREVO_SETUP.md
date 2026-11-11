@@ -8,7 +8,7 @@
 
 ## Overview
 
-FermentFreude uses **Brevo** to send automated transactional emails:
+Fermentfreude uses **Brevo** to send automated transactional emails:
 - ✅ Order confirmations
 - ✅ Workshop booking confirmations
 - ✅ Welcome emails
@@ -41,7 +41,7 @@ Brevo needs to verify that `kontakt@fermentfreude.at` is really yours before sen
 3. **Click "Add a Sender"** or **"Add a Domain"**
 4. **Enter domain:** `fermentfreude.at`
 5. **Sender email:** `kontakt@fermentfreude.at`
-6. **Sender name:** `FermentFreude`
+6. **Sender name:** `Fermentfreude`
 7. **Click "Authenticate Domain"**
 
 Brevo will give you **DNS records** to add to your domain registrar:
@@ -69,7 +69,7 @@ Your website needs this key to authenticate with Brevo's API and send emails.
 1. **Log into Brevo:** https://app.brevo.com
 2. **Go to Settings** (left sidebar → SMTP & API → API keys)
 3. **Click "Create a new API key"**
-4. **Name it:** `FermentFreude Website`
+4. **Name it:** `Fermentfreude Website`
 5. **Copy the key** (looks like: `xkeysib-72037b27cccf...`)
 6. **Save it securely** — you'll need it in Step 4
 

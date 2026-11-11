@@ -61,7 +61,7 @@ const STATIC_TEAM_IMAGES: Record<string, string> = {
 
 const DEFAULTS = {
   label: 'Our Team',
-  heading: 'Meet the Experts Behind FermentFreude',
+  heading: 'Meet the Experts Behind Fermentfreude',
   members: [
     {
       name: 'Marcel Rauminger',

@@ -60,8 +60,8 @@ export default function NewsletterForm({ locale = 'de' }: Props) {
 
   const successTitle = isDe ? 'Danke für dein Vertrauen!' : 'Thank you!'
   const successBody = isDe
-    ? 'Du bist jetzt Teil der FermentFreude-Community. Wir haben dir eine Bestätigung per E-Mail geschickt.'
-    : "You're now part of the FermentFreude community. We just sent a confirmation to your inbox."
+    ? 'Du bist jetzt Teil der Fermentfreude-Community. Wir haben dir eine Bestätigung per E-Mail geschickt.'
+    : "You're now part of the Fermentfreude community. We just sent a confirmation to your inbox."
   const closeLabel = isDe ? 'Schließen' : 'Close'
 
   return (

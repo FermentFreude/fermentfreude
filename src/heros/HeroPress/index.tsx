@@ -17,7 +17,7 @@ import type { Media as MediaType, Page } from '@/payload-types'
 
 const DEFAULTS = {
   label: 'Press',
-  heading: 'FermentFreude in the Media',
+  heading: 'Fermentfreude in the Media',
   description:
     'Press and TV coverage, awards, and expert appearances on fermentation and our workshops.',
 }

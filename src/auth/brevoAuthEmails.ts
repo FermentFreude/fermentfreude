@@ -14,8 +14,8 @@ import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
 const SERVER_URL = () => process.env.NEXT_PUBLIC_SERVER_URL || 'https://www.fermentfreude.at'
 
 const PLACEHOLDER_HTML =
-  '<p>Diese E-Mail wurde über FermentFreude (Brevo) versendet.</p>' +
-  '<p>This email was sent via FermentFreude (Brevo).</p>'
+  '<p>Diese E-Mail wurde über Fermentfreude (Brevo) versendet.</p>' +
+  '<p>This email was sent via Fermentfreude (Brevo).</p>'
 
 type AuthEmailArgs = {
   req?: PayloadRequest
@@ -85,5 +85,5 @@ export const verifyEmailHTML = async (args?: AuthEmailArgs): Promise<string> => 
   return PLACEHOLDER_HTML
 }
 
-export const forgotPasswordEmailSubject = () => 'Passwort zurücksetzen — FermentFreude'
-export const verifyEmailSubject = () => 'Bitte bestätige deine E-Mail-Adresse — FermentFreude'
+export const forgotPasswordEmailSubject = () => 'Passwort zurücksetzen — Fermentfreude'
+export const verifyEmailSubject = () => 'Bitte bestätige deine E-Mail-Adresse — Fermentfreude'

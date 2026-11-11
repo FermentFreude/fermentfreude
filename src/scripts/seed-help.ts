@@ -660,7 +660,7 @@ async function seedHelp() {
     const uploaded = await payload.create({
       collection: 'media',
       data: {
-        alt: 'Help center hero — FermentFreude workshop and support illustration',
+        alt: 'Help center hero — Fermentfreude workshop and support illustration',
       },
       file: await optimizedFile(heroBgPath, IMAGE_PRESETS.hero),
       context: ctx,

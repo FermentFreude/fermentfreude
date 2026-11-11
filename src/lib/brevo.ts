@@ -1,5 +1,5 @@
 /**
- * Brevo Email Service for FermentFreude
+ * Brevo Email Service for Fermentfreude
  *
  * Strategy: Brevo Transactional API with template IDs.
  * Templates are designed and edited in Brevo's dashboard (non-coder friendly).

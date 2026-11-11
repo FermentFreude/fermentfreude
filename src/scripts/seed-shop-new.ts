@@ -36,7 +36,7 @@ interface BlockItem extends WithId {
 
 const HERO_CHROME_DE = {
   soldOutLabel: 'Ausverkauft',
-  signatureBrand: 'FermentFreude',
+  signatureBrand: 'Fermentfreude',
   signatureLabel: 'Signature',
   signatureSubtitle: 'Handgemacht in Graz',
   priceLabel: 'Preis',
@@ -46,7 +46,7 @@ const HERO_CHROME_DE = {
 }
 const HERO_CHROME_EN = {
   soldOutLabel: 'Sold out',
-  signatureBrand: 'FermentFreude',
+  signatureBrand: 'Fermentfreude',
   signatureLabel: 'Signature',
   signatureSubtitle: 'Handmade in Graz',
   priceLabel: 'Price',
@@ -161,7 +161,7 @@ async function fillEmptyShopChrome(
           brand:
             asTrimmed(existing.brand) ||
             asTrimmed(filled.next.signatureBrand) ||
-            'FermentFreude',
+            'Fermentfreude',
           title:
             asTrimmed(existing.title) || asTrimmed(filled.next.signatureLabel) || 'Signature',
           subtitle:
@@ -397,7 +397,7 @@ async function seedShopNew() {
     showSignatureBadge: true,
     signatureBadge: {
       show: true,
-      brand: 'FermentFreude',
+      brand: 'Fermentfreude',
       title: 'Signature',
       subtitle: 'Handgemacht in Graz',
     },
@@ -554,7 +554,7 @@ async function seedShopNew() {
       showSignatureBadge: true,
       signatureBadge: {
         show: true,
-        brand: 'FermentFreude',
+        brand: 'Fermentfreude',
         title: 'Signature',
         subtitle: 'Handmade in Graz',
       },

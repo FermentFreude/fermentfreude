@@ -1,6 +1,6 @@
-# FermentFreude Brand System
+# Fermentfreude Brand System
 
-Self-contained brand reference — paste this into any AI design prompt (Claude's artifact/design skills, a new project's system prompt, etc.) so generated work matches FermentFreude's actual identity instead of a generic placeholder.
+Self-contained brand reference — paste this into any AI design prompt (Claude's artifact/design skills, a new project's system prompt, etc.) so generated work matches Fermentfreude's actual identity instead of a generic placeholder.
 
 Source of truth in code: `src/app/(app)/globals.css`. Token-usage rules (typography scale, spacing scale as Tailwind classes) live in `docs/DESIGN_SYSTEM.md` — this file adds the colors and brand fundamentals that doc doesn't cover, plus a portable summary of both.
 
@@ -8,7 +8,7 @@ Source of truth in code: `src/app/(app)/globals.css`. Token-usage rules (typogra
 
 ## 1. Brand in one paragraph
 
-FermentFreude is a fermentation workshop and product studio — warm, earthy, artisanal, slightly premium. The palette is built on ivory/cream neutrals with charcoal and near-black for contrast, warmed up by a muted gold accent. One saturated exception: a deep burgundy used only for the shop/product line. Typography is Neue Haas Grotesk exclusively — a clean, confident grotesque, never a geometric sans like Inter or Geist, never a system font. The overall feel: natural, handcrafted, unfussy — closer to a specialty food brand's print materials than a typical SaaS product.
+Fermentfreude is a fermentation workshop and product studio — warm, earthy, artisanal, slightly premium. The palette is built on ivory/cream neutrals with charcoal and near-black for contrast, warmed up by a muted gold accent. One saturated exception: a deep burgundy used only for the shop/product line. Typography is Neue Haas Grotesk exclusively — a clean, confident grotesque, never a geometric sans like Inter or Geist, never a system font. The overall feel: natural, handcrafted, unfussy — closer to a specialty food brand's print materials than a typical SaaS product.
 
 ---
 
@@ -160,7 +160,7 @@ Soft, rounded — never sharp corners on cards or buttons.
 ## 8. Copy-paste summary (minimal version for tight prompt budgets)
 
 ```
-Brand: FermentFreude — warm, earthy, artisanal fermentation studio.
+Brand: Fermentfreude — warm, earthy, artisanal fermentation studio.
 Fonts: Neue Haas Grotesk only (Text=body, Display=headings/nav/buttons). Never Inter/Geist/system fonts.
 Colors: ivory #F9F0DC / cream #FFFEF9 backgrounds · charcoal #4B4B4B / near-black #1A1A1A text ·
         gold #E6BE68 accent (primary, general use) · olive #4B4F4A (secondary accent, sparing) ·

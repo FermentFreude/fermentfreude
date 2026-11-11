@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
- *  FermentFreude Tipps — Vom Feld ins Glas Articles
+ *  Fermentfreude Tipps — Vom Feld ins Glas Articles
  *
  *  6 guides for the Marktgarten special workshop.
  *  Seeded via src/scripts/seed-feld-ins-glas-posts.ts

@@ -10,7 +10,7 @@ import { getPayload } from 'payload'
 import { accountI18n, type AccountTranslations } from '@/app/(app)/account/i18n'
 
 export const metadata = {
-  title: 'Dashboard — FermentFreude',
+  title: 'Dashboard — Fermentfreude',
   description: 'Your account dashboard',
 }
 

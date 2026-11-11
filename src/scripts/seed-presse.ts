@@ -315,7 +315,7 @@ async function seedPresse() {
       id: image.id,
       locale: 'en',
       context: ctx,
-      data: { alt: `presse-card-${i + 1} – ${PRESS_IMAGE_ALTS_EN[i] ?? 'FermentFreude press'}` },
+      data: { alt: `presse-card-${i + 1} – ${PRESS_IMAGE_ALTS_EN[i] ?? 'Fermentfreude press'}` },
     })
   }
 
@@ -326,7 +326,7 @@ async function seedPresse() {
       locale: 'en',
       context: ctx,
       data: {
-        alt: 'presse-hero-video – Kanal 3 TV feature on fermentation (FermentFreude)',
+        alt: 'presse-hero-video – Kanal 3 TV feature on fermentation (Fermentfreude)',
       },
     })
   }
@@ -338,7 +338,7 @@ async function seedPresse() {
       locale: 'en',
       context: ctx,
       data: {
-        alt: 'presse-hero-poster – Kanal 3 TV feature on fermentation with FermentFreude',
+        alt: 'presse-hero-poster – Kanal 3 TV feature on fermentation with Fermentfreude',
       },
     })
   }
@@ -350,7 +350,7 @@ async function seedPresse() {
       locale: 'en',
       context: ctx,
       data: {
-        alt: 'presse-hero – FermentFreude founders with field-bean tempeh and fermented vegetables',
+        alt: 'presse-hero – Fermentfreude founders with field-bean tempeh and fermented vegetables',
       },
     })
   }

@@ -20,7 +20,7 @@ export function FooterBrand() {
     <div className="w-full py-8 grid grid-cols-[1fr_auto] items-center md:items-end gap-4">
       <Link
         href="/"
-        aria-label="FermentFreude home"
+        aria-label="Fermentfreude home"
         className="block flex-1 min-w-0"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { getPayload } from 'payload'
 
 export const metadata: Metadata = {
-  title: 'E-Mail bestätigen — FermentFreude',
+  title: 'E-Mail bestätigen — Fermentfreude',
 }
 
 type Props = {

@@ -1,4 +1,4 @@
-# FermentFreude — Full Setup Reference
+# Fermentfreude — Full Setup Reference
 
 Complete technical reference for the theme system, locale/i18n system, Tailwind CSS configuration, Payload CMS API, access control, and provider architecture.
 
@@ -220,7 +220,7 @@ function LocaleToggle() {
 
 ### Dual config system (Tailwind v4)
 
-FermentFreude uses Tailwind CSS v4 with **two config sources**:
+Fermentfreude uses Tailwind CSS v4 with **two config sources**:
 
 1. **`tailwind.config.mjs`** — Traditional JS config (legacy compat, keyframes, animations, typography plugin)
 2. **`src/app/(app)/globals.css`** — CSS-first config using `@theme`, `@custom-variant`, `@layer`

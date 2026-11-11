@@ -22,7 +22,7 @@ export function SecondaryLogo({
   return (
     <Image
       src="/secondary-logo.svg"
-      alt="FermentFreude"
+      alt="Fermentfreude"
       width={width}
       height={height}
       className={clsx('h-auto w-auto', className)}

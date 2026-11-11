@@ -25,7 +25,7 @@ export const FeaturedProductCards: Block = {
       label: 'Hero Product',
       admin: {
         description:
-          'Shown first and largest — FermentFreude hero product (Käferbohnentempeh).',
+          'Shown first and largest — Fermentfreude hero product (Käferbohnentempeh).',
       },
     },
     {

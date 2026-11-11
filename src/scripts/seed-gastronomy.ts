@@ -618,7 +618,7 @@ async function seedGastronomy() {
     if (fs.existsSync(contactPath)) {
       const created = await payload.create({
         collection: 'media',
-        data: { alt: 'Contact – FermentFreude team at workshop' },
+        data: { alt: 'Contact – Fermentfreude team at workshop' },
         file: readLocalFile(contactPath),
         context: { skipAutoTranslate: true },
       })

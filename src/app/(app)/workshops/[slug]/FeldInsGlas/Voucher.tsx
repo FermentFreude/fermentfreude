@@ -24,7 +24,7 @@ const COPY = {
     eyebrow: 'Geschenk',
     title: 'Verschenke Fermentation als Erlebnis.',
     description:
-      'Ein FermentFreude-Gutschein für „Vom Feld ins Glas“ — für Menschen, die mehr suchen als ein Kochbuch. Schöner verpackt, per Post oder digital, mit persönlicher Widmung.',
+      'Ein Fermentfreude-Gutschein für „Vom Feld ins Glas“ — für Menschen, die mehr suchen als ein Kochbuch. Schöner verpackt, per Post oder digital, mit persönlicher Widmung.',
     primaryLabel: 'Gutschein bestellen',
     secondaryLabel: 'Zum Shop',
     imageQuote: '„Das schönste Geschenk ist Zeit — im Garten.“',
@@ -39,7 +39,7 @@ const COPY = {
     eyebrow: 'Gift',
     title: 'Gift fermentation as an experience.',
     description:
-      'A FermentFreude voucher for “Vom Feld ins Glas” — for people who want more than a cookbook. Beautifully packed, by post or digital, with a personal dedication.',
+      'A Fermentfreude voucher for “Vom Feld ins Glas” — for people who want more than a cookbook. Beautifully packed, by post or digital, with a personal dedication.',
     primaryLabel: 'Order voucher',
     secondaryLabel: 'To the shop',
     imageQuote: '“The most beautiful gift is time — in the garden.”',

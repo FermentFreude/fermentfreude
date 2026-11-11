@@ -83,7 +83,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     let subject = 'Email Preview'
     const titleMatch = renderedHtml.match(/<title[^>]*>([^<]+)<\/title>/i)
     if (titleMatch) {
-      subject = titleMatch[1].replace('FermentFreude — ', '').trim()
+      subject = titleMatch[1].replace(/Fermentfreude — /i, '').trim()
     }
 
     // Wrap in a full page for display
@@ -184,7 +184,7 @@ function buildEmailHTML(doc: BrevoTemplateDoc): string {
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>FermentFreude — ${subject}</title>
+  <title>Fermentfreude — ${subject}</title>
   <style>
     * { margin: 0; padding: 0; font-family: 'Inter', Arial, sans-serif; }
     body { background-color: #f9f0dc; padding: 40px 0; }
@@ -200,7 +200,7 @@ function buildEmailHTML(doc: BrevoTemplateDoc): string {
         <tr>
           <td style="padding: 32px 40px; background: #1a1a1a; text-align: center;">
             <img src="https://pub-0cf8a1c18a9a4cde9e56a0a34e600307.r2.dev/media/fermentfreude-logo-light.png" 
-                 alt="FermentFreude" width="180" style="width: 180px; max-width: 100%; height: auto;" />
+                 alt="Fermentfreude" width="180" style="width: 180px; max-width: 100%; height: auto;" />
           </td>
         </tr>
       </table>

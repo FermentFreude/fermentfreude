@@ -1,4 +1,4 @@
-# Stripe Payment → Email Confirmation Flow — FermentFreude
+# Stripe Payment → Email Confirmation Flow — Fermentfreude
 
 > **Complete order-to-confirmation pipeline with automatic email receipts**
 
@@ -111,7 +111,7 @@ confirmWorkshopBookings hook triggers:
 ### Step 7: Customer Receives Emails
 ```
 📧 Email 1 (ORDER_CONFIRMATION) arrives in inbox
-   Subject: "Deine Bestellung bei FermentFreude — ord_..."
+   Subject: "Deine Bestellung bei Fermentfreude — ord_..."
    Body: Order details, items, total, receipt info
    ↓
 ⏳ 2-5 seconds later...

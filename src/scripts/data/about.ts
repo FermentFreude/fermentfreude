@@ -19,7 +19,7 @@ export const aboutHeroDE = (args: AboutSeedArgs = {}) => ({
   splitLabel: 'Über uns',
   splitHeading: 'Wo Tradition auf Wissenschaft trifft',
   splitDescription:
-    'FermentFreude macht Fermentation zugänglich und genussvoll. Entdecke Workshops, Produkte und unser leidenschaftliches Team für Darmgesundheit.',
+    'Fermentfreude macht Fermentation zugänglich und genussvoll. Entdecke Workshops, Produkte und unser leidenschaftliches Team für Darmgesundheit.',
   splitCtaLabel: 'Mehr erfahren',
   splitCtaUrl: '/fermentation',
   splitMedia: args.heroSplitImage?.id ?? args.heroImage?.id ?? undefined,
@@ -30,7 +30,7 @@ export const aboutHeroEN = (args: AboutSeedArgs = {}) => ({
   splitLabel: 'About Us',
   splitHeading: 'Where tradition meets science',
   splitDescription:
-    'FermentFreude makes fermentation accessible and enjoyable. Discover workshops, products, and our passionate team dedicated to gut health.',
+    'Fermentfreude makes fermentation accessible and enjoyable. Discover workshops, products, and our passionate team dedicated to gut health.',
   splitCtaLabel: 'Learn more',
   splitCtaUrl: '/fermentation',
   splitMedia: args.heroSplitImage?.id ?? args.heroImage?.id ?? undefined,
@@ -45,7 +45,7 @@ export const ourStoryDE = (args: AboutSeedArgs = {}) => ({
     'Fermentation zugänglich und genussvoll machen, während wir Darmgesundheit durch Geschmack, Bildung und qualitativ hochwertige handgemachte Lebensmittel fördern',
   paragraphs: [
     {
-      text: 'FermentFreude ist ein österreichisches Food-Tech-Unternehmen mit der Mission, Freude in die Fermentation zu bringen. Durch praktische Workshops und hochwertige fermentierte Produkte helfen wir Menschen zu entdecken, wie Darmgesundheit und Genuss zusammenkommen – und wie alte Handwerkskunst zum alltäglichen Vergnügen wird.',
+      text: 'Fermentfreude ist ein österreichisches Food-Tech-Unternehmen mit der Mission, Freude in die Fermentation zu bringen. Durch praktische Workshops und hochwertige fermentierte Produkte helfen wir Menschen zu entdecken, wie Darmgesundheit und Genuss zusammenkommen – und wie alte Handwerkskunst zum alltäglichen Vergnügen wird.',
       image: args.ourStoryImage1?.id ?? undefined,
     },
     {
@@ -63,7 +63,7 @@ export const ourStoryEN = (args: AboutSeedArgs = {}) => ({
     'Making fermentation joyful & accessible while empowering gut health through taste, education, and quality handmade foods',
   paragraphs: [
     {
-      text: 'FermentFreude is an Austrian food-tech company on a mission to bring joy to fermentation. Through hands-on workshops and premium fermented products, we help people discover how gut health meets delight—turning age-old craft into everyday pleasure.',
+      text: 'Fermentfreude is an Austrian food-tech company on a mission to bring joy to fermentation. Through hands-on workshops and premium fermented products, we help people discover how gut health meets delight—turning age-old craft into everyday pleasure.',
       image: args.ourStoryImage1?.id ?? undefined,
     },
     {
@@ -78,7 +78,7 @@ export const teamCardsDE = (args: AboutSeedArgs = {}) => ({
   blockType: 'teamCards' as const,
   blockName: 'our-team',
   label: 'Unser Team',
-  heading: 'Lernen Sie die Experten hinter FermentFreude kennen',
+  heading: 'Lernen Sie die Experten hinter Fermentfreude kennen',
   members: [
     {
       image: args.marcelImage?.id ?? undefined,
@@ -92,7 +92,7 @@ export const teamCardsDE = (args: AboutSeedArgs = {}) => ({
       name: 'David Heider',
       role: 'Ernährungsspezialist & Lebensmittelentwickler',
       description:
-        'Mit einem Hintergrund in Lebensmittelwissenschaften und Wirtschaftswissenschaften ist David leidenschaftlich daran interessiert, komplexe wissenschaftliche Konzepte für alle verdaulich zu machen. Er entwickelt quelloffene Fermentationstechniken basierend auf fermentierten Lebensmitteln, die fantastisch schmecken und das Wohlbefinden unterstützen und die perfekte Brücke zwischen Wissenschaft und Kunst von FermentFreude schaffen.',
+        'Mit einem Hintergrund in Lebensmittelwissenschaften und Wirtschaftswissenschaften ist David leidenschaftlich daran interessiert, komplexe wissenschaftliche Konzepte für alle verdaulich zu machen. Er entwickelt quelloffene Fermentationstechniken basierend auf fermentierten Lebensmitteln, die fantastisch schmecken und das Wohlbefinden unterstützen und die perfekte Brücke zwischen Wissenschaft und Kunst von Fermentfreude schaffen.',
     },
   ],
 })
@@ -101,7 +101,7 @@ export const teamCardsEN = (args: AboutSeedArgs = {}) => ({
   blockType: 'teamCards' as const,
   blockName: 'our-team',
   label: 'Our Team',
-  heading: 'Meet the Experts Behind FermentFreude',
+  heading: 'Meet the Experts Behind Fermentfreude',
   members: [
     {
       image: args.marcelImage?.id ?? undefined,
@@ -115,7 +115,7 @@ export const teamCardsEN = (args: AboutSeedArgs = {}) => ({
       name: 'David Heider',
       role: 'Nutrition Specialist & Food Developer',
       description:
-        'With a background in food science and economics, David is passionate about making complex scientific concepts digestible for everyone. He develops open-source fermentation techniques based on fermented foods that taste amazing and support wellbeing, creating the perfect bridge between science and the art of FermentFreude.',
+        'With a background in food science and economics, David is passionate about making complex scientific concepts digestible for everyone. He develops open-source fermentation techniques based on fermented foods that taste amazing and support wellbeing, creating the perfect bridge between science and the art of Fermentfreude.',
     },
   ],
 })

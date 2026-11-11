@@ -103,7 +103,7 @@ async function syncToBrevoAPI({
     // Extract subject from HTML title tag
     const titleMatch = doc.htmlContent?.match(/<title[^>]*>([^<]+)<\/title>/i)
     const subject = titleMatch
-      ? titleMatch[1].replace('FermentFreude — ', '').trim()
+      ? titleMatch[1].replace(/Fermentfreude — /i, '').trim()
       : doc.templateName
 
     // Send to Brevo API

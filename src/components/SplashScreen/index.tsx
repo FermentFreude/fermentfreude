@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { announceSplash } from './splashSignal'
+
 /**
  * SplashScreen — Wave reveals logo, wave closes to reveal page
  *
@@ -50,6 +52,7 @@ export function SplashScreen() {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
       setPhase('done')
+      announceSplash('done')
       return
     }
 
@@ -92,9 +95,13 @@ export function SplashScreen() {
     // 5.3s   : done
     t(() => setPhase('wave'), 300)
     t(() => setPhase('filled'), 2300)
-    t(() => setPhase('close'), 3800)
+    t(() => {
+      setPhase('close')
+      announceSplash('revealing') // hero & other entrances start as the wave lifts
+    }, 3800)
     t(() => {
       setPhase('done')
+      announceSplash('done')
       document.body.style.overflow = ''
     }, 5300)
 

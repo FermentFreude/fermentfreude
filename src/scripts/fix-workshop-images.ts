@@ -71,12 +71,12 @@ const WORKSHOP_IMAGES: Record<
 const TEAM_IMAGES = {
   david: {
     source: path.join(imagesDir, 'david-heider.jpg'),
-    alt: 'David Heider – FermentFreude co-founder and instructor',
+    alt: 'David Heider – Fermentfreude co-founder and instructor',
     preset: IMAGE_PRESETS.card,
   },
   marcel: {
     source: path.join(imagesDir, 'marcel-rauminger.jpg'),
-    alt: 'Marcel Rauminger – FermentFreude co-founder and instructor',
+    alt: 'Marcel Rauminger – Fermentfreude co-founder and instructor',
     preset: IMAGE_PRESETS.card,
   },
 }
@@ -252,7 +252,7 @@ async function fixImages() {
         await payload.update({
           collection: 'media',
           id: bgImg.id,
-          data: { alt: 'FermentFreude chefs banner – professional kitchen scene' },
+          data: { alt: 'Fermentfreude chefs banner – professional kitchen scene' },
           file,
           context: ctx,
         })

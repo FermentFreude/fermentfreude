@@ -221,7 +221,7 @@ export function OpeningPopups({ locale }: Props) {
         <DialogContent className="max-w-sm sm:max-w-md border-[#1d1d1d]/15 bg-[#fdfbf8] p-4 sm:p-6">
           <DialogHeader>
             <p className="font-sans text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1d1d1d]/60">
-              {isDe ? 'FermentFreude News' : 'FermentFreude News'}
+              {isDe ? 'Fermentfreude News' : 'Fermentfreude News'}
             </p>
             <DialogTitle className="font-display text-lg sm:text-xl text-[#1d1d1d]">
               {isDe ? 'Newsletter abonnieren' : 'Join our Newsletter'}

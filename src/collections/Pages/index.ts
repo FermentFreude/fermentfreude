@@ -6,6 +6,9 @@ import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
 import { Archive } from '@/blocks/ArchiveBlock/config'
 import { Banner } from '@/blocks/Banner/config'
 import { gastronomySectionBlocks } from '@/blocks/GastronomySections/config'
+import { HomeTempehStory } from '@/blocks/HomeTempehStory/config'
+import { FermentationStory } from '@/blocks/FermentationStory/config'
+import { ProductShowcase } from '@/blocks/ProductShowcase/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Carousel } from '@/blocks/Carousel/config'
 import { CollectionGrid } from '@/blocks/CollectionGrid/config'
@@ -41,6 +44,7 @@ import { WorkshopSlider } from '@/blocks/WorkshopSlider/config'
 import { hero } from '@/fields/hero'
 import { workshopDetailFields } from '@/fields/workshopDetailFields'
 import { workshopOverviewFields } from '@/fields/workshopOverviewFields'
+import { voucherTab } from './voucherTab'
 import { autoTranslateCollection } from '@/hooks/autoTranslateCollection'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import {
@@ -111,6 +115,19 @@ const GASTRONOMY_HIDDEN_KEYS = [
   'gastronomyWorkshopNextDateLabel',
   'gastronomyWorkshopCards',
 ] as const
+
+/** The sections the Home page is built from — the only blocks offered when editing Home. */
+const HOME_BLOCKS = [
+  'productShowcase',
+  'voucherCta',
+  'featureCards',
+  'heroBanner',
+  'fermentationStory',
+  'teamPreview',
+  'testimonials',
+  'pressBanner',
+  'sponsorsBar',
+]
 
 const preserveHiddenGastronomyFields: CollectionBeforeChangeHook = ({
   data,
@@ -210,6 +227,9 @@ export const Pages: CollectionConfig = {
                 Content,
                 FeatureCards,
                 HeroBanner,
+                HomeTempehStory,
+                ProductShowcase,
+                FermentationStory,
                 MediaBlock,
                 Archive,
                 Carousel,
@@ -241,6 +261,14 @@ export const Pages: CollectionConfig = {
                 WorkshopPhases,
               ],
               required: false,
+              // Home: only offer the sections Home is built from (plus any already on it)
+              filterOptions: ({ data }) => {
+                if (data?.slug !== 'home') return true
+                const present = (Array.isArray(data?.layout) ? data.layout : [])
+                  .map((b: { blockType?: string }) => b?.blockType)
+                  .filter((s: unknown): s is string => typeof s === 'string')
+                return [...new Set([...HOME_BLOCKS, ...present])]
+              },
               admin: {
                 description:
                   'Content blocks. Leave empty for Voucher, Gastronomy, and Fermentation pages (they use dedicated tabs).',
@@ -320,7 +348,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Tagline',
-                  admin: { description: 'One short line under the title. Keep it to 1–2 sentences.' },
+                  admin: {
+                    description: 'One short line under the title. Keep it to 1–2 sentences.',
+                  },
                 },
                 {
                   type: 'row',
@@ -403,7 +433,8 @@ export const Pages: CollectionConfig = {
                   maxRows: 8,
                   labels: { singular: 'Slide', plural: 'Slides' },
                   admin: {
-                    description: 'Each slide: photo + title + one short line. Photography does the talking.',
+                    description:
+                      'Each slide: photo + title + one short line. Photography does the talking.',
                   },
                   fields: [
                     {
@@ -538,7 +569,9 @@ export const Pages: CollectionConfig = {
                   required: false,
                   localized: true,
                   label: 'Product CTA label',
-                  admin: { description: 'Button under the facts. e.g. “Jetzt B2B-Anfrage senden”.' },
+                  admin: {
+                    description: 'Button under the facts. e.g. “Jetzt B2B-Anfrage senden”.',
+                  },
                 },
                 {
                   name: 'gastronomyProductB2bLine',
@@ -581,7 +614,13 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Image',
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -678,7 +717,13 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Icon',
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -891,7 +936,13 @@ export const Pages: CollectionConfig = {
                       required: false,
                       label: 'Image',
                     },
-                    { name: 'title', type: 'text', required: true, localized: true, label: 'Title' },
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      localized: true,
+                      label: 'Title',
+                    },
                     {
                       name: 'description',
                       type: 'textarea',
@@ -956,7 +1007,8 @@ export const Pages: CollectionConfig = {
                   maxRows: 4,
                   labels: { singular: 'Card', plural: 'Cards' },
                   admin: {
-                    description: 'Photo, title and one short line. Leave photo empty to use the default.',
+                    description:
+                      'Photo, title and one short line. Leave photo empty to use the default.',
                   },
                   fields: [
                     {
@@ -1078,99 +1130,105 @@ export const Pages: CollectionConfig = {
                 },
                 {
                   name: 'gastronomyFormPlaceholders',
-              type: 'group',
-              label: 'Form Placeholders',
-              fields: [
+                  type: 'group',
+                  label: 'Form Placeholders',
+                  fields: [
+                    {
+                      name: 'firstName',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Name',
+                    },
+                    {
+                      name: 'lastName',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Restaurant / company',
+                    },
+                    {
+                      name: 'email',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Email',
+                    },
+                    {
+                      name: 'phone',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Phone',
+                    },
+                    {
+                      name: 'quantity',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Quantity',
+                    },
+                    {
+                      name: 'message',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Message',
+                    },
+                  ],
+                },
                 {
-                  name: 'firstName',
+                  name: 'gastronomyBusinessTypeOptions',
+                  type: 'group',
+                  label: 'Type of business dropdown',
+                  fields: [
+                    {
+                      name: 'default',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Placeholder',
+                      admin: { description: 'e.g. “Art des Betriebs”.' },
+                    },
+                    {
+                      name: 'options',
+                      type: 'array',
+                      label: 'Options',
+                      minRows: 0,
+                      fields: [{ name: 'label', type: 'text', required: false, localized: true }],
+                    },
+                  ],
+                },
+                {
+                  name: 'gastronomySubjectOptions',
+                  type: 'group',
+                  label: 'Interest dropdown',
+                  fields: [
+                    {
+                      name: 'default',
+                      type: 'text',
+                      required: false,
+                      localized: true,
+                      label: 'Placeholder',
+                      admin: { description: 'e.g. “Worum geht es?”.' },
+                    },
+                    {
+                      name: 'options',
+                      type: 'array',
+                      label: 'Options',
+                      minRows: 0,
+                      fields: [{ name: 'label', type: 'text', required: false, localized: true }],
+                    },
+                  ],
+                },
+                {
+                  name: 'gastronomySubmitButtonLabel',
                   type: 'text',
                   required: false,
                   localized: true,
-                  label: 'Name',
+                  label: 'Submit button',
+                  admin: { description: 'e.g. “Anfrage senden” / “Send enquiry”.' },
                 },
-                {
-                  name: 'lastName',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Restaurant / company',
-                },
-                { name: 'email', type: 'text', required: false, localized: true, label: 'Email' },
-                {
-                  name: 'phone',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Phone',
-                },
-                {
-                  name: 'quantity',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Quantity',
-                },
-                {
-                  name: 'message',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Message',
-                },
-              ],
-            },
-            {
-              name: 'gastronomyBusinessTypeOptions',
-              type: 'group',
-              label: 'Type of business dropdown',
-              fields: [
-                {
-                  name: 'default',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Placeholder',
-                  admin: { description: 'e.g. “Art des Betriebs”.' },
-                },
-                {
-                  name: 'options',
-                  type: 'array',
-                  label: 'Options',
-                  minRows: 0,
-                  fields: [{ name: 'label', type: 'text', required: false, localized: true }],
-                },
-              ],
-            },
-            {
-              name: 'gastronomySubjectOptions',
-              type: 'group',
-              label: 'Interest dropdown',
-              fields: [
-                {
-                  name: 'default',
-                  type: 'text',
-                  required: false,
-                  localized: true,
-                  label: 'Placeholder',
-                  admin: { description: 'e.g. “Worum geht es?”.' },
-                },
-                {
-                  name: 'options',
-                  type: 'array',
-                  label: 'Options',
-                  minRows: 0,
-                  fields: [{ name: 'label', type: 'text', required: false, localized: true }],
-                },
-              ],
-            },
-            {
-              name: 'gastronomySubmitButtonLabel',
-              type: 'text',
-              required: false,
-              localized: true,
-              label: 'Submit button',
-              admin: { description: 'e.g. “Anfrage senden” / “Send enquiry”.' },
-            },
               ],
             },
           ],
@@ -1852,744 +1910,7 @@ export const Pages: CollectionConfig = {
             },
           ],
         },
-        {
-          name: 'voucher',
-          label: 'Voucher Page',
-          admin: {
-            description:
-              'Content for the Gift Voucher page. These fields only apply when this page\'s slug is "voucher".',
-            condition: (data) => data?.slug === 'voucher',
-          },
-          fields: [
-            {
-              name: 'voucherShowHero',
-              type: 'checkbox',
-              label: 'Show this section',
-              defaultValue: true,
-              localized: true,
-              admin: {
-                description: 'Toggle off to hide the voucher hero section on the website.',
-              },
-            },
-            {
-              name: 'heroHeading',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Hero Heading',
-              admin: {
-                description:
-                  'Main headline above the voucher form (e.g. "Give the gift of fermentation").',
-                condition: (data) => data?.voucherShowHero !== false,
-              },
-            },
-            {
-              name: 'heroDescription',
-              type: 'textarea',
-              required: true,
-              localized: true,
-              label: 'Hero Description',
-              admin: {
-                description: 'Short intro text below the heading explaining the voucher.',
-                condition: (data) => data?.voucherShowHero !== false,
-              },
-            },
-            {
-              name: 'voucherShowAmounts',
-              type: 'checkbox',
-              label: 'Show this section',
-              defaultValue: true,
-              localized: true,
-              admin: {
-                description: 'Toggle off to hide the voucher amount selection on the website.',
-                condition: (data) => data?.voucherShowHero !== false,
-              },
-            },
-            {
-              name: 'voucherAmounts',
-              type: 'array',
-              label: 'Voucher Amounts',
-              required: true,
-              minRows: 1,
-              admin: {
-                description:
-                  'List of amount options shown as buttons (e.g. 50€, 99€). Same in all languages.',
-                condition: (data) =>
-                  data?.voucherShowHero !== false && data?.voucherShowAmounts !== false,
-              },
-              fields: [
-                {
-                  name: 'amount',
-                  type: 'text',
-                  required: true,
-                  label: 'Amount',
-                },
-              ],
-            },
-            {
-              name: 'voucherShowDeliveryOptions',
-              type: 'checkbox',
-              label: 'Show this section',
-              defaultValue: true,
-              localized: true,
-              admin: {
-                description: 'Toggle off to hide delivery options on the website.',
-                condition: (data) => data?.voucherShowHero !== false,
-              },
-            },
-            {
-              name: 'deliveryOptions',
-              type: 'array',
-              label: 'Delivery Options',
-              required: true,
-              minRows: 1,
-              admin: {
-                description:
-                  'Email or pick up from store. Post/card removed for product freshness.',
-                condition: (data) =>
-                  data?.voucherShowHero !== false && data?.voucherShowDeliveryOptions !== false,
-              },
-              fields: [
-                {
-                  name: 'type',
-                  type: 'text',
-                  required: true,
-                  label: 'Type (internal)',
-                  admin: {
-                    description: 'Internal key, e.g. "email" or "post". Used for logic, not shown.',
-                  },
-                },
-                {
-                  name: 'title',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Title',
-                  admin: {
-                    description: 'Label shown to the user (e.g. "By email to print at home").',
-                  },
-                },
-                {
-                  name: 'iconSource',
-                  type: 'select',
-                  label: 'Icon Type',
-                  defaultValue: 'preset',
-                  options: [
-                    { label: 'Built-in icon', value: 'preset' },
-                    { label: 'Custom upload (Media)', value: 'custom' },
-                  ],
-                  admin: {
-                    description:
-                      'Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.',
-                  },
-                },
-                {
-                  name: 'icon',
-                  type: 'select',
-                  required: false,
-                  label: 'Icon',
-                  options: [
-                    { label: 'Email', value: 'email' },
-                    { label: 'Pick up from store', value: 'pickup' },
-                    { label: 'Card / Post (deprecated)', value: 'card' },
-                  ],
-                  admin: {
-                    description: 'Icon displayed next to this option. Use email or pickup only.',
-                  },
-                },
-              ],
-            },
-            {
-              name: 'cardLogo',
-              type: 'upload',
-              relationTo: 'media',
-              label: 'Card Logo',
-              admin: {
-                description:
-                  'Logo displayed on the voucher preview card. Leave empty to use fallback.',
-                condition: (data) => data?.voucherShowHero !== false,
-              },
-            },
-            {
-              name: 'cardLabel',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Card Label',
-              admin: {
-                description: 'Label on the voucher preview card (e.g. "GIFT VOUCHER").',
-                condition: (data) => data?.voucherShowHero !== false,
-              },
-            },
-            {
-              name: 'valueLabel',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Value Label',
-              admin: {
-                description: 'Label above the amount on the card (e.g. "Voucher value").',
-                condition: (data) => data?.voucherShowHero !== false,
-              },
-            },
-            {
-              name: 'cardDisclaimer',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Card Disclaimer',
-              admin: {
-                description: 'Small text under the amount (e.g. "Redeemable in our shop").',
-                condition: (data) => data?.voucherShowHero !== false,
-              },
-            },
-            {
-              name: 'amountSectionLabel',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Amount Section Label',
-              admin: {
-                description: 'Label above the amount buttons (e.g. "VOUCHER VALUE").',
-                condition: (data) =>
-                  data?.voucherShowHero !== false && data?.voucherShowAmounts !== false,
-              },
-            },
-            {
-              name: 'deliverySectionLabel',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Delivery Section Label',
-              admin: {
-                description: 'Label above delivery options (e.g. "DELIVERY METHOD").',
-                condition: (data) =>
-                  data?.voucherShowHero !== false && data?.voucherShowDeliveryOptions !== false,
-              },
-            },
-            {
-              name: 'deliveryDisclaimer',
-              type: 'textarea',
-              label: 'Delivery Disclaimer',
-              localized: true,
-              admin: {
-                description:
-                  'Explains why products cannot be sent by post (e.g. freshness). Shown under the delivery option.',
-                condition: (data) =>
-                  data?.voucherShowHero !== false && data?.voucherShowDeliveryOptions !== false,
-              },
-            },
-            {
-              name: 'pickupAddress',
-              type: 'textarea',
-              label: 'Pick-up store address',
-              localized: true,
-              admin: {
-                description:
-                  'Address shown when "Pick up from store" is selected (e.g. Grabenstraße 15, 8010 Graz).',
-                condition: (data) =>
-                  data?.voucherShowHero !== false && data?.voucherShowDeliveryOptions !== false,
-              },
-            },
-            {
-              name: 'voucherShowCTA',
-              type: 'checkbox',
-              label: 'Show this section',
-              defaultValue: true,
-              localized: true,
-              admin: {
-                description: 'Toggle off to hide the add-to-cart button on the website.',
-                condition: (data) => data?.voucherShowHero !== false,
-              },
-            },
-            {
-              name: 'addToCartButton',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Add to Cart Button',
-              admin: {
-                description: 'Text for the main CTA button (e.g. "Add to cart").',
-                condition: (data) =>
-                  data?.voucherShowHero !== false && data?.voucherShowCTA !== false,
-              },
-            },
-            {
-              type: 'collapsible',
-              label: 'Why Section',
-              admin: { initCollapsed: false },
-              fields: [
-                {
-                  name: 'voucherShowWhy',
-                  type: 'checkbox',
-                  label: 'Show this section',
-                  defaultValue: true,
-                  localized: true,
-                  admin: {
-                    description: 'Toggle off to hide the voucher "Why" section on the website.',
-                  },
-                },
-                {
-                  name: 'voucherWhyHeading',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Why Voucher Section Heading',
-                  admin: {
-                    description:
-                      'Heading for the "Why a fermentation voucher" section (e.g. "Why a fermentation voucher is a great gift").',
-                    condition: (data) => data?.voucherShowWhy !== false,
-                  },
-                },
-                {
-                  name: 'voucherWhyBody',
-                  type: 'textarea',
-                  required: true,
-                  localized: true,
-                  label: 'Why Voucher Section Body',
-                  admin: {
-                    description:
-                      'Body text that explains why a fermentation workshop voucher is a good present.',
-                    condition: (data) => data?.voucherShowWhy !== false,
-                  },
-                },
-                {
-                  name: 'voucherWhyImage',
-                  type: 'upload',
-                  relationTo: 'media',
-                  label: 'Why Section Image',
-                  admin: {
-                    description:
-                      'Optional joyful image for the "Why" section (e.g. fermentation, gift, workshop). Shown beside the text. Leave empty to show text only.',
-                    condition: (data) => data?.voucherShowWhy !== false,
-                  },
-                },
-                {
-                  name: 'voucherWhyBenefits',
-                  type: 'array',
-                  label: 'Why Section Benefit Items',
-                  required: false,
-                  maxRows: 4,
-                  admin: {
-                    description:
-                      'Four benefit items shown in a 2×2 grid (e.g. Unforgettable Experience, Health & Pleasure). Leave empty to use default copy.',
-                    condition: (data) => data?.voucherShowWhy !== false,
-                  },
-                  fields: [
-                    {
-                      name: 'iconSource',
-                      type: 'select',
-                      label: 'Icon Type',
-                      defaultValue: 'preset',
-                      options: [
-                        { label: 'Built-in icon', value: 'preset' },
-                        { label: 'Custom upload (Media)', value: 'custom' },
-                      ],
-                      admin: {
-                        description:
-                          'Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.',
-                      },
-                    },
-                    {
-                      name: 'icon',
-                      type: 'select',
-                      required: false,
-                      label: 'Icon',
-                      options: [
-                        { label: 'Sparkle (experience)', value: 'sparkle' },
-                        { label: 'Heart (health)', value: 'heart' },
-                        { label: 'Graduation cap (knowledge)', value: 'graduation' },
-                        { label: 'Leaf (sustainability)', value: 'leaf' },
-                      ],
-                      admin: {
-                        condition: (_, siblingData) => siblingData?.iconSource !== 'custom',
-                      },
-                    },
-                    {
-                      name: 'customIcon',
-                      type: 'upload',
-                      relationTo: 'media',
-                      label: 'Custom Icon',
-                      admin: {
-                        description:
-                          'Optional uploaded icon from Media. Recommended: square icon with transparent background.',
-                        condition: (_, siblingData) => siblingData?.iconSource === 'custom',
-                      },
-                    },
-                    {
-                      name: 'title',
-                      type: 'text',
-                      required: true,
-                      localized: true,
-                      label: 'Title',
-                    },
-                    {
-                      name: 'description',
-                      type: 'textarea',
-                      required: true,
-                      localized: true,
-                      label: 'Description',
-                    },
-                  ],
-                },
-                {
-                  name: 'voucherWhyPerfectForVisible',
-                  type: 'checkbox',
-                  label: 'Show this section',
-                  defaultValue: false,
-                  localized: true,
-                  admin: {
-                    description:
-                      'Toggle off to hide the "Perfect for" section on the website without deleting the content.',
-                    condition: (data) => data?.voucherShowWhy !== false,
-                  },
-                },
-                {
-                  name: 'voucherWhyPerfectForHeading',
-                  type: 'text',
-                  localized: true,
-                  label: '"Perfect for" heading',
-                  admin: {
-                    description:
-                      'Heading above the audience tags (e.g. "Perfect for"). Shown at the end of the Why section. Leave empty to hide.',
-                    condition: (data) =>
-                      data?.voucherShowWhy !== false && data?.voucherWhyPerfectForVisible === true,
-                  },
-                },
-                {
-                  name: 'voucherWhyPerfectForTags',
-                  type: 'array',
-                  label: '"Perfect for" tags',
-                  admin: {
-                    description:
-                      'Tags shown under the heading (e.g. Foodies, Health-conscious). Leave empty to hide.',
-                    condition: (data) =>
-                      data?.voucherShowWhy !== false && data?.voucherWhyPerfectForVisible === true,
-                  },
-                  fields: [
-                    {
-                      name: 'label',
-                      type: 'text',
-                      required: true,
-                      localized: true,
-                      label: 'Tag',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              name: 'voucherHowHeading',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'How It Works Section Heading',
-              admin: {
-                description: 'Heading above the steps (e.g. "How it works").',
-                condition: (data) => data?.voucherShowHow !== false,
-              },
-            },
-            {
-              name: 'voucherShowHow',
-              type: 'checkbox',
-              label: 'Show this section',
-              defaultValue: true,
-              localized: true,
-              admin: {
-                description:
-                  'Toggle off to hide the voucher "How it works" section on the website.',
-              },
-            },
-            {
-              name: 'voucherHowSteps',
-              type: 'array',
-              label: 'How It Works Steps',
-              required: true,
-              minRows: 1,
-              admin: {
-                description:
-                  'Four steps with title and optional description (e.g. "Buy" / "Order online for €99").',
-                condition: (data) => data?.voucherShowHow !== false,
-              },
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Title',
-                  admin: { description: 'Step heading (e.g. "Buy", "Receive").' },
-                },
-                {
-                  name: 'description',
-                  type: 'text',
-                  localized: true,
-                  label: 'Description',
-                  admin: { description: 'Optional detail (e.g. "Order online for €99").' },
-                },
-              ],
-            },
-            {
-              name: 'voucherShowStarterSet',
-              type: 'checkbox',
-              label: 'Show this section',
-              defaultValue: false,
-              localized: true,
-              admin: {
-                description: 'Toggle off to hide the starter set section on the website.',
-              },
-            },
-            {
-              name: 'starterSetHeading',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Starter Set Section Heading',
-              admin: {
-                description: 'Heading for the "Combine with Starter Set" section.',
-                condition: (data) => data?.voucherShowStarterSet === true,
-              },
-            },
-            {
-              name: 'starterSetDescription',
-              type: 'textarea',
-              required: true,
-              localized: true,
-              label: 'Starter Set Description',
-              admin: {
-                description: 'Body text for the starter set section.',
-                condition: (data) => data?.voucherShowStarterSet === true,
-              },
-            },
-            {
-              name: 'starterSetButton',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Starter Set Button',
-              admin: {
-                description: 'Button text (e.g. "View Starter Sets").',
-                condition: (data) => data?.voucherShowStarterSet === true,
-              },
-            },
-            {
-              name: 'starterSetImage',
-              type: 'upload',
-              relationTo: 'media',
-              label: 'Starter Set Image',
-              admin: {
-                description: 'Image shown in the starter set section. Leave empty to use fallback.',
-                condition: (data) => data?.voucherShowStarterSet === true,
-              },
-            },
-            {
-              name: 'voucherShowGiftOccasions',
-              type: 'checkbox',
-              label: 'Show this section',
-              defaultValue: true,
-              localized: true,
-              admin: {
-                description:
-                  'Toggle off to hide the voucher gift occasions section on the website.',
-              },
-            },
-            {
-              name: 'giftOccasionsHeading',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Gift Occasions Heading',
-              admin: {
-                description: 'Heading for the "Gift for every occasion" section.',
-                condition: (data) => data?.voucherShowGiftOccasions !== false,
-              },
-            },
-            {
-              name: 'giftOccasions',
-              type: 'array',
-              label: 'Gift Occasions',
-              required: true,
-              minRows: 1,
-              maxRows: 4,
-              admin: {
-                description: 'Occasion cards with image and caption (e.g. Birthdays, Weddings).',
-                condition: (data) => data?.voucherShowGiftOccasions !== false,
-              },
-              fields: [
-                {
-                  name: 'image',
-                  type: 'upload',
-                  relationTo: 'media',
-                  required: false,
-                  label: 'Image',
-                  admin: { description: 'Optional. Uses fallback if empty.' },
-                },
-                {
-                  name: 'caption',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Caption',
-                },
-              ],
-            },
-            {
-              name: 'voucherBenefitsHeading',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Voucher Benefits Section Heading',
-              admin: {
-                description:
-                  'Heading above the benefits list (e.g. "What\'s included in the voucher").',
-                condition: (data) => data?.voucherShowBenefits !== false,
-              },
-            },
-            {
-              name: 'voucherShowBenefits',
-              type: 'checkbox',
-              label: 'Show this section',
-              defaultValue: true,
-              localized: true,
-              admin: {
-                description: 'Toggle off to hide the voucher benefits section on the website.',
-              },
-            },
-            {
-              name: 'voucherBenefitsSubtitle',
-              type: 'text',
-              localized: true,
-              label: 'Voucher Benefits Subtitle',
-              admin: {
-                description: 'Short line under the heading (e.g. "All at a glance").',
-                condition: (data) => data?.voucherShowBenefits !== false,
-              },
-            },
-            {
-              name: 'voucherBenefits',
-              type: 'array',
-              label: 'Voucher Benefits',
-              required: true,
-              minRows: 1,
-              admin: {
-                description:
-                  'List of benefit cards with editable icon, title, and optional subtext.',
-                condition: (data) => data?.voucherShowBenefits !== false,
-              },
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Title',
-                  admin: { description: 'Main benefit line (e.g. "Valid for all workshops").' },
-                },
-                {
-                  name: 'iconSource',
-                  type: 'select',
-                  label: 'Icon Type',
-                  defaultValue: 'preset',
-                  options: [
-                    { label: 'Built-in icon', value: 'preset' },
-                    { label: 'Custom upload (Media)', value: 'custom' },
-                  ],
-                  admin: {
-                    description:
-                      'Choose built-in icon from the list, or switch to custom to upload/select an icon from Media.',
-                  },
-                },
-                {
-                  name: 'icon',
-                  type: 'select',
-                  label: 'Icon',
-                  options: [
-                    { label: 'Calendar', value: 'calendar' },
-                    { label: 'Shield', value: 'shield' },
-                    { label: 'Users', value: 'users' },
-                    { label: 'Users Round', value: 'usersRound' },
-                    { label: 'Zap', value: 'zap' },
-                    { label: 'Package', value: 'package' },
-                  ],
-                  admin: {
-                    description:
-                      'Card icon shown above this benefit title. Leave empty to use the default sequence.',
-                    condition: (_, siblingData) => siblingData?.iconSource !== 'custom',
-                  },
-                },
-                {
-                  name: 'customIcon',
-                  type: 'upload',
-                  relationTo: 'media',
-                  label: 'Custom Icon',
-                  admin: {
-                    description:
-                      'Optional uploaded icon from Media. Recommended: square icon with transparent background.',
-                    condition: (_, siblingData) => siblingData?.iconSource === 'custom',
-                  },
-                },
-                {
-                  name: 'subtext',
-                  type: 'text',
-                  localized: true,
-                  label: 'Subtext',
-                  admin: {
-                    description:
-                      'Optional detail below the title (e.g. "Kombucha, Lakto, Tempeh & seasonal").',
-                  },
-                },
-              ],
-            },
-            {
-              name: 'voucherShowFAQ',
-              type: 'checkbox',
-              label: 'Show this section',
-              defaultValue: true,
-              localized: true,
-              admin: {
-                description: 'Toggle off to hide the voucher FAQ section on the website.',
-              },
-            },
-            {
-              name: 'faqHeading',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'FAQ Heading',
-              admin: {
-                description: 'Heading above the voucher FAQ accordion.',
-                condition: (data) => data?.voucherShowFAQ !== false,
-              },
-            },
-            {
-              name: 'faqs',
-              type: 'array',
-              label: 'FAQs',
-              required: true,
-              minRows: 1,
-              admin: {
-                description: 'Frequently asked questions about vouchers.',
-                condition: (data) => data?.voucherShowFAQ !== false,
-              },
-              fields: [
-                {
-                  name: 'question',
-                  type: 'text',
-                  required: true,
-                  localized: true,
-                  label: 'Question',
-                },
-                {
-                  name: 'answer',
-                  type: 'textarea',
-                  required: true,
-                  localized: true,
-                  label: 'Answer',
-                },
-              ],
-            },
-          ],
-        },
+        voucherTab,
         {
           name: 'workshops',
           label: 'Workshops Overview Page',

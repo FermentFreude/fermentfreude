@@ -17,17 +17,17 @@ async function seedEmail01() {
       brevoTemplateId: 27,
       templateName: 'Willkommen',
       triggerDescription: 'Wird gesendet, wenn ein neues Konto erstellt wird',
-      subject: 'Willkommen bei FermentFreude!',
+      subject: 'Willkommen bei Fermentfreude!',
       heroIcon: '👋',
       heroHeading: 'WILLKOMMEN',
       heroSubheading: 'Dein Konto wurde erfolgreich erstellt.',
       greeting: 'Hallo {{ params.FIRST_NAME }},',
       bodySection1:
-        'schön, dass du dabei bist! Bei FermentFreude dreht sich alles um die faszinierende Welt der Fermentation — von Kombucha über Kimchi bis Tempeh.',
+        'schön, dass du dabei bist! Bei Fermentfreude dreht sich alles um die faszinierende Welt der Fermentation — von Kombucha über Kimchi bis Tempeh.',
       bodySection2:
         'Entdecke unsere Workshops, stöbere im Shop oder starte direkt mit deinem ersten Online-Kurs.',
       bodySection3:
-        'Das erwartet dich bei FermentFreude: Workshops buchen — Lerne Fermentation von Kombucha bis Tempeh in kleinen Gruppen mit Hands-on-Erfahrung. Shop entdecken — Fermentationssets, Zutaten und Bücher — alles für dein nächstes Projekt. Online-Kurse — Lerne in deinem eigenen Tempo mit unseren Schritt-für-Schritt-Videokursen. Gastronomie-Partner — Professionelle Fermentationslösungen für Restaurants und Hotels.',
+        'Das erwartet dich bei Fermentfreude: Workshops buchen — Lerne Fermentation von Kombucha bis Tempeh in kleinen Gruppen mit Hands-on-Erfahrung. Shop entdecken — Fermentationssets, Zutaten und Bücher — alles für dein nächstes Projekt. Online-Kurse — Lerne in deinem eigenen Tempo mit unseren Schritt-für-Schritt-Videokursen. Gastronomie-Partner — Professionelle Fermentationslösungen für Restaurants und Hotels.',
       bodySection4:
         'So startest du durch: 1. Profil anlegen — Erzähl uns mehr über dich und deine Fermentations-Interessen. 2. Workshop wählen — Finde den perfekten Kurs — von Basics bis Fortgeschrittene. 3. Loslegen — Buche deinen Platz und starte dein Fermentations-Abenteuer.',
       ctaHeading: 'Dein erster Workshop wartet',

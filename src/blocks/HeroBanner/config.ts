@@ -1,10 +1,12 @@
 import type { Block } from 'payload'
 
+import { pointIconField } from '@/fields/pointIcon'
+
 export const HeroBanner: Block = {
   slug: 'heroBanner',
   interfaceName: 'HeroBannerBlock',
   labels: {
-    singular: 'Hero Banner',
+    singular: 'Big banner (photo or video + text)',
     plural: 'Hero Banners',
   },
   fields: [
@@ -16,6 +18,13 @@ export const HeroBanner: Block = {
       admin: {
         description: 'Toggle off to hide this section on the page without deleting it.',
       },
+    },
+    {
+      name: 'eyebrow',
+      type: 'text',
+      localized: true,
+      label: 'Small label',
+      admin: { description: 'Gold label above the heading, e.g. "Events & Gastronomie". Optional.' },
     },
     {
       name: 'heading',
@@ -56,6 +65,47 @@ export const HeroBanner: Block = {
       label: 'Button Link',
       admin: {
         description: 'URL the CTA button links to.',
+      },
+    },
+    {
+      name: 'points',
+      type: 'array',
+      maxRows: 4,
+      labels: { singular: 'Offer point', plural: 'Offer points' },
+      admin: {
+        description:
+          'Optional: what you offer, shown as a short row under the text (e.g. "Tempeh für eure Küche", "Schulungen fürs Team"). 3 points look best.',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            pointIconField('chefHat'),
+            {
+              name: 'title',
+              type: 'text',
+              localized: true,
+              required: true,
+              label: 'Title',
+              admin: { width: '75%' },
+            },
+          ],
+        },
+        { name: 'text', type: 'textarea', localized: true, label: 'Short text (one line)' },
+      ],
+    },
+    {
+      name: 'mediaLayout',
+      type: 'select',
+      defaultValue: 'side',
+      label: 'Picture / video position',
+      options: [
+        { label: 'Beside the text (rounded frame on the right)', value: 'side' },
+        { label: 'Full background (cinematic, text on top)', value: 'background' },
+      ],
+      admin: {
+        description:
+          'Side: black section with the picture or video in a rounded frame. Full background: the picture or video fills the whole section, the text sits on a dark shade.',
       },
     },
     {

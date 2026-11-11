@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════
- *  FermentFreude Tipps — Article Data
+ *  Fermentfreude Tipps — Article Data
  *
  *  6 educational articles about lacto-fermented vegetables,
- *  written in FermentFreude brand voice (German).
+ *  written in Fermentfreude brand voice (German).
  *  Images are managed via Payload Admin — placeholder shown if missing.
  * ═══════════════════════════════════════════════════════════════ */
 

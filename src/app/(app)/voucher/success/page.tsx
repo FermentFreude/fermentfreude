@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { VoucherSuccessClient } from './VoucherSuccessClient'
 
 export const metadata: Metadata = {
-  title: 'Gutschein erfolgreich! | FermentFreude',
+  title: 'Gutschein erfolgreich! | Fermentfreude',
   description: 'Dein Geschenkgutschein wurde erstellt.',
   robots: { index: false },
 }

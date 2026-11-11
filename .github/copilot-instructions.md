@@ -1,4 +1,4 @@
-# Copilot Instructions — FermentFreude
+# Copilot Instructions — Fermentfreude
 
 > **Canonical rules live in `docs/##INSTRUCTIONS.md`.** This file is a summary for GitHub Copilot. Read the full docs for detailed patterns.
 

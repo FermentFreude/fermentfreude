@@ -37,7 +37,7 @@ function CheckIcon({ className }: { className?: string }) {
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Basic Fermentation Course | FermentFreude',
+    title: 'Basic Fermentation Course | Fermentfreude',
     description:
       'Foundational course on lacto-fermented vegetables. Learn to ferment safely at home with step-by-step modules and short video lessons.',
   }

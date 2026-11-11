@@ -21,9 +21,9 @@ import { getPayload } from 'payload'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Workshops | FermentFreude',
+    title: 'Workshops | Fermentfreude',
     openGraph: {
-      title: 'Workshops | FermentFreude',
+      title: 'Workshops | Fermentfreude',
       description: 'Entdecke unsere Fermentations-Workshops',
     },
   }
