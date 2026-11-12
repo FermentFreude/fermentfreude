@@ -70,6 +70,7 @@ export function ShopProductCardImage({
           className={imgClassName}
           sizes={sizes}
           priority={priority}
+          unoptimized
         />
       ) : (
         <div className={cn('absolute inset-0', emptyClassName)} aria-hidden />
