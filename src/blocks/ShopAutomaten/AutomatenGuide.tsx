@@ -180,6 +180,7 @@ export function AutomatenEditorial({
                   fill
                   sizes="(max-width: 1024px) 100vw, 40vw"
                   className="object-cover transition-transform duration-[1.2s] ease-out automaten-featured-img"
+                  unoptimized
                 />
               ) : (
                 <div className="absolute inset-0 bg-[#ECE5DE]" />
@@ -215,6 +216,7 @@ export function AutomatenEditorial({
                             fill
                             sizes="(max-width: 768px) 100vw, 208px"
                             className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                            unoptimized
                           />
                         ) : (
                           <div className="absolute inset-0 bg-[#ECE5DE]" />
@@ -281,6 +283,7 @@ export function AutomatenEditorial({
                           fill
                           sizes="(max-width: 768px) 100vw, 208px"
                           className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                          unoptimized
                         />
                       ) : (
                         <div className="absolute inset-0 bg-[#ECE5DE]" />
