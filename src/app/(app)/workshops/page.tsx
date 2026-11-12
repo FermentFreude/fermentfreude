@@ -20,12 +20,16 @@ import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 
 export async function generateMetadata(): Promise<Metadata> {
+  const isEn = (await getLocale()) === 'en'
+  const title = 'Workshops | Fermentfreude'
+  const description = isEn
+    ? 'Fermentation workshops in Graz: lacto vegetables, tempeh and kombucha. Pick a date and book your spot.'
+    : 'Fermentations-Workshops in Graz: Lakto-Gemüse, Tempeh und Kombucha. Termin wählen und Platz buchen.'
   return {
-    title: 'Workshops | Fermentfreude',
-    openGraph: {
-      title: 'Workshops | Fermentfreude',
-      description: 'Entdecke unsere Fermentations-Workshops',
-    },
+    title,
+    description,
+    alternates: { canonical: '/workshops' },
+    openGraph: { title, description, url: '/workshops' },
   }
 }
 
@@ -113,7 +117,9 @@ export default async function WorkshopsPage() {
         soldOutLabel={ws?.workshopsCalendarSoldOutLabel}
         bookLabel={ws?.workshopsCalendarBookLabel}
         emptyMessage={ws?.workshopsCalendarEmptyMessage}
-        comingSoonLabel={localeKey === 'en' ? 'New dates coming soon' : 'Bald neue Termine verfügbar'}
+        comingSoonLabel={
+          localeKey === 'en' ? 'New dates coming soon' : 'Bald neue Termine verfügbar'
+        }
       />
 
       {/* 3. Voucher CTA — page override or global */}

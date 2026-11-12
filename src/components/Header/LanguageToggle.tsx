@@ -21,7 +21,7 @@ export function LanguageToggle() {
             ? 'bg-ff-charcoal dark:bg-ff-cream text-ff-ivory dark:text-ff-charcoal'
             : 'text-ff-gray-15 dark:text-neutral-400 hover:text-ff-charcoal dark:hover:text-white',
         )}
-        aria-label="Deutsch"
+        aria-label="DE – Deutsch"
         aria-pressed={locale === 'de'}
       >
         DE
@@ -35,7 +35,7 @@ export function LanguageToggle() {
             ? 'bg-ff-charcoal dark:bg-ff-cream text-ff-ivory dark:text-ff-charcoal'
             : 'text-ff-gray-15 dark:text-neutral-400 hover:text-ff-charcoal dark:hover:text-white',
         )}
-        aria-label="English"
+        aria-label="EN – English"
         aria-pressed={locale === 'en'}
       >
         EN

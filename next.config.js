@@ -45,6 +45,11 @@ const nextConfig = {
   images: {
     // <Media> renders at quality 90; Next 16 refuses qualities that aren't listed
     qualities: [75, 90],
+    // Modern formats + long cache: resized copies are served from the CDN, not regenerated
+    formats: ['image/avif', 'image/webp'],
+    // Cap at 1920 px: nobody needs a 3840 px copy of a website photo
+    deviceSizes: [360, 640, 828, 1080, 1440, 1920],
+    minimumCacheTTL: 60 * 60 * 24 * 31,
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
         const url = new URL(item)

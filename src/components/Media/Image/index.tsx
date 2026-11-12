@@ -8,10 +8,6 @@ import React from 'react'
 
 import type { Props as MediaProps } from '../types'
 
-import { cssVariables } from '@/cssVariables'
-
-const { breakpoints } = cssVariables
-
 function isValidImageSrc(src: unknown): src is string {
   if (typeof src !== 'string' || !src.trim()) return false
   if (/undefined|null|NaN/.test(src)) return false
@@ -68,7 +64,11 @@ export const Image: React.FC<MediaProps> = (props) => {
       src =
         url.startsWith('http') || url.startsWith('/')
           ? url
-          : base ? `${base}/${url.replace(/^\//, '')}` : url.startsWith('/') ? url : `/${url}`
+          : base
+            ? `${base}/${url.replace(/^\//, '')}`
+            : url.startsWith('/')
+              ? url
+              : `/${url}`
     }
   }
 
@@ -83,11 +83,8 @@ export const Image: React.FC<MediaProps> = (props) => {
   }
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
-  const sizes = sizeFromProps
-    ? sizeFromProps
-    : Object.entries(breakpoints)
-        .map(([, value]) => `(max-width: ${value}px) ${value}px`)
-        .join(', ')
+  // Without an explicit size, assume full width (never the huge 3840 px variant)
+  const sizes = sizeFromProps || '100vw'
 
   return (
     <NextImage
@@ -108,10 +105,9 @@ export const Image: React.FC<MediaProps> = (props) => {
         }
       }}
       priority={priority}
-      quality={90}
+      quality={75}
       sizes={sizes}
       src={src}
-      unoptimized
       width={!fill ? width || widthFromProps : undefined}
     />
   )

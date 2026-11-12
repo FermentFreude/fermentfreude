@@ -187,7 +187,7 @@ export const PressBannerBlock: React.FC<Props> = ({
                           </div>
                         )}
                         {slide.outlet ? (
-                          <p className="label-uppercase text-ff-near-black/50">{slide.outlet}</p>
+                          <p className="label-uppercase text-ff-near-black/70">{slide.outlet}</p>
                         ) : null}
                       </div>
 
