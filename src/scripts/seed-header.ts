@@ -40,11 +40,6 @@ const deNavItems = [
         isSmall: true,
       },
       {
-        label: 'Vom Feld ins Glas',
-        href: '/workshops/vom-feld-ins-glas',
-        isSmall: true,
-      },
-      {
         label: 'Online Kurse',
         href: '/courses',
         description: 'Lerne in deinem eigenen Tempo',
@@ -149,11 +144,6 @@ async function seedHeader() {
     locale: 'de',
     context: ctx,
     data: {
-      announcementBar: {
-        enabled: true,
-        text: 'Unsere Online-Kurse sind da. Jetzt entdecken',
-        link: '/courses',
-      },
       navItems: deNavItems,
     },
   })
@@ -175,11 +165,6 @@ async function seedHeader() {
     locale: 'en',
     context: ctx,
     data: {
-      announcementBar: {
-        enabled: true,
-        text: 'Explore our online courses',
-        link: '/courses',
-      },
       navItems: buildEnglishNav(savedNavItems),
     },
   })

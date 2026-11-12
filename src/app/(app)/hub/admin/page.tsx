@@ -1527,13 +1527,6 @@ export default function AdminHubPage() {
         <FieldTable
           fields={[
             {
-              name: 'Announcement Bar',
-              description: t(
-                'Farbige Leiste ganz oben mit einer Nachricht und optionalem Link. Kann ein-/ausgeschaltet werden.',
-                'Colored bar at the very top with a message and optional link. Can be toggled on/off.',
-              ),
-            },
-            {
               name: t('Navigations-Elemente', 'Navigation Items'),
               description: t(
                 'Links in der Hauptnavigation. Jeder Link hat ein Label (DE + EN), einen Typ (Seite oder eigene URL) und optionale Dropdown-Unter-Elemente.',
