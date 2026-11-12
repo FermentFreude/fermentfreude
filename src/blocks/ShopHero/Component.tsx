@@ -98,12 +98,26 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
   const payload = await getPayload({ config: configPromise })
   const product = await loadKafer(payload, locale, props.heroProduct)
 
-  const ctaLabel = cmsTextLocalized(props.ctaPrimaryLabel, locale, DEFAULTS.en.ctaLabel, DEFAULTS.de.ctaLabel)
-  const pickup = cmsTextLocalized(props.bottomSubtitle, locale, DEFAULTS.en.pickup, DEFAULTS.de.pickup)
+  const ctaLabel = cmsTextLocalized(
+    props.ctaPrimaryLabel,
+    locale,
+    DEFAULTS.en.ctaLabel,
+    DEFAULTS.de.ctaLabel,
+  )
+  const pickup = cmsTextLocalized(
+    props.bottomSubtitle,
+    locale,
+    DEFAULTS.en.pickup,
+    DEFAULTS.de.pickup,
+  )
   const badge = props.signatureBadge
-  const showSignatureBadge =
-    (badge?.show ?? props.showSignatureBadge) !== false
-  const soldOutLabel = cmsTextLocalized(props.soldOutLabel, locale, DEFAULTS.en.soldOut, DEFAULTS.de.soldOut)
+  const showSignatureBadge = (badge?.show ?? props.showSignatureBadge) !== false
+  const soldOutLabel = cmsTextLocalized(
+    props.soldOutLabel,
+    locale,
+    DEFAULTS.en.soldOut,
+    DEFAULTS.de.soldOut,
+  )
   const signatureBrand = cmsTextLocalized(
     badge?.brand ?? props.signatureBrand,
     locale,
@@ -122,14 +136,24 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
     DEFAULTS.en.signatureSubtitle,
     DEFAULTS.de.signatureSubtitle,
   )
-  const priceLabel = cmsTextLocalized(props.priceLabel, locale, DEFAULTS.en.priceLabel, DEFAULTS.de.priceLabel)
+  const priceLabel = cmsTextLocalized(
+    props.priceLabel,
+    locale,
+    DEFAULTS.en.priceLabel,
+    DEFAULTS.de.priceLabel,
+  )
   const addToCartLabel = cmsTextLocalized(
     props.addToCartLabel,
     locale,
     DEFAULTS.en.addToCart,
     DEFAULTS.de.addToCart,
   )
-  const detailsLabel = cmsTextLocalized(props.detailsLabel, locale, DEFAULTS.en.details, DEFAULTS.de.details)
+  const detailsLabel = cmsTextLocalized(
+    props.detailsLabel,
+    locale,
+    DEFAULTS.en.details,
+    DEFAULTS.de.details,
+  )
   const viewDetailsLabel = cmsTextLocalized(
     props.viewDetailsLabel,
     locale,
@@ -153,11 +177,7 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
   return (
     <section id="shop-hero" className="shop-hero relative w-full overflow-hidden bg-ff-near-black">
       <div className="relative min-h-[78vh] md:min-h-[85vh]">
-        <Link
-          href={href}
-          className="absolute inset-0 z-0"
-          aria-label={detailsLabel}
-        >
+        <Link href={href} className="absolute inset-0 z-0" aria-label={detailsLabel}>
           <Image
             src={heroSrc}
             alt={heroAlt}
@@ -165,7 +185,6 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
             priority
             sizes="100vw"
             className="object-cover object-[50%_75%] md:object-[48%_70%]"
-            unoptimized={heroSrc.startsWith('http')}
           />
         </Link>
 
@@ -193,39 +212,39 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
             </span>
           )}
           {showSignatureBadge && (
-          <div
-            className="flex items-center gap-2 rounded-xl border border-ff-gold/45 bg-ff-near-black/75 py-1.5 pl-2.5 pr-1.5 shadow-[0_10px_28px_rgba(0,0,0,0.35)] backdrop-blur-md sm:gap-3 sm:rounded-2xl sm:py-3 sm:pl-4 sm:pr-3"
-            aria-label={d.signatureAria}
-          >
-            <div className="flex flex-col items-end leading-none text-right">
-              <span className="font-display text-[7px] font-bold uppercase tracking-[0.18em] text-ff-gold/90 sm:text-[9px] sm:tracking-[0.24em]">
-                {signatureBrand}
-              </span>
-              <span className="mt-1 font-display text-[11px] font-extrabold uppercase tracking-[0.08em] text-white sm:mt-1.5 sm:text-sm sm:tracking-[0.12em]">
-                {signatureLabel}
-              </span>
-              {/* Subtitle hidden below sm: — the badge's fixed top-right position collides
+            <div
+              className="flex items-center gap-2 rounded-xl border border-ff-gold/45 bg-ff-near-black/75 py-1.5 pl-2.5 pr-1.5 shadow-[0_10px_28px_rgba(0,0,0,0.35)] backdrop-blur-md sm:gap-3 sm:rounded-2xl sm:py-3 sm:pl-4 sm:pr-3"
+              aria-label={d.signatureAria}
+            >
+              <div className="flex flex-col items-end leading-none text-right">
+                <span className="font-display text-[7px] font-bold uppercase tracking-[0.18em] text-ff-gold/90 sm:text-[9px] sm:tracking-[0.24em]">
+                  {signatureBrand}
+                </span>
+                <span className="mt-1 font-display text-[11px] font-extrabold uppercase tracking-[0.08em] text-white sm:mt-1.5 sm:text-sm sm:tracking-[0.12em]">
+                  {signatureLabel}
+                </span>
+                {/* Subtitle hidden below sm: — the badge's fixed top-right position collides
                   with the hero title's wrapped text on narrow screens otherwise; keeping
                   brand + label is enough to read as "Signature" on mobile. */}
-              <span className="mt-1.5 hidden text-[10px] font-medium text-white/65 sm:block">
-                {signatureSubtitle}
-              </span>
-            </div>
-            <div
-              className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-ff-gold/15 sm:size-11"
-              aria-hidden
-            >
-              <span className="absolute inset-[2px] rounded-full border border-ff-gold/75" />
-              <span className="relative flex flex-col items-center leading-none">
-                <span className="font-display text-[6px] font-bold uppercase tracking-wider text-ff-gold sm:text-[7px]">
-                  No
+                <span className="mt-1.5 hidden text-[10px] font-medium text-white/65 sm:block">
+                  {signatureSubtitle}
                 </span>
-                <span className="font-display text-[11px] font-extrabold tabular-nums text-ff-gold sm:text-sm">
-                  01
+              </div>
+              <div
+                className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-ff-gold/15 sm:size-11"
+                aria-hidden
+              >
+                <span className="absolute inset-[2px] rounded-full border border-ff-gold/75" />
+                <span className="relative flex flex-col items-center leading-none">
+                  <span className="font-display text-[6px] font-bold uppercase tracking-wider text-ff-gold sm:text-[7px]">
+                    No
+                  </span>
+                  <span className="font-display text-[11px] font-extrabold tabular-nums text-ff-gold sm:text-sm">
+                    01
+                  </span>
                 </span>
-              </span>
+              </div>
             </div>
-          </div>
           )}
         </div>
 

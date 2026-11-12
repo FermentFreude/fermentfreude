@@ -3,10 +3,7 @@
 import type { Product } from '@/payload-types'
 
 import { cn } from '@/utilities/cn'
-import {
-  resolveProductCardMedia,
-  SHOP_CARD_IMAGE_FALLBACK,
-} from '@/utilities/productDetailDisplay'
+import { resolveProductCardMedia, SHOP_CARD_IMAGE_FALLBACK } from '@/utilities/productDetailDisplay'
 import NextImage from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -21,7 +18,12 @@ export function ShopProductCardImage({
   priority = false,
 }: {
   product: Product
-  resource?: { url?: string | null; alt?: string | null; width?: number | null; height?: number | null } | null
+  resource?: {
+    url?: string | null
+    alt?: string | null
+    width?: number | null
+    height?: number | null
+  } | null
   /** Overrides slug default — use for PDP gallery index fallbacks */
   fallbackSrc?: string
   className?: string
@@ -68,7 +70,6 @@ export function ShopProductCardImage({
           className={imgClassName}
           sizes={sizes}
           priority={priority}
-          unoptimized
         />
       ) : (
         <div className={cn('absolute inset-0', emptyClassName)} aria-hidden />

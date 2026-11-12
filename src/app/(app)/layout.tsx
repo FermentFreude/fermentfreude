@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
 import { Footer } from '@/components/Footer'
@@ -10,12 +11,16 @@ import { ScrollToTopOnNavigate } from '@/components/ScrollToTopOnNavigate'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { getLocale } from '@/utilities/getLocale'
+import { getServerSideURL } from '@/utilities/getURL'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import Script from 'next/script'
 import './globals.css'
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
+
+/** Absolute base so relative canonical / OG URLs resolve to full addresses */
+export const metadata: Metadata = { metadataBase: new URL(getServerSideURL()) }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale()
@@ -39,7 +44,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body suppressHydrationWarning={true}>
         {/* Google Tag Manager — main script (loads after page is interactive) */}
         {GTM_ID && (
-          <Script id="gtm-script" strategy="afterInteractive">
+          <Script id="gtm-script" strategy="lazyOnload">
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=

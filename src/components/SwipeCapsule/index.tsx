@@ -236,7 +236,7 @@ export function SwipeCapsule({
               key={index}
               type="button"
               onClick={() => onSelect(index)}
-              className="flex h-6 items-center rounded-full px-1 outline-none focus-visible:ring-2 focus-visible:ring-ff-gold"
+              className="flex h-6 min-w-6 items-center justify-center rounded-full px-1 outline-none focus-visible:ring-2 focus-visible:ring-ff-gold"
               aria-label={`${label}${isActive ? ' (current)' : ''}`}
               aria-current={isActive ? 'true' : undefined}
             >

@@ -1064,6 +1064,8 @@
   --ff-olive-dark: #3a3e3a;
   --ff-gold-accent: #e5b765;
   --ff-gold-accent-dark: #d4a654;
+  /* Gold for small text on light backgrounds (contrast 4.5+ on white) */
+  --ff-gold-ink: #7d5a14;
   --ff-dark: #1e1e1e;
   --ff-dark-deep: #1b1b1b;
   --ff-navy: #091638;
@@ -1190,6 +1192,7 @@
   --color-ff-olive-dark: var(--ff-olive-dark);
   --color-ff-gold-accent: var(--ff-gold-accent);
   --color-ff-gold-accent-dark: var(--ff-gold-accent-dark);
+  --color-ff-gold-ink: var(--ff-gold-ink);
   --color-ff-dark: var(--ff-dark);
   --color-ff-dark-deep: var(--ff-dark-deep);
   --color-ff-navy: var(--ff-navy);

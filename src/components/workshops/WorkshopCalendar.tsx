@@ -118,9 +118,9 @@ function WorkshopCard({
         </div>
 
         {/* Next Date OR Coming Soon Message */}
-        {(isFullySoldOut || hasNoDates) ? (
+        {isFullySoldOut || hasNoDates ? (
           <div className="mb-4">
-            <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide">
+            <p className="text-xs text-[#6b6b6b] font-semibold uppercase tracking-wide">
               {nextDateLabel || 'Nächster Termin'}
             </p>
             <p className="font-display text-sm sm:text-base font-medium text-[#6b6b6b] italic">
@@ -130,7 +130,7 @@ function WorkshopCard({
         ) : (
           workshop.nextDate && (
             <div className="mb-4">
-              <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide">
+              <p className="text-xs text-[#6b6b6b] font-semibold uppercase tracking-wide">
                 {nextDateLabel || 'Nächster Termin'}
               </p>
               <p className="font-display text-base sm:text-lg font-bold text-[#1a1a1a]">
@@ -176,7 +176,7 @@ function WorkshopCard({
             aria-disabled={isFullySoldOut || hasNoDates}
             className={`inline-flex items-center justify-center px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide rounded-md transition-all duration-300 ${
               isFullySoldOut || hasNoDates
-                ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
+                ? 'bg-[#d0ccc6] text-[#6b6b6b] cursor-not-allowed'
                 : 'bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954]'
             }`}
           >
@@ -470,7 +470,7 @@ export function WorkshopCalendar({
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-start sm:items-center">
                     {/* Workshop Type */}
                     <div>
-                      <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                      <p className="text-xs text-[#6b6b6b] font-semibold uppercase tracking-wide mb-1">
                         {typeColumnLabel || 'Workshop-Art'}
                       </p>
                       <p className="font-display font-bold text-base text-[#1a1a1a]">
@@ -480,7 +480,7 @@ export function WorkshopCalendar({
 
                     {/* Date & Time */}
                     <div>
-                      <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                      <p className="text-xs text-[#6b6b6b] font-semibold uppercase tracking-wide mb-1">
                         {dateColumnLabel || 'Datum & Zeit'}
                       </p>
                       <div className="space-y-1">
@@ -509,7 +509,7 @@ export function WorkshopCalendar({
                     {/* Availability — hidden on sold-out rows; the disabled button already conveys the state */}
                     {date.availableSpots > 0 ? (
                       <div>
-                        <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                        <p className="text-xs text-[#6b6b6b] font-semibold uppercase tracking-wide mb-1">
                           {spotsColumnLabel || 'Plätze frei'}
                         </p>
                         <div className="flex items-center gap-2">
@@ -536,7 +536,7 @@ export function WorkshopCalendar({
                         }}
                         className={`inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
                           date.availableSpots === 0
-                            ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
+                            ? 'bg-[#d0ccc6] text-[#6b6b6b] cursor-not-allowed'
                             : 'bg-[#555954] text-white hover:bg-[#f5f1e8] hover:text-[#555954]'
                         }`}
                       >
@@ -550,7 +550,7 @@ export function WorkshopCalendar({
 
             {filteredDates.length === 0 && (
               <div className="py-8 sm:py-12 text-center">
-                <p className="text-[#9a9a9a] text-sm sm:text-body">
+                <p className="text-[#6b6b6b] text-sm sm:text-body">
                   {emptyMessage ||
                     'Für diese Workshop-Art gibt es derzeit keine verfügbaren Termine.'}
                 </p>

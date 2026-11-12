@@ -1,3 +1,4 @@
+import { LazyVideo } from '@/components/LazyVideo'
 import type { Metadata } from 'next'
 
 import { DangerAccordion } from '@/app/(app)/fermentation/DangerAccordion'
@@ -482,8 +483,8 @@ export default async function FermentationPage({ searchParams }: FermentationPag
     retouchDe.heroBenefitsTitle,
     retouchEn.heroBenefitsTitle,
   )
-  const cmsHeroBlocks = (f?.fermentationHeroBlocks ?? []).filter(
-    (block) => block?.title?.trim(),
+  const cmsHeroBlocks = (f?.fermentationHeroBlocks ?? []).filter((block) =>
+    block?.title?.trim(),
   ) as HeroBlock[]
   let heroBlocks = resolveFermentationRows(
     cmsHeroBlocks,
@@ -689,12 +690,6 @@ export default async function FermentationPage({ searchParams }: FermentationPag
     typeof (ctaVideoMedia as { url?: string; mimeType?: string }).url === 'string'
       ? (ctaVideoMedia as { url: string }).url
       : (ctaVideoUrlFromText ?? DEFAULT_CTA_VIDEO)
-  const ctaVideoMimeType =
-    typeof ctaVideoMedia === 'object' &&
-    ctaVideoMedia !== null &&
-    typeof (ctaVideoMedia as { mimeType?: string }).mimeType === 'string'
-      ? (ctaVideoMedia as { mimeType: string }).mimeType
-      : 'video/mp4'
   const ctaBackgroundImage = f?.fermentationCtaBackgroundImage
 
   // Workshop section — fermentation or gastronomy fallback (skip gastronomy when forceDefaults)
@@ -815,7 +810,12 @@ export default async function FermentationPage({ searchParams }: FermentationPag
             <div className="relative z-20 flex justify-center md:justify-end">
               <div className="relative -top-6 aspect-4/3 w-full min-h-60 max-w-3xl overflow-hidden md:-top-20 md:max-h-105">
                 {isResolvedMedia(heroImage) ? (
-                  <Media resource={heroImage} fill imgClassName="object-contain object-bottom" priority />
+                  <Media
+                    resource={heroImage}
+                    fill
+                    imgClassName="object-contain object-bottom"
+                    priority
+                  />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -1009,20 +1009,15 @@ export default async function FermentationPage({ searchParams }: FermentationPag
               {/* Optional video or image background */}
               {ctaVideoUrl ? (
                 <>
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
+                  <LazyVideo
+                    src={ctaVideoUrl}
                     className="absolute inset-0 size-full object-cover"
                     poster={
                       isResolvedMedia(ctaBackgroundImage)
                         ? ((ctaBackgroundImage as MediaType).url ?? undefined)
                         : undefined
                     }
-                  >
-                    <source src={ctaVideoUrl} type={ctaVideoMimeType} />
-                  </video>
+                  />
                   <div className="absolute inset-0 bg-[#333333]/80" aria-hidden />
                 </>
               ) : isResolvedMedia(ctaBackgroundImage) ? (
@@ -1141,7 +1136,6 @@ export default async function FermentationPage({ searchParams }: FermentationPag
           locale={locale as 'de' | 'en'}
         />
       </FadeIn>
-
     </article>
   )
 }
