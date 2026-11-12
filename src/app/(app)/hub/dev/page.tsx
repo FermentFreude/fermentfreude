@@ -478,7 +478,7 @@ npx tsc --noEmit            # Must pass with zero errors`}</Code>
             </thead>
             <tbody style={{ color: '#626160' }}>
               {[
-                ['Header', t('Obere Navigation', 'Top navigation'), 'announcementBar (enabled, text, link), navItems (label, type, ref/url, dropdownItems)'],
+                ['Header', t('Obere Navigation', 'Top navigation'), 'navItems (label, type, ref/url, dropdownItems)'],
                 ['Footer', t('Footer-Inhalte', 'Footer content'), 'navItems (max 8), workshopLinks (max 6), location, phone, newsletter, socialMedia'],
                 ['Testimonials', t('Kundenbewertungen', 'Customer reviews'), 'eyebrow, heading, testimonials[] (quote, authorName, authorRole, rating 1–5)'],
                 ['ProductSlider', t('Produkt-Karussell', 'Product carousel config'), t('Ausgewählte Produkte, Überschrift', 'Featured products selection, heading')],

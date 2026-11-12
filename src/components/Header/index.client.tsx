@@ -8,7 +8,6 @@ import Link from 'next/link'
 import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { Header } from '@/payload-types'
-import { AnnouncementBar } from './AnnouncementBar'
 import { MobileMenu } from './MobileMenu'
 
 import { useHeaderTheme } from '@/providers/HeaderTheme'
@@ -188,15 +187,6 @@ export function HeaderClient({ header, locale, navWorkshops = [] }: Props) {
         data-transparent={isTransparent ? '' : undefined}
         data-header-theme={mounted && isTransparent && headerTheme === 'dark' ? 'dark' : undefined}
       >
-        {/* Announcement bar — always visible, sits above nav so the nav can
-            tuck under it on scroll-down without any visual overlap. */}
-        <div className="relative z-10">
-          <AnnouncementBar
-            enabled={header.announcementBar?.enabled}
-            text={header.announcementBar?.text}
-            link={header.announcementBar?.link}
-          />
-        </div>
         {/* Navbar — slides up out of view on scroll-down, drops back in on scroll-up. */}
         <nav
           className={cn(

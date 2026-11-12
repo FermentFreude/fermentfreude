@@ -1,3 +1,4 @@
+import { isHiddenWorkshopHref } from '@/utilities/workshopPageUtils'
 import type { Footer } from '@/payload-types'
 import type { CSSProperties } from 'react'
 
@@ -126,6 +127,7 @@ export async function Footer() {
       : isDe
         ? WORKSHOP_LINKS_DE
         : WORKSHOP_LINKS_EN
+  const visibleWorkshopLinks = workshopLinks.filter((item) => !isHiddenWorkshopHref(item.href))
 
   const legalLinks =
     footer.legalLinks && footer.legalLinks.length > 0
@@ -186,7 +188,7 @@ export async function Footer() {
                 {workshopsHeading}
               </h3>
               <nav className="flex flex-col gap-1.5">
-                {workshopLinks.map((item) => (
+                {visibleWorkshopLinks.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
