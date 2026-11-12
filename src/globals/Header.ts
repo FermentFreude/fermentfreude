@@ -17,46 +17,6 @@ export const Header: GlobalConfig = {
   },
   fields: [
     {
-      name: 'announcementBar',
-      type: 'group',
-      label: 'Announcement Bar',
-      admin: {
-        description:
-          'The banner shown at the very top of the site. Use it to highlight promotions, events, or important messages.',
-      },
-      fields: [
-        {
-          name: 'enabled',
-          type: 'checkbox',
-          defaultValue: true,
-          label: 'Show Announcement Bar',
-          admin: {
-            description: 'Toggle the announcement bar on or off site-wide.',
-          },
-        },
-        {
-          name: 'text',
-          type: 'text',
-          required: true,
-          localized: true,
-          label: 'Announcement Text',
-          admin: {
-            description:
-              'The message displayed in the announcement bar (e.g. "New workshops available!").',
-          },
-        },
-        {
-          name: 'link',
-          type: 'text',
-          label: 'Link URL',
-          admin: {
-            description:
-              'URL the announcement links to (e.g. "/workshops"). Leave empty for no link.',
-          },
-        },
-      ],
-    },
-    {
       name: 'navItems',
       type: 'array',
       label: 'Navigation Items',

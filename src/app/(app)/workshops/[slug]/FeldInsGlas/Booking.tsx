@@ -100,12 +100,6 @@ export function FeldInsGlasBooking({ copy, workshop, dates }: Props) {
                 guestCount,
                 locale,
                 pageSlug: 'vom-feld-ins-glas',
-                locationName: isDe
-                  ? 'Marktgarten „Unser Bauerngarten“'
-                  : 'Marktgarten “Unser Bauerngarten”',
-                locationAddress: isDe
-                  ? 'Hochfeldweg, Graz (nicht Grabenstraße)'
-                  : 'Hochfeldweg, Graz (not Grabenstraße)',
               })
               setBookingDate(null)
               router.refresh()

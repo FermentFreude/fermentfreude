@@ -53,10 +53,24 @@ export function resolveWorkshopPageSlugForDbSlug(
     if (!page.slug) continue
     const score = scoreWorkshopPageLink(page, dbSlug)
     if (score <= 0) continue
-    if (!best || score > best.score || (score === best.score && page.slug.length < best.slug.length)) {
+    if (
+      !best ||
+      score > best.score ||
+      (score === best.score && page.slug.length < best.slug.length)
+    ) {
       best = { slug: page.slug, score }
     }
   }
 
   return best?.slug
 }
+
+/**
+ * Workshop pages hidden from the site for now (season workshop, no dates).
+ * Removes them from footer, workshop cards and the page URL (404).
+ * To bring one back: delete its slug here and set the workshop active in /admin.
+ */
+export const HIDDEN_WORKSHOP_SLUGS: string[] = ['vom-feld-ins-glas']
+
+export const isHiddenWorkshopHref = (href?: string | null): boolean =>
+  !!href && HIDDEN_WORKSHOP_SLUGS.some((slug) => href.endsWith(`/workshops/${slug}`))

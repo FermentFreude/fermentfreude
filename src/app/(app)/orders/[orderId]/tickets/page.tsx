@@ -116,23 +116,36 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
     }
   }
 
-  // ── 3. Fetch workshop location ───────────────────────────────────────────
-  let locationName = 'The Ginery'
-  let locationAddress = 'Grabenstraße 15, 8010 Graz'
-
-  try {
-    const locations = await payload.find({
-      collection: 'workshop-locations',
-      where: { isActive: { equals: true } },
-      limit: 1,
-      locale,
-      depth: 0,
-    })
-    const loc = locations.docs[0] as { name?: string; address?: string } | undefined
-    if (loc?.name) locationName = loc.name
-    if (loc?.address) locationAddress = loc.address
-  } catch {
-    // ignore — fallback used
+  // ── 3. Location of each booked date ──────────────────────────────────────
+  // Every ticket shows the location of ITS appointment (chosen by the founders
+  // per date), never a global default: Vom Feld ins Glas can be at the
+  // Marktgarten while the other workshops are at the Ginery.
+  const FALLBACK_LOCATION = { name: 'Ginery', address: 'Grabenstraße 15, 8010 Graz, Österreich' }
+  const locationByAppointment = new Map<string, { name: string; address: string }>()
+  for (const booking of bookings) {
+    const appointmentId = (booking as { appointmentId?: string | null }).appointmentId
+    if (!appointmentId || locationByAppointment.has(appointmentId)) continue
+    try {
+      const appointment = await payload.findByID({
+        collection: 'workshop-appointments',
+        id: appointmentId,
+        locale,
+        depth: 1,
+        overrideAccess: true,
+      })
+      const loc = (appointment as { location?: unknown }).location
+      if (typeof loc === 'object' && loc !== null) {
+        const l = loc as { name?: string; address?: string }
+        if (l.name) {
+          locationByAppointment.set(appointmentId, {
+            name: l.name,
+            address: l.address ?? '',
+          })
+        }
+      }
+    } catch {
+      // ignore — the fallback below is used for this ticket
+    }
   }
 
   // ── 4. Build flat per-seat list ──────────────────────────────────────────
@@ -141,16 +154,19 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
     workshopTitle: string
     date: string
     time: string
-    seatIndex: number   // 0-based
+    seatIndex: number // 0-based
     totalSeats: number
-    name: string        // '' if not set
-    note: string        // giftNote / dietary requirements
+    name: string // '' if not set
+    note: string // giftNote / dietary requirements
     bookingRef: string
+    locationName: string
+    locationAddress: string
   }
 
   const seatTickets: SeatTicket[] = []
 
   for (const booking of bookings) {
+    const appointmentId = (booking as { appointmentId?: string | null }).appointmentId
     const totalSeats = typeof booking.guestCount === 'number' ? booking.guestCount : 1
     const seats = (booking.seats ?? []) as { recipientName?: string; giftNote?: string }[]
 
@@ -165,6 +181,9 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
         name: seats[i]?.recipientName ?? '',
         note: seats[i]?.giftNote ?? '',
         bookingRef: `#${booking.id.slice(0, 8).toUpperCase()}`,
+        locationName: (locationByAppointment.get(appointmentId ?? '') ?? FALLBACK_LOCATION).name,
+        locationAddress: (locationByAppointment.get(appointmentId ?? '') ?? FALLBACK_LOCATION)
+          .address,
       })
     }
   }
@@ -184,9 +203,7 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
         </Link>
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-subheading font-display text-ff-near-black">
-              {t.viewTickets}
-            </h1>
+            <h1 className="text-subheading font-display text-ff-near-black">{t.viewTickets}</h1>
             <p className="text-body-sm text-ff-text-muted mt-1">
               {locale === 'de'
                 ? `Bestellung #${orderId.slice(0, 8).toUpperCase()}`
@@ -267,8 +284,10 @@ export default async function WorkshopTicketsPage({ params, searchParams }: Tick
                       <p className="text-xs text-ff-text-muted uppercase tracking-wide font-display">
                         {locale === 'de' ? 'Ort' : 'Location'}
                       </p>
-                      <p className="text-sm font-semibold text-ff-near-black">{locationName}</p>
-                      <p className="text-xs text-ff-text-muted">{locationAddress}</p>
+                      <p className="text-sm font-semibold text-ff-near-black">
+                        {seat.locationName}
+                      </p>
+                      <p className="text-xs text-ff-text-muted">{seat.locationAddress}</p>
                     </div>
                   </div>
                 </div>

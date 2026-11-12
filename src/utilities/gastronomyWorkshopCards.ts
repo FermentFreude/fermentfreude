@@ -6,10 +6,8 @@
 import type { Media } from '@/payload-types'
 import type { NextWorkshopDateInfo } from '@/utilities/getNextWorkshopDatesByHref'
 import { looksGerman } from '@/utilities/gastronomyLocaleContent'
-import {
-  WORKSHOP_CARD_URLS,
-  type WorkshopPageCardSync,
-} from '@/utilities/workshopHeroImages'
+import { isHiddenWorkshopHref } from '@/utilities/workshopPageUtils'
+import { WORKSHOP_CARD_URLS, type WorkshopPageCardSync } from '@/utilities/workshopHeroImages'
 
 export type GastronomyWorkshopCardDefault = {
   title: string
@@ -23,8 +21,7 @@ export type GastronomyWorkshopCardDefault = {
 const DEFAULTS_DE: GastronomyWorkshopCardDefault[] = [
   {
     title: 'Lakto-Gemüse',
-    description:
-      'Gemüse fermentieren, Aromen erleben – jeden Monat anders. Live online Session.',
+    description: 'Gemüse fermentieren, Aromen erleben – jeden Monat anders. Live online Session.',
     price: '€99',
     priceSuffix: 'pro Person',
     buttonLabel: 'Mehr Infos & Buchen',
@@ -78,8 +75,7 @@ const DEFAULTS_EN: GastronomyWorkshopCardDefault[] = [
   },
   {
     title: 'Tempeh',
-    description:
-      'Discover the versatility of tempeh and how to incorporate it into your cooking.',
+    description: 'Discover the versatility of tempeh and how to incorporate it into your cooking.',
     price: '€99',
     priceSuffix: 'per Person',
     buttonLabel: 'More Info & Book',
@@ -156,7 +152,7 @@ export function buildSyncedWorkshopCards(
     cmsCards.filter((c) => c.buttonUrl).map((c) => [c.buttonUrl!, c] as const),
   )
 
-  return WORKSHOP_CARD_URLS.map((buttonUrl) => {
+  return WORKSHOP_CARD_URLS.filter((url) => !isHiddenWorkshopHref(url)).map((buttonUrl) => {
     const fallback = defaults.find((d) => d.buttonUrl === buttonUrl)!
     const cms = cmsByUrl.get(buttonUrl)
     const synced = workshopPageData[buttonUrl]

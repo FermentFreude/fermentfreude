@@ -5,6 +5,7 @@ import { Media } from '@/components/Media'
 import { getLocale } from '@/utilities/getLocale'
 import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
+import { HIDDEN_WORKSHOP_SLUGS } from '@/utilities/workshopPageUtils'
 import { getPayload } from 'payload'
 
 import { FermentedVegHowTos } from '@/components/fermentation/FermentedVegHowTos'
@@ -288,6 +289,7 @@ function normalizeVoucherHref(href: string | null | undefined): string | null | 
 
 export default async function WorkshopDetailPage({ params }: Args) {
   const { slug } = await params
+  if (HIDDEN_WORKSHOP_SLUGS.includes(slug)) return notFound()
   const locale = await getLocale()
   const { isEnabled: draft } = await draftMode()
   const WORKSHOP_PAGE_SLUGS = ['tempeh', 'lakto-gemuese', 'kombucha', 'vom-feld-ins-glas']
@@ -380,7 +382,8 @@ export default async function WorkshopDetailPage({ params }: Args) {
     perPageHowToArticles.length > 0 ? Promise.resolve(null) : getLatestPosts(locale, 6),
     useGlobalVoucher ? getVoucherCtaGlobal(locale) : Promise.resolve(null),
   ])
-  const howToArticles = perPageHowToArticles.length > 0 ? perPageHowToArticles : fetchedHowToArticles!
+  const howToArticles =
+    perPageHowToArticles.length > 0 ? perPageHowToArticles : fetchedHowToArticles!
   const voucherCms =
     voucherGlobal && (voucherGlobal.eyebrow || voucherGlobal.title)
       ? {
@@ -497,8 +500,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
       return s && s !== slug
     })
     const workshopTypesHeading =
-      detail?.sliderHeading ??
-      (isDe ? 'Entdecke weitere Workshops.' : 'Discover more workshops.')
+      detail?.sliderHeading ?? (isDe ? 'Entdecke weitere Workshops.' : 'Discover more workshops.')
 
     const howToForFeld =
       perPageHowToArticles.length > 0
@@ -534,16 +536,11 @@ export default async function WorkshopDetailPage({ params }: Args) {
               workshopSlug: FELD_INS_GLAS_SLUG,
               workshopTitle: copy.title,
               pageSlug: FELD_INS_GLAS_SLUG,
-              locationName: isDe
-                ? 'Marktgarten „Unser Bauerngarten“'
-                : 'Marktgarten “Unser Bauerngarten”',
-              locationAddress: isDe
-                ? 'Hochfeldweg, Graz (nicht Grabenstraße)'
-                : 'Hochfeldweg, Graz (not Grabenstraße)',
             }}
             cms={{
               bookingEyebrow:
-                detail?.bookingEyebrow ?? (isDe ? 'Fermentations-Workshop' : 'Fermentation Workshop'),
+                detail?.bookingEyebrow ??
+                (isDe ? 'Fermentations-Workshop' : 'Fermentation Workshop'),
               bookingTitle: detail?.bookingTitle ?? copy.title,
               bookingPrice: detail?.bookingPrice ?? copy.price,
               bookingPriceSuffix: detail?.bookingPriceSuffix ?? copy.priceLabel,
