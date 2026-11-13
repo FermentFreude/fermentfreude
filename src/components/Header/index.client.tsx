@@ -201,7 +201,7 @@ export function HeaderClient({ header, locale, navWorkshops = [] }: Props) {
             {/* Logo */}
             <Link
               href="/"
-              className="shrink-0 flex items-center h-full justify-self-start"
+              className="shrink-0 flex items-center h-full justify-self-start focus-visible:ring-0 focus-visible:ring-offset-0"
               aria-label="Fermentfreude Home"
             >
               <Image
