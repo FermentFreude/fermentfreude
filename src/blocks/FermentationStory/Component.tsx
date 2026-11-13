@@ -363,6 +363,7 @@ function StoryCard({
                   >
                     <Image
                       src={pic.src}
+                      unoptimized
                       width={pic.width}
                       height={pic.height}
                       alt=""
@@ -444,6 +445,7 @@ function StoryCard({
                     >
                       <Image
                         src={pic.src}
+                        unoptimized
                         width={pic.width}
                         height={pic.height}
                         alt=""
