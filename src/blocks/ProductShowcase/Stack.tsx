@@ -46,9 +46,9 @@ export type LayerImage = {
  * How a layer is loaded without Vercel's metered resizer: CMS images pick the best R2 copy,
  * everything else (already-optimized WebP files, single copies) is served as it is.
  */
-function layerLoading(img: LayerImage) {
+function layerLoading(img: LayerImage, minShare?: number) {
   return img.variants && img.variants.length > 1
-    ? { loader: makeLoader(img.variants) }
+    ? { loader: makeLoader(img.variants, minShare) }
     : { unoptimized: true }
 }
 
@@ -375,7 +375,7 @@ function ProductPanel({
         <div aria-hidden className="absolute inset-0 -z-10">
           <Image
             src={slide.background.src}
-            {...layerLoading(slide.background)}
+            {...layerLoading(slide.background, 1)}
             alt=""
             fill
             sizes="100vw"
