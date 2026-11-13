@@ -11,7 +11,8 @@ import { EditSeatControl } from './EditSeatControl'
 import { MoveBookingControl } from './MoveBookingControl'
 import { SendAlternateDateEmailBar } from './SendAlternateDateEmailBar'
 import type { AppointmentRow, BookingRow } from './types'
-import { BRAND, STATUS, workshopColor } from './rosterTheme'
+import { bookingOrigin } from './bookingOrigin'
+import { BRAND, OriginBadge, STATUS, workshopColor } from './rosterTheme'
 import { seatStatusLabel } from './seatStatusLabels'
 
 interface Props {
@@ -252,6 +253,7 @@ export function WorkshopDetailView({ appointment, bookings, onBack, onRefresh }:
                         {card.seatNumber || '–'}
                       </span>
                       <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--theme-text)' }}>{card.name}</span>
+                  <OriginBadge origin={bookingOrigin(card.booking)} />
                     </div>
                     {(() => {
                       const st = seatStatusLabel(card.seatStatus)

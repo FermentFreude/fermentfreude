@@ -3,6 +3,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ActivityView } from './ActivityView'
+import { ArchiveView } from './ArchiveView'
+import { CalendarView } from './CalendarView'
 import { DashboardView } from './DashboardView'
 import { OrdersView } from './OrdersView'
 import { ParticipantsView } from './ParticipantsView'
@@ -12,12 +14,16 @@ import { RefundsView } from './RefundsView'
 import type { RosterData } from './types'
 import { VouchersView } from './VouchersView'
 import { WorkshopDetailView } from './WorkshopDetailView'
+import { WelcomeView } from './WelcomeView'
 import { WorkshopsView } from './WorkshopsView'
-import { BRAND } from './rosterTheme'
+import { readLang, saveLang, type Lang } from './rosterI18n'
+import { BRAND, TabBar } from './rosterTheme'
 
 type Section =
   | 'dashboard'
   | 'workshops'
+  | 'calendar'
+  | 'archive'
   | 'detail'
   | 'participants'
   | 'pickups'
@@ -132,6 +138,61 @@ const REFUNDS_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
   },
 ]
 
+type GroupId = 'today' | 'workshops' | 'vouchers' | 'shop' | 'requests'
+
+const GROUPS: { id: GroupId; label: string; tabs: { id: Section; label: string }[] }[] = [
+  { id: 'today', label: 'Heute', tabs: [{ id: 'dashboard', label: 'Übersicht' }] },
+  {
+    id: 'workshops',
+    label: 'Workshops',
+    tabs: [
+      { id: 'calendar', label: 'Kalender' },
+      { id: 'workshops', label: 'Liste' },
+      { id: 'participants', label: 'Teilnehmer' },
+      { id: 'archive', label: 'Archiv' },
+    ],
+  },
+  { id: 'vouchers', label: 'Gutscheine', tabs: [{ id: 'vouchers', label: 'Gutscheine' }] },
+  {
+    id: 'shop',
+    label: 'Shop',
+    tabs: [
+      { id: 'orders', label: 'Bestellungen' },
+      { id: 'pickups', label: 'Abholung' },
+      { id: 'quotes', label: 'Angebote' },
+    ],
+  },
+  {
+    id: 'requests',
+    label: 'Anfragen',
+    tabs: [
+      { id: 'refunds', label: 'Rückerstattungen' },
+      { id: 'activity', label: 'Aktivität' },
+    ],
+  },
+]
+
+const ICONS: Record<GroupId, React.ReactNode> = {
+  today: NAV[0]!.icon,
+  workshops: NAV[1]!.icon,
+  vouchers: SHOP_NAV.find((i) => i.id === 'vouchers')!.icon,
+  shop: ORDERS_NAV[0]!.icon,
+  requests: REFUNDS_NAV[0]!.icon,
+}
+
+const DEFAULT_TAB: Record<GroupId, Section> = {
+  today: 'dashboard',
+  workshops: 'calendar',
+  vouchers: 'vouchers',
+  shop: 'orders',
+  requests: 'refunds',
+}
+
+function groupOf(section: Section): GroupId {
+  if (section === 'detail') return 'workshops'
+  return GROUPS.find((g) => g.tabs.some((t) => t.id === section))?.id ?? 'today'
+}
+
 const navItemStyle = (active: boolean): React.CSSProperties => ({
   display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '6px',
   fontSize: '14px', fontWeight: active ? 600 : 400, cursor: 'pointer',
@@ -239,6 +300,12 @@ const MOBILE_CSS = `
 export function RosterClient({ initialData }: { initialData: RosterData }) {
   const [data, setData] = useState<RosterData>(initialData)
   const [section, setSection] = useState<Section>('dashboard')
+  const [lang, setLang] = useState<Lang>('en')
+  useEffect(() => setLang(readLang()), [])
+  const chooseLang = (l: Lang) => {
+    setLang(l)
+    saveLang(l)
+  }
   const [selectedApptId, setSelectedApptId] = useState<string | null>(null)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const refreshingRef = useRef(false)
@@ -284,10 +351,27 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [refresh])
 
+  const [lastTab, setLastTab] = useState<Record<GroupId, Section>>(DEFAULT_TAB)
+
   const navigate = (sec: Section) => {
     setSection(sec)
-    if (sec !== 'detail') setSelectedApptId(null)
+    if (sec !== 'detail') {
+      setSelectedApptId(null)
+      setLastTab((prev) => ({ ...prev, [groupOf(sec)]: sec }))
+    }
   }
+
+  const activeGroup = groupOf(section)
+  const activeGroupDef = GROUPS.find((g) => g.id === activeGroup)!
+
+  const tabBadge = (id: Section): number => {
+    if (id === 'refunds') return data.refundRequests.filter((r) => r.status === 'requested').length
+    if (id === 'activity') return data.activityUnreadCount
+    if (id === 'pickups') return data.stats.openPickups
+    return 0
+  }
+  const groupBadge = (id: GroupId): number =>
+    GROUPS.find((g) => g.id === id)!.tabs.reduce((sum, t) => sum + tabBadge(t.id), 0)
 
   const openDetail = (apptId: string) => {
     setSelectedApptId(apptId)
@@ -310,52 +394,39 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
         </div>
 
         <div className="ff-roster-navsection" style={s.navSection}>
-          <p className="ff-roster-navlabel" style={s.navLabel}>Übersicht</p>
-          {NAV.map((item) => (
-            <button key={item.id} style={navItemStyle(section === item.id || (section === 'detail' && item.id === 'workshops'))} onClick={() => navigate(item.id)}>
-              <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="ff-roster-navsection" style={s.navSection}>
-          <p className="ff-roster-navlabel" style={s.navLabel}>Shop</p>
-          {SHOP_NAV.map((item) => (
-            <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
-              <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="ff-roster-navsection" style={s.navSection}>
-          <p className="ff-roster-navlabel" style={s.navLabel}>Buchhaltung</p>
-          {ORDERS_NAV.map((item) => (
-            <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
-              <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="ff-roster-navsection" style={s.navSection}>
-          <p className="ff-roster-navlabel" style={s.navLabel}>Refunds & Rebooking</p>
-          {REFUNDS_NAV.map((item) => {
-            const badgeCount =
-              item.id === 'refunds'
-                ? data.refundRequests.filter((r) => r.status === 'requested').length
-                : item.id === 'activity'
-                  ? data.activityUnreadCount
-                  : 0
+          {GROUPS.map((g) => {
+            const badge = groupBadge(g.id)
             return (
-              <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
-                <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
-                {item.label}
-                {badgeCount > 0 && <span style={s.navBadge}>{badgeCount > 99 ? '99+' : badgeCount}</span>}
+              <button
+                key={g.id}
+                style={navItemStyle(activeGroup === g.id)}
+                onClick={() => navigate(g.id === activeGroup && section !== 'detail' ? section : lastTab[g.id])}
+              >
+                <span style={{ opacity: 0.65, flexShrink: 0 }}>{ICONS[g.id]}</span>
+                {g.label}
+                {badge > 0 && <span style={s.navBadge}>{badge > 99 ? '99+' : badge}</span>}
               </button>
             )
           })}
+        </div>
+
+        <div role="group" aria-label="Language" style={{ display: 'flex', gap: '6px', padding: '8px 12px' }}>
+          {(['en', 'de'] as const).map((l) => (
+            <button
+              key={l}
+              type="button"
+              aria-pressed={lang === l}
+              onClick={() => chooseLang(l)}
+              style={{
+                padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+                border: '1px solid var(--theme-elevation-150)',
+                background: lang === l ? BRAND.gold : 'transparent',
+                color: lang === l ? BRAND.nearBlack : 'var(--theme-text)',
+              }}
+            >
+              {l.toUpperCase()}
+            </button>
+          ))}
         </div>
 
         <div className="ff-roster-live" style={s.liveIndicator}>
@@ -366,17 +437,28 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
 
       {/* Main content */}
       <main className="ff-roster-main" style={s.main}>
+        {section !== 'detail' && activeGroupDef.tabs.length > 1 && (
+          <TabBar
+            tabs={activeGroupDef.tabs.map((t) => ({ id: t.id, label: t.label, badge: tabBadge(t.id) }))}
+            active={section}
+            onChange={navigate}
+          />
+        )}
         {section === 'dashboard' && (
-          <DashboardView data={data} onSelectWorkshop={openDetail} onNavigate={navigate} />
+          <WelcomeView data={data} lang={lang} onRefresh={refresh} onSelectWorkshop={openDetail} onNavigate={navigate} />
         )}
         {section === 'workshops' && (
           <WorkshopsView appointments={data.appointments} onSelectAppointment={openDetail} />
         )}
+        {section === 'calendar' && (
+          <CalendarView appointments={data.appointments} onSelectAppointment={openDetail} />
+        )}
+        {section === 'archive' && <ArchiveView />}
         {section === 'detail' && selectedApptId && (
           <WorkshopDetailView
             appointment={data.appointments.find((a) => a.id === selectedApptId) ?? data.appointments[0]}
             bookings={data.bookingsByAppointment[selectedApptId] ?? []}
-            onBack={() => navigate('workshops')}
+            onBack={() => navigate(lastTab.workshops)}
             onRefresh={refresh}
           />
         )}

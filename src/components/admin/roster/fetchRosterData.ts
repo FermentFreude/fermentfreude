@@ -1,6 +1,7 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
+import type { AttentionNoteRow } from './attentionTypes'
 import type {
   ActivityEventRow,
   AppointmentRow,
@@ -165,6 +166,23 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     const totalBooked = bResult.docs.reduce((sum, b) => sum + seatsHoldingPlace(b), 0)
     const capacity = Number(workshopAny?.maxCapacityPerSlot ?? 12)
 
+    // Unpaid bookings hold seats on the booking page; only relevant for upcoming dates.
+    let pendingSeats = 0
+    if (!isPast) {
+      const pending = await payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [{ appointmentId: { equals: String(appt.id) } }, { status: { equals: 'pending' } }],
+        },
+        limit: 50,
+        depth: 0,
+        overrideAccess: true,
+      })
+      pendingSeats = pending.docs.reduce((sum, b) => sum + Math.max(Number(b.guestCount) || 1, 1), 0)
+    }
+    const rawFree = (appt as unknown as { availableSpots?: unknown }).availableSpots
+    const counterFree = typeof rawFree === 'number' ? rawFree : null
+
     appointments.push({
       id: String(appt.id),
       workshopTitle: title,
@@ -177,6 +195,8 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       totalBooked,
       capacity,
       isPast,
+      counterFree,
+      pendingSeats,
     })
 
     bookingsByAppointment[String(appt.id)] = bResult.docs.map((b) => toBookingRow(b))
@@ -542,6 +562,34 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   })
   const activityUnreadCount = activityEvents.filter((e) => e.isUnread).length
 
+  // ── 5b. "Needs a look" notes + acknowledgements ────────────────────────────
+  const attentionResult = await payload.find({
+    collection: 'attention-notes',
+    sort: '-createdAt',
+    limit: 500,
+    depth: 0,
+    overrideAccess: true,
+  })
+  const attentionNotes: AttentionNoteRow[] = attentionResult.docs
+    .filter((n) => n.kind !== 'ack')
+    .map((n) => ({
+      id: String(n.id),
+      title: n.title ?? '',
+      body: n.body ?? '',
+      severity: (n.severity ?? 'attention') as AttentionNoteRow['severity'],
+      status: n.status === 'done' ? 'done' : 'open',
+      appointmentId: n.appointmentId ?? '',
+      bookingId: n.bookingId ?? '',
+      dueDate: n.dueDate ? new Date(n.dueDate).toLocaleDateString('sv-SE', { timeZone: 'Europe/Vienna' }) : '',
+      createdByName: n.createdByName ?? '',
+      createdAt: n.createdAt ?? '',
+      doneByName: n.doneByName ?? '',
+      doneAt: n.doneAt ?? '',
+    }))
+  const attentionAcks = attentionResult.docs
+    .filter((n) => n.kind === 'ack' && n.autoKey)
+    .map((n) => String(n.autoKey))
+
   // ── 6. Stats ───────────────────────────────────────────────────────────────
   const upcomingWorkshops = appointments.filter((a) => !a.isPast).length
   const totalParticipants = Object.values(bookingsByAppointment).reduce(
@@ -578,5 +626,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     refundRequests,
     activityEvents,
     activityUnreadCount,
+    attentionNotes,
+    attentionAcks,
   }
 }

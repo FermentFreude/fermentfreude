@@ -2,6 +2,8 @@
 
 import React from 'react'
 
+import { ORIGIN_INFO, type BookingOrigin } from './bookingOrigin'
+
 /**
  * Shared visual language for the roster admin dashboard — brand colors
  * (docs/BRAND.md), workshop-type identity, stat cards, and status badges.
@@ -148,6 +150,119 @@ export function PageHeader({
         )}
       </div>
       {action}
+    </div>
+  )
+}
+
+/** Small rounded label used for statuses, origins and payment kinds. */
+export function Pill({
+  label,
+  tone = 'neutral',
+  title,
+}: {
+  label: string
+  tone?: keyof typeof STATUS
+  title?: string
+}) {
+  const t = STATUS[tone]
+  return (
+    <span
+      title={title}
+      style={{
+        display: 'inline-block',
+        padding: '2px 9px',
+        borderRadius: '999px',
+        background: t.bg,
+        color: t.color,
+        fontSize: '11px',
+        fontWeight: 600,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </span>
+  )
+}
+
+const ORIGIN_TONE: Record<BookingOrigin, keyof typeof STATUS> = {
+  website: 'neutral',
+  manual: 'purple',
+  wix: 'info',
+  unmarked: 'warning',
+}
+
+/** Shows where a booking came from: website, added by hand, Wix import, or unmarked. */
+export function OriginBadge({ origin }: { origin: BookingOrigin }) {
+  const info = ORIGIN_INFO[origin]
+  return <Pill label={info.label} tone={ORIGIN_TONE[origin]} title={info.hint} />
+}
+
+/** Horizontal tab bar with a gold underline on the active tab. */
+export function TabBar<T extends string>({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: { id: T; label: string; badge?: number }[]
+  active: T | null
+  onChange: (id: T) => void
+}) {
+  return (
+    <div
+      role="tablist"
+      style={{
+        display: 'flex',
+        gap: '4px',
+        padding: '0 40px',
+        borderBottom: '1px solid var(--theme-elevation-100)',
+        overflowX: 'auto',
+      }}
+    >
+      {tabs.map((tab) => {
+        const isActive = tab.id === active
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onChange(tab.id)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '14px 16px',
+              border: 'none',
+              borderBottom: `3px solid ${isActive ? BRAND.gold : 'transparent'}`,
+              background: 'transparent',
+              color: 'var(--theme-text)',
+              opacity: isActive ? 1 : 0.6,
+              fontSize: '14px',
+              fontWeight: isActive ? 700 : 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {tab.label}
+            {tab.badge ? (
+              <span
+                style={{
+                  minWidth: '20px',
+                  padding: '1px 6px',
+                  borderRadius: '999px',
+                  background: BRAND.gold,
+                  color: BRAND.nearBlack,
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  textAlign: 'center',
+                }}
+              >
+                {tab.badge}
+              </span>
+            ) : null}
+          </button>
+        )
+      })}
     </div>
   )
 }

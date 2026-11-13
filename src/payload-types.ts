@@ -74,6 +74,7 @@ export interface Config {
   collections: {
     users: User;
     'backlog-items': BacklogItem;
+    'attention-notes': AttentionNote;
     pages: Page;
     categories: Category;
     'course-progress': CourseProgress;
@@ -128,6 +129,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'backlog-items': BacklogItemsSelect<false> | BacklogItemsSelect<true>;
+    'attention-notes': AttentionNotesSelect<false> | AttentionNotesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'course-progress': CourseProgressSelect<false> | CourseProgressSelect<true>;
@@ -5980,6 +5982,38 @@ export interface BacklogItem {
   createdAt: string;
 }
 /**
+ * Notes and acknowledgements behind the "Needs a look" list. Managed in the Roster dashboard.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attention-notes".
+ */
+export interface AttentionNote {
+  id: string;
+  kind: 'note' | 'ack';
+  title?: string | null;
+  body?: string | null;
+  severity?: ('info' | 'attention' | 'urgent') | null;
+  status?: ('open' | 'done') | null;
+  /**
+   * Optional link to a workshop date.
+   */
+  appointmentId?: string | null;
+  /**
+   * Optional link to a booking.
+   */
+  bookingId?: string | null;
+  dueDate?: string | null;
+  /**
+   * Key of the automatic item (kind "ack" only).
+   */
+  autoKey?: string | null;
+  createdByName?: string | null;
+  doneByName?: string | null;
+  doneAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6705,6 +6739,10 @@ export interface PayloadLockedDocument {
         value: string | BacklogItem;
       } | null)
     | ({
+        relationTo: 'attention-notes';
+        value: string | AttentionNote;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -6949,6 +6987,26 @@ export interface BacklogItemsSelect<T extends boolean = true> {
         id?: T;
       };
   decision?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attention-notes_select".
+ */
+export interface AttentionNotesSelect<T extends boolean = true> {
+  kind?: T;
+  title?: T;
+  body?: T;
+  severity?: T;
+  status?: T;
+  appointmentId?: T;
+  bookingId?: T;
+  dueDate?: T;
+  autoKey?: T;
+  createdByName?: T;
+  doneByName?: T;
+  doneAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

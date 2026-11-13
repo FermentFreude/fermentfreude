@@ -20,16 +20,18 @@ interface Props {
   data: RosterData
   onSelectWorkshop: (apptId: string) => void
   onNavigate: (section: Section) => void
+  /** Replaces the plain page header, e.g. with the welcome block. */
+  top?: React.ReactNode
 }
 
-export function DashboardView({ data, onSelectWorkshop, onNavigate }: Props) {
+export function DashboardView({ data, onSelectWorkshop, onNavigate, top }: Props) {
   const { stats, appointments, orders } = data
   const upcoming = appointments.filter((a) => !a.isPast).slice(0, 8)
   const latestOrders = orders.slice(0, 5)
 
   return (
     <div style={{ padding: '40px', maxWidth: '900px' }}>
-      <PageHeader title="Dashboard" subtitle="Willkommen zurück! Hier ist deine Übersicht." />
+      {top ?? <PageHeader title="Dashboard" subtitle="Willkommen zurück! Hier ist deine Übersicht." />}
 
       {/* Latest orders from the website — first thing a founder sees, and
           where the admin order-notification email's button now lands. */}

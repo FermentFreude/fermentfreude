@@ -17,6 +17,10 @@ export type AppointmentRow = {
   totalBooked: number
   capacity: number
   isPast: boolean
+  /** Free places the public booking page currently shows (null = unknown). */
+  counterFree?: number | null
+  /** Places held by unpaid (pending) bookings. */
+  pendingSeats?: number
 }
 
 export type SeatEntry = {
@@ -161,6 +165,8 @@ export type ActivityEventRow = {
   isUnread: boolean
 }
 
+import type { AttentionNoteRow } from './attentionTypes'
+
 export type RosterData = {
   stats: RosterStats
   appointments: AppointmentRow[]
@@ -173,4 +179,7 @@ export type RosterData = {
   refundRequests: RefundRequestRow[]
   activityEvents: ActivityEventRow[]
   activityUnreadCount: number
+  attentionNotes: AttentionNoteRow[]
+  /** Keys of automatic items someone marked as known. */
+  attentionAcks: string[]
 }

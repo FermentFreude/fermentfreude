@@ -16,6 +16,7 @@ import path from 'path'
 import { buildConfig } from 'payload'
 
 import { ActivityEvents } from '@/collections/ActivityEvents'
+import { AttentionNotes } from '@/collections/AttentionNotes'
 import { BacklogItems } from '@/collections/BacklogItems'
 import { BookingMagicLinks } from '@/collections/BookingMagicLinks'
 import { BrevoEmailTemplates } from '@/collections/BrevoEmailTemplates'
@@ -169,6 +170,7 @@ export default buildConfig({
   collections: [
     Users,
     BacklogItems,
+    AttentionNotes,
     Pages,
     Categories,
     CourseProgress,
