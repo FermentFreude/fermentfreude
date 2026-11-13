@@ -1,5 +1,6 @@
 import type { Media, Product, ProductShowcaseBlock } from '@/payload-types'
 import { getLocale } from '@/utilities/getLocale'
+import { mediaCandidates } from '@/utilities/mediaLoader'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { formatEurPrice } from '@/utilities/productDetailDisplay'
@@ -18,6 +19,8 @@ const fromMedia = (m: Media, alt: string): LayerImage => ({
   width: m.width ?? 1200,
   height: m.height ?? 900,
   alt: m.alt || alt,
+  // Pre-made R2 copies, so the browser picks the right size without any Vercel resizing
+  variants: mediaCandidates(m),
 })
 
 /** English fallback — CMS data always wins. */

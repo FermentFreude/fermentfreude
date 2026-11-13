@@ -185,7 +185,8 @@ export const ShopHeroComponent: React.FC<ShopHeroBlock> = async (props) => {
             priority
             sizes="100vw"
             className="object-cover object-[50%_75%] md:object-[48%_70%]"
-            unoptimized={heroSrc.startsWith('http')}
+            // Already-optimized file (R2 URL or /public fallback): serve as is, no Vercel resizing
+            unoptimized
           />
         </Link>
 
