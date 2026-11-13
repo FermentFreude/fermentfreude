@@ -158,7 +158,7 @@ export function AutomatenEditorial({
     <section id="automaten" className="automaten-editorial relative overflow-hidden bg-white">
       <div className="container relative mx-auto container-padding py-16 md:py-24 lg:py-28">
         <div className="mx-auto max-w-3xl text-center md:mx-0 md:max-w-xl md:text-left">
-          <p className="font-display text-[11px] font-bold uppercase tracking-[0.22em] text-ff-gold">
+          <p className="font-display text-[11px] font-bold uppercase tracking-[0.22em] text-ff-gold-ink">
             {eyebrow}
           </p>
           <h2 className="mt-4 font-display text-[1.85rem] font-bold leading-[1.08] tracking-tight text-ff-near-black sm:text-[2.1rem] md:text-[2.85rem] lg:text-[3.15rem]">
@@ -229,7 +229,7 @@ export function AutomatenEditorial({
                             {loc.badge}
                           </span>
                           {loc.city && (
-                            <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold">
+                            <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold-ink">
                               {loc.city}
                             </span>
                           )}
@@ -265,7 +265,7 @@ export function AutomatenEditorial({
 
               {showTip && (
                 <li className="relative pb-0 md:pb-0">
-                  <p className="mb-3 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold">
+                  <p className="mb-3 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold-ink">
                     {tipLabel} · {tipKindLabel}
                   </p>
                   <article
@@ -295,7 +295,7 @@ export function AutomatenEditorial({
                         <span className="inline-flex w-fit items-center rounded-full bg-[#ECE5DE] px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-[0.12em] text-ff-charcoal">
                           {tipKindLabel}
                         </span>
-                        <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold">
+                        <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-ff-gold-ink">
                           {tipCity}
                         </span>
                       </div>
@@ -311,7 +311,9 @@ export function AutomatenEditorial({
                         </p>
                       )}
                       {tipText && (
-                        <p className="mt-3 text-body-sm leading-relaxed text-ff-charcoal">{tipText}</p>
+                        <p className="mt-3 text-body-sm leading-relaxed text-ff-charcoal">
+                          {tipText}
+                        </p>
                       )}
                       <ActionRow
                         mapsUrl={tipMapsUrl!}

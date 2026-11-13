@@ -3,6 +3,7 @@
 import { StackPanel } from '@/components/StackPanel'
 import { PointsRow, type PointsRowItem } from '@/components/PointsRow'
 import { cn } from '@/utilities/cn'
+import { makeLoader, type MediaCandidate } from '@/utilities/mediaLoader'
 import { ArrowUpRight } from 'lucide-react'
 import {
   MotionConfig,
@@ -32,7 +33,24 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
  * ═══════════════════════════════════════════════════════════════ */
 
 /** One image layer — from public/showcase (code) or a CMS fallback */
-export type LayerImage = { src: string; width: number; height: number; alt: string }
+export type LayerImage = {
+  src: string
+  width: number
+  height: number
+  alt: string
+  /** Pre-made copies on R2 (CMS images). Files from /public have none and are served as they are. */
+  variants?: MediaCandidate[]
+}
+
+/**
+ * How a layer is loaded without Vercel's metered resizer: CMS images pick the best R2 copy,
+ * everything else (already-optimized WebP files, single copies) is served as it is.
+ */
+function layerLoading(img: LayerImage, minShare?: number) {
+  return img.variants && img.variants.length > 1
+    ? { loader: makeLoader(img.variants, minShare) }
+    : { unoptimized: true }
+}
 
 export type ShowcaseSlide = {
   key: string
@@ -110,6 +128,7 @@ function LayerImg({ img, shadow }: { img: LayerImage; shadow?: boolean }) {
   return (
     <Image
       src={img.src}
+      {...layerLoading(img)}
       alt={img.alt}
       fill
       sizes="(max-width: 1024px) 90vw, 60vw"
@@ -356,6 +375,7 @@ function ProductPanel({
         <div aria-hidden className="absolute inset-0 -z-10">
           <Image
             src={slide.background.src}
+            {...layerLoading(slide.background, 1)}
             alt=""
             fill
             sizes="100vw"

@@ -1,4 +1,5 @@
 import { FadeIn } from '@/components/FadeIn'
+import { LazyVideo } from '@/components/LazyVideo'
 import { Media } from '@/components/Media'
 import { PointsRow } from '@/components/PointsRow'
 import type { HeroBannerBlock as HeroBannerBlockType, Media as MediaType } from '@/payload-types'
@@ -79,16 +80,11 @@ export const HeroBannerBlock: React.FC<Props> = ({
   ) : null
 
   const media = backgroundVideoUrl ? (
-    <video
-      autoPlay
-      loop
-      muted
-      playsInline
-      className="absolute inset-0 h-full w-full object-cover"
+    <LazyVideo
+      src={backgroundVideoUrl}
       poster={image?.url ?? undefined}
-    >
-      <source src={backgroundVideoUrl} type="video/mp4" />
-    </video>
+      className="absolute inset-0 h-full w-full object-cover"
+    />
   ) : image ? (
     <div className="absolute inset-0">
       <Media

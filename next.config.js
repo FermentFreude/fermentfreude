@@ -43,8 +43,8 @@ const nextConfig = {
     ]
   },
   images: {
-    // <Media> renders at quality 90; Next 16 refuses qualities that aren't listed
-    qualities: [75, 90],
+    // Widths the browser can ask for in srcset (our own loader maps them to the pre-made copies)
+    deviceSizes: [360, 640, 828, 1080, 1440, 1920],
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
         const url = new URL(item)
