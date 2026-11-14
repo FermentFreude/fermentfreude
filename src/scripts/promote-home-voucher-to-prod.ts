@@ -77,7 +77,9 @@ const isOid = (x: any) =>
 const collectIds = (x: any, out = new Set<string>(), key = ''): Set<string> => {
   if (x == null || key === '_id' || key === 'id') return out
   if (isOid(x)) out.add(String(x))
-  else if (typeof x === 'string') HEX.test(x) && out.add(x)
+  else if (typeof x === 'string') {
+    if (HEX.test(x)) out.add(x)
+  }
   else if (Array.isArray(x)) x.forEach((v) => collectIds(v, out, key))
   else if (typeof x === 'object' && !(x instanceof Date))
     for (const [k, v] of Object.entries(x)) collectIds(v, out, k)
@@ -150,15 +152,13 @@ async function main() {
   const tProducts = await T.collection('products').find({}).project({ slug: 1 }).toArray()
   for (const w of sWorkshops) {
     const m = tWorkshops.find((x: any) => x.slug === w.slug)
-    m
-      ? idMap.set(String(w._id), String(m._id))
-      : problems.push(`workshop "${w.slug}" does not exist in the target`)
+    if (m) idMap.set(String(w._id), String(m._id))
+    else problems.push(`workshop "${w.slug}" does not exist in the target`)
   }
   for (const p of sProducts) {
     const m = tProducts.find((x: any) => x.slug === p.slug)
-    m
-      ? idMap.set(String(p._id), String(m._id))
-      : problems.push(`product "${p.slug}" does not exist in the target`)
+    if (m) idMap.set(String(p._id), String(m._id))
+    else problems.push(`product "${p.slug}" does not exist in the target`)
   }
 
   const tMediaByName = new Map<string, any>()
