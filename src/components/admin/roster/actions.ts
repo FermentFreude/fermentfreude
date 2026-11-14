@@ -319,8 +319,9 @@ export async function createManualWorkshopBooking(params: {
         ...(params.email?.trim() ? { email: params.email.trim() } : {}),
         ...(params.phone?.trim() ? { phone: params.phone.trim() } : {}),
         guestCount: params.guestCount,
-        pricePerPerson: workshop.basePrice ?? 0,
-        totalPrice: (workshop.basePrice ?? 0) * params.guestCount,
+        // A rebooking (already paid on the original booking) is not a new sale: 0 €.
+        pricePerPerson: payment?.paymentMethod === 'rebooking' ? 0 : (workshop.basePrice ?? 0),
+        totalPrice: payment?.paymentMethod === 'rebooking' ? 0 : (workshop.basePrice ?? 0) * params.guestCount,
         ...(params.notes?.trim() ? { notes: params.notes.trim() } : {}),
         seats: Array.from({ length: params.guestCount }, () => ({ seatStatus: 'active' as const })),
         ...(params.channel || payment

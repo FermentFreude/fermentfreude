@@ -1,3 +1,5 @@
+import { seatsHoldingPlace } from '@/lib/seatCapacity'
+
 import { bookingOrigin } from './bookingOrigin'
 import { seatMismatch } from './seatCheck'
 import type { AutoAttentionItem } from './attentionTypes'
@@ -20,14 +22,16 @@ export function detectAttentionItems(data: RosterData): AutoAttentionItem[] {
       })
     }
     for (const b of data.bookingsByAppointment[a.id] ?? []) {
-      if (bookingOrigin(b) === 'unmarked') {
-        items.push({
-          key: `no-receipt:${b.id}`,
-          severity: 'info',
-          rule: 'no-receipt',
-          appointmentId: a.id,
-          params: { name: [b.firstName, b.lastName].filter(Boolean).join(' ') || b.email, workshop: a.workshopTitle, date: a.date },
-        })
+      if (seatsHoldingPlace(b) === 0) continue
+      const origin = bookingOrigin(b)
+      if (origin === 'website' || origin === 'wix') continue // paid online / in Wix: nothing to record
+      const params = { name: [b.firstName, b.lastName].filter(Boolean).join(' ') || b.email, workshop: a.workshopTitle, date: a.date }
+      if (b.manual?.paymentStatus === 'open') {
+        // a reservation that has not been paid yet
+        items.push({ key: `payment-open:${b.id}`, severity: 'attention', rule: 'payment-open', appointmentId: a.id, params })
+      } else if (!b.manual?.paymentStatus) {
+        // added by hand (or entered without a marker) and nobody recorded how it was paid
+        items.push({ key: `no-receipt:${b.id}`, severity: 'info', rule: 'no-receipt', appointmentId: a.id, params })
       }
     }
   }

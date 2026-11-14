@@ -4,6 +4,7 @@ import type { Payload } from 'payload'
 
 import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
 import { BREVO_TEMPLATES, sendTemplateEmail } from '@/lib/brevo'
+import { freezeInvoiceNow } from '@/lib/buildOrderReceiptData'
 import { generateBookingICS } from '@/lib/generateBookingICS'
 import { getServerSideURL } from '@/utilities/getURL'
 
@@ -18,7 +19,7 @@ import { getServerSideURL } from '@/utilities/getURL'
 
 export type ManualChannel = 'email' | 'phone' | 'inperson' | 'wix' | 'other'
 export type ManualPaymentStatus = 'paid' | 'open'
-export type ManualPaymentMethod = 'transfer' | 'cash' | 'card_onsite' | 'voucher_wix' | 'voucher_shop' | 'wix_paid' | 'other'
+export type ManualPaymentMethod = 'transfer' | 'cash' | 'card_onsite' | 'voucher_wix' | 'voucher_shop' | 'wix_paid' | 'rebooking' | 'other'
 
 export const CHANNEL_LABEL: Record<ManualChannel, string> = {
   email: 'per E-Mail',
@@ -34,6 +35,7 @@ export const METHOD_LABEL: Record<ManualPaymentMethod, string> = {
   voucher_wix: 'Wix-Gutschein',
   voucher_shop: 'Gutschein (Shop / Website)',
   wix_paid: 'bereits in Wix bezahlt',
+  rebooking: 'Umbuchung (bereits bezahlt)',
   other: 'sonstiges',
 }
 
@@ -79,10 +81,15 @@ export async function recordPayment(payload: Payload, bookingId: string, input: 
   const p = cleanPayment(input)
   const booking = await payload.findByID({ collection: 'workshop-bookings', id: bookingId, depth: 0, overrideAccess: true })
   const previous = (booking as { manualInfo?: Record<string, unknown> }).manualInfo ?? {}
+  // A rebooking is not a new sale: the money was paid (and invoiced) on the original booking.
+  // The seat carries 0 €, so it can never be invoiced again or counted as revenue twice.
+  const isRebooking = p.paymentStatus === 'paid' && p.paymentMethod === 'rebooking'
+  if (isRebooking && booking.orderId) throw new Error('Diese Buchung gehört zu einer Bestellung und kann keine Umbuchung sein.')
   await payload.update({
     collection: 'workshop-bookings',
     id: bookingId,
     data: {
+      ...(isRebooking ? { pricePerPerson: 0, totalPrice: 0 } : {}),
       manualInfo: {
         ...previous,
         paymentStatus: p.paymentStatus,
@@ -116,6 +123,9 @@ export async function createInvoice(payload: Payload, bookingId: string, by: str
     throw new Error('Diese Buchung kommt aus Wix. Zahlung und Rechnung laufen über Wix.')
   }
   if (booking.status !== 'confirmed') throw new Error('Nur bestätigte Buchungen bekommen eine Rechnung.')
+  if ((booking as { manualInfo?: { paymentMethod?: string } }).manualInfo?.paymentMethod === 'rebooking') {
+    throw new Error('Das ist eine Umbuchung: bezahlt und fakturiert wurde schon über die ursprüngliche Buchung. Es gibt keine neue Rechnung.')
+  }
   const info = (booking as { manualInfo?: { paymentStatus?: string; paymentMethod?: ManualPaymentMethod; voucherCode?: string } }).manualInfo
   if (info?.paymentStatus === 'open') throw new Error('Die Zahlung ist noch offen. Erst „bezahlt“ eintragen, dann die Rechnung erstellen.')
 
@@ -141,6 +151,7 @@ export async function createInvoice(payload: Payload, bookingId: string, by: str
   })
   const order = created as unknown as { id: string | number; invoiceNumber?: string | null }
   await payload.update({ collection: 'workshop-bookings', id: bookingId, data: { orderId: String(order.id) }, overrideAccess: true })
+  await freezeInvoiceNow(payload, String(order.id)) // the invoice shows exactly this from now on
   const invoiceNumber = order.invoiceNumber ?? ''
   await addBookingHistory(payload, bookingId, {
     type: 'invoice_created',

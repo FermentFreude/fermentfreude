@@ -218,6 +218,8 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     bookingsByAppointment[String(appt.id)] = bResult.docs.map((b) => toBookingRow(b))
   }
 
+  // What was really charged per order (cents): a voucher covers part of the seats' value, and that part was paid when the voucher was sold.
+  const orderAmountCents = new Map<string, number>()
   // Invoice number + how it was paid, for the day sheet (same rules as the archive).
   {
     const allRows = Object.values(bookingsByAppointment).flat()
@@ -234,6 +236,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       for (const doc of found.docs) {
         const o = doc as unknown as { id: string | number; invoiceNumber?: string | null; amount?: number | null }
         orderById.set(String(o.id), { invoiceNumber: o.invoiceNumber ?? '', amount: Number(o.amount ?? 0) })
+        orderAmountCents.set(String(o.id), Number(o.amount ?? 0))
       }
     }
     for (const row of allRows) {
@@ -682,13 +685,32 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   const openPickups = pickupOrders.filter(
     (o) => o.pickupStatus === 'pending' || o.pickupStatus === 'ready',
   ).length
-  const workshopRevenue = Object.values(bookingsByAppointment)
+  // Workshop revenue = money received for workshop seats.
+  //  - not rebooked (counted on the new booking), not swapped for a voucher, not refunded;
+  //    a cancellation without refund still counts
+  //  - not a rebooking by hand (paid on the original booking) and not an unpaid reservation
+  //  - the part of an order that a VOUCHER paid is left out: that money came in when the voucher was
+  //    sold, so counting it here again would count it twice (the voucher invoice + the workshop invoice)
+  const seatValue = (b: BookingRow) =>
+    paidSeats(b) *
+    (appointments.find((a) => bookingsByAppointment[a.id]?.some((bk) => bk.id === b.id))?.pricePerPerson ?? 0)
+  const countable = Object.values(bookingsByAppointment)
     .flat()
-    // Money that stayed with this date: not rebooked (counted on the new booking),
-    // not swapped for a voucher, not refunded. A cancellation without refund still counts.
-    .reduce((sum, b) => sum + paidSeats(b) * (appointments.find((a) =>
-      bookingsByAppointment[a.id]?.some((bk) => bk.id === b.id)
-    )?.pricePerPerson ?? 0), 0)
+    .filter((b) => b.manual?.paymentMethod !== 'rebooking' && b.manual?.paymentStatus !== 'open')
+  const grossByOrder = new Map<string, number>()
+  for (const b of countable) if (b.orderId) grossByOrder.set(b.orderId, (grossByOrder.get(b.orderId) ?? 0) + seatValue(b))
+  const workshopRevenue = countable.reduce((sum, b) => {
+    const value = seatValue(b)
+    if (b.orderId) {
+      const gross = grossByOrder.get(b.orderId) ?? 0
+      const cash = orderAmountCents.get(b.orderId)
+      // share of the seats' value that was really charged (1 = nothing paid by voucher)
+      const share = cash === undefined || gross <= 0 ? 1 : Math.min(1, cash / 100 / gross)
+      return sum + value * share
+    }
+    const voucherPaid = b.manual?.paymentMethod === 'voucher_wix' || b.manual?.paymentMethod === 'voucher_shop'
+    return sum + (voucherPaid ? 0 : value)
+  }, 0)
 
   const stats: RosterStats = {
     upcomingWorkshops,
