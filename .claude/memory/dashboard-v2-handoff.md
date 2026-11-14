@@ -1,4 +1,4 @@
-# Dashboard v2 — handoff (updated 2026-11-13, evening)
+# Dashboard v2 — handoff (updated 2026-11-14)
 
 ## Where we are
 - Branch: `feature/dashboard-v2` (local only, not pushed). `origin/staging` merged in (merge commit a34a0a3, includes #181–#184).
@@ -21,3 +21,15 @@
 - Vercel Preview (staging): add EMAIL_TEST_ALLOWLIST with team test inboxes, or test emails on staging go only to @fermentfreude.at.
 - Sender name on existing Brevo templates is "FermentFreude" (brand spelling) — not part of text editing; fix in Brevo settings if wanted.
 - Pickup tab unchanged (mock-up says later).
+
+## Added 2026-11-14 (all still uncommitted unless Rafaela says otherwise; staging has the 2026-11-13 state)
+- **Participant profile** (`CustomerProfile.tsx`, `profileActions.ts`): Teilnehmer → name opens a full page (bookings, orders, vouchers, links, refunds, merged history with filters); the day sheet opens a booking-scoped popup. Workshop names link to the date.
+- **Manual bookings: source + payment + optional invoice/confirmation** (`ManualPayment.tsx`, `lib/manualBooking.ts`, `manualBookingActions.ts`, `WorkshopBookings.manualInfo`). "Zahlung" button for hand-entered/Wix/unmarked rows. Wix = paid in Wix, no invoice.
+- **Editing everything after adding** (`lib/bookingEdit.ts`, `bookingEditActions.ts`): phone, price, source, seats (add/cancel), name/email/note with history.
+- **Move some people** (`lib/moveSeats.ts`), moves on past dates, price follows for bookings without an order.
+- **Platz freigeben** (`releaseSeats`): free seats of any booking incl. invoice ones, no refund, invoice stays.
+- **Conversations no longer send emails** (alertTeam, checkbox, profile pref removed).
+- **Per-date capacity** (`lib/appointmentCapacity.ts`, `hooks/appointmentCapacity.ts`, dashboard "Kapazität" button); 12 limits removed; BookingModal follows free seats.
+- **CMS lock**: `workshop-bookings` update/delete = false. **Seat-check warning** already in the dashboard.
+- Docs: `docs/SEATS_AND_CAPACITY.md`, CLAUDE.md section "Seats, Capacity & Bookings".
+- Open: production counters wrong for 10 Jan Lakto (shows 1, real 3) and 21 Jan Kombucha (shows 6, real 5) — founders to be asked, then correct with Rafaela's go. "Zähler angleichen" button proposed, not built.

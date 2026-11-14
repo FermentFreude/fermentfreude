@@ -3,6 +3,8 @@
 import React, { useState, useTransition } from 'react'
 
 import { createManualWorkshopBooking } from './actions'
+import { CHANNELS, EMPTY_PAYMENT, MP, PaymentFields, toPaymentInput, validatePayment, type PaymentForm } from './ManualPayment'
+import type { Lang } from './rosterI18n'
 import { BRAND } from './rosterTheme'
 
 const inputStyle: React.CSSProperties = {
@@ -32,10 +34,13 @@ export function AddManualBookingForm({
   appointmentId,
   remainingSpots,
   onDone,
+  lang = 'de',
 }: {
   appointmentId: string
   remainingSpots: number
-  onDone: () => void
+  /** Called after saving; the message lists what was done (and any warnings). */
+  onDone: (message?: string) => void
+  lang?: Lang
 }) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -43,6 +48,8 @@ export function AddManualBookingForm({
   const [phone, setPhone] = useState('')
   const [guestCount, setGuestCount] = useState(1)
   const [notes, setNotes] = useState('')
+  const [channel, setChannel] = useState('')
+  const [pay, setPay] = useState<PaymentForm>(EMPTY_PAYMENT)
   const [error, setError] = useState('')
   const [isCreating, startCreate] = useTransition()
 
@@ -59,10 +66,19 @@ export function AddManualBookingForm({
       setError(`Nur noch ${remainingSpots} Platz/Plätze verfügbar.`)
       return
     }
+    if (!channel) {
+      setError(lang === 'de' ? 'Bitte angeben, wie die Buchung zustande gekommen ist.' : 'Please say how the booking came in.')
+      return
+    }
+    const payProblem = validatePayment(pay, lang)
+    if (payProblem) {
+      setError(payProblem)
+      return
+    }
     setError('')
     startCreate(async () => {
       try {
-        await createManualWorkshopBooking({
+        const result = await createManualWorkshopBooking({
           appointmentId,
           firstName: firstName.trim(),
           lastName: lastName.trim(),
@@ -70,8 +86,17 @@ export function AddManualBookingForm({
           phone: phone.trim() || undefined,
           guestCount,
           notes: notes.trim() || undefined,
+          channel: channel as never,
+          payment: toPaymentInput(pay),
+          createInvoice: pay.invoice,
+          sendConfirmation: pay.confirm,
         })
-        onDone()
+        const parts = [
+          lang === 'de' ? 'Gespeichert.' : 'Saved.',
+          result.invoiceNumber ? `${lang === 'de' ? 'Rechnung' : 'Invoice'} ${result.invoiceNumber}` : '',
+          ...result.warnings.map((w) => `⚠ ${w}`),
+        ].filter(Boolean)
+        onDone(parts.join(' · '))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Sitzplatz konnte nicht hinzugefügt werden.')
       }
@@ -155,6 +180,16 @@ export function AddManualBookingForm({
           rows={2}
           style={{ ...inputStyle, resize: 'vertical' }}
         />
+      </div>
+
+      <div style={{ marginBottom: '16px', display: 'grid', gap: '12px' }}>
+        <label className="ff-field"><span>{MP[lang].channel} *</span>
+          <select className="ff-input" value={channel} onChange={(e) => setChannel(e.target.value)}>
+            <option value="">{MP[lang].pick}</option>
+            {CHANNELS.map((c) => <option key={c} value={c}>{MP[lang].channels[c]}</option>)}
+          </select>
+        </label>
+        <PaymentFields value={pay} onChange={setPay} lang={lang} hasEmail={Boolean(email.trim())} />
       </div>
 
       {error && <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#dc2626' }}>{error}</p>}

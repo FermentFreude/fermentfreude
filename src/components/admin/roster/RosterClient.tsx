@@ -7,6 +7,7 @@ import { ActivityView } from './ActivityView'
 import { ProfileDialog, useUnreadNoteCount } from './AttentionPanel'
 import { ArchiveView } from './ArchiveView'
 import { CalendarView } from './CalendarView'
+import { CustomerProfilePage } from './CustomerProfile'
 import { EmailTemplatesView } from './EmailTemplatesView'
 import { OrdersView } from './OrdersView'
 import { ParticipantsView } from './ParticipantsView'
@@ -168,6 +169,8 @@ function RosterShell({ initialData }: { initialData: RosterData }) {
   const [dragKey, setDragKey] = useState<WsTab | null>(null)
   const [overKey, setOverKey] = useState<WsTab | null>(null)
   const [selectedApptId, setSelectedApptId] = useState<string | null>(null)
+  /** Person whose full profile is open inside Teilnehmer (null = the list). */
+  const [profileEmail, setProfileEmail] = useState<string | null>(null)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const refreshingRef = useRef(false)
   const t = NAV_T[lang]
@@ -226,6 +229,7 @@ function RosterShell({ initialData }: { initialData: RosterData }) {
 
   const navigate = (sec: Section) => {
     setSection(sec)
+    setProfileEmail(null)
     if (sec !== 'detail') {
       setSelectedApptId(null)
       setLastTab((prev) => ({ ...prev, [groupOf(sec)]: sec }))
@@ -273,7 +277,17 @@ function RosterShell({ initialData }: { initialData: RosterData }) {
     saveOrder(next)
   }
 
+  const openProfile = (email: string) => {
+    setProfileEmail(email)
+    setSection('participants')
+    setLastTab((prev) => ({ ...prev, [groupOf('participants')]: 'participants' }))
+    window.scrollTo({ top: 0 })
+  }
   const openDetail = (apptId: string) => {
+    if (!data.appointments.some((a) => a.id === apptId)) {
+      toast(lang === 'de' ? 'Dieser Termin ist nicht mehr in der Liste (zu alt). Er steht im Archiv.' : 'This date is no longer in the list (too old). It is in the Archive.')
+      return
+    }
     setSelectedApptId(apptId)
     setSection('detail')
     window.scrollTo({ top: 0 })
@@ -418,9 +432,16 @@ function RosterShell({ initialData }: { initialData: RosterData }) {
               lang={lang}
               onBack={() => navigate(lastTab.workshops ?? wsOrder[0])}
               onRefresh={refresh}
+              onOpenProfile={openProfile}
+              onOpenWorkshop={openDetail}
             />
           )}
-          {section === 'participants' && <ParticipantsView participants={data.participants} stats={data.stats} />}
+          {section === 'participants' && profileEmail && (
+            <CustomerProfilePage email={profileEmail} lang={lang} onBack={() => setProfileEmail(null)} onOpenWorkshop={openDetail} />
+          )}
+          {section === 'participants' && !profileEmail && (
+            <ParticipantsView participants={data.participants} stats={data.stats} lang={lang} onOpenProfile={openProfile} />
+          )}
           {section === 'pickups' && <PickupsView orders={data.pickupOrders} onRefresh={refresh} />}
           {section === 'vouchers' && <VouchersView vouchers={data.vouchers} onRefresh={refresh} />}
           {section === 'orders' && <OrdersView orders={data.orders} onRefresh={refresh} />}

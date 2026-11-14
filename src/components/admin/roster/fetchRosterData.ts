@@ -19,6 +19,7 @@ import type {
   VoucherRow,
 } from './types'
 import { seatsHoldingPlace, seatStatusAt } from '@/lib/seatCapacity'
+import { capacityOf, workshopCapacity } from '@/lib/appointmentCapacity'
 
 /** Extract plain text from a Lexical rich-text JSON node (recursive). */
 function lexicalToPlainText(value: unknown): string {
@@ -72,6 +73,7 @@ export function toBookingRow(b: { id: string | number }): BookingRow {
     seats?: Array<{ recipientName?: string; email?: string | null; giftNote?: string; seatStatus?: string; cancelledAt?: string; cancelledReason?: string }>
     createdAt?: string
     orderId?: string
+    appointmentId?: string
     workshopTitle?: string
     workshopSlug?: string
     date?: string
@@ -80,6 +82,7 @@ export function toBookingRow(b: { id: string | number }): BookingRow {
     totalPrice?: number
     status?: string
     history?: Array<{ id?: string; at?: string; type?: string; summary?: string; by?: string }>
+    manualInfo?: { channel?: string | null; paymentStatus?: string | null; paymentMethod?: string | null; voucherCode?: string | null; paymentNote?: string | null }
   }
   const seats: SeatEntry[] = (bk.seats ?? []).map((s) => ({
     recipientName: s.recipientName?.trim() ?? '',
@@ -91,6 +94,7 @@ export function toBookingRow(b: { id: string | number }): BookingRow {
   }))
   return {
     id: String(b.id),
+    appointmentId: bk.appointmentId ?? '',
     firstName: bk.firstName ?? '',
     lastName: bk.lastName ?? '',
     email: bk.email ?? '',
@@ -114,6 +118,15 @@ export function toBookingRow(b: { id: string | number }): BookingRow {
       summary: h.summary ?? '',
       by: h.by ?? '',
     })),
+    manual: bk.manualInfo
+      ? {
+          channel: bk.manualInfo.channel ?? '',
+          paymentStatus: (bk.manualInfo.paymentStatus as 'paid' | 'open' | null) ?? '',
+          paymentMethod: bk.manualInfo.paymentMethod ?? '',
+          voucherCode: bk.manualInfo.voucherCode ?? '',
+          paymentNote: bk.manualInfo.paymentNote ?? '',
+        }
+      : undefined,
   } satisfies BookingRow
 }
 
@@ -165,7 +178,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
 
     // Seats that were rebooked, cancelled or refunded no longer take a place here.
     const totalBooked = bResult.docs.reduce((sum, b) => sum + seatsHoldingPlace(b), 0)
-    const capacity = Number(workshopAny?.maxCapacityPerSlot ?? 12)
+    const capacity = capacityOf(appt as never)
 
     // Unpaid bookings hold seats on the booking page; only relevant for upcoming dates.
     let pendingSeats = 0
@@ -195,6 +208,8 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       pricePerPerson,
       totalBooked,
       capacity,
+      ownCapacity: typeof (appt as { capacity?: unknown }).capacity === 'number' ? ((appt as { capacity?: number }).capacity as number) : null,
+      standardCapacity: workshopCapacity(workshopAny) ?? undefined,
       isPast,
       counterFree,
       pendingSeats,

@@ -9,6 +9,7 @@ import { cancelReasonLabel, loadFreshForMutation, logActivityEvent, updateSeat }
 import { getServerSideURL } from '@/utilities/getURL'
 import { addBookingHistory, emailOutcome } from '@/lib/bookingHistory'
 import { releaseSeatFromAppointment } from '@/lib/seatCapacity'
+import { capacityOf } from '@/lib/appointmentCapacity'
 
 /* ═══════════════════════════════════════════════════════════════
  *  POST /api/manage-booking/[token]/rebook-now
@@ -282,7 +283,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // Roll back the reservation — without this, a failed booking-create
     // still leaves the spot permanently decremented with nothing to show
     // for it, silently shrinking capacity on the target date.
-    const rollbackMaxCapacity = newWorkshop.maxCapacityPerSlot ?? 12
+    const rollbackMaxCapacity = capacityOf(newAppointment)
     await releaseSpotsAtomic(payload, newAppointmentId, 1, rollbackMaxCapacity).catch(() => {})
     payload.logger.error(
       `[manage-booking] Failed to create rebooked booking for original ${booking.id}: ${err instanceof Error ? err.message : String(err)}`,

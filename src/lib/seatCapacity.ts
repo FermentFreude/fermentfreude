@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import { releaseSpotsAtomic } from '@/lib/atomicSpots'
+import { capacityOf } from '@/lib/appointmentCapacity'
 
 /* ═══════════════════════════════════════════════════════════════
  *  Which seats of a booking still take up a place on its date.
@@ -57,10 +58,7 @@ export async function releaseSeatFromAppointment(
       depth: 1,
       overrideAccess: true,
     })
-    const workshop = appointment.workshop
-    const maxCapacity =
-      typeof workshop === 'object' && workshop !== null ? Number(workshop.maxCapacityPerSlot ?? 12) : 12
-    await releaseSpotsAtomic(payload, appointmentId, 1, maxCapacity)
+    await releaseSpotsAtomic(payload, appointmentId, 1, capacityOf(appointment))
   } catch (err) {
     payload.logger.error(
       `[${logContext}] Seat left appointment ${appointmentId} but giving the place back failed: ${err instanceof Error ? err.message : String(err)}`,

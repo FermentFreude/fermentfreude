@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 
 import { BookingDetailModal } from './BookingDetailModal'
+import type { Lang } from './rosterI18n'
 import type { ParticipantRow, RosterStats } from './types'
 import { BRAND, PageHeader, StatCard, STATUS } from './rosterTheme'
 import { seatStatusLabel } from './seatStatusLabels'
@@ -10,6 +11,9 @@ import { seatStatusLabel } from './seatStatusLabels'
 interface Props {
   participants: ParticipantRow[]
   stats: RosterStats
+  lang?: Lang
+  /** Opens the person's full profile page (needs an email). */
+  onOpenProfile?: (email: string) => void
 }
 
 function initials(name: string): string {
@@ -21,7 +25,7 @@ function initials(name: string): string {
     .join('')
 }
 
-export function ParticipantsView({ participants, stats }: Props) {
+export function ParticipantsView({ participants, stats, onOpenProfile }: Props) {
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<ParticipantRow | null>(null)
 
@@ -95,7 +99,7 @@ export function ParticipantsView({ participants, stats }: Props) {
               {filtered.map((p, i) => (
                 <tr
                   key={i}
-                  onClick={() => setSelected(p)}
+                  onClick={() => (p.email && onOpenProfile ? onOpenProfile(p.email) : setSelected(p))}
                   style={{ borderTop: '1px solid var(--theme-elevation-100)', cursor: 'pointer' }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'var(--theme-elevation-50)' }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent' }}

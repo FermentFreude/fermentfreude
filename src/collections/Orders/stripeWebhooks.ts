@@ -5,6 +5,7 @@ import { logActivityEvent } from '@/lib/manageBooking'
 import { fulfilVoucherPurchase } from '@/lib/voucherFulfilment'
 import type { PayloadRequest } from 'payload'
 import type Stripe from 'stripe'
+import { capacityOf } from '@/lib/appointmentCapacity'
 
 /**
  * Custom Stripe webhook handlers for the ecommerce plugin.
@@ -171,10 +172,7 @@ export async function handleChargeRefunded({
             depth: 1,
             overrideAccess: true,
           })
-          const maxCapacity =
-            typeof appointment.workshop === 'object'
-              ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
-              : 12
+          const maxCapacity = capacityOf(appointment)
           await releaseSpotsAtomic(payload, booking.appointmentId, 1, maxCapacity)
         } catch (err) {
           payload.logger.error(
@@ -294,10 +292,7 @@ export async function handleChargeRefunded({
           overrideAccess: true,
         })
 
-        const maxCapacity =
-          typeof appointment.workshop === 'object'
-            ? (appointment.workshop?.maxCapacityPerSlot ?? 12)
-            : 12
+        const maxCapacity = capacityOf(appointment)
 
         await releaseSpotsAtomic(payload, booking.appointmentId, booking.guestCount ?? 1, maxCapacity)
 

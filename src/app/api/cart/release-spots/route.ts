@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const appointmentId = typeof body.appointmentId === 'string' ? body.appointmentId.trim() : ''
     const bookingId = typeof body.bookingId === 'string' ? body.bookingId.trim() : ''
     const releaseGuests =
-      typeof body.releaseGuests === 'number' && body.releaseGuests >= 1 && body.releaseGuests <= 12
+      typeof body.releaseGuests === 'number' && body.releaseGuests >= 1 && body.releaseGuests <= 50
         ? Math.floor(body.releaseGuests)
         : null
 

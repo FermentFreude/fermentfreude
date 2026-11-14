@@ -269,7 +269,7 @@ npx tsc --noEmit            # Must pass with zero errors`}</Code>
             { name: 'title', description: 'Workshop name (localized)', required: true },
             { name: 'description', description: 'Rich-text description (localized)' },
             { name: 'basePrice', description: 'Price per person in EUR (not cents!)', required: true },
-            { name: 'maxCapacityPerSlot', description: 'Fixed at 12 per session' },
+            { name: 'maxCapacityPerSlot', description: 'Standard capacity per session; a single date can override it' },
             { name: 'image', description: 'Hero image upload' },
             { name: 'isActive', description: 'Visibility toggle' },
           ]}

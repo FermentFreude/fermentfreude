@@ -364,6 +364,19 @@ npx tsc --noEmit            # Must pass with zero errors
 - **Brute-force protection on login is `auth.maxLoginAttempts` + `lockTime` on `Users`, not a rate-limit middleware** — there is no rate-limiting library in this project. This is a deliberate choice: Payload persists lockout state per-user in MongoDB, so it holds across Vercel's serverless instances, whereas an in-memory limiter wouldn't. There is currently no comparable protection against `/api/users/forgot-password` being spammed for a given email (email-bombing / Brevo quota abuse) — flagged as a known gap, not yet fixed.
 - **Any Payload collection whose `access` block returns `true` unconditionally for `create`/`update`/`delete` is a real vulnerability, not a convenience** — it means an unauthenticated request can write to it via Payload's REST/GraphQL API regardless of what the admin UI's own page-level gating implies. Use `adminOnly` (or the correct narrower access function) explicitly, every time, even for collections that "should" only ever be touched from `/admin`.
 
+## Seats, Capacity & Bookings (rules)
+
+Details: `docs/SEATS_AND_CAPACITY.md`.
+
+- **Bookings are managed in the roster dashboard, not in the CMS.** `workshop-bookings` is read-only in `/admin` (update/delete blocked). Dates and capacity are managed in the CMS.
+- **Capacity = the date's own "Kapazität für diesen Termin", else the workshop's `maxCapacityPerSlot`, else 12.** Always use `capacityOf()` from `src/lib/appointmentCapacity.ts`; never hard-code 12 or read `maxCapacityPerSlot` directly. There is no 12 limit any more.
+- **`availableSpots` only changes via `reserveSpotsAtomic` / `releaseSpotsAtomic`** (`src/lib/atomicSpots.ts`). Never import `next/cache` there (build error); call `refreshPublicAvailability()` (`components/admin/roster/publicAvailability.ts`) in the server action instead.
+- Real free seats = capacity − confirmed seats still holding a place − pending holds. The dashboard warns ("!") when the website counter differs. **Never correct production counters without Rafaela's explicit go**; ask the founders first.
+- **Checkout-hold seats are given back with `releaseSeatsOnce`** (idempotent, recoverable by `sweepPendingReleases`, run every 5 min by `/api/cron/release-holds`); cancelling a hold also cancels the basket's open Stripe payments. Never use a bare `releaseSpotsAtomic` for a hold.
+- Every dashboard edit (name, email, note, phone, price, payment, move, seat changes, release) writes a history entry with who and old → new.
+- Hand-entered bookings carry `manualInfo` (source + payment). Wix imports are paid in Wix; no invoice from the dashboard.
+- **Copying production to staging:** back up staging, dump prod read-only, restore only a folder with the wanted collections (`--drop`, after `--dryRun`), never use `--nsInclude` with `--nsFrom/--nsTo`, then anonymise all non-team emails/phones. Full procedure in the doc.
+
 ## Admin Dashboard
 
 David & Marcel (founders) are non-coders who manage content via `/admin`.
@@ -383,5 +396,6 @@ David & Marcel (founders) are non-coders who manage content via `/admin`.
 - `docs/TRANSLATION.md` — DeepL hooks, locale system
 - `docs/SECURITY.md` — Auth, GDPR, payments, incident response
 - `docs/DEVELOPMENT.md` — Dev workflow, troubleshooting
+- `docs/SEATS_AND_CAPACITY.md` — Capacity per date, seat counter, who changes what, manual bookings, prod→staging copy
 - `docs/ACCESSIBILITY.md` — WCAG 2.1 AA compliance
 - `docs/PERFORMANCE.md` — Lighthouse 90+, Core Web Vitals

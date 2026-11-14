@@ -3,8 +3,6 @@
 import configPromise from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 
-import { sendTransactionalEmail } from '@/lib/brevo'
-import { getServerSideURL } from '@/utilities/getURL'
 
 import type { AttentionSeverity } from './attentionTypes'
 import { adminDisplayName, requireAdminUser } from './requireAdmin'
@@ -75,49 +73,6 @@ async function validImageIds(payload: Payload, ids: string[] | undefined): Promi
   return out
 }
 
-/** Email the people a note concerns, if their alert setting allows it. Never the sender. */
-async function alertTeam(
-  payload: Payload,
-  opts: { noteId: string; title: string; severity: string; to: string; senderId: string; senderName: string; text: string },
-): Promise<string[]> {
-  const team = await payload.find({
-    collection: 'users',
-    where: { roles: { contains: 'admin' } },
-    limit: 50,
-    depth: 0,
-    overrideAccess: true,
-  })
-  const targets = team.docs.filter((u) => {
-    const id = String(u.id)
-    if (id === opts.senderId) return false
-    if (opts.to !== 'all' && opts.to !== id) return false
-    const pref = (u as { noteEmailPref?: string | null }).noteEmailPref ?? 'all'
-    return pref === 'all' || (pref === 'urgent' && opts.severity === 'urgent')
-  })
-  const link = `${getServerSideURL().replace(/\/$/, '')}/admin/workshop-roster?note=${encodeURIComponent(opts.noteId)}`
-  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  const notified: string[] = []
-  for (const u of targets) {
-    if (!u.email) continue
-    const html = `<!doctype html><html lang="de"><body style="margin:0;background:#F5F3EE;font-family:Helvetica,Arial,sans-serif;color:#2A2C28">
-<div style="max-width:560px;margin:0 auto;padding:32px 20px">
-<p style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#7A540C;margin:0 0 8px">Fermentfreude Dashboard</p>
-<h1 style="font-size:22px;margin:0 0 16px">${esc(opts.title)}</h1>
-<p style="margin:0 0 6px;color:#6F726B">${esc(opts.senderName)} schreibt:</p>
-<div style="background:#fff;border:1px solid #E6E2D7;border-radius:12px;padding:14px 16px;white-space:pre-wrap">${esc(opts.text || '(ohne Text)')}</div>
-<p style="margin:24px 0"><a href="${link}" style="background:#E6BE68;color:#2A2C28;text-decoration:none;font-weight:700;padding:11px 18px;border-radius:10px;display:inline-block">Im Dashboard öffnen</a></p>
-<p style="font-size:12px;color:#6F726B">Diese Hinweise kannst du im Dashboard unter deinem Profil ausschalten.</p>
-</div></body></html>`
-    const r = await sendTransactionalEmail({
-      to: [{ email: u.email, name: (u as { name?: string | null }).name ?? undefined }],
-      subject: `${opts.severity === 'urgent' ? 'Dringend: ' : ''}${opts.title} — Notiz im Dashboard`,
-      htmlContent: html,
-    })
-    if (r.success && !r.blocked) notified.push((u as { name?: string | null }).name || u.email)
-  }
-  return notified
-}
-
 export type NoteInput = {
   title: string
   body?: string
@@ -127,7 +82,6 @@ export type NoteInput = {
   /** user id, 'all' or '' */
   assignedTo?: string
   imageIds?: string[]
-  notify?: boolean
   /** When the note grows out of an automatic item: that item's key (it is then hidden). */
   fromAutoKey?: string
 }
@@ -172,13 +126,7 @@ export async function createAttentionNote(input: NoteInput): Promise<Result<{ id
       overrideAccess: true,
     })
     if (input.fromAutoKey) await ackKey(payload, user, input.fromAutoKey, `Ins Gespräch übernommen: ${meta.title}`)
-    const notified =
-      input.notify && to
-        ? await alertTeam(payload, {
-            noteId: String(doc.id), title: meta.title, severity: meta.severity, to, senderId: me,
-            senderName: adminDisplayName(user), text,
-          })
-        : []
+    const notified: string[] = []
     return { ok: true, data: { id: String(doc.id), notified } }
   } catch (e) {
     return fail(e)
@@ -222,16 +170,7 @@ export async function replyToNote(params: {
       data: { messages, seenBy: seen, ...(reopen ? { status: 'open', doneByName: '', doneAt: null } : {}) },
       overrideAccess: true,
     })
-    // Who should hear about it: the asked person, or — if they answered — the one who asked.
-    const asked = note.assignedTo ?? ''
-    const target = asked === 'all' ? 'all' : asked && asked !== me ? asked : (note.createdById ?? '')
-    const notified =
-      params.notify && target && target !== me
-        ? await alertTeam(payload, {
-            noteId: params.id, title: note.title ?? 'Notiz', severity: note.severity ?? 'attention', to: target,
-            senderId: me, senderName: adminDisplayName(user), text,
-          })
-        : []
+    const notified: string[] = []
     return { ok: true, data: { notified } }
   } catch (e) {
     return fail(e)
@@ -257,12 +196,7 @@ export async function reassignNote(params: { id: string; to: string; text?: stri
       data: { assignedTo: params.to, messages, seenBy: seen, status: 'open', doneByName: '', doneAt: null },
       overrideAccess: true,
     })
-    const notified = params.notify
-      ? await alertTeam(payload, {
-          noteId: params.id, title: note.title ?? 'Notiz', severity: note.severity ?? 'attention', to: params.to,
-          senderId: me, senderName: adminDisplayName(user), text,
-        })
-      : []
+    const notified: string[] = []
     return { ok: true, data: { notified } }
   } catch (e) {
     return fail(e)
