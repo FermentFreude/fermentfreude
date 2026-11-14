@@ -44,7 +44,7 @@ export type AutoAttentionItem = {
   key: string
   severity: AttentionSeverity
   /** Which rule found it — decides the wording. */
-  rule: 'seat-mismatch' | 'no-receipt' | 'refund-open'
+  rule: 'seat-mismatch' | 'no-receipt' | 'payment-open' | 'refund-open'
   appointmentId?: string
   params: Record<string, string | number>
 }

@@ -456,6 +456,18 @@ export interface Order {
    */
   invoiceIssuedAt?: string | null;
   /**
+   * Frozen invoice lines. Saved once when the invoice is issued, so moving a booking or changing a price later can never change an invoice that was already issued.
+   */
+  invoiceItemsSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
    * Set automatically when this order is a voucher purchase — the voucher that was bought.
    */
   purchasedVoucher?: (string | null) | Voucher;
@@ -5804,7 +5816,7 @@ export interface Voucher {
    */
   redeemedBy?: (string | null) | User;
   /**
-   * Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on purchase.
+   * Nummer aus der FF-Reihe (FF-JJJJ-NNNN), wird automatisch vergeben und steht nicht auf dem Gutschein-PDF (dort steht der Code FF-GIFT-…). Die Rechnung für einen Gutschein-Kauf ist aktuell die WEB-Rechnung der zugehörigen Bestellung. Beim Einlösen entsteht eine eigene Rechnung für den Workshop, die den Gutschein als bereits bezahlt abzieht: das ist kein zweiter Kauf.
    */
   invoiceNumber?: string | null;
   /**
@@ -6363,7 +6375,7 @@ export interface WorkshopBooking {
     channel?: ('email' | 'phone' | 'inperson' | 'wix' | 'other') | null;
     paymentStatus?: ('paid' | 'open') | null;
     paymentMethod?:
-      | ('transfer' | 'cash' | 'card_onsite' | 'voucher_wix' | 'voucher_shop' | 'wix_paid' | 'other')
+      | ('transfer' | 'cash' | 'card_onsite' | 'voucher_wix' | 'voucher_shop' | 'wix_paid' | 'rebooking' | 'other')
       | null;
     voucherCode?: string | null;
     paymentNote?: string | null;
@@ -10030,6 +10042,7 @@ export interface OrdersSelect<T extends boolean = true> {
   invoiceNumber?: T;
   downloadToken?: T;
   invoiceIssuedAt?: T;
+  invoiceItemsSnapshot?: T;
   purchasedVoucher?: T;
   updatedAt?: T;
   createdAt?: T;

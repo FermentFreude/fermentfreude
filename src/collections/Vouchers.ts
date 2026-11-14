@@ -192,11 +192,12 @@ export const Vouchers: CollectionConfig = {
     {
       name: 'invoiceNumber',
       type: 'text',
-      label: 'Invoice Number',
+      label: 'Gutschein-Nr. (FF-Reihe)',
       admin: {
         readOnly: true,
         position: 'sidebar',
-        description: 'Sequential invoice number (e.g. FF-2026-0001). Assigned automatically on purchase.',
+        description:
+          'Nummer aus der FF-Reihe (FF-JJJJ-NNNN), wird automatisch vergeben und steht nicht auf dem Gutschein-PDF (dort steht der Code FF-GIFT-…). Die Rechnung für einen Gutschein-Kauf ist aktuell die WEB-Rechnung der zugehörigen Bestellung. Beim Einlösen entsteht eine eigene Rechnung für den Workshop, die den Gutschein als bereits bezahlt abzieht: das ist kein zweiter Kauf.',
       },
     },
     /* ── PDF Download (admin-only button) ── */

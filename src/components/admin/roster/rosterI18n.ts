@@ -75,6 +75,7 @@ type Dict = {
   rule: {
     seatMismatch: (p: { workshop: string; date: string; shown: number; expected: number }) => { title: string; detail: string }
     noReceipt: (p: { name: string; workshop: string; date: string }) => { title: string; detail: string }
+    paymentOpen: (p: { name: string; workshop: string; date: string }) => { title: string; detail: string }
     refundOpen: (p: { name: string; days: number }) => { title: string; detail: string }
   }
   lang: string
@@ -128,6 +129,10 @@ export const WELCOME: Record<Lang, Dict> = {
       noReceipt: (p) => ({
         title: `Seat without receipt: ${p.name}`,
         detail: `${p.workshop}, ${p.date}. No order or import note found. Add how it was paid.`,
+      }),
+      paymentOpen: (p) => ({
+        title: `Reservation not paid yet: ${p.name}`,
+        detail: `${p.workshop}, ${p.date}. The seat is held but no payment is recorded. Record the payment under "Payment", or free the seat.`,
       }),
       refundOpen: (p) => ({
         title: `Refund request from ${p.name}`,
@@ -183,6 +188,10 @@ export const WELCOME: Record<Lang, Dict> = {
       noReceipt: (p) => ({
         title: `Platz ohne Beleg: ${p.name}`,
         detail: `${p.workshop}, ${p.date}. Keine Bestellung oder Import-Notiz gefunden. Bitte die Zahlungsart ergänzen.`,
+      }),
+      paymentOpen: (p) => ({
+        title: `Reservierung noch nicht bezahlt: ${p.name}`,
+        detail: `${p.workshop}, ${p.date}. Der Platz ist reserviert, aber es ist keine Zahlung eingetragen. Bitte unter „Zahlung“ eintragen oder den Platz freigeben.`,
       }),
       refundOpen: (p) => ({
         title: `Rückerstattung von ${p.name}`,

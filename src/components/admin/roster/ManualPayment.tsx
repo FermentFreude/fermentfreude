@@ -25,7 +25,7 @@ export type PaymentForm = {
 export const EMPTY_PAYMENT: PaymentForm = { status: '', method: '', voucherCode: '', note: '', invoice: false, confirm: false }
 
 export const CHANNELS = ['email', 'phone', 'inperson', 'wix', 'other'] as const
-export const METHODS = ['transfer', 'cash', 'card_onsite', 'voucher_wix', 'voucher_shop', 'wix_paid', 'other'] as const
+export const METHODS = ['transfer', 'cash', 'card_onsite', 'voucher_wix', 'voucher_shop', 'wix_paid', 'rebooking', 'other'] as const
 
 export const MP = {
   de: {
@@ -33,28 +33,28 @@ export const MP = {
     channels: { email: 'Per E-Mail', phone: 'Telefon', inperson: 'Vor Ort / im Shop', wix: 'Über Wix', other: 'Sonstiges' } as Record<string, string>,
     status: 'Zahlung', paid: 'Bezahlt', open: 'Noch offen (Reservierung)',
     method: 'Zahlungsart',
-    methods: { transfer: 'Überweisung', cash: 'Bar', card_onsite: 'Karte vor Ort', voucher_wix: 'Wix-Gutschein', voucher_shop: 'Gutschein (Shop / Website)', wix_paid: 'Bereits in Wix bezahlt', other: 'Sonstiges' } as Record<string, string>,
+    methods: { transfer: 'Überweisung', cash: 'Bar', card_onsite: 'Karte vor Ort', voucher_wix: 'Wix-Gutschein', voucher_shop: 'Gutschein (Shop / Website)', wix_paid: 'Bereits in Wix bezahlt', rebooking: 'Umbuchung (bereits bezahlt)', other: 'Sonstiges' } as Record<string, string>,
     code: 'Gutschein-Code', note: 'Notiz zur Zahlung (optional)', notePh: 'z. B. Überweisung am 12.11. eingegangen',
     invoice: 'Rechnung erstellen', invoiceHint: 'Optional, geht auch später. Nur für bezahlte Plätze.',
     invoiceVoucher: 'Bei Gutscheinen gibt es die Rechnung meist schon beim Gutscheinkauf.',
     confirm: 'Bestätigung per E-Mail senden', confirmHint: 'Optional, geht auch später.', noEmail: 'Dafür wird eine E-Mail-Adresse gebraucht.',
     title: 'Zahlung und Herkunft', save: 'Speichern', cancel: 'Abbrechen', saved: 'Gespeichert.',
     needStatus: 'Bitte angeben, ob bezahlt oder noch offen.', needMethod: 'Bitte die Zahlungsart wählen.', needCode: 'Bitte den Gutschein-Code eintragen.',
-    hasInvoice: 'Es gibt schon eine Rechnung.', wixInvoice: 'Aus Wix übernommen: Zahlung und Rechnung laufen über Wix.',
+    hasInvoice: 'Es gibt schon eine Rechnung.', rebookNote: 'Umbuchung: kein neuer Verkauf. Der Platz kostet 0 €, es gibt keine neue Rechnung. Bezahlt und fakturiert ist über die ursprüngliche Buchung.', wixInvoice: 'Aus Wix übernommen: Zahlung und Rechnung laufen über Wix.',
   },
   en: {
     channel: 'How did the booking come in?', pick: '– please choose –',
     channels: { email: 'By email', phone: 'Phone', inperson: 'In person / in the shop', wix: 'Via Wix', other: 'Other' } as Record<string, string>,
     status: 'Payment', paid: 'Paid', open: 'Not paid yet (reservation)',
     method: 'Payment method',
-    methods: { transfer: 'Bank transfer', cash: 'Cash', card_onsite: 'Card on site', voucher_wix: 'Wix voucher', voucher_shop: 'Voucher (shop / website)', wix_paid: 'Already paid in Wix', other: 'Other' } as Record<string, string>,
+    methods: { transfer: 'Bank transfer', cash: 'Cash', card_onsite: 'Card on site', voucher_wix: 'Wix voucher', voucher_shop: 'Voucher (shop / website)', wix_paid: 'Already paid in Wix', rebooking: 'Rebooking (already paid)', other: 'Other' } as Record<string, string>,
     code: 'Voucher code', note: 'Payment note (optional)', notePh: 'e.g. transfer received on 12 Nov',
     invoice: 'Create invoice', invoiceHint: 'Optional, can be done later. Paid seats only.',
     invoiceVoucher: 'For vouchers the invoice usually exists from the voucher purchase.',
     confirm: 'Send confirmation email', confirmHint: 'Optional, can be done later.', noEmail: 'This needs an email address.',
     title: 'Payment and source', save: 'Save', cancel: 'Cancel', saved: 'Saved.',
     needStatus: 'Please say whether it is paid or still open.', needMethod: 'Please choose the payment method.', needCode: 'Please enter the voucher code.',
-    hasInvoice: 'An invoice already exists.', wixInvoice: 'Imported from Wix: payment and invoice are handled in Wix.',
+    hasInvoice: 'An invoice already exists.', rebookNote: 'Rebooking: not a new sale. The seat costs 0 €, there is no new invoice. It was paid and invoiced on the original booking.', wixInvoice: 'Imported from Wix: payment and invoice are handled in Wix.',
   },
 }
 
@@ -105,7 +105,7 @@ export function PaymentFields({
         </label>
         {value.status === 'paid' && (
           <label className="ff-field"><span>{t.method} *</span>
-            <select className="ff-input" value={value.method} onChange={(e) => set({ method: e.target.value })}>
+            <select className="ff-input" value={value.method} onChange={(e) => set({ method: e.target.value, ...(e.target.value === 'rebooking' ? { invoice: false } : {}) })}>
               <option value="">{t.pick}</option>
               {METHODS.map((m) => <option key={m} value={m}>{t.methods[m]}</option>)}
             </select>
@@ -122,12 +122,12 @@ export function PaymentFields({
           <input className="ff-input" value={value.note} maxLength={300} placeholder={t.notePh} onChange={(e) => set({ note: e.target.value })} />
         </label>
       )}
-      <label className="ff-chk" style={{ opacity: value.status === 'paid' && canInvoice ? 1 : 0.5 }}>
-        <input type="checkbox" checked={value.invoice} disabled={value.status !== 'paid' || !canInvoice} onChange={(e) => set({ invoice: e.target.checked })} />
+      <label className="ff-chk" style={{ opacity: value.status === 'paid' && canInvoice && value.method !== 'rebooking' ? 1 : 0.5 }}>
+        <input type="checkbox" checked={value.invoice} disabled={value.status !== 'paid' || !canInvoice || value.method === 'rebooking'} onChange={(e) => set({ invoice: e.target.checked })} />
         <span>
           <b>{t.invoice}</b>
           <span className="ff-muted" style={{ display: 'block', fontSize: 12 }}>
-            {!canInvoice ? (invoiceNote ?? t.hasInvoice) : t.invoiceHint}
+            {value.method === 'rebooking' ? t.rebookNote : !canInvoice ? (invoiceNote ?? t.hasInvoice) : t.invoiceHint}
             {isVoucher && canInvoice && ` ${t.invoiceVoucher}`}
           </span>
         </span>

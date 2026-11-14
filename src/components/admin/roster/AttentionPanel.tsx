@@ -221,7 +221,13 @@ export function AttentionPanel({
       .map((i) => {
         const p = i.params
         const text =
-          i.rule === 'seat-mismatch' ? w.rule.seatMismatch(p as never) : i.rule === 'no-receipt' ? w.rule.noReceipt(p as never) : w.rule.refundOpen(p as never)
+          i.rule === 'seat-mismatch'
+            ? w.rule.seatMismatch(p as never)
+            : i.rule === 'no-receipt'
+              ? w.rule.noReceipt(p as never)
+              : i.rule === 'payment-open'
+                ? w.rule.paymentOpen(p as never)
+                : w.rule.refundOpen(p as never)
         return { key: i.key, severity: i.severity, appointmentId: i.appointmentId, ...text }
       })
   }, [data, w])

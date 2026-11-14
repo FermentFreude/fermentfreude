@@ -415,6 +415,7 @@ export const WorkshopBookings: CollectionConfig = {
             { label: 'Wix-Gutschein', value: 'voucher_wix' },
             { label: 'Gutschein (Shop / Website)', value: 'voucher_shop' },
             { label: 'Bereits in Wix bezahlt', value: 'wix_paid' },
+            { label: 'Umbuchung (bereits bezahlt, kein neuer Verkauf)', value: 'rebooking' },
             { label: 'Sonstiges', value: 'other' },
           ],
         },
