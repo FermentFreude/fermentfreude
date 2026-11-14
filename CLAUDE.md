@@ -38,7 +38,13 @@ STRIPE_WEBHOOKS_SIGNING_SECRET       # whsec_
 DEEPL_API_KEY                        # Auto-translation DE→EN
 CRON_SECRET                          # Auth for Vercel Cron → /api/emails/workshop-reminders (route refuses to run without it)
 MAINTENANCE_MODE                     # "true" = visitors see /wartung (503); team enters PREVIEW_PASSWORD at /maintenance. Off by default
+EMAIL_TEST_COPY_TO                   # Comma-separated: gets a copy of every "Test an mich senden" from the dashboard's E-Mails tab
+EMAIL_TEST_ALLOWLIST                 # Comma-separated test inboxes. Outside production Brevo ONLY emails @fermentfreude.at/.de, ADMIN_NOTIFICATION_EMAIL and these (src/lib/emailSafety.ts)
 ```
+
+**Email safety (since Nov 2026):** `src/lib/brevo.ts` sends to real recipients only when `VERCEL_ENV === 'production'` and `DATABASE_URL` is not the staging DB. Localhost, staging and scripts drop every other recipient and log it — the staging DB still contains some real customer accounts, and the Brevo account is shared. Never add a switch to turn this off outside production.
+
+**Email texts:** founders edit the Brevo template texts in the Roster dashboard → "E-Mails" (text only; links, placeholders, Liquid and addresses are locked; a before-copy goes to `email-template-versions`). Outside production only `TEST – …` copies can be saved. `scripts/push-brevo-templates.mjs` now refuses to overwrite without `--overwrite-dashboard-edits`.
 
 **CRITICAL:** `NEXT_PUBLIC_*` vars are baked in at **build time**. Changing them in Vercel requires a full redeploy **without cache**.
 

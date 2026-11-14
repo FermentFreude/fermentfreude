@@ -61,6 +61,42 @@ export const Users: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'avatar',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Profile photo (team only)',
+      access: {
+        create: adminOnlyFieldAccess,
+        read: adminOnlyFieldAccess,
+        update: adminOnlyFieldAccess,
+      },
+      admin: {
+        description:
+          'Only for the team: shown in the founders dashboard next to your notes and messages. Can also be changed in the dashboard.',
+        condition: (data) => Array.isArray(data?.roles) && data.roles.includes('admin'),
+      },
+    },
+    {
+      name: 'noteEmailPref',
+      type: 'select',
+      label: 'Dashboard email alerts (team only)',
+      defaultValue: 'all',
+      options: [
+        { label: 'When someone asks me or replies', value: 'all' },
+        { label: 'Only urgent notes', value: 'urgent' },
+        { label: 'Off', value: 'off' },
+      ],
+      access: {
+        create: adminOnlyFieldAccess,
+        read: adminOnlyFieldAccess,
+        update: adminOnlyFieldAccess,
+      },
+      admin: {
+        description: 'Only for the team: when the founders dashboard sends you an email about notes. Can also be changed in the dashboard.',
+        condition: (data) => Array.isArray(data?.roles) && data.roles.includes('admin'),
+      },
+    },
+    {
       name: 'marketingConsent',
       type: 'checkbox',
       defaultValue: false,

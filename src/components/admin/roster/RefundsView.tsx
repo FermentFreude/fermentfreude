@@ -84,7 +84,7 @@ export function RefundsView({ refundRequests, onRefresh }: Props) {
   }
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: '1200px' }}>
+    <div className="ff-page">
       <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)', margin: '0 0 4px' }}>
         Rückerstattungen
       </h1>

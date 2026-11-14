@@ -74,6 +74,7 @@ export interface Config {
   collections: {
     users: User;
     'backlog-items': BacklogItem;
+    'attention-notes': AttentionNote;
     pages: Page;
     categories: Category;
     'course-progress': CourseProgress;
@@ -96,6 +97,7 @@ export interface Config {
     'refund-requests': RefundRequest;
     'activity-events': ActivityEvent;
     'brevo-email-templates': BrevoEmailTemplate;
+    'email-template-versions': EmailTemplateVersion;
     'brevo-templates': BrevoTemplate;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -128,6 +130,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'backlog-items': BacklogItemsSelect<false> | BacklogItemsSelect<true>;
+    'attention-notes': AttentionNotesSelect<false> | AttentionNotesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'course-progress': CourseProgressSelect<false> | CourseProgressSelect<true>;
@@ -150,6 +153,7 @@ export interface Config {
     'refund-requests': RefundRequestsSelect<false> | RefundRequestsSelect<true>;
     'activity-events': ActivityEventsSelect<false> | ActivityEventsSelect<true>;
     'brevo-email-templates': BrevoEmailTemplatesSelect<false> | BrevoEmailTemplatesSelect<true>;
+    'email-template-versions': EmailTemplateVersionsSelect<false> | EmailTemplateVersionsSelect<true>;
     'brevo-templates': BrevoTemplatesSelect<false> | BrevoTemplatesSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -250,6 +254,14 @@ export interface User {
   id: string;
   name?: string | null;
   /**
+   * Only for the team: shown in the founders dashboard next to your notes and messages. Can also be changed in the dashboard.
+   */
+  avatar?: (string | null) | Media;
+  /**
+   * Only for the team: when the founders dashboard sends you an email about notes. Can also be changed in the dashboard.
+   */
+  noteEmailPref?: ('all' | 'urgent' | 'off') | null;
+  /**
    * Whether the customer opted in to marketing emails during account creation.
    */
   marketingConsent?: boolean | null;
@@ -288,6 +300,67 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  caption?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -665,67 +738,6 @@ export interface Product {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  prefix?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    hero?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5980,6 +5992,80 @@ export interface BacklogItem {
   createdAt: string;
 }
 /**
+ * Notes and acknowledgements behind the "Needs a look" list. Managed in the Roster dashboard.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attention-notes".
+ */
+export interface AttentionNote {
+  id: string;
+  kind: 'note' | 'ack';
+  title?: string | null;
+  body?: string | null;
+  severity?: ('info' | 'attention' | 'urgent') | null;
+  status?: ('open' | 'done') | null;
+  /**
+   * Optional link to a workshop date.
+   */
+  appointmentId?: string | null;
+  /**
+   * Optional link to a booking.
+   */
+  bookingId?: string | null;
+  dueDate?: string | null;
+  /**
+   * Key of the automatic item (kind "ack" only).
+   */
+  autoKey?: string | null;
+  createdByName?: string | null;
+  doneByName?: string | null;
+  doneAt?: string | null;
+  /**
+   * User id of the person who started the note.
+   */
+  createdById?: string | null;
+  /**
+   * Who is asked: a user id, or "all" for the whole team. Empty = nobody in particular.
+   */
+  assignedTo?: string | null;
+  /**
+   * Why an automatic item was marked as known (kind "ack").
+   */
+  ackReason?: string | null;
+  /**
+   * The conversation: messages and events (asked, done, reopened), oldest first.
+   */
+  messages?:
+    | {
+        byId?: string | null;
+        byName?: string | null;
+        at: string;
+        text?: string | null;
+        images?: (string | Media)[] | null;
+        event?: ('asked' | 'done' | 'reopened') | null;
+        /**
+         * For "asked": the user id or "all".
+         */
+        eventTo?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Per user id: how many messages that person has seen (for "new" badges).
+   */
+  seenBy?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Stores which lessons a user has completed per course. Used for "Dein Fortschritt" on course pages.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6537,7 +6623,7 @@ export interface BookingMagicLink {
   /**
    * Which branch of seatActionOptions() this link resolves to — organiser-cancellation links are only valid while the appointment is CANCELLED_BY_ORGANISER.
    */
-  scope: 'self-service' | 'organiser-cancellation';
+  scope: 'self-service' | 'organiser-cancellation' | 'date-offer';
   issuedAt: string;
   /**
    * Nullable — leave empty for no expiry. When set and passed, the route rejects the token and the customer must be issued a new link (via the confirmation email's "resend" path or an admin action) — the underlying entitlement is untouched.
@@ -6583,7 +6669,7 @@ export interface ActivityEvent {
   createdAt: string;
 }
 /**
- * 19 pre-built email templates from /public/email-templates — edit HTML content directly
+ * Retired. Edit email texts in the dashboard under "E-Mails".
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "brevo-email-templates".
@@ -6618,7 +6704,25 @@ export interface BrevoEmailTemplate {
   createdAt: string;
 }
 /**
- * Brevo email templates. Edit content and it syncs to Brevo API.
+ * Before-copies of the email templates, used by "Rückgängig" in the dashboard. Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-template-versions".
+ */
+export interface EmailTemplateVersion {
+  id: string;
+  templateId: number;
+  templateName?: string | null;
+  subject: string;
+  htmlContent: string;
+  reason: 'before-edit' | 'before-restore';
+  savedByName?: string | null;
+  savedByEmail?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Retired — not connected to Brevo. Edit email texts in the dashboard under "E-Mails".
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "brevo-templates".
@@ -6703,6 +6807,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'backlog-items';
         value: string | BacklogItem;
+      } | null)
+    | ({
+        relationTo: 'attention-notes';
+        value: string | AttentionNote;
       } | null)
     | ({
         relationTo: 'pages';
@@ -6791,6 +6899,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'brevo-email-templates';
         value: string | BrevoEmailTemplate;
+      } | null)
+    | ({
+        relationTo: 'email-template-versions';
+        value: string | EmailTemplateVersion;
       } | null)
     | ({
         relationTo: 'brevo-templates';
@@ -6884,6 +6996,8 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  avatar?: T;
+  noteEmailPref?: T;
   marketingConsent?: T;
   roles?: T;
   orders?: T;
@@ -6949,6 +7063,42 @@ export interface BacklogItemsSelect<T extends boolean = true> {
         id?: T;
       };
   decision?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attention-notes_select".
+ */
+export interface AttentionNotesSelect<T extends boolean = true> {
+  kind?: T;
+  title?: T;
+  body?: T;
+  severity?: T;
+  status?: T;
+  appointmentId?: T;
+  bookingId?: T;
+  dueDate?: T;
+  autoKey?: T;
+  createdByName?: T;
+  doneByName?: T;
+  doneAt?: T;
+  createdById?: T;
+  assignedTo?: T;
+  ackReason?: T;
+  messages?:
+    | T
+    | {
+        byId?: T;
+        byName?: T;
+        at?: T;
+        text?: T;
+        images?: T;
+        event?: T;
+        eventTo?: T;
+        id?: T;
+      };
+  seenBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -9398,6 +9548,21 @@ export interface BrevoEmailTemplatesSelect<T extends boolean = true> {
   syncStatus?: T;
   lastSyncedAt?: T;
   syncError?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-template-versions_select".
+ */
+export interface EmailTemplateVersionsSelect<T extends boolean = true> {
+  templateId?: T;
+  templateName?: T;
+  subject?: T;
+  htmlContent?: T;
+  reason?: T;
+  savedByName?: T;
+  savedByEmail?: T;
   updatedAt?: T;
   createdAt?: T;
 }

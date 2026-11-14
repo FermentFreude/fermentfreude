@@ -1,23 +1,34 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useAuth } from '@payloadcms/ui'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ActivityView } from './ActivityView'
-import { DashboardView } from './DashboardView'
+import { ProfileDialog, useUnreadNoteCount } from './AttentionPanel'
+import { ArchiveView } from './ArchiveView'
+import { CalendarView } from './CalendarView'
+import { EmailTemplatesView } from './EmailTemplatesView'
 import { OrdersView } from './OrdersView'
 import { ParticipantsView } from './ParticipantsView'
 import { PickupsView } from './PickupsView'
 import { QuotesView } from './QuotesView'
 import { RefundsView } from './RefundsView'
+import { readLang, saveLang, type Lang } from './rosterI18n'
+import { ROSTER_CSS } from './rosterStyles'
+import { ToastProvider, useToast } from './RosterToast'
 import type { RosterData } from './types'
+import { UserAvatar } from './UserAvatar'
 import { VouchersView } from './VouchersView'
+import { WelcomeView } from './WelcomeView'
+import { Wordmark } from './Wordmark'
 import { WorkshopDetailView } from './WorkshopDetailView'
 import { WorkshopsView } from './WorkshopsView'
-import { BRAND } from './rosterTheme'
 
 type Section =
   | 'dashboard'
   | 'workshops'
+  | 'calendar'
+  | 'archive'
   | 'detail'
   | 'participants'
   | 'pickups'
@@ -26,222 +37,148 @@ type Section =
   | 'quotes'
   | 'refunds'
   | 'activity'
+  | 'emails'
 
-const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-        <rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
-      </svg>
-    ),
-  },
-  {
-    id: 'workshops',
-    label: 'Workshops',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-      </svg>
-    ),
-  },
-  {
-    id: 'participants',
-    label: 'Teilnehmer',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    ),
-  },
-]
+type GroupId = 'today' | 'workshops' | 'vouchers' | 'shop' | 'requests' | 'emails'
+type WsTab = 'calendar' | 'workshops' | 'participants' | 'archive'
 
-const SHOP_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
-  {
-    id: 'pickups',
-    label: 'Abholbestellungen',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
-      </svg>
-    ),
-  },
-  {
-    id: 'vouchers',
-    label: 'Gutscheine',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6" />
-        <path d="M22 7H2v5h20V7z" />
-        <path d="M12 22V7" />
-        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
-        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
-      </svg>
-    ),
-  },
-]
+const WS_DEFAULT: WsTab[] = ['calendar', 'workshops', 'participants', 'archive']
 
-const ORDERS_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
+const NAV_T: Record<
+  Lang,
   {
-    id: 'orders',
-    label: 'Bestellungen',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 2 6 7v13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7l-3-5" />
-        <path d="M6 7h12" />
-        <path d="M9 12a3 3 0 0 0 6 0" />
-      </svg>
-    ),
+    sub: string
+    signed: string
+    profile: string
+    cms: string
+    cmsHint: string
+    live: string
+    groups: Record<GroupId, string>
+    tabs: Record<Exclude<Section, 'detail'>, string>
+    arr: string
+    arrDone: string
+    arrReset: string
+    arrMain: string
+    arrSaved: (n: string) => string
+    arrHint: string
+    left: string
+    right: string
+  }
+> = {
+  de: {
+    sub: 'Admin',
+    signed: 'Angemeldet als',
+    profile: 'Mein Profil: Foto und E-Mail-Hinweise',
+    cms: 'CMS-Dashboard',
+    cmsHint: 'Webseiten-Texte, Bilder, Produkte und Workshop-Termine bearbeiten.',
+    live: 'Live',
+    groups: { today: 'Dashboard', workshops: 'Workshops', vouchers: 'Gutscheine', shop: 'Shop', requests: 'Anfragen', emails: 'E-Mails' },
+    tabs: {
+      dashboard: 'Übersicht', calendar: 'Kalender', workshops: 'Liste', participants: 'Teilnehmer', archive: 'Archiv',
+      vouchers: 'Gutscheine', orders: 'Bestellungen', pickups: 'Abholung', quotes: 'Angebote', refunds: 'Rückerstattungen',
+      activity: 'Aktivität', emails: 'E-Mail-Texte',
+    },
+    arr: 'Tabs anordnen',
+    arrDone: 'Fertig',
+    arrReset: 'Zurücksetzen',
+    arrMain: 'Start',
+    arrSaved: (n) => `Gespeichert. „${n}“ öffnet sich jetzt zuerst.`,
+    arrHint: 'Zieh die Tabs oder nutze die Pfeile. Der erste Tab öffnet sich, wenn du auf Workshops klickst. Die Reihenfolge gilt nur für dich.',
+    left: 'Nach links',
+    right: 'Nach rechts',
   },
-  {
-    id: 'quotes',
-    label: 'Angebote',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <path d="M14 2v6h6" />
-        <path d="M9 15h6" /><path d="M9 11h1" />
-      </svg>
-    ),
+  en: {
+    sub: 'Admin',
+    signed: 'Signed in as',
+    profile: 'My profile: photo and email alerts',
+    cms: 'CMS dashboard',
+    cmsHint: 'Edit website texts, images, products and workshop dates.',
+    live: 'Live',
+    groups: { today: 'Dashboard', workshops: 'Workshops', vouchers: 'Vouchers', shop: 'Shop', requests: 'Requests', emails: 'Emails' },
+    tabs: {
+      dashboard: 'Overview', calendar: 'Calendar', workshops: 'List', participants: 'Participants', archive: 'Archive',
+      vouchers: 'Vouchers', orders: 'Orders', pickups: 'Pickup', quotes: 'Quotes', refunds: 'Refunds', activity: 'Activity',
+      emails: 'Email texts',
+    },
+    arr: 'Arrange tabs',
+    arrDone: 'Done',
+    arrReset: 'Reset',
+    arrMain: 'Start',
+    arrSaved: (n) => `Saved. "${n}" now opens first.`,
+    arrHint: 'Drag the tabs or use the arrows. The first tab opens when you click Workshops. The order is saved only for you.',
+    left: 'Move left',
+    right: 'Move right',
   },
-]
-
-const REFUNDS_NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
-  {
-    id: 'refunds',
-    label: 'Rückerstattungen',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-        <path d="M3 3v5h5" />
-      </svg>
-    ),
-  },
-  {
-    id: 'activity',
-    label: 'Aktivität',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-      </svg>
-    ),
-  },
-]
-
-const navItemStyle = (active: boolean): React.CSSProperties => ({
-  display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '6px',
-  fontSize: '14px', fontWeight: active ? 600 : 400, cursor: 'pointer',
-  border: 'none', borderLeft: active ? `3px solid ${BRAND.gold}` : '3px solid transparent',
-  background: active ? 'var(--theme-elevation-100)' : 'transparent',
-  color: 'var(--theme-text)', width: '100%', textAlign: 'left', transition: 'background 0.15s, border-color 0.15s',
-})
-
-const s: Record<string, React.CSSProperties> = {
-  shell: { display: 'flex', minHeight: '100vh', background: 'var(--theme-bg)' },
-  sidebar: {
-    width: '220px',
-    flexShrink: 0,
-    borderRight: '1px solid var(--theme-elevation-100)',
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '24px 0',
-    background: 'var(--theme-elevation-0)',
-  },
-  sidebarHeader: { padding: '0 20px 24px', borderBottom: '1px solid var(--theme-elevation-100)' },
-  sidebarTitle: { fontSize: '16px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 },
-  sidebarSub: { fontSize: '12px', color: 'var(--theme-text)', opacity: 0.5, margin: '2px 0 0' },
-  navSection: { padding: '16px 12px 8px' },
-  navLabel: { fontSize: '11px', fontWeight: 600, color: 'var(--theme-text)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.07em', padding: '0 8px 6px' },
-  navBadge: {
-    marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    minWidth: '18px', height: '18px', padding: '0 5px', borderRadius: '999px',
-    background: '#ef4444', color: '#fff', fontSize: '11px', fontWeight: 700, lineHeight: 1,
-  },
-  liveIndicator: {
-    display: 'flex', alignItems: 'center', gap: '6px', padding: '16px 20px 0',
-    marginTop: 'auto', fontSize: '11px', color: 'var(--theme-text)', opacity: 0.4,
-  },
-  liveDot: { width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', flexShrink: 0 },
-  main: { flex: 1, overflow: 'auto' },
 }
 
-/**
- * Mobile rules for the admin dashboard.
- *
- * The roster is styled with inline `style` objects, which beat any stylesheet
- * on specificity — hence `!important` here. Keeping the overrides in one
- * media-query block means the desktop layout is untouched and every rule that
- * changes behaviour is visible in one place, rather than spread across
- * twenty-odd components as conditional style objects.
- *
- * The shell is a 220px fixed sidebar beside the content, so on a 375px phone
- * the content had about 155px to work with. Below 900px the sidebar becomes a
- * horizontally scrolling bar across the top and the content takes the width.
- */
-const MOBILE_CSS = `
-@media (max-width: 900px) {
-  .ff-roster-shell { flex-direction: column !important; }
+const ico = (d: React.ReactNode) => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    {d}
+  </svg>
+)
 
-  .ff-roster-sidebar {
-    width: 100% !important;
-    flex-direction: row !important;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 12px !important;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border-right: none !important;
-    border-bottom: 1px solid var(--theme-elevation-100) !important;
-  }
-  .ff-roster-sidebar::-webkit-scrollbar { height: 0; }
-
-  .ff-roster-head {
-    flex-shrink: 0;
-    padding: 0 10px 0 0 !important;
-    border-bottom: none !important;
-  }
-  .ff-roster-head p { white-space: nowrap; }
-
-  .ff-roster-navsection {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-    padding: 0 !important;
-  }
-  .ff-roster-navsection > * { flex-shrink: 0; white-space: nowrap; }
-
-  /* Section headings and the live dot are noise in a one-line nav bar. */
-  .ff-roster-navlabel, .ff-roster-live { display: none !important; }
-
-  /* Wide tables scroll inside their own box instead of pushing the page out. */
-  .ff-roster table {
-    display: block;
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Hardcoded two-column grids stack; the auto-fit grids already collapse. */
-  .ff-roster [style*="1fr 1fr"] { grid-template-columns: 1fr !important; }
-
-  /* Nothing should force the page wider than the screen. */
-  .ff-roster [style*="min-width: 700"],
-  .ff-roster [style*="min-width: 560"],
-  .ff-roster [style*="minWidth: 700"],
-  .ff-roster [style*="minWidth: 560"] { min-width: 0 !important; }
+const ICONS: Record<GroupId, React.ReactNode> = {
+  today: ico(<><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /></>),
+  workshops: ico(<><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></>),
+  vouchers: ico(<><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" /><path d="M22 7H2v5h20V7zM12 22V7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></>),
+  shop: ico(<><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><path d="M3 6h18M16 10a4 4 0 0 1-8 0" /></>),
+  requests: ico(<><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></>),
+  emails: ico(<><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 6L2 7" /></>),
 }
-`
+
+const STATIC_TABS: Record<Exclude<GroupId, 'workshops'>, Section[]> = {
+  today: ['dashboard'],
+  vouchers: ['vouchers'],
+  shop: ['orders', 'pickups', 'quotes'],
+  requests: ['refunds', 'activity'],
+  emails: ['emails'],
+}
+const GROUP_ORDER: GroupId[] = ['today', 'workshops', 'vouchers', 'shop', 'requests', 'emails']
+
+function tabOrderKey(userId: string | number | undefined) {
+  return `ff-roster-taborder:${userId ?? 'anon'}`
+}
+
+function readTabOrder(userId: string | number | undefined): WsTab[] {
+  try {
+    const v = JSON.parse(window.localStorage.getItem(tabOrderKey(userId)) ?? 'null')
+    if (Array.isArray(v) && v.length === WS_DEFAULT.length && WS_DEFAULT.every((k) => v.includes(k))) return v
+  } catch {
+    /* storage unavailable */
+  }
+  return WS_DEFAULT
+}
 
 export function RosterClient({ initialData }: { initialData: RosterData }) {
+  return (
+    <ToastProvider>
+      <RosterShell initialData={initialData} />
+    </ToastProvider>
+  )
+}
+
+function RosterShell({ initialData }: { initialData: RosterData }) {
+  const { user } = useAuth()
+  const toast = useToast()
   const [data, setData] = useState<RosterData>(initialData)
   const [section, setSection] = useState<Section>('dashboard')
+  const [lang, setLang] = useState<Lang>('de')
+  const [wsOrder, setWsOrder] = useState<WsTab[]>(WS_DEFAULT)
+  const [arrange, setArrange] = useState(false)
+  const [dragKey, setDragKey] = useState<WsTab | null>(null)
+  const [overKey, setOverKey] = useState<WsTab | null>(null)
   const [selectedApptId, setSelectedApptId] = useState<string | null>(null)
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const refreshingRef = useRef(false)
+  const t = NAV_T[lang]
+
+  useEffect(() => setLang(readLang()), [])
+  useEffect(() => setWsOrder(readTabOrder(user?.id)), [user?.id])
+
+  const chooseLang = (l: Lang) => {
+    setLang(l)
+    saveLang(l)
+  }
 
   const refresh = useCallback(async () => {
     if (refreshingRef.current) return
@@ -249,8 +186,7 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
     try {
       const res = await fetch('/api/admin/roster', { cache: 'no-store' })
       if (res.ok) {
-        const fresh = await res.json()
-        setData(fresh)
+        setData(await res.json())
         setLastRefresh(new Date())
       }
     } catch {
@@ -260,142 +196,241 @@ export function RosterClient({ initialData }: { initialData: RosterData }) {
     }
   }, [])
 
-  // One eager refresh on mount — the server-rendered initialData has no
-  // authenticated user context (fetchRosterData() was called without one),
-  // so it conservatively marks every activity event as unread. This first
-  // client-side refresh (which does have the session cookie, so the API
-  // route can resolve the real user) corrects the unread badge within a
-  // fraction of a second instead of waiting for the 30s poll.
+  // The server-rendered data has no user context (unread badges) — refresh once on mount.
   useEffect(() => {
     refresh()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Poll every 30 seconds
+  }, [refresh])
   useEffect(() => {
     const id = setInterval(refresh, 30_000)
     return () => clearInterval(id)
   }, [refresh])
-
-  // Refresh on tab focus
   useEffect(() => {
-    const onVisible = () => { if (document.visibilityState === 'visible') refresh() }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refresh()
+    }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [refresh])
 
+  const groupTabs = useCallback(
+    (g: GroupId): Section[] => (g === 'workshops' ? wsOrder : STATIC_TABS[g]),
+    [wsOrder],
+  )
+  const groupOf = useCallback(
+    (s: Section): GroupId =>
+      s === 'detail' ? 'workshops' : (GROUP_ORDER.find((g) => groupTabs(g).includes(s)) ?? 'today'),
+    [groupTabs],
+  )
+
+  const [lastTab, setLastTab] = useState<Partial<Record<GroupId, Section>>>({})
+
   const navigate = (sec: Section) => {
     setSection(sec)
-    if (sec !== 'detail') setSelectedApptId(null)
+    if (sec !== 'detail') {
+      setSelectedApptId(null)
+      setLastTab((prev) => ({ ...prev, [groupOf(sec)]: sec }))
+    }
+    window.scrollTo({ top: 0 })
+  }
+  const openGroup = (g: GroupId) => {
+    // Workshops always opens the tab the person put first.
+    navigate(g === 'workshops' ? wsOrder[0] : (lastTab[g] ?? groupTabs(g)[0]))
+  }
+
+  const activeGroup = groupOf(section)
+  const tabs = groupTabs(activeGroup)
+
+  const tabBadge = (id: Section): number => {
+    if (id === 'refunds') return data.refundRequests.filter((r) => r.status === 'requested').length
+    if (id === 'activity') return data.activityUnreadCount
+    if (id === 'pickups') return data.stats.openPickups
+    return 0
+  }
+  const unreadNotes = useUnreadNoteCount(data)
+  const groupBadge = (g: GroupId) => (g === 'today' ? unreadNotes : 0) + groupTabs(g).reduce((sum, s) => sum + tabBadge(s), 0)
+
+  const saveOrder = (next: WsTab[]) => {
+    setWsOrder(next)
+    try {
+      window.localStorage.setItem(tabOrderKey(user?.id), JSON.stringify(next))
+    } catch {
+      /* ignore */
+    }
+    toast(t.arrSaved(t.tabs[next[0]]))
+  }
+  const moveTab = (k: WsTab, dir: -1 | 1) => {
+    const i = wsOrder.indexOf(k)
+    const j = i + dir
+    if (j < 0 || j >= wsOrder.length) return
+    const next = wsOrder.slice()
+    ;[next[i], next[j]] = [next[j], next[i]]
+    saveOrder(next)
+  }
+  const dropOn = (target: WsTab) => {
+    if (!dragKey || dragKey === target) return
+    const next = wsOrder.filter((k) => k !== dragKey)
+    next.splice(wsOrder.indexOf(target), 0, dragKey)
+    saveOrder(next)
   }
 
   const openDetail = (apptId: string) => {
     setSelectedApptId(apptId)
     setSection('detail')
+    window.scrollTo({ top: 0 })
   }
 
-  const timeStr = lastRefresh.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const timeStr = lastRefresh?.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' }) ?? ''
+  const userName = useMemo(() => {
+    const u = user as { name?: string; email?: string } | null
+    return u?.name?.trim() || u?.email || ''
+  }, [user])
+  const myAvatar = data.team.find((m) => m.id === data.me)?.avatarUrl ?? null
+  const [profileOpen, setProfileOpen] = useState(false)
+  const isWs = activeGroup === 'workshops'
+  const showTabs = section !== 'detail' && (tabs.length > 1 || isWs)
 
   return (
-    <div className="ff-roster ff-roster-shell" style={s.shell}>
-      <style>{MOBILE_CSS}</style>
-      {/* Sidebar */}
-      <aside className="ff-roster-sidebar" style={s.sidebar}>
-        <div className="ff-roster-head" style={s.sidebarHeader}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: BRAND.gold, flexShrink: 0 }} />
-            <p style={s.sidebarTitle}>Fermentfreude</p>
+    <div className="ff-roster" lang={lang}>
+      {/* Brand font (Neue Haas Grotesk) — the admin itself does not load the Typekit kit. */}
+      <link rel="stylesheet" href="https://use.typekit.net/dtk7kir.css" precedence="default" />
+      <style>{ROSTER_CSS}</style>
+      <div className="ff-app">
+        <nav className="ff-rail" aria-label={lang === 'de' ? 'Bereiche' : 'Sections'}>
+          {userName && (
+            <button type="button" className="ff-prof" onClick={() => setProfileOpen(true)} title={t.profile}>
+              <UserAvatar name={userName} url={myAvatar} size={104} />
+              <span>
+                <b>{userName}</b>
+                <small>{t.signed}</small>
+              </span>
+            </button>
+          )}
+          <div className="ff-logo">
+            <Wordmark />
           </div>
-          <p style={s.sidebarSub}>Admin Dashboard</p>
-        </div>
-
-        <div className="ff-roster-navsection" style={s.navSection}>
-          <p className="ff-roster-navlabel" style={s.navLabel}>Übersicht</p>
-          {NAV.map((item) => (
-            <button key={item.id} style={navItemStyle(section === item.id || (section === 'detail' && item.id === 'workshops'))} onClick={() => navigate(item.id)}>
-              <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="ff-roster-navsection" style={s.navSection}>
-          <p className="ff-roster-navlabel" style={s.navLabel}>Shop</p>
-          {SHOP_NAV.map((item) => (
-            <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
-              <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="ff-roster-navsection" style={s.navSection}>
-          <p className="ff-roster-navlabel" style={s.navLabel}>Buchhaltung</p>
-          {ORDERS_NAV.map((item) => (
-            <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
-              <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="ff-roster-navsection" style={s.navSection}>
-          <p className="ff-roster-navlabel" style={s.navLabel}>Refunds & Rebooking</p>
-          {REFUNDS_NAV.map((item) => {
-            const badgeCount =
-              item.id === 'refunds'
-                ? data.refundRequests.filter((r) => r.status === 'requested').length
-                : item.id === 'activity'
-                  ? data.activityUnreadCount
-                  : 0
+          <div className="ff-sub">{t.sub}</div>
+          {GROUP_ORDER.map((g) => {
+            const badge = groupBadge(g)
             return (
-              <button key={item.id} style={navItemStyle(section === item.id)} onClick={() => navigate(item.id)}>
-                <span style={{ opacity: 0.65, flexShrink: 0 }}>{item.icon}</span>
-                {item.label}
-                {badgeCount > 0 && <span style={s.navBadge}>{badgeCount > 99 ? '99+' : badgeCount}</span>}
+              <button key={g} type="button" className="ff-gbtn" aria-current={activeGroup === g} onClick={() => openGroup(g)}>
+                {ICONS[g]}
+                {t.groups[g]}
+                {badge > 0 && <span className="ff-n">{badge > 99 ? '99+' : badge}</span>}
               </button>
             )
           })}
-        </div>
+          <div className="ff-rfoot">
+            <a className="ff-cmsbtn" href="/admin" target="_blank" rel="noopener" title={t.cmsHint}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              </svg>
+              {t.cms}
+            </a>
+            <div className="ff-lang" role="group" aria-label="Sprache / Language">
+              {(['de', 'en'] as const).map((l) => (
+                <button key={l} type="button" aria-pressed={lang === l} onClick={() => chooseLang(l)}>
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            {timeStr && (
+              <div className="ff-live">
+                <i aria-hidden /> {t.live} · {timeStr}
+              </div>
+            )}
+          </div>
+        </nav>
 
-        <div className="ff-roster-live" style={s.liveIndicator}>
-          <span style={s.liveDot} />
-          Live · {timeStr}
-        </div>
-      </aside>
+        <main className="ff-main">
+          {showTabs && (
+            <div className="ff-tabs" role="tablist">
+              {tabs.map((k, i) => {
+                const wsk = k as WsTab
+                const badge = tabBadge(k)
+                const label = t.tabs[k as Exclude<Section, 'detail'>]
+                return (
+                  <React.Fragment key={k}>
+                    {isWs && arrange && (
+                      <button type="button" className="ff-mvb" disabled={i === 0} aria-label={`${label}: ${t.left}`} onClick={() => moveTab(wsk, -1)}>
+                        ‹
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={k === section}
+                      className={['ff-tab', arrange && isWs ? 'is-arr' : '', overKey === k && dragKey !== k ? 'is-over' : '', dragKey === k ? 'is-dragging' : ''].join(' ')}
+                      draggable={isWs}
+                      onDragStart={isWs ? () => setDragKey(wsk) : undefined}
+                      onDragEnd={isWs ? () => { setDragKey(null); setOverKey(null) } : undefined}
+                      onDragOver={isWs ? (e) => { e.preventDefault(); setOverKey(wsk) } : undefined}
+                      onDragLeave={isWs ? () => setOverKey(null) : undefined}
+                      onDrop={isWs ? (e) => { e.preventDefault(); dropOn(wsk); setDragKey(null); setOverKey(null) } : undefined}
+                      onClick={() => navigate(k)}
+                    >
+                      {label}
+                      {isWs && arrange && i === 0 && <span className="ff-mainb">{t.arrMain}</span>}
+                      {badge > 0 && <span className="ff-n">{badge}</span>}
+                    </button>
+                    {isWs && arrange && (
+                      <button type="button" className="ff-mvb" disabled={i === tabs.length - 1} aria-label={`${label}: ${t.right}`} onClick={() => moveTab(wsk, 1)}>
+                        ›
+                      </button>
+                    )}
+                  </React.Fragment>
+                )
+              })}
+              {isWs && (
+                <>
+                  <span className="ff-arrsp" />
+                  {arrange && (
+                    <button type="button" className="ff-arrbtn" onClick={() => saveOrder(WS_DEFAULT)}>
+                      {t.arrReset}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={`ff-arrbtn${arrange ? ' is-on' : ''}`}
+                    aria-pressed={arrange}
+                    title={t.arrHint}
+                    onClick={() => {
+                      setArrange((v) => !v)
+                      if (!arrange) toast(t.arrHint)
+                    }}
+                  >
+                    {arrange ? t.arrDone : t.arr}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
 
-      {/* Main content */}
-      <main className="ff-roster-main" style={s.main}>
-        {section === 'dashboard' && (
-          <DashboardView data={data} onSelectWorkshop={openDetail} onNavigate={navigate} />
-        )}
-        {section === 'workshops' && (
-          <WorkshopsView appointments={data.appointments} onSelectAppointment={openDetail} />
-        )}
-        {section === 'detail' && selectedApptId && (
-          <WorkshopDetailView
-            appointment={data.appointments.find((a) => a.id === selectedApptId) ?? data.appointments[0]}
-            bookings={data.bookingsByAppointment[selectedApptId] ?? []}
-            onBack={() => navigate('workshops')}
-            onRefresh={refresh}
-          />
-        )}
-        {section === 'participants' && <ParticipantsView participants={data.participants} stats={data.stats} />}
-        {section === 'pickups' && (
-          <PickupsView orders={data.pickupOrders} onRefresh={refresh} />
-        )}
-        {section === 'vouchers' && (
-          <VouchersView vouchers={data.vouchers} onRefresh={refresh} />
-        )}
-        {section === 'orders' && <OrdersView orders={data.orders} onRefresh={refresh} />}
-        {section === 'quotes' && <QuotesView quotes={data.quotes} onRefresh={refresh} />}
-        {section === 'refunds' && (
-          <RefundsView refundRequests={data.refundRequests} onRefresh={refresh} />
-        )}
-        {section === 'activity' && (
-          <ActivityView activityEvents={data.activityEvents} onRefresh={refresh} />
-        )}
-      </main>
+          {section === 'dashboard' && (
+            <WelcomeView data={data} lang={lang} onRefresh={refresh} onSelectWorkshop={openDetail} onNavigate={navigate} />
+          )}
+          {section === 'workshops' && <WorkshopsView appointments={data.appointments} lang={lang} onSelectAppointment={openDetail} />}
+          {section === 'calendar' && <CalendarView appointments={data.appointments} lang={lang} onSelectAppointment={openDetail} />}
+          {section === 'archive' && <ArchiveView />}
+          {section === 'detail' && selectedApptId && (
+            <WorkshopDetailView
+              appointment={data.appointments.find((a) => a.id === selectedApptId) ?? data.appointments[0]}
+              bookings={data.bookingsByAppointment[selectedApptId] ?? []}
+              lang={lang}
+              onBack={() => navigate(lastTab.workshops ?? wsOrder[0])}
+              onRefresh={refresh}
+            />
+          )}
+          {section === 'participants' && <ParticipantsView participants={data.participants} stats={data.stats} />}
+          {section === 'pickups' && <PickupsView orders={data.pickupOrders} onRefresh={refresh} />}
+          {section === 'vouchers' && <VouchersView vouchers={data.vouchers} onRefresh={refresh} />}
+          {section === 'orders' && <OrdersView orders={data.orders} onRefresh={refresh} />}
+          {section === 'quotes' && <QuotesView quotes={data.quotes} onRefresh={refresh} />}
+          {section === 'refunds' && <RefundsView refundRequests={data.refundRequests} onRefresh={refresh} />}
+          {section === 'activity' && <ActivityView activityEvents={data.activityEvents} onRefresh={refresh} />}
+          {section === 'emails' && <EmailTemplatesView lang={lang} />}
+        </main>
+        {profileOpen && <ProfileDialog data={data} lang={lang} onClose={() => setProfileOpen(false)} onRefresh={refresh} />}
+      </div>
     </div>
   )
 }

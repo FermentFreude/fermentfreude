@@ -2,6 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 
 import {
+  dateOfferActions,
   hydrateSeatDefaults,
   seatActionOptions,
   type AppointmentStatus,
@@ -119,6 +120,7 @@ export function getAllSeatBundles(
   booking: WorkshopBooking,
   appointment: WorkshopAppointment | null,
   now: Date = new Date(),
+  scope?: string | null,
 ): SeatBundle[] {
   const rawSeats = booking.seats ?? []
   const guestCount = typeof booking.guestCount === 'number' ? booking.guestCount : rawSeats.length || 1
@@ -139,7 +141,10 @@ export function getAllSeatBundles(
         dateTime: appointment.dateTime,
         status: appointmentToPolicyStatus(appointment),
       }
-      options = seatActionOptions(seat, policyAppointment, now)
+      options =
+        scope === 'date-offer'
+          ? dateOfferActions(seat, policyAppointment, now)
+          : seatActionOptions(seat, policyAppointment, now)
     }
 
     bundles.push({
@@ -159,8 +164,9 @@ export function getSeatBundle(
   appointment: WorkshopAppointment | null,
   seatIndex: number,
   now: Date = new Date(),
+  scope?: string | null,
 ): SeatBundle | null {
-  const bundles = getAllSeatBundles(booking, appointment, now)
+  const bundles = getAllSeatBundles(booking, appointment, now, scope)
   return bundles[seatIndex] ?? null
 }
 
@@ -192,7 +198,7 @@ export async function loadFreshForMutation(
   if (!resolved.ok) return { error: resolved.reason }
 
   const { booking, appointment, magicLink } = resolved
-  const bundle = getSeatBundle(booking, appointment, seatIndex)
+  const bundle = getSeatBundle(booking, appointment, seatIndex, new Date(), magicLink.scope)
   if (!bundle) return { error: 'seat_not_found' }
 
   const payload = await getPayloadClient()

@@ -87,7 +87,9 @@ export async function recordMagicLinkOpened(
       summary:
         magicLink.scope === 'organiser-cancellation'
           ? 'Link "Ersatztermin oder Erstattung" zum ersten Mal geöffnet'
-          : 'Link "Buchung verwalten" zum ersten Mal geöffnet',
+          : magicLink.scope === 'date-offer'
+            ? 'Link "Neuen Termin wählen" zum ersten Mal geöffnet'
+            : 'Link "Buchung verwalten" zum ersten Mal geöffnet',
       by: 'Kund:in',
     })
   } catch (err) {

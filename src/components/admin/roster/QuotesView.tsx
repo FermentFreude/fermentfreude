@@ -38,7 +38,7 @@ export function QuotesView({ quotes, onRefresh }: Props) {
   const [showForm, setShowForm] = useState(false)
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: '1200px' }}>
+    <div className="ff-page">
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '4px' }}>
         <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>
           Angebote

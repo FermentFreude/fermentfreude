@@ -1,6 +1,8 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
+import { bookingOrigin } from './bookingOrigin'
+import type { AttentionNoteRow, TeamMember } from './attentionTypes'
 import type {
   ActivityEventRow,
   AppointmentRow,
@@ -165,6 +167,23 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     const totalBooked = bResult.docs.reduce((sum, b) => sum + seatsHoldingPlace(b), 0)
     const capacity = Number(workshopAny?.maxCapacityPerSlot ?? 12)
 
+    // Unpaid bookings hold seats on the booking page; only relevant for upcoming dates.
+    let pendingSeats = 0
+    if (!isPast) {
+      const pending = await payload.find({
+        collection: 'workshop-bookings',
+        where: {
+          and: [{ appointmentId: { equals: String(appt.id) } }, { status: { equals: 'pending' } }],
+        },
+        limit: 50,
+        depth: 0,
+        overrideAccess: true,
+      })
+      pendingSeats = pending.docs.reduce((sum, b) => sum + Math.max(Number(b.guestCount) || 1, 1), 0)
+    }
+    const rawFree = (appt as unknown as { availableSpots?: unknown }).availableSpots
+    const counterFree = typeof rawFree === 'number' ? rawFree : null
+
     appointments.push({
       id: String(appt.id),
       workshopTitle: title,
@@ -177,9 +196,38 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       totalBooked,
       capacity,
       isPast,
+      counterFree,
+      pendingSeats,
     })
 
     bookingsByAppointment[String(appt.id)] = bResult.docs.map((b) => toBookingRow(b))
+  }
+
+  // Invoice number + how it was paid, for the day sheet (same rules as the archive).
+  {
+    const allRows = Object.values(bookingsByAppointment).flat()
+    const orderIds = [...new Set(allRows.map((r) => r.orderId).filter(Boolean))]
+    const orderById = new Map<string, { invoiceNumber: string; amount: number }>()
+    if (orderIds.length) {
+      const found = await payload.find({
+        collection: 'orders',
+        where: { id: { in: orderIds } },
+        limit: 2000,
+        depth: 0,
+        overrideAccess: true,
+      })
+      for (const doc of found.docs) {
+        const o = doc as unknown as { id: string | number; invoiceNumber?: string | null; amount?: number | null }
+        orderById.set(String(o.id), { invoiceNumber: o.invoiceNumber ?? '', amount: Number(o.amount ?? 0) })
+      }
+    }
+    for (const row of allRows) {
+      const order = row.orderId ? orderById.get(row.orderId) : undefined
+      const origin = bookingOrigin(row)
+      row.invoiceNumber = order?.invoiceNumber ?? ''
+      row.payment =
+        origin === 'manual' ? 'manual' : origin === 'wix' ? 'wix' : origin === 'website' && order ? (order.amount > 0 ? 'stripe' : 'voucher') : 'none'
+    }
   }
 
   // ── 3. Participants (all confirmed bookings, recent first) ─────────────────
@@ -542,6 +590,74 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   })
   const activityUnreadCount = activityEvents.filter((e) => e.isUnread).length
 
+  // ── 5b. "Needs a look" notes + acknowledgements ────────────────────────────
+  const attentionResult = await payload.find({
+    collection: 'attention-notes',
+    sort: '-createdAt',
+    limit: 500,
+    depth: 1, // message images → media docs with URLs
+    overrideAccess: true,
+  })
+  const mediaRef = (m: unknown) => {
+    if (!m || typeof m !== 'object') return null
+    const d = m as { id?: string | number; url?: string | null; sizes?: { thumbnail?: { url?: string | null } } }
+    if (!d.url) return null
+    return { id: String(d.id), url: d.url, thumb: d.sizes?.thumbnail?.url || d.url }
+  }
+  const attentionNotes: AttentionNoteRow[] = attentionResult.docs
+    .filter((n) => n.kind !== 'ack')
+    .map((n) => ({
+      id: String(n.id),
+      title: n.title ?? '',
+      body: n.body ?? '',
+      severity: (n.severity ?? 'attention') as AttentionNoteRow['severity'],
+      status: n.status === 'done' ? 'done' : 'open',
+      appointmentId: n.appointmentId ?? '',
+      bookingId: n.bookingId ?? '',
+      dueDate: n.dueDate ? new Date(n.dueDate).toLocaleDateString('sv-SE', { timeZone: 'Europe/Vienna' }) : '',
+      createdByName: n.createdByName ?? '',
+      createdAt: n.createdAt ?? '',
+      doneByName: n.doneByName ?? '',
+      doneAt: n.doneAt ?? '',
+      createdById: n.createdById ?? '',
+      assignedTo: n.assignedTo ?? '',
+      messages: (n.messages ?? []).map((m) => ({
+        byId: m.byId ?? '',
+        byName: m.byName ?? '',
+        at: m.at ?? '',
+        text: m.text ?? '',
+        images: (m.images ?? []).map(mediaRef).filter((x): x is NonNullable<ReturnType<typeof mediaRef>> => x !== null),
+        event: (m.event ?? '') as AttentionNoteRow['messages'][number]['event'],
+        eventTo: m.eventTo ?? '',
+      })),
+      seenCount:
+        currentUserId && n.seenBy && typeof n.seenBy === 'object' && !Array.isArray(n.seenBy)
+          ? Number((n.seenBy as Record<string, unknown>)[currentUserId] ?? 0)
+          : 0,
+    }))
+  const attentionAcks = attentionResult.docs
+    .filter((n) => n.kind === 'ack' && n.autoKey)
+    .map((n) => String(n.autoKey))
+
+  // ── 5c. The team (admins) — for "ask someone", avatars and email alerts ───
+  const teamResult = await payload.find({
+    collection: 'users',
+    where: { roles: { contains: 'admin' } },
+    limit: 50,
+    depth: 1,
+    overrideAccess: true,
+  })
+  const team: TeamMember[] = teamResult.docs.map((u) => {
+    const ud = u as unknown as { id: string | number; name?: string | null; email?: string | null; avatar?: unknown; noteEmailPref?: string | null }
+    return {
+      id: String(ud.id),
+      name: ud.name?.trim() || (ud.email ?? '').split('@')[0] || 'Admin',
+      email: ud.email ?? '',
+      avatarUrl: mediaRef(ud.avatar)?.thumb ?? null,
+      emailPref: (ud.noteEmailPref === 'urgent' || ud.noteEmailPref === 'off' ? ud.noteEmailPref : 'all') as TeamMember['emailPref'],
+    }
+  })
+
   // ── 6. Stats ───────────────────────────────────────────────────────────────
   const upcomingWorkshops = appointments.filter((a) => !a.isPast).length
   const totalParticipants = Object.values(bookingsByAppointment).reduce(
@@ -578,5 +694,9 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     refundRequests,
     activityEvents,
     activityUnreadCount,
+    attentionNotes,
+    attentionAcks,
+    team,
+    me: currentUserId ?? '',
   }
 }

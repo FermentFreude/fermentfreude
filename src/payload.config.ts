@@ -16,9 +16,11 @@ import path from 'path'
 import { buildConfig } from 'payload'
 
 import { ActivityEvents } from '@/collections/ActivityEvents'
+import { AttentionNotes } from '@/collections/AttentionNotes'
 import { BacklogItems } from '@/collections/BacklogItems'
 import { BookingMagicLinks } from '@/collections/BookingMagicLinks'
 import { BrevoEmailTemplates } from '@/collections/BrevoEmailTemplates'
+import { EmailTemplateVersions } from '@/collections/EmailTemplateVersions'
 import { BrevoTemplates } from '@/collections/BrevoTemplates'
 import { CancellationInvoices } from '@/collections/CancellationInvoices'
 import { CancellationRequests } from '@/collections/CancellationRequests'
@@ -169,6 +171,7 @@ export default buildConfig({
   collections: [
     Users,
     BacklogItems,
+    AttentionNotes,
     Pages,
     Categories,
     CourseProgress,
@@ -191,6 +194,7 @@ export default buildConfig({
     RefundRequests,
     ActivityEvents,
     BrevoEmailTemplates,
+    EmailTemplateVersions,
     BrevoTemplates,
   ],
   db: mongooseAdapter({
