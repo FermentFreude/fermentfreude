@@ -417,24 +417,6 @@ function Dlg({ label, wide, children, onClose, onDropFiles, dropLabel }: {
   )
 }
 
-function EmailToggle({ targetId, team, me, t, checked, onChange, severity }: {
-  targetId: string; team: TeamMember[]; me: string; t: NDict; checked: boolean; onChange: (v: boolean) => void; severity: AttentionSeverity
-}) {
-  if (!targetId || targetId === me) return null
-  if (targetId === 'all') {
-    return (
-      <label className="ff-chk is-small"><input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} /> {t.emailAll}</label>
-    )
-  }
-  const m = team.find((x) => x.id === targetId)
-  if (!m) return null
-  const off = m.emailPref === 'off' || (m.emailPref === 'urgent' && severity !== 'urgent')
-  if (off) return <span className="ff-muted" style={{ fontSize: 12 }}>{t.emailOff(m.name)}</span>
-  return (
-    <label className="ff-chk is-small"><input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} /> {t.emailAlso(m.name)}</label>
-  )
-}
-
 function ThreadDialog({ note, data, lang, t, onClose, onRefresh, onOpenAppointment, onEdit }: {
   note: AttentionNoteRow; data: RosterData; lang: Lang; t: NDict; onClose: () => void; onRefresh: () => void | Promise<void>
   onOpenAppointment: (id: string) => void; onEdit: () => void
@@ -445,7 +427,6 @@ function ThreadDialog({ note, data, lang, t, onClose, onRefresh, onOpenAppointme
   const [text, setText] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
-  const [notify, setNotify] = useState(true)
   const [reassignTo, setReassignTo] = useState('')
   const [zoom, setZoom] = useState<string | null>(null)
   const att = useAttachments(setErr)
@@ -460,15 +441,13 @@ function ThreadDialog({ note, data, lang, t, onClose, onRefresh, onOpenAppointme
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight })
   }, [note.messages.length])
 
-  const asked = note.assignedTo
-  const replyTarget = asked === 'all' ? 'all' : asked && asked !== me ? asked : note.createdById !== me ? note.createdById : ''
   const appt = data.appointments.find((a) => a.id === note.appointmentId)
 
   const send = async () => {
     if (!text.trim() && att.ids.length === 0) return
     setBusy(true)
     setErr('')
-    const r = await replyToNote({ id: note.id, text, imageIds: att.ids, notify: notify && !!replyTarget })
+    const r = await replyToNote({ id: note.id, text, imageIds: att.ids })
     setBusy(false)
     if (!r.ok) return setErr(r.error)
     setText('')
@@ -486,7 +465,7 @@ function ThreadDialog({ note, data, lang, t, onClose, onRefresh, onOpenAppointme
   const reassign = async () => {
     if (!reassignTo) return
     setBusy(true)
-    const r = await reassignNote({ id: note.id, to: reassignTo, text, notify: true })
+    const r = await reassignNote({ id: note.id, to: reassignTo, text })
     setBusy(false)
     if (!r.ok) return setErr(r.error)
     setText('')
@@ -577,7 +556,6 @@ function ThreadDialog({ note, data, lang, t, onClose, onRefresh, onOpenAppointme
             📎 {t.attach}
             <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden onChange={(e) => { att.add([...(e.target.files ?? [])]); e.target.value = '' }} />
           </label>
-          <EmailToggle targetId={replyTarget} team={team} me={me} t={t} checked={notify} onChange={setNotify} severity={note.severity} />
           <span style={{ flex: 1 }} />
           <button type="button" className="ff-btn is-gold" onClick={send} disabled={busy || att.busy || (!text.trim() && att.ids.length === 0)}>
             {att.busy ? t.uploading : t.send}
@@ -626,7 +604,6 @@ function NoteForm({ data, t, mode, note, item, onClose, onDone }: {
   const [to, setTo] = useState(mode === 'ask' ? (others[0]?.id ?? 'all') : '')
   const [appointmentId, setAppointmentId] = useState(note?.appointmentId ?? item?.appointmentId ?? '')
   const [due, setDue] = useState(note?.dueDate ?? '')
-  const [notify, setNotify] = useState(true)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const att = useAttachments(setErr)
@@ -644,7 +621,7 @@ function NoteForm({ data, t, mode, note, item, onClose, onDone }: {
       return onDone(t.save)
     }
     const r = await createAttentionNote({
-      title, body, severity, appointmentId, dueDate: due, assignedTo: to, imageIds: att.ids, notify: notify && !!to, fromAutoKey: item?.key,
+      title, body, severity, appointmentId, dueDate: due, assignedTo: to, imageIds: att.ids, fromAutoKey: item?.key,
     })
     setBusy(false)
     if (!r.ok) return setErr(r.error)
@@ -709,7 +686,6 @@ function NoteForm({ data, t, mode, note, item, onClose, onDone }: {
             <input className="ff-input" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
           </label>
         </div>
-        {mode !== 'edit' && <EmailToggle targetId={to} team={team} me={me} t={t} checked={notify} onChange={setNotify} severity={severity} />}
         {err && <div className="ff-err">{err}</div>}
         <div className="ff-acts">
           <button type="button" className="ff-btn" onClick={onClose} disabled={busy}>{t.cancel}</button>
@@ -792,15 +768,6 @@ export function ProfileDialog({ data, lang, onClose, onRefresh }: { data: Roster
         </div>
       </div>
       <p className="ff-muted" style={{ fontSize: 13, marginTop: 6 }}>{t.photoHint}</p>
-      <fieldset style={{ border: 0, padding: 0, margin: '14px 0 0', display: 'grid', gap: 8 }}>
-        <legend style={{ fontWeight: 700, marginBottom: 6 }}>{t.emailPref}</legend>
-        {(['all', 'urgent', 'off'] as const).map((p) => (
-          <label key={p} className="ff-pick2">
-            <input type="radio" name="emailpref" checked={(meRow?.emailPref ?? 'all') === p} disabled={busy} onChange={() => set({ emailPref: p })} />
-            <span><b>{p === 'all' ? t.ep1 : p === 'urgent' ? t.ep2 : t.ep3}</b></span>
-          </label>
-        ))}
-      </fieldset>
       {err && <div className="ff-err" style={{ marginTop: 10 }}>{err}</div>}
       <div className="ff-acts">
         <button type="button" className="ff-btn" onClick={onClose}>{t.close}</button>

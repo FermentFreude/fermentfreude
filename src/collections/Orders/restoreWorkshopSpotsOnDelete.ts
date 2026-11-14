@@ -1,6 +1,7 @@
 import { releaseSpotsAtomic } from '@/lib/atomicSpots'
 import { revalidateTag } from 'next/cache'
 import type { CollectionAfterDeleteHook } from 'payload'
+import { capacityOf } from '@/lib/appointmentCapacity'
 
 /**
  * restoreWorkshopSpotsOnDelete — Orders afterDelete hook.
@@ -77,11 +78,7 @@ export const restoreWorkshopSpotsOnDelete: CollectionAfterDeleteHook = async ({ 
           overrideAccess: true,
         })
 
-        const maxCapacity =
-          typeof appointment.workshop === 'object'
-            ? (((appointment.workshop as unknown) as Record<string, unknown>)
-                ?.maxCapacityPerSlot as number) ?? 12
-            : 12
+        const maxCapacity = capacityOf(appointment)
 
         const { availableSpots: restoredSpots } = await releaseSpotsAtomic(
           payload,

@@ -10,6 +10,7 @@ import type {
 import { bookingOrigin } from '@/components/admin/roster/bookingOrigin'
 import { fmtDate, fmtTime, toBookingRow } from '@/components/admin/roster/fetchRosterData'
 import { seatsHoldingPlace } from '@/lib/seatCapacity'
+import { capacityOf } from '@/lib/appointmentCapacity'
 
 /**
  * READ-ONLY archive of past workshops for one year: who was booked, how each booking
@@ -155,7 +156,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         date: dateTimeStr ? fmtDate(dateTimeStr) : '',
         time: dateTimeStr ? `${fmtTime(dateTimeStr)} Uhr` : '',
         location: String(location?.name ?? ''),
-        capacity: Number(workshop?.maxCapacityPerSlot ?? 12),
+        capacity: capacityOf(appt),
         seatsHeld: bookings.reduce((sum, b) => sum + b.seatsHeld, 0),
         noShows: bookings.reduce((sum, b) => sum + b.seats.filter((s) => s.status === 'no_show').length, 0),
         bookings,

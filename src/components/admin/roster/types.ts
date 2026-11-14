@@ -16,6 +16,10 @@ export type AppointmentRow = {
   pricePerPerson: number
   totalBooked: number
   capacity: number
+  /** This date's own capacity, if the founders set one (null = the workshop's standard applies). */
+  ownCapacity?: number | null
+  /** The workshop's standard capacity. */
+  standardCapacity?: number
   isPast: boolean
   /** Free places the public booking page currently shows (null = unknown). */
   counterFree?: number | null
@@ -42,6 +46,8 @@ export type BookingHistoryEntry = {
 
 export type BookingRow = {
   id: string
+  /** The workshop date this booking is on ('' = unknown). */
+  appointmentId?: string
   firstName: string
   lastName: string
   email: string
@@ -64,6 +70,14 @@ export type BookingRow = {
   invoiceNumber?: string
   /** How the booking was paid (see archive). */
   payment?: 'stripe' | 'voucher' | 'manual' | 'wix' | 'none'
+  /** Only for seats added by hand: how it came in and how it was paid. */
+  manual?: {
+    channel: string
+    paymentStatus: '' | 'paid' | 'open'
+    paymentMethod: string
+    voucherCode: string
+    paymentNote: string
+  }
 }
 
 export type ParticipantRow = {

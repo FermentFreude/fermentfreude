@@ -1,4 +1,5 @@
 import { adminOnly } from '@/access/adminOnly'
+import { refreshAvailabilityCache, syncAppointmentCapacity } from '@/hooks/appointmentCapacity'
 import { handleOrganiserCancellation } from '@/hooks/handleOrganiserCancellation'
 import type { CollectionConfig } from 'payload'
 
@@ -55,14 +56,34 @@ export const WorkshopAppointments: CollectionConfig = {
       },
     },
     {
+      name: 'capacity',
+      type: 'number',
+      min: 1,
+      label: 'Kapazität für diesen Termin (optional)',
+      admin: {
+        description:
+          'Wie viele Personen bei DIESEM Termin dabei sein können. Leer lassen = die Standard-Kapazität des Workshops gilt. Wird die Zahl später geändert, passen sich die freien Plätze automatisch an. Sie kann nicht unter die Zahl der schon gebuchten Plätze gesenkt werden.',
+      },
+    },
+    {
       name: 'availableSpots',
       type: 'number',
       required: true,
       defaultValue: 12,
       min: 0,
-      max: 12,
       admin: {
-        description: 'Number of spots available for booking (0 = sold out, max 12 per workshop)',
+        description:
+          'Freie Plätze (0 = ausgebucht). Wird automatisch geführt: bei einem neuen Termin gleich der Kapazität, danach zählen Buchungen und Stornos mit. Nur im Ausnahmefall von Hand ändern.',
+      },
+    },
+    {
+      name: 'releasedBookingIds',
+      type: 'json',
+      admin: {
+        hidden: true,
+        readOnly: true,
+        description:
+          'Internal: ids of checkout holds whose seats were already given back, so a seat can never be given back twice (or lost half-way). Do not edit.',
       },
     },
     {
@@ -137,15 +158,11 @@ export const WorkshopAppointments: CollectionConfig = {
           }
         }
 
-        // Validate availableSpots does not exceed maxCapacityPerSlot (12)
-        if (data?.availableSpots && data.availableSpots > 12) {
-          throw new Error('Available spots cannot exceed 12 per workshop')
-        }
-
         return data
       },
     ],
     beforeChange: [
+      syncAppointmentCapacity,
       ({ data, originalDoc }) => {
         // Cancelling always takes the appointment off the public site too —
         // "notify existing bookings" and "stop taking new ones" are the same
@@ -161,7 +178,7 @@ export const WorkshopAppointments: CollectionConfig = {
         return data
       },
     ],
-    afterChange: [handleOrganiserCancellation],
+    afterChange: [handleOrganiserCancellation, refreshAvailabilityCache],
   },
   // TODO: Add unique index on (workshop, location, dateTime) — requires MongoDB setup
   // This prevents duplicate appointments

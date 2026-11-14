@@ -8,11 +8,16 @@ import {
   deleteManualWorkshopBooking,
   getAlternateAppointments,
   moveWorkshopBooking,
+  moveWorkshopSeats,
+  setAppointmentCapacity,
+  alignAppointmentCounter,
   sendAlternateDateEmail,
   updateBookingSeatDetails,
 } from './actions'
 import { AddManualBookingForm } from './AddManualBookingForm'
-import { BookingDetailModal } from './BookingDetailModal'
+import { addBookingSeats, cancelBookingSeat, releaseBookingSeats, updateBookingDetails } from './bookingEditActions'
+import { CustomerProfileModal } from './CustomerProfile'
+import { CHANNELS, ManualPaymentDialog, MP } from './ManualPayment'
 import { bookingOrigin, type BookingOrigin } from './bookingOrigin'
 import { sendChooseOwnDateLinks } from './chooseDateActions'
 import { LOCALE, type Lang } from './rosterI18n'
@@ -57,7 +62,11 @@ const T = {
     mvTo: 'Neuer Termin (auch ein anderer Workshop)', mvFree: (n: number) => `Hier werden ${n === 1 ? '1 Platz' : `${n} Plätze`} frei.`,
     mvTake: (w: string, n: number, f: number) => `Auf ${w} ${n === 1 ? 'wird 1 Platz' : `werden ${n} Plätze`} belegt (danach ${f} frei).`,
     mvOrder: 'Zuerst wird der neue Platz gesichert, dann der alte freigegeben. Der Eintrag bekommt einen Vermerk im Verlauf.',
-    mvInv: 'Andere Workshop-Art: Die Rechnung nennt weiterhin den ersten Workshop.',
+    mvInv: 'Andere Workshop-Art: Der Preis wird auf den neuen Workshop angepasst (nur bei Buchungen ohne Online-Bestellung). Ob eine schon erstellte Rechnung korrigiert werden muss, bitte intern klären.',
+    ePhone: 'Telefon', ePrice: 'Preis pro Person (€)', eChannel: 'Herkunft der Buchung', eSeats: 'Plätze',
+    eAdd: 'Platz dazubuchen', eDrop: 'Platz streichen', eDropSure: 'Wirklich streichen?', eDropped: 'Platz gestrichen. Er ist wieder frei.', eAdded: 'Platz dazugebucht.',
+    eLocked: 'Preis und Plätze lassen sich bei Buchungen mit Rechnung oder Online-Bestellung nicht ändern (dafür gibt es Umbuchung und Erstattung).',
+    mvWho: 'Wer soll verschoben werden?', mvWhoHint: 'Wer nicht angehakt ist, bleibt auf diesem Termin.', movedSome: 'Verschoben. Die Person hat jetzt eine eigene Buchung am neuen Termin.',
     mvNotify: 'Die Person per E-Mail informieren', mvNotifyHint: 'Aus, wenn ihr es schon telefonisch besprochen habt.',
     mvYes: 'Ja, verschieben', moved: 'Verschoben. Beide Platzzahlen wurden angepasst.', mvNone: 'Es gibt keinen anderen Termin mit genug freien Plätzen.',
     mvMailFail: 'Verschoben, aber die E-Mail konnte nicht gesendet werden. Bitte die Person direkt informieren.',
@@ -71,8 +80,13 @@ const T = {
     gSentLink: (n: number) => `Persönlicher Link an ${n} ${n === 1 ? 'Person' : 'Personen'} gesendet.`,
     gSentOne: (n: number) => `E-Mail an ${n} ${n === 1 ? 'Person' : 'Personen'} gesendet.`,
     gSkipped: (names: string) => `Nicht gesendet: ${names}`,
-    rT: 'Manuelle Buchung entfernen', rBody: (n: string, s: number) => `Die Buchung von ${n} wird entfernt. ${s === 1 ? '1 Platz wird' : `${s} Plätze werden`} wieder frei.`,
-    rOnly: 'Nur von Hand eingetragene Buchungen lassen sich entfernen. Online bezahlte Buchungen laufen über Rückerstattungen.',
+    aBtn: 'Zähler angleichen', aSure: (s: number, e: number) => `Die Website zeigt ${s}, laut Buchungen sind es ${e}. Auf ${e} setzen?`, aYes: 'Ja, angleichen', aDone: (s: number, e: number) => `Angeglichen: ${s} → ${e}. Die Änderung steht in den Notizen des Termins.`,
+    cT: 'Kapazität dieses Termins', cLabel: 'Wie viele Personen können dabei sein?', cHint: (std: number) => `Leer lassen = Standard des Workshops (${std}). Die freien Plätze auf der Website passen sich automatisch an. Die Zahl kann nicht unter die schon gebuchten Plätze gesenkt werden.`, cSaved: 'Kapazität gespeichert. Die freien Plätze wurden angepasst.', cBtn: 'Kapazität', cOwn: 'eigene Kapazität',
+    fT: 'Platz freigeben', fBtn: 'Platz freigeben', fWho: 'Wer kommt nicht?', fReason: 'Grund',
+    fReasons: { no_show: 'Nicht erschienen', late_cancel: 'Zu spät abgesagt (keine Erstattung)', never_paid: 'Zahlung nie eingegangen', test: 'Test-Buchung', other: 'Sonstiges' } as Record<string, string>,
+    fNote: 'Notiz (optional)', fInfo: 'Die Plätze werden wieder frei und die Person steht unter „Nicht mehr auf diesem Termin“. Die Buchung bleibt erhalten, eine vorhandene Rechnung wird nicht gelöscht. Eine Erstattung läuft getrennt über „Erstattungen“.', fYes: 'Ja, freigeben', fDone: 'Platz freigegeben. Er ist wieder frei.',
+    rT: 'Buchung entfernen', rBody: (n: string, s: number) => `Die Buchung von ${n} wird entfernt. ${s === 1 ? '1 Platz wird' : `${s} Plätze werden`} wieder frei.`,
+    rOnly: 'Entfernen löscht die Buchung ganz. Das geht nur ohne Bestellung oder Rechnung. Sonst bitte „Platz freigeben“ nutzen.',
     rYes: 'Ja, entfernen', removed: 'Entfernt. Die Plätze sind wieder frei.',
     printTitle: 'Tagesliste', printSig: 'Anwesend',
     pastNote: 'Dieser Termin liegt in der Vergangenheit.',
@@ -110,7 +124,11 @@ const T = {
     mvTo: 'New date (can be a different workshop)', mvFree: (n: number) => `${n === 1 ? '1 seat becomes' : `${n} seats become`} free here.`,
     mvTake: (w: string, n: number, f: number) => `On ${w} ${n === 1 ? '1 seat is' : `${n} seats are`} taken (${f} free afterwards).`,
     mvOrder: 'The new seat is secured first, then the old one is released. The booking gets a history note.',
-    mvInv: 'Different workshop type: the invoice still names the first workshop.',
+    mvInv: 'Different workshop type: the price follows the new workshop (only for bookings without an online order). Whether an invoice that was already created needs a correction is for you to decide internally.',
+    ePhone: 'Phone', ePrice: 'Price per person (€)', eChannel: 'How the booking came in', eSeats: 'Seats',
+    eAdd: 'Add a seat', eDrop: 'Cancel seat', eDropSure: 'Really cancel?', eDropped: 'Seat cancelled. It is free again.', eAdded: 'Seat added.',
+    eLocked: 'Price and seats cannot be changed for bookings with an invoice or an online order (use rebooking and refunds instead).',
+    mvWho: 'Who should move?', mvWhoHint: 'Anyone left unticked stays on this date.', movedSome: 'Moved. The person now has their own booking on the new date.',
     mvNotify: 'Tell the person by email', mvNotifyHint: 'Off if you already agreed it by phone.',
     mvYes: 'Yes, move', moved: 'Moved. Both seat counts were updated.', mvNone: 'There is no other date with enough free seats.',
     mvMailFail: 'Moved, but the email could not be sent. Please contact the person directly.',
@@ -124,8 +142,13 @@ const T = {
     gSentLink: (n: number) => `Personal link sent to ${n} ${n === 1 ? 'person' : 'people'}.`,
     gSentOne: (n: number) => `Email sent to ${n} ${n === 1 ? 'person' : 'people'}.`,
     gSkipped: (names: string) => `Not sent: ${names}`,
-    rT: 'Remove manual booking', rBody: (n: string, s: number) => `The booking of ${n} will be removed. ${s === 1 ? '1 seat becomes' : `${s} seats become`} free again.`,
-    rOnly: 'Only bookings you entered by hand can be removed. Bookings paid online go through refunds.',
+    aBtn: 'Align counter', aSure: (s: number, e: number) => `The website shows ${s}, the bookings say ${e}. Set it to ${e}?`, aYes: 'Yes, align', aDone: (s: number, e: number) => `Aligned: ${s} → ${e}. The change is in the date's notes.`,
+    cT: 'Capacity of this date', cLabel: 'How many people can take part?', cHint: (std: number) => `Leave empty = the workshop standard (${std}). The free seats on the website follow automatically. It cannot go below the seats already booked.`, cSaved: 'Capacity saved. The free seats were adjusted.', cBtn: 'Capacity', cOwn: 'own capacity',
+    fT: 'Release seat', fBtn: 'Release seat', fWho: 'Who is not coming?', fReason: 'Reason',
+    fReasons: { no_show: 'No show', late_cancel: 'Cancelled too late (no refund)', never_paid: 'Never paid', test: 'Test booking', other: 'Other' } as Record<string, string>,
+    fNote: 'Note (optional)', fInfo: 'The places become free again and the person moves to "No longer on this date". The booking stays, and an existing invoice is not deleted. A refund is a separate step under "Refunds".', fYes: 'Yes, release', fDone: 'Seat released. It is free again.',
+    rT: 'Remove booking', rBody: (n: string, s: number) => `The booking of ${n} will be removed. ${s === 1 ? '1 seat becomes' : `${s} seats become`} free again.`,
+    rOnly: 'Removing deletes the booking completely. Only possible without an order or invoice. Otherwise use "Release seat".',
     rYes: 'Yes, remove', removed: 'Removed. The seats are free again.',
     printTitle: 'Day sheet', printSig: 'Present',
     pastNote: 'This date is in the past.',
@@ -168,6 +191,9 @@ type Dialog =
   | { kind: 'move'; booking: BookingRow }
   | { kind: 'alt'; bookingIds: string[] }
   | { kind: 'remove'; booking: BookingRow }
+  | { kind: 'pay'; booking: BookingRow }
+  | { kind: 'release'; booking: BookingRow }
+  | { kind: 'capacity' }
   | null
 
 export function WorkshopDetailView({
@@ -176,17 +202,25 @@ export function WorkshopDetailView({
   lang,
   onBack,
   onRefresh,
+  onOpenProfile,
+  onOpenWorkshop,
 }: {
   appointment: AppointmentRow
   bookings: BookingRow[]
   lang: Lang
   onBack: () => void
   onRefresh: () => void | Promise<void>
+  /** Opens the person's full profile (Teilnehmer). */
+  onOpenProfile?: (email: string) => void
+  /** Opens another workshop date's day sheet. */
+  onOpenWorkshop?: (appointmentId: string) => void
 }) {
   const t = T[lang]
   const toast = useToast()
   const [dialog, setDialog] = useState<Dialog>(null)
   const [detail, setDetail] = useState<BookingRow | null>(null)
+  const [alignAsk, setAlignAsk] = useState(false)
+  const [aligning, setAligning] = useState(false)
   const color = kindColor(appointment.workshopTitle)
 
   const held = appointment.totalBooked
@@ -264,6 +298,11 @@ export function WorkshopDetailView({
               + {t.add}
             </button>
           )}
+          {!appointment.isPast && (
+            <button type="button" className="ff-btn" onClick={() => setDialog({ kind: 'capacity' })} title={appointment.ownCapacity ? t.cOwn : undefined}>
+              {t.cBtn}: {appointment.capacity}
+            </button>
+          )}
           <button type="button" className="ff-btn" onClick={() => window.print()}>
             {t.print}
           </button>
@@ -286,7 +325,36 @@ export function WorkshopDetailView({
         </div>
       </section>
 
-      {mism && <div className="ff-note ff-noprint" style={{ marginTop: 14 }}>{t.mism(mism.shown, mism.expected)}</div>}
+      {mism && (
+        <div className="ff-note ff-noprint" style={{ marginTop: 14 }}>
+          {t.mism(mism.shown, mism.expected)}
+          <div style={{ marginTop: 8 }}>
+            {alignAsk ? (
+              <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <b>{t.aSure(mism.shown, mism.expected)}</b>
+                <button
+                  type="button"
+                  className="ff-btn is-sm is-gold"
+                  disabled={aligning}
+                  onClick={async () => {
+                    setAligning(true)
+                    const r = await alignAppointmentCounter({ appointmentId: appointment.id, seen: mism.shown })
+                    setAligning(false)
+                    setAlignAsk(false)
+                    if (r.ok) await done(t.aDone(r.from, r.to))
+                    else toast(r.error)
+                  }}
+                >
+                  {aligning ? '…' : t.aYes}
+                </button>
+                <button type="button" className="ff-btn is-sm" onClick={() => setAlignAsk(false)}>{t.cancel}</button>
+              </span>
+            ) : (
+              <button type="button" className="ff-btn is-sm" onClick={() => setAlignAsk(true)}>{t.aBtn}</button>
+            )}
+          </div>
+        </div>
+      )}
       {appointment.isPast && <div className="ff-info ff-noprint" style={{ marginTop: 14 }}>{t.pastNote}</div>}
 
       <div className="ff-printonly" style={{ margin: '18px 0 8px' }}>
@@ -319,7 +387,7 @@ export function WorkshopDetailView({
                     <div key={s.index} className={`ff-seat${s.holds ? '' : ' is-gone'}`}>
                       <span className="ff-printno" aria-hidden>{s.holds ? ++printNo : '–'}</span>
                       <span style={{ minWidth: 0 }}>
-                        <span className="nm">{s.name}</span>
+                        <button type="button" className="nm ff-namebtn" onClick={() => setDetail(b)} title={t.details}>{s.name}</button>
                         {seats.length > 1 && <span className="ff-muted" style={{ fontSize: 12 }}> · {t.seatN(s.index + 1)}</span>}
                         {s.note && <span className="ff-allergy">{s.note}</span>}
                       </span>
@@ -338,6 +406,12 @@ export function WorkshopDetailView({
                 <div className="c-p">
                   <span className={`ff-pill ${ORIGIN_TONE[origin]}`} title={t.originHint[origin]}>{t.origin[origin]}</span>
                   {origin === 'website' && <span className={`ff-pill ${PAY_TONE[pay]}`}>{t.pay[pay]}</span>}
+                  {origin !== 'website' && b.manual?.channel && <span className="ff-pill neu">{MP[lang].channels[b.manual.channel] ?? b.manual.channel}</span>}
+                  {origin !== 'website' && b.manual?.paymentStatus === 'open' && <span className="ff-pill warn">{MP[lang].open}</span>}
+                  {origin !== 'website' && b.manual?.paymentStatus === 'paid' && (
+                    <span className="ff-pill ok">{MP[lang].paid}{b.manual.paymentMethod ? `: ${MP[lang].methods[b.manual.paymentMethod] ?? b.manual.paymentMethod}` : ''}{b.manual.voucherCode ? ` (${b.manual.voucherCode})` : ''}</span>
+                  )}
+                  {origin !== 'website' && !b.manual?.paymentStatus && (origin === 'wix' ? <span className="ff-pill ok">{t.pay.wix}</span> : <span className="ff-pill gold">{t.pay.manual}</span>)}
                   {b.orderId && b.invoiceNumber && (
                     <a className="ff-link ff-noprint" style={{ fontSize: 12 }} href={`/api/admin/orders/${b.orderId}/receipt`} target="_blank" rel="noopener">
                       {b.invoiceNumber}
@@ -352,13 +426,17 @@ export function WorkshopDetailView({
                 <div className="c-a ff-noprint">
                   <button type="button" className="ff-btn is-sm" onClick={() => setDetail(b)}>{t.details}</button>
                   <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'edit', booking: b })}>{t.edit}</button>
+                  <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'move', booking: b })}>{t.move}</button>
                   {!appointment.isPast && (
-                    <>
-                      <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'move', booking: b })}>{t.move}</button>
-                      <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'alt', bookingIds: [b.id] })} disabled={!b.email}>{t.alt}</button>
-                    </>
+                    <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'alt', bookingIds: [b.id] })} disabled={!b.email}>{t.alt}</button>
                   )}
-                  {!b.orderId && origin === 'manual' && (
+                  {origin !== 'website' && (
+                    <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'pay', booking: b })}>{lang === 'de' ? 'Zahlung' : 'Payment'}</button>
+                  )}
+                  {seats.some((x) => x.holds) && (
+                    <button type="button" className="ff-btn is-sm is-danger" onClick={() => setDialog({ kind: 'release', booking: b })}>{t.fBtn}</button>
+                  )}
+                  {!b.orderId && origin !== 'website' && (
                     <button type="button" className="ff-btn is-sm is-danger" onClick={() => setDialog({ kind: 'remove', booking: b })}>{t.remove}</button>
                   )}
                 </div>
@@ -395,14 +473,32 @@ export function WorkshopDetailView({
         </div>
       )}
 
-      {detail && <BookingDetailModal booking={detail} onClose={() => setDetail(null)} />}
+      {detail && (
+        <CustomerProfileModal
+          bookingId={detail.id}
+          title={buyerName(detail)}
+          lang={lang}
+          onClose={() => setDetail(null)}
+          onOpenProfile={onOpenProfile ? (email: string) => { setDetail(null); onOpenProfile(email) } : undefined}
+          onOpenWorkshop={(id: string) => { setDetail(null); if (id !== appointment.id) onOpenWorkshop?.(id) }}
+        />
+      )}
 
       {dialog?.kind === 'add' && (
         <Modal title={t.aT} onClose={() => setDialog(null)} wide>
-          <AddManualBookingForm appointmentId={appointment.id} remainingSpots={free} onDone={() => done(t.saved)} />
+          <AddManualBookingForm appointmentId={appointment.id} remainingSpots={free} lang={lang} onDone={(m) => done(m || t.saved)} />
         </Modal>
       )}
-      {dialog?.kind === 'edit' && <EditDialog t={t} booking={dialog.booking} onClose={() => setDialog(null)} onDone={() => done(t.saved)} />}
+      {dialog?.kind === 'capacity' && (
+        <CapacityDialog t={t} appointment={appointment} onClose={() => setDialog(null)} onDone={(m) => done(m)} />
+      )}
+      {dialog?.kind === 'release' && (
+        <ReleaseDialog t={t} booking={dialog.booking} onClose={() => setDialog(null)} onDone={(m) => done(m)} />
+      )}
+      {dialog?.kind === 'pay' && (
+        <ManualPaymentDialog booking={dialog.booking} lang={lang} onClose={() => setDialog(null)} onDone={(m) => done(m)} />
+      )}
+      {dialog?.kind === 'edit' && <EditDialog t={t} lang={lang} booking={dialog.booking} onClose={() => setDialog(null)} onDone={(m) => done(m || t.saved)} />}
       {dialog?.kind === 'move' && (
         <MoveDialog t={t} lang={lang} booking={dialog.booking} appointment={appointment} onClose={() => setDialog(null)} onDone={done} />
       )}
@@ -442,25 +538,55 @@ function Modal({ title, children, onClose, wide }: { title: string; children: Re
   )
 }
 
-function EditDialog({ t, booking, onClose, onDone }: { t: Dict; booking: BookingRow; onClose: () => void; onDone: () => void }) {
+function EditDialog({ t, lang, booking, onClose, onDone }: { t: Dict; lang: Lang; booking: BookingRow; onClose: () => void; onDone: (msg?: string) => void }) {
   const initial = seatsOf(booking, t.guestOf).map((s) => ({
     index: s.index,
     name: booking.seats[s.index]?.recipientName || (s.index === 0 ? buyerName(booking) : ''),
     email: s.email,
     note: s.note,
+    holds: s.holds,
   }))
   const [seats, setSeats] = useState(initial)
+  const [phone, setPhone] = useState(booking.phone)
+  const [price, setPrice] = useState(String(booking.pricePerPerson ?? 0))
+  const [channel, setChannel] = useState(booking.manual?.channel ?? '')
+  const [dropAsk, setDropAsk] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
+  const locked = Boolean(booking.orderId)
+  const canChannel = bookingOrigin(booking) !== 'website'
+  const live = seats.filter((s) => s.holds).length
+
+  const run = async (fn: () => Promise<{ ok: true } | { ok: false; error: string }>, msg: string) => {
+    setBusy(true)
+    setErr('')
+    const r = await fn()
+    if (!r.ok) {
+      setErr(r.error)
+      setBusy(false)
+      return
+    }
+    onDone(msg)
+  }
   const save = async () => {
     setBusy(true)
     setErr('')
     try {
-      // Sequential writes (MongoDB Atlas M0, no transactions).
+      // Booking-level details first (phone, price, source), then each seat. Sequential writes (MongoDB Atlas M0, no transactions).
+      const priceNum = Number(price.replace(',', '.'))
+      const r = await updateBookingDetails({
+        bookingId: booking.id,
+        phone,
+        ...(!locked && Number.isFinite(priceNum) ? { pricePerPerson: priceNum } : {}),
+        ...(canChannel && channel ? { channel: channel as never } : {}),
+      })
+      if (!r.ok) throw new Error(r.error)
       for (const s of seats) {
         const before = initial[s.index]
         if (s.name === before.name && s.email === before.email && s.note === before.note) continue
-        await updateBookingSeatDetails({ bookingId: booking.id, seatIndex: s.index, name: s.name, email: s.email, notes: s.note })
+        // The sheet hides the "[Wix Import …]" marker from the note — put it back, or saving would erase where this booking came from.
+        const marker = s.index === 0 ? (booking.notes.match(/\[Wix Import[^\]]*\]/gi) ?? []).join(' ') : ''
+        await updateBookingSeatDetails({ bookingId: booking.id, seatIndex: s.index, name: s.name, email: s.email, notes: [s.note.trim(), marker].filter(Boolean).join(' ') })
       }
       onDone()
     } catch (e) {
@@ -471,9 +597,28 @@ function EditDialog({ t, booking, onClose, onDone }: { t: Dict; booking: Booking
   return (
     <Modal title={t.eT} onClose={onClose} wide>
       <p className="ff-muted" style={{ marginTop: 0 }}>{t.eHint}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8, marginBottom: 6 }}>
+        <label className="ff-field"><span>{t.ePhone}</span>
+          <input className="ff-input" value={phone} maxLength={40} onChange={(e) => setPhone(e.target.value)} />
+        </label>
+        <label className="ff-field"><span>{t.ePrice}</span>
+          <input className="ff-input" inputMode="decimal" value={price} disabled={locked} onChange={(e) => setPrice(e.target.value)} />
+        </label>
+        {canChannel && (
+          <label className="ff-field"><span>{t.eChannel}</span>
+            <select className="ff-input" value={channel} onChange={(e) => setChannel(e.target.value)}>
+              <option value="">{MP[lang].pick}</option>
+              {CHANNELS.map((c) => <option key={c} value={c}>{MP[lang].channels[c]}</option>)}
+            </select>
+          </label>
+        )}
+      </div>
+      {locked && <p className="ff-muted" style={{ fontSize: 12, margin: '0 0 6px' }}>{t.eLocked}</p>}
       {seats.map((s, i) => (
-        <fieldset key={s.index} style={{ border: 0, borderTop: '1px solid var(--ff-line)', padding: '12px 0', margin: 0, display: 'grid', gap: 8 }}>
-          <legend style={{ fontWeight: 700, padding: 0, marginBottom: 4 }}>{t.seatN(s.index + 1)}</legend>
+        <fieldset key={s.index} style={{ border: 0, borderTop: '1px solid var(--ff-line)', padding: '12px 0', margin: 0, display: 'grid', gap: 8, opacity: s.holds ? 1 : 0.55 }}>
+          <legend style={{ fontWeight: 700, padding: 0, marginBottom: 4 }}>
+            {t.seatN(s.index + 1)}{!s.holds && <span className="ff-muted" style={{ fontWeight: 400 }}> · {t.st[booking.seats[s.index]?.seatStatus || 'active'] ?? ''}</span>}
+          </legend>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
             <label className="ff-field"><span>{t.eName}</span>
               <input className="ff-input" value={s.name} onChange={(e) => setSeats((p) => p.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
@@ -485,8 +630,26 @@ function EditDialog({ t, booking, onClose, onDone }: { t: Dict; booking: Booking
           <label className="ff-field"><span>{t.eNote}</span>
             <textarea className="ff-input" rows={2} value={s.note} onChange={(e) => setSeats((p) => p.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} />
           </label>
+          {!locked && s.holds && live > 1 && (
+            <div>
+              {dropAsk === s.index ? (
+                <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+                  <b>{t.eDropSure}</b>
+                  <button type="button" className="ff-btn is-sm is-danger" disabled={busy} onClick={() => run(() => cancelBookingSeat({ bookingId: booking.id, seatIndex: s.index }), t.eDropped)}>{t.rYes}</button>
+                  <button type="button" className="ff-btn is-sm" onClick={() => setDropAsk(null)}>{t.cancel}</button>
+                </span>
+              ) : (
+                <button type="button" className="ff-btn is-sm is-danger" disabled={busy} onClick={() => setDropAsk(s.index)}>{t.eDrop}</button>
+              )}
+            </div>
+          )}
         </fieldset>
       ))}
+      {!locked && (
+        <div style={{ borderTop: '1px solid var(--ff-line)', paddingTop: 12 }}>
+          <button type="button" className="ff-btn is-sm" disabled={busy || seats.length >= 12} onClick={() => run(() => addBookingSeats({ bookingId: booking.id, count: 1 }), t.eAdded)}>+ {t.eAdd}</button>
+        </div>
+      )}
       {err && <div className="ff-err">{err}</div>}
       <div className="ff-acts">
         <button type="button" className="ff-btn" onClick={onClose} disabled={busy}>{t.cancel}</button>
@@ -509,7 +672,9 @@ function MoveDialog({
 }: {
   t: Dict; lang: Lang; booking: BookingRow; appointment: AppointmentRow; onClose: () => void; onDone: (msg: string) => void
 }) {
-  const n = seatsHoldingPlace(booking)
+  const movable = useMemo(() => seatsOf(booking, t.guestOf).filter((s) => s.holds), [booking, t])
+  const [picked, setPicked] = useState<Set<number>>(() => new Set(movable.map((s) => s.index)))
+  const n = picked.size
   const [alts, setAlts] = useState<Alt[] | null>(null)
   const [to, setTo] = useState('')
   const [notify, setNotify] = useState(false)
@@ -518,22 +683,25 @@ function MoveDialog({
   useEffect(() => {
     getAlternateAppointments(appointment.id, { anyWorkshop: true })
       .then((r) => {
-        const fit = r.filter((a) => a.capacity - a.totalBooked >= n)
+        const fit = r.filter((a) => a.capacity - a.totalBooked >= Math.max(n, 1))
         setAlts(fit)
         const same = fit.find((a) => a.workshopTitle === appointment.workshopTitle)
-        setTo((same ?? fit[0])?.id ?? '')
+        setTo((cur) => (fit.some((a) => a.id === cur) ? cur : ((same ?? fit[0])?.id ?? '')))
       })
       .catch((e) => setErr(e instanceof Error ? e.message : String(e)))
   }, [appointment.id, appointment.workshopTitle, n])
   const target = alts?.find((a) => a.id === to)
   const otherKind = target && target.workshopTitle !== appointment.workshopTitle
   const move = async () => {
-    if (!to) return
+    if (!to || n === 0) return
     setBusy(true)
     setErr('')
     try {
-      const r = await moveWorkshopBooking({ bookingId: booking.id, newAppointmentId: to, notifyCustomer: notify })
-      onDone(notify && r.emailSent !== true ? t.mvMailFail : t.moved)
+      const partial = n < movable.length
+      const r = partial
+        ? await moveWorkshopSeats({ bookingId: booking.id, seatIndexes: [...picked], newAppointmentId: to, notifyCustomer: notify })
+        : await moveWorkshopBooking({ bookingId: booking.id, newAppointmentId: to, notifyCustomer: notify })
+      onDone(notify && r.emailSent !== true ? t.mvMailFail : partial ? t.movedSome : t.moved)
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e))
       setBusy(false)
@@ -547,6 +715,22 @@ function MoveDialog({
   return (
     <Modal title={t.mvT} onClose={onClose}>
       <p style={{ marginTop: 0 }}><strong>{t.mvFrom(buyerName(booking), n)}</strong></p>
+      {movable.length > 1 && (
+        <fieldset style={{ border: 0, padding: 0, margin: '0 0 12px', display: 'grid', gap: 6 }}>
+          <legend style={{ fontWeight: 700, marginBottom: 4, padding: 0 }}>{t.mvWho}</legend>
+          {movable.map((s) => (
+            <label key={s.index} className="ff-chk">
+              <input
+                type="checkbox"
+                checked={picked.has(s.index)}
+                onChange={(e) => setPicked((prev) => { const next = new Set(prev); if (e.target.checked) next.add(s.index); else next.delete(s.index); return next })}
+              />
+              <span>{s.name}{s.note ? <span className="ff-muted"> · {s.note}</span> : null}</span>
+            </label>
+          ))}
+          <span className="ff-muted" style={{ fontSize: 12 }}>{t.mvWhoHint}</span>
+        </fieldset>
+      )}
       {alts === null && !err && <p className="ff-muted">{t.loading}</p>}
       {alts && alts.length === 0 && <div className="ff-info">{t.mvNone}</div>}
       {alts && alts.length > 0 && (
@@ -577,7 +761,7 @@ function MoveDialog({
       {err && <div className="ff-err" style={{ marginTop: 12 }}>{err}</div>}
       <div className="ff-acts">
         <button type="button" className="ff-btn" onClick={onClose} disabled={busy}>{t.cancel}</button>
-        <button type="button" className="ff-btn is-gold" onClick={move} disabled={busy || !to}>{busy ? '…' : t.mvYes}</button>
+        <button type="button" className="ff-btn is-gold" onClick={move} disabled={busy || !to || n === 0}>{busy ? '…' : t.mvYes}</button>
       </div>
     </Modal>
   )
@@ -676,6 +860,93 @@ function AltDialog({
       <div className="ff-acts">
         <button type="button" className="ff-btn" onClick={onClose} disabled={busy}>{t.cancel}</button>
         <button type="button" className="ff-btn is-gold" onClick={send} disabled={busy || picked.size === 0 || (mode === 'one' && !to)}>{busy ? '…' : t.gSend}</button>
+      </div>
+    </Modal>
+  )
+}
+
+function CapacityDialog({ t, appointment, onClose, onDone }: { t: Dict; appointment: AppointmentRow; onClose: () => void; onDone: (msg: string) => void }) {
+  const standard = appointment.standardCapacity ?? appointment.capacity
+  const [value, setValue] = useState(appointment.ownCapacity ? String(appointment.ownCapacity) : '')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const save = async () => {
+    const trimmed = value.trim()
+    const cap = trimmed === '' ? null : Number(trimmed)
+    if (cap !== null && (!Number.isInteger(cap) || cap < 1)) return setErr(t.cLabel)
+    setBusy(true)
+    setErr('')
+    const r = await setAppointmentCapacity({ appointmentId: appointment.id, capacity: cap })
+    if (!r.ok) {
+      setErr(r.error)
+      setBusy(false)
+      return
+    }
+    onDone(t.cSaved)
+  }
+  return (
+    <Modal title={t.cT} onClose={onClose}>
+      <label className="ff-field"><span>{t.cLabel}</span>
+        <input className="ff-input" inputMode="numeric" value={value} placeholder={String(standard)} onChange={(e) => setValue(e.target.value)} />
+      </label>
+      <p className="ff-muted" style={{ fontSize: 13 }}>{t.cHint(standard)}</p>
+      {err && <div className="ff-err">{err}</div>}
+      <div className="ff-acts">
+        <button type="button" className="ff-btn" onClick={onClose} disabled={busy}>{t.cancel}</button>
+        <button type="button" className="ff-btn is-gold" onClick={save} disabled={busy}>{busy ? '…' : t.save}</button>
+      </div>
+    </Modal>
+  )
+}
+
+function ReleaseDialog({ t, booking, onClose, onDone }: { t: Dict; booking: BookingRow; onClose: () => void; onDone: (msg: string) => void }) {
+  const live = seatsOf(booking, t.guestOf).filter((s) => s.holds)
+  const [picked, setPicked] = useState<Set<number>>(() => new Set(live.map((s) => s.index)))
+  const [reason, setReason] = useState('no_show')
+  const [note, setNote] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const go = async () => {
+    if (picked.size === 0) return
+    setBusy(true)
+    setErr('')
+    const r = await releaseBookingSeats({ bookingId: booking.id, seatIndexes: [...picked], reason: reason as never, note })
+    if (!r.ok) {
+      setErr(r.error)
+      setBusy(false)
+      return
+    }
+    onDone(t.fDone)
+  }
+  return (
+    <Modal title={t.fT} onClose={onClose}>
+      <p style={{ marginTop: 0 }}><strong>{buyerName(booking)}</strong></p>
+      <fieldset style={{ border: 0, padding: 0, margin: '0 0 12px', display: 'grid', gap: 6 }}>
+        <legend style={{ fontWeight: 700, marginBottom: 4, padding: 0 }}>{t.fWho}</legend>
+        {live.map((s) => (
+          <label key={s.index} className="ff-chk">
+            <input
+              type="checkbox"
+              checked={picked.has(s.index)}
+              onChange={(e) => setPicked((prev) => { const next = new Set(prev); if (e.target.checked) next.add(s.index); else next.delete(s.index); return next })}
+            />
+            <span>{s.name}</span>
+          </label>
+        ))}
+      </fieldset>
+      <label className="ff-field"><span>{t.fReason}</span>
+        <select className="ff-input" value={reason} onChange={(e) => setReason(e.target.value)}>
+          {Object.entries(t.fReasons).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
+      </label>
+      <label className="ff-field" style={{ marginTop: 10 }}><span>{t.fNote}</span>
+        <input className="ff-input" value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} />
+      </label>
+      <p className="ff-muted" style={{ fontSize: 13 }}>{t.fInfo}</p>
+      {err && <div className="ff-err">{err}</div>}
+      <div className="ff-acts">
+        <button type="button" className="ff-btn" onClick={onClose} disabled={busy}>{t.cancel}</button>
+        <button type="button" className="ff-btn is-danger" onClick={go} disabled={busy || picked.size === 0}>{busy ? '…' : t.fYes}</button>
       </div>
     </Modal>
   )

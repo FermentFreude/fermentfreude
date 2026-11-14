@@ -3350,7 +3350,7 @@ export interface ProductShowcaseBlock {
   blockType: 'productShowcase';
 }
 /**
- * Define workshop metadata. Price and capacity apply to all dates and locations.
+ * Define workshop metadata. Price and standard capacity apply to all dates and locations. A single date can have its own capacity.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "workshops".
@@ -3388,7 +3388,7 @@ export interface Workshop {
    */
   basePrice: number;
   /**
-   * Maximum number of people per workshop session. Keep this matched to your real room/class size — it controls how many spots show as available on the booking page.
+   * Standard-Kapazität: wie viele Personen pro Termin dabei sein können. Sie gilt für alle Termine dieses Workshops, die keine eigene Kapazität haben (bei einem einzelnen Termin kann sie unter „Workshop-Termine“ überschrieben werden). Eine Änderung passt die freien Plätze aller kommenden Termine ohne eigene Kapazität automatisch an.
    */
   maxCapacityPerSlot: number;
   /**
@@ -6168,9 +6168,25 @@ export interface WorkshopAppointment {
    */
   dateTime: string;
   /**
-   * Number of spots available for booking (0 = sold out, max 12 per workshop)
+   * Wie viele Personen bei DIESEM Termin dabei sein können. Leer lassen = die Standard-Kapazität des Workshops gilt. Wird die Zahl später geändert, passen sich die freien Plätze automatisch an. Sie kann nicht unter die Zahl der schon gebuchten Plätze gesenkt werden.
+   */
+  capacity?: number | null;
+  /**
+   * Freie Plätze (0 = ausgebucht). Wird automatisch geführt: bei einem neuen Termin gleich der Kapazität, danach zählen Buchungen und Stornos mit. Nur im Ausnahmefall von Hand ändern.
    */
   availableSpots: number;
+  /**
+   * Internal: ids of checkout holds whose seats were already given back, so a seat can never be given back twice (or lost half-way). Do not edit.
+   */
+  releasedBookingIds?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   /**
    * Uncheck to hide this date from the website (useful for sold-out or cancelled sessions)
    */
@@ -6202,7 +6218,7 @@ export interface WorkshopAppointment {
 export interface WorkshopBooking {
   id: string;
   /**
-   * Set to "Confirmed" for phone/manual bookings where payment was received outside of Stripe.
+   * Read-only here. Change bookings in the roster dashboard (Workshops → the date → Bearbeiten / Zahlung / Platz freigeben).
    */
   status: 'pending' | 'confirmed' | 'cancelled' | 'refunded';
   /**
@@ -6337,6 +6353,23 @@ export interface WorkshopBooking {
       }[]
     | null;
   /**
+   * Internal: a cancelled checkout hold whose seats have not been given back yet. The background job finishes it. Do not edit.
+   */
+  releasePending?: boolean | null;
+  /**
+   * Wird im Dashboard ausgefüllt, wenn jemand von Hand eingetragen wird (E-Mail, Telefon, vor Ort, Wix-Gutschein …). Nicht hier bearbeiten, sondern im Dashboard unter „Zahlung“.
+   */
+  manualInfo?: {
+    channel?: ('email' | 'phone' | 'inperson' | 'wix' | 'other') | null;
+    paymentStatus?: ('paid' | 'open') | null;
+    paymentMethod?:
+      | ('transfer' | 'cash' | 'card_onsite' | 'voucher_wix' | 'voucher_shop' | 'wix_paid' | 'other')
+      | null;
+    voucherCode?: string | null;
+    paymentNote?: string | null;
+    paidAt?: string | null;
+  };
+  /**
    * Everything that happened to this booking, newest last: how it was created, moves, emails sent (or not), link opened, customer choices, refunds. Written automatically — cannot be edited, so nothing gets lost.
    */
   history?:
@@ -6358,6 +6391,12 @@ export interface WorkshopBooking {
               | 'customer_cancelled'
               | 'refund_requested'
               | 'refund_completed'
+              | 'details_edited'
+              | 'seats_changed'
+              | 'seat_released'
+              | 'payment_recorded'
+              | 'invoice_created'
+              | 'confirmation_sent'
             )
           | null;
         summary?: string | null;
@@ -9270,7 +9309,9 @@ export interface WorkshopAppointmentsSelect<T extends boolean = true> {
   workshop?: T;
   location?: T;
   dateTime?: T;
+  capacity?: T;
   availableSpots?: T;
+  releasedBookingIds?: T;
   isPublished?: T;
   notes?: T;
   cancellationStatus?: T;
@@ -9326,6 +9367,17 @@ export interface WorkshopBookingsSelect<T extends boolean = true> {
         rebookedFromBookingId?: T;
         rebookedFromSeatIndex?: T;
         id?: T;
+      };
+  releasePending?: T;
+  manualInfo?:
+    | T
+    | {
+        channel?: T;
+        paymentStatus?: T;
+        paymentMethod?: T;
+        voucherCode?: T;
+        paymentNote?: T;
+        paidAt?: T;
       };
   history?:
     | T

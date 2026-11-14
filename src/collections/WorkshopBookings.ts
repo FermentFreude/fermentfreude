@@ -24,8 +24,14 @@ export const WorkshopBookings: CollectionConfig = {
     // reality — see fix-workshop-capacity.ts's doc comment for the incident
     // this caused. Add seats from the roster dashboard instead.
     create: () => false,
-    update: isAdmin,
-    delete: isAdmin,
+    // Editing or deleting a booking here would change the bookings without the seat
+    // counter that the public booking page uses (it only follows the roster
+    // dashboard's actions and the website), so the two would drift apart. Every
+    // change to a booking goes through the roster dashboard (edit, move, free a
+    // seat, remove); those use overrideAccess and are unaffected. This view stays
+    // read-only so the full record can still be looked at.
+    update: () => false,
+    delete: () => false,
   },
   fields: [
     // ── Sidebar ────────────────────────────────────────────────
@@ -43,7 +49,7 @@ export const WorkshopBookings: CollectionConfig = {
       ],
       admin: {
         position: 'sidebar',
-        description: 'Set to "Confirmed" for phone/manual bookings where payment was received outside of Stripe.',
+        description: 'Read-only here. Change bookings in the roster dashboard (Workshops → the date → Bearbeiten / Zahlung / Platz freigeben).',
       },
     },
     {
@@ -198,7 +204,6 @@ export const WorkshopBookings: CollectionConfig = {
       required: true,
       label: 'Number of Guests',
       min: 1,
-      max: 12,
     },
     {
       name: 'pricePerPerson',
@@ -352,6 +357,70 @@ export const WorkshopBookings: CollectionConfig = {
             readOnly: true,
           },
         },
+      ],
+    },
+
+    // ── Internal: seat release bookkeeping for checkout holds ──
+    {
+      name: 'releasePending',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        hidden: true,
+        readOnly: true,
+        description:
+          'Internal: a cancelled checkout hold whose seats have not been given back yet. The background job finishes it. Do not edit.',
+      },
+    },
+
+    // ── Manual bookings: how it came in and how it was paid ────
+    {
+      name: 'manualInfo',
+      type: 'group',
+      label: 'Manuelle Buchung: Herkunft und Zahlung',
+      admin: {
+        description:
+          'Wird im Dashboard ausgefüllt, wenn jemand von Hand eingetragen wird (E-Mail, Telefon, vor Ort, Wix-Gutschein …). Nicht hier bearbeiten, sondern im Dashboard unter „Zahlung“.',
+      },
+      fields: [
+        {
+          name: 'channel',
+          type: 'select',
+          label: 'Wie ist die Buchung zustande gekommen?',
+          options: [
+            { label: 'Per E-Mail', value: 'email' },
+            { label: 'Telefon', value: 'phone' },
+            { label: 'Vor Ort / im Shop', value: 'inperson' },
+            { label: 'Über Wix', value: 'wix' },
+            { label: 'Sonstiges', value: 'other' },
+          ],
+        },
+        {
+          name: 'paymentStatus',
+          type: 'select',
+          label: 'Zahlung',
+          options: [
+            { label: 'Bezahlt', value: 'paid' },
+            { label: 'Noch offen (Reservierung)', value: 'open' },
+          ],
+        },
+        {
+          name: 'paymentMethod',
+          type: 'select',
+          label: 'Zahlungsart',
+          options: [
+            { label: 'Überweisung', value: 'transfer' },
+            { label: 'Bar', value: 'cash' },
+            { label: 'Karte vor Ort', value: 'card_onsite' },
+            { label: 'Wix-Gutschein', value: 'voucher_wix' },
+            { label: 'Gutschein (Shop / Website)', value: 'voucher_shop' },
+            { label: 'Bereits in Wix bezahlt', value: 'wix_paid' },
+            { label: 'Sonstiges', value: 'other' },
+          ],
+        },
+        { name: 'voucherCode', type: 'text', label: 'Gutschein-Code' },
+        { name: 'paymentNote', type: 'text', label: 'Notiz zur Zahlung' },
+        { name: 'paidAt', type: 'date', label: 'Bezahlt am' },
       ],
     },
 

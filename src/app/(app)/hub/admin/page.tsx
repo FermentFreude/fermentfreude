@@ -1013,8 +1013,8 @@ export default function AdminHubPage() {
             {
               name: t('Verfügbare Plätze', 'Available Spots'),
               description: t(
-                'Zwischen 0 und 12. 0 = ausverkauft, 12 = voll verfügbar',
-                'Between 0 and 12. 0 = sold out, 12 = fully available',
+                'Freie Plätze, 0 = ausverkauft. Wird automatisch geführt (neuer Termin = volle Kapazität). Die Kapazität eines Termins kann einzeln eingestellt werden.',
+                'Free spots, 0 = sold out. Kept automatically (a new date = full capacity). A date can have its own capacity.',
               ),
             },
             {

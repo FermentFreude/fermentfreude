@@ -365,6 +365,13 @@ async function run() {
         email,
         phone,
         notes,
+        // Wix took the payment and issued the invoice already.
+        manualInfo: {
+          channel: 'wix',
+          paymentStatus: 'paid',
+          paymentMethod: 'wix_paid',
+          paymentNote: 'Zahlung und Rechnung laufen über Wix',
+        },
       },
     })
     summary.created.push(label)

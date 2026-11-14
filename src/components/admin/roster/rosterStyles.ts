@@ -158,6 +158,8 @@ html[data-theme='dark'] .ff-roster {
 .ff-btn.is-gold:hover:not(:disabled) { background: var(--ff-gold-dark); border-color: var(--ff-gold-dark); }
 .ff-btn.is-sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
 .ff-btn.is-danger { color: var(--ff-bad-fg); }
+.ff-namebtn { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: inherit; cursor: pointer; text-align: left; }
+.ff-namebtn:hover { text-decoration: underline; color: var(--ff-gold-ink); }
 .ff-link { background: none; border: 0; padding: 0; font-weight: 600; text-decoration: underline; cursor: pointer; color: var(--ff-gold-ink); }
 .ff-pill { display: inline-block; border-radius: 99px; padding: 2px 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
 .ff-pill.ok { background: var(--ff-ok-bg); color: var(--ff-ok-fg); }
