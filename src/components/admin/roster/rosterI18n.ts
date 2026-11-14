@@ -9,7 +9,8 @@ export function readLang(): Lang {
   } catch {
     /* storage can be unavailable */
   }
-  return 'en'
+  // The founders work in German; English only when the browser asks for it.
+  return typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de'
 }
 
 export function saveLang(lang: Lang) {

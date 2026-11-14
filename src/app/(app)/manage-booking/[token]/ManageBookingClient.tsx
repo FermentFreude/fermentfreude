@@ -97,11 +97,13 @@ export function ManageBookingClient({
   const guestCount = booking.guestCount ?? initialSeats.length ?? 1
   const isMultiSeat = guestCount > 1
   const isOrganiserCancellation = scope === 'organiser-cancellation'
+  // "Choose your own date" link from the founders: no reason to ask — we asked them.
+  const isDateOffer = scope === 'date-offer'
 
   const [seats, setSeats] = useState(initialSeats)
   const [seatIndex, setSeatIndex] = useState<number | null>(isMultiSeat ? null : 0)
-  const [step, setStep] = useState<Step>(isMultiSeat ? 'seat-picker' : 'reason')
-  const [reason, setReason] = useState<string>('')
+  const [step, setStep] = useState<Step>(isMultiSeat ? 'seat-picker' : isDateOffer ? 'options' : 'reason')
+  const [reason, setReason] = useState<string>(isDateOffer ? 'other' : '')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [dates, setDates] = useState<AvailableDate[]>([])
@@ -152,8 +154,8 @@ export function ManageBookingClient({
     setError(null)
     setQueuePosition(0)
     setSeatIndex(selectedSeatIndices[0])
-    setReason('')
-    setStep('reason')
+    setReason(isDateOffer ? 'other' : '')
+    setStep(isDateOffer ? 'options' : 'reason')
   }
 
   async function confirmReason() {
@@ -248,8 +250,8 @@ export function ManageBookingClient({
     if (nextPosition < selectedSeatIndices.length) {
       setQueuePosition(nextPosition)
       setSeatIndex(selectedSeatIndices[nextPosition])
-      setReason('')
-      setStep('reason')
+      setReason(isDateOffer ? 'other' : '')
+      setStep(isDateOffer ? 'options' : 'reason')
     } else {
       setStep('mixed-summary')
     }
@@ -314,6 +316,13 @@ export function ManageBookingClient({
           )}
         </div>
 
+        {isDateOffer && (
+          <div className="mb-6 rounded-xl border border-[#e8e4d9] bg-white px-4 py-3 text-[13px] text-[#1a1a1a]">
+            Wir bitten dich, einen neuen Termin für deinen Workshop zu wählen. Dein bisheriger
+            Platz bleibt reserviert, bis du gewählt hast. Es entstehen keine zusätzlichen Kosten.
+          </div>
+        )}
+
         {isOrganiserCancellation && (
           <div className="mb-6 rounded-xl border border-[#e8e4d9] bg-white px-4 py-3 text-[13px] text-[#1a1a1a]">
             Dieser Termin musste leider von uns abgesagt werden. Wähle einen Ersatztermin oder
@@ -329,7 +338,9 @@ export function ManageBookingClient({
 
         {step === 'seat-picker' && (
           <div className="bg-white border border-[#e8e4d9] rounded-2xl p-6">
-            <h2 className="text-[16px] font-semibold text-[#1a1a1a] mb-1">Wer kann nicht kommen?</h2>
+            <h2 className="text-[16px] font-semibold text-[#1a1a1a] mb-1">
+              {isDateOffer ? 'Für welche Plätze wählst du einen neuen Termin?' : 'Wer kann nicht kommen?'}
+            </h2>
             <p className="text-[13px] text-[#626160] mb-4">
               Wähle einen oder mehrere Plätze — jeder Platz wird unabhängig behandelt und kann
               eine andere Lösung erhalten.

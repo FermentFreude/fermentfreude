@@ -1,32 +1,23 @@
-# Dashboard v2 — handoff (2026-11-13)
+# Dashboard v2 — handoff (updated 2026-11-13, evening)
 
 ## Where we are
-- Branch: `feature/dashboard-v2` (local only, not pushed). Based on staging at the time (458d682).
-- Commit `76e35a0` already contains: CalendarView, ArchiveView, WelcomeView, AttentionPanel, AttentionNotes collection (+ `payload.config.ts` registration), autoAttention / seatCheck / bookingOrigin helpers, rosterI18n (DE/EN), archive API route (`src/app/api/admin/roster/archive/`), updated DashboardView / RosterClient / WorkshopDetailView / fetchRosterData / rosterTheme / types. `tsc` was clean.
-- Staging/main moved on since (perf PRs #179-#183 merged to main). Before pushing, merge or rebase `origin/staging` into this branch.
-- Old v1 attempt: `feature/founders-dashboard` (at main, no own work; old changes in `stash@{0}`).
+- Branch: `feature/dashboard-v2` (local only, not pushed). `origin/staging` merged in (merge commit a34a0a3, includes #181–#184).
+- Committed earlier: 76e35a0 (calendar, archive, welcome, attention notes, DE/EN), 24482d7 (this note).
+- **Everything below is UNCOMMITTED** — Rafaela checks on localhost first; commit only on her explicit yes.
 
-## Source of the plan
-- HTML mock-up (artifact): https://claude.ai/artifact/NJ8e28JVmf559ovWf5C7sK ("Fermentfreude Admin Vorschau"). Read it with the Artifact tool (action: read) before planning.
-- Mock-up features: calendar + list views, participants, archive, move seat, add/edit/remove person, "email another date" incl. "everyone chooses own date" link, invoices / ZIP / CSV, team-note conversations (replies, images, profile photos), arrange tabs, pickup tab (suggested: skip), new look.
+## Built in this session (uncommitted)
+1. **Email safety net** — `src/lib/emailSafety.ts`, wired into `sendTemplateEmail` / `sendTransactionalEmail` / `upsertContact` in `src/lib/brevo.ts`. Outside production (VERCEL_ENV≠production or staging DB) only @fermentfreude.at/.de, ADMIN_NOTIFICATION_EMAIL and EMAIL_TEST_ALLOWLIST receive mail. Local `.env` has EMAIL_TEST_ALLOWLIST=connectwithrafaela@gmail.com. Staging DB check (2026-11-13): bookings/orders/vouchers/transactions scrubbed to @example.invalid, but `users` still has ~19 real addresses → the guard is the protection.
+2. **E-Mails tab** — `EmailTemplatesView.tsx`, `emailTemplateActions.ts`, `emailTemplateMeta.ts` (29 templates incl. new 104, "when sent" from the Google doc), engine `src/lib/emailTemplateText.ts` (byte-exact text-only edits, locked ⟦markers⟧, fingerprint check; tested against all 28 live templates + `tests/int/emailTemplateText.int.spec.ts`), `src/lib/brevoTemplates.ts`, collection `email-template-versions` (before-copies, restore). Outside production only "TEST – …" copies (inactive) are writable; button "Testkopie anlegen" in the editor. Old `brevo-email-templates` (raw HTML push) and `brevo-templates` (never synced) hidden/read-only. Push script refuses without `--overwrite-dashboard-edits`.
+3. **New look** — `rosterStyles.ts` (tokens from the mock-up, Neue Haas Grotesk via Typekit, Payload `--theme-*` vars remapped inside `.ff-roster`), new shell in `RosterClient.tsx` (charcoal rail, wordmark `Wordmark.tsx`, profile chip, E-Mails group, CMS link, DE/EN), arrange Workshops tabs (drag/arrows, per user in localStorage), `RosterToast.tsx`. Every view uses `.ff-page`. `DashboardView.tsx` deleted (unused).
+4. **Welcome / List / Calendar** rebuilt to the mock-up (`WelcomeView`, `WorkshopCard`, `WorkshopsView`, `CalendarView`, bilingual).
+5. **Day sheet** — `WorkshopDetailView.tsx`: header stats + bar, add person, print day sheet (print CSS), copy list, invoices ZIP (`/api/admin/orders/receipt-bulk?ids=…`), per-booking details/edit/move (any workshop, impact preview)/email another date/remove. Bookings now carry `invoiceNumber` + `payment` (fetchRosterData).
+6. **Choose your own date** — new magic-link scope `date-offer` (`dateOfferActions` in policyEngine; manageBooking/page/route pass scope; customer page skips the reason step and shows an intro). Action `chooseDateActions.ts`. **Brevo template #104 "Workshop – Neuen Termin wählen (Dashboard)" was created** (text-only copy of 99) via `src/scripts/create-brevo-date-offer-template.ts`; `BREVO_TEMPLATES.WORKSHOP_DATE_OFFER = 104`.
+7. **Conversations** — AttentionNotes got `createdById`, `assignedTo`, `messages[]` (text, images→media, events), `seenBy`, `ackReason`; Users got `avatar` + `noteEmailPref` (admin-only fields). `attentionActions.ts` rewritten (ask, reply, reassign, done/reopen, seen, image upload, profile). `AttentionPanel.tsx` rewritten (filters, unread, thread dialog with paste/drop screenshots, ask/known for system items, profile dialog). Email alerts are built in code (`alertTeam`), link `/admin/workshop-roster?note=<id>`.
 
-## Next feature to build: edit Brevo email templates from the dashboard
-Why: David writes the template copy; founders should edit it without a developer.
-Facts to respect (see memory `project_brevo_templates_state`):
-- One Brevo account serves staging AND production; templates are shared. 28 active templates, 19 sent by the site, 9 unsent kept on purpose (32,33,34,35,38,39,42,43,44) — never propose deleting them.
-- Edit via Brevo API (`BREVO_API_KEY`, server side only): GET/PUT `/v3/smtp/templates`. Change only text nodes, subject, name, alt/title. Never touch URLs, `{{ params.X }}` placeholders, `{% if %}` Liquid, class names or email addresses.
-- Safety: admin-only check at the top of every server action / API route (`requireAdmin()` pattern in `src/components/admin/roster/actions.ts`); store a before-copy of each template (undo); preview with a real contact email + params; "send test to myself".
-- Founder-friendly German UI, plain labels, show "when is this sent" per template (table in the Google doc "Fermentfreude Brevo Email Templates").
-- Brand spelling: always `Fermentfreude`.
+## Not verified yet
+- No logged-in browser pass was possible (creating a temporary admin was blocked). `tsc`, eslint, `generate:types/importmap`, new int tests and a dev-server compile all pass. Rafaela needs to click through on localhost.
 
-## Other pending work (separate)
-- Ala (colleague) works on the workshop page booking component (location display) on her own branch from staging.
-- Open email gaps and decisions are listed in the Google doc (section 3) — wrong contact addresses on About/FAQ, 14-day vs 48-hour cancellation rule, login notification after every login, "ready for pickup" email, etc.
-- Chatbot is parked: `feature/chatbot-assistant` (local, own folder `fermentfreude-chatbot`) and `feature/website-chatbot` (pushed).
-
-## Working rules (from CLAUDE.md + user preferences)
-- Local first, commit last: check on localhost; commit when she says details are done. Never push / PR / merge without an explicit yes.
-- Staging DB is shared test data (disposable); production only read-only unless she says otherwise. Scripts touching DBs must guard `DATABASE_URL`.
-- After schema changes: `pnpm generate:types`, `pnpm generate:importmap`, `npx tsc --noEmit` (zero errors).
-- MongoDB Atlas M0: sequential writes, no `Promise.all` for mutations. Admin fields need clear labels + descriptions; all text localized (de + en).
-- Branch flow: feature/* → PR into staging → test → staging → main.
+## Open / next
+- Vercel Preview (staging): add EMAIL_TEST_ALLOWLIST with team test inboxes, or test emails on staging go only to @fermentfreude.at.
+- Sender name on existing Brevo templates is "FermentFreude" (brand spelling) — not part of text editing; fix in Brevo settings if wanted.
+- Pickup tab unchanged (mock-up says later).

@@ -471,7 +471,8 @@ export async function updateBookingSeatDetails(params: {
  */
 export async function getAlternateAppointments(
   excludeAppointmentId: string,
-): Promise<{ id: string; date: string; time: string; totalBooked: number; capacity: number }[]> {
+  opts?: { anyWorkshop?: boolean },
+): Promise<{ id: string; date: string; time: string; totalBooked: number; capacity: number; workshopTitle: string; dateTime: string }[]> {
   const payload = await getPayload({ config: configPromise })
   await requireAdmin(payload)
 
@@ -492,20 +493,23 @@ export async function getAlternateAppointments(
     collection: 'workshop-appointments',
     where: {
       and: [
-        { workshop: { equals: workshopId } },
+        ...(opts?.anyWorkshop ? [] : [{ workshop: { equals: workshopId } }]),
         { id: { not_equals: excludeAppointmentId } },
         { isPublished: { equals: true } },
         { dateTime: { greater_than: new Date().toISOString() } },
       ],
     },
-    limit: 50,
+    limit: 80,
     sort: 'dateTime',
-    depth: 0,
+    depth: opts?.anyWorkshop ? 1 : 0,
     overrideAccess: true,
   })
 
   const results = []
   for (const appt of appointments.docs) {
+    const ws = typeof appt.workshop === 'object' && appt.workshop !== null ? appt.workshop : null
+    const apptCapacity = ws ? Number(ws.maxCapacityPerSlot ?? 12) : capacity
+    const workshopTitle = ws ? String(ws.title ?? '') : typeof current.workshop === 'object' && current.workshop ? String(current.workshop.title ?? '') : ''
     const bookings = await payload.find({
       collection: 'workshop-bookings',
       where: { and: [{ appointmentId: { equals: appt.id } }, { status: { equals: 'confirmed' } }] },
@@ -519,7 +523,9 @@ export async function getAlternateAppointments(
       date: fmtDate(String(appt.dateTime)),
       time: `${fmtTime(String(appt.dateTime))} Uhr`,
       totalBooked,
-      capacity,
+      capacity: apptCapacity,
+      workshopTitle,
+      dateTime: String(appt.dateTime),
     })
   }
   return results

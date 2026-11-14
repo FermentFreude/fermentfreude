@@ -40,7 +40,7 @@ export function ParticipantsView({ participants, stats }: Props) {
   const customerCount = participants.filter((p) => p.isBuyer).length
 
   return (
-    <div style={{ padding: '40px', maxWidth: '900px' }}>
+    <div className="ff-page">
       <PageHeader title="Teilnehmer" subtitle="Alle Kunden und Teilnehmer im Überblick" />
 
       {/* Stat cards */}

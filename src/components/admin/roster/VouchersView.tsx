@@ -69,7 +69,6 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
 
   const active = vouchers.filter((v) => v.status === 'active').length
   const redeemed = vouchers.filter((v) => v.status === 'redeemed').length
-  const totalValue = vouchers.reduce((s, v) => s + v.value, 0)
   const redeemedValue = vouchers.filter((v) => v.status === 'redeemed').reduce((s, v) => s + v.value, 0)
 
   const filtered = vouchers.filter((v) => {
@@ -120,7 +119,7 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
   }
 
   return (
-    <div style={{ padding: '40px', maxWidth: '960px' }}>
+    <div className="ff-page">
       {/* Delete confirmation modal */}
       {confirmDelete && (
         <div style={{
@@ -343,7 +342,6 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
         <StatCard label="Gesamt Gutscheine" value={vouchers.length} accentKey="gold" icon={<span style={{ fontSize: '16px' }}>🎟</span>} />
         <StatCard label="Aktiv" value={active} accentKey="green" icon={<span style={{ fontSize: '16px' }}>✓</span>} />
         <StatCard label="Eingelöst" value={redeemed} accentKey="purple" icon={<span style={{ fontSize: '16px' }}>★</span>} />
-        <StatCard label="Gesamtwert verkauft" value={`€${totalValue}`} accentKey="blue" icon={<span style={{ fontSize: '14px', fontWeight: 700 }}>€</span>} />
       </div>
 
       {/* Filter + search */}

@@ -2,42 +2,51 @@
 
 import React, { useMemo, useState } from 'react'
 
-import { seatMismatch, seatMismatchText } from './seatCheck'
-import { BRAND, PageHeader, STATUS, fillLevel, workshopColor } from './rosterTheme'
+import { LOCALE, type Lang } from './rosterI18n'
+import { seatMismatch } from './seatCheck'
 import type { AppointmentRow } from './types'
+import { kindColor } from './workshopKind'
 
-interface Props {
-  appointments: AppointmentRow[]
-  onSelectAppointment: (id: string) => void
-}
-
-const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 const TZ = 'Europe/Vienna'
-
 const dayKey = (iso: string) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: TZ })
+
+const T = {
+  de: {
+    title: 'Kalender', sub: 'Alle Termine auf einen Blick. Ein Klick öffnet den Workshop mit allen Teilnehmenden.',
+    today: 'Heute', prev: 'Vorheriger Monat', next: 'Nächster Monat', wd: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+    seats: 'Plätze gebucht', ws: (n: number) => `${n} ${n === 1 ? 'Workshop' : 'Workshops'}`,
+    warn: (n: number) => `Bei ${n === 1 ? 'einem Termin' : `${n} Terminen`} weicht die Platzzahl auf der Buchungsseite von den Buchungen ab (mit ! markiert).`,
+    mism: (s: number, e: number) => `Die Buchungsseite zeigt ${s} freie Plätze, laut Buchungen sollten es ${e} sein.`,
+    older: 'Ältere Termine stehen im Archiv.',
+    legend: [['kombucha', 'Kombucha'], ['lakto', 'Lakto-Gemüse'], ['tempeh', 'Tempeh'], ['feld', 'Vom Feld ins Glas']],
+  },
+  en: {
+    title: 'Calendar', sub: 'All dates at a glance. One click opens the workshop with all participants.',
+    today: 'Today', prev: 'Previous month', next: 'Next month', wd: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    seats: 'seats booked', ws: (n: number) => `${n} ${n === 1 ? 'workshop' : 'workshops'}`,
+    warn: (n: number) => `For ${n === 1 ? 'one date' : `${n} dates`} the seat count on the booking page differs from the bookings (marked with !).`,
+    mism: (s: number, e: number) => `The booking page shows ${s} free seats; according to the bookings it should be ${e}.`,
+    older: 'Older dates are in the archive.',
+    legend: [['kombucha', 'Kombucha'], ['lakto', 'Lakto vegetables'], ['tempeh', 'Tempeh'], ['feld', 'From field to jar']],
+  },
+}
 
 function shortTitle(title: string): string {
   const t = (title || '').toLowerCase()
-  if (t.includes('kombucha')) return 'Kombucha'
-  if (t.includes('lakto')) return 'Lakto'
-  if (t.includes('tempeh')) return 'Tempeh'
-  if (t.includes('vom feld')) return 'Vom Feld ins Glas'
+  if (t.includes('lakto')) return 'Lakto-Gemüse'
   return title
 }
 
-const navButton: React.CSSProperties = {
-  width: '36px',
-  height: '36px',
-  borderRadius: '8px',
-  border: '1px solid var(--theme-elevation-150)',
-  background: 'var(--theme-elevation-0)',
-  color: 'var(--theme-text)',
-  fontSize: '18px',
-  cursor: 'pointer',
-  lineHeight: 1,
-}
-
-export function CalendarView({ appointments, onSelectAppointment }: Props) {
+export function CalendarView({
+  appointments,
+  lang,
+  onSelectAppointment,
+}: {
+  appointments: AppointmentRow[]
+  lang: Lang
+  onSelectAppointment: (id: string) => void
+}) {
+  const t = T[lang]
   const todayKey = new Date().toLocaleDateString('sv-SE', { timeZone: TZ })
   const [cursor, setCursor] = useState(() => {
     const [y, m] = todayKey.split('-').map(Number)
@@ -49,9 +58,7 @@ export function CalendarView({ appointments, onSelectAppointment }: Props) {
     for (const a of appointments) {
       if (!a.dateTime) continue
       const key = dayKey(a.dateTime)
-      const list = map.get(key) ?? []
-      list.push(a)
-      map.set(key, list)
+      map.set(key, [...(map.get(key) ?? []), a])
     }
     for (const list of map.values()) list.sort((a, b) => a.dateTime.localeCompare(b.dateTime))
     return map
@@ -65,206 +72,85 @@ export function CalendarView({ appointments, onSelectAppointment }: Props) {
 
   const monthKey = `${cursor.y}-${String(cursor.m + 1).padStart(2, '0')}`
   const inMonth = appointments.filter((a) => a.dateTime && dayKey(a.dateTime).startsWith(monthKey))
-  const seatsBooked = inMonth.reduce((sum, a) => sum + a.totalBooked, 0)
-  const seatsTotal = inMonth.reduce((sum, a) => sum + a.capacity, 0)
-  const mismatches = inMonth.filter((a) => seatMismatch(a) !== null).length
+  const booked = inMonth.reduce((s, a) => s + a.totalBooked, 0)
+  const cap = inMonth.reduce((s, a) => s + a.capacity, 0)
+  const pct = cap ? Math.round((booked / cap) * 100) : 0
+  const mismatches = inMonth.filter((a) => seatMismatch(a)).length
+  const monthTitle = first.toLocaleDateString(LOCALE[lang], { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
-  const monthTitle = first.toLocaleDateString('de-AT', { month: 'long', year: 'numeric', timeZone: 'UTC' })
-
-  const shift = (delta: number) => {
-    const d = new Date(Date.UTC(cursor.y, cursor.m + delta, 1))
-    setCursor({ y: d.getUTCFullYear(), m: d.getUTCMonth() })
+  const shift = (d: number) => {
+    const x = new Date(Date.UTC(cursor.y, cursor.m + d, 1))
+    setCursor({ y: x.getUTCFullYear(), m: x.getUTCMonth() })
   }
   const goToday = () => {
     const [y, m] = todayKey.split('-').map(Number)
     setCursor({ y: y as number, m: (m as number) - 1 })
   }
 
-  const legend = ['Kombucha', 'Lakto', 'Tempeh', 'Vom Feld ins Glas']
-
   return (
-    <div style={{ padding: '32px 40px 48px', maxWidth: '1200px' }}>
-      <PageHeader
-        title="Kalender"
-        subtitle="Alle Termine auf einen Blick — ein Klick öffnet den Workshop mit allen Teilnehmern."
-      />
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-        <button type="button" aria-label="Vorheriger Monat" style={navButton} onClick={() => shift(-1)}>
-          ‹
-        </button>
-        <button type="button" aria-label="Nächster Monat" style={navButton} onClick={() => shift(1)}>
-          ›
-        </button>
-        <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: 'var(--theme-text)', textTransform: 'capitalize' }}>
-          {monthTitle}
-        </h2>
-        <button
-          type="button"
-          onClick={goToday}
-          style={{
-            padding: '8px 14px',
-            borderRadius: '8px',
-            border: '1px solid var(--theme-elevation-150)',
-            background: 'var(--theme-elevation-0)',
-            color: 'var(--theme-text)',
-            fontSize: '13px',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          Heute
-        </button>
-        <span style={{ marginLeft: 'auto', fontSize: '13px', color: 'var(--theme-text)', opacity: 0.6 }}>
-          {inMonth.length} {inMonth.length === 1 ? 'Workshop' : 'Workshops'} · {seatsBooked} von {seatsTotal} Plätzen gebucht
-        </span>
-      </div>
-
-      {mismatches > 0 && (
-        <div
-          style={{
-            marginBottom: '16px',
-            padding: '10px 14px',
-            borderRadius: '10px',
-            background: STATUS.warning.bg,
-            color: STATUS.warning.color,
-            fontSize: '13px',
-            fontWeight: 500,
-          }}
-        >
-          {mismatches === 1 ? 'Bei einem Termin' : `Bei ${mismatches} Terminen`} weicht die Platzzahl auf der Buchungsseite
-          von den Buchungen ab (mit ! markiert). Fahr mit der Maus darüber für Details.
+    <div className="ff-page is-wide" style={{ maxWidth: 1240 }}>
+      <div className="ff-head">
+        <div>
+          <h1>{t.title}</h1>
+          <p>{t.sub}</p>
         </div>
-      )}
-
-      <div style={{ overflowX: 'auto' }}>
-        <div
-          style={{
-            minWidth: '760px',
-            border: '1px solid var(--theme-elevation-100)',
-            borderRadius: '14px',
-            overflow: 'hidden',
-            background: 'var(--theme-elevation-0)',
-          }}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
-            {WEEKDAYS.map((d) => (
-              <div
-                key={d}
-                style={{
-                  padding: '10px 12px',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '0.07em',
-                  textTransform: 'uppercase',
-                  color: 'var(--theme-text)',
-                  opacity: 0.5,
-                  borderBottom: '1px solid var(--theme-elevation-100)',
-                }}
-              >
-                {d}
-              </div>
-            ))}
-            {cells.map((date) => {
-              const key = date.toISOString().slice(0, 10)
-              const inThisMonth = date.getUTCMonth() === cursor.m
-              const isToday = key === todayKey
-              const list = byDay.get(key) ?? []
-              return (
-                <div
-                  key={key}
-                  style={{
-                    minHeight: '112px',
-                    padding: '8px',
-                    borderRight: '1px solid var(--theme-elevation-100)',
-                    borderBottom: '1px solid var(--theme-elevation-100)',
-                    background: inThisMonth ? 'transparent' : 'var(--theme-elevation-50)',
-                    opacity: inThisMonth ? 1 : 0.55,
-                  }}
-                >
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minWidth: '24px',
-                      height: '24px',
-                      padding: '0 6px',
-                      borderRadius: '999px',
-                      fontSize: '12px',
-                      fontWeight: isToday ? 800 : 500,
-                      background: isToday ? BRAND.gold : 'transparent',
-                      color: isToday ? BRAND.nearBlack : 'var(--theme-text)',
-                    }}
-                  >
-                    {date.getUTCDate()}
-                  </span>
-                  {list.map((a) => {
-                    const color = workshopColor(a.workshopTitle)
-                    const level = fillLevel(a.totalBooked, a.capacity)
-                    const mismatch = seatMismatch(a)
-                    return (
-                      <button
-                        key={a.id}
-                        type="button"
-                        onClick={() => onSelectAppointment(a.id)}
-                        title={`${a.workshopTitle} · ${a.time} · ${a.totalBooked} von ${a.capacity} Plätzen`}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          width: '100%',
-                          marginTop: '4px',
-                          padding: '5px 6px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          borderLeft: `3px solid ${color.accent}`,
-                          background: color.bg,
-                          color: BRAND.nearBlack,
-                          fontSize: '11px',
-                          textAlign: 'left',
-                          cursor: 'pointer',
-                          opacity: a.isPast ? 0.6 : 1,
-                        }}
-                      >
-                        <span style={{ fontWeight: 700 }}>{a.time.replace(' Uhr', '')}</span>
-                        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {shortTitle(a.workshopTitle)}
-                        </span>
-                        <span style={{ fontWeight: 700, color: level.color }}>
-                          {a.totalBooked}/{a.capacity}
-                        </span>
-                        {mismatch && (
-                          <span title={seatMismatchText(mismatch)} style={{ fontWeight: 800, color: STATUS.warning.accent }}>
-                            !
-                          </span>
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-              )
-            })}
+      </div>
+      <div className="ff-calbar">
+        <button type="button" className="ff-btn ff-sq" onClick={() => shift(-1)} aria-label={t.prev}>‹</button>
+        <button type="button" className="ff-btn ff-sq" onClick={() => shift(1)} aria-label={t.next}>›</button>
+        <h2>{monthTitle}</h2>
+        <button type="button" className="ff-btn" onClick={goToday}>{t.today}</button>
+        {inMonth.length > 0 && (
+          <div className="ff-mbadge" role="status">
+            <div className="ff-mbtop"><b>{booked}</b><span>/ {cap}</span><em>{t.seats}</em></div>
+            <div className="ff-bar" aria-hidden><i style={{ width: `${pct}%` }} /></div>
+            <small>{t.ws(inMonth.length)} · {pct}%</small>
           </div>
+        )}
+      </div>
+      {mismatches > 0 && <div className="ff-note">{t.warn(mismatches)}</div>}
+      <div className="ff-panel ff-cal">
+        <div className="ff-calgrid">
+          {t.wd.map((d) => <div key={d} className="ff-dow">{d}</div>)}
+          {cells.map((d) => {
+            const key = d.toISOString().slice(0, 10)
+            const out = d.getUTCMonth() !== cursor.m
+            const list = byDay.get(key) ?? []
+            return (
+              <div key={key} className={`ff-day${out ? ' is-out' : ''}`}>
+                <span className={`ff-dn${key === todayKey ? ' is-today' : ''}`}>{d.getUTCDate()}</span>
+                {list.map((a) => {
+                  const m = seatMismatch(a)
+                  const time = new Date(a.dateTime).toLocaleTimeString(LOCALE[lang], { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: TZ })
+                  return (
+                    <button
+                      key={a.id}
+                      type="button"
+                      className="ff-chip2"
+                      style={{ ['--c' as string]: kindColor(a.workshopTitle), opacity: a.isPast ? 0.6 : 1 }}
+                      onClick={() => onSelectAppointment(a.id)}
+                    >
+                      <span className="ct">{shortTitle(a.workshopTitle)}</span>
+                      <span className="cm">
+                        <span>{time}</span>
+                        <span>
+                          <b>{a.totalBooked}/{a.capacity}</b>
+                          {m && <span className="ff-warnmark" title={t.mism(m.shown, m.expected)}> !</span>}
+                        </span>
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )
+          })}
         </div>
       </div>
-
-      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '16px' }}>
-        {legend.map((name) => {
-          const color = workshopColor(name)
-          return (
-            <span
-              key={name}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--theme-text)', opacity: 0.7 }}
-            >
-              <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: color.accent }} />
-              {name}
-            </span>
-          )
-        })}
-        <span style={{ fontSize: '12px', color: 'var(--theme-text)', opacity: 0.5 }}>
-          Ältere Termine stehen im Archiv.
-        </span>
+      <div className="ff-legend">
+        {t.legend.map(([k, label]) => (
+          <span key={k}><i style={{ ['--c' as string]: `var(--ff-${k})` }} />{label}</span>
+        ))}
+        <span>{t.older}</span>
       </div>
     </div>
   )

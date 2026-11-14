@@ -68,7 +68,7 @@ export function OrdersView({ orders, onRefresh }: Props) {
   }
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: '1200px' }}>
+    <div className="ff-page">
       {stornoTarget && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 1000,

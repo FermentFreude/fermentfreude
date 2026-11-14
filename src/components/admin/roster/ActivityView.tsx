@@ -42,7 +42,7 @@ export function ActivityView({ activityEvents, onRefresh }: Props) {
   }
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: '900px' }}>
+    <div className="ff-page">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)', margin: '0 0 4px' }}>

@@ -1,18 +1,27 @@
 import { adminOnly } from '@/access/adminOnly'
 import type { CollectionConfig } from 'payload'
 
+/**
+ * RETIRED (Nov 2026). This collection let admins edit a template's full raw
+ * HTML and pushed it to Brevo on every save — that can break links,
+ * placeholders and Liquid in live customer emails. Email texts are now edited
+ * in the Roster dashboard → "E-Mails" (text-only, checked, with before-copies).
+ * Kept read-only and hidden so existing rows stay readable; no create/update,
+ * so the afterChange push below can no longer fire.
+ */
 export const BrevoEmailTemplates: CollectionConfig = {
   slug: 'brevo-email-templates',
   admin: {
+    hidden: true,
     useAsTitle: 'templateName',
     description:
-      '19 pre-built email templates from /public/email-templates — edit HTML content directly',
+      'Retired. Edit email texts in the dashboard under "E-Mails".',
     defaultColumns: ['brevoTemplateId', 'templateName', 'syncStatus'],
   },
   access: {
     read: adminOnly,
-    create: adminOnly,
-    update: adminOnly,
+    create: () => false,
+    update: () => false,
     delete: async () => false, // Never delete templates
   },
   fields: [

@@ -202,7 +202,7 @@ export function PickupsView({ orders, onRefresh }: Props) {
   })
 
   return (
-    <div style={{ padding: '40px', maxWidth: '900px' }}>
+    <div className="ff-page">
       <PageHeader title="Abholbestellungen" subtitle="Verwalte Produktbestellungen zur Abholung" />
 
       {/* Stat cards */}

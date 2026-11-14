@@ -14,6 +14,30 @@ export type AttentionNoteRow = {
   createdAt: string
   doneByName: string
   doneAt: string
+  createdById: string
+  /** user id, 'all', or '' */
+  assignedTo: string
+  messages: NoteMessage[]
+  /** How many messages the current user has seen. */
+  seenCount: number
+}
+
+export type NoteMessage = {
+  byId: string
+  byName: string
+  at: string
+  text: string
+  images: { id: string; url: string; thumb: string }[]
+  event: '' | 'asked' | 'done' | 'reopened'
+  eventTo: string
+}
+
+export type TeamMember = {
+  id: string
+  name: string
+  email: string
+  avatarUrl: string | null
+  emailPref: 'all' | 'urgent' | 'off'
 }
 
 export type AutoAttentionItem = {

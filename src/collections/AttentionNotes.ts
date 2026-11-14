@@ -59,5 +59,40 @@ export const AttentionNotes: CollectionConfig = {
     { name: 'createdByName', type: 'text' },
     { name: 'doneByName', type: 'text' },
     { name: 'doneAt', type: 'date' },
+    // ── Conversations (dashboard v2) ──
+    { name: 'createdById', type: 'text', admin: { description: 'User id of the person who started the note.' } },
+    {
+      name: 'assignedTo',
+      type: 'text',
+      admin: { description: 'Who is asked: a user id, or "all" for the whole team. Empty = nobody in particular.' },
+    },
+    { name: 'ackReason', type: 'text', admin: { description: 'Why an automatic item was marked as known (kind "ack").' } },
+    {
+      name: 'messages',
+      type: 'array',
+      admin: { description: 'The conversation: messages and events (asked, done, reopened), oldest first.' },
+      fields: [
+        { name: 'byId', type: 'text' },
+        { name: 'byName', type: 'text' },
+        { name: 'at', type: 'date', required: true },
+        { name: 'text', type: 'textarea' },
+        { name: 'images', type: 'upload', relationTo: 'media', hasMany: true },
+        {
+          name: 'event',
+          type: 'select',
+          options: [
+            { label: 'Asked someone', value: 'asked' },
+            { label: 'Marked done', value: 'done' },
+            { label: 'Reopened', value: 'reopened' },
+          ],
+        },
+        { name: 'eventTo', type: 'text', admin: { description: 'For "asked": the user id or "all".' } },
+      ],
+    },
+    {
+      name: 'seenBy',
+      type: 'json',
+      admin: { description: 'Per user id: how many messages that person has seen (for "new" badges).' },
+    },
   ],
 }

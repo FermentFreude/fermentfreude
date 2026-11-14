@@ -173,7 +173,7 @@ export function ArchiveView() {
   const noShows = visible.reduce((sum, a) => sum + a.noShows, 0)
 
   return (
-    <div style={{ padding: '32px 40px 48px', maxWidth: '1000px' }}>
+    <div className="ff-page">
       <PageHeader
         title="Archiv"
         subtitle="Vergangene Workshops: wer gebucht hatte, wie bezahlt wurde und welche Belege es gibt."

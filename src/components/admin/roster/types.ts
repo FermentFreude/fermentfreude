@@ -60,6 +60,10 @@ export type BookingRow = {
   status: string
   /** Append-only "Verlauf" — oldest first, as stored. */
   history: BookingHistoryEntry[]
+  /** Invoice number of the linked order ('' = none). Filled for upcoming dates. */
+  invoiceNumber?: string
+  /** How the booking was paid (see archive). */
+  payment?: 'stripe' | 'voucher' | 'manual' | 'wix' | 'none'
 }
 
 export type ParticipantRow = {
@@ -165,7 +169,7 @@ export type ActivityEventRow = {
   isUnread: boolean
 }
 
-import type { AttentionNoteRow } from './attentionTypes'
+import type { AttentionNoteRow, TeamMember } from './attentionTypes'
 
 export type RosterData = {
   stats: RosterStats
@@ -182,4 +186,8 @@ export type RosterData = {
   attentionNotes: AttentionNoteRow[]
   /** Keys of automatic items someone marked as known. */
   attentionAcks: string[]
+  /** Admin users (for conversations). */
+  team: TeamMember[]
+  /** Current user's id ('' in the server-rendered first paint). */
+  me: string
 }
