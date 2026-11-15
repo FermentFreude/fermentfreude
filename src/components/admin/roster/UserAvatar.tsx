@@ -2,8 +2,7 @@
 
 import React from 'react'
 
-/** One avatar style for everyone: brand cream square, charcoal letter (10:1 contrast, works in light and dark). */
-const AVATAR = { bg: '#FBF5E8', fg: '#3A3E3A' }
+import { AvatarMark } from '../BrandLockup'
 
 /** The first letter of the name (an email address works too). */
 export function initialsOf(name: string) {
@@ -20,7 +19,7 @@ export function avatarUrl(avatar: unknown): string | null {
   return null
 }
 
-/** Profile photo, or the first letter on the brand cream square. */
+/** Profile photo, or the Fermentfreude logo mark as the default avatar. */
 export function UserAvatar({
   user,
   name,
@@ -32,16 +31,15 @@ export function UserAvatar({
   url?: string | null
   size?: number
 }) {
-  const label = name ?? user?.name ?? user?.email ?? '?'
-  const src = url ?? avatarUrl(user?.avatar)
+    const src = url ?? avatarUrl(user?.avatar)
   return (
     <span
       className="ff-av"
-      style={{ ['--s' as string]: `${size}px`, background: src ? undefined : AVATAR.bg, color: src ? undefined : AVATAR.fg }}
+      style={{ ['--s' as string]: `${size}px` }}
       aria-hidden
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- tiny avatar from our own media store */}
-      {src ? <img src={src} alt="" /> : initialsOf(label)}
+      {src ? <img src={src} alt="" /> : <AvatarMark />}
     </span>
   )
 }

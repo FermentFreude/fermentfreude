@@ -21,6 +21,7 @@ import {
 } from '@/lib/manualBooking'
 import { capacityOf } from '@/lib/appointmentCapacity'
 import { editSeatCore } from '@/lib/bookingEdit'
+import { noteCapacityException, reserveSeatsAllowingException, revertCapacityException } from '@/lib/seatException'
 import { alignCounterCore } from '@/lib/seatCounter'
 import { moveSeatsCore } from '@/lib/moveSeats'
 import { seatsHoldingPlace } from '@/lib/seatCapacity'
@@ -265,6 +266,8 @@ export async function createManualWorkshopBooking(params: {
   createInvoice?: boolean
   /** Send the normal booking confirmation email (needs an email address). */
   sendConfirmation?: boolean
+  /** Exception: the date is full or has too few free seats. Its capacity is raised by the missing seats. */
+  allowException?: boolean
 }): Promise<{ id: string; invoiceNumber?: string; warnings: string[] }> {
   const payload = await getPayload({ config: configPromise })
   const user = await requireAdmin(payload)
@@ -297,12 +300,13 @@ export async function createManualWorkshopBooking(params: {
   if (params.createInvoice && payment?.paymentStatus !== 'paid') throw new Error('Eine Rechnung gibt es nur für bezahlte Plätze.')
   if (params.sendConfirmation && !params.email?.trim()) throw new Error('Für die Bestätigung wird eine E-Mail-Adresse gebraucht.')
 
-  const reserveResult = await reserveSpotsAtomic(payload, params.appointmentId, params.guestCount)
-  if (!reserveResult.success) {
-    throw new Error(`Nur noch ${reserveResult.availableSpots ?? 0} Platz/Plätze verfügbar.`)
+  const reserve = await reserveSeatsAllowingException(payload, appointment, params.guestCount, Boolean(params.allowException))
+  if (!reserve.ok) {
+    throw new Error(`Nur noch ${reserve.available} Platz/Plätze verfügbar.`)
   }
+  const raised = reserve.raised
 
-  const maxCapacity = capacityOf(appointment)
+  const maxCapacity = reserve.capacityNow
   try {
     const dateTimeStr = String(appointment.dateTime ?? '')
     const created = await payload.create({
@@ -359,6 +363,15 @@ export async function createManualWorkshopBooking(params: {
       by,
     })
 
+    if (raised) {
+      await addBookingHistory(payload, id, {
+        type: 'seats_changed',
+        summary: `Ausnahme: Der Termin war voll. Die Kapazität dieses Termins wurde von ${raised.from} auf ${raised.to} erhöht, damit diese Person noch dazukommt.`,
+        by,
+      })
+      await noteCapacityException(payload, params.appointmentId, raised, by, [params.firstName, params.lastName].filter(Boolean).join(' ').trim())
+    }
+
     // The seat is booked. The optional extras must never undo that — failures come back as warnings.
     const warnings: string[] = []
     let invoiceNumber: string | undefined
@@ -383,6 +396,7 @@ export async function createManualWorkshopBooking(params: {
     // Booking create failed AFTER the atomic reserve succeeded — release the
     // spot back so it isn't silently lost.
     await releaseSpotsAtomic(payload, params.appointmentId, params.guestCount, maxCapacity)
+    if (raised) await revertCapacityException(payload, params.appointmentId, raised)
     throw err
   }
 }
@@ -491,8 +505,6 @@ export async function getAlternateAppointments(
   })
   const workshopId =
     typeof current.workshop === 'object' && current.workshop !== null ? current.workshop.id : current.workshop
-  const capacity = capacityOf(current)
-
   const appointments = await payload.find({
     collection: 'workshop-appointments',
     where: {
@@ -1101,6 +1113,56 @@ export async function acknowledgeRefundRequest(refundRequestId: string): Promise
       )
     }
   }
+}
+
+export type RefundResolution = 'refunded' | 'partial' | 'voucher' | 'rebooked' | 'declined' | 'other'
+
+/**
+ * A founder records how a refund request is being handled. Nothing is sent to Stripe from here.
+ * - refunded / partial: the money goes back through Stripe by hand → status "acknowledged"; the
+ *   charge.refunded webhook closes it when Stripe confirms (and a reminder appears if it never does).
+ *   Only "refunded" creates the Stornorechnung (same as the old acknowledge button did the first time).
+ * - voucher / rebooked / declined / other: solved without a refund → status "resolved" (closed).
+ */
+export async function handleRefundRequest(
+  refundRequestId: string,
+  resolution: RefundResolution,
+  note: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const payload = await getPayload({ config: configPromise })
+  const user = await requireAdmin(payload)
+  const allowed: RefundResolution[] = ['refunded', 'partial', 'voucher', 'rebooked', 'declined', 'other']
+  if (!allowed.includes(resolution)) return { ok: false, error: 'Unbekannte Lösung.' }
+  const text = note.trim().slice(0, 1000)
+  if ((resolution === 'other' || resolution === 'declined') && !text) return { ok: false, error: 'Bitte kurz notieren, was entschieden wurde.' }
+
+  const existing = await payload.findByID({ collection: 'refund-requests', id: refundRequestId, depth: 1, overrideAccess: true })
+  if (existing.status === 'completed' || existing.status === 'failed') return { ok: false, error: 'Diese Rückerstattung ist schon abgeschlossen.' }
+  const wasFirst = existing.status === 'requested'
+  const byName = ((user as { name?: string | null }).name || (user as { email?: string }).email || '').toString()
+  const moneyBack = resolution === 'refunded' || resolution === 'partial'
+
+  await payload.update({
+    collection: 'refund-requests',
+    id: refundRequestId,
+    data: {
+      status: moneyBack ? 'acknowledged' : 'resolved',
+      resolution,
+      resolutionNote: text,
+      handledByName: byName,
+      acknowledgedAt: new Date().toISOString(),
+    },
+    overrideAccess: true,
+  })
+
+  if (wasFirst && resolution === 'refunded') {
+    try {
+      await createCancellationInvoiceForRefundRequest(payload, existing as unknown as Record<string, unknown>)
+    } catch (err) {
+      payload.logger.error(`[handleRefundRequest] Failed to create Stornorechnung: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+  return { ok: true }
 }
 
 /** Marks specific activity-events as read by the current admin user. */

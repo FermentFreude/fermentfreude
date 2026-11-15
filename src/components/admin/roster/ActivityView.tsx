@@ -3,113 +3,83 @@
 import React, { useTransition } from 'react'
 
 import { markActivityEventsRead, markAllActivityEventsRead } from './actions'
+import type { Lang } from './rosterI18n'
 import type { ActivityEventRow } from './types'
-import { BRAND } from './rosterTheme'
 
-interface Props {
-  activityEvents: ActivityEventRow[]
-  onRefresh: () => Promise<void>
+export const TYPE_LABELS: Record<Lang, Record<string, string>> = {
+  de: {
+    order_placed: 'Bestellung',
+    voucher_purchased: 'Gutschein-Kauf',
+    voucher_redeemed: 'Gutschein eingelöst',
+    booking_rebooked: 'Umbuchung',
+    booking_cancelled_no_refund: 'Storno (ohne Erstattung)',
+    refund_requested: 'Rückerstattung angefragt',
+    refund_completed: 'Rückerstattung abgeschlossen',
+    appointment_cancelled_by_organiser: 'Termin abgesagt',
+  },
+  en: {
+    order_placed: 'Order',
+    voucher_purchased: 'Voucher purchase',
+    voucher_redeemed: 'Voucher redeemed',
+    booking_rebooked: 'Rebooking',
+    booking_cancelled_no_refund: 'Cancellation (no refund)',
+    refund_requested: 'Refund requested',
+    refund_completed: 'Refund completed',
+    appointment_cancelled_by_organiser: 'Date cancelled',
+  },
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  order_placed: 'Bestellung',
-  voucher_purchased: 'Gutschein-Kauf',
-  voucher_redeemed: 'Gutschein eingelöst',
-  booking_rebooked: 'Umbuchung',
-  booking_cancelled_no_refund: 'Storno (ohne Erstattung)',
-  refund_requested: 'Rückerstattung angefragt',
-  refund_completed: 'Rückerstattung abgeschlossen',
-  appointment_cancelled_by_organiser: 'Termin abgesagt',
+const T = {
+  de: { empty: 'Noch keine Aktivität.', markAll: (n: number) => `Alle als gelesen markieren (${n})`, marking: 'Markiere …', markOne: 'Als gelesen markieren' },
+  en: { empty: 'No activity yet.', markAll: (n: number) => `Mark all as read (${n})`, marking: 'Marking…', markOne: 'Mark as read' },
 }
 
-export function ActivityView({ activityEvents, onRefresh }: Props) {
+/** What customers did on the website (orders, vouchers, rebookings, refunds) — shown inside the Notifications card. */
+export function ActivityFeed({ activityEvents, lang, onRefresh }: { activityEvents: ActivityEventRow[]; lang: Lang; onRefresh: () => void | Promise<void> }) {
   const [isPending, startTransition] = useTransition()
-
+  const t = T[lang]
   const unreadCount = activityEvents.filter((e) => e.isUnread).length
 
-  const handleMarkAll = () => {
+  const markAll = () =>
     startTransition(async () => {
       await markAllActivityEventsRead()
       await onRefresh()
     })
-  }
-
-  const handleMarkOne = (id: string) => {
+  const markOne = (id: string) =>
     startTransition(async () => {
       await markActivityEventsRead([id])
       await onRefresh()
     })
-  }
 
   return (
-    <div className="ff-page">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)', margin: '0 0 4px' }}>
-            Aktivität
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.55, margin: 0 }}>
-            Bestellungen, Gutscheine, Umbuchungen, Stornierungen und Rückerstattungen — alles an einem Ort.
-          </p>
-        </div>
-        {unreadCount > 0 && (
-          <button
-            onClick={handleMarkAll}
-            disabled={isPending}
-            style={{
-              padding: '8px 14px', borderRadius: '6px', border: '1px solid var(--theme-elevation-150)',
-              background: 'var(--theme-elevation-0)', color: 'var(--theme-text)', fontSize: '13px',
-              cursor: isPending ? 'default' : 'pointer', opacity: isPending ? 0.5 : 1,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {/* Sequential writes (MongoDB Atlas M0 has no transactions) mean
-                marking many events read can take a few seconds — say so,
-                rather than leaving the button looking unresponsive. */}
-            {isPending ? 'Markiere …' : `Alle als gelesen markieren (${unreadCount})`}
+    <div>
+      {unreadCount > 0 && (
+        <div style={{ padding: '0 20px 12px' }}>
+          {/* Writes run one after another (MongoDB Atlas M0, no transactions) — say so while it works. */}
+          <button type="button" className="ff-btn is-sm" onClick={markAll} disabled={isPending}>
+            {isPending ? t.marking : t.markAll(unreadCount)}
           </button>
-        )}
-      </div>
-
-      {activityEvents.length === 0 && (
-        <div style={{ padding: '48px', textAlign: 'center', color: 'var(--theme-text)', opacity: 0.5, fontSize: '13px' }}>
-          Noch keine Aktivität.
         </div>
       )}
-
-      <div style={{ border: '1px solid var(--theme-elevation-100)', borderRadius: '8px', overflow: 'hidden' }}>
-        {activityEvents.map((event, i) => (
-          <div
-            key={event.id}
-            onClick={() => event.isUnread && handleMarkOne(event.id)}
-            style={{
-              display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 16px',
-              borderTop: i > 0 ? '1px solid var(--theme-elevation-100)' : 'none',
-              background: event.isUnread ? 'var(--theme-elevation-50)' : 'transparent',
-              cursor: event.isUnread ? 'pointer' : 'default',
-            }}
-            title={event.isUnread ? 'Als gelesen markieren' : undefined}
+      {activityEvents.length === 0 ? (
+        <p className="ff-muted" style={{ margin: 0, padding: '14px 20px 20px', borderTop: '1px solid var(--ff-line)' }}>{t.empty}</p>
+      ) : (
+        activityEvents.map((e) => (
+          <button
+            key={e.id}
+            type="button"
+            className={`ff-nrow${e.isUnread ? ' is-unread' : ''}`}
+            onClick={() => e.isUnread && markOne(e.id)}
+            title={e.isUnread ? t.markOne : undefined}
+            style={{ cursor: e.isUnread ? 'pointer' : 'default' }}
           >
-            <span
-              style={{
-                width: '7px', height: '7px', borderRadius: '50%', marginTop: '6px', flexShrink: 0,
-                background: event.isUnread ? BRAND.gold : 'transparent',
-              }}
-            />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', opacity: 0.5 }}>
-                  {TYPE_LABELS[event.type] ?? event.type}
-                </span>
-                <span style={{ fontSize: '11px', opacity: 0.4 }}>{event.createdAt}</span>
-              </div>
-              <div style={{ fontSize: '13px', fontWeight: event.isUnread ? 600 : 400, color: 'var(--theme-text)' }}>
-                {event.summary}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            <span className="ff-nmain">
+              <b>{e.summary}</b>
+              <small>{TYPE_LABELS[lang][e.type] ?? e.type} · {e.createdAt}</small>
+            </span>
+          </button>
+        ))
+      )}
     </div>
   )
 }

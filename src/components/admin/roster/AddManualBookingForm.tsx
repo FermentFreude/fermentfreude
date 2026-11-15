@@ -51,7 +51,11 @@ export function AddManualBookingForm({
   const [channel, setChannel] = useState('')
   const [pay, setPay] = useState<PaymentForm>(EMPTY_PAYMENT)
   const [error, setError] = useState('')
+  const [exceptionOk, setExceptionOk] = useState(false)
   const [isCreating, startCreate] = useTransition()
+  // More people than free seats: only as an explicit exception (the date's capacity is raised by the missing seats).
+  const missing = Math.max(guestCount - remainingSpots, 0)
+  const needsException = missing > 0
 
   const handleCreate = () => {
     if (!firstName.trim()) {
@@ -62,8 +66,8 @@ export function AddManualBookingForm({
       setError('Anzahl der Plätze muss mindestens 1 sein.')
       return
     }
-    if (guestCount > remainingSpots) {
-      setError(`Nur noch ${remainingSpots} Platz/Plätze verfügbar.`)
+    if (needsException && !exceptionOk) {
+      setError(lang === 'de' ? 'Bitte die Ausnahme bestätigen (siehe oben) oder weniger Plätze eintragen.' : 'Please confirm the exception (see above) or enter fewer seats.')
       return
     }
     if (!channel) {
@@ -87,6 +91,7 @@ export function AddManualBookingForm({
           guestCount,
           notes: notes.trim() || undefined,
           channel: channel as never,
+          allowException: needsException && exceptionOk,
           payment: toPaymentInput(pay),
           createInvoice: pay.invoice,
           sendConfirmation: pay.confirm,
@@ -159,11 +164,10 @@ export function AddManualBookingForm({
           />
         </div>
         <div>
-          <label style={labelStyle}>Anzahl Plätze * (max. {remainingSpots})</label>
+          <label style={labelStyle}>Anzahl Plätze * {remainingSpots > 0 ? `(frei: ${remainingSpots})` : '(Termin voll)'}</label>
           <input
             type="number"
             min={1}
-            max={remainingSpots}
             value={guestCount}
             onChange={(e) => setGuestCount(parseInt(e.target.value, 10) || 1)}
             style={inputStyle}
@@ -192,24 +196,32 @@ export function AddManualBookingForm({
         <PaymentFields value={pay} onChange={setPay} lang={lang} hasEmail={Boolean(email.trim())} />
       </div>
 
-      {error && <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#dc2626' }}>{error}</p>}
+      {needsException && (
+        <div style={{ margin: '0 0 16px', padding: '12px 14px', borderRadius: '8px', background: 'var(--ff-warn-bg, #fbf1dd)', color: 'var(--ff-warn-fg, #7a540c)', fontSize: '13px', lineHeight: 1.5 }}>
+          <b>{lang === 'de' ? (remainingSpots <= 0 ? 'Dieser Termin ist voll.' : `Es ${remainingSpots === 1 ? 'ist nur noch 1 Platz' : `sind nur noch ${remainingSpots} Plätze`} frei.`) : (remainingSpots <= 0 ? 'This date is full.' : `Only ${remainingSpots} seat${remainingSpots === 1 ? '' : 's'} left.`)}</b>{' '}
+          {lang === 'de'
+            ? `Als Ausnahme wird die Kapazität dieses Termins um ${missing} erhöht, damit die Person noch dazukommt. Das steht im Verlauf der Buchung und in den Notizen des Termins.`
+            : `As an exception the capacity of this date is raised by ${missing} so the person fits. This is written into the booking history and the date's notes.`}
+          <label className="ff-chk" style={{ marginTop: 8 }}>
+            <input type="checkbox" checked={exceptionOk} onChange={(e) => setExceptionOk(e.target.checked)} />
+            <span><b>{lang === 'de' ? 'Ja, Ausnahme eintragen' : 'Yes, add as an exception'}</b></span>
+          </label>
+        </div>
+      )}
+
+      {error && <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'var(--ff-alert)' }}>{error}</p>}
 
       <button
         onClick={handleCreate}
-        disabled={isCreating || remainingSpots <= 0}
+        disabled={isCreating || (needsException && !exceptionOk)}
         style={{
           padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-          background: BRAND.gold, color: BRAND.nearBlack, fontSize: '14px', fontWeight: 700,
-          opacity: isCreating || remainingSpots <= 0 ? 0.5 : 1,
+          background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '14px', fontWeight: 700,
+          opacity: isCreating || (needsException && !exceptionOk) ? 0.5 : 1,
         }}
       >
         {isCreating ? 'Wird hinzugefügt…' : 'Sitzplatz hinzufügen'}
       </button>
-      {remainingSpots <= 0 && (
-        <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#dc2626' }}>
-          Dieser Termin hat keine freien Plätze mehr.
-        </p>
-      )}
     </div>
   )
 }

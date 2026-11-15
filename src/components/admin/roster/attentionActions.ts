@@ -231,6 +231,75 @@ export async function setAttentionNoteStatus(id: string, status: 'open' | 'done'
   }
 }
 
+/** "Delete" = move to the trash (admin only). It can be restored from the "Gelöscht" list. */
+export async function deleteAttentionNote(id: string): Promise<Result> {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const user = await requireAdminUser(payload)
+    const note = await loadNote(payload, id)
+    if (note.kind === 'ack') return { ok: false, error: 'Das ist keine Notiz.' }
+    if (note.status === 'deleted') return { ok: true, data: null }
+    await payload.update({
+      collection: 'attention-notes',
+      id,
+      data: { status: 'deleted', statusBeforeDelete: note.status === 'done' ? 'done' : 'open', deletedByName: adminDisplayName(user), deletedAt: new Date().toISOString() },
+      overrideAccess: true,
+    })
+    return { ok: true, data: null }
+  } catch (e) {
+    return fail(e)
+  }
+}
+
+/** Bring a note back from the trash, to where it was before (open or done). */
+export async function restoreAttentionNote(id: string): Promise<Result> {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    await requireAdminUser(payload)
+    const note = await loadNote(payload, id)
+    if (note.kind === 'ack' || note.status !== 'deleted') return { ok: true, data: null }
+    await payload.update({
+      collection: 'attention-notes',
+      id,
+      data: { status: note.statusBeforeDelete === 'done' ? 'done' : 'open', deletedByName: '', deletedAt: null, statusBeforeDelete: '' },
+      overrideAccess: true,
+    })
+    return { ok: true, data: null }
+  } catch (e) {
+    return fail(e)
+  }
+}
+
+/** Remove from the trash for good. Only works on notes that are already in the trash. */
+export async function purgeAttentionNote(id: string): Promise<Result> {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    await requireAdminUser(payload)
+    const note = await loadNote(payload, id)
+    if (note.kind === 'ack' || note.status !== 'deleted') return { ok: false, error: 'Nur Einträge im Papierkorb können endgültig gelöscht werden.' }
+    await payload.delete({ collection: 'attention-notes', id, overrideAccess: true })
+    return { ok: true, data: null }
+  } catch (e) {
+    return fail(e)
+  }
+}
+
+/** Show a closed ("known") automatic item again. */
+export async function reopenAutoItem(autoKey: string): Promise<Result> {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    await requireAdminUser(payload)
+    await payload.delete({
+      collection: 'attention-notes',
+      where: { and: [{ kind: { equals: 'ack' } }, { autoKey: { equals: autoKey.trim().slice(0, 300) } }] },
+      overrideAccess: true,
+    })
+    return { ok: true, data: null }
+  } catch (e) {
+    return fail(e)
+  }
+}
+
 /** Opening a thread marks everything in it as read for the current user. */
 export async function markNoteSeen(id: string): Promise<Result> {
   try {

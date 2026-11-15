@@ -123,14 +123,14 @@ export function MoveBookingControl({
               </span>
             </span>
           </label>
-          {error && <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#dc2626' }}>{error}</p>}
+          {error && <p style={{ margin: '0 0 8px', fontSize: '12px', color: 'var(--ff-alert)' }}>{error}</p>}
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               onClick={handleMove}
               disabled={isMoving}
               style={{
                 padding: '6px 14px', borderRadius: '6px', border: 'none', cursor: 'pointer',
-                background: BRAND.gold, color: BRAND.nearBlack, fontSize: '12px', fontWeight: 700,
+                background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '12px', fontWeight: 700,
                 opacity: isMoving ? 0.5 : 1,
               }}
             >
@@ -149,7 +149,7 @@ export function MoveBookingControl({
           </div>
         </>
       ) : (
-        error && <p style={{ margin: 0, fontSize: '12px', color: '#dc2626' }}>{error}</p>
+        error && <p style={{ margin: 0, fontSize: '12px', color: 'var(--ff-alert)' }}>{error}</p>
       )}
     </div>
   )

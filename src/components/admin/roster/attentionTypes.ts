@@ -5,7 +5,9 @@ export type AttentionNoteRow = {
   title: string
   body: string
   severity: AttentionSeverity
-  status: 'open' | 'done'
+  status: 'open' | 'done' | 'deleted'
+  deletedByName: string
+  deletedAt: string
   appointmentId: string
   bookingId: string
   /** ISO date (yyyy-mm-dd) or empty. */
@@ -44,7 +46,9 @@ export type AutoAttentionItem = {
   key: string
   severity: AttentionSeverity
   /** Which rule found it — decides the wording. */
-  rule: 'seat-mismatch' | 'no-receipt' | 'payment-open' | 'refund-open'
+  rule: 'seat-mismatch' | 'no-receipt' | 'payment-open' | 'refund-open' | 'refund-stale'
   appointmentId?: string
+  /** Opens this Management page instead of a workshop. */
+  section?: 'refunds'
   params: Record<string, string | number>
 }

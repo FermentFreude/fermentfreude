@@ -50,8 +50,12 @@ export const AttentionNotes: CollectionConfig = {
       options: [
         { label: 'Open', value: 'open' },
         { label: 'Done', value: 'done' },
+        { label: 'Deleted (trash)', value: 'deleted' },
       ],
     },
+    { name: 'deletedByName', type: 'text', admin: { description: 'Who moved this to the trash.' } },
+    { name: 'deletedAt', type: 'date' },
+    { name: 'statusBeforeDelete', type: 'text', admin: { description: 'Status to restore to (open or done).' } },
     { name: 'appointmentId', type: 'text', admin: { description: 'Optional link to a workshop date.' } },
     { name: 'bookingId', type: 'text', admin: { description: 'Optional link to a booking.' } },
     { name: 'dueDate', type: 'date' },

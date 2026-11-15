@@ -16,10 +16,10 @@ interface Props {
 type Tab = 'all' | 'completed' | 'processing' | 'cancelled' | 'refunded'
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; dot: string }> = {
-  processing: { label: 'In Bearbeitung', bg: '#dbeafe', color: '#1e40af', dot: '#3b82f6' },
-  completed: { label: 'Abgeschlossen', bg: '#dcfce7', color: '#166534', dot: '#22c55e' },
+  processing: { label: 'In Bearbeitung', bg: '#F0EDE5', color: '#55584F', dot: '#8A8D84' },
+  completed: { label: 'Abgeschlossen', bg: '#ECE5DE', color: '#3A3E3A', dot: '#4B4F4A' },
   cancelled: { label: 'Storniert', bg: '#f3f4f6', color: '#374151', dot: '#9ca3af' },
-  refunded: { label: 'Rückerstattet', bg: '#fee2e2', color: '#991b1b', dot: '#ef4444' },
+  refunded: { label: 'Rückerstattet', bg: '#F0EDE5', color: 'var(--ff-alert)', dot: 'var(--ff-alert)' },
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -121,7 +121,7 @@ export function OrdersView({ orders, onRefresh }: Props) {
                 disabled={isStorning}
                 style={{
                   padding: '9px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                  fontSize: '14px', fontWeight: 600, background: '#dc2626', color: '#fff',
+                  fontSize: '14px', fontWeight: 600, background: 'var(--ff-bad-bg)', color: 'var(--ff-bad-fg)',
                   opacity: isStorning ? 0.5 : 1,
                 }}
               >
@@ -140,7 +140,7 @@ export function OrdersView({ orders, onRefresh }: Props) {
           style={{
             display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
             borderRadius: '8px', border: 'none', cursor: 'pointer',
-            background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
+            background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap',
           }}
         >
           <span style={{ fontSize: '16px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>
@@ -253,7 +253,7 @@ export function OrdersView({ orders, onRefresh }: Props) {
                         href={`/api/admin/cancellations/${o.cancellationInvoiceId}/receipt`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ fontSize: '12px', color: '#991b1b', opacity: 0.8 }}
+                        style={{ fontSize: '12px', color: 'var(--ff-alert)', opacity: 0.8 }}
                       >
                         Storno ↓
                       </a>

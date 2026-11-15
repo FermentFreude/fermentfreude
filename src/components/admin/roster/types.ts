@@ -18,6 +18,8 @@ export type AppointmentRow = {
   capacity: number
   /** This date's own capacity, if the founders set one (null = the workshop's standard applies). */
   ownCapacity?: number | null
+  /** Internal note on the date (CMS "notes"), e.g. capacity exceptions. */
+  internalNote?: string
   /** The workshop's standard capacity. */
   standardCapacity?: number
   isPast: boolean
@@ -69,7 +71,7 @@ export type BookingRow = {
   /** Invoice number of the linked order ('' = none). Filled for upcoming dates. */
   invoiceNumber?: string
   /** How the booking was paid (see archive). */
-  payment?: 'stripe' | 'voucher' | 'manual' | 'wix' | 'none'
+  payment?: 'stripe' | 'voucher' | 'mixed' | 'manual' | 'wix' | 'none'
   /** Only for seats added by hand: how it came in and how it was paid. */
   manual?: {
     channel: string
@@ -90,6 +92,8 @@ export type ParticipantRow = {
   /** This person's own seat — 'rebooked', 'refunded' etc. means they're no longer on this date. */
   seatStatus: string
   isBuyer: boolean
+  /** True when someone registered a shop account with this email. Otherwise a guest (booking record only). */
+  hasAccount: boolean
   guestOfName: string
   orderRef: string
   booking: BookingRow
@@ -143,11 +147,18 @@ export type RefundRequestRow = {
   workshopDate: string
   seatIndex: number
   amount: number // cents
-  status: 'requested' | 'acknowledged' | 'processing' | 'completed' | 'failed'
+  status: 'requested' | 'acknowledged' | 'processing' | 'completed' | 'failed' | 'resolved'
   stripePaymentIntentId: string
   requestedAt: string
   completedAt: string
   daysPending: number
+  /** How the founders handled it ('' = not handled yet). */
+  resolution: '' | 'refunded' | 'partial' | 'voucher' | 'rebooked' | 'declined' | 'other'
+  resolutionNote: string
+  handledByName: string
+  /** Date it was handled (de-DE) and the days since — drives the "Stripe has not confirmed" reminder. */
+  handledAt: string
+  daysSinceHandled: number
 }
 
 export type OrderRow = {

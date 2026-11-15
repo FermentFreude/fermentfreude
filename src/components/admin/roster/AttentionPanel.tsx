@@ -5,6 +5,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   acknowledgeAutoItem,
   createAttentionNote,
+  deleteAttentionNote,
+  purgeAttentionNote,
+  reopenAutoItem,
+  restoreAttentionNote,
   markNoteSeen,
   reassignNote,
   replyToNote,
@@ -14,6 +18,9 @@ import {
   uploadNoteImage,
 } from './attentionActions'
 import type { AttentionNoteRow, AttentionSeverity, NoteMessage, TeamMember } from './attentionTypes'
+import { Accordion } from './Accordion'
+import { ActivityFeed } from './ActivityView'
+import { RefundSummary, isOpenRefund } from './RefundSummary'
 import { detectAttentionItems } from './autoAttention'
 import { LOCALE, WELCOME, type Lang } from './rosterI18n'
 import { useToast } from './RosterToast'
@@ -24,30 +31,30 @@ import { UserAvatar } from './UserAvatar'
 
 const NT = {
   de: {
-    title: 'Notizen',
-    sub: 'Notizen zwischen euch und Dinge, die das System gefunden hat. Wer gefragt wird, bekommt einen Hinweis.',
-    add: 'Notiz hinzufügen',
-    fMe: 'Für mich', fAll: 'Alle offenen', fBy: 'Von mir gefragt', fSys: 'System', fDone: 'Erledigt',
+    title: 'Benachrichtigungen',
+    sub: 'Hier landet, was eure Aufmerksamkeit braucht: Notizen, die ihr euch gegenseitig schreibt, und Hinweise des Systems. Notiz hinzufügen, jemanden fragen, als erledigt markieren.',
+    add: 'Benachrichtigung hinzufügen',
+    fMe: 'Für mich', fAll: 'Alle offenen', fBy: 'Von mir gefragt', fSys: 'System', fRefunds: 'Rückerstattungen', fActivity: 'Aktivität', openRefunds: 'Rückerstattungen öffnen', fDone: 'Erledigt', fTrash: 'Gelöscht', restore: 'Wiederherstellen', purge: 'Endgültig löschen', purgeSure: 'Endgültig löschen? Das geht nicht rückgängig.', restored: 'Wiederhergestellt.', trashEmpty: 'Hier ist nichts gelöscht.', trashHint: 'Gelöschte Einträge liegen hier und können wiederhergestellt werden.', deletedBy: (n: string) => `Gelöscht von ${n}`, closedSys: 'System-Hinweis geschlossen', showAgain: 'Wieder anzeigen',
     isNew: 'Neu', waitFor: (n: string) => `Wartet auf ${n}`, waitAll: 'Wartet auf alle', everyone: 'Alle', system: 'System',
     ask: 'Fragen …', known: 'Bekannt', openWs: 'Workshop öffnen',
     replyPh: 'Antwort schreiben. Einen Screenshot kannst du mit Strg+V oder Cmd+V einfügen.',
     attach: 'Bild anhängen', send: 'Senden', rmImg: 'Bild entfernen', uploading: 'Lädt hoch …',
     emailAlso: (n: string) => `${n} auch eine E-Mail senden`, emailOff: (n: string) => `${n} hat E-Mail-Hinweise ausgeschaltet`,
     emailAll: 'Dem Team auch eine E-Mail senden',
-    markDone: 'Als erledigt markieren', reopen: 'Wieder öffnen', reassign: 'Jemand anderen fragen', edit: 'Bearbeiten',
+    markDone: 'Als erledigt markieren', del: 'Löschen', closeItem: 'Schließen', delSure: 'Wirklich löschen?', delYes: 'Ja, löschen', deleted: 'Gelöscht.', doneNote: 'Erledigte Einträge bleiben 30 Tage sichtbar.', reopen: 'Wieder öffnen', reassign: 'Jemand anderen fragen', edit: 'Bearbeiten',
     closed: (n: string) => `Abgeschlossen von ${n}`,
     evAsked: (a: string, b: string) => `${a} hat ${b} gefragt`, evDone: (a: string) => `${a} hat das als erledigt markiert`,
     evReopen: (a: string) => `${a} hat das wieder geöffnet`,
     askT: 'Jemanden fragen', askHint: 'Die Person bekommt einen Hinweis im Dashboard und eine E-Mail, wenn ihre Hinweise an sind. Der Systempunkt wandert ins Gespräch.',
     askWho: 'Wer soll sich das ansehen?', askMsg: 'Nachricht',
-    knownT: 'Als bekannt markieren', knownHint: 'Schreib kurz den Grund. Er wird mit deinem Namen gespeichert, damit das Team später weiß, warum das ignoriert wurde.',
+    knownT: 'Als bekannt markieren', knownHint: 'Optional: schreib kurz den Grund. Er wird mit deinem Namen gespeichert, damit das Team später weiß, warum das ignoriert wurde.',
     knownWhy: 'Grund', knownNeed: 'Bitte kurz den Grund schreiben.', save: 'Speichern',
-    addT: 'Neue Notiz', editT: 'Notiz bearbeiten', fTitle: 'Titel *', fMsg: 'Nachricht', fSev: 'Wichtigkeit', fWho: 'Für', nobody: 'Niemand bestimmtes',
+    addT: 'Neue Benachrichtigung', editT: 'Benachrichtigung bearbeiten', fTitle: 'Titel *', fMsg: 'Nachricht', fSev: 'Wichtigkeit', fWho: 'Für', nobody: 'Niemand bestimmtes',
     fWs: 'Workshop (optional)', fNoWs: 'Kein Workshop', fDue: 'Fällig am (optional)', titleNeed: 'Bitte einen Titel angeben.', cancel: 'Abbrechen',
-    sentTo: (n: string) => `Gesendet. E-Mail an ${n}.`, posted: 'Notiz hinzugefügt.', known2: 'Als bekannt markiert.', sent: 'Gesendet.',
+    sentTo: (n: string) => `Gesendet. E-Mail an ${n}.`, posted: 'Benachrichtigung hinzugefügt.', known2: 'Als bekannt markiert.', sent: 'Gesendet.',
     profT: 'Mein Profil', photo: 'Foto', upload: 'Foto hochladen', remove: 'Foto entfernen',
     photoHint: 'Ein quadratisches Foto passt am besten. Es erscheint neben deinen Nachrichten.',
-    emailPref: 'E-Mail-Hinweise', ep1: 'Wenn mich jemand fragt oder antwortet', ep2: 'Nur dringende Notizen', ep3: 'Aus', close: 'Schließen',
+    emailPref: 'E-Mail-Hinweise', ep1: 'Wenn mich jemand fragt oder antwortet', ep2: 'Nur dringende Benachrichtigungen', ep3: 'Aus', close: 'Schließen',
     profSaved: 'Profil gespeichert.',
     empty: 'Im Moment nichts.', showAll: (n: number) => `Alle ${n} anzeigen`, showLess: 'Weniger anzeigen',
     due: (d: string) => `fällig ${d}`, to: 'für', you: 'du',
@@ -55,30 +62,30 @@ const NT = {
     knownBy: (n: string, r: string) => `Bekannt von ${n}: ${r}`,
   },
   en: {
-    title: 'Notes',
-    sub: 'Notes between you and things the system found. Whoever is asked gets a notice.',
-    add: 'Add note',
-    fMe: 'For me', fAll: 'All open', fBy: 'Asked by me', fSys: 'System', fDone: 'Done',
+    title: 'Notifications',
+    sub: 'Everything that needs your attention: notes you write to each other and hints from the system. Add a note, ask someone, mark it as done.',
+    add: 'Add notification',
+    fMe: 'For me', fAll: 'All open', fBy: 'Asked by me', fSys: 'System', fRefunds: 'Refunds', fActivity: 'Activity', openRefunds: 'Open refunds', fDone: 'Done', fTrash: 'Deleted', restore: 'Restore', purge: 'Delete forever', purgeSure: 'Delete forever? This cannot be undone.', restored: 'Restored.', trashEmpty: 'Nothing deleted.', trashHint: 'Deleted entries are kept here and can be restored.', deletedBy: (n: string) => `Deleted by ${n}`, closedSys: 'System item closed', showAgain: 'Show again',
     isNew: 'New', waitFor: (n: string) => `Waiting for ${n}`, waitAll: 'Waiting for everyone', everyone: 'Everyone', system: 'System',
     ask: 'Ask…', known: 'Known', openWs: 'Open workshop',
     replyPh: 'Write a reply. Paste a screenshot with Ctrl+V or Cmd+V.',
     attach: 'Attach image', send: 'Send', rmImg: 'Remove image', uploading: 'Uploading…',
     emailAlso: (n: string) => `Also send ${n} an email`, emailOff: (n: string) => `${n} has email alerts turned off`,
     emailAll: 'Also email the team',
-    markDone: 'Mark as done', reopen: 'Reopen', reassign: 'Ask someone else', edit: 'Edit',
+    markDone: 'Mark as done', del: 'Delete', closeItem: 'Close', delSure: 'Really delete?', delYes: 'Yes, delete', deleted: 'Deleted.', doneNote: 'Completed entries stay visible for 30 days.', reopen: 'Reopen', reassign: 'Ask someone else', edit: 'Edit',
     closed: (n: string) => `Closed by ${n}`,
     evAsked: (a: string, b: string) => `${a} asked ${b}`, evDone: (a: string) => `${a} marked this as done`,
     evReopen: (a: string) => `${a} reopened this`,
     askT: 'Ask someone', askHint: 'The person gets a notice in the dashboard and an email if their alerts are on. The system item moves into the conversation.',
     askWho: 'Who should look at this?', askMsg: 'Message',
-    knownT: 'Mark as known', knownHint: 'Write the reason briefly. It is saved with your name so the team knows later why this was ignored.',
+    knownT: 'Mark as known', knownHint: 'Optional: write the reason briefly. It is saved with your name so the team knows later why this was ignored.',
     knownWhy: 'Reason', knownNeed: 'Please write a short reason.', save: 'Save',
-    addT: 'New note', editT: 'Edit note', fTitle: 'Title *', fMsg: 'Message', fSev: 'Importance', fWho: 'For', nobody: 'Nobody in particular',
+    addT: 'New notification', editT: 'Edit notification', fTitle: 'Title *', fMsg: 'Message', fSev: 'Importance', fWho: 'For', nobody: 'Nobody in particular',
     fWs: 'Workshop (optional)', fNoWs: 'No workshop', fDue: 'Due (optional)', titleNeed: 'Please add a title.', cancel: 'Cancel',
-    sentTo: (n: string) => `Sent. Email to ${n}.`, posted: 'Note added.', known2: 'Marked as known.', sent: 'Sent.',
+    sentTo: (n: string) => `Sent. Email to ${n}.`, posted: 'Notification added.', known2: 'Marked as known.', sent: 'Sent.',
     profT: 'My profile', photo: 'Photo', upload: 'Upload photo', remove: 'Remove photo',
     photoHint: 'A square photo works best. It appears next to your messages.',
-    emailPref: 'Email alerts', ep1: 'When someone asks me or replies', ep2: 'Only urgent notes', ep3: 'Off', close: 'Close',
+    emailPref: 'Email alerts', ep1: 'When someone asks me or replies', ep2: 'Only urgent notifications', ep3: 'Off', close: 'Close',
     profSaved: 'Profile saved.',
     empty: 'Nothing right now.', showAll: (n: number) => `Show all ${n}`, showLess: 'Show less',
     due: (d: string) => `due ${d}`, to: 'for', you: 'you',
@@ -184,19 +191,21 @@ function AttachStrip({ items, onRemove, t }: { items: Attachment[]; onRemove: (k
 
 /* ── Panel ─────────────────────────────────────────────── */
 
-type Filter = 'me' | 'all' | 'by' | 'sys' | 'done'
-type AutoEntry = { key: string; severity: AttentionSeverity; title: string; detail: string; appointmentId?: string }
+type Filter = 'me' | 'all' | 'by' | 'sys' | 'refunds' | 'activity' | 'done' | 'trash'
+type AutoEntry = { key: string; severity: AttentionSeverity; title: string; detail: string; appointmentId?: string; section?: 'refunds' }
 
 export function AttentionPanel({
   data,
   lang,
   onRefresh,
   onOpenAppointment,
+  onNavigate,
 }: {
   data: RosterData
   lang: Lang
   onRefresh: () => void | Promise<void>
   onOpenAppointment: (id: string) => void
+  onNavigate?: (s: 'refunds') => void
 }) {
   const t = NT[lang]
   const w = WELCOME[lang]
@@ -212,12 +221,17 @@ export function AttentionPanel({
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get('note')
     if (id) setOpenId(id)
+    // A pop-up was clicked: open that conversation.
+    const w = window as unknown as { ffOpenNote?: string }
+    if (w.ffOpenNote) { setOpenId(w.ffOpenNote); w.ffOpenNote = undefined }
+    const on = (e: Event) => { const d = (e as CustomEvent<string>).detail; if (d) setOpenId(d) }
+    window.addEventListener('ff-open-note', on)
+    return () => window.removeEventListener('ff-open-note', on)
   }, [])
 
-  const auto: AutoEntry[] = useMemo(() => {
+  const autoAll: (AutoEntry & { closed: boolean })[] = useMemo(() => {
     const acks = new Set(data.attentionAcks)
     return detectAttentionItems(data)
-      .filter((i) => !acks.has(i.key))
       .map((i) => {
         const p = i.params
         const text =
@@ -227,10 +241,14 @@ export function AttentionPanel({
               ? w.rule.noReceipt(p as never)
               : i.rule === 'payment-open'
                 ? w.rule.paymentOpen(p as never)
-                : w.rule.refundOpen(p as never)
-        return { key: i.key, severity: i.severity, appointmentId: i.appointmentId, ...text }
+                : i.rule === 'refund-stale'
+                  ? w.rule.refundStale(p as never)
+                  : w.rule.refundOpen(p as never)
+        return { key: i.key, severity: i.severity, appointmentId: i.appointmentId, section: i.section, closed: acks.has(i.key), ...text }
       })
   }, [data, w])
+  const auto: AutoEntry[] = useMemo(() => autoAll.filter((a) => !a.closed), [autoAll])
+  const closedAuto = useMemo(() => autoAll.filter((a) => a.closed), [autoAll])
 
   const open = data.attentionNotes.filter((n) => n.status === 'open')
   const lists: Record<Filter, AttentionNoteRow[]> = {
@@ -238,9 +256,13 @@ export function AttentionPanel({
     all: open,
     by: open.filter((n) => isByMe(n, me)),
     sys: [],
-    done: data.attentionNotes.filter((n) => n.status === 'done'),
+    activity: [],
+    refunds: [],
+    // "Done" is a short-term list: entries drop off after 30 days (they stay stored, only the list is kept tidy).
+    trash: data.attentionNotes.filter((n) => n.status === 'deleted'),
+    done: data.attentionNotes.filter((n) => n.status === 'done' && (!n.doneAt || Date.now() - new Date(n.doneAt).getTime() < 30 * 86400000)),
   }
-  const counts: Record<Filter, number> = { me: lists.me.length, all: open.length + auto.length, by: lists.by.length, sys: auto.length, done: lists.done.length }
+  const counts: Record<Filter, number> = { me: lists.me.length, all: open.length + auto.length, by: lists.by.length, sys: auto.length, activity: data.activityEvents.filter((e) => e.isUnread).length, refunds: data.refundRequests.filter(isOpenRefund).length, done: lists.done.length, trash: lists.trash.length + closedAuto.length }
   const active: Filter = filter ?? (me && counts.me > 0 ? 'me' : 'all')
 
   const byRecency = (a: AttentionNoteRow, b: AttentionNoteRow) =>
@@ -249,40 +271,65 @@ export function AttentionPanel({
     (lastMsg(b)?.at ?? b.createdAt).localeCompare(lastMsg(a)?.at ?? a.createdAt)
   const notes = [...lists[active]].sort(byRecency)
   const showAuto = active === 'all' || active === 'sys'
+  const showActivity = active === 'activity'
+  const showRefunds = active === 'refunds'
   const rows: React.ReactNode[] = [
-    ...(showAuto ? auto.map((a) => <AutoRow key={a.key} item={a} t={t} onAsk={() => setDialog({ kind: 'ask', item: a })} onKnown={() => setDialog({ kind: 'known', item: a })} onOpenAppointment={onOpenAppointment} />) : []),
-    ...notes.map((n) => <NoteRow key={n.id} note={n} me={me} team={team} lang={lang} t={t} onOpen={() => setOpenId(n.id)} />),
+    ...(showAuto ? auto.map((a) => <AutoRow key={a.key} item={a} t={t} onNavigate={onNavigate} onAsk={() => setDialog({ kind: 'ask', item: a })} onKnown={() => setDialog({ kind: 'known', item: a })} onClose={async () => { const r = await acknowledgeAutoItem(a.key, ''); if (r.ok) { toast(t.known2); await onRefresh() } }} onOpenAppointment={onOpenAppointment} />) : []),
+    ...(active === 'trash'
+      ? [
+          ...closedAuto.map((a) => (
+            <div key={`c-${a.key}`} className="ff-nrow is-sys is-done">
+              <span className="ff-avs" aria-hidden><span className="ff-av is-sys" style={{ ['--s' as string]: '30px' }}>!</span></span>
+              <span className="ff-nmain"><b>{a.title}</b><span className="ff-snip">{a.detail}</span><small>{t.closedSys}</small></span>
+              <span className="ff-nside"><span className="ff-nbtns">
+                <button type="button" className="ff-btn is-sm" onClick={async () => { const r = await reopenAutoItem(a.key); if (r.ok) { toast(t.restored); await onRefresh() } }}>{t.showAgain}</button>
+              </span></span>
+            </div>
+          )),
+          ...notes.map((n) => <TrashRow key={n.id} note={n} t={t} lang={lang} onOpen={() => setOpenId(n.id)}
+            onRestore={async () => { const r = await restoreAttentionNote(n.id); if (r.ok) { toast(t.restored); await onRefresh() } else toast(r.error) }}
+            onPurge={async () => { const r = await purgeAttentionNote(n.id); if (r.ok) { toast(t.deleted); await onRefresh() } else toast(r.error) }} />),
+        ]
+      : []),
+    ...(active === 'trash' ? [] : notes).map((n) => <NoteRow key={n.id} note={n} me={me} team={team} lang={lang} t={t} onOpen={() => setOpenId(n.id)} onDelete={async () => { const r = await deleteAttentionNote(n.id); if (r.ok) { toast(t.deleted); await onRefresh() } else toast(r.error) }} />),
   ]
   const LIMIT = 6
   const visible = showAll ? rows : rows.slice(0, LIMIT)
   const openNote = data.attentionNotes.find((n) => n.id === openId) ?? null
+  const unreadNew = data.attentionNotes.filter((n) => isUnread(n, data.me)).length
 
   return (
-    <section className="ff-panel" aria-labelledby="notes-title" style={{ marginBottom: 24, overflow: 'hidden' }}>
-      <div style={{ padding: '18px 20px 12px', display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <h2 id="notes-title" style={{ margin: 0, fontSize: 18 }}>{t.title}</h2>
-          <p className="ff-muted" style={{ margin: '4px 0 0', fontSize: 13 }}>{t.sub}</p>
-        </div>
-        <button type="button" className="ff-btn is-gold" onClick={() => setDialog({ kind: 'new' })}>+ {t.add}</button>
-      </div>
+    <>
+      <Accordion
+        id="notes"
+        title={t.title}
+        sub={t.sub}
+        count={counts.all}
+        badge={unreadNew > 0 ? (lang === 'de' ? `${unreadNew} neu` : `${unreadNew} new`) : undefined}
+        actions={<button type="button" className="ff-btn is-gold" onClick={() => setDialog({ kind: 'new' })}>+ {t.add}</button>}
+      >
       <div className="ff-fchips" role="group" aria-label={t.title}>
-        {(['me', 'all', 'by', 'sys', 'done'] as Filter[]).map((f) => (
+        {(['me', 'all', 'by', 'sys', 'refunds', 'activity', 'done', 'trash'] as Filter[]).map((f) => (
           <button key={f} type="button" className="ff-fchip" aria-pressed={active === f} onClick={() => { setFilter(f); setShowAll(false) }}>
-            {{ me: t.fMe, all: t.fAll, by: t.fBy, sys: t.fSys, done: t.fDone }[f]} <b>{counts[f]}</b>
+            {{ me: t.fMe, all: t.fAll, by: t.fBy, sys: t.fSys, refunds: t.fRefunds, activity: t.fActivity, done: t.fDone, trash: t.fTrash }[f]} <b>{counts[f]}</b>
           </button>
         ))}
       </div>
-      {rows.length === 0 ? (
-        <p className="ff-muted" style={{ margin: 0, padding: '14px 20px 20px', borderTop: '1px solid var(--ff-line)' }}>{t.empty}</p>
+      {showRefunds ? (
+        <RefundSummary refundRequests={data.refundRequests} lang={lang} onOpen={() => onNavigate?.('refunds')} />
+      ) : showActivity ? (
+        <ActivityFeed activityEvents={data.activityEvents} lang={lang} onRefresh={onRefresh} />
+      ) : rows.length === 0 ? (
+        <p className="ff-muted" style={{ margin: 0, padding: '14px 20px 20px', borderTop: '1px solid var(--ff-line)' }}>{active === 'trash' ? t.trashEmpty : t.empty}</p>
       ) : (
         <div>{visible}</div>
       )}
-      {rows.length > LIMIT && (
+      {!showActivity && !showRefunds && rows.length > LIMIT && (
         <button type="button" className="ff-more" onClick={() => setShowAll((v) => !v)}>
           {showAll ? t.showLess : t.showAll(rows.length)}
         </button>
       )}
+      </Accordion>
 
       {openNote && (
         <ThreadDialog
@@ -310,7 +357,7 @@ export function AttentionPanel({
       {dialog?.kind === 'known' && (
         <KnownDialog t={t} item={dialog.item} onClose={() => setDialog(null)} onDone={async () => { setDialog(null); toast(t.known2); await onRefresh() }} />
       )}
-    </section>
+    </>
   )
 }
 
@@ -332,12 +379,14 @@ function TeamAvatar({ id, team, size = 30 }: { id: string; team: TeamMember[]; s
   return <UserAvatar name={m?.name ?? '?'} url={m?.avatarUrl} size={size} />
 }
 
-function NoteRow({ note, me, team, lang, t, onOpen }: { note: AttentionNoteRow; me: string; team: TeamMember[]; lang: Lang; t: NDict; onOpen: () => void }) {
+function NoteRow({ note, me, team, lang, t, onOpen, onDelete }: { onDelete: () => void | Promise<void>; note: AttentionNoteRow; me: string; team: TeamMember[]; lang: Lang; t: NDict; onOpen: () => void }) {
   const unread = isUnread(note, me)
   const wait = note.status === 'open' ? waitingOn(note) : ''
   const last = lastMsg(note)
   const snippet = last?.text ? (last.text.length > 110 ? `${last.text.slice(0, 110)}…` : last.text) : note.body
+  const [ask, setAsk] = useState(false)
   return (
+    <div className="ff-nwrap">
     <button type="button" className={`ff-nrow${unread ? ' is-unread' : ''}${note.status === 'done' ? ' is-done' : ''}`} onClick={onOpen}>
       <span className="ff-avs" aria-hidden>
         <TeamAvatar id={note.createdById} team={team} />
@@ -366,10 +415,46 @@ function NoteRow({ note, me, team, lang, t, onOpen }: { note: AttentionNoteRow; 
         {note.status === 'done' && note.doneByName && <span className="ff-wchip">{t.closed(note.doneByName)}</span>}
       </span>
     </button>
+    <span className="ff-ndel">
+      {ask ? (
+        <>
+          <span className="ff-muted">{t.delSure}</span>
+          <button type="button" className="ff-btn is-sm is-gold" onClick={() => onDelete()}>{t.delYes}</button>
+          <button type="button" className="ff-btn is-sm" onClick={() => setAsk(false)}>{t.cancel}</button>
+        </>
+      ) : (
+        <button type="button" className="ff-btn is-sm ff-xbtn" onClick={() => setAsk(true)} aria-label={t.del} title={t.del}>✕</button>
+      )}
+    </span>
+    </div>
   )
 }
 
-function AutoRow({ item, t, onAsk, onKnown, onOpenAppointment }: { item: AutoEntry; t: NDict; onAsk: () => void; onKnown: () => void; onOpenAppointment: (id: string) => void }) {
+function TrashRow({ note, t, lang, onOpen, onRestore, onPurge }: { note: AttentionNoteRow; t: NDict; lang: Lang; onOpen: () => void; onRestore: () => void | Promise<void>; onPurge: () => void | Promise<void> }) {
+  const [ask, setAsk] = useState(false)
+  return (
+    <div className="ff-nrow is-done">
+      <span className="ff-nmain" style={{ cursor: 'pointer' }} onClick={onOpen}>
+        <b>{note.title}</b>
+        <small>{note.deletedByName ? t.deletedBy(note.deletedByName) : ''}{note.deletedAt ? ` · ${ago(note.deletedAt, lang)}` : ''}</small>
+      </span>
+      <span className="ff-nside"><span className="ff-nbtns">
+        <button type="button" className="ff-btn is-sm is-gold" onClick={() => onRestore()}>{t.restore}</button>
+        {ask ? (
+          <>
+            <span className="ff-muted">{t.purgeSure}</span>
+            <button type="button" className="ff-btn is-sm" onClick={() => onPurge()}>{t.delYes}</button>
+            <button type="button" className="ff-btn is-sm" onClick={() => setAsk(false)}>{t.cancel}</button>
+          </>
+        ) : (
+          <button type="button" className="ff-btn is-sm" onClick={() => setAsk(true)}>{t.purge}</button>
+        )}
+      </span></span>
+    </div>
+  )
+}
+
+function AutoRow({ onClose, item, t, onAsk, onKnown, onOpenAppointment, onNavigate }: { onNavigate?: (s: 'refunds') => void; onClose: () => void; item: AutoEntry; t: NDict; onAsk: () => void; onKnown: () => void; onOpenAppointment: (id: string) => void }) {
   return (
     <div className="ff-nrow is-sys">
       <span className="ff-avs" aria-hidden>
@@ -386,8 +471,12 @@ function AutoRow({ item, t, onAsk, onKnown, onOpenAppointment }: { item: AutoEnt
           {item.appointmentId && (
             <button type="button" className="ff-btn is-sm" onClick={() => onOpenAppointment(item.appointmentId!)}>{t.openWs}</button>
           )}
+          {item.section === 'refunds' && onNavigate && (
+            <button type="button" className="ff-btn is-sm" onClick={() => onNavigate('refunds')}>{t.openRefunds}</button>
+          )}
           <button type="button" className="ff-btn is-sm" onClick={onAsk}>{t.ask}</button>
           <button type="button" className="ff-btn is-sm" onClick={onKnown}>{t.known}</button>
+          <button type="button" className="ff-btn is-sm ff-xbtn" onClick={onClose} aria-label={t.closeItem} title={t.closeItem}>✕</button>
         </span>
       </span>
     </div>
@@ -396,7 +485,7 @@ function AutoRow({ item, t, onAsk, onKnown, onOpenAppointment }: { item: AutoEnt
 
 /* ── Dialogs ──────────────────────────────────────────── */
 
-function Dlg({ label, wide, children, onClose, onDropFiles, dropLabel }: {
+export function Dlg({ label, wide, children, onClose, onDropFiles, dropLabel }: {
   label: string; wide?: boolean; children: React.ReactNode; onClose: () => void; onDropFiles?: (files: File[]) => void; dropLabel?: string
 }) {
   const [dropping, setDropping] = useState(false)
@@ -466,6 +555,16 @@ function ThreadDialog({ note, data, lang, t, onClose, onRefresh, onOpenAppointme
     const r = await setAttentionNoteStatus(note.id, s)
     setBusy(false)
     if (!r.ok) return setErr(r.error)
+    await onRefresh()
+  }
+  const [confirmDel, setConfirmDel] = useState(false)
+  const remove = async () => {
+    setBusy(true)
+    const r = await deleteAttentionNote(note.id)
+    setBusy(false)
+    if (!r.ok) return setErr(r.error)
+    toast(t.deleted)
+    onClose()
     await onRefresh()
   }
   const reassign = async () => {
@@ -575,6 +674,15 @@ function ThreadDialog({ note, data, lang, t, onClose, onRefresh, onOpenAppointme
           <button type="button" className="ff-btn" onClick={() => status('done')} disabled={busy}>✓ {t.markDone}</button>
         ) : (
           <button type="button" className="ff-btn" onClick={() => status('open')} disabled={busy}>{t.reopen}</button>
+        )}
+        {confirmDel ? (
+          <span className="ff-sel" style={{ marginLeft: 0 }}>
+            {t.delSure}
+            <button type="button" className="ff-btn is-sm is-gold" onClick={remove} disabled={busy}>{t.delYes}</button>
+            <button type="button" className="ff-btn is-sm" onClick={() => setConfirmDel(false)} disabled={busy}>{t.cancel}</button>
+          </span>
+        ) : (
+          <button type="button" className="ff-btn" onClick={() => setConfirmDel(true)} disabled={busy}>{t.del}</button>
         )}
         <span className="ff-sel">
           {t.reassign}
@@ -707,7 +815,6 @@ function KnownDialog({ t, item, onClose, onDone }: { t: NDict; item: AutoEntry; 
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const save = async () => {
-    if (!why.trim()) return setErr(t.knownNeed)
     setBusy(true)
     const r = await acknowledgeAutoItem(item.key, why)
     setBusy(false)
@@ -779,5 +886,78 @@ export function ProfileDialog({ data, lang, onClose, onRefresh }: { data: Roster
         <button type="button" className="ff-btn" onClick={onClose}>{t.close}</button>
       </div>
     </Dlg>
+  )
+}
+
+
+/**
+ * Chat-style pop-ups: when someone writes in a conversation that involves you, a small card
+ * slides in at the bottom right (name, first words). Click it to open the chat. Nothing pops
+ * up for what was already unread when the page was opened.
+ */
+export function NoteAlerts({ data, lang, onOpen }: { data: RosterData; lang: Lang; onOpen: (noteId: string) => void }) {
+  const t = NT[lang]
+  const known = useRef<Map<string, number> | null>(null)
+  const [alerts, setAlerts] = useState<{ key: string; id: string; title: string; by: string; text: string; byId: string }[]>([])
+  useEffect(() => {
+    if (!data.me) return
+    const unread = data.attentionNotes.filter((n) => isUnread(n, data.me))
+    if (known.current === null) {
+      known.current = new Map(unread.map((n) => [n.id, n.messages.length]))
+      // On opening Management: pop up what is still unread (once per browser session per message).
+      let seen: string[] = []
+      try {
+        seen = JSON.parse(sessionStorage.getItem('ff-note-popups') || '[]')
+      } catch {
+        seen = []
+      }
+      const first: typeof alerts = []
+      for (const n of unread) {
+        const key = `${n.id}:${n.messages.length}`
+        if (seen.includes(key)) continue
+        const last = lastMsg(n)
+        first.push({ key, id: n.id, title: n.title, by: last?.byName ?? '', byId: last?.byId ?? '', text: last?.text || (last?.images.length ? '📎' : n.body) })
+        seen.push(key)
+      }
+      try {
+        sessionStorage.setItem('ff-note-popups', JSON.stringify(seen.slice(-200)))
+      } catch {
+        // storage unavailable — popups just show again next time
+      }
+      if (first.length) setAlerts(first.slice(-3))
+      return
+    }
+    const fresh: typeof alerts = []
+    for (const n of unread) {
+      if (n.messages.length > (known.current.get(n.id) ?? 0)) {
+        const last = lastMsg(n)
+        fresh.push({ key: `${n.id}:${n.messages.length}`, id: n.id, title: n.title, by: last?.byName ?? '', byId: last?.byId ?? '', text: last?.text || (last?.images.length ? '📎' : n.body) })
+      }
+      known.current.set(n.id, n.messages.length)
+    }
+    if (fresh.length) setAlerts((a) => [...a, ...fresh].slice(-3))
+  }, [data])
+  useEffect(() => {
+    if (!alerts.length) return
+    const id = setTimeout(() => setAlerts((a) => a.slice(1)), 12000)
+    return () => clearTimeout(id)
+  }, [alerts])
+  if (!alerts.length) return null
+  return (
+    <div className="ff-alerts" role="status" aria-live="polite">
+      {alerts.map((a) => (
+        <div key={a.key} className="ff-alert">
+          <button type="button" className="ff-alert-main" onClick={() => { setAlerts((x) => x.filter((y) => y.key !== a.key)); onOpen(a.id) }}>
+            <TeamAvatar id={a.byId} team={data.team} />
+            <span>
+              <b>{a.by || t.system}</b>
+              <small>{a.title}</small>
+              <span className="ff-alert-text">{a.text.length > 120 ? `${a.text.slice(0, 120)}…` : a.text}</span>
+            </span>
+          </button>
+          <button type="button" className="ff-alert-x" onClick={() => setAlerts((x) => x.filter((y) => y.key !== a.key))} aria-label={t.closeItem}>✕</button>
+        </div>
+      ))}
+    </div>
   )
 }

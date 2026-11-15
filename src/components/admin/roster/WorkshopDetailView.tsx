@@ -18,13 +18,14 @@ import { AddManualBookingForm } from './AddManualBookingForm'
 import { addBookingSeats, cancelBookingSeat, releaseBookingSeats, updateBookingDetails } from './bookingEditActions'
 import { CustomerProfileModal } from './CustomerProfile'
 import { CHANNELS, ManualPaymentDialog, MP } from './ManualPayment'
-import { bookingOrigin, type BookingOrigin } from './bookingOrigin'
+import type { AttentionNoteRow } from './attentionTypes'
+import { bookingOrigin, isRedundantNote, noteHints, type BookingOrigin } from './bookingOrigin'
 import { sendChooseOwnDateLinks } from './chooseDateActions'
 import { LOCALE, type Lang } from './rosterI18n'
 import { useToast } from './RosterToast'
 import { seatMismatch } from './seatCheck'
 import type { AppointmentRow, BookingRow } from './types'
-import { kindColor } from './workshopKind'
+import { kindColor, workshopKind } from './workshopKind'
 
 type Alt = Awaited<ReturnType<typeof getAlternateAppointments>>[number]
 type Payment = NonNullable<BookingRow['payment']>
@@ -32,7 +33,7 @@ type Payment = NonNullable<BookingRow['payment']>
 const T = {
   de: {
     back: '← Zurück',
-    seats: 'Gebucht', free: 'Frei', held: 'Reserviert', heldHint: 'Plätze in noch nicht bezahlten Buchungen.',
+    seats: 'Plätze gebucht', free: 'Plätze frei', held: 'Reserviert', heldHint: 'Plätze in noch nicht bezahlten Buchungen.',
     of: (c: number) => `von ${c} Plätzen`,
     mism: (s: number, e: number) => `Die Buchungsseite zeigt ${s} freie Plätze, laut Buchungen sollten es ${e} sein. Die Zahl wird nur angezeigt, hier wird nichts automatisch geändert.`,
     add: 'Person hinzufügen', copy: 'Liste kopieren', print: 'Tagesliste drucken', invAll: (n: number) => `Rechnungen (${n}) als ZIP`, mailAll: 'Anderen Termin mailen',
@@ -41,13 +42,15 @@ const T = {
     seatN: (i: number) => `Platz ${i}`, guestOf: (n: string) => `Gast von ${n}`,
     gone: 'Nicht mehr auf diesem Termin',
     nothing: 'Noch niemand gebucht. Über „Person hinzufügen“ tragt ihr telefonische oder spontane Buchungen ein.',
-    details: 'Details', edit: 'Bearbeiten', move: 'Verschieben', alt: 'Anderen Termin mailen', remove: 'Entfernen', inv: 'Rechnung',
+    details: 'Profil', edit: 'Bearbeiten', move: 'Verschieben', alt: 'Anderen Termin mailen', remove: 'Entfernen', inv: 'Rechnung',
+    seatWord: (n: number): string => (n === 1 ? 'Platz' : 'Plätze'),
+    manualBadge: 'Manuell eingetragen', manualBy: (who: string, when: string) => `von ${who}${when ? ` am ${when}` : ''}`,
     origin: { website: 'Online', manual: 'Manuell', wix: 'Wix-Import', unmarked: 'Herkunft unbekannt' } as Record<BookingOrigin, string>,
     originHint: {
       website: 'Über die Webseite gebucht.', manual: 'Von euch im Dashboard eingetragen.', wix: 'Aus dem alten Wix-Shop übernommen.',
       unmarked: 'Keine Bestellung oder Import-Notiz gefunden, daher ist unklar, wie dieser Platz gebucht wurde.',
     } as Record<BookingOrigin, string>,
-    pay: { stripe: 'Stripe', voucher: 'Gutschein', manual: 'Zahlung nicht erfasst', wix: 'In Wix bezahlt', none: 'Kein Beleg' } as Record<Payment, string>,
+    pay: { stripe: 'Bezahlt · Stripe', mixed: 'Bezahlt + Gutschein', voucher: 'Mit Gutschein', manual: 'Zahlung nicht erfasst', wix: 'In Wix bezahlt', none: 'Kein Beleg' } as Record<Payment, string>,
     st: {
       active: 'Bestätigt', rebooked: 'Umgebucht', voucher_issued: 'Gutschein statt Termin', cancelled_no_refund: 'Storniert',
       refunded: 'Rückerstattet', no_show: 'Nicht erschienen', refund_requested: 'Rückerstattung angefragt',
@@ -55,6 +58,7 @@ const T = {
     } as Record<string, string>,
     noEmail: 'keine E-Mail, keine Erinnerung',
     cancel: 'Abbrechen', close: 'Schließen', save: 'Speichern', saved: 'Gespeichert.',
+    addPast: 'Dieser Termin liegt in der Vergangenheit: hier kann niemand mehr hinzugefügt werden.', addException: 'Person hinzufügen (Ausnahme)', addFullHint: 'Der Termin ist voll. Du kannst eine Person als Ausnahme von Hand dazunehmen.',
     aT: 'Person hinzufügen', fullErr: 'Für diesen Termin sind keine Plätze mehr frei.',
     eT: 'Buchung bearbeiten', eHint: 'Name, E-Mail und Notiz für jeden Platz. Das könnt ihr jederzeit ändern, auch nach dem Workshop.',
     eName: 'Name', eMail: 'E-Mail', eNote: 'Notiz (z. B. Allergien)',
@@ -88,13 +92,13 @@ const T = {
     rT: 'Buchung entfernen', rBody: (n: string, s: number) => `Die Buchung von ${n} wird entfernt. ${s === 1 ? '1 Platz wird' : `${s} Plätze werden`} wieder frei.`,
     rOnly: 'Entfernen löscht die Buchung ganz. Das geht nur ohne Bestellung oder Rechnung. Sonst bitte „Platz freigeben“ nutzen.',
     rYes: 'Ja, entfernen', removed: 'Entfernt. Die Plätze sind wieder frei.',
-    printTitle: 'Tagesliste', printSig: 'Anwesend',
+    printNotes: 'Notizen zu diesem Termin', printTitle: 'Tagesliste', printSig: 'Anwesend',
     pastNote: 'Dieser Termin liegt in der Vergangenheit.',
     bookedOn: (d: string) => `gebucht ${d}`,
   },
   en: {
     back: '← Back',
-    seats: 'Booked', free: 'Free', held: 'Held', heldHint: 'Seats in bookings that are not paid yet.',
+    seats: 'Seats booked', free: 'Seats free', held: 'Held', heldHint: 'Seats in bookings that are not paid yet.',
     of: (c: number) => `of ${c} seats`,
     mism: (s: number, e: number) => `The booking page shows ${s} free seats; according to the bookings it should be ${e}. The number is only displayed; nothing is changed automatically here.`,
     add: 'Add person', copy: 'Copy list', print: 'Print day sheet', invAll: (n: number) => `Invoices (${n}) as ZIP`, mailAll: 'Email another date',
@@ -103,13 +107,15 @@ const T = {
     seatN: (i: number) => `Seat ${i}`, guestOf: (n: string) => `Guest of ${n}`,
     gone: 'No longer on this date',
     nothing: 'Nobody has booked yet. Use "Add person" for phone or walk-in bookings.',
-    details: 'Details', edit: 'Edit', move: 'Move', alt: 'Email another date', remove: 'Remove', inv: 'Invoice',
+    details: 'Profile', edit: 'Edit', move: 'Move', alt: 'Email another date', remove: 'Remove', inv: 'Invoice',
+    seatWord: (n: number): string => (n === 1 ? 'seat' : 'seats'),
+    manualBadge: 'Added manually', manualBy: (who: string, when: string) => `by ${who}${when ? ` on ${when}` : ''}`,
     origin: { website: 'Online', manual: 'Manual', wix: 'Wix import', unmarked: 'Unknown source' } as Record<BookingOrigin, string>,
     originHint: {
       website: 'Booked through the website.', manual: 'Entered by you in the dashboard.', wix: 'Taken over from the old Wix shop.',
       unmarked: 'No order or import note found, so it is unclear how this seat was booked.',
     } as Record<BookingOrigin, string>,
-    pay: { stripe: 'Stripe', voucher: 'Voucher', manual: 'Payment not recorded', wix: 'Paid in Wix', none: 'No receipt' } as Record<Payment, string>,
+    pay: { stripe: 'Paid · Stripe', mixed: 'Paid + voucher', voucher: 'With voucher', manual: 'Payment not recorded', wix: 'Paid in Wix', none: 'No receipt' } as Record<Payment, string>,
     st: {
       active: 'Confirmed', rebooked: 'Rebooked', voucher_issued: 'Voucher instead', cancelled_no_refund: 'Cancelled',
       refunded: 'Refunded', no_show: 'No-show', refund_requested: 'Refund requested', rebooking_pending: 'Rebooking pending',
@@ -117,6 +123,7 @@ const T = {
     } as Record<string, string>,
     noEmail: 'no email, no reminder',
     cancel: 'Cancel', close: 'Close', save: 'Save', saved: 'Saved.',
+    addPast: 'This date is in the past: nobody can be added any more.', addException: 'Add person (exception)', addFullHint: 'This date is full. You can add one more person by hand as an exception.',
     aT: 'Add person', fullErr: 'There are no free seats left on this date.',
     eT: 'Edit booking', eHint: 'Name, email and note for each seat. You can change this at any time, also after the workshop.',
     eName: 'Name', eMail: 'Email', eNote: 'Note (e.g. allergies)',
@@ -150,14 +157,19 @@ const T = {
     rT: 'Remove booking', rBody: (n: string, s: number) => `The booking of ${n} will be removed. ${s === 1 ? '1 seat becomes' : `${s} seats become`} free again.`,
     rOnly: 'Removing deletes the booking completely. Only possible without an order or invoice. Otherwise use "Release seat".',
     rYes: 'Yes, remove', removed: 'Removed. The seats are free again.',
-    printTitle: 'Day sheet', printSig: 'Present',
+    printNotes: 'Notes for this date', printTitle: 'Day sheet', printSig: 'Present',
     pastNote: 'This date is in the past.',
     bookedOn: (d: string) => `booked ${d}`,
   },
 }
 
+/** Online bookings keep every note; for hand-entered ones a note that only repeats source/payment is dropped (the pills say it). */
+function hideIfRedundant(note: string, origin: BookingOrigin): string {
+  return origin !== 'website' && note && isRedundantNote(note) ? '' : note
+}
+
 const ORIGIN_TONE: Record<BookingOrigin, string> = { website: 'neu', manual: 'gold', wix: 'info', unmarked: 'warn' }
-const PAY_TONE: Record<Payment, string> = { stripe: 'ok', voucher: 'gold', manual: 'gold', wix: 'info', none: 'warn' }
+const PAY_TONE: Record<Payment, string> = { stripe: 'ok', mixed: 'gold', voucher: 'gold', manual: 'gold', wix: 'info', none: 'warn' }
 const ST_TONE: Record<string, string> = {
   active: 'ok', rebooked: 'info', voucher_issued: 'gold', cancelled_no_refund: 'bad', refunded: 'bad', no_show: 'neu',
   refund_requested: 'warn', rebooking_pending: 'warn', organiser_cancelled_pending: 'warn',
@@ -178,7 +190,7 @@ function seatsOf(b: BookingRow, guestOf: (n: string) => string): Seat[] {
       index: i,
       name: s?.recipientName || (i === 0 ? buyer : guestOf(buyer)),
       email: i === 0 ? b.email : (s?.email ?? ''),
-      note: s?.giftNote || (i === 0 ? b.notes.replace(/\[Wix Import[^\]]*\]/gi, '').trim() : ''),
+      note: s?.giftNote || (i === 0 ? hideIfRedundant(b.notes.replace(/\[Wix[^\]]*\]/gi, '').trim(), bookingOrigin(b)) : ''),
       status,
       holds: seatHoldsPlace(status),
     }
@@ -199,6 +211,7 @@ type Dialog =
 export function WorkshopDetailView({
   appointment,
   bookings,
+  teamNotes = [],
   lang,
   onBack,
   onRefresh,
@@ -207,6 +220,8 @@ export function WorkshopDetailView({
 }: {
   appointment: AppointmentRow
   bookings: BookingRow[]
+  /** Open team notes about this date or its bookings: they are printed on the day sheet too. */
+  teamNotes?: AttentionNoteRow[]
   lang: Lang
   onBack: () => void
   onRefresh: () => void | Promise<void>
@@ -219,6 +234,18 @@ export function WorkshopDetailView({
   const toast = useToast()
   const [dialog, setDialog] = useState<Dialog>(null)
   const [detail, setDetail] = useState<BookingRow | null>(null)
+  // The "⋯" menu is a <details>: close any open one when clicking elsewhere or pressing Escape.
+  useEffect(() => {
+    const close = (e: Event) => {
+      document.querySelectorAll<HTMLDetailsElement>('details.ff-rowmenu[open]').forEach((d) => {
+        if (e.type === 'keydown' || !d.contains(e.target as Node)) d.removeAttribute('open')
+      })
+    }
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close(e)
+    document.addEventListener('click', close)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('click', close); document.removeEventListener('keydown', onKey) }
+  }, [])
   const [alignAsk, setAlignAsk] = useState(false)
   const [aligning, setAligning] = useState(false)
   const color = kindColor(appointment.workshopTitle)
@@ -226,8 +253,9 @@ export function WorkshopDetailView({
   const held = appointment.totalBooked
   const pending = appointment.pendingSeats ?? 0
   const free = Math.max(appointment.capacity - held - pending, 0)
-  const pct = appointment.capacity ? Math.min(100, Math.round((held / appointment.capacity) * 100)) : 0
   const mism = seatMismatch(appointment)
+  const pct = appointment.capacity ? Math.min(100, Math.round((held / appointment.capacity) * 100)) : 0
+  const fill = held >= appointment.capacity ? 'var(--ff-bar-full)' : pct >= 70 ? 'var(--ff-bar-mid)' : 'var(--ff-bar-low)'
 
   const dt = new Date(appointment.dateTime)
   const dateLong = dt.toLocaleDateString(LOCALE[lang], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Vienna' })
@@ -265,39 +293,40 @@ export function WorkshopDetailView({
         {t.back}
       </button>
 
-      <section className="ff-panel ff-dayhead" style={{ ['--c' as string]: color }}>
-        <div>
-          <div className="ff-eyebrow">{dateLong}</div>
-          <h1>{appointment.workshopTitle}</h1>
-          <div className="ff-muted" style={{ marginTop: 4 }}>
-            {timeStr} {lang === 'de' ? 'Uhr' : ''} · {appointment.locationName}
-          </div>
-        </div>
-        <div className="ff-dstats">
-          <div>
-            <b>{held}</b>
-            <span>{t.seats}</span>
-          </div>
-          <div>
-            <b>{free}</b>
-            <span>{t.free}</span>
-          </div>
-          {pending > 0 && (
-            <div title={t.heldHint}>
-              <b>{pending}</b>
-              <span>{t.held}</span>
-            </div>
-          )}
-        </div>
-        <div className="ff-bar is-wide" aria-label={`${held} ${t.of(appointment.capacity)}`}>
-          <i style={{ width: `${pct}%` }} />
+      <section className="ff-panel ff-dayhead" data-kind={workshopKind(appointment.workshopTitle) || 'other'} style={{ ['--c' as string]: color, ['--c2' as string]: fill }}>
+        <div className="ff-dtop">
+          <span className="ff-datebox">
+            <small>{dt.toLocaleDateString(LOCALE[lang], { weekday: 'short', timeZone: 'Europe/Vienna' })}</small>
+            <b>{dt.toLocaleDateString(LOCALE[lang], { day: 'numeric', timeZone: 'Europe/Vienna' })}</b>
+            <span>{dt.toLocaleDateString(LOCALE[lang], { month: 'short', timeZone: 'Europe/Vienna' })}</span>
+          </span>
+          <span className="ff-lmain">
+            <h1>{appointment.workshopTitle}</h1>
+            <span className="ff-lsub">
+              {dateLong} · {timeStr}{lang === 'de' ? ' Uhr' : ''} · {appointment.locationName}
+            </span>
+            <span className="ff-bar" style={{ maxWidth: 360, marginTop: 12 }} aria-label={`${held} ${t.of(appointment.capacity)}`}>
+              <i style={{ width: `${pct}%` }} />
+            </span>
+          </span>
+          <span className="ff-lside">
+            <b>{held}/{appointment.capacity}</b>
+            <span className="ff-muted" style={{ fontSize: 12 }}>{t.of(appointment.capacity)}</span>
+            {free <= 0 ? <span className="ff-pill bad">{lang === 'de' ? 'ausgebucht' : 'fully booked'}</span> : <span className="ff-pill ok">{lang === 'de' ? `${free} frei` : `${free} free`}</span>}
+            {pending > 0 && <span className="ff-muted" style={{ fontSize: 12 }} title={t.heldHint}>{pending} {t.held}</span>}
+          </span>
         </div>
         <div className="ff-dact ff-noprint">
-          {!appointment.isPast && (
-            <button type="button" className="ff-btn is-gold" onClick={() => setDialog({ kind: 'add' })} disabled={free <= 0} title={free <= 0 ? t.fullErr : undefined}>
-              + {t.add}
-            </button>
-          )}
+          {/* Past date: the button stays visible but cannot be clicked. Full date: it works as an exception (capacity +1). */}
+          <button
+            type="button"
+            className={`ff-btn ${free <= 0 && !appointment.isPast ? '' : 'is-gold'}`}
+            onClick={() => setDialog({ kind: 'add' })}
+            disabled={appointment.isPast}
+            title={appointment.isPast ? t.addPast : free <= 0 ? t.addFullHint : undefined}
+          >
+            + {free <= 0 && !appointment.isPast ? t.addException : t.add}
+          </button>
           {!appointment.isPast && (
             <button type="button" className="ff-btn" onClick={() => setDialog({ kind: 'capacity' })} title={appointment.ownCapacity ? t.cOwn : undefined}>
               {t.cBtn}: {appointment.capacity}
@@ -360,6 +389,23 @@ export function WorkshopDetailView({
       <div className="ff-printonly" style={{ margin: '18px 0 8px' }}>
         <strong>{t.printTitle}</strong> · {held} {t.of(appointment.capacity)}
       </div>
+      {(appointment.internalNote || teamNotes.length > 0) && (
+        <div className="ff-printonly ff-teamnotes">
+          <strong>{t.printNotes}</strong>
+          {appointment.internalNote && <div>{appointment.internalNote.split('\n').map((l, i) => <div key={i}>• {l}</div>)}</div>}
+          {teamNotes.map((n) => {
+            const last = [...n.messages].reverse().find((m) => m.text)
+            const who = n.bookingId ? bookings.find((b) => b.id === n.bookingId) : null
+            return (
+              <div key={n.id}>
+                • <b>{n.title}</b>
+                {who ? ` (${buyerName(who)})` : ''}
+                {last?.text ? `: ${last.text}` : n.body && n.body !== n.title ? `: ${n.body}` : ''}
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       <h2 className="ff-noprint" style={{ fontSize: 18, margin: '28px 0 12px' }}>{t.sheet}</h2>
 
@@ -368,7 +414,7 @@ export function WorkshopDetailView({
           <p className="ff-muted" style={{ margin: 0 }}>{t.nothing}</p>
         </div>
       ) : (
-        <div className="ff-panel ff-sheet">
+        <div className="ff-sheet" style={{ ['--c' as string]: color }}>
           <div className="ff-srow ff-shead" aria-hidden>
             <span>{t.cBy}</span>
             <span>{t.cSeats}</span>
@@ -378,68 +424,132 @@ export function WorkshopDetailView({
           </div>
           {rows.here.map(({ b, seats, held: n }) => {
             const origin = bookingOrigin(b)
+            // Old hand-entered bookings carry no marker: they get the same badge, plus what their note says.
+            const byHand = origin === 'manual' || origin === 'unmarked'
+            const rawHints = origin === 'unmarked' ? noteHints(b.notes, lang) : { source: [], pay: [] }
+            // Where the booking already records a channel / payment, the note must not add the same label a second time.
+            const hints = { source: b.manual?.channel ? [] : rawHints.source, pay: b.manual?.paymentStatus ? [] : rawHints.pay }
+            // A note we could not read into a label: show the exact wording instead of guessing.
+            // Entered by hand and not paid yet: a reservation, not a confirmed booking.
+            const unpaidReservation = origin !== 'website' && origin !== 'wix' && (b.manual?.paymentStatus === 'open' || hints.pay.includes(lang === 'de' ? 'Zahlung offen' : 'Payment open'))
+            const manualBy = origin === 'manual' ? (b.history.find((h) => h.type === 'created_manual')?.by ?? '') : ''
+            const noteText = b.notes.replace(/\[Wix[^\]]*\]/gi, '').trim()
+            // The note we could not read into labels is shown in the source/payment column; do not repeat it under the name.
+            const noteAsPill = origin === 'unmarked' && !b.manual && !!noteText && !rawHints.source.length && !rawHints.pay.length
             const pay = b.payment ?? 'none'
             const statuses = [...new Set(seats.map((s) => s.status))]
             return (
-              <div key={b.id} className="ff-srow">
+              <div
+                key={b.id}
+                className="ff-srow is-click"
+                onClick={(e) => { if (!(e.target as HTMLElement).closest('button, a, summary, details, input, select, textarea')) setDetail(b) }}
+              >
                 <div className="c-n">
                   {seats.map((s) => (
                     <div key={s.index} className={`ff-seat${s.holds ? '' : ' is-gone'}`}>
                       <span className="ff-printno" aria-hidden>{s.holds ? ++printNo : '–'}</span>
                       <span style={{ minWidth: 0 }}>
                         <button type="button" className="nm ff-namebtn" onClick={() => setDetail(b)} title={t.details}>{s.name}</button>
-                        {seats.length > 1 && <span className="ff-muted" style={{ fontSize: 12 }}> · {t.seatN(s.index + 1)}</span>}
-                        {s.note && <span className="ff-allergy">{s.note}</span>}
+                        {seats.length > 1 && <span className="ff-seatno">{t.seatN(s.index + 1)}</span>}
+                        {s.note && !(noteAsPill && s.index === 0 && s.note === noteText) && <span className="ff-allergy">{s.note}</span>}
                       </span>
                       <span className="ff-printonly ff-tick" aria-hidden />
                     </div>
                   ))}
-                  <span className="ff-muted ff-noprint" style={{ fontSize: 12 }}>
-                    {b.email || <span style={{ color: 'var(--ff-warn-fg)' }}>⚠ {t.noEmail}</span>}
-                    {b.phone ? ` · ${b.phone}` : ''}
-                    {b.createdAt ? ` · ${t.bookedOn(new Date(b.createdAt).toLocaleDateString(LOCALE[lang], { timeZone: 'Europe/Vienna' }))}` : ''}
-                  </span>
+                  {(() => {
+                    // The buyer's booking note is shown with seat 1; if seat 1 has its own note, the booking note still must not be lost.
+                    const extra = b.seats[0]?.giftNote ? hideIfRedundant(b.notes.replace(/\[Wix[^\]]*\]/gi, '').trim(), origin) : ''
+                    return extra && extra !== b.seats[0]?.giftNote ? <span className="ff-allergy">{extra}</span> : null
+                  })()}
+                  {origin !== 'wix' && b.manual?.paymentNote && !isRedundantNote(b.manual.paymentNote) && <span className="ff-contact">{lang === 'de' ? 'Zahlung' : 'Payment'}: {b.manual.paymentNote}</span>}
+                  <div className="ff-ctl">
+                    {b.phone && <span className="ff-ctl-line"><b>{b.phone}</b></span>}
+                    <span className="ff-ctl-line ff-ctl-mail">
+                      {b.email || <span style={{ color: 'var(--ff-gold-ink)', fontWeight: 600 }}>⚠ {t.noEmail}</span>}
+                    </span>
+                    {b.createdAt && (
+                      <span className="ff-ctl-line ff-ctl-booked">
+                        {lang === 'de' ? 'Gebucht am' : 'Booked on'}{' '}
+                        <b>{new Date(b.createdAt).toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Vienna' })}</b>
+                      </span>
+                    )}
+                    {origin === 'manual' && (() => {
+                      const entry = b.history.find((h) => h.type === 'created_manual')
+                      return entry?.by && entry.by !== 'System' ? <span className="ff-ctl-line ff-printonly">{lang === 'de' ? 'Eingetragen' : 'Entered'} {t.manualBy(entry.by, '')}</span> : null
+                    })()}
+                  </div>
                 </div>
                 <div className="c-s">
-                  <b>{n}</b>
+                  {byHand && (
+                    <span className="ff-manualwrap">
+                      <span className="ff-manual">✎ {t.manualBadge}</span>
+                      {origin === 'manual' && manualBy && manualBy !== 'System' && <span className="ff-manualby">{t.manualBy(manualBy, '')}</span>}
+                    </span>
+                  )}
+                  <span className="ff-seatcount">
+                    <b>{n}</b>
+                    <span className="ff-lbl">{t.seatWord(n)}</span>
+                  </span>
                 </div>
                 <div className="c-p">
-                  <span className={`ff-pill ${ORIGIN_TONE[origin]}`} title={t.originHint[origin]}>{t.origin[origin]}</span>
-                  {origin === 'website' && <span className={`ff-pill ${PAY_TONE[pay]}`}>{t.pay[pay]}</span>}
-                  {origin !== 'website' && b.manual?.channel && <span className="ff-pill neu">{MP[lang].channels[b.manual.channel] ?? b.manual.channel}</span>}
-                  {origin !== 'website' && b.manual?.paymentStatus === 'open' && <span className="ff-pill warn">{MP[lang].open}</span>}
-                  {origin !== 'website' && b.manual?.paymentStatus === 'paid' && (
+                  {byHand && <span className="ff-printonly ff-pill neu">✎ {t.manualBadge}</span>}
+                  {hints.source.map((h) => <span key={h} className="ff-pill neu">{h}</span>)}
+                  {hints.pay.filter((h) => !unpaidReservation || !/offen|open/i.test(h)).map((h) => <span key={h} className={`ff-pill ${/offen|open/i.test(h) ? 'warn' : 'gold'}`}>{h}</span>)}
+                  {noteAsPill && (
+                    <span className="ff-pill gold" title={noteText} style={{ whiteSpace: 'normal', textAlign: 'left' }}>{noteText}</span>
+                  )}
+                  {/* One pill is enough: online = how it was paid (Stripe / voucher, it is clear it came from the shop); Wix = "Wix import". */}
+                  {origin === 'website' && (pay === 'none'
+                    ? <span className={`ff-pill ${ORIGIN_TONE[origin]}`} title={t.originHint[origin]}>{t.origin[origin]}</span>
+                    : <span className={`ff-pill ${PAY_TONE[pay]}`} title={t.originHint[origin]}>{t.pay[pay]}</span>)}
+                  {origin === 'wix' && <span className={`ff-pill ${ORIGIN_TONE[origin]}`} title={t.originHint[origin]}>{t.origin[origin]}</span>}
+                  {origin !== 'website' && origin !== 'wix' && b.manual?.channel && <span className="ff-pill neu">{MP[lang].channels[b.manual.channel] ?? b.manual.channel}</span>}
+                                    {origin !== 'website' && origin !== 'wix' && b.manual?.paymentStatus === 'paid' && (
                     <span className="ff-pill ok">{MP[lang].paid}{b.manual.paymentMethod ? `: ${MP[lang].methods[b.manual.paymentMethod] ?? b.manual.paymentMethod}` : ''}{b.manual.voucherCode ? ` (${b.manual.voucherCode})` : ''}</span>
                   )}
-                  {origin !== 'website' && !b.manual?.paymentStatus && (origin === 'wix' ? <span className="ff-pill ok">{t.pay.wix}</span> : <span className="ff-pill gold">{t.pay.manual}</span>)}
-                  {b.orderId && b.invoiceNumber && (
-                    <a className="ff-link ff-noprint" style={{ fontSize: 12 }} href={`/api/admin/orders/${b.orderId}/receipt`} target="_blank" rel="noopener">
-                      {b.invoiceNumber}
-                    </a>
-                  )}
+                  {origin !== 'website' && !b.manual?.paymentStatus && !hints.pay.length && !(origin === 'unmarked' && noteText) && (origin !== 'wix' && <span className="ff-pill gold">{t.pay.manual}</span>)}
+                  {b.orderId && b.invoiceNumber && <span className="ff-printonly ff-contact">{b.invoiceNumber}</span>}
                 </div>
                 <div className="c-t">
                   {statuses.map((st) => (
-                    <span key={st} className={`ff-pill ${ST_TONE[st] ?? 'neu'}`}>{t.st[st] ?? st}</span>
+                    unpaidReservation && st === 'active'
+                      ? <span key={st} className="ff-pill warn">{lang === 'de' ? 'Reservierung · noch nicht bezahlt' : 'Reservation · not paid yet'}</span>
+                      : <span key={st} className={`ff-pill ${ST_TONE[st] ?? 'neu'}`}>{t.st[st] ?? st}</span>
                   ))}
                 </div>
                 <div className="c-a ff-noprint">
                   <button type="button" className="ff-btn is-sm" onClick={() => setDetail(b)}>{t.details}</button>
                   <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'edit', booking: b })}>{t.edit}</button>
-                  <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'move', booking: b })}>{t.move}</button>
-                  {!appointment.isPast && (
-                    <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'alt', bookingIds: [b.id] })} disabled={!b.email}>{t.alt}</button>
-                  )}
-                  {origin !== 'website' && (
-                    <button type="button" className="ff-btn is-sm" onClick={() => setDialog({ kind: 'pay', booking: b })}>{lang === 'de' ? 'Zahlung' : 'Payment'}</button>
-                  )}
-                  {seats.some((x) => x.holds) && (
-                    <button type="button" className="ff-btn is-sm is-danger" onClick={() => setDialog({ kind: 'release', booking: b })}>{t.fBtn}</button>
-                  )}
-                  {!b.orderId && origin !== 'website' && (
-                    <button type="button" className="ff-btn is-sm is-danger" onClick={() => setDialog({ kind: 'remove', booking: b })}>{t.remove}</button>
-                  )}
+                  <details className="ff-rowmenu">
+                    <summary className="ff-btn is-sm" aria-label={lang === 'de' ? 'Mehr' : 'More'}>⋯</summary>
+                    <div className="ff-menu" onClick={(e) => (e.currentTarget.closest('details') as HTMLDetailsElement | null)?.removeAttribute('open')}>
+                      <button type="button" onClick={() => setDialog({ kind: 'move', booking: b })}>{t.move}</button>
+                      {origin !== 'website' && (
+                        <button type="button" onClick={() => setDialog({ kind: 'pay', booking: b })}>{lang === 'de' ? 'Zahlung' : 'Payment'}</button>
+                      )}
+                      {!appointment.isPast && (
+                        <button type="button" onClick={() => setDialog({ kind: 'alt', bookingIds: [b.id] })} disabled={!b.email}>{t.alt}</button>
+                      )}
+                      {seats.some((x) => x.holds) && <button type="button" onClick={() => setDialog({ kind: 'release', booking: b })}>{t.fBtn}</button>}
+                      {!b.orderId && origin !== 'website' && (
+                        <>
+                          <hr />
+                          <button type="button" onClick={() => setDialog({ kind: 'remove', booking: b })}>{t.remove}</button>
+                        </>
+                      )}
+                    </div>
+                  </details>
                 </div>
+                {b.orderId && b.invoiceNumber && (
+                  <div className="c-i ff-noprint">
+                    <a className="ff-link" href={`/api/admin/orders/${b.orderId}/receipt?view=1`} target="_blank" rel="noopener" title={b.invoiceNumber}>
+                      {lang === 'de' ? 'Rechnung ansehen' : 'View invoice'}
+                    </a>
+                    <a className="ff-link" href={`/api/admin/orders/${b.orderId}/receipt`} title={b.invoiceNumber}>
+                      {lang === 'de' ? 'Herunterladen ↓' : 'Download ↓'}
+                    </a>
+                  </div>
+                )}
               </div>
             )
           })}
@@ -457,7 +567,7 @@ export function WorkshopDetailView({
                     <div key={s.index} className="ff-seat is-gone"><span className="nm">{s.name}</span></div>
                   ))}
                 </div>
-                <div className="c-s"><b>0</b></div>
+                <div className="c-s"><b>0</b><span className="ff-lbl">{t.seatWord(0)}</span></div>
                 <div className="c-p"><span className={`ff-pill ${ORIGIN_TONE[bookingOrigin(b)]}`}>{t.origin[bookingOrigin(b)]}</span></div>
                 <div className="c-t">
                   {[...new Set(seats.map((s) => s.status))].map((st) => (
@@ -479,6 +589,7 @@ export function WorkshopDetailView({
           title={buyerName(detail)}
           lang={lang}
           onClose={() => setDetail(null)}
+          onEdit={() => { const bk = detail; setDetail(null); setDialog({ kind: 'edit', booking: bk }) }}
           onOpenProfile={onOpenProfile ? (email: string) => { setDetail(null); onOpenProfile(email) } : undefined}
           onOpenWorkshop={(id: string) => { setDetail(null); if (id !== appointment.id) onOpenWorkshop?.(id) }}
         />
@@ -585,7 +696,7 @@ function EditDialog({ t, lang, booking, onClose, onDone }: { t: Dict; lang: Lang
         const before = initial[s.index]
         if (s.name === before.name && s.email === before.email && s.note === before.note) continue
         // The sheet hides the "[Wix Import …]" marker from the note — put it back, or saving would erase where this booking came from.
-        const marker = s.index === 0 ? (booking.notes.match(/\[Wix Import[^\]]*\]/gi) ?? []).join(' ') : ''
+        const marker = s.index === 0 ? (booking.notes.match(/\[Wix[^\]]*\]/gi) ?? []).join(' ') : ''
         await updateBookingSeatDetails({ bookingId: booking.id, seatIndex: s.index, name: s.name, email: s.email, notes: [s.note.trim(), marker].filter(Boolean).join(' ') })
       }
       onDone()

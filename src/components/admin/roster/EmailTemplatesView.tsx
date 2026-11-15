@@ -572,7 +572,7 @@ function TemplateEditor({
           invalid={Boolean(err)}
           label={t.kinds[f.kind]}
         />
-        {err && <div style={{ color: 'var(--ff-bad-fg)', fontSize: 12, fontWeight: 600 }}>{err}</div>}
+        {err && <div style={{ color: 'var(--ff-fg)', fontSize: 12, fontWeight: 700 }}>⚠ {err}</div>}
       </div>
     )
   }
@@ -643,7 +643,7 @@ function TemplateEditor({
                 invalid={Boolean(fieldErrors.subject)}
                 label={t.subject}
               />
-              {fieldErrors.subject && <div style={{ color: 'var(--ff-bad-fg)', fontSize: 12, fontWeight: 600 }}>{fieldErrors.subject}</div>}
+              {fieldErrors.subject && <div style={{ color: 'var(--ff-fg)', fontSize: 12, fontWeight: 700 }}>⚠ {fieldErrors.subject}</div>}
             </div>
           </div>
 

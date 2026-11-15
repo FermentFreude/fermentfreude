@@ -1,3 +1,5 @@
+import React from 'react'
+
 /** Fermentfreude wordmark (from public/primary-logo.svg), drawn in currentColor. */
 export function Wordmark({ className }: { className?: string }) {
   return (
