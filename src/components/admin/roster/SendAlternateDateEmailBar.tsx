@@ -64,10 +64,10 @@ export function SendAlternateDateEmailBar({
     <div
       style={{
         marginBottom: '20px', padding: '16px', borderRadius: '10px',
-        background: '#fffbeb', border: '1px solid #fbbf24',
+        background: '#FBF3E1', border: '1px solid #D4A654',
       }}
     >
-      <p style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 700, color: '#92400e' }}>
+      <p style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 700, color: '#6B470A' }}>
         {selectedBookingIds.length} {selectedBookingIds.length === 1 ? 'Buchung' : 'Buchungen'} ausgewählt
       </p>
 
@@ -99,7 +99,7 @@ export function SendAlternateDateEmailBar({
             disabled={isSending}
             style={{
               padding: '7px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer',
-              background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700,
+              background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '13px', fontWeight: 700,
               opacity: isSending ? 0.5 : 1,
             }}
           >
@@ -108,10 +108,10 @@ export function SendAlternateDateEmailBar({
         </div>
       ) : null}
 
-      {error && <p style={{ margin: '10px 0 0', fontSize: '13px', color: '#dc2626' }}>{error}</p>}
+      {error && <p style={{ margin: '10px 0 0', fontSize: '13px', color: 'var(--ff-alert)' }}>{error}</p>}
 
       {result && (
-        <div style={{ marginTop: '10px', fontSize: '13px', color: '#92400e' }}>
+        <div style={{ marginTop: '10px', fontSize: '13px', color: '#6B470A' }}>
           {result.sent.length > 0 && <p style={{ margin: '0 0 4px' }}>✅ Gesendet an: {result.sent.join(', ')}</p>}
           {result.skippedNoEmail.length > 0 && (
             <p style={{ margin: 0 }}>⚠️ Übersprungen (keine E-Mail oder Fehler): {result.skippedNoEmail.join(', ')}</p>

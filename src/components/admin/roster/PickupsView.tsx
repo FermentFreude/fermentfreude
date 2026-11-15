@@ -12,9 +12,9 @@ interface Props {
 }
 
 const STATUS_CONFIG = {
-  pending: { label: 'In Bearbeitung', bg: '#fef3c7', color: '#92400e', dotColor: '#f59e0b' },
-  ready: { label: 'Abholbereit', bg: '#dbeafe', color: '#1e40af', dotColor: '#3b82f6' },
-  collected: { label: 'Abgeholt', bg: '#dcfce7', color: '#166534', dotColor: '#22c55e' },
+  pending: { label: 'In Bearbeitung', bg: '#F6E7BC', color: '#6B470A', dotColor: '#D4A654' },
+  ready: { label: 'Abholbereit', bg: '#F0EDE5', color: '#55584F', dotColor: '#8A8D84' },
+  collected: { label: 'Abgeholt', bg: '#ECE5DE', color: '#3A3E3A', dotColor: '#4B4F4A' },
 }
 
 type Filter = 'all' | 'pending' | 'ready'
@@ -124,12 +124,12 @@ function OrderCard({ order, onRefresh }: { order: PickupOrderRow; onRefresh: () 
       {/* Note */}
       {order.notes && (
         <div style={{
-          padding: '10px 12px', borderRadius: '6px', background: '#fffbeb',
-          border: '1px solid #fbbf24', marginBottom: '16px',
+          padding: '10px 12px', borderRadius: '6px', background: '#FBF3E1',
+          border: '1px solid #D4A654', marginBottom: '16px',
           display: 'flex', alignItems: 'flex-start', gap: '8px',
         }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span style={{ fontSize: '13px', color: '#92400e' }}>Notiz: {order.notes}</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D4A654" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span style={{ fontSize: '13px', color: '#6B470A' }}>Notiz: {order.notes}</span>
         </div>
       )}
 
@@ -141,7 +141,7 @@ function OrderCard({ order, onRefresh }: { order: PickupOrderRow; onRefresh: () 
             disabled={isPending}
             style={{
               padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-              background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700,
+              background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '13px', fontWeight: 700,
               opacity: isPending ? 0.5 : 1,
             }}
           >
@@ -154,7 +154,7 @@ function OrderCard({ order, onRefresh }: { order: PickupOrderRow; onRefresh: () 
             disabled={isPending}
             style={{
               padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-              background: BRAND.gold, color: BRAND.nearBlack, fontSize: '13px', fontWeight: 700,
+              background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '13px', fontWeight: 700,
               opacity: isPending ? 0.5 : 1,
             }}
           >

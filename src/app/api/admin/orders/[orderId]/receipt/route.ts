@@ -78,7 +78,7 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Disposition': `${request.nextUrl.searchParams.get('view') === '1' ? 'inline' : 'attachment'}; filename="${filename}"`,
         'Content-Length': String(pdfBuffer.length),
         'Cache-Control': 'private, no-store',
         'X-Content-Type-Options': 'nosniff',

@@ -89,6 +89,8 @@ export type CustomerProfile = {
   events: ProfileEvent[]
   /** True when only one booking (and what belongs to it) is included. */
   scoped: boolean
+  /** When opened from one booking: that booking, so it can be shown first. */
+  focusBookingId?: string
 }
 
 const text = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
@@ -133,15 +135,27 @@ async function chainOf(payload: Payload, bookingId: string): Promise<Doc[]> {
   return [...out.values()]
 }
 
-export async function getCustomerProfile(params: { email?: string; bookingId?: string }): Promise<CustomerProfile> {
+export async function getCustomerProfile(params: { email?: string; bookingId?: string; full?: boolean }): Promise<CustomerProfile> {
   const payload = await getPayload({ config: configPromise })
   await requireAdminUser(payload)
 
-  const scoped = Boolean(params.bookingId)
   let email = text(params.email)
+  let focusBookingId: string | undefined
+  // Opened from one booking but the whole account is wanted: use the booking's email (if it has one).
+  if (params.bookingId && params.full && !email) {
+    try {
+      const one = await payload.findByID({ collection: 'workshop-bookings', id: params.bookingId, depth: 0, overrideAccess: true })
+      email = text(one.email)
+      focusBookingId = String(one.id)
+    } catch {
+      /* falls back to the single booking below */
+    }
+  }
+  const wholeAccount = Boolean(params.full && email)
+  const scoped = Boolean(params.bookingId) && !wholeAccount
   let bookingDocs: Doc[] = []
 
-  if (params.bookingId) {
+  if (scoped && params.bookingId) {
     bookingDocs = await chainOf(payload, params.bookingId)
     if (!email) email = text(bookingDocs.find((b) => String(b.id) === params.bookingId)?.email)
   } else if (email) {
@@ -331,5 +345,6 @@ export async function getCustomerProfile(params: { email?: string; bookingId?: s
     refunds,
     events,
     scoped,
+    focusBookingId,
   }
 }

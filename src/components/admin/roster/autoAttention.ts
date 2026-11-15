@@ -1,9 +1,12 @@
 import { seatsHoldingPlace } from '@/lib/seatCapacity'
 
-import { bookingOrigin } from './bookingOrigin'
+import { bookingOrigin, noteHints } from './bookingOrigin'
 import { seatMismatch } from './seatCheck'
 import type { AutoAttentionItem } from './attentionTypes'
 import type { RosterData } from './types'
+
+/** Days after "refund started" without Stripe's confirmation before the dashboard reminds the founders. */
+const REFUND_STALE_DAYS = 5
 
 /** Problems the dashboard finds by itself. Read-only: nothing here changes data. */
 export function detectAttentionItems(data: RosterData): AutoAttentionItem[] {
@@ -26,10 +29,13 @@ export function detectAttentionItems(data: RosterData): AutoAttentionItem[] {
       const origin = bookingOrigin(b)
       if (origin === 'website' || origin === 'wix') continue // paid online / in Wix: nothing to record
       const params = { name: [b.firstName, b.lastName].filter(Boolean).join(' ') || b.email, workshop: a.workshopTitle, date: a.date }
-      if (b.manual?.paymentStatus === 'open') {
+      // Old hand-entered bookings: the note often already says how it was paid ("Gutschein", "zahlt vor Ort").
+      const fromNote = origin === 'unmarked' && !b.manual ? noteHints(b.notes, 'de').pay : []
+      const noteOpen = fromNote.includes('Zahlung offen')
+      if (b.manual?.paymentStatus === 'open' || noteOpen) {
         // a reservation that has not been paid yet
         items.push({ key: `payment-open:${b.id}`, severity: 'attention', rule: 'payment-open', appointmentId: a.id, params })
-      } else if (!b.manual?.paymentStatus) {
+      } else if (!b.manual?.paymentStatus && fromNote.length === 0) {
         // added by hand (or entered without a marker) and nobody recorded how it was paid
         items.push({ key: `no-receipt:${b.id}`, severity: 'info', rule: 'no-receipt', appointmentId: a.id, params })
       }
@@ -42,7 +48,20 @@ export function detectAttentionItems(data: RosterData): AutoAttentionItem[] {
       key: `refund-open:${r.id}`,
       severity: r.daysPending >= 3 ? 'urgent' : 'attention',
       rule: 'refund-open',
+      section: 'refunds',
       params: { name: r.customerName || r.customerEmail, days: r.daysPending },
+    })
+  }
+  // A refund the founders started in Stripe that Stripe has not confirmed yet (the webhook closes it when the money is back).
+  for (const r of data.refundRequests) {
+    if ((r.status !== 'acknowledged' && r.status !== 'processing') || r.resolution === 'voucher' || r.resolution === 'rebooked') continue
+    if (r.daysSinceHandled < REFUND_STALE_DAYS) continue
+    items.push({
+      key: `refund-stale:${r.id}`,
+      severity: 'attention',
+      rule: 'refund-stale',
+      section: 'refunds',
+      params: { name: r.customerName || r.customerEmail, days: r.daysSinceHandled },
     })
   }
 

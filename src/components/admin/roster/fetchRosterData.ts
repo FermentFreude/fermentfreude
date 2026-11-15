@@ -130,11 +130,128 @@ export function toBookingRow(b: { id: string | number }): BookingRow {
   } satisfies BookingRow
 }
 
+type PayloadInstance = Awaited<ReturnType<typeof getPayload>>
+
+/** Per order: invoice number, what was charged (cents) and whether a voucher was used to pay (a voucher can cover only some seats). */
+async function loadOrderPay(payload: PayloadInstance, ids: string[]) {
+  const out = new Map<string, { invoiceNumber: string; amount: number; hasVoucher: boolean }>()
+  if (!ids.length) return out
+  const found = await payload.find({ collection: 'orders', where: { id: { in: ids } }, limit: 2000, depth: 0, overrideAccess: true })
+  const txIds: string[] = []
+  const txByOrder = new Map<string, string[]>()
+  for (const doc of found.docs) {
+    const o = doc as unknown as { id: string | number; transactions?: unknown[] }
+    const ids2 = (o.transactions ?? []).map((t) => (t && typeof t === 'object' ? String((t as { id?: unknown }).id ?? '') : String(t ?? ''))).filter(Boolean)
+    txByOrder.set(String(o.id), ids2)
+    txIds.push(...ids2)
+  }
+  const withVoucher = new Set<string>()
+  if (txIds.length) {
+    const tx = await payload.find({ collection: 'transactions', where: { id: { in: txIds } }, limit: 5000, depth: 0, pagination: false, overrideAccess: true })
+    for (const t of tx.docs) if ((t as unknown as { voucherCode?: string }).voucherCode) withVoucher.add(String(t.id))
+  }
+  for (const doc of found.docs) {
+    const o = doc as unknown as { id: string | number; invoiceNumber?: string | null; amount?: number | null }
+    const hasVoucher = (txByOrder.get(String(o.id)) ?? []).some((t) => withVoucher.has(t))
+    out.set(String(o.id), { invoiceNumber: o.invoiceNumber ?? '', amount: Number(o.amount ?? 0), hasVoucher })
+  }
+  return out
+}
+
+/** How an online booking was paid. */
+function onlinePayment(order: { amount: number; hasVoucher: boolean }): 'stripe' | 'voucher' | 'mixed' {
+  return order.amount > 0 ? (order.hasVoucher ? 'mixed' : 'stripe') : 'voucher'
+}
+
 export async function fetchRosterData(currentUserId?: string): Promise<RosterData> {
   const payload = await getPayload({ config: configPromise })
   const now = new Date()
   const since = new Date()
   since.setDate(since.getDate() - 14)
+
+  // All reads below are independent: start them together instead of one after the other (each one is a network round trip).
+  // Reads only — writes elsewhere stay sequential (MongoDB Atlas M0, no transactions).
+  const pre = {
+    allBookings: payload.find({
+    collection: 'workshop-bookings',
+    where: { status: { equals: 'confirmed' } },
+    sort: '-createdAt',
+    limit: 500,
+    overrideAccess: true,
+  }),
+    usersResult: payload.find({ collection: 'users', limit: 5000, depth: 0, pagination: false, overrideAccess: true }),
+    pickupResult: payload.find({
+    collection: 'orders',
+    where: { pickupDate: { not_equals: '' } },
+    sort: '-createdAt',
+    limit: 200,
+    depth: 1,
+    overrideAccess: true,
+  }),
+    ordersResult: payload.find({
+    collection: 'orders',
+    sort: '-createdAt',
+    limit: 500,
+    depth: 1,
+    overrideAccess: true,
+  }),
+    cancellationsResult: payload.find({
+    collection: 'cancellation-invoices',
+    limit: 500,
+    depth: 0,
+    overrideAccess: true,
+  }),
+    giftVouchers: payload.find({
+    collection: 'vouchers',
+    // Vouchers from before July 2026 have no origin at all — those were purchases too.
+    where: { or: [{ origin: { equals: 'gift-purchase' } }, { origin: { exists: false } }] },
+    limit: 1000,
+    depth: 0,
+    overrideAccess: true,
+  }),
+    quotesResult: payload.find({
+    collection: 'quotes',
+    sort: '-createdAt',
+    limit: 200,
+    depth: 0,
+    overrideAccess: true,
+  }),
+    voucherResult: payload.find({
+    collection: 'vouchers',
+    sort: '-createdAt',
+    limit: 500,
+    overrideAccess: true,
+  }),
+    refundRequestsResult: payload.find({
+    collection: 'refund-requests',
+    sort: 'requestedAt',
+    limit: 200,
+    depth: 1,
+    overrideAccess: true,
+  }),
+    activityEventsResult: payload.find({
+    collection: 'activity-events',
+    sort: '-createdAt',
+    limit: 200,
+    depth: 0,
+    overrideAccess: true,
+  }),
+    attentionResult: payload.find({
+    collection: 'attention-notes',
+    sort: '-createdAt',
+    limit: 500,
+    depth: 1, // message images → media docs with URLs
+    overrideAccess: true,
+  }),
+    teamResult: payload.find({
+    collection: 'users',
+    where: { roles: { contains: 'admin' } },
+    limit: 50,
+    depth: 1,
+    overrideAccess: true,
+  }),
+  }
+  for (const pr of Object.values(pre)) pr.catch(() => {})
 
   // ── 1. Appointments (from 14 days ago onward) ──────────────────────────────
   const apptResult = await payload.find({
@@ -147,6 +264,34 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   })
 
   // ── 2. Confirmed bookings per appointment (sequential — M0) ───────────────
+  // One query for every date's confirmed bookings and one for the unpaid holds (instead of two per date).
+  const apptIds = apptResult.docs.map((a) => String(a.id))
+  type BookingDoc = Awaited<typeof pre.allBookings>['docs'][number]
+  const confirmedBy = new Map<string, BookingDoc[]>()
+  const pendingBy = new Map<string, BookingDoc[]>()
+  if (apptIds.length) {
+    const [confirmedAll, pendingAll] = await Promise.all([
+      payload.find({
+        collection: 'workshop-bookings',
+        where: { and: [{ appointmentId: { in: apptIds } }, { status: { equals: 'confirmed' } }] },
+        sort: 'createdAt',
+        limit: 5000,
+        pagination: false,
+        overrideAccess: true,
+      }),
+      payload.find({
+        collection: 'workshop-bookings',
+        where: { and: [{ appointmentId: { in: apptIds } }, { status: { equals: 'pending' } }] },
+        limit: 5000,
+        depth: 0,
+        pagination: false,
+        overrideAccess: true,
+      }),
+    ])
+    for (const b of confirmedAll.docs) confirmedBy.set(String(b.appointmentId), [...(confirmedBy.get(String(b.appointmentId)) ?? []), b])
+    for (const b of pendingAll.docs) pendingBy.set(String(b.appointmentId), [...(pendingBy.get(String(b.appointmentId)) ?? []), b])
+  }
+
   const appointments: AppointmentRow[] = []
   const bookingsByAppointment: Record<string, BookingRow[]> = {}
 
@@ -163,18 +308,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     const dateTimeStr = String(appt.dateTime ?? '')
     const isPast = dateTimeStr ? new Date(dateTimeStr) < now : false
 
-    const bResult = await payload.find({
-      collection: 'workshop-bookings',
-      where: {
-        and: [
-          { appointmentId: { equals: String(appt.id) } },
-          { status: { equals: 'confirmed' } },
-        ],
-      },
-      sort: 'createdAt',
-      limit: 50,
-      overrideAccess: true,
-    })
+    const bResult = { docs: confirmedBy.get(String(appt.id)) ?? [] }
 
     // Seats that were rebooked, cancelled or refunded no longer take a place here.
     const totalBooked = bResult.docs.reduce((sum, b) => sum + seatsHoldingPlace(b), 0)
@@ -183,15 +317,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     // Unpaid bookings hold seats on the booking page; only relevant for upcoming dates.
     let pendingSeats = 0
     if (!isPast) {
-      const pending = await payload.find({
-        collection: 'workshop-bookings',
-        where: {
-          and: [{ appointmentId: { equals: String(appt.id) } }, { status: { equals: 'pending' } }],
-        },
-        limit: 50,
-        depth: 0,
-        overrideAccess: true,
-      })
+      const pending = { docs: pendingBy.get(String(appt.id)) ?? [] }
       pendingSeats = pending.docs.reduce((sum, b) => sum + Math.max(Number(b.guestCount) || 1, 1), 0)
     }
     const rawFree = (appt as unknown as { availableSpots?: unknown }).availableSpots
@@ -208,6 +334,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       pricePerPerson,
       totalBooked,
       capacity,
+      internalNote: typeof (appt as { notes?: unknown }).notes === 'string' ? ((appt as { notes?: string }).notes as string).trim() : '',
       ownCapacity: typeof (appt as { capacity?: unknown }).capacity === 'number' ? ((appt as { capacity?: number }).capacity as number) : null,
       standardCapacity: workshopCapacity(workshopAny) ?? undefined,
       isPast,
@@ -224,41 +351,37 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   {
     const allRows = Object.values(bookingsByAppointment).flat()
     const orderIds = [...new Set(allRows.map((r) => r.orderId).filter(Boolean))]
-    const orderById = new Map<string, { invoiceNumber: string; amount: number }>()
-    if (orderIds.length) {
-      const found = await payload.find({
-        collection: 'orders',
-        where: { id: { in: orderIds } },
-        limit: 2000,
-        depth: 0,
-        overrideAccess: true,
-      })
-      for (const doc of found.docs) {
-        const o = doc as unknown as { id: string | number; invoiceNumber?: string | null; amount?: number | null }
-        orderById.set(String(o.id), { invoiceNumber: o.invoiceNumber ?? '', amount: Number(o.amount ?? 0) })
-        orderAmountCents.set(String(o.id), Number(o.amount ?? 0))
-      }
-    }
+    const orderById = await loadOrderPay(payload, orderIds as string[])
+    for (const [id, o] of orderById) orderAmountCents.set(id, o.amount)
     for (const row of allRows) {
       const order = row.orderId ? orderById.get(row.orderId) : undefined
       const origin = bookingOrigin(row)
       row.invoiceNumber = order?.invoiceNumber ?? ''
       row.payment =
-        origin === 'manual' ? 'manual' : origin === 'wix' ? 'wix' : origin === 'website' && order ? (order.amount > 0 ? 'stripe' : 'voucher') : 'none'
+        origin === 'manual' ? 'manual' : origin === 'wix' ? 'wix' : origin === 'website' && order ? onlinePayment(order) : 'none'
     }
   }
 
   // ── 3. Participants (all confirmed bookings, recent first) ─────────────────
-  const allBookings = await payload.find({
-    collection: 'workshop-bookings',
-    where: { status: { equals: 'confirmed' } },
-    sort: '-createdAt',
-    limit: 500,
-    overrideAccess: true,
-  })
+  const allBookings = await pre.allBookings
 
+  // Who has a registered shop account (everyone else is a guest: we only have their booking record).
+  const accountEmails = new Set<string>()
+  const usersResult = await pre.usersResult
+  for (const u of usersResult.docs) if (u.email) accountEmails.add(String(u.email).trim().toLowerCase())
+
+  const participantOrders = await loadOrderPay(
+    payload,
+    [...new Set(allBookings.docs.map((b) => String((b as unknown as { order?: unknown }).order && typeof (b as unknown as { order?: { id?: unknown } }).order === 'object' ? ((b as unknown as { order: { id?: unknown } }).order.id ?? '') : (b as unknown as { order?: unknown }).order ?? '')).filter(Boolean))],
+  )
   const participants: ParticipantRow[] = allBookings.docs.flatMap((b) => {
     const booking = toBookingRow(b)
+    {
+      const po = booking.orderId ? participantOrders.get(booking.orderId) : undefined
+      const origin0 = bookingOrigin(booking)
+      booking.invoiceNumber = po?.invoiceNumber ?? ''
+      booking.payment = origin0 === 'manual' ? 'manual' : origin0 === 'wix' ? 'wix' : origin0 === 'website' && po ? onlinePayment(po) : 'none'
+    }
     const buyerName = [booking.firstName, booking.lastName].filter(Boolean).join(' ') || booking.email || '—'
     const bookingDate = booking.createdAt
       ? new Date(booking.createdAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
@@ -281,6 +404,10 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
         status: (booking.status as ParticipantRow['status']) || 'confirmed',
         seatStatus: booking.seats[si]?.seatStatus || 'active',
         isBuyer,
+        hasAccount: (() => {
+          const em = (isBuyer ? booking.email : booking.seats[si]?.email ?? '').trim().toLowerCase()
+          return !!em && accountEmails.has(em)
+        })(),
         guestOfName: !isBuyer && !seatName ? buyerName : '',
         orderRef: !isBuyer ? orderRef : '',
         booking,
@@ -290,14 +417,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   })
 
   // ── 4. Pickup orders ───────────────────────────────────────────────────────
-  const pickupResult = await payload.find({
-    collection: 'orders',
-    where: { pickupDate: { not_equals: '' } },
-    sort: '-createdAt',
-    limit: 200,
-    depth: 1,
-    overrideAccess: true,
-  })
+  const pickupResult = await pre.pickupResult
 
   const pickupOrders: PickupOrderRow[] = pickupResult.docs
     .filter((o) => {
@@ -351,22 +471,11 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     })
 
   // ── 4b. All orders (Bestellungen — every order, every status, for invoices) ─
-  const ordersResult = await payload.find({
-    collection: 'orders',
-    sort: '-createdAt',
-    limit: 500,
-    depth: 1,
-    overrideAccess: true,
-  })
+  const ordersResult = await pre.ordersResult
 
   // Cross-reference existing Stornorechnungen so each order row can show
   // "Storno ↓" instead of "Stornieren" once one has been issued.
-  const cancellationsResult = await payload.find({
-    collection: 'cancellation-invoices',
-    limit: 500,
-    depth: 0,
-    overrideAccess: true,
-  })
+  const cancellationsResult = await pre.cancellationsResult
   const cancellationByOrderId = new Map<string, { id: string; cancellationNumber: string }>()
   for (const c of cancellationsResult.docs) {
     const cd = c as unknown as { order?: unknown; cancellationNumber?: string }
@@ -382,14 +491,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   // Voucher purchases create an order without items — find the voucher each
   // one bought so the list can say what it was. Newer orders store the link
   // (purchasedVoucher); older ones are matched by buyer email + amount + time.
-  const giftVouchers = await payload.find({
-    collection: 'vouchers',
-    // Vouchers from before July 2026 have no origin at all — those were purchases too.
-    where: { or: [{ origin: { equals: 'gift-purchase' } }, { origin: { exists: false } }] },
-    limit: 1000,
-    depth: 0,
-    overrideAccess: true,
-  })
+  const giftVouchers = await pre.giftVouchers
   const voucherForOrder = (o: { purchasedVoucher?: unknown; customerEmail?: string; amount?: number; createdAt?: string }) => {
     const linkedId =
       typeof o.purchasedVoucher === 'object' && o.purchasedVoucher !== null
@@ -456,13 +558,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   })
 
   // ── 4c. Quotes (Angebote) ────────────────────────────────────────────────
-  const quotesResult = await payload.find({
-    collection: 'quotes',
-    sort: '-createdAt',
-    limit: 200,
-    depth: 0,
-    overrideAccess: true,
-  })
+  const quotesResult = await pre.quotesResult
 
   const quotes: QuoteRow[] = quotesResult.docs.map((q) => {
     const qd = q as unknown as {
@@ -495,12 +591,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   })
 
   // ── 5. Vouchers ────────────────────────────────────────────────────────────
-  const voucherResult = await payload.find({
-    collection: 'vouchers',
-    sort: '-createdAt',
-    limit: 500,
-    overrideAccess: true,
-  })
+  const voucherResult = await pre.voucherResult
 
   const vouchers: VoucherRow[] = voucherResult.docs.map((v) => {
     const vd = v as unknown as {
@@ -541,18 +632,12 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   })
 
   // ── 5b. Refund requests (plan §10 — Refunds panel) ──────────────────────────
-  const refundRequestsResult = await payload.find({
-    collection: 'refund-requests',
-    sort: 'requestedAt',
-    limit: 200,
-    depth: 1,
-    overrideAccess: true,
-  })
+  const refundRequestsResult = await pre.refundRequestsResult
 
   const refundRequests: RefundRequestRow[] = refundRequestsResult.docs.map((rr) => {
     const bookingDoc = typeof rr.booking === 'object' && rr.booking !== null ? rr.booking : null
     const requestedAtMs = rr.requestedAt ? new Date(rr.requestedAt).getTime() : now.getTime()
-    const daysPending = rr.status === 'completed' || rr.status === 'failed'
+    const daysPending = rr.status === 'completed' || rr.status === 'failed' || rr.status === 'resolved'
       ? 0
       : Math.max(0, Math.floor((now.getTime() - requestedAtMs) / (1000 * 60 * 60 * 24)))
 
@@ -573,17 +658,20 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
         ? new Date(rr.completedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
         : '',
       daysPending,
+      resolution: (rr.resolution as RefundRequestRow['resolution']) ?? '',
+      resolutionNote: rr.resolutionNote ?? '',
+      handledByName: rr.handledByName ?? '',
+      handledAt: rr.acknowledgedAt
+        ? new Date(rr.acknowledgedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
+        : '',
+      daysSinceHandled: rr.acknowledgedAt
+        ? Math.max(0, Math.floor((now.getTime() - new Date(rr.acknowledgedAt).getTime()) / (1000 * 60 * 60 * 24)))
+        : 0,
     } satisfies RefundRequestRow
   })
 
   // ── 5c. Activity feed (plan §10 — Activity / Benachrichtigungen) ────────────
-  const activityEventsResult = await payload.find({
-    collection: 'activity-events',
-    sort: '-createdAt',
-    limit: 200,
-    depth: 0,
-    overrideAccess: true,
-  })
+  const activityEventsResult = await pre.activityEventsResult
 
   const activityEvents: ActivityEventRow[] = activityEventsResult.docs.map((ev) => {
     const readByIds = (Array.isArray(ev.readBy) ? ev.readBy : []).map((r) =>
@@ -609,13 +697,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
   const activityUnreadCount = activityEvents.filter((e) => e.isUnread).length
 
   // ── 5b. "Needs a look" notes + acknowledgements ────────────────────────────
-  const attentionResult = await payload.find({
-    collection: 'attention-notes',
-    sort: '-createdAt',
-    limit: 500,
-    depth: 1, // message images → media docs with URLs
-    overrideAccess: true,
-  })
+  const attentionResult = await pre.attentionResult
   const mediaRef = (m: unknown) => {
     if (!m || typeof m !== 'object') return null
     const d = m as { id?: string | number; url?: string | null; sizes?: { thumbnail?: { url?: string | null } } }
@@ -629,7 +711,9 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       title: n.title ?? '',
       body: n.body ?? '',
       severity: (n.severity ?? 'attention') as AttentionNoteRow['severity'],
-      status: n.status === 'done' ? 'done' : 'open',
+      status: n.status === 'done' ? 'done' : n.status === 'deleted' ? 'deleted' : 'open',
+      deletedByName: n.deletedByName ?? '',
+      deletedAt: n.deletedAt ?? '',
       appointmentId: n.appointmentId ?? '',
       bookingId: n.bookingId ?? '',
       dueDate: n.dueDate ? new Date(n.dueDate).toLocaleDateString('sv-SE', { timeZone: 'Europe/Vienna' }) : '',
@@ -658,13 +742,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
     .map((n) => String(n.autoKey))
 
   // ── 5c. The team (admins) — for "ask someone", avatars and email alerts ───
-  const teamResult = await payload.find({
-    collection: 'users',
-    where: { roles: { contains: 'admin' } },
-    limit: 50,
-    depth: 1,
-    overrideAccess: true,
-  })
+  const teamResult = await pre.teamResult
   const team: TeamMember[] = teamResult.docs.map((u) => {
     const ud = u as unknown as { id: string | number; name?: string | null; email?: string | null; avatar?: unknown; noteEmailPref?: string | null }
     return {

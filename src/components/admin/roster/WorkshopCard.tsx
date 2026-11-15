@@ -24,7 +24,7 @@ export function WorkshopCard({ a, lang, onOpen }: { a: AppointmentRow; lang: Lan
   const dt = new Date(a.dateTime)
   const free = Math.max(a.capacity - a.totalBooked - (a.pendingSeats ?? 0), 0)
   const pct = a.capacity ? Math.min(100, Math.round((a.totalBooked / a.capacity) * 100)) : 0
-  const fill = a.totalBooked >= a.capacity ? 'var(--ff-bad-fg)' : pct >= 70 ? 'var(--ff-warn-fg)' : 'var(--ff-ok-fg)'
+  const fill = a.totalBooked >= a.capacity ? 'var(--ff-bar-full)' : pct >= 70 ? 'var(--ff-bar-mid)' : 'var(--ff-bar-low)'
   const m = seatMismatch(a)
   const part = (o: Intl.DateTimeFormatOptions) => dt.toLocaleDateString(LOCALE[lang], { timeZone: 'Europe/Vienna', ...o })
   const time = dt.toLocaleTimeString(LOCALE[lang], { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Vienna' })

@@ -12,8 +12,8 @@ interface Props {
 }
 
 const STATUS_CONFIG = {
-  active: { label: 'Aktiv', bg: '#dcfce7', color: '#166534', dot: '#22c55e' },
-  redeemed: { label: 'Eingelöst', bg: '#ede9fe', color: '#5b21b6', dot: '#8b5cf6' },
+  active: { label: 'Aktiv', bg: '#ECE5DE', color: '#3A3E3A', dot: '#4B4F4A' },
+  redeemed: { label: 'Eingelöst', bg: '#F3ECE0', color: '#6B5A3F', dot: '#A8957A' },
   expired: { label: 'Abgelaufen', bg: 'var(--theme-elevation-100)', color: 'var(--theme-text)', dot: '#9ca3af' },
 }
 
@@ -45,7 +45,7 @@ function CopyButton({ text }: { text: string }) {
       title="Code kopieren"
       style={{
         border: 'none', background: 'transparent', cursor: 'pointer', padding: '2px 6px',
-        borderRadius: '4px', fontSize: '11px', color: copied ? '#22c55e' : 'var(--theme-text)',
+        borderRadius: '4px', fontSize: '11px', color: copied ? '#4B4F4A' : 'var(--theme-text)',
         opacity: copied ? 1 : 0.45, transition: 'all 0.15s',
       }}
     >
@@ -162,7 +162,7 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
                 disabled={isDeleting}
                 style={{
                   padding: '9px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                  fontSize: '14px', fontWeight: 600, background: '#dc2626', color: '#fff',
+                  fontSize: '14px', fontWeight: 600, background: 'var(--ff-bad-bg)', color: 'var(--ff-bad-fg)',
                   opacity: isDeleting ? 0.5 : 1,
                 }}
               >
@@ -182,7 +182,7 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
             style={{
               display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px',
               borderRadius: '8px', border: 'none', cursor: 'pointer',
-              background: BRAND.gold, color: BRAND.nearBlack, fontSize: '14px', fontWeight: 700,
+              background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '14px', fontWeight: 700,
             }}
           >
             <span style={{ fontSize: '18px', lineHeight: 1 }}>{showForm ? '×' : '+'}</span>
@@ -195,19 +195,19 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
       {lastCreated && (
         <div style={{
           marginBottom: '24px', padding: '16px 20px', borderRadius: '10px',
-          background: '#f0fdf4', border: '1px solid #86efac',
+          background: '#ECE5DE', border: '1px solid #4B4F4A',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap',
         }}>
           <div>
-            <p style={{ margin: 0, fontWeight: 600, fontSize: '14px', color: '#166534' }}>
+            <p style={{ margin: 0, fontWeight: 600, fontSize: '14px', color: '#3A3E3A' }}>
               Gutschein erstellt!
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-              <span style={{ fontFamily: 'monospace', fontSize: '16px', fontWeight: 700, color: '#166534', letterSpacing: '0.05em' }}>
+              <span style={{ fontFamily: 'monospace', fontSize: '16px', fontWeight: 700, color: '#3A3E3A', letterSpacing: '0.05em' }}>
                 {lastCreated.code}
               </span>
               <CopyButton text={lastCreated.code} />
-              <span style={{ fontSize: '13px', color: '#166534', opacity: 0.7 }}>· €{lastCreated.value}</span>
+              <span style={{ fontSize: '13px', color: '#3A3E3A', opacity: 0.7 }}>· €{lastCreated.value}</span>
             </div>
           </div>
           <a
@@ -216,7 +216,7 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
             rel="noopener noreferrer"
             style={{
               display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 16px',
-              borderRadius: '8px', background: '#166534', color: '#fff',
+              borderRadius: '8px', background: '#3A3E3A', color: '#fff',
               textDecoration: 'none', fontSize: '13px', fontWeight: 600, flexShrink: 0,
             }}
           >
@@ -321,14 +321,14 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
             />
           </div>
           {formError && (
-            <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#dc2626' }}>{formError}</p>
+            <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'var(--ff-alert)' }}>{formError}</p>
           )}
           <button
             onClick={handleCreate}
             disabled={isPending}
             style={{
               padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-              background: BRAND.gold, color: BRAND.nearBlack, fontSize: '14px', fontWeight: 700,
+              background: 'var(--ff-btn, #555954)', color: 'var(--ff-btn-fg, #FFFFFF)', fontSize: '14px', fontWeight: 700,
               opacity: isPending ? 0.5 : 1,
             }}
           >
@@ -466,10 +466,10 @@ export function VouchersView({ vouchers, onRefresh }: Props) {
                       style={{
                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                         width: '32px', height: '32px', borderRadius: '6px', border: 'none',
-                        cursor: 'pointer', background: 'transparent', color: '#dc2626',
+                        cursor: 'pointer', background: 'transparent', color: 'var(--ff-alert)',
                         opacity: 0.6, transition: 'opacity 0.15s, background 0.15s',
                       }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; (e.currentTarget as HTMLButtonElement).style.background = '#fee2e2' }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; (e.currentTarget as HTMLButtonElement).style.background = '#F0EDE5' }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.6'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
                     >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>

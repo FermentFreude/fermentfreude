@@ -23,20 +23,21 @@ export const BRAND = {
 }
 
 export const STATUS = {
-  success: { accent: '#16a34a', bg: '#dcfce7', color: '#166534' },
-  warning: { accent: '#d97706', bg: '#fef3c7', color: '#92400e' },
-  danger: { accent: '#dc2626', bg: '#fee2e2', color: '#991b1b' },
-  info: { accent: '#3b82f6', bg: '#dbeafe', color: '#1e40af' },
-  purple: { accent: '#8b5cf6', bg: '#ede9fe', color: '#5b21b6' },
+  // On brand: warm gray (done / fine), gold (needs a look), charcoal (problem). No green, red or orange.
+  success: { accent: '#4B4F4A', bg: '#ECE5DE', color: '#3A3E3A' },
+  warning: { accent: '#D4A654', bg: '#F6E7BC', color: '#6B470A' },
+  danger: { accent: '#3A3E3A', bg: '#3A3E3A', color: '#F9F0DC' },
+  info: { accent: '#8A8D84', bg: '#F0EDE5', color: '#55584F' },
+  purple: { accent: '#A8957A', bg: '#F3ECE0', color: '#6B5A3F' },
   neutral: { accent: '#9ca3af', bg: 'var(--theme-elevation-100)', color: 'var(--theme-text)' },
 }
 
 /** Distinct accent per workshop type — used for icon chips throughout. */
 export const WORKSHOP_COLORS: Record<string, { accent: string; bg: string; icon: string }> = {
-  kombucha: { accent: '#0d9488', bg: '#ccfbf1', icon: '🫧' },
-  tempeh: { accent: '#b45309', bg: '#fef3c7', icon: '🫘' },
-  lakto: { accent: '#15803d', bg: '#dcfce7', icon: '🥬' },
-  'vom feld': { accent: '#c2410c', bg: '#ffedd5', icon: '🌾' },
+  kombucha: { accent: '#4B4F4A', bg: '#ECE5DE', icon: '🫧' },
+  tempeh: { accent: '#8C7A5E', bg: '#F3ECE0', icon: '🫘' },
+  lakto: { accent: '#C9A04E', bg: '#FBF3E1', icon: '🥬' },
+  'vom feld': { accent: '#A9A296', bg: '#F0EDE5', icon: '🌾' },
 }
 
 export function workshopColor(title: string) {
@@ -51,19 +52,19 @@ export function fillLevel(booked: number, capacity: number) {
   const pct = Math.min(100, Math.round((booked / capacity) * 100))
   if (booked > capacity) return { pct: 100, accent: STATUS.warning.accent, bg: STATUS.warning.bg, color: STATUS.warning.color } // overbooked
   if (booked === capacity) return { pct: 100, accent: STATUS.danger.accent, bg: STATUS.danger.bg, color: STATUS.danger.color } // full
-  if (pct >= 70) return { pct, accent: '#ea580c', bg: '#ffedd5', color: '#9a3412' } // filling up
+  if (pct >= 70) return { pct, accent: STATUS.warning.accent, bg: STATUS.warning.bg, color: STATUS.warning.color } // filling up
   if (pct > 0) return { pct, accent: STATUS.success.accent, bg: STATUS.success.bg, color: STATUS.success.color } // open, has bookings
   return { pct, ...STATUS.neutral } // empty
 }
 
 /** Rotating palette for generic stat cards (not tied to a workshop type). */
 export const STAT_ACCENTS = {
-  indigo: { accent: '#4f46e5', bg: '#e0e7ff' },
-  green: { accent: '#16a34a', bg: '#dcfce7' },
-  orange: { accent: '#ea580c', bg: '#ffedd5' },
-  purple: { accent: '#c026d3', bg: '#fae8ff' },
+  indigo: { accent: '#4B4F4A', bg: '#ECE5DE' },
+  green: { accent: '#6B6B6B', bg: '#F0EDE5' },
+  orange: { accent: '#B8892F', bg: '#F6E7BC' },
+  purple: { accent: '#8C7A5E', bg: '#F3ECE0' },
   gold: { accent: BRAND.goldDark, bg: BRAND.goldTint },
-  blue: { accent: '#2563eb', bg: '#dbeafe' },
+  blue: { accent: '#55584F', bg: '#F0EDE5' },
 }
 
 export function StatCard({
@@ -108,6 +109,7 @@ export function StatCard({
           justifyContent: 'center',
           fontSize: '18px',
           flexShrink: 0,
+          filter: 'grayscale(1)', // emoji carry their own colours; keep them on brand
         }}
       >
         {icon}
@@ -125,8 +127,8 @@ export const primaryButtonStyle: React.CSSProperties = {
   borderRadius: '8px',
   border: 'none',
   cursor: 'pointer',
-  background: BRAND.gold,
-  color: BRAND.nearBlack,
+  background: 'var(--ff-btn, #555954)',
+  color: 'var(--ff-btn-fg, #FFFFFF)',
   fontSize: '14px',
   fontWeight: 700,
   whiteSpace: 'nowrap',

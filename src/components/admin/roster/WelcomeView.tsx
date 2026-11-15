@@ -2,21 +2,24 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { Accordion } from './Accordion'
 import { AttentionPanel, useAttentionCount } from './AttentionPanel'
+import { RefundSummary, isOpenRefund } from './RefundSummary'
 import { bookingOrigin } from './bookingOrigin'
 import { LOCALE, WELCOME, partOfDay, type Lang } from './rosterI18n'
 import type { BookingRow, RosterData } from './types'
 import { WorkshopCard } from './WorkshopCard'
-import { kindColor } from './workshopKind'
 
 const X = {
   de: {
-    latT: 'Letzte Käufe', latS: 'Die letzten 10 Buchungen über die Webseite.', latNone: 'Noch keine Käufe über die Webseite.',
-    seats: (n: number) => `${n} ${n === 1 ? 'Platz' : 'Plätze'}`, open: 'Workshop öffnen', next: 'Nächste Workshops', all: 'Alle Termine',
+    refT: 'Rückerstattungen', refS: 'Kundinnen und Kunden, die ihr Geld zurückwollen. Öffnen, vermerken, dass ihr die Rückzahlung gestartet habt, und eine Notiz dazu schreiben.',
+    latT: 'Letzte Käufe', latS: 'Die 10 neuesten Buchungen über die Webseite. Anklicken, um Zahlung, Platz und Kontakt zu prüfen oder zu ändern.', latNone: 'Noch keine Käufe über die Webseite.',
+    seats: (n: number) => `${n} ${n === 1 ? 'Platz' : 'Plätze'}`, open: 'Workshop öffnen', next: 'Nächste Workshops', nextS: 'Die kommenden Termine mit freien Plätzen. Einen Termin öffnen, um Teilnehmende zu sehen, Buchungen zu ändern oder umzubuchen.', all: 'Alle Termine',
   },
   en: {
-    latT: 'Latest purchases', latS: 'The last 10 bookings through the website.', latNone: 'No website purchases yet.',
-    seats: (n: number) => `${n} ${n === 1 ? 'seat' : 'seats'}`, open: 'Open workshop', next: 'Next workshops', all: 'All dates',
+    refT: 'Refunds', refS: 'Customers asking for their money back. Open a request, record that you started the refund and add a note.',
+    latT: 'Latest purchases', latS: 'The 10 newest bookings from the website. Click one to check or change payment, seat and contact details.', latNone: 'No website purchases yet.',
+    seats: (n: number) => `${n} ${n === 1 ? 'seat' : 'seats'}`, open: 'Open workshop', next: 'Next workshops', nextS: 'Upcoming dates with free seats. Open one to see participants, edit bookings or move people to another date.', all: 'All dates',
   },
 }
 
@@ -31,7 +34,7 @@ export function WelcomeView({
   lang: Lang
   onRefresh: () => void | Promise<void>
   onSelectWorkshop: (id: string) => void
-  onNavigate: (s: 'workshops') => void
+  onNavigate: (s: 'workshops' | 'refunds') => void
 }) {
   const t = WELCOME[lang]
   const x = X[lang]
@@ -78,13 +81,30 @@ export function WelcomeView({
         <div className="ff-panel ff-kpi"><b>{attentionCount}</b><span>{t.kpiAttention}</span></div>
       </div>
 
-      <AttentionPanel data={data} lang={lang} onRefresh={onRefresh} onOpenAppointment={onSelectWorkshop} />
+      <AttentionPanel data={data} lang={lang} onRefresh={onRefresh} onOpenAppointment={onSelectWorkshop} onNavigate={onNavigate} />
 
-      <section className="ff-panel" style={{ overflow: 'hidden' }} aria-labelledby="latest-title">
-        <div style={{ padding: '18px 20px 12px' }}>
-          <h2 id="latest-title" style={{ fontSize: 18, margin: 0 }}>{x.latT}</h2>
-          <p className="ff-muted" style={{ margin: '4px 0 0', fontSize: 13 }}>{x.latS}</p>
+      <Accordion
+        id="refunds"
+        title={x.refT}
+        sub={x.refS}
+        count={data.refundRequests.filter(isOpenRefund).length}
+      >
+        <RefundSummary refundRequests={data.refundRequests} lang={lang} onOpen={() => onNavigate('refunds')} />
+      </Accordion>
+
+      <Accordion
+        id="next"
+        title={x.next}
+        sub={x.nextS}
+        count={upcoming.length}
+        actions={<button type="button" className="ff-btn is-gold" onClick={() => onNavigate('workshops')}>{x.all} →</button>}
+      >
+        <div className="ff-stack" style={{ padding: 16 }}>
+          {upcoming.slice(0, 4).map((a) => <WorkshopCard key={a.id} a={a} lang={lang} onOpen={onSelectWorkshop} />)}
         </div>
+      </Accordion>
+
+      <Accordion id="latest" title={x.latT} sub={x.latS} count={latest.length}>
         {latest.length === 0 ? (
           <p className="ff-muted" style={{ margin: 0, padding: '14px 20px', borderTop: '1px solid var(--ff-line)' }}>{x.latNone}</p>
         ) : (
@@ -109,29 +129,8 @@ export function WelcomeView({
             )
           })
         )}
-      </section>
+      </Accordion>
 
-      <h2 className="ff-sec">{t.fullTitle}</h2>
-      {full.length === 0 ? (
-        <p className="ff-muted">{t.fullNone}</p>
-      ) : (
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          {full.map((a) => (
-            <button key={a.id} type="button" className="ff-btn" style={{ borderLeft: `4px solid ${kindColor(a.workshopTitle)}`, textAlign: 'left', display: 'grid', justifyItems: 'start' }} onClick={() => onSelectWorkshop(a.id)}>
-              <b>{a.workshopTitle}</b>
-              <small className="ff-muted" style={{ fontWeight: 500 }}>{a.date} · {a.time}</small>
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
-        <h2 className="ff-sec">{x.next}</h2>
-        <button type="button" className="ff-link" onClick={() => onNavigate('workshops')}>{x.all} →</button>
-      </div>
-      <div className="ff-stack">
-        {upcoming.slice(0, 4).map((a) => <WorkshopCard key={a.id} a={a} lang={lang} onOpen={onSelectWorkshop} />)}
-      </div>
     </div>
   )
 }

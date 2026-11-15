@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { ArchiveAppointment, ArchiveBooking, ArchiveResponse } from './archiveTypes'
 import { ORIGIN_INFO } from './bookingOrigin'
-import { OriginBadge, PageHeader, Pill, STATUS, primaryButtonStyle, workshopColor } from './rosterTheme'
+import { OriginBadge, PageHeader, Pill, STATUS, workshopColor } from './rosterTheme'
 import { seatStatusLabel } from './seatStatusLabels'
 
 const TZ = 'Europe/Vienna'
@@ -180,7 +180,7 @@ export function ArchiveView() {
         action={
           <button
             type="button"
-            style={primaryButtonStyle}
+            className="ff-btn is-gold"
             disabled={visible.length === 0}
             onClick={() => downloadCsv(`fermentfreude-archiv-${year}.csv`, buildCsv(visible))}
           >

@@ -1,190 +1,194 @@
 'use client'
 
-import React, { useState, useTransition } from 'react'
+import React, { useState } from 'react'
 
-import { acknowledgeRefundRequest } from './actions'
-import type { RefundRequestRow } from './types'
-import { BRAND } from './rosterTheme'
+import { handleRefundRequest, type RefundResolution } from './actions'
+import { Dlg } from './AttentionPanel'
+import type { Lang } from './rosterI18n'
+import { PageHeader } from './rosterTheme'
+import { useToast } from './RosterToast'
+import type { ActivityEventRow, RefundRequestRow } from './types'
+import { TYPE_LABELS } from './ActivityView'
 
-interface Props {
-  refundRequests: RefundRequestRow[]
-  onRefresh: () => Promise<void>
-}
-
-const STATUS_CONFIG: Record<RefundRequestRow['status'], { label: string; bg: string; color: string; dot: string }> = {
-  requested: { label: 'Angefragt', bg: '#FEF3C7', color: '#92400E', dot: '#f59e0b' },
-  acknowledged: { label: 'In Bearbeitung', bg: '#dbeafe', color: '#1e40af', dot: '#3b82f6' },
-  processing: { label: 'In Bearbeitung', bg: '#dbeafe', color: '#1e40af', dot: '#3b82f6' },
-  completed: { label: 'Abgeschlossen', bg: '#dcfce7', color: '#166534', dot: '#22c55e' },
-  failed: { label: 'Fehlgeschlagen', bg: '#fee2e2', color: '#991b1b', dot: '#ef4444' },
-}
-
-function StatusBadge({ status }: { status: RefundRequestRow['status'] }) {
-  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.requested
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: '5px',
-      padding: '2px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 600,
-      background: cfg.bg, color: cfg.color,
-    }}>
-      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: cfg.dot, flexShrink: 0 }} />
-      {cfg.label}
-    </span>
-  )
-}
-
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
-  if (!text) return <span style={{ opacity: 0.4 }}>—</span>
-  const copy = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    })
-  }
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'monospace', fontSize: '12px' }}>
-      {text}
-      <button
-        onClick={copy}
-        title="Kopieren"
-        style={{
-          border: 'none', background: 'transparent', cursor: 'pointer', padding: '2px 4px',
-          borderRadius: '4px', fontSize: '11px', color: copied ? '#22c55e' : 'var(--theme-text)',
-          opacity: copied ? 1 : 0.45,
-        }}
-      >
-        {copied ? '✓' : '⎘'}
-      </button>
-    </span>
-  )
+const T = {
+  de: {
+    title: 'Rückerstattungen',
+    sub: 'Das Geld wird weiterhin von euch in Stripe zurückgezahlt — hier haltet ihr fest, was ihr getan habt. Sobald Stripe die Rückzahlung bestätigt, wird die Anfrage automatisch abgeschlossen.',
+    open: 'Offen', done: 'Erledigt', history: 'Verlauf', noneOpen: 'Keine offenen Rückerstattungen.', noneDone: 'Noch nichts erledigt.',
+    histSub: 'Frühere Rückerstattungen, Stornos und Absagen aus dem Aktivitätsprotokoll — auch wenn es dazu keine Anfrage mehr im System gibt.', noneHist: 'Noch nichts im Verlauf.',
+    days: (n: number) => `${n} ${n === 1 ? 'Tag' : 'Tage'} offen`, seat: 'Platz',
+    status: { requested: 'Angefragt', acknowledged: 'Gestartet — wartet auf Stripe', processing: 'Gestartet — wartet auf Stripe', completed: 'Von Stripe bestätigt', failed: 'Fehlgeschlagen', resolved: 'Gelöst ohne Rückzahlung' },
+    handle: 'Bearbeiten …', edit: 'Notiz ändern', handled: (n: string, d: string) => `${n ? `Von ${n}` : 'Bearbeitet'}${d ? ` am ${d}` : ''}`,
+    copy: 'Kopieren', stripe: 'In Stripe öffnen ↗',
+    dlgTitle: 'Rückerstattung bearbeiten', how: 'Wie wird es gelöst?', note: 'Notiz (was wurde gemacht oder vereinbart?)', notePh: 'z. B. Rückzahlung am 15.11. in Stripe angestoßen',
+    stripeHint: 'Die Rückzahlung selbst macht ihr in Stripe. Hier speichert ihr nur, dass sie läuft.',
+    cancel: 'Abbrechen', save: 'Speichern', saved: 'Gespeichert.',
+    res: { refunded: 'Rückzahlung in Stripe gestartet', partial: 'Teilrückzahlung in Stripe gestartet', voucher: 'Gutschein statt Rückzahlung', rebooked: 'Auf anderen Termin umgebucht', declined: 'Abgelehnt', other: 'Andere Lösung' },
+  },
+  en: {
+    title: 'Refunds',
+    sub: 'You still send the money back in Stripe — here you record what you did. When Stripe confirms the refund, the request closes by itself.',
+    open: 'Open', done: 'Done', history: 'History', noneOpen: 'No open refunds.', noneDone: 'Nothing done yet.',
+    histSub: 'Earlier refunds, cancellations and date cancellations from the activity log — even if the request no longer exists in the system.', noneHist: 'Nothing in the history yet.',
+    days: (n: number) => `${n} day${n === 1 ? '' : 's'} open`, seat: 'Seat',
+    status: { requested: 'Requested', acknowledged: 'Started — waiting for Stripe', processing: 'Started — waiting for Stripe', completed: 'Confirmed by Stripe', failed: 'Failed', resolved: 'Solved without refund' },
+    handle: 'Handle…', edit: 'Edit note', handled: (n: string, d: string) => `${n ? `By ${n}` : 'Handled'}${d ? ` on ${d}` : ''}`,
+    copy: 'Copy', stripe: 'Open in Stripe ↗',
+    dlgTitle: 'Handle refund', how: 'How is it solved?', note: 'Note (what was done or agreed?)', notePh: 'e.g. Refund started in Stripe on 15 Nov',
+    stripeHint: 'You send the money back in Stripe yourselves. Here you only record that it is on its way.',
+    cancel: 'Cancel', save: 'Save', saved: 'Saved.',
+    res: { refunded: 'Refund started in Stripe', partial: 'Partial refund started in Stripe', voucher: 'Voucher instead of refund', rebooked: 'Moved to another date', declined: 'Declined', other: 'Other solution' },
+  },
 }
 
 const fmtMoney = (cents: number) => `€${(cents / 100).toFixed(2).replace('.', ',')}`
+const RESOLUTIONS: RefundResolution[] = ['refunded', 'partial', 'voucher', 'rebooked', 'declined', 'other']
 
-export function RefundsView({ refundRequests, onRefresh }: Props) {
-  const [tab, setTab] = useState<'queue' | 'completed'>('queue')
-  const [isPending, startTransition] = useTransition()
-  const [ackingId, setAckingId] = useState<string | null>(null)
-
-  const queue = refundRequests
-    .filter((r) => r.status === 'requested' || r.status === 'acknowledged' || r.status === 'processing')
-    .sort((a, b) => b.daysPending - a.daysPending) // oldest-first (most days pending first)
-  const completed = refundRequests.filter((r) => r.status === 'completed' || r.status === 'failed')
-
-  const rows = tab === 'queue' ? queue : completed
-
-  const handleAcknowledge = (id: string) => {
-    setAckingId(id)
-    startTransition(async () => {
-      await acknowledgeRefundRequest(id)
-      await onRefresh()
-      setAckingId(null)
-    })
+function RefundDialog({ r, lang, onClose, onDone }: { r: RefundRequestRow; lang: Lang; onClose: () => void; onDone: () => void }) {
+  const t = T[lang]
+  const [resolution, setResolution] = useState<RefundResolution>((r.resolution as RefundResolution) || 'refunded')
+  const [note, setNote] = useState(r.resolutionNote)
+  const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
+  const save = async () => {
+    setBusy(true)
+    setErr('')
+    try {
+      const res = await handleRefundRequest(r.id, resolution, note)
+      if (!res.ok) setErr(res.error)
+      else onDone()
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Error')
+    }
+    setBusy(false)
   }
+  return (
+    <Dlg label={t.dlgTitle} onClose={onClose}>
+      <h3>{t.dlgTitle}</h3>
+      <p style={{ margin: '0 0 12px' }}>
+        <strong>{r.customerName || r.customerEmail}</strong>
+        <br />
+        <span className="ff-muted">{r.workshopTitle} · {r.workshopDate} · {fmtMoney(r.amount)}</span>
+      </p>
+      <label className="ff-field"><span>{t.how}</span>
+        <select className="ff-input" value={resolution} onChange={(e) => setResolution(e.target.value as RefundResolution)}>
+          {RESOLUTIONS.map((k) => <option key={k} value={k}>{t.res[k]}</option>)}
+        </select>
+      </label>
+      {(resolution === 'refunded' || resolution === 'partial') && <p className="ff-muted" style={{ margin: '8px 0 0', fontSize: 13 }}>{t.stripeHint}</p>}
+      <label className="ff-field" style={{ marginTop: 12 }}><span>{t.note}</span>
+        <textarea className="ff-input" rows={4} maxLength={1000} value={note} placeholder={t.notePh} onChange={(e) => setNote(e.target.value)} />
+      </label>
+      {err && <div className="ff-err" style={{ marginTop: 10 }}>{err}</div>}
+      <div className="ff-acts">
+        <button type="button" className="ff-btn" onClick={onClose} disabled={busy}>{t.cancel}</button>
+        <button type="button" className="ff-btn is-gold" onClick={save} disabled={busy}>{t.save}</button>
+      </div>
+    </Dlg>
+  )
+}
+
+function Copy({ text, label }: { text: string; label: string }) {
+  const [ok, setOk] = useState(false)
+  if (!text) return null
+  return (
+    <button
+      type="button"
+      className="ff-btn is-sm"
+      onClick={() => navigator.clipboard.writeText(text).then(() => { setOk(true); setTimeout(() => setOk(false), 1500) }).catch(() => {})}
+      title={text}
+    >
+      {ok ? '✓' : label}
+    </button>
+  )
+}
+
+const HISTORY_TYPES = ['refund_requested', 'refund_completed', 'booking_cancelled_no_refund', 'appointment_cancelled_by_organiser']
+
+export function RefundsView({ refundRequests, activityEvents = [], lang = 'de', onRefresh }: { refundRequests: RefundRequestRow[]; activityEvents?: ActivityEventRow[]; lang?: Lang; onRefresh: () => Promise<void> }) {
+  const t = T[lang]
+  const toast = useToast()
+  const [tab, setTab] = useState<'open' | 'done' | 'history'>('open')
+  const [dialog, setDialog] = useState<RefundRequestRow | null>(null)
+
+  const isOpen = (r: RefundRequestRow) => r.status === 'requested' || r.status === 'acknowledged' || r.status === 'processing'
+  const open = refundRequests.filter(isOpen).sort((a, b) => b.daysPending - a.daysPending)
+  const done = refundRequests.filter((r) => !isOpen(r))
+  const rows = tab === 'open' ? open : tab === 'done' ? done : []
+  const history = activityEvents.filter((e) => HISTORY_TYPES.includes(e.type))
 
   return (
     <div className="ff-page">
-      <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--theme-text)', margin: '0 0 4px' }}>
-        Rückerstattungen
-      </h1>
-      <p style={{ fontSize: '13px', color: 'var(--theme-text)', opacity: 0.55, margin: '0 0 24px' }}>
-        Keine Rückerstattung wird automatisch ausgeführt — nutze die Stripe-PaymentIntent-ID, um sie im
-        Stripe-Dashboard manuell zu bearbeiten. Abgeschlossen wird eine Zeile automatisch, sobald Stripe die
-        Rückerstattung bestätigt.
-      </p>
+      <PageHeader title={t.title} subtitle={t.sub} />
 
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '20px', borderBottom: '1px solid var(--theme-elevation-100)' }}>
-        {(['queue', 'completed'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            style={{
-              padding: '10px 16px', border: 'none', background: 'transparent', cursor: 'pointer',
-              fontSize: '13px', fontWeight: tab === t ? 600 : 400,
-              color: 'var(--theme-text)', opacity: tab === t ? 1 : 0.55,
-              borderBottom: tab === t ? `2px solid ${BRAND.gold}` : '2px solid transparent',
-            }}
-          >
-            {t === 'queue' ? `Offen (${queue.length})` : `Abgeschlossen (${completed.length})`}
-          </button>
-        ))}
+      <div className="ff-fchips" style={{ padding: '0 0 16px' }} role="group" aria-label={t.title}>
+        <button type="button" className="ff-fchip" aria-pressed={tab === 'open'} onClick={() => setTab('open')}>{t.open} <b>{open.length}</b></button>
+        <button type="button" className="ff-fchip" aria-pressed={tab === 'done'} onClick={() => setTab('done')}>{t.done} <b>{done.length}</b></button>
+        <button type="button" className="ff-fchip" aria-pressed={tab === 'history'} onClick={() => setTab('history')}>{t.history} <b>{history.length}</b></button>
       </div>
 
-      {rows.length === 0 && (
-        <div style={{ padding: '48px', textAlign: 'center', color: 'var(--theme-text)', opacity: 0.5, fontSize: '13px' }}>
-          {tab === 'queue' ? 'Keine offenen Rückerstattungen.' : 'Noch keine abgeschlossenen Rückerstattungen.'}
+      {tab === 'history' ? (
+        <section className="ff-panel" style={{ overflow: 'hidden' }}>
+          <p className="ff-muted" style={{ margin: 0, padding: '14px 20px', fontSize: 13 }}>{t.histSub}</p>
+          {history.length === 0 ? (
+            <p className="ff-muted" style={{ margin: 0, padding: '14px 20px 20px', borderTop: '1px solid var(--ff-line)' }}>{t.noneHist}</p>
+          ) : (
+            history.map((e) => (
+              <div key={e.id} className="ff-nrow" style={{ cursor: 'default' }}>
+                <span className="ff-nmain">
+                  <b>{e.summary}</b>
+                  <small>{TYPE_LABELS[lang][e.type] ?? e.type} · {e.createdAt}</small>
+                </span>
+              </div>
+            ))
+          )}
+        </section>
+      ) : rows.length === 0 ? (
+        <p className="ff-muted">{tab === 'open' ? t.noneOpen : t.noneDone}</p>
+      ) : (
+        <div style={{ display: 'grid', gap: 12 }}>
+          {rows.map((r) => (
+            <section key={r.id} className="ff-panel" style={{ padding: '16px 18px', display: 'grid', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                <div style={{ minWidth: 0 }}>
+                  <b style={{ fontSize: 16 }}>{r.customerName || r.customerEmail}</b>
+                  {r.customerName && <div className="ff-muted" style={{ fontSize: 13, overflowWrap: 'anywhere' }}>{r.customerEmail}</div>}
+                  <div className="ff-muted" style={{ fontSize: 13, marginTop: 2 }}>{r.workshopTitle} · {r.workshopDate} · {t.seat} {r.seatIndex + 1}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <b style={{ fontSize: 18 }}>{fmtMoney(r.amount)}</b>
+                  <div style={{ marginTop: 4 }}><span className="ff-pill ff-pillgrey">{t.status[r.status]}</span></div>
+                  {isOpen(r) && <div className="ff-muted" style={{ fontSize: 12, marginTop: 4 }}>{t.days(r.daysPending)}</div>}
+                </div>
+              </div>
+
+              {(r.resolution || r.resolutionNote) && (
+                <div className="ff-info" style={{ margin: 0, background: 'var(--ff-surface2)', color: 'var(--ff-fg)' }}>
+                  <b>{r.resolution ? t.res[r.resolution] : ''}</b>
+                  {r.resolutionNote && <div style={{ marginTop: 2, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{r.resolutionNote}</div>}
+                  <small className="ff-muted" style={{ display: 'block', marginTop: 4 }}>{t.handled(r.handledByName, r.handledAt)}</small>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                {r.stripePaymentIntentId && (
+                  <>
+                    <Copy text={r.stripePaymentIntentId} label={t.copy} />
+                    <a className="ff-btn is-sm" href={`https://dashboard.stripe.com/search?query=${encodeURIComponent(r.stripePaymentIntentId)}`} target="_blank" rel="noopener noreferrer">{t.stripe}</a>
+                  </>
+                )}
+                {isOpen(r) && (
+                  <button type="button" className="ff-btn is-gold" style={{ marginLeft: 'auto' }} onClick={() => setDialog(r)}>
+                    {r.resolution ? t.edit : t.handle}
+                  </button>
+                )}
+              </div>
+            </section>
+          ))}
         </div>
       )}
 
-      {rows.length > 0 && (
-        <div style={{ border: '1px solid var(--theme-elevation-100)', borderRadius: '8px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ background: 'var(--theme-elevation-50)', textAlign: 'left' }}>
-                {['Kund:in', 'Workshop', 'Platz', 'Betrag', tab === 'queue' ? 'Tage offen' : 'Status', 'Stripe PaymentIntent', ''].map((h) => (
-                  <th key={h} style={{ padding: '10px 14px', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', opacity: 0.55 }}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} style={{ borderTop: '1px solid var(--theme-elevation-100)' }}>
-                  <td style={{ padding: '12px 14px' }}>
-                    <div style={{ fontWeight: 500 }}>{r.customerName || '—'}</div>
-                    <div style={{ opacity: 0.55, fontSize: '12px' }}>{r.customerEmail}</div>
-                  </td>
-                  <td style={{ padding: '12px 14px' }}>
-                    <div>{r.workshopTitle}</div>
-                    <div style={{ opacity: 0.55, fontSize: '12px' }}>{r.workshopDate}</div>
-                  </td>
-                  <td style={{ padding: '12px 14px' }}>{r.seatIndex + 1}</td>
-                  <td style={{ padding: '12px 14px', fontWeight: 600 }}>{fmtMoney(r.amount)}</td>
-                  <td style={{ padding: '12px 14px' }}>
-                    {tab === 'queue' ? (
-                      <span style={{ fontWeight: r.daysPending >= 7 ? 700 : 400, color: r.daysPending >= 7 ? '#dc2626' : 'inherit' }}>
-                        {r.daysPending} {r.daysPending === 1 ? 'Tag' : 'Tage'}
-                      </span>
-                    ) : (
-                      <StatusBadge status={r.status} />
-                    )}
-                  </td>
-                  <td style={{ padding: '12px 14px' }}>
-                    <CopyButton text={r.stripePaymentIntentId} />
-                    {r.stripePaymentIntentId && (
-                      <a
-                        href={`https://dashboard.stripe.com/search?query=${encodeURIComponent(r.stripePaymentIntentId)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ marginLeft: '8px', fontSize: '11px', color: 'var(--theme-text)', opacity: 0.55 }}
-                      >
-                        In Stripe öffnen ↗
-                      </a>
-                    )}
-                  </td>
-                  <td style={{ padding: '12px 14px' }}>
-                    {tab === 'queue' && r.status === 'requested' && (
-                      <button
-                        onClick={() => handleAcknowledge(r.id)}
-                        disabled={isPending && ackingId === r.id}
-                        style={{
-                          padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--theme-elevation-150)',
-                          background: 'var(--theme-elevation-0)', color: 'var(--theme-text)', fontSize: '12px', cursor: 'pointer',
-                        }}
-                        title="Rein kosmetisch — markiert nur als 'in Bearbeitung', schließt nichts ab. Der Webhook von Stripe bleibt maßgeblich."
-                      >
-                        {isPending && ackingId === r.id ? '…' : 'In Stripe bearbeitet ✓'}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {dialog && <RefundDialog r={dialog} lang={lang} onClose={() => setDialog(null)} onDone={async () => { setDialog(null); toast(t.saved); await onRefresh() }} />}
     </div>
   )
 }

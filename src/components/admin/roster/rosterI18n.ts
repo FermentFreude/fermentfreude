@@ -77,6 +77,7 @@ type Dict = {
     noReceipt: (p: { name: string; workshop: string; date: string }) => { title: string; detail: string }
     paymentOpen: (p: { name: string; workshop: string; date: string }) => { title: string; detail: string }
     refundOpen: (p: { name: string; days: number }) => { title: string; detail: string }
+    refundStale: (p: { name: string; days: number }) => { title: string; detail: string }
   }
   lang: string
 }
@@ -138,6 +139,10 @@ export const WELCOME: Record<Lang, Dict> = {
         title: `Refund request from ${p.name}`,
         detail: p.days <= 0 ? 'Requested today.' : `Waiting for ${p.days} day${p.days === 1 ? '' : 's'}.`,
       }),
+      refundStale: (p) => ({
+        title: `Refund for ${p.name} not confirmed yet`,
+        detail: `Started ${p.days} days ago, but Stripe has not confirmed the money going back. Check it in Stripe.`,
+      }),
     },
     lang: 'Language',
   },
@@ -196,6 +201,10 @@ export const WELCOME: Record<Lang, Dict> = {
       refundOpen: (p) => ({
         title: `Rückerstattung von ${p.name}`,
         detail: p.days <= 0 ? 'Heute angefragt.' : `Wartet seit ${p.days} ${p.days === 1 ? 'Tag' : 'Tagen'}.`,
+      }),
+      refundStale: (p) => ({
+        title: `Rückerstattung für ${p.name} noch nicht bestätigt`,
+        detail: `Vor ${p.days} Tagen gestartet, aber Stripe hat die Rückzahlung noch nicht bestätigt. Bitte in Stripe prüfen.`,
       }),
     },
     lang: 'Sprache',

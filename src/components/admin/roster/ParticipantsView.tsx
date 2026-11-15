@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { BookingDetailModal } from './BookingDetailModal'
+import { bookingOrigin } from './bookingOrigin'
 import type { Lang } from './rosterI18n'
-import type { ParticipantRow, RosterStats } from './types'
-import { BRAND, PageHeader, StatCard, STATUS } from './rosterTheme'
 import { seatStatusLabel } from './seatStatusLabels'
+import type { ParticipantRow, RosterStats } from './types'
+import { kindColor } from './workshopKind'
 
 interface Props {
   participants: ParticipantRow[]
@@ -14,7 +15,34 @@ interface Props {
   lang?: Lang
   /** Opens the person's full profile page (needs an email). */
   onOpenProfile?: (email: string) => void
+  /** Opens the workshop date page of a participant's booking. */
+  onOpenWorkshop?: (appointmentId: string) => void
 }
+
+const T = {
+  de: {
+    title: 'Teilnehmer', placeholder: 'Name, E-Mail oder Telefon …', clear: 'Suche leeren',
+    results: (n: number, q: boolean) => (q ? `${n} ${n === 1 ? 'Treffer' : 'Treffer'}` : `${n} Teilnehmende`),
+    total: 'Teilnehmende gesamt',
+    none: 'Keine Treffer. Probier einen Teil des Namens oder der E-Mail.', empty: 'Noch keine Teilnehmer.',
+    manual: 'Manuell', companion: 'Begleitung', companionOf: (n: string) => `Begleitung von ${n}`, order: 'Bestellung',
+    noEmail: 'Keine E-Mail', open: 'Workshop öffnen', openHint: 'Diesen Workshop-Termin öffnen', account: 'Kundenakte öffnen', accountHint: 'Alle Infos zu dieser Person: Buchungen, Käufe, Verlauf', hasAcc: 'Hat ein Konto', guest: 'Gast, kein Konto', acctAll: 'Alle', acctYes: 'Mit Konto', acctNo: 'Gäste (ohne Konto)', booking: 'Buchung ansehen', more: (n: number) => `Mehr anzeigen (${n})`,
+    all: 'Alle', hint: 'Tipp: Auch nach Workshop oder Datum suchen, mit mehreren Wörtern, z. B. „anna lakto“.',
+  },
+  en: {
+    title: 'Participants', placeholder: 'Name, email or phone …', clear: 'Clear search',
+    results: (n: number, q: boolean) => (q ? `${n} ${n === 1 ? 'match' : 'matches'}` : `${n} participants`),
+    total: 'participants in total',
+    none: 'No matches. Try part of the name or email.', empty: 'No participants yet.',
+    manual: 'Manual', companion: 'Companion', companionOf: (n: string) => `Companion of ${n}`, order: 'Order',
+    noEmail: 'No email', open: 'Open workshop', openHint: 'Open this workshop date', account: 'Open customer record', accountHint: 'Everything about this person: bookings, purchases, history', booking: 'View booking', hasAcc: 'Has an account', guest: 'Guest, no account', acctAll: 'All', acctYes: 'With account', acctNo: 'Guests (no account)', more: (n: number) => `Show more (${n})`,
+    all: 'All', hint: 'Tip: you can also search by workshop or date, with several words, e.g. "anna lakto".',
+  },
+}
+
+const PAGE = 40
+
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 
 function initials(name: string): string {
   return name
@@ -25,141 +53,138 @@ function initials(name: string): string {
     .join('')
 }
 
-export function ParticipantsView({ participants, stats, onOpenProfile }: Props) {
+const TONE: Record<string, string> = { success: 'ok', danger: 'bad', warning: 'warn', info: 'info', purple: 'info', neutral: 'neu' }
+
+export function ParticipantsView({ participants, lang = 'de', onOpenProfile, onOpenWorkshop }: Props) {
+  const t = T[lang]
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<ParticipantRow | null>(null)
+  const [shown, setShown] = useState(PAGE)
+  const [acct, setAcct] = useState<'all' | 'yes' | 'no'>('all')
+  const input = useRef<HTMLInputElement>(null)
 
-  const filtered = query.trim()
-    ? participants.filter((p) => {
-        const q = query.toLowerCase()
-        return (
-          p.name.toLowerCase().includes(q) ||
-          p.email.toLowerCase().includes(q) ||
-          p.phone.toLowerCase().includes(q)
-        )
-      })
-    : participants
+  // People come here to look someone up: the search box is ready to type in.
+  useEffect(() => {
+    input.current?.focus()
+  }, [])
+  useEffect(() => setShown(PAGE), [query, acct])
 
-  const pending = participants.filter((p) => p.status === 'pending').length
-  const customerCount = participants.filter((p) => p.isBuyer).length
+  const index = useMemo(
+    () =>
+      participants.map((p) => ({
+        p,
+        hay: norm([p.name, p.email, p.phone, p.workshopTitle, p.booking.date, p.guestOfName, p.orderRef].filter(Boolean).join(' ')),
+      })),
+    [participants],
+  )
+  const words = norm(query).split(/\s+/).filter(Boolean)
+  const matched = words.length ? index.filter((x) => words.every((w) => x.hay.includes(w))).map((x) => x.p) : participants
+  const filtered = acct === 'all' ? matched : matched.filter((p) => (acct === 'yes') === p.hasAccount)
+  const visible = filtered.slice(0, shown)
+
+  const openRow = (p: ParticipantRow) => (p.email && onOpenProfile ? onOpenProfile(p.email) : setSelected(p))
 
   return (
     <div className="ff-page">
-      <PageHeader title="Teilnehmer" subtitle="Alle Kunden und Teilnehmer im Überblick" />
-
-      {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-        <StatCard label="Gesamt Kunden" value={customerCount} accentKey="gold" icon={<span style={{ fontSize: '18px' }}>👤</span>} />
-        <StatCard label="Bestätigte Buchungen" value={stats.totalParticipants} accentKey="green" icon={<span style={{ fontSize: '18px' }}>📅</span>} />
-        <StatCard label="Ausstehende Buchungen" value={pending} accentKey="orange" icon={<span style={{ fontSize: '18px' }}>🕐</span>} />
+      <div className="ff-head" style={{ marginBottom: 14 }}>
+        <div>
+          <h1>{t.title}</h1>
+        </div>
+        <div className="ff-pstats" aria-label="Overview">
+          <span><b>{participants.length}</b> {t.total}</span>
+        </div>
       </div>
 
-      {/* Table card */}
-      <div style={{
-        background: 'var(--theme-elevation-50)', border: '1px solid var(--theme-elevation-100)',
-        borderRadius: '12px', overflow: 'hidden',
-      }}>
-        <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--theme-elevation-100)', gap: '16px', flexWrap: 'wrap' }}>
-          <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--theme-text)' }}>Kundenliste</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--theme-elevation-100)', borderRadius: '8px', padding: '8px 12px', minWidth: '260px' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.45, flexShrink: 0 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Suche nach Name, E-Mail oder Telefon..."
-              style={{
-                border: 'none', background: 'transparent', outline: 'none', fontSize: '13px',
-                color: 'var(--theme-text)', width: '100%',
-              }}
-            />
-          </div>
-        </div>
-
-        {filtered.length === 0 ? (
-          <p style={{ padding: '20px', color: 'var(--theme-text)', opacity: 0.5, margin: 0 }}>
-            {query ? 'Keine Ergebnisse gefunden.' : 'Noch keine Teilnehmer.'}
-          </p>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', minWidth: '560px', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ background: 'var(--theme-elevation-100)' }}>
-                {['Name', 'E-Mail', 'Telefon', 'Workshop'].map((col) => (
-                  <th key={col} style={{
-                    padding: '10px 16px', textAlign: 'left', fontWeight: 600, fontSize: '11px',
-                    textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--theme-text)',
-                    opacity: 0.55, whiteSpace: 'nowrap',
-                  }}>
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p, i) => (
-                <tr
-                  key={i}
-                  onClick={() => (p.email && onOpenProfile ? onOpenProfile(p.email) : setSelected(p))}
-                  style={{ borderTop: '1px solid var(--theme-elevation-100)', cursor: 'pointer' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'var(--theme-elevation-50)' }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent' }}
-                >
-                  <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{
-                        width: '32px', height: '32px', borderRadius: '50%', background: BRAND.goldTint,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '11px', fontWeight: 700, color: BRAND.goldDark, flexShrink: 0,
-                      }}>
-                        {initials(p.name) || '?'}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 500, color: 'var(--theme-text)' }}>
-                          {p.name}
-                          {p.seatStatus !== 'active' && (() => {
-                            const st = seatStatusLabel(p.seatStatus)
-                            return (
-                              <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 600, padding: '1px 8px', borderRadius: '999px', background: STATUS[st.tone].bg, color: STATUS[st.tone].color }}>
-                                {st.label}
-                              </span>
-                            )
-                          })()}
-                        </div>
-                        {!p.isBuyer && (
-                          <div style={{ fontSize: '11px', color: 'var(--theme-text)', opacity: 0.5 }}>
-                            {p.guestOfName ? `Begleitung von ${p.guestOfName}` : 'Begleitung'}
-                            {p.orderRef && ` · Bestellung #${p.orderRef}`}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
-                    {p.email ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.45, flexShrink: 0 }}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                        <a href={`mailto:${p.email}`} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--theme-text)', opacity: 0.75, textDecoration: 'none', fontSize: '13px' }}>{p.email}</a>
-                      </div>
-                    ) : <span style={{ opacity: 0.35 }}>—</span>}
-                  </td>
-                  <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
-                    {p.phone ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.45, flexShrink: 0 }}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17v-.08z"/></svg>
-                        <span style={{ color: 'var(--theme-text)', opacity: 0.75 }}>{p.phone}</span>
-                      </div>
-                    ) : <span style={{ opacity: 0.35 }}>—</span>}
-                  </td>
-                  <td style={{ padding: '12px 16px', verticalAlign: 'middle', color: 'var(--theme-text)', opacity: 0.65 }}>
-                    {p.workshopTitle || '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
+      <div className="ff-psearch" role="search">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input
+          ref={input}
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t.placeholder}
+          aria-label={t.placeholder}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        {query && (
+          <button type="button" onClick={() => { setQuery(''); input.current?.focus() }} aria-label={t.clear}>✕</button>
         )}
       </div>
+      <div className="ff-pmeta" role="status" aria-live="polite">
+        {(words.length > 0 || acct !== 'all') && <span>{t.results(filtered.length, true)}</span>}
+        {words.length === 0 && <span className="ff-muted">{t.hint}</span>}
+        <span className="ff-pfilter" role="group" aria-label={t.hasAcc}>
+          {(['all', 'yes', 'no'] as const).map((k) => (
+            <button key={k} type="button" aria-pressed={acct === k} onClick={() => setAcct(k)}>
+              {{ all: t.acctAll, yes: t.acctYes, no: t.acctNo }[k]}
+            </button>
+          ))}
+        </span>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="ff-panel" style={{ padding: 24 }}>
+          <p className="ff-muted" style={{ margin: 0 }}>{words.length ? t.none : t.empty}</p>
+        </div>
+      ) : (
+        <div className="ff-plist">
+          {visible.map((p, i) => {
+            const origin = bookingOrigin(p.booking)
+            const st = p.seatStatus !== 'active' ? seatStatusLabel(p.seatStatus) : null
+            const when = p.booking.date ? `${p.booking.date}${p.booking.time ? ` · ${p.booking.time}` : ''}` : ''
+            return (
+              <div
+                key={`${p.booking.id}-${i}`}
+                className="ff-prow"
+                style={{ ['--c' as string]: kindColor(p.workshopTitle) }}
+                onClick={(e) => { if (!(e.target as HTMLElement).closest('a, button')) openRow(p) }}
+              >
+                <span className="ff-pav" aria-hidden>{initials(p.name) || '?'}</span>
+                <div className="ff-pwho">
+                  <button type="button" className="ff-pname" onClick={() => openRow(p)}>{p.name || '—'}</button>
+                  <span className="ff-pbadges">
+                    {origin === 'manual' && <span className="ff-manual">✎ {t.manual}</span>}
+                    {st && <span className={`ff-pill ${TONE[st.tone] ?? 'neu'}`}>{st.label}</span>}
+                    <span className={`ff-pill ${p.hasAccount ? 'gold' : 'neu'}`} title={p.hasAccount ? undefined : t.guest}>{p.hasAccount ? `● ${t.hasAcc}` : t.guest}</span>
+                    {!p.isBuyer && <span className="ff-pill neu">{p.guestOfName ? t.companionOf(p.guestOfName) : t.companion}</span>}
+                  </span>
+                  <span className="ff-pcontact">
+                    {p.email ? <a href={`mailto:${p.email}`}>{p.email}</a> : <span className="ff-muted">{t.noEmail}</span>}
+                    {p.phone && <a href={`tel:${p.phone.replace(/\s+/g, '')}`}>{p.phone}</a>}
+                  </span>
+                </div>
+                <div className="ff-pws">
+                  <b>{p.workshopTitle || '—'}</b>
+                  {when && <span>{when}</span>}
+                  {!p.isBuyer && p.orderRef && <span className="ff-muted">{t.order} #{p.orderRef}</span>}
+                </div>
+                <div className="ff-pacts">
+                  <button type="button" className="ff-btn is-sm is-gold" onClick={() => openRow(p)} title={t.accountHint}>
+                    {p.email && onOpenProfile ? t.account : t.booking}
+                  </button>
+                  {onOpenWorkshop && p.booking.appointmentId && (
+                    <button
+                      type="button"
+                      className="ff-btn is-sm"
+                      onClick={() => onOpenWorkshop(p.booking.appointmentId as string)}
+                      title={t.openHint}
+                    >
+                      {t.open}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+          {filtered.length > visible.length && (
+            <button type="button" className="ff-more" onClick={() => setShown((n) => n + PAGE)}>{t.more(filtered.length - visible.length)}</button>
+          )}
+        </div>
+      )}
 
       {selected && <BookingDetailModal booking={selected.booking} onClose={() => setSelected(null)} />}
     </div>

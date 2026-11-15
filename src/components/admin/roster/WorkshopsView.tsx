@@ -4,6 +4,7 @@ import React from 'react'
 
 import type { Lang } from './rosterI18n'
 import type { AppointmentRow } from './types'
+import { ViewToggle } from './ViewToggle'
 import { WorkshopCard } from './WorkshopCard'
 
 const T = {
@@ -15,10 +16,12 @@ export function WorkshopsView({
   appointments,
   lang,
   onSelectAppointment,
+  onSwitchView,
 }: {
   appointments: AppointmentRow[]
   lang: Lang
   onSelectAppointment: (id: string) => void
+  onSwitchView?: () => void
 }) {
   const t = T[lang]
   const upcoming = appointments.filter((a) => !a.isPast).sort((x, y) => x.dateTime.localeCompare(y.dateTime))
@@ -29,6 +32,7 @@ export function WorkshopsView({
           <h1>{t.title}</h1>
           <p>{t.sub}</p>
         </div>
+        {onSwitchView && <ViewToggle lang={lang} current="list" onSwitch={onSwitchView} />}
       </div>
       {upcoming.length === 0 ? (
         <p className="ff-muted">{t.none}</p>
