@@ -797,6 +797,7 @@ export default async function WorkshopDetailPage({ params }: Args) {
 
         {/* 2. Modern Booking Card */}
         <LaktoBookingCard
+          colorKey="lakto"
           workshop={workshopDetailData!}
           cms={{
             ...(detail

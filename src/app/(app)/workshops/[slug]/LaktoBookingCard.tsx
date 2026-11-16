@@ -10,6 +10,9 @@ import { useEffect, useRef, useState } from 'react'
 import { BookingModal } from './BookingModal'
 import { addWorkshopToCart } from './add-to-cart-utils'
 import type { WorkshopDate, WorkshopDetailData } from './workshop-data'
+import { formatWorkshopDate } from '@/lib/formatWorkshopDate'
+import { mapsUrl, shortLocation } from '@/lib/mapsUrl'
+import { workshopColorVars } from '@/utilities/workshopColors'
 
 /* ═══════════════════════════════════════════════════════════════
  *  LaktoBookingCard — Modern booking experience
@@ -59,6 +62,8 @@ export type LaktoBookingCMS = {
     time?: string | null
     spotsLeft?: number | null
     id?: string
+    locationName?: string | null
+    locationAddress?: string | null
   }> | null
   modalConfirmHeading?: string | null
   modalConfirmSubheading?: string | null
@@ -109,6 +114,24 @@ function ChevronDown({ open }: { open: boolean }) {
   )
 }
 
+function PinIcon({ className = 'size-4' }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M10 18s6-5.2 6-10a6 6 0 10-12 0c0 4.8 6 10 6 10z" />
+      <circle cx="10" cy="8" r="2.2" />
+    </svg>
+  )
+}
+
 // ─── Experience Cards Data ──────────────────────────────────
 
 const EXPERIENCE_CARDS = [
@@ -139,7 +162,9 @@ export function LaktoBookingCard({
   cms,
   className,
   /** Header + primary CTA color. Default is Lakto olive-gray; Feld ins Glas uses page near-black. */
-  accentColor = '#555954',
+  accentColor = '#2D2F2C',
+  /** Workshop palette key (e.g. 'lakto'). Omit to derive colors from accentColor (Feld ins Glas). */
+  colorKey,
   /**
    * Cart / booking identity overrides.
    * Feld ins Glas shares the lakto product + appointments but needs its own title & location in the cart.
@@ -150,6 +175,7 @@ export function LaktoBookingCard({
   cms?: LaktoBookingCMS
   className?: string
   accentColor?: string
+  colorKey?: string
   cartOverrides?: {
     /** DB / product slug for /api/cart/add-workshop (e.g. vom-feld-ins-glas) */
     workshopSlug?: string
@@ -221,8 +247,25 @@ export function LaktoBookingCard({
           spotsLeft: d.spotsLeft ?? 0,
           appointmentId: (d as { appointmentId?: string }).appointmentId ?? d.id ?? `cms-${i}`,
           availableSpots: d.spotsLeft ?? 0,
+          dateTime: (d as { dateTime?: string }).dateTime,
+          locationName: d.locationName ?? null,
+          locationAddress: d.locationAddress ?? null,
         }))
       : []
+
+  // Locations shown before booking (display only). One location → name + address;
+  // several → their names joined.
+  const uniqueLocations = Array.from(
+    new Map(
+      cmsDates
+        .filter((d) => d.locationName)
+        .map((d) => [d.locationName!, { name: d.locationName!, address: d.locationAddress }]),
+    ).values(),
+  )
+  const headerLocation =
+    uniqueLocations.length === 1
+      ? [uniqueLocations[0].name, uniqueLocations[0].address].filter(Boolean).join(', ')
+      : uniqueLocations.map((l) => l.name).join(' · ')
 
   // Build merged workshop for BookingModal
   const mergedWorkshop: WorkshopDetailData = {
@@ -249,6 +292,43 @@ export function LaktoBookingCard({
   const infoRef = useRef<HTMLDivElement>(null)
   const { addItem, clearCart } = useCart()
   const { locale } = useLocale()
+  // UI labels for the dates list + details (follow the site language)
+  const L =
+    locale === 'en'
+      ? {
+          date: 'Date',
+          time: 'Time',
+          location: 'Location',
+          spotsFree: 'Spots left',
+          soldOut: 'Sold out',
+          book: '→ Book',
+          tba: 'To be announced',
+          noDates: 'No dates scheduled right now — check back soon.',
+          closeDates: 'Close dates',
+          closeDetails: 'Close details',
+          about: 'ABOUT THE WORKSHOP',
+          schedule: 'SCHEDULE',
+          included: 'INCLUDED IN THE PRICE',
+          why: 'WHY THIS WORKSHOP',
+          spots: (n: number) => (n === 1 ? '1 spot' : `${n} spots`),
+        }
+      : {
+          date: 'Datum',
+          time: 'Zeit',
+          location: 'Standort',
+          spotsFree: 'Plätze frei',
+          soldOut: 'Ausgebucht',
+          book: '→ Buchen',
+          tba: 'Wird bekanntgegeben',
+          noDates: 'Aktuell keine Termine geplant — schau bald wieder vorbei.',
+          closeDates: 'Termine schließen',
+          closeDetails: 'Details schließen',
+          about: 'ÜBER DEN WORKSHOP',
+          schedule: 'ABLAUF',
+          included: 'IM PREIS ENTHALTEN',
+          why: 'DARUM DIESER WORKSHOP',
+          spots: (n: number) => (n === 1 ? '1 Platz' : `${n} Plätze`),
+        }
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -308,6 +388,9 @@ export function LaktoBookingCard({
         ref={sectionRef}
         id="booking"
         className={cn('bg-white section-padding-lg', className)}
+        style={workshopColorVars(
+          colorKey ?? { fill: accentColor, on: '#FFFFFF', ink: accentColor, tint: '#F5F1E8' },
+        )}
       >
         <div className="container mx-auto container-padding">
           {/* ────────────────────────────────────────────
@@ -333,6 +416,19 @@ export function LaktoBookingCard({
                     <h2 className="font-display text-section-heading font-black tracking-tight text-white">
                       {bookingTitle}
                     </h2>
+                    {headerLocation && (
+                      <p className="mt-3 inline-flex items-start gap-2 font-display text-sm font-semibold text-white/90">
+                        <PinIcon className="mt-0.5 size-4 shrink-0 text-[#E6BE68]" />
+                        <a
+                          href={mapsUrl(headerLocation)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline decoration-white/40 underline-offset-4 transition-colors hover:decoration-white"
+                        >
+                          {headerLocation}
+                        </a>
+                      </p>
+                    )}
                   </div>
                   {/* Right — price */}
                   <div className="shrink-0 text-left sm:text-right">
@@ -362,6 +458,9 @@ export function LaktoBookingCard({
                 </div>
               </div>
 
+              {/* Workshop color strip */}
+              <div className="h-1.5 w-full bg-(--ws)" aria-hidden="true" />
+
               {/* ── Image ───────────────────────────── */}
               <div className="relative aspect-21/9 w-full overflow-hidden bg-[#ECE5DE]">
                 {isResolvedMedia(bookingImage) ? (
@@ -383,8 +482,7 @@ export function LaktoBookingCard({
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <button
                     onClick={handleToggleDates}
-                    className="inline-flex flex-1 items-center justify-center gap-2.5 rounded-full px-8 py-4 font-display text-sm font-bold uppercase tracking-wider text-white transition-all duration-300 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
-                    style={{ backgroundColor: accentColor }}
+                    className="inline-flex flex-1 items-center justify-center gap-2.5 rounded-full px-8 py-4 font-display text-sm font-bold uppercase tracking-wider bg-(--ws) text-(--ws-on) transition-all duration-300 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <CalendarIcon />
                     {showDates ? hideDatesLabel : viewDatesLabel}
@@ -419,7 +517,7 @@ export function LaktoBookingCard({
                 <button
                   onClick={() => setShowDates(false)}
                   className="rounded-full p-2 text-[#9a9a9a] transition-colors hover:bg-[#f5f1e8] hover:text-[#1a1a1a]"
-                  aria-label="Termine schließen"
+                  aria-label={L.closeDates}
                 >
                   <svg
                     className="size-5"
@@ -436,7 +534,7 @@ export function LaktoBookingCard({
               <div className="space-y-3 sm:space-y-4">
                 {cmsDates.length === 0 ? (
                   <p className="py-8 text-center font-display text-sm text-[#9a9a9a]">
-                    Aktuell keine Termine geplant — schau bald wieder vorbei.
+                    {L.noDates}
                   </p>
                 ) : (
                   cmsDates.map((d) => {
@@ -447,25 +545,55 @@ export function LaktoBookingCard({
                       aria-disabled={isSoldOut}
                       className={`relative rounded-lg p-4 sm:p-5 transition-all duration-300 ${
                         isSoldOut
-                          ? 'bg-[#ECEAE5] border border-[#d8d4cc] opacity-60'
-                          : 'bg-[#f9f7f3] border border-[#e8e4d9]'
+                          ? 'bg-[#ECEAE5] border border-[#d8d4cc] border-l-4 border-l-(--ws) opacity-60'
+                          : 'bg-[#f9f7f3] border border-[#e8e4d9] border-l-4 border-l-(--ws) hover:border-(--ws)'
                       }`}
                     >
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-start sm:items-center">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1.4fr_0.8fr_9.5rem] gap-3 sm:gap-4 items-start">
+                        {/* Phone: compact summary (columns below are hidden on phones) */}
+                        <div className="sm:hidden">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="mb-0! font-display text-base font-bold text-[#1a1a1a]">{formatWorkshopDate(d.dateTime, locale, d.date)}</p>
+                            <span className="shrink-0 text-xs font-semibold text-[#6b6b6b]">
+                              {isSoldOut ? L.soldOut : L.spots(d.spotsLeft)}
+                            </span>
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[#4b4b4b]">
+                            <span className="inline-flex items-center gap-1.5">
+                              <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                              {d.time}
+                            </span>
+                            {d.locationName && (
+                              <>
+                                <span aria-hidden="true">·</span>
+                                <a
+                                  href={mapsUrl(d.locationName, d.locationAddress)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 underline decoration-current/40 underline-offset-4"
+                                >
+                                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 20 20" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 18s6-5.2 6-10a6 6 0 10-12 0c0 4.8 6 10 6 10z" /><circle cx="10" cy="8" r="2.2" /></svg>
+                                  {shortLocation(d.locationName, d.locationAddress)}
+                                </a>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
                         {/* Date */}
-                        <div>
+                        <div className="hidden sm:block">
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                            Datum
+                            {L.date}
                           </p>
                           <p className="font-display font-bold text-base text-[#1a1a1a]">
-                            {d.date}
+                            {formatWorkshopDate(d.dateTime, locale, d.date)}
                           </p>
                         </div>
 
                         {/* Time */}
-                        <div>
+                        <div className="hidden sm:block">
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                            Zeit
+                            {L.time}
                           </p>
                           <div
                             className="flex items-center gap-2 text-sm"
@@ -488,31 +616,60 @@ export function LaktoBookingCard({
                           </div>
                         </div>
 
-                        {/* Availability */}
-                        <div>
+                        {/* Location — shown before booking */}
+                        <div className="hidden sm:block">
                           <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
-                            Plätze frei
+                            {L.location}
+                          </p>
+                          {d.locationName ? (
+                            <a
+                              href={mapsUrl(d.locationName, d.locationAddress)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={[d.locationName, d.locationAddress].filter(Boolean).join(', ')}
+                              className="group inline-flex items-start gap-1.5 text-sm text-[#2D2F2C]"
+                            >
+                              <PinIcon className="mt-0.5 size-4 shrink-0" />
+                              <span>
+                                <span className="font-display font-bold text-[#1a1a1a] underline decoration-[#1a1a1a]/40 underline-offset-4 transition-colors group-hover:decoration-[#1a1a1a]">
+                                  {d.locationName}
+                                </span>
+                                {d.locationAddress && (
+                                  <span className="block text-xs text-[#6b6b6b]">
+                                    {d.locationAddress}
+                                  </span>
+                                )}
+                              </span>
+                            </a>
+                          ) : (
+                            <p className="text-sm text-[#9a9a9a]">{L.tba}</p>
+                          )}
+                        </div>
+
+                        {/* Availability */}
+                        <div className="hidden sm:block">
+                          <p className="text-xs text-[#9a9a9a] font-semibold uppercase tracking-wide mb-1">
+                            {L.spotsFree}
                           </p>
                           <p className="font-display font-bold text-base text-[#1a1a1a]">
-                            {isSoldOut ? 'Ausgebucht' : `${d.spotsLeft} Plätze`}
+                            {isSoldOut ? L.soldOut : L.spots(d.spotsLeft)}
                           </p>
                         </div>
 
                         {/* Action Button */}
-                        <div className="pt-2 sm:pt-0">
+                        <div className="pt-2 sm:pt-0 sm:self-center">
                           <button
                             type="button"
                             onClick={() => !isSoldOut && setBookingDate(d)}
                             disabled={isSoldOut}
-                            aria-label={isSoldOut ? 'Ausgebucht' : '→ Buchen'}
-                            className={`inline-block w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
+                            aria-label={isSoldOut ? L.soldOut : L.book}
+                            className={`inline-block w-full sm:w-auto lg:w-full px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-center rounded-md transition-all duration-300 ${
                               isSoldOut
                                 ? 'bg-[#d0ccc6] text-[#9a9a9a] cursor-not-allowed'
-                                : 'text-white hover:opacity-90'
+                                : 'bg-(--ws) text-(--ws-on) hover:bg-(--ws-hover) hover:text-(--ws-hover-on) hover:-translate-y-px hover:shadow-md'
                             }`}
-                            style={isSoldOut ? undefined : { backgroundColor: accentColor }}
                           >
-                            {isSoldOut ? 'Ausgebucht' : '→ Buchen'}
+                            {isSoldOut ? L.soldOut : L.book}
                           </button>
                         </div>
                       </div>
@@ -536,8 +693,8 @@ export function LaktoBookingCard({
             <div className="space-y-10 rounded-3xl border border-ff-border-light bg-white p-8 shadow-sm sm:p-10">
               {/* About */}
               <div>
-                <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  ÜBER DEN WORKSHOP
+                <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#2D2F2C]/60">
+                  {L.about}
                 </p>
                 <h3 className="mb-4 font-display text-subheading font-bold text-ff-near-black">
                   {aboutHeading}
@@ -549,8 +706,8 @@ export function LaktoBookingCard({
 
               {/* Schedule */}
               <div>
-                <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  ABLAUF
+                <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#2D2F2C]/60">
+                  {L.schedule}
                 </p>
                 <h3 className="mb-8 font-display text-subheading font-bold text-ff-near-black">
                   {scheduleHeading}
@@ -570,7 +727,7 @@ export function LaktoBookingCard({
                       <div className="pt-1">
                         <div className="mb-1 inline-flex items-center gap-2">
                           <span
-                            className="rounded-full px-3 py-1 font-display text-caption font-semibold text-[#555954]"
+                            className="rounded-full px-3 py-1 font-display text-caption font-semibold text-[#2D2F2C]"
                             style={{ backgroundColor: '#F6F0E8' }}
                           >
                             {step.duration}
@@ -588,8 +745,8 @@ export function LaktoBookingCard({
 
               {/* Included */}
               <div>
-                <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  IM PREIS ENTHALTEN
+                <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#2D2F2C]/60">
+                  {L.included}
                 </p>
                 <h3 className="mb-6 font-display text-subheading font-bold text-ff-near-black">
                   {includedHeading}
@@ -616,8 +773,8 @@ export function LaktoBookingCard({
                 className="rounded-2xl px-8 py-10 sm:px-10"
                 style={{ backgroundColor: '#F6F0E8' }}
               >
-                <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#555954]/60">
-                  DARUM DIESER WORKSHOP
+                <p className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-[#2D2F2C]/60">
+                  {L.why}
                 </p>
                 <h3 className="mb-8 font-display text-subheading font-bold text-ff-near-black">
                   {whyHeading}
@@ -638,7 +795,7 @@ export function LaktoBookingCard({
                   onClick={() => setShowInfo(false)}
                   className="rounded-full border-2 border-ff-border-light px-8 py-3 font-display text-body-sm font-semibold text-ff-gray-text transition-all duration-200 hover:bg-ff-warm-gray hover:text-ff-near-black"
                 >
-                  Details schließen
+                  {L.closeDetails}
                 </button>
               </div>
             </div>

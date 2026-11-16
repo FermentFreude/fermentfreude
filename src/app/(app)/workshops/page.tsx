@@ -10,6 +10,7 @@ import { VoucherCtaGlobalWrapper } from '@/components/VoucherCtaGlobalWrapper'
 import { AllWorkshopsHero } from '@/components/workshops/AllWorkshopsHero'
 import { WorkshopCalendar } from '@/components/workshops/WorkshopCalendar'
 import type { Media, Page, Product } from '@/payload-types'
+import { formatWorkshopDate } from '@/lib/formatWorkshopDate'
 import { getAllWorkshopAppointments } from '@/utilities/getAllWorkshopAppointments'
 import { getLocale } from '@/utilities/getLocale'
 import { strictLocaleQuery, normalizeAppLocale } from '@/utilities/payloadLocaleQuery'
@@ -72,9 +73,19 @@ export default async function WorkshopsPage() {
     const nextAppointment = upcomingAppointments.find(
       (apt) => apt.workshopType === card.workshopType && apt.availableSpots > 0,
     )
+    // Location shown on the card (display only): the next bookable date's venue,
+    // or — if sold out — the venue of any upcoming date of this workshop.
+    const locationSource =
+      nextAppointment ?? upcomingAppointments.find((apt) => apt.workshopType === card.workshopType)
     return {
       ...card,
-      nextDate: nextAppointment?.date ?? null,
+      nextDate: nextAppointment
+        ? formatWorkshopDate(nextAppointment.dateTime, localeKey, nextAppointment.date)
+        : null,
+      nextLocationName: locationSource?.locationName ?? null,
+      nextLocationAddress: locationSource?.locationAddress ?? null,
+      price: locationSource?.price ?? null,
+      spotsLeft: nextAppointment?.availableSpots ?? null,
     }
   })
 
@@ -120,6 +131,7 @@ export default async function WorkshopsPage() {
         comingSoonLabel={
           localeKey === 'en' ? 'New dates coming soon' : 'Bald neue Termine verfügbar'
         }
+        locationColumnLabel={localeKey === 'en' ? 'Location' : 'Standort'}
       />
 
       {/* 3. Voucher CTA — page override or global */}
