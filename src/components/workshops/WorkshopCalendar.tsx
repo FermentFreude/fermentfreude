@@ -450,34 +450,31 @@ export function WorkshopCalendar({
     ? upcomingDates.filter((d) => d.workshopType === selectedType)
     : upcomingDates
 
-  // ── Date list: bookable first (by month), sold-out last, first 6 only ──
+  // ── Date list: date order (sold-out dates stay in place — shows demand), first 6 only ──
   const VISIBLE_DATES = 6
-  const bookableDates = filteredDates.filter((d) => d.availableSpots > 0)
-  const soldOutDates = filteredDates.filter((d) => d.availableSpots <= 0)
-  const shownBookable = showAllDates ? bookableDates : bookableDates.slice(0, VISIBLE_DATES)
-  // Sold-out dates appear only once the list is expanded (or when there is nothing to hide)
-  const showSoldOut = showAllDates || bookableDates.length <= VISIBLE_DATES
-  const hiddenCount = showAllDates
-    ? 0
-    : bookableDates.length - shownBookable.length + (showSoldOut ? 0 : soldOutDates.length)
-  const canCollapse = bookableDates.length > VISIBLE_DATES
+  const shownDates = showAllDates ? filteredDates : filteredDates.slice(0, VISIBLE_DATES)
+  const hiddenCount = filteredDates.length - shownDates.length
+  const canCollapse = filteredDates.length > VISIBLE_DATES
+
+  // "Nur noch 1 Platz!" on almost-full dates (1–3 spots left)
+  const LOW_SPOTS_ROW = 3
+  const lowSpotsText = (n: number) =>
+    n > 0 && n <= LOW_SPOTS_ROW
+      ? locale === 'en'
+        ? `Only ${n} ${n === 1 ? 'spot' : 'spots'} left!`
+        : `Nur noch ${n} ${n === 1 ? 'Platz' : 'Plätze'}!`
+      : null
 
   // "13. Dezember 2026" → "Dezember 2026"
   const displayDate = (d: WorkshopDate) => formatWorkshopDate(d.dateTime, locale, d.date)
   // "13. Dezember 2026" / "13 December 2026" → month + year
   const monthOf = (d: WorkshopDate) => displayDate(d).replace(/^\s*\d{1,2}\.?\s*/, '')
   const visibleGroups: { label: string; dates: WorkshopDate[] }[] = []
-  for (const d of shownBookable) {
+  for (const d of shownDates) {
     const label = monthOf(d)
     const last = visibleGroups[visibleGroups.length - 1]
     if (last && last.label === label) last.dates.push(d)
     else visibleGroups.push({ label, dates: [d] })
-  }
-  if (showSoldOut && soldOutDates.length > 0) {
-    visibleGroups.push({
-      label: soldOutLabel || (locale === 'en' ? 'Sold out' : 'Ausgebucht'),
-      dates: soldOutDates,
-    })
   }
 
   // Bookable dates per workshop, for the filter pill counts
@@ -499,13 +496,21 @@ export function WorkshopCalendar({
               <span className="size-2.5 shrink-0 rounded-full bg-(--ws)" aria-hidden="true" />
               {getWorkshopTypeLabel(date.workshopType)}
             </span>
-            <span className="shrink-0 text-xs font-semibold opacity-75">
-              {date.availableSpots > 0
-                ? date.availableSpots === 1
-                  ? `1 ${locale === 'en' ? 'spot' : 'Platz'}`
-                  : `${date.availableSpots} ${spotsLabel || 'Plätze'}`
-                : soldOutLabel || 'Ausgebucht'}
-            </span>
+            {lowSpotsText(date.availableSpots) ? (
+              <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#2D2F2C] px-2.5 py-1 font-display text-[11px] font-bold uppercase tracking-wide text-[#FAF2E0]">
+                <span
+                  className="size-1.5 rounded-full bg-current animate-pulse"
+                  aria-hidden="true"
+                />
+                {lowSpotsText(date.availableSpots)}
+              </span>
+            ) : (
+              <span className="shrink-0 text-xs font-semibold opacity-75">
+                {date.availableSpots > 0
+                  ? `${date.availableSpots} ${spotsLabel || 'Plätze'}`
+                  : soldOutLabel || 'Ausgebucht'}
+              </span>
+            )}
           </div>
           <p className="mt-1.5 mb-0! font-display text-base font-bold">{displayDate(date)}</p>
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm opacity-80">
@@ -632,13 +637,19 @@ export function WorkshopCalendar({
             <p className="text-xs opacity-75 font-semibold uppercase tracking-wide mb-1">
               {spotsColumnLabel || 'Plätze frei'}
             </p>
-            <div className="flex items-center gap-2">
+            {lowSpotsText(date.availableSpots) ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#2D2F2C] px-2.5 py-1 font-display text-[11px] font-bold uppercase tracking-wide text-[#FAF2E0]">
+                <span
+                  className="size-1.5 rounded-full bg-current animate-pulse"
+                  aria-hidden="true"
+                />
+                {lowSpotsText(date.availableSpots)}
+              </span>
+            ) : (
               <p className="font-display font-bold text-base">
-                {date.availableSpots === 1
-                  ? `1 ${locale === 'en' ? 'spot' : 'Platz'}`
-                  : `${date.availableSpots} ${spotsLabel || 'Plätze'}`}
+                {`${date.availableSpots} ${spotsLabel || 'Plätze'}`}
               </p>
-            </div>
+            )}
           </div>
         ) : (
           <div className="hidden sm:block" aria-hidden="true" />
