@@ -31,6 +31,11 @@ const nextConfig = {
         ],
       },
       {
+        // Brand book (static file public/brand/index.html): reachable by link, hidden from Google
+        source: '/brand/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
         // Allow preview iframe in admin (Payload's live preview)
         source: '/:path*',
         headers: [
@@ -68,6 +73,15 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  // /brand = the brand book, a single static HTML file exported from Claude (public/brand/index.html).
+  // beforeFiles so the CMS catch-all [slug] route never sees /brand.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: '/brand', destination: '/brand/index.html' },
+      ],
+    }
+  },
   // Heavy packages resolved once on the server, not re-bundled
   serverExternalPackages: ['sharp', 'graphql'],
   experimental: {
