@@ -241,6 +241,7 @@ export type ActivityEventType =
   | 'refund_requested'
   | 'refund_completed'
   | 'appointment_cancelled_by_organiser'
+  | 'founder_exception'
 
 /** Best-effort — a failed activity-log write must never fail the mutation it's logging. */
 export async function logActivityEvent(
@@ -248,11 +249,27 @@ export async function logActivityEvent(
   type: ActivityEventType,
   refId: string,
   summary: string,
+  extra?: {
+    /** The customer's reason (already as a readable label). */
+    reason?: string
+    /** Founder who made an exception — empty when the customer did it. */
+    actorName?: string
+    /** Users who already know (the founder who did it) — it is not "new" for them. */
+    readBy?: (string | number)[]
+  },
 ): Promise<void> {
   try {
     await payload.create({
       collection: 'activity-events',
-      data: { type, refId, summary },
+      data: {
+        type,
+        refId,
+        summary,
+        ...(extra?.reason ? { reason: extra.reason } : {}),
+        ...(extra?.actorName ? { actorName: extra.actorName } : {}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(extra?.readBy?.length ? { readBy: extra.readBy as any } : {}),
+      },
       overrideAccess: true,
     })
   } catch (err) {

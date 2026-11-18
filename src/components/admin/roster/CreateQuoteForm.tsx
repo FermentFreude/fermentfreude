@@ -3,7 +3,6 @@
 import React, { useState, useTransition } from 'react'
 
 import { createQuote } from './actions'
-import { BRAND } from './rosterTheme'
 
 interface FormItem {
   key: string

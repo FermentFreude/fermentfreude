@@ -104,6 +104,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     'refund_requested',
     String(refundRequest.id),
     `${booking.firstName ?? 'Gast'} ${booking.lastName ?? ''} — ${booking.workshopTitle}, €${(requestedAmountCents / 100).toFixed(2)} Erstattung angefragt`.trim(),
+    { reason: cancelReasonLabel(reason) },
   )
 
   // ─── Customer confirmation email (best-effort) ───────────────────

@@ -649,6 +649,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       workshopDate: bookingDoc?.date ?? '',
       seatIndex: rr.seatIndex ?? 0,
       amount: rr.requestedAmount ?? 0,
+      refundedAmount: rr.refundedAmount ?? null,
       status: (rr.status as RefundRequestRow['status']) ?? 'requested',
       stripePaymentIntentId: rr.stripePaymentIntentId ?? '',
       requestedAt: rr.requestedAt
@@ -660,6 +661,7 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       daysPending,
       resolution: (rr.resolution as RefundRequestRow['resolution']) ?? '',
       resolutionNote: rr.resolutionNote ?? '',
+      reason: /^Grund:\s*(.+)$/m.exec(rr.notes ?? '')?.[1]?.trim() ?? '',
       handledByName: rr.handledByName ?? '',
       handledAt: rr.acknowledgedAt
         ? new Date(rr.acknowledgedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Vienna' })
@@ -667,6 +669,8 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       daysSinceHandled: rr.acknowledgedAt
         ? Math.max(0, Math.floor((now.getTime() - new Date(rr.acknowledgedAt).getTime()) / (1000 * 60 * 60 * 24)))
         : 0,
+      stornoId: rr.cancellationInvoice ? String(typeof rr.cancellationInvoice === 'object' ? rr.cancellationInvoice.id : rr.cancellationInvoice) : '',
+      stornoNumber: typeof rr.cancellationInvoice === 'object' && rr.cancellationInvoice ? (rr.cancellationInvoice.cancellationNumber ?? '') : '',
     } satisfies RefundRequestRow
   })
 
@@ -688,6 +692,8 @@ export async function fetchRosterData(currentUserId?: string): Promise<RosterDat
       type: ev.type,
       refId: ev.refId ?? '',
       summary: ev.summary,
+      reason: ev.reason ?? '',
+      actorName: ev.actorName ?? '',
       createdAt: ev.createdAt
         ? new Date(ev.createdAt).toLocaleString('de-DE', { timeZone: 'Europe/Vienna' })
         : '',

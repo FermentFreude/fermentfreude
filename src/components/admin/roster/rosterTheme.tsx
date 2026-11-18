@@ -46,17 +46,6 @@ export function workshopColor(title: string) {
   return match ? WORKSHOP_COLORS[match] : { accent: BRAND.gold, bg: BRAND.goldTint, icon: '🍽️' }
 }
 
-/** Continuous booked/capacity → color, for progress bars + capacity badges. */
-export function fillLevel(booked: number, capacity: number) {
-  if (capacity <= 0) return { pct: 0, ...STATUS.neutral }
-  const pct = Math.min(100, Math.round((booked / capacity) * 100))
-  if (booked > capacity) return { pct: 100, accent: STATUS.warning.accent, bg: STATUS.warning.bg, color: STATUS.warning.color } // overbooked
-  if (booked === capacity) return { pct: 100, accent: STATUS.danger.accent, bg: STATUS.danger.bg, color: STATUS.danger.color } // full
-  if (pct >= 70) return { pct, accent: STATUS.warning.accent, bg: STATUS.warning.bg, color: STATUS.warning.color } // filling up
-  if (pct > 0) return { pct, accent: STATUS.success.accent, bg: STATUS.success.bg, color: STATUS.success.color } // open, has bookings
-  return { pct, ...STATUS.neutral } // empty
-}
-
 /** Rotating palette for generic stat cards (not tied to a workshop type). */
 export const STAT_ACCENTS = {
   indigo: { accent: '#4B4F4A', bg: '#ECE5DE' },
@@ -116,22 +105,6 @@ export function StatCard({
       </div>
     </div>
   )
-}
-
-/** Branded primary action button (gold), replacing the generic near-black CTA. */
-export const primaryButtonStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  padding: '10px 18px',
-  borderRadius: '8px',
-  border: 'none',
-  cursor: 'pointer',
-  background: 'var(--ff-btn, #555954)',
-  color: 'var(--ff-btn-fg, #FFFFFF)',
-  fontSize: '14px',
-  fontWeight: 700,
-  whiteSpace: 'nowrap',
 }
 
 export function PageHeader({
@@ -197,74 +170,4 @@ const ORIGIN_TONE: Record<BookingOrigin, keyof typeof STATUS> = {
 export function OriginBadge({ origin }: { origin: BookingOrigin }) {
   const info = ORIGIN_INFO[origin]
   return <Pill label={info.label} tone={ORIGIN_TONE[origin]} title={info.hint} />
-}
-
-/** Horizontal tab bar with a gold underline on the active tab. */
-export function TabBar<T extends string>({
-  tabs,
-  active,
-  onChange,
-}: {
-  tabs: { id: T; label: string; badge?: number }[]
-  active: T | null
-  onChange: (id: T) => void
-}) {
-  return (
-    <div
-      role="tablist"
-      style={{
-        display: 'flex',
-        gap: '4px',
-        padding: '0 40px',
-        borderBottom: '1px solid var(--theme-elevation-100)',
-        overflowX: 'auto',
-      }}
-    >
-      {tabs.map((tab) => {
-        const isActive = tab.id === active
-        return (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onChange(tab.id)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '14px 16px',
-              border: 'none',
-              borderBottom: `3px solid ${isActive ? BRAND.gold : 'transparent'}`,
-              background: 'transparent',
-              color: 'var(--theme-text)',
-              opacity: isActive ? 1 : 0.6,
-              fontSize: '14px',
-              fontWeight: isActive ? 700 : 500,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {tab.label}
-            {tab.badge ? (
-              <span
-                style={{
-                  minWidth: '20px',
-                  padding: '1px 6px',
-                  borderRadius: '999px',
-                  background: BRAND.gold,
-                  color: BRAND.nearBlack,
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  textAlign: 'center',
-                }}
-              >
-                {tab.badge}
-              </span>
-            ) : null}
-          </button>
-        )
-      })}
-    </div>
-  )
 }

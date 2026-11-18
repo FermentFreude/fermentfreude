@@ -5,7 +5,6 @@ import React, { useState } from 'react'
 import { updateQuoteStatus } from './actions'
 import { CreateQuoteForm } from './CreateQuoteForm'
 import type { QuoteRow } from './types'
-import { BRAND } from './rosterTheme'
 
 interface Props {
   quotes: QuoteRow[]

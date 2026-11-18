@@ -42,6 +42,7 @@ export const ActivityEvents: CollectionConfig = {
         { label: 'Refund requested', value: 'refund_requested' },
         { label: 'Refund completed', value: 'refund_completed' },
         { label: 'Appointment cancelled by organiser', value: 'appointment_cancelled_by_organiser' },
+        { label: 'Exception by a founder', value: 'founder_exception' },
       ],
     },
     {
@@ -57,6 +58,18 @@ export const ActivityEvents: CollectionConfig = {
       admin: {
         description: 'Human-readable one-liner, e.g. "Thomas Huber — Kombucha 12.9., €99 refund requested".',
       },
+    },
+    {
+      name: 'reason',
+      type: 'text',
+      label: 'Reason',
+      admin: { description: 'The reason the customer chose in their booking link (cancellations, refunds, rebookings).' },
+    },
+    {
+      name: 'actorName',
+      type: 'text',
+      label: 'Done by',
+      admin: { description: 'Empty = the customer did it through their link. Otherwise the founder who made the exception.' },
     },
     {
       name: 'readBy',

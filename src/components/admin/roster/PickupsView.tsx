@@ -4,7 +4,7 @@ import React, { useState, useTransition } from 'react'
 
 import { updatePickupStatus } from './actions'
 import type { PickupOrderRow } from './types'
-import { BRAND, PageHeader, StatCard } from './rosterTheme'
+import { PageHeader, StatCard } from './rosterTheme'
 
 interface Props {
   orders: PickupOrderRow[]
